@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable max-classes-per-file */
 
 import type {
@@ -52,34 +54,34 @@ type TestAsyncProfileProvider = Parameters<TestAsyncProfileService['registerProv
 const provider: TestProfileProvider = {
   profileId: 'test-profile-1',
   profile: {
-    getCellRenderers: jest.fn((prev) => (params) => prev(params)),
+    getCellRenderers: vi.fn((prev) => (params) => prev(params)),
   },
-  resolve: jest.fn(() => ({ isMatch: false })),
+  resolve: vi.fn(() => ({ isMatch: false })),
 };
 
 const provider2: TestProfileProvider = {
   profileId: 'test-profile-2',
-  profile: { getCellRenderers: jest.fn((prev) => (params) => prev(params)) },
-  resolve: jest.fn(({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
+  profile: { getCellRenderers: vi.fn((prev) => (params) => prev(params)) },
+  resolve: vi.fn(({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
 };
 
 const provider3: TestProfileProvider = {
   profileId: 'test-profile-3',
-  profile: { getCellRenderers: jest.fn((prev) => (params) => prev(params)) },
-  resolve: jest.fn(({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
+  profile: { getCellRenderers: vi.fn((prev) => (params) => prev(params)) },
+  resolve: vi.fn(({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
 };
 
 const asyncProvider2: TestAsyncProfileProvider = {
   profileId: 'test-profile-2',
-  profile: { getCellRenderers: jest.fn((prev) => (params) => prev(params)) },
-  resolve: jest.fn(async ({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
+  profile: { getCellRenderers: vi.fn((prev) => (params) => prev(params)) },
+  resolve: vi.fn(async ({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
 };
 
 describe('ProfileService', () => {
   let service: TestProfileService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new TestProfileService();
   });
 
@@ -100,7 +102,7 @@ describe('ProfileService', () => {
     };
     const profile = service.getProfile(params);
     const profile2 = service.getProfile(params2);
-    const baseImpl = jest.fn(() => ({}));
+    const baseImpl = vi.fn(() => ({}));
     profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
     expect(provider.profile.getCellRenderers).toHaveBeenCalledTimes(1);
     expect(provider.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, params);
@@ -148,7 +150,7 @@ describe('AsyncProfileService', () => {
   let service: TestAsyncProfileService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new TestAsyncProfileService();
   });
 

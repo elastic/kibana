@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { z } from '@kbn/zod/v4';
 import { validateKeysAllowed, validateRecordMaxKeys } from './validators';
 
 const ctx = {
-  addIssue: jest.fn(),
+  addIssue: vi.fn(),
 } as unknown as z.RefinementCtx;
 
 describe('validators', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('validateRecordMaxKeys', () => {
     it('does not add error if the keys of the record are less than the maximum', () => {

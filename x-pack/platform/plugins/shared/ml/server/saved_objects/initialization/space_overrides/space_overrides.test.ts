@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { createJobSpaceOverrides } from './space_overrides';
 
@@ -51,7 +53,7 @@ const result = {
 
 const callAs = {
   ml: {
-    getJobs: jest.fn(() => Promise.resolve({ jobs })),
+    getJobs: vi.fn(() => Promise.resolve({ jobs })),
   },
 };
 

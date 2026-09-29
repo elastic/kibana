@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
@@ -22,15 +25,21 @@ import type { SignificantEventsMaintenanceState } from '../../../../common/maint
 import { internalScheduledDiscoveryRoutes } from './route';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 
-jest.mock('../../utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../agent_builder/agents/discovery', () => ({
-  installDiscoveryAgents: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../../agent_builder/agents/discovery', () => {
+      const mocked = {
+      installDiscoveryAgents: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const installDiscoveryAgentsMock = installDiscoveryAgents as jest.MockedFunction<
+const installDiscoveryAgentsMock = installDiscoveryAgents as MockedFunction<
   typeof installDiscoveryAgents
 >;
 
@@ -62,35 +71,35 @@ const createHandlerParams = ({
   spaceSettings?: Record<string, boolean | number>;
 }) => {
   const uiSettingsClient = {
-    getAll: jest.fn().mockResolvedValue(spaceSettings),
-    setMany: jest.fn().mockResolvedValue(undefined),
+    getAll: vi.fn().mockResolvedValue(spaceSettings),
+    setMany: vi.fn().mockResolvedValue(undefined),
   };
   const scheduledWorkflowService = {
-    ensureWorkflow: jest
+    ensureWorkflow: vi
       .fn()
       .mockImplementation(() =>
         scheduledWorkflowError ? Promise.reject(scheduledWorkflowError) : Promise.resolve()
       ),
   };
   const maintenanceService = {
-    getState: jest.fn().mockResolvedValue(maintenanceState),
+    getState: vi.fn().mockResolvedValue(maintenanceState),
   };
-  const agentBuilder = { agents: { ensure: jest.fn() } };
+  const agentBuilder = { agents: { ensure: vi.fn() } };
 
   const handlerParams = {
     params: { body: { scheduledDiscovery } },
     request: {},
-    getScopedClients: jest.fn().mockResolvedValue({
+    getScopedClients: vi.fn().mockResolvedValue({
       licensing: {},
       uiSettingsClient,
     }),
     server: { agentBuilder },
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
     maintenanceService,
-    getSpaceId: jest.fn().mockResolvedValue('space-a'),
-    logger: { warn: jest.fn() },
+    getSpaceId: vi.fn().mockResolvedValue('space-a'),
+    logger: { warn: vi.fn() },
     telemetry: {
-      reportStreamsStateError: jest.fn(),
+      reportStreamsStateError: vi.fn(),
     },
     response: {},
     context: {},
@@ -138,7 +147,7 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
     });
     expect(installDiscoveryAgentsMock.mock.invocationCallOrder[0]).toBeLessThan(
-      (scheduledWorkflowService.ensureWorkflow as jest.Mock).mock.invocationCallOrder[0]
+      (scheduledWorkflowService.ensureWorkflow as Mock).mock.invocationCallOrder[0]
     );
     expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
       enabled: true,

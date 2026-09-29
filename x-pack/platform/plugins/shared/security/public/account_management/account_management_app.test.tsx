@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
@@ -17,7 +19,7 @@ import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
 import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 
-const AccountManagementPageMock = jest
+const AccountManagementPageMock = vi
   .spyOn(AccountManagementPageImports, 'AccountManagementPage')
   .mockReturnValue(null);
 
@@ -69,8 +71,8 @@ describe('accountManagementApp', () => {
       unmount = await mount({
         element: document.createElement('div'),
         appBasePath: '',
-        onAppLeave: jest.fn(),
-        setHeaderActionMenu: jest.fn(),
+        onAppLeave: vi.fn(),
+        setHeaderActionMenu: vi.fn(),
         history: scopedHistoryMock.create(),
         theme$: themeServiceMock.createTheme$(),
       });

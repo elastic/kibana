@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -20,14 +22,14 @@ describe('ObservableTypes', () => {
     disabled: false,
     isLoading: false,
     observableTypes: [],
-    handleAddObservableType: jest.fn(),
-    handleEditObservableType: jest.fn(),
-    handleDeleteObservableType: jest.fn(),
+    handleAddObservableType: vi.fn(),
+    handleEditObservableType: vi.fn(),
+    handleDeleteObservableType: vi.fn(),
   };
 
   describe('with sufficient permissions', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders correctly when there are no observable types', async () => {
@@ -84,7 +86,7 @@ describe('ObservableTypes', () => {
 
   describe('with insufficient permissions', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders correctly when there are no observable types', async () => {

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { DispatcherPipeline } from './execution_pipeline';
 import { createDispatcherPipelineInput, createMockDispatcherStep } from './fixtures/test_utils';
 import { EpisodeScan, EpisodeTriage } from './state';
 import type { DispatcherPipelineState } from './types';
 
-jest.mock('./with_dispatcher_span', () => ({
-  withDispatcherSpan: (_name: string, cb: () => Promise<unknown>) => cb(),
-}));
+vi.mock('./with_dispatcher_span', () => {
+      const mocked = {
+      withDispatcherSpan: (_name: string, cb: () => Promise<unknown>) => cb(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DispatcherPipeline', () => {
   describe('execute', () => {

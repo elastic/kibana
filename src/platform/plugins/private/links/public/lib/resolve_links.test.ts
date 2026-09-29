@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
 import { resolveLinkInfo, resolveLinks, serializeResolvedLinks } from './resolve_links';
@@ -14,23 +16,29 @@ import type { Link } from '../../server';
 import type { ResolvedLink } from '../types';
 import { DASHBOARD_LINK_TYPE } from '../../common/constants';
 
-jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
-  fetchDashboard: async (id: string) => {
-    if (id === '404') {
-      const error = new Error('Dashboard not found');
-      throw error;
-    }
-    return {
-      id,
-      title: `Dashboard ${id}`,
-      description: 'Some descriptive text.',
+vi.mock('../components/dashboard_link/dashboard_link_tools', () => {
+      const mocked = {
+      fetchDashboard: async (id: string) => {
+        if (id === '404') {
+          const error = new Error('Dashboard not found');
+          throw error;
+        }
+        return {
+          id,
+          title: `Dashboard ${id}`,
+          description: 'Some descriptive text.',
+        };
+      },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValueOnce('generated-id-1').mockReturnValueOnce('generated-id-2'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValueOnce('generated-id-1').mockReturnValueOnce('generated-id-2'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('resolveLinkInfo', () => {
   it('resolves a dashboard link with no label', async () => {

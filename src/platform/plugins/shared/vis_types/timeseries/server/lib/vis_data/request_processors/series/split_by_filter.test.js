@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { splitByFilter } from './split_by_filter';
 
 describe('splitByFilter(req, panel, series)', () => {
@@ -34,7 +36,7 @@ describe('splitByFilter(req, panel, series)', () => {
   });
 
   test('calls next when finished', () => {
-    const next = jest.fn();
+    const next = vi.fn();
     splitByFilter(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
@@ -66,7 +68,7 @@ describe('splitByFilter(req, panel, series)', () => {
 
   test('calls next and does not add a filter', () => {
     series.split_mode = 'terms';
-    const next = jest.fn((doc) => doc);
+    const next = vi.fn((doc) => doc);
     const doc = splitByFilter(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});

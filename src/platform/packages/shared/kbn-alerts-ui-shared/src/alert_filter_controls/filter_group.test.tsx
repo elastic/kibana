@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { FilterGroup } from './filter_group';
 import type { FC } from 'react';
 import React from 'react';
@@ -53,13 +55,16 @@ const mockControlGroupRenderer = getMockedControlGroupRenderer(
   controlGroupMock as unknown as ControlGroupRendererApi
 );
 
-jest.mock('@kbn/control-group-renderer', () => ({
-  ...jest.requireActual('@kbn/control-group-renderer'),
-  ControlGroupRenderer: jest.fn().mockImplementation((props) => mockControlGroupRenderer(props)),
-}));
+vi.mock('@kbn/control-group-renderer', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/control-group-renderer')),
+      ControlGroupRenderer: vi.fn().mockImplementation((props) => mockControlGroupRenderer(props)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onFilterChangeMock = jest.fn();
-const onInitMock = jest.fn();
+const onFilterChangeMock = vi.fn();
+const onInitMock = vi.fn();
 
 const ruleTypeIds = ['.es-query'];
 const spaceId = 'test-space-id';
@@ -96,12 +101,12 @@ const openContextMenu = async () => {
 
 describe(' Filter Group Component ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     global.localStorage.clear();
   });
   describe('Basic Functions ', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       global.localStorage.clear();
     });
 
@@ -204,8 +209,8 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should call controlGroupTransform which returns object WITHOUT placeholder when type != OPTION_LIST_CONTROL on opening Flyout', async () => {
-      const returnValueWatcher = jest.fn();
-      (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = jest
+      const returnValueWatcher = vi.fn();
+      (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = vi
         .fn()
         .mockImplementationOnce(({ controlStateTransform }) => {
           if (controlStateTransform) {
@@ -237,8 +242,8 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should call controlGroupTransform which returns object WITH correct placeholder value when type = OPTION_LIST_CONTROL on opening Flyout', async () => {
-      const returnValueWatcher = jest.fn();
-      (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = jest
+      const returnValueWatcher = vi.fn();
+      (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = vi
         .fn()
         .mockImplementationOnce(({ controlStateTransform }) => {
           if (controlStateTransform) {
@@ -526,7 +531,7 @@ describe(' Filter Group Component ', () => {
 
   describe('Filter Changed Banner', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       global.localStorage.clear();
     });
 
@@ -577,7 +582,7 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should ignore url params if there is an error in using them', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementationOnce(jest.fn());
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementationOnce(vi.fn());
 
       render(
         <TestComponent
@@ -602,8 +607,8 @@ describe(' Filter Group Component ', () => {
 
   describe('onFilterChange', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      jest.useFakeTimers();
+      vi.clearAllMocks();
+      vi.useFakeTimers();
       global.localStorage.clear();
     });
 
@@ -629,7 +634,7 @@ describe(' Filter Group Component ', () => {
       updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
       updateControlGroupOutputMock(sampleOutputData);
 
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       updateControlGroupOutputMock({
         ...sampleOutputData,
         filters: [],
@@ -652,7 +657,7 @@ describe(' Filter Group Component ', () => {
       updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
       updateControlGroupOutputMock(sampleOutputData);
 
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
 
       // updating output should call filter change again with different output
       const changedOutput = { ...sampleOutputData };
@@ -666,7 +671,7 @@ describe(' Filter Group Component ', () => {
 
   describe('Restore from local storage', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       global.localStorage.clear();
     });
 

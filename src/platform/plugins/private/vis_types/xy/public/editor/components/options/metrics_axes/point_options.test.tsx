@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -17,12 +20,12 @@ import { PointOptions } from './point_options';
 import { seriesParam } from './mocks';
 
 describe('PointOptions component', () => {
-  let setChart: jest.Mock;
+  let setChart: Mock;
   let defaultProps: PointOptionsParams;
   let chart: SeriesParam;
 
   beforeEach(() => {
-    setChart = jest.fn();
+    setChart = vi.fn();
     chart = { ...seriesParam };
 
     defaultProps = {

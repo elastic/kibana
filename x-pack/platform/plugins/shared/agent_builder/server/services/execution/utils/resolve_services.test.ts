@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -19,9 +22,9 @@ import {
 } from '../../../test_utils/agents';
 import { resolveServices } from './resolve_services';
 
-jest.mock('../../../utils/resolve_selected_connector_id');
+vi.mock('../../../utils/resolve_selected_connector_id');
 
-const resolveSelectedConnectorIdMock = resolveSelectedConnectorId as jest.MockedFn<
+const resolveSelectedConnectorIdMock = resolveSelectedConnectorId as MockedFunction<
   typeof resolveSelectedConnectorId
 >;
 
@@ -53,7 +56,7 @@ describe('resolveServices', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a 404 Agent Builder error when the scoped user cannot access the agent', async () => {

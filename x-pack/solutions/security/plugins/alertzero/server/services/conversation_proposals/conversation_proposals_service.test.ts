@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
@@ -33,7 +35,7 @@ const makeProposalsService = (
   { total }: { total?: number } = {}
 ): ReturnType<ProposalsPluginStart['getProposalsService']> =>
   ({
-    list: jest.fn().mockResolvedValue({
+    list: vi.fn().mockResolvedValue({
       proposals,
       total: total ?? proposals.length,
     }),
@@ -57,8 +59,8 @@ const makeAgentBuilder = (
 ): AgentBuilderPluginStart =>
   ({
     conversations: {
-      getScopedClient: jest.fn().mockResolvedValue({
-        bulkGet: jest.fn().mockImplementation(async (ids: string[]) => {
+      getScopedClient: vi.fn().mockResolvedValue({
+        bulkGet: vi.fn().mockImplementation(async (ids: string[]) => {
           const result = new Map<
             string,
             { title: string; agent_id?: string; metadata?: Record<string, unknown> }
@@ -83,8 +85,8 @@ const makeAgentBuilder = (
 const makeImpactClient = (
   entityIdsByConversationId: Record<string, string[]> = {}
 ): AgenticInvestigationsPluginStart['getImpactClient'] =>
-  jest.fn().mockReturnValue({
-    listByConversationIds: jest.fn().mockImplementation(async (ids: string[]) =>
+  vi.fn().mockReturnValue({
+    listByConversationIds: vi.fn().mockImplementation(async (ids: string[]) =>
       ids.flatMap((conversationId) => {
         const entityIds = entityIdsByConversationId[conversationId];
         return entityIds ? [{ conversationId, entities: entityIds.map((id) => ({ id })) }] : [];
@@ -98,7 +100,7 @@ describe('ConversationProposalsService', () => {
   const spaceId = 'default';
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('listByCategory', () => {
@@ -240,8 +242,8 @@ describe('ConversationProposalsService', () => {
         () =>
           ({
             conversations: {
-              getScopedClient: jest.fn().mockResolvedValue({
-                bulkGet: jest.fn().mockRejectedValue(new Error('access denied')),
+              getScopedClient: vi.fn().mockResolvedValue({
+                bulkGet: vi.fn().mockRejectedValue(new Error('access denied')),
               }),
             },
           } as unknown as AgentBuilderPluginStart),
@@ -269,8 +271,8 @@ describe('ConversationProposalsService', () => {
         makeProposal({ id: 'p1', conversationId: 'shared' }),
         makeProposal({ id: 'p2', conversationId: 'shared' }),
       ];
-      const getScopedClient = jest.fn().mockResolvedValue({
-        bulkGet: jest.fn().mockResolvedValue(new Map([['shared', { title: 'Shared' }]])),
+      const getScopedClient = vi.fn().mockResolvedValue({
+        bulkGet: vi.fn().mockResolvedValue(new Map([['shared', { title: 'Shared' }]])),
       });
       const agentBuilder = {
         conversations: { getScopedClient },
@@ -294,8 +296,8 @@ describe('ConversationProposalsService', () => {
       const proposals = [makeProposal({ conversationId: 'conv-1' })];
       const agentBuilder = {
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({
-            bulkGet: jest.fn().mockRejectedValue(new Error('network error')),
+          getScopedClient: vi.fn().mockResolvedValue({
+            bulkGet: vi.fn().mockRejectedValue(new Error('network error')),
           }),
         },
       } as unknown as AgentBuilderPluginStart;
@@ -338,7 +340,7 @@ describe('ConversationProposalsService', () => {
         makeProposal({ id: 'p2', conversationId: 'shared' }),
         makeProposal({ id: 'p3', conversationId: 'other' }),
       ];
-      const listByConversationIds = jest
+      const listByConversationIds = vi
         .fn()
         .mockImplementation(async (ids: string[]) =>
           ids.flatMap((conversationId) =>
@@ -347,7 +349,7 @@ describe('ConversationProposalsService', () => {
               : []
           )
         );
-      const getImpactClient = jest.fn().mockReturnValue({ listByConversationIds });
+      const getImpactClient = vi.fn().mockReturnValue({ listByConversationIds });
 
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
@@ -372,8 +374,8 @@ describe('ConversationProposalsService', () => {
         makeProposalsService([makeProposal()]),
         makeAgentBuilder(),
         logger,
-        jest.fn().mockReturnValue({
-          listByConversationIds: jest.fn().mockRejectedValue(new Error('index missing')),
+        vi.fn().mockReturnValue({
+          listByConversationIds: vi.fn().mockRejectedValue(new Error('index missing')),
         })
       );
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -442,8 +444,8 @@ describe('ConversationProposalsService', () => {
       const proposals = [makeProposal({ status: 'no_action', decision: 'dismissed' })];
       const agentBuilder = {
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({
-            bulkGet: jest.fn().mockRejectedValue(new Error('access denied')),
+          getScopedClient: vi.fn().mockResolvedValue({
+            bulkGet: vi.fn().mockRejectedValue(new Error('access denied')),
           }),
         },
       } as unknown as AgentBuilderPluginStart;

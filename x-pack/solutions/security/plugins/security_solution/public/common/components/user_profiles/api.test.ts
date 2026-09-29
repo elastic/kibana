@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { mockUserProfiles } from './mock';
@@ -12,8 +15,8 @@ import { suggestUsers } from './api';
 import { KibanaServices } from '../../lib/kibana';
 import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../common/constants';
 
-const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
+vi.mock('../../lib/kibana');
 
 const coreStartMock = coreMock.createStart({ basePath: '/mock' });
 mockKibanaServices.mockReturnValue(coreStartMock);

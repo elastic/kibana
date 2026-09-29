@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { EndpointUploadActionResult } from './endpoint_upload_action_result';
@@ -84,7 +86,7 @@ describe('Endpoint Upload Action Result component', () => {
   });
 
   it('should render nothing if action is not `upload`', () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn');
+    const consoleWarnSpy = vi.spyOn(console, 'warn');
     action.command = 'isolate';
     const { queryByTestId } = render();
 

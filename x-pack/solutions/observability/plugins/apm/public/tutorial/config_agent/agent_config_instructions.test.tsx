@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import { render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -16,13 +19,13 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('AgentConfigInstructions', () => {
-  let getApmAgentCommandsSpy: jest.SpyInstance;
+  let getApmAgentCommandsSpy: MockInstance;
   beforeAll(() => {
-    getApmAgentCommandsSpy = jest.spyOn(getCommands, 'getApmAgentCommands');
+    getApmAgentCommandsSpy = vi.spyOn(getCommands, 'getApmAgentCommands');
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders OpenTelemetry instructions when the variant is "openTelemetry"', async () => {

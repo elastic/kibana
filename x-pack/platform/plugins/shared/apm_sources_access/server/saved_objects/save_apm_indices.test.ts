@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { saveApmIndices } from './apm_indices';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('saveApmIndices', () => {
   it('should trim and strip empty settings', async () => {
     const savedObjectsClient = {
-      create: jest.fn(),
+      create: vi.fn(),
     } as unknown as SavedObjectsClientContract;
 
     const apmIndices = {

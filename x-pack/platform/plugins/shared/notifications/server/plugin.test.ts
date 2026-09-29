@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedClass } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { NotificationsConfigType } from './config';
@@ -13,9 +16,9 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { EmailServiceProvider } from './services/connectors_email_service_provider';
 import type { EmailServiceStart } from './services';
 
-jest.mock('./services/connectors_email_service_provider');
+vi.mock('./services/connectors_email_service_provider');
 
-const emailServiceProviderMock = EmailServiceProvider as jest.MockedClass<
+const emailServiceProviderMock = EmailServiceProvider as MockedClass<
   typeof EmailServiceProvider
 >;
 
@@ -91,12 +94,12 @@ describe('Notifications Plugin', () => {
       const { plugin, coreStart, pluginStart } = createNotificationsPlugin(validConnectorConfig);
 
       const emailStart: EmailServiceStart = {
-        getEmailService: jest.fn(),
-        isEmailServiceAvailable: jest.fn(),
+        getEmailService: vi.fn(),
+        isEmailServiceAvailable: vi.fn(),
       };
 
       const providerMock = emailServiceProviderMock.mock
-        .instances[0] as jest.Mocked<EmailServiceProvider>;
+        .instances[0] as Mocked<EmailServiceProvider>;
       providerMock.start.mockReturnValue(emailStart);
       const start = plugin.start(coreStart, pluginStart);
       expect(emailServiceProviderMock.mock.instances[0].start).toHaveBeenCalledTimes(1);

@@ -5,47 +5,53 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { GCS_BUCKET, OTEL_DEMO_GCS_BASE_PATH_PREFIX } from '../constants';
 import type { GcsConfig } from './snapshot_run_config';
 
-const mockCreateGcsRepository = jest.fn(() => ({ mocked: true }));
-const mockRestoreSnapshot = jest.fn();
+const mockCreateGcsRepository = vi.fn(() => ({ mocked: true }));
+const mockRestoreSnapshot = vi.fn();
 
-jest.mock('@kbn/es-snapshot-loader', () => ({
-  createGcsRepository: mockCreateGcsRepository,
-  restoreSnapshot: mockRestoreSnapshot,
-}));
+vi.mock('@kbn/es-snapshot-loader', () => {
+      const mocked = {
+      createGcsRepository: mockCreateGcsRepository,
+      restoreSnapshot: mockRestoreSnapshot,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('load_from_snapshot: loadKIFeaturesFromSnapshot', () => {
   interface EsClientMock {
     indices: {
-      delete: jest.MockedFunction<Client['indices']['delete']>;
+      delete: MockedFunction<Client['indices']['delete']>;
     };
-    search: jest.MockedFunction<Client['search']>;
+    search: MockedFunction<Client['search']>;
   }
 
-  const log: jest.Mocked<Pick<ToolingLog, 'info' | 'debug' | 'warning' | 'error'>> = {
-    info: jest.fn(),
-    debug: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
+  const log: Mocked<Pick<ToolingLog, 'info' | 'debug' | 'warning' | 'error'>> = {
+    info: vi.fn(),
+    debug: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
   };
 
   const gcs: GcsConfig = { bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX };
 
   const makeEsClient = (): EsClientMock => ({
     indices: {
-      delete: jest.fn(),
+      delete: vi.fn(),
     },
-    search: jest.fn(),
+    search: vi.fn(),
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env.SIGEVENTS_SNAPSHOT_RUN = '2026-02-26-test';
-    jest.resetModules();
+    vi.resetModules();
   });
 
   it('returns an empty array when allowNoMatches results in zero restored indices', async () => {

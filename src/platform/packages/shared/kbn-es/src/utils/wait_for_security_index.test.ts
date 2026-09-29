@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { waitForSecurityIndex } from './wait_for_security_index';
 
-jest.mock('@elastic/elasticsearch', () => {
+vi.mock('@elastic/elasticsearch', () => {
   return {
-    Client: jest.fn(),
+    Client: vi.fn(),
   };
 });
 
@@ -21,13 +23,12 @@ const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
 
-const createApiKey = jest.fn();
-const invalidateApiKey = jest.fn();
+const createApiKey = vi.fn();
+const invalidateApiKey = vi.fn();
 
-beforeEach(() => {
-  jest.resetAllMocks();
-  jest
-    .requireMock('@elastic/elasticsearch')
+beforeEach(async () => {
+  vi.resetAllMocks();
+  (await vi.importMock('@elastic/elasticsearch'))
     .Client.mockImplementation(() => ({ security: { createApiKey, invalidateApiKey } }));
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
@@ -35,7 +36,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('waitForSecurityIndex', () => {

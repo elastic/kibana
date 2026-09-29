@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { registerFieldsRoute } from './fields_rules';
 
-jest.mock('../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('registerFieldsRoute', () => {
-  const mockGetFieldsForWildcard = jest.fn();
+  const mockGetFieldsForWildcard = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockGetFieldsForWildcard.mockResolvedValue({ fields: ['foo'] });
     IndexPatternsFetcher.prototype.getFieldsForWildcard = mockGetFieldsForWildcard;
   });

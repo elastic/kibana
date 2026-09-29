@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { LOCAL_STORAGE_KEYS } from '../../../../../../common/constants';
@@ -16,20 +19,23 @@ import {
   useSidebarResize,
 } from './use_sidebar_resize';
 
-const mockUseCasesLocalStorage = jest.fn();
-jest.mock('../../../../../common/use_cases_local_storage', () => ({
-  useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
-}));
+const mockUseCasesLocalStorage = vi.fn();
+vi.mock('../../../../../common/use_cases_local_storage', () => {
+      const mocked = {
+      useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const pointerDown = (clientX: number) =>
   ({
     clientX,
     pointerId: 1,
     // The rail captures the pointer so the drag survives passing over an embeddable.
-    currentTarget: { setPointerCapture: jest.fn() },
+    currentTarget: { setPointerCapture: vi.fn() },
   } as unknown as ReactPointerEvent<HTMLButtonElement>);
 
-const arrowKey = (key: string, preventDefault = jest.fn()) =>
+const arrowKey = (key: string, preventDefault = vi.fn()) =>
   ({ key, preventDefault } as unknown as ReactKeyboardEvent<HTMLButtonElement>);
 
 const dragTo = (clientX: number) =>
@@ -38,15 +44,15 @@ const dragTo = (clientX: number) =>
 const endDrag = () => window.dispatchEvent(new MouseEvent('pointerup'));
 
 describe('useSidebarResize', () => {
-  let setStoredWidth: jest.Mock;
+  let setStoredWidth: Mock;
 
   const mockStoredWidth = (width: number) => {
     mockUseCasesLocalStorage.mockReturnValue([width, setStoredWidth]);
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    setStoredWidth = jest.fn();
+    vi.clearAllMocks();
+    setStoredWidth = vi.fn();
     mockStoredWidth(DEFAULT_SIDEBAR_WIDTH);
   });
 
@@ -129,7 +135,7 @@ describe('useSidebarResize', () => {
   });
 
   it('leaves other keys to the browser', () => {
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     const { result } = renderHook(() => useSidebarResize());
 
     act(() => result.current.onKeyDown(arrowKey('ArrowUp', preventDefault)));

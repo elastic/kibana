@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,7 +14,7 @@ import { renderWithTestingProviders } from '../../../../common/mock';
 import { SidebarToggleButton } from './sidebar_toggle_button';
 import { SidebarProvider } from './sidebar_context';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const renderButton = () => {
   return renderWithTestingProviders(

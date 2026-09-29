@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
@@ -35,7 +37,7 @@ describe('Task Run Statistics', () => {
   const pollInterval = 3000;
 
   beforeAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('createBackgroundTaskUtilizationAggregator', () => {

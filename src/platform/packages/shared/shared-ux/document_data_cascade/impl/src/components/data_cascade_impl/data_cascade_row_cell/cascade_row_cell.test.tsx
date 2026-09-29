@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import type { Row } from '@tanstack/react-table';
@@ -23,7 +25,7 @@ const renderComponent = ({
   initialGroupColumn,
   row,
   getVirtualizer,
-  onCascadeLeafNodeExpanded = jest.fn(),
+  onCascadeLeafNodeExpanded = vi.fn(),
   onCascadeLeafNodeCollapsed,
 }: Pick<
   React.ComponentProps<typeof CascadeRowCellPrimitive>,
@@ -54,25 +56,25 @@ const renderComponent = ({
 };
 
 describe('CascadeRowCellPrimitive', () => {
-  const onCascadeLeafNodeExpanded = jest.fn();
+  const onCascadeLeafNodeExpanded = vi.fn();
 
-  const mockVirtualizerGetter = jest.fn(
+  const mockVirtualizerGetter = vi.fn(
     () =>
       ({
-        getVirtualItems: jest.fn(() => []),
-        getTotalSize: jest.fn(() => 0),
+        getVirtualItems: vi.fn(() => []),
+        getTotalSize: vi.fn(() => 0),
         isScrolling: false,
-        measureElement: jest.fn(),
+        measureElement: vi.fn(),
         scrollOffset: 0,
         scrollElement: null,
         activeStickyIndex: null,
         virtualizedRowComputedTranslateValue: new Map(),
-        preventRowSizeChangePropagation: jest.fn(() => jest.fn()),
+        preventRowSizeChangePropagation: vi.fn(() => vi.fn()),
         childController: {
-          subscribe: jest.fn(() => () => {}),
-          shouldActivate: jest.fn(() => true),
-          enqueue: jest.fn(() => jest.fn()),
-          isReturningCell: jest.fn(() => false),
+          subscribe: vi.fn(() => () => {}),
+          shouldActivate: vi.fn(() => true),
+          enqueue: vi.fn(() => vi.fn()),
+          isReturningCell: vi.fn(() => false),
         },
       } as unknown as CascadeRootVirtualizerReturnValue)
   );
@@ -92,8 +94,8 @@ describe('CascadeRowCellPrimitive', () => {
         id: '1',
         depth: 0,
         original: rowData,
-        getToggleSelectedHandler: jest.fn(),
-        getToggleExpandedHandler: jest.fn(),
+        getToggleSelectedHandler: vi.fn(),
+        getToggleExpandedHandler: vi.fn(),
       } as unknown as Row<any>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
@@ -110,7 +112,7 @@ describe('CascadeRowCellPrimitive', () => {
   it('will invoke the passed onCascadeLeafNodeCollapsed if the leafNode has data when the component unmounts', () => {
     const cascadeGroups = ['group1', 'group2'];
 
-    const onCascadeLeafNodeCollapsed = jest.fn();
+    const onCascadeLeafNodeCollapsed = vi.fn();
 
     const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
       id: '1',
@@ -124,8 +126,8 @@ describe('CascadeRowCellPrimitive', () => {
         id: '1',
         depth: 0,
         original: rowData,
-        getToggleSelectedHandler: jest.fn(),
-        getToggleExpandedHandler: jest.fn(),
+        getToggleSelectedHandler: vi.fn(),
+        getToggleExpandedHandler: vi.fn(),
       } as unknown as Row<any>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
@@ -147,8 +149,8 @@ describe('CascadeRowCellPrimitive', () => {
 
     it('should pass all required methods and properties to the child component', async () => {
       const cascadeGroups = ['group1', 'group2'];
-      const childPropsSpy = jest.fn();
-      const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue(mockLeafData);
+      const childPropsSpy = vi.fn();
+      const mockOnCascadeLeafNodeExpanded = vi.fn().mockResolvedValue(mockLeafData);
 
       const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
         id: '1',
@@ -163,8 +165,8 @@ describe('CascadeRowCellPrimitive', () => {
           index: 0,
           depth: 0,
           original: rowData,
-          getToggleSelectedHandler: jest.fn(),
-          getToggleExpandedHandler: jest.fn(),
+          getToggleSelectedHandler: vi.fn(),
+          getToggleExpandedHandler: vi.fn(),
         } as unknown as Row<any>,
         children: (props) => {
           childPropsSpy(props);
@@ -190,22 +192,22 @@ describe('CascadeRowCellPrimitive', () => {
     it('should provide virtualizerController from the virtualizer childController', async () => {
       const cascadeGroups = ['group1', 'group2'];
       let capturedVirtualizerController: ChildVirtualizerController | undefined;
-      const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue(mockLeafData);
+      const mockOnCascadeLeafNodeExpanded = vi.fn().mockResolvedValue(mockLeafData);
 
       const mockChildController = {
-        subscribe: jest.fn(() => () => {}),
-        shouldActivate: jest.fn(() => true),
-        enqueue: jest.fn(() => jest.fn()),
-        isReturningCell: jest.fn(() => false),
+        subscribe: vi.fn(() => () => {}),
+        shouldActivate: vi.fn(() => true),
+        enqueue: vi.fn(() => vi.fn()),
+        isReturningCell: vi.fn(() => false),
       };
 
-      const customMockVirtualizerGetter = jest.fn(
+      const customMockVirtualizerGetter = vi.fn(
         () =>
           ({
-            getVirtualItems: jest.fn(() => []),
-            getTotalSize: jest.fn(() => 0),
+            getVirtualItems: vi.fn(() => []),
+            getTotalSize: vi.fn(() => 0),
             isScrolling: false,
-            measureElement: jest.fn(),
+            measureElement: vi.fn(),
             scrollOffset: 0,
             scrollElement: null,
             activeStickyIndex: null,
@@ -227,8 +229,8 @@ describe('CascadeRowCellPrimitive', () => {
           index: 0,
           depth: 0,
           original: rowData,
-          getToggleSelectedHandler: jest.fn(),
-          getToggleExpandedHandler: jest.fn(),
+          getToggleSelectedHandler: vi.fn(),
+          getToggleExpandedHandler: vi.fn(),
         } as unknown as Row<any>,
         children: (props) => {
           capturedVirtualizerController = props.virtualizerController;

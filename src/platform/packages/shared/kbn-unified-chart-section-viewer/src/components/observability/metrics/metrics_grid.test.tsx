@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -28,17 +31,17 @@ import {
 import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
-jest.mock('@kbn/discover-utils', () => {
+vi.mock('@kbn/discover-utils', async () => {
   const {
     METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
     METRICS_GRID_SORT_DEFAULTS,
-  } = jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
+  } = (await vi.importActual('@kbn/discover-utils/src/data_types/metrics'));
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
-    openAfterDismissingOtherFlyouts: jest.fn((_flyout: string, open: () => void) => open()),
+    openAfterDismissingOtherFlyouts: vi.fn((_flyout: string, open: () => void) => open()),
     METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
@@ -46,36 +49,42 @@ jest.mock('@kbn/discover-utils', () => {
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useIsWithinMinBreakpoint: jest.fn(() => true),
+    useIsWithinMinBreakpoint: vi.fn(() => true),
   };
 });
 
-jest.mock('../../chart', () => ({
-  Chart: jest.fn(() => <div data-test-subj="chart" />),
-}));
+vi.mock('../../chart', () => {
+      const mocked = {
+      Chart: vi.fn(() => <div data-test-subj="chart" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/utils', () => ({
-  ...jest.requireActual('../../../common/utils'),
-  createESQLQuery: jest.fn((params) => {
-    const { metricItem, splitAccessors = [] } = params;
-    const splitAccessorsStr =
-      splitAccessors.length > 0
-        ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
-        : '';
-    return `FROM ${metricItem.indexName} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
-  }),
-}));
+vi.mock('../../../common/utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/utils')),
+      createESQLQuery: vi.fn((params) => {
+        const { metricItem, splitAccessors = [] } = params;
+        const splitAccessorsStr =
+          splitAccessors.length > 0
+            ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
+            : '';
+        return `FROM ${metricItem.indexName} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MetricsGrid', () => {
   let discoverFetch$: UnifiedHistogramFetch$;
 
   const actions: UnifiedMetricsGridProps['actions'] = {
-    openInNewTab: jest.fn(),
-    updateESQLQuery: jest.fn(),
+    openInNewTab: vi.fn(),
+    updateESQLQuery: vi.fn(),
   };
 
   const fetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
@@ -153,7 +162,7 @@ describe('MetricsGrid', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     discoverFetch$ = getFetch$Mock(fetchParams);
   });
 
@@ -248,7 +257,7 @@ describe('MetricsGrid', () => {
       },
     ];
 
-    const getUserMessages = jest.fn((metric: (typeof metricItems)[0]) =>
+    const getUserMessages = vi.fn((metric: (typeof metricItems)[0]) =>
       metric.metricName === 'system.cpu.utilization' ? messagesForCpu : undefined
     );
 
@@ -273,7 +282,7 @@ describe('MetricsGrid', () => {
   it('passes getDescription(metric) result to each chart when getDescription is provided', () => {
     const descriptionForFirst = 'Data stream: metrics-system.cpu-default';
 
-    const getDescription = jest.fn((metric: (typeof metricItems)[0]) =>
+    const getDescription = vi.fn((metric: (typeof metricItems)[0]) =>
       metric.metricName === 'system.cpu.utilization' ? descriptionForFirst : undefined
     );
 
@@ -424,11 +433,11 @@ describe('MetricsGrid', () => {
 
   describe('MetricsGrid keyboard navigation', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('renders with proper ARIA grid attributes', () => {
@@ -543,14 +552,14 @@ describe('MetricsGrid', () => {
   describe('MetricsGrid focus management', () => {
     beforeEach(() => {
       // Mock setTimeout to run synchronously in tests
-      jest.spyOn(global, 'setTimeout').mockImplementation((callback: any) => {
+      vi.spyOn(global, 'setTimeout').mockImplementation((callback: any) => {
         callback();
         return 0 as any;
       });
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     describe('Chart ref management', () => {
@@ -577,11 +586,11 @@ describe('MetricsGrid', () => {
 
     describe('Focus state management', () => {
       beforeEach(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
       });
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('should update focus state when cell receives focus', async () => {
@@ -621,13 +630,13 @@ describe('MetricsGrid', () => {
       renderMetricsGrid();
 
       // Get the onViewDetails callback passed to the first Chart
-      const chartCalls = (Chart as jest.Mock).mock.calls;
+      const chartCalls = (Chart as Mock).mock.calls;
       expect(chartCalls.length).toBeGreaterThan(0);
 
       const firstChartProps = chartCalls[0][0];
       expect(firstChartProps.onViewDetails).toBeDefined();
 
-      (openAfterDismissingOtherFlyouts as jest.Mock).mockClear();
+      (openAfterDismissingOtherFlyouts as Mock).mockClear();
 
       // Trigger the onViewDetails callback
       act(() => {
@@ -645,7 +654,7 @@ describe('MetricsGrid', () => {
 
     it('keeps a restored flyout unmounted until the other flyouts have been dismissed', () => {
       let openFlyout: (() => void) | undefined;
-      (openAfterDismissingOtherFlyouts as jest.Mock).mockImplementationOnce(
+      (openAfterDismissingOtherFlyouts as Mock).mockImplementationOnce(
         (_flyout: string, open: () => void) => {
           openFlyout = open;
         }
@@ -698,7 +707,7 @@ describe('MetricsGrid', () => {
 
       expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
 
-      const firstChartProps = (Chart as jest.Mock).mock.calls[0][0];
+      const firstChartProps = (Chart as Mock).mock.calls[0][0];
 
       act(() => {
         firstChartProps.onViewDetails();
@@ -710,7 +719,7 @@ describe('MetricsGrid', () => {
     it('marks the originating chart as selected when its flyout is open', () => {
       const { getAllByRole } = renderMetricsGrid();
 
-      const firstChartProps = (Chart as jest.Mock).mock.calls[0][0];
+      const firstChartProps = (Chart as Mock).mock.calls[0][0];
 
       act(() => {
         firstChartProps.onViewDetails();
@@ -781,7 +790,7 @@ describe('MetricsGrid', () => {
     });
 
     it('preserves restored flyoutState during initial render when metric items are empty (duplicate-tab scenario)', () => {
-      const onInitialStateChange = jest.fn();
+      const onInitialStateChange = vi.fn();
       const initialFlyoutState: FlyoutState = {
         gridPosition: 0,
         metricUniqueKey: `${metricItems[0].indexName}::${metricItems[0].metricName}`,
@@ -807,7 +816,7 @@ describe('MetricsGrid', () => {
     });
 
     it('clears stale flyoutState when the referenced metric is no longer present', () => {
-      const onInitialStateChange = jest.fn();
+      const onInitialStateChange = vi.fn();
 
       render(
         <MetricsGridWithRestorableState
@@ -831,7 +840,7 @@ describe('MetricsGrid', () => {
     });
 
     it('clears flyoutState when the flyout is closed', () => {
-      const onInitialStateChange = jest.fn();
+      const onInitialStateChange = vi.fn();
 
       const { getByTestId, queryByTestId } = render(
         <MetricsGridWithRestorableState
@@ -914,7 +923,7 @@ describe('MetricsGrid', () => {
     });
 
     it('returns focus to the originating grid cell after closing the flyout', () => {
-      jest
+      vi
         .spyOn(global, 'requestAnimationFrame')
         .mockImplementation((cb: FrameRequestCallback): number => {
           cb(0);
@@ -949,11 +958,11 @@ describe('MetricsGrid', () => {
 
       expect(document.activeElement).toBe(gridCells[1]);
 
-      (global.requestAnimationFrame as unknown as jest.SpyInstance).mockRestore();
+      (global.requestAnimationFrame as unknown as MockInstance).mockRestore();
     });
 
     it('returns focus to the live metric position when the grid reordered while the flyout was open', () => {
-      jest
+      vi
         .spyOn(global, 'requestAnimationFrame')
         .mockImplementation((cb: FrameRequestCallback): number => {
           cb(0);
@@ -988,7 +997,7 @@ describe('MetricsGrid', () => {
 
       expect(document.activeElement).toBe(gridCells[1]);
 
-      (global.requestAnimationFrame as unknown as jest.SpyInstance).mockRestore();
+      (global.requestAnimationFrame as unknown as MockInstance).mockRestore();
     });
   });
 
@@ -1027,7 +1036,7 @@ describe('MetricsGrid', () => {
       );
 
       expect(createESQLQuery).toHaveBeenCalledTimes(nonOverlappingMetrics.length);
-      (createESQLQuery as jest.Mock).mockClear();
+      (createESQLQuery as Mock).mockClear();
 
       // Select 'host.name'. Only system.cpu.utilization supports it —
       // k8s.container.cpu stays at [] → [] with a stable empty array reference.
@@ -1059,7 +1068,7 @@ describe('MetricsGrid', () => {
       );
 
       expect(createESQLQuery).toHaveBeenCalledTimes(nonOverlappingMetrics.length);
-      (createESQLQuery as jest.Mock).mockClear();
+      (createESQLQuery as Mock).mockClear();
 
       rerender(
         <MetricsExperienceStateProvider profileId="test-profile">
@@ -1089,7 +1098,7 @@ describe('MetricsGrid', () => {
       );
 
       expect(createESQLQuery).toHaveBeenCalledTimes(1);
-      (createESQLQuery as jest.Mock).mockClear();
+      (createESQLQuery as Mock).mockClear();
 
       rerender(
         <MetricsExperienceStateProvider profileId="test-profile">
@@ -1128,7 +1137,7 @@ describe('MetricsGrid', () => {
       );
 
       expect(Chart).toHaveBeenCalledTimes(metricItems.length);
-      (Chart as jest.Mock).mockClear();
+      (Chart as Mock).mockClear();
 
       fireEvent.click(screen.getByTestId('currentPageControl'));
 
@@ -1153,7 +1162,7 @@ describe('MetricsGrid', () => {
       );
 
       expect(Chart).toHaveBeenCalledTimes(metricItems.length);
-      (Chart as jest.Mock).mockClear();
+      (Chart as Mock).mockClear();
 
       rerender(
         <MetricsExperienceStateProvider
@@ -1209,7 +1218,7 @@ describe('MetricsGrid', () => {
     // The chart is mocked, so render a panel action control inside it to simulate the
     // embeddable's quick-action buttons that the cell click handler looks for.
     const renderChartWithPanelAction = () => {
-      (Chart as jest.Mock).mockImplementation(() => (
+      (Chart as Mock).mockImplementation(() => (
         <div data-test-subj="chart">
           <button type="button" data-test-subj="embeddablePanelAction-ACTION_INSPECT_PANEL" />
         </div>
@@ -1217,12 +1226,12 @@ describe('MetricsGrid', () => {
     };
 
     afterEach(() => {
-      (Chart as jest.Mock).mockImplementation(() => <div data-test-subj="chart" />);
+      (Chart as Mock).mockImplementation(() => <div data-test-subj="chart" />);
     });
 
     it('records the metric as explored when a panel action is clicked', () => {
       renderChartWithPanelAction();
-      const onMetricExplored = jest.fn();
+      const onMetricExplored = vi.fn();
       const { container } = render(
         <MetricsExperienceStateProvider
           profileId="test-profile"
@@ -1244,7 +1253,7 @@ describe('MetricsGrid', () => {
 
     it('does not record the metric when clicking outside panel actions', () => {
       renderChartWithPanelAction();
-      const onMetricExplored = jest.fn();
+      const onMetricExplored = vi.fn();
       const { container } = render(
         <MetricsExperienceStateProvider
           profileId="test-profile"

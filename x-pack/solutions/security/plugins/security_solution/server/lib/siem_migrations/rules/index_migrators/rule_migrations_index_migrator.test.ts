@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RuleMigrationIndexMigrator } from '.';
 import * as RuleMigrationSpaceIndexMigratorModule from './rule_migrations_per_space_index_migrator';
@@ -15,7 +18,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 const rulesIndexName = '.kibana-siem-rule-migrations-rules';
 const esClientMock = {
   indices: {
-    get: jest.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({
       '.kibana-siem-rule-migrations-rules-space1': {},
       '.kibana-siem-rule-migrations-rules-space2': {},
       '.kibana-siem-rule-migrations-rules-space3': {},
@@ -31,18 +34,18 @@ const ruleMigrationIndexAdapters = {
 
 const mockLogger = loggerMock.create();
 
-const mockPerSpaceIndexMigrator = jest.spyOn(
+const mockPerSpaceIndexMigrator = vi.spyOn(
   RuleMigrationSpaceIndexMigratorModule,
   'RuleMigrationSpaceIndexMigrator'
 );
 
 describe('Index migrator', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPerSpaceIndexMigrator.mockImplementation(
       () =>
         ({
-          run: jest.fn(),
+          run: vi.fn(),
         } as unknown as RuleMigrationSpaceIndexMigratorModule.RuleMigrationSpaceIndexMigrator)
     );
   });
@@ -79,7 +82,7 @@ describe('Index migrator', () => {
       );
     });
     it('should return an empty list if no indices are found', async () => {
-      (esClientMock.indices.get as jest.Mock).mockResolvedValueOnce({});
+      (esClientMock.indices.get as Mock).mockResolvedValueOnce({});
       const migrator = new RuleMigrationIndexMigrator(
         ruleMigrationIndexAdapters,
         esClientMock,

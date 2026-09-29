@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { CPSProject } from '@kbn/cps-utils';
 import { useFetchProjects } from '@kbn/cps-utils';
@@ -17,16 +20,16 @@ import { pluginContextDefaultValue, render } from '../../../../utils/test_helper
 import type { CreateSLOForm } from '../../types';
 import { ProjectRoutingsSelector } from './project_routings_selector';
 
-jest.mock('../../../../hooks/use_plugin_context');
-jest.mock('../../../../hooks/use_kibana');
-const mockProjectScopePickerSpy = jest.fn();
+vi.mock('../../../../hooks/use_plugin_context');
+vi.mock('../../../../hooks/use_kibana');
+const mockProjectScopePickerSpy = vi.fn();
 
-jest.mock('@kbn/cps-utils', () => {
-  const actual = jest.requireActual('@kbn/cps-utils');
-  const mockReact = jest.requireActual('react');
+vi.mock('@kbn/cps-utils', async () => {
+  const actual = (await vi.importActual('@kbn/cps-utils'));
+  const mockReact = require('react');
   return {
     ...actual,
-    useFetchProjects: jest.fn(),
+    useFetchProjects: vi.fn(),
     ProjectScopePicker: (props: {
       onProjectRoutingChange: (projectRouting: string) => void;
       originProjectId?: string;
@@ -46,9 +49,9 @@ jest.mock('@kbn/cps-utils', () => {
   };
 });
 
-const usePluginContextMock = usePluginContext as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchProjectsMock = useFetchProjects as jest.Mock;
+const usePluginContextMock = usePluginContext as Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchProjectsMock = useFetchProjects as Mock;
 
 const ORIGIN_PROJECT: CPSProject = {
   _id: 'origin-1',
@@ -110,8 +113,8 @@ function mockGate(options?: {
           options?.hasManager === false
             ? undefined
             : {
-                fetchProjects: jest.fn(),
-                getDefaultProjectRouting: jest
+                fetchProjects: vi.fn(),
+                getDefaultProjectRouting: vi
                   .fn()
                   .mockReturnValue(options?.defaultProjectRouting ?? LOCAL_PROJECT_ROUTING),
               },
@@ -136,7 +139,7 @@ function mockFetchProjects(options?: {
 
 describe('ProjectRoutingsSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGate();
     mockFetchProjects();
   });

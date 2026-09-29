@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { pick } from 'lodash';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -16,9 +19,12 @@ import { cloneRuleRoute } from './clone_rule_route';
 import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('cloneRuleRoute', () => {
   const createdAt = new Date();
@@ -109,8 +115,8 @@ describe('cloneRuleRoute', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
+    vi.resetAllMocks();
+    rulesClient.get = vi.fn().mockResolvedValue(mockedRule);
   });
 
   it('clone a rule with proper parameters', async () => {
@@ -179,7 +185,7 @@ describe('cloneRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('OMG');
     });
 
@@ -278,7 +284,7 @@ describe('cloneRuleRoute', () => {
     it('returns 400 if the rule type is internally managed', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
-      rulesClient.get = jest
+      rulesClient.get = vi
         .fn()
         .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
 

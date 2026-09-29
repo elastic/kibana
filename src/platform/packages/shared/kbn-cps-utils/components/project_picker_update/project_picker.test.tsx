@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { CPSProject } from '../../types';
 import { ProjectPicker } from './project_picker';
 
 class MockIntersectionObserver {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-  takeRecords = jest.fn(() => []);
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  takeRecords = vi.fn(() => []);
 }
 
 const createProject = (id: string, tags: Partial<CPSProject> = {}): CPSProject => ({
@@ -28,7 +30,7 @@ const createProject = (id: string, tags: Partial<CPSProject> = {}): CPSProject =
 });
 
 const createFetchProjectsByRouting = (projects: CPSProject[]) =>
-  jest.fn(async (routing?: string) => {
+  vi.fn(async (routing?: string) => {
     if (!routing) {
       return { origin: projects[0] ?? null, linkedProjects: projects.slice(1) };
     }
@@ -64,11 +66,11 @@ describe('ProjectPicker', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('preserves tag-only routing on mount', async () => {
-    const onProjectRoutingChange = jest.fn();
+    const onProjectRoutingChange = vi.fn();
 
     const originProject = createProject('p1', { _type: 'security' });
     const linkedProjects = [createProject('p2', { _type: 'observability' })];
@@ -96,7 +98,7 @@ describe('ProjectPicker', () => {
   });
 
   it('preserves tag filters and decoded exclusions on mount', async () => {
-    const onProjectRoutingChange = jest.fn();
+    const onProjectRoutingChange = vi.fn();
 
     const originProject = createProject('p1', { _type: 'security' });
     const linkedProjects = [createProject('p2', { _type: 'security' })];
@@ -124,7 +126,7 @@ describe('ProjectPicker', () => {
   });
 
   it('preserves explicit-ID snapshot routing on mount', async () => {
-    const onProjectRoutingChange = jest.fn();
+    const onProjectRoutingChange = vi.fn();
     const matchingProject = createProject('matching');
     const matching2Project = createProject('matching2');
     const nonMatchingProject = createProject('non-matching');

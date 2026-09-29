@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Container } from 'inversify';
 import { cacheInScope } from './utils';
 
@@ -14,13 +17,13 @@ describe('cacheInScope', () => {
   let parent: Container;
   let child: Container;
   let serviceIdentifier: symbol;
-  let factory: jest.Mock;
+  let factory: Mock;
 
   beforeEach(() => {
     parent = new Container();
     child = new Container({ parent });
     serviceIdentifier = Symbol('Service');
-    factory = jest.fn(() => 'something');
+    factory = vi.fn(() => 'something');
 
     parent
       .bind(serviceIdentifier)

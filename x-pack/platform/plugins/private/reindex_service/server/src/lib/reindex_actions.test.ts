@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -20,10 +23,10 @@ import { getMockVersionInfo } from '@kbn/upgrade-assistant-pkg-server/src/__fixt
 
 const { currentMajor } = getMockVersionInfo();
 
-const getRollupJobByIndexNameMock = jest.fn();
+const getRollupJobByIndexNameMock = vi.fn();
 
 describe('ReindexActions', () => {
-  let client: jest.Mocked<any>;
+  let client: Mocked<any>;
   let clusterClient: ScopedClusterClientMock;
   let actions: ReindexActions;
   const log = loggingSystemMock.createLogger();
@@ -34,14 +37,14 @@ describe('ReindexActions', () => {
   beforeEach(() => {
     client = {
       errors: SavedObjectsErrorHelpers,
-      create: jest.fn(unimplemented('create')),
-      bulkCreate: jest.fn(unimplemented('bulkCreate')),
-      delete: jest.fn(unimplemented('delete')),
-      find: jest.fn(unimplemented('find')),
-      bulkGet: jest.fn(unimplemented('bulkGet')),
-      get: jest.fn(unimplemented('get')),
+      create: vi.fn(unimplemented('create')),
+      bulkCreate: vi.fn(unimplemented('bulkCreate')),
+      delete: vi.fn(unimplemented('delete')),
+      find: vi.fn(unimplemented('find')),
+      bulkGet: vi.fn(unimplemented('bulkGet')),
+      get: vi.fn(unimplemented('get')),
       // Fake update implementation that simply resolves to whatever the update says.
-      update: jest.fn((type: string, id: string, attributes: object) =>
+      update: vi.fn((type: string, id: string, attributes: object) =>
         Promise.resolve({ id, attributes } as ReindexSavedObject)
       ) as any,
     };
@@ -81,7 +84,7 @@ describe('ReindexActions', () => {
     });
 
     it("rollup apis aren't called when disabled", async () => {
-      const rollupJobsMock = jest.fn();
+      const rollupJobsMock = vi.fn();
 
       actions = reindexActionsFactory(
         client,

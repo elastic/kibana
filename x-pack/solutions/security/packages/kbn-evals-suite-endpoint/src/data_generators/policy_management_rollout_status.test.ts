@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { KbnClient } from '@kbn/test';
@@ -28,21 +31,24 @@ import {
   waitForPolicyManagementTransformPropagation,
 } from './policy_management_rollout_status';
 
-jest.mock(
+vi.mock(
   '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy',
-  () => ({
-    indexFleetEndpointPolicy: jest.fn(),
-    deleteIndexedFleetEndpointPolicies: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        indexFleetEndpointPolicy: vi.fn(),
+        deleteIndexedFleetEndpointPolicies: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const createLog = (): jest.Mocked<ToolingLog> =>
+const createLog = (): Mocked<ToolingLog> =>
   ({
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-  } as unknown as jest.Mocked<ToolingLog>);
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  } as unknown as Mocked<ToolingLog>);
 
 const ROLLOUT_STATUS_PACKAGE_POLICY_ID = 'rollout-status-package-policy-id';
 const ROLLOUT_STATUS_AGENT_POLICY_ID = 'rollout-status-agent-policy-id';
@@ -142,7 +148,7 @@ const createSearchClient = ({
   unitedSource?: Record<string, unknown> | undefined;
 } = {}): Client =>
   ({
-    search: jest.fn(async ({ index }: { index: string }) => {
+    search: vi.fn(async ({ index }: { index: string }) => {
       if (index === metadataCurrentIndexPattern) {
         return {
           hits: { hits: currentSource === undefined ? [] : [{ _source: currentSource }] },
@@ -152,23 +158,23 @@ const createSearchClient = ({
         hits: { hits: unitedSource === undefined ? [] : [{ _source: unitedSource }] },
       };
     }),
-    create: jest.fn().mockResolvedValue({}),
-    deleteByQuery: jest.fn().mockResolvedValue({}),
+    create: vi.fn().mockResolvedValue({}),
+    deleteByQuery: vi.fn().mockResolvedValue({}),
   } as unknown as Client);
 
 const expectSeedRejectsWithCleanup = async (item: unknown, expectedError: string) => {
   const indexed = createIndexed();
-  jest.mocked(indexFleetEndpointPolicy).mockResolvedValue(indexed);
+  vi.mocked(indexFleetEndpointPolicy).mockResolvedValue(indexed);
 
-  const request = jest.fn(async () => ({ data: { item } }));
+  const request = vi.fn(async () => ({ data: { item } }));
   const esClient = {
-    create: jest.fn(),
-    deleteByQuery: jest.fn().mockResolvedValue({}),
+    create: vi.fn(),
+    deleteByQuery: vi.fn().mockResolvedValue({}),
   } as unknown as Client;
   const internalEsClient = {
-    delete: jest.fn().mockResolvedValue({}),
-    index: jest.fn(),
-    deleteByQuery: jest.fn().mockResolvedValue({}),
+    delete: vi.fn().mockResolvedValue({}),
+    index: vi.fn(),
+    deleteByQuery: vi.fn().mockResolvedValue({}),
   } as unknown as Client;
   const kbnClient = { request } as unknown as KbnClient;
 
@@ -197,9 +203,9 @@ const expectSeedRejectsWithCleanup = async (item: unknown, expectedError: string
 
 describe('policy management rollout-status fixtures', () => {
   beforeEach(() => {
-    jest.mocked(indexFleetEndpointPolicy).mockReset();
-    jest.mocked(deleteIndexedFleetEndpointPolicies).mockReset();
-    jest.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
+    vi.mocked(indexFleetEndpointPolicy).mockReset();
+    vi.mocked(deleteIndexedFleetEndpointPolicies).mockReset();
+    vi.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
       integrationPolicies: undefined,
       agentPolicies: undefined,
     });
@@ -222,10 +228,10 @@ describe('policy management rollout-status fixtures', () => {
 
   it('seeds a Fleet agent and endpoint metadata with an applied revision behind the live package policy', async () => {
     const indexed = createIndexed();
-    jest.mocked(indexFleetEndpointPolicy).mockResolvedValue(indexed);
+    vi.mocked(indexFleetEndpointPolicy).mockResolvedValue(indexed);
 
     let persistedRevision = 1;
-    const request = jest.fn(
+    const request = vi.fn(
       async ({
         method,
         path,
@@ -269,8 +275,8 @@ describe('policy management rollout-status fixtures', () => {
 
     const esClient = createSearchClient();
     const internalEsClient = {
-      index: jest.fn().mockResolvedValue({}),
-      deleteByQuery: jest.fn().mockResolvedValue({}),
+      index: vi.fn().mockResolvedValue({}),
+      deleteByQuery: vi.fn().mockResolvedValue({}),
     } as unknown as Client;
 
     const seeded = await seedPolicyManagementRolloutStatus({
@@ -301,20 +307,20 @@ describe('policy management rollout-status fixtures', () => {
 
   it('throws and cleans captured policies plus prefix-scoped docs when revision does not increase', async () => {
     const indexed = createIndexed();
-    jest.mocked(indexFleetEndpointPolicy).mockResolvedValue(indexed);
+    vi.mocked(indexFleetEndpointPolicy).mockResolvedValue(indexed);
 
-    const request = jest.fn(async () => {
+    const request = vi.fn(async () => {
       return { data: { item: createItem({ revision: 1 }) } };
     });
     const esClient = {
-      create: jest.fn(),
-      search: jest.fn(),
-      deleteByQuery: jest.fn().mockResolvedValue({}),
+      create: vi.fn(),
+      search: vi.fn(),
+      deleteByQuery: vi.fn().mockResolvedValue({}),
     } as unknown as Client;
     const internalEsClient = {
-      index: jest.fn(),
-      delete: jest.fn().mockResolvedValue({}),
-      deleteByQuery: jest.fn().mockResolvedValue({}),
+      index: vi.fn(),
+      delete: vi.fn().mockResolvedValue({}),
+      deleteByQuery: vi.fn().mockResolvedValue({}),
     } as unknown as Client;
     const client = { request } as unknown as KbnClient;
 
@@ -331,8 +337,8 @@ describe('policy management rollout-status fixtures', () => {
       { index: '.fleet-agents', id: EVAL_PM_ROLLOUT_STATUS_AGENT_ID, refresh: true },
       { ignore: [404] }
     );
-    expect((internalEsClient.delete as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
-      (deleteIndexedFleetEndpointPolicies as jest.Mock).mock.invocationCallOrder[0]
+    expect((internalEsClient.delete as Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (deleteIndexedFleetEndpointPolicies as Mock).mock.invocationCallOrder[0]
     );
     expect(deleteIndexedFleetEndpointPolicies).toHaveBeenCalledWith(client, indexed);
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EsClient } from '@kbn/scout';
 import type { RuleCreationExample } from '../../datasets/golden';
 import type { RuleCreationResult } from '../rule_creation_client';
@@ -220,7 +222,7 @@ describe('createQueryExecutabilityEvaluator', () => {
   const makeEsClient = (response: { values?: unknown[][] } | { error: Error }): EsClient => {
     const mock = {
       esql: {
-        query: jest
+        query: vi
           .fn()
           .mockImplementation(() =>
             'error' in response ? Promise.reject(response.error) : Promise.resolve(response)

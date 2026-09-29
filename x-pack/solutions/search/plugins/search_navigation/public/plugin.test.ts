@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
@@ -12,7 +14,7 @@ import { SearchNavigationPlugin } from './plugin';
 
 describe('SearchNavigationPlugin', () => {
   const createContextEngineSetup = () => ({
-    registerAppChromeAdapter: jest.fn(),
+    registerAppChromeAdapter: vi.fn(),
   });
 
   const createPlugin = () => new SearchNavigationPlugin(coreMock.createPluginInitializerContext());

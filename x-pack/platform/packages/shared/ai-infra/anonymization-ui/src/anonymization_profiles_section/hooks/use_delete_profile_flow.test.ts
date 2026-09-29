@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { mapProfilesApiError } from '../../common/services/profiles/errors';
 import { useDeleteProfile } from '../../common/services/profiles/hooks/use_delete_profile';
 import { useDeleteProfileFlow } from './use_delete_profile_flow';
 
-jest.mock('../../common/services/profiles/hooks/use_delete_profile', () => ({
-  useDeleteProfile: jest.fn(),
-}));
+vi.mock('../../common/services/profiles/hooks/use_delete_profile', () => {
+      const mocked = {
+      useDeleteProfile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createDeleteProfileMutationMock = ({
-  mutateAsync = jest.fn(),
+  mutateAsync = vi.fn(),
   isLoading = false,
   error = null,
-  reset = jest.fn(),
+  reset = vi.fn(),
 }: {
-  mutateAsync?: jest.Mock;
+  mutateAsync?: Mock;
   isLoading?: boolean;
   error?: unknown;
-  reset?: jest.Mock;
+  reset?: Mock;
 } = {}): ReturnType<typeof useDeleteProfile> =>
   ({
     mutateAsync,
@@ -33,21 +39,21 @@ const createDeleteProfileMutationMock = ({
   } as unknown as ReturnType<typeof useDeleteProfile>);
 
 const client = {
-  findProfiles: jest.fn(),
-  getProfile: jest.fn(),
-  createProfile: jest.fn(),
-  updateProfile: jest.fn(),
-  deleteProfile: jest.fn(),
+  findProfiles: vi.fn(),
+  getProfile: vi.fn(),
+  createProfile: vi.fn(),
+  updateProfile: vi.fn(),
+  deleteProfile: vi.fn(),
 };
 
 describe('useDeleteProfileFlow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('opens and cancels confirmation state', () => {
-    const reset = jest.fn();
-    jest.mocked(useDeleteProfile).mockReturnValue(createDeleteProfileMutationMock({ reset }));
+    const reset = vi.fn();
+    vi.mocked(useDeleteProfile).mockReturnValue(createDeleteProfileMutationMock({ reset }));
 
     const { result } = renderHook(() =>
       useDeleteProfileFlow({
@@ -69,8 +75,8 @@ describe('useDeleteProfileFlow', () => {
   });
 
   it('deletes selected profile and clears pending id on success', async () => {
-    const mutateAsync = jest.fn().mockResolvedValue({ deleted: true });
-    jest.mocked(useDeleteProfile).mockReturnValue(
+    const mutateAsync = vi.fn().mockResolvedValue({ deleted: true });
+    vi.mocked(useDeleteProfile).mockReturnValue(
       createDeleteProfileMutationMock({
         mutateAsync,
       })
@@ -97,8 +103,8 @@ describe('useDeleteProfileFlow', () => {
   });
 
   it('keeps pending id on delete failure', async () => {
-    const mutateAsync = jest.fn().mockRejectedValue(new Error('delete failed'));
-    jest.mocked(useDeleteProfile).mockReturnValue(
+    const mutateAsync = vi.fn().mockRejectedValue(new Error('delete failed'));
+    vi.mocked(useDeleteProfile).mockReturnValue(
       createDeleteProfileMutationMock({
         mutateAsync,
       })
@@ -124,7 +130,7 @@ describe('useDeleteProfileFlow', () => {
   });
 
   it('normalizes non-API mutation errors for display', () => {
-    jest.mocked(useDeleteProfile).mockReturnValue(
+    vi.mocked(useDeleteProfile).mockReturnValue(
       createDeleteProfileMutationMock({
         error: new Error('adapter failure'),
       })
@@ -142,7 +148,7 @@ describe('useDeleteProfileFlow', () => {
   });
 
   it('preserves mapped API errors from delete mutation', () => {
-    jest.mocked(useDeleteProfile).mockReturnValue(
+    vi.mocked(useDeleteProfile).mockReturnValue(
       createDeleteProfileMutationMock({
         error: mapProfilesApiError({ statusCode: 403 }),
       })

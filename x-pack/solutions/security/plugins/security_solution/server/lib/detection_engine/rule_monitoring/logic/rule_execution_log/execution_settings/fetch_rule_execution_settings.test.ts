@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 
@@ -41,7 +43,7 @@ const setup = ({ error }: { error?: Error } = {}) => {
   };
 };
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('fetchRuleExecutionSettings()', () => {
   test('reads the settings on a healthy fetch', async () => {

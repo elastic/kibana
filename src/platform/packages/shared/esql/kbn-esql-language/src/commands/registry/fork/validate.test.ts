@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
@@ -16,7 +18,7 @@ const forkExpectErrors = (query: string, expectedErrors: string[], context = moc
 
 describe('FORK Validation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('no errors for valid command', () => {

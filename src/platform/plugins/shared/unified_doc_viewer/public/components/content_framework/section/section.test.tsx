@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -19,14 +21,14 @@ const defaultProps: ContentFrameworkSectionProps = {
   actions: [
     {
       icon: 'maximize',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
       ariaLabel: 'Expand section',
       dataTestSubj: 'unifiedDocViewerSectionActionButton-expand',
       ebt: { action: 'expand', element: 'sectionExpandButton' },
     },
     {
       icon: 'fullScreen',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
       ariaLabel: 'Full screen',
       dataTestSubj: 'unifiedDocViewerSectionActionButton-fullScreen',
       label: 'Full Screen',
@@ -97,7 +99,7 @@ describe('ContentFrameworkSection', () => {
   });
 
   it('calls onToggle when the accordion is toggled', async () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     render(<ContentFrameworkSection {...defaultProps} onToggle={onToggle} forceState="open" />);
     const toggleBtn = screen.getByText('Test Section');
     await userEvent.click(toggleBtn);

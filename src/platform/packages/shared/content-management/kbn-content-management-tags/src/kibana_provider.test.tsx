@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -35,7 +37,7 @@ describe('ContentManagementTagsKibanaProvider', () => {
   // Cast to the tagging plugin's Tag type (which requires id: string, not optional)
   mockSavedObjectsTagging.ui.getTagList.mockReturnValue(mockTags as any);
 
-  const mockAddError = jest.fn();
+  const mockAddError = vi.fn();
 
   const mockCore: ContentManagementTagsKibanaDependencies['core'] = {
     notifications: {
@@ -57,7 +59,7 @@ describe('ContentManagementTagsKibanaProvider', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAddError.mockClear();
   });
 

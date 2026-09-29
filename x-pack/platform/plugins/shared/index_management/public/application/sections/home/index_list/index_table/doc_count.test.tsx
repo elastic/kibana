@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { DocCountCell } from './doc_count';
 import { RequestResultType } from './get_doc_count';
 
-jest.mock('react-use/lib/useObservable', () => jest.fn());
+vi.mock('react-use/lib/useObservable', () => vi.fn());
 
-const mockedUseObservable = jest.requireMock('react-use/lib/useObservable');
+const mockedUseObservable = (await vi.importMock('react-use/lib/useObservable'));
 
 describe('DocCountCell', () => {
   const docCountApi = {
-    getByName: jest.fn(),
-    getObservable: jest.fn(),
-    abort: jest.fn(),
+    getByName: vi.fn(),
+    getObservable: vi.fn(),
+    abort: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
     // Ensure we don't leave work in the React scheduler between tests.
-    jest.runOnlyPendingTimers();
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('shows a spinner while loading and requests the count for the index', () => {

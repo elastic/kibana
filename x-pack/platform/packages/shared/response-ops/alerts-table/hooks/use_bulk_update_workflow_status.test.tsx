@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -30,7 +32,7 @@ const wrapper = ({ children }: PropsWithChildren) => {
 
 describe('useBulkUpdateWorkflowStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

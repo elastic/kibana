@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
 import { indexes, integrations, mockContext } from '../../../__tests__/commands/context_fixtures';
 import { METADATA_FIELDS } from '../options/metadata';
@@ -54,7 +57,7 @@ const visibleDataSources = [...(mockContext.sources ?? []), ...visibleIntegratio
 describe('FROM Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset mockContext.sources to original indexes
     mockContext.sources = indexes.map((name) => ({
@@ -65,11 +68,11 @@ describe('FROM Autocomplete', () => {
 
     // Reset mocks before each test to ensure isolation
     mockCallbacks = {
-      getByType: jest.fn(),
+      getByType: vi.fn(),
     };
 
     const expectedFields = getFieldNamesByType('any', true);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedFields.map((name) => ({ label: name, text: name }))
     );
   });
@@ -77,7 +80,7 @@ describe('FROM Autocomplete', () => {
     test('suggests Browse data sources in empty source slots when enabled', async () => {
       mockCallbacks = {
         ...mockCallbacks,
-        canSuggestResourceBrowser: jest.fn().mockResolvedValue(true),
+        canSuggestResourceBrowser: vi.fn().mockResolvedValue(true),
       };
 
       const suggest = async (query: string) => {

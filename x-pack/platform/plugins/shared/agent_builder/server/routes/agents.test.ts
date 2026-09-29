@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -21,11 +24,11 @@ describe('Agent Routes - experimental access-control gate', () => {
     string,
     { handler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown> }
   >;
-  let mockCreate: jest.Mock;
-  let mockUpdate: jest.Mock;
-  let mockAuditLogCreated: jest.Mock;
-  let mockAuditLogUpdated: jest.Mock;
-  let mockUiSettingsGet: jest.Mock;
+  let mockCreate: Mock;
+  let mockUpdate: Mock;
+  let mockAuditLogCreated: Mock;
+  let mockAuditLogUpdated: Mock;
+  let mockUiSettingsGet: Mock;
 
   // Keyed rather than a blanket `mockResolvedValue` so these tests only drive the experimental
   // features flag, and don't incidentally enable the Context Engine as well.
@@ -40,10 +43,10 @@ describe('Agent Routes - experimental access-control gate', () => {
       },
     }),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
     agentBuilder: Promise.resolve({
-      spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
     }),
   });
 
@@ -68,22 +71,22 @@ describe('Agent Routes - experimental access-control gate', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routeHandlers = {};
-    mockCreate = jest.fn().mockResolvedValue(mockProfile);
-    mockUpdate = jest.fn().mockResolvedValue(mockProfile);
-    mockAuditLogCreated = jest.fn();
-    mockAuditLogUpdated = jest.fn();
-    mockUiSettingsGet = jest.fn();
+    mockCreate = vi.fn().mockResolvedValue(mockProfile);
+    mockUpdate = vi.fn().mockResolvedValue(mockProfile);
+    mockAuditLogCreated = vi.fn();
+    mockAuditLogUpdated = vi.fn();
+    mockUiSettingsGet = vi.fn();
 
     const mockRegistry = {
       create: mockCreate,
       update: mockUpdate,
     };
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       agents: {
-        getRegistry: jest.fn().mockResolvedValue(mockRegistry),
+        getRegistry: vi.fn().mockResolvedValue(mockRegistry),
       },
       auditLogService: {
         logAgentCreated: mockAuditLogCreated,
@@ -92,7 +95,7 @@ describe('Agent Routes - experimental access-control gate', () => {
     });
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest
+      addVersion: vi
         .fn()
         .mockImplementation(
           (
@@ -100,36 +103,36 @@ describe('Agent Routes - experimental access-control gate', () => {
             handler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>
           ) => {
             routeHandlers[`${method}:${path}`] = { handler };
-            return { addVersion: jest.fn() };
+            return { addVersion: vi.fn() };
           }
         ),
     });
 
     const mockRouter = {
-      get: jest.fn(),
+      get: vi.fn(),
       versioned: {
-        get: jest
+        get: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('GET', config.path)
           ),
-        post: jest
+        post: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('POST', config.path)
           ),
-        put: jest
+        put: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('PUT', config.path)
           ),
-        delete: jest
+        delete: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('DELETE', config.path)
           ),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerAgentRoutes({
       router: mockRouter,
@@ -143,8 +146,8 @@ describe('Agent Routes - experimental access-control gate', () => {
   const getUpdateHandler = () => routeHandlers[`PUT:${updatePath}`]?.handler;
 
   const mockResponse = {
-    ok: jest.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
-    badRequest: jest.fn((params: { body?: { message?: string } }) => ({
+    ok: vi.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
+    badRequest: vi.fn((params: { body?: { message?: string } }) => ({
       type: 'badRequest',
       ...params,
     })),
@@ -230,10 +233,10 @@ describe('Agent Routes - ai_indices Context Engine gate', () => {
   type Handler = (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
   let routeHandlers: Record<string, { handler: Handler }>;
-  let mockGet: jest.Mock;
-  let mockList: jest.Mock;
-  let mockCreate: jest.Mock;
-  let mockUpdate: jest.Mock;
+  let mockGet: Mock;
+  let mockList: Mock;
+  let mockCreate: Mock;
+  let mockUpdate: Mock;
 
   const agentWithoutAiIndices = {
     id: 'agent-1',
@@ -252,87 +255,87 @@ describe('Agent Routes - ai_indices Context Engine gate', () => {
     core: Promise.resolve({
       uiSettings: {
         client: {
-          get: jest.fn(async (key: string) =>
+          get: vi.fn(async (key: string) =>
             key === CONTEXT_ENGINE_ENABLED_SETTING_ID ? contextEngineEnabled : true
           ),
         },
       },
     }),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
     agentBuilder: Promise.resolve({
-      spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
     }),
   });
 
   const mockResponse = {
-    ok: jest.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
-    badRequest: jest.fn((params: { body?: { message?: string } }) => ({
+    ok: vi.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
+    badRequest: vi.fn((params: { body?: { message?: string } }) => ({
       type: 'badRequest',
       ...params,
     })),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routeHandlers = {};
-    mockGet = jest.fn().mockResolvedValue(agentWithoutAiIndices);
-    mockList = jest.fn().mockResolvedValue([agentWithoutAiIndices, agentWithAiIndices]);
-    mockCreate = jest.fn(async (createRequest) => ({
+    mockGet = vi.fn().mockResolvedValue(agentWithoutAiIndices);
+    mockList = vi.fn().mockResolvedValue([agentWithoutAiIndices, agentWithAiIndices]);
+    mockCreate = vi.fn(async (createRequest) => ({
       ...agentWithoutAiIndices,
       ...createRequest,
     }));
-    mockUpdate = jest.fn(async (agentId, update) => ({
+    mockUpdate = vi.fn(async (agentId, update) => ({
       ...agentWithoutAiIndices,
       id: agentId,
       configuration: { ...agentWithoutAiIndices.configuration, ...update.configuration },
     }));
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       agents: {
-        getRegistry: jest.fn().mockResolvedValue({
+        getRegistry: vi.fn().mockResolvedValue({
           get: mockGet,
           list: mockList,
           create: mockCreate,
           update: mockUpdate,
         }),
       },
-      auditLogService: { logAgentCreated: jest.fn(), logAgentUpdated: jest.fn() },
+      auditLogService: { logAgentCreated: vi.fn(), logAgentUpdated: vi.fn() },
     });
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest.fn().mockImplementation((_config: unknown, handler: Handler) => {
+      addVersion: vi.fn().mockImplementation((_config: unknown, handler: Handler) => {
         routeHandlers[`${method}:${path}`] = { handler };
-        return { addVersion: jest.fn() };
+        return { addVersion: vi.fn() };
       }),
     });
 
     const mockRouter = {
-      get: jest.fn(),
+      get: vi.fn(),
       versioned: {
-        get: jest
+        get: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('GET', config.path)
           ),
-        post: jest
+        post: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('POST', config.path)
           ),
-        put: jest
+        put: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('PUT', config.path)
           ),
-        delete: jest
+        delete: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('DELETE', config.path)
           ),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerAgentRoutes({
       router: mockRouter,
@@ -480,43 +483,43 @@ describe('Agent Routes - request body schemas', () => {
 
   beforeAll(() => {
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest.fn().mockImplementation((config: any) => {
+      addVersion: vi.fn().mockImplementation((config: any) => {
         if (config?.validate?.request?.body) {
           routeSchemas[`${method}:${path}`] = config.validate.request.body;
         }
-        return { addVersion: jest.fn() };
+        return { addVersion: vi.fn() };
       }),
     });
 
     const mockRouter = {
-      get: jest.fn(),
+      get: vi.fn(),
       versioned: {
-        get: jest
+        get: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('GET', config.path)
           ),
-        post: jest
+        post: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('POST', config.path)
           ),
-        put: jest
+        put: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('PUT', config.path)
           ),
-        delete: jest
+        delete: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('DELETE', config.path)
           ),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerAgentRoutes({
       router: mockRouter,
-      getInternalServices: jest.fn(),
+      getInternalServices: vi.fn(),
       logger: loggingSystemMock.createLogger(),
       analyticsService: undefined,
     } as unknown as RouteDependencies);

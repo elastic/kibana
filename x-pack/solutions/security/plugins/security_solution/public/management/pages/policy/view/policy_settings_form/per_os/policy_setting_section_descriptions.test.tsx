@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -25,13 +28,13 @@ import { PerOsMemoryProtectionCard } from './per_os_memory_protection_card';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
 import { PerOsRansomwareProtectionCard } from './per_os_ransomware_protection_card';
 
-jest.mock('../../../../../../common/hooks/use_license');
-jest.mock('../hooks/use_get_device_control_component');
+vi.mock('../../../../../../common/hooks/use_license');
+vi.mock('../hooks/use_get_device_control_component');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
-const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
+const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as Mock;
 
 const CARD_CASES: ReadonlyArray<{
   name: string;
@@ -115,7 +118,7 @@ describe('per-OS policy setting section descriptions', () => {
     ({ dataTestSubj, descriptionKey, renderCard }) => {
       const props: PolicyFormComponentCommonProps = {
         policy,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         mode: 'edit',
         'data-test-subj': dataTestSubj,
       };

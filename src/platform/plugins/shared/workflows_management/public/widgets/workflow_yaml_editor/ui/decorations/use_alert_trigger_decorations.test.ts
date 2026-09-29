@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { useAlertTriggerDecorations } from './use_alert_trigger_decorations';
 
-jest.mock('@kbn/monaco', () => {
-  const actualMonaco = jest.requireActual('@kbn/monaco');
+vi.mock('@kbn/monaco', async () => {
+  const actualMonaco = (await vi.importActual('@kbn/monaco'));
   return {
     ...actualMonaco,
     monaco: {
       ...actualMonaco.monaco,
-      Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+      Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
         startLineNumber: startLine,
         startColumn: startCol,
         endLineNumber: endLine,
@@ -31,10 +34,10 @@ jest.mock('@kbn/monaco', () => {
 const createMockModel = (value: string) => {
   const lines = value.split('\n');
   return {
-    getValue: jest.fn(() => value),
-    getLineContent: jest.fn((lineNum: number) => lines[lineNum - 1] ?? ''),
-    getLineMaxColumn: jest.fn((lineNum: number) => (lines[lineNum - 1]?.length ?? 0) + 1),
-    getPositionAt: jest.fn((offset: number) => {
+    getValue: vi.fn(() => value),
+    getLineContent: vi.fn((lineNum: number) => lines[lineNum - 1] ?? ''),
+    getLineMaxColumn: vi.fn((lineNum: number) => (lines[lineNum - 1]?.length ?? 0) + 1),
+    getPositionAt: vi.fn((offset: number) => {
       let remaining = offset;
       for (let i = 0; i < lines.length; i++) {
         if (remaining <= lines[i].length) {
@@ -50,13 +53,13 @@ const createMockModel = (value: string) => {
 const createMockEditor = (value: string) => {
   const model = createMockModel(value);
   const decorationsCollection = {
-    clear: jest.fn(),
-    set: jest.fn(),
+    clear: vi.fn(),
+    set: vi.fn(),
   };
   return {
     editor: {
-      createDecorationsCollection: jest.fn(() => decorationsCollection),
-      getModel: jest.fn(() => model),
+      createDecorationsCollection: vi.fn(() => decorationsCollection),
+      getModel: vi.fn(() => model),
     } as unknown as monaco.editor.IStandaloneCodeEditor,
     decorationsCollection,
   };
@@ -117,7 +120,7 @@ describe('useAlertTriggerDecorations', () => {
     );
 
     expect(editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
-    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
+    const decorations = (editor.createDecorationsCollection as Mock).mock.calls[0][0];
     // Each alert trigger produces a glyph decoration and a line highlight decoration
     expect(decorations.length).toBe(2);
     expect(decorations[0].options.glyphMarginClassName).toBe('alert-trigger-glyph');

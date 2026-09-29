@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useCurrentUserProfile } from './use_current_user_profile';
 
-const mockGetCurrent = jest.fn();
+const mockGetCurrent = vi.fn();
 
 const mockUserProfile = {
   getCurrent: mockGetCurrent,
@@ -26,7 +28,7 @@ const wrapper = () => {
 };
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('useCurrentUserProfile', () => {

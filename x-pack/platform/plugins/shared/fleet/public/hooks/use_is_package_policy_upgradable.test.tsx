@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useIsPackagePolicyUpgradable } from './use_is_package_policy_upgradable';
 import { useGetPackagesQuery } from './use_request/epm';
 
-jest.mock('./use_request/epm');
+vi.mock('./use_request/epm');
 
-const mockedUseGetPackagesQuery = useGetPackagesQuery as jest.MockedFunction<
+const mockedUseGetPackagesQuery = useGetPackagesQuery as MockedFunction<
   typeof useGetPackagesQuery
 >;
 

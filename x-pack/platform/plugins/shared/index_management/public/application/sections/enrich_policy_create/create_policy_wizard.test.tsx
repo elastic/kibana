@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,23 +23,32 @@ import { CreatePolicyWizard } from './create_policy_wizard';
 // `services/documentation` reaches `@kbn/monaco` through the mappings editor constants and the
 // runtime fields plugin. Only the ES|QL/Painless language registration is loaded there, and that
 // pulls in every generated definition plus their i18n messages at import time.
-jest.mock('@kbn/monaco', () => ({ PainlessLang: { ID: 'painless' } }));
+vi.mock('@kbn/monaco', () => {
+      const mocked = { PainlessLang: { ID: 'painless' } };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
-  CodeEditor: ({ value }: { value?: string }) => (
-    <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
-  ),
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
+      CodeEditor: ({ value }: { value?: string }) => (
+        <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/api', () => ({
-  ...jest.requireActual('../../services/api'),
-  createEnrichPolicy: jest.fn(),
-  getFieldsFromIndices: jest.fn(),
-}));
+vi.mock('../../services/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../services/api')),
+      createEnrichPolicy: vi.fn(),
+      getFieldsFromIndices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createEnrichPolicyMock = jest.mocked(createEnrichPolicy);
-const getFieldsFromIndicesMock = jest.mocked(getFieldsFromIndices);
+const createEnrichPolicyMock = vi.mocked(createEnrichPolicy);
+const getFieldsFromIndicesMock = vi.mocked(getFieldsFromIndices);
 
 const completedDraft: DraftPolicy = {
   name: 'test_policy',
@@ -72,9 +83,9 @@ const renderCreatePolicyWizard = () => {
   const notificationService = new NotificationService(
     notificationServiceMock.createStartContract().toasts
   );
-  const showSuccessToast = jest.spyOn(notificationService, 'showSuccessToast');
+  const showSuccessToast = vi.spyOn(notificationService, 'showSuccessToast');
   const appDependencies = {
-    core: { application: { getUrlForApp: jest.fn() } },
+    core: { application: { getUrlForApp: vi.fn() } },
     history,
     services: { notificationService },
   } as unknown as AppDependencies;
@@ -109,7 +120,7 @@ const goToCreationStep = async () => {
 
 describe('<CreatePolicyWizard />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getFieldsFromIndicesMock.mockResolvedValue({
       data: { commonFields: [], indices: [] },
       error: null,

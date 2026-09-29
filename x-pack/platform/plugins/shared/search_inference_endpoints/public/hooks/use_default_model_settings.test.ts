@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import {
@@ -15,9 +18,9 @@ import { useDefaultModelSettings } from './use_default_model_settings';
 import { useKibana } from './use_kibana';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 type SettingsStore = Record<string, unknown>;
 
@@ -29,8 +32,8 @@ const buildSettingsClient = (initial: SettingsStore = {}) => {
   };
   const update$ = new Subject<{ key: string }>();
   return {
-    get: jest.fn(<T>(key: string, _defaultValue: T): T => store[key] as T),
-    set: jest.fn(async (key: string, value: unknown) => {
+    get: vi.fn(<T>(key: string, _defaultValue: T): T => store[key] as T),
+    set: vi.fn(async (key: string, value: unknown) => {
       store[key] = value;
       update$.next({ key });
     }),
@@ -41,14 +44,14 @@ const buildSettingsClient = (initial: SettingsStore = {}) => {
 
 const buildNotifications = () => ({
   toasts: {
-    addSuccess: jest.fn(),
-    addDanger: jest.fn(),
+    addSuccess: vi.fn(),
+    addDanger: vi.fn(),
   },
 });
 
 describe('useDefaultModelSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('derives enableAi=true and featureSpecificModels=true when AI is configured', () => {

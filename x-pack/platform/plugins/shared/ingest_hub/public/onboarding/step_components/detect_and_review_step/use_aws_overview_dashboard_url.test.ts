@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -18,9 +24,9 @@ import {
   type InstallationSnapshot,
 } from './use_aws_overview_dashboard_url';
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockPrepend = jest.fn((path: string) => `/base${path}`);
-const mockGetActiveSpace = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const mockPrepend = vi.fn((path: string) => `/base${path}`);
+const mockGetActiveSpace = vi.fn();
 
 function setupKibana(spaceId?: string) {
   mockGetActiveSpace.mockResolvedValue(spaceId ? { id: spaceId } : undefined);
@@ -33,7 +39,7 @@ function setupKibana(spaceId?: string) {
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   setupKibana('default');
 });
 

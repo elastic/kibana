@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { ChatEventType } from '@kbn/agent-builder-common/chat/events';
@@ -25,8 +27,8 @@ const contextPackage: DiagnosisContextPackage = {
 
 describe('openFailureDiagnosisChat', () => {
   const chat$ = new Subject();
-  const openChat = jest.fn();
-  const httpPost = jest.fn().mockResolvedValue({});
+  const openChat = vi.fn();
+  const httpPost = vi.fn().mockResolvedValue({});
 
   const agentBuilder = {
     openChat,

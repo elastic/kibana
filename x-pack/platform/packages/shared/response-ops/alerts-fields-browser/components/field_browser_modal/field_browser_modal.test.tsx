@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -13,9 +15,9 @@ import { mockBrowserFields } from '../../mock';
 import type { FieldBrowserModalProps } from './field_browser_modal';
 import { FieldBrowserModal } from './field_browser_modal';
 
-const mockOnHide = jest.fn();
-const mockOnToggleColumn = jest.fn();
-const mockOnResetColumns = jest.fn();
+const mockOnHide = vi.fn();
+const mockOnToggleColumn = vi.fn();
+const mockOnResetColumns = vi.fn();
 
 const testProps: FieldBrowserModalProps = {
   columnIds: [],
@@ -23,15 +25,15 @@ const testProps: FieldBrowserModalProps = {
   searchInput: '',
   appliedFilterInput: '',
   isSearching: false,
-  setSelectedCategoryIds: jest.fn(),
+  setSelectedCategoryIds: vi.fn(),
   onHide: mockOnHide,
   onResetColumns: mockOnResetColumns,
-  onSearchInputChange: jest.fn(),
+  onSearchInputChange: vi.fn(),
   onToggleColumn: mockOnToggleColumn,
   restoreFocusTo: React.createRef<HTMLButtonElement>(),
   selectedCategoryIds: [],
   filterSelectedEnabled: false,
-  onFilterSelectedChange: jest.fn(),
+  onFilterSelectedChange: vi.fn(),
 };
 
 const renderComponent = (props: Partial<FieldBrowserModalProps> = {}) =>
@@ -39,7 +41,7 @@ const renderComponent = (props: Partial<FieldBrowserModalProps> = {}) =>
 
 describe('FieldBrowserModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders the Close button', () => {
@@ -102,7 +104,7 @@ describe('FieldBrowserModal', () => {
   });
 
   test('it invokes onSearchInputChange when the user types in the field search input', async () => {
-    const onSearchInputChange = jest.fn();
+    const onSearchInputChange = vi.fn();
     const inputText = 'event.category';
 
     renderComponent({ onSearchInputChange });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useState, useEffect } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -63,7 +65,7 @@ describe('useFormIsModified()', () => {
     );
   };
 
-  const onIsModifiedChange = jest.fn();
+  const onIsModifiedChange = vi.fn();
   const isFormModified = () =>
     onIsModifiedChange.mock.calls[onIsModifiedChange.mock.calls.length - 1][0];
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -33,7 +35,7 @@ const mockWorkflows: WorkflowItem[] = [
 
 const defaultProps = {
   label: 'Test Workflow Picker',
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   selectedWorkflowIds: [],
   workflows: mockWorkflows,
 };
@@ -45,7 +47,7 @@ const findOptionByName = (name: string): HTMLElement | null =>
 
 describe('WorkflowPicker', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the workflow picker', () => {
@@ -120,7 +122,7 @@ describe('WorkflowPicker', () => {
   });
 
   it('calls onChange with array when selection changes', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <TestProviders>
         <WorkflowPicker {...defaultProps} onChange={onChange} />
@@ -144,7 +146,7 @@ describe('WorkflowPicker', () => {
   });
 
   it('calls onChange with multiple items when additional selection is made', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <TestProviders>
         <WorkflowPicker
@@ -172,7 +174,7 @@ describe('WorkflowPicker', () => {
   });
 
   it('calls onChange with empty array when all selections are cleared', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <TestProviders>
         <WorkflowPicker
@@ -490,7 +492,7 @@ describe('WorkflowPicker', () => {
     });
 
     it('shows enabled workflows before disabled workflows in singleSelection mode', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <TestProviders>
           <WorkflowPicker
@@ -526,7 +528,7 @@ describe('WorkflowPicker', () => {
     });
 
     it('calls onChange with single-item array when selection changes in single selection mode', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <TestProviders>
           <WorkflowPicker {...defaultProps} onChange={onChange} singleSelection />

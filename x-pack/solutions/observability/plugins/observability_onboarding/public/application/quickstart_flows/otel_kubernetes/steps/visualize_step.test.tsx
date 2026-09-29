@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { renderWithHostPageProviders } from '../../../pages/host/__tests__/test_helpers';
 import { OtelKubernetesVisualizeStep } from './visualize_step';
 
-jest.mock('../../kubernetes/data_ingest_status', () => ({
-  DataIngestStatus: ({ onboardingId }: { onboardingId: string }) => (
-    <div data-test-subj="dataIngestStatus" data-onboarding-id={onboardingId} />
-  ),
-}));
+vi.mock('../../kubernetes/data_ingest_status', () => {
+      const mocked = {
+      DataIngestStatus: ({ onboardingId }: { onboardingId: string }) => (
+        <div data-test-subj="dataIngestStatus" data-onboarding-id={onboardingId} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('OtelKubernetesVisualizeStep', () => {
   const defaultProps = {
     data: { onboardingId: 'test-onboarding-id' },
     actionLinks: [],
-    onDataReceived: jest.fn(),
+    onDataReceived: vi.fn(),
   };
 
   it('renders guidance before monitoring starts', () => {

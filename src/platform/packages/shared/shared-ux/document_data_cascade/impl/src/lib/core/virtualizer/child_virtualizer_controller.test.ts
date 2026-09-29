@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   createChildVirtualizerController,
   type ChildVirtualizerController,
@@ -35,14 +37,14 @@ const createMockRootVirtualizer = (
   } as unknown as CascadeVirtualizerReturnValue;
 };
 
-const flushRaf = () => jest.advanceTimersByTime(16);
+const flushRaf = () => vi.advanceTimersByTime(16);
 
 describe('ChildVirtualizerController', () => {
   let controller: ChildVirtualizerController;
   let mockRoot: CascadeVirtualizerReturnValue;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockRoot = createMockRootVirtualizer();
     controller = createChildVirtualizerController({
       getRootVirtualizer: () => mockRoot,
@@ -51,7 +53,7 @@ describe('ChildVirtualizerController', () => {
 
   afterEach(() => {
     controller.destroy();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('getChildConfig', () => {
@@ -154,7 +156,7 @@ describe('ChildVirtualizerController', () => {
     });
 
     it('notifies listeners on preRegister', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       controller.subscribe(listener);
       controller.enqueue('cell-a', 2);
       expect(listener).toHaveBeenCalled();
@@ -283,7 +285,7 @@ describe('ChildVirtualizerController', () => {
 
   describe('subscribe', () => {
     it('notifies listeners on connect', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       controller.subscribe(listener);
 
       controller.connect('cell-a', 2);
@@ -292,7 +294,7 @@ describe('ChildVirtualizerController', () => {
 
     it('notifies listeners on disconnect', () => {
       const handle = controller.connect('cell-a', 2);
-      const listener = jest.fn();
+      const listener = vi.fn();
       controller.subscribe(listener);
 
       handle.disconnect();
@@ -304,7 +306,7 @@ describe('ChildVirtualizerController', () => {
       const handle = controller.connect('cell-a', 2);
       flushRaf(); // drain stagger activation rAF
 
-      const listener = jest.fn();
+      const listener = vi.fn();
       controller.subscribe(listener);
 
       handle.reportState({ scrollOffset: 100 });
@@ -316,7 +318,7 @@ describe('ChildVirtualizerController', () => {
     });
 
     it('notifies listeners on markRootStable', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       controller.subscribe(listener);
 
       controller.markRootStable();
@@ -324,7 +326,7 @@ describe('ChildVirtualizerController', () => {
     });
 
     it('unsubscribe stops notifications', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       const unsub = controller.subscribe(listener);
       unsub();
 
@@ -509,7 +511,7 @@ describe('ChildVirtualizerController', () => {
       const handle = controller.connect('cell-a', 2);
       flushRaf();
 
-      const listener = jest.fn();
+      const listener = vi.fn();
       controller.subscribe(listener);
 
       handle.detachScrollElement();
@@ -525,7 +527,7 @@ describe('ChildVirtualizerController', () => {
       const handle = controller.connect('cell-a', 2);
       flushRaf();
 
-      const listener = jest.fn();
+      const listener = vi.fn();
       controller.subscribe(listener);
 
       handle.detachScrollElement();
@@ -539,7 +541,7 @@ describe('ChildVirtualizerController', () => {
       const handle = controller.connect('cell-a', 2);
       flushRaf();
 
-      const listener = jest.fn();
+      const listener = vi.fn();
       controller.subscribe(listener);
 
       handle.reattachScrollElement();
@@ -634,7 +636,7 @@ describe('ChildVirtualizerController', () => {
         initialPersistedAnchors: { 'cell-a': 5 },
       });
       returningController.markRootStable();
-      const listener = jest.fn();
+      const listener = vi.fn();
       returningController.subscribe(listener);
 
       returningController.enqueue('cell-a', 2);

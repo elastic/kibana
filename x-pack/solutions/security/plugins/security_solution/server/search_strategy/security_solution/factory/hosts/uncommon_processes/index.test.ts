@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import * as buildQuery from './dsl/query.dsl';
@@ -17,7 +19,7 @@ import {
 import type { HostUncommonProcessesRequestOptions } from '../../../../../../common/api/search_strategy';
 
 describe('uncommonProcesses search strategy', () => {
-  const buildUncommonProcessesQuery = jest.spyOn(buildQuery, 'buildQuery');
+  const buildUncommonProcessesQuery = vi.spyOn(buildQuery, 'buildQuery');
 
   afterEach(() => {
     buildUncommonProcessesQuery.mockClear();

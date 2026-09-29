@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
@@ -75,31 +78,37 @@ import {
 
 import { installPackageKibanaAssetsHandler } from './install_assets_handler';
 
-jest.mock('./handlers', () => ({
-  ...jest.requireActual('./handlers'),
-  getCategoriesHandler: jest.fn(),
-  getListHandler: jest.fn(),
-  getInstalledListHandler: jest.fn(),
-  getLimitedListHandler: jest.fn(),
-  getInfoHandler: jest.fn(),
-  getBulkAssetsHandler: jest.fn(),
-  installPackageFromRegistryHandler: jest.fn(),
-  installPackageByUploadHandler: jest.fn(),
-  deletePackageHandler: jest.fn(),
-  bulkInstallPackagesFromRegistryHandler: jest.fn(),
-  getStatsHandler: jest.fn(),
-  updatePackageHandler: jest.fn(),
-  getVerificationKeyIdHandler: jest.fn(),
-  reauthorizeTransformsHandler: jest.fn(),
-  getDataStreamsHandler: jest.fn(),
-  createCustomIntegrationHandler: jest.fn(),
-  updateCustomIntegrationHandler: jest.fn(),
-  getInputsHandler: jest.fn(),
-}));
+vi.mock('./handlers', async () => {
+      const mocked = {
+      ...(await vi.importActual('./handlers')),
+      getCategoriesHandler: vi.fn(),
+      getListHandler: vi.fn(),
+      getInstalledListHandler: vi.fn(),
+      getLimitedListHandler: vi.fn(),
+      getInfoHandler: vi.fn(),
+      getBulkAssetsHandler: vi.fn(),
+      installPackageFromRegistryHandler: vi.fn(),
+      installPackageByUploadHandler: vi.fn(),
+      deletePackageHandler: vi.fn(),
+      bulkInstallPackagesFromRegistryHandler: vi.fn(),
+      getStatsHandler: vi.fn(),
+      updatePackageHandler: vi.fn(),
+      getVerificationKeyIdHandler: vi.fn(),
+      reauthorizeTransformsHandler: vi.fn(),
+      getDataStreamsHandler: vi.fn(),
+      createCustomIntegrationHandler: vi.fn(),
+      updateCustomIntegrationHandler: vi.fn(),
+      getInputsHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./install_assets_handler', () => ({
-  installPackageKibanaAssetsHandler: jest.fn(),
-}));
+vi.mock('./install_assets_handler', () => {
+      const mocked = {
+      installPackageKibanaAssetsHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -334,7 +343,7 @@ describe('schema validation', () => {
     const expectedResponse: GetCategoriesResponse = {
       items: [category],
     };
-    (getCategoriesHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getCategoriesHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getCategoriesHandler(context, {} as any, response);
@@ -396,7 +405,7 @@ describe('schema validation', () => {
     const expectedResponse: GetPackagesResponse = {
       items: [packageItem],
     };
-    (getListHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getListHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getListHandler(context, {} as any, response);
@@ -437,7 +446,7 @@ describe('schema validation', () => {
       total: 1,
       searchAfter: ['test'],
     };
-    (getInstalledListHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getInstalledListHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getInstalledListHandler(context, {} as any, response);
@@ -453,7 +462,7 @@ describe('schema validation', () => {
     const expectedResponse: GetLimitedPackagesResponse = {
       items: ['test'],
     };
-    (getLimitedListHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getLimitedListHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getLimitedListHandler(context, {} as any, response);
@@ -472,7 +481,7 @@ describe('schema validation', () => {
         package_policy_count: 0,
       },
     };
-    (getStatsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getStatsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getStatsHandler(context, {} as any, response);
@@ -503,7 +512,7 @@ describe('schema validation', () => {
         },
       ],
     };
-    (getInputsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getInputsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getInputsHandler(context, {} as any, response);
@@ -575,7 +584,7 @@ describe('schema validation', () => {
         has_policies: true,
       },
     };
-    (getInfoHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getInfoHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getInfoHandler(context, {} as any, response);
@@ -622,7 +631,7 @@ describe('schema validation', () => {
         has_policies: true,
       },
     };
-    (getInfoHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getInfoHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getInfoHandler(context, {} as any, response);
@@ -638,7 +647,7 @@ describe('schema validation', () => {
     const expectedResponse: UpdatePackageResponse = {
       item: packageInfo,
     };
-    (updatePackageHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (updatePackageHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await updatePackageHandler(context, {} as any, response);
@@ -664,7 +673,7 @@ describe('schema validation', () => {
         name: 'test',
       },
     };
-    (installPackageFromRegistryHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (installPackageFromRegistryHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await installPackageFromRegistryHandler(context, {} as any, response);
@@ -680,7 +689,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       success: true,
     };
-    (installPackageKibanaAssetsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (installPackageKibanaAssetsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await installPackageKibanaAssetsHandler(context, {} as any, response);
@@ -713,7 +722,7 @@ describe('schema validation', () => {
     const expectedResponse: BulkInstallPackagesResponse = {
       items: [item, { name: 'test', statusCode: 400, error: 'test' }],
     };
-    (bulkInstallPackagesFromRegistryHandler as jest.Mock).mockImplementation(
+    (bulkInstallPackagesFromRegistryHandler as Mock).mockImplementation(
       (ctx, request, res) => {
         return res.ok({ body: expectedResponse });
       }
@@ -731,7 +740,7 @@ describe('schema validation', () => {
     const expectedResponse: GetEpmDataStreamsResponse = {
       items: [{ name: 'test' }],
     };
-    (getDataStreamsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getDataStreamsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getDataStreamsHandler(context, {} as any, response);
@@ -759,7 +768,7 @@ describe('schema validation', () => {
         },
       ],
     };
-    (getBulkAssetsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getBulkAssetsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getBulkAssetsHandler(context, {} as any, response);
@@ -784,7 +793,7 @@ describe('schema validation', () => {
         error: 'error',
       },
     ];
-    (reauthorizeTransformsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (reauthorizeTransformsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await reauthorizeTransformsHandler(context, {} as any, response);
@@ -804,7 +813,7 @@ describe('schema validation', () => {
         status: 'installed',
       },
     };
-    (updateCustomIntegrationHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (updateCustomIntegrationHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await updateCustomIntegrationHandler(context, {} as any, response);

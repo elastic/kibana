@@ -7,36 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 
-jest.mock('@kbn/ci-stats-reporter', () => ({
-  CiStatsReporter: {
-    fromEnv: jest.fn(),
-  },
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
+vi.mock('@kbn/ci-stats-reporter', () => {
+      const mocked = {
+      CiStatsReporter: {
+        fromEnv: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('fs', () => {
+      const mocked = {
+      readFileSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import Fs from 'fs';
 
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 
-const mockRun = jest.requireMock('@kbn/dev-cli-runner').run as jest.Mock;
-const mockReadFileSync = Fs.readFileSync as jest.MockedFunction<typeof Fs.readFileSync>;
+const mockRun = (await vi.importMock('@kbn/dev-cli-runner')).run as Mock;
+const mockReadFileSync = Fs.readFileSync as MockedFunction<typeof Fs.readFileSync>;
 
 describe('ship_ci_stats_cli', () => {
   let runCallback: (args: {
-    log: { success: jest.Mock; debug: jest.Mock };
-    flagsReader: { boolean: jest.Mock; arrayOfStrings: jest.Mock };
+    log: { success: Mock; debug: Mock };
+    flagsReader: { boolean: Mock; arrayOfStrings: Mock };
   }) => Promise<void>;
 
-  const mockMetrics = jest.fn();
-  const mockFromEnv = CiStatsReporter.fromEnv as jest.MockedFunction<
+  const mockMetrics = vi.fn();
+  const mockFromEnv = CiStatsReporter.fromEnv as MockedFunction<
     typeof CiStatsReporter.fromEnv
   >;
 
@@ -46,7 +58,7 @@ describe('ship_ci_stats_cli', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delete process.env.IGNORE_SHIP_CI_STATS_ERROR;
 
     mockFromEnv.mockReturnValue({
@@ -58,13 +70,13 @@ describe('ship_ci_stats_cli', () => {
   });
 
   const makeFlagsReader = (opts: { validate?: boolean; metrics?: string[] }) => ({
-    boolean: jest.fn((name: string) => {
+    boolean: vi.fn((name: string) => {
       if (name === 'validate') {
         return opts.validate ?? false;
       }
       throw new Error(`unexpected boolean flag ${name}`);
     }),
-    arrayOfStrings: jest.fn((name: string) => {
+    arrayOfStrings: vi.fn((name: string) => {
       if (name === 'metrics') {
         return opts.metrics;
       }
@@ -79,7 +91,7 @@ describe('ship_ci_stats_cli', () => {
     const paths = opts.metricsPaths ?? ['/tmp/ci-stats-metrics.json'];
     mockReadFileSync.mockReturnValue(JSON.stringify(metrics));
     await runCallback({
-      log: { success: jest.fn(), debug: jest.fn() },
+      log: { success: vi.fn(), debug: vi.fn() },
       flagsReader: makeFlagsReader({ validate: opts.validate, metrics: paths }),
     });
   };

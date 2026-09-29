@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -17,12 +20,15 @@ import {
   useBootstrapEaseRulesMutation,
 } from './use_bootstrap_ease_rules';
 
-jest.mock('../../api', () => ({
-  bootstrapEaseRules: jest.fn(),
-}));
-jest.mock('../use_find_rules_query');
+vi.mock('../../api', () => {
+      const mocked = {
+      bootstrapEaseRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../use_find_rules_query');
 
-const bootstrapEaseRulesMock = bootstrapEaseRules as jest.MockedFunction<typeof bootstrapEaseRules>;
+const bootstrapEaseRulesMock = bootstrapEaseRules as MockedFunction<typeof bootstrapEaseRules>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -46,12 +52,12 @@ const createMockResponse = (
 });
 
 describe('useBootstrapEaseRulesMutation', () => {
-  let invalidateFindRulesQuery: jest.Mock;
+  let invalidateFindRulesQuery: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    invalidateFindRulesQuery = jest.fn();
-    (useInvalidateFindRulesQuery as jest.Mock).mockReturnValue(invalidateFindRulesQuery);
+    vi.clearAllMocks();
+    invalidateFindRulesQuery = vi.fn();
+    (useInvalidateFindRulesQuery as Mock).mockReturnValue(invalidateFindRulesQuery);
   });
 
   describe('BOOTSTRAP_EASE_RULES_KEY', () => {
@@ -134,7 +140,7 @@ describe('useBootstrapEaseRulesMutation', () => {
     it('calls the provided onSuccess callback', async () => {
       const response = createMockResponse({ installed: 1 });
       bootstrapEaseRulesMock.mockResolvedValue(response);
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
 
       const { result } = renderHook(() => useBootstrapEaseRulesMutation({ onSuccess }), {
         wrapper: createWrapper(),

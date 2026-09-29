@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { createFieldFormatMock } from '../test_utils';
@@ -16,25 +18,28 @@ import { NumberFormatEditor } from './number';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  context: jest.requireActual('@kbn/kibana-react-plugin/public/context').context,
-}));
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      context: (await vi.importActual('@kbn/kibana-react-plugin/public/context')).context,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const fieldType = 'number';
 
 const format = createFieldFormatMock({
-  getParamDefaults: jest.fn().mockImplementation(() => {
+  getParamDefaults: vi.fn().mockImplementation(() => {
     return { pattern: '0,0.[000]' };
   }),
-  convertToReact: jest.fn().mockImplementation((input: number) => input * 2),
+  convertToReact: vi.fn().mockImplementation((input: number) => input * 2),
 });
 
 const formatParams = {
   pattern: '',
 };
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const fieldFormattersNumberDocLink =
   'https://www.elastic.co/docs/explore-analyze/numeral-formatting';

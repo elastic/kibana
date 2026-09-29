@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -23,18 +26,18 @@ const updateFailureStoreHandler =
     'PUT /internal/dataset_quality/data_streams/{dataStream}/update_failure_store'
   ].handler;
 
-jest.mock('./get_data_stream_details');
-jest.mock('./get_data_streams_default_retention_period');
-jest.mock('./update_failure_store');
+vi.mock('./get_data_stream_details');
+vi.mock('./get_data_streams_default_retention_period');
+vi.mock('./update_failure_store');
 
-const mockGetDataStreamDetails = getDataStreamDetails as jest.MockedFunction<
+const mockGetDataStreamDetails = getDataStreamDetails as MockedFunction<
   typeof getDataStreamDetails
 >;
 const mockGetDataStreamDefaultRetentionPeriod =
-  getDataStreamDefaultRetentionPeriod as jest.MockedFunction<
+  getDataStreamDefaultRetentionPeriod as MockedFunction<
     typeof getDataStreamDefaultRetentionPeriod
   >;
-const mockUpdateFailureStore = updateFailureStore as jest.MockedFunction<typeof updateFailureStore>;
+const mockUpdateFailureStore = updateFailureStore as MockedFunction<typeof updateFailureStore>;
 
 describe('dataStreamDetailsRoute', () => {
   let mockResources: DatasetQualityRouteHandlerResources & {
@@ -59,10 +62,10 @@ describe('dataStreamDetailsRoute', () => {
             client: mockEsClient,
           },
           savedObjects: {
-            client: jest.fn(),
+            client: vi.fn(),
           },
           uiSettings: {
-            client: jest.fn(),
+            client: vi.fn(),
           },
         }),
       },
@@ -71,15 +74,15 @@ describe('dataStreamDetailsRoute', () => {
       plugins: {
         fleet: {
           setup: {},
-          start: jest.fn().mockResolvedValue({
+          start: vi.fn().mockResolvedValue({
             packageService: {
-              asScoped: jest.fn().mockReturnValue({}),
+              asScoped: vi.fn().mockReturnValue({}),
             },
           }),
         },
       },
-      getEsCapabilities: jest.fn(),
-      getIsSecurityEnabled: jest.fn().mockResolvedValue(true),
+      getEsCapabilities: vi.fn(),
+      getIsSecurityEnabled: vi.fn().mockResolvedValue(true),
       params: {
         path: {
           dataStream: 'logs-test-default',
@@ -114,12 +117,12 @@ describe('dataStreamDetailsRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('non-serverless', () => {
     beforeEach(() => {
-      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+      (mockResources.getEsCapabilities as Mock).mockResolvedValue({
         serverless: false,
       });
     });
@@ -219,7 +222,7 @@ describe('dataStreamDetailsRoute', () => {
 
   describe('serverless', () => {
     beforeEach(() => {
-      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+      (mockResources.getEsCapabilities as Mock).mockResolvedValue({
         serverless: true,
       });
     });
@@ -300,10 +303,10 @@ describe('updateFailureStoreRoute', () => {
             client: mockEsClient,
           },
           savedObjects: {
-            client: jest.fn(),
+            client: vi.fn(),
           },
           uiSettings: {
-            client: jest.fn(),
+            client: vi.fn(),
           },
         }),
       },
@@ -312,15 +315,15 @@ describe('updateFailureStoreRoute', () => {
       plugins: {
         fleet: {
           setup: {},
-          start: jest.fn().mockResolvedValue({
+          start: vi.fn().mockResolvedValue({
             packageService: {
-              asScoped: jest.fn().mockReturnValue({}),
+              asScoped: vi.fn().mockReturnValue({}),
             },
           }),
         },
       },
-      getEsCapabilities: jest.fn(),
-      getIsSecurityEnabled: jest.fn().mockResolvedValue(true),
+      getEsCapabilities: vi.fn(),
+      getIsSecurityEnabled: vi.fn().mockResolvedValue(true),
       params: {
         path: {
           dataStream: 'logs-test-default',
@@ -343,12 +346,12 @@ describe('updateFailureStoreRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('success scenarios', () => {
     it('should enable failure store with custom retention period in non-serverless', async () => {
-      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+      (mockResources.getEsCapabilities as Mock).mockResolvedValue({
         serverless: false,
       });
 
@@ -364,7 +367,7 @@ describe('updateFailureStoreRoute', () => {
     });
 
     it('should enable failure store with custom retention period in serverless', async () => {
-      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+      (mockResources.getEsCapabilities as Mock).mockResolvedValue({
         serverless: true,
       });
 
@@ -380,7 +383,7 @@ describe('updateFailureStoreRoute', () => {
     });
 
     it('should disable failure store without custom retention period', async () => {
-      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+      (mockResources.getEsCapabilities as Mock).mockResolvedValue({
         serverless: false,
       });
 
@@ -401,7 +404,7 @@ describe('updateFailureStoreRoute', () => {
     });
 
     it('should enable failure store without custom retention period', async () => {
-      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+      (mockResources.getEsCapabilities as Mock).mockResolvedValue({
         serverless: false,
       });
 
@@ -424,7 +427,7 @@ describe('updateFailureStoreRoute', () => {
 
   describe('error handling', () => {
     it('should propagate errors from updateFailureStore', async () => {
-      (mockResources.getEsCapabilities as jest.Mock).mockResolvedValue({
+      (mockResources.getEsCapabilities as Mock).mockResolvedValue({
         serverless: false,
       });
 

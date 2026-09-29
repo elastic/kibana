@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SummaryTab } from '.';
@@ -14,8 +17,8 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { createStartServicesMock } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import { useBulkGetUserProfiles } from '../../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../../../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
 const getMockUser = () => ({
   uid: 'user-1',
@@ -29,20 +32,20 @@ const getMockUser = () => ({
 
 describe('SummaryTab', () => {
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         ...createStartServicesMock(),
       },
     });
 
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: [getMockUser()],
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the comments', () => {

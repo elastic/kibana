@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, renderHook } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,39 +19,45 @@ const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I1
 let mockLicense: { hasAtLeast: (level: string) => boolean } | undefined;
 let mockCloud: { isCloudEnabled?: boolean; trialDaysLeft?: () => number | undefined } | undefined;
 let mockLicenseManagementCapable = true;
-const mockGetUrlForApp = jest.fn(
+const mockGetUrlForApp = vi.fn(
   (app: string, opts?: { path?: string }) => `/app/${app}/${opts?.path ?? ''}`
 );
 
-const mockUseSnapshotRepositories = jest.fn();
+const mockUseSnapshotRepositories = vi.fn();
 
-jest.mock('react-use/lib/useObservable', () => ({
+vi.mock('react-use/lib/useObservable', () => ({
   __esModule: true,
   default: () => mockLicense,
 }));
 
-jest.mock('./use_snapshot_repositories', () => ({
-  useSnapshotRepositories: (...args: unknown[]) => mockUseSnapshotRepositories(...args),
-}));
+vi.mock('./use_snapshot_repositories', () => {
+      const mocked = {
+      useSnapshotRepositories: (...args: unknown[]) => mockUseSnapshotRepositories(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      application: {
-        getUrlForApp: mockGetUrlForApp,
-        capabilities: {
-          management: { stack: { license_management: mockLicenseManagementCapable } },
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {
+          application: {
+            getUrlForApp: mockGetUrlForApp,
+            capabilities: {
+              management: { stack: { license_management: mockLicenseManagementCapable } },
+            },
+          },
         },
-      },
-    },
-    dependencies: {
-      start: {
-        licensing: { license$: {} },
-        cloud: mockCloud,
-      },
-    },
-  }),
-}));
+        dependencies: {
+          start: {
+            licensing: { license$: {} },
+            cloud: mockCloud,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createDefinition = (canCreateSnapshotRepository: boolean): Streams.ingest.all.GetResponse =>
   ({
@@ -63,7 +71,7 @@ const setSnapshotRepositories = (defaultRepository?: string, repositories?: stri
     isLoading: false,
     hasFetched: true,
     error: null,
-    refresh: jest.fn(),
+    refresh: vi.fn(),
   });
 };
 
@@ -77,7 +85,7 @@ const renderGating = (canCreateSnapshotRepository = true) =>
 
 describe('useDlmFrozenPhaseGating', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLicense = { hasAtLeast: () => true };
     mockCloud = { isCloudEnabled: false, trialDaysLeft: () => undefined };
     mockLicenseManagementCapable = true;
@@ -228,7 +236,7 @@ describe('useDlmFrozenPhaseGating', () => {
   describe('resuming the frozen flow after the default repository is configured', () => {
     it('closes the gating modal and calls onFrozenGatingResolved once a default repository appears', () => {
       setSnapshotRepositories(undefined);
-      const onFrozenGatingResolved = jest.fn();
+      const onFrozenGatingResolved = vi.fn();
       const { result, rerender } = renderHook(() =>
         useDlmFrozenPhaseGating({
           definition: createDefinition(true),
@@ -255,7 +263,7 @@ describe('useDlmFrozenPhaseGating', () => {
     });
 
     it('does not call onFrozenGatingResolved when no gating modal is open', () => {
-      const onFrozenGatingResolved = jest.fn();
+      const onFrozenGatingResolved = vi.fn();
       const { rerender } = renderHook(() =>
         useDlmFrozenPhaseGating({
           definition: createDefinition(true),

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -54,7 +56,7 @@ const defaultSchedulerContext = getDefaultSchedulerContext(
 );
 
 const actionsParams = { myParams: 'test' };
-const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+const buildActionParams = vi.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
 defaultSchedulerContext.taskRunnerContext.connectorAdapterRegistry.register({
   connectorTypeId: '.test-system-action',
   ruleActionParamsSchema: schema.object({}),
@@ -106,7 +108,7 @@ describe('System Action Scheduler', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     mockActionsPlugin.isActionExecutable.mockReturnValue(true);
     mockActionsPlugin.getActionsClientWithRequest.mockResolvedValue(actionsClient);

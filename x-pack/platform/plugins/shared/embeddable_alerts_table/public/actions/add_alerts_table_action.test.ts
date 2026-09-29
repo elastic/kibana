@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
@@ -15,8 +17,8 @@ import { ALERTS_FEATURE_ID } from '@kbn/alerts-ui-shared/src/common/constants';
 const core = coreMock.createStart();
 const mockPresentationContainer = getMockPresentationContainer();
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
-const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
+vi.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
+const mockGetInternalRuleTypes = vi.mocked(getInternalRuleTypes);
 
 describe('getAddAlertsTableAction', () => {
   it('should be compatible only when the user has access to at least one rule type', async () => {

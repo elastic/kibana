@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { RequestHandlerContext } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -21,15 +24,15 @@ import {
 } from '../lib/deployment_stats';
 import { registerDeploymentStatsRoute } from './deployment_stats';
 
-jest.mock('../lib/dashboards');
-jest.mock('../lib/deployment_stats');
+vi.mock('../lib/dashboards');
+vi.mock('../lib/deployment_stats');
 
-const mockFetchIndexStats = fetchIndexStats as jest.MockedFunction<typeof fetchIndexStats>;
-const mockFetchDashboardsCount = fetchDashboardsCount as jest.MockedFunction<
+const mockFetchIndexStats = fetchIndexStats as MockedFunction<typeof fetchIndexStats>;
+const mockFetchDashboardsCount = fetchDashboardsCount as MockedFunction<
   typeof fetchDashboardsCount
 >;
-const mockFetchApiKeysStats = fetchApiKeysStats as jest.MockedFunction<typeof fetchApiKeysStats>;
-const mockFetchMonitorPrivileges = fetchMonitorPrivileges as jest.MockedFunction<
+const mockFetchApiKeysStats = fetchApiKeysStats as MockedFunction<typeof fetchApiKeysStats>;
+const mockFetchMonitorPrivileges = fetchMonitorPrivileges as MockedFunction<
   typeof fetchMonitorPrivileges
 >;
 
@@ -40,7 +43,7 @@ describe('registerDeploymentStatsRoute', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     logger = loggingSystemMock.createLogger();
     esClient = elasticsearchServiceMock.createScopedClusterClient();

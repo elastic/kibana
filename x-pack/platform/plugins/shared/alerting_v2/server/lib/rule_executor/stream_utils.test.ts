@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   collectStreamResults,
   createPipelineStream,
@@ -80,7 +82,7 @@ describe('forwardThenFinalize', () => {
       input: createRuleExecutionInput({ ruleId: 'rule-a' }),
     });
     const last = createRulePipelineState({ input: createRuleExecutionInput({ ruleId: 'rule-b' }) });
-    const finalize = jest.fn(
+    const finalize = vi.fn(
       (_acc: string[], _lastState: RulePipelineState): StepStreamResult | undefined => undefined
     );
 
@@ -113,7 +115,7 @@ describe('forwardThenFinalize', () => {
   it('forwards a halt and does not run finalize', async () => {
     const continueState = createRulePipelineState();
     const haltState = createRulePipelineState();
-    const finalize = jest.fn(() => undefined);
+    const finalize = vi.fn(() => undefined);
 
     async function* upstream(): PipelineStateStream {
       yield { type: 'continue', state: continueState };
@@ -134,7 +136,7 @@ describe('forwardThenFinalize', () => {
   });
 
   it('does not run finalize for an empty stream', async () => {
-    const finalize = jest.fn(() => undefined);
+    const finalize = vi.fn(() => undefined);
 
     const results = await collectStreamResults(
       forwardThenFinalize(createPipelineStream([]), { seed: 0, accumulate: (acc) => acc, finalize })

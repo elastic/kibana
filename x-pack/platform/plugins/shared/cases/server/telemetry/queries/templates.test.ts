@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getTemplatesTelemetryData } from './templates';
@@ -198,7 +200,7 @@ describe('templates', () => {
       // `resetAllMocks`, not `clearAllMocks`: the latter keeps implementations, so the
       // rejection queued by the failure case below would stay the default for every test
       // declared after it.
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('returns the correct res', async () => {

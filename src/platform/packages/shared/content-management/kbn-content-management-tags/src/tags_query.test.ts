@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { Query } from '@elastic/eui';
 import { useTags } from './tags_query';
@@ -64,7 +66,7 @@ describe('useTags', () => {
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
-          updateQuery: jest.fn(),
+          updateQuery: vi.fn(),
           items: mockItems,
         })
       );
@@ -82,7 +84,7 @@ describe('useTags', () => {
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
-          updateQuery: jest.fn(),
+          updateQuery: vi.fn(),
           items: itemsWithoutTags,
         })
       );
@@ -94,7 +96,7 @@ describe('useTags', () => {
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
-          updateQuery: jest.fn(),
+          updateQuery: vi.fn(),
           items: [],
         })
       );
@@ -113,7 +115,7 @@ describe('useTags', () => {
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
-          updateQuery: jest.fn(),
+          updateQuery: vi.fn(),
           items: itemsWithMultipleTags,
         })
       );
@@ -128,7 +130,7 @@ describe('useTags', () => {
 
   describe('toggleIncludeTagFilter', () => {
     it('adds tag to include filter when not present', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -147,7 +149,7 @@ describe('useTags', () => {
     });
 
     it('handles tag with non-array clause value', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:(Important)'), // Single tag, not array
@@ -167,7 +169,7 @@ describe('useTags', () => {
     });
 
     it('removes tag from include filter when already present', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:(Important)'),
@@ -186,7 +188,7 @@ describe('useTags', () => {
     });
 
     it('moves tag from exclude to include filter', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('-tag:(Important)'),
@@ -206,7 +208,7 @@ describe('useTags', () => {
     });
 
     it('handles multiple tags in filter', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:(Important)'),
@@ -224,7 +226,7 @@ describe('useTags', () => {
     });
 
     it('removes tag from multiple-tag include filter', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:(Important or Urgent)'), // Multiple tags in OR clause
@@ -245,7 +247,7 @@ describe('useTags', () => {
 
   describe('toggleExcludeTagFilter', () => {
     it('adds tag to exclude filter when not present', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -264,7 +266,7 @@ describe('useTags', () => {
     });
 
     it('removes tag from multiple-tag exclude filter', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('-tag:(Important or Urgent)'), // Multiple excluded tags
@@ -283,7 +285,7 @@ describe('useTags', () => {
     });
 
     it('removes tag from exclude filter when already present', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('-tag:(Important)'),
@@ -302,7 +304,7 @@ describe('useTags', () => {
     });
 
     it('moves tag from include to exclude filter', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:(Important)'),
@@ -323,7 +325,7 @@ describe('useTags', () => {
 
   describe('clearTagSelection', () => {
     it('removes all tag filters from query', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:(Important or Urgent) -tag:(Archive)'),
@@ -342,7 +344,7 @@ describe('useTags', () => {
     });
 
     it('preserves non-tag filters', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('searchTerm tag:(Important)'),
@@ -360,7 +362,7 @@ describe('useTags', () => {
     });
 
     it('handles empty query', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -383,7 +385,7 @@ describe('useTags', () => {
     it('does not mutate original query', () => {
       const originalQuery = Query.parse('tag:(Important)');
       const originalText = originalQuery.text;
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
 
       const { result } = renderHook(() =>
         useTags({
@@ -401,7 +403,7 @@ describe('useTags', () => {
     });
 
     it('calls updateQuery only once per action', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -420,7 +422,7 @@ describe('useTags', () => {
 
   describe('multi-word tag names', () => {
     it('adds a multi-word tag to include filter with quoted syntax', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -439,7 +441,7 @@ describe('useTags', () => {
     });
 
     it('removes a multi-word tag from include filter', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:("New York")'),
@@ -458,7 +460,7 @@ describe('useTags', () => {
     });
 
     it('combines multi-word and single-word tags in an OR clause', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:(Important)'),
@@ -477,7 +479,7 @@ describe('useTags', () => {
     });
 
     it('adds a multi-word tag to exclude filter', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -497,7 +499,7 @@ describe('useTags', () => {
     });
 
     it('moves a multi-word tag from include to exclude', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:("New York")'),
@@ -516,7 +518,7 @@ describe('useTags', () => {
     });
 
     it('clears multi-word tags along with single-word tags', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('tag:(Important or "New York") -tag:("New York")'),
@@ -544,7 +546,7 @@ describe('useTags', () => {
         managed: false,
       };
 
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -568,7 +570,7 @@ describe('useTags', () => {
         managed: false,
       };
 
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -591,7 +593,7 @@ describe('useTags', () => {
         ({ items }) =>
           useTags({
             query: Query.parse(''),
-            updateQuery: jest.fn(),
+            updateQuery: vi.fn(),
             items,
           }),
         { initialProps: { items: mockItems } }
@@ -615,7 +617,7 @@ describe('useTags', () => {
     });
 
     it('maintains stable function references when query changes', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result, rerender } = renderHook(
         ({ query }) =>
           useTags({
@@ -639,7 +641,7 @@ describe('useTags', () => {
     });
 
     it('maintains stable tagsToTableItemMap reference when items do not change', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result, rerender } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -659,7 +661,7 @@ describe('useTags', () => {
 
   describe('concurrent operations', () => {
     it('handles multiple filter toggles in sequence', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -682,7 +684,7 @@ describe('useTags', () => {
     });
 
     it('handles rapid successive calls to same toggle function', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
@@ -713,7 +715,7 @@ describe('useTags', () => {
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse(''),
-          updateQuery: jest.fn(),
+          updateQuery: vi.fn(),
           items: itemsWithOverlap,
         })
       );
@@ -726,7 +728,7 @@ describe('useTags', () => {
     });
 
     it('preserves other query clauses when clearing tags', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { result } = renderHook(() =>
         useTags({
           query: Query.parse('searchTerm type:dashboard tag:(Important)'),
@@ -746,7 +748,7 @@ describe('useTags', () => {
     });
 
     it('handles switching tag from include to exclude and back', () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
 
       // Start with include filter
       const { result, rerender } = renderHook(

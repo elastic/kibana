@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -16,8 +18,8 @@ describe('LogicButtons', () => {
       <LogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
       />
     );
 
@@ -26,14 +28,14 @@ describe('LogicButtons', () => {
   });
 
   test('it invokes "onOrClicked" when "or" button is clicked', () => {
-    const onOrClicked = jest.fn();
+    const onOrClicked = vi.fn();
 
     const wrapper = mount(
       <LogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         onOrClicked={onOrClicked}
-        onAndClicked={jest.fn()}
+        onAndClicked={vi.fn()}
       />
     );
 
@@ -43,13 +45,13 @@ describe('LogicButtons', () => {
   });
 
   test('it invokes "onAndClicked" when "and" button is clicked', () => {
-    const onAndClicked = jest.fn();
+    const onAndClicked = vi.fn();
 
     const wrapper = mount(
       <LogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
-        onOrClicked={jest.fn()}
+        onOrClicked={vi.fn()}
         onAndClicked={onAndClicked}
       />
     );
@@ -64,8 +66,8 @@ describe('LogicButtons', () => {
       <LogicButtons
         isOrDisabled={false}
         isAndDisabled
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
       />
     );
 
@@ -79,8 +81,8 @@ describe('LogicButtons', () => {
       <LogicButtons
         isOrDisabled
         isAndDisabled={false}
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
       />
     );
 

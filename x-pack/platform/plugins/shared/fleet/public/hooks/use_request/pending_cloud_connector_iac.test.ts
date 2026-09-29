@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   hasPendingIacConfirm,
   persistPendingCloudConnectorIac,
@@ -13,16 +15,19 @@ import {
 } from './pending_cloud_connector_iac';
 import { sendUpdateCloudConnector } from './cloud_connector';
 
-jest.mock('./cloud_connector', () => ({
-  sendUpdateCloudConnector: jest.fn(),
-}));
+vi.mock('./cloud_connector', () => {
+      const mocked = {
+      sendUpdateCloudConnector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedSendUpdateCloudConnector = jest.mocked(sendUpdateCloudConnector);
+const mockedSendUpdateCloudConnector = vi.mocked(sendUpdateCloudConnector);
 
 describe('pending cloud connector IaC', () => {
   afterEach(() => {
     takePendingCloudConnectorIac('test-policy');
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('stores and takes IaC for a policy name', () => {
@@ -100,7 +105,7 @@ describe('pending cloud connector IaC', () => {
     const updateError = new Error('update failed');
     mockedSendUpdateCloudConnector.mockResolvedValue({ data: null, error: updateError });
     setPendingCloudConnectorIac('test-policy', pending);
-    const onError = jest.fn();
+    const onError = vi.fn();
 
     await expect(
       persistPendingCloudConnectorIac({
@@ -119,7 +124,7 @@ describe('pending cloud connector IaC', () => {
     const thrown = new Error('network down');
     mockedSendUpdateCloudConnector.mockRejectedValue(thrown);
     setPendingCloudConnectorIac('test-policy', pending);
-    const onError = jest.fn();
+    const onError = vi.fn();
 
     await expect(
       persistPendingCloudConnectorIac({
@@ -136,7 +141,7 @@ describe('pending cloud connector IaC', () => {
   it('wraps a non-Error throw before reporting it', async () => {
     mockedSendUpdateCloudConnector.mockRejectedValue('string failure');
     setPendingCloudConnectorIac('test-policy', { iac_key: 'sha256:abc' });
-    const onError = jest.fn();
+    const onError = vi.fn();
 
     await persistPendingCloudConnectorIac({
       policyName: 'test-policy',
@@ -152,7 +157,7 @@ describe('pending cloud connector IaC', () => {
   it('reports a failed write once and swallows a throwing handler', async () => {
     mockedSendUpdateCloudConnector.mockRejectedValue(new Error('network down'));
     setPendingCloudConnectorIac('test-policy', { iac_key: 'sha256:abc' });
-    const onError = jest.fn(() => {
+    const onError = vi.fn(() => {
       throw new Error('toast service down');
     });
 
@@ -183,7 +188,7 @@ describe('pending cloud connector IaC', () => {
   it('does not report an error when the write succeeds or nothing is pending', async () => {
     mockedSendUpdateCloudConnector.mockResolvedValue({ data: {} as any, error: null });
     setPendingCloudConnectorIac('test-policy', { iac_key: 'sha256:abc' });
-    const onError = jest.fn();
+    const onError = vi.fn();
 
     await persistPendingCloudConnectorIac({
       policyName: 'test-policy',

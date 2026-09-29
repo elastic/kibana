@@ -5,33 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IndexImportManageDataSource } from './index_import_manage_data_source';
 import { TestProviders } from '../../../common/mock';
 
-const mockUseFetchMonitoredIndices = jest.fn().mockImplementation(() => ({
+const mockUseFetchMonitoredIndices = vi.fn().mockImplementation(() => ({
   data: { sources: [] },
   isFetching: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 }));
 
-jest.mock('../privileged_user_monitoring_onboarding/hooks/use_fetch_monitored_indices', () => ({
-  useFetchMonitoredIndices: () => mockUseFetchMonitoredIndices(),
-}));
+vi.mock('../privileged_user_monitoring_onboarding/hooks/use_fetch_monitored_indices', () => {
+      const mocked = {
+      useFetchMonitoredIndices: () => mockUseFetchMonitoredIndices(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    updatePrivMonMonitoredIndices: jest.fn(),
-    registerPrivMonMonitoredIndices: jest.fn(),
-  }),
-}));
+vi.mock('../../api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        updatePrivMonMonitoredIndices: vi.fn(),
+        registerPrivMonMonitoredIndices: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('IndexImportManageDataSource', () => {
-  const setAddDataSourceResult = jest.fn();
+  const setAddDataSourceResult = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders indices header and info text', () => {
@@ -53,7 +61,7 @@ describe('IndexImportManageDataSource', () => {
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
       data: { sources: [] },
       isFetching: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }));
 
     render(<IndexImportManageDataSource setAddDataSourceResult={setAddDataSourceResult} />, {
@@ -66,7 +74,7 @@ describe('IndexImportManageDataSource', () => {
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
       data: { sources: [{ indexPattern: 'foo,bar,baz' }] },
       isFetching: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }));
 
     render(<IndexImportManageDataSource setAddDataSourceResult={setAddDataSourceResult} />, {
@@ -86,7 +94,7 @@ describe('IndexImportManageDataSource', () => {
   });
 
   it('calls setAddDataSourceResult and refetch on import', async () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
 
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
       data: { sources: [{ indexPattern: 'foo,bar,baz' }] },

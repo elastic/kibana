@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import './helpers/mocks';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -28,9 +30,9 @@ type Repository = ReturnType<typeof fixtures.getRepository>;
 type Snapshot = ReturnType<typeof fixtures.getSnapshot>;
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
-jest.mock('@kbn/i18n-react', () => {
-  const original = jest.requireActual('@kbn/i18n-react');
-  const { i18n } = jest.requireActual('@kbn/i18n');
+vi.mock('@kbn/i18n-react', async () => {
+  const original = (await vi.importActual('@kbn/i18n-react'));
+  const { i18n } = (await vi.importActual('@kbn/i18n'));
   i18n.init({ locale: 'en' });
 
   return {
@@ -67,7 +69,7 @@ describe('<SnapshotRestoreHome />', () => {
   }: { initialEntries?: string[] } = {}) => renderHome(httpSetup, { initialEntries });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;

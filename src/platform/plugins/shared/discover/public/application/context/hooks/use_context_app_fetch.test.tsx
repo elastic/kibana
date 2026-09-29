@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
@@ -30,10 +32,10 @@ const mockInterceptedWarning = {
 };
 
 let mockOverrideInterceptedWarnings = false;
-const mockFetchSurroundingDocs = jest.fn();
+const mockFetchSurroundingDocs = vi.fn();
 
-jest.mock('../services/context', () => {
-  const originalModule = jest.requireActual('../services/context');
+vi.mock('../services/context', async () => {
+  const originalModule = (await vi.importActual('../services/context'));
   return {
     ...originalModule,
 
@@ -41,17 +43,20 @@ jest.mock('../services/context', () => {
   };
 });
 
-jest.mock('../services/anchor', () => ({
-  fetchAnchor: (anchorId: string, dataView: DataView) => {
-    if (!dataView.id || !anchorId) {
-      throw new Error();
-    }
-    return {
-      anchorRow: mockAnchorHit,
-      interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
+vi.mock('../services/anchor', () => {
+      const mocked = {
+      fetchAnchor: (anchorId: string, dataView: DataView) => {
+        if (!dataView.id || !anchorId) {
+          throw new Error();
+        }
+        return {
+          anchorRow: mockAnchorHit,
+          interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
+        };
+      },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const initDefaults = (
   tieBreakerFields: string[],
@@ -59,7 +64,7 @@ const initDefaults = (
   predecessorCount = 2,
   successorCount = 2
 ) => {
-  const dangerNotification = jest.fn();
+  const dangerNotification = vi.fn();
   const services = createDiscoverServicesMock();
 
   services.toastNotifications.addDanger = dangerNotification;

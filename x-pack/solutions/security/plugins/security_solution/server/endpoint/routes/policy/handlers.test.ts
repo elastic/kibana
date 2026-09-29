@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
@@ -30,8 +33,8 @@ import type { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
   let mockScopedClient: ScopedClusterClientMock;
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockSavedObjectClient: Mocked<SavedObjectsClientContract>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
 
   describe('test policy response handler', () => {
     beforeEach(() => {
@@ -103,7 +106,7 @@ describe('test policy response handler', () => {
 
     it('should retrieve internal fleet services using space id', async () => {
       mockScopedClient.asInternalUser.search.mockResponseOnce(createSearchResponse());
-      const getInternalFleetServicesSpy = jest.spyOn(
+      const getInternalFleetServicesSpy = vi.spyOn(
         endpointAppContextService,
         'getInternalFleetServices'
       );
@@ -118,7 +121,7 @@ describe('test policy response handler', () => {
       const mockContext = requestContextMock.convertContext(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
       );
-      ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue('foo');
+      ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue('foo');
       await hostPolicyResponseHandler(mockContext, mockRequest, mockResponse);
 
       expect(getInternalFleetServicesSpy).toHaveBeenCalledWith('foo');

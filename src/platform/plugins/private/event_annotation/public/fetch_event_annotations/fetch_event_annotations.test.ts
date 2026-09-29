@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 
 import type {
@@ -21,11 +24,11 @@ import type { FetchEventAnnotationsArgs, QueryPointEventAnnotationOutput } from 
 import type { EventAnnotationStartDependencies } from '../plugin';
 import { of as mockOf } from 'rxjs';
 import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
-jest.mock('../../common/fetch_event_annotations/handle_request', () => {
-  const original = jest.requireActual('../../common/fetch_event_annotations/handle_request');
+vi.mock('../../common/fetch_event_annotations/handle_request', async () => {
+  const original = (await vi.importActual('../../common/fetch_event_annotations/handle_request'));
   return {
     ...original,
-    handleRequest: jest.fn(() =>
+    handleRequest: vi.fn(() =>
       mockOf({
         type: 'datatable',
         columns: [
@@ -98,29 +101,29 @@ const dataView2 = {
 const dataMock = dataPluginMock.createStartContract();
 
 const mockHandlers = {
-  abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
-  getSearchContext: jest.fn(),
-  getSearchSessionId: jest.fn().mockReturnValue('abc123'),
-  getExecutionContext: jest.fn(),
-  inspectorAdapters: jest.fn(),
+  abortSignal: vi.fn() as unknown as Mocked<AbortSignal>,
+  getSearchContext: vi.fn(),
+  getSearchSessionId: vi.fn().mockReturnValue('abc123'),
+  getExecutionContext: vi.fn(),
+  inspectorAdapters: vi.fn(),
   variables: {},
   types: {},
 };
 
 const startServices = [
-  { uiSettings: { get: jest.fn(() => {}) } as unknown as IUiSettingsClient },
+  { uiSettings: { get: vi.fn(() => {}) } as unknown as IUiSettingsClient },
   {
     data: {
       ...dataMock,
       search: {
         ...dataMock.search,
         aggs: {
-          createAggConfigs: jest.fn((_, arg) => arg),
+          createAggConfigs: vi.fn((_, arg) => arg),
         } as unknown as AggsStart,
       },
       dataViews: {
         ...dataMock.dataViews,
-        create: jest.fn().mockResolvedValue({}),
+        create: vi.fn().mockResolvedValue({}),
       } as DataViewsContract,
     },
   },
@@ -283,8 +286,8 @@ const runGetFetchEventAnnotations = async (args: FetchEventAnnotationsArgs) => {
 
 describe('getFetchEventAnnotations', () => {
   afterEach(() => {
-    (startServices[1].data.dataViews.create as jest.Mock).mockClear();
-    (handleRequest as jest.Mock).mockClear();
+    (startServices[1].data.dataViews.create as Mock).mockClear();
+    (handleRequest as Mock).mockClear();
   });
   test('Returns empty datatable for empty groups', async () => {
     const result = await runGetFetchEventAnnotations({
@@ -362,8 +365,8 @@ describe('getFetchEventAnnotations', () => {
       await runGetFetchEventAnnotations(sampleArgs);
       expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(2);
       expect(handleRequest).toHaveBeenCalledTimes(2);
-      expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
-      expect((handleRequest as jest.Mock).mock.calls[1][0]!.aggs).toMatchSnapshot();
+      expect((handleRequest as Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
+      expect((handleRequest as Mock).mock.calls[1][0]!.aggs).toMatchSnapshot();
     });
     test('runs single handleRequest for query annotations with the same data view and timeField and creates aggregation for each extraField', async () => {
       const sampleArgs = {
@@ -384,17 +387,17 @@ describe('getFetchEventAnnotations', () => {
       await runGetFetchEventAnnotations(sampleArgs);
       expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(1);
       expect(handleRequest).toHaveBeenCalledTimes(1);
-      expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
+      expect((handleRequest as Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
     });
     test('labels extra field columns with data-view custom labels', async () => {
-      (startServices[1].data.dataViews.create as jest.Mock).mockResolvedValueOnce({
+      (startServices[1].data.dataViews.create as Mock).mockResolvedValueOnce({
         id: dataView1.value.id,
         getFieldByName: (name: string) =>
           name === 'price'
             ? { customLabel: 'Price', displayName: 'Price' }
             : { displayName: 'c.currency' },
       });
-      (handleRequest as jest.Mock).mockReturnValueOnce(
+      (handleRequest as Mock).mockReturnValueOnce(
         mockOf({
           type: 'datatable',
           columns: [
@@ -461,8 +464,8 @@ describe('getFetchEventAnnotations', () => {
       await runGetFetchEventAnnotations(sampleArgs);
       expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(1);
       expect(handleRequest).toHaveBeenCalledTimes(2); // how many times and with what params
-      expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
-      expect((handleRequest as jest.Mock).mock.calls[1][0]!.aggs).toMatchSnapshot();
+      expect((handleRequest as Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
+      expect((handleRequest as Mock).mock.calls[1][0]!.aggs).toMatchSnapshot();
     });
   });
 });

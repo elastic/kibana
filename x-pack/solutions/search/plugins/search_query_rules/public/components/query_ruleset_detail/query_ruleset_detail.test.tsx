@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,87 +16,102 @@ import React from 'react';
 import { QueryRulesetDetail } from './query_ruleset_detail';
 import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../../common/__fixtures__/query_rules_ruleset';
 
-jest.mock('../../hooks/use_fetch_ruleset_exists', () => ({
-  useFetchQueryRulesetExist: jest.fn(() => ({
-    data: { exists: false },
-    isLoading: false,
-    isError: false,
-  })),
-}));
-
-jest.mock('./use_query_ruleset_detail_state', () => ({
-  useQueryRulesetDetailState: jest.fn(() => ({
-    queryRuleset: MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
-    rules: [
-      ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE.rules.map((rule) => ({
-        ...rule,
-        criteria: Array.isArray(rule.criteria) ? rule.criteria : [rule.criteria],
+vi.mock('../../hooks/use_fetch_ruleset_exists', () => {
+      const mocked = {
+      useFetchQueryRulesetExist: vi.fn(() => ({
+        data: { exists: false },
+        isLoading: false,
+        isError: false,
       })),
-    ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-    setNewRules: jest.fn(),
-    updateRule: jest.fn(),
-  })),
-}));
+vi.mock('./use_query_ruleset_detail_state', () => {
+      const mocked = {
+      useQueryRulesetDetailState: vi.fn(() => ({
+        queryRuleset: MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
+        rules: [
+          ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE.rules.map((rule) => ({
+            ...rule,
+            criteria: Array.isArray(rule.criteria) ? rule.criteria : [rule.criteria],
+          })),
+        ],
 
-jest.mock('../../hooks/use_fetch_query_ruleset', () => ({
-  useFetchQueryRuleset: jest.fn(() => ({
-    data: {
-      ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
-    },
-    isLoading: false,
-    isError: false,
-    isInitialLoading: false,
-  })),
-}));
+        setNewRules: vi.fn(),
+        updateRule: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useParams: jest.fn(() => ({ rulesetId: MOCK_QUERY_RULESET_RESPONSE_FIXTURE.ruleset_id })),
-}));
+vi.mock('../../hooks/use_fetch_query_ruleset', () => {
+      const mocked = {
+      useFetchQueryRuleset: vi.fn(() => ({
+        data: {
+          ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
+        },
+        isLoading: false,
+        isError: false,
+        isInitialLoading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => {
-  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: vi.fn(() => ({ rulesetId: MOCK_QUERY_RULESET_RESPONSE_FIXTURE.ruleset_id })),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../hooks/use_kibana', async () => {
+  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
   return {
     useKibana: () => ({
       services: {
         application: {
-          navigateToUrl: jest.fn(),
-          getUrlForApp: jest.fn().mockReturnValue('/app/test'),
+          navigateToUrl: vi.fn(),
+          getUrlForApp: vi.fn().mockReturnValue('/app/test'),
         },
         http: {
           basePath: {
-            prepend: jest.fn().mockImplementation((path) => `/base${path}`),
+            prepend: vi.fn().mockImplementation((path) => `/base${path}`),
           },
         },
         overlays: {
-          openConfirm: jest.fn().mockResolvedValue(true),
+          openConfirm: vi.fn().mockResolvedValue(true),
         },
         history: {
-          block: jest.fn().mockReturnValue(jest.fn()),
-          listen: jest.fn().mockReturnValue(jest.fn()),
-          createHref: jest.fn().mockImplementation((location) => location.pathname || '/'),
+          block: vi.fn().mockReturnValue(vi.fn()),
+          listen: vi.fn().mockReturnValue(vi.fn()),
+          createHref: vi.fn().mockImplementation((location) => location.pathname || '/'),
         },
         console: {},
         share: {},
         notifications: notificationServiceMock.createStartContract(),
         searchNavigation: {
-          useClassicNavigation: jest.fn(),
+          useClassicNavigation: vi.fn(),
           breadcrumbs: {
-            setSearchBreadCrumbs: jest.fn(),
-            clearBreadcrumbs: jest.fn(),
+            setSearchBreadCrumbs: vi.fn(),
+            clearBreadcrumbs: vi.fn(),
           },
         },
         chrome: {
-          getChromeStyle: jest.fn().mockReturnValue('classic'),
+          getChromeStyle: vi.fn().mockReturnValue('classic'),
         },
       },
     }),
   };
 });
 
-jest.mock('@kbn/unsaved-changes-prompt', () => ({
-  useUnsavedChangesPrompt: jest.fn(),
-}));
+vi.mock('@kbn/unsaved-changes-prompt', () => {
+      const mocked = {
+      useUnsavedChangesPrompt: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Query rule detail', () => {
   const TEST_IDS = {

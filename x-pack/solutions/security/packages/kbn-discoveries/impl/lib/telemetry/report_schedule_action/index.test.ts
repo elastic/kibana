@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { ATTACK_DISCOVERY_SCHEDULE_ACTION_EVENT } from '../event_based_telemetry';
@@ -15,7 +17,7 @@ const mockLogger = loggingSystemMock.createLogger();
 
 describe('reportScheduleAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reports event with action, has_actions, and interval for create', () => {

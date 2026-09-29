@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IndexPatternLoadStartDependencies } from '../../common/expressions';
 import { getFunctionDefinition } from './load_index_pattern';
 
 describe('indexPattern expression function', () => {
   let getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
-  let toSpec: jest.Mock;
+  let toSpec: Mock;
 
   beforeEach(() => {
-    toSpec = jest.fn(() => ({
+    toSpec = vi.fn(() => ({
       title: 'value',
     }));
-    getStartDependencies = jest.fn().mockResolvedValue({
+    getStartDependencies = vi.fn().mockResolvedValue({
       indexPatterns: {
         get: (id: string) => ({
           toSpec,

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { of, throwError } from 'rxjs';
 import { useMlNotifications, MlNotificationsContextProvider } from './ml_notifications_context';
 import { useStorage } from '@kbn/ml-local-storage';
 import { useMlKibana } from '../kibana';
 
-const mockCountMessages = jest.fn(() => {
+const mockCountMessages = vi.fn(() => {
   return of({ info: 1, error: 0, warning: 0 });
 });
 
@@ -36,34 +39,40 @@ const mockKibana = {
   },
 };
 
-jest.mock('../kibana', () => ({
-  useMlKibana: jest.fn(() => {
-    return mockKibana;
-  }),
-}));
+vi.mock('../kibana', () => {
+      const mocked = {
+      useMlKibana: vi.fn(() => {
+        return mockKibana;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetStorageValue = jest.fn();
-jest.mock('@kbn/ml-local-storage', () => ({
-  useStorage: jest.fn(() => {
-    return [undefined, mockSetStorageValue];
-  }),
-}));
+const mockSetStorageValue = vi.fn();
+vi.mock('@kbn/ml-local-storage', () => {
+      const mocked = {
+      useStorage: vi.fn(() => {
+        return [undefined, mockSetStorageValue];
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useMlNotifications', () => {
   beforeEach(() => {
     // Set mocks to the default values
-    (useMlKibana as jest.MockedFunction<typeof useMlKibana>).mockReturnValue(
+    (useMlKibana as MockedFunction<typeof useMlKibana>).mockReturnValue(
       mockKibana as unknown as ReturnType<typeof useMlKibana>
     );
 
-    jest.useFakeTimers();
-    jest.setSystemTime(1663945337063);
+    vi.useFakeTimers();
+    vi.setSystemTime(1663945337063);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   test('retries polling on error with 1m delay', () => {
@@ -76,7 +85,7 @@ describe('useMlNotifications', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(0);
+      vi.advanceTimersByTime(0);
     });
 
     expect(mockKibana.services.mlServices.mlApi.notifications.countMessages$).toHaveBeenCalledTimes(
@@ -88,7 +97,7 @@ describe('useMlNotifications', () => {
 
     act(() => {
       // ticks 4 minutes
-      jest.advanceTimersByTime(60000 * 4);
+      vi.advanceTimersByTime(60000 * 4);
     });
 
     expect(mockKibana.services.mlServices.mlApi.notifications.countMessages$).toHaveBeenCalledTimes(
@@ -112,7 +121,7 @@ describe('useMlNotifications', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(0);
+      vi.advanceTimersByTime(0);
     });
 
     expect(mockCountMessages).toHaveBeenCalledTimes(1);
@@ -121,7 +130,7 @@ describe('useMlNotifications', () => {
     rerender();
 
     act(() => {
-      jest.advanceTimersByTime(10000);
+      vi.advanceTimersByTime(10000);
     });
 
     expect(mockCountMessages).toHaveBeenCalledTimes(1);
@@ -133,7 +142,7 @@ describe('useMlNotifications', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(0);
+      vi.advanceTimersByTime(0);
     });
 
     expect(mockCountMessages).toHaveBeenCalledTimes(1);
@@ -144,7 +153,7 @@ describe('useMlNotifications', () => {
 
     act(() => {
       mockCountMessages.mockReturnValueOnce(of({ info: 1, error: 2, warning: 0 }));
-      jest.advanceTimersByTime(60000);
+      vi.advanceTimersByTime(60000);
     });
 
     expect(mockCountMessages).toHaveBeenCalledTimes(2);
@@ -155,7 +164,7 @@ describe('useMlNotifications', () => {
   });
 
   test('starts polling for notifications with a 1 minute interval using the lastCheckedAt from storage', () => {
-    (useStorage as jest.MockedFunction<typeof useStorage>).mockReturnValue([
+    (useStorage as MockedFunction<typeof useStorage>).mockReturnValue([
       1664551009292,
       mockSetStorageValue,
     ]);
@@ -164,7 +173,7 @@ describe('useMlNotifications', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(0);
+      vi.advanceTimersByTime(0);
     });
 
     expect(mockCountMessages).toHaveBeenCalledTimes(1);
@@ -175,7 +184,7 @@ describe('useMlNotifications', () => {
   });
 
   test('switches to polling with the lastCheckedAt from storage when available', () => {
-    (useStorage as jest.MockedFunction<typeof useStorage>).mockReturnValue([
+    (useStorage as MockedFunction<typeof useStorage>).mockReturnValue([
       undefined,
       mockSetStorageValue,
     ]);
@@ -184,7 +193,7 @@ describe('useMlNotifications', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(0);
+      vi.advanceTimersByTime(0);
     });
 
     expect(mockCountMessages).toHaveBeenCalledTimes(1);
@@ -194,7 +203,7 @@ describe('useMlNotifications', () => {
     expect(result.current.lastCheckedAt).toEqual(undefined);
 
     act(() => {
-      (useStorage as jest.MockedFunction<typeof useStorage>).mockReturnValue([
+      (useStorage as MockedFunction<typeof useStorage>).mockReturnValue([
         1664551009292,
         mockSetStorageValue,
       ]);
@@ -215,7 +224,7 @@ describe('useMlNotifications', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(0);
+      vi.advanceTimersByTime(0);
     });
 
     expect(mockCountMessages).toHaveBeenCalledTimes(1);
@@ -223,7 +232,7 @@ describe('useMlNotifications', () => {
     unmount();
 
     act(() => {
-      jest.advanceTimersByTime(60001);
+      vi.advanceTimersByTime(60001);
     });
     expect(mockCountMessages).toHaveBeenCalledTimes(1);
   });
@@ -240,7 +249,7 @@ describe('useMlNotifications', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(0);
+      vi.advanceTimersByTime(0);
     });
 
     expect(

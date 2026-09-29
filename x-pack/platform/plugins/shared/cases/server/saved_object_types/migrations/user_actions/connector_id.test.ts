@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type {
@@ -62,7 +64,7 @@ const create_7_14_0_userAction = (params: {
 describe('user action migrations', () => {
   describe('7.15.0 connector ID migration', () => {
     describe('userActionsConnectorIdMigration', () => {
-      let context: jest.Mocked<SavedObjectMigrationContext>;
+      let context: Mocked<SavedObjectMigrationContext>;
 
       beforeEach(() => {
         context = migrationMocks.createContext();
@@ -251,7 +253,7 @@ describe('user action migrations', () => {
 
           userActionsConnectorIdMigration(userAction, context);
 
-          const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+          const log = context.log as Mocked<SavedObjectsMigrationLogger>;
           expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
@@ -445,7 +447,7 @@ describe('user action migrations', () => {
 
           userActionsConnectorIdMigration(userAction, context);
 
-          const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+          const log = context.log as Mocked<SavedObjectsMigrationLogger>;
           expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
@@ -641,7 +643,7 @@ describe('user action migrations', () => {
 
           userActionsConnectorIdMigration(userAction, context);
 
-          const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+          const log = context.log as Mocked<SavedObjectsMigrationLogger>;
           expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Unexpected token 'e', \\"new json value\\" is not valid JSON",

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -14,7 +16,7 @@ import type { EsAssetReference } from '../../../../../common/types/models';
 import { deleteTransformRefs } from './remove';
 
 describe('test transform install', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();
   });

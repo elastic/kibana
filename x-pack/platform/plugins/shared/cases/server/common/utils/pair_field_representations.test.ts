@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isBoom } from '@hapi/boom';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { getTypedApiErrorAttributes } from '../api_errors';
@@ -440,7 +442,7 @@ describe('throwIfFieldRepresentationConflicts', () => {
   });
 
   it('increments the conflict usage counter before throwing', () => {
-    const usageCounter = { incrementCounter: jest.fn(), domainId: 'cases' };
+    const usageCounter = { incrementCounter: vi.fn(), domainId: 'cases' };
 
     expect(() => throwIfFieldRepresentationConflicts(['my_number'], usageCounter)).toThrow();
     expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
@@ -464,7 +466,7 @@ describe('incrementPairedWriteCounter', () => {
   });
 
   it('increments only when the pairing changed a representation of a linked field', () => {
-    const usageCounter = { incrementCounter: jest.fn(), domainId: 'cases' };
+    const usageCounter = { incrementCounter: vi.fn(), domainId: 'cases' };
 
     incrementPairedWriteCounter(usageCounter, pairedResult({ my_key: 'my_key_as_keyword' }), true);
     expect(usageCounter.incrementCounter).toHaveBeenCalledWith({

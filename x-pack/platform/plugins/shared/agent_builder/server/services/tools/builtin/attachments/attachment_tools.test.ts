@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType, attachmentTools } from '@kbn/agent-builder-common';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -311,7 +313,7 @@ describe('attachment tools', () => {
     });
 
     it('returns a small image marker (not base64) for image attachments', async () => {
-      const getBase64 = jest.fn(async () => 'BASE64_SHOULD_NOT_APPEAR');
+      const getBase64 = vi.fn(async () => 'BASE64_SHOULD_NOT_APPEAR');
       const imageAttachmentsService = {
         getTypeDefinition: () => ({
           id: 'image',

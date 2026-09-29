@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ESQLLang, monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { useSplitQueryValidation } from './use_split_query_validation';
 import { getModelDependencies } from './esql_editor_messages_registry';
 
-jest.mock('@kbn/code-editor', () => ({
-  ESQLLang: {
-    validate: jest.fn(),
-  },
-  monaco: {
-    editor: {
-      setModelMarkers: jest.fn(),
-    },
-  },
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      ESQLLang: {
+        validate: vi.fn(),
+      },
+      monaco: {
+        editor: {
+          setModelMarkers: vi.fn(),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const flushDebounce = async () => {
-  jest.advanceTimersByTime(256);
+  vi.advanceTimersByTime(256);
   // Allow the awaited validate() promise chain to settle.
   await Promise.resolve();
   await Promise.resolve();
@@ -32,36 +38,36 @@ const flushDebounce = async () => {
 describe('useSplitQueryValidation', () => {
   const callbacks = {} as ESQLCallbacks;
   let contentListener: () => void;
-  let model: { getValue: jest.Mock; isDisposed: jest.Mock; uri: { toString: () => string } };
-  let editor: { getModel: jest.Mock; onDidChangeModelContent: jest.Mock };
+  let model: { getValue: Mock; isDisposed: Mock; uri: { toString: () => string } };
+  let editor: { getModel: Mock; onDidChangeModelContent: Mock };
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
 
     model = {
-      getValue: jest.fn(() => '| WHERE cpu > 0.8'),
-      isDisposed: jest.fn(() => false),
+      getValue: vi.fn(() => '| WHERE cpu > 0.8'),
+      isDisposed: vi.fn(() => false),
       uri: { toString: () => 'model-uri-1' },
     };
     editor = {
-      getModel: jest.fn(() => model),
-      onDidChangeModelContent: jest.fn((listener: () => void) => {
+      getModel: vi.fn(() => model),
+      onDidChangeModelContent: vi.fn((listener: () => void) => {
         contentListener = listener;
-        return { dispose: jest.fn() };
+        return { dispose: vi.fn() };
       }),
     };
 
-    jest.mocked(ESQLLang.validate).mockResolvedValue({ errors: [], warnings: [] });
+    vi.mocked(ESQLLang.validate).mockResolvedValue({ errors: [], warnings: [] });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('validates the composed base + block and offsets markers to block line numbers', async () => {
     // base spans 2 lines → a marker on line 3 of the composed query is block line 1.
-    jest.mocked(ESQLLang.validate).mockResolvedValue({
+    vi.mocked(ESQLLang.validate).mockResolvedValue({
       errors: [
         {
           message: 'bad',
@@ -88,14 +94,14 @@ describe('useSplitQueryValidation', () => {
       'FROM logs-*\n| STATS c = COUNT()\n| WHERE cpu > 0.8',
       callbacks
     );
-    const markers = jest.mocked(monaco.editor.setModelMarkers).mock.calls.at(-1)?.[2];
+    const markers = vi.mocked(monaco.editor.setModelMarkers).mock.calls.at(-1)?.[2];
     expect(markers).toEqual([
       expect.objectContaining({ startLineNumber: 1, endLineNumber: 1, code: undefined }),
     ]);
   });
 
   it('publishes fragment-space messages (with code) to the registry for code actions', async () => {
-    jest.mocked(ESQLLang.validate).mockResolvedValue({
+    vi.mocked(ESQLLang.validate).mockResolvedValue({
       errors: [
         {
           message: 'bad',
@@ -145,7 +151,7 @@ describe('useSplitQueryValidation', () => {
   });
 
   it('drops markers that fall inside the locked base', async () => {
-    jest.mocked(ESQLLang.validate).mockResolvedValue({
+    vi.mocked(ESQLLang.validate).mockResolvedValue({
       errors: [
         {
           message: 'base error',
@@ -167,7 +173,7 @@ describe('useSplitQueryValidation', () => {
     result.current.onEditorMount(editor as unknown as monaco.editor.IStandaloneCodeEditor);
     await flushDebounce();
 
-    const markers = jest.mocked(monaco.editor.setModelMarkers).mock.calls.at(-1)?.[2];
+    const markers = vi.mocked(monaco.editor.setModelMarkers).mock.calls.at(-1)?.[2];
     expect(markers).toEqual([]);
   });
 
@@ -187,11 +193,11 @@ describe('useSplitQueryValidation', () => {
 
     result.current.onEditorMount(editor as unknown as monaco.editor.IStandaloneCodeEditor);
     await flushDebounce();
-    const initialCalls = jest.mocked(ESQLLang.validate).mock.calls.length;
+    const initialCalls = vi.mocked(ESQLLang.validate).mock.calls.length;
 
     contentListener();
     await flushDebounce();
 
-    expect(jest.mocked(ESQLLang.validate).mock.calls.length).toBeGreaterThan(initialCalls);
+    expect(vi.mocked(ESQLLang.validate).mock.calls.length).toBeGreaterThan(initialCalls);
   });
 });

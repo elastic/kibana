@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renameRiskScoreComponentTemplate } from './rename_risk_score_component_templates';
 import {
   loggingSystemMock,
@@ -13,19 +15,25 @@ import {
 } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
-const mockCreateComponentTemplate = jest.fn();
-const mockCreateIndexTemplate = jest.fn();
+const mockCreateComponentTemplate = vi.fn();
+const mockCreateIndexTemplate = vi.fn();
 
-jest.mock('../../risk_score/risk_score_data_client', () => ({
-  RiskScoreDataClient: jest.fn().mockImplementation(() => ({
-    createOrUpdateRiskScoreComponentTemplate: () => mockCreateComponentTemplate(),
-    createOrUpdateRiskScoreIndexTemplate: () => mockCreateIndexTemplate(),
-  })),
-}));
+vi.mock('../../risk_score/risk_score_data_client', () => {
+      const mocked = {
+      RiskScoreDataClient: vi.fn().mockImplementation(() => ({
+        createOrUpdateRiskScoreComponentTemplate: () => mockCreateComponentTemplate(),
+        createOrUpdateRiskScoreIndexTemplate: () => mockCreateIndexTemplate(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
-}));
+vi.mock('../../risk_score/tasks/helpers', () => {
+      const mocked = {
+      buildScopedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildSavedObjectResponse = (namespaces = ['default']) => ({
   page: 1,
@@ -42,20 +50,20 @@ const buildSavedObjectResponse = (namespaces = ['default']) => ({
 });
 
 describe('renameRiskScoreComponentTemplate', () => {
-  const mockGetStartServices = jest.fn();
+  const mockGetStartServices = vi.fn();
   const mockAuditLogger = auditLoggerMock.create();
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   const mockSoClient = mockSavedObjectsClient.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCreateComponentTemplate.mockReset();
     mockCreateIndexTemplate.mockReset();
     mockGetStartServices.mockResolvedValue([
       {
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(mockSoClient),
+          createInternalRepository: vi.fn().mockReturnValue(mockSoClient),
         },
         elasticsearch: {
           client: {

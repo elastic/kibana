@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
@@ -12,9 +14,12 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { CalendarsListTable } from './table';
 
-jest.mock('../../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToManagementMlLink: jest.fn(),
-}));
+vi.mock('../../../../contexts/kibana/use_create_url', () => {
+      const mocked = {
+      useCreateAndNavigateToManagementMlLink: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const calendars = [
   {

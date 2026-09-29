@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useActiveContexts } from './use_active_contexts';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
@@ -65,7 +67,7 @@ describe('useActiveContexts', () => {
     const { result, scopedProfilesManager } = setup();
     const { rootContext, dataSourceContext } = scopedProfilesManager.getContexts();
 
-    const onOpenDocDetails = jest.fn();
+    const onOpenDocDetails = vi.fn();
     const adapter = result.current({ onOpenDocDetails });
 
     expect(adapter.getRootContext()).toEqual(rootContext);
@@ -86,7 +88,7 @@ describe('useActiveContexts', () => {
       hookAttrs: { dataDocuments$: documentsSubject },
     });
 
-    const onOpenDocDetails = jest.fn();
+    const onOpenDocDetails = vi.fn();
     const adapter = result.current({ onOpenDocDetails });
     const contexts = adapter.getDocumentContexts();
 
@@ -111,7 +113,7 @@ describe('useActiveContexts', () => {
       hookAttrs: { dataDocuments$: documentsSubject },
     });
 
-    const onOpenDocDetails = jest.fn();
+    const onOpenDocDetails = vi.fn();
     const adapter = result.current({ onOpenDocDetails });
     const contexts = adapter.getDocumentContexts();
 
@@ -123,7 +125,7 @@ describe('useActiveContexts', () => {
   it('should call onOpenDocDetails when openDocDetails is called', () => {
     const { result } = setup({});
 
-    const onOpenDocDetails = jest.fn();
+    const onOpenDocDetails = vi.fn();
     const adapter = result.current({ onOpenDocDetails });
 
     const mockRecord = getDataTableRecordMock();

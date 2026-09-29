@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -18,21 +21,24 @@ import React, { useState } from 'react';
 import { SourcePicker } from './source_picker';
 import type { SelectedSource } from './types';
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: ({
-    query,
-    onTextLangQueryChange,
-  }: {
-    query: { esql: string };
-    onTextLangQueryChange: (query: { esql: string }) => void;
-  }) => (
-    <textarea
-      data-test-subj="mockEsqlEditor"
-      value={query.esql}
-      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-    />
-  ),
-}));
+vi.mock('@kbn/esql/public', () => {
+      const mocked = {
+      ESQLLangEditor: ({
+        query,
+        onTextLangQueryChange,
+      }: {
+        query: { esql: string };
+        onTextLangQueryChange: (query: { esql: string }) => void;
+      }) => (
+        <textarea
+          data-test-subj="mockEsqlEditor"
+          value={query.esql}
+          onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const CONNECTORS = [
   { id: 'connector-gdrive', name: 'Google Drive', connector_type_id: '.google_drive' },
@@ -67,10 +73,10 @@ const createServices = ({
   const services = coreMock.createStart();
   const data = dataPluginMock.createStartContract();
   data.dataViews.getIndices = indicesError
-    ? jest.fn().mockRejectedValue(indicesError)
-    : jest.fn().mockResolvedValue(indices);
+    ? vi.fn().mockRejectedValue(indicesError)
+    : vi.fn().mockResolvedValue(indices);
 
-  (services.http.get as jest.Mock).mockImplementation((path: string) => {
+  (services.http.get as Mock).mockImplementation((path: string) => {
     if (path === '/api/actions/connector_types') return Promise.resolve(SUPPORTED_TYPES);
     if (path === '/api/actions/connectors') return Promise.resolve(CONNECTORS);
     return Promise.resolve(undefined);
@@ -126,13 +132,13 @@ const selectIndexSource = async (indexName: string) => {
 
 describe('SourcePicker', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('selects the Elasticsearch data tab by default with index picker visible', () => {

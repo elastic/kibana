@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { usePersistConfiguration } from './use_persist_configuration';
@@ -21,14 +24,14 @@ import {
 import { TestProviders, createTestQueryClient } from '../../common/mock';
 import React from 'react';
 
-jest.mock('./api');
-jest.mock('../../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../../common/lib/kibana');
 
-const useToastMock = useToasts as jest.Mock;
+const useToastMock = useToasts as Mock;
 
 describe('usePersistConfiguration', () => {
-  const addError = jest.fn();
-  const addSuccess = jest.fn();
+  const addError = vi.fn();
+  const addSuccess = vi.fn();
 
   useToastMock.mockReturnValue({
     addError,
@@ -51,12 +54,12 @@ describe('usePersistConfiguration', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls postCaseConfigure when the id is empty', async () => {
-    const spyPost = jest.spyOn(api, 'postCaseConfigure');
-    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+    const spyPost = vi.spyOn(api, 'postCaseConfigure');
+    const spyPatch = vi.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
       wrapper: TestProviders,
@@ -81,8 +84,8 @@ describe('usePersistConfiguration', () => {
   });
 
   it('calls postCaseConfigure when the version is empty', async () => {
-    const spyPost = jest.spyOn(api, 'postCaseConfigure');
-    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+    const spyPost = vi.spyOn(api, 'postCaseConfigure');
+    const spyPatch = vi.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
       wrapper: TestProviders,
@@ -107,7 +110,7 @@ describe('usePersistConfiguration', () => {
   });
 
   it('calls postCaseConfigure with correct data', async () => {
-    const spyPost = jest.spyOn(api, 'postCaseConfigure');
+    const spyPost = vi.spyOn(api, 'postCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
       wrapper: TestProviders,
@@ -136,8 +139,8 @@ describe('usePersistConfiguration', () => {
   });
 
   it('calls patchCaseConfigure when the id and the version are not empty', async () => {
-    const spyPost = jest.spyOn(api, 'postCaseConfigure');
-    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+    const spyPost = vi.spyOn(api, 'postCaseConfigure');
+    const spyPatch = vi.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
       wrapper: TestProviders,
@@ -162,7 +165,7 @@ describe('usePersistConfiguration', () => {
   });
 
   it('calls patchCaseConfigure with correct data', async () => {
-    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+    const spyPatch = vi.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
       wrapper: TestProviders,
@@ -191,7 +194,7 @@ describe('usePersistConfiguration', () => {
   });
 
   it('calls patchCaseConfigure without observableTypes if it is not specified', async () => {
-    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+    const spyPatch = vi.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
       wrapper: TestProviders,
@@ -222,7 +225,7 @@ describe('usePersistConfiguration', () => {
 
   it('invalidates the queries correctly', async () => {
     const queryClient = createTestQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
@@ -252,7 +255,7 @@ describe('usePersistConfiguration', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest
+    vi
       .spyOn(api, 'postCaseConfigure')
       .mockRejectedValue(new Error('useCreateAttachments: Test error'));
 

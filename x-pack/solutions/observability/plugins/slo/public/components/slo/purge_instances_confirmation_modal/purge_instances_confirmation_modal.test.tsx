@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -15,16 +18,16 @@ import { useGetSettings } from '../../../pages/slo_settings/hooks/use_get_settin
 import { render } from '../../../utils/test_helper';
 import { PurgeInstancesConfirmationModal } from './purge_instances_confirmation_modal';
 
-jest.mock('../../../pages/slo_management/hooks/use_purge_instances');
-jest.mock('../../../pages/slo_settings/hooks/use_get_settings');
+vi.mock('../../../pages/slo_management/hooks/use_purge_instances');
+vi.mock('../../../pages/slo_settings/hooks/use_get_settings');
 
-const usePurgeInstancesMock = usePurgeInstances as jest.Mock;
-const useGetSettingsMock = useGetSettings as jest.Mock;
+const usePurgeInstancesMock = usePurgeInstances as Mock;
+const useGetSettingsMock = useGetSettings as Mock;
 
 describe('PurgeInstancesConfirmationModal', () => {
-  const mockPurgeInstances = jest.fn();
-  const mockOnCancel = jest.fn();
-  const mockOnConfirm = jest.fn();
+  const mockPurgeInstances = vi.fn();
+  const mockOnCancel = vi.fn();
+  const mockOnConfirm = vi.fn();
 
   const defaultProps = {
     items: [buildSlo({ id: 'slo-1' }), buildSlo({ id: 'slo-2' })],
@@ -33,7 +36,7 @@ describe('PurgeInstancesConfirmationModal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     usePurgeInstancesMock.mockReturnValue({ mutate: mockPurgeInstances });
     useGetSettingsMock.mockReturnValue({
       data: { staleThresholdInHours: 72 },

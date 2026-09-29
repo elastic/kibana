@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import * as Rx from 'rxjs';
 import {
@@ -21,7 +23,7 @@ import { ReportDeleteButton } from './report_delete_button';
 describe('ReportDeleteButton', () => {
   it('renders prompt modal for single selected report', async () => {
     const deletePerformed$ = new Rx.Subject<void>();
-    const performDelete = jest.fn().mockResolvedValue(Rx.firstValueFrom(deletePerformed$));
+    const performDelete = vi.fn().mockResolvedValue(Rx.firstValueFrom(deletePerformed$));
     const jobs = [mockJobs[0].payload] as Job[];
 
     const { findByTestId } = render(
@@ -50,7 +52,7 @@ describe('ReportDeleteButton', () => {
 
   it('renders prompt modal for multiple selected reports', async () => {
     const deletePerformed$ = new Rx.Subject<void>();
-    const performDelete = jest.fn().mockResolvedValue(Rx.firstValueFrom(deletePerformed$));
+    const performDelete = vi.fn().mockResolvedValue(Rx.firstValueFrom(deletePerformed$));
     const jobs = [mockJobs[0].payload, mockJobs[1].payload] as Job[];
 
     const { findByTestId } = render(

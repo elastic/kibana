@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,13 +26,13 @@ import { useAttachSavedObject } from './use_attach_saved_object';
 import { useOpenLensForAttach } from '../../lens/lens_return/use_open_lens_for_attach';
 import type { FoundSavedObject } from './types';
 
-jest.mock('./use_find_saved_objects');
-jest.mock('./use_attach_saved_object');
-jest.mock('../../lens/lens_return/use_open_lens_for_attach');
+vi.mock('./use_find_saved_objects');
+vi.mock('./use_attach_saved_object');
+vi.mock('../../lens/lens_return/use_open_lens_for_attach');
 
-const useFindSavedObjectsMock = useFindSavedObjects as jest.Mock;
-const useAttachSavedObjectMock = useAttachSavedObject as jest.Mock;
-const useOpenLensForAttachMock = useOpenLensForAttach as jest.Mock;
+const useFindSavedObjectsMock = useFindSavedObjects as Mock;
+const useAttachSavedObjectMock = useAttachSavedObject as Mock;
+const useOpenLensForAttachMock = useOpenLensForAttach as Mock;
 
 const sampleItems: FoundSavedObject[] = [
   {
@@ -84,12 +87,12 @@ const caseWithSavedObjectAttachment = ({
   } as CaseUI);
 
 describe('AttachSavedObjectModal', () => {
-  const attach = jest.fn();
-  const openLensForAttach = jest.fn().mockResolvedValue(undefined);
-  const onClose = jest.fn();
+  const attach = vi.fn();
+  const openLensForAttach = vi.fn().mockResolvedValue(undefined);
+  const onClose = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useFindSavedObjectsMock.mockReturnValue({
       items: sampleItems,
       total: sampleItems.length,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
@@ -15,19 +18,19 @@ import { useAddToCaseActions } from '../../alerts_table/timeline_actions/use_add
 import { useAlertTagsActions } from '../../alerts_table/timeline_actions/use_alert_tags_actions';
 import { ROW_ACTION_FLYOUT_ICON_TEST_ID } from './open_flyout_row_control_column';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../alerts_table/timeline_actions/use_add_to_case_actions');
-jest.mock('../../alerts_table/timeline_actions/use_alert_tags_actions');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../alerts_table/timeline_actions/use_add_to_case_actions');
+vi.mock('../../alerts_table/timeline_actions/use_alert_tags_actions');
 
 describe('ActionsCell', () => {
   it('should render icons', () => {
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      openFlyout: jest.fn(),
+    (useExpandableFlyoutApi as Mock).mockReturnValue({
+      openFlyout: vi.fn(),
     });
-    (useAddToCaseActions as jest.Mock).mockReturnValue({
+    (useAddToCaseActions as Mock).mockReturnValue({
       addToCaseActionItems: [],
     });
-    (useAlertTagsActions as jest.Mock).mockReturnValue({
+    (useAlertTagsActions as Mock).mockReturnValue({
       alertTagsItems: [],
       alertTagsPanels: [],
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityMetadataClient, BulkDropTypeSummary } from '@kbn/entity-store/server';
 import type { RelationshipMetadataDoc } from '@kbn/entity-store/common';
@@ -28,9 +31,9 @@ const makeEntityMetadataClient = (
   dropsByType: BulkDropTypeSummary[] = []
 ): {
   entityMetadataClient: EntityMetadataClient;
-  bulkAppend: jest.Mock;
+  bulkAppend: Mock;
 } => {
-  const bulkAppend = jest.fn().mockImplementation(async (docs: unknown[]) => ({
+  const bulkAppend = vi.fn().mockImplementation(async (docs: unknown[]) => ({
     successful: docs.length - failed,
     failed,
     dropsByType,
@@ -41,7 +44,7 @@ const makeEntityMetadataClient = (
   return { entityMetadataClient, bulkAppend };
 };
 
-const getDocsFromCall = (bulkAppend: jest.Mock): RelationshipMetadataDoc[] => {
+const getDocsFromCall = (bulkAppend: Mock): RelationshipMetadataDoc[] => {
   const [args] = bulkAppend.mock.calls;
   return args[0] as RelationshipMetadataDoc[];
 };
@@ -288,7 +291,7 @@ describe('writeRelationshipMetadatas', () => {
   describe('error propagation', () => {
     it('does NOT catch EntityMetadataClient exceptions — they propagate to the boundary', async () => {
       const entityMetadataClient = {
-        bulkAppendMetadata: jest.fn().mockRejectedValue(new Error('bulk transport failure')),
+        bulkAppendMetadata: vi.fn().mockRejectedValue(new Error('bulk transport failure')),
       } as unknown as EntityMetadataClient;
       const records: EntityRelationshipRecord[] = [
         {

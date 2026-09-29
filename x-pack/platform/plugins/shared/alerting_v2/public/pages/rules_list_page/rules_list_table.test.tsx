@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -74,24 +76,24 @@ const defaultProps: RulesListTableProps = {
   isAllSelected: false,
   isPageSelected: false,
   isRowSelected: () => false,
-  onSelectRow: jest.fn(),
-  onSelectPage: jest.fn(),
-  onSelectAll: jest.fn(),
-  onClearSelection: jest.fn(),
-  onBulkEnable: jest.fn(),
-  onBulkDisable: jest.fn(),
-  onBulkDelete: jest.fn(),
-  onBulkUpdateApiKey: jest.fn(),
-  onNavigateToDetails: jest.fn(),
-  onExpand: jest.fn(),
-  onQuickEdit: jest.fn(),
-  onEdit: jest.fn(),
-  onClone: jest.fn(),
-  onDelete: jest.fn(),
-  onToggleEnabled: jest.fn(),
-  onUpdateApiKey: jest.fn(),
-  onRun: jest.fn(),
-  onTableChange: jest.fn(),
+  onSelectRow: vi.fn(),
+  onSelectPage: vi.fn(),
+  onSelectAll: vi.fn(),
+  onClearSelection: vi.fn(),
+  onBulkEnable: vi.fn(),
+  onBulkDisable: vi.fn(),
+  onBulkDelete: vi.fn(),
+  onBulkUpdateApiKey: vi.fn(),
+  onNavigateToDetails: vi.fn(),
+  onExpand: vi.fn(),
+  onQuickEdit: vi.fn(),
+  onEdit: vi.fn(),
+  onClone: vi.fn(),
+  onDelete: vi.fn(),
+  onToggleEnabled: vi.fn(),
+  onUpdateApiKey: vi.fn(),
+  onRun: vi.fn(),
+  onTableChange: vi.fn(),
 };
 
 const renderTable = (overrides: Partial<RulesListTableProps> = {}) => {
@@ -105,7 +107,7 @@ const renderTable = (overrides: Partial<RulesListTableProps> = {}) => {
 
 describe('RulesListTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -239,7 +241,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onSelectPage when header checkbox is clicked', () => {
-      const onSelectPage = jest.fn();
+      const onSelectPage = vi.fn();
       renderTable({ onSelectPage });
 
       fireEvent.click(screen.getByTestId('selectAllRulesOnPage'));
@@ -248,7 +250,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onSelectRow when a row checkbox is clicked', () => {
-      const onSelectRow = jest.fn();
+      const onSelectRow = vi.fn();
       renderTable({ onSelectRow });
 
       fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
@@ -339,7 +341,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onSelectAll when select all button is clicked', () => {
-      const onSelectAll = jest.fn();
+      const onSelectAll = vi.fn();
       renderTable({ selectedCount: 1, isAllSelected: false, onSelectAll });
 
       fireEvent.click(screen.getByTestId('selectAllRulesButton'));
@@ -348,7 +350,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onClearSelection when clear button is clicked', () => {
-      const onClearSelection = jest.fn();
+      const onClearSelection = vi.fn();
       renderTable({ selectedCount: 1, onClearSelection });
 
       fireEvent.click(screen.getByTestId('clearSelectionButton'));
@@ -357,7 +359,7 @@ describe('RulesListTable', () => {
     });
 
     it('opens bulk actions popover and calls onBulkEnable', async () => {
-      const onBulkEnable = jest.fn();
+      const onBulkEnable = vi.fn();
       renderTable({ selectedCount: 1, onBulkEnable });
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
@@ -370,7 +372,7 @@ describe('RulesListTable', () => {
     });
 
     it('opens bulk actions popover and calls onBulkDisable', async () => {
-      const onBulkDisable = jest.fn();
+      const onBulkDisable = vi.fn();
       renderTable({ selectedCount: 1, onBulkDisable });
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
@@ -383,7 +385,7 @@ describe('RulesListTable', () => {
     });
 
     it('opens bulk actions popover and calls onBulkDelete', async () => {
-      const onBulkDelete = jest.fn();
+      const onBulkDelete = vi.fn();
       renderTable({ selectedCount: 1, onBulkDelete });
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
@@ -396,7 +398,7 @@ describe('RulesListTable', () => {
     });
 
     it('opens bulk actions popover and calls onBulkUpdateApiKey', async () => {
-      const onBulkUpdateApiKey = jest.fn();
+      const onBulkUpdateApiKey = vi.fn();
       renderTable({ selectedCount: 1, onBulkUpdateApiKey });
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
@@ -427,7 +429,7 @@ describe('RulesListTable', () => {
 
   describe('row actions menu', () => {
     it('calls onEdit when edit action is clicked', async () => {
-      const onEdit = jest.fn();
+      const onEdit = vi.fn();
       renderTable({ onEdit });
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -440,7 +442,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onClone when clone action is clicked', async () => {
-      const onClone = jest.fn();
+      const onClone = vi.fn();
       renderTable({ onClone });
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -453,7 +455,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onDelete when delete action is clicked', async () => {
-      const onDelete = jest.fn();
+      const onDelete = vi.fn();
       renderTable({ onDelete });
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -466,7 +468,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onViewChangeHistory when view change history action is clicked', async () => {
-      const onViewChangeHistory = jest.fn();
+      const onViewChangeHistory = vi.fn();
       renderTable({ onViewChangeHistory });
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -495,7 +497,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onRun when run action is clicked for an enabled rule', async () => {
-      const onRun = jest.fn();
+      const onRun = vi.fn();
       renderTable({ onRun });
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -508,7 +510,7 @@ describe('RulesListTable', () => {
     });
 
     it('disables the run action for a disabled rule', async () => {
-      const onRun = jest.fn();
+      const onRun = vi.fn();
       renderTable({ onRun });
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
@@ -525,7 +527,7 @@ describe('RulesListTable', () => {
 
   describe('enabled switch', () => {
     it('calls onToggleEnabled when the switch is clicked', () => {
-      const onToggleEnabled = jest.fn();
+      const onToggleEnabled = vi.fn();
       renderTable({ onToggleEnabled });
 
       fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
@@ -570,7 +572,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onNavigateToDetails when rule name link is clicked', () => {
-      const onNavigateToDetails = jest.fn();
+      const onNavigateToDetails = vi.fn();
       renderTable({ onNavigateToDetails });
 
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
@@ -595,7 +597,7 @@ describe('RulesListTable', () => {
     });
 
     it('still shows View change history (a read action) without write actions', async () => {
-      const onViewChangeHistory = jest.fn();
+      const onViewChangeHistory = vi.fn();
       renderTable({ canWrite: false, onViewChangeHistory });
 
       // No quick edit shortcut for read-only, but the actions menu is available.
@@ -641,7 +643,7 @@ describe('RulesListTable', () => {
     });
 
     it('calls onExpand with the row rule when the expand button is clicked', () => {
-      const onExpand = jest.fn();
+      const onExpand = vi.fn();
       renderTable({ onExpand });
 
       fireEvent.click(screen.getByTestId('expandRule-rule-1'));

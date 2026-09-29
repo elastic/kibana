@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { useRotateInboundIngress } from './use_rotate_inbound_ingress';
 
-const mockAddDanger = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockRotateInboundIngress = jest.fn();
+const mockAddDanger = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockRotateInboundIngress = vi.fn();
 
-jest.mock('../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -30,9 +32,12 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../lib/action_connector_api', () => ({
-  rotateInboundIngress: (...args: unknown[]) => mockRotateInboundIngress(...args),
-}));
+vi.mock('../lib/action_connector_api', () => {
+      const mocked = {
+      rotateInboundIngress: (...args: unknown[]) => mockRotateInboundIngress(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,7 +56,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useRotateInboundIngress', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

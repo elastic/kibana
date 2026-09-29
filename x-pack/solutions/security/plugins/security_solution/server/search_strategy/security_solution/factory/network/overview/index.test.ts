@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as buildQuery from './query.overview_network.dsl';
 import { networkOverview } from '.';
 import {
@@ -14,7 +16,7 @@ import {
 } from './__mocks__';
 
 describe('networkOverview search strategy', () => {
-  const buildOverviewNetworkQuery = jest.spyOn(buildQuery, 'buildOverviewNetworkQuery');
+  const buildOverviewNetworkQuery = vi.spyOn(buildQuery, 'buildOverviewNetworkQuery');
 
   afterEach(() => {
     buildOverviewNetworkQuery.mockClear();

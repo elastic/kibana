@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useEpisodesBulkActions } from './use_episodes_bulk_actions';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
@@ -21,8 +24,8 @@ const stubAction = (overrides: Partial<EpisodeAction> = {}): EpisodeAction => ({
   order: 1,
   displayName: 'Stub',
   iconType: 'star',
-  isCompatible: jest.fn(() => true),
-  execute: jest.fn(async () => {}),
+  isCompatible: vi.fn(() => true),
+  execute: vi.fn(async () => {}),
   ...overrides,
 });
 
@@ -30,7 +33,7 @@ describe('useEpisodesBulkActions', () => {
   it('maps each action to a CustomBulkActions entry with correct label/icon', () => {
     const action = stubAction();
     const { result } = renderHook(() =>
-      useEpisodesBulkActions({ actions: [action], episodesData: [], onSuccess: jest.fn() })
+      useEpisodesBulkActions({ actions: [action], episodesData: [], onSuccess: vi.fn() })
     );
     expect(result.current).toEqual([
       expect.objectContaining({ key: 'STUB', label: 'Stub', icon: 'star' }),
@@ -44,7 +47,7 @@ describe('useEpisodesBulkActions', () => {
       useEpisodesBulkActions({
         actions: [action],
         episodesData: episodesData as any,
-        onSuccess: jest.fn(),
+        onSuccess: vi.fn(),
       })
     );
     result.current[0].isAvailable!({ selectedDocIds: ['0'] } as any);
@@ -52,7 +55,7 @@ describe('useEpisodesBulkActions', () => {
   });
 
   it('onClick calls action.execute with selected episodes and onSuccess', () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const episodesData = [stubEpisode({ 'episode.id': 'e1' })];
     const action = stubAction();
     const { result } = renderHook(() =>
@@ -64,7 +67,7 @@ describe('useEpisodesBulkActions', () => {
 
   it('returns an empty array when no actions are provided', () => {
     const { result } = renderHook(() =>
-      useEpisodesBulkActions({ actions: [], episodesData: [], onSuccess: jest.fn() })
+      useEpisodesBulkActions({ actions: [], episodesData: [], onSuccess: vi.fn() })
     );
     expect(result.current).toEqual([]);
   });
@@ -72,7 +75,7 @@ describe('useEpisodesBulkActions', () => {
   it('handles undefined episodesData gracefully', () => {
     const action = stubAction();
     const { result } = renderHook(() =>
-      useEpisodesBulkActions({ actions: [action], episodesData: undefined, onSuccess: jest.fn() })
+      useEpisodesBulkActions({ actions: [action], episodesData: undefined, onSuccess: vi.fn() })
     );
     result.current[0].isAvailable!({ selectedDocIds: ['0'] } as any);
     expect(action.isCompatible).toHaveBeenCalledWith({ episodes: [] });
@@ -87,12 +90,12 @@ describe('useEpisodesBulkActions', () => {
       useEpisodesBulkActions({
         actions: [action],
         episodesData: [v2Episode, classicEpisode] as any,
-        onSuccess: jest.fn(),
+        onSuccess: vi.fn(),
       })
     );
 
     result.current[0].isAvailable!({ selectedDocIds: ['0', '1'] } as any);
-    const compatibleCall = (action.isCompatible as jest.Mock).mock.calls[0][0];
+    const compatibleCall = (action.isCompatible as Mock).mock.calls[0][0];
     const resolvedIds = compatibleCall.episodes.map((ep: any) => ep['episode.id']);
     expect(resolvedIds).not.toContain('classic-ep');
   });
@@ -100,7 +103,7 @@ describe('useEpisodesBulkActions', () => {
   it('onClick passes only actionable episodes when mixed rows are selected', () => {
     const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
     const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const action = stubAction();
 
     const { result } = renderHook(() =>
@@ -112,7 +115,7 @@ describe('useEpisodesBulkActions', () => {
     );
 
     result.current[0].onClick!({ selectedDocIds: ['0', '1'] } as any);
-    const executeCall = (action.execute as jest.Mock).mock.calls[0][0];
+    const executeCall = (action.execute as Mock).mock.calls[0][0];
     const resolvedIds = executeCall.episodes.map((ep: any) => ep['episode.id']);
     expect(resolvedIds).not.toContain('classic-ep');
   });

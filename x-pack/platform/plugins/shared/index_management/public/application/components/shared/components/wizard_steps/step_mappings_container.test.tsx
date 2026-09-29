@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,27 +19,30 @@ import { MappingsEditor } from '../../../mappings_editor';
 import { documentationService } from '../../../mappings_editor/shared_imports';
 import { StepMappingsContainer } from './step_mappings_container';
 
-jest.mock('../../../../../shared_imports', () => {
-  const actual = jest.requireActual('../../../../../shared_imports');
+vi.mock('../../../../../shared_imports', async () => {
+  const actual = (await vi.importActual('../../../../../shared_imports'));
   return {
     ...actual,
     Forms: {
-      useContent: jest.fn(() => ({
+      useContent: vi.fn(() => ({
         defaultValue: {},
-        updateContent: jest.fn(),
-        getSingleContentData: jest.fn(),
+        updateContent: vi.fn(),
+        getSingleContentData: vi.fn(),
       })),
-      useMultiContentContext: jest.fn(() => ({ getData: jest.fn() })),
+      useMultiContentContext: vi.fn(() => ({ getData: vi.fn() })),
     },
   };
 });
 
-jest.mock('../../../mappings_editor', () => ({
-  LoadMappingsFromJsonButton: jest.fn(() => null),
-  MappingsEditor: jest.fn(() => null),
-}));
+vi.mock('../../../mappings_editor', () => {
+      const mocked = {
+      LoadMappingsFromJsonButton: vi.fn(() => null),
+      MappingsEditor: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMappingsEditor = jest.mocked(MappingsEditor);
+const mockMappingsEditor = vi.mocked(MappingsEditor);
 const docLinks = docLinksServiceMock.createStartContract();
 const appDependencies = { docLinks } as AppDependencies;
 let http = httpServiceMock.createSetupContract();
@@ -57,7 +62,7 @@ describe('StepMappingsContainer', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http = httpServiceMock.createSetupContract();
     httpService.setup(http);
   });

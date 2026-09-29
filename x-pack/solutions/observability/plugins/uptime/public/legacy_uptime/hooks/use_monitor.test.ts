@@ -5,22 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import { useMonitorId } from './use_monitor';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useMonitorId', () => {
   const mockUseParams = (monitorId: string | undefined) => {
-    (useParams as jest.Mock).mockReturnValue({ monitorId });
+    (useParams as Mock).mockReturnValue({ monitorId });
   };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('decodes a valid base64-encoded monitor id', () => {

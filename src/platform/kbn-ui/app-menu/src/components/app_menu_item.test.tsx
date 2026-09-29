@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,21 +21,21 @@ describe('AppMenuItem', () => {
     iconType: 'logoElastic',
     order: 1,
     isPopoverOpen: false,
-    onPopoverToggle: jest.fn(),
-    onPopoverClose: jest.fn(),
+    onPopoverToggle: vi.fn(),
+    onPopoverClose: vi.fn(),
   };
 
   const buttonProps = {
     ...defaultProps,
-    run: jest.fn(),
+    run: vi.fn(),
     testId: 'test-button',
   };
 
   const itemWithPopoverProps = {
     ...defaultProps,
     items: [
-      { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
-      { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
+      { id: 'item1', label: 'Item 1', run: vi.fn(), order: 1 },
+      { id: 'item2', label: 'Item 2', run: vi.fn(), order: 2 },
     ],
     testId: 'test-item-with-popover',
   };
@@ -46,7 +48,7 @@ describe('AppMenuItem', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render basic item', () => {

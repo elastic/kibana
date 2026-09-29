@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ATTACKS_PAGE_LOADING_TEST_ID, AttacksPage } from './attacks';
@@ -20,20 +23,26 @@ import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileg
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../components/user_info');
-jest.mock('../../../common/components/user_privileges');
-jest.mock('../../containers/detection_engine/lists/use_lists_config');
-jest.mock('../../hooks/use_signal_helpers');
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn().mockReturnValue({ dataView: {}, status: 'ready' }),
-}));
-jest.mock('../../../common/hooks/use_missing_privileges');
-jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../components/attacks/wrapper', () => ({
-  Wrapper: () => <div data-test-subj={'attacks-page-data-view-wrapper'} />,
-}));
+vi.mock('../../components/user_info');
+vi.mock('../../../common/components/user_privileges');
+vi.mock('../../containers/detection_engine/lists/use_lists_config');
+vi.mock('../../hooks/use_signal_helpers');
+vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn().mockReturnValue({ dataView: {}, status: 'ready' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/hooks/use_missing_privileges');
+vi.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../components/attacks/wrapper', () => {
+      const mocked = {
+      Wrapper: () => <div data-test-subj={'attacks-page-data-view-wrapper'} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
 const defaultAlertsPrivileges = {
   hasAlertsAll: true,
@@ -49,7 +58,7 @@ const defaultAlertsPrivileges = {
 };
 
 const doMockRulesPrivileges = ({ read = false }) => {
-  (useUserPrivileges as jest.Mock).mockReturnValue({
+  (useUserPrivileges as Mock).mockReturnValue({
     rulesPrivileges: {
       rules: {
         read,
@@ -61,16 +70,16 @@ const doMockRulesPrivileges = ({ read = false }) => {
 
 describe('<AttacksPageWrapper />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     doMockRulesPrivileges({});
     mockUseAlertsPrivileges.mockReturnValue(defaultAlertsPrivileges);
   });
 
   describe('showing loading spinner', () => {
     it('should render a loading spinner if userInfoLoading is true', () => {
-      (useUserData as jest.Mock).mockReturnValue([{ loading: true }]);
-      (useListsConfig as jest.Mock).mockReturnValue({ loading: false });
-      (useSignalHelpers as jest.Mock).mockReturnValue({});
+      (useUserData as Mock).mockReturnValue([{ loading: true }]);
+      (useListsConfig as Mock).mockReturnValue({ loading: false });
+      (useSignalHelpers as Mock).mockReturnValue({});
 
       const { getByTestId } = render(
         <TestProviders>
@@ -83,9 +92,9 @@ describe('<AttacksPageWrapper />', () => {
     });
 
     it('should render a loading spinner if listsConfigLoading is true', () => {
-      (useUserData as jest.Mock).mockReturnValue([{ loading: false }]);
-      (useListsConfig as jest.Mock).mockReturnValue({ loading: true });
-      (useSignalHelpers as jest.Mock).mockReturnValue({});
+      (useUserData as Mock).mockReturnValue([{ loading: false }]);
+      (useListsConfig as Mock).mockReturnValue({ loading: true });
+      (useSignalHelpers as Mock).mockReturnValue({});
 
       const { getByTestId } = render(
         <TestProviders>
@@ -100,9 +109,9 @@ describe('<AttacksPageWrapper />', () => {
 
   describe('showing user not authenticated', () => {
     it('should render unauthenticated page', () => {
-      (useUserData as jest.Mock).mockReturnValue([{ isAuthenticated: false }]);
-      (useListsConfig as jest.Mock).mockReturnValue({});
-      (useSignalHelpers as jest.Mock).mockReturnValue({});
+      (useUserData as Mock).mockReturnValue([{ isAuthenticated: false }]);
+      (useListsConfig as Mock).mockReturnValue({});
+      (useSignalHelpers as Mock).mockReturnValue({});
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
@@ -118,9 +127,9 @@ describe('<AttacksPageWrapper />', () => {
 
   describe('showing no index', () => {
     it('should render no index page if  if signalIndexNeedsInit is true', () => {
-      (useUserData as jest.Mock).mockReturnValue([{}]);
-      (useListsConfig as jest.Mock).mockReturnValue({});
-      (useSignalHelpers as jest.Mock).mockReturnValue({ signalIndexNeedsInit: true });
+      (useUserData as Mock).mockReturnValue([{}]);
+      (useListsConfig as Mock).mockReturnValue({});
+      (useSignalHelpers as Mock).mockReturnValue({ signalIndexNeedsInit: true });
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
@@ -135,9 +144,9 @@ describe('<AttacksPageWrapper />', () => {
     });
 
     it('should render no index page if needsListsConfiguration is true', () => {
-      (useUserData as jest.Mock).mockReturnValue([{}]);
-      (useListsConfig as jest.Mock).mockReturnValue({ needsConfiguration: true });
-      (useSignalHelpers as jest.Mock).mockReturnValue({});
+      (useUserData as Mock).mockReturnValue([{}]);
+      (useListsConfig as Mock).mockReturnValue({ needsConfiguration: true });
+      (useSignalHelpers as Mock).mockReturnValue({});
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
@@ -154,7 +163,7 @@ describe('<AttacksPageWrapper />', () => {
 
   describe('showing callouts', () => {
     it('should render NoApiIntegrationKeyCallOut', () => {
-      (useUserData as jest.Mock).mockReturnValue([
+      (useUserData as Mock).mockReturnValue([
         {
           loading: false,
           isAuthenticated: true,
@@ -162,14 +171,14 @@ describe('<AttacksPageWrapper />', () => {
           hasEncryptionKey: false,
         },
       ]);
-      (useListsConfig as jest.Mock).mockReturnValue({
+      (useListsConfig as Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
       });
-      (useSignalHelpers as jest.Mock).mockReturnValue({
+      (useSignalHelpers as Mock).mockReturnValue({
         signalIndexNeedsInit: false,
       });
-      (useMissingPrivileges as jest.Mock).mockReturnValue({
+      (useMissingPrivileges as Mock).mockReturnValue({
         indexPrivileges: [],
         featurePrivileges: [],
       });
@@ -185,7 +194,7 @@ describe('<AttacksPageWrapper />', () => {
     });
 
     it('should render NeedAdminForUpdateRulesCallOut', () => {
-      (useUserData as jest.Mock).mockReturnValue([
+      (useUserData as Mock).mockReturnValue([
         {
           loading: false,
           isAuthenticated: true,
@@ -194,14 +203,14 @@ describe('<AttacksPageWrapper />', () => {
           hasIndexManage: false,
         },
       ]);
-      (useListsConfig as jest.Mock).mockReturnValue({
+      (useListsConfig as Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
       });
-      (useSignalHelpers as jest.Mock).mockReturnValue({
+      (useSignalHelpers as Mock).mockReturnValue({
         signalIndexNeedsInit: false,
       });
-      (useMissingPrivileges as jest.Mock).mockReturnValue({
+      (useMissingPrivileges as Mock).mockReturnValue({
         indexPrivileges: [],
         featurePrivileges: [],
       });
@@ -217,21 +226,21 @@ describe('<AttacksPageWrapper />', () => {
     });
 
     it('should render MissingPrivilegesCallOut', () => {
-      (useUserData as jest.Mock).mockReturnValue([
+      (useUserData as Mock).mockReturnValue([
         {
           loading: false,
           isAuthenticated: true,
           canUserREAD: true,
         },
       ]);
-      (useListsConfig as jest.Mock).mockReturnValue({
+      (useListsConfig as Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
       });
-      (useSignalHelpers as jest.Mock).mockReturnValue({
+      (useSignalHelpers as Mock).mockReturnValue({
         signalIndexNeedsInit: false,
       });
-      (useMissingPrivileges as jest.Mock).mockReturnValue({
+      (useMissingPrivileges as Mock).mockReturnValue({
         indexPrivileges: [['index', ['privilege']]],
         featurePrivileges: [['feature', ['privilege']]],
       });
@@ -249,7 +258,7 @@ describe('<AttacksPageWrapper />', () => {
 
   describe('showing the actual content', () => {
     it('should render NoPrivileges when the user has no access to alerts', () => {
-      (useUserData as jest.Mock).mockReturnValue([
+      (useUserData as Mock).mockReturnValue([
         {
           loading: false,
           isAuthenticated: true,
@@ -259,14 +268,14 @@ describe('<AttacksPageWrapper />', () => {
         ...defaultAlertsPrivileges,
         hasAlertsRead: false,
       });
-      (useListsConfig as jest.Mock).mockReturnValue({
+      (useListsConfig as Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
       });
-      (useSignalHelpers as jest.Mock).mockReturnValue({
+      (useSignalHelpers as Mock).mockReturnValue({
         signalIndexNeedsInit: false,
       });
-      (useMissingPrivileges as jest.Mock).mockReturnValue({
+      (useMissingPrivileges as Mock).mockReturnValue({
         indexPrivileges: [],
         featurePrivileges: [],
       });
@@ -283,21 +292,21 @@ describe('<AttacksPageWrapper />', () => {
     });
 
     it('should render AttacksPageDataViewWrapper', () => {
-      (useUserData as jest.Mock).mockReturnValue([
+      (useUserData as Mock).mockReturnValue([
         {
           loading: false,
           isAuthenticated: true,
         },
       ]);
       doMockRulesPrivileges({ read: true });
-      (useListsConfig as jest.Mock).mockReturnValue({
+      (useListsConfig as Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
       });
-      (useSignalHelpers as jest.Mock).mockReturnValue({
+      (useSignalHelpers as Mock).mockReturnValue({
         signalIndexNeedsInit: false,
       });
-      (useMissingPrivileges as jest.Mock).mockReturnValue({
+      (useMissingPrivileges as Mock).mockReturnValue({
         indexPrivileges: [],
         featurePrivileges: [],
       });

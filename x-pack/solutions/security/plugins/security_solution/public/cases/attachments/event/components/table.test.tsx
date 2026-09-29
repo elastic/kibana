@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import {
@@ -28,20 +30,20 @@ import { searchEvents } from '../hooks/search_events';
 import { EcsFlat } from '@elastic/ecs';
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 
-jest.mock('../hooks/use_events_data_view');
-jest.mock('../hooks/search_events');
+vi.mock('../hooks/use_events_data_view');
+vi.mock('../hooks/search_events');
 
 // Failing: See https://github.com/elastic/kibana/issues/271294
 describe.skip('EventsTableForCases', () => {
   beforeEach(() => {
-    jest.mocked(useCaseEventsDataView).mockReturnValue({
+    vi.mocked(useCaseEventsDataView).mockReturnValue({
       dataView: new DataView({
         fieldFormats: fieldFormatsMock,
       }),
       status: 'ready',
     });
 
-    jest.mocked(searchEvents).mockResolvedValue([
+    vi.mocked(searchEvents).mockResolvedValue([
       {
         _id: 'mock-id',
         data: [
@@ -86,7 +88,7 @@ describe.skip('EventsTableForCases', () => {
   });
 
   it('renders empty state for no events', async () => {
-    jest.mocked(searchEvents).mockResolvedValue([]);
+    vi.mocked(searchEvents).mockResolvedValue([]);
     render(<EventsTableForCases events={[]} />, { wrapper: TestProviders });
 
     await waitFor(() => {
@@ -113,8 +115,8 @@ describe.skip('EventsTableForCases', () => {
       screen.getByTestId('pagination-button-3').click();
     });
 
-    expect(jest.mocked(searchEvents)).toHaveBeenCalled();
-    expect(jest.mocked(searchEvents)).toHaveBeenCalledWith(
+    expect(vi.mocked(searchEvents)).toHaveBeenCalled();
+    expect(vi.mocked(searchEvents)).toHaveBeenCalledWith(
       expect.anything(),
       expect.any(DataView),
       expect.objectContaining({ pageIndex: 3, itemsPerPage: 25 })
@@ -134,8 +136,8 @@ describe.skip('EventsTableForCases', () => {
       { wrapper: TestProviders }
     );
 
-    expect(jest.mocked(searchEvents)).toHaveBeenCalled();
-    expect(jest.mocked(searchEvents)).toHaveBeenCalledWith(
+    expect(vi.mocked(searchEvents)).toHaveBeenCalled();
+    expect(vi.mocked(searchEvents)).toHaveBeenCalledWith(
       expect.anything(),
       expect.any(DataView),
       expect.objectContaining({ eventIds: expect.arrayContaining(['mock-event-id']) })

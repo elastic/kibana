@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import * as React from 'react';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,16 +19,19 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('../../lib/action_connector_api', () => ({
-  ...(jest.requireActual('../../lib/action_connector_api') as any),
-  loadActionTypes: jest.fn(),
-}));
-const { loadActionTypes } = jest.requireMock('../../lib/action_connector_api');
+vi.mock('../../lib/action_connector_api', async () => {
+      const mocked = {
+      ...((await vi.importActual('../../lib/action_connector_api')) as any),
+      loadActionTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { loadActionTypes } = (await vi.importMock('../../lib/action_connector_api'));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('connector_add_flyout', () => {
   let appMockRenderer: AppMockRenderer;
@@ -49,12 +55,12 @@ describe('connector_add_flyout', () => {
 
   afterEach(() => {
     actionTypeRegistry.get.mockReset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
     it('renders action type menu with proper EuiCards for registered action types', async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
         iconClass: 'test',
@@ -89,7 +95,7 @@ describe('connector_add_flyout', () => {
     });
 
     it(`doesn't renders action types that are disabled via config`, async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
         iconClass: 'test',
@@ -124,7 +130,7 @@ describe('connector_add_flyout', () => {
     });
 
     it(`renders action types as disabled when disabled by license`, async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
         iconClass: 'test',
@@ -159,7 +165,7 @@ describe('connector_add_flyout', () => {
     });
 
     it('renders action type based on hideInUi flag', async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       const actionType1 = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type-1',
         iconClass: 'test',
@@ -224,7 +230,7 @@ describe('connector_add_flyout', () => {
   });
 
   describe('filtering', () => {
-    const onActionTypeChange = jest.fn();
+    const onActionTypeChange = vi.fn();
 
     const actionType1 = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'action-type-1',
@@ -249,7 +255,7 @@ describe('connector_add_flyout', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('Filters connectors based on name search', async () => {
@@ -369,7 +375,7 @@ describe('connector_add_flyout', () => {
 
   describe('spec connectors', () => {
     it('renders a spec connector using name and description from the server response', async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       loadActionTypes.mockResolvedValue([
         {
           id: 'my-spec-connector',
@@ -398,7 +404,7 @@ describe('connector_add_flyout', () => {
     });
 
     it('does not render a spec connector when enabledInConfig is false', async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       loadActionTypes.mockResolvedValue([
         {
           id: 'my-spec-connector',
@@ -425,8 +431,8 @@ describe('connector_add_flyout', () => {
     });
 
     it('does not render a spec connector when workflows UI is disabled and connector only supports workflows', async () => {
-      const onActionTypeChange = jest.fn();
-      useKibanaMock().services.uiSettings.get = jest
+      const onActionTypeChange = vi.fn();
+      useKibanaMock().services.uiSettings.get = vi
         .fn()
         .mockImplementation((key: string) => (key === 'workflows:ui:enabled' ? false : undefined));
       loadActionTypes.mockResolvedValue([
@@ -457,7 +463,7 @@ describe('connector_add_flyout', () => {
 
   describe('deprecated connectors', () => {
     it('does not render a stack action type card when isDeprecated is true', async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       const deprecatedActionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-deprecated-action-type',
         iconClass: 'test',
@@ -521,7 +527,7 @@ describe('connector_add_flyout', () => {
     });
 
     it('does not render a spec connector card when isDeprecated is true', async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       loadActionTypes.mockResolvedValue([
         {
           id: 'my-deprecated-spec-connector',
@@ -561,7 +567,7 @@ describe('connector_add_flyout', () => {
 
   describe('beta badge', () => {
     it(`does not render beta badge when isExperimental=undefined`, async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
         iconClass: 'test',
@@ -595,7 +601,7 @@ describe('connector_add_flyout', () => {
       expect(screen.queryByTestId('my-action-type-card')).not.toBeInTheDocument();
     });
     it(`does not render beta badge when isExperimental=false`, async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
         iconClass: 'test',
@@ -631,7 +637,7 @@ describe('connector_add_flyout', () => {
     });
 
     it(`renders beta badge when isExperimental=true`, async () => {
-      const onActionTypeChange = jest.fn();
+      const onActionTypeChange = vi.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
         iconClass: 'test',

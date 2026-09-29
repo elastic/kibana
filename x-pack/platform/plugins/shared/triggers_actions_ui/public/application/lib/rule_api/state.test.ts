@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRuleState } from './state';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 const http = httpServiceMock.createStartContract();
 
 describe('loadRuleState', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('should call get API with base parameters', async () => {
     const ruleId = uuidv4();

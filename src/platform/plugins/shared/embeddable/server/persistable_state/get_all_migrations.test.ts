@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getAllMigrations } from './get_all_migrations';
 
 describe('embeddable getAllMigratons', () => {
@@ -14,7 +16,7 @@ describe('embeddable getAllMigratons', () => {
     { migrations: { '7.11.0': (state: unknown) => state } },
     { migrations: () => ({ '7.13.0': (state: unknown) => state }) },
   ];
-  const migrateFn = jest.fn();
+  const migrateFn = vi.fn();
 
   test('returns all migrations', () => {
     const migrations = getAllMigrations(factories, migrateFn);

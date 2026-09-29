@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { File } from '../file';
 
-jest.mock('eslint', () => {
-  const mockConstructor = jest.fn();
-  const mockLintFiles = jest.fn();
-  const mockLoadFormatter = jest.fn();
-  const mockOutputFixes = jest.fn();
+vi.mock('eslint', () => {
+  const mockConstructor = vi.fn();
+  const mockLintFiles = vi.fn();
+  const mockLoadFormatter = vi.fn();
+  const mockOutputFixes = vi.fn();
 
   return {
     ESLint: class ESLint {
@@ -40,19 +43,19 @@ jest.mock('eslint', () => {
 
 import { lintFiles } from './lint_files';
 
-const { __mock } = jest.requireMock('eslint') as {
+const { __mock } = (await vi.importMock('eslint')) as {
   __mock: {
-    mockConstructor: jest.Mock;
-    mockLintFiles: jest.Mock;
-    mockLoadFormatter: jest.Mock;
-    mockOutputFixes: jest.Mock;
+    mockConstructor: Mock;
+    mockLintFiles: Mock;
+    mockLoadFormatter: Mock;
+    mockOutputFixes: Mock;
   };
 };
 const { mockConstructor, mockLintFiles, mockLoadFormatter, mockOutputFixes } = __mock;
 
 describe('lintFiles', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLintFiles.mockResolvedValue([
       {
         errorCount: 0,
@@ -74,14 +77,14 @@ describe('lintFiles', () => {
       },
     ]);
     mockLoadFormatter.mockResolvedValue({
-      format: jest.fn(),
+      format: vi.fn(),
     });
   });
 
   it('returns and logs the files updated by eslint --fix', async () => {
     const log = new ToolingLog();
-    jest.spyOn(log, 'info').mockImplementation(() => undefined);
-    jest.spyOn(log, 'success').mockImplementation(() => undefined);
+    vi.spyOn(log, 'info').mockImplementation(() => undefined);
+    vi.spyOn(log, 'success').mockImplementation(() => undefined);
 
     const result = await lintFiles(
       log,
@@ -123,11 +126,11 @@ describe('lintFiles', () => {
       },
     ]);
     mockLoadFormatter.mockResolvedValue({
-      format: jest.fn().mockReturnValue('error output'),
+      format: vi.fn().mockReturnValue('error output'),
     });
 
     const log = new ToolingLog();
-    jest.spyOn(log, 'error').mockImplementation(() => undefined);
+    vi.spyOn(log, 'error').mockImplementation(() => undefined);
 
     const result = await lintFiles(
       log,
@@ -149,11 +152,11 @@ describe('lintFiles', () => {
       },
     ]);
     mockLoadFormatter.mockResolvedValue({
-      format: jest.fn().mockReturnValue('mixed output'),
+      format: vi.fn().mockReturnValue('mixed output'),
     });
 
     const log = new ToolingLog();
-    jest.spyOn(log, 'error').mockImplementation(() => undefined);
+    vi.spyOn(log, 'error').mockImplementation(() => undefined);
 
     const result = await lintFiles(log, [new File(`${REPO_ROOT}/src/mixed.ts`)], { fix: false });
 

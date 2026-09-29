@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { type ICPSManager, ProjectRoutingAccess } from '../types';
 import { useCpsPickerAccess } from './use_cps_picker_access';
 
 describe('useCpsPickerAccess', () => {
-  const registerAppAccess = jest.fn();
+  const registerAppAccess = vi.fn();
   const mockCurrentAppId$ = new BehaviorSubject<string | undefined>('app-id');
   const cpsManager = { registerAppAccess } as unknown as ICPSManager;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCurrentAppId$.next('app-id');
   });
 
   it('registers the provided resolver when app id and cpsManager are defined', () => {
-    const resolver = jest.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
+    const resolver = vi.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
 
     renderHook(() =>
       useCpsPickerAccess({
@@ -64,8 +66,8 @@ describe('useCpsPickerAccess', () => {
   });
 
   it('re-registers when the resolver reference changes', () => {
-    const resolverA = jest.fn().mockReturnValue(ProjectRoutingAccess.DISABLED);
-    const resolverB = jest.fn().mockReturnValue(ProjectRoutingAccess.EDITABLE);
+    const resolverA = vi.fn().mockReturnValue(ProjectRoutingAccess.DISABLED);
+    const resolverB = vi.fn().mockReturnValue(ProjectRoutingAccess.EDITABLE);
 
     const { rerender } = renderHook(
       ({ resolver }) =>
@@ -83,7 +85,7 @@ describe('useCpsPickerAccess', () => {
   });
 
   it('re-registers when currentAppId$ emits a new app id', () => {
-    const resolver = jest.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
+    const resolver = vi.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
 
     const { rerender } = renderHook(() =>
       useCpsPickerAccess({
@@ -102,7 +104,7 @@ describe('useCpsPickerAccess', () => {
   });
 
   it('resets access to DISABLED on unmount', () => {
-    const resolver = jest.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
+    const resolver = vi.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
 
     const { unmount } = renderHook(() =>
       useCpsPickerAccess({

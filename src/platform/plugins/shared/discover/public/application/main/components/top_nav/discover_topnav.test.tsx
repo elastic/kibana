@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -78,7 +81,7 @@ const MockCustomSearchBar: typeof mockDiscoverService.navigation.ui.AggregateQue
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
-  CustomDataViewPicker: jest.fn(() => <div data-test-subj="custom-data-view-picker" />),
+  CustomDataViewPicker: vi.fn(() => <div data-test-subj="custom-data-view-picker" />),
 };
 
 const mockSearchBarCustomizationWithCustomSearchBar: SearchBarCustomization = {
@@ -93,10 +96,13 @@ const mockSearchBarCustomizationWithHiddenDataViewPicker: SearchBarCustomization
 
 let mockUseCustomizations = false;
 
-jest.mock('../../../../customizations', () => ({
-  ...jest.requireActual('../../../../customizations'),
-  useDiscoverCustomization: jest.fn(),
-}));
+vi.mock('../../../../customizations', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../customizations')),
+      useDiscoverCustomization: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDefaultCapabilities = {
   discover_v2: { save: true },
@@ -138,7 +144,7 @@ async function setup(
 
   const props: DiscoverTopNavProps = {
     savedQuery: '',
-    onFieldEdited: jest.fn(),
+    onFieldEdited: vi.fn(),
   };
 
   return { toolkit, props };
@@ -182,9 +188,9 @@ describe('Discover topnav component', () => {
   beforeEach(() => {
     mockUseCustomizations = false;
     capturedTopNavMenu = undefined;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+    (useDiscoverCustomization as Mock).mockImplementation((id: DiscoverCustomizationId) => {
       if (!mockUseCustomizations) {
         return undefined;
       }
@@ -386,7 +392,7 @@ describe('Discover topnav component', () => {
 
   describe('search bar customization', () => {
     it('should render custom Search Bar', async () => {
-      (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+      (useDiscoverCustomization as Mock).mockImplementation((id: DiscoverCustomizationId) => {
         if (id === 'search_bar') {
           return mockSearchBarCustomizationWithCustomSearchBar;
         }
@@ -412,7 +418,7 @@ describe('Discover topnav component', () => {
     });
 
     it('should not render the dataView picker when hideDataViewPicker is true', async () => {
-      (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+      (useDiscoverCustomization as Mock).mockImplementation((id: DiscoverCustomizationId) => {
         if (id === 'search_bar') {
           return mockSearchBarCustomizationWithHiddenDataViewPicker;
         }

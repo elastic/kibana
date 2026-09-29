@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { lastValueFrom, of } from 'rxjs';
 import type {
   ChatCompletionChunkEvent,
@@ -20,8 +22,8 @@ describe('chunksIntoMessage', () => {
   }
 
   const logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
 
   it('concatenates content chunks into a single message', async () => {

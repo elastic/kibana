@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { useAnomalyOverview } from './use_anomaly_overview';
 import { useEntityAnalyticsRoutes } from '../api';
 
-jest.mock('../api');
+vi.mock('../api');
 
-const mockFetchAnomalyOverview = jest.fn();
+const mockFetchAnomalyOverview = vi.fn();
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
     {children}
@@ -21,8 +24,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (useEntityAnalyticsRoutes as jest.Mock).mockReturnValue({
+  vi.clearAllMocks();
+  (useEntityAnalyticsRoutes as Mock).mockReturnValue({
     fetchAnomalyOverview: mockFetchAnomalyOverview,
   });
   mockFetchAnomalyOverview.mockResolvedValue({});

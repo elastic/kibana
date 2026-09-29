@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import YAML, { Document } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod/v4';
@@ -18,28 +20,33 @@ import type { StepPropInfo } from '../../../../../../entities/workflows/store';
 import { createStepInfo as createBaseStepInfo } from '../../../../../../shared/test_utils';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
-jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  normalizeFieldsToJsonSchema: jest.fn(),
-}));
+vi.mock('@kbn/workflows/spec/lib/field_conversion', () => {
+      const mocked = {
+      normalizeFieldsToJsonSchema: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_input_placeholder', () => ({
-  getPlaceholderForProperty: jest.fn().mockReturnValue('"placeholder"'),
-}));
+vi.mock('./workflow_input_placeholder', () => {
+      const mocked = {
+      getPlaceholderForProperty: vi.fn().mockReturnValue('"placeholder"'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../../features/validate_workflow_yaml/lib/validate_workflow_outputs_in_yaml',
-  () => ({
-    getOutputsFromYamlDocument: jest.fn().mockReturnValue(undefined),
-  })
+  () => {
+      const mocked = {
+        getOutputsFromYamlDocument: vi.fn().mockReturnValue(undefined),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const { normalizeFieldsToJsonSchema } = jest.requireMock(
-  '@kbn/workflows/spec/lib/field_conversion'
-);
-const { getOutputsFromYamlDocument } = jest.requireMock(
-  '../../../../../../features/validate_workflow_yaml/lib/validate_workflow_outputs_in_yaml'
-);
-const { getPlaceholderForProperty } = jest.requireMock('./workflow_input_placeholder');
+const { normalizeFieldsToJsonSchema } = (await vi.importMock('@kbn/workflows/spec/lib/field_conversion'));
+const { getOutputsFromYamlDocument } = (await vi.importMock('../../../../../../features/validate_workflow_yaml/lib/validate_workflow_outputs_in_yaml'));
+const { getPlaceholderForProperty } = (await vi.importMock('./workflow_input_placeholder'));
 
 const createMockRange = (): monaco.IRange => ({
   startLineNumber: 5,
@@ -123,7 +130,7 @@ describe('isInWorkflowOutputWithBlock', () => {
 
 describe('getWorkflowOutputsSuggestions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getPlaceholderForProperty.mockReturnValue('"placeholder"');
     getOutputsFromYamlDocument.mockReturnValue(undefined);
     normalizeFieldsToJsonSchema.mockReturnValue(null);

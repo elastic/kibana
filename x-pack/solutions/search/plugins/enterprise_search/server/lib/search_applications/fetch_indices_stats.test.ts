@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchIndicesStats } from './fetch_indices_stats';
@@ -12,10 +14,10 @@ describe('fetchIndicesStats lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
-        get: jest.fn(),
-        stats: jest.fn(),
+        get: vi.fn(),
+        stats: vi.fn(),
       },
-      msearch: jest.fn(),
+      msearch: vi.fn(),
     },
     asInternalUser: {},
   };
@@ -67,7 +69,7 @@ describe('fetchIndicesStats lib function', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return hydrated indices for all available and open indices', async () => {

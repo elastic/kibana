@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -14,19 +17,19 @@ import { ExitTryBlockNodeImpl } from '../exit_try_block_node_impl';
 
 describe('ExitTryBlockNodeImpl', () => {
   let underTest: ExitTryBlockNodeImpl;
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
 
   beforeEach(() => {
     mockStepExecutionRuntime = {
-      getCurrentStepState: jest.fn(),
-      failStep: jest.fn().mockResolvedValue(undefined),
-      finishStep: jest.fn().mockResolvedValue(undefined),
+      getCurrentStepState: vi.fn(),
+      failStep: vi.fn().mockResolvedValue(undefined),
+      finishStep: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     mockWorkflowRuntime = {
-      setWorkflowError: jest.fn(),
-      navigateToNextNode: jest.fn(),
+      setWorkflowError: vi.fn(),
+      navigateToNextNode: vi.fn(),
     } as any;
 
     underTest = new ExitTryBlockNodeImpl(mockStepExecutionRuntime, mockWorkflowRuntime);
@@ -37,7 +40,7 @@ describe('ExitTryBlockNodeImpl', () => {
       const mockError = new Error('Test error');
 
       beforeEach(() => {
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue({
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue({
           error: mockError,
         });
       });
@@ -72,14 +75,14 @@ describe('ExitTryBlockNodeImpl', () => {
           type: 'TimeoutError',
           message: 'Step execution exceeded timeout',
         };
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue({
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue({
           error: serializedTimeoutError,
         });
 
         await underTest.run();
 
         expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(expect.any(ExecutionError));
-        const failedError = (mockStepExecutionRuntime.failStep as jest.Mock).mock.calls[0][0];
+        const failedError = (mockStepExecutionRuntime.failStep as Mock).mock.calls[0][0];
         expect(failedError).toBeInstanceOf(ExecutionError);
         expect(failedError.toSerializableObject()).toEqual(serializedTimeoutError);
       });
@@ -87,7 +90,7 @@ describe('ExitTryBlockNodeImpl', () => {
 
     describe('when there is no error in step state', () => {
       beforeEach(() => {
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue({});
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue({});
       });
 
       it('should get step state for enter node', async () => {
@@ -118,7 +121,7 @@ describe('ExitTryBlockNodeImpl', () => {
 
     describe('when step state is null/undefined', () => {
       beforeEach(() => {
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue(null);
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue(null);
       });
 
       it('should handle null step state gracefully', async () => {

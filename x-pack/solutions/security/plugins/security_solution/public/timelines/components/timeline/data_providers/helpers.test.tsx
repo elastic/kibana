@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataProvider, DataProvidersAnd } from './data_provider';
 import {
   addContentToTimeline,
@@ -290,7 +292,7 @@ describe('helpers', () => {
     };
 
     test('it dispatches an `updateProviders` action with the expected re-ordered group', () => {
-      const dispatch = jest.fn();
+      const dispatch = vi.fn();
 
       reArrangeProvidersInSameGroup({
         dataProviderGroups,
@@ -363,7 +365,7 @@ describe('helpers', () => {
     });
 
     test('it does NOT dispatch an action if the group index from the source droppableId is invalid', () => {
-      const dispatch = jest.fn();
+      const dispatch = vi.fn();
 
       reArrangeProvidersInSameGroup({
         dataProviderGroups,
@@ -441,7 +443,7 @@ describe('helpers', () => {
           droppableId: 'droppableId.timelineProviders.timeline-1.group.1',
           index: 0,
         };
-        const dispatch = jest.fn();
+        const dispatch = vi.fn();
         const source = {
           droppableId: 'droppableId.timelineProviders.timeline-1.group.0',
           index: moveProviderFromSourceIndex,
@@ -480,7 +482,7 @@ describe('helpers', () => {
             droppableId: 'droppableId.timelineProviders.timeline-1.group.1',
             index: moveProviderToDestinationIndex,
           };
-          const dispatch = jest.fn();
+          const dispatch = vi.fn();
           const source = {
             droppableId: 'droppableId.timelineProviders.timeline-1.group.0',
             index: moveProviderFromSourceIndex,
@@ -526,7 +528,7 @@ describe('helpers', () => {
             droppableId: 'droppableId.timelineProviders.timeline-1.group.1',
             index: moveProviderToDestinationIndex,
           };
-          const dispatch = jest.fn();
+          const dispatch = vi.fn();
           const source = {
             droppableId: 'droppableId.timelineProviders.timeline-1.group.0',
             index: moveProviderFromSourceIndex,
@@ -572,7 +574,7 @@ describe('helpers', () => {
         droppableId: 'droppableId.timelineProviders.timeline-1.group.1',
         index: 0,
       };
-      const dispatch = jest.fn();
+      const dispatch = vi.fn();
       const source = {
         droppableId: 'droppableId.timelineProviders.timeline-1.group.1234', // <-- invalid sourceGroupIndex
         index: 0,
@@ -595,7 +597,7 @@ describe('helpers', () => {
         droppableId: 'droppableId.timelineProviders.timeline-1.group.1234', // <-- invalid destinationGroupIndex
         index: 0,
       };
-      const dispatch = jest.fn();
+      const dispatch = vi.fn();
       const source = {
         droppableId: 'droppableId.timelineProviders.timeline-1.group.0',
         index: 0,
@@ -615,8 +617,8 @@ describe('helpers', () => {
 
   describe('addProviderToEmptyTimeline', () => {
     test('it dispatches the expected action', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
       const providerToAdd = { ...providerA, and: [] };
 
       addProviderToEmptyTimeline({
@@ -646,8 +648,8 @@ describe('helpers', () => {
     });
 
     test('it invokes onAddedToTimeline with the name of the provider', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
       const providerToAdd = { ...providerA, and: [] };
 
       addProviderToEmptyTimeline({
@@ -667,7 +669,7 @@ describe('helpers', () => {
         droppableId: 'droppableId.timelineProviders.timeline-1.group.1234', // <-- invalid destination group
         index: 1,
       };
-      const dispatch = jest.fn();
+      const dispatch = vi.fn();
       const source = {
         index: 0,
         droppableId: 'droppableId.timelineProviders.timeline-1.group.0',
@@ -689,7 +691,7 @@ describe('helpers', () => {
         droppableId: 'droppableId.timelineProviders.timeline-1.group.0',
         index: 1,
       };
-      const dispatch = jest.fn();
+      const dispatch = vi.fn();
       const source = {
         index: 0,
         droppableId: 'droppableId.timelineProviders.timeline-1.group.0',
@@ -770,7 +772,7 @@ describe('helpers', () => {
         droppableId: 'droppableId.timelineProviders.timeline-1.group.1',
         index: 0,
       };
-      const dispatch = jest.fn();
+      const dispatch = vi.fn();
       const source = {
         index: 0,
         droppableId: 'droppableId.timelineProviders.timeline-1.group.0',
@@ -856,8 +858,8 @@ describe('helpers', () => {
     const providerToAdd = { ...providerB, and: [] };
 
     test('it does NOT dispatch an action when destination is undefined', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
 
       addProviderToGroup({
         dataProviders,
@@ -872,8 +874,8 @@ describe('helpers', () => {
     });
 
     test('it does NOT invoke onAddedToTimeline when destination undefined', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
 
       addProviderToGroup({
         dataProviders,
@@ -888,8 +890,8 @@ describe('helpers', () => {
     });
 
     test('it does NOT dispatch an action when destination is invalid', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
 
       addProviderToGroup({
         dataProviders,
@@ -907,8 +909,8 @@ describe('helpers', () => {
     });
 
     test('it does NOT invoke onAddedToTimeline when destination is invalid', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
 
       addProviderToGroup({
         dataProviders,
@@ -926,8 +928,8 @@ describe('helpers', () => {
     });
 
     test('it dispatches the UPDATE_PROVIDERS action with the expected values', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
 
       addProviderToGroup({
         dataProviders,
@@ -967,8 +969,8 @@ describe('helpers', () => {
     });
 
     test('it invokes onAddedToTimeline with the expected provider name', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
 
       addProviderToGroup({
         dataProviders,
@@ -991,8 +993,8 @@ describe('helpers', () => {
       const destination = { droppableId: 'droppableId.timelineProviders.timeline-1', index: 0 };
 
       test('it dispatches the UPDATE_PROVIDERS action with the expected values when the timeline is empty', () => {
-        const dispatch = jest.fn();
-        const onAddedToTimeline = jest.fn();
+        const dispatch = vi.fn();
+        const onAddedToTimeline = vi.fn();
 
         addContentToTimeline({
           dataProviders,
@@ -1023,8 +1025,8 @@ describe('helpers', () => {
       });
 
       test('it invokes onAddedToTimeline with the expected provider name when the timeline is empty', () => {
-        const dispatch = jest.fn();
-        const onAddedToTimeline = jest.fn();
+        const dispatch = vi.fn();
+        const onAddedToTimeline = vi.fn();
 
         addContentToTimeline({
           dataProviders,
@@ -1047,8 +1049,8 @@ describe('helpers', () => {
       };
 
       test('it dispatches the UPDATE_PROVIDERS action with the expected values when the timeline is NON-empty', () => {
-        const dispatch = jest.fn();
-        const onAddedToTimeline = jest.fn();
+        const dispatch = vi.fn();
+        const onAddedToTimeline = vi.fn();
 
         addContentToTimeline({
           dataProviders,
@@ -1088,8 +1090,8 @@ describe('helpers', () => {
       });
 
       test('it invokes onAddedToTimeline with the expected provider name when the timeline is NON-empty', () => {
-        const dispatch = jest.fn();
-        const onAddedToTimeline = jest.fn();
+        const dispatch = vi.fn();
+        const onAddedToTimeline = vi.fn();
 
         addContentToTimeline({
           dataProviders,

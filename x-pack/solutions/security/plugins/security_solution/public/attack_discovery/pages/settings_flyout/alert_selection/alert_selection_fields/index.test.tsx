@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -15,24 +18,30 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from '../translations';
 
-jest.mock('react-router', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('react-router', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   connectorId: 'test-connector',
-  filterManager: jest.fn() as unknown as FilterManager,
-  onConnectorIdSelected: jest.fn(),
-  onSettingsChanged: jest.fn(),
+  filterManager: vi.fn() as unknown as FilterManager,
+  onConnectorIdSelected: vi.fn(),
+  onSettingsChanged: vi.fn(),
   settings: {
     end: '2024-10-01T00:00:00.000Z',
     filters: [],
@@ -43,12 +52,12 @@ const defaultProps = {
   showConnectorSelector: true,
 };
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseDataView = useDataView as MockedFunction<typeof useDataView>;
 
 describe('AlertSelectionFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -61,12 +70,12 @@ describe('AlertSelectionFields', () => {
           },
         },
       },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    } as unknown as Mocked<ReturnType<typeof useKibana>>);
 
     mockUseDataView.mockReturnValue({
       dataView: { id: 'security', title: 'security' },
       status: 'ready',
-    } as unknown as jest.Mocked<ReturnType<typeof useDataView>>);
+    } as unknown as Mocked<ReturnType<typeof useDataView>>);
   });
 
   it('renders the alertSelectionFields form', () => {

@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { writeFile, exists } from './fs';
 import { writePidFile } from './write_pid_file';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-jest.mock('./fs', () => ({
-  writeFile: jest.fn(),
-  exists: jest.fn(),
-}));
+vi.mock('./fs', () => {
+      const mocked = {
+      writeFile: vi.fn(),
+      exists: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const writeFileMock = writeFile as jest.MockedFunction<typeof writeFile>;
-const existsMock = exists as jest.MockedFunction<typeof exists>;
+const writeFileMock = writeFile as MockedFunction<typeof writeFile>;
+const existsMock = exists as MockedFunction<typeof exists>;
 
 const pid = String(process.pid);
 
@@ -26,14 +32,14 @@ describe('writePidFile', () => {
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    jest.spyOn(process, 'once');
+    vi.spyOn(process, 'once');
 
     writeFileMock.mockImplementation(() => Promise.resolve());
     existsMock.mockImplementation(() => Promise.resolve(false));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const allLogs = () =>

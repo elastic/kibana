@@ -5,28 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useLatestStats } from './use_latest_stats';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useLatestStats as useLatestStatsBase } from '../../../common/service';
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/service', () => ({
-  useLatestStats: jest.fn(),
-}));
+vi.mock('../../../common/service', () => {
+      const mocked = {
+      useLatestStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
-const useLatestStatsBaseMock = useLatestStatsBase as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useLatestStatsBaseMock = useLatestStatsBase as Mock;
 
 describe('useLatestStats', () => {
-  const refreshStats = jest.fn();
-  const addError = jest.fn();
+  const refreshStats = vi.fn();
+  const addError = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         siemMigrations: {

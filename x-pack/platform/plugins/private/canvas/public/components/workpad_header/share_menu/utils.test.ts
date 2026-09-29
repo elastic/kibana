@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('../../../../common/lib/fetch');
+import { vi } from 'vitest';
+
+vi.mock('../../../../common/lib/fetch');
 
 import { getPdfJobParams } from './utils';
 import { workpads } from '../../../../__fixtures__/workpads';

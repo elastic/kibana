@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type ReactNode } from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -23,63 +25,99 @@ import { getColumns } from '../../tools/prevalence/utils/get_columns';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
-  useRuleWithFallback: jest.fn(),
-}));
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(),
-}));
-jest.mock('../../tools/prevalence/utils/get_columns', () => ({
-  ...jest.requireActual('../../tools/prevalence/utils/get_columns'),
-  getColumns: jest.fn(),
-}));
-jest.mock('../../tools/correlations', () => ({
-  CorrelationsDetails: () => null,
-}));
-jest.mock('../../../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('./correlations_overview', () => ({
-  CorrelationsOverview: ({
-    onShowCorrelationsDetails,
-  }: {
-    onShowCorrelationsDetails: () => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="correlationsOverviewMock"
-      onClick={onShowCorrelationsDetails}
-    >
-      {'Show correlations'}
-    </button>
-  ),
-}));
-jest.mock('./prevalence_overview', () => ({
-  PrevalenceOverview: ({ onShowPrevalenceDetails }: { onShowPrevalenceDetails: () => void }) => (
-    <button type="button" data-test-subj="prevalenceOverviewMock" onClick={onShowPrevalenceDetails}>
-      {'Show prevalence'}
-    </button>
-  ),
-}));
-jest.mock('./threat_intelligence_overview', () => ({
-  ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
-}));
-jest.mock('./entities_overview', () => ({
-  EntitiesOverview: ({ onShowEntitiesDetails }: { onShowEntitiesDetails: () => void }) => (
-    <button type="button" data-test-subj="entitiesOverviewMock" onClick={onShowEntitiesDetails}>
-      {'Show entities'}
-    </button>
-  ),
-}));
-jest.mock('../../tools/entities', () => ({
-  EntityDetails: () => null,
-}));
+vi.mock('../../../shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
+      const mocked = {
+      useRuleWithFallback: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../tools/prevalence/utils/get_columns', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../tools/prevalence/utils/get_columns')),
+      getColumns: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../tools/correlations', () => {
+      const mocked = {
+      CorrelationsDetails: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./correlations_overview', () => {
+      const mocked = {
+      CorrelationsOverview: ({
+        onShowCorrelationsDetails,
+      }: {
+        onShowCorrelationsDetails: () => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="correlationsOverviewMock"
+          onClick={onShowCorrelationsDetails}
+        >
+          {'Show correlations'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./prevalence_overview', () => {
+      const mocked = {
+      PrevalenceOverview: ({ onShowPrevalenceDetails }: { onShowPrevalenceDetails: () => void }) => (
+        <button type="button" data-test-subj="prevalenceOverviewMock" onClick={onShowPrevalenceDetails}>
+          {'Show prevalence'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./threat_intelligence_overview', () => {
+      const mocked = {
+      ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./entities_overview', () => {
+      const mocked = {
+      EntitiesOverview: ({ onShowEntitiesDetails }: { onShowEntitiesDetails: () => void }) => (
+        <button type="button" data-test-subj="entitiesOverviewMock" onClick={onShowEntitiesDetails}>
+          {'Show entities'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../tools/entities', () => {
+      const mocked = {
+      EntityDetails: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -96,8 +134,8 @@ const nonAlertMockHit = createMockHit({
   'event.kind': 'event',
   'signal.rule.id': 'rule-2',
 });
-const onAlertUpdated = jest.fn();
-const mockRenderCellActions = jest.fn(({ children }) => <>{children}</>);
+const onAlertUpdated = vi.fn();
+const mockRenderCellActions = vi.fn(({ children }) => <>{children}</>);
 
 /**
  * `overlays.openSystemFlyout` is mocked (see `mockOpenSystemFlyout`), so the flyout content it
@@ -127,14 +165,14 @@ const findElementWithProp = (node: ReactNode, propName: string): React.ReactElem
 };
 
 describe('InsightsSection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
-  const mockUseRuleWithFallback = jest.mocked(useRuleWithFallback);
-  const mockUseKibana = jest.mocked(useKibana);
-  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
-  const mockGetColumns = jest.mocked(getColumns);
+  const mockUseExpandSection = vi.mocked(useExpandSection);
+  const mockUseRuleWithFallback = vi.mocked(useRuleWithFallback);
+  const mockUseKibana = vi.mocked(useKibana);
+  const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);
+  const mockGetColumns = vi.mocked(getColumns);
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
-  const mockOpenSystemFlyout = jest.fn();
+  const mockOpenSystemFlyout = vi.fn();
 
   const renderInsightsSection = (hit = alertMockHit) =>
     render(
@@ -152,7 +190,7 @@ describe('InsightsSection', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseExpandSection.mockReturnValue(true);
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseRuleWithFallback.mockReturnValue({
@@ -163,14 +201,14 @@ describe('InsightsSection', () => {
       },
     } as unknown as ReturnType<typeof useRuleWithFallback>);
     mockGetColumns.mockReturnValue([]);
-    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
           openSystemFlyout: mockOpenSystemFlyout,
         },
-        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
-        telemetry: { reportEvent: jest.fn() },
+        storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });

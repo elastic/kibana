@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getStepStatus, checkTemplateExists } from './utils';
 import { getTemplate } from './api/api';
 
-jest.mock('./api/api');
+vi.mock('./api/api');
 
 describe('utils', () => {
   describe('getStepStatus', () => {
@@ -27,11 +30,11 @@ describe('utils', () => {
 
   describe('checkTemplateExists', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns true when getTemplate resolves', async () => {
-      (getTemplate as jest.Mock).mockResolvedValue({ templateId: 'test-id' });
+      (getTemplate as Mock).mockResolvedValue({ templateId: 'test-id' });
 
       const result = await checkTemplateExists('test-id');
 
@@ -40,7 +43,7 @@ describe('utils', () => {
     });
 
     it('returns false when getTemplate rejects', async () => {
-      (getTemplate as jest.Mock).mockRejectedValue(new Error('Not found'));
+      (getTemplate as Mock).mockRejectedValue(new Error('Not found'));
 
       const result = await checkTemplateExists('missing-id');
 

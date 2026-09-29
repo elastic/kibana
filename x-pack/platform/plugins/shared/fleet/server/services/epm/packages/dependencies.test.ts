@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { InstallablePackage } from '../../../../common/types';
 
 import { appContextService } from '../../app_context';
 
 import { getPackageDependencies, mergeIsDependencyOf } from './dependencies';
 
-jest.mock('../../app_context');
+vi.mock('../../app_context');
 
 describe('getPackageDependencies', () => {
-  const mockGetExperimentalFeatures = jest.mocked(appContextService.getExperimentalFeatures);
+  const mockGetExperimentalFeatures = vi.mocked(appContextService.getExperimentalFeatures);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null when enableResolveDependencies is false', () => {

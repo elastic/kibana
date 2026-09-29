@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type {
   FindExceptionListItemOptions,
   FindExceptionListsItemOptions,
@@ -27,7 +29,7 @@ describe('Artifacts: setFindRequestFilterScopeToActiveSpace()', () => {
 
     (
       endpointAppContextServices.getInternalFleetServices()
-        .packagePolicy as jest.Mocked<PackagePolicyClient>
+        .packagePolicy as Mocked<PackagePolicyClient>
     ).listIds.mockResolvedValue({
       items: ['policy-1', 'policy-2'],
       total: 2,
@@ -94,7 +96,7 @@ describe('Artifacts: setFindRequestFilterScopeToActiveSpace()', () => {
   it('should inject additional filtering when there is no visible policies in active space', async () => {
     (
       endpointAppContextServices.getInternalFleetServices()
-        .packagePolicy as jest.Mocked<PackagePolicyClient>
+        .packagePolicy as Mocked<PackagePolicyClient>
     ).listIds.mockResolvedValue({
       items: [],
       total: 0,

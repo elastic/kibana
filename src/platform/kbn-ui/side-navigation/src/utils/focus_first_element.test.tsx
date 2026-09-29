@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React, { forwardRef } from 'react';
 import { render } from '@testing-library/react';
 
 import { focusFirstElement } from './focus_first_element';
 import { getFocusableElements } from './get_focusable_elements';
 
-jest.mock('./get_focusable_elements');
+vi.mock('./get_focusable_elements');
 
-const mockGetFocusableElements = getFocusableElements as jest.MockedFunction<
+const mockGetFocusableElements = getFocusableElements as MockedFunction<
   typeof getFocusableElements
 >;
 
@@ -32,13 +35,13 @@ describe('focusFirstElement', () => {
     const { container } = render(<Wrapper ref={(el) => (ref.current = el)} />);
 
     const buttons = container.querySelectorAll('button');
-    buttons.forEach((btn) => (btn.focus = jest.fn()));
+    buttons.forEach((btn) => (btn.focus = vi.fn()));
 
     return { ref, buttons };
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does nothing if ref.current is null', () => {

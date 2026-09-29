@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,14 +14,14 @@ import { TestProviders } from '../../../../common/mock';
 import type { Props } from './field_selection';
 import { FieldSelection } from './field_selection';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
 const defaultProps: Props = {
-  setStackByField0: jest.fn(),
-  setStackByField1: jest.fn(),
+  setStackByField0: vi.fn(),
+  setStackByField1: vi.fn(),
   stackByField0: 'kibana.alert.rule.name',
   stackByField1: 'host.name',
   uniqueQueryId: 'alerts-treemap-7cc69a83-1cd0-4d6e-89fa-f9010e9073db',

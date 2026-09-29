@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -24,10 +26,10 @@ const defaultValue: CustomDurationState = {
 };
 
 describe('SnoozeDurationPicker', () => {
-  const onChangeMock = jest.fn();
+  const onChangeMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('mode switching', () => {

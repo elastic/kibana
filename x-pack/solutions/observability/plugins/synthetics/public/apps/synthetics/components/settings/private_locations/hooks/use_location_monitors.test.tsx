@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { createElement } from 'react';
 import * as reactRedux from 'react-redux-v7';
 import { renderHook } from '@testing-library/react';
@@ -13,9 +16,9 @@ import { WrappedHelper } from '../../../../utils/testing';
 import { useLocationMonitors } from './use_location_monitors';
 
 describe('useLocationMonitors', () => {
-  let useSelectorSpy: jest.SpyInstance;
+  let useSelectorSpy: MockInstance;
   beforeEach(() => {
-    useSelectorSpy = jest.spyOn(reactRedux, 'useSelector').mockReturnValue({
+    useSelectorSpy = vi.spyOn(reactRedux, 'useSelector').mockReturnValue({
       locationMonitors: [
         {
           id: 'Private location',
@@ -36,8 +39,8 @@ describe('useLocationMonitors', () => {
   });
 
   it('calls fetch action', () => {
-    const dispatchSpy = jest.fn();
-    jest.spyOn(reactRedux, 'useDispatch').mockReturnValue(dispatchSpy);
+    const dispatchSpy = vi.fn();
+    vi.spyOn(reactRedux, 'useDispatch').mockReturnValue(dispatchSpy);
 
     renderHook(() => useLocationMonitors());
 

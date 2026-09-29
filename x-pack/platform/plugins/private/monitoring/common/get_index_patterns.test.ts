@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DS_INDEX_PATTERN_TYPES } from './constants';
 import type { MonitoringConfig } from '../server';
 import {
@@ -32,7 +34,7 @@ type TestTuple = [DS_INDEX_PATTERN_TYPES | undefined, string];
 describe('Get Index Patterns', () => {
   describe('getIndexPatterns', () => {
     beforeEach(() => {
-      jest.resetModules();
+      vi.resetModules();
     });
     it.each<TestTuple>([
       [undefined, '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.*-*'],

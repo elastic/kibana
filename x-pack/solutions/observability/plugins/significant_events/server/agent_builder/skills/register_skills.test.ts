@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
@@ -39,7 +41,7 @@ const telemetry = {} as EbtTelemetryClient;
 const streamsKIsOnboardingClient = {} as SignificantEventsKIsOnboardingClient;
 const maintenanceService = {} as SignificantEventsMaintenanceService;
 
-const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+const availability = { cacheMode: 'space' as const, handler: vi.fn() };
 
 const createOptions = (
   overrides: Partial<Parameters<typeof registerSignificantEventsSkills>[0]> = {}
@@ -48,10 +50,10 @@ const createOptions = (
   const options = {
     agentBuilder,
     telemetry,
-    getScopedClients: jest.fn(),
+    getScopedClients: vi.fn(),
     maintenanceService,
     logger: loggerMock.create(),
-    isAvailable: jest.fn().mockResolvedValue(true),
+    isAvailable: vi.fn().mockResolvedValue(true),
     availability,
     ...overrides,
   };
@@ -74,7 +76,7 @@ describe('registerSignificantEventsSkills', () => {
 
   it('registers nothing when the availability flag is disabled', async () => {
     const { agentBuilder, options } = createOptions({
-      isAvailable: jest.fn().mockResolvedValue(false),
+      isAvailable: vi.fn().mockResolvedValue(false),
     });
 
     await registerSignificantEventsSkills(options);
@@ -170,7 +172,7 @@ describe('registerSignificantEventsSkills', () => {
   });
 
   it('installs on flip: registers nothing while unavailable, then registers once it becomes available', async () => {
-    const isAvailable = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+    const isAvailable = vi.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
     const { agentBuilder, options } = createOptions({ isAvailable });
 
     const { ensureRegistered } = await registerSignificantEventsSkills(options);
@@ -244,7 +246,7 @@ describe('registerSignificantEventsSkills', () => {
 
   it('serializes concurrent ensureRegistered calls and registers each skill exactly once', async () => {
     // Unavailable on the initial call so registration happens on the concurrent flips below.
-    const isAvailable = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+    const isAvailable = vi.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
     const { agentBuilder, options } = createOptions({
       isAvailable,
       streamsKIsOnboardingClient,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 import {
@@ -109,7 +111,7 @@ describe('attachments_by_type', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('normalizes legacy keys, entity-counts alerts/events and merges both saved objects', async () => {

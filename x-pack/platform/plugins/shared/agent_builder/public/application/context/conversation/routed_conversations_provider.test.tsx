@@ -5,49 +5,72 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { RoutedConversationsProvider } from './routed_conversations_provider';
 import { useConversationContext } from './conversation_context';
 
-const mockUseParams = jest.fn();
-const mockUseLocation = jest.fn();
+const mockUseParams = vi.fn();
+const mockUseLocation = vi.fn();
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => mockUseParams(),
-  useLocation: () => mockUseLocation(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => mockUseParams(),
+      useLocation: () => mockUseLocation(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  useQueryClient: jest.fn(() => ({})),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQueryClient: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: jest.fn(() => ({
-    conversationsService: {},
-  })),
-}));
+vi.mock('../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: vi.fn(() => ({
+        conversationsService: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => ({
-    services: { analytics: { reportEvent: jest.fn() } },
-  })),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({
+        services: { analytics: { reportEvent: vi.fn() } },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_navigation', () => ({
-  useNavigation: jest.fn(() => ({
-    navigateToAgentBuilderUrl: jest.fn(),
-  })),
-}));
+vi.mock('../../hooks/use_navigation', () => {
+      const mocked = {
+      useNavigation: vi.fn(() => ({
+        navigateToAgentBuilderUrl: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_conversation_actions', () => ({
-  useConversationActions: jest.fn(() => ({})),
-}));
+vi.mock('./use_conversation_actions', () => {
+      const mocked = {
+      useConversationActions: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./conversation_change_notifier', () => ({
-  ConversationChangeNotifier: () => null,
-}));
+vi.mock('./conversation_change_notifier', () => {
+      const mocked = {
+      ConversationChangeNotifier: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockAttachment = (): ConversationAttachment => ({
   type: 'test.attachment',

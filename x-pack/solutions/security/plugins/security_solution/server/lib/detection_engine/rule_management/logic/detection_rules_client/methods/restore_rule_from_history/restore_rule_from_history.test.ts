@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { withSpan } from '@kbn/apm-utils';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -21,14 +24,17 @@ import { getMockRulesAuthz } from '../../../../__mocks__/authz';
 import { createPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { restoreRuleFromHistory } from '.';
 
-jest.mock('@kbn/apm-utils', () => ({
-  withSpan: jest.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
-}));
+vi.mock('@kbn/apm-utils', () => {
+      const mocked = {
+      withSpan: vi.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../machine_learning/authz');
-jest.mock('../../../../../../machine_learning/validation');
+vi.mock('../../../../../../machine_learning/authz');
+vi.mock('../../../../../../machine_learning/validation');
 
-const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
 const RULE_ID = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 const CHANGE_ID = 'change-abc-123';
@@ -50,9 +56,9 @@ const RESTORE_DELETED_RULE_SPAN = expect.objectContaining({
 
 describe('restoreRuleFromHistory', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
   const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient();
 
@@ -86,8 +92,8 @@ describe('restoreRuleFromHistory', () => {
     withSpanMock.mockClear();
     rulesClient = rulesClientMock.create();
     actionsClient = {
-      isSystemAction: jest.fn(() => false),
-    } as unknown as jest.Mocked<ActionsClient>;
+      isSystemAction: vi.fn(() => false),
+    } as unknown as Mocked<ActionsClient>;
   });
 
   describe('APM spans', () => {

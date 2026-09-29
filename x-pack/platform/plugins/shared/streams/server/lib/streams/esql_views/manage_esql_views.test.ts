@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getEsqlView, upsertEsqlView, deleteEsqlView } from './manage_esql_views';
 
@@ -12,7 +14,7 @@ describe('manage_esql_views', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getEsqlView', () => {

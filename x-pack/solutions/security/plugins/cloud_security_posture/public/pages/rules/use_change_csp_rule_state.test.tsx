@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -40,15 +42,18 @@ const initialRules = {
   },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: {
-        post: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          http: {
+            post: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const testWrapper = () => {
   const queryClient = new QueryClient({
@@ -59,8 +64,8 @@ const testWrapper = () => {
     },
     // this is needed to avoid the errors in the console that are cause by QueryClient`
     logger: {
-      log: jest.fn(),
-      warn: jest.fn(),
+      log: vi.fn(),
+      warn: vi.fn(),
       error: () => {},
     },
   });
@@ -77,12 +82,12 @@ const testWrapper = () => {
 
 describe('use_change_csp_rule_state', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call http.post with the correct parameters', async () => {
     const appMockRender = testWrapper();
-    const httpPostSpy = jest.spyOn(useKibana().services.http!, 'post');
+    const httpPostSpy = vi.spyOn(useKibana().services.http!, 'post');
 
     const { result } = await renderHook(() => useChangeCspRuleState(), {
       wrapper: appMockRender.wrapper,
@@ -124,9 +129,9 @@ describe('use_change_csp_rule_state', () => {
 
   it('should cancel queries and update query data onMutate', async () => {
     const appMockRender = testWrapper();
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'cancelQueries');
-    const queryClientGetSpy = jest.spyOn(appMockRender.queryClient, 'getQueryData');
-    const mockSetQueryDataSpy = jest.spyOn(appMockRender.queryClient, 'setQueryData');
+    const queryClientSpy = vi.spyOn(appMockRender.queryClient, 'cancelQueries');
+    const queryClientGetSpy = vi.spyOn(appMockRender.queryClient, 'getQueryData');
+    const mockSetQueryDataSpy = vi.spyOn(appMockRender.queryClient, 'setQueryData');
 
     const { result } = await renderHook(() => useChangeCspRuleState(), {
       wrapper: appMockRender.wrapper,
@@ -163,7 +168,7 @@ describe('use_change_csp_rule_state', () => {
 
   it('should invalidate queries onSettled', async () => {
     const appMockRender = testWrapper();
-    const mockInvalidateQueriesSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const mockInvalidateQueriesSpy = vi.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
     const { result } = await renderHook(() => useChangeCspRuleState(), {
       wrapper: appMockRender.wrapper,
@@ -195,7 +200,7 @@ describe('use_change_csp_rule_state', () => {
 
   it('should restore previous query data onError', async () => {
     const appMockRender = testWrapper();
-    const mockSetQueryDataSpy = jest.spyOn(appMockRender.queryClient, 'setQueryData');
+    const mockSetQueryDataSpy = vi.spyOn(appMockRender.queryClient, 'setQueryData');
 
     const { result } = await renderHook(() => useChangeCspRuleState(), {
       wrapper: appMockRender.wrapper,

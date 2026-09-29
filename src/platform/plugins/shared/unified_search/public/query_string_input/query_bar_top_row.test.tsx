@@ -7,20 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockPersistedLogFactory } from '@kbn/kql/public/components/query_string_input/query_string_input.test.mocks';
 
-jest.mock('@kbn/esql/public/kibana_services', () => ({
-  useKibanaServices: jest.fn(() => ({})),
-  untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
-}));
+vi.mock('@kbn/esql/public/kibana_services', () => {
+      const mocked = {
+      useKibanaServices: vi.fn(() => ({})),
+      untilPluginStartServicesReady: vi.fn(() => new Promise(() => {})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/date-range-picker-presets', () => ({
-  useDateRangePickerPresets: jest.fn(() => ({
-    presets: [],
-    onPresetSave: undefined,
-    onPresetDelete: undefined,
-  })),
-}));
+vi.mock('@kbn/date-range-picker-presets', () => {
+      const mocked = {
+      useDateRangePickerPresets: vi.fn(() => ({
+        presets: [],
+        onPresetSave: undefined,
+        onPresetDelete: undefined,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -46,13 +55,13 @@ import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import { DATE_RANGE_PICKER_FEATURE_FLAG } from '@kbn/date-range-picker';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-const mockUseDateRangePickerPresets = useDateRangePickerPresets as jest.Mock;
+const mockUseDateRangePickerPresets = useDateRangePickerPresets as Mock;
 
 const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const mockTimeHistory = {
-  add: () => jest.fn(),
+  add: () => vi.fn(),
   get: () => {
     return [];
   },
@@ -122,20 +131,20 @@ const esqlQuery = {
 };
 
 const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
+  clear: vi.fn(),
+  getItem: vi.fn(),
+  key: vi.fn(),
+  removeItem: vi.fn(),
+  setItem: vi.fn(),
   length: 0,
 });
 
 const createMockStorage = () => ({
   storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 });
 
 function wrapQueryBarTopRowInContext(
@@ -173,7 +182,7 @@ function wrapQueryBarTopRowInContext(
 
 describe('QueryBarTopRowTopRow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useNewDateRangePickerFlag = true;
     usePresetPersistenceFlag = true;
   });
@@ -222,7 +231,7 @@ describe('QueryBarTopRowTopRow', () => {
             indexPatterns: [stubIndexPattern],
             timeHistory: mockTimeHistory,
             isLoading: true,
-            onCancel: jest.fn(),
+            onCancel: vi.fn(),
             submitButtonStyle: 'withText',
             useBackgroundSearchButton: value,
           })
@@ -252,7 +261,7 @@ describe('QueryBarTopRowTopRow', () => {
           dateRangeTo: 'now',
           esqlApproximation: {
             isApproximate: false,
-            onChange: jest.fn(),
+            onChange: vi.fn(),
           },
         },
         { servicesOverride: { licensing } }
@@ -287,7 +296,7 @@ describe('QueryBarTopRowTopRow', () => {
           showDatePicker: { disabled: true, disabledReason },
           esqlApproximation: {
             isApproximate: false,
-            onChange: jest.fn(),
+            onChange: vi.fn(),
             disabledReason,
           },
         },
@@ -314,7 +323,7 @@ describe('QueryBarTopRowTopRow', () => {
         it('should call the submit callback', async () => {
           // Given
           const user = userEvent.setup();
-          const onSubmit = jest.fn();
+          const onSubmit = vi.fn();
 
           // When
           const { getByTestId } = render(
@@ -375,7 +384,7 @@ describe('QueryBarTopRowTopRow', () => {
         it('should call the cancel callback', async () => {
           // Given
           const user = userEvent.setup();
-          const onCancel = jest.fn();
+          const onCancel = vi.fn();
 
           // When
           const { getByTestId } = render(
@@ -404,7 +413,7 @@ describe('QueryBarTopRowTopRow', () => {
         it('should call the send to background callback', async () => {
           // Given
           const user = userEvent.setup();
-          const onSendToBackground = jest.fn();
+          const onSendToBackground = vi.fn();
 
           // When
           const { getByTestId } = render(
@@ -416,7 +425,7 @@ describe('QueryBarTopRowTopRow', () => {
                 indexPatterns: [stubIndexPattern],
                 timeHistory: mockTimeHistory,
                 isLoading,
-                onCancel: jest.fn(),
+                onCancel: vi.fn(),
                 onSendToBackground,
                 useBackgroundSearchButton: true,
               },
@@ -591,7 +600,7 @@ describe('QueryBarTopRowTopRow', () => {
 
   describe('draft', () => {
     it('should call onDraftChange when in dirty state', async () => {
-      const onDraftChange = jest.fn();
+      const onDraftChange = vi.fn();
       const state = {
         query: kqlQuery,
         dateRangeFrom: 'now-7d',
@@ -612,7 +621,7 @@ describe('QueryBarTopRowTopRow', () => {
     });
 
     it('should call onDraftChange when in dirty state and no date picker', async () => {
-      const onDraftChange = jest.fn();
+      const onDraftChange = vi.fn();
       const state = {
         query: kqlQuery,
         dateRangeFrom: 'now-7d',
@@ -638,7 +647,7 @@ describe('QueryBarTopRowTopRow', () => {
     });
 
     it('should call onDraftChange with empty draft when in normal state', async () => {
-      const onDraftChange = jest.fn();
+      const onDraftChange = vi.fn();
       const state = {
         query: kqlQuery,
         dateRangeFrom: 'now-7d',
@@ -659,7 +668,7 @@ describe('QueryBarTopRowTopRow', () => {
     });
 
     it('should call onDraftChange only once even if unmounted', async () => {
-      const onDraftChange = jest.fn();
+      const onDraftChange = vi.fn();
       const state = {
         query: kqlQuery,
         dateRangeFrom: 'now-7d',
@@ -1142,7 +1151,7 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   describe('auto-refresh-only mode (new picker)', () => {
-    const renderAutoRefreshOnly = (onRefreshChange: jest.Mock) =>
+    const renderAutoRefreshOnly = (onRefreshChange: Mock) =>
       render(
         wrapQueryBarTopRowInContext({
           isDirty: false,
@@ -1160,7 +1169,7 @@ describe('QueryBarTopRowTopRow', () => {
     });
 
     it('renders the picker readOnly with an operable play/pause button even when refresh starts paused', async () => {
-      renderAutoRefreshOnly(jest.fn());
+      renderAutoRefreshOnly(vi.fn());
 
       await waitFor(() => {
         // Time filter is off: hidden marker present, control inert.
@@ -1172,7 +1181,7 @@ describe('QueryBarTopRowTopRow', () => {
     });
 
     it('starts the refresh timer when the play button is clicked', async () => {
-      const onRefreshChange = jest.fn();
+      const onRefreshChange = vi.fn();
       renderAutoRefreshOnly(onRefreshChange);
 
       await waitFor(() => {
@@ -1202,7 +1211,7 @@ describe('SharingMetaFields', () => {
   });
 
   it('Should convert to absolute correctly', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2024-10-21T10:19:31.254Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2024-10-21T10:19:31.254Z'));
 
     const from = 'now-1d/d';
     const to = 'now-1d/d';
@@ -1220,7 +1229,7 @@ describe('SharingMetaFields', () => {
 
   it('Should render the component without data-shared-timefilter-duration if time is not set correctly', () => {
     // Mock console.warn to suppress moment.js warnings about invalid date format
-    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation();
 
     const { getByTestId } = render(
       <SharingMetaFields from="boom" to="now" dateFormat="MMM D, YYYY @ HH:mm:ss.SSS" />

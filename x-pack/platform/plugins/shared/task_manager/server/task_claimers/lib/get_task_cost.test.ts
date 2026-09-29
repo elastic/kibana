@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { getTaskCost } from './get_task_cost';
 import type { ConcreteTaskInstance } from '../../task';
@@ -42,11 +44,11 @@ taskDefinitions.registerTaskDefinitions({
   limitedTaskTypeWithCost: {
     title: 'Limited Concurrency Task Type with Cost',
     cost: TaskCost.Tiny,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   taskType1: {
     title: 'Task Type 1',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
 });
 

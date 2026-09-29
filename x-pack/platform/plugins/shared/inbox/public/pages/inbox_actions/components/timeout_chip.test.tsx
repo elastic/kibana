@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TimeoutChip } from './timeout_chip';
 
 describe('TimeoutChip', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-04-24T12:00:00Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-24T12:00:00Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders nothing when no timeout and not expired', () => {

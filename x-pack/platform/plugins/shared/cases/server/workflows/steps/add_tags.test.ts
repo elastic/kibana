@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
 import { addTagsStepDefinition } from './add_tags';
@@ -18,11 +20,11 @@ describe('addTagsStepDefinition', () => {
     const inputTags = ['triage', 'coke'];
     const mergedTags = ['coke', 'pepsi', 'triage'];
     const currentCase = { ...createCaseResponseFixture, tags: ['coke', 'pepsi'] };
-    const get = jest.fn().mockResolvedValue(currentCase);
-    const bulkUpdate = jest
+    const get = vi.fn().mockResolvedValue(currentCase);
+    const bulkUpdate = vi
       .fn()
       .mockResolvedValue([{ ...createCaseResponseFixture, tags: mergedTags }]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = addTagsStepDefinition(getCasesClient);

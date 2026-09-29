@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
@@ -19,7 +21,7 @@ const defaultDefinition: PublicStepDefinition = {
   category: StepCategory.Kibana,
   label: 'My Custom Step',
   description: 'A custom step implementation',
-  icon: jest.fn(),
+  icon: vi.fn(),
   inputSchema: z.object({ name: z.string() }),
   outputSchema: z.object({ name: z.string() }),
 };
@@ -125,7 +127,7 @@ describe('PublicStepRegistry', () => {
     });
 
     it('should not resolve loader until whenReady is called', async () => {
-      const mockLoader = jest.fn().mockResolvedValue(defaultDefinition);
+      const mockLoader = vi.fn().mockResolvedValue(defaultDefinition);
       registry.register(mockLoader);
 
       expect(registry.has(stepId)).toBe(false);

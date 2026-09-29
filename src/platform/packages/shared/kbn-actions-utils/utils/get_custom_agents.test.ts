@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Agent as HttpsAgent } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
@@ -15,8 +17,8 @@ import { getCustomAgents } from './get_custom_agents';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from './types';
 
 const logger = {
-  debug: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const targetHost = 'elastic.co';
@@ -30,7 +32,7 @@ const defaultSSLSettings = {
 
 describe('getCustomAgents', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('get agents for valid proxy URL', () => {
@@ -53,7 +55,7 @@ describe('getCustomAgents', () => {
   });
 
   test('passes target SSL overrides to the CONNECT-upgraded TLS request', async () => {
-    const connectSpy = jest
+    const connectSpy = vi
       .spyOn(HttpsProxyAgent.prototype, 'connect')
       .mockResolvedValue({} as Awaited<ReturnType<HttpsProxyAgent<string>['connect']>>);
     const proxySettings = {

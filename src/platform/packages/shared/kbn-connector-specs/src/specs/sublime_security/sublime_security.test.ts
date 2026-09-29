@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { SublimeSecurityConnector } from './sublime_security';
@@ -17,18 +20,18 @@ const BASE_URL = 'https://platform.sublime.security';
 
 describe('SublimeSecurityConnector', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-  } as unknown as jest.Mocked<AxiosInstance>;
+    get: vi.fn(),
+    post: vi.fn(),
+  } as unknown as Mocked<AxiosInstance>;
 
   const mockContext = {
     client: mockClient,
     config: { baseUrl: BASE_URL },
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {
@@ -107,7 +110,7 @@ describe('SublimeSecurityConnector', () => {
     };
 
     it('maps camelCase inputs to the Sublime query params', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { total: 1, count: 1, message_groups: [rawGroup] },
       });
 
@@ -133,7 +136,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('maps mailboxEmail to the mailbox_email__is query param', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { total: 0, count: 0, message_groups: [] },
       });
 
@@ -143,7 +146,7 @@ describe('SublimeSecurityConnector', () => {
         offset: 0,
       });
 
-      const [, options] = (mockClient.get as jest.Mock).mock.calls[0];
+      const [, options] = (mockClient.get as Mock).mock.calls[0];
       expect(options.params.mailbox_email__is).toBe('user@corp.example');
     });
 
@@ -165,7 +168,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('preserves stats_limit_exceeded so callers can page past a lower-bound total', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { total: 10000, count: 20, stats_limit_exceeded: true, message_groups: [] },
       });
 
@@ -179,7 +182,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('trims groups to summaries with at most 5 sample messages and no organization_id', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { total: 1, count: 1, message_groups: [rawGroup] },
       });
 
@@ -211,7 +214,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('defaults flagged=true and a 30-day time anchor when neither is provided', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { total: 0, count: 0, message_groups: [] },
       });
 
@@ -220,14 +223,14 @@ describe('SublimeSecurityConnector', () => {
         offset: 0,
       });
 
-      const [, options] = (mockClient.get as jest.Mock).mock.calls[0];
+      const [, options] = (mockClient.get as Mock).mock.calls[0];
       expect(options.params.flagged).toBe(true);
       expect(options.params.created_at__gte).toEqual(expect.any(String));
       expect(new Date(options.params.created_at__gte).getTime()).toBeLessThan(Date.now());
     });
 
     it('does not force flagged when userReported is set', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { total: 0, count: 0, message_groups: [] },
       });
 
@@ -237,13 +240,13 @@ describe('SublimeSecurityConnector', () => {
         offset: 0,
       });
 
-      const [, options] = (mockClient.get as jest.Mock).mock.calls[0];
+      const [, options] = (mockClient.get as Mock).mock.calls[0];
       expect(options.params.flagged).toBeUndefined();
       expect(options.params.user_reported).toBe(true);
     });
 
     it('surfaces the vendor error payload and request id', async () => {
-      (mockClient.get as jest.Mock).mockRejectedValue({
+      (mockClient.get as Mock).mockRejectedValue({
         response: {
           status: 401,
           data: { message: 'invalid api key' },
@@ -264,7 +267,7 @@ describe('SublimeSecurityConnector', () => {
 
   describe('getMessageGroup', () => {
     it('encodes the id and returns counts for reports and link clicks', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: {
           id: 'grp/1',
           state: 'flagged',
@@ -287,7 +290,7 @@ describe('SublimeSecurityConnector', () => {
 
   describe('getMessage', () => {
     it('returns selected metadata fields only', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: {
           id: 'msg-1',
           canonical_id: 'canon-1',
@@ -311,7 +314,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('reconstructs sender explicitly instead of passing it through raw', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: {
           id: 'msg-1',
           sender: {
@@ -335,7 +338,7 @@ describe('SublimeSecurityConnector', () => {
 
   describe('getAttackScore', () => {
     it('returns score, verdict, and trimmed top signals', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: {
           score: 97.2,
           verdict: 'malicious',
@@ -362,7 +365,7 @@ describe('SublimeSecurityConnector', () => {
 
   describe('getAsaVerdict', () => {
     it('returns the verdict when ASA has triaged the message', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: { verdict: 'malicious' } });
+      (mockClient.get as Mock).mockResolvedValue({ data: { verdict: 'malicious' } });
 
       const result = await SublimeSecurityConnector.actions.getAsaVerdict.handler(mockContext, {
         messageId: 'msg-1',
@@ -373,7 +376,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('returns triaged: false instead of throwing on 404', async () => {
-      (mockClient.get as jest.Mock).mockRejectedValue({
+      (mockClient.get as Mock).mockRejectedValue({
         response: { status: 404, data: { error: { type: 'not_found' } }, headers: {} },
       });
 
@@ -385,7 +388,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('still throws on non-404 errors', async () => {
-      (mockClient.get as jest.Mock).mockRejectedValue({
+      (mockClient.get as Mock).mockRejectedValue({
         response: { status: 500, data: 'boom', headers: {} },
       });
 
@@ -401,7 +404,7 @@ describe('SublimeSecurityConnector', () => {
     ['restoreMessageGroups', 'restore'],
   ] as const)('%s', (actionName, apiPath) => {
     it('posts the bulk body and returns the task id', async () => {
-      (mockClient.post as jest.Mock).mockResolvedValue({ data: { task_id: 'task-9' } });
+      (mockClient.post as Mock).mockResolvedValue({ data: { task_id: 'task-9' } });
 
       const result = await SublimeSecurityConnector.actions[actionName].handler(mockContext, {
         messageGroupIds: ['grp-1', 'grp-2'],
@@ -418,7 +421,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('omits optional fields that are not provided', async () => {
-      (mockClient.post as jest.Mock).mockResolvedValue({ data: { task_id: 'task-10' } });
+      (mockClient.post as Mock).mockResolvedValue({ data: { task_id: 'task-10' } });
 
       await SublimeSecurityConnector.actions[actionName].handler(mockContext, {
         messageGroupIds: ['grp-1'],
@@ -432,7 +435,7 @@ describe('SublimeSecurityConnector', () => {
 
   describe('listMailboxes', () => {
     it('lists mailboxes with trimmed fields', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: {
           total: 2,
           count: 2,
@@ -472,7 +475,7 @@ describe('SublimeSecurityConnector', () => {
 
   describe('getTask', () => {
     it('returns the task state', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { id: 'task-9', state: 'succeeded', created_at: '2026-07-14T15:09:26Z' },
       });
 
@@ -490,7 +493,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('fails when the task response is missing id or state', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { id: 'task-9' },
       });
 
@@ -498,7 +501,7 @@ describe('SublimeSecurityConnector', () => {
         SublimeSecurityConnector.actions.getTask.handler(mockContext, { taskId: 'task-9' })
       ).rejects.toThrow('unexpected task response for task task-9: missing state');
 
-      (mockClient.get as jest.Mock).mockResolvedValue({
+      (mockClient.get as Mock).mockResolvedValue({
         data: { state: 'succeeded' },
       });
 
@@ -514,7 +517,7 @@ describe('SublimeSecurityConnector', () => {
         ...mockContext,
         config: { baseUrl: `${BASE_URL}///` },
       } as unknown as ActionContext;
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: { id: 'task-9', state: 'pending' } });
+      (mockClient.get as Mock).mockResolvedValue({ data: { id: 'task-9', state: 'pending' } });
 
       await SublimeSecurityConnector.actions.getTask.handler(slashContext, { taskId: 'task-9' });
 
@@ -527,7 +530,7 @@ describe('SublimeSecurityConnector', () => {
 
     it('is enabled and lists one mailbox on success', async () => {
       expect(testSpec.enabled).toBe(true);
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: { mailboxes: [], total: 0 } });
+      (mockClient.get as Mock).mockResolvedValue({ data: { mailboxes: [], total: 0 } });
 
       const result = await testSpec.handler(mockContext);
 
@@ -538,7 +541,7 @@ describe('SublimeSecurityConnector', () => {
     });
 
     it('throws on failure', async () => {
-      (mockClient.get as jest.Mock).mockRejectedValue({
+      (mockClient.get as Mock).mockRejectedValue({
         response: { status: 401, data: 'unauthorized', headers: {} },
       });
 

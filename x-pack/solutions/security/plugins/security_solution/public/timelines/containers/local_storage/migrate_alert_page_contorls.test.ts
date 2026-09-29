@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { NewFormatExplicitInput } from './migrate_alert_page_controls';
 import {
@@ -240,7 +242,7 @@ const storage = new Storage(localStorage);
 
 const mockPlugins = {
   spaces: {
-    getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+    getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
   },
 } as unknown as StartPlugins;
 
@@ -251,7 +253,7 @@ describe('migrateAlertPageControlsTo816', () => {
   describe('Default space', () => {
     beforeEach(() => {
       if (mockPlugins.spaces?.getActiveSpace) {
-        mockPlugins.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
+        mockPlugins.spaces.getActiveSpace = vi.fn().mockResolvedValue({ id: 'default' });
       }
     });
     it('should migrate the old format to the new format', async () => {
@@ -298,7 +300,7 @@ describe('migrateAlertPageControlsTo816', () => {
     const nonDefaultSpaceId = 'space1';
     beforeEach(() => {
       if (mockPlugins.spaces?.getActiveSpace) {
-        mockPlugins.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: nonDefaultSpaceId });
+        mockPlugins.spaces.getActiveSpace = vi.fn().mockResolvedValue({ id: nonDefaultSpaceId });
       }
     });
     it('should migrate the old format to the new format', async () => {

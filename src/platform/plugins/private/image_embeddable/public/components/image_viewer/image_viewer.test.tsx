@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ImageViewer } from './image_viewer';
 import { ImageViewerContext } from './image_viewer_context';
 import type { ImageConfig } from '../../types';
 
-const validateUrl = jest.fn(() => ({ isValid: true }));
+const validateUrl = vi.fn(() => ({ isValid: true }));
 
 beforeEach(() => {
   validateUrl.mockImplementation(() => ({ isValid: true }));

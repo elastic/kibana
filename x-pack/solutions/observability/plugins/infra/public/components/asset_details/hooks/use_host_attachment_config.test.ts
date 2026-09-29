@@ -5,36 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHostAttachmentConfig } from './use_host_attachment_config';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useDatePickerContext } from './use_date_picker';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('./use_asset_details_render_props');
-jest.mock('./use_date_picker');
+vi.mock('../../../hooks/use_kibana');
+vi.mock('./use_asset_details_render_props');
+vi.mock('./use_date_picker');
 
-const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
+const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
 const useAssetDetailsRenderPropsContextMock =
-  useAssetDetailsRenderPropsContext as jest.MockedFunction<
+  useAssetDetailsRenderPropsContext as MockedFunction<
     typeof useAssetDetailsRenderPropsContext
   >;
-const useDatePickerContextMock = useDatePickerContext as jest.MockedFunction<
+const useDatePickerContextMock = useDatePickerContext as MockedFunction<
   typeof useDatePickerContext
 >;
 
-const mockSetAgentBuilderChatConfig = jest.fn();
-const mockClearAgentBuilderChatConfig = jest.fn();
+const mockSetAgentBuilderChatConfig = vi.fn();
+const mockClearAgentBuilderChatConfig = vi.fn();
 
 const mockAgentBuilder = {
   setChatConfig: mockSetAgentBuilderChatConfig,
   clearChatConfig: mockClearAgentBuilderChatConfig,
 };
 
-const mockGetParsedDateRange = jest.fn().mockReturnValue({
+const mockGetParsedDateRange = vi.fn().mockReturnValue({
   from: '2024-01-01T00:00:00.000Z',
   to: '2024-01-02T00:00:00.000Z',
 });
@@ -77,7 +80,7 @@ const setupMocks = (overrides: SetupMocksOptions = {}) => {
 
 describe('useHostAttachmentConfig', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not configure attachment when agentBuilder is not available', () => {

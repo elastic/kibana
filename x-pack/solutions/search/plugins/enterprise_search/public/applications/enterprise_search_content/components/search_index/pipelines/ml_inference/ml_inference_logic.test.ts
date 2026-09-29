@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import type { HttpResponse } from '@kbn/core/public';
@@ -109,7 +111,7 @@ describe('MlInferenceLogic', () => {
   const { mount: mountStartTextExpansionModel } = new LogicMounter(StartTextExpansionModelApiLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mountMappingApiLogic();
     mountCachedFetchModelsApiLogic();
     mountFetchMlInferencePipelineProcessorsApiLogic();
@@ -404,7 +406,7 @@ describe('MlInferenceLogic', () => {
             },
           },
         });
-        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
+        vi.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
 
         CachedFetchModelsApiLogic.actions.apiSuccess(MODELS);
         MLInferenceLogic.actions.selectFields(['my_source_field1', 'my_source_field2']);
@@ -432,7 +434,7 @@ describe('MlInferenceLogic', () => {
     });
     describe('startTextExpansionModelSuccess', () => {
       it('fetches ml models', () => {
-        jest.spyOn(MLInferenceLogic.actions, 'startPollingModels');
+        vi.spyOn(MLInferenceLogic.actions, 'startPollingModels');
         StartTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: 'started',
           modelId: 'foo',
@@ -443,7 +445,7 @@ describe('MlInferenceLogic', () => {
     });
     describe('onAddInferencePipelineStepChange', () => {
       it('calls setAddInferencePipelineStep with given step', () => {
-        jest.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
+        vi.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
           AddInferencePipelineSteps.Fields
@@ -456,8 +458,8 @@ describe('MlInferenceLogic', () => {
           modelID: 'unit-test-model',
           existingPipeline: false,
         });
-        jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
-        jest.spyOn(MLInferenceLogic.actions, 'startPollingModels');
+        vi.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        vi.spyOn(MLInferenceLogic.actions, 'startPollingModels');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.fetchPipelineByName).toHaveBeenCalledWith({
           pipelineName: 'ml-inference-unit-test-pipeline',
@@ -471,8 +473,8 @@ describe('MlInferenceLogic', () => {
           modelID: 'unit-test-model',
           existingPipeline: true,
         });
-        jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
-        jest.spyOn(MLInferenceLogic.actions, 'startPollingModels');
+        vi.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        vi.spyOn(MLInferenceLogic.actions, 'startPollingModels');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.fetchPipelineByName).not.toHaveBeenCalled();
         expect(MLInferenceLogic.actions.startPollingModels).not.toHaveBeenCalled();
@@ -480,7 +482,7 @@ describe('MlInferenceLogic', () => {
     });
     describe('fetchPipelineSuccess', () => {
       it('goes back to configuration step when pipeline is found', () => {
-        jest.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
+        vi.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
 
         MLInferenceLogic.actions.fetchPipelineSuccess({
           'mock-pipeline': {},

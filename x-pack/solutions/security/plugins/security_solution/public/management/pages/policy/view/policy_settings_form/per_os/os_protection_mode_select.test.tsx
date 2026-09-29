@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import React from 'react';
@@ -15,7 +17,7 @@ import type { OsProtectionModeSelectProps } from './os_protection_mode_select';
 import { OsProtectionModeSelect } from './os_protection_mode_select';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 describe('OsProtectionModeSelect', () => {
   const testSubj = 'osProtectionModeSelect';
 
@@ -30,7 +32,7 @@ describe('OsProtectionModeSelect', () => {
 
     formProps = {
       mode: ProtectionModes.prevent,
-      onModeChange: jest.fn(),
+      onModeChange: vi.fn(),
       'data-test-subj': testSubj,
     };
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { useQuickPromptUpdater } from './use_quick_prompt_updater';
@@ -13,13 +16,13 @@ import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import { bulkUpdatePrompts } from '../../../..';
 import type { IToasts } from '@kbn/core-notifications-browser';
 const mockHttp = {} as HttpSetup;
-jest.mock('../../../..');
-jest.mock('../../quick_prompts/quick_prompt_settings/helpers', () => {
+vi.mock('../../../..');
+vi.mock('../../quick_prompts/quick_prompt_settings/helpers', () => {
   return {
-    getRandomEuiColor: jest.fn(() => '#61A2FF'),
+    getRandomEuiColor: vi.fn(() => '#61A2FF'),
   };
 });
-const mockBulkUpdatePrompts = bulkUpdatePrompts as jest.Mock;
+const mockBulkUpdatePrompts = bulkUpdatePrompts as Mock;
 const quickPrompt: PromptResponse = {
   timestamp: '2025-02-24T18:13:51.851Z',
   users: [{ id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' }],
@@ -67,13 +70,13 @@ const mockAllPrompts: FindPromptsResponse = {
   ],
 };
 const mockToasts = {
-  addSuccess: jest.fn(),
-  addDanger: jest.fn(),
+  addSuccess: vi.fn(),
+  addDanger: vi.fn(),
 } as unknown as IToasts;
 
 describe('useQuickPromptUpdater', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should initialize with quick prompts', () => {
     const { result } = renderHook(() =>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 
@@ -16,21 +19,21 @@ import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bu
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 
-jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
+vi.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../containers/user_profiles/use_suggest_user_profiles');
 
-const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
-const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as Mock;
 
 describe('EditAssigneesFlyout', () => {
   const props = {
     selectedCases: [basicCase],
-    onClose: jest.fn(),
-    onSaveAssignees: jest.fn(),
+    onClose: vi.fn(),
+    onSaveAssignees: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap, isLoading: false });
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });

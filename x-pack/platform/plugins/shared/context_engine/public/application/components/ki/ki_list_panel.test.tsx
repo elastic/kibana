@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -19,11 +21,14 @@ import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/const
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { KiListPanel } from './ki_list_panel';
 
-const mockUseKiList = jest.fn();
+const mockUseKiList = vi.fn();
 
-jest.mock('../../hooks/use_ki_list', () => ({
-  useKiList: (...args: unknown[]) => mockUseKiList(...args),
-}));
+vi.mock('../../hooks/use_ki_list', () => {
+      const mocked = {
+      useKiList: (...args: unknown[]) => mockUseKiList(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const aiIndex: GetAiIndexResponse = {
   id: 'sample-ki',
@@ -59,7 +64,7 @@ const renderWithProviders = (ui: React.ReactElement, options: RenderOptions = {}
   indexManagementLocator.getUrl.mockResolvedValue(SAMPLE_INDEX_MANAGEMENT_URL);
   const discoverLocator = sharePluginMock.createLocator();
   discoverLocator.getRedirectUrl.mockReturnValue(SAMPLE_DISCOVER_URL);
-  jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
+  vi.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
     if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
       return indexManagementLocator;
     }
@@ -107,12 +112,12 @@ describe('KiListPanel', () => {
       isLoading: false,
       isFetching: false,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the list rows and type filters from counts_by_type', async () => {
@@ -178,7 +183,7 @@ describe('KiListPanel', () => {
       isLoading: true,
       isFetching: true,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
@@ -198,7 +203,7 @@ describe('KiListPanel', () => {
       isLoading: false,
       isFetching: false,
       error: new Error('boom'),
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
@@ -219,7 +224,7 @@ describe('KiListPanel', () => {
       isLoading: false,
       isFetching: false,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
@@ -273,7 +278,7 @@ describe('KiListPanel', () => {
       isLoading: false,
       isFetching: false,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }));
 
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
@@ -303,7 +308,7 @@ describe('KiListPanel', () => {
       isLoading: false,
       isFetching: false,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }));
 
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
@@ -339,7 +344,7 @@ describe('KiListPanel', () => {
       isLoading: false,
       isFetching: false,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }));
 
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />, { discoverShow: false });

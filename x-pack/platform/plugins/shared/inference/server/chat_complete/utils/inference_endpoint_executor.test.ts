@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { PassThrough } from 'stream';
 import {
   createInferenceEndpointExecutor,
@@ -13,12 +16,12 @@ import {
 
 describe('createInferenceEndpointExecutor', () => {
   let executor: InferenceEndpointExecutor;
-  let mockTransportRequest: jest.Mock;
+  let mockTransportRequest: Mock;
 
   const inferenceId = 'my-inference-endpoint';
 
   beforeEach(() => {
-    mockTransportRequest = jest.fn();
+    mockTransportRequest = vi.fn();
     executor = createInferenceEndpointExecutor({
       inferenceId,
       esClient: { transport: { request: mockTransportRequest } } as any,

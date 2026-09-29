@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { convertToRawColorMappingsFn } from '.';
 import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import { convertXYToRawColorMappings } from './xy';
@@ -12,22 +14,34 @@ import { convertPieToRawColorMappings } from './partition';
 import { convertDatatableToRawColorMappings } from './datatable';
 import { convertTagcloudToRawColorMappings } from './tagcloud';
 
-jest.mock('./xy', () => ({
-  convertXYToRawColorMappings: jest.fn().mockReturnValue('new xyVisState'),
-}));
-jest.mock('./partition', () => ({
-  convertPieToRawColorMappings: jest.fn().mockReturnValue('new partitionVisState'),
-}));
-jest.mock('./datatable', () => ({
-  convertDatatableToRawColorMappings: jest.fn().mockReturnValue('new datatableVisState'),
-}));
-jest.mock('./tagcloud', () => ({
-  convertTagcloudToRawColorMappings: jest.fn().mockReturnValue('new tagcloudVisState'),
-}));
+vi.mock('./xy', () => {
+      const mocked = {
+      convertXYToRawColorMappings: vi.fn().mockReturnValue('new xyVisState'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./partition', () => {
+      const mocked = {
+      convertPieToRawColorMappings: vi.fn().mockReturnValue('new partitionVisState'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./datatable', () => {
+      const mocked = {
+      convertDatatableToRawColorMappings: vi.fn().mockReturnValue('new datatableVisState'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tagcloud', () => {
+      const mocked = {
+      convertTagcloudToRawColorMappings: vi.fn().mockReturnValue('new tagcloudVisState'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Legend stat transforms', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return original attributes if no state', () => {

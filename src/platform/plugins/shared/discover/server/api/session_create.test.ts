@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -18,9 +20,9 @@ import { createDiscoverSession } from './session_create';
 describe('createDiscoverSession', () => {
   it('stores an inline ID and filter references without exposing the ID in the public response', async () => {
     const core = coreMock.createRequestHandlerContext();
-    const context = jest.mocked<RequestHandlerContext>({
+    const context = vi.mocked<RequestHandlerContext>({
       core: Promise.resolve(core),
-      resolve: jest.fn().mockResolvedValue({ core }),
+      resolve: vi.fn().mockResolvedValue({ core }),
     });
     core.savedObjects.client.create.mockImplementation(async (type, attributes, options) => ({
       id: 'session-id',

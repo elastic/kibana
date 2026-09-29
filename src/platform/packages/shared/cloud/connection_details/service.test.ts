@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, filter } from 'rxjs';
 import { ConnectionDetailsService } from './service';
 import type { ConnectionDetailsOpts } from './types';
@@ -17,8 +19,8 @@ const waitForPermissionCheck = (service: ConnectionDetailsService) =>
 
 const createMockOpts = (overrides: Partial<ConnectionDetailsOpts> = {}): ConnectionDetailsOpts => ({
   apiKeys: {
-    createKey: jest.fn(),
-    hasPermission: jest.fn().mockResolvedValue(true),
+    createKey: vi.fn(),
+    hasPermission: vi.fn().mockResolvedValue(true),
     ...overrides.apiKeys,
   },
   ...overrides,
@@ -26,7 +28,7 @@ const createMockOpts = (overrides: Partial<ConnectionDetailsOpts> = {}): Connect
 
 describe('ConnectionDetailsService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -37,13 +39,13 @@ describe('ConnectionDetailsService', () => {
     });
 
     it('should initialize apiKeyHasAccess$ as null before permission resolves', () => {
-      const hasPermission = jest.fn(
+      const hasPermission = vi.fn(
         () => new Promise<boolean>(() => {}) // never resolves
       );
 
       const service = new ConnectionDetailsService(
         createMockOpts({
-          apiKeys: { createKey: jest.fn(), hasPermission },
+          apiKeys: { createKey: vi.fn(), hasPermission },
         })
       );
 
@@ -53,11 +55,11 @@ describe('ConnectionDetailsService', () => {
 
   describe('permission check', () => {
     it('should set apiKeyHasAccess$ to true when user has permission', async () => {
-      const hasPermission = jest.fn().mockResolvedValue(true);
+      const hasPermission = vi.fn().mockResolvedValue(true);
       const service = new ConnectionDetailsService(
         createMockOpts({
           apiKeys: {
-            createKey: jest.fn(),
+            createKey: vi.fn(),
             hasPermission,
           },
         })
@@ -70,11 +72,11 @@ describe('ConnectionDetailsService', () => {
     });
 
     it('should set apiKeyHasAccess$ to false when user lacks permission', async () => {
-      const hasPermission = jest.fn().mockResolvedValue(false);
+      const hasPermission = vi.fn().mockResolvedValue(false);
       const service = new ConnectionDetailsService(
         createMockOpts({
           apiKeys: {
-            createKey: jest.fn(),
+            createKey: vi.fn(),
             hasPermission,
           },
         })
@@ -87,13 +89,13 @@ describe('ConnectionDetailsService', () => {
     });
 
     it('should set apiKeyHasAccess$ to false when permission check fails', async () => {
-      const hasPermission = jest.fn().mockRejectedValue(new Error('Network error'));
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const hasPermission = vi.fn().mockRejectedValue(new Error('Network error'));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const service = new ConnectionDetailsService(
         createMockOpts({
           apiKeys: {
-            createKey: jest.fn(),
+            createKey: vi.fn(),
             hasPermission,
           },
         })
@@ -124,12 +126,12 @@ describe('ConnectionDetailsService', () => {
     });
 
     it('should defer setting apiKeys tab until permission check completes', async () => {
-      const hasPermission = jest.fn().mockResolvedValue(true);
+      const hasPermission = vi.fn().mockResolvedValue(true);
       const service = new ConnectionDetailsService(
         createMockOpts({
           defaultTabId: 'apiKeys',
           apiKeys: {
-            createKey: jest.fn(),
+            createKey: vi.fn(),
             hasPermission,
           },
         })
@@ -145,12 +147,12 @@ describe('ConnectionDetailsService', () => {
     });
 
     it('should keep endpoints tab when defaultTabId is apiKeys but user lacks permission', async () => {
-      const hasPermission = jest.fn().mockResolvedValue(false);
+      const hasPermission = vi.fn().mockResolvedValue(false);
       const service = new ConnectionDetailsService(
         createMockOpts({
           defaultTabId: 'apiKeys',
           apiKeys: {
-            createKey: jest.fn(),
+            createKey: vi.fn(),
             hasPermission,
           },
         })
@@ -165,11 +167,11 @@ describe('ConnectionDetailsService', () => {
 
   describe('tab switching on permission denial', () => {
     it('should switch from apiKeys to endpoints when permission is denied', async () => {
-      const hasPermission = jest.fn().mockResolvedValue(false);
+      const hasPermission = vi.fn().mockResolvedValue(false);
       const service = new ConnectionDetailsService(
         createMockOpts({
           apiKeys: {
-            createKey: jest.fn(),
+            createKey: vi.fn(),
             hasPermission,
           },
         })
@@ -183,11 +185,11 @@ describe('ConnectionDetailsService', () => {
     });
 
     it('should not switch tabs when user has permission', async () => {
-      const hasPermission = jest.fn().mockResolvedValue(true);
+      const hasPermission = vi.fn().mockResolvedValue(true);
       const service = new ConnectionDetailsService(
         createMockOpts({
           apiKeys: {
-            createKey: jest.fn(),
+            createKey: vi.fn(),
             hasPermission,
           },
         })
@@ -204,10 +206,10 @@ describe('ConnectionDetailsService', () => {
 
   describe('setTab', () => {
     it('should block switching to apiKeys without permission', async () => {
-      const hasPermission = jest.fn().mockResolvedValue(false);
+      const hasPermission = vi.fn().mockResolvedValue(false);
       const service = new ConnectionDetailsService(
         createMockOpts({
-          apiKeys: { createKey: jest.fn(), hasPermission },
+          apiKeys: { createKey: vi.fn(), hasPermission },
         })
       );
 

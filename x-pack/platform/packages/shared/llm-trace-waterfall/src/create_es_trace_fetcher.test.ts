@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { of } from 'rxjs';
 import { createEsTraceFetcher } from './create_es_trace_fetcher';
@@ -33,7 +35,7 @@ describe('createEsTraceFetcher', () => {
   ];
 
   const createMockSearch = () =>
-    jest.fn().mockReturnValue(
+    vi.fn().mockReturnValue(
       of({
         rawResponse: {
           hits: { hits },

@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { MetricUnit, NullableMetricUnit } from '../../../types';
 import { useChartLayers } from './use_chart_layers';
 import { createMetricAggregation } from '../../../common/utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-jest.mock('../../../common/utils', () => ({
-  ...jest.requireActual('../../../common/utils'),
-  createMetricAggregation: jest.fn(({ metricName }) => `AVG(${metricName})`),
-  createTimeBucketAggregation: jest.fn(() => 'time_bucket_agg'),
-}));
+vi.mock('../../../common/utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/utils')),
+      createMetricAggregation: vi.fn(({ metricName }) => `AVG(${metricName})`),
+      createTimeBucketAggregation: vi.fn(() => 'time_bucket_agg'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type MetricItemInput = Parameters<typeof useChartLayers>[0]['metricItem'];
 

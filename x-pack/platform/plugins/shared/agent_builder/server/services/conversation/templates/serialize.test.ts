@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import {
   serializeMetadataValue,
@@ -226,7 +228,7 @@ describe('withDeserializedMetadata', () => {
   };
 
   it('resolves the template through the injected resolver', () => {
-    const resolveTemplate = jest.fn().mockReturnValue(template);
+    const resolveTemplate = vi.fn().mockReturnValue(template);
 
     const result = withDeserializedMetadata(
       {
@@ -252,7 +254,7 @@ describe('withDeserializedMetadata', () => {
   });
 
   it('does not call the resolver when template_id or metadata are missing', () => {
-    const resolveTemplate = jest.fn();
+    const resolveTemplate = vi.fn();
     const conversation = { id: 'conversation-1' };
 
     expect(withDeserializedMetadata(conversation, resolveTemplate)).toEqual(conversation);

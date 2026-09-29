@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { UseLoadRuleAggregationsQueryProps } from './use_load_rule_aggregations_query';
@@ -13,16 +16,17 @@ import { useKibana } from '../../common/lib/kibana';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({
-  loadRuleAggregationsWithKueryFilter: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana');
+vi.mock('../lib/rule_api/aggregate_kuery_filter', () => {
+      const mocked = {
+      loadRuleAggregationsWithKueryFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
-const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
-  '../lib/rule_api/aggregate_kuery_filter'
-);
+const { loadRuleAggregationsWithKueryFilter } = (await vi.importMock('../lib/rule_api/aggregate_kuery_filter'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,7 +52,7 @@ const MOCK_AGGS = {
 describe('useLoadRuleAggregations', () => {
   beforeEach(() => {
     useKibanaMock().services.notifications.toasts = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as IToasts;
 
     loadRuleAggregationsWithKueryFilter.mockResolvedValue(MOCK_AGGS);
@@ -56,7 +60,7 @@ describe('useLoadRuleAggregations', () => {
 
   afterEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call loadRuleAggregations API and handle result', async () => {

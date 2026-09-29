@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
@@ -51,7 +53,7 @@ const createSoClient = (
   features: InferenceSettingsAttributes['features'] | 'not_found' = []
 ): ISavedObjectsRepository =>
   ({
-    get: jest.fn().mockImplementation(() => {
+    get: vi.fn().mockImplementation(() => {
       if (features === 'not_found') {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError('inference-settings', 'default');
       }
@@ -67,7 +69,7 @@ const createGetConnectorById = (
   connectorIds: string[]
 ): ((id: string) => Promise<InferenceConnector>) => {
   const connectorMap = new Map(connectorIds.map((id) => [id, createConnector(id)]));
-  return jest.fn().mockImplementation((id: string) => {
+  return vi.fn().mockImplementation((id: string) => {
     const connector = connectorMap.get(id);
     if (!connector) {
       throw new Error(`Connector ${id} not found`);
@@ -252,7 +254,7 @@ describe('getForFeature', () => {
   it('falls back to recommended endpoints when SO client fails with non-404 error', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const soClient = {
-      get: jest.fn().mockRejectedValue(new Error('Connection refused')),
+      get: vi.fn().mockRejectedValue(new Error('Connection refused')),
     } as unknown as ISavedObjectsRepository;
     const result = await getForFeature(
       registry,

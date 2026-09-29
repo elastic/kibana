@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useDeleteObservable } from './use_delete_observables';
 import { deleteObservable } from './api';
@@ -12,24 +15,24 @@ import { useCasesToast } from '../common/use_cases_toast';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/use_cases_toast');
-jest.mock('../components/case_view/use_on_refresh_case_view_page');
+vi.mock('./api');
+vi.mock('../common/use_cases_toast');
+vi.mock('../components/case_view/use_on_refresh_case_view_page');
 
 describe('useDeleteObservable', () => {
   const caseId = 'test-case-id';
   const observableId = 'test-observable-id';
-  const showErrorToast = jest.fn();
-  const showSuccessToast = jest.fn();
+  const showErrorToast = vi.fn();
+  const showSuccessToast = vi.fn();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
+    vi.clearAllMocks();
+    (useCasesToast as Mock).mockReturnValue({ showErrorToast, showSuccessToast });
   });
 
   it('should call deleteObservable and show success toast on success', async () => {
-    (deleteObservable as jest.Mock).mockResolvedValue({});
+    (deleteObservable as Mock).mockResolvedValue({});
 
     const { result } = renderHook(() => useDeleteObservable(caseId, observableId), {
       wrapper: TestProviders,
@@ -46,7 +49,7 @@ describe('useDeleteObservable', () => {
 
   it('should show error toast on failure', async () => {
     const error = new Error('Failed to delete observable');
-    (deleteObservable as jest.Mock).mockRejectedValue(error);
+    (deleteObservable as Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => useDeleteObservable(caseId, observableId), {
       wrapper: TestProviders,

@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { withPerformanceMetrics } from './with_performance_metrics';
 
-jest.mock('@kbn/ebt-tools', () => ({
-  reportPerformanceMetricEvent: jest.fn(),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      reportPerformanceMetricEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('withPerformanceMetrics', () => {
   const analytics = {} as AnalyticsServiceStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     let now = 0;
-    jest.spyOn(window.performance, 'now').mockImplementation(() => {
+    vi.spyOn(window.performance, 'now').mockImplementation(() => {
       const value = now;
       now += 250;
       return value;
@@ -29,11 +34,11 @@ describe('withPerformanceMetrics', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("reports the wrapped call's elapsed duration with the supplied event name and saved object type", async () => {
-    const search = jest.fn().mockResolvedValue({ total: 0, hits: [] });
+    const search = vi.fn().mockResolvedValue({ total: 0, hits: [] });
 
     const wrapped = withPerformanceMetrics(search, {
       analytics,
@@ -53,7 +58,7 @@ describe('withPerformanceMetrics', () => {
 
   it('passes the wrapped function arguments through and returns its resolved value', async () => {
     const result = { total: 1, hits: [{ id: 'a' }] };
-    const search = jest.fn().mockResolvedValue(result);
+    const search = vi.fn().mockResolvedValue(result);
 
     const wrapped = withPerformanceMetrics(search, {
       analytics,
@@ -66,7 +71,7 @@ describe('withPerformanceMetrics', () => {
   });
 
   it('merges per-call `meta` from the options callback into the EBT event', async () => {
-    const del = jest.fn().mockResolvedValue(undefined);
+    const del = vi.fn().mockResolvedValue(undefined);
 
     const wrapped = withPerformanceMetrics(del, {
       analytics,
@@ -85,7 +90,7 @@ describe('withPerformanceMetrics', () => {
   });
 
   it('does not report when the wrapped function throws', async () => {
-    const search = jest.fn().mockRejectedValue(new Error('boom'));
+    const search = vi.fn().mockRejectedValue(new Error('boom'));
 
     const wrapped = withPerformanceMetrics(search, {
       analytics,

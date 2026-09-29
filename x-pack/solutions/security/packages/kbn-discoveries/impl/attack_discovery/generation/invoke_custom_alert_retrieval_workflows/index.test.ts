@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AuthenticatedUser, Logger, KibanaRequest } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -29,24 +32,27 @@ const mockAuthenticatedUser = {
   username: 'test-user',
 } as AuthenticatedUser;
 
-const mockEventLogger = { logEvent: jest.fn() } as unknown as IEventLogger;
+const mockEventLogger = { logEvent: vi.fn() } as unknown as IEventLogger;
 
 const mockEventLogIndex = '.kibana-event-log-test';
 
 const mockExecutionUuid = 'test-execution-uuid';
 
-jest.mock('../../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
-  writeAttackDiscoveryEvent: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
+      writeAttackDiscoveryEvent: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createMockWorkflowsApi = (): jest.Mocked<WorkflowsManagementApi> => ({
-  getWorkflow: jest.fn(),
-  getWorkflowExecution: jest.fn(),
-  runWorkflow: jest.fn(),
-  scheduleWorkflow: jest.fn(),
+const createMockWorkflowsApi = (): Mocked<WorkflowsManagementApi> => ({
+  getWorkflow: vi.fn(),
+  getWorkflowExecution: vi.fn(),
+  runWorkflow: vi.fn(),
+  scheduleWorkflow: vi.fn(),
 });
 
 describe('invokeCustomAlertRetrievalWorkflows', () => {
@@ -435,8 +441,8 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
   describe('catch block errorCategory extraction', () => {
     it('passes errorCategory to the failed event when the workflow throws an AttackDiscoveryError', async () => {
       const api = createMockWorkflowsApi();
-      const mockWriteAttackDiscoveryEvent = jest.requireMock('../../persistence/event_logging')
-        .writeAttackDiscoveryEvent as jest.Mock;
+      const mockWriteAttackDiscoveryEvent = (await vi.importMock('../../persistence/event_logging'))
+        .writeAttackDiscoveryEvent as Mock;
 
       api.getWorkflow.mockRejectedValueOnce(
         new AttackDiscoveryError({
@@ -473,8 +479,8 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
 
     it('passes undefined errorCategory when the thrown error is a plain Error', async () => {
       const api = createMockWorkflowsApi();
-      const mockWriteAttackDiscoveryEvent = jest.requireMock('../../persistence/event_logging')
-        .writeAttackDiscoveryEvent as jest.Mock;
+      const mockWriteAttackDiscoveryEvent = (await vi.importMock('../../persistence/event_logging'))
+        .writeAttackDiscoveryEvent as Mock;
 
       api.getWorkflow.mockRejectedValueOnce(new Error('plain error'));
 
@@ -556,11 +562,11 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
 
   describe('isReady polling for step metadata (workflow-engine persistence race)', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     const emptyCompletedExecution = {
@@ -619,7 +625,7 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
         workflowsManagementApi: api,
       });
 
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
       const result = await promise;
 

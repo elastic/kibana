@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { render, screen, fireEvent, within } from '@testing-library/react';
@@ -18,7 +20,7 @@ import type { EqlQueryBarProps } from './eql_query_bar';
 import { EqlQueryBar } from './eql_query_bar';
 import { getEqlValidationError } from './validators.mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('EqlQueryBar', () => {
   let mockField: EqlQueryBarProps['field'];
@@ -58,7 +60,7 @@ describe('EqlQueryBar', () => {
   });
 
   it('re-validates when index pattern id or title changes', () => {
-    const validate = jest.fn();
+    const validate = vi.fn();
     mockField = useFormFieldMock({
       value: mockQueryBar,
       validate,

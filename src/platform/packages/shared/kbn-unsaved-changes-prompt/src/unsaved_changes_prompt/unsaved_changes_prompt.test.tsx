@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { createMemoryHistory } from 'history';
 
 import { renderHook, act, cleanup, waitFor } from '@testing-library/react';
@@ -20,26 +23,26 @@ const basePath = '/mock';
 const memoryHistory = createMemoryHistory({ initialEntries: [basePath] });
 const history = new CoreScopedHistory(memoryHistory, basePath);
 const coreStart = coreMock.createStart();
-const navigateToUrl = jest.fn().mockImplementation(async (url) => {
+const navigateToUrl = vi.fn().mockImplementation(async (url) => {
   history.push(url);
 });
 
 describe('useUnsavedChangesPrompt', () => {
-  let addSpy: jest.SpiedFunction<Window['addEventListener']>;
-  let removeSpy: jest.SpiedFunction<Window['removeEventListener']>;
-  let blockSpy: jest.SpiedFunction<CoreScopedHistory['block']>;
+  let addSpy: MockInstance<Window['addEventListener']>;
+  let removeSpy: MockInstance<Window['removeEventListener']>;
+  let blockSpy: MockInstance<CoreScopedHistory['block']>;
 
   beforeEach(() => {
-    addSpy = jest.spyOn(window, 'addEventListener');
-    removeSpy = jest.spyOn(window, 'removeEventListener');
-    blockSpy = jest.spyOn(history, 'block');
+    addSpy = vi.spyOn(window, 'addEventListener');
+    removeSpy = vi.spyOn(window, 'removeEventListener');
+    blockSpy = vi.spyOn(history, 'block');
   });
 
   afterEach(() => {
     addSpy.mockRestore();
     removeSpy.mockRestore();
     blockSpy.mockRestore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should not block if not edited', () => {

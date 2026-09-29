@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -52,15 +55,18 @@ const envStagingExpression = {
 const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
 const envStagingKey = getFilterExpressionLookupKey(envStagingExpression);
 
-const mockUseProjectPickerState = jest.fn();
-const mockUseProjectPickerActions = jest.fn();
-const mockFetchProjectsByRouting = jest.fn();
+const mockUseProjectPickerState = vi.fn();
+const mockUseProjectPickerActions = vi.fn();
+const mockFetchProjectsByRouting = vi.fn();
 
-jest.mock('../../../../../state', () => ({
-  useProjectPickerState: () => mockUseProjectPickerState(),
-  useProjectPickerActions: () => mockUseProjectPickerActions(),
-  useFetchProjectsByRouting: () => mockFetchProjectsByRouting,
-}));
+vi.mock('../../../../../state', () => {
+      const mocked = {
+      useProjectPickerState: () => mockUseProjectPickerState(),
+      useProjectPickerActions: () => mockUseProjectPickerActions(),
+      useFetchProjectsByRouting: () => mockFetchProjectsByRouting,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createFilterExpressions = (
   entries: Array<[FilterExpressionValue, boolean?]>
@@ -100,15 +106,15 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
 };
 
 const defaultActions = {
-  addFilterExpression: jest.fn(),
-  updateFilterExpression: jest.fn(),
+  addFilterExpression: vi.fn(),
+  updateFilterExpression: vi.fn(),
 };
 
 const renderForm = (
   stateOverrides: Partial<ProjectPickerState> = {},
-  props: { filterId?: string; onCloseFilterFormRequested?: jest.Mock } = {}
+  props: { filterId?: string; onCloseFilterFormRequested?: Mock } = {}
 ) => {
-  const onCloseFilterFormRequested = props.onCloseFilterFormRequested ?? jest.fn();
+  const onCloseFilterFormRequested = props.onCloseFilterFormRequested ?? vi.fn();
   mockUseProjectPickerState.mockReturnValue(createState(stateOverrides));
   mockUseProjectPickerActions.mockReturnValue(defaultActions);
 
@@ -155,7 +161,7 @@ const fillExistsFilterForm = async (
 
 describe('ProjectPickerFilterForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchProjectsByRouting.mockImplementation(async (routing?: string) => {
       if (!routing) {
         return { origin: securityProject, linkedProjects: [] };

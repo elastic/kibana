@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowLookup } from './build_workflow_lookup';
 import { findStepByLine } from './step_finder';
 import {
@@ -21,7 +23,7 @@ const createLookup = createWorkflowLookup;
 
 describe('findStepByLine', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('null/undefined workflowLookup', () => {

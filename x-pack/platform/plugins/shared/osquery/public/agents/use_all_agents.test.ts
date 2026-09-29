@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
@@ -13,16 +16,22 @@ import { useAllAgents } from './use_all_agents';
 import { useOsqueryPolicies } from './use_osquery_policies';
 import { buildPolicyIdKuery } from '../../common/utils/build_policy_id_kuery';
 
-jest.mock('../common/lib/kibana');
-jest.mock('../common/hooks/use_error_toast', () => ({
-  useErrorToast: () => jest.fn(),
-}));
-jest.mock('./use_osquery_policies', () => ({
-  useOsqueryPolicies: jest.fn(),
-}));
+vi.mock('../common/lib/kibana');
+vi.mock('../common/hooks/use_error_toast', () => {
+      const mocked = {
+      useErrorToast: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_osquery_policies', () => {
+      const mocked = {
+      useOsqueryPolicies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const useOsqueryPoliciesMock = useOsqueryPolicies as jest.MockedFunction<typeof useOsqueryPolicies>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
+const useOsqueryPoliciesMock = useOsqueryPolicies as MockedFunction<typeof useOsqueryPolicies>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -32,10 +41,10 @@ const createWrapper = (queryClient: QueryClient) => {
 };
 
 describe('useAllAgents', () => {
-  const httpGet = jest.fn().mockResolvedValue({ agents: [], groups: {}, total: 0 });
+  const httpGet = vi.fn().mockResolvedValue({ agents: [], groups: {}, total: 0 });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: { http: { get: httpGet } },
     } as unknown as ReturnType<typeof useKibana>);

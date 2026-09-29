@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient } from '../rules_client';
@@ -13,9 +16,9 @@ import { formatLegacyActions } from '../lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { getRulesClientMockParams } from '../../test_utils';
 
-jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
+vi.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
-    formatLegacyActions: jest.fn(),
+    formatLegacyActions: vi.fn(),
   };
 });
 
@@ -30,7 +33,7 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
@@ -187,7 +190,7 @@ describe('resolve()', () => {
   });
 
   test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
-    const injectReferencesFn = jest.fn().mockReturnValue({
+    const injectReferencesFn = vi.fn().mockReturnValue({
       bar: true,
       parameterThatIsSavedObjectId: '9',
     });
@@ -206,7 +209,7 @@ describe('resolve()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
+        extractReferences: vi.fn(),
         injectReferences: injectReferencesFn,
       },
       validate: {
@@ -351,7 +354,7 @@ describe('resolve()', () => {
   });
 
   test('throws an error if useSavedObjectReferences.injectReferences throws an error', async () => {
-    const injectReferencesFn = jest.fn().mockImplementation(() => {
+    const injectReferencesFn = vi.fn().mockImplementation(() => {
       throw new Error('something went wrong!');
     });
     ruleTypeRegistry.get.mockImplementation(() => ({
@@ -369,7 +372,7 @@ describe('resolve()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
+        extractReferences: vi.fn(),
         injectReferences: injectReferencesFn,
       },
       validate: {
@@ -718,7 +721,7 @@ describe('resolve()', () => {
         outcome: 'aliasMatch',
         alias_target_id: '2',
       });
-      (formatLegacyActions as jest.Mock).mockResolvedValue([
+      (formatLegacyActions as Mock).mockResolvedValue([
         {
           id: 'migrated_rule_mock',
         },

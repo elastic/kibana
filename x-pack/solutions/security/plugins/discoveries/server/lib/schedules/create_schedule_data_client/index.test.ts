@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -15,9 +18,12 @@ import { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedul
 import { createScheduleDataClient } from '.';
 import { ATTACK_DISCOVERY_SCHEDULE_TAG } from '../constants';
 
-jest.mock('@kbn/attack-discovery-schedules-common', () => ({
-  AttackDiscoveryScheduleDataClient: jest.fn(),
-}));
+vi.mock('@kbn/attack-discovery-schedules-common', () => {
+      const mocked = {
+      AttackDiscoveryScheduleDataClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createScheduleDataClient', () => {
   const mockRulesClient = rulesClientMock.create();
@@ -25,8 +31,8 @@ describe('createScheduleDataClient', () => {
   const mockLogger = loggerMock.create();
   const mockRequest = httpServerMock.createKibanaRequest();
 
-  const mockGetRulesClient = jest.fn().mockResolvedValue(mockRulesClient);
-  const mockGetActionsClientWithRequest = jest.fn().mockResolvedValue(mockActionsClient);
+  const mockGetRulesClient = vi.fn().mockResolvedValue(mockRulesClient);
+  const mockGetActionsClientWithRequest = vi.fn().mockResolvedValue(mockActionsClient);
 
   const mockAlertingContext = {
     getRulesClient: mockGetRulesClient,
@@ -39,7 +45,7 @@ describe('createScheduleDataClient', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates an AttackDiscoveryScheduleDataClient with applyTags set to the schedule tag', async () => {
@@ -68,7 +74,7 @@ describe('createScheduleDataClient', () => {
     // Migration continuity: schedules created while the feature flag was off
     // are untagged and must remain visible once the flag is on, so the internal
     // API must not filter by tag at find time.
-    const [params] = (AttackDiscoveryScheduleDataClient as jest.Mock).mock.calls[0];
+    const [params] = (AttackDiscoveryScheduleDataClient as Mock).mock.calls[0];
     expect(params.filterTags).toBeUndefined();
   });
 

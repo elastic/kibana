@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 
-jest.unmock('./send_request');
+vi.unmock('./send_request');
 
 describe('Status Code Extraction in sendRequest', () => {
-  let mockHttp: jest.Mocked<HttpSetup>;
+  let mockHttp: Mocked<HttpSetup>;
 
   beforeEach(() => {
     mockHttp = {
-      post: jest.fn(),
+      post: vi.fn(),
     } as any;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('extractStatusCodeAndText function behavior', () => {

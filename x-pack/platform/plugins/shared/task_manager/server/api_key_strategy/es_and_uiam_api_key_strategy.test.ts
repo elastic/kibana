@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, MockedFunction } from 'vitest';
+
 import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ApiKeyType } from '../config';
@@ -23,19 +26,22 @@ import {
 
 // `getUiamApiKeySecret` is a pure format helper the assertions below rely on, so it keeps its real
 // implementation while the credential-minting helpers are stubbed.
-jest.mock('../lib/api_key_utils', () => ({
-  ...jest.requireActual('../lib/api_key_utils'),
-  createApiKey: jest.fn(),
-  hasApiKey: jest.fn(),
-  getApiKeyFromRequest: jest.fn(),
-  shouldCloneApiKeyFromRequest: jest.fn(),
-}));
-const createApiKeyMock = createApiKey as jest.MockedFunction<typeof createApiKey>;
-const hasApiKeyMock = hasApiKey as jest.MockedFunction<typeof hasApiKey>;
-const getApiKeyFromRequestMock = getApiKeyFromRequest as jest.MockedFunction<
+vi.mock('../lib/api_key_utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../lib/api_key_utils')),
+      createApiKey: vi.fn(),
+      hasApiKey: vi.fn(),
+      getApiKeyFromRequest: vi.fn(),
+      shouldCloneApiKeyFromRequest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const createApiKeyMock = createApiKey as MockedFunction<typeof createApiKey>;
+const hasApiKeyMock = hasApiKey as MockedFunction<typeof hasApiKey>;
+const getApiKeyFromRequestMock = getApiKeyFromRequest as MockedFunction<
   typeof getApiKeyFromRequest
 >;
-const shouldCloneApiKeyFromRequestMock = shouldCloneApiKeyFromRequest as jest.MockedFunction<
+const shouldCloneApiKeyFromRequestMock = shouldCloneApiKeyFromRequest as MockedFunction<
   typeof shouldCloneApiKeyFromRequest
 >;
 
@@ -55,15 +61,15 @@ const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): Concre
 });
 
 describe('EsAndUiamApiKeyStrategy', () => {
-  let recordUiamApiKeyFallbackSpy: jest.SpyInstance;
-  let recordTaskRunSpy: jest.SpyInstance;
+  let recordUiamApiKeyFallbackSpy: MockInstance;
+  let recordTaskRunSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    recordUiamApiKeyFallbackSpy = jest
+    vi.clearAllMocks();
+    recordUiamApiKeyFallbackSpy = vi
       .spyOn(taskManagerUiamTelemetry, 'recordUiamApiKeyFallback')
       .mockImplementation(() => {});
-    recordTaskRunSpy = jest
+    recordTaskRunSpy = vi
       .spyOn(taskManagerUiamTelemetry, 'recordTaskRun')
       .mockImplementation(() => {});
     // `clearAllMocks` does not reset implementations, so re-establish the default
@@ -75,9 +81,9 @@ describe('EsAndUiamApiKeyStrategy', () => {
     const coreStart = coreMock.createStart();
     const logger = loggingSystemMock.createLogger();
     const mockUiam = {
-      grant: jest.fn(),
-      invalidate: jest.fn(),
-      convert: jest.fn(),
+      grant: vi.fn(),
+      invalidate: vi.fn(),
+      convert: vi.fn(),
     };
     coreStart.security.authc.apiKeys.uiam = mockUiam as never;
 
@@ -361,7 +367,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       // Cloning a UIAM request: skip the ES clone path entirely and mint one fresh UIAM key.
       shouldCloneApiKeyFromRequestMock.mockReturnValue(true);
       hasApiKeyMock.mockReturnValue(true);
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
         username: 'testuser',
       });
 
@@ -397,11 +403,11 @@ describe('EsAndUiamApiKeyStrategy', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'ApiKey essu_uiam-credential' },
       });
-      const onApiKeyCreated = jest.fn();
+      const onApiKeyCreated = vi.fn();
 
       shouldCloneApiKeyFromRequestMock.mockReturnValue(true);
       hasApiKeyMock.mockReturnValue(true);
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
         username: 'testuser',
       });
       mockUiam.grant
@@ -441,7 +447,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       hasApiKeyMock.mockReturnValue(true);
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
         username: 'testuser',
         authentication_type: 'api_key',
       });
@@ -475,7 +481,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       hasApiKeyMock.mockReturnValue(true);
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
         username: 'testuser',
         authentication_type: 'api_key',
         // UIAM reported the authenticated API key as external
@@ -506,7 +512,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
       hasApiKeyMock.mockReturnValue(false);
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
         username: 'testuser',
         profile_uid: 'u_profile_123',
       });
@@ -543,7 +549,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         id: 'uiam-req-id',
         api_key: 'essu_from-request',
       });
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
         username: 'testuser',
         profile_uid: 'u_profile_456',
       });
@@ -566,7 +572,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
       hasApiKeyMock.mockReturnValue(false);
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
         username: 'testuser',
       });
 
@@ -589,7 +595,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
       hasApiKeyMock.mockReturnValue(false);
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
         username: 'testuser',
       });
 

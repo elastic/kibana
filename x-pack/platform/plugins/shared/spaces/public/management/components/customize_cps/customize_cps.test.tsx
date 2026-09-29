@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
@@ -16,7 +18,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { CustomizeCps } from './customize_cps';
 
 describe('CustomizeCps', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   const originProject = {
     _alias: 'local_project',
@@ -35,7 +37,7 @@ describe('CustomizeCps', () => {
     key1: 'value1',
   };
 
-  const mockFetchProjects = jest.fn().mockImplementation(async (projectRouting?: string) => {
+  const mockFetchProjects = vi.fn().mockImplementation(async (projectRouting?: string) => {
     // When scoped to "This project" we should not return linked projects.
     if (projectRouting === '_alias:_origin') {
       return { origin: originProject, linkedProjects: [] };
@@ -47,7 +49,7 @@ describe('CustomizeCps', () => {
 
   const mockCpsManager = {
     fetchProjects: mockFetchProjects,
-    getConfigurationLinks: jest.fn(),
+    getConfigurationLinks: vi.fn(),
   };
 
   const defaultSpace: { id: SpaceId; name: string; projectRouting?: string } = {
@@ -91,7 +93,7 @@ describe('CustomizeCps', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Rendering', () => {

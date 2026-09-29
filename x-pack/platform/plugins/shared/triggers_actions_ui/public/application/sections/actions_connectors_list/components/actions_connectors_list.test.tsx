@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,58 +24,73 @@ import { times } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../..', () => ({
-  ...jest.requireActual('../../../..'),
-  useConnectorContext: jest.fn().mockReturnValue({
-    services: {
-      validateEmailAddresses: jest.fn(),
-      enabledEmailServices: ['*'],
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../..', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../..')),
+      useConnectorContext: vi.fn().mockReturnValue({
+        services: {
+          validateEmailAddresses: vi.fn(),
+          enabledEmailServices: ['*'],
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-oauth-hooks', () => ({
-  useConnectorOAuthConnect: jest.fn().mockReturnValue({
-    connect: jest.fn(),
-    cancelConnect: jest.fn(),
-    isConnecting: false,
-    isAwaitingCallback: false,
-  }),
-  useConnectorOAuthDisconnect: jest.fn().mockReturnValue({
-    disconnect: jest.fn(),
-    isDisconnecting: false,
-  }),
-  OAuthRedirectMode: { NewTab: 'new_tab' },
-}));
-jest.mock('../../../lib/action_connector_api', () => ({
-  loadAllActions: jest.fn(),
-  loadActionTypes: jest.fn(),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn().mockReturnValue({}),
-  useLocation: jest.fn().mockReturnValue({ search: '' }),
-  useHistory: jest.fn().mockReturnValue({ push: jest.fn(), createHref: jest.fn() }),
-}));
-jest.mock('@kbn/response-ops-oauth-hooks', () => ({
-  ...jest.requireActual('@kbn/response-ops-oauth-hooks'),
-  useConnectorOAuthConnect: jest.fn().mockReturnValue({
-    connect: jest.fn(),
-    cancelConnect: jest.fn(),
-    isConnecting: false,
-    isAwaitingCallback: false,
-  }),
-  useConnectorOAuthDisconnect: jest.fn().mockReturnValue({
-    disconnect: jest.fn(),
-    isDisconnecting: false,
-  }),
-}));
+vi.mock('@kbn/response-ops-oauth-hooks', () => {
+      const mocked = {
+      useConnectorOAuthConnect: vi.fn().mockReturnValue({
+        connect: vi.fn(),
+        cancelConnect: vi.fn(),
+        isConnecting: false,
+        isAwaitingCallback: false,
+      }),
+      useConnectorOAuthDisconnect: vi.fn().mockReturnValue({
+        disconnect: vi.fn(),
+        isDisconnecting: false,
+      }),
+      OAuthRedirectMode: { NewTab: 'new_tab' },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/action_connector_api', () => {
+      const mocked = {
+      loadAllActions: vi.fn(),
+      loadActionTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn().mockReturnValue({}),
+      useLocation: vi.fn().mockReturnValue({ search: '' }),
+      useHistory: vi.fn().mockReturnValue({ push: vi.fn(), createHref: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-oauth-hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/response-ops-oauth-hooks')),
+      useConnectorOAuthConnect: vi.fn().mockReturnValue({
+        connect: vi.fn(),
+        cancelConnect: vi.fn(),
+        isConnecting: false,
+        isAwaitingCallback: false,
+      }),
+      useConnectorOAuthDisconnect: vi.fn().mockReturnValue({
+        disconnect: vi.fn(),
+        isDisconnecting: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mocks = coreMock.createSetup();
-const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
+const { loadActionTypes } = (await vi.importMock('../../../lib/action_connector_api'));
 
 describe('actions_connectors_list', () => {
   describe('component empty', () => {
@@ -113,7 +131,7 @@ describe('actions_connectors_list', () => {
     });
 
     it('if click create button should render CreateConnectorFlyout', async () => {
-      const setAddFlyoutVisibility = jest.fn();
+      const setAddFlyoutVisibility = vi.fn();
       const user = userEvent.setup();
 
       render(
@@ -178,7 +196,7 @@ describe('actions_connectors_list', () => {
         referencedByCount: 1,
       }),
     ];
-    let mockedEditItem: jest.Mock;
+    let mockedEditItem: Mock;
 
     beforeEach(async () => {
       loadActionTypes.mockResolvedValueOnce([
@@ -217,7 +235,7 @@ describe('actions_connectors_list', () => {
         ...capabilities,
         actions: { delete: true, save: true, show: true },
       };
-      mockedEditItem = jest.fn();
+      mockedEditItem = vi.fn();
     });
 
     it('renders table of connectors', async () => {
@@ -425,10 +443,10 @@ describe('actions_connectors_list', () => {
 
     it('call editItem when connectorId presented in url', async () => {
       const selectedConnector = mockedActions[3];
-      const mockedCreateHref = jest.fn(({ pathname }) => pathname);
-      const replaceStateSpy = jest.spyOn(window.history, 'replaceState');
-      (useParams as jest.Mock).mockReturnValue({ connectorId: selectedConnector.id });
-      (useHistory as jest.Mock).mockReturnValue({ createHref: mockedCreateHref });
+      const mockedCreateHref = vi.fn(({ pathname }) => pathname);
+      const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+      (useParams as Mock).mockReturnValue({ connectorId: selectedConnector.id });
+      (useHistory as Mock).mockReturnValue({ createHref: mockedCreateHref });
 
       render(
         <IntlProvider>
@@ -939,33 +957,33 @@ describe('actions_connectors_list', () => {
   });
 
   describe('OAuth operations (authorize/disconnect buttons)', () => {
-    let useConnectorOAuthConnect: jest.Mock;
-    let useConnectorOAuthDisconnect: jest.Mock;
-    let useConnectorContext: jest.Mock;
+    let useConnectorOAuthConnect: Mock;
+    let useConnectorOAuthDisconnect: Mock;
+    let useConnectorContext: Mock;
 
     beforeEach(async () => {
-      useConnectorOAuthConnect = jest.requireMock('@kbn/response-ops-oauth-hooks')
-        .useConnectorOAuthConnect as jest.Mock;
-      useConnectorOAuthDisconnect = jest.requireMock('@kbn/response-ops-oauth-hooks')
-        .useConnectorOAuthDisconnect as jest.Mock;
-      useConnectorContext = jest.requireMock('../../../..').useConnectorContext as jest.Mock;
+      useConnectorOAuthConnect = (await vi.importMock('@kbn/response-ops-oauth-hooks'))
+        .useConnectorOAuthConnect as Mock;
+      useConnectorOAuthDisconnect = (await vi.importMock('@kbn/response-ops-oauth-hooks'))
+        .useConnectorOAuthDisconnect as Mock;
+      useConnectorContext = (await vi.importMock('../../../..')).useConnectorContext as Mock;
 
       useConnectorContext.mockReturnValue({
         services: {
-          validateEmailAddresses: jest.fn(),
+          validateEmailAddresses: vi.fn(),
           enabledEmailServices: ['*'],
         },
       });
 
       useConnectorOAuthConnect.mockReturnValue({
-        connect: jest.fn(),
-        cancelConnect: jest.fn(),
+        connect: vi.fn(),
+        cancelConnect: vi.fn(),
         isConnecting: false,
         isAwaitingCallback: false,
       });
 
       useConnectorOAuthDisconnect.mockReturnValue({
-        disconnect: jest.fn(),
+        disconnect: vi.fn(),
         isDisconnecting: false,
       });
 
@@ -1068,8 +1086,8 @@ describe('actions_connectors_list', () => {
 
     it('shows "Connecting..." button with loading spinner and cancel icon when isAwaitingCallback is true', async () => {
       useConnectorOAuthConnect.mockReturnValue({
-        connect: jest.fn(),
-        cancelConnect: jest.fn(),
+        connect: vi.fn(),
+        cancelConnect: vi.fn(),
         isConnecting: false,
         isAwaitingCallback: true,
       });
@@ -1112,8 +1130,8 @@ describe('actions_connectors_list', () => {
 
     it('shows "Connecting..." button with loading spinner when isConnecting is true', async () => {
       useConnectorOAuthConnect.mockReturnValue({
-        connect: jest.fn(),
-        cancelConnect: jest.fn(),
+        connect: vi.fn(),
+        cancelConnect: vi.fn(),
         isConnecting: true,
         isAwaitingCallback: false,
       });
@@ -1149,11 +1167,11 @@ describe('actions_connectors_list', () => {
     });
 
     it('calls cancelConnect when cancel icon is clicked during awaiting callback', async () => {
-      const cancelConnect = jest.fn();
+      const cancelConnect = vi.fn();
       const user = userEvent.setup();
 
       useConnectorOAuthConnect.mockReturnValue({
-        connect: jest.fn(),
+        connect: vi.fn(),
         cancelConnect,
         isConnecting: false,
         isAwaitingCallback: true,
@@ -1190,12 +1208,12 @@ describe('actions_connectors_list', () => {
     });
 
     it('calls setActions with updated userAuthStatus to connected after successful authorization', async () => {
-      const setActions = jest.fn();
+      const setActions = vi.fn();
       const user = userEvent.setup();
 
       useConnectorOAuthConnect.mockImplementation(({ onSuccess }: { onSuccess: () => void }) => ({
         connect: () => onSuccess(),
-        cancelConnect: jest.fn(),
+        cancelConnect: vi.fn(),
         isConnecting: false,
         isAwaitingCallback: false,
       }));

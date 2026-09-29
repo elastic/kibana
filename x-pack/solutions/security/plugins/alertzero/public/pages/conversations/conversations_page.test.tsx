@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -39,32 +42,41 @@ import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summar
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
-jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
-  ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
-}));
+vi.mock('../../components/scan_failure_callout/scan_failure_callout', () => {
+      const mocked = {
+      ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
 // the dismiss modal's select needs for real.
-jest.mock('@kbn/proposals-plugin/public', () => ({
-  ...jest.requireActual('@kbn/proposals-plugin/public'),
-  useApproveProposal: jest.fn(),
-  useDismissProposal: jest.fn(),
-  useIsApprovingProposal: jest.fn(),
-  useIsDecliningProposal: jest.fn(),
-}));
+vi.mock('@kbn/proposals-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/proposals-plugin/public')),
+      useApproveProposal: vi.fn(),
+      useDismissProposal: vi.fn(),
+      useIsApprovingProposal: vi.fn(),
+      useIsDecliningProposal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 // Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
 // jest.mock calls for the same module would silently replace one another rather than merge.
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
-  useCurrentUserProfile: jest.fn(() => ({ data: null })),
-  useAssignInvestigation: jest.fn(),
-  useUserProfiles: jest.fn(),
-  useSuggestUserProfiles: jest.fn(),
-  useSetInvestigationStatus: jest.fn(),
-  useInvestigationClosePreview: jest.fn(),
-}));
-jest.mock('@kbn/agentic-investigations-common', () => {
-  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+      useCurrentUserProfile: vi.fn(() => ({ data: null })),
+      useAssignInvestigation: vi.fn(),
+      useUserProfiles: vi.fn(),
+      useSuggestUserProfiles: vi.fn(),
+      useSetInvestigationStatus: vi.fn(),
+      useInvestigationClosePreview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/agentic-investigations-common', async () => {
+  const actual = (await vi.importActual('@kbn/agentic-investigations-common'));
   return {
     ...actual,
     // Replace AssignToUsers with a minimal stub so the queue renders without needing
@@ -93,15 +105,18 @@ jest.mock('@kbn/agentic-investigations-common', () => {
       ),
   };
 });
-jest.mock('../../hooks/use_proposals_api');
-jest.mock('../../hooks/use_proposal_charts_summary');
-jest.mock('../../components/proposals_trend_chart', () => ({
-  ProposalsTrendChartRow: () => null,
-}));
+vi.mock('../../hooks/use_proposals_api');
+vi.mock('../../hooks/use_proposal_charts_summary');
+vi.mock('../../components/proposals_trend_chart', () => {
+      const mocked = {
+      ProposalsTrendChartRow: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 // Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
 // affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
 // so the mutation assertions still hold.
-jest.mock('../../components/connected_status/connected_close_investigation_modal', () => {
+vi.mock('../../components/connected_status/connected_close_investigation_modal', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const agenticInvestigationsPublic = require('@kbn/agentic-investigations-plugin/public');
   // eslint-disable-next-line react/display-name
@@ -132,23 +147,23 @@ jest.mock('../../components/connected_status/connected_close_investigation_modal
   return { ConnectedCloseInvestigationModal };
 });
 
-const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
-const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
-const mockUseClosedProposals = useClosedProposals as jest.Mock;
-const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
-const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
-const mockUseApproveProposal = useApproveProposal as jest.Mock;
-const mockUseDismissProposal = useDismissProposal as jest.Mock;
-const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
-const mockUseIsDecliningProposal = useIsDecliningProposal as jest.Mock;
-const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
-const mockUseUserProfiles = useUserProfiles as jest.Mock;
-const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
-const mockUseSetInvestigationStatus = useSetInvestigationStatus as jest.Mock;
-const mockUseInvestigationClosePreview = useInvestigationClosePreview as jest.Mock;
+const mockUseProposalsByCategory = useProposalsByCategory as Mock;
+const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as Mock;
+const mockUseClosedProposals = useClosedProposals as Mock;
+const mockUseClosedProposalsCount = useClosedProposalsCount as Mock;
+const mockUseProposalChartsSummary = useProposalChartsSummary as Mock;
+const mockUseApproveProposal = useApproveProposal as Mock;
+const mockUseDismissProposal = useDismissProposal as Mock;
+const mockUseIsApprovingProposal = useIsApprovingProposal as Mock;
+const mockUseIsDecliningProposal = useIsDecliningProposal as Mock;
+const mockUseAssignInvestigation = useAssignInvestigation as Mock;
+const mockUseUserProfiles = useUserProfiles as Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as Mock;
+const mockUseSetInvestigationStatus = useSetInvestigationStatus as Mock;
+const mockUseInvestigationClosePreview = useInvestigationClosePreview as Mock;
 
 /** Records the fetchNextPage of each bucket, so a Show more click can be asserted. */
-const fetchNextPage: Record<string, jest.Mock> = {};
+const fetchNextPage: Record<string, Mock> = {};
 
 /**
  * Fans a category→proposals map across the four hooks a section uses: a count-only
@@ -165,7 +180,7 @@ const mockProposals = (groups: Record<string, ProposalItem[]>) => {
 
   const pages = (bucket: string, all: ProposalItem[], firstPageSize: number, enabled: boolean) => {
     // Resolves, like the real one: the caller waits on it to hear that a page failed.
-    fetchNextPage[bucket] = fetchNextPage[bucket] ?? jest.fn().mockResolvedValue({});
+    fetchNextPage[bucket] = fetchNextPage[bucket] ?? vi.fn().mockResolvedValue({});
     if (!enabled) {
       return {
         data: undefined,
@@ -248,8 +263,8 @@ const renderPage = (
   );
   (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
   const agentBuilder = agentBuilderMocks.createStart();
-  const closeFlyout = jest.fn();
-  (agentBuilder.openConversationDetails as jest.Mock).mockResolvedValue(closeFlyout);
+  const closeFlyout = vi.fn();
+  (agentBuilder.openConversationDetails as Mock).mockResolvedValue(closeFlyout);
   const history: MemoryHistory = createMemoryHistory({ initialEntries: [initialEntry] });
 
   // The sections discard their accumulated pages through the query client on
@@ -275,10 +290,10 @@ const renderPage = (
   return { core, agentBuilder, closeFlyout, history, rerender: () => rendered.rerender(page()) };
 };
 
-const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
-const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
-const setStatusMutate = jest.fn();
-const assignInvestigationMutate = jest.fn().mockResolvedValue({});
+const approveMutateAsync = vi.fn().mockResolvedValue(undefined);
+const dismissMutateAsync = vi.fn().mockResolvedValue(undefined);
+const setStatusMutate = vi.fn();
+const assignInvestigationMutate = vi.fn().mockResolvedValue({});
 
 beforeEach(() => {
   approveMutateAsync.mockResolvedValue(undefined);
@@ -295,7 +310,7 @@ beforeEach(() => {
     data: { pending_proposal_count: 0, pending_proposals: [] },
     isLoading: false,
     isFetching: false,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   });
   mockOpenCount(0);
 });
@@ -314,7 +329,7 @@ describe('ConversationsPage details flyout', () => {
     mockProposals({ investigate: [proposal] });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it("opens Agent Builder's flyout for a conversation named in the URL", async () => {
     const { agentBuilder } = renderPage('/?selectedConversationId=inv-1');
@@ -363,7 +378,7 @@ describe('ConversationsPage details flyout', () => {
     const { agentBuilder, history } = renderPage('/?selectedConversationId=inv-1');
     await waitFor(() => expect(agentBuilder.openConversationDetails).toHaveBeenCalled());
 
-    const { onClose } = (agentBuilder.openConversationDetails as jest.Mock).mock.calls[0][0];
+    const { onClose } = (agentBuilder.openConversationDetails as Mock).mock.calls[0][0];
     act(() => onClose());
 
     // Otherwise the id would linger and reopen the flyout on the next render.
@@ -401,7 +416,7 @@ describe('ConversationsPage open in chat', () => {
     mockProposals({ investigate: [proposal] });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   const chatControl = () => screen.getByTestId('conversationCardOpenInChat');
 
@@ -468,7 +483,7 @@ describe('ConversationsPage decisions', () => {
     mockProposals({ respond: [actionProposal] });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   // The modal is titled with the action name, which distinguishes it from the actions
   // popover — also a dialog — and from the menu item that opened it.
@@ -720,7 +735,7 @@ describe('ConversationsPage queue sections', () => {
       category === 'investigate'
         ? {
             data: undefined,
-            fetchNextPage: jest.fn(),
+            fetchNextPage: vi.fn(),
             hasNextPage: undefined,
             isFetchingNextPage: false,
             isInitialLoading: false,
@@ -731,7 +746,7 @@ describe('ConversationsPage queue sections', () => {
               pages: [{ proposals: category === 'respond' ? [proposal] : [], total: 1 }],
               pageParams: [undefined],
             },
-            fetchNextPage: jest.fn(),
+            fetchNextPage: vi.fn(),
             hasNextPage: false,
             isFetchingNextPage: false,
             isInitialLoading: false,
@@ -758,7 +773,7 @@ describe('ConversationsPage queue sections', () => {
     });
     mockUseClosedProposals.mockReturnValue({
       data: undefined,
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       hasNextPage: undefined,
       isFetchingNextPage: false,
       isInitialLoading: true,
@@ -791,7 +806,7 @@ describe('ConversationsPage impact pills', () => {
     mockProposals({ investigate: [hostProposal, userProposal] });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('filters the queue to conversations whose entity ids include the selected pill', () => {
     renderPage('/');
@@ -865,7 +880,7 @@ describe('ConversationsPage assignee picker', () => {
     mockProposals({ investigate: [proposal] });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('passes the conversationId (not the proposal id) to the assignment mutation', async () => {
     renderPage('/', { capabilities: { manageInvestigations: true } });

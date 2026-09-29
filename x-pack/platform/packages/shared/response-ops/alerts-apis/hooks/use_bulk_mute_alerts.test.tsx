@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -12,7 +14,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/bulk_mute_alerts';
 import { useBulkMuteAlerts } from './use_bulk_mute_alerts';
 
-jest.mock('../apis/bulk_mute_alerts');
+vi.mock('../apis/bulk_mute_alerts');
 
 const params = {
   rules: [
@@ -27,11 +29,11 @@ describe('useBulkMuteAlerts', () => {
   const addErrorMock = notifications.toasts.addError;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const bulkMuteAlertsSpy = jest.spyOn(api, 'bulkMuteAlerts');
+    const bulkMuteAlertsSpy = vi.spyOn(api, 'bulkMuteAlerts');
 
     const { result } = renderHook(() => useBulkMuteAlerts({ http, notifications }), {
       wrapper: Wrapper,
@@ -48,7 +50,7 @@ describe('useBulkMuteAlerts', () => {
   });
 
   it('shows a toast error when the api returns an error', async () => {
-    const spy = jest.spyOn(api, 'bulkMuteAlerts').mockRejectedValue(new Error('An error'));
+    const spy = vi.spyOn(api, 'bulkMuteAlerts').mockRejectedValue(new Error('An error'));
 
     const { result } = renderHook(() => useBulkMuteAlerts({ http, notifications }), {
       wrapper: Wrapper,

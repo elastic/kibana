@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/core-http-router-server-internal', () => {
-  const realModule = jest.requireActual('@kbn/core-http-router-server-internal');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('@kbn/core-http-router-server-internal', async () => {
+  const realModule = (await vi.importActual('@kbn/core-http-router-server-internal'));
   return {
     ...realModule,
-    ensureRawRequest: jest.fn(),
+    ensureRawRequest: vi.fn(),
   };
 });
 
@@ -36,12 +39,12 @@ describe('Console Proxy Route', () => {
   });
 
   afterEach(async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('headers', () => {
     it('forwards the remote header info', async () => {
-      (ensureRawRequest as jest.Mock).mockReturnValue({
+      (ensureRawRequest as Mock).mockReturnValue({
         // This mocks the shape of the hapi request object, will probably change
         info: {
           remoteAddress: '0.0.0.0',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DEFAULT_DETECTIONS_CLOSE_REASONS_KEY } from '../../../../../../common/constants';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { requestContextMock } from '../../__mocks__';
@@ -12,13 +15,13 @@ import { validateClosingReason } from './validate_closing_reason';
 
 describe('validateClosingReason', () => {
   let core: Awaited<SecuritySolutionRequestHandlerContext['core']>;
-  let uiSettingsGet: jest.Mock;
+  let uiSettingsGet: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const { context } = requestContextMock.createTools();
     core = context.core as unknown as Awaited<SecuritySolutionRequestHandlerContext['core']>;
-    uiSettingsGet = context.core.uiSettings.client.get as unknown as jest.Mock;
+    uiSettingsGet = context.core.uiSettings.client.get as unknown as Mock;
     uiSettingsGet.mockResolvedValue([]);
   });
 

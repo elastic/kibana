@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { resetSessionApp } from './reset_session_app';
 
 // Mock the dynamic import
-const mockRenderResetSessionPage = jest.fn(() => jest.fn());
-jest.mock('./reset_session_page', () => ({
-  renderResetSessionPage: mockRenderResetSessionPage,
-}));
+const mockRenderResetSessionPage = vi.fn(() => vi.fn());
+vi.mock('./reset_session_page', () => {
+      const mocked = {
+      renderResetSessionPage: mockRenderResetSessionPage,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('resetSessionApp', () => {
   beforeAll(() => {
@@ -27,7 +32,7 @@ describe('resetSessionApp', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     window.location.search = '';
   });
 

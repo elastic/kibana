@@ -7,40 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { convertToLens } from '.';
 import { sampleAreaVis } from '../sample_vis.test.mocks';
 
-const mockGetColumnsFromVis = jest.fn();
-const mockCreateStaticValueColumn = jest.fn().mockReturnValue({ operationType: 'static_value' });
-const mockGetVisSchemas = jest.fn().mockReturnValue({
+const mockGetColumnsFromVis = vi.fn();
+const mockCreateStaticValueColumn = vi.fn().mockReturnValue({ operationType: 'static_value' });
+const mockGetVisSchemas = vi.fn().mockReturnValue({
   metric: [{ aggId: '1' }],
 });
-const mockGetConfiguration = jest.fn().mockReturnValue({});
+const mockGetConfiguration = vi.fn().mockReturnValue({});
 
-jest.mock('../services', () => ({
-  getDataViewsStart: jest.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/get_series_params', () => ({
-  getSeriesParams: jest.fn(() => undefined),
-}));
+vi.mock('../utils/get_series_params', () => {
+      const mocked = {
+      getSeriesParams: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/visualizations-plugin/public', () => ({
-  getConvertToLensModule: async () => ({
-    getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
-    createStaticValueColumn: jest.fn(() => mockCreateStaticValueColumn()),
-  }),
-  getDataViewByIndexPatternId: jest.fn(() => ({ id: 'index-pattern' })),
-  getVisSchemas: jest.fn(() => mockGetVisSchemas()),
-}));
+vi.mock('@kbn/visualizations-plugin/public', () => {
+      const mocked = {
+      getConvertToLensModule: async () => ({
+        getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
+        createStaticValueColumn: vi.fn(() => mockCreateStaticValueColumn()),
+      }),
+      getDataViewByIndexPatternId: vi.fn(() => ({ id: 'index-pattern' })),
+      getVisSchemas: vi.fn(() => mockGetVisSchemas()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./configurations', () => ({
-  getConfiguration: jest.fn(() => mockGetConfiguration()),
-}));
+vi.mock('./configurations', () => {
+      const mocked = {
+      getConfiguration: vi.fn(() => mockGetConfiguration()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertToLens', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return null if getColumnsFromVis returns null', async () => {

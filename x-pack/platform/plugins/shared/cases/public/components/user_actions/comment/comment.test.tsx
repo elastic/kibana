@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiCommentList } from '@elastic/eui';
@@ -42,12 +45,12 @@ import {
   STACK_ALERT_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/navigation/hooks');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/navigation/hooks');
 
-const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
-const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
-const navigateToCaseView = jest.fn();
+const useCaseViewParamsMock = useCaseViewParams as Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as Mock;
+const navigateToCaseView = vi.fn();
 
 describe('createCommentUserActionBuilder', () => {
   const builderArgs = getMockBuilderArgs();
@@ -74,7 +77,7 @@ describe('createCommentUserActionBuilder', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
     useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
   });
@@ -357,7 +360,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('deletes a user comment correctly', async () => {
-      const handleDeleteComment = jest.fn();
+      const handleDeleteComment = vi.fn();
       const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
@@ -385,7 +388,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('edits a user comment correctly', async () => {
-      const handleManageMarkdownEditId = jest.fn();
+      const handleManageMarkdownEditId = vi.fn();
       const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
@@ -418,7 +421,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('quotes a user comment correctly', async () => {
-      const handleManageQuote = jest.fn();
+      const handleManageQuote = vi.fn();
       const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
@@ -728,12 +731,12 @@ describe('createCommentUserActionBuilder', () => {
 
     describe('Unified value attachments', () => {
       it('renders correctly a unified value attachment', async () => {
-        const MockComponent = jest.fn((props) => {
+        const MockComponent = vi.fn((props) => {
           const state = props.data.state as { test_foo: string };
           return <div data-test-subj={`attachment_${state.test_foo}`} />;
         });
 
-        const SpyLazyFactory = jest.fn(() => {
+        const SpyLazyFactory = vi.fn(() => {
           return Promise.resolve().then(() => {
             return {
               default: React.memo(MockComponent),
@@ -898,7 +901,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('shows correctly the visible primary actions', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
@@ -943,7 +946,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('shows correctly a custom action', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
@@ -968,7 +971,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('shows correctly the non visible primary actions', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
@@ -1015,7 +1018,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('hides correctly the  default actions', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
@@ -1057,7 +1060,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('shows correctly the registered primary actions and non-primary actions', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
@@ -1119,7 +1122,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('divides correctly less than two primary actions', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [

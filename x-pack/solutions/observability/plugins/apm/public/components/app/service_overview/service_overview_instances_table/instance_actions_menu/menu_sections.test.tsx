@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getMenuSections } from './menu_sections';
 import type { IBasePath } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
@@ -18,28 +20,28 @@ type InstaceDetails =
 
 describe('getMenuSections', () => {
   const mockBasePath = {
-    prepend: jest.fn((path: string) => `/basepath${path}`),
+    prepend: vi.fn((path: string) => `/basepath${path}`),
   } as unknown as IBasePath;
 
   const mockLogsLocator = {
-    getRedirectUrl: jest.fn(() => 'logs-url'),
+    getRedirectUrl: vi.fn(() => 'logs-url'),
   } as unknown as LocatorPublic<LogsLocatorParams>;
 
   const mockAssetDetailsLocator = {
-    getRedirectUrl: jest.fn(() => 'asset-details-url'),
+    getRedirectUrl: vi.fn(() => 'asset-details-url'),
   } as unknown as AssetDetailsLocator;
 
   const mockDiscoverLocator = {
-    getRedirectUrl: jest.fn((params: SerializableRecord) => {
+    getRedirectUrl: vi.fn((params: SerializableRecord) => {
       const esql = (params.query as { esql?: string })?.esql || '';
       return `/app/discover#/?_a=(query:(esql:'${esql}'))`;
     }),
   } as unknown as LocatorPublic<SerializableRecord>;
 
-  const mockOnFilterByInstanceClick = jest.fn();
+  const mockOnFilterByInstanceClick = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns APM actions section with filter and metrics actions', () => {

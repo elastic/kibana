@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { SystemPromptSelector } from './system_prompt_selector';
 import { mockSystemPromptSettings } from '../../../../../mock/system_prompt';
 
-const onSystemPromptSelectionChange = jest.fn();
-const onSystemPromptDeleted = jest.fn();
+const onSystemPromptSelectionChange = vi.fn();
+const onSystemPromptDeleted = vi.fn();
 const testProps = {
   systemPrompts: mockSystemPromptSettings,
   onSystemPromptSelectionChange,
@@ -21,7 +23,7 @@ const testProps = {
 
 describe('SystemPromptSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Selects an existing system prompt', () => {
     const { getByTestId } = render(<SystemPromptSelector {...testProps} />);
@@ -59,7 +61,7 @@ describe('SystemPromptSelector', () => {
     expect(onSystemPromptSelectionChange).toHaveBeenCalledWith(mockSystemPromptSettings[1]);
   });
   it('Reset settings every time before selecting an system prompt from the input if resetSettings is provided', () => {
-    const mockResetSettings = jest.fn();
+    const mockResetSettings = vi.fn();
     const { getByTestId } = render(
       <SystemPromptSelector {...testProps} resetSettings={mockResetSettings} />
     );

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { useReactFlow, useStore } from '@xyflow/react';
@@ -17,14 +20,17 @@ import {
   GRAPH_CONTROLS_ZOOM_OUT_ID,
 } from '../test_ids';
 
-jest.mock('@xyflow/react', () => ({
-  ...jest.requireActual('@xyflow/react'),
-  useReactFlow: jest.fn(),
-  useStore: jest.fn(),
-}));
+vi.mock('@xyflow/react', () => {
+      const mocked = {
+      ...require('@xyflow/react'),
+      useReactFlow: vi.fn(),
+      useStore: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useReactFlowMock = useReactFlow as jest.Mock;
-const useStoreMock = useStore as jest.Mock;
+const useReactFlowMock = useReactFlow as Mock;
+const useStoreMock = useStore as Mock;
 
 describe('Controls integration with Graph', () => {
   const renderGraphPreview = (props: GraphProps) =>
@@ -36,9 +42,9 @@ describe('Controls integration with Graph', () => {
 
   beforeEach(() => {
     useReactFlowMock.mockReturnValue({
-      zoomIn: jest.fn(),
-      zoomOut: jest.fn(),
-      fitView: jest.fn(),
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
+      fitView: vi.fn(),
     });
 
     useStoreMock.mockReturnValue({ minZoomReached: false, maxZoomReached: false });

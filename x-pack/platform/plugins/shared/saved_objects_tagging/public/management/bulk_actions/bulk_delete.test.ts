@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { overlayServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { tagClientMock } from '../../services/tags/tags_client.mock';
@@ -15,7 +18,7 @@ describe('bulkDeleteAction', () => {
   let tagClient: ReturnType<typeof tagClientMock.create>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
-  let setLoading: jest.MockedFunction<(loading: boolean) => void>;
+  let setLoading: MockedFunction<(loading: boolean) => void>;
   let action: TagBulkAction;
   let canceled$: Subject<void>;
 
@@ -26,7 +29,7 @@ describe('bulkDeleteAction', () => {
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
     canceled$ = new Subject();
-    setLoading = jest.fn();
+    setLoading = vi.fn();
 
     action = getBulkDeleteAction({ tagClient, overlays, notifications, setLoading });
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CustomFieldTypes, CaseStatuses, CaseSeverity } from '../../../common/types/domain';
 import { stringify as yamlStringify } from 'yaml';
 import {
@@ -38,13 +40,13 @@ describe('update', () => {
   };
 
   const casesClientMock = createCasesClientMock();
-  casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+  casesClientMock.configure.get = vi.fn().mockResolvedValue([]);
 
   describe('assignee identity population', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
@@ -159,7 +161,7 @@ describe('update', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -692,7 +694,7 @@ describe('update', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -828,7 +830,7 @@ describe('update', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -941,7 +943,7 @@ describe('update', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('counts a template applied to an existing case', async () => {
@@ -1341,7 +1343,7 @@ describe('update', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -1478,7 +1480,7 @@ describe('update', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -1618,7 +1620,7 @@ describe('update', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -1774,7 +1776,7 @@ describe('update', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -1974,7 +1976,7 @@ describe('update', () => {
     ];
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       // These tests assert the exact custom-field patch payload; the extended_fields
       // mirroring (templates flag ON) is covered by dedicated tests below.
       clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
@@ -1986,7 +1988,7 @@ describe('update', () => {
         page: 1,
       });
 
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: defaultCustomFieldsConfiguration,
@@ -2255,7 +2257,7 @@ describe('update', () => {
     });
 
     it('throws error when required custom fields are null', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: [
@@ -2308,7 +2310,7 @@ describe('update', () => {
     });
 
     it('throws error when required custom fields are undefined and missing a default value', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: [
@@ -2383,7 +2385,7 @@ describe('update', () => {
     const clientArgsMock = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgsMock.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
@@ -2476,7 +2478,7 @@ describe('update', () => {
 
     describe('Validate max user actions per page', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         clientArgsMock.services.caseService.getCases.mockResolvedValue({
           saved_objects: [{ ...mockCases[0] }, { ...mockCases[1] }],
         });
@@ -2596,7 +2598,7 @@ describe('update', () => {
       const clientArgs = createCasesClientMockArgs();
 
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
         clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
           saved_objects: [],
@@ -2781,7 +2783,7 @@ describe('update', () => {
       const clientArgs = createCasesClientMockArgs();
 
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
         clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
           saved_objects: [],
@@ -3044,7 +3046,7 @@ describe('update', () => {
         const invalidCloseReason = 'invalid_reason';
         const clientArgsWithValidator = {
           ...clientArgs,
-          closeReasonValidator: jest.fn().mockResolvedValue(false),
+          closeReasonValidator: vi.fn().mockResolvedValue(false),
         };
 
         await expect(
@@ -3195,7 +3197,7 @@ describe('update', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({
         saved_objects: [secCase, obsCase],
       });
@@ -3304,7 +3306,7 @@ describe('update', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -3348,7 +3350,7 @@ describe('update', () => {
 
   describe('customFields → extended_fields adapter (write-time mirror)', () => {
     const casesClientMock2 = createCasesClientMock();
-    casesClientMock2.configure.get = jest.fn().mockResolvedValue([]);
+    casesClientMock2.configure.get = vi.fn().mockResolvedValue([]);
 
     const customFieldsCfg = [
       {
@@ -3439,7 +3441,7 @@ describe('update', () => {
         ],
         total: 2,
       });
-      casesClientMock2.configure.get = jest
+      casesClientMock2.configure.get = vi
         .fn()
         .mockResolvedValue([
           { owner: mockCases[0].attributes.owner, customFields: customFieldsCfg },
@@ -3917,7 +3919,7 @@ describe('update', () => {
         ],
         total: 1,
       });
-      casesClientMock3.configure.get = jest
+      casesClientMock3.configure.get = vi
         .fn()
         .mockResolvedValue([
           { owner: mockCases[0].attributes.owner, customFields: closeCustomFieldsCfg },

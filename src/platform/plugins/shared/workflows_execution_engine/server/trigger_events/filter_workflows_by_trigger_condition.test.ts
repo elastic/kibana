@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { ALL_CONNECTOR_IDS, type WorkflowDetailDto } from '@kbn/workflows';
 import {
@@ -39,7 +41,7 @@ const createMockWorkflow = (
 
 describe('workflowMatchesTriggerCondition', () => {
   const mockLogger: Logger = {
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   it('should return false when workflow has no triggers', () => {
@@ -261,7 +263,7 @@ describe('workflowMatchesTriggerCondition', () => {
 
 describe('classifyWorkflowTriggerMatch', () => {
   const mockLogger: Logger = {
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   it('returns disabled when workflow is not enabled', () => {

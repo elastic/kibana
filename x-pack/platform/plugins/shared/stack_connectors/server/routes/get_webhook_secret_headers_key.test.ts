@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
 import Boom from '@hapi/boom';
@@ -12,7 +14,7 @@ import Boom from '@hapi/boom';
 describe('getWebhookSecretHeadersKeyRoute', () => {
   const router = httpServiceMock.createRouter();
   const mockActionsClient = {
-    get: jest.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({
       id: '1',
       actionTypeId: '.webhook',
       name: 'My connector',
@@ -23,15 +25,15 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
     }),
   };
 
-  const getStartServices = jest.fn().mockResolvedValue([
+  const getStartServices = vi.fn().mockResolvedValue([
     {},
     {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+        getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
       },
       encryptedSavedObjects: {
-        getClient: jest.fn().mockReturnValue({
-          getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        getClient: vi.fn().mockReturnValue({
+          getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
             attributes: {
               secrets: {
                 secretHeaders: { secretKey: 'supersecret' },
@@ -42,7 +44,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
       },
       spaces: {
         spacesService: {
-          getSpaceId: jest.fn().mockReturnValue('default'),
+          getSpaceId: vi.fn().mockReturnValue('default'),
         },
       },
     },
@@ -70,7 +72,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
     const routeHandler = router.get.mock.calls[0][1];
 
     const mockActionsClientInvalid = {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: '2',
         actionTypeId: '.email',
         name: 'Invalid connector',
@@ -83,18 +85,18 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
       {},
       {
         actions: {
-          getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClientInvalid),
+          getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClientInvalid),
         },
         encryptedSavedObjects: {
-          getClient: jest.fn().mockReturnValue({
-            getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+          getClient: vi.fn().mockReturnValue({
+            getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
               attributes: {},
             }),
           }),
         },
         spaces: {
           spacesService: {
-            getSpaceId: jest.fn().mockReturnValue('default'),
+            getSpaceId: vi.fn().mockReturnValue('default'),
           },
         },
       },
@@ -120,25 +122,25 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
     const routeHandler = router.get.mock.calls[0][1];
 
     const mockActionsClientAuthFail = {
-      get: jest.fn().mockRejectedValue(new Boom.Boom('Not authorized', { statusCode: 403 })),
+      get: vi.fn().mockRejectedValue(new Boom.Boom('Not authorized', { statusCode: 403 })),
     };
 
     getStartServices.mockResolvedValue([
       {},
       {
         actions: {
-          getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClientAuthFail),
+          getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClientAuthFail),
         },
         encryptedSavedObjects: {
-          getClient: jest.fn().mockReturnValue({
-            getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+          getClient: vi.fn().mockReturnValue({
+            getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
               attributes: {},
             }),
           }),
         },
         spaces: {
           spacesService: {
-            getSpaceId: jest.fn().mockReturnValue('default'),
+            getSpaceId: vi.fn().mockReturnValue('default'),
           },
         },
       },

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { v1 as uuidv1 } from 'uuid';
 
 import type { Case } from '../../../common/types/domain';
@@ -52,7 +54,7 @@ describe('find', () => {
     },
   ];
   const casesClientMock = createCasesClientMock();
-  casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
+  casesClientMock.configure.get = vi.fn().mockResolvedValue(configureMock);
 
   describe('constructSearch', () => {
     const clientArgs = createCasesClientMockArgs();
@@ -74,7 +76,7 @@ describe('find', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('search by uuid updates search term and adds rootSearchFields', async () => {
@@ -141,10 +143,10 @@ describe('find', () => {
 
   describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
-    casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
+    casesClientMock.configure.get = vi.fn().mockResolvedValue(configureMock);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('when foo:bar attribute in request payload', async () => {
@@ -316,7 +318,7 @@ describe('find', () => {
     });
 
     it('throws error when no customFields in configuration', async () => {
-      casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+      casesClientMock.configure.get = vi.fn().mockResolvedValue([]);
       const findRequest = createCasesClientMockFindRequest({
         customFields: { second_key: [true] },
         owner: 'cases',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AppHeaderBadge } from '@kbn/app-header';
@@ -20,7 +22,7 @@ const overviewTab = {
   id: 'overview',
   label: 'Overview',
   isSelected: true,
-  onClick: jest.fn(),
+  onClick: vi.fn(),
   'data-test-subj': 'infraAssetDetailsOverviewTab',
 };
 
@@ -31,100 +33,142 @@ const hostBadges: AppHeaderBadge[] = [
   },
 ];
 
-const mockGetBreadcrumbOptions = jest.fn(() => ({
+const mockGetBreadcrumbOptions = vi.fn(() => ({
   text: inventoryTitle,
   link: { href: '/app/metrics/inventory' },
 }));
 
-const mockUseAssetDetailsRenderPropsContext = jest.fn();
-const mockGetHostHeaderBadges = jest.fn((_args: GetHostHeaderBadgesArgs) => hostBadges);
+const mockUseAssetDetailsRenderPropsContext = vi.fn();
+const mockGetHostHeaderBadges = vi.fn((_args: GetHostHeaderBadgesArgs) => hostBadges);
 
 // The Page composes the header; rendering the real `AppHeader` tree is covered by
 // `metrics_detail_app_header.test.tsx`, so capture the props here instead of mounting it.
 let lastMetricsDetailAppHeaderProps: MetricsDetailAppHeaderProps | undefined;
 
-jest.mock('../../../pages/metrics/header/metrics_detail_app_header', () => ({
-  MetricsDetailAppHeader: (props: MetricsDetailAppHeaderProps) => {
-    lastMetricsDetailAppHeaderProps = props;
-    return <div data-test-subj="metricsDetailAppHeader" />;
-  },
-}));
+vi.mock('../../../pages/metrics/header/metrics_detail_app_header', () => {
+      const mocked = {
+      MetricsDetailAppHeader: (props: MetricsDetailAppHeaderProps) => {
+        lastMetricsDetailAppHeaderProps = props;
+        return <div data-test-subj="metricsDetailAppHeader" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_metrics_breadcrumbs', () => ({
-  useMetricsBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../hooks/use_metrics_breadcrumbs', () => {
+      const mocked = {
+      useMetricsBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_parent_breadcrumb_resolver', () => ({
-  useParentBreadcrumbResolver: () => ({
-    getBreadcrumbOptions: () => mockGetBreadcrumbOptions(),
-  }),
-}));
+vi.mock('../../../hooks/use_parent_breadcrumb_resolver', () => {
+      const mocked = {
+      useParentBreadcrumbResolver: () => ({
+        getBreadcrumbOptions: () => mockGetBreadcrumbOptions(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      telemetry: { reportAssetDetailsPageViewed: jest.fn() },
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          telemetry: { reportAssetDetailsPageViewed: vi.fn() },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_metadata_state', () => ({
-  useMetadataStateContext: () => ({
-    metadata: { hasSystemIntegration: true },
-    loading: false,
-  }),
-}));
+vi.mock('../hooks/use_metadata_state', () => {
+      const mocked = {
+      useMetadataStateContext: () => ({
+        metadata: { hasSystemIntegration: true },
+        loading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_asset_details_render_props', () => ({
-  useAssetDetailsRenderPropsContext: () => mockUseAssetDetailsRenderPropsContext(),
-}));
+vi.mock('../hooks/use_asset_details_render_props', () => {
+      const mocked = {
+      useAssetDetailsRenderPropsContext: () => mockUseAssetDetailsRenderPropsContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_host_attachment_config', () => ({
-  useHostAttachmentConfig: jest.fn(),
-}));
+vi.mock('../hooks/use_host_attachment_config', () => {
+      const mocked = {
+      useHostAttachmentConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_page_header', () => ({
-  usePageHeader: () => ({
-    rightSideItems: [],
-    tabEntries: [],
-    appHeaderTabs: [overviewTab],
-    breadcrumbs: [],
-  }),
-}));
+vi.mock('../hooks/use_page_header', () => {
+      const mocked = {
+      usePageHeader: () => ({
+        rightSideItems: [],
+        tabEntries: [],
+        appHeaderTabs: [overviewTab],
+        breadcrumbs: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_tab_switcher', () => ({
-  useTabSwitcherContext: () => ({
-    activeTabId: 'overview',
-    showTab: jest.fn(),
-    renderedTabsSet: { current: new Set(['overview']) },
-  }),
-}));
+vi.mock('../hooks/use_tab_switcher', () => {
+      const mocked = {
+      useTabSwitcherContext: () => ({
+        activeTabId: 'overview',
+        showTab: vi.fn(),
+        renderedTabsSet: { current: new Set(['overview']) },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_date_picker', () => ({
-  useDatePickerContext: () => ({
-    dateRange: { from: 'now-15m', to: 'now' },
-    setDateRange: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/use_date_picker', () => {
+      const mocked = {
+      useDatePickerContext: () => ({
+        dateRange: { from: 'now-15m', to: 'now' },
+        setDateRange: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_profiling_kuery', () => ({
-  useProfilingKuery: () => ({
-    customKuery: '',
-    setCustomKuery: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/use_profiling_kuery', () => {
+      const mocked = {
+      useProfilingKuery: () => ({
+        customKuery: '',
+        setCustomKuery: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../date_picker/date_picker', () => ({
-  DatePicker: () => <div data-test-subj="assetDetailsDatePicker" />,
-}));
+vi.mock('../date_picker/date_picker', () => {
+      const mocked = {
+      DatePicker: () => <div data-test-subj="assetDetailsDatePicker" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../content/content', () => ({
-  Content: () => <div data-test-subj="assetDetailsContent" />,
-}));
+vi.mock('../content/content', () => {
+      const mocked = {
+      Content: () => <div data-test-subj="assetDetailsContent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../header/host_header_title', () => ({
-  getHostHeaderBadges: (args: GetHostHeaderBadgesArgs) => mockGetHostHeaderBadges(args),
-}));
+vi.mock('../header/host_header_title', () => {
+      const mocked = {
+      getHostHeaderBadges: (args: GetHostHeaderBadgesArgs) => mockGetHostHeaderBadges(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let lastInfraPageTemplateProps: {
   onboardingFlow?: string;
@@ -132,27 +176,30 @@ let lastInfraPageTemplateProps: {
   header?: React.ReactNode;
 } = {};
 
-jest.mock('../../shared/templates/infra_page_template', () => ({
-  InfraPageTemplate: ({
-    children,
-    header,
-    onboardingFlow,
-    hasDataOverride,
-  }: {
-    children: React.ReactNode;
-    header?: React.ReactNode;
-    onboardingFlow?: string;
-    hasDataOverride?: boolean;
-  }) => {
-    lastInfraPageTemplateProps = { onboardingFlow, hasDataOverride, header };
-    return (
-      <div data-test-subj="infraPageTemplate">
-        {header}
-        {children}
-      </div>
-    );
-  },
-}));
+vi.mock('../../shared/templates/infra_page_template', () => {
+      const mocked = {
+      InfraPageTemplate: ({
+        children,
+        header,
+        onboardingFlow,
+        hasDataOverride,
+      }: {
+        children: React.ReactNode;
+        header?: React.ReactNode;
+        onboardingFlow?: string;
+        hasDataOverride?: boolean;
+      }) => {
+        lastInfraPageTemplateProps = { onboardingFlow, hasDataOverride, header };
+        return (
+          <div data-test-subj="infraPageTemplate">
+            {header}
+            {children}
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderPage = () => render(<Page tabs={[]} />);
 

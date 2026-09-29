@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import v8 from 'v8';
 import {
   LOW_MEMORY_BATCH_SIZE,
@@ -26,7 +28,7 @@ describe('isMemoryConstrained', () => {
   });
 
   it('defaults to the V8 heap size limit of the current process', () => {
-    const spy = jest
+    const spy = vi
       .spyOn(v8, 'getHeapStatistics')
       .mockReturnValue({ heap_size_limit: 512 * 1024 * 1024 } as v8.HeapInfo);
 

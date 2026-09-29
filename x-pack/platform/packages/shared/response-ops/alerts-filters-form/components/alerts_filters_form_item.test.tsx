@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -13,16 +15,16 @@ import { alertsFiltersMetadata } from '../filters_metadata';
 import type { AlertsFiltersFormItemProps } from './alerts_filters_form_item';
 import { AlertsFiltersFormItem } from './alerts_filters_form_item';
 
-jest.mock('../filters_metadata', () => {
+vi.mock('../filters_metadata', async () => {
   const original: { alertsFiltersMetadata: typeof alertsFiltersMetadata } =
-    jest.requireActual('../filters_metadata');
+    (await vi.importActual('../filters_metadata'));
   return {
     alertsFiltersMetadata: Object.fromEntries(
       Object.entries(original.alertsFiltersMetadata).map(([key, value]) => [
         key,
         {
           ...value,
-          component: jest
+          component: vi
             .fn()
             .mockImplementation((props) => (
               <div data-test-subj={`${key}Filter`}>{props.value}</div>
@@ -33,8 +35,8 @@ jest.mock('../filters_metadata', () => {
   };
 });
 
-const mockOnTypeChange = jest.fn();
-const mockOnValueChange = jest.fn();
+const mockOnTypeChange = vi.fn();
+const mockOnValueChange = vi.fn();
 
 const TestComponent = (overrides: Partial<AlertsFiltersFormItemProps<unknown>>) => {
   const [type, setType] = useState(overrides?.type);

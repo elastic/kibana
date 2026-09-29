@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { AlertEpisodesRuleFilter } from './rule_filter';
@@ -12,10 +14,10 @@ import { fetchRulesSearch } from '../../apis/fetch_rules_search';
 import * as inlineFilterPopoverModule from './inline_filter_popover';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../apis/fetch_rules_search');
+vi.mock('../../apis/fetch_rules_search');
 
-const mockFetchRulesSearch = jest.mocked(fetchRulesSearch);
-const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
+const mockFetchRulesSearch = vi.mocked(fetchRulesSearch);
+const InlineFilterPopoverSpy = vi.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 
 describe('RuleFilter', () => {
   const mockHttp = {} as any;
@@ -27,7 +29,7 @@ describe('RuleFilter', () => {
 
   const defaultProps = {
     selectedRuleId: null,
-    onRuleChange: jest.fn(),
+    onRuleChange: vi.fn(),
     ruleOptions: mockRuleOptions,
     services: { http: mockHttp },
     'data-test-subj': 'test-rule-filter',
@@ -36,7 +38,7 @@ describe('RuleFilter', () => {
   const user = userEvent.setup({ delay: null });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchRulesSearch.mockResolvedValue([]);
   });
 
@@ -176,7 +178,7 @@ describe('RuleFilter', () => {
 
   describe('selection callback', () => {
     it('calls onRuleChange with rule id when single value is provided', async () => {
-      const onRuleChange = jest.fn();
+      const onRuleChange = vi.fn();
       render(<AlertEpisodesRuleFilter {...defaultProps} onRuleChange={onRuleChange} />);
       await openPopover();
 
@@ -189,7 +191,7 @@ describe('RuleFilter', () => {
     });
 
     it('calls onRuleChange with undefined when empty array is provided', async () => {
-      const onRuleChange = jest.fn();
+      const onRuleChange = vi.fn();
       render(<AlertEpisodesRuleFilter {...defaultProps} onRuleChange={onRuleChange} />);
       await openPopover();
 
@@ -200,7 +202,7 @@ describe('RuleFilter', () => {
     });
 
     it('calls onRuleChange with first value when multiple values are provided', async () => {
-      const onRuleChange = jest.fn();
+      const onRuleChange = vi.fn();
       render(<AlertEpisodesRuleFilter {...defaultProps} onRuleChange={onRuleChange} />);
       await openPopover();
 
@@ -213,12 +215,12 @@ describe('RuleFilter', () => {
 
   describe('search functionality', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
+      vi.runOnlyPendingTimers();
+      vi.useRealTimers();
     });
 
     it('provides initial empty search value', async () => {
@@ -313,7 +315,7 @@ describe('RuleFilter', () => {
       expect(mockFetchRulesSearch).not.toHaveBeenCalled();
 
       act(() => {
-        jest.advanceTimersByTime(250);
+        vi.advanceTimersByTime(250);
       });
 
       await act(async () => {
@@ -337,7 +339,7 @@ describe('RuleFilter', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(250);
+        vi.advanceTimersByTime(250);
       });
 
       await act(async () => {
@@ -361,7 +363,7 @@ describe('RuleFilter', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(250);
+        vi.advanceTimersByTime(250);
       });
 
       await act(async () => {
@@ -388,7 +390,7 @@ describe('RuleFilter', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(250);
+        vi.advanceTimersByTime(250);
       });
 
       await act(async () => {
@@ -420,7 +422,7 @@ describe('RuleFilter', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(250);
+        vi.advanceTimersByTime(250);
       });
 
       await act(async () => {
@@ -452,7 +454,7 @@ describe('RuleFilter', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(250);
+        vi.advanceTimersByTime(250);
       });
 
       await act(async () => {
@@ -480,7 +482,7 @@ describe('RuleFilter', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(250);
+        vi.advanceTimersByTime(250);
       });
 
       await act(async () => {

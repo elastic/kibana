@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -14,8 +16,8 @@ import { TestProviders } from '../../../common/mock';
 import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import type { SeverityCount } from '../severity/types';
 
-jest.mock('@kbn/cell-actions', () => {
-  const actual = jest.requireActual('@kbn/cell-actions');
+vi.mock('@kbn/cell-actions', async () => {
+  const actual = (await vi.importActual('@kbn/cell-actions'));
   return {
     ...actual,
     CellActions: ({ data, metadata }: CellActionsProps) => {
@@ -44,7 +46,7 @@ const buildEntityDataView = (): DataView => {
   return {
     id: 'entity-store-dv-id',
     fields: {
-      getByName: jest.fn((name: string) => {
+      getByName: vi.fn((name: string) => {
         if (name !== ENTITY_RISK_LEVEL_FIELD) return undefined;
         return {
           ...fieldSpec,
@@ -213,7 +215,7 @@ describe('RiskLevelBreakdownTable', () => {
     const emptyDataView = {
       id: 'empty-dv',
       fields: {
-        getByName: jest.fn().mockReturnValue(undefined),
+        getByName: vi.fn().mockReturnValue(undefined),
       },
     } as unknown as DataView;
 

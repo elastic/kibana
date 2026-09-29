@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import type { UsePerformEvaluationParams } from './use_perform_evaluation';
 import { usePerformEvaluation } from './use_perform_evaluation';
@@ -13,43 +16,46 @@ import { useMutation as _useMutation } from '@kbn/react-query';
 import type { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
-const useMutationMock = _useMutation as jest.Mock;
-const postEvaluationMock = _postEvaluation as jest.Mock;
+const useMutationMock = _useMutation as Mock;
+const postEvaluationMock = _postEvaluation as Mock;
 
-jest.mock('./evaluate', () => {
-  const actual = jest.requireActual('./evaluate');
+vi.mock('./evaluate', async () => {
+  const actual = (await vi.importActual('./evaluate'));
   return {
     ...actual,
-    postEvaluation: jest.fn((...args) => actual.postEvaluation(...args)),
+    postEvaluation: vi.fn((...args) => actual.postEvaluation(...args)),
   };
 });
 
-jest.mock('@kbn/react-query', () => ({
-  useMutation: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
-    try {
-      const res = await fn();
-      return Promise.resolve(res);
-    } catch (e) {
-      opts.onError(e);
-    }
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useMutation: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
+        try {
+          const res = await fn();
+          return Promise.resolve(res);
+        } catch (e) {
+          opts.onError(e);
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const statusResponse = {
   success: true,
 };
 
 const http = {
-  post: jest.fn().mockResolvedValue(statusResponse),
+  post: vi.fn().mockResolvedValue(statusResponse),
 };
 const toasts = {
-  addError: jest.fn(),
+  addError: vi.fn(),
 };
 const defaultProps = { http, toasts } as unknown as UsePerformEvaluationParams;
 
 describe('usePerformEvaluation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should call api with undefined evalParams', async () => {
     renderHook(() => usePerformEvaluation(defaultProps));

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { SearchField } from '.';
 
 describe('SearchField', () => {
-  const onSearch = jest.fn();
+  const onSearch = vi.fn();
 
   it('renders the component', () => {
     const { getByTestId } = render(<SearchField onSearch={onSearch} />);

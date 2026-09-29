@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -16,9 +18,9 @@ import { AnomaliesBadge } from './anomalies_badge';
 // return that path so tests fail if the badge uses it instead of `getUrl`.
 const SHARE_REDIRECT_URL = '/app/r?l=APM_LOCATOR&lz=compressed-payload';
 
-const mockGetRedirectUrl = jest.fn().mockReturnValue(SHARE_REDIRECT_URL);
+const mockGetRedirectUrl = vi.fn().mockReturnValue(SHARE_REDIRECT_URL);
 
-const mockGetUrl = jest
+const mockGetUrl = vi
   .fn()
   .mockImplementation(async ({ serviceName, isMobileAgentName, query }: any) => {
     const base = isMobileAgentName
@@ -32,7 +34,7 @@ const mockGetUrl = jest
   });
 
 const mockLocators = {
-  get: jest.fn().mockReturnValue({ getUrl: mockGetUrl, getRedirectUrl: mockGetRedirectUrl }),
+  get: vi.fn().mockReturnValue({ getUrl: mockGetUrl, getRedirectUrl: mockGetRedirectUrl }),
 } as unknown as AnomaliesBadgeNavigationProps['locators'];
 
 const regularClickProps: AnomaliesBadgeNavigationProps = {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
@@ -13,12 +16,12 @@ import { useUserPrivileges } from '../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../exceptions/hooks/use_endpoint_exceptions_capability';
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 
-jest.mock('../common/components/user_privileges');
-jest.mock('../exceptions/hooks/use_endpoint_exceptions_capability');
+vi.mock('../common/components/user_privileges');
+vi.mock('../exceptions/hooks/use_endpoint_exceptions_capability');
 // Mock RuleDetailsPage to display the current tab from route params
-jest.mock('../detection_engine/rule_details_ui/pages/rule_details', () => {
+vi.mock('../detection_engine/rule_details_ui/pages/rule_details', () => {
   // import useParams directly from react-router-dom because the wrapper @kbn/shared-ux-router does not expose it
-  const useParams = jest.requireActual('react-router-dom').useParams;
+  const useParams = require('react-router-dom').useParams;
   return {
     RuleDetailsPage: () => {
       const { tabName } = useParams();
@@ -27,8 +30,8 @@ jest.mock('../detection_engine/rule_details_ui/pages/rule_details', () => {
   };
 });
 
-const mockUseUserPrivileges = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
-const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.MockedFunction<
+const mockUseUserPrivileges = useUserPrivileges as MockedFunction<typeof useUserPrivileges>;
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as MockedFunction<
   typeof useEndpointExceptionsCapability
 >;
 
@@ -60,7 +63,7 @@ describe('RuleDetailsRedirect', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('redirects to the correct path with default landing tab', () => {
@@ -97,7 +100,7 @@ describe('RuleDetailsTabGuard', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUserPrivileges.mockReturnValue(
       defaultPrivileges as ReturnType<typeof useUserPrivileges>
     );

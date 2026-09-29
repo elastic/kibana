@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import type { IWorkspace } from '@kbn/workspaces';
 import type { ScriptBenchmark } from '../config/types';
@@ -28,13 +30,13 @@ describe('fromScriptBenchmark', () => {
 
   const createContext = (buildDir?: string) => {
     const workspace: IWorkspace = {
-      ensureCheckout: jest.fn(async () => {}),
-      ensureBootstrap: jest.fn(async () => {}),
-      ensureBuild: jest.fn(async () => {}),
+      ensureCheckout: vi.fn(async () => {}),
+      ensureBootstrap: vi.fn(async () => {}),
+      ensureBuild: vi.fn(async () => {}),
       getDisplayName: () => 'test-workspace',
       getCommitLine: async () => 'test-commit',
       getDir: () => '/repo',
-      exec: jest.fn() as IWorkspace['exec'],
+      exec: vi.fn() as IWorkspace['exec'],
     };
 
     const context: BenchmarkRunContext = {

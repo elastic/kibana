@@ -5,42 +5,50 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { ImportDataModalComponent } from '.';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-jest.mock('../../lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: { http: { basePath: { prepend: jest.fn() } } },
-  }),
-}));
-jest.mock('../../hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-  }),
-}));
+vi.mock('../../lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: { http: { basePath: { prepend: vi.fn() } } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ImportDataModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders correctly against snapshot', () => {
     const { queryByText } = render(
       <ImportDataModalComponent
         isModalVisible={true}
-        closeModal={jest.fn()}
+        closeModal={vi.fn()}
         title="Import Modal Title"
         description="Import Modal Description"
         filePickerPrompt="Please select a file"
         submitBtnText="Import Button"
-        errorMessage={jest.fn()}
-        importData={jest.fn()}
-        onImportComplete={jest.fn()}
+        errorMessage={vi.fn()}
+        importData={vi.fn()}
+        onImportComplete={vi.fn()}
       />
     );
 
@@ -51,18 +59,18 @@ describe('ImportDataModal', () => {
   });
 
   test('should import file and invoke a callback on completion', async () => {
-    const importData = jest.fn().mockReturnValue({ success: true, errors: [] });
-    const importComplete = jest.fn();
+    const importData = vi.fn().mockReturnValue({ success: true, errors: [] });
+    const importComplete = vi.fn();
 
     const { queryByTestId } = render(
       <ImportDataModalComponent
         isModalVisible={true}
-        closeModal={jest.fn()}
+        closeModal={vi.fn()}
         title="Import Modal Title"
         description="Import Modal Description"
         filePickerPrompt="Please select a file"
         submitBtnText="Import Button"
-        errorMessage={jest.fn()}
+        errorMessage={vi.fn()}
         importData={importData}
         onImportComplete={importComplete}
       />

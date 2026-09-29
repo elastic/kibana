@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useHasSecurityCapability as _useHasSecurityCapability } from '../../../helper_hooks';
 import { renderHook as reactRenderHook } from '@testing-library/react';
 import { useEndpointExceptionsCapability } from '.';
 import { useGetEndpointExceptionsPerPolicyOptIn as _useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 
-jest.mock('../../../helper_hooks');
-jest.mock('../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
+vi.mock('../../../helper_hooks');
+vi.mock('../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
 
-const useHasSecurityCapabilityMock = _useHasSecurityCapability as jest.Mock;
-const useGetEndpointExceptionsPerPolicyOptIn = _useGetEndpointExceptionsPerPolicyOptIn as jest.Mock;
+const useHasSecurityCapabilityMock = _useHasSecurityCapability as Mock;
+const useGetEndpointExceptionsPerPolicyOptIn = _useGetEndpointExceptionsPerPolicyOptIn as Mock;
 
 describe('useEndpointExceptionsCapability()', () => {
   let capabilities: Record<string, boolean>;
@@ -36,7 +39,7 @@ describe('useEndpointExceptionsCapability()', () => {
 
     useGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({ data: { status: false } });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should return 'true' if capability 'crudEndpointExceptions' allowed`, () => {

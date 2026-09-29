@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   savedObjectsClientMock,
   elasticsearchServiceMock,
@@ -18,15 +21,18 @@ import type {
 import { WatchlistEntitySourceClient } from './entity_source_client';
 import { watchlistEntitySourceTypeName } from './entity_source_type';
 
-const mockValidateIndexPermissions = jest.fn();
-const mockInvalidateEntitySourceApiKey = jest.fn();
-const mockGrantEntitySourceApiKey = jest.fn();
+const mockValidateIndexPermissions = vi.fn();
+const mockInvalidateEntitySourceApiKey = vi.fn();
+const mockGrantEntitySourceApiKey = vi.fn();
 
-jest.mock('../entity_source_api_key', () => ({
-  validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
-  invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
-  grantEntitySourceApiKey: (...args: unknown[]) => mockGrantEntitySourceApiKey(...args),
-}));
+vi.mock('../entity_source_api_key', () => {
+      const mocked = {
+      validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
+      invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
+      grantEntitySourceApiKey: (...args: unknown[]) => mockGrantEntitySourceApiKey(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WatchlistEntitySourceClient', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
@@ -34,15 +40,15 @@ describe('WatchlistEntitySourceClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockSecurity: {
     authc: {
-      getCurrentUser: jest.Mock;
+      getCurrentUser: Mock;
       apiKeys: {
-        grantAsInternalUser: jest.Mock;
-        cloneAsInternalUser: jest.Mock;
-        invalidateAsInternalUser: jest.Mock;
+        grantAsInternalUser: Mock;
+        cloneAsInternalUser: Mock;
+        invalidateAsInternalUser: Mock;
       };
     };
   };
-  let mockGetStartServices: jest.Mock;
+  let mockGetStartServices: Mock;
   let client: WatchlistEntitySourceClient;
 
   const mockedApiKey = { apiKeyId: 'new-kid', apiKey: 'new-secret' };
@@ -54,15 +60,15 @@ describe('WatchlistEntitySourceClient', () => {
 
     mockSecurity = {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue({ authentication_type: 'token' }),
+        getCurrentUser: vi.fn().mockReturnValue({ authentication_type: 'token' }),
         apiKeys: {
-          grantAsInternalUser: jest.fn(),
-          cloneAsInternalUser: jest.fn(),
-          invalidateAsInternalUser: jest.fn(),
+          grantAsInternalUser: vi.fn(),
+          cloneAsInternalUser: vi.fn(),
+          invalidateAsInternalUser: vi.fn(),
         },
       },
     };
-    mockGetStartServices = jest.fn().mockResolvedValue([{ security: mockSecurity }]);
+    mockGetStartServices = vi.fn().mockResolvedValue([{ security: mockSecurity }]);
 
     mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
     mockInvalidateEntitySourceApiKey.mockReset().mockResolvedValue(undefined);
@@ -318,7 +324,7 @@ describe('WatchlistEntitySourceClient', () => {
         apiKey: 'should-be-stripped',
       } as never);
 
-      const [, , calledAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+      const [, , calledAttrs] = (soClient.update as Mock).mock.calls[0];
       expect(calledAttrs).not.toHaveProperty('apiKeyId');
       expect(calledAttrs).not.toHaveProperty('apiKey');
     });
@@ -393,7 +399,7 @@ describe('WatchlistEntitySourceClient', () => {
           logger
         );
         expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
-        const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+        const [, , savedAttrs] = (soClient.update as Mock).mock.calls[0];
         expect(savedAttrs).toMatchObject({
           apiKeyId: mockedApiKey.apiKeyId,
           apiKey: mockedApiKey.apiKey,
@@ -426,7 +432,7 @@ describe('WatchlistEntitySourceClient', () => {
 
         expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
         expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
-        const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+        const [, , savedAttrs] = (soClient.update as Mock).mock.calls[0];
         expect(savedAttrs).toMatchObject({
           apiKeyId: mockedApiKey.apiKeyId,
           apiKey: mockedApiKey.apiKey,
@@ -489,7 +495,7 @@ describe('WatchlistEntitySourceClient', () => {
           logger
         );
         expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
-        const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+        const [, , savedAttrs] = (soClient.update as Mock).mock.calls[0];
         expect(savedAttrs).toMatchObject({ apiKeyId: null, apiKey: null });
       });
     });
@@ -510,7 +516,7 @@ describe('WatchlistEntitySourceClient', () => {
 
         expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
         expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
-        const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+        const [, , savedAttrs] = (soClient.update as Mock).mock.calls[0];
         expect(savedAttrs).toMatchObject({
           apiKeyId: mockedApiKey.apiKeyId,
           apiKey: mockedApiKey.apiKey,

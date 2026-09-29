@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
 import {
   searchEventsToolHandler,
@@ -55,10 +57,10 @@ describe('searchEventsToolHandler', () => {
   };
 
   const makeClient = (hits: object[] = [event], total = hits.length) => ({
-    findLatestByCurrentStatePaginated: jest
+    findLatestByCurrentStatePaginated: vi
       .fn()
       .mockResolvedValue({ hits, page: 1, perPage: 20, total }),
-    findLatestPaginated: jest.fn().mockResolvedValue({ hits, page: 1, perPage: 20, total }),
+    findLatestPaginated: vi.fn().mockResolvedValue({ hits, page: 1, perPage: 20, total }),
   });
 
   it('returns a bounded compact routing projection with complete signal state', async () => {

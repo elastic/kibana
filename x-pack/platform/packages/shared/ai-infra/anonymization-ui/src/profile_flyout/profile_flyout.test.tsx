@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,18 +23,18 @@ const createBaseTargetIdField = (): UseTargetIdFieldResult => ({
   targetIdAsyncError: '',
   isTargetIdValidating: false,
   isTargetIdLoading: false,
-  onTargetIdSearchChange: jest.fn(),
-  onTargetIdFocus: jest.fn(),
-  onTargetIdSelectChange: jest.fn(),
+  onTargetIdSearchChange: vi.fn(),
+  onTargetIdFocus: vi.fn(),
+  onTargetIdSelectChange: vi.fn(),
   onTargetIdCreateOption: undefined,
-  validateAndHydrateTargetId: jest.fn().mockResolvedValue(true),
+  validateAndHydrateTargetId: vi.fn().mockResolvedValue(true),
 });
 
 let mockTargetIdField = createBaseTargetIdField();
 
-jest.mock('../profile_form/profile_form_provider', () => {
-  const mockReact: typeof import('react') = jest.requireActual('react');
-  const { ProfileFormContextProvider } = jest.requireActual('../profile_form/profile_form_context');
+vi.mock('../profile_form/profile_form_provider', async () => {
+  const mockReact: typeof import('react') = require('react');
+  const { ProfileFormContextProvider } = (await vi.importActual('../profile_form/profile_form_context'));
   type MockProfileFormProviderProps = React.PropsWithChildren<ProfileFormProps>;
 
   return {
@@ -52,7 +54,7 @@ jest.mock('../profile_form/profile_form_provider', () => {
         onSubmit: onSubmitWithTargetValidation,
         targetIdField: mockTargetIdField,
         includeHiddenAndSystemIndices: false,
-        onIncludeHiddenAndSystemIndicesChange: jest.fn(),
+        onIncludeHiddenAndSystemIndicesChange: vi.fn(),
         submitAttemptCount,
       };
 
@@ -68,8 +70,8 @@ jest.mock('../profile_form/profile_form_provider', () => {
 });
 
 const renderFlyout = (overrides: Partial<React.ComponentProps<typeof ProfileFlyout>> = {}) => {
-  const onSubmit = jest.fn().mockResolvedValue(undefined);
-  const onCancel = jest.fn();
+  const onSubmit = vi.fn().mockResolvedValue(undefined);
+  const onCancel = vi.fn();
 
   const renderResult = render(
     <I18nProvider>
@@ -84,14 +86,14 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof ProfileFlyo
         regexRules={[]}
         nerRules={[]}
         isSubmitting={false}
-        onNameChange={jest.fn()}
-        onDescriptionChange={jest.fn()}
-        onTargetTypeChange={jest.fn()}
-        onTargetIdChange={jest.fn()}
-        onFieldRulesChange={jest.fn()}
-        onRegexRulesChange={jest.fn()}
-        onNerRulesChange={jest.fn()}
-        fetch={jest.fn()}
+        onNameChange={vi.fn()}
+        onDescriptionChange={vi.fn()}
+        onTargetTypeChange={vi.fn()}
+        onTargetIdChange={vi.fn()}
+        onFieldRulesChange={vi.fn()}
+        onRegexRulesChange={vi.fn()}
+        onNerRulesChange={vi.fn()}
+        fetch={vi.fn()}
         onCancel={onCancel}
         onSubmit={onSubmit}
         {...overrides}
@@ -104,7 +106,7 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof ProfileFlyo
 
 describe('ProfileFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockTargetIdField = createBaseTargetIdField();
   });
 
@@ -120,7 +122,7 @@ describe('ProfileFlyout', () => {
   });
 
   it('validates current target before submit', async () => {
-    const validateAndHydrateTargetId = jest.fn().mockResolvedValue(true);
+    const validateAndHydrateTargetId = vi.fn().mockResolvedValue(true);
     mockTargetIdField = {
       ...createBaseTargetIdField(),
       validateAndHydrateTargetId,
@@ -192,16 +194,16 @@ describe('ProfileFlyout', () => {
           nerRules={[]}
           fieldRulesError="Entity class is required for anonymized fields."
           isSubmitting={false}
-          onNameChange={jest.fn()}
-          onDescriptionChange={jest.fn()}
-          onTargetTypeChange={jest.fn()}
-          onTargetIdChange={jest.fn()}
-          onFieldRulesChange={jest.fn()}
-          onRegexRulesChange={jest.fn()}
-          onNerRulesChange={jest.fn()}
-          fetch={jest.fn()}
-          onCancel={jest.fn()}
-          onSubmit={jest.fn().mockResolvedValue(undefined)}
+          onNameChange={vi.fn()}
+          onDescriptionChange={vi.fn()}
+          onTargetTypeChange={vi.fn()}
+          onTargetIdChange={vi.fn()}
+          onFieldRulesChange={vi.fn()}
+          onRegexRulesChange={vi.fn()}
+          onNerRulesChange={vi.fn()}
+          fetch={vi.fn()}
+          onCancel={vi.fn()}
+          onSubmit={vi.fn().mockResolvedValue(undefined)}
         />
       </I18nProvider>
     );
@@ -239,16 +241,16 @@ describe('ProfileFlyout', () => {
           nerRules={[]}
           regexRulesError="Regex pattern and entity class are required for regex rules"
           isSubmitting={false}
-          onNameChange={jest.fn()}
-          onDescriptionChange={jest.fn()}
-          onTargetTypeChange={jest.fn()}
-          onTargetIdChange={jest.fn()}
-          onFieldRulesChange={jest.fn()}
-          onRegexRulesChange={jest.fn()}
-          onNerRulesChange={jest.fn()}
-          fetch={jest.fn()}
-          onCancel={jest.fn()}
-          onSubmit={jest.fn().mockResolvedValue(undefined)}
+          onNameChange={vi.fn()}
+          onDescriptionChange={vi.fn()}
+          onTargetTypeChange={vi.fn()}
+          onTargetIdChange={vi.fn()}
+          onFieldRulesChange={vi.fn()}
+          onRegexRulesChange={vi.fn()}
+          onNerRulesChange={vi.fn()}
+          fetch={vi.fn()}
+          onCancel={vi.fn()}
+          onSubmit={vi.fn().mockResolvedValue(undefined)}
         />
       </I18nProvider>
     );
@@ -287,16 +289,16 @@ describe('ProfileFlyout', () => {
           nerRules={[]}
           nerRulesError="NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC."
           isSubmitting={false}
-          onNameChange={jest.fn()}
-          onDescriptionChange={jest.fn()}
-          onTargetTypeChange={jest.fn()}
-          onTargetIdChange={jest.fn()}
-          onFieldRulesChange={jest.fn()}
-          onRegexRulesChange={jest.fn()}
-          onNerRulesChange={jest.fn()}
-          fetch={jest.fn()}
-          onCancel={jest.fn()}
-          onSubmit={jest.fn().mockResolvedValue(undefined)}
+          onNameChange={vi.fn()}
+          onDescriptionChange={vi.fn()}
+          onTargetTypeChange={vi.fn()}
+          onTargetIdChange={vi.fn()}
+          onFieldRulesChange={vi.fn()}
+          onRegexRulesChange={vi.fn()}
+          onNerRulesChange={vi.fn()}
+          fetch={vi.fn()}
+          onCancel={vi.fn()}
+          onSubmit={vi.fn().mockResolvedValue(undefined)}
         />
       </I18nProvider>
     );

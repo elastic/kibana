@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type { ConfigType } from '@kbn/screenshotting-server';
@@ -22,7 +24,7 @@ describe('chromium driver', () => {
   const mockBasePath = '/kibanaTest1';
 
   beforeEach(() => {
-    mockLogger = { debug: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as Logger;
+    mockLogger = { debug: vi.fn(), error: vi.fn(), info: vi.fn() } as unknown as Logger;
     mockLogger.get = () => mockLogger;
 
     mockConfig = {
@@ -47,19 +49,19 @@ describe('chromium driver', () => {
     };
 
     mockPage = {
-      screenshot: jest.fn().mockResolvedValue(`you won't believe this one weird screenshot`),
-      evaluate: jest.fn(),
+      screenshot: vi.fn().mockResolvedValue(`you won't believe this one weird screenshot`),
+      evaluate: vi.fn(),
     } as unknown as puppeteer.Page;
 
     mockScreenshotModeSetup = {
-      setScreenshotContext: jest.fn(),
-      setScreenshotModeEnabled: jest.fn(),
-      isScreenshotMode: jest.fn(),
+      setScreenshotContext: vi.fn(),
+      setScreenshotModeEnabled: vi.fn(),
+      isScreenshotMode: vi.fn(),
     };
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('return screenshot with preserve layout option', async () => {
@@ -90,7 +92,7 @@ describe('chromium driver', () => {
     );
 
     // @ts-expect-error spy on non-public class method
-    const testSpy = jest.spyOn(driver, 'injectScreenshottingErrorHeader');
+    const testSpy = vi.spyOn(driver, 'injectScreenshottingErrorHeader');
 
     const result = await driver.screenshot({
       elementPosition: {
@@ -120,7 +122,7 @@ describe('chromium driver', () => {
 
     const layout = new PreserveLayout({} as Size);
 
-    const testSpy = jest.spyOn(layout, 'setPdfImageSize');
+    const testSpy = vi.spyOn(layout, 'setPdfImageSize');
 
     await driver.screenshot({
       elementPosition: {

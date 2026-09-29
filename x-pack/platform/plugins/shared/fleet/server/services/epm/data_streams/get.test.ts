@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { dataStreamService } from '../../data_streams';
 
 import { getDataStreams } from './get';
 
-jest.mock('../../data_streams', () => {
+vi.mock('../../data_streams', () => {
   return {
     dataStreamService: {
-      getMatchingDataStreams: jest.fn().mockImplementation(async () => {
+      getMatchingDataStreams: vi.fn().mockImplementation(async () => {
         return [
           {
             name: 'logs-elastic_agent-default',
@@ -192,7 +195,7 @@ describe('getDataStreams', () => {
   describe('profiles data stream type', () => {
     it('includes profiles-* data streams and filters out profiling-* data streams', async () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-      (dataStreamService.getMatchingDataStreams as jest.Mock).mockResolvedValueOnce([
+      (dataStreamService.getMatchingDataStreams as Mock).mockResolvedValueOnce([
         {
           name: 'profiles-generic.otel-default',
           timestamp_field: { name: '@timestamp' },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -17,11 +20,14 @@ import { UNGROUPED_FACTORY_KEY } from '../constants';
 import { getData } from './get_data';
 import { getElasticsearchMetricQuery } from './metric_query';
 
-jest.mock('./metric_query', () => ({
-  getElasticsearchMetricQuery: jest.fn(),
-}));
+vi.mock('./metric_query', () => {
+      const mocked = {
+      getElasticsearchMetricQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGetElasticsearchMetricQuery = getElasticsearchMetricQuery as jest.MockedFunction<
+const mockedGetElasticsearchMetricQuery = getElasticsearchMetricQuery as MockedFunction<
   typeof getElasticsearchMetricQuery
 >;
 
@@ -60,7 +66,7 @@ const esQueryConfig = {
   ignoreFilterIfFieldNotInIndex: false,
 };
 
-const logger = { debug: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn() } as unknown as Logger;
 
 const expectedNoDataResponse = {
   [UNGROUPED_FACTORY_KEY]: {
@@ -89,7 +95,7 @@ const callGetData = (search: ElasticsearchClient['search'], groupBy?: string | s
 
 describe('getData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedGetElasticsearchMetricQuery.mockReturnValue({
       track_total_hits: true,
       query: { bool: { must: [], must_not: [], filter: [], should: [] } },
@@ -100,7 +106,7 @@ describe('getData', () => {
 
   it('returns no data when a last value aggregation has no numeric bucket path value', async () => {
     const response = await callGetData(
-      jest.fn().mockRejectedValue({
+      vi.fn().mockRejectedValue({
         meta: {
           body: {
             error: {
@@ -124,7 +130,7 @@ describe('getData', () => {
 
   it('returns no data when a last value no-data error is surfaced as a message', async () => {
     const response = await callGetData(
-      jest.fn().mockRejectedValue({
+      vi.fn().mockRejectedValue({
         message:
           'buckets_path must reference either a number value or a single value numeric metric aggregation',
       })
@@ -135,7 +141,7 @@ describe('getData', () => {
 
   it('returns an empty result when a grouped search has no surviving composite buckets', async () => {
     const response = await callGetData(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         aggregations: {
           groupings: {
             buckets: [],
@@ -153,7 +159,7 @@ describe('getData', () => {
   });
 
   it('returns a fresh object for each no-data call so in-place mutation cannot leak across rules', async () => {
-    const search = jest.fn().mockResolvedValue({
+    const search = vi.fn().mockResolvedValue({
       _shards: { successful: 0 },
     });
 
@@ -171,12 +177,12 @@ describe('getData', () => {
   it('throws other Elasticsearch errors', async () => {
     const error = new Error('Elasticsearch failed for another reason');
 
-    await expect(callGetData(jest.fn().mockRejectedValue(error))).rejects.toThrow(error);
+    await expect(callGetData(vi.fn().mockRejectedValue(error))).rejects.toThrow(error);
   });
 
   it('unflattens flat dotted additional context from top_hits _source', async () => {
     const response = await callGetData(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         aggregations: {
           groupings: {
             buckets: [
@@ -229,7 +235,7 @@ describe('getData', () => {
 
   it('keeps already-nested additional context from top_hits _source', async () => {
     const response = await callGetData(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         aggregations: {
           groupings: {
             buckets: [

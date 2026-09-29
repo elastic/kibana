@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AppMenuPopover } from './app_menu_popover';
 
 describe('AppMenuPopover', () => {
   const defaultItems = [
-    { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
-    { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
+    { id: 'item1', label: 'Item 1', run: vi.fn(), order: 1 },
+    { id: 'item2', label: 'Item 2', run: vi.fn(), order: 2 },
   ];
 
   const defaultAnchorElement = <button data-test-subj="anchor-button">Anchor</button>;
@@ -23,11 +25,11 @@ describe('AppMenuPopover', () => {
     items: defaultItems,
     anchorElement: defaultAnchorElement,
     isOpen: false,
-    onClose: jest.fn(),
+    onClose: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the popover with anchor element', () => {
@@ -112,7 +114,7 @@ describe('AppMenuPopover', () => {
           {
             id: 'item1',
             label: 'Item 1',
-            run: jest.fn(),
+            run: vi.fn(),
             order: 1,
             testId: 'described-item',
             description: 'Supporting text',
@@ -136,7 +138,7 @@ describe('AppMenuPopover', () => {
           {
             id: 'item1',
             label: 'Item 1',
-            run: jest.fn(),
+            run: vi.fn(),
             order: 1,
             testId: 'disabled-described-item',
             description: 'Unavailable right now',

@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ExportApp } from './export_app.component';
 import type { CanvasWorkpad } from '../../../types';
 
-jest.mock('../workpad_page', () => ({
-  WorkpadPage: (props: any) => <div>Page</div>,
-}));
+vi.mock('../workpad_page', () => {
+      const mocked = {
+      WorkpadPage: (props: any) => <div>Page</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../routing', () => ({
-  RoutingLink: (props: any) => <div>Link</div>,
-}));
+vi.mock('../routing', () => {
+      const mocked = {
+      RoutingLink: (props: any) => <div>Link</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<ExportApp />', () => {
   test('renders as expected', () => {

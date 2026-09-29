@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -43,7 +45,7 @@ const allowed = async () => true;
 
 describe('getDeleteKiStepDefinition', () => {
   it('throws FeatureDisabledError when Context Engine is disabled', async () => {
-    const esClient = { search: jest.fn(), delete: jest.fn() };
+    const esClient = { search: vi.fn(), delete: vi.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
       esClient,
@@ -66,7 +68,7 @@ describe('getDeleteKiStepDefinition', () => {
   });
 
   it('throws PermissionError when the workflow user lacks the write privilege', async () => {
-    const esClient = { search: jest.fn(), delete: jest.fn() };
+    const esClient = { search: vi.fn(), delete: vi.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
       esClient,
@@ -88,8 +90,8 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('deletes the KI from its backing index and returns the document id', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+      search: vi.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: vi.fn().mockResolvedValue({ result: 'deleted' }),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
@@ -117,8 +119,8 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('waits for the refresh when refresh is true', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+      search: vi.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: vi.fn().mockResolvedValue({ result: 'deleted' }),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', refresh: true },
@@ -141,9 +143,9 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('appends a revision with lifecycle status deleted on a data stream', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001')),
-      index: jest.fn().mockResolvedValue({ _id: 'new' }),
-      delete: jest.fn(),
+      search: vi.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001')),
+      index: vi.fn().mockResolvedValue({ _id: 'new' }),
+      delete: vi.fn(),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
@@ -181,8 +183,8 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('resolves the AI index with the workflow space id', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+      search: vi.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: vi.fn().mockResolvedValue({ result: 'deleted' }),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
@@ -204,7 +206,7 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('throws NotFoundError when the data stream KI is already deleted', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -215,8 +217,8 @@ describe('getDeleteKiStepDefinition', () => {
           ],
         },
       }),
-      index: jest.fn(),
-      delete: jest.fn(),
+      index: vi.fn(),
+      delete: vi.fn(),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
@@ -239,7 +241,7 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('throws ValidationError when the KI id matches documents in multiple backing indices', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: [
             { _id: 'ki-1', _index: 'ai-index-idx-foo' },
@@ -247,7 +249,7 @@ describe('getDeleteKiStepDefinition', () => {
           ],
         },
       }),
-      delete: jest.fn(),
+      delete: vi.fn(),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
@@ -273,8 +275,8 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('throws NotFoundError when the KI does not exist in the AI index', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-      delete: jest.fn(),
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
+      delete: vi.fn(),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'missing-ki' },
@@ -297,8 +299,8 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('throws NotFoundError when the KI was removed concurrently', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      delete: jest.fn().mockRejectedValue(createNotFoundResponseError()),
+      search: vi.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: vi.fn().mockRejectedValue(createNotFoundResponseError()),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
@@ -320,8 +322,8 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('reports a success event and logs after the delete', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+      search: vi.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: vi.fn().mockResolvedValue({ result: 'deleted' }),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
@@ -352,8 +354,8 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('reports a failure event when the KI is missing', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-      delete: jest.fn(),
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
+      delete: vi.fn(),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'missing-ki' },
@@ -386,8 +388,8 @@ describe('getDeleteKiStepDefinition', () => {
   it('reports an aborted event when the run was cancelled', async () => {
     const abortController = new AbortController();
     const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      delete: jest.fn().mockImplementation(() => {
+      search: vi.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: vi.fn().mockImplementation(() => {
         abortController.abort();
         return Promise.reject(new errors.RequestAbortedError('Request aborted'));
       }),
@@ -421,13 +423,13 @@ describe('getDeleteKiStepDefinition', () => {
   });
 
   it('throws NotFoundError when the AI index does not exist', async () => {
-    const esClient = { search: jest.fn(), delete: jest.fn() };
+    const esClient = { search: vi.fn(), delete: vi.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'missing', ki_id: 'ki-1' },
       esClient,
     });
     const service = {
-      get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('missing')),
+      get: vi.fn().mockRejectedValue(new AiIndexNotFoundError('missing')),
     } as unknown as AiIndexService;
 
     const { handler } = getDeleteKiStepDefinition({

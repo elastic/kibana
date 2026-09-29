@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -99,7 +101,7 @@ describe('SpanLinksBadge', () => {
   describe('onClick functionality', () => {
     it('calls onClick handler with correct tab parameter when clicked', async () => {
       const user = userEvent.setup();
-      const onClickMock = jest.fn();
+      const onClickMock = vi.fn();
       render(
         <SpanLinksBadge
           {...defaultProps}
@@ -124,7 +126,7 @@ describe('SpanLinksBadge', () => {
     });
 
     it('has correct aria label when onClick is provided', () => {
-      const onClickMock = jest.fn();
+      const onClickMock = vi.fn();
       render(
         <SpanLinksBadge
           {...defaultProps}

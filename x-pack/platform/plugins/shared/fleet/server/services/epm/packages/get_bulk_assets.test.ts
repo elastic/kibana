@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ISavedObjectTypeRegistry, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../../common/types';
@@ -14,7 +16,7 @@ import { getBulkAssets } from './get_bulk_assets';
 describe('getBulkAssets', () => {
   it('uses attributes.name as the display title when attributes.title is unavailable', async () => {
     const soClient = {
-      bulkResolve: jest.fn().mockResolvedValue({
+      bulkResolve: vi.fn().mockResolvedValue({
         resolved_objects: [
           {
             saved_object: {
@@ -33,7 +35,7 @@ describe('getBulkAssets', () => {
     } as unknown as SavedObjectsClientContract;
 
     const soTypeRegistry = {
-      getType: jest.fn().mockReturnValue({
+      getType: vi.fn().mockReturnValue({
         management: {},
       }),
     } as unknown as ISavedObjectTypeRegistry;
@@ -62,7 +64,7 @@ describe('getBulkAssets', () => {
 
   it('forwards alerting rule template engine and v2 nested description', async () => {
     const soClient = {
-      bulkResolve: jest.fn().mockResolvedValue({
+      bulkResolve: vi.fn().mockResolvedValue({
         resolved_objects: [
           {
             saved_object: {
@@ -97,7 +99,7 @@ describe('getBulkAssets', () => {
     } as unknown as SavedObjectsClientContract;
 
     const soTypeRegistry = {
-      getType: jest.fn().mockReturnValue({
+      getType: vi.fn().mockReturnValue({
         management: {
           getTitle: (obj: { attributes: { engine?: string; name?: string; rule?: unknown } }) =>
             obj.attributes.engine === 'v2'
@@ -140,7 +142,7 @@ describe('getBulkAssets', () => {
 
   it('keeps the Kibana link for Elasticsearch assets, which resolve as unsupported types', async () => {
     const soClient = {
-      bulkResolve: jest.fn().mockResolvedValue({
+      bulkResolve: vi.fn().mockResolvedValue({
         resolved_objects: [
           {
             saved_object: {
@@ -158,7 +160,7 @@ describe('getBulkAssets', () => {
     } as unknown as SavedObjectsClientContract;
 
     const soTypeRegistry = {
-      getType: jest.fn().mockReturnValue(undefined),
+      getType: vi.fn().mockReturnValue(undefined),
     } as unknown as ISavedObjectTypeRegistry;
 
     const assets = await getBulkAssets(soClient, soTypeRegistry, [

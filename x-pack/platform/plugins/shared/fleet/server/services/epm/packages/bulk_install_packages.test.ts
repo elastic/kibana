@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { times } from 'lodash';
 
@@ -16,11 +18,11 @@ import { fetchFindLatestPackageOrThrow } from '../registry';
 
 import { bulkInstallPackages } from './bulk_install_packages';
 
-const mockedFetchFindLatestPackageOrThrow = jest.mocked(fetchFindLatestPackageOrThrow);
+const mockedFetchFindLatestPackageOrThrow = vi.mocked(fetchFindLatestPackageOrThrow);
 
-jest.mock('../registry', () => {
+vi.mock('../registry', () => {
   return {
-    fetchFindLatestPackageOrThrow: jest.fn().mockResolvedValue({}),
+    fetchFindLatestPackageOrThrow: vi.fn().mockResolvedValue({}),
   };
 });
 

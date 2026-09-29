@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -12,7 +15,7 @@ import { createLoggerService } from './logger_service.mock';
 import { LoggerService } from './logger_service';
 
 describe('LoggerService', () => {
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let loggerService: LoggerService;
 
   beforeEach(() => {
@@ -21,7 +24,7 @@ describe('LoggerService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('debug', () => {

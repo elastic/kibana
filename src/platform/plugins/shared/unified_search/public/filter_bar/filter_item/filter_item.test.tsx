@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
@@ -16,34 +19,49 @@ import type { FilterItemProps } from './filter_item';
 
 const { uiSettings, docLinks } = coreMock.createStart();
 
-jest.mock('@kbn/data-plugin/public', () => ({
-  getDisplayValueFromFilter: () => '',
-}));
+vi.mock('@kbn/data-plugin/public', () => {
+      const mocked = {
+      getDisplayValueFromFilter: () => '',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
-  useMemoCss: () => ({}),
-}));
+vi.mock('@kbn/css-utils/public/use_memo_css', () => {
+      const mocked = {
+      useMemoCss: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../filter_view', () => ({
-  FilterView: ({ onClick }: { onClick: React.MouseEventHandler }) => (
-    <button data-test-subj="filter-badge" onClick={onClick} type="button">
-      filter
-    </button>
-  ),
-}));
+vi.mock('../filter_view', () => {
+      const mocked = {
+      FilterView: ({ onClick }: { onClick: React.MouseEventHandler }) => (
+        <button data-test-subj="filter-badge" onClick={onClick} type="button">
+          filter
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../filter_editor/filter_editor', () => ({
-  FilterEditor: () => <div data-test-subj="mock-filter-editor" />,
-}));
+vi.mock('../filter_editor/filter_editor', () => {
+      const mocked = {
+      FilterEditor: () => <div data-test-subj="mock-filter-editor" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Prevent loading the barrel (which pulls in phrases_values_input → withEuiTheme)
-jest.mock('../filter_editor', () => ({
-  withCloseFilterEditorConfirmModal: (Component: React.ComponentType<any>) => Component,
-}));
+vi.mock('../filter_editor', () => {
+      const mocked = {
+      withCloseFilterEditorConfirmModal: (Component: React.ComponentType<any>) => Component,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Override only the components that need test-harness behaviour; keep the rest from test-env
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiPopover: ({
@@ -86,25 +104,25 @@ const filter: Filter = {
   query: { match_phrase: { host: 'kibana.org' } },
 };
 
-const makeProps = (onCloseFilterPopover: jest.Mock): FilterItemProps => ({
+const makeProps = (onCloseFilterPopover: Mock): FilterItemProps => ({
   id: '0',
   filter,
   indexPatterns: [],
-  onUpdate: jest.fn(),
-  onRemove: jest.fn(),
+  onUpdate: vi.fn(),
+  onRemove: vi.fn(),
   intl: {
     formatMessage: ({ defaultMessage }: { defaultMessage: string }) => defaultMessage,
   } as any,
   uiSettings,
   docLinks,
   onCloseFilterPopover,
-  onLocalFilterCreate: jest.fn(),
-  onLocalFilterUpdate: jest.fn(),
+  onLocalFilterCreate: vi.fn(),
+  onLocalFilterUpdate: vi.fn(),
 });
 
 describe('FilterItemComponent.closePopover', () => {
   it('does NOT call onCloseFilterPopover when closing the menu popover', () => {
-    const onCloseFilterPopover = jest.fn();
+    const onCloseFilterPopover = vi.fn();
     render(<FilterItemComponent {...makeProps(onCloseFilterPopover)} />);
 
     fireEvent.click(screen.getByTestId('filter-badge'));
@@ -115,7 +133,7 @@ describe('FilterItemComponent.closePopover', () => {
   });
 
   it('calls onCloseFilterPopover when closing the filter editor', () => {
-    const onCloseFilterPopover = jest.fn();
+    const onCloseFilterPopover = vi.fn();
     render(<FilterItemComponent {...makeProps(onCloseFilterPopover)} />);
 
     fireEvent.click(screen.getByTestId('filter-badge'));

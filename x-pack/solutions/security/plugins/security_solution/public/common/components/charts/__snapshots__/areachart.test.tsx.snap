@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`AreaChartBaseComponent render with default configs if no customized configs given should 2 render AreaSeries 1`] = `
 <div

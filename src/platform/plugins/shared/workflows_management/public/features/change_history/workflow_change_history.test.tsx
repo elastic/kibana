@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
@@ -81,9 +84,9 @@ const sampleWorkflowHistoryResponse: WorkflowChangesHistoryResponse = {
 };
 
 class IntersectionObserverMock {
-  observe = jest.fn();
-  disconnect = jest.fn();
-  unobserve = jest.fn();
+  observe = vi.fn();
+  disconnect = vi.fn();
+  unobserve = vi.fn();
 }
 
 beforeAll(() => {
@@ -93,90 +96,105 @@ beforeAll(() => {
     value: IntersectionObserverMock,
   });
 
-  jest.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
     callback(0);
     return 1;
   });
 });
 
-jest.mock('./use_workflow_change_history', () => ({
-  ...jest.requireActual('./use_workflow_change_history'),
-  useWorkflowChangeHistoryEnabled: jest.fn(),
-}));
+vi.mock('./use_workflow_change_history', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_workflow_change_history')),
+      useWorkflowChangeHistoryEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_workflow_change_history_preview_validation', () => ({
-  useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
-    validationResults: [],
-    isValidationLoading: false,
-    validationError: null,
-    handleValidationErrorClick: jest.fn(),
-  })),
-}));
-
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    MarkerSeverity: { Error: 8 },
-    editor: {
-      createModel: jest.fn(() => ({ dispose: jest.fn() })),
-      create: jest.fn(() => ({
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        getModel: jest.fn(() => ({ dispose: jest.fn() })),
-        updateOptions: jest.fn(),
-        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+vi.mock('./use_workflow_change_history_preview_validation', () => {
+      const mocked = {
+      useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
+        validationResults: [],
+        isValidationLoading: false,
+        validationError: null,
+        handleValidationErrorClick: vi.fn(),
       })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        updateOptions: jest.fn(),
-        getLineChanges: jest.fn(() => [
-          {
-            originalStartLineNumber: 1,
-            originalEndLineNumber: 1,
-            modifiedStartLineNumber: 1,
-            modifiedEndLineNumber: 1,
-          },
-        ]),
-        onDidUpdateDiff: jest.fn(() => ({ dispose: jest.fn() })),
-        getOriginalEditor: jest.fn(() => ({ updateOptions: jest.fn() })),
-        getModifiedEditor: jest.fn(() => ({
-          updateOptions: jest.fn(),
-          revealLineInCenter: jest.fn(),
-          getModel: jest.fn(() => ({ dispose: jest.fn() })),
-          createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-        })),
-      })),
-      setModelMarkers: jest.fn(),
-      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useDefineWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      monaco: {
+        MarkerSeverity: { Error: 8 },
+        editor: {
+          createModel: vi.fn(() => ({ dispose: vi.fn() })),
+          create: vi.fn(() => ({
+            dispose: vi.fn(),
+            layout: vi.fn(),
+            getModel: vi.fn(() => ({ dispose: vi.fn() })),
+            updateOptions: vi.fn(),
+            createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+          })),
+          createDiffEditor: vi.fn(() => ({
+            setModel: vi.fn(),
+            dispose: vi.fn(),
+            layout: vi.fn(),
+            updateOptions: vi.fn(),
+            getLineChanges: vi.fn(() => [
+              {
+                originalStartLineNumber: 1,
+                originalEndLineNumber: 1,
+                modifiedStartLineNumber: 1,
+                modifiedEndLineNumber: 1,
+              },
+            ]),
+            onDidUpdateDiff: vi.fn(() => ({ dispose: vi.fn() })),
+            getOriginalEditor: vi.fn(() => ({ updateOptions: vi.fn() })),
+            getModifiedEditor: vi.fn(() => ({
+              updateOptions: vi.fn(),
+              revealLineInCenter: vi.fn(),
+              getModel: vi.fn(() => ({ dispose: vi.fn() })),
+              createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+            })),
+          })),
+          setModelMarkers: vi.fn(),
+          onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useDefineWorkflowsMonacoTheme: vi.fn(),
+      WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
-    useWorkflowsCapabilities: jest.fn(() => ({
+    useWorkflowsCapabilities: vi.fn(() => ({
       canReadWorkflow: true,
       canUpdateWorkflow: true,
     })),
   };
 });
 
-const mockLoadWorkflowSpy = jest.fn();
+const mockLoadWorkflowSpy = vi.fn();
 
-jest.mock('../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk', () => {
-  const { createAsyncThunk } = jest.requireActual('redux-toolkit-v1');
+vi.mock('../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk', () => {
+  const { createAsyncThunk } = require('redux-toolkit-v1');
   return {
     loadWorkflowThunk: createAsyncThunk(
       'detail/loadWorkflowThunk/test',
@@ -188,16 +206,16 @@ jest.mock('../../entities/workflows/store/workflow_detail/thunks/load_workflow_t
   };
 });
 
-const { useWorkflowChangeHistoryEnabled } = jest.requireMock('./use_workflow_change_history');
-const { useKibana } = jest.requireMock('../../hooks/use_kibana');
-const { useWorkflowsCapabilities } = jest.requireMock('@kbn/workflows-ui');
+const { useWorkflowChangeHistoryEnabled } = (await vi.importMock('./use_workflow_change_history'));
+const { useKibana } = (await vi.importMock('../../hooks/use_kibana'));
+const { useWorkflowsCapabilities } = (await vi.importMock('@kbn/workflows-ui'));
 
 const mockWorkflowChangeHistoryKibanaServices = ({
   configureHttp,
   reportEvent,
 }: {
   configureHttp?: (http: StartServicesMock['http']) => void;
-  reportEvent?: jest.Mock;
+  reportEvent?: Mock;
 } = {}): StartServicesMock => {
   const services: StartServicesMock = createStartServicesMock();
 
@@ -254,8 +272,8 @@ describe('WorkflowChangeHistoryListItem', () => {
     });
     mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
-        jest.mocked(http.post).mockResolvedValue({});
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.post).mockResolvedValue({});
       },
     });
   });
@@ -275,11 +293,11 @@ describe('WorkflowChangeHistoryListItem', () => {
   });
 
   it('reports change_history_opened when the history modal opens', async () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     const services = mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
-        jest.mocked(http.post).mockResolvedValue({});
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.post).mockResolvedValue({});
       },
       reportEvent,
     });
@@ -308,8 +326,8 @@ describe('WorkflowChangeHistoryListItem', () => {
   it('opens modal and loads workflow yaml preview through the real change history UI', async () => {
     const services = mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
-        jest.mocked(http.post).mockResolvedValue({});
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.post).mockResolvedValue({});
       },
     });
 
@@ -344,8 +362,8 @@ describe('WorkflowChangeHistoryListItem', () => {
   it('restores a historical version and reloads the workflow', async () => {
     const services = mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
-        jest.mocked(http.post).mockResolvedValue({ id: 'workflow-1' });
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.post).mockResolvedValue({ id: 'workflow-1' });
       },
     });
 
@@ -383,13 +401,13 @@ describe('WorkflowChangeHistoryListItem', () => {
       expect(mockLoadWorkflowSpy).toHaveBeenCalledWith({ id: 'workflow-1' });
     });
 
-    expect(jest.mocked(services.http.get).mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(vi.mocked(services.http.get).mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 
   it('shows the current version badge on the first history item when there are no unsaved edits', async () => {
     mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
       },
     });
 
@@ -416,7 +434,7 @@ describe('WorkflowChangeHistoryListItem', () => {
   it('shows unsaved edits as the current version without a sequence', async () => {
     mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
       },
     });
 
@@ -460,7 +478,7 @@ describe('WorkflowChangeHistoryListItem', () => {
   it('shows split compare labels with the unsaved badge for the pending selection', async () => {
     mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
       },
     });
 
@@ -506,7 +524,7 @@ describe('WorkflowChangeHistoryListItem', () => {
   it('warns when restoring with unsaved workflow changes', async () => {
     mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
       },
     });
 
@@ -540,8 +558,8 @@ describe('WorkflowChangeHistoryListItem', () => {
   it('keeps the confirm modal visible when restore fails', async () => {
     mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
-        jest.mocked(http.post).mockRejectedValue({
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.post).mockRejectedValue({
           response: { status: 409 },
           body: { message: 'Workflow was updated by another user.' },
           message: 'Conflict',
@@ -578,8 +596,8 @@ describe('WorkflowChangeHistoryListItem', () => {
   it('hides restore for managed workflows', async () => {
     mockWorkflowChangeHistoryKibanaServices({
       configureHttp: (http) => {
-        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
-        jest.mocked(http.post).mockResolvedValue({ id: 'workflow-1' });
+        vi.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+        vi.mocked(http.post).mockResolvedValue({ id: 'workflow-1' });
       },
     });
 

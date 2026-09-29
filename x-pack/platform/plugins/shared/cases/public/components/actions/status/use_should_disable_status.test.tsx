@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useShouldDisableStatus } from './use_should_disable_status';
 
-jest.mock('../../user_actions/use_user_permissions');
-const mockUseUserPermissions = useUserPermissions as jest.Mock;
+vi.mock('../../user_actions/use_user_permissions');
+const mockUseUserPermissions = useUserPermissions as Mock;
 
 describe('useShouldDisableStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should disable status when user has no permissions', () => {

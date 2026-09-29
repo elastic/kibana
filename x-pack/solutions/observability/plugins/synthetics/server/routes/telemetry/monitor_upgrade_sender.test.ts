@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
@@ -203,8 +205,8 @@ describe('monitor upgrade telemetry helpers', () => {
 });
 
 describe('sendTelemetryEvents', () => {
-  let eventsTelemetryMock: jest.Mocked<TelemetryEventsSender>;
-  let loggerMock: jest.Mocked<Logger>;
+  let eventsTelemetryMock: Mocked<TelemetryEventsSender>;
+  let loggerMock: Mocked<Logger>;
 
   beforeEach(() => {
     eventsTelemetryMock = createMockTelemetryEventsSender();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { delay } from '../utils/test_helpers';
@@ -20,12 +23,12 @@ async function asyncFn(name: string, ms: number) {
 
 describe('when simulating race condition', () => {
   let requestCallOrder: Array<[string, string, number]>;
-  let renderSpy: jest.Mock;
+  let renderSpy: Mock;
 
   beforeEach(async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
 
-    renderSpy = jest.fn();
+    renderSpy = vi.fn();
     requestCallOrder = [];
 
     function MyComponent({ name, ms, renderFn }: { name: string; ms: number; renderFn: any }) {
@@ -56,7 +59,7 @@ describe('when simulating race condition', () => {
   });
 
   it('should render "Hello from Peter" after 200ms', async () => {
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     await waitFor(() => {});
 
@@ -68,7 +71,7 @@ describe('when simulating race condition', () => {
   });
 
   it('should render "Hello from Peter" after 600ms', async () => {
-    jest.advanceTimersByTime(600);
+    vi.advanceTimersByTime(600);
     await waitFor(() => {});
 
     expect(renderSpy).toHaveBeenLastCalledWith({
@@ -79,7 +82,7 @@ describe('when simulating race condition', () => {
   });
 
   it('should should NOT have rendered "Hello from John" at any point', async () => {
-    jest.advanceTimersByTime(600);
+    vi.advanceTimersByTime(600);
     await waitFor(() => {});
 
     expect(renderSpy).not.toHaveBeenCalledWith({
@@ -90,7 +93,7 @@ describe('when simulating race condition', () => {
   });
 
   it('should send and receive calls in the right order', async () => {
-    jest.advanceTimersByTime(600);
+    vi.advanceTimersByTime(600);
     await waitFor(() => {});
 
     expect(requestCallOrder).toEqual([

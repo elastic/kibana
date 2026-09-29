@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import type { ILayer } from '../../../../../classes/layers/layer';
 
-jest.mock('../../../../../kibana_services', () => {
+vi.mock('../../../../../kibana_services', () => {
   return {
     getMapsCapabilities() {
       return { save: true };

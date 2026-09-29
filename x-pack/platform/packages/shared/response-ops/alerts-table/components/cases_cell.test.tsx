@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,9 +21,9 @@ import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
 import { createPartialObjectMock } from '../utils/test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
-jest.mock('../hooks/use_case_view_navigation');
+vi.mock('../hooks/use_case_view_navigation');
 
-const useCaseViewNavigationMock = jest.mocked(useCaseViewNavigation);
+const useCaseViewNavigationMock = vi.mocked(useCaseViewNavigation);
 const casesMap = getCasesMapMock();
 const maintenanceWindowsMap = getMaintenanceWindowsMapMock();
 const alert: Alert = {
@@ -45,7 +47,7 @@ const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
   },
 });
 
-const navigateToCaseView = jest.fn();
+const navigateToCaseView = vi.fn();
 useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
 
 const TestComponent = (_props: CellComponentProps) => (

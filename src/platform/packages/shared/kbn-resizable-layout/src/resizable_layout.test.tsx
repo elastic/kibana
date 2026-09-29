@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ReactElement } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -38,7 +40,7 @@ describe('ResizableLayout component', () => {
         minFixedPanelSize={minFixedPanelSize}
         minFlexPanelSize={minFlexPanelSize}
         mode={mode}
-        onFixedPanelSizeChange={jest.fn()}
+        onFixedPanelSizeChange={vi.fn()}
       />
     );
   };

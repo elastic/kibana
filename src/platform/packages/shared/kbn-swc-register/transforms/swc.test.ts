@@ -7,39 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { transformSync } from '@swc/core';
 import { getNodeRegisterSwcConfig } from '@kbn/swc-config/node_register';
 
 import type { Cache } from '../cache/types';
 import { swcTransform } from './swc';
 
-jest.mock('@swc/core', () => ({
-  transformSync: jest.fn(),
-}));
+vi.mock('@swc/core', () => {
+      const mocked = {
+      transformSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/swc-config/node_register', () => ({
-  getNodeRegisterSwcConfig: jest.fn((path: string, options = {}) => ({
-    filename: path,
-    sourceMaps: options.inlineSourceMaps ? 'inline' : true,
-  })),
-}));
+vi.mock('@kbn/swc-config/node_register', () => {
+      const mocked = {
+      getNodeRegisterSwcConfig: vi.fn((path: string, options = {}) => ({
+        filename: path,
+        sourceMaps: options.inlineSourceMaps ? 'inline' : true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const transformSyncMock = transformSync as jest.Mock;
-const getNodeRegisterSwcConfigMock = getNodeRegisterSwcConfig as jest.Mock;
+const transformSyncMock = transformSync as Mock;
+const getNodeRegisterSwcConfigMock = getNodeRegisterSwcConfig as Mock;
 
 const makeCache = (code: string | undefined = undefined) => {
   const cache: Cache = {
-    getKey: jest.fn(() => 'cache-key'),
-    getCode: jest.fn(() => code),
-    getSourceMap: jest.fn(),
-    update: jest.fn(async () => undefined),
+    getKey: vi.fn(() => 'cache-key'),
+    getCode: vi.fn(() => code),
+    getSourceMap: vi.fn(),
+    update: vi.fn(async () => undefined),
   };
 
   return cache;
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 it('returns cached code without calling SWC', () => {

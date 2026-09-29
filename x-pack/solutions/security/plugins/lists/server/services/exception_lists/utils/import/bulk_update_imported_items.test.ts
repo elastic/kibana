@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -31,7 +33,7 @@ describe('bulkUpdateImportedItems', () => {
       type: 'exception-list',
     },
   ];
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();

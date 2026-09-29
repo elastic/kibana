@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { useDeleteMaintenanceWindow } from './use_delete_maintenance_window';
 
-const mockAddDanger = jest.fn();
-const mockAddSuccess = jest.fn();
+const mockAddDanger = vi.fn();
+const mockAddSuccess = vi.fn();
 
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -29,17 +31,20 @@ jest.mock('../utils/kibana_react', () => {
     },
   };
 });
-jest.mock('../services/delete', () => ({
-  deleteMaintenanceWindow: jest.fn(),
-}));
+vi.mock('../services/delete', () => {
+      const mocked = {
+      deleteMaintenanceWindow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { deleteMaintenanceWindow } = jest.requireMock('../services/delete');
+const { deleteMaintenanceWindow } = (await vi.importMock('../services/delete'));
 
 let appMockRenderer: AppMockRenderer;
 
 describe('useDeleteMaintenanceWindow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appMockRenderer = createAppMockRenderer();
   });

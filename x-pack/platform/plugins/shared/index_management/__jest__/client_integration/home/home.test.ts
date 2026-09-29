@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, fireEvent, within } from '@testing-library/react';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -12,14 +14,14 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { renderHome } from '../helpers/render_home';
 
-jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+vi.mock('react-use/lib/useObservable', () => () => vi.fn());
 
 describe('<IndexManagementHome />', () => {
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
   });
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '@kbn/code-editor';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,20 +24,20 @@ import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import { ESQL_CONTROL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 const mockModel = {
-  getValue: jest.fn(),
-  getPositionAt: jest.fn(),
+  getValue: vi.fn(),
+  getPositionAt: vi.fn(),
 };
 
 const mockEditor = {
-  addCommand: jest.fn(),
-  addAction: jest.fn(() => ({ dispose: jest.fn() })),
-  getPosition: jest.fn(),
-  getValue: jest.fn(),
-  getModel: jest.fn(() => mockModel),
-  executeEdits: jest.fn(),
-  setPosition: jest.fn(),
-  focus: jest.fn(),
-  trigger: jest.fn(),
+  addCommand: vi.fn(),
+  addAction: vi.fn(() => ({ dispose: vi.fn() })),
+  getPosition: vi.fn(),
+  getValue: vi.fn(),
+  getModel: vi.fn(() => mockModel),
+  executeEdits: vi.fn(),
+  setPosition: vi.fn(),
+  focus: vi.fn(),
+  trigger: vi.fn(),
 } as unknown as monaco.editor.IStandaloneCodeEditor;
 
 const mockUiActions = {
@@ -42,23 +45,23 @@ const mockUiActions = {
 };
 
 const mockTelemetryService = {
-  trackEsqlControlFlyoutOpened: jest.fn(),
-  trackRecommendedQueryClicked: jest.fn(),
+  trackEsqlControlFlyoutOpened: vi.fn(),
+  trackRecommendedQueryClicked: vi.fn(),
 } as unknown as ESQLEditorTelemetryService;
 
 describe('Custom Editor Commands', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockModel.getValue.mockReturnValue('');
     mockModel.getPositionAt.mockReturnValue({ lineNumber: 1, column: 1 });
     // Mock monaco.editor.registerCommand to return a disposable
-    jest.spyOn(monaco.editor, 'registerCommand').mockReturnValue({
-      dispose: jest.fn(),
+    vi.spyOn(monaco.editor, 'registerCommand').mockReturnValue({
+      dispose: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('registerCustomCommands', () => {
@@ -67,13 +70,13 @@ describe('Custom Editor Commands', () => {
       const updatedVariables = [{ key: 'var2', type: ESQLVariableType.VALUES, value: 'updated' }];
 
       const initialContext = {
-        onSaveControl: jest.fn(),
-        onCancelControl: jest.fn(),
+        onSaveControl: vi.fn(),
+        onCancelControl: vi.fn(),
         supportsControls: false,
       };
       const updatedContext = {
-        onSaveControl: jest.fn(),
-        onCancelControl: jest.fn(),
+        onSaveControl: vi.fn(),
+        onCancelControl: vi.fn(),
         supportsControls: true,
       };
 
@@ -87,15 +90,15 @@ describe('Custom Editor Commands', () => {
         uiActions: mockUiActions,
         telemetryService: mockTelemetryService,
         editorRef,
-        getCurrentQuery: jest.fn().mockReturnValue('FROM index'),
+        getCurrentQuery: vi.fn().mockReturnValue('FROM index'),
         esqlVariables: esqlVariablesRef,
         controlsContext: controlsContextRef,
-        openTimePickerPopover: jest.fn(),
+        openTimePickerPopover: vi.fn(),
       } as unknown as MonacoCommandDependencies;
 
       registerCustomCommands(deps);
 
-      const registerCommandCalls = (monaco.editor.registerCommand as jest.Mock).mock.calls;
+      const registerCommandCalls = (monaco.editor.registerCommand as Mock).mock.calls;
       const controlCommandCall = registerCommandCalls.find(
         ([commandId]) => commandId === 'esql.control.values.create'
       );
@@ -120,7 +123,7 @@ describe('Custom Editor Commands', () => {
     });
 
     it('should use getCurrentQuery function that accesses current editor state', async () => {
-      const getCurrentQuery = jest.fn().mockReturnValue('FROM updated_index');
+      const getCurrentQuery = vi.fn().mockReturnValue('FROM updated_index');
       const esqlVariablesRef = { current: [] };
       const controlsContextRef = { current: null };
       const editorRef = { current: mockEditor };
@@ -133,12 +136,12 @@ describe('Custom Editor Commands', () => {
         getCurrentQuery,
         esqlVariables: esqlVariablesRef,
         controlsContext: controlsContextRef,
-        openTimePickerPopover: jest.fn(),
+        openTimePickerPopover: vi.fn(),
       } as unknown as MonacoCommandDependencies;
 
       registerCustomCommands(deps);
 
-      const registerCommandCalls = (monaco.editor.registerCommand as jest.Mock).mock.calls;
+      const registerCommandCalls = (monaco.editor.registerCommand as Mock).mock.calls;
       const controlCommandCall = registerCommandCalls.find(
         ([commandId]) => commandId === 'esql.control.values.create'
       );
@@ -167,15 +170,15 @@ describe('Custom Editor Commands', () => {
         uiActions: mockUiActions,
         telemetryService: mockTelemetryService,
         editorRef: { current: mockEditor },
-        getCurrentQuery: jest.fn(),
+        getCurrentQuery: vi.fn(),
         esqlVariables: { current: [] },
         controlsContext: { current: null },
-        openTimePickerPopover: jest.fn(),
+        openTimePickerPopover: vi.fn(),
       } as unknown as MonacoCommandDependencies;
 
       registerCustomCommands(deps);
 
-      const registerCommandCalls = (monaco.editor.registerCommand as jest.Mock).mock.calls;
+      const registerCommandCalls = (monaco.editor.registerCommand as Mock).mock.calls;
       const acceptCommandCall = registerCommandCalls.find(
         ([commandId]) => commandId === ESQL_APPLY_TEXT_REPLACEMENT_COMMAND
       );
@@ -202,28 +205,28 @@ describe('Custom Editor Commands', () => {
 
   describe('addEditorKeyBindings', () => {
     const findAction = (keybinding: number) =>
-      (mockEditor.addAction as jest.Mock).mock.calls.find(([action]) =>
+      (mockEditor.addAction as Mock).mock.calls.find(([action]) =>
         action.keybindings.includes(keybinding)
       )?.[0];
 
     // Registered as actions so the keybindings stay scoped to this editor instead of firing while
     // another editor on the page has focus.
     it('registers scoped actions rather than page-wide commands', () => {
-      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn());
+      addEditorKeyBindings(mockEditor, vi.fn(), vi.fn(), vi.fn());
 
       expect(mockEditor.addAction).toHaveBeenCalledTimes(4);
       expect(mockEditor.addCommand).not.toHaveBeenCalled();
     });
 
     it('returns a disposable per registered action', () => {
-      const disposables = addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn());
+      const disposables = addEditorKeyBindings(mockEditor, vi.fn(), vi.fn(), vi.fn());
 
       expect(disposables).toHaveLength(4);
       disposables.forEach((disposable) => expect(typeof disposable.dispose).toBe('function'));
     });
 
     it('registers the generate-from-comment action only when the callback is supplied', () => {
-      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn(), jest.fn());
+      addEditorKeyBindings(mockEditor, vi.fn(), vi.fn(), vi.fn(), vi.fn());
 
       expect(mockEditor.addAction).toHaveBeenCalledTimes(5);
       // eslint-disable-next-line no-bitwise
@@ -231,8 +234,8 @@ describe('Custom Editor Commands', () => {
     });
 
     it('calls toggleVisor on CMD+K', () => {
-      const mockToggleVisor = jest.fn();
-      addEditorKeyBindings(mockEditor, jest.fn(), mockToggleVisor, jest.fn());
+      const mockToggleVisor = vi.fn();
+      addEditorKeyBindings(mockEditor, vi.fn(), mockToggleVisor, vi.fn());
 
       // eslint-disable-next-line no-bitwise
       findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK).run();
@@ -241,9 +244,9 @@ describe('Custom Editor Commands', () => {
     });
 
     it('calls onQuerySubmit on CMD+Enter when query is non-empty', () => {
-      const mockOnQuerySubmit = jest.fn();
-      (mockEditor.getValue as jest.Mock).mockReturnValue('FROM logs');
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn(), jest.fn());
+      const mockOnQuerySubmit = vi.fn();
+      (mockEditor.getValue as Mock).mockReturnValue('FROM logs');
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, vi.fn(), vi.fn());
 
       // eslint-disable-next-line no-bitwise
       findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter).run();
@@ -252,9 +255,9 @@ describe('Custom Editor Commands', () => {
     });
 
     it('does not call onQuerySubmit on CMD+Enter when query is empty', () => {
-      const mockOnQuerySubmit = jest.fn();
-      (mockEditor.getValue as jest.Mock).mockReturnValue('   ');
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn(), jest.fn());
+      const mockOnQuerySubmit = vi.fn();
+      (mockEditor.getValue as Mock).mockReturnValue('   ');
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, vi.fn(), vi.fn());
 
       // eslint-disable-next-line no-bitwise
       findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter).run();
@@ -263,8 +266,8 @@ describe('Custom Editor Commands', () => {
     });
 
     it('calls onPrettifyQuery on CMD+I', () => {
-      const mockOnPrettifyQuery = jest.fn();
-      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), mockOnPrettifyQuery);
+      const mockOnPrettifyQuery = vi.fn();
+      addEditorKeyBindings(mockEditor, vi.fn(), vi.fn(), mockOnPrettifyQuery);
 
       // eslint-disable-next-line no-bitwise
       findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI).run();
@@ -273,7 +276,7 @@ describe('Custom Editor Commands', () => {
     });
 
     it('inserts a newline on Shift+Enter', () => {
-      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn());
+      addEditorKeyBindings(mockEditor, vi.fn(), vi.fn(), vi.fn());
 
       // The action receives the focused editor, so the newline lands there rather than in a
       // closed-over reference to this one.

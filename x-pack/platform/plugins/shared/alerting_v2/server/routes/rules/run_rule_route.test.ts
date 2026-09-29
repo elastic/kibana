@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { RulesClient } from '../../lib/rules_client';
@@ -12,7 +15,7 @@ import { createRouteDependencies } from '../test_utils';
 import { RunRuleRoute } from './run_rule_route';
 
 const createRulesClientStub = () =>
-  ({ runRuleNow: jest.fn().mockResolvedValue(undefined) } as unknown as jest.Mocked<
+  ({ runRuleNow: vi.fn().mockResolvedValue(undefined) } as unknown as Mocked<
     Pick<RulesClient, 'runRuleNow'>
   >);
 

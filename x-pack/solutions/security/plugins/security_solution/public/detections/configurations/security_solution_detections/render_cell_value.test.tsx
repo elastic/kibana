@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { cloneDeep } from 'lodash/fp';
 import type { ComponentProps } from 'react';
@@ -22,7 +24,7 @@ import { CellValue } from './render_cell_value';
 import { AlertTableCellContextProvider } from './cell_value_context';
 import { PageScope } from '../../../data_view_manager/constants';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -57,7 +59,7 @@ describe('RenderCellValue', () => {
       linkValues,
       rowIndex,
       colIndex: 0,
-      setCellProps: jest.fn(),
+      setCellProps: vi.fn(),
       scopeId,
       rowRenderers: defaultRowRenderers,
       asPlainText: false,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EsQuerySortValue, SearchSourceFields } from '@kbn/data-plugin/common';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
@@ -16,7 +18,7 @@ describe('getQueryFromCsvJob', () => {
   it('returns QueryInspection data', async () => {
     const searchSourceStart = { ...searchSourceCommonMock };
     const originalCreate = searchSourceStart.create;
-    searchSourceStart.create = jest.fn().mockImplementation(async () => {
+    searchSourceStart.create = vi.fn().mockImplementation(async () => {
       const original = await originalCreate();
       const originalGetField = original.getField;
       const getField = (fieldName: keyof SearchSourceFields) => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -22,7 +24,7 @@ describe('EditTagsSelectable', () => {
     selectedCases: [basicCase],
     isLoading: false,
     tags: ['one', 'two', ...basicCase.tags],
-    onChangeTags: jest.fn(),
+    onChangeTags: vi.fn(),
   };
 
   /**
@@ -37,11 +39,11 @@ describe('EditTagsSelectable', () => {
     ],
     isLoading: false,
     tags: ['one', 'two', 'three', ...basicCase.tags],
-    onChangeTags: jest.fn(),
+    onChangeTags: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

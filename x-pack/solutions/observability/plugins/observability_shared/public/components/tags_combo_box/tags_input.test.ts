@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import { createTagsPasteHandler, getNewTags, hasTagDelimiter, splitTags } from './tags_input';
 
@@ -53,7 +55,7 @@ describe('tags_combo_box tags_input helpers', () => {
 
   describe('createTagsPasteHandler', () => {
     const buildEvent = (text: string) => {
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       const event = {
         clipboardData: { getData: () => text },
         preventDefault,
@@ -62,7 +64,7 @@ describe('tags_combo_box tags_input helpers', () => {
     };
 
     it('splits a delimited clipboard value and prevents the default paste', () => {
-      const addTags = jest.fn();
+      const addTags = vi.fn();
       const { event, preventDefault } = buildEvent('tag1\ntag2,tag3');
 
       createTagsPasteHandler(addTags)(event);
@@ -72,7 +74,7 @@ describe('tags_combo_box tags_input helpers', () => {
     });
 
     it('leaves default paste behavior when there is no delimiter', () => {
-      const addTags = jest.fn();
+      const addTags = vi.fn();
       const { event, preventDefault } = buildEvent('single-tag');
 
       createTagsPasteHandler(addTags)(event);

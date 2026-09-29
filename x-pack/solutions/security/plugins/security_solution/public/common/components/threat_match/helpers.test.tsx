@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { FormattedEntry } from './types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
@@ -21,9 +23,12 @@ import {
   getUpdatedEntriesOnDelete,
 } from './helpers';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getMockIndexPattern = (): DataViewBase =>
   ({
@@ -47,7 +52,7 @@ describe('Helpers', () => {
 
   afterEach(() => {
     moment.tz.setDefault('Browser');
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#getFormattedEntry', () => {

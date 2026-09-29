@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import {
   bulkAckEpisodeActions,
@@ -24,7 +26,7 @@ import {
 describe('series bulk actions', () => {
   const mockHttp = httpServiceMock.createStartContract();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('bulkSnoozeSeriesActions POSTs the items envelope to _bulk_snooze and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
@@ -52,7 +54,7 @@ describe('series bulk actions', () => {
 describe('episode bulk actions', () => {
   const mockHttp = httpServiceMock.createStartContract();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('bulkTagEpisodeActions POSTs the items envelope to _bulk_tag and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 2, errors: [] });

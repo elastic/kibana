@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { CollapsibleStatement } from './collapsible_statement';
 import { shallow } from 'enzyme';
@@ -16,8 +18,8 @@ describe('CollapsibleStatement component', () => {
   let expand;
 
   beforeEach(() => {
-    collapse = jest.fn();
-    expand = jest.fn();
+    collapse = vi.fn();
+    expand = vi.fn();
     props = {
       collapse,
       expand,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
@@ -15,12 +18,12 @@ import { createFetchData } from '../../../main/utils/fetch_data';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
 
-jest.mock('@kbn/es-query');
-jest.mock('@kbn/react-query');
-jest.mock('react-redux-v7');
-jest.mock('../../../main/utils/fetch_data');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('@kbn/es-query');
+vi.mock('@kbn/react-query');
+vi.mock('react-redux-v7');
+vi.mock('../../../main/utils/fetch_data');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');
 
 const highlightedFieldsFilters: Record<string, QueryDslQueryContainer> = {
   'host.name': { term: { 'host.name': 'host-1' } },
@@ -32,35 +35,35 @@ const interval = {
 };
 
 const searchServiceMock = {} as unknown;
-const uiSettingsGetMock = jest.fn();
+const uiSettingsGetMock = vi.fn();
 let mockServerless: unknown;
 
 describe('useFetchPrevalence', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockServerless = undefined;
-    (useKibana as jest.Mock).mockImplementation(() => ({
+    (useKibana as Mock).mockImplementation(() => ({
       services: {
         data: { search: searchServiceMock },
         uiSettings: { get: uiSettingsGetMock },
         serverless: mockServerless,
       },
     }));
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false,
     });
-    (useSelector as jest.Mock).mockReturnValue({ patternList: ['alerts-*', 'logs-*'] });
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({ indexPatterns: ['security-*'] });
-    (buildEsQuery as jest.Mock).mockReturnValue({ bool: { filter: [] } });
-    (createFetchData as jest.Mock).mockResolvedValue({});
+    (useSelector as Mock).mockReturnValue({ patternList: ['alerts-*', 'logs-*'] });
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({ indexPatterns: ['security-*'] });
+    (buildEsQuery as Mock).mockReturnValue({ bool: { filter: [] } });
+    (createFetchData as Mock).mockResolvedValue({});
     uiSettingsGetMock.mockReturnValue(true);
   });
 
   it('returns loading, error and data from useQuery', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       data: { aggregations: {} },
       isLoading: false,
       isError: true,
@@ -78,7 +81,7 @@ describe('useFetchPrevalence', () => {
   it('uses security default patterns and excludes cold/frozen tiers when ui setting is enabled', async () => {
     renderHook(() => useFetchPrevalence({ highlightedFieldsFilters, interval }));
 
-    const [, , filters] = (buildEsQuery as jest.Mock).mock.calls[0];
+    const [, , filters] = (buildEsQuery as Mock).mock.calls[0];
     expect(filters[0].query.bool.filter).toEqual(
       expect.arrayContaining([
         {
@@ -93,7 +96,7 @@ describe('useFetchPrevalence', () => {
       ])
     );
 
-    const queryFn = (useQuery as jest.Mock).mock.calls[0][1];
+    const queryFn = (useQuery as Mock).mock.calls[0][1];
     await queryFn();
 
     expect(createFetchData).toHaveBeenCalledWith(
@@ -111,7 +114,7 @@ describe('useFetchPrevalence', () => {
 
     renderHook(() => useFetchPrevalence({ highlightedFieldsFilters, interval }));
 
-    const [, , filters] = (buildEsQuery as jest.Mock).mock.calls[0];
+    const [, , filters] = (buildEsQuery as Mock).mock.calls[0];
     expect(filters[0].query.bool.filter).toEqual(
       expect.arrayContaining([
         {
@@ -126,7 +129,7 @@ describe('useFetchPrevalence', () => {
     );
     expect(filters[0].query.bool.filter).toHaveLength(1);
 
-    const queryFn = (useQuery as jest.Mock).mock.calls[0][1];
+    const queryFn = (useQuery as Mock).mock.calls[0][1];
     queryFn();
 
     expect(createFetchData).toHaveBeenCalledWith(
@@ -145,7 +148,7 @@ describe('useFetchPrevalence', () => {
 
     renderHook(() => useFetchPrevalence({ highlightedFieldsFilters, interval }));
 
-    const [, , filters] = (buildEsQuery as jest.Mock).mock.calls[0];
+    const [, , filters] = (buildEsQuery as Mock).mock.calls[0];
     expect(filters[0].query.bool.filter).toEqual(
       expect.arrayContaining([
         {

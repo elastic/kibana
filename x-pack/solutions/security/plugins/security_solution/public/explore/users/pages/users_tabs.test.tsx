@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -15,18 +17,24 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../../common/components/empty_prompt');
-jest.mock('../../../common/components/search_bar', () => ({
-  SiemSearchBar: () => null,
-}));
-jest.mock('../../../common/components/query_bar', () => ({
-  QueryBar: () => null,
-}));
-jest.mock('../../../common/components/visualization_actions/actions');
-jest.mock('../../../common/components/visualization_actions/lens_embeddable');
-const mockNavigateToApp = jest.fn();
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/components/empty_prompt');
+vi.mock('../../../common/components/search_bar', () => {
+      const mocked = {
+      SiemSearchBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/query_bar', () => {
+      const mocked = {
+      QueryBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/visualization_actions/actions');
+vi.mock('../../../common/components/visualization_actions/lens_embeddable');
+const mockNavigateToApp = vi.fn();
+vi.mock('../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -39,7 +47,7 @@ jest.mock('../../../common/lib/kibana', () => {
         },
         cases: {
           ui: {
-            getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+            getCasesContext: vi.fn().mockReturnValue(mockCasesContext),
           },
         },
       },
@@ -58,14 +66,14 @@ const mockHistory = {
   length: 2,
   location,
   action: pop,
-  push: jest.fn(),
-  replace: jest.fn(),
-  go: jest.fn(),
-  goBack: jest.fn(),
-  goForward: jest.fn(),
-  block: jest.fn(),
-  createHref: jest.fn(),
-  listen: jest.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
+  go: vi.fn(),
+  goBack: vi.fn(),
+  goForward: vi.fn(),
+  block: vi.fn(),
+  createHref: vi.fn(),
+  listen: vi.fn(),
 };
 
 describe('Users - rendering', () => {
@@ -82,7 +90,7 @@ describe('Users - rendering', () => {
   });
 
   test('it should render tab navigation', async () => {
-    jest.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
+    vi.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
 
     render(
       <TestProviders>

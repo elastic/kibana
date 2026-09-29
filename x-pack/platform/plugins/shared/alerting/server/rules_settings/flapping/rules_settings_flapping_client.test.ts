@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RulesSettingsFlappingClientConstructorOptions } from './rules_settings_flapping_client';
 import { RulesSettingsFlappingClient } from './rules_settings_flapping_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -35,10 +38,10 @@ const getMockRulesSettings = (): RulesSettings => {
   };
 };
 
-const rulesSettingsFlappingClientParams: jest.Mocked<RulesSettingsFlappingClientConstructorOptions> =
+const rulesSettingsFlappingClientParams: Mocked<RulesSettingsFlappingClientConstructorOptions> =
   {
     logger: loggingSystemMock.create().get(),
-    getModificationMetadata: jest.fn(),
+    getModificationMetadata: vi.fn(),
     savedObjectsClient,
   };
 
@@ -62,17 +65,17 @@ describe('RulesSettingsFlappingClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(mockDateString));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(mockDateString));
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   test('can get flapping settings', async () => {

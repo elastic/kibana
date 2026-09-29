@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSecuritySolutionInitialization } from '../../../common/components/initialization/use_security_solution_initialization';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -13,28 +16,31 @@ import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../common/api/
 import { useBootstrapEaseRulesMutation } from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_ease_rules';
 import { useBootstrapEaseRules, useIsBootstrappingEaseRules } from './use_bootstrap_ease_rules';
 
-jest.mock('../../../common/components/initialization/use_security_solution_initialization');
-jest.mock('../../../common/components/user_privileges');
-jest.mock('../../../common/hooks/use_app_toasts');
-jest.mock(
+vi.mock('../../../common/components/initialization/use_security_solution_initialization');
+vi.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/hooks/use_app_toasts');
+vi.mock(
   '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_ease_rules'
 );
 
 // useIsMutating is used by useIsBootstrappingEaseRules
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useIsMutating: jest.fn().mockReturnValue(0),
-}));
+vi.mock('@kbn/react-query', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-query')),
+      useIsMutating: vi.fn().mockReturnValue(0),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddError = jest.fn();
-const mockMutate = jest.fn();
+const mockAddError = vi.fn();
+const mockMutate = vi.fn();
 
 const useSecuritySolutionInitializationMock =
-  useSecuritySolutionInitialization as jest.MockedFunction<
+  useSecuritySolutionInitialization as MockedFunction<
     typeof useSecuritySolutionInitialization
   >;
-const useUserPrivilegesMock = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
-const useBootstrapEaseRulesMutationMock = useBootstrapEaseRulesMutation as jest.MockedFunction<
+const useUserPrivilegesMock = useUserPrivileges as MockedFunction<typeof useUserPrivileges>;
+const useBootstrapEaseRulesMutationMock = useBootstrapEaseRulesMutation as MockedFunction<
   typeof useBootstrapEaseRulesMutation
 >;
 
@@ -70,8 +76,8 @@ const mockUserPrivileges = ({ canEditRules }: { canEditRules: boolean }) => {
 
 describe('useBootstrapEaseRules', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({ addError: mockAddError });
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({ addError: mockAddError });
     useBootstrapEaseRulesMutationMock.mockReturnValue({ mutate: mockMutate } as never);
   });
 
@@ -144,8 +150,8 @@ describe('useBootstrapEaseRules', () => {
 });
 
 describe('useIsBootstrappingEaseRules', () => {
-  it('returns false when no mutation is in flight', () => {
-    const { useIsMutating } = jest.requireMock('@kbn/react-query');
+  it('returns false when no mutation is in flight', async () => {
+    const { useIsMutating } = (await vi.importMock('@kbn/react-query'));
     useIsMutating.mockReturnValue(0);
 
     const { result } = renderHook(() => useIsBootstrappingEaseRules());
@@ -153,8 +159,8 @@ describe('useIsBootstrappingEaseRules', () => {
     expect(result.current).toBe(false);
   });
 
-  it('returns true when a mutation is in flight', () => {
-    const { useIsMutating } = jest.requireMock('@kbn/react-query');
+  it('returns true when a mutation is in flight', async () => {
+    const { useIsMutating } = (await vi.importMock('@kbn/react-query'));
     useIsMutating.mockReturnValue(1);
 
     const { result } = renderHook(() => useIsBootstrappingEaseRules());

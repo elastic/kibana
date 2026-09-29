@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -16,37 +19,49 @@ import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { CloudProviderIcon } from '../../../components/cloud_provider_icon';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useEuiTheme: jest.fn(),
+    useEuiTheme: vi.fn(),
   };
 });
 
-jest.mock('../../../components/compliance_score_bar', () => ({
-  ComplianceScoreBar: jest.fn(() => null),
-}));
+vi.mock('../../../components/compliance_score_bar', () => {
+      const mocked = {
+      ComplianceScoreBar: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/cloud_security_grouping', () => ({
-  firstNonNullValue: jest.requireActual('../../../components/cloud_security_grouping')
-    .firstNonNullValue,
-  LoadingGroup: () => <div data-test-subj="loading-group">Loading</div>,
-  NullGroup: ({ title }: { title: string }) => <div data-test-subj="null-group">{title}</div>,
-}));
+vi.mock('../../../components/cloud_security_grouping', async () => {
+      const mocked = {
+      firstNonNullValue: (await vi.importActual('../../../components/cloud_security_grouping'))
+        .firstNonNullValue,
+      LoadingGroup: () => <div data-test-subj="loading-group">Loading</div>,
+      NullGroup: ({ title }: { title: string }) => <div data-test-subj="null-group">{title}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/cis_benchmark_icon', () => ({
-  CISBenchmarkIcon: jest.fn(() => <div data-test-subj="cis-benchmark-icon" />),
-}));
+vi.mock('../../../components/cis_benchmark_icon', () => {
+      const mocked = {
+      CISBenchmarkIcon: vi.fn(() => <div data-test-subj="cis-benchmark-icon" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/cloud_provider_icon', () => ({
-  CloudProviderIcon: jest.fn(() => <div data-test-subj="cloud-provider-icon" />),
-}));
+vi.mock('../../../components/cloud_provider_icon', () => {
+      const mocked = {
+      CloudProviderIcon: vi.fn(() => <div data-test-subj="cloud-provider-icon" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<ComplianceBarComponent />', () => {
   beforeEach(() => {
-    (useEuiTheme as jest.Mock).mockReturnValue({ euiTheme: { size: { s: 's' } } });
-    (ComplianceScoreBar as jest.Mock).mockClear();
+    (useEuiTheme as Mock).mockReturnValue({ euiTheme: { size: { s: 's' } } });
+    (ComplianceScoreBar as Mock).mockClear();
   });
 
   it('renders ComplianceScoreBar with correct totalFailed and totalPassed, when total = failed+passed', () => {
@@ -127,8 +142,8 @@ describe('groupPanelRenderer - CLOUD_ACCOUNT_ID', () => {
   } as unknown as RawBucket<FindingsGroupingAggregation>;
 
   beforeEach(() => {
-    (CISBenchmarkIcon as jest.Mock).mockClear();
-    (CloudProviderIcon as jest.Mock).mockClear();
+    (CISBenchmarkIcon as Mock).mockClear();
+    (CloudProviderIcon as Mock).mockClear();
   });
 
   it('renders CISBenchmarkIcon when benchmarkId is present (native integration)', () => {

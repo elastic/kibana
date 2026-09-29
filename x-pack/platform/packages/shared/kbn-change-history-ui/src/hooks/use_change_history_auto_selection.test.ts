@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useChangeHistoryAutoSelection } from './use_change_history_auto_selection';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
@@ -18,7 +20,7 @@ const createItem = (id: string): ChangeHistoryListItem => ({
 
 describe('useChangeHistoryAutoSelection', () => {
   it('auto-selects the first item once the first page fetch settles', async () => {
-    const setSelectedChangeId = jest.fn();
+    const setSelectedChangeId = vi.fn();
 
     const { rerender } = renderHook(
       ({ items, isFetchingFirstPage }) =>
@@ -63,7 +65,7 @@ describe('useChangeHistoryAutoSelection', () => {
   });
 
   it('re-selects the first item after unlock when fresh items arrive', async () => {
-    const setSelectedChangeId = jest.fn();
+    const setSelectedChangeId = vi.fn();
 
     const { result, rerender } = renderHook(
       ({ items, isFetchingFirstPage }) =>
@@ -106,7 +108,7 @@ describe('useChangeHistoryAutoSelection', () => {
   });
 
   it('invokes onAutoSelect when auto-selecting the first item', async () => {
-    const onAutoSelect = jest.fn();
+    const onAutoSelect = vi.fn();
     const firstItem = createItem('evt-1');
 
     const { rerender } = renderHook(
@@ -115,7 +117,7 @@ describe('useChangeHistoryAutoSelection', () => {
           objectId: 'obj-1',
           items,
           isFetchingFirstPage,
-          setSelectedChangeId: jest.fn(),
+          setSelectedChangeId: vi.fn(),
           onAutoSelect,
         }),
       {
@@ -137,7 +139,7 @@ describe('useChangeHistoryAutoSelection', () => {
   });
 
   it('resets selection when objectId changes', () => {
-    const setSelectedChangeId = jest.fn();
+    const setSelectedChangeId = vi.fn();
 
     const { rerender } = renderHook(
       ({ objectId }) =>

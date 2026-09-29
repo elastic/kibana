@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MutableRefObject } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useScrollSync } from './use_scroll_sync';
@@ -49,7 +51,7 @@ describe('useScrollSync', () => {
   };
 
   it('should attach a scroll listener to the main scroll container', () => {
-    const addSpy = jest.spyOn(scrollContainer, 'addEventListener');
+    const addSpy = vi.spyOn(scrollContainer, 'addEventListener');
     renderHook(() => useScrollSync(registryRef));
     expect(addSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
     addSpy.mockRestore();
@@ -86,7 +88,7 @@ describe('useScrollSync', () => {
   });
 
   it('should clean up listener on unmount', () => {
-    const removeSpy = jest.spyOn(scrollContainer, 'removeEventListener');
+    const removeSpy = vi.spyOn(scrollContainer, 'removeEventListener');
     const { unmount } = renderHook(() => useScrollSync(registryRef));
 
     unmount();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,27 +16,33 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../timelines/containers/details');
-jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('@kbn/discover-utils', () => ({
-  buildDataTableRecord: jest.fn(() => ({ id: '1', raw: { _id: '1' }, flattened: {} })),
-  getFieldValue: jest.fn(() => 'event'),
-}));
+vi.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../timelines/containers/details');
+vi.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('@kbn/discover-utils', () => {
+      const mocked = {
+      buildDataTableRecord: vi.fn(() => ({ id: '1', raw: { _id: '1' }, flattened: {} })),
+      getFieldValue: vi.fn(() => 'event'),
+    };
+      return { ...mocked, default: mocked };
+    });
 // Stub the presentational flyout so we don't need its full provider tree.
-jest.mock('.', () => ({
-  DocumentFlyout: () => <div data-test-subj="document-flyout" />,
-}));
+vi.mock('.', () => {
+      const mocked = {
+      DocumentFlyout: () => <div data-test-subj="document-flyout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const props = {
   documentId: '1',
   indexName: 'logs-*,.alerts-security.alerts-default',
   renderCellActions: () => null,
-  onAlertUpdated: jest.fn(),
+  onAlertUpdated: vi.fn(),
 };
 
 const setEventsDetails = (tuple: unknown[]) =>
-  (useTimelineEventsDetails as jest.Mock).mockReturnValue(tuple);
+  (useTimelineEventsDetails as Mock).mockReturnValue(tuple);
 
 const renderFromPattern = () =>
   render(
@@ -44,22 +53,22 @@ const renderFromPattern = () =>
 
 describe('DocumentFlyoutWrapperFromPattern', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDataView as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useDataView as Mock).mockReturnValue({
       dataView: {
-        getRuntimeMappings: jest.fn(() => ({})),
-        getIndexPattern: jest.fn(() => 'logs-*'),
-        hasMatchedIndices: jest.fn(() => true),
+        getRuntimeMappings: vi.fn(() => ({})),
+        getIndexPattern: vi.fn(() => 'logs-*'),
+        hasMatchedIndices: vi.fn(() => true),
       },
       status: 'ready',
     });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
     // [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetch]
-    setEventsDetails([false, [], { _id: '1', _index: 'x', fields: {} }, {}, jest.fn()]);
+    setEventsDetails([false, [], { _id: '1', _index: 'x', fields: {} }, {}, vi.fn()]);
   });
 
   it('shows the loading state while the document is being fetched', () => {
-    setEventsDetails([true, [], undefined, null, jest.fn()]);
+    setEventsDetails([true, [], undefined, null, vi.fn()]);
     const { getByTestId } = renderFromPattern();
     expect(getByTestId('document-from-pattern-wrapper-loading')).toBeInTheDocument();
   });
@@ -70,17 +79,17 @@ describe('DocumentFlyoutWrapperFromPattern', () => {
   });
 
   it('shows a not-found callout when no document matches the id across the pattern', () => {
-    setEventsDetails([false, [], undefined, null, jest.fn()]);
+    setEventsDetails([false, [], undefined, null, vi.fn()]);
     const { getByTestId } = renderFromPattern();
     expect(getByTestId('document-from-pattern-wrapper-not-found')).toBeInTheDocument();
   });
 
   it('shows a data view error when the data view failed to load', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: {
-        getRuntimeMappings: jest.fn(() => ({})),
-        getIndexPattern: jest.fn(() => 'logs-*'),
-        hasMatchedIndices: jest.fn(() => true),
+        getRuntimeMappings: vi.fn(() => ({})),
+        getIndexPattern: vi.fn(() => 'logs-*'),
+        hasMatchedIndices: vi.fn(() => true),
       },
       status: 'error',
     });
@@ -96,11 +105,11 @@ describe('DocumentFlyoutWrapperFromPattern', () => {
   });
 
   it('still fetches the document when the data view has no matched indices', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: {
-        getRuntimeMappings: jest.fn(() => ({})),
-        getIndexPattern: jest.fn(() => 'logs-*'),
-        hasMatchedIndices: jest.fn(() => false),
+        getRuntimeMappings: vi.fn(() => ({})),
+        getIndexPattern: vi.fn(() => 'logs-*'),
+        hasMatchedIndices: vi.fn(() => false),
       },
       status: 'ready',
     });

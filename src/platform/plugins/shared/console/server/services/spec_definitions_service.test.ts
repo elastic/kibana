@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import { SpecDefinitionsService } from '.';
 import type { EndpointDefinition, EndpointsAvailability } from '../../common/types';
 
-const mockReadFileSync = jest.spyOn(fs, 'readFileSync');
-const mockGlobbySync = jest.spyOn(fs, 'globSync');
-const mockJsLoadersGetter = jest.fn();
+const mockReadFileSync = vi.spyOn(fs, 'readFileSync');
+const mockGlobbySync = vi.spyOn(fs, 'globSync');
+const mockJsLoadersGetter = vi.fn();
 
-jest.mock('../lib', () => {
+vi.mock('../lib', async () => {
   return {
-    ...jest.requireActual('../lib'),
+    ...(await vi.importActual('../lib')),
     get jsSpecLoaders() {
       return mockJsLoadersGetter();
     },
@@ -53,10 +55,10 @@ const getMockEndpoint = ({
 
 describe('SpecDefinitionsService', () => {
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date(1577836800000));
+    vi.useFakeTimers().setSystemTime(new Date(1577836800000));
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   beforeEach(() => {
     // mock the function that lists files in the definitions folders
@@ -67,7 +69,7 @@ describe('SpecDefinitionsService', () => {
     mockJsLoadersGetter.mockImplementation(() => []);
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('initializes with empty definitions when folders and global rules are empty', () => {

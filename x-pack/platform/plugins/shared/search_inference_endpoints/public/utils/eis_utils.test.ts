@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { EisModelStatus, type CspRegion, type EisInferenceEndpoint } from '../../common/types';
 import {
@@ -73,12 +75,12 @@ describe('eis utility functions', function () {
 
   describe('isModelDeprecated', function () {
     beforeEach(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2026-05-13'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-05-13'));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('returns false when metadata is undefined', () => {
@@ -130,14 +132,14 @@ describe('eis utility functions', function () {
     });
 
     it('returns Deprecated when EOL date is within the next 30 days regardless of status', () => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2026-05-13'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-05-13'));
       try {
         expect(getModelStatus(makeMetadata({ status: 'ga', end_of_life_date: '2026-06-01' }))).toBe(
           EisModelStatus.Deprecated
         );
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 

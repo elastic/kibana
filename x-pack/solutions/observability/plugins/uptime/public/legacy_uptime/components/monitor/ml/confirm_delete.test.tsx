@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ConfirmJobDeletion } from './confirm_delete';
@@ -12,14 +14,14 @@ import { ConfirmJobDeletion } from './confirm_delete';
 describe('ML Confirm Job Delete', () => {
   it('shallow renders without errors', () => {
     const wrapper = shallowWithIntl(
-      <ConfirmJobDeletion loading={false} onConfirm={jest.fn()} onCancel={jest.fn()} />
+      <ConfirmJobDeletion loading={false} onConfirm={vi.fn()} onCancel={vi.fn()} />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('shallow renders without errors while loading', () => {
     const wrapper = shallowWithIntl(
-      <ConfirmJobDeletion loading={true} onConfirm={jest.fn()} onCancel={jest.fn()} />
+      <ConfirmJobDeletion loading={true} onConfirm={vi.fn()} onCancel={vi.fn()} />
     );
     expect(wrapper).toMatchSnapshot();
   });

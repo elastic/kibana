@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useReducer } from 'react';
 import { groupActions, groupsReducerWithStorage, initialState } from '.';
@@ -29,12 +31,12 @@ const groupById = {
   },
 };
 
-const setItem = jest.spyOn(window.localStorage.__proto__, 'setItem');
-const getItem = jest.spyOn(window.localStorage.__proto__, 'getItem');
+const setItem = vi.spyOn(window.localStorage.__proto__, 'setItem');
+const getItem = vi.spyOn(window.localStorage.__proto__, 'getItem');
 
 describe('grouping reducer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('updateGroupOptions, initializes group with defaults and provided newOptionList', () => {
     const { result } = renderHook(() => useReducer(groupsReducerWithStorage, initialState));

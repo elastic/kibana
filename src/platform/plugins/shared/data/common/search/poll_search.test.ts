@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { pollSearch } from './poll_search';
 import { AbortError, AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 describe('pollSearch', () => {
   function getMockedSearch$(resolveOnI = 1) {
     let counter = 0;
-    return jest.fn().mockImplementation(() => {
+    return vi.fn().mockImplementation(() => {
       counter++;
       const lastCall = counter === resolveOnI;
       return new Promise((resolve) => {
@@ -36,7 +39,7 @@ describe('pollSearch', () => {
 
   test('Defers execution', async () => {
     const searchFn = getMockedSearch$(1);
-    const cancelFn = jest.fn();
+    const cancelFn = vi.fn();
     pollSearch(searchFn, cancelFn);
     expect(searchFn).toHaveBeenCalledTimes(0);
     expect(cancelFn).toHaveBeenCalledTimes(0);
@@ -44,7 +47,7 @@ describe('pollSearch', () => {
 
   test('Resolves immediatelly', async () => {
     const searchFn = getMockedSearch$(1);
-    const cancelFn = jest.fn();
+    const cancelFn = vi.fn();
     await pollSearch(searchFn, cancelFn).toPromise();
     expect(searchFn).toHaveBeenCalledTimes(1);
     expect(cancelFn).toHaveBeenCalledTimes(0);
@@ -52,15 +55,15 @@ describe('pollSearch', () => {
 
   test('Resolves when complete', async () => {
     const searchFn = getMockedSearch$(3);
-    const cancelFn = jest.fn();
+    const cancelFn = vi.fn();
     await pollSearch(searchFn, cancelFn).toPromise();
     expect(searchFn).toHaveBeenCalledTimes(3);
     expect(cancelFn).toHaveBeenCalledTimes(0);
   });
 
   test('Throws AbortError on empty response', async () => {
-    const searchFn = jest.fn().mockResolvedValue(undefined);
-    const cancelFn = jest.fn();
+    const searchFn = vi.fn().mockResolvedValue(undefined);
+    const cancelFn = vi.fn();
     const poll = pollSearch(searchFn, cancelFn).toPromise();
     await expect(poll).rejects.toThrow(AbortError);
     expect(searchFn).toHaveBeenCalledTimes(1);
@@ -69,7 +72,7 @@ describe('pollSearch', () => {
 
   test('Throws AbortError and cancels on abort', async () => {
     const searchFn = getMockedSearch$(20);
-    const cancelFn = jest.fn();
+    const cancelFn = vi.fn();
     const abortController = new AbortController();
     const poll = pollSearch(searchFn, cancelFn, {
       abortSignal: abortController.signal,
@@ -87,12 +90,12 @@ describe('pollSearch', () => {
   });
 
   test('Does not throw or cancel if abort reason is CANCELED', async () => {
-    const searchFn = jest.fn().mockResolvedValue({
+    const searchFn = vi.fn().mockResolvedValue({
       isRunning: false,
       isPartial: false,
       rawResponse: {},
     });
-    const cancelFn = jest.fn();
+    const cancelFn = vi.fn();
 
     const abortController = new AbortController();
     setTimeout(() => abortController.abort(AbortReason.CANCELED), 100);
@@ -111,7 +114,7 @@ describe('pollSearch', () => {
 
   test('Does not leak unresolved promises on cancel', async () => {
     const searchFn = getMockedSearch$(20);
-    const cancelFn = jest.fn().mockRejectedValueOnce({ error: 'Oh no!' });
+    const cancelFn = vi.fn().mockRejectedValueOnce({ error: 'Oh no!' });
     const abortController = new AbortController();
     const poll = pollSearch(searchFn, cancelFn, {
       abortSignal: abortController.signal,
@@ -130,7 +133,7 @@ describe('pollSearch', () => {
 
   test("Stops, but doesn't cancel on unsubscribe", async () => {
     const searchFn = getMockedSearch$(20);
-    const cancelFn = jest.fn();
+    const cancelFn = vi.fn();
     const subscription = pollSearch(searchFn, cancelFn).subscribe(() => {});
 
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -143,7 +146,7 @@ describe('pollSearch', () => {
 
   test('Calls cancel even when consumer unsubscribes', async () => {
     const searchFn = getMockedSearch$(20);
-    const cancelFn = jest.fn();
+    const cancelFn = vi.fn();
     const abortController = new AbortController();
     const subscription = pollSearch(searchFn, cancelFn, {
       abortSignal: abortController.signal,
@@ -156,20 +159,20 @@ describe('pollSearch', () => {
   });
 
   describe('default backoff interval', () => {
-    let dateNowSpy: jest.SpyInstance;
+    let dateNowSpy: MockInstance;
     let now = Date.now();
     const advanceTimersBy = (by: number) => {
       now = now + by;
-      jest.advanceTimersByTime(by);
+      vi.advanceTimersByTime(by);
     };
     beforeEach(() => {
-      dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => now);
       now = Date.now();
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
     afterEach(() => {
       dateNowSpy.mockRestore();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('the interval should backoff as search takes longer', async () => {

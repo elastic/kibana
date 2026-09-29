@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { buildMatrix, rowCommitShas } from './build_matrix';
 import { parseMatrixConfig, type MatrixConfig } from './load_matrix_config';
 import type { AggregatedModelScores } from './query_matrix_scores';
@@ -813,7 +815,7 @@ describe('buildMatrix sparse-column warning', () => {
   })) as unknown as AggregatedModelScores[];
 
   it('warns that a column covering a minority of models cannot rank', () => {
-    const log = { warning: jest.fn() };
+    const log = { warning: vi.fn() };
     buildMatrix(sparseScores, sparseConfig, log);
 
     expect(log.warning).toHaveBeenCalledWith(
@@ -822,7 +824,7 @@ describe('buildMatrix sparse-column warning', () => {
   });
 
   it('stays quiet about a column every model ran', () => {
-    const log = { warning: jest.fn() };
+    const log = { warning: vi.fn() };
     buildMatrix(sparseScores, sparseConfig, log);
 
     expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('"Dense"'));
@@ -846,7 +848,7 @@ describe('buildMatrix total-score-loss guard', () => {
       { modelId: 'model-b', suites: [] },
     ] as unknown as AggregatedModelScores[];
 
-    const log = { warning: jest.fn() };
+    const log = { warning: vi.fn() };
     buildMatrix(empty, lossConfig, log);
 
     expect(log.warning).toHaveBeenCalledWith(
@@ -871,7 +873,7 @@ describe('buildMatrix total-score-loss guard', () => {
       ],
     })) as unknown as AggregatedModelScores[];
 
-    const log = { warning: jest.fn() };
+    const log = { warning: vi.fn() };
     buildMatrix(scored, lossConfig, log);
 
     expect(log.warning).not.toHaveBeenCalledWith(
@@ -913,7 +915,7 @@ describe('per-row commit provenance', () => {
   });
 
   it('warns when rows were graded against different codebases', () => {
-    const log = { warning: jest.fn() };
+    const log = { warning: vi.fn() };
     buildMatrix(
       [
         { ...scores([{ sha: 'aaaaaaaaaaaa1' }]), modelId: 'model-good' },
@@ -927,7 +929,7 @@ describe('per-row commit provenance', () => {
   });
 
   it('stays quiet when every row came from one codebase', () => {
-    const log = { warning: jest.fn() };
+    const log = { warning: vi.fn() };
     buildMatrix(
       [
         { ...scores([{ sha: 'aaaaaaaaaaaa1' }]), modelId: 'model-good' },
@@ -1371,7 +1373,7 @@ describe('buildMatrix round-4 review findings', () => {
       columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'] }],
       models: [{ id: 'model-a', label: 'Model A' }],
     });
-    const warning = jest.fn();
+    const warning = vi.fn();
 
     const matrix = buildMatrix([{ modelId: 'model-a', suites: [suite('suite-a', 0.2)] }], cfg, {
       warning,
@@ -1389,7 +1391,7 @@ describe('buildMatrix round-4 review findings', () => {
       columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'] }],
       models: [{ id: 'model-a', label: 'Model A' }],
     });
-    const warning = jest.fn();
+    const warning = vi.fn();
 
     buildMatrix([{ modelId: 'model-a', suites: [] }], cfg, { warning });
 

@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useUiPrivileges } from './use_ui_privileges';
 
-const mockUseKibana = jest.fn();
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+const mockUseKibana = vi.fn();
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUiPrivileges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns isAdmin true when capability is set', () => {

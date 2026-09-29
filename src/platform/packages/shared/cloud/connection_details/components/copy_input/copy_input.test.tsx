@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -17,7 +19,7 @@ describe('CopyInput', () => {
   const originalExecCommand = document.execCommand;
 
   beforeEach(() => {
-    document.execCommand = jest.fn().mockReturnValue(true);
+    document.execCommand = vi.fn().mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -32,8 +34,8 @@ describe('CopyInput', () => {
 
   it('calls onCopyClick and onCopySuccess when copying', async () => {
     const user = userEvent.setup();
-    const onCopyClick = jest.fn();
-    const onCopySuccess = jest.fn();
+    const onCopyClick = vi.fn();
+    const onCopySuccess = vi.fn();
 
     render(
       <CopyInput value="secret-value" onCopyClick={onCopyClick} onCopySuccess={onCopySuccess} />

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import type {
   GithubApi,
@@ -38,19 +40,19 @@ const TRACKING_REPO = 'elastic/kibana';
 /** A fake API serving the listings from one set of issues. */
 const createGithubApi = (issues: GithubIssue[] = []) => {
   const api = {
-    getRequestCount: jest.fn(() => 0),
-    listIssues: jest.fn(async ({ state }: ListIssuesOptions) =>
+    getRequestCount: vi.fn(() => 0),
+    listIssues: vi.fn(async ({ state }: ListIssuesOptions) =>
       issues.filter((issue) => state === 'all' || issue.state === state)
     ),
-    createIssue: jest.fn(async (title: string, body: string, _labels?: string[]) => ({
+    createIssue: vi.fn(async (title: string, body: string, _labels?: string[]) => ({
       number: 900,
       html_url: 'https://github.com/elastic/kibana/issues/900',
       node_id: 'n900',
       title,
       body,
     })),
-    addIssueComment: jest.fn(async (_number: number, _body: string) => {}),
-    editIssueBodyAndEnsureOpen: jest.fn(async (_number: number, _body: string) => {}),
+    addIssueComment: vi.fn(async (_number: number, _body: string) => {}),
+    editIssueBodyAndEnsureOpen: vi.fn(async (_number: number, _body: string) => {}),
   };
   return api as typeof api & GithubApi;
 };

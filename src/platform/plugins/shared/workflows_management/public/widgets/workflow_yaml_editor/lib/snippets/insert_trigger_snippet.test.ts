@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import * as generateTriggerSnippetModule from './generate_trigger_snippet';
@@ -14,11 +17,11 @@ import { insertTriggerSnippet } from './insert_trigger_snippet';
 import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
 
 describe('insertTriggerSnippet', () => {
-  let generateTriggerSnippetSpy: jest.SpyInstance;
+  let generateTriggerSnippetSpy: MockInstance;
 
   beforeEach(() => {
-    generateTriggerSnippetSpy = jest.spyOn(generateTriggerSnippetModule, 'generateTriggerSnippet');
-    jest.clearAllMocks();
+    generateTriggerSnippetSpy = vi.spyOn(generateTriggerSnippetModule, 'generateTriggerSnippet');
+    vi.clearAllMocks();
   });
 
   it('should insert a trigger snippet after the last trigger', () => {
@@ -186,7 +189,7 @@ steps:
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     const mockEditor = {
-      pushUndoStop: jest.fn(),
+      pushUndoStop: vi.fn(),
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     insertTriggerSnippet(

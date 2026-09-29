@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,9 +16,9 @@ import { SloInstanceSelector } from './slo_instance_selector';
 import { render } from '../../../utils/test_helper';
 import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
 
-jest.mock('../../../hooks/use_fetch_slo_instances');
+vi.mock('../../../hooks/use_fetch_slo_instances');
 
-const useFetchSloInstancesMock = useFetchSloInstances as jest.MockedFunction<
+const useFetchSloInstancesMock = useFetchSloInstances as MockedFunction<
   typeof useFetchSloInstances
 >;
 
@@ -35,7 +38,7 @@ describe('SloInstanceSelector', () => {
   let lastParams: Parameters<typeof useFetchSloInstances>[0] | undefined;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     lastParams = undefined;
     useFetchSloInstancesMock.mockImplementation((params) => {
       lastParams = params;
@@ -44,14 +47,14 @@ describe('SloInstanceSelector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   const renderComponent = (
     props: Partial<React.ComponentProps<typeof SloInstanceSelector>> = {}
   ) => {
-    const onSelected = jest.fn();
+    const onSelected = vi.fn();
     render(<SloInstanceSelector sloId="slo-1" onSelected={onSelected} {...props} />);
     return { onSelected };
   };
@@ -76,7 +79,7 @@ describe('SloInstanceSelector', () => {
     });
 
     const user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { onSelected } = renderComponent({ remoteName: 'remote-1' });
@@ -92,7 +95,7 @@ describe('SloInstanceSelector', () => {
     useFetchSloInstancesMock.mockReturnValue(createHookResponse(['alpha', 'beta']));
 
     const user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { onSelected } = renderComponent();

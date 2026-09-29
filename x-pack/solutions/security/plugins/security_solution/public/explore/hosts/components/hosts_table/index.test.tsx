@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 
@@ -15,57 +17,81 @@ import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { HostsTable } from '.';
 import { mockData } from './mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../../common/lib/kibana/hooks', () => ({
-  useNavigateTo: () => ({
-    navigateTo: jest.fn(),
-  }),
-}));
+vi.mock('../../../../common/lib/kibana/hooks', () => {
+      const mocked = {
+      useNavigateTo: () => ({
+        navigateTo: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../../../common/components/search_bar', () => ({
-  SiemSearchBar: () => null,
-}));
-jest.mock('../../../../common/components/query_bar', () => ({
-  QueryBar: () => null,
-}));
+vi.mock('../../../../common/components/search_bar', () => {
+      const mocked = {
+      SiemSearchBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/query_bar', () => {
+      const mocked = {
+      QueryBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/link_to');
+vi.mock('../../../../common/components/link_to');
 
-const mockUseMlCapabilities = jest.fn().mockReturnValue({ isPlatinumOrTrialLicense: true });
+const mockUseMlCapabilities = vi.fn().mockReturnValue({ isPlatinumOrTrialLicense: true });
 
-jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
-  useMlCapabilities: () => mockUseMlCapabilities(),
-}));
+vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => {
+      const mocked = {
+      useMlCapabilities: () => mockUseMlCapabilities(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
-jest.mock('../../../../helper_hooks', () => ({
-  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-}));
+const mockUseHasSecurityCapability = vi.fn().mockReturnValue(false);
+vi.mock('../../../../helper_hooks', () => {
+      const mocked = {
+      useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenHostFlyout = jest.fn();
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
-}));
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => true,
-}));
-jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({
-    openHostFlyout: mockOpenHostFlyout,
-    openUserFlyout: jest.fn(),
-    openServiceFlyout: jest.fn(),
-    openGenericEntityFlyout: jest.fn(),
-  }),
-}));
+const mockOpenHostFlyout = vi.fn();
+const mockOpenFlyout = vi.fn();
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../flyout_v2/use_flyout_api', () => {
+      const mocked = {
+      useFlyoutApi: () => ({
+        openHostFlyout: mockOpenHostFlyout,
+        openUserFlyout: vi.fn(),
+        openServiceFlyout: vi.fn(),
+        openGenericEntityFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+const mockUseUiSetting = vi.fn().mockReturnValue([false]);
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useUiSetting$: () => mockUseUiSetting(),
@@ -73,7 +99,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 describe('Hosts Table', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
   const store = createMockStore();
 
   beforeEach(() => {
@@ -92,7 +118,7 @@ describe('Hosts Table', () => {
             fakeTotalCount={0}
             loading={false}
             loadPage={loadPage}
-            setQuerySkip={jest.fn()}
+            setQuerySkip={vi.fn()}
             showMorePagesIndicator={false}
             totalCount={-1}
             type={hostsModel.HostsType.page}
@@ -116,7 +142,7 @@ describe('Hosts Table', () => {
             data={mockData}
             totalCount={0}
             fakeTotalCount={-1}
-            setQuerySkip={jest.fn()}
+            setQuerySkip={vi.fn()}
             showMorePagesIndicator={false}
             loadPage={loadPage}
             type={hostsModel.HostsType.page}
@@ -140,7 +166,7 @@ describe('Hosts Table', () => {
             data={mockData}
             totalCount={0}
             fakeTotalCount={-1}
-            setQuerySkip={jest.fn()}
+            setQuerySkip={vi.fn()}
             showMorePagesIndicator={false}
             loadPage={loadPage}
             type={hostsModel.HostsType.page}
@@ -164,7 +190,7 @@ describe('Hosts Table', () => {
             data={mockData}
             totalCount={0}
             fakeTotalCount={-1}
-            setQuerySkip={jest.fn()}
+            setQuerySkip={vi.fn()}
             showMorePagesIndicator={false}
             loadPage={loadPage}
             type={hostsModel.HostsType.page}
@@ -189,7 +215,7 @@ describe('Hosts Table', () => {
             data={mockData}
             totalCount={0}
             fakeTotalCount={-1}
-            setQuerySkip={jest.fn()}
+            setQuerySkip={vi.fn()}
             showMorePagesIndicator={false}
             loadPage={loadPage}
             type={hostsModel.HostsType.page}
@@ -223,7 +249,7 @@ describe('Hosts Table', () => {
             fakeTotalCount={0}
             loading={false}
             loadPage={loadPage}
-            setQuerySkip={jest.fn()}
+            setQuerySkip={vi.fn()}
             showMorePagesIndicator={false}
             totalCount={0}
             type={hostsModel.HostsType.page}
@@ -252,7 +278,7 @@ describe('Hosts Table', () => {
             fakeTotalCount={0}
             loading={false}
             loadPage={loadPage}
-            setQuerySkip={jest.fn()}
+            setQuerySkip={vi.fn()}
             showMorePagesIndicator={false}
             totalCount={0}
             type={hostsModel.HostsType.page}
@@ -277,7 +303,7 @@ describe('Hosts Table', () => {
               data={mockData}
               totalCount={0}
               fakeTotalCount={-1}
-              setQuerySkip={jest.fn()}
+              setQuerySkip={vi.fn()}
               showMorePagesIndicator={false}
               loadPage={loadPage}
               type={hostsModel.HostsType.page}
@@ -308,7 +334,7 @@ describe('Hosts Table', () => {
               data={mockData}
               totalCount={0}
               fakeTotalCount={-1}
-              setQuerySkip={jest.fn()}
+              setQuerySkip={vi.fn()}
               showMorePagesIndicator={false}
               loadPage={loadPage}
               type={hostsModel.HostsType.page}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { serverMock, requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../../../saved_object/timelines';
 
@@ -13,19 +16,22 @@ import { getTimelineRequest } from '../../../__mocks__/request_responses';
 import { getTimelineRoute } from '.';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
-jest.mock('../../../saved_object/timelines', () => ({
-  getAllTimeline: jest.fn(),
-  getTimelineOrNull: jest.fn(),
-  getTimelineTemplateOrNull: jest.fn(),
-}));
+vi.mock('../../../saved_object/timelines', () => {
+      const mocked = {
+      getAllTimeline: vi.fn(),
+      getTimelineOrNull: vi.fn(),
+      getTimelineTemplateOrNull: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('get timeline', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
@@ -34,8 +40,8 @@ describe('get timeline', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('should call getTimelineTemplateOrNull if templateTimelineId is given', async () => {
@@ -45,7 +51,7 @@ describe('get timeline', () => {
       requestContextMock.convertContext(context)
     );
 
-    expect((getTimelineTemplateOrNull as jest.Mock).mock.calls[0][1]).toEqual(templateTimelineId);
+    expect((getTimelineTemplateOrNull as Mock).mock.calls[0][1]).toEqual(templateTimelineId);
   });
 
   test('should call getTimelineOrNull if id is given', async () => {
@@ -53,7 +59,7 @@ describe('get timeline', () => {
 
     await server.inject(getTimelineRequest({ id }), requestContextMock.convertContext(context));
 
-    expect((getTimelineOrNull as jest.Mock).mock.calls[0][1]).toEqual(id);
+    expect((getTimelineOrNull as Mock).mock.calls[0][1]).toEqual(id);
   });
 
   test('should throw error message if nither templateTimelineId nor id is given', async () => {

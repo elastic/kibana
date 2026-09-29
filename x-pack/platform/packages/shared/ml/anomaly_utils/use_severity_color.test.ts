@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSeverityColor } from './use_severity_color';
 
 // Mock the EUI dependencies
-jest.mock('@elastic/eui', () => {
+vi.mock('@elastic/eui', () => {
   const mockSkyBluePalette = ['#dceef7', '#a6d8ec', '#a6d8ec', '#a6d8ec', '#a6d8ec', '#a6d8ec'];
   return {
     useEuiTheme: () => ({

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -50,7 +53,7 @@ const mockMinimalAuthUser = new Proxy(
 );
 
 describe('SearchSessionService', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
   let asCurrentUserElasticsearchClient: ElasticsearchClientMock;
   let service: SearchSessionService;
 
@@ -105,9 +108,9 @@ describe('SearchSessionService', () => {
         },
       } as unknown as ConfigSchema;
       const mockLogger: any = {
-        debug: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       };
       service = new SearchSessionService(mockLogger, config, '8.0.0');
       service.setup(coreMock.createSetup(), {});
@@ -158,7 +161,7 @@ describe('SearchSessionService', () => {
   });
 
   describe('Feature enabled', () => {
-    let mockLogger: jest.Mocked<any>;
+    let mockLogger: Mocked<any>;
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
       const config: ConfigSchema = {
@@ -174,9 +177,9 @@ describe('SearchSessionService', () => {
         },
       } as unknown as ConfigSchema;
       mockLogger = {
-        debug: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       };
       service = new SearchSessionService(mockLogger, config, '8.0.0');
       service.setup(coreMock.createSetup(), {});
@@ -1129,7 +1132,7 @@ describe('SearchSessionService', () => {
               } as SavedObjectErrorResult,
             ],
           });
-          const spy = jest.spyOn(updateSessionStatusModule, 'updateSessionStatus');
+          const spy = vi.spyOn(updateSessionStatusModule, 'updateSessionStatus');
           spy.mockResolvedValue({
             status: SearchSessionStatus.COMPLETE,
           });
@@ -1214,7 +1217,7 @@ describe('SearchSessionService', () => {
           ],
         });
 
-        const spy = jest.spyOn(updateSessionStatusModule, 'updateSessionStatus');
+        const spy = vi.spyOn(updateSessionStatusModule, 'updateSessionStatus');
 
         spy.mockResolvedValueOnce({
           status: SearchSessionStatus.COMPLETE,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { SetStateAction } from 'react';
 import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
@@ -23,32 +25,41 @@ import { getLastSetStateValue, selectComboBoxOption } from './test_utils';
 // `services/documentation` reaches `@kbn/monaco` through the mappings editor constants and the
 // runtime fields plugin. Only the ES|QL/Painless language registration is loaded there, and that
 // pulls in every generated definition plus their i18n messages at import time.
-jest.mock('@kbn/monaco', () => ({ PainlessLang: { ID: 'painless' } }));
+vi.mock('@kbn/monaco', () => {
+      const mocked = { PainlessLang: { ID: 'painless' } };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
-  CodeEditor: ({ value }: { value?: string }) => (
-    <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
-  ),
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
+      CodeEditor: ({ value }: { value?: string }) => (
+        <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../services/api', () => ({
-  ...jest.requireActual('../../../services/api'),
-  getMatchingDataStreams: jest.fn(),
-  getMatchingIndices: jest.fn(),
-}));
+vi.mock('../../../services/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../services/api')),
+      getMatchingDataStreams: vi.fn(),
+      getMatchingIndices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getMatchingDataStreamsMock = jest.mocked(getMatchingDataStreams);
-const getMatchingIndicesMock = jest.mocked(getMatchingIndices);
+const getMatchingDataStreamsMock = vi.mocked(getMatchingDataStreams);
+const getMatchingIndicesMock = vi.mocked(getMatchingIndices);
 
 const uploadFileUrl = '/app/home#/tutorial_directory/fileDataViz';
 
 const renderConfigurationStep = async () => {
   const draft: DraftPolicy = {};
   const completionState: CompletionState = { configurationStep: false, fieldsSelectionStep: false };
-  const onNext = jest.fn();
-  const updateDraft = jest.fn<void, [SetStateAction<DraftPolicy>]>();
-  const updateCompletionState = jest.fn<void, [SetStateAction<CompletionState>]>();
+  const onNext = vi.fn();
+  const updateDraft = vi.fn<void, [SetStateAction<DraftPolicy>]>();
+  const updateCompletionState = vi.fn<void, [SetStateAction<CompletionState>]>();
   const application = applicationServiceMock.createStartContract();
   application.getUrlForApp.mockReturnValue(uploadFileUrl);
   const appDependencies = { core: { application } } as unknown as AppDependencies;
@@ -83,7 +94,7 @@ describe('<ConfigurationStep />', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getMatchingIndicesMock.mockResolvedValue({
       data: { indices: ['test-1', 'test-2'] },
       error: null,

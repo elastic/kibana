@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { LogsRepository } from './logs_repository';
 
 const createDataStreamClientMock = () => ({
-  create: jest.fn().mockResolvedValue(undefined),
-  search: jest.fn().mockResolvedValue({
+  create: vi.fn().mockResolvedValue(undefined),
+  search: vi.fn().mockResolvedValue({
     hits: {
       total: { value: 2 },
       hits: [
@@ -24,9 +27,12 @@ const createDataStreamClientMock = () => ({
   }),
 });
 
-jest.mock('./data_stream', () => ({
-  initializeDataStreamClient: jest.fn(),
-}));
+vi.mock('./data_stream', () => {
+      const mocked = {
+      initializeDataStreamClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { initializeDataStreamClient } = require('./data_stream');
@@ -37,7 +43,7 @@ describe('LogsRepository', () => {
 
   beforeEach(() => {
     dataStreamClient = createDataStreamClientMock();
-    (initializeDataStreamClient as jest.Mock).mockResolvedValue(dataStreamClient);
+    (initializeDataStreamClient as Mock).mockResolvedValue(dataStreamClient);
     repo = new LogsRepository({} as any, loggerMock.create());
   });
 

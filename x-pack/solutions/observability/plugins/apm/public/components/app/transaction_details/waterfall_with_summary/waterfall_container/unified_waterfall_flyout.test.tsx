@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 import { useTraceWaterfallContext } from '@kbn/apm-ui-shared';
 import { Router } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
@@ -12,45 +15,60 @@ import React from 'react';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { UnifiedWaterfallFlyout } from './unified_waterfall_flyout';
 
-jest.mock('@kbn/apm-ui-shared', () => ({
-  useTraceWaterfallContext: jest.fn(),
-}));
+vi.mock('@kbn/apm-ui-shared', () => {
+      const mocked = {
+      useTraceWaterfallContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
-    query: {
-      flyoutDetailTab: 'metadata',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-    },
-  }),
-}));
+vi.mock('../../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({
+        query: {
+          flyoutDetailTab: 'metadata',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    start: '2025-01-15T11:00:00.000Z',
-    end: '2025-01-15T13:00:00.000Z',
-  }),
-}));
+vi.mock('../../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        start: '2025-01-15T11:00:00.000Z',
+        end: '2025-01-15T13:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../shared/span_flyout', () => ({
-  SpanFlyout: jest.fn((props) => (
-    <div data-test-subj="mockSpanFlyout" data-props={JSON.stringify(props)} />
-  )),
-}));
+vi.mock('../../../../shared/span_flyout', () => {
+      const mocked = {
+      SpanFlyout: vi.fn((props) => (
+        <div data-test-subj="mockSpanFlyout" data-props={JSON.stringify(props)} />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../shared/transaction_flyout', () => ({
-  TransactionFlyout: jest.fn((props) => (
-    <div data-test-subj="mockTransactionFlyout" data-props={JSON.stringify(props)} />
-  )),
-}));
+vi.mock('../../../../shared/transaction_flyout', () => {
+      const mocked = {
+      TransactionFlyout: vi.fn((props) => (
+        <div data-test-subj="mockTransactionFlyout" data-props={JSON.stringify(props)} />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseTraceWaterfallContext = useTraceWaterfallContext as jest.MockedFunction<
+const mockUseTraceWaterfallContext = useTraceWaterfallContext as MockedFunction<
   typeof useTraceWaterfallContext
 >;
 
-const { SpanFlyout } = jest.requireMock('../../../../shared/span_flyout');
-const { TransactionFlyout } = jest.requireMock('../../../../shared/transaction_flyout');
+const { SpanFlyout } = (await vi.importMock('../../../../shared/span_flyout'));
+const { TransactionFlyout } = (await vi.importMock('../../../../shared/transaction_flyout'));
 
 const ROOT_TRANSACTION: TraceItem = {
   id: 'transaction-1',
@@ -83,13 +101,13 @@ const CHILD_SPAN: TraceItem = {
 function renderFlyout({
   waterfallItemId,
   traceItems = [ROOT_TRANSACTION, CHILD_SPAN],
-  toggleFlyout = jest.fn(),
+  toggleFlyout = vi.fn(),
   rootItem = ROOT_TRANSACTION,
   duration = ROOT_TRANSACTION.duration,
 }: {
   waterfallItemId?: string;
   traceItems?: TraceItem[];
-  toggleFlyout?: jest.Mock;
+  toggleFlyout?: Mock;
   rootItem?: TraceItem;
   duration?: number;
 } = {}) {
@@ -114,7 +132,7 @@ function renderFlyout({
 
 describe('UnifiedWaterfallFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders nothing when waterfallItemId is undefined', () => {
@@ -162,7 +180,7 @@ describe('UnifiedWaterfallFlyout', () => {
     });
 
     it('calls toggleFlyout when onClose is invoked', () => {
-      const toggleFlyout = jest.fn();
+      const toggleFlyout = vi.fn();
       renderFlyout({ waterfallItemId: 'transaction-1', toggleFlyout });
 
       const props = TransactionFlyout.mock.calls[0][0];
@@ -224,7 +242,7 @@ describe('UnifiedWaterfallFlyout', () => {
     });
 
     it('calls toggleFlyout when onClose is invoked', () => {
-      const toggleFlyout = jest.fn();
+      const toggleFlyout = vi.fn();
       renderFlyout({ waterfallItemId: 'span-1', toggleFlyout });
 
       const props = SpanFlyout.mock.calls[0][0];

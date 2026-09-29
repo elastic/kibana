@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useWorkflowHealthCheck } from '.';
@@ -12,9 +15,9 @@ import { useListWorkflows } from '../../workflow_configuration/hooks/use_list_wo
 import type { WorkflowConfiguration } from '../../workflow_configuration/types';
 import * as workflowI18n from '../../workflow_configuration/translations';
 
-jest.mock('../../workflow_configuration/hooks/use_list_workflows');
+vi.mock('../../workflow_configuration/hooks/use_list_workflows');
 
-const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
+const mockUseListWorkflows = useListWorkflows as MockedFunction<typeof useListWorkflows>;
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalMode: 'custom_query',
@@ -49,7 +52,7 @@ const mockWorkflows = [
 
 describe('useWorkflowHealthCheck', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseListWorkflows.mockReturnValue({
       data: mockWorkflows,

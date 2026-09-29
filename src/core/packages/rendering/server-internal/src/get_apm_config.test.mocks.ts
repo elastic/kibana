@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getConfigurationMock = jest.fn();
-export const shouldInstrumentClientMock = jest.fn(() => true);
-jest.doMock('@kbn/apm-config-loader', () => ({
-  getConfiguration: getConfigurationMock,
-  shouldInstrumentClient: shouldInstrumentClientMock,
-}));
+import { vi } from 'vitest';
+
+export const getConfigurationMock = vi.fn();
+export const shouldInstrumentClientMock = vi.fn(() => true);
+vi.doMock('@kbn/apm-config-loader', () => {
+      const mocked = {
+      getConfiguration: getConfigurationMock,
+      shouldInstrumentClient: shouldInstrumentClientMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const agentMock = {} as Record<string, any>;
-jest.doMock('elastic-apm-node', () => agentMock);
+vi.doMock('elastic-apm-node', () => agentMock);

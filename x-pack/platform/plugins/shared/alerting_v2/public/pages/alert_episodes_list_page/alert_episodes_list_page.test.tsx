@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
@@ -34,10 +36,8 @@ const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -49,103 +49,130 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('@kbn/unified-data-table', () => ({
-  DataLoadingState: { loading: 'loading', loaded: 'loaded' },
-  ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-  // The page injects the episode count + reset-filters controls via the toolbar's leftSide.
-  // Render the custom toolbar (and have the toolbar builder render its leftSide) so those
-  // controls end up in the DOM and stay reactive to the page's filter state.
-  UnifiedDataTable: jest.fn((props: { renderCustomToolbar?: () => React.ReactNode }) =>
-    props.renderCustomToolbar ? props.renderCustomToolbar() : null
-  ),
-  getRenderCustomToolbarWithElements: jest.fn(
-    ({ leftSide }: { leftSide: React.ReactNode }) =>
-      () =>
-        leftSide
-  ),
-}));
+vi.mock('@kbn/unified-data-table', () => {
+      const mocked = {
+      DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+      ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
+      // The page injects the episode count + reset-filters controls via the toolbar's leftSide.
+      // Render the custom toolbar (and have the toolbar builder render its leftSide) so those
+      // controls end up in the DOM and stay reactive to the page's filter state.
+      UnifiedDataTable: vi.fn((props: { renderCustomToolbar?: () => React.ReactNode }) =>
+        props.renderCustomToolbar ? props.renderCustomToolbar() : null
+      ),
+      getRenderCustomToolbarWithElements: vi.fn(
+        ({ leftSide }: { leftSide: React.ReactNode }) =>
+          () =>
+            leftSide
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
-jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes');
+vi.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
+vi.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes');
 
 // useAlertingEpisodesDataView uses react-use/useAsync internally with getEsqlDataView,
 // which requires heavy Kibana data-view infra. Mock the hook so useFetchAlertingEpisodesQuery
 // gets a ready dataView without going through the full data-view construction path.
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
 
-jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
-  createEpisodeActions: jest.fn(() => []),
-  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/actions', () => {
+      const mocked = {
+      createEpisodeActions: vi.fn(() => []),
+      READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
-  AlertEpisodeDetailsFlyout: jest.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => {
+      const mocked = {
+      AlertEpisodeDetailsFlyout: vi.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_compose_discover_flyout', () => ({
-  useComposeDiscoverFlyout: () => ({
-    flyout: null,
-    confirmationModal: null,
-    openCreateFlyout: jest.fn(),
-    openEditFlyout: jest.fn(),
-    openCloneFlyout: jest.fn(),
-  }),
-}));
+vi.mock('../../hooks/use_compose_discover_flyout', () => {
+      const mocked = {
+      useComposeDiscoverFlyout: () => ({
+        flyout: null,
+        confirmationModal: null,
+        openCreateFlyout: vi.fn(),
+        openEditFlyout: vi.fn(),
+        openCloneFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The stub echoes the props the page passes so tests can assert on them from the DOM, which keeps
 // the mock factory free of module scope references it cannot reach while jest hoists it.
-jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => ({
-  RuleSummaryFlyoutContainer: ({ ruleId, onClose }: { ruleId: string; onClose: () => void }) => (
-    <div data-test-subj={`mockRuleSummaryFlyout-${ruleId}`}>
-      <button data-test-subj="mockRuleSummaryFlyoutClose" onClick={onClose} type="button">
-        close
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => {
+      const mocked = {
+      RuleSummaryFlyoutContainer: ({ ruleId, onClose }: { ruleId: string; onClose: () => void }) => (
+        <div data-test-subj={`mockRuleSummaryFlyout-${ruleId}`}>
+          <button data-test-subj="mockRuleSummaryFlyoutClose" onClick={onClose} type="button">
+            close
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
+vi.mock('../../hooks/use_breadcrumbs', () => {
+      const mocked = { useBreadcrumbs: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/episodes_kpis', () => ({
-  EpisodesKpis: () => null,
-}));
+vi.mock('./components/episodes_kpis', () => {
+      const mocked = {
+      EpisodesKpis: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Capture filter-bar props so tests can drive refresh + filter changes from outside the component.
 // onRefresh is typed as returning unknown so tests can await the result (invalidateEpisodeQueries returns a Promise).
 let capturedFilterBarOnRefresh: (() => unknown) | undefined;
 let capturedFilterBarOnFilterChange: ((update: any) => void) | undefined;
-jest.mock('./components/episodes_filter_bar', () => ({
-  EpisodesFilterBar: jest.fn(
-    ({
-      onRefresh,
-      onFilterChange,
-    }: {
-      onRefresh?: () => unknown;
-      onFilterChange?: (update: any) => void;
-    }) => {
-      capturedFilterBarOnRefresh = onRefresh;
-      capturedFilterBarOnFilterChange = onFilterChange;
-      return null;
-    }
-  ),
-}));
+vi.mock('./components/episodes_filter_bar', () => {
+      const mocked = {
+      EpisodesFilterBar: vi.fn(
+        ({
+          onRefresh,
+          onFilterChange,
+        }: {
+          onRefresh?: () => unknown;
+          onFilterChange?: (update: any) => void;
+        }) => {
+          capturedFilterBarOnRefresh = onRefresh;
+          capturedFilterBarOnFilterChange = onFilterChange;
+          return null;
+        }
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/episodes_histogram', () => ({
-  EpisodesHistogram: () => null,
-}));
+vi.mock('./components/episodes_histogram', () => {
+      const mocked = {
+      EpisodesHistogram: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-use/lib/useObservable', () =>
-  jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
+vi.mock('react-use/lib/useObservable', () =>
+  vi.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
 );
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockSpaces = createMockSpaces();
 
 const mockStorage = {
-  get: jest.fn().mockReturnValue(null),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn().mockReturnValue(null),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 };
 
 const mockServices = {
@@ -154,17 +181,17 @@ const mockServices = {
     query: {
       timefilter: {
         timefilter: {
-          getTimeUpdate$: jest.fn().mockReturnValue({
-            pipe: jest.fn().mockReturnValue({ subscribe: jest.fn() }),
+          getTimeUpdate$: vi.fn().mockReturnValue({
+            pipe: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
           }),
-          getTime: jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' }),
-          setTime: jest.fn(),
+          getTime: vi.fn().mockReturnValue({ from: 'now-24h', to: 'now' }),
+          setTime: vi.fn(),
         },
       },
     },
   },
   overlays: {},
-  notifications: { toasts: { addError: jest.fn() } },
+  notifications: { toasts: { addError: vi.fn() } },
   rendering: {},
   application: { capabilities: {} },
   expressions: {},
@@ -173,22 +200,25 @@ const mockServices = {
   unifiedDocViewer: {},
   dataViews: {},
   userProfile: {},
-  uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
+  uiActions: { getTriggerCompatibleActions: vi.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
   storage: mockStorage,
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockImplementation(() => ({ services: mockServices })),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockImplementation(() => ({ services: mockServices })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUnifiedDataTable = jest.mocked(UnifiedDataTable);
+const mockUnifiedDataTable = vi.mocked(UnifiedDataTable);
 
 const mockDataView = {
-  fields: { forEach: jest.fn() },
-  setFieldCustomLabel: jest.fn(),
-  setFieldFormat: jest.fn(),
-  addRuntimeField: jest.fn(),
+  fields: { forEach: vi.fn() },
+  setFieldCustomLabel: vi.fn(),
+  setFieldFormat: vi.fn(),
+  addRuntimeField: vi.fn(),
   timeFieldName: '@timestamp',
 };
 
@@ -215,12 +245,12 @@ const mockEpisodes = [
 
 // jest.clearAllMocks() only resets call history, not implementations, so these stable
 // return values are set once at module scope and persist across all tests.
-jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+vi.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+vi.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
 mockHttp.post.mockResolvedValue({ rules: [] });
 
-const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
+const mockCreateEpisodeActions = vi.mocked(createEpisodeActions);
 
 const mockLocators = createMockLocators();
 
@@ -240,12 +270,12 @@ const renderPage = () => {
 
 describe('AlertEpisodesListPage', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
     mockCreateEpisodeActions.mockReturnValue([]);
-    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+    vi.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
     renderPage();
     // Wait for episodes to load so bulk action handlers have access to episode data
@@ -273,8 +303,8 @@ describe('AlertEpisodesListPage', () => {
       order: 1,
       displayName: 'Test Action',
       iconType: 'star',
-      isCompatible: jest.fn(() => true),
-      execute: jest.fn(async () => {}),
+      isCompatible: vi.fn(() => true),
+      execute: vi.fn(async () => {}),
     };
     mockCreateEpisodeActions.mockReturnValue([mockAction]);
 
@@ -399,7 +429,7 @@ describe('AlertEpisodesListPage', () => {
 
   it('builds the toolbar with the loaded episode count on the left side', () => {
     // getRenderCustomToolbarWithElements receives the leftSide element, which renders the count
-    const mockGetRenderCustomToolbarWithElements = jest.mocked(getRenderCustomToolbarWithElements);
+    const mockGetRenderCustomToolbarWithElements = vi.mocked(getRenderCustomToolbarWithElements);
     const lastArgs = mockGetRenderCustomToolbarWithElements.mock.calls.at(-1)?.[0];
     expect(lastArgs?.leftSide).toBeDefined();
     expect(screen.getByTestId('alertEpisodesItemCount')).toBeInTheDocument();
@@ -408,13 +438,13 @@ describe('AlertEpisodesListPage', () => {
 
 describe('query invalidation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
     capturedFilterBarOnRefresh = undefined;
     mockCreateEpisodeActions.mockReturnValue([]);
-    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+    vi.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
   });
 
@@ -426,7 +456,7 @@ describe('query invalidation', () => {
     });
 
     // Set up the spy after rendering so it does not interfere with React Query's query execution
-    const mockInvalidateQueries = jest
+    const mockInvalidateQueries = vi
       .spyOn(QueryClient.prototype, 'invalidateQueries')
       .mockResolvedValue(undefined);
 
@@ -443,8 +473,8 @@ describe('query invalidation', () => {
       order: 1,
       displayName: 'Test Action',
       iconType: 'star',
-      isCompatible: jest.fn(() => true),
-      execute: jest.fn(async ({ onSuccess }: EpisodeActionContext) => {
+      isCompatible: vi.fn(() => true),
+      execute: vi.fn(async ({ onSuccess }: EpisodeActionContext) => {
         capturedOnSuccess = onSuccess;
       }),
     };
@@ -462,7 +492,7 @@ describe('query invalidation', () => {
     const firstAction = bulkActions[0];
 
     // Set up the spy after rendering so it does not interfere with React Query's query execution
-    const mockInvalidateQueries = jest
+    const mockInvalidateQueries = vi
       .spyOn(QueryClient.prototype, 'invalidateQueries')
       .mockResolvedValue(undefined);
 
@@ -483,18 +513,18 @@ describe('query invalidation', () => {
 
 describe('episode count + reset filters toolbar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
     capturedFilterBarOnFilterChange = undefined;
     mockCreateEpisodeActions.mockReturnValue([]);
-    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+    vi.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
   });
 
   it('renders the loaded episode count when under the page size cap', async () => {
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
     expect(node.textContent).toMatch(/^Showing\s+3\s+episodes$/);
@@ -502,7 +532,7 @@ describe('episode count + reset filters toolbar', () => {
 
   it('uses the loaded row count even when it differs from a larger filter total', async () => {
     // Previously the toolbar used KPI alertsCount; it must follow the table rows instead.
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
     expect(node).toHaveTextContent('Showing 3 episodes');
@@ -516,7 +546,7 @@ describe('episode count + reset filters toolbar', () => {
       group_hash: `gh${index}`,
       '@timestamp': '2026-01-01T00:00:00Z',
     }));
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(cappedEpisodes as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(cappedEpisodes as any);
 
     renderPage();
 
@@ -562,7 +592,7 @@ describe('privilege gating', () => {
     displayName: 'Acknowledge',
     iconType: 'checkCircle',
     isCompatible: () => true,
-    execute: jest.fn(async () => {}),
+    execute: vi.fn(async () => {}),
   };
   const discoverAction = {
     id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
@@ -570,14 +600,14 @@ describe('privilege gating', () => {
     displayName: 'Open in Discover',
     iconType: 'discoverApp',
     isCompatible: () => true,
-    execute: jest.fn(async () => {}),
+    execute: vi.fn(async () => {}),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+    vi.clearAllMocks();
+    vi.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
     mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
   });
@@ -624,11 +654,11 @@ describe('privilege gating', () => {
 
 describe('rule summary flyout', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
     mockCreateEpisodeActions.mockReturnValue([]);
-    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     mockHttp.post.mockResolvedValue({ rules: [] });
     renderPage();
     await waitFor(() => {
@@ -712,17 +742,17 @@ const classicEpisodes = [
 
 describe('AlertEpisodesListPage fetch errors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
     mockCreateEpisodeActions.mockReturnValue([]);
-    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+    vi.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
   });
 
   it('toasts when classic alerts return 500', async () => {
-    jest
+    vi
       .mocked(fetchClassicAlertsAsEpisodes)
       .mockRejectedValue(httpError(500, 'classic alerts failed'));
 
@@ -742,7 +772,7 @@ describe('AlertEpisodesListPage fetch errors', () => {
   });
 
   it.each([403, 503])('does not toast when classic alerts return %s', async (status) => {
-    jest
+    vi
       .mocked(fetchClassicAlertsAsEpisodes)
       .mockRejectedValue(httpError(status, `classic ${status}`));
 
@@ -760,8 +790,8 @@ describe('AlertEpisodesListPage fetch errors', () => {
   });
 
   it('toasts and still shows classic rows when v2 returns 500', async () => {
-    jest.mocked(fetchAlertingEpisodes).mockRejectedValue(httpError(500, 'v2 episodes failed'));
-    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue(classicEpisodes as any);
+    vi.mocked(fetchAlertingEpisodes).mockRejectedValue(httpError(500, 'v2 episodes failed'));
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue(classicEpisodes as any);
 
     renderPage();
 
@@ -783,12 +813,12 @@ describe('AlertEpisodesListPage fetch errors', () => {
 
 describe('manageRulesHref override', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
     mockCreateEpisodeActions.mockReturnValue([]);
-    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+    vi.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    vi.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
   });
 

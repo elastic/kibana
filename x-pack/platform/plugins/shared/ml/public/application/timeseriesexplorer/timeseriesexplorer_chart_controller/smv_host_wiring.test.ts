@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   buildSmvEmptyFocusStatePatch,
   consumeSmvContextLoadResult,
@@ -59,36 +61,36 @@ describe('smv_host_wiring', () => {
 
   describe('consumeSmvContextLoadResult', () => {
     it('does nothing when result is null', () => {
-      const applyStatePatch = jest.fn();
+      const applyStatePatch = vi.fn();
       consumeSmvContextLoadResult({
         result: null,
         isUnmounted: () => false,
         loadCounterWhenStarted: 1,
         readLoadCounter: () => 1,
-        syncPreviousSelectedForecastIdFromProps: jest.fn(),
+        syncPreviousSelectedForecastIdFromProps: vi.fn(),
         applyStatePatch,
       });
       expect(applyStatePatch).not.toHaveBeenCalled();
     });
 
     it('does nothing when load counter has advanced', () => {
-      const applyStatePatch = jest.fn();
+      const applyStatePatch = vi.fn();
       consumeSmvContextLoadResult({
         result: { statePatch: { loading: false }, shouldUpdatePreviousSelectedForecastId: false },
         isUnmounted: () => false,
         loadCounterWhenStarted: 1,
         readLoadCounter: () => 2,
-        syncPreviousSelectedForecastIdFromProps: jest.fn(),
+        syncPreviousSelectedForecastIdFromProps: vi.fn(),
         applyStatePatch,
       });
       expect(applyStatePatch).not.toHaveBeenCalled();
     });
 
     it('applies state, zoom, forecast sync, and after hook with pending focus', () => {
-      const applyStatePatch = jest.fn();
-      const applyZoomSelection = jest.fn();
-      const syncPrevious = jest.fn();
-      const afterStatePatch = jest.fn();
+      const applyStatePatch = vi.fn();
+      const applyZoomSelection = vi.fn();
+      const syncPrevious = vi.fn();
+      const afterStatePatch = vi.fn();
       const zoomSelection = { from: new Date('2020-01-01'), to: new Date('2020-01-02') };
 
       consumeSmvContextLoadResult({
@@ -117,8 +119,8 @@ describe('smv_host_wiring', () => {
     });
 
     it('invokes afterStatePatch without pending focus for dataNotChartable', () => {
-      const afterStatePatch = jest.fn();
-      const applyStatePatch = jest.fn();
+      const afterStatePatch = vi.fn();
+      const applyStatePatch = vi.fn();
 
       consumeSmvContextLoadResult({
         result: {
@@ -128,7 +130,7 @@ describe('smv_host_wiring', () => {
         isUnmounted: () => false,
         loadCounterWhenStarted: 1,
         readLoadCounter: () => 1,
-        syncPreviousSelectedForecastIdFromProps: jest.fn(),
+        syncPreviousSelectedForecastIdFromProps: vi.fn(),
         applyStatePatch,
         afterStatePatch,
       });
@@ -150,7 +152,7 @@ describe('smv_host_wiring', () => {
     });
 
     it('reports hasPendingFocus false when context finishes without zoomSelection', () => {
-      const afterStatePatch = jest.fn();
+      const afterStatePatch = vi.fn();
 
       consumeSmvContextLoadResult({
         result: {
@@ -160,8 +162,8 @@ describe('smv_host_wiring', () => {
         isUnmounted: () => false,
         loadCounterWhenStarted: 1,
         readLoadCounter: () => 1,
-        syncPreviousSelectedForecastIdFromProps: jest.fn(),
-        applyStatePatch: jest.fn(),
+        syncPreviousSelectedForecastIdFromProps: vi.fn(),
+        applyStatePatch: vi.fn(),
         afterStatePatch,
       });
 
@@ -172,7 +174,7 @@ describe('smv_host_wiring', () => {
     });
 
     it('does not invoke afterStatePatch for stale loads', () => {
-      const afterStatePatch = jest.fn();
+      const afterStatePatch = vi.fn();
 
       consumeSmvContextLoadResult({
         result: {
@@ -182,8 +184,8 @@ describe('smv_host_wiring', () => {
         isUnmounted: () => false,
         loadCounterWhenStarted: 1,
         readLoadCounter: () => 2,
-        syncPreviousSelectedForecastIdFromProps: jest.fn(),
-        applyStatePatch: jest.fn(),
+        syncPreviousSelectedForecastIdFromProps: vi.fn(),
+        applyStatePatch: vi.fn(),
         afterStatePatch,
       });
 

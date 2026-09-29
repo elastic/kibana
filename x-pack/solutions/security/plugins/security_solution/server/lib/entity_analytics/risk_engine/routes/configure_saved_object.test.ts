@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   serverMock,
   requestContextMock,
@@ -21,13 +24,13 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let mockRiskEngineDataClient: ReturnType<typeof riskEngineDataClientMock.create>;
-  let getStartServicesMock: jest.Mock;
+  let getStartServicesMock: Mock;
 
   beforeEach(() => {
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     mockRiskEngineDataClient = riskEngineDataClientMock.create();
-    mockRiskEngineDataClient.updateRiskEngineSavedObject = jest.fn();
+    mockRiskEngineDataClient.updateRiskEngineSavedObject = vi.fn();
     context = requestContextMock.convertContext(
       requestContextMock.create({
         ...clients,
@@ -35,7 +38,7 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
       })
     );
     mockTaskManagerStart = taskManagerMock.createStart();
-    getStartServicesMock = jest.fn().mockResolvedValue([
+    getStartServicesMock = vi.fn().mockResolvedValue([
       {},
       {
         taskManager: mockTaskManagerStart,

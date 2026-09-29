@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import React, { useMemo, useReducer } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -40,11 +43,11 @@ import {
 import { useIndividualTagsActionContext } from '../contexts/individual_tags_action_context';
 import { useTagsAction } from './tags/use_tags_action';
 
-jest.mock('../hooks/use_case_view_navigation');
-jest.mock('./tags/use_tags_action');
+vi.mock('../hooks/use_case_view_navigation');
+vi.mock('./tags/use_tags_action');
 
-const cellActionOnClickMockedFn = jest.fn();
-const mockOnChangeVisibleColumns = jest.fn();
+const cellActionOnClickMockedFn = vi.fn();
+const mockOnChangeVisibleColumns = vi.fn();
 
 const { fix, cleanup } = getJsDomPerformanceFix();
 
@@ -72,12 +75,12 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
     setVisibleColumns: mockOnChangeVisibleColumns,
   },
   'data-test-subj': 'testTable',
-  onToggleColumn: jest.fn(),
-  onResetColumns: jest.fn(),
+  onToggleColumn: vi.fn(),
+  onResetColumns: vi.fn(),
   query: {},
   sort: [],
   alertsQuerySnapshot: { request: [], response: [] },
-  onSortChange: jest.fn(),
+  onSortChange: vi.fn(),
   additionalBulkActions: [
     {
       id: 0,
@@ -99,8 +102,8 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
 };
 
 describe('AlertsDataGrid', () => {
-  const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
-  useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView: jest.fn() });
+  const useCaseViewNavigationMock = useCaseViewNavigation as Mock;
+  useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView: vi.fn() });
 
   const TestComponent: React.FunctionComponent<
     Omit<TestAlertsDataGridProps, 'renderContext'> & {
@@ -133,17 +136,17 @@ describe('AlertsDataGrid', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Reset the tags action mock to default state
-    const mockUseTagsAction = jest.mocked(useTagsAction);
+    const mockUseTagsAction = vi.mocked(useTagsAction);
     mockUseTagsAction.mockReset();
     mockUseTagsAction.mockImplementation(() => ({
       isFlyoutOpen: false,
       selectedAlerts: [],
-      openFlyout: jest.fn(),
-      onClose: jest.fn(),
-      onSaveTags: jest.fn(),
-      getAction: jest.fn(),
+      openFlyout: vi.fn(),
+      onClose: vi.fn(),
+      onSaveTags: vi.fn(),
+      getAction: vi.fn(),
     }));
   });
 
@@ -289,7 +292,7 @@ describe('AlertsDataGrid', () => {
 
       describe('row loading state on action', () => {
         type ExtractFunctionComponent<T> = T extends FunctionComponent<infer P> ? T : never;
-        const mockRenderActionsCell = jest.fn(
+        const mockRenderActionsCell = vi.fn(
           mockRenderContext.renderActionsCell as ExtractFunctionComponent<
             typeof mockRenderContext.renderActionsCell
           >
@@ -346,7 +349,7 @@ describe('AlertsDataGrid', () => {
     });
 
     describe('Cell Actions', () => {
-      const mockGetCellActionsForColumn = jest.fn(
+      const mockGetCellActionsForColumn = vi.fn(
         (columnId: string): EuiDataGridColumnCellAction[] => [
           ({ rowIndex, Component }) => {
             const label = 'Fake Cell First Action';
@@ -603,7 +606,7 @@ describe('AlertsDataGrid', () => {
     });
 
     describe('Individual tags flyout', () => {
-      const mockUseTagsAction = jest.mocked(useTagsAction);
+      const mockUseTagsAction = vi.mocked(useTagsAction);
       const mockAlert = {
         _id: 'alert-1',
         _index: 'test-index',
@@ -619,10 +622,10 @@ describe('AlertsDataGrid', () => {
         mockUseTagsAction.mockImplementation(() => ({
           isFlyoutOpen: false,
           selectedAlerts: [],
-          openFlyout: jest.fn(),
-          onClose: jest.fn(),
-          onSaveTags: jest.fn(),
-          getAction: jest.fn(),
+          openFlyout: vi.fn(),
+          onClose: vi.fn(),
+          onSaveTags: vi.fn(),
+          getAction: vi.fn(),
         }));
       });
 
@@ -634,17 +637,17 @@ describe('AlertsDataGrid', () => {
       });
 
       it('should render individual tags flyout when opened', async () => {
-        const mockOnClose = jest.fn();
-        const mockOnSaveTags = jest.fn();
+        const mockOnClose = vi.fn();
+        const mockOnSaveTags = vi.fn();
 
         // Set up the mock implementation before rendering
         mockUseTagsAction.mockImplementation(() => ({
           isFlyoutOpen: true,
           selectedAlerts: [mockAlert],
-          openFlyout: jest.fn(),
+          openFlyout: vi.fn(),
           onClose: mockOnClose,
           onSaveTags: mockOnSaveTags,
-          getAction: jest.fn(),
+          getAction: vi.fn(),
         }));
 
         render(<TestComponent {...mockDataGridProps} />);
@@ -654,16 +657,16 @@ describe('AlertsDataGrid', () => {
       });
 
       it('should call onClose when cancel button is clicked', async () => {
-        const mockOnClose = jest.fn();
-        const mockOnSaveTags = jest.fn();
+        const mockOnClose = vi.fn();
+        const mockOnSaveTags = vi.fn();
 
         mockUseTagsAction.mockImplementation(() => ({
           isFlyoutOpen: true,
           selectedAlerts: [mockAlert],
-          openFlyout: jest.fn(),
+          openFlyout: vi.fn(),
           onClose: mockOnClose,
           onSaveTags: mockOnSaveTags,
-          getAction: jest.fn(),
+          getAction: vi.fn(),
         }));
 
         render(<TestComponent {...mockDataGridProps} />);
@@ -706,10 +709,10 @@ describe('AlertsDataGrid', () => {
         mockUseTagsAction.mockImplementation(() => ({
           isFlyoutOpen: true,
           selectedAlerts: [mockAlert],
-          openFlyout: jest.fn(),
-          onClose: jest.fn(),
-          onSaveTags: jest.fn(),
-          getAction: jest.fn(),
+          openFlyout: vi.fn(),
+          onClose: vi.fn(),
+          onSaveTags: vi.fn(),
+          getAction: vi.fn(),
         }));
 
         render(<TestComponent {...mockDataGridProps} />);

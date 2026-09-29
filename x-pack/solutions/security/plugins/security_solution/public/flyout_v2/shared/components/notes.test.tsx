@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
@@ -22,20 +25,23 @@ import { getEmptyValue } from '../../../common/components/empty_value';
 import { ReqStatus } from '../../../notes';
 import type { Note } from '../../../../common/api/timeline';
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-const mockOnOpenNotesTab = jest.fn();
-const mockAddError = jest.fn();
+const mockOnOpenNotesTab = vi.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -61,8 +67,8 @@ const renderNotes = (
 
 describe('Notes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: true, read: true },
     });
   });
@@ -159,7 +165,7 @@ describe('Notes', () => {
   });
 
   it('shows dash when user cannot read notes', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: false, read: false },
     });
     const { getByText, queryByTestId } = renderNotes();
@@ -168,7 +174,7 @@ describe('Notes', () => {
   });
 
   it('shows View notes button when user has read but not crud and notes exist', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: false, read: true },
     });
     const createMockNote = (noteId: string): Note => ({

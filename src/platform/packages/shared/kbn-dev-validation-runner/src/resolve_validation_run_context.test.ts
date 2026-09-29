@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   countCommitsBetweenRefs,
   hasStagedChanges,
@@ -26,40 +29,49 @@ import {
   resolveValidationRunContext,
 } from './resolve_validation_run_context';
 
-jest.mock('@kbn/dev-cli-errors', () => ({
-  createFailError: (message: string) => new Error(message),
-}));
+vi.mock('@kbn/dev-cli-errors', () => {
+      const mocked = {
+      createFailError: (message: string) => new Error(message),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/dev-utils', () => ({
-  countCommitsBetweenRefs: jest.fn(),
-  hasStagedChanges: jest.fn(),
-  isShallowRepository: jest.fn(),
-  parseAndResolveValidationContract: jest.fn(),
-  VALIDATION_PROFILE_DEFAULTS: {
-    branch: {
-      scope: 'branch',
-      testMode: 'affected',
-      downstream: 'none',
-    },
-  },
-}));
+vi.mock('@kbn/dev-utils', () => {
+      const mocked = {
+      countCommitsBetweenRefs: vi.fn(),
+      hasStagedChanges: vi.fn(),
+      isShallowRepository: vi.fn(),
+      parseAndResolveValidationContract: vi.fn(),
+      VALIDATION_PROFILE_DEFAULTS: {
+        branch: {
+          scope: 'branch',
+          testMode: 'affected',
+          downstream: 'none',
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/moon', () => ({
-  getAffectedMoonProjectsFromChangedFiles: jest.fn(),
-  getMoonChangedFiles: jest.fn(),
-  resolveMoonAffectedBase: jest.fn(),
-  summarizeAffectedMoonProjects: jest.fn(),
-}));
+vi.mock('@kbn/moon', () => {
+      const mocked = {
+      getAffectedMoonProjectsFromChangedFiles: vi.fn(),
+      getMoonChangedFiles: vi.fn(),
+      resolveMoonAffectedBase: vi.fn(),
+      summarizeAffectedMoonProjects: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockParseAndResolveValidationContract = parseAndResolveValidationContract as jest.Mock;
-const mockHasStagedChanges = hasStagedChanges as jest.Mock;
-const mockIsShallowRepository = isShallowRepository as jest.Mock;
-const mockResolveMoonAffectedBase = resolveMoonAffectedBase as jest.Mock;
-const mockCountCommitsBetweenRefs = countCommitsBetweenRefs as jest.Mock;
+const mockParseAndResolveValidationContract = parseAndResolveValidationContract as Mock;
+const mockHasStagedChanges = hasStagedChanges as Mock;
+const mockIsShallowRepository = isShallowRepository as Mock;
+const mockResolveMoonAffectedBase = resolveMoonAffectedBase as Mock;
+const mockCountCommitsBetweenRefs = countCommitsBetweenRefs as Mock;
 const mockGetAffectedMoonProjectsFromChangedFiles =
-  getAffectedMoonProjectsFromChangedFiles as jest.Mock;
-const mockSummarizeAffectedMoonProjects = summarizeAffectedMoonProjects as jest.Mock;
-const mockGetMoonChangedFiles = getMoonChangedFiles as jest.Mock;
+  getAffectedMoonProjectsFromChangedFiles as Mock;
+const mockSummarizeAffectedMoonProjects = summarizeAffectedMoonProjects as Mock;
+const mockGetMoonChangedFiles = getMoonChangedFiles as Mock;
 
 describe('assertNoValidationRunFlagsForDirectTarget', () => {
   it('throws when direct target is combined with run flags', () => {
@@ -75,7 +87,7 @@ describe('assertNoValidationRunFlagsForDirectTarget', () => {
 
 describe('resolveValidationRunContext', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetMoonChangedFiles.mockResolvedValue(['packages/foo/src/index.ts']);
     mockIsShallowRepository.mockResolvedValue(false);
   });
@@ -134,7 +146,7 @@ describe('resolveValidationRunContext', () => {
       headRef: undefined,
     });
     mockResolveMoonAffectedBase.mockRejectedValue(new Error('merge-base failed'));
-    const warning = jest.fn();
+    const warning = vi.fn();
 
     await expect(
       resolveValidationRunContext({
@@ -262,7 +274,7 @@ describe('resolveValidationRunContext', () => {
     });
     mockGetMoonChangedFiles.mockResolvedValue([]);
     mockIsShallowRepository.mockResolvedValue(true);
-    const warning = jest.fn();
+    const warning = vi.fn();
 
     await expect(resolveValidationRunContext({ flags: {}, onWarning: warning })).resolves.toEqual({
       kind: 'affected',
@@ -287,7 +299,7 @@ describe('resolveValidationRunContext', () => {
 
 describe('resolveValidationAffectedProjects', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('summarizes Moon-affected projects from pre-resolved changed files', async () => {

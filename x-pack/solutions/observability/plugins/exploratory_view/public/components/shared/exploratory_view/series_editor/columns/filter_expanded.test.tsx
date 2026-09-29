@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
@@ -17,7 +19,7 @@ describe('FilterExpanded', function () {
   const mockSeries = { ...mockUxSeries, filters };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('render', async () => {

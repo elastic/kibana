@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -14,7 +17,7 @@ import { Milestone } from '../../../../common/trial_companion/types';
 import { NBA_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 describe('TrialCompanionMilestoneRepositoryImpl', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: Mocked<SavedObjectsClientContract>;
   let repository: TrialCompanionMilestoneRepository;
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
@@ -22,7 +25,7 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
       loggingSystemMock.createLogger(),
       soClient
     );
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {

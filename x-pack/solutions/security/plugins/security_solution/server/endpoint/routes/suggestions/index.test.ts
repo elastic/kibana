@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { TypeOf } from '@kbn/config-schema';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
@@ -46,29 +49,32 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
-jest.mock('@kbn/kql/server/autocomplete/terms_enum', () => {
+vi.mock('@kbn/kql/server/autocomplete/terms_enum', () => {
   return {
-    termsEnumSuggestions: jest.fn(),
+    termsEnumSuggestions: vi.fn(),
   };
 });
 
-jest.mock('@kbn/kql/server/autocomplete/terms_agg', () => {
+vi.mock('@kbn/kql/server/autocomplete/terms_agg', () => {
   return {
-    termsAggSuggestions: jest.fn(),
+    termsAggSuggestions: vi.fn(),
   };
 });
 
-jest.mock('../../../../common/endpoint/utils/index_name_utilities', () => ({
-  buildIndexNameWithNamespace: jest.fn(),
-}));
+vi.mock('../../../../common/endpoint/utils/index_name_utilities', () => {
+      const mocked = {
+      buildIndexNameWithNamespace: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const termsEnumSuggestionsMock = termsEnumSuggestions as jest.MockedFunction<
+const termsEnumSuggestionsMock = termsEnumSuggestions as MockedFunction<
   typeof termsEnumSuggestions
 >;
-const termsAggSuggestionsMock = termsAggSuggestions as jest.MockedFunction<
+const termsAggSuggestionsMock = termsAggSuggestions as MockedFunction<
   typeof termsAggSuggestions
 >;
-const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as jest.MockedFunction<
+const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as MockedFunction<
   typeof buildIndexNameWithNamespace
 >;
 
@@ -79,8 +85,8 @@ interface CallRouteInterface {
 
 describe('when calling the Suggestions route handler', () => {
   let mockScopedEsClient: ScopedClusterClientMock;
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockSavedObjectClient: Mocked<SavedObjectsClientContract>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
   let suggestionsRouteHandler: ReturnType<typeof getEndpointSuggestionsRequestHandler>;
   let callRoute: (
     routePrefix: string,
@@ -92,14 +98,14 @@ describe('when calling the Suggestions route handler', () => {
 
   beforeEach(() => {
     mockEndpointContext = createMockEndpointAppContext();
-    (mockEndpointContext.service.getEndpointMetadataService as jest.Mock) = jest
+    (mockEndpointContext.service.getEndpointMetadataService as Mock) = vi
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
       });
     mockScopedEsClient = elasticsearchServiceMock.createScopedClusterClient();
     (
-      mockScopedEsClient.asInternalUser.cluster.remoteInfo as unknown as jest.Mock
+      mockScopedEsClient.asInternalUser.cluster.remoteInfo as unknown as Mock
     ).mockResolvedValue({});
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
@@ -136,13 +142,13 @@ describe('when calling the Suggestions route handler', () => {
         );
 
         // Mock the space ID retrieval using the correct pattern
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         // Mock the fleet services
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -166,7 +172,7 @@ describe('when calling the Suggestions route handler', () => {
 
         await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect((await mockContext.securitySolution).getSpaceId as Mock).toHaveBeenCalled();
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
         expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
@@ -201,13 +207,13 @@ describe('when calling the Suggestions route handler', () => {
         );
 
         // Mock the space ID retrieval using the correct pattern
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         // Mock the fleet services
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -230,7 +236,7 @@ describe('when calling the Suggestions route handler', () => {
 
         await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect((await mockContext.securitySolution).getSpaceId as Mock).toHaveBeenCalled();
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
         // buildIndexNameWithNamespace should not be called when namespaces array is empty
@@ -252,13 +258,13 @@ describe('when calling the Suggestions route handler', () => {
         );
 
         // Mock the space ID retrieval using the correct pattern
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         // Mock the fleet services
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -311,14 +317,14 @@ describe('when calling the Suggestions route handler', () => {
       beforeEach(() => {
         mockFleetServices = {
           packagePolicy: {
-            fetchAllItems: jest.fn(),
+            fetchAllItems: vi.fn(),
           },
         };
 
         mockSecuritySolutionContext = {
-          getInternalFleetServices: jest.fn().mockReturnValue(mockFleetServices),
-          getSpaceId: jest.fn().mockReturnValue('default'),
-          getEndpointAuthz: jest.fn().mockResolvedValue(getEndpointAuthzInitialStateMock()),
+          getInternalFleetServices: vi.fn().mockReturnValue(mockFleetServices),
+          getSpaceId: vi.fn().mockReturnValue('default'),
+          getEndpointAuthz: vi.fn().mockResolvedValue(getEndpointAuthzInitialStateMock()),
         };
 
         applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
@@ -700,12 +706,12 @@ describe('when calling the Suggestions route handler', () => {
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
         );
 
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -728,7 +734,7 @@ describe('when calling the Suggestions route handler', () => {
 
         await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect((await mockContext.securitySolution).getSpaceId as Mock).toHaveBeenCalled();
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
         expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
@@ -776,12 +782,12 @@ describe('when calling the Suggestions route handler', () => {
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
         );
 
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -804,7 +810,7 @@ describe('when calling the Suggestions route handler', () => {
 
         await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect((await mockContext.securitySolution).getSpaceId as Mock).toHaveBeenCalled();
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
         expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
@@ -850,12 +856,12 @@ describe('when calling the Suggestions route handler', () => {
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
         );
 
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -878,7 +884,7 @@ describe('when calling the Suggestions route handler', () => {
 
         await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect((await mockContext.securitySolution).getSpaceId as Mock).toHaveBeenCalled();
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
         expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
@@ -910,12 +916,12 @@ describe('when calling the Suggestions route handler', () => {
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
         );
 
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -938,7 +944,7 @@ describe('when calling the Suggestions route handler', () => {
 
         await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect((await mockContext.securitySolution).getSpaceId as Mock).toHaveBeenCalled();
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
         expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
@@ -956,12 +962,12 @@ describe('when calling the Suggestions route handler', () => {
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
         );
 
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -1003,7 +1009,7 @@ describe('when calling the Suggestions route handler', () => {
 
     describe('when CCS is enabled', () => {
       beforeEach(() => {
-        (mockEndpointContext.service.isCcsEnabled as jest.Mock).mockResolvedValue(true);
+        (mockEndpointContext.service.isCcsEnabled as Mock).mockResolvedValue(true);
         suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
           config$,
           mockEndpointContext
@@ -1021,12 +1027,12 @@ describe('when calling the Suggestions route handler', () => {
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
         );
 
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+        ((await mockContext.securitySolution).getSpaceId as Mock).mockReturnValue(spaceId);
 
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        mockEndpointContext.service.getInternalFleetServices = jest
+        mockEndpointContext.service.getInternalFleetServices = vi
           .fn()
           .mockReturnValue(mockFleetServices);
 
@@ -1083,7 +1089,7 @@ describe('when calling the Suggestions route handler', () => {
             username: 'superuser',
             roles: ['superuser'],
           };
-          (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
+          (startContract.security.authc.getCurrentUser as Mock).mockImplementationOnce(
             () => superUser
           );
 

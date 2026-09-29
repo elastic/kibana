@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -21,7 +23,7 @@ const renderTour = (ui: React.ReactElement) =>
 describe('DisplayOptionsTour', () => {
   it('does not render the close control when the tour is closed', () => {
     const { queryByTestId, getByTestId } = renderTour(
-      <DisplayOptionsTour isOpen={false} onDismiss={jest.fn()}>
+      <DisplayOptionsTour isOpen={false} onDismiss={vi.fn()}>
         <button type="button" data-test-subj="eisDisplayOptionsTourAnchor" />
       </DisplayOptionsTour>
     );
@@ -31,7 +33,7 @@ describe('DisplayOptionsTour', () => {
   });
 
   it('calls onDismiss from Close when the tour is open', () => {
-    const onDismiss = jest.fn();
+    const onDismiss = vi.fn();
     const { getByTestId } = renderTour(
       <DisplayOptionsTour isOpen={true} onDismiss={onDismiss}>
         <button type="button" data-test-subj="eisDisplayOptionsTourAnchor" />

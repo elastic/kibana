@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { lastValueFrom, throwError } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -17,9 +19,12 @@ import {
 } from '@kbn/agent-builder-common';
 import { convertErrors, toClientError } from './convert_errors';
 
-jest.mock('../../../tracing', () => ({
-  getCurrentTraceId: () => 'trace-1',
-}));
+vi.mock('../../../tracing', () => {
+      const mocked = {
+      getCurrentTraceId: () => 'trace-1',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('toClientError', () => {
   it('returns the same AgentBuilderError instance with the trace id stamped on meta', () => {
@@ -85,7 +90,7 @@ describe('toClientError', () => {
 
 describe('convertErrors', () => {
   it('reports the round error and rethrows the client error', async () => {
-    const reportRoundError = jest.fn();
+    const reportRoundError = vi.fn();
     const source$ = throwError(() => new Error('llm exploded'));
 
     await expect(
@@ -117,7 +122,7 @@ describe('convertErrors', () => {
   });
 
   it('forwards the round origin to the reported round error', async () => {
-    const reportRoundError = jest.fn();
+    const reportRoundError = vi.fn();
     const source$ = throwError(() => new Error('llm exploded'));
 
     await expect(

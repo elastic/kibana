@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getTaskClaimer, isTaskTypeExcluded } from '.';
 import { mockLogger } from '../test_utils';
 import { claimAvailableTasksMget } from './strategy_mget';
@@ -12,7 +14,7 @@ import { claimAvailableTasksMget } from './strategy_mget';
 const logger = mockLogger();
 
 describe('task_claimers/index', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   describe('getTaskClaimer()', () => {
     test('returns expected result for mget', () => {

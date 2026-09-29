@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { ReactNode } from 'react';
@@ -27,38 +29,53 @@ interface MockAgentInstance {
 type ColumnWithRender = EuiTableFieldDataColumnType<MockAgentInstance>;
 
 // Mock the hooks and components
-const mockUseAnyOfApmParams = jest.fn();
-const mockGetComparisonEnabled = jest.fn();
+const mockUseAnyOfApmParams = vi.fn();
+const mockGetComparisonEnabled = vi.fn();
 
-jest.mock('../../../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => mockUseAnyOfApmParams(),
-}));
+vi.mock('../../../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => mockUseAnyOfApmParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../shared/time_comparison/get_comparison_enabled', () => ({
-  getComparisonEnabled: () => mockGetComparisonEnabled(),
-}));
+vi.mock('../../../../../shared/time_comparison/get_comparison_enabled', () => {
+      const mocked = {
+      getComparisonEnabled: () => mockGetComparisonEnabled(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock child components
-jest.mock('../../../../../shared/environment_badge', () => ({
-  EnvironmentBadge: ({ environments }: { environments: string[] }) => (
-    <div data-test-subj="environment-badge">{environments.join(', ')}</div>
-  ),
-}));
+vi.mock('../../../../../shared/environment_badge', () => {
+      const mocked = {
+      EnvironmentBadge: ({ environments }: { environments: string[] }) => (
+        <div data-test-subj="environment-badge">{environments.join(', ')}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../shared/item_badge', () => ({
-  ItemsBadge: ({ items }: { items: string[] }) => (
-    <div data-test-subj="items-badge">{items.join(', ')}</div>
-  ),
-}));
+vi.mock('../../../../../shared/item_badge', () => {
+      const mocked = {
+      ItemsBadge: ({ items }: { items: string[] }) => (
+        <div data-test-subj="items-badge">{items.join(', ')}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../shared/popover_tooltip', () => ({
-  PopoverTooltip: ({ children }: { children: ReactNode }) => (
-    <div data-test-subj="popover-tooltip">{children}</div>
-  ),
-}));
+vi.mock('../../../../../shared/popover_tooltip', () => {
+      const mocked = {
+      PopoverTooltip: ({ children }: { children: ReactNode }) => (
+        <div data-test-subj="popover-tooltip">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/apm-ui-shared', () => {
-  const original = jest.requireActual('@kbn/apm-ui-shared');
+vi.mock('@kbn/apm-ui-shared', async () => {
+  const original = (await vi.importActual('@kbn/apm-ui-shared'));
 
   return {
     ...original,
@@ -71,16 +88,19 @@ jest.mock('@kbn/apm-ui-shared', () => {
   };
 });
 
-jest.mock('../../../../../shared/links/apm/metric_overview_link', () => ({
-  MetricOverviewLink: ({ children, serviceName, query }: any) => (
-    <a
-      data-test-subj="metric-overview-link"
-      href={`/services/${serviceName}/metrics?${new URLSearchParams(query)}`}
-    >
-      {children}
-    </a>
-  ),
-}));
+vi.mock('../../../../../shared/links/apm/metric_overview_link', () => {
+      const mocked = {
+      MetricOverviewLink: ({ children, serviceName, query }: any) => (
+        <a
+          data-test-subj="metric-overview-link"
+          href={`/services/${serviceName}/metrics?${new URLSearchParams(query)}`}
+        >
+          {children}
+        </a>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -114,7 +134,7 @@ describe('AgentInstancesDetails', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAnyOfApmParams.mockReturnValue(mockParams);
     mockGetComparisonEnabled.mockReturnValue(false);
   });

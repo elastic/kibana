@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
@@ -60,14 +63,14 @@ function createMockAsset(data: unknown) {
  * Routes calls based on the asset path.
  */
 function mockPackageAssets(
-  packageService: jest.Mocked<PackageService>,
+  packageService: Mocked<PackageService>,
   options: {
     osquery?: unknown;
     ecs?: unknown;
     metadata?: unknown;
   }
 ) {
-  (packageService.asInternalUser.getPackageAsset as jest.Mock).mockImplementation(
+  (packageService.asInternalUser.getPackageAsset as Mock).mockImplementation(
     (assetPath: string) => {
       if (assetPath.endsWith('/schemas/osquery.json') && options.osquery !== undefined) {
         return Promise.resolve(createMockAsset(options.osquery));
@@ -88,30 +91,30 @@ function mockPackageAssets(
 
 describe('SchemaService', () => {
   let logger: Logger;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let packageService: jest.Mocked<PackageService>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
+  let packageService: Mocked<PackageService>;
   let schemaService: SchemaService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     logger = loggingSystemMock.createLogger();
 
     savedObjectsClient = {
-      get: jest.fn(),
-      find: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      bulkGet: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsClientContract>;
+      get: vi.fn(),
+      find: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      bulkGet: vi.fn(),
+    } as unknown as Mocked<SavedObjectsClientContract>;
 
     packageService = {
       asInternalUser: {
-        getInstallation: jest.fn(),
-        getPackageAsset: jest.fn(),
+        getInstallation: vi.fn(),
+        getPackageAsset: vi.fn(),
       },
-    } as unknown as jest.Mocked<PackageService>;
+    } as unknown as Mocked<PackageService>;
 
     schemaService = new SchemaService(logger);
   });
@@ -119,7 +122,7 @@ describe('SchemaService', () => {
   describe('getSchema', () => {
     it('should return osquery schema with metadata version and pkgVersion', async () => {
       const pkgVersion = '1.25.0';
-      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+      (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
         version: pkgVersion,
       });
 
@@ -139,7 +142,7 @@ describe('SchemaService', () => {
 
     it('should return ecs schema with metadata version and pkgVersion', async () => {
       const pkgVersion = '1.25.0';
-      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+      (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
         version: pkgVersion,
       });
 
@@ -159,7 +162,7 @@ describe('SchemaService', () => {
 
     it('should fall back to package version when metadata is not available', async () => {
       const pkgVersion = '1.4.0';
-      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+      (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
         version: pkgVersion,
       });
 
@@ -178,7 +181,7 @@ describe('SchemaService', () => {
     });
 
     it('should not include pkgVersion in fallback response', async () => {
-      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue(undefined);
+      (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue(undefined);
 
       const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
@@ -191,7 +194,7 @@ describe('SchemaService', () => {
     describe('cache hit', () => {
       it('should return cached data when package version has not changed', async () => {
         const pkgVersion = '1.25.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
@@ -218,7 +221,7 @@ describe('SchemaService', () => {
 
       it('should call getInstallation once when getSchema is invoked repeatedly within the installation cache TTL', async () => {
         const pkgVersion = '1.25.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
@@ -239,9 +242,9 @@ describe('SchemaService', () => {
         const firstVersion = '1.24.0';
         const secondVersion = '1.25.0';
         const now = Date.now();
-        const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(now);
+        const dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(now);
 
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValueOnce({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValueOnce({
           version: firstVersion,
         });
 
@@ -257,7 +260,7 @@ describe('SchemaService', () => {
         dateNowSpy.mockReturnValue(now + 61_000);
 
         // Version bumps to 1.25.0
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValueOnce({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValueOnce({
           version: secondVersion,
         });
 
@@ -294,7 +297,7 @@ describe('SchemaService', () => {
     describe('Fleet asset fetch', () => {
       it('should construct the correct asset paths', async () => {
         const pkgVersion = '2.0.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
@@ -319,7 +322,7 @@ describe('SchemaService', () => {
     describe('Fleet asset not found (fallback)', () => {
       it('should fall back to bundled JSON when Fleet asset is missing', async () => {
         const pkgVersion = '1.5.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
@@ -336,11 +339,11 @@ describe('SchemaService', () => {
 
       it('should fall back to bundled JSON when Fleet asset has no UTF-8 data', async () => {
         const pkgVersion = '1.5.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockImplementation(
+        (packageService.asInternalUser.getPackageAsset as Mock).mockImplementation(
           (assetPath: string) => {
             if (assetPath.endsWith('/schemas/osquery.json')) {
               return Promise.resolve({
@@ -361,7 +364,7 @@ describe('SchemaService', () => {
 
     describe('package not installed (fallback)', () => {
       it('should fall back to bundled JSON when getInstallation returns undefined', async () => {
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue(undefined);
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue(undefined);
 
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
@@ -380,7 +383,7 @@ describe('SchemaService', () => {
 
     describe('error handling', () => {
       it('should log a debug message and fall back when getInstallation throws', async () => {
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockRejectedValue(
+        (packageService.asInternalUser.getInstallation as Mock).mockRejectedValue(
           new Error('Fleet is unavailable')
         );
 
@@ -394,11 +397,11 @@ describe('SchemaService', () => {
 
       it('should log a warning and fall back when getPackageAsset throws', async () => {
         const pkgVersion = '1.5.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockRejectedValue(
+        (packageService.asInternalUser.getPackageAsset as Mock).mockRejectedValue(
           new Error('Elasticsearch connection refused')
         );
 
@@ -413,7 +416,7 @@ describe('SchemaService', () => {
     describe('cache hit', () => {
       it('should return cached data when package version has not changed', async () => {
         const pkgVersion = '1.25.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
@@ -439,7 +442,7 @@ describe('SchemaService', () => {
     describe('Fleet asset fetch', () => {
       it('should return data from Fleet package assets on success', async () => {
         const pkgVersion = '1.25.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
@@ -461,7 +464,7 @@ describe('SchemaService', () => {
     describe('Fleet asset not found (fallback)', () => {
       it('should fall back to bundled JSON when Fleet ECS asset is missing', async () => {
         const pkgVersion = '1.5.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
@@ -479,7 +482,7 @@ describe('SchemaService', () => {
 
     describe('package not installed (fallback)', () => {
       it('should fall back to bundled JSON when getInstallation returns undefined', async () => {
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue(undefined);
+        (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue(undefined);
 
         const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
@@ -493,7 +496,7 @@ describe('SchemaService', () => {
   describe('schema metadata', () => {
     it('should fetch metadata once during getPackageInfo and reuse for both schemas', async () => {
       const pkgVersion = '1.25.0';
-      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+      (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
         version: pkgVersion,
       });
 
@@ -521,11 +524,11 @@ describe('SchemaService', () => {
 
     it('should gracefully fall back to pkgVersion when metadata fetch fails', async () => {
       const pkgVersion = '1.5.0';
-      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+      (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
         version: pkgVersion,
       });
 
-      (packageService.asInternalUser.getPackageAsset as jest.Mock).mockImplementation(
+      (packageService.asInternalUser.getPackageAsset as Mock).mockImplementation(
         (assetPath: string) => {
           if (assetPath.endsWith('/schemas/metadata.json')) {
             return Promise.reject(new Error('Not found'));
@@ -553,7 +556,7 @@ describe('SchemaService', () => {
   describe('independent cache per schema type', () => {
     it('should maintain separate caches for osquery and ecs schema types', async () => {
       const pkgVersion = '1.25.0';
-      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+      (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
         version: pkgVersion,
       });
 
@@ -588,7 +591,7 @@ describe('SchemaService', () => {
 
     it('should serve osquery cache hit without affecting ecs schema fetch', async () => {
       const pkgVersion = '1.25.0';
-      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+      (packageService.asInternalUser.getInstallation as Mock).mockResolvedValue({
         version: pkgVersion,
       });
 

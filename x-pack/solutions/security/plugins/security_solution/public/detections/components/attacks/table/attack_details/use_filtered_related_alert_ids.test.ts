@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useFilteredRelatedAlertIds } from './use_filtered_related_alert_ids';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
@@ -14,56 +17,77 @@ import { useDataView } from '../../../../../data_view_manager/hooks/use_data_vie
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 
-jest.mock('../../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn(),
-}));
+vi.mock('../../../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/use_selector', () => ({
-  useDeepEqualSelector: jest.fn(),
-}));
+vi.mock('../../../../../common/hooks/use_selector', () => {
+      const mocked = {
+      useDeepEqualSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(),
-}));
+vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../data_view_manager/hooks/use_browser_fields', () => ({
-  useBrowserFields: jest.fn(),
-}));
+vi.mock('../../../../../data_view_manager/hooks/use_browser_fields', () => {
+      const mocked = {
+      useBrowserFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: jest.fn(),
-}));
+vi.mock('../../../../containers/detection_engine/alerts/use_query', () => {
+      const mocked = {
+      useQueryAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kuery', () => ({
-  combineQueries: jest.fn(() => ({
-    filterQuery: '{"match_all":{}}',
-  })),
-}));
+vi.mock('../../../../../common/lib/kuery', () => {
+      const mocked = {
+      combineQueries: vi.fn(() => ({
+        filterQuery: '{"match_all":{}}',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFilteredRelatedAlertIds', () => {
-  const setQueryMock = jest.fn();
+  const setQueryMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useGlobalTime as jest.Mock).mockReturnValue({
+    (useGlobalTime as Mock).mockReturnValue({
       from: 'now-15m',
       to: 'now',
     });
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         uiSettings: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
       },
     });
 
-    (useDeepEqualSelector as jest.Mock).mockImplementation((selector) => {
+    (useDeepEqualSelector as Mock).mockImplementation((selector) => {
       // Mock globalQuery
       if (selector.name === 'globalQuerySelector') {
         return { query: '', language: 'kuery' };
@@ -72,13 +96,13 @@ describe('useFilteredRelatedAlertIds', () => {
       return [];
     });
 
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: {},
     });
 
-    (useBrowserFields as jest.Mock).mockReturnValue({});
+    (useBrowserFields as Mock).mockReturnValue({});
 
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       data: {
         hits: {
           hits: [{ _id: 'alert-1' }, { _id: 'alert-2' }],
@@ -157,7 +181,7 @@ describe('useFilteredRelatedAlertIds', () => {
   });
 
   it('handles loading state from useQueryAlerts', () => {
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       data: undefined,
       loading: true,
       setQuery: setQueryMock,

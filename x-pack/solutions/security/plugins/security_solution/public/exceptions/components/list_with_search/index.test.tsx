@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
@@ -15,15 +18,21 @@ import { ListWithSearch } from '.';
 import { useListWithSearchComponent } from '../../hooks/use_list_with_search';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../../hooks/use_list_with_search');
-jest.mock('../../hooks/use_endpoint_exceptions_capability', () => ({
-  useEndpointExceptionsCapability: jest.fn().mockReturnValue(true),
-}));
-jest.mock('../../../common/components/user_privileges', () => ({
-  useUserPrivileges: jest.fn().mockReturnValue({
-    rulesPrivileges: { exceptions: { edit: true, read: true } },
-  }),
-}));
+vi.mock('../../hooks/use_list_with_search');
+vi.mock('../../hooks/use_endpoint_exceptions_capability', () => {
+      const mocked = {
+      useEndpointExceptionsCapability: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/user_privileges', () => {
+      const mocked = {
+      useUserPrivileges: vi.fn().mockReturnValue({
+        rulesPrivileges: { exceptions: { edit: true, read: true } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getMockUseListWithSearchComponent = () => ({
   exceptionViewerStatus: '',
@@ -40,22 +49,22 @@ const getMockUseListWithSearchComponent = () => ({
   showAddExceptionFlyout: false,
   showEditExceptionFlyout: false,
   exceptionToEdit: undefined,
-  onSearch: jest.fn(),
-  onAddExceptionClick: jest.fn(),
-  onDeleteException: jest.fn(),
-  onEditExceptionItem: jest.fn(),
-  onPaginationChange: jest.fn(),
-  handleCancelExceptionItemFlyout: jest.fn(),
-  handleConfirmExceptionFlyout: jest.fn(),
+  onSearch: vi.fn(),
+  onAddExceptionClick: vi.fn(),
+  onDeleteException: vi.fn(),
+  onEditExceptionItem: vi.fn(),
+  onPaginationChange: vi.fn(),
+  handleCancelExceptionItemFlyout: vi.fn(),
+  handleConfirmExceptionFlyout: vi.fn(),
 });
 
 describe('ListWithSearch', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const renderListAndOpenDeleteModal = (onDeleteException: jest.Mock) => {
-    (useListWithSearchComponent as jest.Mock).mockReturnValue({
+  const renderListAndOpenDeleteModal = (onDeleteException: Mock) => {
+    (useListWithSearchComponent as Mock).mockReturnValue({
       ...getMockUseListWithSearchComponent(),
       onDeleteException,
     });
@@ -73,7 +82,7 @@ describe('ListWithSearch', () => {
   };
 
   it('shows the delete confirmation modal without deleting the item', () => {
-    const onDeleteException = jest.fn();
+    const onDeleteException = vi.fn();
     const wrapper = renderListAndOpenDeleteModal(onDeleteException);
 
     expect(wrapper.getByTestId('exceptionItemDeleteConfirmModal')).toBeTruthy();
@@ -81,7 +90,7 @@ describe('ListWithSearch', () => {
   });
 
   it('deletes the item on confirm', () => {
-    const onDeleteException = jest.fn();
+    const onDeleteException = vi.fn();
     const wrapper = renderListAndOpenDeleteModal(onDeleteException);
 
     fireEvent.click(wrapper.getByTestId('confirmModalConfirmButton'));
@@ -96,7 +105,7 @@ describe('ListWithSearch', () => {
   });
 
   it('does not delete the item on cancel', () => {
-    const onDeleteException = jest.fn();
+    const onDeleteException = vi.fn();
     const wrapper = renderListAndOpenDeleteModal(onDeleteException);
 
     fireEvent.click(wrapper.getByTestId('confirmModalCancelButton'));

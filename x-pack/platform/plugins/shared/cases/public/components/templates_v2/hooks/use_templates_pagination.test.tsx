@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
@@ -30,10 +32,10 @@ describe('useTemplatesPagination', () => {
     isDeleted: false,
   };
 
-  const setQueryParams = jest.fn();
+  const setQueryParams = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns pagination configuration', () => {

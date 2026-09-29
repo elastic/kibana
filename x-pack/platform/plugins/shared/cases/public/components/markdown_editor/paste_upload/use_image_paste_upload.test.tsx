@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // eslint-disable-next-line max-classes-per-file
 import React from 'react';
 import { type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -35,9 +37,9 @@ describe('useImagePasteUpload', () => {
         done$,
         error$,
         uploading$,
-        setFiles: jest.fn((files: File[]) => files$.next(files as unknown as FileState[])),
-        hasFiles: jest.fn(() => files$.value.length > 0),
-        upload: jest.fn(),
+        setFiles: vi.fn((files: File[]) => files$.next(files as unknown as FileState[])),
+        hasFiles: vi.fn(() => files$.value.length > 0),
+        upload: vi.fn(),
       };
     };
 
@@ -68,11 +70,11 @@ describe('useImagePasteUpload', () => {
     });
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       mockUploadState = createMockUploadState();
 
-      jest.doMock('@kbn/shared-ux-file-upload/src/upload_state', () => {
-        const actual = jest.requireActual('@kbn/shared-ux-file-upload/src/upload_state');
+      vi.doMock('@kbn/shared-ux-file-upload/src/upload_state', async () => {
+        const actual = (await vi.importActual('@kbn/shared-ux-file-upload/src/upload_state'));
         return {
           ...actual,
           createUploadState: () => mockUploadState,
@@ -81,7 +83,7 @@ describe('useImagePasteUpload', () => {
     });
 
     afterEach(() => {
-      jest.dontMock('@kbn/shared-ux-file-upload/src/upload_state');
+      vi.dontMock('@kbn/shared-ux-file-upload/src/upload_state');
     });
 
     const setup = () => {
@@ -90,7 +92,7 @@ describe('useImagePasteUpload', () => {
       const field: FieldHook<string> = {
         value: '',
         // make setValue mutate both field.value and textarea.value so that later placeholder replacement works
-        setValue: jest.fn((newVal: string) => {
+        setValue: vi.fn((newVal: string) => {
           // @ts-ignore update mutable ref
           field.value = newVal;
           textarea.value = newVal;
@@ -98,8 +100,8 @@ describe('useImagePasteUpload', () => {
       } as unknown as FieldHook<string>;
 
       const filesClient = {
-        getFileKind: jest.fn(() => ({})),
-        getDownloadHref: jest.fn(() => 'http://download'),
+        getFileKind: vi.fn(() => ({})),
+        getDownloadHref: vi.fn(() => 'http://download'),
       };
 
       const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (

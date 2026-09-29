@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 
 import { useCreateDataView } from './use_create_data_view';
 import { useKibana } from '../lib/kibana';
 
-jest.mock('../lib/kibana');
-jest.mock('./use_experimental_features');
+vi.mock('../lib/kibana');
+vi.mock('./use_experimental_features');
 
 describe('useCreateDataView', () => {
   const dataViewSpec = { title: 'test' };
   const mockDataViews = {
-    create: jest.fn(),
+    create: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         dataViews: mockDataViews,
       },

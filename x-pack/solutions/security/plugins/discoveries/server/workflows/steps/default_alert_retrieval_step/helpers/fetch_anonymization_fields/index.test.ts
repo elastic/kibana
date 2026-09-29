@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchAnonymizationFields } from '.';
 
 const mockEsClient = {
-  search: jest.fn(),
+  search: vi.fn(),
 } as unknown as ElasticsearchClient;
 
 describe('fetchAnonymizationFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the index contains fields', () => {
     it('returns mapped anonymization fields', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue({
+      (mockEsClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {
@@ -59,7 +62,7 @@ describe('fetchAnonymizationFields', () => {
     });
 
     it('queries the correct space-scoped index', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
+      (mockEsClient.search as Mock).mockResolvedValue({ hits: { hits: [] } });
 
       await fetchAnonymizationFields({ esClient: mockEsClient, spaceId: 'my-space' });
 
@@ -71,7 +74,7 @@ describe('fetchAnonymizationFields', () => {
     });
 
     it('filters out hits without _source', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue({
+      (mockEsClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             { _id: 'no-source', _source: undefined },
@@ -90,7 +93,7 @@ describe('fetchAnonymizationFields', () => {
     });
 
     it('uses empty string for id when _id is undefined', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue({
+      (mockEsClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {
@@ -109,7 +112,7 @@ describe('fetchAnonymizationFields', () => {
 
   describe('when the index does not exist or query fails', () => {
     it('returns an empty array on error', async () => {
-      (mockEsClient.search as jest.Mock).mockRejectedValue(new Error('index_not_found_exception'));
+      (mockEsClient.search as Mock).mockRejectedValue(new Error('index_not_found_exception'));
 
       const result = await fetchAnonymizationFields({ esClient: mockEsClient, spaceId: 'default' });
 
@@ -117,7 +120,7 @@ describe('fetchAnonymizationFields', () => {
     });
 
     it('returns an empty array when hits are empty', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
+      (mockEsClient.search as Mock).mockResolvedValue({ hits: { hits: [] } });
 
       const result = await fetchAnonymizationFields({ esClient: mockEsClient, spaceId: 'default' });
 

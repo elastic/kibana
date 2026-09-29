@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -38,7 +40,7 @@ async function getTestProps({
   defaultFetchStatus?: FetchStatus;
   resetTheHook?: boolean;
 }) {
-  const replaceUrlState = jest
+  const replaceUrlState = vi
     .spyOn(internalStateActions, 'updateAppStateAndReplaceUrl')
     .mockClear();
 
@@ -134,7 +136,7 @@ describe('buildEsqlFetchSubscribe', () => {
     lastTestDataState?.cancel();
     lastTestToolkit = undefined;
     lastTestDataState = undefined;
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   test('an ES|QL query should change state when loading and finished', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest();

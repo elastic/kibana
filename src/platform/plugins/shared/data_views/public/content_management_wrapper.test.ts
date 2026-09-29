@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ContentMagementWrapper } from './content_management_wrapper';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { DataViewSavedObjectConflictError } from '../common';
@@ -18,7 +20,7 @@ describe('ContentMagementWrapper', () => {
     const mockedSavedObject = {
       version: 'abc',
     };
-    cmClient.get = jest
+    cmClient.get = vi
       .fn()
       .mockResolvedValue({ meta: { outcome: 'exactMatch' }, item: mockedSavedObject });
     const service = new ContentMagementWrapper(cmClient);
@@ -30,7 +32,7 @@ describe('ContentMagementWrapper', () => {
     const mockedSavedObject = {
       version: 'def',
     };
-    cmClient.get = jest
+    cmClient.get = vi
       .fn()
       .mockResolvedValue({ meta: { outcome: 'aliasMatch' }, item: mockedSavedObject });
     const service = new ContentMagementWrapper(cmClient);
@@ -43,7 +45,7 @@ describe('ContentMagementWrapper', () => {
       version: 'ghi',
     };
 
-    cmClient.get = jest
+    cmClient.get = vi
       .fn()
       .mockResolvedValue({ meta: { outcome: 'conflict' }, item: mockedSavedObject });
     const service = new ContentMagementWrapper(cmClient);

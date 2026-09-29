@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { HttpSelfService } from '@kbn/core-http-server';
 import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
@@ -12,9 +14,9 @@ import { dispatchApiRequest } from './dispatch_request';
 import type { ApiRequest } from './types';
 
 describe('dispatchApiRequest', () => {
-  const fetchMock = jest.fn();
+  const fetchMock = vi.fn();
   const selfClient = {
-    asScoped: jest.fn().mockReturnValue({ fetch: fetchMock }),
+    asScoped: vi.fn().mockReturnValue({ fetch: fetchMock }),
   } as unknown as HttpSelfService;
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
   const request = httpServerMock.createKibanaRequest();

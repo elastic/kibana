@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -13,10 +16,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import type { FleetRequestHandlerContext } from '../..';
 
-jest.mock('../../services/data_streams');
-jest.mock('../../services/epm/packages/get');
-jest.mock('../../services');
-jest.mock('./get_data_streams_query_metadata');
+vi.mock('../../services/data_streams');
+vi.mock('../../services/epm/packages/get');
+vi.mock('../../services');
+vi.mock('./get_data_streams_query_metadata');
 
 import { dataStreamService } from '../../services/data_streams';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
@@ -30,7 +33,7 @@ import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
 describe('getListHandler', () => {
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let request: jest.Mocked<KibanaRequest>;
+  let request: Mocked<KibanaRequest>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   const createDataStreamInfo = (name: string) => ({
@@ -47,13 +50,13 @@ describe('getListHandler', () => {
   beforeEach(() => {
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     response = httpServerMock.createResponseFactory();
-    request = httpServerMock.createKibanaRequest() as jest.Mocked<KibanaRequest>;
+    request = httpServerMock.createKibanaRequest() as Mocked<KibanaRequest>;
 
-    jest.mocked(appContextService.getConfig).mockReturnValue({
+    vi.mocked(appContextService.getConfig).mockReturnValue({
       internal: { useMeteringApi: true },
     } as any);
 
-    jest
+    vi
       .mocked(dataStreamService.getAllFleetDataStreams)
       .mockResolvedValue([
         createDataStreamInfo('logs-nginx.access-default'),
@@ -61,17 +64,17 @@ describe('getListHandler', () => {
         createDataStreamInfo('.workflows-events'),
       ] as any);
 
-    jest.mocked(dataStreamService.getAllFleetMeteringStats).mockResolvedValue([
+    vi.mocked(dataStreamService.getAllFleetMeteringStats).mockResolvedValue([
       { name: 'logs-nginx.access-default', num_docs: 1, size_in_bytes: 100 },
       { name: '.ds-logs-system-default', num_docs: 1, size_in_bytes: 100 },
       { name: '.workflows-events', num_docs: 1, size_in_bytes: 100 },
     ]);
 
-    jest.mocked(getPackageSavedObjects).mockResolvedValue({
+    vi.mocked(getPackageSavedObjects).mockResolvedValue({
       saved_objects: [],
     } as any);
 
-    jest.mocked(getDataStreamsQueryMetadata).mockResolvedValue({
+    vi.mocked(getDataStreamsQueryMetadata).mockResolvedValue({
       maxIngested: Date.now(),
       namespace: 'default',
       dataset: 'nginx.access',
@@ -90,7 +93,7 @@ describe('getListHandler', () => {
         },
         savedObjects: {
           client: {
-            bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+            bulkGet: vi.fn().mockResolvedValue({ saved_objects: [] }),
           },
         },
       },
@@ -101,7 +104,7 @@ describe('getListHandler', () => {
     await getListHandler(context, request, response);
 
     expect(response.ok).toHaveBeenCalled();
-    const [call] = jest.mocked(response.ok).mock.calls;
+    const [call] = vi.mocked(response.ok).mock.calls;
     const body = call[0]?.body as { data_streams: Array<{ index: string }> };
     expect(body.data_streams).toHaveLength(1);
     expect(body.data_streams[0].index).toBe('logs-nginx.access-default');
@@ -112,13 +115,13 @@ describe('getListHandler', () => {
 describe('getDeprecatedILMCheckHandler', () => {
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let request: jest.Mocked<KibanaRequest>;
+  let request: Mocked<KibanaRequest>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     response = httpServerMock.createResponseFactory();
-    request = httpServerMock.createKibanaRequest() as jest.Mocked<KibanaRequest>;
+    request = httpServerMock.createKibanaRequest() as Mocked<KibanaRequest>;
 
     context = {
       core: {
@@ -447,7 +450,7 @@ describe('getHasDataHandler', () => {
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   const makeRequest = (query: { dataStreams: string; start: string }) =>
-    httpServerMock.createKibanaRequest({ query }) as jest.Mocked<KibanaRequest>;
+    httpServerMock.createKibanaRequest({ query }) as Mocked<KibanaRequest>;
 
   beforeEach(() => {
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -691,7 +694,7 @@ describe('getHasDataHandler', () => {
 
     await getHasDataHandler(context, request, response);
 
-    const { searches } = jest.mocked(mockEsClient.msearch).mock.calls[0][0] as any;
+    const { searches } = vi.mocked(mockEsClient.msearch).mock.calls[0][0] as any;
     expect(searches).toHaveLength(2); // 1 pattern × 2 items (header + body)
     expect(searches[0]).toMatchObject({ index: 'logs-aws.vpcflow-*', ignore_unavailable: true });
     expect(searches[1]).toMatchObject({ size: 0, terminate_after: 1 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -31,22 +34,22 @@ function setup() {
   const share = {
     url: {
       locators: {
-        get: jest.fn(() => sharePluginMock.createLocator()),
+        get: vi.fn(() => sharePluginMock.createLocator()),
       },
     },
   };
   const pluginDeps = { data, logsShared, share } as unknown as InfraClientStartDeps;
 
-  const dataSearch = data.search.search as jest.MockedFunction<typeof data.search.search>;
-  const getResolvedLogView = logsShared.logViews.client.getResolvedLogView as jest.MockedFunction<
+  const dataSearch = data.search.search as MockedFunction<typeof data.search.search>;
+  const getResolvedLogView = logsShared.logViews.client.getResolvedLogView as MockedFunction<
     typeof logsShared.logViews.client.getResolvedLogView
   >;
   const getResolvedLogViewStatus = logsShared.logViews.client
-    .getResolvedLogViewStatus as jest.MockedFunction<
+    .getResolvedLogViewStatus as MockedFunction<
     typeof logsShared.logViews.client.getResolvedLogViewStatus
   >;
 
-  const mockedGetStartServices = jest.fn(() =>
+  const mockedGetStartServices = vi.fn(() =>
     Promise.resolve<[CoreStart, InfraClientStartDeps, InfraClientStartExports]>([
       core,
       pluginDeps,
@@ -66,7 +69,7 @@ function setup() {
 
 describe('Logs UI Observability Homepage Functions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getLogsHasDataFetcher()', () => {

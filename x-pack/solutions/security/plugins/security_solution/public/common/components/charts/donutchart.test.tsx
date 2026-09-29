@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@emotion/jest';
 import React from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -16,40 +19,43 @@ import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 
-jest.mock('@elastic/charts', () => {
-  const actual = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const actual = require('@elastic/charts');
   return {
     ...actual,
-    Chart: jest.fn(({ children, ...props }) => (
+    Chart: vi.fn(({ children, ...props }) => (
       <div data-test-subj="es-chart" {...props}>
         {children}
       </div>
     )),
-    Partition: jest.fn((props) => <div data-test-subj="es-chart-partition" {...props} />),
-    Settings: jest.fn((props) => <div data-test-subj="es-chart-settings" {...props} />),
+    Partition: vi.fn((props) => <div data-test-subj="es-chart-partition" {...props} />),
+    Settings: vi.fn((props) => <div data-test-subj="es-chart-settings" {...props} />),
   };
 });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('test-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('test-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../overview/components/detection_response/alerts_by_status/chart_label', () => {
+vi.mock('../../../overview/components/detection_response/alerts_by_status/chart_label', () => {
   return {
-    ChartLabel: jest.fn((props) => <span data-test-subj="chart-label" {...props} />),
+    ChartLabel: vi.fn((props) => <span data-test-subj="chart-label" {...props} />),
   };
 });
 
-jest.mock('./draggable_legend', () => {
+vi.mock('./draggable_legend', () => {
   return {
-    DraggableLegend: jest.fn((props) => <span data-test-subj="draggable-legend" {...props} />),
+    DraggableLegend: vi.fn((props) => <span data-test-subj="draggable-legend" {...props} />),
   };
 });
 
 const mockBaseTheme = LEGACY_LIGHT_THEME;
-jest.mock('./common', () => {
+vi.mock('./common', () => {
   return {
-    useThemes: jest.fn(() => ({
+    useThemes: vi.fn(() => ({
       baseTheme: mockBaseTheme,
       theme: {},
     })),
@@ -68,7 +74,7 @@ describe('DonutChart', () => {
     data: parsedMockAlertsData?.open?.severities,
     label: 'Open',
     title: <ChartLabel count={parsedMockAlertsData?.open?.total} />,
-    fillColor: jest.fn(() => '#ccc'),
+    fillColor: vi.fn(() => '#ccc'),
     totalCount: parsedMockAlertsData?.open?.total,
     legendItems: (['critical', 'high', 'medium', 'low'] as Severity[]).map((d) => ({
       color: testColors[d],
@@ -79,7 +85,7 @@ describe('DonutChart', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('should render Chart', () => {
     const { container } = render(<DonutChart {...props} />);
@@ -90,7 +96,7 @@ describe('DonutChart', () => {
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="es-chart-settings"]`)).toBeInTheDocument();
 
-    const settingsProps = (Settings as jest.Mock).mock.calls[0][0];
+    const settingsProps = (Settings as Mock).mock.calls[0][0];
     expect(settingsProps.baseTheme).toEqual(LEGACY_LIGHT_THEME);
     expect(settingsProps.theme[0]).toEqual({
       chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
@@ -119,16 +125,16 @@ describe('DonutChart', () => {
   test('should render chart Partition', () => {
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="es-chart-partition"]`)).toBeInTheDocument();
-    expect((Partition as jest.Mock).mock.calls[0][0].data).toEqual(
+    expect((Partition as Mock).mock.calls[0][0].data).toEqual(
       parsedMockAlertsData?.open?.severities
     );
-    expect((Partition as jest.Mock).mock.calls[0][0].layout).toEqual('sunburst');
+    expect((Partition as Mock).mock.calls[0][0].layout).toEqual('sunburst');
   });
 
   test('should render chart legend', () => {
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="draggable-legend"]`)).toBeInTheDocument();
-    expect((DraggableLegend as unknown as jest.Mock).mock.calls[0][0].legendItems).toEqual([
+    expect((DraggableLegend as unknown as Mock).mock.calls[0][0].legendItems).toEqual([
       {
         color: '#EF6550',
         field: 'kibana.alert.severity',

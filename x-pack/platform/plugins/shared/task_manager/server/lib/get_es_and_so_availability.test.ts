@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -32,7 +34,7 @@ function getOpts(
 
 describe('getElasticsearchAndSOAvailability', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('returns false when elasticsearch isnt avialable, so is avialable and elasticsearch is healthy', async () => {
@@ -149,7 +151,7 @@ describe('getElasticsearchAndSOAvailability', () => {
   test('returns true when both services are available and elasticsearch cluster client fails to load', async () => {
     const core$ = new Subject<CoreStatus>();
     const availability = getElasticsearchAndSOAvailability(
-      getOpts({ core$, getClusterClient: jest.fn().mockRejectedValue(new Error('Failed to load')) })
+      getOpts({ core$, getClusterClient: vi.fn().mockRejectedValue(new Error('Failed to load')) })
     )
       .pipe(take(3), bufferCount(3))
       .toPromise();

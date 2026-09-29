@@ -5,23 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MonitorMaintenanceWindows } from './monitor_maintenance_windows';
 
-const mockUseFetchMaintenanceWindows = jest.fn();
+const mockUseFetchMaintenanceWindows = vi.fn();
 
-jest.mock('../../../hooks', () => ({
-  useFetchMaintenanceWindows: () => mockUseFetchMaintenanceWindows(),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useFetchMaintenanceWindows: () => mockUseFetchMaintenanceWindows(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn',
-  () => ({
-    MaintenanceWindowsLink: ({ id, label }: { id?: string; label?: string }) => (
-      <a data-test-subj={`mwLink-${id}`}>{label}</a>
-    ),
-  })
+  () => {
+      const mocked = {
+        MaintenanceWindowsLink: ({ id, label }: { id?: string; label?: string }) => (
+          <a data-test-subj={`mwLink-${id}`}>{label}</a>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('MonitorMaintenanceWindows', () => {

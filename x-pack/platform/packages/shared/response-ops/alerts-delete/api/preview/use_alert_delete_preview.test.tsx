@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertDeletePreview } from './use_alert_delete_preview';
@@ -14,9 +17,12 @@ import { getAlertDeletePreview } from './get_alert_delete_preview';
 
 const http = httpServiceMock.createStartContract();
 
-jest.mock('./get_alert_delete_preview', () => ({
-  getAlertDeletePreview: jest.fn(),
-}));
+vi.mock('./get_alert_delete_preview', () => {
+      const mocked = {
+      getAlertDeletePreview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAlertDeletePreview', () => {
   const queryClient = new QueryClient();
@@ -26,11 +32,11 @@ describe('useAlertDeletePreview', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the API with correct parameters', async () => {
-    (getAlertDeletePreview as jest.Mock).mockResolvedValueOnce({ affectedAlertCount: 42 });
+    (getAlertDeletePreview as Mock).mockResolvedValueOnce({ affectedAlertCount: 42 });
 
     const { result } = renderHook(
       () =>
@@ -78,7 +84,7 @@ describe('useAlertDeletePreview', () => {
   });
 
   it('handles API errors gracefully', async () => {
-    (getAlertDeletePreview as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
+    (getAlertDeletePreview as Mock).mockRejectedValueOnce(new Error('API Error'));
 
     const { result } = renderHook(
       () =>

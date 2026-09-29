@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { KibanaMcpHttpTransport } from './kibana_mcp_http_transport';
 import type { KibanaRequest, KibanaResponseFactory, RouteMethod } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -95,7 +98,7 @@ const createMockKibanaRequest = (
   body?: any,
   headers: Record<string, string> = {},
   method: RouteMethod = 'post'
-): jest.Mocked<KibanaRequest> =>
+): Mocked<KibanaRequest> =>
   httpServerMock.createKibanaRequest({
     headers,
     body,
@@ -128,7 +131,7 @@ describe('KibanaMcpHttpTransport', () => {
   let responseFactory: KibanaResponseFactory;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const { transport: newTransport } = await createTestServer();
     transport = newTransport;
     responseFactory = createMinimalResponseFactory();
@@ -543,7 +546,7 @@ describe('KibanaMcpHttpTransport', () => {
 
       await transport.handleRequest(initRequest, responseFactory);
 
-      const onCloseSpy = jest.fn();
+      const onCloseSpy = vi.fn();
       transport.onclose = onCloseSpy;
 
       await transport.close();
@@ -556,7 +559,7 @@ describe('KibanaMcpHttpTransport', () => {
 
   describe('Error Handling in send()', () => {
     it('should call onerror callback when send() fails', async () => {
-      const onErrorSpy = jest.fn();
+      const onErrorSpy = vi.fn();
       transport.onerror = onErrorSpy;
 
       // Try to send a response without establishing a connection

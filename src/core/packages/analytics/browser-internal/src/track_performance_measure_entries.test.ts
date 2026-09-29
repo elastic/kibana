@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { trackPerformanceMeasureEntries } from './track_performance_measure_entries';
 import { analyticsClientMock } from './analytics_service.test.mocks';
 
@@ -14,7 +16,7 @@ interface MockEntryList {
   getEntries: () => [object];
 }
 type ObsCallback = (_entries: MockEntryList, _obs: object) => undefined;
-const mockObs = { observe: jest.fn, disconnect: jest.fn };
+const mockObs = { observe: vi.fn, disconnect: vi.fn };
 
 const setupMockPerformanceObserver = (entries: [object]) => {
   const mockPerformanceObserver = function (callback: ObsCallback) {
@@ -32,7 +34,7 @@ const setupMockPerformanceObserver = (entries: [object]) => {
 
 describe('trackPerformanceMeasureEntries', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test("doesn't report an analytics event when not receiving events", () => {

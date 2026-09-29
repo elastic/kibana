@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -65,7 +67,7 @@ describe('anomaly_table_euid', () => {
       const scopedDsl = { bool: { filter: [{ term: { 'user.email': 'a@b.c' } }] } };
       const euid = {
         dsl: {
-          getEuidFilterBasedOnDocument: jest.fn().mockReturnValue(scopedDsl),
+          getEuidFilterBasedOnDocument: vi.fn().mockReturnValue(scopedDsl),
         },
         getEuidSourceFields: () => ({
           requiresOneOf: ['user.name'],
@@ -85,7 +87,7 @@ describe('anomaly_table_euid', () => {
 
     test('scoped path passes entityRecord directly when provided', () => {
       const scopedDsl = { bool: { filter: [{ term: { 'user.name': 'alice' } }] } };
-      const getEuidFilterBasedOnDocument = jest.fn().mockReturnValue(scopedDsl);
+      const getEuidFilterBasedOnDocument = vi.fn().mockReturnValue(scopedDsl);
       const euid = {
         dsl: { getEuidFilterBasedOnDocument },
         getEuidSourceFields: () => ({
@@ -110,9 +112,9 @@ describe('anomaly_table_euid', () => {
     test('returns empty criteria when scoped DSL is produced (terms live in influencers filter)', () => {
       const euid = {
         dsl: {
-          getEuidFilterBasedOnDocument: jest.fn().mockReturnValue({ bool: { filter: [] } }),
+          getEuidFilterBasedOnDocument: vi.fn().mockReturnValue({ bool: { filter: [] } }),
         },
-        getEntityIdentifiersFromDocument: jest.fn(),
+        getEntityIdentifiersFromDocument: vi.fn(),
       } as unknown as EntityStoreEuid;
 
       expect(
@@ -129,9 +131,9 @@ describe('anomaly_table_euid', () => {
     test('falls back to identifier map terms when DSL is not available', () => {
       const euid = {
         dsl: {
-          getEuidFilterBasedOnDocument: jest.fn().mockReturnValue(undefined),
+          getEuidFilterBasedOnDocument: vi.fn().mockReturnValue(undefined),
         },
-        getEntityIdentifiersFromDocument: jest
+        getEntityIdentifiersFromDocument: vi
           .fn()
           .mockReturnValue({ 'user.id': 'uid-9', 'user.name': 'bob' }),
       } as unknown as EntityStoreEuid;
@@ -150,8 +152,8 @@ describe('anomaly_table_euid', () => {
     });
 
     test('passes entityRecord directly when provided', () => {
-      const getEuidFilterBasedOnDocument = jest.fn().mockReturnValue(undefined);
-      const getEntityIdentifiersFromDocument = jest.fn().mockReturnValue({ 'user.name': 'carol' });
+      const getEuidFilterBasedOnDocument = vi.fn().mockReturnValue(undefined);
+      const getEntityIdentifiersFromDocument = vi.fn().mockReturnValue({ 'user.name': 'carol' });
       const euid = {
         dsl: { getEuidFilterBasedOnDocument },
         getEntityIdentifiersFromDocument,

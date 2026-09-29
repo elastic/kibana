@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   usePadTopAnomalousUsersEsqlSource,
   usePadAnomalyDataEsqlSource,
@@ -12,9 +14,12 @@ import {
 
 const trimEsql = (str: string) => str.replace(/[\n]/g, '').replace(/\s\s+/g, ' ').trim();
 
-jest.mock('../../../../../recent_anomalies/anomaly_heatmap_interval', () => ({
-  useIntervalForHeatmap: () => 24,
-}));
+vi.mock('../../../../../recent_anomalies/anomaly_heatmap_interval', () => {
+      const mocked = {
+      useIntervalForHeatmap: () => 24,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('the source queries for privileged access detection', () => {
   describe('the top anomalous users ESQL query', () => {

@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { render, WrappedHelper } from '../utils/testing';
 import { useSyntheticsPrivileges } from './use_synthetics_priviliges';
 
-jest.mock('../../../hooks/use_capabilities', () => ({
-  useCanReadSyntheticsIndex: jest.fn().mockReturnValue({ canRead: true, loading: false }),
-}));
+vi.mock('../../../hooks/use_capabilities', () => {
+      const mocked = {
+      useCanReadSyntheticsIndex: vi.fn().mockReturnValue({ canRead: true, loading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
-    useSelector: jest.fn().mockReturnValue({ error: { body: { message: 'License not active' } } }),
+    useSelector: vi.fn().mockReturnValue({ error: { body: { message: 'License not active' } } }),
   };
 });
 

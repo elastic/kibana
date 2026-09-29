@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+import { vi } from 'vitest';
+
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 import sinon from 'sinon';
 import moment from 'moment';
@@ -311,26 +313,26 @@ describe('setRefreshInterval', () => {
   test('should start auto refresh when unpaused', () => {
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
     expect(autoRefreshFetch.callCount).toBe(0);
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(autoRefreshFetch.callCount).toBe(1);
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(autoRefreshFetch.callCount).toBe(2);
   });
 
   test('should stop auto refresh when paused', () => {
     timefilter.setRefreshInterval({ pause: true, value: 1000 });
     expect(autoRefreshFetch.callCount).toBe(0);
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(autoRefreshFetch.callCount).toBe(0);
   });
 
   test('should not keep old interval when updated', () => {
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
     expect(autoRefreshFetch.callCount).toBe(0);
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(autoRefreshFetch.callCount).toBe(1);
     timefilter.setRefreshInterval({ pause: false, value: 2000 });
-    jest.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(2000);
     expect(autoRefreshFetch.callCount).toBe(2);
   });
 });
@@ -446,7 +448,7 @@ describe('calculateBounds', () => {
 
 describe('getAutoRefreshFetch$', () => {
   test('next auto refresh loop starts after "done" called', () => {
-    const autoRefreshFetch = jest.fn();
+    const autoRefreshFetch = vi.fn();
     let doneCb: AutoRefreshDoneFn | undefined;
     timefilter.getAutoRefreshFetch$().subscribe((done) => {
       autoRefreshFetch();
@@ -455,17 +457,17 @@ describe('getAutoRefreshFetch$', () => {
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
 
     expect(autoRefreshFetch).toHaveBeenCalledTimes(0);
-    jest.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(5000);
     expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
 
     if (doneCb) doneCb();
 
-    jest.advanceTimersByTime(1005);
+    vi.advanceTimersByTime(1005);
     expect(autoRefreshFetch).toHaveBeenCalledTimes(2);
   });
 
   test('new getAutoRefreshFetch$ subscription restarts refresh loop', () => {
-    const autoRefreshFetch = jest.fn();
+    const autoRefreshFetch = vi.fn();
     const fetch$ = timefilter.getAutoRefreshFetch$();
     const sub1 = fetch$.subscribe((done) => {
       autoRefreshFetch();
@@ -474,13 +476,13 @@ describe('getAutoRefreshFetch$', () => {
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
 
     expect(autoRefreshFetch).toHaveBeenCalledTimes(0);
-    jest.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(5000);
     expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
 
     fetch$.subscribe(autoRefreshFetch);
     expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
     sub1.unsubscribe();
-    jest.advanceTimersByTime(1005);
+    vi.advanceTimersByTime(1005);
     expect(autoRefreshFetch).toHaveBeenCalledTimes(2);
   });
 });

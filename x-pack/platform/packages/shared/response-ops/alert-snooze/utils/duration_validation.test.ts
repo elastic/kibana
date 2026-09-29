@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { validateDuration, computeEndDate } from './duration_validation';
 import type { CustomDurationState } from '../components/types';
 
 const MOCKED_NOW = '2026-03-09T19:05:00.000Z';
 
-jest.mock('moment', () => {
-  const actual = jest.requireActual('moment');
+vi.mock('moment', () => {
+  const actual = require('moment');
   return Object.assign(
     (...args: unknown[]) => (args.length ? actual(...args) : actual(MOCKED_NOW)),
     actual,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ReactNode } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@kbn/react-query';
@@ -14,14 +17,14 @@ import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../common';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
 import { dataUsageTestQueryClientOptions } from '../../common/test_utils';
 
-const useQueryMock = _useQuery as jest.Mock;
+const useQueryMock = _useQuery as Mock;
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
 
   return {
     ...actualReactQueryModule,
-    useQuery: jest.fn((...args) => actualReactQueryModule.useQuery(...args)),
+    useQuery: vi.fn((...args) => actualReactQueryModule.useQuery(...args)),
   };
 });
 
@@ -33,7 +36,7 @@ const createWrapper = () => {
   );
 };
 
-jest.mock('../utils/use_kibana', () => {
+vi.mock('../utils/use_kibana', () => {
   return {
     useKibanaContextForPlugin: () => ({
       services: mockServices,
@@ -47,7 +50,7 @@ const defaultDataStreamsRequestParams = {
 
 describe('useGetDataUsageDataStreams', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the correct API', async () => {

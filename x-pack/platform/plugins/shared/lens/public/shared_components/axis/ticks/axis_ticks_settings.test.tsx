@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { AxisTicksSettingsProps } from './axis_ticks_settings';
 import { AxisTicksSettings } from './axis_ticks_settings';
@@ -15,7 +17,7 @@ const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTicksSettingsProps
     <AxisTicksSettings
       isAxisLabelVisible={true}
       axis="x"
-      updateTicksVisibilityState={jest.fn()}
+      updateTicksVisibilityState={vi.fn()}
       {...propsOverrides}
     />
   );
@@ -33,7 +35,7 @@ describe('Axes Ticks settings', () => {
   });
 
   it('should call the updateTicksVisibilityState when changing the switch status', () => {
-    const updateTicksVisibilityStateSpy = jest.fn();
+    const updateTicksVisibilityStateSpy = vi.fn();
     renderAxisTicksSettings({
       updateTicksVisibilityState: updateTicksVisibilityStateSpy,
     });

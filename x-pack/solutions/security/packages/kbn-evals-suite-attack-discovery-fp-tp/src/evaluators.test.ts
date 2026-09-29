@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Evaluator } from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -172,7 +174,7 @@ describe('skipFailedRuns', () => {
     name: 'Criteria',
     kind: 'LLM',
     direction: 'maximize',
-    evaluate: jest.fn().mockResolvedValue({ score: 0.5 }),
+    evaluate: vi.fn().mockResolvedValue({ score: 0.5 }),
   };
   const wrapped = skipFailedRuns(inner);
 

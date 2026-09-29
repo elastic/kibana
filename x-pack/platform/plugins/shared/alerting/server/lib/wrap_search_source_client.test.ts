@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
@@ -22,20 +24,20 @@ const rule = {
 
 const createSearchSourceClientMock = () => {
   const searchSourceMock = createSearchSourceMock();
-  searchSourceMock.fetch$ = jest.fn().mockImplementation(() => of({ rawResponse: { took: 5 } }));
+  searchSourceMock.fetch$ = vi.fn().mockImplementation(() => of({ rawResponse: { took: 5 } }));
 
   return {
     searchSourceMock,
     searchSourceClientMock: {
-      create: jest.fn().mockReturnValue(searchSourceMock),
-      createEmpty: jest.fn().mockReturnValue(searchSourceMock),
+      create: vi.fn().mockReturnValue(searchSourceMock),
+      createEmpty: vi.fn().mockReturnValue(searchSourceMock),
     } as unknown as ISearchStartSearchSource,
   };
 };
 
 describe('wrapSearchSourceClient', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   beforeEach(() => {
@@ -43,11 +45,11 @@ describe('wrapSearchSourceClient', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('searches with provided abort controller', async () => {
@@ -117,7 +119,7 @@ describe('wrapSearchSourceClient', () => {
   test('keeps track of number of queries', async () => {
     const abortController = new AbortController();
     const { searchSourceMock, searchSourceClientMock } = createSearchSourceClientMock();
-    searchSourceMock.fetch$ = jest
+    searchSourceMock.fetch$ = vi
       .fn()
       .mockImplementation(() => of({ rawResponse: { took: 333 } }));
 
@@ -148,7 +150,7 @@ describe('wrapSearchSourceClient', () => {
   test('re-throws error when search throws error', async () => {
     const abortController = new AbortController();
     const { searchSourceMock, searchSourceClientMock } = createSearchSourceClientMock();
-    searchSourceMock.fetch$ = jest
+    searchSourceMock.fetch$ = vi
       .fn()
       .mockReturnValue(throwError(new Error('something went wrong!')));
 
@@ -168,7 +170,7 @@ describe('wrapSearchSourceClient', () => {
     const abortController = new AbortController();
     abortController.abort();
     const { searchSourceMock, searchSourceClientMock } = createSearchSourceClientMock();
-    searchSourceMock.fetch$ = jest
+    searchSourceMock.fetch$ = vi
       .fn()
       .mockReturnValue(throwError(new Error('Request has been aborted by the user')));
 

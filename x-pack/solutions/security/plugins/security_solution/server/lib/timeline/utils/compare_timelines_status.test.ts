@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 
@@ -29,33 +32,31 @@ import { TimelineStatusActions } from './common';
 describe('CompareTimelinesStatus', () => {
   describe('timeline', () => {
     describe('given timeline exists', () => {
-      const mockGetTimeline: jest.Mock = jest.fn();
-      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      const mockGetTimeline: Mock = vi.fn();
+      const mockGetTemplateTimeline: Mock = vi.fn();
       let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       afterAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeEach(async () => {
-        jest.doMock('../saved_object/timelines', () => {
+        vi.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual(
-          './compare_timelines_status'
-        ).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -104,33 +105,31 @@ describe('CompareTimelinesStatus', () => {
     });
 
     describe('given timeline does NOT exists', () => {
-      const mockGetTimeline: jest.Mock = jest.fn();
-      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      const mockGetTimeline: Mock = vi.fn();
+      const mockGetTemplateTimeline: Mock = vi.fn();
       let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       afterAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeEach(async () => {
-        jest.doMock('../saved_object/timelines', () => {
+        vi.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual(
-          './compare_timelines_status'
-        ).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -181,22 +180,23 @@ describe('CompareTimelinesStatus', () => {
 
   describe('timeline template', () => {
     describe('given timeline template exists', () => {
-      const mockGetTimeline: jest.Mock = jest.fn();
-      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      const mockGetTimeline: Mock = vi.fn();
+      const mockGetTemplateTimeline: Mock = vi.fn();
 
       let timelineObj: TimelinesStatusType;
 
       beforeEach(async () => {
-        jest.doMock('../saved_object/timelines', () => ({
-          getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
-          getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
-            mockGetTemplateTimelineValue
-          ),
-        }));
+        vi.doMock('../saved_object/timelines', () => {
+              const mocked = {
+                      getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+                      getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
+                        mockGetTemplateTimelineValue
+                      ),
+                    };
+              return { ...mocked, default: mocked };
+            });
 
-        const CompareTimelinesStatus = jest.requireActual(
-          './compare_timelines_status'
-        ).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -215,15 +215,15 @@ describe('CompareTimelinesStatus', () => {
       });
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       afterAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       test('should get timeline', () => {
@@ -256,32 +256,33 @@ describe('CompareTimelinesStatus', () => {
     });
 
     describe('given timeline template does NOT exists', () => {
-      const mockGetTimeline: jest.Mock = jest.fn();
-      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      const mockGetTimeline: Mock = vi.fn();
+      const mockGetTemplateTimeline: Mock = vi.fn();
 
       let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       afterAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeEach(async () => {
-        jest.doMock('../saved_object/timelines', () => ({
-          getTimelineOrNull: mockGetTimeline,
-          getTimelineTemplateOrNull: mockGetTemplateTimeline,
-        }));
+        vi.doMock('../saved_object/timelines', () => {
+              const mocked = {
+                      getTimelineOrNull: mockGetTimeline,
+                      getTimelineTemplateOrNull: mockGetTemplateTimeline,
+                    };
+              return { ...mocked, default: mocked };
+            });
 
-        const CompareTimelinesStatus = jest.requireActual(
-          './compare_timelines_status'
-        ).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -349,33 +350,31 @@ describe('CompareTimelinesStatus', () => {
 
   describe(`Throw error if given title does NOT exists`, () => {
     describe('timeline', () => {
-      const mockGetTimeline: jest.Mock = jest.fn();
-      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      const mockGetTimeline: Mock = vi.fn();
+      const mockGetTemplateTimeline: Mock = vi.fn();
       let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       afterAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeEach(async () => {
-        jest.doMock('../saved_object/timelines', () => {
+        vi.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual(
-          './compare_timelines_status'
-        ).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -429,33 +428,31 @@ describe('CompareTimelinesStatus', () => {
     });
 
     describe('timeline template', () => {
-      const mockGetTimeline: jest.Mock = jest.fn();
-      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      const mockGetTimeline: Mock = vi.fn();
+      const mockGetTemplateTimeline: Mock = vi.fn();
       let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       afterAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeEach(async () => {
-        jest.doMock('../saved_object/timelines', () => {
+        vi.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual(
-          './compare_timelines_status'
-        ).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -516,24 +513,24 @@ describe('CompareTimelinesStatus', () => {
 
   describe(`Throw error if timeline status is updated`, () => {
     describe('immutable timeline', () => {
-      const mockGetTimeline: jest.Mock = jest.fn();
-      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      const mockGetTimeline: Mock = vi.fn();
+      const mockGetTemplateTimeline: Mock = vi.fn();
       let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       afterAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeEach(async () => {
-        jest.doMock('../saved_object/timelines', () => {
+        vi.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue({
               ...mockGetTimelineValue,
@@ -543,9 +540,7 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual(
-          './compare_timelines_status'
-        ).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -589,24 +584,24 @@ describe('CompareTimelinesStatus', () => {
     });
 
     describe('immutable timeline template', () => {
-      const mockGetTimeline: jest.Mock = jest.fn();
-      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      const mockGetTimeline: Mock = vi.fn();
+      const mockGetTemplateTimeline: Mock = vi.fn();
       let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       afterAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeAll(() => {
-        jest.resetModules();
+        vi.resetModules();
       });
 
       beforeEach(async () => {
-        jest.doMock('../saved_object/timelines', () => {
+        vi.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue({
               ...mockGetTemplateTimelineValue,
@@ -619,9 +614,7 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual(
-          './compare_timelines_status'
-        ).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -664,32 +657,33 @@ describe('CompareTimelinesStatus', () => {
   });
 
   describe('If create timeline template without timeline template id', () => {
-    const mockGetTimeline: jest.Mock = jest.fn();
-    const mockGetTemplateTimeline: jest.Mock = jest.fn();
+    const mockGetTimeline: Mock = vi.fn();
+    const mockGetTemplateTimeline: Mock = vi.fn();
 
     let timelineObj: TimelinesStatusType;
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterAll(() => {
-      jest.resetModules();
+      vi.resetModules();
     });
 
     beforeAll(() => {
-      jest.resetModules();
+      vi.resetModules();
     });
 
     beforeEach(async () => {
-      jest.doMock('../saved_object/timelines', () => ({
-        getTimelineOrNull: mockGetTimeline,
-        getTimelineTemplateOrNull: mockGetTemplateTimeline,
-      }));
+      vi.doMock('../saved_object/timelines', () => {
+            const mocked = {
+                  getTimelineOrNull: mockGetTimeline,
+                  getTimelineTemplateOrNull: mockGetTemplateTimeline,
+                };
+            return { ...mocked, default: mocked };
+          });
 
-      const CompareTimelinesStatus = jest.requireActual(
-        './compare_timelines_status'
-      ).CompareTimelinesStatus;
+      const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
       timelineObj = new CompareTimelinesStatus({
         timelineInput: {
@@ -727,34 +721,35 @@ describe('CompareTimelinesStatus', () => {
   });
 
   describe('Throw error if timeline template version is conflict when update via import', () => {
-    const mockGetTimeline: jest.Mock = jest.fn();
-    const mockGetTemplateTimeline: jest.Mock = jest.fn();
+    const mockGetTimeline: Mock = vi.fn();
+    const mockGetTemplateTimeline: Mock = vi.fn();
 
     let timelineObj: TimelinesStatusType;
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterAll(() => {
-      jest.resetModules();
+      vi.resetModules();
     });
 
     beforeAll(() => {
-      jest.resetModules();
+      vi.resetModules();
     });
 
     beforeEach(async () => {
-      jest.doMock('../saved_object/timelines', () => ({
-        getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
-        getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
-          mockGetTemplateTimelineValue
-        ),
-      }));
+      vi.doMock('../saved_object/timelines', () => {
+            const mocked = {
+                  getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+                  getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
+                    mockGetTemplateTimelineValue
+                  ),
+                };
+            return { ...mocked, default: mocked };
+          });
 
-      const CompareTimelinesStatus = jest.requireActual(
-        './compare_timelines_status'
-      ).CompareTimelinesStatus;
+      const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
 
       timelineObj = new CompareTimelinesStatus({
         timelineInput: {

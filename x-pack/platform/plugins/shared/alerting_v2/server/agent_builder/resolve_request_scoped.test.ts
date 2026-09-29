@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { Global } from '@kbn/core-di-internal';
 import { Request } from '@kbn/core-di-server';
@@ -14,14 +16,14 @@ import { resolveRequestScoped } from './resolve_request_scoped';
 const TOKEN = Symbol.for('test.token');
 
 const createMockScope = () => ({
-  bind: jest.fn().mockReturnValue({ toConstantValue: jest.fn() }),
-  get: jest.fn().mockReturnValue({}),
+  bind: vi.fn().mockReturnValue({ toConstantValue: vi.fn() }),
+  get: vi.fn().mockReturnValue({}),
 });
 
 const createMockInjection = (scope = createMockScope()): CoreDiServiceStart =>
   ({
-    fork: jest.fn().mockReturnValue(scope),
-    getContainer: jest.fn(),
+    fork: vi.fn().mockReturnValue(scope),
+    getContainer: vi.fn(),
   } as unknown as CoreDiServiceStart);
 
 describe('resolveRequestScoped', () => {
@@ -72,8 +74,8 @@ describe('resolveRequestScoped', () => {
     const scope1 = createMockScope();
     const scope2 = createMockScope();
     const injection = {
-      fork: jest.fn().mockReturnValueOnce(scope1).mockReturnValueOnce(scope2),
-      getContainer: jest.fn(),
+      fork: vi.fn().mockReturnValueOnce(scope1).mockReturnValueOnce(scope2),
+      getContainer: vi.fn(),
     } as unknown as CoreDiServiceStart;
 
     resolveRequestScoped(injection, httpServerMock.createKibanaRequest(), TOKEN);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,16 +14,19 @@ import HttpActionConnectorFields from './http_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { formSerializer, formDeserializer } from '../lib/http/form_serialization';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-jest.mock('../../common/auth/auth_config', () => ({
+vi.mock('../../common/auth/auth_config', () => ({
   __esModule: true,
   default: () => <div data-test-subj="authConfigMock">Auth</div>,
 }));
 
-jest.mock('../../common/auth/use_secret_query_params', () => ({
-  useSecretQueryParams: () => ({ isLoading: false, isFetching: false, data: [] }),
-}));
+vi.mock('../../common/auth/use_secret_query_params', () => {
+      const mocked = {
+      useSecretQueryParams: () => ({ isLoading: false, isFetching: false, data: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('HttpActionConnectorFields', () => {
   const connector = {
@@ -48,7 +53,7 @@ describe('HttpActionConnectorFields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders base URL field and proxy switch', async () => {
@@ -61,7 +66,7 @@ describe('HttpActionConnectorFields', () => {
         <HttpActionConnectorFields
           readOnly={false}
           isEdit={false}
-          registerPreSubmitValidator={jest.fn()}
+          registerPreSubmitValidator={vi.fn()}
         />
       </ConnectorFormTestProvider>
     );
@@ -83,7 +88,7 @@ describe('HttpActionConnectorFields', () => {
         <HttpActionConnectorFields
           readOnly={false}
           isEdit={false}
-          registerPreSubmitValidator={jest.fn()}
+          registerPreSubmitValidator={vi.fn()}
         />
       </ConnectorFormTestProvider>
     );
@@ -112,7 +117,7 @@ describe('HttpActionConnectorFields', () => {
         <HttpActionConnectorFields
           readOnly={false}
           isEdit={false}
-          registerPreSubmitValidator={jest.fn()}
+          registerPreSubmitValidator={vi.fn()}
         />
       </ConnectorFormTestProvider>
     );
@@ -155,7 +160,7 @@ describe('HttpActionConnectorFields', () => {
         <HttpActionConnectorFields
           readOnly={false}
           isEdit={true}
-          registerPreSubmitValidator={jest.fn()}
+          registerPreSubmitValidator={vi.fn()}
         />
       </ConnectorFormTestProvider>
     );
@@ -175,7 +180,7 @@ describe('HttpActionConnectorFields', () => {
         <HttpActionConnectorFields
           readOnly={false}
           isEdit={false}
-          registerPreSubmitValidator={jest.fn()}
+          registerPreSubmitValidator={vi.fn()}
         />
       </ConnectorFormTestProvider>
     );
@@ -195,7 +200,7 @@ describe('HttpActionConnectorFields', () => {
         <HttpActionConnectorFields
           readOnly={false}
           isEdit={false}
-          registerPreSubmitValidator={jest.fn()}
+          registerPreSubmitValidator={vi.fn()}
         />
       </ConnectorFormTestProvider>
     );

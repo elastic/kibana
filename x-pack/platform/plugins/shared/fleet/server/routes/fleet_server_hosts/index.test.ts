@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -20,22 +23,25 @@ import {
   putFleetServerHostHandler,
 } from './handler';
 
-jest.mock('../../services', () => ({
-  appContextService: {
-    getLogger: jest.fn().mockReturnValue({ error: jest.fn() } as any),
-    getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false } as any),
-  },
-  agentPolicyService: {
-    bumpAllAgentPoliciesForFleetServerHosts: jest.fn().mockResolvedValue({}),
-  },
-  fleetServerHostService: {
-    list: jest.fn(),
-    get: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn().mockResolvedValue({}),
-    delete: jest.fn(),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+        getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
+      },
+      agentPolicyService: {
+        bumpAllAgentPoliciesForFleetServerHosts: vi.fn().mockResolvedValue({}),
+      },
+      fleetServerHostService: {
+        list: vi.fn(),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn().mockResolvedValue({}),
+        delete: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -78,7 +84,7 @@ describe('schema validation', () => {
       page: 1,
       perPage: 20,
     };
-    (fleetServerHostService.list as jest.Mock).mockResolvedValue(expectedResponse);
+    (fleetServerHostService.list as Mock).mockResolvedValue(expectedResponse);
     await getAllFleetServerHostsHandler(context, {} as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({
@@ -141,7 +147,7 @@ describe('schema validation', () => {
       page: 1,
       perPage: 20,
     };
-    (fleetServerHostService.list as jest.Mock).mockResolvedValue(listResponse);
+    (fleetServerHostService.list as Mock).mockResolvedValue(listResponse);
     (await context.fleet).authz.fleet.readSettings = false;
 
     await getAllFleetServerHostsHandler(context, {} as any, response);
@@ -164,7 +170,7 @@ describe('schema validation', () => {
         proxy_id: 'proxy1',
       },
     };
-    (fleetServerHostService.create as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (fleetServerHostService.create as Mock).mockResolvedValue(expectedResponse.item);
     await postFleetServerHost(
       context,
       {
@@ -194,7 +200,7 @@ describe('schema validation', () => {
         proxy_id: null,
       },
     };
-    (fleetServerHostService.update as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (fleetServerHostService.update as Mock).mockResolvedValue(expectedResponse.item);
     await putFleetServerHostHandler(
       context,
       {
@@ -225,7 +231,7 @@ describe('schema validation', () => {
         proxy_id: null,
       },
     };
-    (fleetServerHostService.get as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (fleetServerHostService.get as Mock).mockResolvedValue(expectedResponse.item);
     await getFleetServerHostHandler(
       context,
       { body: {}, params: { itemId: 'host1' } } as any,

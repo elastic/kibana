@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics';
 import { TestProviders } from '../../common/mock';
@@ -13,13 +15,16 @@ import {
   useUserLimitStatus,
 } from './use_privileged_monitoring_health';
 
-const mockFetchPrivilegeMonitoringEngineStatus = jest.fn();
+const mockFetchPrivilegeMonitoringEngineStatus = vi.fn();
 
-jest.mock('../api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    fetchPrivilegeMonitoringEngineStatus: mockFetchPrivilegeMonitoringEngineStatus,
-  }),
-}));
+vi.mock('../api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        fetchPrivilegeMonitoringEngineStatus: mockFetchPrivilegeMonitoringEngineStatus,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const healthResponse: PrivMonHealthResponse = {
   status: 'started',

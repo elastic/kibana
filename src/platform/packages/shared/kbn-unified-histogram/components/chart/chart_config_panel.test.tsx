@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { render } from '@testing-library/react';
@@ -35,9 +37,9 @@ describe('ChartConfigPanel', () => {
             attributes: lensAttributes,
           } as unknown as UnifiedHistogramVisContext,
           isFlyoutVisible: true,
-          setIsFlyoutVisible: jest.fn(),
-          onSuggestionContextChange: jest.fn(),
-          onSuggestionContextEdit: jest.fn(),
+          setIsFlyoutVisible: vi.fn(),
+          onSuggestionContextChange: vi.fn(),
+          onSuggestionContextEdit: vi.fn(),
           isPlainRecord: true,
           lensAdapters: lensAdaptersMock,
           query: {
@@ -68,9 +70,9 @@ describe('ChartConfigPanel', () => {
             attributes: lensAttributes,
           } as unknown as UnifiedHistogramVisContext,
           isFlyoutVisible: true,
-          setIsFlyoutVisible: jest.fn(),
-          onSuggestionContextChange: jest.fn(),
-          onSuggestionContextEdit: jest.fn(),
+          setIsFlyoutVisible: vi.fn(),
+          onSuggestionContextChange: vi.fn(),
+          onSuggestionContextEdit: vi.fn(),
           isPlainRecord: false,
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
@@ -16,11 +18,11 @@ import { createRuleManagementSkill } from './rule_management_skill';
 
 const createDeps = () => ({
   logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    forSubsystem: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    forSubsystem: vi.fn(),
   } as unknown as LoggerServiceContract,
 });
 
@@ -51,7 +53,7 @@ describe('createRuleManagementSkill', () => {
 
   it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
     const skill = createRuleManagementSkill(createDeps());
-    const uiSettings = { get: jest.fn().mockResolvedValue(false) };
+    const uiSettings = { get: vi.fn().mockResolvedValue(false) };
 
     await expect(skill.availability?.handler({ uiSettings } as never)).resolves.toEqual({
       status: 'unavailable',

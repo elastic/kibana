@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getShardTimeout, getDefaultSearchParams } from './request_utils';
 import type { IUiSettingsClient, SharedGlobalConfig } from '@kbn/core/server';
 
@@ -16,7 +18,7 @@ describe('request utils', () => {
       const result = getShardTimeout({
         elasticsearch: {
           shardTimeout: {
-            asMilliseconds: jest.fn(),
+            asMilliseconds: vi.fn(),
           },
         },
       } as unknown as SharedGlobalConfig);
@@ -27,7 +29,7 @@ describe('request utils', () => {
       const result = getShardTimeout({
         elasticsearch: {
           shardTimeout: {
-            asMilliseconds: jest.fn().mockReturnValue(0),
+            asMilliseconds: vi.fn().mockReturnValue(0),
           },
         },
       } as unknown as SharedGlobalConfig);
@@ -38,7 +40,7 @@ describe('request utils', () => {
       const result = getShardTimeout({
         elasticsearch: {
           shardTimeout: {
-            asMilliseconds: jest.fn().mockReturnValue(10),
+            asMilliseconds: vi.fn().mockReturnValue(10),
           },
         },
       } as unknown as SharedGlobalConfig);
@@ -50,21 +52,21 @@ describe('request utils', () => {
     describe('max_concurrent_shard_requests', () => {
       test('returns value if > 0', async () => {
         const result = await getDefaultSearchParams({
-          get: jest.fn().mockResolvedValue(1),
+          get: vi.fn().mockResolvedValue(1),
         } as unknown as IUiSettingsClient);
         expect(result).toHaveProperty('max_concurrent_shard_requests', 1);
       });
 
       test('returns undefined if === 0', async () => {
         const result = await getDefaultSearchParams({
-          get: jest.fn().mockResolvedValue(0),
+          get: vi.fn().mockResolvedValue(0),
         } as unknown as IUiSettingsClient);
         expect(result.max_concurrent_shard_requests).toBe(undefined);
       });
 
       test('returns undefined if undefined', async () => {
         const result = await getDefaultSearchParams({
-          get: jest.fn(),
+          get: vi.fn(),
         } as unknown as IUiSettingsClient);
         expect(result.max_concurrent_shard_requests).toBe(undefined);
       });
@@ -73,7 +75,7 @@ describe('request utils', () => {
     describe('other defaults', () => {
       test('returns ignore_unavailable and track_total_hits', async () => {
         const result = await getDefaultSearchParams({
-          get: jest.fn(),
+          get: vi.fn(),
         } as unknown as IUiSettingsClient);
         expect(result).toHaveProperty('ignore_unavailable', true);
         expect(result).toHaveProperty('track_total_hits', true);

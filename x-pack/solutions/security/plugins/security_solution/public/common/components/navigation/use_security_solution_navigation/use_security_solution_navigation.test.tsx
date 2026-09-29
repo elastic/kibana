@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
@@ -12,23 +14,29 @@ import { useSecuritySolutionNavigation } from './use_security_solution_navigatio
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 
-const mockUseBreadcrumbsNav = jest.fn();
-jest.mock('../breadcrumbs', () => ({
-  useBreadcrumbsNav: () => mockUseBreadcrumbsNav(),
-}));
+const mockUseBreadcrumbsNav = vi.fn();
+vi.mock('../breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbsNav: () => mockUseBreadcrumbsNav(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSecuritySideNav = jest.fn(() => <div data-test-subj="SecuritySideNav" />);
-jest.mock('../security_side_nav', () => ({
-  SecuritySideNav: () => mockSecuritySideNav(),
-}));
+const mockSecuritySideNav = vi.fn(() => <div data-test-subj="SecuritySideNav" />);
+vi.mock('../security_side_nav', () => {
+      const mocked = {
+      SecuritySideNav: () => mockSecuritySideNav(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetChromeStyle$ = jest.fn().mockReturnValue(of('classic'));
+const mockGetChromeStyle$ = vi.fn().mockReturnValue(of('classic'));
 
 const mockServices: Record<string, unknown> = {
   chrome: { getChromeStyle$: () => mockGetChromeStyle$() },
 };
 
-jest.mock('../../../lib/kibana/kibana_react', () => {
+vi.mock('../../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: mockServices,
@@ -38,7 +46,7 @@ jest.mock('../../../lib/kibana/kibana_react', () => {
 
 describe('Security Solution Navigation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('while chrome style is undefined', () => {
     beforeAll(() => {

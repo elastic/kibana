@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,40 +19,46 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useKibana: () => ({
       services: {
-        uiSettings: { get: jest.fn() },
-        notifications: { toasts: { add: jest.fn() } },
-        http: { get: jest.fn().mockResolvedValue({}) },
+        uiSettings: { get: vi.fn() },
+        notifications: { toasts: { add: vi.fn() } },
+        http: { get: vi.fn().mockResolvedValue({}) },
       },
     }),
   };
 });
 
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  useFetcher: () => ({ data: undefined, status: 'success' }),
-  isPending: () => false,
-  FETCH_STATUS: { SUCCESS: 'success', LOADING: 'loading', FAILURE: 'failure' },
-}));
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: () => ({ data: undefined, status: 'success' }),
+      isPending: () => false,
+      FETCH_STATUS: { SUCCESS: 'success', LOADING: 'loading', FAILURE: 'failure' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../services/rest/create_call_apm_api', () => ({
-  createCallApmApi: jest.fn(),
-}));
+vi.mock('../../../../services/rest/create_call_apm_api', () => {
+      const mocked = {
+      createCallApmApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderRuleType = (
   ruleParams: Partial<TransactionDurationRuleParams>,
-  setRuleParams = jest.fn()
+  setRuleParams = vi.fn()
 ) => {
   render(
     <IntlProvider locale="en">
       <TransactionDurationRuleType
         ruleParams={ruleParams as TransactionDurationRuleParams}
         setRuleParams={setRuleParams}
-        setRuleProperty={jest.fn()}
+        setRuleProperty={vi.fn()}
       />
     </IntlProvider>
   );

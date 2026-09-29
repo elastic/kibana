@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,7 +20,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { ToastsStart } from '@kbn/core/public';
 
 // Mock DataViewSelector to avoid expensive EuiTextTruncate rendering in jsdom
-const MockedDataViewSelector = jest.fn(
+const MockedDataViewSelector = vi.fn(
   ({
     dataViewsList,
     onChangeDataView,
@@ -40,19 +42,22 @@ const MockedDataViewSelector = jest.fn(
     </div>
   )
 );
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  DataViewSelector: (props: {
-    dataViewsList: Array<{ id: string; title: string }>;
-    onChangeDataView: (id: string) => void;
-  }) => MockedDataViewSelector(props),
-}));
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      DataViewSelector: (props: {
+        dataViewsList: Array<{ id: string; title: string }>;
+        onChangeDataView: (id: string) => void;
+      }) => MockedDataViewSelector(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const selectedDataView = {
   id: 'mock-data-logs-id',
   namespaces: ['default'],
   title: 'kibana_sample_data_logs',
-  isTimeBased: jest.fn(),
-  isPersisted: jest.fn(() => true),
+  isTimeBased: vi.fn(),
+  isPersisted: vi.fn(() => true),
   getName: () => 'kibana_sample_data_logs',
 } as unknown as DataView;
 
@@ -92,8 +97,8 @@ const dataViewOptions = [
     namespaces: ['default'],
     title: 'kibana_sample_data_ecommerce',
     typeMeta: {},
-    isTimeBased: jest.fn(),
-    isPersisted: jest.fn(() => true),
+    isTimeBased: vi.fn(),
+    isPersisted: vi.fn(() => true),
     getName: () => 'kibana_sample_data_ecommerce',
   },
   {
@@ -101,8 +106,8 @@ const dataViewOptions = [
     namespaces: ['default'],
     title: 'test',
     typeMeta: {},
-    isTimeBased: jest.fn(),
-    isPersisted: jest.fn(() => true),
+    isTimeBased: vi.fn(),
+    isPersisted: vi.fn(() => true),
     getName: () => 'test',
   },
   {
@@ -110,8 +115,8 @@ const dataViewOptions = [
     namespaces: ['default'],
     title: 'ad-hoc data view',
     typeMeta: {},
-    isTimeBased: jest.fn(),
-    isPersisted: jest.fn(() => false),
+    isTimeBased: vi.fn(),
+    isPersisted: vi.fn(() => false),
     getName: () => 'ad-hoc data view',
   },
   {
@@ -120,26 +125,26 @@ const dataViewOptions = [
     title: 'ad-hoc data view esql',
     type: ESQL_TYPE,
     typeMeta: {},
-    isTimeBased: jest.fn(),
-    isPersisted: jest.fn(() => false),
+    isTimeBased: vi.fn(),
+    isPersisted: vi.fn(() => false),
     getName: () => 'ad-hoc data view esql',
   },
 ];
 
-const mockAddDanger = jest.fn();
+const mockAddDanger = vi.fn();
 
 const mount = () => {
   const dataViewsMock = dataViewPluginMocks.createStartContract();
-  dataViewsMock.getIdsWithTitle = jest
+  dataViewsMock.getIdsWithTitle = vi
     .fn()
     .mockImplementation(() => Promise.resolve(dataViewListItems));
-  dataViewsMock.get = jest
+  dataViewsMock.get = vi
     .fn()
     .mockImplementation((id: string) =>
       Promise.resolve(dataViewOptions.find((current) => current.id === id))
     );
   const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
-  const onSelectDataView = jest.fn();
+  const onSelectDataView = vi.fn();
   const toasts = { addDanger: mockAddDanger } as unknown as ToastsStart;
   const props: DataViewSelectPopoverProps = {
     dependencies: { dataViews: dataViewsMock, dataViewEditor: dataViewEditorMock, toasts },
@@ -157,7 +162,7 @@ const mount = () => {
 
 describe('DataViewSelectPopover', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     MockedDataViewSelector.mockClear();
   });
 
@@ -221,7 +226,7 @@ describe('DataViewSelectPopover', () => {
 
   test('shows a specific toast when the selected data view fails to load', async () => {
     const { dataViewsMock, onSelectDataView } = mount();
-    dataViewsMock.get = jest
+    dataViewsMock.get = vi
       .fn()
       .mockRejectedValue(new Error('index_not_found_exception: no such index'));
 

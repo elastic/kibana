@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { modelsProvider } from './models_provider';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { MlClient } from '../../lib/ml_client';
@@ -16,7 +19,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { ExistingModelBase } from '@kbn/ml-common-types/trained_models';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
-jest.mock('../../lib/log');
+vi.mock('../../lib/log');
 
 describe('modelsProvider', () => {
   const mockClient = elasticsearchClientMock.createScopedClusterClient();
@@ -43,7 +46,7 @@ describe('modelsProvider', () => {
 
   mockClient.asInternalUser.tasks.list.mockResolvedValue({ tasks: [] });
 
-  const mockMlClient = {} as unknown as jest.Mocked<MlClient>;
+  const mockMlClient = {} as unknown as Mocked<MlClient>;
 
   const mockCloud = cloudMock.createSetup();
 
@@ -56,7 +59,7 @@ describe('modelsProvider', () => {
   const modelService = modelsProvider(mockClient, mockMlClient, mockCloud, enabledMlFeatures);
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getModelDownloads', () => {
@@ -364,11 +367,11 @@ describe('modelsProvider', () => {
         endpoints: inferenceServices,
       });
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('when the user has required privileges', () => {

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MisconfigurationsPreview } from './misconfiguration_preview';
 import { TestProviders } from '../../../common/mock/test_providers';
 
 describe('MisconfigurationsPreview', () => {
-  const mockOpenDetailsPanel = jest.fn();
+  const mockOpenDetailsPanel = vi.fn();
 
   it('renders', () => {
     const { getByTestId } = render(

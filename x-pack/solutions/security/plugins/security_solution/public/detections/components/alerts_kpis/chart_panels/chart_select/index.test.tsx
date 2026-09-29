@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
@@ -11,13 +13,13 @@ import { ChartSelect } from '.';
 
 describe('ChartSelect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders the chart select tabs', () => {
     render(
       <TestProviders>
-        <ChartSelect alertViewSelection="trend" setAlertViewSelection={jest.fn()} />
+        <ChartSelect alertViewSelection="trend" setAlertViewSelection={vi.fn()} />
       </TestProviders>
     );
 
@@ -26,7 +28,7 @@ describe('ChartSelect', () => {
   });
 
   test('changing selection render correctly', () => {
-    const setAlertViewSelection = jest.fn();
+    const setAlertViewSelection = vi.fn();
     const { rerender } = render(
       <TestProviders>
         <ChartSelect alertViewSelection="trend" setAlertViewSelection={setAlertViewSelection} />

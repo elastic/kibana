@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ATTACK_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
 import { useGetAttackFlyoutLink } from './use_get_attack_flyout_link';
 
-jest.mock('../../../common/lib/kibana/hooks', () => ({
-  useAppUrl: () => ({
-    getAppUrl: ({ path }: { path: string }) => path,
-  }),
-}));
+vi.mock('../../../common/lib/kibana/hooks', () => {
+      const mocked = {
+      useAppUrl: () => ({
+        getAppUrl: ({ path }: { path: string }) => path,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const attackId = 'attack-1';
 const indexName = 'indexName';

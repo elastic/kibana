@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ContextSwitcher } from './context_switcher';
@@ -40,7 +42,7 @@ const buildEnvironmentContext = (
   submenuFooterAction: {
     id: 'create-project',
     label: 'Create project',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
     'data-test-subj': 'contextSwitcherSubmenuFooterAction-createProject',
   },
   ...overrides,
@@ -50,7 +52,7 @@ const buildProps = (overrides?: Partial<ContextSwitcherProps>): ContextSwitcherP
   spaces: {
     active: buildSpaces()[0],
     items: buildSpaces(),
-    onSelect: jest.fn(),
+    onSelect: vi.fn(),
   },
   ...overrides,
 });
@@ -80,7 +82,7 @@ describe('ContextSwitcher', () => {
 
   it('calls onOpen when popover opens', async () => {
     const user = userEvent.setup();
-    const onOpen = jest.fn();
+    const onOpen = vi.fn();
 
     render(<ContextSwitcher {...buildProps({ onOpen })} />);
 
@@ -92,7 +94,7 @@ describe('ContextSwitcher', () => {
 
   it('calls spaces.onSelect and closes popover when a space is selected', async () => {
     const user = userEvent.setup();
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     const props = buildProps();
     props.spaces.onSelect = onSelect;
 
@@ -110,7 +112,7 @@ describe('ContextSwitcher', () => {
 
   it('keeps popover open for cmd/ctrl click', async () => {
     const user = userEvent.setup();
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     const props = buildProps();
     props.spaces.onSelect = onSelect;
 
@@ -130,7 +132,7 @@ describe('ContextSwitcher', () => {
 
   it('keeps popover open for shift click', async () => {
     const user = userEvent.setup();
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     const props = buildProps();
     props.spaces.onSelect = onSelect;
 
@@ -204,8 +206,8 @@ describe('ContextSwitcher', () => {
 
   it('closes the popover when clicking footer link or submenu footer action', async () => {
     const user = userEvent.setup();
-    const onFooterLinkClick = jest.fn();
-    const onSubmenuFooterActionClick = jest.fn();
+    const onFooterLinkClick = vi.fn();
+    const onSubmenuFooterActionClick = vi.fn();
     const env = buildEnvironmentContext();
     env.submenuFooterAction = { ...env.submenuFooterAction, onClick: onSubmenuFooterActionClick };
     const props = buildProps({

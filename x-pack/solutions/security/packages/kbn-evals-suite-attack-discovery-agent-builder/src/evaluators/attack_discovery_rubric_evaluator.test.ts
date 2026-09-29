@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DefaultEvaluators } from '@kbn/evals';
 import { createAttackDiscoveryRubricEvaluator } from './attack_discovery_rubric_evaluator';
 import { EMPTY_RETRIEVAL_EVIDENCE } from '../types';
@@ -54,8 +56,8 @@ const expectedFor = (
 });
 
 describe('createAttackDiscoveryRubricEvaluator', () => {
-  const judge = jest.fn();
-  const criteria = jest.fn(() => ({
+  const judge = vi.fn();
+  const criteria = vi.fn(() => ({
     name: 'criteria',
     kind: 'LLM' as const,
     direction: 'maximize',
@@ -75,7 +77,7 @@ describe('createAttackDiscoveryRubricEvaluator', () => {
     } as Parameters<ReturnType<typeof createAttackDiscoveryRubricEvaluator>['evaluate']>[0]);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     judge.mockResolvedValue({ score: 1, label: 'Y' });
   });
 

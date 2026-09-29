@@ -5,33 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, fireEvent, render } from '@testing-library/react';
 import { useStartRulesMigrationModal } from './use_start_rules_migration_modal';
 
-jest.mock('../../common/components', () => ({
-  StartMigrationModal: (props: {
-    onStartMigrationWithSettings: (settings: { connectorId: string }) => void;
-    additionalSettings: React.ReactNode;
-  }) => (
-    <div>
-      <button
-        type="button"
-        onClick={() => props.onStartMigrationWithSettings({ connectorId: 'test-connector' })}
-      >
-        {'Start Test Migration'}
-      </button>
-      {props.additionalSettings}
-    </div>
-  ),
-  DATA_TEST_SUBJ_PREFIX: 'test',
-}));
+vi.mock('../../common/components', () => {
+      const mocked = {
+      StartMigrationModal: (props: {
+        onStartMigrationWithSettings: (settings: { connectorId: string }) => void;
+        additionalSettings: React.ReactNode;
+      }) => (
+        <div>
+          <button
+            type="button"
+            onClick={() => props.onStartMigrationWithSettings({ connectorId: 'test-connector' })}
+          >
+            {'Start Test Migration'}
+          </button>
+          {props.additionalSettings}
+        </div>
+      ),
+      DATA_TEST_SUBJ_PREFIX: 'test',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useStartRulesMigrationModal', () => {
-  const mockOnStartMigrationWithSettings = jest.fn();
+  const mockOnStartMigrationWithSettings = vi.fn();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not render the modal initially', () => {

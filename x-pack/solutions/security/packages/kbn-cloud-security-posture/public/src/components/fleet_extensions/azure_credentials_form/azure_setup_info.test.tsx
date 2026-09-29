@@ -4,17 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AzureSetupInfoContent } from './azure_setup_info';
 
 // Mock the cloud setup hook
-jest.mock('../hooks/use_cloud_setup_context', () => ({
-  useCloudSetup: jest.fn(() => ({
-    shortName: 'CSPM',
-  })),
-}));
+vi.mock('../hooks/use_cloud_setup_context', () => {
+      const mocked = {
+      useCloudSetup: vi.fn(() => ({
+        shortName: 'CSPM',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AzureSetupInfoContent', () => {
   const mockDocumentationLink =

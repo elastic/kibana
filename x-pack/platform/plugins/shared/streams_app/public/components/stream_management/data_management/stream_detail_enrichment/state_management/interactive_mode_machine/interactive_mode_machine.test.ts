@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { GrokCollection } from '@kbn/grok-ui';
 import { ALWAYS_CONDITION, type StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
@@ -15,13 +17,16 @@ import type { InteractiveModeParentRef } from './types';
 // Mock htmlIdGenerator to return unique IDs (the default EUI test-env mock returns
 // the same 'generated-id' for all calls, which breaks tests that create multiple steps)
 let mockIdCounter = 0;
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  htmlIdGenerator: () => () => `test-id-${mockIdCounter++}`,
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      htmlIdGenerator: () => () => `test-id-${mockIdCounter++}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createParentRef = () => {
-  const send = jest.fn();
+  const send = vi.fn();
 
   const mockSimulatorRef = {
     getSnapshot: () => ({
@@ -69,7 +74,7 @@ describe('interactiveModeMachine condition focus behavior', () => {
         privileges: { manage: true, simulate: true },
         simulationMode: 'partial',
         streamName: 'test-stream',
-        grokCollection: { setCustomPatterns: jest.fn() } as unknown as GrokCollection,
+        grokCollection: { setCustomPatterns: vi.fn() } as unknown as GrokCollection,
       },
     });
 
@@ -172,7 +177,7 @@ describe('interactiveModeMachine condition focus behavior', () => {
         privileges: { manage: true, simulate: true },
         simulationMode: 'partial',
         streamName: 'test-stream',
-        grokCollection: { setCustomPatterns: jest.fn() } as unknown as GrokCollection,
+        grokCollection: { setCustomPatterns: vi.fn() } as unknown as GrokCollection,
       },
     });
 

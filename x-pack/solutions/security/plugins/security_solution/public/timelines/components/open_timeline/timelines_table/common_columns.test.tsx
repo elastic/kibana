@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
@@ -23,7 +25,7 @@ import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
 import { TestProvidersComponent } from '../../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('#getCommonColumns', () => {
   let mockResults: OpenTimelineResult[];
@@ -165,7 +167,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it invokes onToggleShowNotes to expand the row when the row is not expanded', () => {
-      const onToggleShowNotes = jest.fn();
+      const onToggleShowNotes = vi.fn();
       const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       // the saved object id does not exist in the map yet, so the row is not expanded:
@@ -195,7 +197,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it invokes onToggleShowNotes to remove the row when the row is expanded', () => {
-      const onToggleShowNotes = jest.fn();
+      const onToggleShowNotes = vi.fn();
       const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       // the saved object id exists in the map yet, so the row is expanded:
@@ -401,7 +403,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it invokes `onOpenTimeline` when the hyperlink is clicked', () => {
-      const onOpenTimeline = jest.fn();
+      const onOpenTimeline = vi.fn();
 
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(mockResults),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { act, render, waitFor } from '@testing-library/react';
@@ -19,15 +22,18 @@ import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-const mockSetAppFilters = jest.fn();
+const mockSetAppFilters = vi.fn();
 const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);
 mockFilterManager.setAppFilters = mockSetAppFilters;
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-const mockUpdateUrlParam = jest.fn();
-jest.mock('../../utils/global_query_string', () => ({
-  useUpdateUrlParam: () => mockUpdateUrlParam,
-}));
+const mockUpdateUrlParam = vi.fn();
+vi.mock('../../utils/global_query_string', () => {
+      const mocked = {
+      useUpdateUrlParam: () => mockUpdateUrlParam,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const dataViewSpec: DataViewSpec = dataView.toSpec();
@@ -45,7 +51,7 @@ const useKibanaMock = {
     },
     unifiedSearch: {
       ui: {
-        SearchBar: jest.fn().mockImplementation((props) => (
+        SearchBar: vi.fn().mockImplementation((props) => (
           <button
             data-test-subj="querySubmitButton"
             onClick={() => props.onQuerySubmit({ dateRange: { from: 'now', to: 'now' } })}
@@ -67,9 +73,9 @@ describe('SearchBarComponent', () => {
     },
     dataView,
     sourcererDataViewSpec: dataViewSpec,
-    updateSearch: jest.fn(),
-    setSavedQuery: jest.fn(),
-    setSearchBarFilter: jest.fn(),
+    updateSearch: vi.fn(),
+    setSavedQuery: vi.fn(),
+    setSearchBarFilter: vi.fn(),
     end: '',
     start: '',
     toStr: '',
@@ -84,9 +90,9 @@ describe('SearchBarComponent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useKibana as jest.Mock).mockReturnValue(useKibanaMock);
+    (useKibana as Mock).mockReturnValue(useKibanaMock);
   });
 
   it('calls useUpdateUrlParam for filter and query', () => {
@@ -351,7 +357,7 @@ describe('SearchBarComponent', () => {
     });
 
     it('initializes timerange URL param with redux date on mount -- serverless', async () => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         ...useKibanaMock,
         services: { ...useKibanaMock.services, serverless: {} },
       });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -15,18 +18,24 @@ import { OverviewNetwork } from '../overview_network';
 import { EventCounts } from '.';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../../../common/components/link_to');
-jest.mock('../overview_host', () => ({
-  OverviewHost: jest.fn(() => <div data-test-subj="overview-host-mock">{'OverviewHost'}</div>),
-}));
-jest.mock('../overview_network', () => ({
-  OverviewNetwork: jest.fn(() => (
-    <div data-test-subj="overview-network-mock">{'OverviewNetwork'}</div>
-  )),
-}));
+vi.mock('../../../common/components/link_to');
+vi.mock('../overview_host', () => {
+      const mocked = {
+      OverviewHost: vi.fn(() => <div data-test-subj="overview-host-mock">{'OverviewHost'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../overview_network', () => {
+      const mocked = {
+      OverviewNetwork: vi.fn(() => (
+        <div data-test-subj="overview-network-mock">{'OverviewNetwork'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const OverviewHostMocked = OverviewHost as jest.MockedFunction<typeof OverviewHost>;
-const OverviewNetworkMocked = OverviewNetwork as jest.MockedFunction<typeof OverviewNetwork>;
+const OverviewHostMocked = OverviewHost as MockedFunction<typeof OverviewHost>;
+const OverviewNetworkMocked = OverviewNetwork as MockedFunction<typeof OverviewNetwork>;
 
 describe('EventCounts', () => {
   const from = '2020-01-20T20:49:57.080Z';
@@ -43,7 +52,7 @@ describe('EventCounts', () => {
     indexNames: [],
     dataViewSpec: mockDataViewSpec,
     dataView: createStubDataView({ spec: {} }),
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
     to,
     query: {
       query: '',

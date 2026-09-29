@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,10 +19,10 @@ import { useAssistantContext } from '../../../assistant_context';
 import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {
-  fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
+  fetch: vi.fn().mockResolvedValue(defaultAssistantFeatures),
 } as unknown as HttpSetup;
 
-jest.mock('../../../assistant_context');
+vi.mock('../../../assistant_context');
 
 const createWrapper = () => {
   const queryClient = new QueryClient();
@@ -30,7 +33,7 @@ const createWrapper = () => {
 };
 
 describe('useFetchPrompts', () => {
-  (useAssistantContext as jest.Mock).mockReturnValue({
+  (useAssistantContext as Mock).mockReturnValue({
     http,
     assistantAvailability: {
       isAssistantEnabled: true,

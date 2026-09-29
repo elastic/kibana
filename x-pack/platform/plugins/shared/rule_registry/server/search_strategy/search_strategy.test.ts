@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 import { lastValueFrom, of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -21,7 +24,7 @@ import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authoriza
 import { Boom } from '@hapi/boom';
 import { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 
-jest.mock('../lib/get_is_kibana_request');
+vi.mock('../lib/get_is_kibana_request');
 
 const getBasicResponse = (overwrites = {}) => {
   return merge(
@@ -56,8 +59,8 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   const spaces = spacesMock.createStart();
   const logger = loggerMock.create();
   const authorizationMock = alertingAuthorizationMock.create();
-  const getAuthorizedRuleTypesMock = jest.fn();
-  const getAlertIndicesAliasMock = jest.fn();
+  const getAuthorizedRuleTypesMock = vi.fn();
+  const getAlertIndicesAliasMock = vi.fn();
 
   const response = getBasicResponse({
     rawResponse: {
@@ -73,11 +76,11 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     },
   });
 
-  let getAuthzFilterSpy: jest.SpyInstance;
-  const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
+  let getAuthzFilterSpy: MockInstance;
+  const searchStrategySearch = vi.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     getAuthorizedRuleTypesMock.mockResolvedValue([]);
     getAlertIndicesAliasMock.mockReturnValue(['test']);
@@ -97,15 +100,15 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       };
     });
 
-    (data.search.searchAsInternalUser.search as jest.Mock).mockImplementation(() => {
+    (data.search.searchAsInternalUser.search as Mock).mockImplementation(() => {
       return of(response);
     });
 
-    (getIsKibanaRequest as jest.Mock).mockImplementation(() => {
+    (getIsKibanaRequest as Mock).mockImplementation(() => {
       return true;
     });
 
-    getAuthzFilterSpy = jest
+    getAuthzFilterSpy = vi
       .spyOn(getAuthzFilterImport, 'getAuthzFilter')
       .mockImplementation(async () => {
         return {};
@@ -116,7 +119,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     getAuthorizedRuleTypesMock.mockClear();
     getAlertIndicesAliasMock.mockClear();
     data.search.getSearchStrategy.mockClear();
-    (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
+    (data.search.searchAsInternalUser.search as Mock).mockClear();
     getAuthzFilterSpy.mockClear();
     searchStrategySearch.mockClear();
   });
@@ -292,7 +295,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
     expect(searchStrategySearch).not.toHaveBeenCalled();
-    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][1]).toEqual(
+    expect((data.search.searchAsInternalUser.search as Mock).mock.calls[0][1]).toEqual(
       options
     );
   });
@@ -315,7 +318,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
     );
 
-    expect(data.search.searchAsInternalUser.search as jest.Mock).not.toHaveBeenCalled();
+    expect(data.search.searchAsInternalUser.search as Mock).not.toHaveBeenCalled();
     expect(searchStrategySearch).toHaveBeenCalled();
     expect(searchStrategySearch.mock.calls[0][1]).toEqual(options);
   });
@@ -370,12 +373,12 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
     );
 
-    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls.length).toBe(1);
+    expect((data.search.searchAsInternalUser.search as Mock).mock.calls.length).toBe(1);
     expect(
-      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.size
+      (data.search.searchAsInternalUser.search as Mock).mock.calls[0][0].params.body.size
     ).toBe(10);
     expect(
-      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.from
+      (data.search.searchAsInternalUser.search as Mock).mock.calls[0][0].params.body.from
     ).toBe(0);
   });
 
@@ -403,9 +406,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
     );
 
-    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls.length).toBe(1);
+    expect((data.search.searchAsInternalUser.search as Mock).mock.calls.length).toBe(1);
     expect(
-      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.sort
+      (data.search.searchAsInternalUser.search as Mock).mock.calls[0][0].params.body.sort
     ).toStrictEqual([{ test: { order: 'desc' } }]);
   });
 
@@ -549,7 +552,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
     );
 
-    const arg0 = (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0];
+    const arg0 = (data.search.searchAsInternalUser.search as Mock).mock.calls[0][0];
     const fields = arg0.params.body.fields;
 
     expect(fields.length).toEqual(

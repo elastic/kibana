@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { set } from '@kbn/safer-lodash-set/fp';
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
@@ -13,10 +15,10 @@ import React, { useEffect } from 'react';
 import type { AppToast } from '.';
 import { useStateToaster, ManageGlobalToaster, GlobalToaster, displayErrorToast } from '.';
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
-    v1: jest.fn(() => '27261ae0-0bbb-11ea-b0ea-db767b07ea47'),
-    v4: jest.fn(() => '9e1f72a9-7c73-4b7f-a562-09940f7daf4a'),
+    v1: vi.fn(() => '27261ae0-0bbb-11ea-b0ea-db767b07ea47'),
+    v4: vi.fn(() => '9e1f72a9-7c73-4b7f-a562-09940f7daf4a'),
   };
 });
 
@@ -305,7 +307,7 @@ describe('Toaster', () => {
         },
         type: 'addToaster',
       };
-      const dispatchToasterMock = jest.fn();
+      const dispatchToasterMock = vi.fn();
       displayErrorToast('Title', ['message'], dispatchToasterMock);
       expect(dispatchToasterMock.mock.calls[0][0]).toEqual(mockErrorToast);
     });

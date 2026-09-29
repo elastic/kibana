@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-export const validateTagNameMock = jest.fn();
-export const validateTagColorMock = jest.fn();
-export const validateTagDescriptionMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('../../../common/validation', () => ({
-  validateTagName: validateTagNameMock,
-  validateTagColor: validateTagColorMock,
-  validateTagDescription: validateTagDescriptionMock,
-}));
+export const validateTagNameMock = vi.fn();
+export const validateTagColorMock = vi.fn();
+export const validateTagDescriptionMock = vi.fn();
+
+vi.doMock('../../../common/validation', () => {
+      const mocked = {
+      validateTagName: validateTagNameMock,
+      validateTagColor: validateTagColorMock,
+      validateTagDescription: validateTagDescriptionMock,
+    };
+      return { ...mocked, default: mocked };
+    });

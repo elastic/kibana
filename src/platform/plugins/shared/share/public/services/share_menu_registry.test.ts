@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ShareRegistry } from './share_menu_registry';
 import type {
   ShareContext,
@@ -23,11 +25,11 @@ describe('ShareActionsRegistry', () => {
   const startDeps: ShareRegistryApiStart = {
     urlService: url,
     anonymousAccessServiceProvider: () => ({
-      getCapabilities: jest.fn(),
-      getState: jest.fn(),
+      getCapabilities: vi.fn(),
+      getState: vi.fn(),
     }),
     capabilities: { navLinks: {}, management: {}, catalogue: {} },
-    getLicense: jest.fn(),
+    getLicense: vi.fn(),
   };
 
   describe('registerShareIntegration', () => {
@@ -74,7 +76,7 @@ describe('ShareActionsRegistry', () => {
         const { registerShareIntegration } = shareRegistry.setup();
         const { availableIntegrations } = shareRegistry.start(startDeps);
 
-        const prerequisiteCheckFn = jest.fn(() => false);
+        const prerequisiteCheckFn = vi.fn(() => false);
 
         // register a global integration with a prerequisiteCheck
         registerShareIntegration<TestShareIntegration>({
@@ -100,7 +102,7 @@ describe('ShareActionsRegistry', () => {
         const { registerShareIntegration } = shareRegistry.setup();
         const { availableIntegrations } = shareRegistry.start(startDeps);
 
-        const prerequisiteCheckFn = jest.fn(() => true);
+        const prerequisiteCheckFn = vi.fn(() => true);
 
         // register a global integration with a prerequisiteCheck
         registerShareIntegration<TestShareIntegration>({
@@ -195,19 +197,19 @@ describe('ShareActionsRegistry', () => {
         const service = new ShareRegistry();
         const { registerShareIntegration: registerFunction } = service.setup();
 
-        const shareAction1ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction1ConfigFactory = vi.fn(() => Promise.resolve({}));
         const shareAction1: RegisterShareIntegrationArgs = {
           id: 'shareAction1',
           getShareIntegrationConfig: shareAction1ConfigFactory,
         };
 
-        const shareAction2ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction2ConfigFactory = vi.fn(() => Promise.resolve({}));
         const shareAction2: RegisterShareIntegrationArgs = {
           id: 'shareAction2',
           getShareIntegrationConfig: shareAction2ConfigFactory,
         };
 
-        const shareAction3ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction3ConfigFactory = vi.fn(() => Promise.resolve({}));
         const shareAction3: RegisterShareIntegrationArgs = {
           id: 'shareAction3',
           getShareIntegrationConfig: shareAction3ConfigFactory,
@@ -269,19 +271,19 @@ describe('ShareActionsRegistry', () => {
 
         const isServerless = false;
 
-        const shareAction1ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction1ConfigFactory = vi.fn(() => Promise.resolve({}));
         const shareAction1: RegisterShareIntegrationArgs = {
           id: 'shareAction1',
           getShareIntegrationConfig: shareAction1ConfigFactory,
         };
 
-        const shareAction2ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction2ConfigFactory = vi.fn(() => Promise.resolve({}));
         const shareAction2: RegisterShareIntegrationArgs = {
           id: 'shareAction2',
           getShareIntegrationConfig: shareAction2ConfigFactory,
         };
 
-        const shareAction3ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction3ConfigFactory = vi.fn(() => Promise.resolve({}));
         const shareAction3: RegisterShareIntegrationArgs = {
           id: 'shareAction3',
           getShareIntegrationConfig: shareAction3ConfigFactory,

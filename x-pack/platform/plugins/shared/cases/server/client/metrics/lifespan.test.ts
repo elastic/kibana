@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { UserActionAttributes } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core/server';
 import { CaseStatuses } from '../../../common/types/domain';
@@ -14,15 +16,15 @@ import { createStatusChangeSavedObject } from './test_utils/lifespan';
 describe('lifespan', () => {
   describe('getStatusInfo', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('throws an error when the open date is invalid', () => {
-      jest.setSystemTime(new Date(0));
+      vi.setSystemTime(new Date(0));
 
       expect(() => getStatusInfo([], new Date('blah'))).toThrow('Invalid Date');
     });
@@ -97,7 +99,7 @@ describe('lifespan', () => {
     });
 
     it('sets the openDuration to 10 when the case has stayed in open', () => {
-      jest.setSystemTime(new Date(10));
+      vi.setSystemTime(new Date(10));
       const { inProgressDuration, openDuration } = getStatusInfo([], new Date(0));
 
       expect(openDuration).toBe(10);
@@ -105,7 +107,7 @@ describe('lifespan', () => {
     });
 
     it('sets the inProgressDuration to 10 when the case has stayed in open', () => {
-      jest.setSystemTime(new Date(12));
+      vi.setSystemTime(new Date(12));
       const { inProgressDuration, openDuration } = getStatusInfo(
         [createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date(2))],
         new Date(0)
@@ -158,7 +160,7 @@ describe('lifespan', () => {
     });
 
     it('does not add the current time to a duration when the case is closed', () => {
-      jest.setSystemTime(new Date(12));
+      vi.setSystemTime(new Date(12));
 
       const { openDuration, inProgressDuration } = getStatusInfo(
         [createStatusChangeSavedObject(CaseStatuses.closed, new Date(1))],

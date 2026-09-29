@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -29,48 +31,63 @@ import type { QueryTab } from './types';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <div data-test-subj="codeEditorMock" />,
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: () => <div data-test-subj="codeEditorMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-editor', () => ({
-  ESQLEditor: () => <div data-test-subj="esqlEditorMock" />,
-}));
+vi.mock('@kbn/esql-editor', () => {
+      const mocked = {
+      ESQLEditor: () => <div data-test-subj="esqlEditorMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compose_discover_form/alert_condition_step', () => ({
-  AlertConditionStep: () => null,
-}));
+vi.mock('./compose_discover_form/alert_condition_step', () => {
+      const mocked = {
+      AlertConditionStep: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compose_discover_form/recovery_condition_step', () => ({
-  RecoveryConditionStep: () => null,
-}));
+vi.mock('./compose_discover_form/recovery_condition_step', () => {
+      const mocked = {
+      RecoveryConditionStep: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compose_discover_form/details_and_artifacts_step', () => ({
-  DetailsAndArtifactsStep: () => null,
-}));
+vi.mock('./compose_discover_form/details_and_artifacts_step', () => {
+      const mocked = {
+      DetailsAndArtifactsStep: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
-  LinkedActionPoliciesStep: () => null,
-}));
+vi.mock('./compose_discover_form/linked_action_policies_step', () => {
+      const mocked = {
+      LinkedActionPoliciesStep: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compose_discover_form/esql_recovery_content', () => ({
-  EsqlRecoveryContent: () => null,
-}));
+vi.mock('./compose_discover_form/esql_recovery_content', () => {
+      const mocked = {
+      EsqlRecoveryContent: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
+const mockComposeDiscoverForm = vi.fn((_props: FormProps) => (
   <div data-test-subj="composeDiscoverFormMock" />
 ));
 
-jest.mock('./compose_discover_form', () => {
-  const { useFormContext } = jest.requireActual(
-    'react-hook-form'
-  ) as typeof import('react-hook-form');
-  const { getSteps } = jest.requireActual(
-    './compose_discover_form'
-  ) as typeof import('./compose_discover_form');
-  const { QueryFieldRules } = jest.requireActual(
-    './compose_discover_form/query_field_rules'
-  ) as typeof import('./compose_discover_form/query_field_rules');
+vi.mock('./compose_discover_form', async () => {
+  const { useFormContext } = require('react-hook-form') as typeof import('react-hook-form');
+  const { getSteps } = (await vi.importActual('./compose_discover_form')) as typeof import('./compose_discover_form');
+  const { QueryFieldRules } = (await vi.importActual('./compose_discover_form/query_field_rules')) as typeof import('./compose_discover_form/query_field_rules');
   return {
     getSteps,
     ComposeDiscoverForm: (props: FormProps) => {
@@ -139,73 +156,94 @@ let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecovery: (() => FormValues['recovery']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
 
-jest.mock('./query_sandbox_flyout', () => ({
-  QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
-    sandboxFlyoutProps = props;
-    return (
-      <div data-test-subj="composeDiscoverChildMock">
-        <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
-        {props.onTimeFieldChange ? (
-          <select
-            data-test-subj="querySandboxTimeField"
-            value={props.timeField}
-            onChange={(e) => props.onTimeFieldChange?.(e.target.value)}
-          >
-            {props.timeFieldOptions?.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.text}
-              </option>
-            ))}
-          </select>
-        ) : null}
-        {props.onApply ? (
-          <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
-            Apply
-          </button>
-        ) : null}
-        <button
-          type="button"
-          data-test-subj="composeDiscoverChildMockClose"
-          onClick={props.onClose}
-        >
-          Close sandbox
-        </button>
-      </div>
-    );
-  },
-}));
+vi.mock('./query_sandbox_flyout', () => {
+      const mocked = {
+      QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
+        sandboxFlyoutProps = props;
+        return (
+          <div data-test-subj="composeDiscoverChildMock">
+            <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
+            {props.onTimeFieldChange ? (
+              <select
+                data-test-subj="querySandboxTimeField"
+                value={props.timeField}
+                onChange={(e) => props.onTimeFieldChange?.(e.target.value)}
+              >
+                {props.timeFieldOptions?.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.text}
+                  </option>
+                ))}
+              </select>
+            ) : null}
+            {props.onApply ? (
+              <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
+                Apply
+              </button>
+            ) : null}
+            <button
+              type="button"
+              data-test-subj="composeDiscoverChildMockClose"
+              onClick={props.onClose}
+            >
+              Close sandbox
+            </button>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_esql_providers', () => ({
-  useEsqlAutocomplete: jest.fn(),
-}));
+vi.mock('./use_esql_providers', () => {
+      const mocked = {
+      useEsqlAutocomplete: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_split_query_completion', () => ({
-  useSplitQueryCompletion: () => ({ onEditorMount: jest.fn() }),
-}));
+vi.mock('./use_split_query_completion', () => {
+      const mocked = {
+      useSplitQueryCompletion: () => ({ onEditorMount: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_resolve_time_field', () => ({
-  useResolveTimeField: () => ({
-    timeFieldOptions: [
-      { value: '@timestamp', text: '@timestamp' },
-      { value: 'event.ingested', text: 'event.ingested' },
-    ],
-    isTimeFieldResolved: true,
-  }),
-}));
+vi.mock('./use_resolve_time_field', () => {
+      const mocked = {
+      useResolveTimeField: () => ({
+        timeFieldOptions: [
+          { value: '@timestamp', text: '@timestamp' },
+          { value: 'event.ingested', text: 'event.ingested' },
+        ],
+        isTimeFieldResolved: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: () => ({ data: {}, isLoading: false }),
-}));
+vi.mock('../../form/hooks/use_data_fields', () => {
+      const mocked = {
+      useDataFields: () => ({ data: {}, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLTimeField: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../form/utils/yaml_form_utils', () => ({
-  serializeFormToYaml: () => 'mock-yaml',
-  parseYamlToFormValues: jest.fn((yaml: string) => mockParseYamlToFormValues(yaml)),
-}));
+vi.mock('../../form/utils/yaml_form_utils', () => {
+      const mocked = {
+      serializeFormToYaml: () => 'mock-yaml',
+      parseYamlToFormValues: vi.fn((yaml: string) => mockParseYamlToFormValues(yaml)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultYamlFormValues: FormValues = {
   kind: 'signal',
@@ -226,25 +264,28 @@ let mockParseYamlToFormValues: (yaml: string) => {
   error: null,
 });
 
-jest.mock('../../form/yaml_rule_form', () => ({
-  YamlRuleForm: (props: {
-    setYamlText: (yaml: string) => void;
-    onBlurSync: (values: FormValues) => void;
-  }) => {
-    yamlRuleFormProps = props;
-    return (
-      <div data-test-subj="yamlRuleFormMock">
-        <button
-          data-test-subj="mockMakeYamlDirty"
-          onClick={() => props.setYamlText('name: changed\n')}
-          type="button"
-        >
-          Make YAML dirty
-        </button>
-      </div>
-    );
-  },
-}));
+vi.mock('../../form/yaml_rule_form', () => {
+      const mocked = {
+      YamlRuleForm: (props: {
+        setYamlText: (yaml: string) => void;
+        onBlurSync: (values: FormValues) => void;
+      }) => {
+        yamlRuleFormProps = props;
+        return (
+          <div data-test-subj="yamlRuleFormMock">
+            <button
+              data-test-subj="mockMakeYamlDirty"
+              onClick={() => props.setYamlText('name: changed\n')}
+              type="button"
+            >
+              Make YAML dirty
+            </button>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockServices = (): RuleFormServices => ({
   http: httpServiceMock.createStartContract(),
@@ -269,9 +310,9 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 const defaultProps: ComposeDiscoverFlyoutProps = {
   historyKey: Symbol('test'),
   mode: 'create',
-  onClose: jest.fn(),
+  onClose: vi.fn(),
   services: createMockServices(),
-  onCreateRule: jest.fn(),
+  onCreateRule: vi.fn(),
 };
 
 const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) =>
@@ -642,7 +683,7 @@ describe('ComposeDiscoverFlyout', () => {
 
   describe('unsaved-changes confirmation', () => {
     it('closes immediately when the form is pristine and the X button is clicked', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
@@ -658,7 +699,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('shows the confirmation modal when the form is dirty and the X button is clicked', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
@@ -669,7 +710,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('"Continue editing" dismisses the modal and keeps the flyout open', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
@@ -682,7 +723,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('"Discard changes" calls onClose', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
@@ -693,7 +734,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('shows confirmation in YAML mode when text differs from baseline', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       clickEditMode('yaml');
@@ -706,7 +747,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('closes immediately in YAML mode when text matches baseline', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       clickEditMode('yaml');
@@ -718,7 +759,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('"Continue editing" does not open sandbox when it was closed before close attempt', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose, mode: 'edit' });
 
       expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
@@ -731,7 +772,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('"Continue editing" reopens sandbox in YAML mode', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       clickEditMode('yaml');
@@ -746,7 +787,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('shows confirmation after editing in YAML mode and switching back to form mode', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       clickEditMode('yaml');
@@ -959,7 +1000,7 @@ describe('ComposeDiscoverFlyout', () => {
     };
 
     it('allows YAML save for an alert whose query keeps everything in base', async () => {
-      const onCreateRule = jest.fn();
+      const onCreateRule = vi.fn();
       mockParseYamlToFormValues = () => ({
         values: validSplitYamlValues,
         error: null,
@@ -985,7 +1026,7 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('allows YAML save for a valid split alert', async () => {
-      const onCreateRule = jest.fn();
+      const onCreateRule = vi.fn();
       mockParseYamlToFormValues = () => ({
         values: validSplitYamlValues,
         error: null,

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { useCalculateImpactEstimate } from './use_calculate_impact_estimates';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import {
@@ -12,11 +15,11 @@ import {
   profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 
-jest.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
+vi.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
 
 describe('useCalculateImpactEstimate', () => {
   beforeAll(() => {
-    (useProfilingDependencies as jest.Mock).mockReturnValue({
+    (useProfilingDependencies as Mock).mockReturnValue({
       start: {
         core: {
           uiSettings: {

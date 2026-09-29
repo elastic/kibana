@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { extractMigrationInfo } from './extract_migration_info';
@@ -19,7 +21,7 @@ const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
   ...parts,
 });
 
-const dummyMigration = jest.fn();
+const dummyMigration = vi.fn();
 const dummySchema = schema.object({});
 
 describe('extractMigrationInfo', () => {
@@ -50,7 +52,7 @@ describe('extractMigrationInfo', () => {
 
     it('returns true for `hasExcludeOnUpgrade` if the SO type specifies `excludeOnUpgrade`', () => {
       expect(
-        extractMigrationInfo(createType({ excludeOnUpgrade: jest.fn() })).hasExcludeOnUpgrade
+        extractMigrationInfo(createType({ excludeOnUpgrade: vi.fn() })).hasExcludeOnUpgrade
       ).toEqual(true);
       expect(
         extractMigrationInfo(createType({ excludeOnUpgrade: undefined })).hasExcludeOnUpgrade
@@ -187,7 +189,7 @@ describe('extractMigrationInfo', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -240,7 +242,7 @@ describe('extractMigrationInfo', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -293,11 +295,11 @@ describe('extractMigrationInfo', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
               {
                 type: 'unsafe_transform',
-                transformFn: jest.fn(),
+                transformFn: vi.fn(),
               },
               {
                 type: 'data_removal',
@@ -305,7 +307,7 @@ describe('extractMigrationInfo', () => {
               },
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -344,7 +346,7 @@ describe('extractMigrationInfo', () => {
           1: {
             changes: [],
             schemas: {
-              forwardCompatibility: jest.fn(),
+              forwardCompatibility: vi.fn(),
               create: typeSchemaV1,
             },
           },
@@ -437,7 +439,7 @@ describe('extractMigrationInfo', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },

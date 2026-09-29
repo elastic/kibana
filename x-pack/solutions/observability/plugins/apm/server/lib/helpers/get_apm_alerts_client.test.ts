@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { type ApmAlertsRequiredParams, getApmAlertsClient } from './get_apm_alerts_client';
 import type {
   IScopedClusterClient,
@@ -18,9 +21,9 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 
 describe('get_apm_alerts_client', () => {
-  let ruleRegistryMock: jest.Mocked<RuleRegistryPluginStartContract>;
-  let alertClient: jest.Mocked<AlertsClient>;
-  let uiSettingsClientMock: jest.Mocked<IUiSettingsClient>;
+  let ruleRegistryMock: Mocked<RuleRegistryPluginStartContract>;
+  let alertClient: Mocked<AlertsClient>;
+  let uiSettingsClientMock: Mocked<IUiSettingsClient>;
 
   const params: ApmAlertsRequiredParams = {
     size: 10,
@@ -32,22 +35,22 @@ describe('get_apm_alerts_client', () => {
 
   beforeEach(async () => {
     uiSettingsClientMock = {
-      get: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IUiSettingsClient>;
+      get: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Mocked<IUiSettingsClient>;
 
     alertClient = {
-      find: jest.fn().mockResolvedValue({}),
-      getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['apm']),
-    } as unknown as jest.Mocked<AlertsClient>;
+      find: vi.fn().mockResolvedValue({}),
+      getAuthorizedAlertsIndices: vi.fn().mockResolvedValue(['apm']),
+    } as unknown as Mocked<AlertsClient>;
 
     ruleRegistryMock = {
-      getRacClientWithRequest: jest.fn().mockResolvedValue(alertClient),
-      alerting: jest.fn(),
-    } as unknown as jest.Mocked<RuleRegistryPluginStartContract>;
+      getRacClientWithRequest: vi.fn().mockResolvedValue(alertClient),
+      alerting: vi.fn(),
+    } as unknown as Mocked<RuleRegistryPluginStartContract>;
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   // Helper function to create the APM alerts client
@@ -62,7 +65,7 @@ describe('get_apm_alerts_client', () => {
       } as any,
       plugins: {
         ruleRegistry: {
-          start: jest.fn().mockResolvedValue(ruleRegistryMock),
+          start: vi.fn().mockResolvedValue(ruleRegistryMock),
           setup: {} as any,
         },
       } as any,

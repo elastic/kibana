@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -36,7 +38,7 @@ describe('AppBadge', () => {
   });
 
   it('keeps a clickable badge as a button that still fires onClick, including with a tooltip', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(
       <AppBadge
         badge={{
@@ -55,7 +57,7 @@ describe('AppBadge', () => {
   });
 
   it('keeps a menu badge as a button that still opens its menu', async () => {
-    const onItemClick = jest.fn();
+    const onItemClick = vi.fn();
     render(
       <AppBadge
         badge={{

@@ -4,26 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AssistantOverlay } from './overlay';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-const mockAssistantAvailability = jest.fn(() => ({
+const mockAssistantAvailability = vi.fn(() => ({
   hasAssistantPrivilege: true,
 }));
-jest.mock('@kbn/elastic-assistant', () => ({
-  AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
-  useAssistantContext: () => ({
-    assistantAvailability: mockAssistantAvailability(),
-  }),
-  AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>, // Mock it as a passthrough
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
+      useAssistantContext: () => ({
+        assistantAvailability: mockAssistantAvailability(),
+      }),
+      AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>, // Mock it as a passthrough
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/hooks/use_experimental_features');
-jest.mock('../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'space-id',
-}));
+vi.mock('../common/hooks/use_experimental_features');
+vi.mock('../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => 'space-id',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AssistantOverlay', () => {
   const queryClient = new QueryClient({
@@ -36,7 +44,7 @@ describe('AssistantOverlay', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the header link text', () => {

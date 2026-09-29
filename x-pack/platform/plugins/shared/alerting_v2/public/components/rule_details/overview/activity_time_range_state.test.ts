@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
@@ -24,10 +26,10 @@ const CUSTOM_RANGE = { from: 'now-7d', to: 'now' };
 
 const createMockStorage = (initialValue: unknown = null): Storage =>
   ({
-    get: jest.fn().mockReturnValue(initialValue),
-    set: jest.fn(),
-    remove: jest.fn(),
-    clear: jest.fn(),
+    get: vi.fn().mockReturnValue(initialValue),
+    set: vi.fn(),
+    remove: vi.fn(),
+    clear: vi.fn(),
   } as unknown as Storage);
 
 const createKbnTestUrlStorage = async (

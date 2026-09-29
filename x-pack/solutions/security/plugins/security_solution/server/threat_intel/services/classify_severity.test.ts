@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import {
@@ -16,13 +19,13 @@ import {
 
 const buildModel = (
   output: ClassifySeverityLlmOutput | undefined
-): { model: ScopedModel; invoke: jest.Mock } => {
-  const invoke = jest.fn().mockResolvedValue({
+): { model: ScopedModel; invoke: Mock } => {
+  const invoke = vi.fn().mockResolvedValue({
     raw: { response_metadata: {} },
     parsed: output,
   });
   const structured = { invoke };
-  const withStructuredOutput = jest.fn().mockReturnValue(structured);
+  const withStructuredOutput = vi.fn().mockReturnValue(structured);
   const chatModel = { withStructuredOutput } as unknown as ScopedModel['chatModel'];
   const connector = { connectorId: 'test-connector' } as ScopedModel['connector'];
   return { model: { chatModel, connector } as ScopedModel, invoke };
@@ -32,7 +35,7 @@ describe('classifySeverity', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns critical with score 90 for a critical-sounding classification', async () => {

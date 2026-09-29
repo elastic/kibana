@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,51 +17,66 @@ import { UIStateProvider } from '../../contexts';
 import { useGetIntegrationById } from '../../../../common';
 import { useIntegrationForm } from '../../forms/integration_form';
 
-jest.mock('../../../../common', () => ({
-  useGetIntegrationById: jest.fn(),
-  useDeleteDataStream: jest.fn(() => ({
-    deleteDataStreamMutation: {
-      mutate: jest.fn(),
-      isLoading: false,
-      variables: undefined,
-    },
-  })),
-  isValidNameFormat: jest.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
-  startsWithLetter: jest.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
-}));
-const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
+vi.mock('../../../../common', () => {
+      const mocked = {
+      useGetIntegrationById: vi.fn(),
+      useDeleteDataStream: vi.fn(() => ({
+        deleteDataStreamMutation: {
+          mutate: vi.fn(),
+          isLoading: false,
+          variables: undefined,
+        },
+      })),
+      isValidNameFormat: vi.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
+      startsWithLetter: vi.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseGetIntegrationById = useGetIntegrationById as Mock;
 
-const mockUsePackageNames = jest.fn((): Set<string> | undefined => undefined);
-jest.mock('../../forms/integration_form', () => ({
-  useIntegrationForm: jest.fn(),
-  usePackageNames: () => mockUsePackageNames(),
-}));
-const mockUseIntegrationForm = useIntegrationForm as jest.Mock;
+const mockUsePackageNames = vi.fn((): Set<string> | undefined => undefined);
+vi.mock('../../forms/integration_form', () => {
+      const mocked = {
+      useIntegrationForm: vi.fn(),
+      usePackageNames: () => mockUsePackageNames(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseIntegrationForm = useIntegrationForm as Mock;
 
-const mockReportDataStreamFlyoutOpened = jest.fn();
-jest.mock('../../../telemetry_context', () => ({
-  useTelemetry: () => ({
-    reportDataStreamFlyoutOpened: mockReportDataStreamFlyoutOpened,
-  }),
-}));
+const mockReportDataStreamFlyoutOpened = vi.fn();
+vi.mock('../../../telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        reportDataStreamFlyoutOpened: mockReportDataStreamFlyoutOpened,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./create_data_stream_flyout', () => ({
-  CreateDataStreamFlyout: jest.fn(({ onClose }) => (
-    <div data-test-subj="createDataStreamFlyoutMock">
-      <button type="button" data-test-subj="mockFlyoutClose" onClick={onClose}>
-        {'Close'}
-      </button>
-    </div>
-  )),
-}));
+vi.mock('./create_data_stream_flyout', () => {
+      const mocked = {
+      CreateDataStreamFlyout: vi.fn(({ onClose }) => (
+        <div data-test-subj="createDataStreamFlyoutMock">
+          <button type="button" data-test-subj="mockFlyoutClose" onClick={onClose}>
+            {'Close'}
+          </button>
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./data_streams_table/data_steams_table', () => ({
-  DataStreamsTable: jest.fn(({ items }) => (
-    <div data-test-subj="dataStreamsTableMock">
-      {items.length} {'data streams'}
-    </div>
-  )),
-}));
+vi.mock('./data_streams_table/data_steams_table', () => {
+      const mocked = {
+      DataStreamsTable: vi.fn(({ items }) => (
+        <div data-test-subj="dataStreamsTableMock">
+          {items.length} {'data streams'}
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderDataStreams = (integrationId?: string) => {
   const path = integrationId ? `/edit/${integrationId}` : '/create';
@@ -78,13 +96,13 @@ const renderDataStreams = (integrationId?: string) => {
 
 describe('DataStreams', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetIntegrationById.mockReturnValue({
       integration: undefined,
       isLoading: false,
       isError: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     mockUseIntegrationForm.mockReturnValue({
       formData: { title: 'Integration title', description: 'Integration description' },

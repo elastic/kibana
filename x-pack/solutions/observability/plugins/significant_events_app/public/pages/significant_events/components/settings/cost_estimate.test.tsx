@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -23,12 +26,12 @@ import { useSignificantEventsCost } from '../../../../hooks/use_significant_even
 import { useRunQuotas } from '../../../../hooks/use_significant_events_run_quotas';
 import { CostEstimate } from './cost_estimate';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_significant_events_cost');
-jest.mock('../../../../hooks/use_significant_events_run_quotas');
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const { useState } = jest.requireActual('react') as typeof import('react');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_significant_events_cost');
+vi.mock('../../../../hooks/use_significant_events_run_quotas');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
+  const { useState } = require('react') as typeof import('react');
   const MockEuiIconTip = ({
     content,
     anchorProps,
@@ -82,18 +85,18 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSignificantEventsCost = useSignificantEventsCost as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseSignificantEventsCost = useSignificantEventsCost as MockedFunction<
   typeof useSignificantEventsCost
 >;
-const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
+const mockUseRunQuotas = useRunQuotas as MockedFunction<typeof useRunQuotas>;
 
-const refreshCost = jest.fn();
-const retryCost = jest.fn();
-const setUiSetting = jest.fn();
-const installTokenUsageDashboard = jest.fn();
-const addDanger = jest.fn();
-const addWarning = jest.fn();
+const refreshCost = vi.fn();
+const retryCost = vi.fn();
+const setUiSetting = vi.fn();
+const installTokenUsageDashboard = vi.fn();
+const addDanger = vi.fn();
+const addWarning = vi.fn();
 
 const quotasResponse = (canManage: boolean): RunQuotasResponse => ({
   enabled: true,
@@ -184,9 +187,9 @@ const setTracking = (enabled: boolean, canSaveAdvancedSettings = true) => {
       },
       settings: {
         client: {
-          get: jest.fn().mockReturnValue(enabled),
-          get$: jest.fn().mockReturnValue(tracking$),
-          getUpdateErrors$: jest.fn().mockReturnValue(updateErrors$),
+          get: vi.fn().mockReturnValue(enabled),
+          get$: vi.fn().mockReturnValue(tracking$),
+          getUpdateErrors$: vi.fn().mockReturnValue(updateErrors$),
           set: setUiSetting,
         },
       },
@@ -225,7 +228,7 @@ const renderCost = () =>
 
 describe('CostEstimate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     refreshCost.mockReset().mockResolvedValue(undefined);
     retryCost.mockReset().mockResolvedValue(undefined);
     setUiSetting.mockReset();

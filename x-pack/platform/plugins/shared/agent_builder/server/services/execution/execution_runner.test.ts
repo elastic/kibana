@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import {
   concat,
   lastValueFrom,
@@ -45,37 +48,37 @@ import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { executeAgent$, generateTitle, resolveServices } from './utils';
 import type { Span } from '@opentelemetry/api';
 
-jest.mock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+vi.mock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
 
   return {
     ...actual,
-    executeAgent$: jest.fn(),
-    resolveServices: jest.fn(),
-    generateTitle: jest.fn(),
+    executeAgent$: vi.fn(),
+    resolveServices: vi.fn(),
+    generateTitle: vi.fn(),
   };
 });
 
-jest.mock('uuid', () => {
-  const actual = jest.requireActual('uuid');
+vi.mock('uuid', () => {
+  const actual = require('uuid');
   return {
     ...actual,
-    v4: jest.fn(() => 'round-1'),
+    v4: vi.fn(() => 'round-1'),
   };
 });
 
-const mockSpanSetAttribute = jest.fn();
+const mockSpanSetAttribute = vi.fn();
 
-jest.mock('../../tracing', () => {
-  const actual = jest.requireActual('../../tracing');
+vi.mock('../../tracing', async () => {
+  const actual = (await vi.importActual('../../tracing'));
 
   return {
     ...actual,
-    withConverseSpan: jest.fn(
-      (_opts: unknown, cb: (span: { setAttribute: jest.Mock }) => unknown) =>
+    withConverseSpan: vi.fn(
+      (_opts: unknown, cb: (span: { setAttribute: Mock }) => unknown) =>
         cb({ setAttribute: mockSpanSetAttribute })
     ),
-    loadTracingPrivacySettings: jest.fn().mockResolvedValue({
+    loadTracingPrivacySettings: vi.fn().mockResolvedValue({
       enabled: true,
       includeUserPrompts: true,
       includeLlmResponses: true,
@@ -88,19 +91,19 @@ jest.mock('../../tracing', () => {
   };
 });
 
-const executeAgentMock = executeAgent$ as jest.MockedFunction<typeof executeAgent$>;
-const resolveServicesMock = resolveServices as jest.MockedFunction<typeof resolveServices>;
-const withConverseSpanMock = withConverseSpan as jest.MockedFunction<typeof withConverseSpan>;
-const loadTracingPrivacySettingsMock = loadTracingPrivacySettings as jest.MockedFunction<
+const executeAgentMock = executeAgent$ as MockedFunction<typeof executeAgent$>;
+const resolveServicesMock = resolveServices as MockedFunction<typeof resolveServices>;
+const withConverseSpanMock = withConverseSpan as MockedFunction<typeof withConverseSpan>;
+const loadTracingPrivacySettingsMock = loadTracingPrivacySettings as MockedFunction<
   typeof loadTracingPrivacySettings
 >;
-const generateTitleMock = generateTitle as jest.MockedFunction<typeof generateTitle>;
+const generateTitleMock = generateTitle as MockedFunction<typeof generateTitle>;
 
 const createModelProviderMock = () => ({
-  getDefaultModel: jest.fn().mockResolvedValue({
+  getDefaultModel: vi.fn().mockResolvedValue({
     chatModel: { getConnector: () => ({ type: '.gen-ai' }) },
   }),
-  selectModel: jest.fn().mockResolvedValue({
+  selectModel: vi.fn().mockResolvedValue({
     chatModel: { getConnector: () => ({ type: '.gen-ai' }) },
   }),
 });
@@ -110,28 +113,28 @@ const createDeps = ({
   analyticsService,
 }: {
   conversationClient: ReturnType<typeof createConversationClientMock>;
-  analyticsService?: { reportRoundComplete?: jest.Mock; reportRoundError?: jest.Mock };
+  analyticsService?: { reportRoundComplete?: Mock; reportRoundError?: Mock };
 }) =>
   ({
     logger: loggingSystemMock.createLogger(),
     analyticsService,
-    runAgent: jest.fn(),
+    runAgent: vi.fn(),
     agentService: {
-      getRegistry: jest
+      getRegistry: vi
         .fn()
-        .mockResolvedValue({ get: jest.fn().mockResolvedValue({ name: 'Test agent' }) }),
+        .mockResolvedValue({ get: vi.fn().mockResolvedValue({ name: 'Test agent' }) }),
     },
     meteringService: {
-      reportExecution: jest.fn().mockResolvedValue(undefined),
+      reportExecution: vi.fn().mockResolvedValue(undefined),
     },
     conversationService: {
-      getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
+      getScopedClientAsUser: vi.fn().mockResolvedValue(conversationClient),
     },
     uiSettings: {
-      asScopedToClient: jest.fn().mockReturnValue({}),
+      asScopedToClient: vi.fn().mockReturnValue({}),
     },
     savedObjects: {
-      getScopedClient: jest.fn().mockReturnValue({}),
+      getScopedClient: vi.fn().mockReturnValue({}),
     },
   } as never);
 
@@ -223,7 +226,7 @@ const flushMicrotasks = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('handleAgentExecution', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     generateTitleMock.mockReturnValue(of('Generated title'));
   });
 
@@ -262,14 +265,14 @@ describe('handleAgentExecution', () => {
     const logger = loggingSystemMock.createLogger();
     const deps = createDeps({ conversationClient });
     (deps as { logger: ReturnType<typeof loggingSystemMock.createLogger> }).logger = logger;
-    const getScopedClient = jest.fn().mockReturnValue(soClient);
-    const asScopedToClient = jest.fn().mockReturnValue(uiSettingsClient);
-    (deps as { savedObjects: { getScopedClient: jest.Mock } }).savedObjects.getScopedClient =
+    const getScopedClient = vi.fn().mockReturnValue(soClient);
+    const asScopedToClient = vi.fn().mockReturnValue(uiSettingsClient);
+    (deps as { savedObjects: { getScopedClient: Mock } }).savedObjects.getScopedClient =
       getScopedClient;
-    (deps as { uiSettings: { asScopedToClient: jest.Mock } }).uiSettings.asScopedToClient =
+    (deps as { uiSettings: { asScopedToClient: Mock } }).uiSettings.asScopedToClient =
       asScopedToClient;
-    (deps as { spaces: { spacesService: { getSpaceId: jest.Mock } } }).spaces = {
-      spacesService: { getSpaceId: jest.fn().mockReturnValue('marketing') },
+    (deps as { spaces: { spacesService: { getSpaceId: Mock } } }).spaces = {
+      spacesService: { getSpaceId: vi.fn().mockReturnValue('marketing') },
     };
 
     const events$ = await handleAgentExecution({
@@ -335,9 +338,9 @@ describe('handleAgentExecution', () => {
       modelProvider: createModelProviderMock(),
     } as never);
 
-    const reportExecution = jest.fn().mockResolvedValue(undefined);
+    const reportExecution = vi.fn().mockResolvedValue(undefined);
     const agentRegistry = {
-      get: jest.fn().mockResolvedValue({ name: 'Test agent' }),
+      get: vi.fn().mockResolvedValue({ name: 'Test agent' }),
     };
 
     const execution = {
@@ -361,21 +364,21 @@ describe('handleAgentExecution', () => {
       execution,
       deps: {
         logger: loggingSystemMock.createLogger(),
-        runAgent: jest.fn(),
+        runAgent: vi.fn(),
         agentService: {
-          getRegistry: jest.fn().mockResolvedValue(agentRegistry),
+          getRegistry: vi.fn().mockResolvedValue(agentRegistry),
         },
         meteringService: {
           reportExecution,
         },
         conversationService: {
-          getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
+          getScopedClientAsUser: vi.fn().mockResolvedValue(conversationClient),
         },
         uiSettings: {
-          asScopedToClient: jest.fn().mockReturnValue({}),
+          asScopedToClient: vi.fn().mockReturnValue({}),
         },
         savedObjects: {
-          getScopedClient: jest.fn().mockReturnValue({}),
+          getScopedClient: vi.fn().mockReturnValue({}),
         },
       } as never,
       request: { headers: {} } as never,
@@ -472,7 +475,7 @@ describe('handleAgentExecution', () => {
     await lastValueFrom(events$.pipe(toArray()));
 
     expect(
-      (deps as unknown as { conversationService: { getScopedClientAsUser: jest.Mock } })
+      (deps as unknown as { conversationService: { getScopedClientAsUser: Mock } })
         .conversationService.getScopedClientAsUser
     ).toHaveBeenCalledWith({
       request: { headers: {} },
@@ -904,7 +907,7 @@ describe('handleAgentExecution', () => {
 
 describe('handleAgentExecution — interrupted executions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     generateTitleMock.mockReturnValue(of('Generated title'));
   });
 
@@ -1187,7 +1190,7 @@ describe('handleAgentExecution — interrupted executions', () => {
     const conversationClient = echoingClient();
     mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
     stubResolveServices(conversationClient);
-    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
+    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: Mock } };
     deps.agentService.getRegistry.mockRejectedValue(new Error('registry down'));
 
     const events$ = await handleAgentExecution({
@@ -1235,7 +1238,7 @@ describe('handleAgentExecution — interrupted executions', () => {
     const conversationClient = echoingClient();
     mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
     stubResolveServices(conversationClient);
-    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
+    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: Mock } };
     const abortController = new AbortController();
     deps.agentService.getRegistry.mockImplementation(async () => {
       abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
@@ -1294,7 +1297,7 @@ describe('handleAgentExecution — interrupted executions', () => {
     };
     conversationClient.get.mockResolvedValue(paused);
     stubResolveServices(conversationClient);
-    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
+    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: Mock } };
     deps.agentService.getRegistry.mockRejectedValue(new Error('registry down'));
 
     const events$ = await handleAgentExecution({
@@ -1347,7 +1350,7 @@ describe('handleAgentExecution — interrupted executions', () => {
     stubResolveServices(conversationClient);
     mockAgentStream([makeRoundInterruptedEvent()], 'asyncShared', new Error('llm exploded'));
 
-    const reportRoundError = jest.fn();
+    const reportRoundError = vi.fn();
     const deps = createDeps({ conversationClient, analyticsService: { reportRoundError } });
 
     const events$ = await handleAgentExecution({
@@ -1396,7 +1399,7 @@ describe('handleAgentExecution — interrupted executions', () => {
       new Error('llm exploded')
     );
 
-    const reportRoundError = jest.fn();
+    const reportRoundError = vi.fn();
     const deps = createDeps({ conversationClient, analyticsService: { reportRoundError } });
 
     const events$ = await handleAgentExecution({
@@ -1452,7 +1455,7 @@ describe('handleAgentExecution — interrupted executions', () => {
 
 describe('collectAndWriteEvents — error flush', () => {
   it('flushes the pending batch before rejecting', async () => {
-    const executionClient = { appendEvents: jest.fn().mockResolvedValue(undefined) };
+    const executionClient = { appendEvents: vi.fn().mockResolvedValue(undefined) };
     const source$ = new Subject<ChatEvent>();
     const failure = new Error('stream failed');
 
@@ -1476,7 +1479,7 @@ describe('collectAndWriteEvents — error flush', () => {
 
 describe('setUserAttributes', () => {
   it('sets user.id and user.name when both are present', () => {
-    const span = { setAttribute: jest.fn() } as unknown as Span;
+    const span = { setAttribute: vi.fn() } as unknown as Span;
 
     setUserAttributes(span, { id: 'profile-1', username: 'jane' });
 
@@ -1485,7 +1488,7 @@ describe('setUserAttributes', () => {
   });
 
   it('sets only the fields that are present', () => {
-    const span = { setAttribute: jest.fn() } as unknown as Span;
+    const span = { setAttribute: vi.fn() } as unknown as Span;
 
     setUserAttributes(span, { username: 'jane' });
 
@@ -1509,7 +1512,7 @@ describe('collectAndWriteEvents', () => {
   };
 
   const createExecutionClient = () => ({
-    appendEvents: jest.fn().mockResolvedValue(undefined),
+    appendEvents: vi.fn().mockResolvedValue(undefined),
   });
 
   const execution = {

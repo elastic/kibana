@@ -5,25 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { getInferenceIdFromIndex } from './get_inference_id_from_index';
 
 const logger = loggerMock.create();
 
 type MockEsClient = Parameters<typeof getInferenceIdFromIndex>[0] & {
-  indices: { getMapping: jest.Mock };
+  indices: { getMapping: Mock };
 };
 
 function createEsClient(getMappingResponse?: unknown): MockEsClient {
   return {
     indices: {
-      getMapping: jest.fn().mockResolvedValue(getMappingResponse ?? {}),
+      getMapping: vi.fn().mockResolvedValue(getMappingResponse ?? {}),
     },
   } as unknown as MockEsClient;
 }
 
 describe('getInferenceIdFromIndex', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns the inference_id when the semantic_text field has one', async () => {
     const esClient = createEsClient({

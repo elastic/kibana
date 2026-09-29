@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createListFilesTool } from './list_files';
 import { FilesystemService } from '../../filesystem/filesystem_service';
 import { WorkspaceVolume } from '../../filesystem/workspace_volume';
@@ -12,9 +15,9 @@ import { MemoryVolume } from '../../runner/store/memory_volume';
 import type { IWorkspaceClient } from '../../../workspaces';
 
 const makeService = async () => {
-  const workspaceClient: jest.Mocked<IWorkspaceClient> = {
-    load: jest.fn().mockResolvedValue(undefined),
-    save: jest.fn().mockResolvedValue(undefined),
+  const workspaceClient: Mocked<IWorkspaceClient> = {
+    load: vi.fn().mockResolvedValue(undefined),
+    save: vi.fn().mockResolvedValue(undefined),
   };
   const workspaceVolume = new WorkspaceVolume({ workspaceClient });
   const service = new FilesystemService({

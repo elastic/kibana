@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { riskEngineDisableRoute } from './disable';
 import { riskEnginePrivilegesMock } from './risk_engine_privileges.mock';
@@ -21,7 +24,7 @@ describe('risk score disable route', () => {
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let mockRiskEngineDataClient: ReturnType<typeof riskEngineDataClientMock.create>;
-  let getStartServicesMock: jest.Mock;
+  let getStartServicesMock: Mock;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -46,7 +49,7 @@ describe('risk score disable route', () => {
 
   describe('when task manager is available', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           taskManager: mockTaskManagerStart,
@@ -86,7 +89,7 @@ describe('risk score disable route', () => {
 
   describe('when task manager is unavailable', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           taskManager: undefined,

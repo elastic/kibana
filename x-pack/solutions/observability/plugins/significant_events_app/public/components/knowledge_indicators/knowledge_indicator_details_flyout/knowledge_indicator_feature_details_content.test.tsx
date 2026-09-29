@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { Feature } from '@kbn/significant-events-schema';
 import { useDeveloperMode } from '../../../hooks/use_developer_mode';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 
-jest.mock('../../../hooks/use_developer_mode');
+vi.mock('../../../hooks/use_developer_mode');
 
-const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
+const mockUseDeveloperMode = useDeveloperMode as MockedFunction<typeof useDeveloperMode>;
 
 const feature: Feature = {
   id: 'feature-id',
@@ -28,7 +31,7 @@ const feature: Feature = {
   updated_at: new Date().toISOString(),
 };
 
-const setDeveloperMode = jest.fn();
+const setDeveloperMode = vi.fn();
 
 const renderContent = (isDeveloperMode: boolean) => {
   mockUseDeveloperMode.mockReturnValue({ isDeveloperMode, isSaving: false, setDeveloperMode });

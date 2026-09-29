@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createDynamicAssetHandlerMock } from './bundle_route.test.mocks';
 
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
@@ -27,7 +29,7 @@ describe('registerRouteForBundle', () => {
   });
 
   it('calls `router.get` with the correct parameters', () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     createDynamicAssetHandlerMock.mockReturnValue(handler);
 
     registerRouteForBundle(router, {

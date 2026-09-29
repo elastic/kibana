@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -14,40 +17,58 @@ import { basicCase } from '../../../containers/mock';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { useUrlParams } from '../../../common/navigation';
 
-jest.mock('../../../common/navigation/hooks');
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/navigation/hooks');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('./activity/case_view_activity', () => ({
-  CaseViewActivity: () => <div data-test-subj="case-view-activity" />,
-}));
-jest.mock('./case_view_attachments', () => ({
-  CaseViewAttachments: () => <div data-test-subj="case-view-attachments" />,
-}));
-jest.mock('./case_view_similar_cases', () => ({
-  CaseViewSimilarCases: () => <div data-test-subj="case-view-similar-cases" />,
-}));
-jest.mock('./sidebar/case_view_sidebar', () => ({
-  CaseViewSidebar: () => <div data-test-subj="case-view-page-sidebar" />,
-}));
-jest.mock('./sidebar/sidebar_toggle_button', () => ({
-  SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
-}));
-jest.mock('../case_view_tabs', () => ({
-  CaseViewTabs: () => <div data-test-subj="case-view-tabs" />,
-}));
+vi.mock('./activity/case_view_activity', () => {
+      const mocked = {
+      CaseViewActivity: () => <div data-test-subj="case-view-activity" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./case_view_attachments', () => {
+      const mocked = {
+      CaseViewAttachments: () => <div data-test-subj="case-view-attachments" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./case_view_similar_cases', () => {
+      const mocked = {
+      CaseViewSimilarCases: () => <div data-test-subj="case-view-similar-cases" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./sidebar/case_view_sidebar', () => {
+      const mocked = {
+      CaseViewSidebar: () => <div data-test-subj="case-view-page-sidebar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./sidebar/sidebar_toggle_button', () => {
+      const mocked = {
+      SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../case_view_tabs', () => {
+      const mocked = {
+      CaseViewTabs: () => <div data-test-subj="case-view-tabs" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useUrlParamsMock = useUrlParams as jest.Mock;
+const useUrlParamsMock = useUrlParams as Mock;
 
 describe('CaseViewTabContent', () => {
   const defaultProps = {
     caseData: basicCase,
     searchTerm: '',
-    onSearch: jest.fn(),
-    onUpdateField: jest.fn(),
+    onSearch: vi.fn(),
+    onUpdateField: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUrlParamsMock.mockReturnValue({ urlParams: {} });
   });
 

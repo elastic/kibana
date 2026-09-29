@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -29,25 +31,25 @@ const ALL_CONNECTORS: ConnectorItem[] = [
   connector('c3', 'HTTP', '.http'),
 ];
 
-const update = jest.fn().mockResolvedValue({});
-const addSuccessToast = jest.fn();
-const addErrorToast = jest.fn();
+const update = vi.fn().mockResolvedValue({});
+const addSuccessToast = vi.fn();
+const addErrorToast = vi.fn();
 
-jest.mock('../agents/use_agent_by_id');
-jest.mock('../tools/use_mcp_connectors');
-jest.mock('../use_agent_builder_service');
-jest.mock('../use_toasts');
+vi.mock('../agents/use_agent_by_id');
+vi.mock('../tools/use_mcp_connectors');
+vi.mock('../use_agent_builder_service');
+vi.mock('../use_toasts');
 
-const { useAgentBuilderAgentById } = jest.requireMock('../agents/use_agent_by_id');
-const { useListConnectors } = jest.requireMock('../tools/use_mcp_connectors');
-const { useAgentBuilderServices } = jest.requireMock('../use_agent_builder_service');
-const { useToasts } = jest.requireMock('../use_toasts');
+const { useAgentBuilderAgentById } = (await vi.importMock('../agents/use_agent_by_id'));
+const { useListConnectors } = (await vi.importMock('../tools/use_mcp_connectors'));
+const { useAgentBuilderServices } = (await vi.importMock('../use_agent_builder_service'));
+const { useToasts } = (await vi.importMock('../use_toasts'));
 
 describe('useAgentConnectors', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     useListConnectors.mockReturnValue({
       connectors: ALL_CONNECTORS,
@@ -151,7 +153,7 @@ describe('useAgentConnectors', () => {
     });
 
     it('invalidates the agent query after the mutation settles', async () => {
-      jest.spyOn(queryClient, 'invalidateQueries');
+      vi.spyOn(queryClient, 'invalidateQueries');
       const { result } = setup(['c1', 'c2']);
 
       await act(async () => {

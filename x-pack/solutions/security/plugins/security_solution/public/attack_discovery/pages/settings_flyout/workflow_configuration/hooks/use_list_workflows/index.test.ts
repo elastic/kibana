@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import '@kbn/react-query/mock';
 import * as ReactQuery from '@kbn/react-query';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,9 +18,9 @@ import React from 'react';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useListWorkflows } from '.';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 let queryClient: QueryClient;
 
@@ -27,7 +30,7 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useListWorkflows', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     queryClient = new QueryClient();
   });
@@ -49,7 +52,7 @@ describe('useListWorkflows', () => {
     ];
 
     const mockHttp = {
-      get: jest.fn().mockResolvedValue({ results: workflows, total: workflows.length }),
+      get: vi.fn().mockResolvedValue({ results: workflows, total: workflows.length }),
     } as unknown as HttpSetup;
 
     mockUseKibana.mockReturnValue({ services: { http: mockHttp } } as unknown as ReturnType<
@@ -82,7 +85,7 @@ describe('useListWorkflows', () => {
     ];
 
     const mockHttp = {
-      get: jest.fn().mockResolvedValue({ results: workflows, total: workflows.length }),
+      get: vi.fn().mockResolvedValue({ results: workflows, total: workflows.length }),
     } as unknown as HttpSetup;
 
     mockUseKibana.mockReturnValue({ services: { http: mockHttp } } as unknown as ReturnType<
@@ -98,7 +101,7 @@ describe('useListWorkflows', () => {
 
   it('calls the workflows list API', async () => {
     const mockHttp = {
-      get: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      get: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     } as unknown as HttpSetup;
 
     mockUseKibana.mockReturnValue({ services: { http: mockHttp } } as unknown as ReturnType<
@@ -120,10 +123,10 @@ describe('useListWorkflows', () => {
   });
 
   it('enables refetchOnWindowFocus', () => {
-    const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
+    const useQuerySpy = vi.spyOn(ReactQuery, 'useQuery');
 
     const mockHttp = {
-      get: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      get: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     } as unknown as HttpSetup;
 
     mockUseKibana.mockReturnValue({ services: { http: mockHttp } } as unknown as ReturnType<

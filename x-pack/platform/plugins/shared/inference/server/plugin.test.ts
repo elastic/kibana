@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { resolveReplacementsEncryptionKey } from './plugin';
 
 describe('resolveReplacementsEncryptionKey', () => {
@@ -18,7 +20,7 @@ describe('resolveReplacementsEncryptionKey', () => {
   });
 
   it('returns policy-managed key when anonymization is enabled', async () => {
-    const getReplacementsEncryptionKey = jest.fn().mockResolvedValue('managed-key');
+    const getReplacementsEncryptionKey = vi.fn().mockResolvedValue('managed-key');
 
     await expect(
       resolveReplacementsEncryptionKey({

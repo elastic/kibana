@@ -5,25 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DashboardAgentEvaluationChatClient } from './chat_client';
 
 const createLog = (): ToolingLog =>
   ({
-    error: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
   } as unknown as ToolingLog);
 
 describe('DashboardAgentEvaluationChatClient', () => {
   it('calls the converse API with connector, agent, conversation, and latest message', async () => {
-    const fetch = jest.fn().mockResolvedValue({
+    const fetch = vi.fn().mockResolvedValue({
       conversation_id: 'conversation-1',
       response: { message: 'hello back' },
       steps: [],
       trace_id: 'trace-1',
-    }) as unknown as jest.MockedFunction<HttpHandler>;
+    }) as unknown as MockedFunction<HttpHandler>;
     const client = new DashboardAgentEvaluationChatClient(fetch, createLog(), 'connector-1');
 
     const response = await client.converse({
@@ -53,10 +56,10 @@ describe('DashboardAgentEvaluationChatClient', () => {
 
   it('preserves tool-only steps when response message is absent', async () => {
     const steps = [{ type: 'tool_call', tool_id: 'platform.core.generate_esql' }];
-    const fetch = jest.fn().mockResolvedValue({
+    const fetch = vi.fn().mockResolvedValue({
       conversation_id: 'conversation-1',
       steps,
-    }) as unknown as jest.MockedFunction<HttpHandler>;
+    }) as unknown as MockedFunction<HttpHandler>;
     const client = new DashboardAgentEvaluationChatClient(fetch, createLog(), 'connector-1');
 
     const response = await client.converse({ messages: [{ message: 'create query' }] });
@@ -67,15 +70,15 @@ describe('DashboardAgentEvaluationChatClient', () => {
   });
 
   it('returns a fallback response when the converse API fails', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const log = createLog();
-    const fetch = jest
+    const fetch = vi
       .fn()
-      .mockRejectedValue(new Error('boom')) as unknown as jest.MockedFunction<HttpHandler>;
+      .mockRejectedValue(new Error('boom')) as unknown as MockedFunction<HttpHandler>;
     const client = new DashboardAgentEvaluationChatClient(fetch, log, 'connector-1');
 
     const responsePromise = client.converse({ messages: [{ message: 'hello' }] });
-    await jest.advanceTimersByTimeAsync(10_000);
+    await vi.advanceTimersByTimeAsync(10_000);
     const response = await responsePromise;
 
     expect(response.errors).toHaveLength(1);
@@ -83,6 +86,6 @@ describe('DashboardAgentEvaluationChatClient', () => {
       'This question could not be answered as an internal error occurred. Please try again.'
     );
     expect(log.error).toHaveBeenCalled();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

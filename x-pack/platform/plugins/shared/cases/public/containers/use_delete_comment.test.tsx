@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useDeleteComment } from './use_delete_comment';
 import * as api from './api';
@@ -13,21 +16,21 @@ import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_c
 import { useToasts } from '../common/lib/kibana';
 import { TestProviders } from '../common/mock';
 
-jest.mock('../common/lib/kibana');
-jest.mock('./api');
-jest.mock('../components/case_view/use_on_refresh_case_view_page');
+vi.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../components/case_view/use_on_refresh_case_view_page');
 
 const commentId = 'ab124';
 const successToasterTitle = 'Deleted';
 
 describe('useDeleteComment', () => {
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
 
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('init', async () => {
@@ -39,7 +42,7 @@ describe('useDeleteComment', () => {
   });
 
   it('calls deleteComment with correct arguments - case', async () => {
-    const spyOnDeleteComment = jest.spyOn(api, 'deleteComment');
+    const spyOnDeleteComment = vi.spyOn(api, 'deleteComment');
 
     const { result } = renderHook(() => useDeleteComment(), {
       wrapper: TestProviders,
@@ -99,7 +102,7 @@ describe('useDeleteComment', () => {
   });
 
   it('sets isError when fails to delete a case', async () => {
-    const spyOnDeleteComment = jest.spyOn(api, 'deleteComment');
+    const spyOnDeleteComment = vi.spyOn(api, 'deleteComment');
     spyOnDeleteComment.mockRejectedValue(new Error('Error'));
 
     const { result } = renderHook(() => useDeleteComment(), {

@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useExecuteConnector } from './use_execute_connector';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('useExecuteConnector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    useKibanaMock().services.http.post = jest.fn().mockResolvedValue({ status: 'ok', data: {} });
+    vi.clearAllMocks();
+    useKibanaMock().services.http.post = vi.fn().mockResolvedValue({ status: 'ok', data: {} });
   });
 
   it('init', async () => {

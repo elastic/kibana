@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -14,42 +16,48 @@ import type { DeepPartial } from '@kbn/utility-types';
 import { PipelinesCreate } from './pipelines_create';
 import type { useKibana } from '../../../shared_imports';
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
 type MockServices = ReturnType<typeof useKibana>['services'];
 type DeepPartialMockServices = DeepPartial<MockServices>;
 
 const createMockServices = (overrides: DeepPartialMockServices = {}): DeepPartialMockServices => ({
   api: {
-    createPipeline: jest.fn(),
+    createPipeline: vi.fn(),
   },
   breadcrumbs: {
-    setBreadcrumbs: jest.fn(),
+    setBreadcrumbs: vi.fn(),
   },
   documentation: {
-    getCreatePipelineUrl: jest.fn().mockReturnValue('http://docs'),
+    getCreatePipelineUrl: vi.fn().mockReturnValue('http://docs'),
   },
   consolePlugin: undefined,
   ...overrides,
 });
 
-jest.mock('../../../shared_imports', () => ({
-  ...jest.requireActual('../../../shared_imports'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../../shared_imports', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../shared_imports')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the PipelineForm to easily assert props passed from PipelinesCreate
-jest.mock('../../components', () => ({
-  PipelineForm: (props: { defaultValue?: { name: string }; canEditName: boolean }) => (
-    <div data-test-subj="pipelineForm">
-      <div data-test-subj="formDefaultValue">
-        {props.defaultValue ? props.defaultValue.name : 'no-default'}
-      </div>
-      <div data-test-subj="canEditName">{String(props.canEditName)}</div>
-    </div>
-  ),
-  PipelineAppHeader: () => <div data-test-subj="pipelineAppHeader" />,
-}));
+vi.mock('../../components', () => {
+      const mocked = {
+      PipelineForm: (props: { defaultValue?: { name: string }; canEditName: boolean }) => (
+        <div data-test-subj="pipelineForm">
+          <div data-test-subj="formDefaultValue">
+            {props.defaultValue ? props.defaultValue.name : 'no-default'}
+          </div>
+          <div data-test-subj="canEditName">{String(props.canEditName)}</div>
+        </div>
+      ),
+      PipelineAppHeader: () => <div data-test-subj="pipelineAppHeader" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithPath = (path: string, services: DeepPartialMockServices) => {
   mockUseKibana.mockReturnValue({ services });
@@ -67,7 +75,7 @@ const renderWithPath = (path: string, services: DeepPartialMockServices) => {
 
 describe('PipelinesCreate section', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('WHEN mounting the PipelinesCreate route', () => {

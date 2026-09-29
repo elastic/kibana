@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { WorkspaceLayoutComponent } from '.';
@@ -21,7 +23,7 @@ import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { GraphVisualization } from '../graph_visualization';
 
-jest.mock('react-router-dom', () => {
+vi.mock('react-router-dom', () => {
   const useLocation = () => ({
     search: '?query={}',
   });
@@ -49,13 +51,13 @@ describe('workspace_layout', () => {
       aliasTargetId: '',
     } as SharingSavedObjectProps,
     spaces: spacesPluginMock.createStartContract(),
-    inspect: { open: jest.fn() } as unknown as InspectorStart,
+    inspect: { open: vi.fn() } as unknown as InspectorStart,
     requestAdapter: {
       start: () => ({
-        stats: jest.fn(),
-        json: jest.fn(),
+        stats: vi.fn(),
+        json: vi.fn(),
       }),
-      reset: jest.fn(),
+      reset: vi.fn(),
     } as unknown as RequestAdapter,
     workspace: {} as unknown as Workspace,
   };

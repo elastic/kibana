@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -28,7 +30,7 @@ const closedEscalation: EscalationQueueItem = {
 };
 
 const renderCard = (escalation: EscalationQueueItem, hasBorder = false) => {
-  const renderAssignees = jest.fn(() => <span data-test-subj="assignees-widget" />);
+  const renderAssignees = vi.fn(() => <span data-test-subj="assignees-widget" />);
   renderWithKibanaRenderContext(
     <EscalationCard
       escalation={escalation}

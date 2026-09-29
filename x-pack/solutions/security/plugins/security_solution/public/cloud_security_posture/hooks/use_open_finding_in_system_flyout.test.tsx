@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useOpenFindingInSystemFlyout } from './use_open_finding_in_system_flyout';
 
-jest.mock('../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../flyout_v2/use_flyout_api');
+vi.mock('../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../flyout_v2/use_flyout_api');
 
-const useIsNewFlyoutEnabledMock = useIsNewFlyoutEnabled as jest.Mock;
-const useFlyoutApiMock = useFlyoutApi as jest.Mock;
+const useIsNewFlyoutEnabledMock = useIsNewFlyoutEnabled as Mock;
+const useFlyoutApiMock = useFlyoutApi as Mock;
 
-const openMisconfigurationFinding = jest.fn();
-const openVulnerabilityFinding = jest.fn();
+const openMisconfigurationFinding = vi.fn();
+const openVulnerabilityFinding = vi.fn();
 
 describe('useOpenFindingInSystemFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useFlyoutApiMock.mockReturnValue({ openMisconfigurationFinding, openVulnerabilityFinding });
   });
 

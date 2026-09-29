@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
 import type {
   ElasticsearchClient,
@@ -35,13 +38,13 @@ const createMockPackage = (overrides: Partial<PackageListItem> = {}): PackageLis
   } as PackageListItem);
 
 describe('RuleMigrationsDataIntegrationsClient', () => {
-  const getIndexName = jest.fn().mockResolvedValue('mock-index');
+  const getIndexName = vi.fn().mockResolvedValue('mock-index');
   const currentUser = { username: 'elastic' } as AuthenticatedUser;
   const logger = loggerMock.create();
 
   const esClientMock = {
-    bulk: jest.fn(),
-    search: jest.fn(),
+    bulk: vi.fn(),
+    search: vi.fn(),
   } as unknown as ElasticsearchClient;
 
   const esScopedClientMock: IScopedClusterClient = {
@@ -58,7 +61,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
   let client: RuleMigrationsDataIntegrationsClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     client = new RuleMigrationsDataIntegrationsClient(
       getIndexName,
       currentUser,
@@ -110,7 +113,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
           ],
         }),
       ]);
-      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      esClientMock.bulk = vi.fn().mockResolvedValue({ errors: false, items: [] });
 
       await client.populate();
 
@@ -126,7 +129,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
           ],
         }),
       ]);
-      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      esClientMock.bulk = vi.fn().mockResolvedValue({ errors: false, items: [] });
 
       await client.populate();
 
@@ -159,7 +162,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
           ],
         }),
       ]);
-      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      esClientMock.bulk = vi.fn().mockResolvedValue({ errors: false, items: [] });
 
       // Mock getFieldsMetadata to return our test metadata
       mockGetFieldMetadata.mockResolvedValue(fieldsMetadata);
@@ -185,7 +188,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
     it('should call bulk with transformed logs packages', async () => {
       mockGetPackages.mockResolvedValue([createMockPackage()]);
-      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      esClientMock.bulk = vi.fn().mockResolvedValue({ errors: false, items: [] });
 
       await client.populate();
 
@@ -219,7 +222,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
     it('should throw and log on bulk error', async () => {
       mockGetPackages.mockResolvedValue([createMockPackage()]);
-      esClientMock.bulk = jest.fn().mockResolvedValue({
+      esClientMock.bulk = vi.fn().mockResolvedValue({
         errors: true,
         items: [{ update: { error: { reason: 'test error' } } }],
       });
@@ -234,8 +237,8 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
     const createArchiveIterator = (entries: Array<{ path: string; content: string }>) =>
       ({
-        getPaths: jest.fn().mockResolvedValue(entries.map((e) => e.path)),
-        traverseEntries: jest.fn(
+        getPaths: vi.fn().mockResolvedValue(entries.map((e) => e.path)),
+        traverseEntries: vi.fn(
           async (
             onEntry: (entry: { path: string; buffer: Buffer | null }) => Promise<void>,
             readBuffer?: (path: string) => boolean
@@ -251,11 +254,11 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
     beforeEach(() => {
       mockGetPackages.mockResolvedValue([createMockPackage()]);
-      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      esClientMock.bulk = vi.fn().mockResolvedValue({ errors: false, items: [] });
     });
 
     const getKnowledgeBaseFromMockEsCall = (): string => {
-      const bulkCall = (esClientMock.bulk as jest.Mock).mock.calls[0];
+      const bulkCall = (esClientMock.bulk as Mock).mock.calls[0];
       const docOp = bulkCall[0].operations[1];
       return docOp.doc.knowledge_base;
     };
@@ -371,9 +374,9 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         {
           packageService: {
             asInternalUser: {
-              getPackages: jest.fn().mockResolvedValue([createMockPackage()]),
-              getPackageFieldsMetadata: jest.fn().mockResolvedValue(undefined),
-              getPackage: jest.fn().mockResolvedValue(undefined),
+              getPackages: vi.fn().mockResolvedValue([createMockPackage()]),
+              getPackageFieldsMetadata: vi.fn().mockResolvedValue(undefined),
+              getPackage: vi.fn().mockResolvedValue(undefined),
             },
           },
         } as unknown as SiemMigrationsClientDependencies
@@ -381,7 +384,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
       await clientWithPartialSvc.populate();
 
-      const bulkCall = (esClientMock.bulk as jest.Mock).mock.calls[0];
+      const bulkCall = (esClientMock.bulk as Mock).mock.calls[0];
       const docOp = bulkCall[0].operations[1];
       expect(docOp.doc.knowledge_base).toBe('');
     });
@@ -412,7 +415,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       };
 
-      esClientMock.search = jest.fn().mockResolvedValue(mockResponse);
+      esClientMock.search = vi.fn().mockResolvedValue(mockResponse);
 
       const query = 'test query';
 
@@ -454,7 +457,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
     it('should throw and log on search error', async () => {
       const error = new Error('Search failed');
-      esClientMock.search = jest.fn().mockRejectedValue(error);
+      esClientMock.search = vi.fn().mockRejectedValue(error);
 
       await expect(client.semanticSearch('test')).rejects.toThrow('Search failed');
       expect(logger.error).toHaveBeenCalledWith(

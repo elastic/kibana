@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
@@ -12,33 +15,45 @@ import { apiService } from '../../../../../utils/api_service/api_service';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  FETCH_STATUS: jest.requireActual('@kbn/observability-shared-plugin/public').FETCH_STATUS,
-  useFetcher: jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      FETCH_STATUS: (await vi.importActual('@kbn/observability-shared-plugin/public')).FETCH_STATUS,
+      useFetcher: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_url_space_id', () => ({
-  useUrlSpaceId: jest.fn(),
-}));
+vi.mock('../../../hooks/use_url_space_id', () => {
+      const mocked = {
+      useUrlSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../utils/api_service/api_service', () => ({
-  apiService: { get: jest.fn() },
-}));
+vi.mock('../../../../../utils/api_service/api_service', () => {
+      const mocked = {
+      apiService: { get: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetcher = useFetcher as jest.MockedFunction<typeof useFetcher>;
-const mockUseUrlSpaceId = useUrlSpaceId as jest.MockedFunction<typeof useUrlSpaceId>;
-const mockApiGet = apiService.get as jest.MockedFunction<typeof apiService.get>;
+const mockUseFetcher = useFetcher as MockedFunction<typeof useFetcher>;
+const mockUseUrlSpaceId = useUrlSpaceId as MockedFunction<typeof useUrlSpaceId>;
+const mockApiGet = apiService.get as MockedFunction<typeof apiService.get>;
 
 const setData = (outdatedLocationIds: string[] | undefined) => {
   mockUseFetcher.mockReturnValue({
     data: outdatedLocationIds == null ? undefined : { outdatedLocationIds },
     loading: false,
     status: FETCH_STATUS.SUCCESS,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   });
 };
 
@@ -47,7 +62,7 @@ describe('useOutdatedMwAgentLocationIds', () => {
     mockUseUrlSpaceId.mockReturnValue(undefined);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns an empty set while the request has not resolved', () => {
     setData(undefined);

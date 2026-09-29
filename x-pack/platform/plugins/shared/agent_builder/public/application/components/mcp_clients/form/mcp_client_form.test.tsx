@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
@@ -15,9 +17,12 @@ import { McpClientForm } from './mcp_client_form';
 import { McpClientFormMode } from './types';
 import { useMcpClientForm } from './use_mcp_client_form';
 
-jest.mock('./mcp_logo_picker', () => ({
-  McpLogoPicker: () => null,
-}));
+vi.mock('./mcp_logo_picker', () => {
+      const mocked = {
+      McpLogoPicker: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TestForm = ({ mode }: { mode: McpClientFormMode }) => {
   const form = useMcpClientForm();
@@ -25,7 +30,7 @@ const TestForm = ({ mode }: { mode: McpClientFormMode }) => {
   return (
     <IntlProvider locale="en">
       <FormProvider {...form}>
-        <McpClientForm mode={mode} onSubmit={jest.fn()} />
+        <McpClientForm mode={mode} onSubmit={vi.fn()} />
       </FormProvider>
     </IntlProvider>
   );

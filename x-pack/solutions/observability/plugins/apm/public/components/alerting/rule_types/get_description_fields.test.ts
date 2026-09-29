@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { getDescriptionFields } from './get_description_fields';
 
 describe('getDescriptionFields', () => {
-  const mockPrebuildField = jest.fn();
+  const mockPrebuildField = vi.fn();
   const mockPrebuildFields = {
     customQuery: mockPrebuildField,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty array when rule is not provided', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
@@ -32,7 +34,7 @@ const packages: PackageListItem[] = [
 
 describe('CellValue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should handle missing field', () => {

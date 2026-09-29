@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 
@@ -135,7 +137,7 @@ describe('validation_utils', () => {
 
     describe('with external validator', () => {
       it('returns duplicate error when validator detects duplicate', async () => {
-        const mockValidator: StreamNameValidator = jest.fn().mockResolvedValue({
+        const mockValidator: StreamNameValidator = vi.fn().mockResolvedValue({
           errorType: 'duplicate',
         });
 
@@ -146,7 +148,7 @@ describe('validation_utils', () => {
       });
 
       it('returns higherPriority error with conflicting pattern when validator detects priority conflict', async () => {
-        const mockValidator: StreamNameValidator = jest.fn().mockResolvedValue({
+        const mockValidator: StreamNameValidator = vi.fn().mockResolvedValue({
           errorType: 'higherPriority',
           conflictingIndexPattern: 'logs-*',
         });
@@ -161,7 +163,7 @@ describe('validation_utils', () => {
       });
 
       it('returns no error when validator passes', async () => {
-        const mockValidator: StreamNameValidator = jest.fn().mockResolvedValue({
+        const mockValidator: StreamNameValidator = vi.fn().mockResolvedValue({
           errorType: null,
         });
 
@@ -172,7 +174,7 @@ describe('validation_utils', () => {
       });
 
       it('throws error when validator throws error', async () => {
-        const mockValidator: StreamNameValidator = jest
+        const mockValidator: StreamNameValidator = vi
           .fn()
           .mockRejectedValue(new Error('Network error'));
 
@@ -184,7 +186,7 @@ describe('validation_utils', () => {
 
       it('passes abort signal to validator', async () => {
         const abortController = new AbortController();
-        const mockValidator: StreamNameValidator = jest.fn().mockResolvedValue({
+        const mockValidator: StreamNameValidator = vi.fn().mockResolvedValue({
           errorType: null,
         });
 
@@ -198,7 +200,7 @@ describe('validation_utils', () => {
       });
 
       it('does not call validator when stream name has wildcards', async () => {
-        const mockValidator: StreamNameValidator = jest.fn();
+        const mockValidator: StreamNameValidator = vi.fn();
 
         const result = await validateStreamName('logs-*', mockTemplate, mockValidator);
 
@@ -207,7 +209,7 @@ describe('validation_utils', () => {
       });
 
       it('does not call validator when stream name has invalid format', async () => {
-        const mockValidator: StreamNameValidator = jest.fn();
+        const mockValidator: StreamNameValidator = vi.fn();
 
         const result = await validateStreamName('-logs', mockTemplate, mockValidator);
 
@@ -218,7 +220,7 @@ describe('validation_utils', () => {
       });
 
       it('does not call validator when stream name contains uppercase characters', async () => {
-        const mockValidator: StreamNameValidator = jest.fn();
+        const mockValidator: StreamNameValidator = vi.fn();
 
         const result = await validateStreamName('Logs-myapp', mockTemplate, mockValidator);
 
@@ -230,7 +232,7 @@ describe('validation_utils', () => {
 
       it('throws error when validator is aborted', async () => {
         const abortController = new AbortController();
-        const mockValidator: StreamNameValidator = jest
+        const mockValidator: StreamNameValidator = vi
           .fn()
           .mockImplementation(async (_, __, signal) => {
             // Check if already aborted
@@ -256,7 +258,7 @@ describe('validation_utils', () => {
     describe('validation order', () => {
       it('validates in correct order: wildcards -> format -> lowercase -> external validator', async () => {
         const validationOrder: string[] = [];
-        const mockValidator: StreamNameValidator = jest.fn().mockImplementation(async () => {
+        const mockValidator: StreamNameValidator = vi.fn().mockImplementation(async () => {
           validationOrder.push('external');
           return { errorType: null };
         });

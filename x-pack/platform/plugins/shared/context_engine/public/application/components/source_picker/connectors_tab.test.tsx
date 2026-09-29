@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -47,7 +50,7 @@ interface RenderConnectorsTabOptions {
   isLoading?: boolean;
   isError?: boolean;
   selectedConnectorIds?: string[];
-  onToggle?: jest.Mock;
+  onToggle?: Mock;
   canCreateConnector?: boolean;
 }
 
@@ -56,7 +59,7 @@ const renderConnectorsTab = ({
   isLoading = false,
   isError = false,
   selectedConnectorIds = [],
-  onToggle = jest.fn(),
+  onToggle = vi.fn(),
   canCreateConnector = true,
 }: RenderConnectorsTabOptions = {}) => {
   const coreStart = coreMock.createStart();
@@ -68,7 +71,7 @@ const renderConnectorsTab = ({
     },
   };
 
-  const getAddConnectorFlyout = jest.fn((_props: AddConnectorFlyoutProps) => (
+  const getAddConnectorFlyout = vi.fn((_props: AddConnectorFlyoutProps) => (
     <div data-test-subj="contextCreateConnectorFlyout">Create connector flyout</div>
   ));
 
@@ -107,7 +110,7 @@ const getConnectorOption = (connectorId: string) =>
 
 describe('ConnectorsTab', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders loading skeleton and neither the selectable list nor the empty prompt when loading', () => {
@@ -252,7 +255,7 @@ describe('ConnectorsTab', () => {
     const { getAddConnectorFlyout, onToggle, queryClient } = renderConnectorsTab({
       connectors: [],
     });
-    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
 
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 
@@ -282,7 +285,7 @@ describe('ConnectorsTab', () => {
     const { getAddConnectorFlyout, onToggle, queryClient } = renderConnectorsTab({
       connectors: [],
     });
-    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
 
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 
@@ -308,7 +311,7 @@ describe('ConnectorsTab', () => {
 
   it('invalidates connector queries when the flyout closes after save and test', () => {
     const { getAddConnectorFlyout, queryClient } = renderConnectorsTab({ connectors: [] });
-    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
 
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { IUiSettingsClient } from '@kbn/core/server';
 import {
   loggingSystemMock,
@@ -47,7 +50,7 @@ describe('getExportSettings', () => {
     uiSettingsClient = uiSettingsServiceMock
       .createStartContract()
       .asScopedToClient(savedObjectsClientMock.create());
-    uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
+    uiSettingsClient.get = vi.fn().mockImplementation((key: string) => {
       switch (key) {
         case UI_SETTINGS_CSV_QUOTE_VALUES:
           return true;
@@ -139,7 +142,7 @@ describe('getExportSettings', () => {
   });
 
   test('non-default timezone', async () => {
-    uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
+    uiSettingsClient.get = vi.fn().mockImplementation((key: string) => {
       switch (key) {
         case UI_SETTINGS_DATEFORMAT_TZ:
           return `America/Aruba`;
@@ -154,7 +157,7 @@ describe('getExportSettings', () => {
   });
 
   test('default browser timezone', async () => {
-    uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
+    uiSettingsClient.get = vi.fn().mockImplementation((key: string) => {
       switch (key) {
         case UI_SETTINGS_DATEFORMAT_TZ:
           return `Browser`;
@@ -171,7 +174,7 @@ describe('getExportSettings', () => {
   });
 
   describe('scroll duration function', () => {
-    let spiedDateNow: jest.Spied<typeof Date.now>;
+    let spiedDateNow: MockInstance<typeof Date.now>;
     let mockedTaskInstanceFields: TaskInstanceFields;
     const durationApart: { minutes: number } = { minutes: 5 };
 
@@ -179,7 +182,7 @@ describe('getExportSettings', () => {
       const now = Date.now();
 
       // freeze time for test
-      spiedDateNow = jest.spyOn(Date, 'now').mockReturnValue(now);
+      spiedDateNow = vi.spyOn(Date, 'now').mockReturnValue(now);
 
       mockedTaskInstanceFields = {
         startedAt: moment().subtract(durationApart).toDate(),

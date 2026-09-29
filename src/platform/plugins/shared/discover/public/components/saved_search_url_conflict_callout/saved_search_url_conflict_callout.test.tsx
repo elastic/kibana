@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { History } from 'history';
 
@@ -23,7 +25,7 @@ describe('SavedSearchURLConflictCallout', () => {
 
   beforeEach(() => {
     spaces = spacesPluginMock.createStartContract();
-    spaces.ui.components.getLegacyUrlConflict = jest.fn().mockReturnValue('callout');
+    spaces.ui.components.getLegacyUrlConflict = vi.fn().mockReturnValue('callout');
     history = {
       location: {
         search: '?_g=foo',

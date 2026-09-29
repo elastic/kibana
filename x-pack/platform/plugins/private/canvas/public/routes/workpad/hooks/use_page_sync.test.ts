@@ -5,26 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { usePageSync } from './use_page_sync';
 
-const mockDispatch = jest.fn();
-const mockGetParams = jest.fn();
-const mockGetState = jest.fn();
+const mockDispatch = vi.fn();
+const mockGetParams = vi.fn();
+const mockGetState = vi.fn();
 
 // Mock the hooks and actions used by the UseWorkpad hook
-jest.mock('react-redux-v7', () => ({
-  useDispatch: () => mockDispatch,
-  useSelector: (selector: any) => selector(mockGetState()),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: () => mockDispatch,
+      useSelector: (selector: any) => selector(mockGetState()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => mockGetParams(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => mockGetParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePageSync', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('dispatches page index to match the pagenumber param', () => {

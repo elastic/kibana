@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,7 +16,7 @@ import { ControlSettings } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('<ControlSettings />', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
   const params = coreMock.createAppMountParameters();

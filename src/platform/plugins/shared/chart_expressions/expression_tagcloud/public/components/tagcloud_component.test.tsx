@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import type { WordcloudSpec } from '@elastic/charts';
@@ -20,13 +22,16 @@ import TagCloudChart from './tagcloud_component';
 import type { TagCloudRendererParams } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 
-jest.mock('../format_service', () => ({
-  getFormatService: jest.fn(() => {
-    return {
-      deserialize: jest.fn(),
+vi.mock('../format_service', () => {
+      const mocked = {
+      getFormatService: vi.fn(() => {
+        return {
+          deserialize: vi.fn(),
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const geoDestId = 'geo.dest';
@@ -110,8 +115,8 @@ describe('TagCloudChart', function () {
       visData,
       visParams,
       palettesRegistry,
-      fireEvent: jest.fn(),
-      renderComplete: jest.fn(),
+      fireEvent: vi.fn(),
+      renderComplete: vi.fn(),
       syncColors: false,
       visType: 'tagcloud',
       isDarkMode: false,
@@ -141,8 +146,8 @@ describe('TagCloudChart', function () {
         },
       },
       palettesRegistry,
-      fireEvent: jest.fn(),
-      renderComplete: jest.fn(),
+      fireEvent: vi.fn(),
+      renderComplete: vi.fn(),
       syncColors: false,
       visType: 'tagcloud',
       isDarkMode: false,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
@@ -16,11 +19,14 @@ import {
   type EntityMatchSource,
 } from './entity_resolution';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExecuteEsql = executeEsql as jest.Mock;
+const mockExecuteEsql = executeEsql as Mock;
 const esClient = {} as unknown as ElasticsearchClient;
 
 const singleHostRow = {
@@ -35,7 +41,7 @@ const singleHostRow = {
 const empty = { columns: [], values: [] };
 
 describe('entity_resolution', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('normalizeEntityId', () => {
     it('prefixes a bare id when a type is given', () => {

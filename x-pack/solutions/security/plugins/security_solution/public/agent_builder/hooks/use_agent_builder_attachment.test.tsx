@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../common/mock';
@@ -13,17 +15,20 @@ import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 
-const mockUseUiSetting = jest.fn().mockReturnValue(false);
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
-}));
+const mockUseUiSetting = vi.fn().mockReturnValue(false);
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockChatRef = {
-  close: jest.fn(),
+  close: vi.fn(),
 };
 
-const mockOpenAgentBuilderChat = jest.fn<unknown, Parameters<AgentBuilderPluginStart['openChat']>>(
+const mockOpenAgentBuilderChat = vi.fn<unknown, Parameters<AgentBuilderPluginStart['openChat']>>(
   () => ({
     chatRef: mockChatRef,
   })
@@ -56,12 +61,12 @@ describe('useAgentBuilderAttachment', () => {
   beforeEach(() => {
     mockOpenAgentBuilderChat.mockClear();
     mockChatRef.close.mockClear();
-    jest.spyOn(Date, 'now').mockReturnValue(1234567890);
+    vi.spyOn(Date, 'now').mockReturnValue(1234567890);
     mockUseUiSetting.mockReturnValue(false);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns openAgentBuilderFlyout function', () => {

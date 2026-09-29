@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { IWorkspace } from '@kbn/workspaces';
 import type { LoadedBenchConfig, ModuleBenchmark } from '../config/types';
@@ -15,10 +17,10 @@ import { startMonitoring } from './monitor/start_monitoring';
 import { createBenchmarkExecutor } from './run_benchmark';
 import type { BenchmarkRunnable } from './types';
 
-jest.mock('./monitor/start_monitoring');
+vi.mock('./monitor/start_monitoring');
 
-const mockedStartMonitoring = jest.mocked(startMonitoring);
-const stopMonitoring = jest.fn();
+const mockedStartMonitoring = vi.mocked(startMonitoring);
+const stopMonitoring = vi.fn();
 const benchmark: ModuleBenchmark = {
   kind: 'module',
   name: 'test',
@@ -26,9 +28,9 @@ const benchmark: ModuleBenchmark = {
 };
 const context = {
   log: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
   } as unknown as ToolingLog,
   dataDir: 'data',
   workspace: {
@@ -56,7 +58,7 @@ describe('benchmark monitoring lifecycle', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('collects forced-GC stats only after a successful opted-in run', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { firstValueFrom, of } from 'rxjs';
 import { ML_ANOMALY_THRESHOLD, type MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 
@@ -19,7 +22,7 @@ type EnrichedAnomalyTableRow = MlAnomaliesTableRecord & {
   rulesLength?: number;
 };
 
-function createMlApiStub(getAnomaliesTableData: jest.Mock): MlApi {
+function createMlApiStub(getAnomaliesTableData: Mock): MlApi {
   return { results: { getAnomaliesTableData } } as unknown as MlApi;
 }
 
@@ -50,7 +53,7 @@ describe('fetchAnomaliesTableData$', () => {
 
   it('calls getAnomaliesTableData with normalized threshold, max records, and maps the response', async () => {
     const anomalies = [createTableRow()];
-    const getAnomaliesTableData = jest.fn().mockReturnValue(
+    const getAnomaliesTableData = vi.fn().mockReturnValue(
       of({
         anomalies,
         interval: '2h',
@@ -105,7 +108,7 @@ describe('fetchAnomaliesTableData$', () => {
 
   it('enriches rows for jobService (detector, rulesLength, customUrls)', async () => {
     const row = createTableRow({ jobId: 'job-1', detectorIndex: 0 }) as EnrichedAnomalyTableRow;
-    const getAnomaliesTableData = jest.fn().mockReturnValue(
+    const getAnomaliesTableData = vi.fn().mockReturnValue(
       of({
         anomalies: [row],
         interval: '1h',
@@ -139,7 +142,7 @@ describe('fetchAnomaliesTableData$', () => {
 
   it('falls back to source.function_description when detector_description is missing', async () => {
     const row = createTableRow() as EnrichedAnomalyTableRow;
-    const getAnomaliesTableData = jest
+    const getAnomaliesTableData = vi
       .fn()
       .mockReturnValue(of({ anomalies: [row], interval: '1h', examplesByJobId: {} }));
 
@@ -161,7 +164,7 @@ describe('fetchAnomaliesTableData$', () => {
 
   it('enriches rows for singleJob from analysis_config and custom_settings', async () => {
     const row = createTableRow() as EnrichedAnomalyTableRow;
-    const getAnomaliesTableData = jest
+    const getAnomaliesTableData = vi
       .fn()
       .mockReturnValue(of({ anomalies: [row], interval: '1h', examplesByJobId: {} }));
 

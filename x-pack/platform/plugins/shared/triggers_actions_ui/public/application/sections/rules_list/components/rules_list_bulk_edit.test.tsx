@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -22,59 +25,98 @@ import {
   ruleTypeFromApi,
 } from './test_helper';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn(() => false),
-  useUiSetting$: jest.fn((value: string) => ['0,0']),
-}));
-jest.mock('../../../lib/action_connector_api', () => ({
-  loadActionTypes: jest.fn(),
-  loadAllActions: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
-  loadRulesWithKueryFilter: jest.fn(),
-}));
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
-  getRuleTypes: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
-  loadRuleAggregationsWithKueryFilter: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/update_api_key', () => ({
-  updateAPIKey: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/aggregate', () => ({
-  loadRuleTags: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/snooze', () => ({
-  bulkSnoozeRules: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/unsnooze', () => ({
-  bulkUnsnoozeRules: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/update_api_key', () => ({
-  bulkUpdateAPIKey: jest.fn(),
-}));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => ({
-  fetchAlertingFrameworkHealth: jest.fn(() => ({
-    isSufficientlySecure: true,
-    hasPermanentEncryptionKey: true,
-  })),
-}));
-jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
-jest.mock('../../../lib/rule_api/rules_kuery_filter');
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => ({
-  fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
-}));
-jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
-  fetchUiConfig: jest
-    .fn()
-    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
-}));
-jest.mock('react-router-dom', () => {
+vi.mock('../../../../common/lib/kibana');
+vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
+      const mocked = {
+      useUiSetting: vi.fn(() => false),
+      useUiSetting$: vi.fn((value: string) => ['0,0']),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/action_connector_api', () => {
+      const mocked = {
+      loadActionTypes: vi.fn(),
+      loadAllActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/rules_kuery_filter', () => {
+      const mocked = {
+      loadRulesWithKueryFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
+      const mocked = {
+      getRuleTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/aggregate_kuery_filter', () => {
+      const mocked = {
+      loadRuleAggregationsWithKueryFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/update_api_key', () => {
+      const mocked = {
+      updateAPIKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/aggregate', () => {
+      const mocked = {
+      loadRuleTags: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/snooze', () => {
+      const mocked = {
+      bulkSnoozeRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/unsnooze', () => {
+      const mocked = {
+      bulkUnsnoozeRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/update_api_key', () => {
+      const mocked = {
+      bulkUpdateAPIKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => {
+      const mocked = {
+      fetchAlertingFrameworkHealth: vi.fn(() => ({
+        isSufficientlySecure: true,
+        hasPermanentEncryptionKey: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/aggregate_kuery_filter');
+vi.mock('../../../lib/rule_api/rules_kuery_filter');
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => {
+      const mocked = {
+      fetchUiHealthStatus: vi.fn(() => ({ isRulesAvailable: true })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => {
+      const mocked = {
+      fetchUiConfig: vi
+        .fn()
+        .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
   const history = {
-    push: jest.fn(),
-    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+    push: vi.fn(),
+    createHref: vi.fn(({ pathname }: { pathname: string }) => pathname),
   };
   return {
     useHistory: () => history,
@@ -83,48 +125,61 @@ jest.mock('react-router-dom', () => {
     }),
   };
 });
-jest.mock('../../../lib/capabilities', () => ({
-  hasAllPrivilege: jest.fn(() => true),
-  hasSaveRulesCapability: jest.fn(() => true),
-  hasShowActionsCapability: jest.fn(() => true),
-  hasExecuteActionsCapability: jest.fn(() => true),
-}));
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
-  loadRuleAggregationsWithKueryFilter: jest.fn(),
-}));
-jest.mock('@kbn/alerts-ui-shared', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared'),
-  MaintenanceWindowCallout: jest.fn(() => <></>),
-}));
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
+vi.mock('../../../lib/capabilities', () => {
+      const mocked = {
+      hasAllPrivilege: vi.fn(() => true),
+      hasSaveRulesCapability: vi.fn(() => true),
+      hasShowActionsCapability: vi.fn(() => true),
+      hasExecuteActionsCapability: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/aggregate_kuery_filter', () => {
+      const mocked = {
+      loadRuleAggregationsWithKueryFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/alerts-ui-shared', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared')),
+      MaintenanceWindowCallout: vi.fn(() => <></>),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/kibana-utils-plugin/public', async () => {
+  const originalModule = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
   return {
     ...originalModule,
-    createKbnUrlStateStorage: jest.fn(() => ({
-      get: jest.fn(() => null),
-      set: jest.fn(() => null),
+    createKbnUrlStateStorage: vi.fn(() => ({
+      get: vi.fn(() => null),
+      set: vi.fn(() => null),
     })),
   };
 });
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
-jest.mock('@kbn/ebt-tools');
-jest.mock('@kbn/cps-utils', () => ({
-  ...jest.requireActual('@kbn/cps-utils'),
-  useRouteBasedCpsPickerAccess: jest.fn(),
-}));
+vi.mock('react-use/lib/useLocalStorage', () => vi.fn(() => [null, () => null]));
+vi.mock('@kbn/ebt-tools');
+vi.mock('@kbn/cps-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/cps-utils')),
+      useRouteBasedCpsPickerAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const usePerformanceContextMock = usePerformanceContext as jest.Mock;
-usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
+const usePerformanceContextMock = usePerformanceContext as Mock;
+usePerformanceContextMock.mockReturnValue({ onPageReady: vi.fn() });
 
-const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
-  '../../../lib/rule_api/aggregate_kuery_filter'
-);
-const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
-const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
+const { loadRuleAggregationsWithKueryFilter } = (await vi.importMock('../../../lib/rule_api/aggregate_kuery_filter'));
+const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
+const { loadRulesWithKueryFilter } = (await vi.importMock('../../../lib/rule_api/rules_kuery_filter'));
+const { loadActionTypes, loadAllActions } = (await vi.importMock('../../../lib/action_connector_api'));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -132,7 +187,7 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -154,7 +209,7 @@ const renderWithProviders = (ui: any) => {
 
 describe('Rules list Bulk Edit', () => {
   beforeAll(async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -168,15 +223,15 @@ describe('Rules list Bulk Edit', () => {
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     useKibanaMock().services.notifications.toasts = {
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
-      addDanger: jest.fn(),
-      addWarning: jest.fn(),
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
+      addDanger: vi.fn(),
+      addWarning: vi.fn(),
     } as unknown as IToasts;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -13,13 +16,13 @@ import { useAttackTagsContextMenuItems } from './use_attack_tags_context_menu_it
 import { useBulkAttackTagsItems } from '../bulk_action_items/use_bulk_attack_tags_items';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 
-jest.mock('../bulk_action_items/use_bulk_attack_tags_items');
-jest.mock('../use_attacks_privileges');
+vi.mock('../bulk_action_items/use_bulk_attack_tags_items');
+vi.mock('../use_attacks_privileges');
 
-const mockUseBulkAttackTagsItems = useBulkAttackTagsItems as jest.MockedFunction<
+const mockUseBulkAttackTagsItems = useBulkAttackTagsItems as MockedFunction<
   typeof useBulkAttackTagsItems
 >;
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
 
@@ -30,9 +33,9 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useAttackTagsContextMenuItems', () => {
-  const mockClosePopover = jest.fn();
-  const mockSetIsLoading = jest.fn();
-  const mockOnSuccess = jest.fn();
+  const mockClosePopover = vi.fn();
+  const mockSetIsLoading = vi.fn();
+  const mockOnSuccess = vi.fn();
 
   const defaultProps = {
     attacksWithTags: [
@@ -48,7 +51,7 @@ describe('useAttackTagsContextMenuItems', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
 
     mockUseAttacksPrivileges.mockReturnValue({
@@ -72,7 +75,7 @@ describe('useAttackTagsContextMenuItems', () => {
           id: 1,
           title: React.createElement('div', null, 'Tags'),
           'data-test-subj': 'attack-tags-context-menu-panel',
-          renderContent: jest.fn((props) => React.createElement('div', null, 'Tags Panel')),
+          renderContent: vi.fn((props) => React.createElement('div', null, 'Tags Panel')),
         },
       ],
     });
@@ -112,7 +115,7 @@ describe('useAttackTagsContextMenuItems', () => {
   });
 
   it('should pass correct props to panel renderContent', () => {
-    const mockRenderContent = jest.fn((props) => React.createElement('div', null, 'Tags Panel'));
+    const mockRenderContent = vi.fn((props) => React.createElement('div', null, 'Tags Panel'));
     mockUseBulkAttackTagsItems.mockReturnValue({
       items: [],
       panels: [
@@ -157,7 +160,7 @@ describe('useAttackTagsContextMenuItems', () => {
 
     expect(result.current.panels.length).toBeGreaterThan(0);
     // Verify alertItems contains both attacks
-    const mockRenderContent = jest.fn((renderProps) =>
+    const mockRenderContent = vi.fn((renderProps) =>
       React.createElement('div', null, 'Tags Panel')
     );
     mockUseBulkAttackTagsItems.mockReturnValue({

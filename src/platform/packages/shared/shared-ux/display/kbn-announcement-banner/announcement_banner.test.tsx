@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { fireEvent, renderHook } from '@testing-library/react';
@@ -99,7 +101,7 @@ describe('AnnouncementBanner', () => {
     });
 
     it('fires onDismiss when the dismiss button is clicked', () => {
-      const onDismiss = jest.fn();
+      const onDismiss = vi.fn();
       const { getByTestId } = renderWithEuiTheme(
         <AnnouncementBanner {...requiredProps} onDismiss={onDismiss} />
       );
@@ -179,8 +181,8 @@ describe('AnnouncementBanner', () => {
     });
 
     it('fires primary and secondary onClick', () => {
-      const primaryFn = jest.fn();
-      const secondaryFn = jest.fn();
+      const primaryFn = vi.fn();
+      const secondaryFn = vi.fn();
       const { getByTestId } = renderWithEuiTheme(
         <AnnouncementBanner
           {...requiredProps}

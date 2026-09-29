@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,9 +21,12 @@ import type { CustomizePanelActionApi } from './customize_panel_action';
 import { CustomizePanelEditor } from './customize_panel_editor';
 
 // Mock FilterItems to avoid expensive rendering and lazy-loading delays in tests
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
-}));
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('customize panel editor', () => {
   let api: CustomizePanelActionApi;
@@ -31,11 +36,11 @@ describe('customize panel editor', () => {
 
   beforeEach(() => {
     const title$ = new BehaviorSubject<string | undefined>(undefined);
-    setTitle = jest.fn((title) => title$.next(title));
+    setTitle = vi.fn((title) => title$.next(title));
     const description$ = new BehaviorSubject<string | undefined>(undefined);
-    setDescription = jest.fn((description) => description$.next(description));
+    setDescription = vi.fn((description) => description$.next(description));
     const viewMode$ = new BehaviorSubject<ViewMode>('edit');
-    setViewMode = jest.fn((nextViewMode) => viewMode$.next(nextViewMode));
+    setViewMode = vi.fn((nextViewMode) => viewMode$.next(nextViewMode));
 
     api = {
       viewMode$,
@@ -51,7 +56,7 @@ describe('customize panel editor', () => {
   const renderPanelEditor = (props?: { focusOnTitle: boolean }) => {
     return render(
       <I18nProvider>
-        <CustomizePanelEditor api={api} onClose={jest.fn()} focusOnTitle={props?.focusOnTitle} />
+        <CustomizePanelEditor api={api} onClose={vi.fn()} focusOnTitle={props?.focusOnTitle} />
       </I18nProvider>
     );
   };

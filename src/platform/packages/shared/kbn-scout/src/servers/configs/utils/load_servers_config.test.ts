@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import { loadServersConfig } from '..';
@@ -18,31 +21,46 @@ import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
 import { configureHTTP2 } from './configure_http2';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
-jest.mock('./get_config_file', () => ({
-  getConfigFilePath: jest.fn(),
-}));
+vi.mock('./get_config_file', () => {
+      const mocked = {
+      getConfigFilePath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../loader', () => ({
-  loadRawServerConfig: jest.fn(),
-}));
+vi.mock('../loader', () => {
+      const mocked = {
+      loadRawServerConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../config', () => ({
-  Config: jest.fn(),
-}));
+vi.mock('../config', () => {
+      const mocked = {
+      Config: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./save_scout_test_config', () => ({
-  saveScoutTestConfigOnDisk: jest.fn(),
-}));
+vi.mock('./save_scout_test_config', () => {
+      const mocked = {
+      saveScoutTestConfigOnDisk: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./configure_http2', () => ({
-  configureHTTP2: jest.fn((config: ScoutServerConfig) => config),
-}));
+vi.mock('./configure_http2', () => {
+      const mocked = {
+      configureHTTP2: vi.fn((config: ScoutServerConfig) => config),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('fs', () => {
-  const actualFs = jest.requireActual('fs');
+vi.mock('fs', () => {
+  const actualFs = require('fs');
   return {
     ...actualFs,
-    existsSync: jest.fn(),
+    existsSync: vi.fn(),
   };
 });
 
@@ -82,27 +100,27 @@ describe('loadServersConfig', () => {
   const mockConfigPath = '/mock/config/path.ts';
 
   const mockConfigInstance = {
-    getScoutTestConfig: jest.fn().mockReturnValue(mockScoutTestConfig),
-    get: jest.fn(),
-    getAll: jest.fn(),
-    has: jest.fn(),
+    getScoutTestConfig: vi.fn().mockReturnValue(mockScoutTestConfig),
+    get: vi.fn(),
+    getAll: vi.fn(),
+    has: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLog = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as ToolingLog;
-    (fs.existsSync as jest.Mock).mockReturnValue(true);
-    (Config as unknown as jest.Mock).mockReturnValue(mockConfigInstance);
+    (fs.existsSync as Mock).mockReturnValue(true);
+    (Config as unknown as Mock).mockReturnValue(mockConfigInstance);
   });
 
   it('should load, save, and return cluster configuration without HTTP/2 by default', async () => {
     const configRootDir = '/mock/config/root/default/serverless';
-    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
-    (loadRawServerConfig as jest.Mock).mockResolvedValue({ ...mockRawConfig });
+    (getConfigFilePath as Mock).mockReturnValue(mockConfigPath);
+    (loadRawServerConfig as Mock).mockResolvedValue({ ...mockRawConfig });
 
     const result = await loadServersConfig(mockTestTarget, mockLog, configRootDir);
 
@@ -117,8 +135,8 @@ describe('loadServersConfig', () => {
 
   it('should apply HTTP/2 when http2 is explicitly true', async () => {
     const configRootDir = '/mock/config/root/default/serverless';
-    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
-    (loadRawServerConfig as jest.Mock).mockResolvedValue({ ...mockRawConfig, http2: true });
+    (getConfigFilePath as Mock).mockReturnValue(mockConfigPath);
+    (loadRawServerConfig as Mock).mockResolvedValue({ ...mockRawConfig, http2: true });
 
     await loadServersConfig(mockTestTarget, mockLog, configRootDir);
 
@@ -127,8 +145,8 @@ describe('loadServersConfig', () => {
 
   it('should skip HTTP/2 when http2 is explicitly false', async () => {
     const configRootDir = '/mock/config/root/default/serverless';
-    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
-    (loadRawServerConfig as jest.Mock).mockResolvedValue({ ...mockRawConfig, http2: false });
+    (getConfigFilePath as Mock).mockReturnValue(mockConfigPath);
+    (loadRawServerConfig as Mock).mockResolvedValue({ ...mockRawConfig, http2: false });
 
     await loadServersConfig(mockTestTarget, mockLog, configRootDir);
 
@@ -137,9 +155,9 @@ describe('loadServersConfig', () => {
 
   it('should throw an error if loadRawServerConfig fails', async () => {
     const configRootDir = '/mock/config/root/default/serverless';
-    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
+    (getConfigFilePath as Mock).mockReturnValue(mockConfigPath);
     const errorMessage = 'Failed to read config file';
-    (loadRawServerConfig as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    (loadRawServerConfig as Mock).mockRejectedValue(new Error(errorMessage));
 
     await expect(loadServersConfig(mockTestTarget, mockLog, configRootDir)).rejects.toThrow(
       errorMessage
@@ -151,8 +169,8 @@ describe('loadServersConfig', () => {
 
   it('should load custom config from custom directory', async () => {
     const configRootDir = '/mock/config/root/custom/uiam_local/serverless';
-    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
-    (loadRawServerConfig as jest.Mock).mockResolvedValue({ ...mockRawConfig });
+    (getConfigFilePath as Mock).mockReturnValue(mockConfigPath);
+    (loadRawServerConfig as Mock).mockResolvedValue({ ...mockRawConfig });
 
     const result = await loadServersConfig(mockTestTarget, mockLog, configRootDir);
 
@@ -163,8 +181,8 @@ describe('loadServersConfig', () => {
 
   it('should throw error when config file does not exist', async () => {
     const configRootDir = '/mock/config/root/custom/uiam_local/serverless';
-    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
-    (fs.existsSync as jest.Mock).mockReturnValue(false);
+    (getConfigFilePath as Mock).mockReturnValue(mockConfigPath);
+    (fs.existsSync as Mock).mockReturnValue(false);
 
     await expect(loadServersConfig(mockTestTarget, mockLog, configRootDir)).rejects.toThrow(
       'Config file not found'

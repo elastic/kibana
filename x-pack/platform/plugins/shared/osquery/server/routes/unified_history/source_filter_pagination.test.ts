@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /**
  * Integration-style tests for the source filter + pagination pipeline.
  *
@@ -28,19 +30,22 @@ import { mergeRows } from './merge_rows';
 import { computePaginationCursors, decodeCursor, encodeCursor } from './cursor_utils';
 
 // ── mock result-count enrichment (not relevant to pagination) ──────────
-jest.mock('../../lib/get_result_counts_for_actions', () => ({
-  getResultCountsForActions: jest.fn().mockResolvedValue(new Map()),
-}));
+vi.mock('../../lib/get_result_counts_for_actions', () => {
+      const mocked = {
+      getResultCountsForActions: vi.fn().mockResolvedValue(new Map()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockOsqueryContext = {
-  getStartServices: jest
+  getStartServices: vi
     .fn()
     .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: {} } } }]),
 } as never;
 
 const mockRequest = httpServerMock.createKibanaRequest();
 
-const mockLogger = { warn: jest.fn() } as never;
+const mockLogger = { warn: vi.fn() } as never;
 
 // ── helpers to build realistic ES hits ─────────────────────────────────
 
@@ -197,7 +202,7 @@ const fetchAllPages = async (
 
 describe('source filter pagination (integration)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     tsCounter = 1_700_000_000_000; // reset so tests are independent
   });
 

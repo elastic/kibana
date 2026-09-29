@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -26,9 +29,9 @@ import { waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { RunscriptConfig } from './runscript_config';
 
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('Automated Response actions - Runscript OS type config component', () => {
   let testContext: AppContextTestRender;

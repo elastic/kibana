@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useIntegrationLastAlertIngested } from './use_integration_last_alert_ingested';
 import { useQuery } from '@kbn/react-query';
 
-jest.mock('@kbn/react-query');
+vi.mock('@kbn/react-query');
 
 const integrationName = 'splunk';
 
 describe('useIntegrationLastAlertIngested', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return isLoading true', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: true,
       data: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useIntegrationLastAlertIngested({ integrationName }));
@@ -32,7 +35,7 @@ describe('useIntegrationLastAlertIngested', () => {
   });
 
   it('should return last AlertIngested', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: {
         response: {
@@ -40,7 +43,7 @@ describe('useIntegrationLastAlertIngested', () => {
           values: [['2025-01-01T00:00:000Z']],
         },
       },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useIntegrationLastAlertIngested({ integrationName }));
@@ -50,8 +53,8 @@ describe('useIntegrationLastAlertIngested', () => {
   });
 
   it('should return refetch function', () => {
-    const refetch = jest.fn();
-    (useQuery as jest.Mock).mockReturnValue({
+    const refetch = vi.fn();
+    (useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: {},
       refetch,

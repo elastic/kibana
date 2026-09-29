@@ -5,22 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { VISUALIZATION_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { visualizationSmlType } from './visualization';
 
-jest.mock('@kbn/lens-embeddable-utils', () => ({
-  LensConfigBuilder: jest.fn().mockImplementation(() => ({
-    toAPIFormat: jest.fn().mockReturnValue({ type: 'xy', layers: [] }),
-  })),
-}));
+vi.mock('@kbn/lens-embeddable-utils', () => {
+      const mocked = {
+      LensConfigBuilder: vi.fn().mockImplementation(() => ({
+        toAPIFormat: vi.fn().mockReturnValue({ type: 'xy', layers: [] }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockSavedObjectsClient = {
-  createPointInTimeFinder: jest.fn(),
-  find: jest.fn(),
-  get: jest.fn(),
-  resolve: jest.fn(),
+  createPointInTimeFinder: vi.fn(),
+  find: vi.fn(),
+  get: vi.fn(),
+  resolve: vi.fn(),
 };
 
 const createContext = () => ({
@@ -38,7 +44,7 @@ async function collectPages(iterable: AsyncIterable<SmlListItem[]>): Promise<Sml
 
 describe('visualizationSmlType', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('id', () => {
@@ -53,7 +59,7 @@ describe('visualizationSmlType', () => {
         async *find() {
           yield { saved_objects: [] };
         },
-        close: jest.fn(),
+        close: vi.fn(),
       });
 
       await collectPages(visualizationSmlType.list(createContext() as never));
@@ -77,7 +83,7 @@ describe('visualizationSmlType', () => {
           namespaces: ['default', 'space-1'],
         },
       ];
-      const closeMock = jest.fn();
+      const closeMock = vi.fn();
       mockSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
         async *find() {
           yield { saved_objects: savedObjects };
@@ -112,7 +118,7 @@ describe('visualizationSmlType', () => {
         async *find() {
           yield { saved_objects: savedObjects };
         },
-        close: jest.fn(),
+        close: vi.fn(),
       });
 
       const result = await collectPages(visualizationSmlType.list(createContext() as never));
@@ -138,7 +144,7 @@ describe('visualizationSmlType', () => {
         async *find() {
           yield { saved_objects: savedObjects };
         },
-        close: jest.fn(),
+        close: vi.fn(),
       });
 
       const result = await collectPages(visualizationSmlType.list(createContext() as never));
@@ -348,11 +354,11 @@ describe('visualizationSmlType', () => {
     });
 
     it('omits chart_type when the Lens API type is outside the supported vocabulary', async () => {
-      const { LensConfigBuilder } = jest.requireMock('@kbn/lens-embeddable-utils');
-      (LensConfigBuilder as jest.Mock).mockImplementation(() => ({
+      const { LensConfigBuilder } = (await vi.importMock('@kbn/lens-embeddable-utils'));
+      (LensConfigBuilder as Mock).mockImplementation(() => ({
         // A raw Lens `visualizationType` (not the API vocabulary) must not leak
         // through as chart_type.
-        toAPIFormat: jest.fn().mockReturnValue({ type: 'lnsXY', layers: [] }),
+        toAPIFormat: vi.fn().mockReturnValue({ type: 'lnsXY', layers: [] }),
       }));
 
       mockSavedObjectsClient.resolve.mockResolvedValue({
@@ -403,12 +409,12 @@ describe('visualizationSmlType', () => {
     });
 
     it('uses LensConfigBuilder to convert attributes', async () => {
-      const { LensConfigBuilder } = jest.requireMock('@kbn/lens-embeddable-utils');
-      const toAPIFormatMock = jest.fn().mockReturnValue({
+      const { LensConfigBuilder } = (await vi.importMock('@kbn/lens-embeddable-utils'));
+      const toAPIFormatMock = vi.fn().mockReturnValue({
         type: 'pie',
         layers: [{ id: 'layer1' }],
       });
-      (LensConfigBuilder as jest.Mock).mockImplementation(() => ({
+      (LensConfigBuilder as Mock).mockImplementation(() => ({
         toAPIFormat: toAPIFormatMock,
       }));
 

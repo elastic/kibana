@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionDefinition } from './action';
 import { ActionInternal } from './action_internal';
 
 const defaultActionDef: ActionDefinition = {
   id: 'test-action',
-  execute: jest.fn(),
+  execute: vi.fn(),
 };
 
 describe('ActionInternal', () => {
@@ -22,7 +24,7 @@ describe('ActionInternal', () => {
   });
 
   describe('displays toasts when execute function throws', () => {
-    const addWarningMock = jest.fn();
+    const addWarningMock = vi.fn();
     beforeAll(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../services').getNotifications = () => ({

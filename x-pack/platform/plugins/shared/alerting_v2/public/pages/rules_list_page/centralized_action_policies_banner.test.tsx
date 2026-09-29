@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -16,15 +18,13 @@ import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_p
 import { AlertingV2ActionPoliciesLocatorDefinition } from '../../locators';
 
 const mockLocators = createMockLocators();
-const mockNavigateToUrl = jest.fn();
-const mockToursIsEnabled = jest.fn(() => true);
+const mockNavigateToUrl = vi.fn();
+const mockToursIsEnabled = vi.fn(() => true);
 const MOCK_ACTION_POLICIES_DOCS_URL = 'https://docs.test/action-policies';
 let mockCanWriteActionPolicies = true;
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -64,7 +64,7 @@ const renderBanner = () =>
 
 describe('CentralizedActionPoliciesBanner', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCanWriteActionPolicies = true;
     mockToursIsEnabled.mockReturnValue(true);
     window.localStorage.clear();
@@ -102,7 +102,7 @@ describe('CentralizedActionPoliciesBanner', () => {
 
     fireEvent.click(screen.getByTestId('centralizedActionPoliciesCreate'));
 
-    const [params] = jest.mocked(mockLocators.actionPolicyLocators.navigateSync).mock.calls[0];
+    const [params] = vi.mocked(mockLocators.actionPolicyLocators.navigateSync).mock.calls[0];
     const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
     expect(location).toMatchObject({
       app: 'management',

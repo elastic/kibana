@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
@@ -122,7 +124,7 @@ const hasTemplateNameConflict = ({
 
 const createMockCasesClient = () => ({
   templates: {
-    getAllTemplates: jest.fn(async () => {
+    getAllTemplates: vi.fn(async () => {
       const latestById = new Map<string, Template>();
 
       mockTemplates
@@ -143,7 +145,7 @@ const createMockCasesClient = () => ({
         total: templates.length,
       };
     }),
-    getTemplate: jest.fn(async (templateId: string, version?: string) => {
+    getTemplate: vi.fn(async (templateId: string, version?: string) => {
       const candidates = mockTemplates.filter(
         (template) => template.templateId === templateId && template.deletedAt === null
       );
@@ -163,7 +165,7 @@ const createMockCasesClient = () => ({
 
       return toSavedObject(latest);
     }),
-    createTemplate: jest.fn(async (input: { name?: string; owner: string; definition: string }) => {
+    createTemplate: vi.fn(async (input: { name?: string; owner: string; definition: string }) => {
       const parsedDefinition = yamlParse(input.definition) as { name: string };
       const templateName = input.name ?? parsedDefinition.name;
       if (hasTemplateNameConflict({ name: templateName, owner: input.owner })) {
@@ -186,7 +188,7 @@ const createMockCasesClient = () => ({
 
       return toSavedObject(newTemplate);
     }),
-    updateTemplate: jest.fn(
+    updateTemplate: vi.fn(
       async (templateId: string, input: { name?: string; owner: string; definition: string }) => {
         const candidates = mockTemplates.filter(
           (template) => template.templateId === templateId && template.deletedAt === null
@@ -226,7 +228,7 @@ const createMockCasesClient = () => ({
         return toSavedObject(updatedTemplate);
       }
     ),
-    deleteTemplate: jest.fn(async (templateId: string) => {
+    deleteTemplate: vi.fn(async (templateId: string) => {
       const exists = mockTemplates.some(
         (template) => template.templateId === templateId && template.deletedAt === null
       );
@@ -242,7 +244,7 @@ const createMockCasesClient = () => ({
         }
       });
     }),
-    validateCreateTemplate: jest.fn(
+    validateCreateTemplate: vi.fn(
       async (input: { name?: string; owner: string; definition: string }) => {
         const parsedDefinition = yamlParse(input.definition) as { name: string };
         const templateName = input.name ?? parsedDefinition.name;
@@ -253,7 +255,7 @@ const createMockCasesClient = () => ({
         }
       }
     ),
-    validateUpdateTemplate: jest.fn(
+    validateUpdateTemplate: vi.fn(
       async (templateId: string, input: { name?: string; owner: string; definition: string }) => {
         const exists = mockTemplates.some(
           (template) => template.templateId === templateId && template.deletedAt === null
@@ -263,12 +265,12 @@ const createMockCasesClient = () => ({
         }
       }
     ),
-    getTags: jest.fn(async () => {
+    getTags: vi.fn(async () => {
       const nonDeleted = mockTemplates.filter((t) => t.deletedAt === null);
       const tags = nonDeleted.flatMap((t) => t.tags ?? []);
       return [...new Set(tags)].sort();
     }),
-    getAuthors: jest.fn(async () => {
+    getAuthors: vi.fn(async () => {
       const nonDeleted = mockTemplates.filter((t) => t.deletedAt === null);
       const authors = nonDeleted.map((t) => t.author).filter(Boolean);
       return [...new Set(authors)].sort();
@@ -278,21 +280,21 @@ const createMockCasesClient = () => ({
 
 const createMockContext = () => ({
   cases: {
-    getCasesClient: jest.fn().mockResolvedValue(createMockCasesClient()),
+    getCasesClient: vi.fn().mockResolvedValue(createMockCasesClient()),
   },
 });
 
 const createMockResponse = () => ({
-  ok: jest.fn(),
-  notFound: jest.fn(),
-  conflict: jest.fn(),
-  badRequest: jest.fn(),
-  noContent: jest.fn(),
+  ok: vi.fn(),
+  notFound: vi.fn(),
+  conflict: vi.fn(),
+  badRequest: vi.fn(),
+  noContent: vi.fn(),
 });
 
 describe('Template Routes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockTemplates.length = 0;
     mockTemplates.push(...createTestTemplates());
   });
@@ -458,7 +460,7 @@ describe('Template Routes', () => {
     it('filters out invalid templates and logs warning', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
-      const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+      const logger = { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
 
       const invalidDefinition = yamlStringify({
         name: 'Invalid Template',
@@ -1069,7 +1071,7 @@ describe('Template Routes', () => {
     it('filters out invalid templates and logs a warning', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
-      const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+      const logger = { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
 
       const invalidDefinition = yamlStringify({
         name: 'Bad Template',

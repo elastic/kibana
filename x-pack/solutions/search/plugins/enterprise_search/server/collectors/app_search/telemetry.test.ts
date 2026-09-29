@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockLogger } from '../../__mocks__';
 
 import { registerTelemetryUsageCollector } from './telemetry';
 
 describe('App Search Telemetry Usage Collector', () => {
-  const makeUsageCollectorStub = jest.fn();
-  const registerStub = jest.fn();
+  const makeUsageCollectorStub = vi.fn();
+  const registerStub = vi.fn();
   const usageCollectionMock = {
     makeUsageCollector: makeUsageCollectorStub,
     registerCollector: registerStub,
@@ -28,14 +30,14 @@ describe('App Search Telemetry Usage Collector', () => {
         'ui_clicked.engine_table_link': 50,
       },
     }),
-    incrementCounter: jest.fn(),
+    incrementCounter: vi.fn(),
   };
   const savedObjectsMock = {
-    createInternalRepository: jest.fn(() => savedObjectsRepoStub),
+    createInternalRepository: vi.fn(() => savedObjectsRepoStub),
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('registerTelemetryUsageCollector', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { wrapAsyncSearchClient } from './wrap_async_search_client';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -36,7 +38,7 @@ describe('wrapScopedClusterClient', () => {
   const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   beforeEach(() => {
@@ -44,17 +46,17 @@ describe('wrapScopedClusterClient', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   test('searches with the correct params', async () => {
     const abortController = new AbortController();
-    client.search = jest.fn().mockImplementation(
+    client.search = vi.fn().mockImplementation(
       (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of({
           isRunning: false,
@@ -94,7 +96,7 @@ describe('wrapScopedClusterClient', () => {
 
   test('returns the rawResponse', async () => {
     const abortController = new AbortController();
-    client.search = jest.fn().mockImplementation(
+    client.search = vi.fn().mockImplementation(
       (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of({
           isRunning: false,
@@ -127,7 +129,7 @@ describe('wrapScopedClusterClient', () => {
 
   test('re-throws error when search throws error', async () => {
     const abortController = new AbortController();
-    client.search = jest.fn().mockReturnValue(throwError(() => new Error('something went wrong!')));
+    client.search = vi.fn().mockReturnValue(throwError(() => new Error('something went wrong!')));
 
     const asyncSearchClient = wrapAsyncSearchClient({
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,
@@ -150,7 +152,7 @@ describe('wrapScopedClusterClient', () => {
   test('throws error when search throws abort error', async () => {
     const abortController = new AbortController();
     abortController.abort();
-    client.search = jest.fn().mockReturnValue(throwError(() => new Error()));
+    client.search = vi.fn().mockReturnValue(throwError(() => new Error()));
 
     const asyncSearchClient = wrapAsyncSearchClient({
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,
@@ -174,7 +176,7 @@ describe('wrapScopedClusterClient', () => {
 
   test('keeps the metrics', async () => {
     const abortController = new AbortController();
-    client.search = jest.fn().mockImplementation(
+    client.search = vi.fn().mockImplementation(
       (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of(
           {

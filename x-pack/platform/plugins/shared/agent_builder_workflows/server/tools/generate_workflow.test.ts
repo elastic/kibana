@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { generateWorkflow } from '@kbn/agent-builder-workflow-gen';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import {
@@ -14,11 +17,14 @@ import {
 } from '@kbn/workflows/common/constants';
 import { generateWorkflowTool } from './generate_workflow';
 
-jest.mock('@kbn/agent-builder-workflow-gen', () => ({
-  generateWorkflow: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-workflow-gen', () => {
+      const mocked = {
+      generateWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const generateWorkflowMock = generateWorkflow as jest.MockedFunction<typeof generateWorkflow>;
+const generateWorkflowMock = generateWorkflow as MockedFunction<typeof generateWorkflow>;
 
 describe('generateWorkflowTool', () => {
   const workflowsManagement = {
@@ -26,7 +32,7 @@ describe('generateWorkflowTool', () => {
   } as any;
 
   const aiTelemetryClient = {
-    reportEditResult: jest.fn(),
+    reportEditResult: vi.fn(),
   } as any;
 
   const generatedWorkflow = {
@@ -38,11 +44,11 @@ describe('generateWorkflowTool', () => {
 
   const buildContext = (
     overrides: Partial<{
-      get: jest.Mock;
-      getActive: jest.Mock;
-      add: jest.Mock;
-      update: jest.Mock;
-      sendUiEvent: jest.Mock;
+      get: Mock;
+      getActive: Mock;
+      add: Mock;
+      update: Mock;
+      sendUiEvent: Mock;
       stack: unknown[];
       callSource: string;
     }> = {}
@@ -53,25 +59,25 @@ describe('generateWorkflowTool', () => {
         toolCallId: 'call-1',
         callSource: overrides.callSource ?? 'agent',
       },
-      modelProvider: { getDefaultModel: jest.fn().mockResolvedValue({ id: 'model' }) },
-      logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+      modelProvider: { getDefaultModel: vi.fn().mockResolvedValue({ id: 'model' }) },
+      logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
       request: { __mock: 'request' },
       spaceId: 'default',
       attachments: {
-        get: overrides.get ?? jest.fn(),
-        getActive: overrides.getActive ?? jest.fn().mockReturnValue([]),
+        get: overrides.get ?? vi.fn(),
+        getActive: overrides.getActive ?? vi.fn().mockReturnValue([]),
         add:
           overrides.add ??
-          jest
+          vi
             .fn()
             // first call = diff attachment, second call = workflow attachment (creation path)
             .mockResolvedValueOnce({ id: 'diff-att', current_version: 1 })
             .mockResolvedValueOnce({ id: 'new-att', current_version: 1 }),
         update:
-          overrides.update ?? jest.fn().mockResolvedValue({ id: 'src-att', current_version: 2 }),
+          overrides.update ?? vi.fn().mockResolvedValue({ id: 'src-att', current_version: 2 }),
       },
       events: {
-        sendUiEvent: overrides.sendUiEvent ?? jest.fn(),
+        sendUiEvent: overrides.sendUiEvent ?? vi.fn(),
       },
       runContext: {
         stack: overrides.stack ?? [],
@@ -235,10 +241,10 @@ steps:
         },
       },
     };
-    const get = jest.fn().mockReturnValue(sourceAttachment);
-    const update = jest.fn().mockResolvedValue({ id: 'src-att', current_version: 2 });
-    const addMock = jest.fn().mockResolvedValue({ id: 'diff-att', current_version: 1 });
-    const sendUiEvent = jest.fn();
+    const get = vi.fn().mockReturnValue(sourceAttachment);
+    const update = vi.fn().mockResolvedValue({ id: 'src-att', current_version: 2 });
+    const addMock = vi.fn().mockResolvedValue({ id: 'diff-att', current_version: 1 });
+    const sendUiEvent = vi.fn();
     const context = buildContext({ get, update, add: addMock, sendUiEvent });
 
     const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
@@ -276,7 +282,7 @@ steps:
   });
 
   it('returns an errorResult when attachmentId is provided but the attachment does not exist', async () => {
-    const get = jest.fn().mockReturnValue(undefined);
+    const get = vi.fn().mockReturnValue(undefined);
     const context = buildContext({ get });
     const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
 
@@ -299,7 +305,7 @@ steps:
   });
 
   it('returns an errorResult when the source attachment is the wrong type', async () => {
-    const get = jest.fn().mockReturnValue({ id: 'x', type: 'something_else', data: { data: {} } });
+    const get = vi.fn().mockReturnValue({ id: 'x', type: 'something_else', data: { data: {} } });
     const context = buildContext({ get });
     const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
 

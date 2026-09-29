@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD } from './constants';
@@ -26,7 +28,7 @@ describe('rollDataStreamIfRequired', () => {
   const scheduleMessage = 'scheduling lazy rollover';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 

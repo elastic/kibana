@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { act, screen, within } from '@testing-library/react';
 import user from '@testing-library/user-event';
@@ -45,7 +47,7 @@ describe('ServiceAccountsTable', () => {
     hasMore?: boolean;
     hasLoadMoreError?: boolean;
   } = {}) => {
-    const onLoadMore = jest.fn();
+    const onLoadMore = vi.fn();
 
     renderWithI18n(
       <EuiProvider>

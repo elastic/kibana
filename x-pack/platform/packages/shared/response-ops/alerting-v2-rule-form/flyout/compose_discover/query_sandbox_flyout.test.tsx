@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,43 +19,58 @@ import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers'
 import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbox_flyout';
 import type { QueryTab } from './types';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLTimeField: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockFieldMap: DataViewFieldMap = {};
-jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: () => ({ data: mockFieldMap, isLoading: false }),
-}));
+vi.mock('../../form/hooks/use_data_fields', () => {
+      const mocked = {
+      useDataFields: () => ({ data: mockFieldMap, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
-}));
+vi.mock('@kbn/alerting-v2-browser-shared', () => {
+      const mocked = {
+      AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../form/contexts/rule_form_context', () => ({
-  useRuleFormServices: () => ({
-    http: {},
-    data: { search: { search: jest.fn() } },
-    dataViews: {},
-    application: {},
-    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
-  }),
-}));
+vi.mock('../../form/contexts/rule_form_context', () => {
+      const mocked = {
+      useRuleFormServices: () => ({
+        http: {},
+        data: { search: { search: vi.fn() } },
+        dataViews: {},
+        application: {},
+        notifications: { toasts: { addDanger: vi.fn(), addWarning: vi.fn() } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateTabQueries = jest.fn(
+const mockValidateTabQueries = vi.fn(
   async (_queries: unknown, _callbacks: unknown) =>
     [] as Array<{ tab: QueryTab; messages: string[] }>
 );
-jest.mock('./validate_tab_queries', () => ({
-  validateTabQueries: (queries: unknown, callbacks: unknown) =>
-    mockValidateTabQueries(queries, callbacks),
-}));
+vi.mock('./validate_tab_queries', () => {
+      const mocked = {
+      validateTabQueries: (queries: unknown, callbacks: unknown) =>
+        mockValidateTabQueries(queries, callbacks),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockColumns: never[] = [];
 const mockRows: never[] = [];
-const mockRun = jest.fn();
-const mockUseQueryExecution = jest.fn((_params: unknown) => ({
+const mockRun = vi.fn();
+const mockUseQueryExecution = vi.fn((_params: unknown) => ({
   columns: mockColumns,
   rows: mockRows,
   totalRowCount: 0,
@@ -64,30 +81,42 @@ const mockUseQueryExecution = jest.fn((_params: unknown) => ({
   hasRun: false,
   lastExecutedQuery: null,
 }));
-jest.mock('./use_query_execution', () => ({
-  useQueryExecution: (params: unknown) => mockUseQueryExecution(params),
-}));
+vi.mock('./use_query_execution', () => {
+      const mocked = {
+      useQueryExecution: (params: unknown) => mockUseQueryExecution(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compose_discover_chart', () => ({
-  ComposeDiscoverChart: () => null,
-}));
+vi.mock('./compose_discover_chart', () => {
+      const mocked = {
+      ComposeDiscoverChart: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <div data-test-subj="codeEditorMock" />,
-  ESQL_LANG_ID: 'esql',
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: () => <div data-test-subj="codeEditorMock" />,
+      ESQL_LANG_ID: 'esql',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compose_discover_tabs', () => ({
-  ComposeDiscoverTabs: () => null,
-  QueryTabButton: () => null,
-  TAB_DEFINITIONS: [
-    { id: 'base', label: 'Base query' },
-    { id: 'alert', label: 'Alert query' },
-    { id: 'recovery', label: 'Recovery query' },
-  ],
-  visibleTabIds: () => [],
-  isAlertTabDisabled: () => false,
-}));
+vi.mock('./compose_discover_tabs', () => {
+      const mocked = {
+      ComposeDiscoverTabs: () => null,
+      QueryTabButton: () => null,
+      TAB_DEFINITIONS: [
+        { id: 'base', label: 'Base query' },
+        { id: 'alert', label: 'Alert query' },
+        { id: 'recovery', label: 'Recovery query' },
+      ],
+      visibleTabIds: () => [],
+      isAlertTabDisabled: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockField = (name: string, type: string) =>
   ({ name, type, searchable: true, aggregatable: true } as DataViewFieldMap[string]);
@@ -109,12 +138,12 @@ const conditionRecovery = (): RuleRecovery => ({
 
 const defaultProps: QuerySandboxFlyoutProps = {
   query: unifiedQuery(),
-  onQueryChange: jest.fn(),
+  onQueryChange: vi.fn(),
   timeField: '@timestamp',
-  onTimeFieldChange: jest.fn(),
+  onTimeFieldChange: vi.fn(),
   dateRange: { dateStart: 'now-15m', dateEnd: 'now' },
-  onDateRangeChange: jest.fn(),
-  onClose: jest.fn(),
+  onDateRangeChange: vi.fn(),
+  onClose: vi.fn(),
 };
 
 const testQueryClient = new QueryClient({
@@ -133,11 +162,11 @@ const renderSandbox = (overrides: Partial<QuerySandboxFlyoutProps> = {}) =>
 describe('QuerySandboxFlyout — timefield selection', () => {
   beforeEach(() => {
     mockFieldMap = {};
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not auto-select a field when current timeField is not in the index; offers the real fields', () => {
-    const onTimeFieldChange = jest.fn();
+    const onTimeFieldChange = vi.fn();
     mockFieldMap = {
       'event.start': mockField('event.start', 'date'),
       'event.end': mockField('event.end', 'date'),
@@ -156,7 +185,7 @@ describe('QuerySandboxFlyout — timefield selection', () => {
   });
 
   it('clears the selection and shows no options when the index has no date field', async () => {
-    const onTimeFieldChange = jest.fn();
+    const onTimeFieldChange = vi.fn();
     mockFieldMap = {};
 
     renderSandbox({ timeField: 'event.start', onTimeFieldChange });
@@ -171,7 +200,7 @@ describe('QuerySandboxFlyout — timefield selection', () => {
   });
 
   it('does not call onTimeFieldChange when current timeField exists in the index', () => {
-    const onTimeFieldChange = jest.fn();
+    const onTimeFieldChange = vi.fn();
     mockFieldMap = {
       '@timestamp': mockField('@timestamp', 'date'),
       'event.end': mockField('event.end', 'date'),
@@ -183,7 +212,7 @@ describe('QuerySandboxFlyout — timefield selection', () => {
   });
 
   it('clears @timestamp (does not fabricate) when fieldMap is empty', async () => {
-    const onTimeFieldChange = jest.fn();
+    const onTimeFieldChange = vi.fn();
     mockFieldMap = {};
 
     renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
@@ -192,7 +221,7 @@ describe('QuerySandboxFlyout — timefield selection', () => {
   });
 
   it('clears (does not auto-select) when fieldMap changes and current selection is no longer valid', () => {
-    const onTimeFieldChange = jest.fn();
+    const onTimeFieldChange = vi.fn();
     mockFieldMap = {
       'event.start': mockField('event.start', 'date'),
     };
@@ -229,7 +258,7 @@ describe('QuerySandboxFlyout — timefield selection', () => {
 describe('QuerySandboxFlyout — per-tab query execution', () => {
   beforeEach(() => {
     mockFieldMap = {};
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('runs the base-only query when the Base tab is active', () => {
@@ -239,7 +268,7 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
       recovery: conditionRecovery(),
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'base',
-      onTabChange: jest.fn(),
+      onTabChange: vi.fn(),
     });
 
     expect(mockUseQueryExecution).toHaveBeenCalledWith(
@@ -254,7 +283,7 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
       recovery: conditionRecovery(),
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'alert',
-      onTabChange: jest.fn(),
+      onTabChange: vi.fn(),
     });
 
     expect(mockUseQueryExecution).toHaveBeenCalledWith(
@@ -270,7 +299,7 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
       recovery,
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'recovery',
-      onTabChange: jest.fn(),
+      onTabChange: vi.fn(),
     });
 
     expect(mockUseQueryExecution).toHaveBeenCalledWith(
@@ -283,7 +312,7 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
       query: splitQuery(),
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'recovery',
-      onTabChange: jest.fn(),
+      onTabChange: vi.fn(),
     });
 
     expect(mockUseQueryExecution).toHaveBeenCalledWith(expect.objectContaining({ query: '' }));
@@ -302,7 +331,7 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
 describe('QuerySandboxFlyout — Apply gating', () => {
   beforeEach(() => {
     mockFieldMap = {};
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockValidateTabQueries.mockResolvedValue([]);
   });
 
@@ -313,7 +342,7 @@ describe('QuerySandboxFlyout — Apply gating', () => {
   });
 
   it('applies when validation finds no errors', async () => {
-    const onApply = jest.fn();
+    const onApply = vi.fn();
     mockValidateTabQueries.mockResolvedValue([]);
 
     renderSandbox({ onApply, tabs: ['base', 'alert'], activeTab: 'alert' });
@@ -325,8 +354,8 @@ describe('QuerySandboxFlyout — Apply gating', () => {
   });
 
   it('switches to the offending tab and blocks apply when validation fails elsewhere', async () => {
-    const onApply = jest.fn();
-    const onTabChange = jest.fn();
+    const onApply = vi.fn();
+    const onTabChange = vi.fn();
     mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
 
     renderSandbox({ onApply, onTabChange, tabs: ['base', 'alert'], activeTab: 'base' });
@@ -340,8 +369,8 @@ describe('QuerySandboxFlyout — Apply gating', () => {
   });
 
   it('shows the inline error once the offending tab becomes active', async () => {
-    const onApply = jest.fn();
-    const onTabChange = jest.fn();
+    const onApply = vi.fn();
+    const onTabChange = vi.fn();
     mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
 
     const { rerender } = renderSandbox({
@@ -375,8 +404,8 @@ describe('QuerySandboxFlyout — Apply gating', () => {
   });
 
   it('shows the inline error immediately when the failing tab is already active', async () => {
-    const onApply = jest.fn();
-    const onTabChange = jest.fn();
+    const onApply = vi.fn();
+    const onTabChange = vi.fn();
     mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
 
     renderSandbox({ onApply, onTabChange, tabs: ['base', 'alert'], activeTab: 'alert' });
@@ -389,7 +418,7 @@ describe('QuerySandboxFlyout — Apply gating', () => {
   });
 
   it('shows the error inline in unified (no-tabs) mode without switching tabs', async () => {
-    const onApply = jest.fn();
+    const onApply = vi.fn();
     mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
 
     renderSandbox({ onApply, tabs: undefined });

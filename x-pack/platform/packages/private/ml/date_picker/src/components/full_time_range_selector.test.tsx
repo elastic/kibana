@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import moment from 'moment';
 import React from 'react';
 import { act, render, fireEvent } from '@testing-library/react';
@@ -27,19 +30,19 @@ const mockDependencies = {
   notifications: {},
 } as DatePickerDependencies;
 
-jest.mock('../services/full_time_range_selector_service');
+vi.mock('../services/full_time_range_selector_service');
 
 import { setFullTimeRange } from '../services/full_time_range_selector_service';
 
-jest.mock('@kbn/ml-local-storage', () => {
+vi.mock('@kbn/ml-local-storage', () => {
   return {
-    useStorage: jest.fn(() => 'exclude-frozen'),
+    useStorage: vi.fn(() => 'exclude-frozen'),
   };
 });
 
 describe('FullTimeRangeSelector', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const dataView = {
@@ -60,14 +63,14 @@ describe('FullTimeRangeSelector', () => {
     query,
     disabled: false,
     frozenDataPreference: FROZEN_TIER_PREFERENCE.EXCLUDE,
-    setFrozenDataPreference: jest.fn(),
+    setFrozenDataPreference: vi.fn(),
     timefilter: {} as TimefilterContract,
-    callback: jest.fn(),
+    callback: vi.fn(),
   };
 
   it('calls setFullTimeRange on clicking button', async () => {
     // prepare
-    (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => undefined);
+    (setFullTimeRange as MockedFunction<any>).mockImplementationOnce(() => undefined);
 
     const { getByText } = render(
       <IntlProvider locale="en">
@@ -91,7 +94,7 @@ describe('FullTimeRangeSelector', () => {
 
   it('calls setFullTimeRange and callback on clicking button', async () => {
     // prepare
-    (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => ({
+    (setFullTimeRange as MockedFunction<any>).mockImplementationOnce(() => ({
       success: true,
       start: { epoch: 1234, string: moment(1234).toISOString() },
       end: { epoch: 2345, string: moment(2345).toISOString() },
@@ -130,12 +133,12 @@ describe('FullTimeRangeSelector', () => {
 
   it('passes the explicit project routing to setFullTimeRange', async () => {
     const projectRouting = '_id:linked-project';
-    const getProjectRouting = jest.fn(() => '_id:global-project');
+    const getProjectRouting = vi.fn(() => '_id:global-project');
     const cps = {
       isTierEligible: true,
       cpsManager: { getProjectRouting },
     } as unknown as DatePickerDependencies['cps'];
-    (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => undefined);
+    (setFullTimeRange as MockedFunction<any>).mockImplementationOnce(() => undefined);
 
     const { getByText } = render(
       <IntlProvider locale="en">
@@ -164,12 +167,12 @@ describe('FullTimeRangeSelector', () => {
 
   it('falls back to the CPS context project routing', async () => {
     const projectRouting = '_id:context-project';
-    const getProjectRouting = jest.fn(() => projectRouting);
+    const getProjectRouting = vi.fn(() => projectRouting);
     const cps = {
       isTierEligible: true,
       cpsManager: { getProjectRouting },
     } as unknown as DatePickerDependencies['cps'];
-    (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => undefined);
+    (setFullTimeRange as MockedFunction<any>).mockImplementationOnce(() => undefined);
 
     const { getByText } = render(
       <IntlProvider locale="en">

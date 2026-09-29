@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { useFindAttackDiscoverySchedules } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
@@ -12,21 +15,21 @@ import { renderQuery } from '../../../../../management/hooks/test_utils';
 import { findAttackDiscoverySchedule } from '../api';
 import type { FindAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common';
 
-jest.mock('../api');
-jest.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('../api');
+vi.mock('../../../../../common/hooks/use_app_toasts');
 
-const findAttackDiscoveryScheduleMock = findAttackDiscoverySchedule as jest.MockedFunction<
+const findAttackDiscoveryScheduleMock = findAttackDiscoverySchedule as MockedFunction<
   typeof findAttackDiscoverySchedule
 >;
 
 describe('useFindAttackDiscoverySchedules', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
 
     // Mock data in camelCase format (internal API format)
     findAttackDiscoveryScheduleMock.mockResolvedValue({

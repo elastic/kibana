@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { useLocation } from 'react-router-dom';
@@ -15,29 +18,38 @@ import { resp, createSeries } from '../../../../utils/fixtures/metrics_explorer'
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
-jest.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_kibana');
 
-const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.MockedFunction<
+const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
 
-jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
-  useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
-  useSyncKibanaTimeFilterTime: () => [() => {}],
-}));
+vi.mock('../../../../hooks/use_kibana_timefilter_time', () => {
+      const mocked = {
+      useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
+      useSyncKibanaTimeFilterTime: () => [() => {}],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../alerting/use_alert_prefill', () => ({
-  useAlertPrefillContext: () => ({
-    metricThresholdPrefill: {
-      setPrefillOptions: jest.fn(),
-    },
-  }),
-}));
+vi.mock('../../../../alerting/use_alert_prefill', () => {
+      const mocked = {
+      useAlertPrefillContext: () => ({
+        metricThresholdPrefill: {
+          setPrefillOptions: vi.fn(),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderUseMetricsExplorerStateHook = () =>
   renderHook(() => useMetricsExplorerState(), {
@@ -48,9 +60,9 @@ const renderUseMetricsExplorerStateHook = () =>
     ),
   });
 
-const mockedUseMetricsExplorerData = jest.fn();
+const mockedUseMetricsExplorerData = vi.fn();
 
-jest.mock('./use_metrics_explorer_data', () => {
+vi.mock('./use_metrics_explorer_data', () => {
   return {
     useMetricsExplorerData: () => {
       return mockedUseMetricsExplorerData();
@@ -92,11 +104,11 @@ describe('useMetricsExplorerState', () => {
     delete STORE.MetricsExplorerTimeRange;
 
     const pathname = '/hosts';
-    (useLocation as jest.Mock).mockReturnValue(() => ({
+    (useLocation as Mock).mockReturnValue(() => ({
       pathname,
     }));
-    performance.mark = jest.fn();
-    performance.clearMeasures = jest.fn();
+    performance.mark = vi.fn();
+    performance.clearMeasures = vi.fn();
 
     mockUseKibanaContextForPlugin.mockReturnValue({
       services: {
@@ -106,7 +118,7 @@ describe('useMetricsExplorerState', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should just work', async () => {
@@ -246,7 +258,7 @@ describe('useMetricsExplorerState', () => {
       const { series } = result.current.data!.pages[0];
       expect(series).toBeDefined();
       expect(series.length).toBe(3);
-      const fetchNextPage = jest.fn();
+      const fetchNextPage = vi.fn();
       mockedUseMetricsExplorerData.mockReturnValue({
         isLoading: false,
         error: null,

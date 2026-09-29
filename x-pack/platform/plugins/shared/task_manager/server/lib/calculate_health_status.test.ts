@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { set } from '@kbn/safer-lodash-set';
 import type { RawMonitoringStats } from '../monitoring';
 import { HealthStatus } from '../monitoring';
@@ -13,7 +15,7 @@ import { cloneDeep } from 'lodash';
 import { ApiKeyType } from '../config';
 
 const now = '2023-05-09T13:00:00.000Z';
-Date.now = jest.fn().mockReturnValue(new Date(now));
+Date.now = vi.fn().mockReturnValue(new Date(now));
 
 const logger = loggingSystemMock.create().get();
 const config = {

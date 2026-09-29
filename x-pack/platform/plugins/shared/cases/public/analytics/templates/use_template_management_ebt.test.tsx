@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   CASES_TEMPLATE_CREATED_EVENT_TYPE,
@@ -21,15 +24,21 @@ import {
   useTemplateUpdatedEBT,
 } from './use_template_management_ebt';
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/cases_context/use_cases_context', () => ({
-  useCasesContext: jest.fn(),
-}));
+vi.mock('../../components/cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getMockServices = (reportEvent: jest.Mock) => ({
+const getMockServices = (reportEvent: Mock) => ({
   services: {
     analytics: {
       reportEvent,
@@ -38,12 +47,12 @@ const getMockServices = (reportEvent: jest.Mock) => ({
 });
 
 describe('template management EBT hooks', () => {
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue(getMockServices(reportEvent));
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: [SECURITY_SOLUTION_OWNER] });
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue(getMockServices(reportEvent));
+    (useCasesContext as Mock).mockReturnValue({ owner: [SECURITY_SOLUTION_OWNER] });
   });
 
   describe('useTemplateCreatedEBT', () => {
@@ -60,7 +69,7 @@ describe('template management EBT hooks', () => {
     });
 
     it('reports a clone from the templates list with a distinct creation mode', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
+      (useCasesContext as Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
       const { result } = renderHook(() => useTemplateCreatedEBT());
 
       result.current({ entryPoint: 'templates_list', creationMode: 'clone' });
@@ -73,7 +82,7 @@ describe('template management EBT hooks', () => {
     });
 
     it('falls back to unknown owner', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: ['invalid'] });
+      (useCasesContext as Mock).mockReturnValue({ owner: ['invalid'] });
       const { result } = renderHook(() => useTemplateCreatedEBT());
 
       result.current({ entryPoint: 'template_editor', creationMode: 'blank' });
@@ -110,7 +119,7 @@ describe('template management EBT hooks', () => {
     });
 
     it('falls back to unknown owner', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: [] });
+      (useCasesContext as Mock).mockReturnValue({ owner: [] });
       const { result } = renderHook(() => useTemplateUpdatedEBT());
 
       result.current({ entryPoint: 'template_editor' });
@@ -149,7 +158,7 @@ describe('template management EBT hooks', () => {
     });
 
     it('falls back to unknown owner', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: ['invalid'] });
+      (useCasesContext as Mock).mockReturnValue({ owner: ['invalid'] });
       const { result } = renderHook(() => useTemplateDeletedEBT());
 
       result.current({ entryPoint: 'templates_list', deleteScope: 'single' });

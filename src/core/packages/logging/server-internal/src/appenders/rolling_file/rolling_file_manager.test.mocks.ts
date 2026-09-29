@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockCreateWriteStream = jest.fn();
-export const mockMkdirSync = jest.fn();
-jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream, mkdirSync: mockMkdirSync }));
+import { vi } from 'vitest';
+
+export const mockCreateWriteStream = vi.fn();
+export const mockMkdirSync = vi.fn();
+vi.mock('fs', () => {
+      const mocked = { createWriteStream: mockCreateWriteStream, mkdirSync: mockMkdirSync };
+      return { ...mocked, default: mocked };
+    });
 
 export const resetAllMocks = () => {
   mockCreateWriteStream.mockReset();

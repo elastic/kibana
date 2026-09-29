@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { uniq } from 'lodash';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -25,11 +27,11 @@ import { OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID } from './observability/tra
 const levels = ['root', 'data-source', 'document'];
 let mockAllCollectedProfiles: Array<{ level: string; profileId: string }> = [];
 
-jest.mock('./register_enabled_profile_providers', () => {
-  const real = jest.requireActual('./register_enabled_profile_providers');
+vi.mock('./register_enabled_profile_providers', async () => {
+  const real = (await vi.importActual('./register_enabled_profile_providers'));
   return {
     ...real,
-    registerEnabledProfileProviders: jest.fn((params) => {
+    registerEnabledProfileProviders: vi.fn((params) => {
       let level = 'unknown';
       levels.forEach((l) => {
         if (params.profileService.defaultContext.profileId.includes(l)) {
@@ -67,7 +69,7 @@ const LOG_PROFILE_CASES: Array<[profileId: string, indexPattern: string]> = [
 
 const setupObservabilityProfileStack = async () => {
   const profileProviderServices = createProfileProviderSharedServicesMock();
-  jest.spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable').mockReturnValue(true);
+  vi.spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable').mockReturnValue(true);
   const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
     createContextAwarenessMocks({
       shouldRegisterProviders: false,
@@ -266,7 +268,7 @@ describe('registerProfileProviders', () => {
         const { dataSourceProfileServiceMock, profileProviderServices, rootContext } =
           await setupObservabilityProfileStack();
         const apmSourcesAccess = {
-          getApmIndices: jest.fn().mockResolvedValue({
+          getApmIndices: vi.fn().mockResolvedValue({
             transaction: CUSTOM_TRACES_INDEX_PATTERN,
             span: CUSTOM_TRACES_INDEX_PATTERN,
             error: '',
@@ -274,8 +276,8 @@ describe('registerProfileProviders', () => {
             onboarding: '',
             sourcemap: '',
           }),
-          getApmIndexSettings: jest.fn(),
-          saveApmIndices: jest.fn(),
+          getApmIndexSettings: vi.fn(),
+          saveApmIndices: vi.fn(),
         } as ApmSourceAccessPluginStart;
         const configuredApmContextService = await createApmContextService({
           apmSourcesAccess,

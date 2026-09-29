@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { bulkGetCases } from './bulk_get_cases';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -14,7 +16,7 @@ describe('bulkGetCases', () => {
   const http = mockCoreSetup.http;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http.post.mockResolvedValue({ cases: [], errors: [] });
   });
 

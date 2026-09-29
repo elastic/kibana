@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -56,7 +58,7 @@ describe('ModelUnavailableCallout', () => {
   });
 
   it('shows Edit Region preferences when expanded and onManageRegions is provided', () => {
-    const onManageRegions = jest.fn();
+    const onManageRegions = vi.fn();
     const { getByTestId } = renderCallout(onManageRegions);
 
     fireEvent.click(getByTestId('modelDetailFlyoutViewDetailsButton'));

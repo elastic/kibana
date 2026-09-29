@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { registerWorkflowYamlAttachment } from './workflow_yaml_attachment';
@@ -65,7 +67,7 @@ const registerAndCapture = (
   let registeredType: RegisteredAttachmentType | undefined;
   const mockAgentBuilder = {
     attachments: {
-      registerType: jest.fn((type: unknown) => {
+      registerType: vi.fn((type: unknown) => {
         registeredType = type as RegisteredAttachmentType;
       }),
     },
@@ -100,15 +102,15 @@ const createWorkflowAttachment = (
 describe('workflow_yaml_attachment', () => {
   describe('authorization', () => {
     it.each([true, false])('checks read access before resolving (allowed=%s)', async (allowed) => {
-      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: allowed });
+      const atSpace = vi.fn().mockResolvedValue({ hasAllRequested: allowed });
       const security = {
         authz: {
           actions: { api: { get: (action: string) => `api:${action}` } },
-          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpace }),
+          checkPrivilegesWithRequest: vi.fn().mockReturnValue({ atSpace }),
         },
       } as unknown as SecurityPluginStart;
       const workflow = { id: 'workflow-1', yaml: 'name: Workflow', name: 'Workflow' };
-      const getWorkflow = jest.fn().mockResolvedValue(workflow);
+      const getWorkflow = vi.fn().mockResolvedValue(workflow);
       const type = registerAndCapture({ getWorkflow }, security);
       const request = httpServerMock.createKibanaRequest();
 
@@ -140,7 +142,7 @@ describe('workflow_yaml_attachment', () => {
           }),
         },
       } as unknown as SecurityPluginStart;
-      const getWorkflow = jest.fn();
+      const getWorkflow = vi.fn();
       const type = registerAndCapture({ getWorkflow }, security);
 
       await expect(
@@ -190,7 +192,7 @@ describe('workflow_yaml_attachment', () => {
 
   describe('resolve', () => {
     it('returns mapped workflow data or undefined when not found', async () => {
-      const getWorkflow = jest.fn();
+      const getWorkflow = vi.fn();
       const type = registerAndCapture({ getWorkflow });
 
       getWorkflow.mockResolvedValueOnce({ id: 'w1', yaml: 'version: "1"', name: 'My Workflow' });
@@ -216,7 +218,7 @@ describe('workflow_yaml_attachment', () => {
 
   describe('isStale', () => {
     it('returns false before the workflow has changed', async () => {
-      const getWorkflow = jest.fn().mockResolvedValue({
+      const getWorkflow = vi.fn().mockResolvedValue({
         id: 'workflow-1',
         name: 'Workflow',
         yaml: 'name: Workflow',
@@ -233,7 +235,7 @@ describe('workflow_yaml_attachment', () => {
     });
 
     it('returns false when only YAML formatting has changed', async () => {
-      const getWorkflow = jest.fn().mockResolvedValue({
+      const getWorkflow = vi.fn().mockResolvedValue({
         id: 'workflow-1',
         name: 'Workflow',
         yaml: `# Current persisted workflow
@@ -260,7 +262,7 @@ steps:
     });
 
     it('returns true when the persisted workflow YAML has changed', async () => {
-      const getWorkflow = jest.fn().mockResolvedValue({
+      const getWorkflow = vi.fn().mockResolvedValue({
         id: 'workflow-1',
         name: 'Workflow',
         yaml: 'name: Updated workflow',
@@ -279,7 +281,7 @@ steps:
 
   describe('format', () => {
     it('includes successful validation status and forwards context to validation', async () => {
-      const validateWorkflow = jest.fn().mockResolvedValue({
+      const validateWorkflow = vi.fn().mockResolvedValue({
         valid: true,
         diagnostics: [],
       });
@@ -301,7 +303,7 @@ steps:
     });
 
     it('includes YAML, validation results, and client diagnostics in representation', async () => {
-      const validateWorkflow = jest.fn().mockResolvedValue({
+      const validateWorkflow = vi.fn().mockResolvedValue({
         valid: false,
         diagnostics: [
           { severity: 'error', source: 'schema', message: 'missing name', path: ['name'] },
@@ -334,7 +336,7 @@ steps:
     });
 
     it('still returns YAML and edit guidance when validation throws', async () => {
-      const validateWorkflow = jest.fn().mockRejectedValue(new Error('validation unavailable'));
+      const validateWorkflow = vi.fn().mockRejectedValue(new Error('validation unavailable'));
       const type = registerAndCapture({ validateWorkflow });
 
       const { getRepresentation } = type.format(

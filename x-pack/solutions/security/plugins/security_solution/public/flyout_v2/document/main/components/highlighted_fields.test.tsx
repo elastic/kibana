@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
@@ -22,17 +25,20 @@ import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_p
 import { useRuleDetails } from '../../../rule/main/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
-jest.mock('../hooks/use_highlighted_fields');
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
-jest.mock('../../../../detection_engine/rule_creation_ui/pages/form');
-jest.mock('../hooks/use_highlighted_fields_privilege');
-jest.mock('../../../rule/main/hooks/use_rule_details');
-const mockAddSuccess = jest.fn();
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addSuccess: mockAddSuccess,
-  }),
-}));
+vi.mock('../hooks/use_highlighted_fields');
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+vi.mock('../../../../detection_engine/rule_creation_ui/pages/form');
+vi.mock('../hooks/use_highlighted_fields_privilege');
+vi.mock('../../../rule/main/hooks/use_rule_details');
+const mockAddSuccess = vi.fn();
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addSuccess: mockAddSuccess,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderHighlightedFields = (hideEditButton = false) =>
   render(
@@ -42,7 +48,7 @@ const renderHighlightedFields = (hideEditButton = false) =>
         investigationFields={mockContextValue.investigationFields}
         scopeId={mockContextValue.scopeId}
         hideEditButton={hideEditButton}
-        renderCellActions={jest.fn(({ children }) => (
+        renderCellActions={vi.fn(({ children }) => (
           <>{children}</>
         ))}
       />
@@ -53,16 +59,16 @@ const NO_DATA_MESSAGE = "There's no highlighted fields for this alert.";
 
 describe('<HighlightedFields />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useHighlightedFieldsPrivilege as Mock).mockReturnValue({
       isDisabled: false,
       tooltipContent: 'tooltip content',
     });
-    (useRuleIndexPattern as jest.Mock).mockReturnValue({
+    (useRuleIndexPattern as Mock).mockReturnValue({
       indexPattern: { fields: ['field'] },
       isIndexPatternLoading: false,
     });
-    (useRuleDetails as jest.Mock).mockReturnValue({
+    (useRuleDetails as Mock).mockReturnValue({
       rule: { id: '123' } as RuleResponse,
       isExistingRule: true,
       loading: false,
@@ -70,7 +76,7 @@ describe('<HighlightedFields />', () => {
   });
 
   it('should render the component', () => {
-    (useHighlightedFields as jest.Mock).mockReturnValue({
+    (useHighlightedFields as Mock).mockReturnValue({
       field: {
         values: ['value'],
       },
@@ -83,7 +89,7 @@ describe('<HighlightedFields />', () => {
   });
 
   it(`should render no data message if there aren't any highlighted fields`, () => {
-    (useHighlightedFields as jest.Mock).mockReturnValue({});
+    (useHighlightedFields as Mock).mockReturnValue({});
 
     const { getByText } = renderHighlightedFields();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
@@ -91,7 +97,7 @@ describe('<HighlightedFields />', () => {
 
   describe('edit button', () => {
     it('should render the edit button by default', () => {
-      (useHighlightedFields as jest.Mock).mockReturnValue({
+      (useHighlightedFields as Mock).mockReturnValue({
         field: { values: ['value'] },
       });
 
@@ -101,7 +107,7 @@ describe('<HighlightedFields />', () => {
     });
 
     it('should hide the edit button when hideEditButton is true', () => {
-      (useHighlightedFields as jest.Mock).mockReturnValue({
+      (useHighlightedFields as Mock).mockReturnValue({
         field: { values: ['value'] },
       });
 
@@ -111,7 +117,7 @@ describe('<HighlightedFields />', () => {
     });
 
     it('should not render edit button if rule is null', () => {
-      (useRuleDetails as jest.Mock).mockReturnValue({
+      (useRuleDetails as Mock).mockReturnValue({
         rule: null,
         isExistingRule: true,
         loading: false,

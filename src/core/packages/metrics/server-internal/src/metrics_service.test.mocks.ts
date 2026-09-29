@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 
 export const mockOpsCollector = {
   ...collectorMock.create(),
-  registerMetrics: jest.fn(),
+  registerMetrics: vi.fn(),
 };
 
-jest.doMock('./ops_metrics_collector', () => ({
-  OpsMetricsCollector: jest.fn().mockImplementation(() => mockOpsCollector),
-}));
+vi.doMock('./ops_metrics_collector', () => {
+      const mocked = {
+      OpsMetricsCollector: vi.fn().mockImplementation(() => mockOpsCollector),
+    };
+      return { ...mocked, default: mocked };
+    });

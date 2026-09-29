@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import DateMath from '@kbn/datemath';
 import React, { useState, Fragment } from 'react';
 import type { UptimeUrlParamsHook } from './use_url_params';
@@ -45,17 +47,17 @@ describe('useUrlParams', () => {
   const MOCK_DATE_VALUE = 20;
 
   beforeEach(() => {
-    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy = vi.spyOn(DateMath, 'parse');
     dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
   });
 
   it('accepts router props, updates URL params, and returns the current params', () => {
     const history = createMemoryHistory();
-    jest.spyOn(history, 'push');
+    vi.spyOn(history, 'push');
 
     const component = mountWithRouter(
       <MountWithReduxProvider>
-        <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
+        <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: vi.fn() }}>
           <UseUrlParamsTestComponent hook={useUrlParams} />
         </UptimeRefreshContext.Provider>
       </MountWithReduxProvider>,
@@ -76,7 +78,7 @@ describe('useUrlParams', () => {
         <UptimeRefreshContext.Provider
           value={{
             lastRefresh: 123,
-            refreshApp: jest.fn(),
+            refreshApp: vi.fn(),
           }}
         >
           <UseUrlParamsTestComponent hook={useUrlParams} />
@@ -97,13 +99,13 @@ describe('useUrlParams', () => {
     });
     history.location.key = 'test';
 
-    jest.spyOn(history, 'push');
+    vi.spyOn(history, 'push');
     const component = mountWithRouter(
       <MountWithReduxProvider>
         <UptimeRefreshContext.Provider
           value={{
             lastRefresh: 123,
-            refreshApp: jest.fn(),
+            refreshApp: vi.fn(),
           }}
         >
           <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />

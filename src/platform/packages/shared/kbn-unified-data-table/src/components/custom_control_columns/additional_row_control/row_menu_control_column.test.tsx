@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { getRowMenuControlColumn } from './row_menu_control_column';
@@ -22,10 +24,10 @@ describe('getRowMenuControlColumn', () => {
   };
 
   it('should render the component', async () => {
-    const mockClick = jest.fn();
+    const mockClick = vi.fn();
     const props = {
       id: 'test_row_menu_control',
-      render: jest.fn((Control, rowProps) => (
+      render: vi.fn((Control, rowProps) => (
         <Control
           label={`test-${rowProps.rowIndex}`}
           tooltipContent={`test-${rowProps.rowIndex}`}
@@ -45,7 +47,7 @@ describe('getRowMenuControlColumn', () => {
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowMenuControlColumn
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
           columnId={props.id}
           colIndex={0}
           isDetails={false}

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ConnectorStep, ForEachStep, IfStep, WorkflowYaml } from '../../../spec/schema';
 import { WorkflowGraph } from '../workflow_graph';
 
@@ -93,7 +95,7 @@ describe('getNodeStack', () => {
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     const nodeId = 'secondThenTestConnectorStep';
     const predecessors = Object.freeze(workflowGraph.getAllPredecessors(nodeId));
-    const getAllPredecessorsSpy = jest.spyOn(workflowGraph, 'getAllPredecessors');
+    const getAllPredecessorsSpy = vi.spyOn(workflowGraph, 'getAllPredecessors');
 
     expect(workflowGraph.getNodeStack(nodeId, predecessors)).toEqual([
       'enterForeach_testForeachStep',

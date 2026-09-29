@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { Capabilities } from '@kbn/core/public';
@@ -16,19 +18,25 @@ import {
 } from '../cases_test_utils';
 import { CASES_FEATURE_ID, SECURITY_FEATURE_ID } from '../../common/constants';
 
-const mockNotFoundPage = jest.fn(() => null);
-jest.mock('./404', () => ({
-  NotFoundPage: () => mockNotFoundPage(),
-}));
+const mockNotFoundPage = vi.fn(() => null);
+vi.mock('./404', () => {
+      const mocked = {
+      NotFoundPage: () => mockNotFoundPage(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRedirect = jest.fn((_: unknown) => null);
-jest.mock('react-router-dom', () => ({
-  Redirect: (params: unknown) => mockRedirect(params),
-}));
+const mockRedirect = vi.fn((_: unknown) => null);
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      Redirect: (params: unknown) => mockRedirect(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RedirectRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('RedirectRoute should redirect to overview page when siem and case privileges are all', () => {

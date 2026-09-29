@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type { KibanaRequest } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { ActionExecutor } from './action_executor';
@@ -39,8 +42,8 @@ import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_cli
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 
-const mockRateLimiterLog = jest.fn();
-const mockRateLimiterIsRateLimited = jest.fn().mockReturnValue(false);
+const mockRateLimiterLog = vi.fn();
+const mockRateLimiterIsRateLimited = vi.fn().mockReturnValue(false);
 
 const connectorRateLimiter = {
   logsByConnectors: new Map([]),
@@ -83,7 +86,7 @@ const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
 const securityMockStart = securityServiceMock.createStart();
 
 const authorizationMock = actionsAuthorizationMock.create();
-const getActionsAuthorizationWithRequest = jest.fn();
+const getActionsAuthorizationWithRequest = vi.fn();
 const actionExecutorInitializationParams = {
   logger: loggerMock,
   spaces: spacesMock,
@@ -95,7 +98,7 @@ const actionExecutorInitializationParams = {
   encryptedSavedObjectsClient,
   eventLogger,
   getActionsAuthorizationWithRequest,
-  getCurrentUserProfileIdFromAPIKey: jest.fn().mockResolvedValue(undefined),
+  getCurrentUserProfileIdFromAPIKey: vi.fn().mockResolvedValue(undefined),
   inMemoryConnectors: [
     createMockInMemoryConnector({
       id: 'preconfigured',
@@ -120,7 +123,7 @@ const actionExecutorInitializationParams = {
 };
 actionExecutor.initialize(actionExecutorInitializationParams);
 
-const connectorType: jest.Mocked<ConnectorType> = {
+const connectorType: Mocked<ConnectorType> = {
   id: 'test',
   name: 'Test',
   minimumLicenseRequired: 'basic',
@@ -130,10 +133,10 @@ const connectorType: jest.Mocked<ConnectorType> = {
     secrets: { schema: z.object({ baz: z.boolean() }) },
     params: { schema: z.object({ foo: z.boolean() }) },
   },
-  executor: jest.fn(),
+  executor: vi.fn(),
 };
 
-const connectorTypeWithGlobalHeaders: jest.Mocked<ConnectorType> = {
+const connectorTypeWithGlobalHeaders: Mocked<ConnectorType> = {
   id: 'test-with-global-headers',
   name: 'Test with Global Headers',
   minimumLicenseRequired: 'basic',
@@ -143,13 +146,13 @@ const connectorTypeWithGlobalHeaders: jest.Mocked<ConnectorType> = {
     secrets: { schema: z.object({ baz: z.boolean() }) },
     params: { schema: z.object({ foo: z.boolean() }) },
   },
-  executor: jest.fn(),
+  executor: vi.fn(),
   globalAuthHeaders: {
     'x-custom-header': 'custom-header-value',
   },
 };
 
-const systemConnectorType: jest.Mocked<ConnectorType> = {
+const systemConnectorType: Mocked<ConnectorType> = {
   id: '.cases',
   name: 'Cases',
   minimumLicenseRequired: 'platinum',
@@ -160,10 +163,10 @@ const systemConnectorType: jest.Mocked<ConnectorType> = {
     secrets: { schema: z.any() },
     params: { schema: z.any() },
   },
-  executor: jest.fn(),
+  executor: vi.fn(),
 };
 
-const subFeatureConnectorType: jest.Mocked<ConnectorType> = {
+const subFeatureConnectorType: Mocked<ConnectorType> = {
   id: 'test.sub-feature-action',
   name: 'Test',
   minimumLicenseRequired: 'platinum',
@@ -174,7 +177,7 @@ const subFeatureConnectorType: jest.Mocked<ConnectorType> = {
     secrets: { schema: z.any() },
     params: { schema: z.any() },
   },
-  executor: jest.fn(),
+  executor: vi.fn(),
 };
 
 const connectorSavedObject = {
@@ -284,7 +287,7 @@ const getBaseExecuteEventLogDoc = (
   };
 };
 
-const mockGetRequestBodyByte = jest.spyOn(ConnectorUsageCollector.prototype, 'getRequestBodyByte');
+const mockGetRequestBodyByte = vi.spyOn(ConnectorUsageCollector.prototype, 'getRequestBodyByte');
 const mockRealm = { name: 'default_native', type: 'native' };
 const mockUser = {
   authentication_realm: mockRealm,
@@ -300,8 +303,8 @@ const mockUser = {
 };
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  jest.clearAllMocks();
+  vi.resetAllMocks();
+  vi.clearAllMocks();
   mockGetRequestBodyByte.mockReturnValue(0);
   spacesMock.getSpaceId.mockReturnValue(asSpaceId('some-namespace'));
   loggerMock.get.mockImplementation(() => loggerMock);
@@ -965,7 +968,7 @@ describe('Action Executor', () => {
       );
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
-        executor: jest.fn().mockReturnValue({
+        executor: vi.fn().mockReturnValue({
           actionId: 'test',
           status: 'error',
           message: 'test error message',
@@ -1037,7 +1040,7 @@ describe('Action Executor', () => {
 
       expect(connectorType.executor).toHaveBeenCalledTimes(1);
       const executorCall = (
-        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+        connectorType.executor as MockedFunction<NonNullable<ConnectorType['executor']>>
       ).mock.calls[0][0];
       expect(executorCall.config).toMatchInlineSnapshot(`Object {}`);
     });
@@ -1535,7 +1538,7 @@ describe('Action Executor', () => {
 
     test(`${label} does not log warning when executor succeeds`, async () => {
       (
-        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+        connectorType.executor as MockedFunction<NonNullable<ConnectorType['executor']>>
       ).mockResolvedValueOnce({
         actionId: '1',
         status: 'ok',
@@ -1555,7 +1558,7 @@ describe('Action Executor', () => {
 
     test(`${label} logs warning when executor returns error gracefully`, async () => {
       (
-        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+        connectorType.executor as MockedFunction<NonNullable<ConnectorType['executor']>>
       ).mockResolvedValueOnce({
         actionId: '1',
         status: 'error',
@@ -1593,7 +1596,7 @@ describe('Action Executor', () => {
       const err = new Error('this action execution is intended to fail');
       err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
       (
-        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+        connectorType.executor as MockedFunction<NonNullable<ConnectorType['executor']>>
       ).mockRejectedValueOnce(err);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
@@ -1647,7 +1650,7 @@ describe('Action Executor', () => {
       );
       err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
       (
-        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+        connectorType.executor as MockedFunction<NonNullable<ConnectorType['executor']>>
       ).mockRejectedValueOnce(err);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
@@ -1701,7 +1704,7 @@ describe('Action Executor', () => {
       });
       err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
       (
-        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+        connectorType.executor as MockedFunction<NonNullable<ConnectorType['executor']>>
       ).mockRejectedValueOnce(err);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
@@ -1762,7 +1765,7 @@ describe('Action Executor', () => {
 
     test(`${label} logs warning when executor returns invalid status`, async () => {
       (
-        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+        connectorType.executor as MockedFunction<NonNullable<ConnectorType['executor']>>
       ).mockResolvedValueOnce({
         actionId: '1',
         // @ts-expect-error
@@ -1865,7 +1868,7 @@ describe('Action Executor', () => {
       );
       err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
       (
-        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+        connectorType.executor as MockedFunction<NonNullable<ConnectorType['executor']>>
       ).mockRejectedValueOnce(err);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
@@ -1934,7 +1937,7 @@ describe('Action Executor', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
       );
-      const typeWithStringBar: jest.Mocked<ConnectorType> = {
+      const typeWithStringBar: Mocked<ConnectorType> = {
         ...connectorType,
         validate: {
           ...connectorType.validate,
@@ -1986,7 +1989,7 @@ describe('Action Executor', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
       );
-      const typeWithStringBar: jest.Mocked<ConnectorType> = {
+      const typeWithStringBar: Mocked<ConnectorType> = {
         ...connectorType,
         validate: {
           ...connectorType.validate,
@@ -2572,8 +2575,8 @@ function setupActionExecutorMock(
   actionTypeId = 'test',
   validationOverride?: ConnectorType['validate'],
   additionalConfig?: Record<string, unknown>
-): jest.MockedFunction<NonNullable<ConnectorType['executor']>> {
-  const executor = jest.fn();
+): MockedFunction<NonNullable<ConnectorType['executor']>> {
+  const executor = vi.fn();
   const thisConnectorType = {
     ...connectorType,
     ...(validationOverride ? { validate: validationOverride } : {}),
@@ -2613,7 +2616,7 @@ describe('execute() - optional params validator', () => {
         secrets: { schema: z.object({}) },
         // params validator is missing
       },
-      executor: jest.fn().mockResolvedValue({ status: 'ok', actionId: CONNECTOR_ID }),
+      executor: vi.fn().mockResolvedValue({ status: 'ok', actionId: CONNECTOR_ID }),
     };
 
     connectorTypeRegistry.get.mockReturnValue(connectorTypeWithoutParams);

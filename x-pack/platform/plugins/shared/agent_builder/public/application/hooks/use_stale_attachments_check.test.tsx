@@ -5,51 +5,62 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useStaleAttachments } from './use_stale_attachments_check';
 
-const mockCheckStale = jest.fn();
+const mockCheckStale = vi.fn();
 
-jest.mock('./use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    attachmentsService: { checkStale: mockCheckStale },
-  }),
-}));
+vi.mock('./use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        attachmentsService: { checkStale: mockCheckStale },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddErrorToast = jest.fn();
+const mockAddErrorToast = vi.fn();
 
-jest.mock('./use_toasts', () => ({
-  useToasts: () => ({ addErrorToast: mockAddErrorToast }),
-}));
+vi.mock('./use_toasts', () => {
+      const mocked = {
+      useToasts: () => ({ addErrorToast: mockAddErrorToast }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-use/lib/useEvent', () => ({
+vi.mock('react-use/lib/useEvent', () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
 
 const mockActiveStreams = new Map<string, unknown>();
 
-jest.mock('../context/streaming/streaming_context', () => ({
-  useStreamingContext: () => ({ activeStreams: mockActiveStreams }),
-}));
+vi.mock('../context/streaming/streaming_context', () => {
+      const mocked = {
+      useStreamingContext: () => ({ activeStreams: mockActiveStreams }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useStaleAttachments', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAddErrorToast.mockClear();
     mockActiveStreams.clear();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not call checkStale when conversationId is undefined (after debounce)', async () => {
     renderHook(() => useStaleAttachments(undefined));
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(mockCheckStale).not.toHaveBeenCalled();
@@ -61,7 +72,7 @@ describe('useStaleAttachments', () => {
     renderHook(() => useStaleAttachments('streaming-conv'));
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(mockCheckStale).not.toHaveBeenCalled();
@@ -77,7 +88,7 @@ describe('useStaleAttachments', () => {
     );
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
     expect(mockCheckStale).not.toHaveBeenCalled();
 
@@ -85,7 +96,7 @@ describe('useStaleAttachments', () => {
     rerender({ conversationId: newConversationId });
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(mockCheckStale).not.toHaveBeenCalled();
@@ -104,7 +115,7 @@ describe('useStaleAttachments', () => {
     );
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
     expect(mockCheckStale).not.toHaveBeenCalled();
 
@@ -112,7 +123,7 @@ describe('useStaleAttachments', () => {
 
     await act(async () => {
       result.current.scheduleStaleCheck();
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(mockCheckStale).toHaveBeenCalledWith(newConversationId);
@@ -129,7 +140,7 @@ describe('useStaleAttachments', () => {
     const { result } = renderHook(() => useStaleAttachments('conv-1'));
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(mockCheckStale).toHaveBeenCalledWith('conv-1');
@@ -154,7 +165,7 @@ describe('useStaleAttachments', () => {
     const { result } = renderHook(() => useStaleAttachments('conv-2'));
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(result.current.staleAttachments).toEqual([{ id: 's1', type: 'custom', data: { v: 1 } }]);
@@ -177,7 +188,7 @@ describe('useStaleAttachments', () => {
     );
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
     expect(mockCheckStale).toHaveBeenLastCalledWith('first');
     expect(result.current.staleAttachments).toHaveLength(1);
@@ -185,7 +196,7 @@ describe('useStaleAttachments', () => {
     rerender({ conversationId: 'second' });
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(mockCheckStale).toHaveBeenLastCalledWith('second');
@@ -200,13 +211,13 @@ describe('useStaleAttachments', () => {
     const { result } = renderHook(() => useStaleAttachments('conv-x'));
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
     expect(mockCheckStale).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       result.current.scheduleStaleCheck();
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(mockCheckStale).toHaveBeenCalledTimes(2);
@@ -224,7 +235,7 @@ describe('useStaleAttachments', () => {
     renderHook(() => useStaleAttachments('conv-err'));
 
     await act(async () => {
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(mockAddErrorToast).toHaveBeenCalledTimes(1);

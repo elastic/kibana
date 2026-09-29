@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import assert from 'assert';
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
@@ -19,7 +21,7 @@ const getMockLogger = () =>
 describe(__filename, () => {
   describe('fetchMonitoringClusters', () => {
     test('it should send multiple search queries', async () => {
-      const searchFn = jest.fn().mockResolvedValue({
+      const searchFn = vi.fn().mockResolvedValue({
         aggregations: {
           clusters: {
             buckets: [],
@@ -40,7 +42,7 @@ describe(__filename, () => {
     });
 
     test('it should report request timeouts', async () => {
-      const searchFn = jest
+      const searchFn = vi
         .fn()
         .mockResolvedValueOnce({
           timed_out: false,
@@ -68,7 +70,7 @@ describe(__filename, () => {
     });
 
     test('it should report request errors', async () => {
-      const searchFn = jest
+      const searchFn = vi
         .fn()
         .mockResolvedValueOnce({
           timed_out: false,
@@ -259,7 +261,7 @@ describe(__filename, () => {
         },
       };
 
-      const searchFn = jest
+      const searchFn = vi
         .fn()
         .mockResolvedValueOnce(mainMetricsetsResponse)
         .mockResolvedValueOnce(persistentMetricsetsResponse)

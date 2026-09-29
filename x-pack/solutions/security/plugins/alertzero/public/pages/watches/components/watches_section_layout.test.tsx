@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
@@ -20,34 +22,40 @@ import {
 import { useWatches } from '../../../hooks/use_watches_api';
 import { WatchesSectionLayout } from './watches_section_layout';
 
-jest.mock('../../../hooks/use_watches_api');
+vi.mock('../../../hooks/use_watches_api');
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Chrome `AppHeader` reads Kibana chrome hooks. The stub records `spacing` and `docLink` so the
  * shell test can assert compact spacing and the Documentation link without mounting that tree.
  */
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: ({
-    title,
-    spacing,
-    docLink,
-  }: {
-    title: string;
-    spacing?: string;
-    docLink?: string;
-  }) => (
-    <header data-test-subj="appHeader" data-spacing={spacing} data-doc-link={docLink}>
-      <h1>{title}</h1>
-    </header>
-  ),
-}));
+vi.mock('@kbn/app-header', () => {
+      const mocked = {
+      AppHeader: ({
+        title,
+        spacing,
+        docLink,
+      }: {
+        title: string;
+        spacing?: string;
+        docLink?: string;
+      }) => (
+        <header data-test-subj="appHeader" data-spacing={spacing} data-doc-link={docLink}>
+          <h1>{title}</h1>
+        </header>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWatches = jest.mocked(useWatches);
-const mockUseKibana = jest.mocked(useKibana);
+const mockUseWatches = vi.mocked(useWatches);
+const mockUseKibana = vi.mocked(useKibana);
 
 const catalogWatches = SYSTEM_SECURITY_WATCH_IDS.map((id) => createCatalogWatchPlaceholder(id));
 
@@ -74,7 +82,7 @@ const renderShell = (active = SYSTEM_SECURITY_WATCH_FLOOR_ID) => {
 
 describe('WatchesSectionLayout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },

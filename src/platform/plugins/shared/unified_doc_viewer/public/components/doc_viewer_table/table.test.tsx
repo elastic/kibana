@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
@@ -152,7 +154,7 @@ describe('DocViewerTable', () => {
   describe('switch - show only selected fields', () => {
     describe('when there is a filter function', () => {
       it('should disable the switch if columns is empty', async () => {
-        setupComponent({ filter: jest.fn() });
+        setupComponent({ filter: vi.fn() });
 
         expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
         expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -163,7 +165,7 @@ describe('DocViewerTable', () => {
       it('should disable the switch even if it was previously switched on', async () => {
         storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
 
-        setupComponent({ filter: jest.fn() });
+        setupComponent({ filter: vi.fn() });
 
         expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
         expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -174,7 +176,7 @@ describe('DocViewerTable', () => {
       it('should show only selected fields if it was previously switched on', async () => {
         storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
 
-        setupComponent({ columns: ['extension.keyword'], filter: jest.fn() });
+        setupComponent({ columns: ['extension.keyword'], filter: vi.fn() });
 
         expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeEnabled();
         expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -183,7 +185,7 @@ describe('DocViewerTable', () => {
       });
 
       it('should allow toggling the switch', async () => {
-        const { user } = setupComponent({ columns: ['bytes'], filter: jest.fn() });
+        const { user } = setupComponent({ columns: ['bytes'], filter: vi.fn() });
 
         const showOnlySelectedFieldsSwitch = screen.getByTestId(
           'unifiedDocViewerShowOnlySelectedFieldsSwitch'
@@ -213,7 +215,7 @@ describe('DocViewerTable', () => {
       it('should show multiple selected columns plus timestamp when switch is on', async () => {
         storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
 
-        setupComponent({ columns: ['bytes', 'extension.keyword'], filter: jest.fn() });
+        setupComponent({ columns: ['bytes', 'extension.keyword'], filter: vi.fn() });
 
         expect(screen.getByText('@timestamp')).toBeInTheDocument();
         expect(screen.getByText('bytes')).toBeInTheDocument();
@@ -233,7 +235,7 @@ describe('DocViewerTable', () => {
         storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
         storage.set('discover:pinnedFields', { test: ['extension.keyword'] });
 
-        setupComponent({ columns: ['bytes', 'extension.keyword'], filter: jest.fn() });
+        setupComponent({ columns: ['bytes', 'extension.keyword'], filter: vi.fn() });
 
         const fieldOrder = Array.from(document.querySelectorAll('.kbnDocViewer__fieldName')).map(
           (el) => el.textContent?.trim() ?? ''
@@ -251,7 +253,7 @@ describe('DocViewerTable', () => {
 
         const { user } = setupComponent({
           columns: ['bytes', 'extension.keyword'],
-          filter: jest.fn(),
+          filter: vi.fn(),
         });
 
         // Verify initial state: bytes is pinned and at the top

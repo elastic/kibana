@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
@@ -32,7 +34,7 @@ describe('getAgentUploads', () => {
   });
 
   it('should return right list of files', async () => {
-    esClient.search = jest.fn().mockImplementation(({ index, query }) => {
+    esClient.search = vi.fn().mockImplementation(({ index, query }) => {
       if (index === AGENT_ACTIONS_INDEX) {
         return { hits: { hits: AGENT_ACTIONS_FIXTURES } };
       }
@@ -78,7 +80,7 @@ describe('getAgentIdForUploadFile', () => {
   });
 
   it('should return the agent id from file metadata', async () => {
-    esClient.search = jest.fn().mockResolvedValueOnce({
+    esClient.search = vi.fn().mockResolvedValueOnce({
       hits: { hits: [{ _id: 'file-1', _source: { agent_id: 'agent-1' } }] },
     });
 
@@ -95,7 +97,7 @@ describe('getAgentIdForUploadFile', () => {
   });
 
   it('should throw FleetNotFoundError when file is not found', async () => {
-    esClient.search = jest.fn().mockResolvedValueOnce({ hits: { hits: [] } });
+    esClient.search = vi.fn().mockResolvedValueOnce({ hits: { hits: [] } });
 
     await expect(getAgentIdForUploadFile(esClient, 'missing-file')).rejects.toThrow(
       'File missing-file not found'
@@ -117,16 +119,16 @@ describe('deleteAgentUploadFile', () => {
 
   describe('should return success', () => {
     it('if the file was deleted and metadata was updated normally', async () => {
-      esClient.deleteByQuery = jest.fn().mockResolvedValueOnce({ deleted: 1 });
-      esClient.updateByQuery = jest.fn().mockResolvedValueOnce({ total: 1 });
+      esClient.deleteByQuery = vi.fn().mockResolvedValueOnce({ deleted: 1 });
+      esClient.updateByQuery = vi.fn().mockResolvedValueOnce({ total: 1 });
       const response = await deleteAgentUploadFile(esClient, id);
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
       expect(response).toEqual({ id, deleted: true });
     });
     it('if no files needed to be deleted and metadata was updated normally', async () => {
-      esClient.deleteByQuery = jest.fn().mockResolvedValueOnce({ total: 0 });
-      esClient.updateByQuery = jest.fn().mockResolvedValueOnce({ total: 1 });
+      esClient.deleteByQuery = vi.fn().mockResolvedValueOnce({ total: 0 });
+      esClient.updateByQuery = vi.fn().mockResolvedValueOnce({ total: 1 });
       const response = await deleteAgentUploadFile(esClient, id);
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
@@ -136,15 +138,15 @@ describe('deleteAgentUploadFile', () => {
 
   describe('should throw an error', () => {
     it('if data file deletion failed due to ES client error', async () => {
-      esClient.deleteByQuery = jest.fn().mockRejectedValueOnce(new Error('some es error'));
-      esClient.updateByQuery = jest.fn();
+      esClient.deleteByQuery = vi.fn().mockRejectedValueOnce(new Error('some es error'));
+      esClient.updateByQuery = vi.fn();
       await expect(deleteAgentUploadFile(esClient, id)).rejects.toThrow('some es error');
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });
     it('if data file deletion failed due to no files deleted', async () => {
-      esClient.deleteByQuery = jest.fn().mockResolvedValueOnce({ deleted: 0, total: 1 });
-      esClient.updateByQuery = jest.fn();
+      esClient.deleteByQuery = vi.fn().mockResolvedValueOnce({ deleted: 0, total: 1 });
+      esClient.updateByQuery = vi.fn();
       await expect(deleteAgentUploadFile(esClient, id)).rejects.toThrow(
         `Failed to delete file ${id} from file storage data stream`
       );
@@ -152,15 +154,15 @@ describe('deleteAgentUploadFile', () => {
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });
     it('if metadata deletion failed due to ES client error', async () => {
-      esClient.deleteByQuery = jest.fn().mockResolvedValueOnce({ total: 0 });
-      esClient.updateByQuery = jest.fn().mockRejectedValueOnce(new Error('some es error'));
+      esClient.deleteByQuery = vi.fn().mockResolvedValueOnce({ total: 0 });
+      esClient.updateByQuery = vi.fn().mockRejectedValueOnce(new Error('some es error'));
       await expect(deleteAgentUploadFile(esClient, id)).rejects.toThrow('some es error');
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
     });
     it('if metadata deletion failed due to no files deleted', async () => {
-      esClient.deleteByQuery = jest.fn().mockResolvedValueOnce({ total: 0 });
-      esClient.updateByQuery = jest.fn().mockResolvedValueOnce({ total: 0 });
+      esClient.deleteByQuery = vi.fn().mockResolvedValueOnce({ total: 0 });
+      esClient.updateByQuery = vi.fn().mockResolvedValueOnce({ total: 0 });
       await expect(deleteAgentUploadFile(esClient, id)).rejects.toThrow(
         `Failed to update file ${id} metadata`
       );

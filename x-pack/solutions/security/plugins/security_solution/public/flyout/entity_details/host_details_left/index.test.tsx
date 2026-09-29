@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   RISK_INPUTS_TAB_TEST_ID,
   INSIGHTS_TAB_TEST_ID,
@@ -36,11 +38,14 @@ const riskScore: HostRiskScore = {
     },
   },
 };
-const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [riskScore] });
+const mockUseRiskScore = vi.fn().mockReturnValue({ loading: false, data: [riskScore] });
 
-jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockUseRiskScore(),
-}));
+vi.mock('../../../entity_analytics/api/hooks/use_risk_score', () => {
+      const mocked = {
+      useRiskScore: () => mockUseRiskScore(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('HostDetailsPanel', () => {
   it('render risk inputs panel', () => {

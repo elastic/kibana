@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getElementUnder } from './get_element_under';
 import { DEVELOPER_TOOLBAR_ID, DEVTOOL_MANAGED_ATTR, DEVTOOL_HIDDEN_ATTR } from '../constants';
 
@@ -23,13 +25,13 @@ describe('getElementUnder', () => {
 
   it('should return a regular HTML element', () => {
     const div = document.createElement('div');
-    document.elementsFromPoint = jest.fn().mockReturnValue([div]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([div]);
 
     expect(getElementUnder(10, 10)).toBe(div);
   });
 
   it('should return null when no elements are found', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([]);
 
     expect(getElementUnder(10, 10)).toBeNull();
   });
@@ -37,7 +39,7 @@ describe('getElementUnder', () => {
   it('should return a managed element directly', () => {
     const clone = document.createElement('div');
     clone.setAttribute(DEVTOOL_MANAGED_ATTR, '');
-    document.elementsFromPoint = jest.fn().mockReturnValue([clone]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([clone]);
 
     expect(getElementUnder(10, 10)).toBe(clone);
   });
@@ -49,7 +51,7 @@ describe('getElementUnder', () => {
     clone.appendChild(child);
     document.body.appendChild(clone);
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([child]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([child]);
 
     expect(getElementUnder(10, 10)).toBe(clone);
 
@@ -59,7 +61,7 @@ describe('getElementUnder', () => {
   it('should return null for ignored elements (toolbar)', () => {
     const toolbar = document.createElement('div');
     toolbar.id = DEVELOPER_TOOLBAR_ID;
-    document.elementsFromPoint = jest.fn().mockReturnValue([toolbar]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([toolbar]);
 
     expect(getElementUnder(10, 10)).toBeNull();
   });
@@ -68,7 +70,7 @@ describe('getElementUnder', () => {
     const hidden = document.createElement('div');
     hidden.style.visibility = 'hidden';
     const visible = document.createElement('div');
-    document.elementsFromPoint = jest.fn().mockReturnValue([hidden, visible]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([hidden, visible]);
 
     expect(getElementUnder(10, 10)).toBe(visible);
   });
@@ -77,7 +79,7 @@ describe('getElementUnder', () => {
     const original = document.createElement('div');
     original.setAttribute(DEVTOOL_HIDDEN_ATTR, '');
     const behind = document.createElement('div');
-    document.elementsFromPoint = jest.fn().mockReturnValue([original, behind]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([original, behind]);
 
     expect(getElementUnder(10, 10)).toBe(behind);
   });

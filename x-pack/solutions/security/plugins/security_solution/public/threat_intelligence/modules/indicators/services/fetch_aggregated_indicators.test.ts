@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { BehaviorSubject, throwError } from 'rxjs';
@@ -67,12 +69,12 @@ const mockUserTimeZone = mockUiSetting('dateFormat:tz') as string;
 const mockField = { label: 'myField', value: 'string' };
 
 describe('FetchAggregatedIndicatorsService', () => {
-  beforeEach(jest.clearAllMocks);
+  beforeEach(vi.clearAllMocks);
 
   describe('aggregatedIndicatorsQuery()', () => {
     describe('when query is successful', () => {
       beforeEach(() => {
-        jest
+        vi
           .mocked(mockedSearchService.search)
           .mockReturnValue(new BehaviorSubject(aggregationResponse));
       });
@@ -117,7 +119,7 @@ describe('FetchAggregatedIndicatorsService', () => {
 
     describe('when query fails', () => {
       beforeEach(() => {
-        jest
+        vi
           .mocked(mockedSearchService.search)
           .mockReturnValue(throwError(() => new Error('some random exception')));
       });

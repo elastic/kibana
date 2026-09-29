@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateScheduleLimit } from './get_schedule_frequency';
 import { RulesClient } from '../../../../rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
@@ -53,7 +55,7 @@ describe('getScheduleFrequency()', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return the correct schedule frequency results', async () => {
@@ -138,7 +140,7 @@ describe('validateScheduleLimit', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should not return anything if the updated interval does not exceed limits', async () => {

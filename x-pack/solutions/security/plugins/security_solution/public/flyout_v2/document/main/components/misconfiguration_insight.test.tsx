@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { MisconfigurationsInsight } from './misconfiguration_insight';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
 const hostName = 'test host';
 const testId = 'test';
 
-const onShowMisconfigurationsDetails = jest.fn();
+const onShowMisconfigurationsDetails = vi.fn();
 
 const renderMisconfigurationsInsight = (fieldName: 'host.name' | 'user.name', value: string) => {
   return render(
@@ -32,7 +35,7 @@ const renderMisconfigurationsInsight = (fieldName: 'host.name' | 'user.name', va
 
 describe('MisconfigurationsInsight', () => {
   it('renders', () => {
-    (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+    (useMisconfigurationPreview as Mock).mockReturnValue({
       data: { count: { passed: 1, failed: 2 } },
     });
     const { getByTestId } = renderMisconfigurationsInsight('host.name', hostName);
@@ -41,7 +44,7 @@ describe('MisconfigurationsInsight', () => {
   });
 
   it('open entity details panel when clicking on the count', () => {
-    (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+    (useMisconfigurationPreview as Mock).mockReturnValue({
       data: { count: { passed: 1, failed: 2 } },
     });
     const { getByTestId } = renderMisconfigurationsInsight('host.name', hostName);
@@ -50,7 +53,7 @@ describe('MisconfigurationsInsight', () => {
   });
 
   it('renders null if no misconfiguration data found', () => {
-    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
+    (useMisconfigurationPreview as Mock).mockReturnValue({});
     const { container } = renderMisconfigurationsInsight('host.name', hostName);
     expect(container).toBeEmptyDOMElement();
   });

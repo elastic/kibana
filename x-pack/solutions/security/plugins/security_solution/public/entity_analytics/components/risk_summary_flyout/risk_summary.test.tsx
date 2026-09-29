@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   mockHostRiskScoreState,
   mockUserRiskScoreState,
@@ -27,14 +29,17 @@ import {
   RiskScoreLeftPanelSubTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
-const mockVisualizationEmbeddable = jest
+const mockVisualizationEmbeddable = vi
   .fn()
   .mockReturnValue(<div data-test-subj="visualization-embeddable" />);
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: (props: VisualizationEmbeddableProps) =>
-    mockVisualizationEmbeddable(props),
-}));
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
+      const mocked = {
+      VisualizationEmbeddable: (props: VisualizationEmbeddableProps) =>
+        mockVisualizationEmbeddable(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FlyoutRiskSummary', () => {
   beforeEach(() => {
@@ -285,7 +290,7 @@ describe('FlyoutRiskSummary', () => {
   });
 
   it('entity risk inputs link calls openDetailsPanel with entity sub-tab', () => {
-    const openDetailsPanel = jest.fn();
+    const openDetailsPanel = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary
@@ -309,7 +314,7 @@ describe('FlyoutRiskSummary', () => {
   });
 
   it('resolution risk inputs link calls openDetailsPanel with resolution sub-tab', () => {
-    const openDetailsPanel = jest.fn();
+    const openDetailsPanel = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary
@@ -345,7 +350,7 @@ describe('FlyoutRiskSummary', () => {
               hasResolutionGroup: true,
               resolutionTargetEntityId: 'host:target-entity',
             },
-            refetch: jest.fn(),
+            refetch: vi.fn(),
           }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -394,7 +399,7 @@ describe('FlyoutRiskSummary', () => {
               hasResolutionGroup: true,
               resolutionTargetEntityId: 'host:target-entity',
             },
-            refetch: jest.fn(),
+            refetch: vi.fn(),
           }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -422,7 +427,7 @@ describe('FlyoutRiskSummary', () => {
               hasResolutionGroup: true,
               resolutionTargetEntityId: 'host:target-entity',
             },
-            refetch: jest.fn(),
+            refetch: vi.fn(),
           }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -449,7 +454,7 @@ describe('FlyoutRiskSummary', () => {
               hasResolutionGroup: false,
               resolutionTargetEntityId: 'host:target-entity',
             },
-            refetch: jest.fn(),
+            refetch: vi.fn(),
           }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}

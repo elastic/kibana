@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { matchers } from '@emotion/jest';
@@ -35,7 +37,7 @@ describe('CuratedTileCard', () => {
 
   it('invokes the host-provided onClick', async () => {
     const user = userEvent.setup();
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<CuratedTileCard tile={{ ...baseTile, href: '/kubernetes', onClick }} />);
     await user.click(screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes'));
     expect(onClick).toHaveBeenCalled();

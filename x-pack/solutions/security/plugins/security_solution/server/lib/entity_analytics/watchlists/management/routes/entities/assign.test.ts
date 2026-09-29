@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_URL } from '../../../../../../../common/entity_analytics/watchlists/constants';
 import {
@@ -13,14 +15,17 @@ import {
   requestMock,
 } from '../../../../../detection_engine/routes/__mocks__';
 
-jest.mock('../../watchlist_config');
-jest.mock('../../../entity_sources/manual/service');
-jest.mock('@kbn/entity-store/server/domain/crud', () => ({
-  CRUDClient: jest.fn(),
-}));
+vi.mock('../../watchlist_config');
+vi.mock('../../../entity_sources/manual/service');
+vi.mock('@kbn/entity-store/server/domain/crud', () => {
+      const mocked = {
+      CRUDClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { mockWatchlistGet } = jest.requireMock('../../watchlist_config');
-const { mockAssign } = jest.requireMock('../../../entity_sources/manual/service');
+const { mockWatchlistGet } = (await vi.importMock('../../watchlist_config'));
+const { mockAssign } = (await vi.importMock('../../../entity_sources/manual/service'));
 
 import { assignWatchlistEntitiesRoute } from './assign';
 
@@ -42,7 +47,7 @@ describe('POST /api/entity_analytics/watchlists/{watchlist_id}/entities/assign -
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (watchlistId: string, body: object = {}) =>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -42,7 +44,7 @@ const rowWhereFieldIsAnonymized: ContextEditorRow = {
 };
 
 describe('getColumns', () => {
-  const onListUpdated = jest.fn();
+  const onListUpdated = vi.fn();
   const rawData: Record<string, string[]> = {
     'field.name': ['value1', 'value2'],
   };
@@ -91,14 +93,14 @@ describe('getColumns', () => {
     rawData,
     anonymizationPageFields: mockAnonymizationFields.data,
     selectedFields: [],
-    handlePageChecked: jest.fn(),
-    handlePageUnchecked: jest.fn(),
-    handleRowChecked: jest.fn(),
-    handleRowUnChecked: jest.fn(),
+    handlePageChecked: vi.fn(),
+    handlePageUnchecked: vi.fn(),
+    handleRowChecked: vi.fn(),
+    handleRowUnChecked: vi.fn(),
     totalItemCount: 0,
     anonymizationAllFields: mockAnonymizationFields.data,
-    handleRowReset: jest.fn(),
-    handlePageReset: jest.fn(),
+    handleRowReset: vi.fn(),
+    handlePageReset: vi.fn(),
   };
 
   it('includes the values column when rawData is NOT null', () => {

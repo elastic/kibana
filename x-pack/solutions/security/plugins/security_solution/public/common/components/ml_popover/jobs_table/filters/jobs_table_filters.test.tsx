@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 import { JobsTableFiltersComponent } from './jobs_table_filters';
@@ -20,7 +22,7 @@ describe('JobsTableFilters', () => {
   });
 
   test('when you click Elastic Jobs filter, state is updated and it is selected', () => {
-    const onFilterChanged = jest.fn();
+    const onFilterChanged = vi.fn();
     const wrapper = mount(
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
@@ -40,7 +42,7 @@ describe('JobsTableFilters', () => {
   });
 
   test('when you click Custom Jobs filter, state is updated and it is selected', () => {
-    const onFilterChanged = jest.fn();
+    const onFilterChanged = vi.fn();
     const wrapper = mount(
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
@@ -60,7 +62,7 @@ describe('JobsTableFilters', () => {
   });
 
   test('when you click Custom Jobs filter once, then Elastic Jobs filter, state is updated and  selected changed', () => {
-    const onFilterChanged = jest.fn();
+    const onFilterChanged = vi.fn();
     const wrapper = mount(
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
@@ -92,7 +94,7 @@ describe('JobsTableFilters', () => {
   });
 
   test('when you click Custom Jobs filter twice, state is updated and it is revert', () => {
-    const onFilterChanged = jest.fn();
+    const onFilterChanged = vi.fn();
     const wrapper = mount(
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );

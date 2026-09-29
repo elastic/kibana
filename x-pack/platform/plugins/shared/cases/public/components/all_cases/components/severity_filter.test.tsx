@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CaseSeverity } from '../../../../common/types/domain';
 import React from 'react';
 
@@ -16,7 +18,7 @@ import { renderWithTestingProviders } from '../../../common/mock';
 
 // Failing: See https://github.com/elastic/kibana/issues/176336
 describe('Severity form field', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   const props = {
     selectedOptionKeys: [],

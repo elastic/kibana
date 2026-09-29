@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import dedent from 'dedent';
 import { getGroupingQuery, MAX_RUNTIME_FIELD_SIZE, parseGroupingQuery } from '.';
 import { getEmptyValue } from './helpers';
@@ -15,7 +17,7 @@ import { groupingBucket, mocktestProps1, mockTestProps2 } from '../../mocks';
 
 describe('group selector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getGroupingQuery', () => {

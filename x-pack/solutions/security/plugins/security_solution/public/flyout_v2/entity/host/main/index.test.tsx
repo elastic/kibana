@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
@@ -20,17 +22,23 @@ const mockProps = {
   contextID: 'test-host-panel',
 };
 
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
-const mockedHostRiskScore = jest.fn().mockReturnValue(mockHostRiskScoreState);
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedHostRiskScore(),
-}));
+const mockedHostRiskScore = vi.fn().mockReturnValue(mockHostRiskScoreState);
+vi.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => {
+      const mocked = {
+      useRiskScore: () => mockedHostRiskScore(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseObservedHost = jest.fn().mockReturnValue(mockObservedHostData);
-jest.mock('./hooks/use_observed_host', () => ({
-  useObservedHost: () => mockedUseObservedHost(),
-}));
+const mockedUseObservedHost = vi.fn().mockReturnValue(mockObservedHostData);
+vi.mock('./hooks/use_observed_host', () => {
+      const mocked = {
+      useObservedHost: () => mockedUseObservedHost(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<Host />', () => {
   beforeEach(() => {

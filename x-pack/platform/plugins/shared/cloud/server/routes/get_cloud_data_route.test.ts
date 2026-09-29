@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext, RouteValidatorConfig } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, kibanaResponseFactory } from '@kbn/core/server';
@@ -13,9 +15,9 @@ import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import type { RouteOptions } from '.';
 import { setGetCloudSolutionDataRoute } from './get_cloud_data_route';
 
-const mockSavedObjectsClientGet = jest.fn();
-const mockSavedObjectsClientCreate = jest.fn();
-const mockSavedObjectsClientUpdate = jest.fn();
+const mockSavedObjectsClientGet = vi.fn();
+const mockSavedObjectsClientCreate = vi.fn();
+const mockSavedObjectsClientUpdate = vi.fn();
 
 const mockRouteContext = {
   core: {
@@ -47,7 +49,7 @@ describe('GET /internal/cloud/solution', () => {
     };
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return not found if cloud data does NOT exists', async () => {

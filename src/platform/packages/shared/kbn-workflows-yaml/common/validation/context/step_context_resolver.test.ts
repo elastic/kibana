@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowYaml } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
 import { WorkflowGraph } from '@kbn/workflows/graph';
@@ -30,7 +32,7 @@ describe('createStepContextResolver', () => {
   it('shares predecessor entries and traverses each resolved step only once within a run', () => {
     const registry = createMockWorkflowContextRegistry();
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const getAllPredecessors = jest.spyOn(graph, 'getAllPredecessors');
+    const getAllPredecessors = vi.spyOn(graph, 'getAllPredecessors');
     const resolver = createStepContextResolver(registry, definition, graph);
     const second = resolver.forStep('second');
     const third = resolver.forStep('third');

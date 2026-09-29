@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { pick } from 'lodash';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -29,22 +31,22 @@ describe('GenericError', () => {
     Object.defineProperties(window, {
       history: {
         value: {
-          back: jest.fn(),
+          back: vi.fn(),
         },
       },
       localStorage: {
         value: {
-          clear: jest.fn(),
+          clear: vi.fn(),
         },
       },
       location: {
         value: {
-          reload: jest.fn(),
+          reload: vi.fn(),
         },
       },
       sessionStorage: {
         value: {
-          clear: jest.fn(),
+          clear: vi.fn(),
         },
       },
     });
@@ -74,7 +76,7 @@ describe('GenericError', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should render a generic error screen', () => {

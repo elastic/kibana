@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,10 +15,10 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { ConversationPrompt } from './conversation_prompt';
 import { useKibana } from '../../hooks/use_kibana';
 
-jest.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_kibana');
 
-const mockNavigateToApp = jest.fn();
-const mockUseKibana = useKibana as jest.Mock;
+const mockNavigateToApp = vi.fn();
+const mockUseKibana = useKibana as Mock;
 
 const renderComponent = () =>
   render(

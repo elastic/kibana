@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   savedObjectsClientMock,
   elasticsearchServiceMock,
@@ -15,15 +17,15 @@ import { packagePolicyService } from '../../services';
 
 import { _runBackportPackagePolicyInputId } from './run_backport_package_policy_input_id';
 
-jest.mock('../../services/package_policy');
-jest.mock('../../services/epm/packages/get');
+vi.mock('../../services/package_policy');
+vi.mock('../../services/epm/packages/get');
 
 describe('_runBackportPackagePolicyInputId', () => {
   it('should do nothing if package policies already have input ids', async () => {
     const soClient = savedObjectsClientMock.create();
     const logger = loggingSystemMock.createLogger();
 
-    jest.mocked(packagePolicyService.fetchAllItems).mockResolvedValueOnce(
+    vi.mocked(packagePolicyService.fetchAllItems).mockResolvedValueOnce(
       (async function* () {
         yield [
           {
@@ -54,7 +56,7 @@ describe('_runBackportPackagePolicyInputId', () => {
     const soClient = savedObjectsClientMock.create();
     const logger = loggingSystemMock.createLogger();
 
-    jest.mocked(packagePolicyService.fetchAllItems).mockResolvedValueOnce(
+    vi.mocked(packagePolicyService.fetchAllItems).mockResolvedValueOnce(
       (async function* () {
         yield [
           {
@@ -89,7 +91,7 @@ describe('_runBackportPackagePolicyInputId', () => {
     const soClient = savedObjectsClientMock.create();
     const logger = loggingSystemMock.createLogger();
 
-    jest.mocked(packagePolicyService.fetchAllItems).mockResolvedValueOnce(
+    vi.mocked(packagePolicyService.fetchAllItems).mockResolvedValueOnce(
       (async function* () {
         yield [
           {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,14 +15,17 @@ import { Form, useForm } from '../../../shared_imports';
 import { TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL } from '../../../constants';
 import { TypeParameter } from './type_parameter';
 
-jest.mock('../../../../../services/documentation', () => ({
-  documentationService: {
-    getTypeDocLink: (type: string) => `/docs/${type}`,
-  },
-}));
+vi.mock('../../../../../services/documentation', () => {
+      const mocked = {
+      documentationService: {
+        getTypeDocLink: (type: string) => `/docs/${type}`,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,

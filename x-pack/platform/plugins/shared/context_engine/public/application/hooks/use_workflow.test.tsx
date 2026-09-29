@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { isWorkflowNotFoundError, useWorkflow } from './use_workflow';
 
-const mockGetWorkflow = jest.fn();
+const mockGetWorkflow = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: () => ({ getWorkflow: mockGetWorkflow }),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: () => ({ getWorkflow: mockGetWorkflow }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createNotFoundError = () =>
   Object.assign(new Error('Not Found'), {
@@ -47,7 +52,7 @@ describe('isWorkflowNotFoundError', () => {
 
 describe('useWorkflow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetWorkflow.mockResolvedValue({
       id: 'wf-1',
       name: 'My workflow',

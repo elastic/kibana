@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../../../common/types/api';
@@ -26,7 +28,7 @@ describe('GenerateApiKeyModalLogic', () => {
   const { mount } = new LogicMounter(GenerateApiKeyModalLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     apiLogicMount();
     mount();
   });

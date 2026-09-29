@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 
-export const mockCreatePluginPrebootSetupContext = jest.fn();
-export const mockCreatePluginSetupContext = jest.fn();
-export const mockCreatePluginStartContext = jest.fn();
+export const mockCreatePluginPrebootSetupContext = vi.fn();
+export const mockCreatePluginSetupContext = vi.fn();
+export const mockCreatePluginStartContext = vi.fn();
 
-jest.mock('./plugin_context', () => ({
-  createPluginPrebootSetupContext: mockCreatePluginPrebootSetupContext,
-  createPluginSetupContext: mockCreatePluginSetupContext,
-  createPluginStartContext: mockCreatePluginStartContext,
-}));
+vi.mock('./plugin_context', () => {
+      const mocked = {
+      createPluginPrebootSetupContext: mockCreatePluginPrebootSetupContext,
+      createPluginSetupContext: mockCreatePluginSetupContext,
+      createPluginStartContext: mockCreatePluginStartContext,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const runtimeResolverMock = createRuntimePluginContractResolverMock();
 
-jest.doMock('./plugin_contract_resolver', () => {
+vi.doMock('./plugin_contract_resolver', () => {
   return {
-    RuntimePluginContractResolver: jest.fn().mockImplementation(() => runtimeResolverMock),
+    RuntimePluginContractResolver: vi.fn().mockImplementation(() => runtimeResolverMock),
   };
 });

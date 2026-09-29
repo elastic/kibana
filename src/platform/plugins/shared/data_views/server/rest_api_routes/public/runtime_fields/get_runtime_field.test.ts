@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getRuntimeField } from './get_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
@@ -19,10 +21,10 @@ describe('get runtime field', () => {
     dataViewsService.getDataViewLazy.mockImplementation(
       async (id: string) =>
         ({
-          getFields: jest.fn().mockReturnValueOnce({ getFieldMap: () => ({}) }),
-          getRuntimeField: jest.fn().mockReturnValueOnce({}),
-          getRuntimeFields: jest.fn().mockReturnValueOnce({}),
-          getFieldsByRuntimeFieldName: jest.fn().mockReturnValueOnce({}),
+          getFields: vi.fn().mockReturnValueOnce({ getFieldMap: () => ({}) }),
+          getRuntimeField: vi.fn().mockReturnValueOnce({}),
+          getRuntimeFields: vi.fn().mockReturnValueOnce({}),
+          getFieldsByRuntimeFieldName: vi.fn().mockReturnValueOnce({}),
         } as unknown as DataViewLazy)
     );
 

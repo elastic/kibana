@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 
@@ -17,21 +19,27 @@ import {
 
 import { createListItemsBulk } from '.';
 
-jest.mock('./create_list_items_bulk', () => ({
-  createListItemsBulk: jest.fn(),
-}));
+vi.mock('./create_list_items_bulk', () => {
+      const mocked = {
+      createListItemsBulk: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lists/create_list_if_it_does_not_exist', () => ({
-  createListIfItDoesNotExist: jest.fn(),
-}));
+vi.mock('../lists/create_list_if_it_does_not_exist', () => {
+      const mocked = {
+      createListIfItDoesNotExist: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('write_lines_to_bulk_list_items', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('importListItemsToStream', () => {

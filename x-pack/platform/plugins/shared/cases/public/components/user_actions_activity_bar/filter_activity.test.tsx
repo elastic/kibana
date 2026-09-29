@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { waitFor, screen } from '@testing-library/react';
@@ -15,7 +17,7 @@ import { FilterActivity } from './filter_activity';
 import { renderWithTestingProviders } from '../../common/mock';
 
 describe('FilterActivity ', () => {
-  const onFilterActivityChange = jest.fn();
+  const onFilterActivityChange = vi.fn();
 
   const userActionsStats: CaseUserActionsStats = {
     total: 20,

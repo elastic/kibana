@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -21,28 +23,38 @@ import userEvent from '@testing-library/user-event';
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
-jest.mock('../../../lib/action_connector_api', () => ({
-  loadAllActions: jest.fn(),
-  loadActionTypes: jest.fn(),
-  loadConnectorAuthStatus: jest.fn(),
-}));
-const { loadAllActions, loadConnectorAuthStatus } = jest.requireMock(
-  '../../../lib/action_connector_api'
-);
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../lib/capabilities', () => ({
-  hasSaveActionsCapability: jest.fn(),
-}));
-const { hasSaveActionsCapability } = jest.requireMock('../../../lib/capabilities');
-jest.mock('../../../../common/get_experimental_features');
-jest.mock('../../../components/health_check', () => ({
-  HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../../context/health_context', () => ({
-  HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../lib/action_connector_api', () => {
+      const mocked = {
+      loadAllActions: vi.fn(),
+      loadActionTypes: vi.fn(),
+      loadConnectorAuthStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { loadAllActions, loadConnectorAuthStatus } = (await vi.importMock('../../../lib/action_connector_api'));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../lib/capabilities', () => {
+      const mocked = {
+      hasSaveActionsCapability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { hasSaveActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
+vi.mock('../../../../common/get_experimental_features');
+vi.mock('../../../components/health_check', () => {
+      const mocked = {
+      HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../context/health_context', () => {
+      const mocked = {
+      HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./actions_connectors_list', () => ({
+vi.mock('./actions_connectors_list', () => ({
   __esModule: true,
   default: (props: Record<string, unknown>) => {
     lastActionsConnectorsListProps = props;
@@ -53,7 +65,7 @@ jest.mock('./actions_connectors_list', () => ({
     );
   },
 }));
-jest.mock('./actions_connectors_event_log_list_table', () => {
+vi.mock('./actions_connectors_event_log_list_table', () => {
   return () => (
     <div data-test-subj="connectorEventLogListTableComponent">
       {'Render Connector Event log list table component'}
@@ -98,7 +110,7 @@ const connectorsTabProps = (): RouteComponentProps<MatchParams> => ({
 
 describe('ActionsConnectorsHome', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     hasSaveActionsCapability.mockReturnValue(true);
     lastActionsConnectorsListProps = undefined;
     loadAllActions.mockResolvedValue([]);

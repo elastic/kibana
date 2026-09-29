@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedClass, MockedFunction } from 'vitest';
+
 import 'jest-canvas-mock';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useLensAttributes } from './use_lens_attributes';
@@ -17,11 +20,11 @@ import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
 import { LensConfigBuilder, type LensBaseLayer, type LensConfig } from '@kbn/lens-embeddable-utils';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-jest.mock('@kbn/lens-embeddable-utils');
-const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
+vi.mock('@kbn/lens-embeddable-utils');
+const LensConfigBuilderMock = LensConfigBuilder as MockedClass<typeof LensConfigBuilder>;
 
 const normalizedLoad1m: LensBaseLayer = {
   label: 'Normalized Load',

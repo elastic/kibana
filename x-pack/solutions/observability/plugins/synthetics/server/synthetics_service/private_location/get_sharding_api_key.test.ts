@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import {
@@ -17,9 +19,9 @@ import {
   getPrivateLocationShardingApiKey,
 } from './get_sharding_api_key';
 
-const hasPrivileges = jest.fn();
-const validate = jest.fn();
-const grantAsInternalUser = jest.fn();
+const hasPrivileges = vi.fn();
+const validate = vi.fn();
+const grantAsInternalUser = vi.fn();
 
 const server = {
   logger: loggerMock.create(),
@@ -45,10 +47,10 @@ const server = {
 } as unknown as SyntheticsServerSetup;
 
 describe('private location sharding API key', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('creates and stores a dedicated key with minimal read privileges', async () => {
-    const create = jest.fn();
+    const create = vi.fn();
     const savedObjectsClient = { create } as never;
     grantAsInternalUser.mockResolvedValue({
       id: 'key-id',
@@ -93,7 +95,7 @@ describe('private location sharding API key', () => {
   });
 
   it('accepts a stored key only when it is valid and has both required privileges', async () => {
-    jest.spyOn(privateLocationShardingAPIKeySavedObject, 'get').mockResolvedValue({
+    vi.spyOn(privateLocationShardingAPIKeySavedObject, 'get').mockResolvedValue({
       id: 'key-id',
       name: 'synthetics-private-location-sharding',
       apiKey: 'secret',

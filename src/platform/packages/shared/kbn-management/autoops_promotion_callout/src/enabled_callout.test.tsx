@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
@@ -17,14 +19,17 @@ import {
   AUTOOPS_CALLOUT_DISMISSED_KEY,
 } from './callout';
 
-jest.mock('@elastic/eui-illustrations', () => ({
-  megaphone: {
-    id: 'megaphone',
-    title: 'Megaphone',
-    light: '<svg></svg>',
-    dark: '<svg></svg>',
-  },
-}));
+vi.mock('@elastic/eui-illustrations', () => {
+      const mocked = {
+      megaphone: {
+        id: 'megaphone',
+        title: 'Megaphone',
+        light: '<svg></svg>',
+        dark: '<svg></svg>',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_AUTOOPS_URL = 'https://cloud.elastic.co/performance/abc123';
 const TEST_DOCS_URL = 'https://www.elastic.co/docs/current/en/autoops';
@@ -36,7 +41,7 @@ const renderWithI18n = (component: React.ReactElement) => {
 describe('AutoOpsEnabledCallout', () => {
   beforeEach(() => {
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

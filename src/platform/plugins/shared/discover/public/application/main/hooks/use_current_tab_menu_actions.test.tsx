@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -39,7 +41,7 @@ describe('useCurrentTabMenuActions', () => {
 
   const setup = async () => {
     const services = createDiscoverServicesMock();
-    const getUiSettingsMock = jest.mocked(services.uiSettings.get);
+    const getUiSettingsMock = vi.mocked(services.uiSettings.get);
     const originalGetImplementation = getUiSettingsMock.getMockImplementation();
 
     getUiSettingsMock.mockImplementation((key, defaultOverride) => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -15,18 +18,21 @@ import { WorkspaceClient } from './client/workspace_client';
 import { createWorkspaceService } from './workspace_service';
 
 // Keep the real path validation; stub the ES-backed workspace client + storage.
-jest.mock('./client/workspace_client');
-jest.mock('./client/storage', () => ({ createStorage: jest.fn(() => ({})) }));
+vi.mock('./client/workspace_client');
+vi.mock('./client/storage', () => {
+      const mocked = { createStorage: vi.fn(() => ({})) };
+      return { ...mocked, default: mocked };
+    });
 
 const b64 = (s: string) => Buffer.from(s).toString('base64');
 
 describe('WorkspaceService', () => {
-  let mockGet: jest.Mock;
-  let mockLoad: jest.Mock;
+  let mockGet: Mock;
+  let mockLoad: Mock;
 
   const buildService = () => {
-    mockGet = jest.fn().mockResolvedValue({ id: 'conv-1', workspace_id: 'ws-1' });
-    mockLoad = jest.fn().mockResolvedValue({
+    mockGet = vi.fn().mockResolvedValue({ id: 'conv-1', workspace_id: 'ws-1' });
+    mockLoad = vi.fn().mockResolvedValue({
       files: {
         '/workspace/renders/table/x.json': {
           content: b64('{"hello":"world"}'),
@@ -35,10 +41,10 @@ describe('WorkspaceService', () => {
         },
       },
     });
-    (WorkspaceClient as unknown as jest.Mock).mockImplementation(() => ({ load: mockLoad }));
+    (WorkspaceClient as unknown as Mock).mockImplementation(() => ({ load: mockLoad }));
 
     const conversations = {
-      getScopedClient: jest.fn().mockResolvedValue({ get: mockGet }),
+      getScopedClient: vi.fn().mockResolvedValue({ get: mockGet }),
     } as any;
 
     return createWorkspaceService({
@@ -55,7 +61,7 @@ describe('WorkspaceService', () => {
     return client.readFile({ conversationId: 'conv-1', path });
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('reads and decodes a file within /workspace', async () => {
     const result = await readFile('/workspace/renders/table/x.json');

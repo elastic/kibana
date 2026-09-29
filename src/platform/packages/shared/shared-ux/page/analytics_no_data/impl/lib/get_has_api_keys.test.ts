@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { HasApiKeysResponse } from './get_has_api_keys';
@@ -18,41 +20,49 @@ describe('getHasApiKeys$', () => {
     mockHttp = httpServiceMock.createSetupContract({ basePath: '/test' });
   });
 
-  it('should return the correct sequence of states', (done) => {
-    const httpGetSpy = jest.spyOn(mockHttp, 'get');
-    httpGetSpy.mockResolvedValue({ hasApiKeys: true });
-    const source$ = getHasApiKeys$(mockHttp);
+  it('should return the correct sequence of states', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    const emittedValues: HasApiKeysResponse[] = [];
+          const httpGetSpy = vi.spyOn(mockHttp, 'get');
+          httpGetSpy.mockResolvedValue({ hasApiKeys: true });
+          const source$ = getHasApiKeys$(mockHttp);
 
-    source$.subscribe({
-      next: (value) => emittedValues.push(value),
-      complete: () => {
-        expect(emittedValues).toEqual([
-          { error: null, hasApiKeys: null, isLoading: true },
-          { error: null, hasApiKeys: true, isLoading: false },
-        ]);
-        done();
-      },
-    });
-  });
+          const emittedValues: HasApiKeysResponse[] = [];
 
-  it('should forward the error', (done) => {
-    const httpGetSpy = jest.spyOn(mockHttp, 'get');
-    httpGetSpy.mockRejectedValue('something bad');
-    const source$ = getHasApiKeys$(mockHttp);
+          source$.subscribe({
+            next: (value) => emittedValues.push(value),
+            complete: () => {
+              expect(emittedValues).toEqual([
+                { error: null, hasApiKeys: null, isLoading: true },
+                { error: null, hasApiKeys: true, isLoading: false },
+              ]);
+              done();
+            },
+          });
+        
+      }));
 
-    const emittedValues: HasApiKeysResponse[] = [];
+  it('should forward the error', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    source$.subscribe({
-      next: (value) => emittedValues.push(value),
-      complete: () => {
-        expect(emittedValues).toEqual([
-          { error: null, hasApiKeys: null, isLoading: true },
-          { error: 'something bad', hasApiKeys: null, isLoading: false },
-        ]);
-        done();
-      },
-    });
-  });
+          const httpGetSpy = vi.spyOn(mockHttp, 'get');
+          httpGetSpy.mockRejectedValue('something bad');
+          const source$ = getHasApiKeys$(mockHttp);
+
+          const emittedValues: HasApiKeysResponse[] = [];
+
+          source$.subscribe({
+            next: (value) => emittedValues.push(value),
+            complete: () => {
+              expect(emittedValues).toEqual([
+                { error: null, hasApiKeys: null, isLoading: true },
+                { error: 'something bad', hasApiKeys: null, isLoading: false },
+              ]);
+              done();
+            },
+          });
+        
+      }));
 });

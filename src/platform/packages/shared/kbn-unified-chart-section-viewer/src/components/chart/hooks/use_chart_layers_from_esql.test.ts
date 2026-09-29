@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useChartLayersFromEsql } from './use_chart_layers_from_esql';
 import * as esqlModule from '@kbn/esql-utils';
@@ -17,13 +20,19 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { ESQLVariableType } from '@kbn/esql-types';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLQueryColumns: jest.fn(),
-}));
-jest.mock('../../../hooks', () => ({
-  useEsqlQueryInfo: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLQueryColumns: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useEsqlQueryInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createDeferred = <T>() => {
   let resolve!: (value: T) => void;
@@ -37,10 +46,10 @@ const createDeferred = <T>() => {
   return { promise, resolve, reject };
 };
 
-const getESQLQueryColumnsMock = esqlModule.getESQLQueryColumns as jest.MockedFunction<
+const getESQLQueryColumnsMock = esqlModule.getESQLQueryColumns as MockedFunction<
   typeof esqlModule.getESQLQueryColumns
 >;
-const useEsqlQueryInfoMock = esqlHook.useEsqlQueryInfo as jest.MockedFunction<
+const useEsqlQueryInfoMock = esqlHook.useEsqlQueryInfo as MockedFunction<
   typeof esqlHook.useEsqlQueryInfo
 >;
 
@@ -56,7 +65,7 @@ describe('useChartLayers', () => {
   const timeRange: TimeRange = { from: 'now-1h', to: 'now' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty yAxis if no columns', async () => {

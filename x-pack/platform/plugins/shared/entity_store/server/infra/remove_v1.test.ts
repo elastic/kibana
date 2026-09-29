@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -17,12 +20,12 @@ describe('stopAndRemoveV1', () => {
   const definitionId = `security_${type}_${namespace}`;
 
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let taskManager: jest.Mocked<Pick<TaskManagerStartContract, 'removeIfExists'>>;
+  let taskManager: Mocked<Pick<TaskManagerStartContract, 'removeIfExists'>>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    taskManager = { removeIfExists: jest.fn().mockResolvedValue(undefined) };
+    taskManager = { removeIfExists: vi.fn().mockResolvedValue(undefined) };
     savedObjectsClient = savedObjectsClientMock.create();
     // savedObjectsClientMock.create() creates jest.fn() stubs that return undefined by default.
     // The production code chains .catch() on the return value, so it must be a Promise.

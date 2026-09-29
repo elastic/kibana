@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { getAlertFieldsFromIndexFetcher } from './get_alert_fields_from_index_fetcher';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
@@ -15,18 +17,18 @@ describe('getAlertFieldsFromIndexFetcher', () => {
   const indexPatternsFetcher = new IndexPatternsFetcher(esClientScopedMock);
 
   beforeEach(async () => {
-    IndexPatternsFetcher.prototype.getFieldsForWildcard = jest.fn().mockResolvedValue({
+    IndexPatternsFetcher.prototype.getFieldsForWildcard = vi.fn().mockResolvedValue({
       fields: [],
       indices: [],
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should fetch alert fields correctly', async () => {
-    IndexPatternsFetcher.prototype.getFieldsForWildcard = jest.fn().mockResolvedValueOnce({
+    IndexPatternsFetcher.prototype.getFieldsForWildcard = vi.fn().mockResolvedValueOnce({
       fields: [
         { name: 'message', type: 'string' },
         { name: 'log.level', type: 'string' },
@@ -91,7 +93,7 @@ describe('getAlertFieldsFromIndexFetcher', () => {
   });
 
   test('returns empty fields when not authorized', async () => {
-    IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+    IndexPatternsFetcher.prototype.getFieldsForWildcard = vi
       .fn()
       .mockRejectedValueOnce({ meta: { statusCode: 403 }, message: 'Forbidden' });
     const response = await getAlertFieldsFromIndexFetcher(indexPatternsFetcher, [
@@ -101,7 +103,7 @@ describe('getAlertFieldsFromIndexFetcher', () => {
   });
 
   test('throws error correctly', async () => {
-    IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+    IndexPatternsFetcher.prototype.getFieldsForWildcard = vi
       .fn()
       .mockRejectedValueOnce({ meta: { statusCode: 500 }, message: 'Something went wrong' });
 

@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AttackDiscoveryCard } from './attack_discovery_card';
 import { TestProviders } from '../../../../../common/mock';
 
 const props = {
-  setComplete: jest.fn(),
-  checkComplete: jest.fn(),
-  isCardComplete: jest.fn(),
-  setExpandedCardId: jest.fn(),
-  isCardAvailable: jest.fn(),
+  setComplete: vi.fn(),
+  checkComplete: vi.fn(),
+  isCardComplete: vi.fn(),
+  setExpandedCardId: vi.fn(),
+  isCardAvailable: vi.fn(),
 };
 
 describe('RulesCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('description should be in the document', () => {

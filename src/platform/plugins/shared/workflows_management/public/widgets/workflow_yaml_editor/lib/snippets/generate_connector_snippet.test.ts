@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import {
   connectorTypeRequiresConnectorId,
@@ -14,88 +17,100 @@ import {
   getEnhancedTypeInfo,
 } from './generate_connector_snippet';
 
-jest.mock('../connectors_cache', () => ({
-  getCachedAllConnectors: jest.fn(() => [
-    {
-      type: 'slack',
-      hasConnectorId: 'required',
-    },
-    {
-      type: 'elasticsearch.request',
-      hasConnectorId: undefined,
-    },
-    {
-      type: 'custom.connector',
-      hasConnectorId: 'required',
-    },
-    {
-      type: 'no_id_connector',
-      hasConnectorId: undefined,
-    },
-    {
-      type: 'security.setAttackStatus',
-      hasConnectorId: undefined,
-    },
-    {
-      type: 'custom.typed',
-      hasConnectorId: undefined,
-    },
-  ]),
-}));
+vi.mock('../connectors_cache', () => {
+      const mocked = {
+      getCachedAllConnectors: vi.fn(() => [
+        {
+          type: 'slack',
+          hasConnectorId: 'required',
+        },
+        {
+          type: 'elasticsearch.request',
+          hasConnectorId: undefined,
+        },
+        {
+          type: 'custom.connector',
+          hasConnectorId: 'required',
+        },
+        {
+          type: 'no_id_connector',
+          hasConnectorId: undefined,
+        },
+        {
+          type: 'security.setAttackStatus',
+          hasConnectorId: undefined,
+        },
+        {
+          type: 'custom.typed',
+          hasConnectorId: undefined,
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items', () => ({
-  getConnectorInstancesForType: jest.fn((connectorType: string) => {
-    if (connectorType === 'slack') {
-      return [
-        { id: 'slack-uuid-1', name: 'My Slack', isDeprecated: false },
-        { id: 'slack-uuid-2', name: 'Old Slack', isDeprecated: true },
-      ];
-    }
-    if (connectorType === 'custom.connector') {
-      return [];
-    }
-    return [];
-  }),
-}));
+vi.mock('../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items', () => {
+      const mocked = {
+      getConnectorInstancesForType: vi.fn((connectorType: string) => {
+        if (connectorType === 'slack') {
+          return [
+            { id: 'slack-uuid-1', name: 'My Slack', isDeprecated: false },
+            { id: 'slack-uuid-2', name: 'Old Slack', isDeprecated: true },
+          ];
+        }
+        if (connectorType === 'custom.connector') {
+          return [];
+        }
+        return [];
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../get_required_params_for_connector', () => ({
-  getRequiredParamsForConnector: jest.fn((connectorType: string) => {
-    if (connectorType === 'slack') {
-      return [{ name: 'message', example: 'Hello Slack' }];
-    }
-    if (connectorType === 'custom.connector') {
-      return [];
-    }
-    if (connectorType === 'no_id_connector') {
-      return [{ name: 'body', defaultValue: '{}' }];
-    }
-    if (connectorType === 'security.setAttackStatus') {
-      // Mirrors what the real getRequiredParamsForConnector now derives from a discriminated union.
-      return [
-        { name: 'ids', example: [''] },
-        { name: 'status', example: 'closed' },
-      ];
-    }
-    if (connectorType === 'custom.typed') {
-      // What the real getRequiredParamsForConnector derives for `z.number()` / `z.boolean()` fields.
-      return [
-        { name: 'count', example: 0 },
-        { name: 'enabled', example: false },
-      ];
-    }
-    if (connectorType === 'cases.addAttachments') {
-      return [
-        { name: 'case_id', example: '' },
-        { name: 'attachments', example: [{ type: '' }] },
-      ];
-    }
-    return [];
-  }),
-}));
+vi.mock('../get_required_params_for_connector', () => {
+      const mocked = {
+      getRequiredParamsForConnector: vi.fn((connectorType: string) => {
+        if (connectorType === 'slack') {
+          return [{ name: 'message', example: 'Hello Slack' }];
+        }
+        if (connectorType === 'custom.connector') {
+          return [];
+        }
+        if (connectorType === 'no_id_connector') {
+          return [{ name: 'body', defaultValue: '{}' }];
+        }
+        if (connectorType === 'security.setAttackStatus') {
+          // Mirrors what the real getRequiredParamsForConnector now derives from a discriminated union.
+          return [
+            { name: 'ids', example: [''] },
+            { name: 'status', example: 'closed' },
+          ];
+        }
+        if (connectorType === 'custom.typed') {
+          // What the real getRequiredParamsForConnector derives for `z.number()` / `z.boolean()` fields.
+          return [
+            { name: 'count', example: 0 },
+            { name: 'enabled', example: false },
+          ];
+        }
+        if (connectorType === 'cases.addAttachments') {
+          return [
+            { name: 'case_id', example: '' },
+            { name: 'attachments', example: [{ type: '' }] },
+          ];
+        }
+        return [];
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-utility', () => ({
-  isMac: false,
-}));
+vi.mock('@kbn/shared-ux-utility', () => {
+      const mocked = {
+      isMac: false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('generateConnectorSnippet', () => {
   describe('full snippet with steps section', () => {
@@ -231,9 +246,9 @@ describe('generateConnectorSnippet', () => {
   describe('discriminated union scaffolding', () => {
     // Need to register these connectors in the connectors_cache mock so the
     // snippet generator's connector-id check finds them.
-    beforeAll(() => {
-      const mock = jest.requireMock('../connectors_cache') as {
-        getCachedAllConnectors: jest.Mock;
+    beforeAll(async () => {
+      const mock = (await vi.importMock('../connectors_cache')) as {
+        getCachedAllConnectors: Mock;
       };
       mock.getCachedAllConnectors.mockImplementation(() => [
         { type: 'slack', hasConnectorId: 'required' },

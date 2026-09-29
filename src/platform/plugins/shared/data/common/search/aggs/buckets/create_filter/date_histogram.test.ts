@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment-timezone';
 import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions, autoInterval } from '../_interval_options';
@@ -51,7 +53,7 @@ describe('AggConfig Filters', () => {
         {
           typesRegistry: mockAggTypesRegistry(),
         },
-        jest.fn()
+        vi.fn()
       );
       const bucketKey = 1422579600000;
 

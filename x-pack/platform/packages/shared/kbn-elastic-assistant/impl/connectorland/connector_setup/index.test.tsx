@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { welcomeConvo } from '../../mock/conversation';
 import { mockAssistantAvailability, TestProviders } from '../../mock/test_providers/test_providers';
 import { ConnectorSetup } from '.';
 
-const onConversationUpdate = jest.fn();
+const onConversationUpdate = vi.fn();
 
 const defaultProps = {
   conversation: welcomeConvo,
@@ -19,38 +21,44 @@ const defaultProps = {
 };
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
 
-jest.mock('../add_connector_modal', () => ({
-  // @ts-ignore
-  AddConnectorModal: ({ onSaveConnector, isMissingConnectorPrivileges }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="modal-mock"
-        onClick={() => onSaveConnector(newConnector)}
-      />
-      {isMissingConnectorPrivileges && <span data-test-subj="modal-missing-privileges-indicator" />}
-    </>
-  ),
-}));
+vi.mock('../add_connector_modal', () => {
+      const mocked = {
+      // @ts-ignore
+      AddConnectorModal: ({ onSaveConnector, isMissingConnectorPrivileges }) => (
+        <>
+          <button
+            type="button"
+            data-test-subj="modal-mock"
+            onClick={() => onSaveConnector(newConnector)}
+          />
+          {isMissingConnectorPrivileges && <span data-test-subj="modal-missing-privileges-indicator" />}
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const setApiConfig = jest.fn().mockResolvedValue(welcomeConvo);
+const setApiConfig = vi.fn().mockResolvedValue(welcomeConvo);
 const mockConversation = {
-  appendMessage: jest.fn(),
-  appendReplacements: jest.fn(),
-  clearConversation: jest.fn(),
-  createConversation: jest.fn(),
-  deleteConversation: jest.fn(),
+  appendMessage: vi.fn(),
+  appendReplacements: vi.fn(),
+  clearConversation: vi.fn(),
+  createConversation: vi.fn(),
+  deleteConversation: vi.fn(),
   setApiConfig,
 };
 
-jest.mock('../../assistant/use_conversation', () => ({
-  useConversation: () => mockConversation,
-}));
+vi.mock('../../assistant/use_conversation', () => {
+      const mocked = {
+      useConversation: () => mockConversation,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.spyOn(global, 'clearTimeout');
+vi.spyOn(global, 'clearTimeout');
 describe('ConnectorSetup', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should render action type selector', async () => {
     const { getByTestId } = render(<ConnectorSetup {...defaultProps} />, {

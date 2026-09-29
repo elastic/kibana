@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import type { DetachMlInferencePipelineResponse } from './detach_ml_inference_pipeline';
@@ -13,7 +15,7 @@ import { detachMlInferencePipeline } from './detach_ml_inference_pipeline';
 describe('DetachMlInferencePipelineApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('detachMlInferencePipeline', () => {

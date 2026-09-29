@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
@@ -21,10 +24,13 @@ import type {
 import type { AggsStart } from '../aggs/types';
 import { getFunctionDefinition } from './esaggs';
 
-jest.mock('../../../common/search/expressions', () => ({
-  getEsaggsMeta: jest.fn().mockReturnValue({ name: 'esaggs' }),
-  handleEsaggsRequest: jest.fn(() => mockOf({})),
-}));
+vi.mock('../../../common/search/expressions', () => {
+      const mocked = {
+      getEsaggsMeta: vi.fn().mockReturnValue({ name: 'esaggs' }),
+      handleEsaggsRequest: vi.fn(() => mockOf({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
 
@@ -55,26 +61,26 @@ describe('esaggs expression function - public', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHandlers = {
-      abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
-      getSearchContext: jest.fn().mockReturnValue({}),
-      getSearchSessionId: jest.fn().mockReturnValue('abc123'),
-      getExecutionContext: jest.fn(),
-      inspectorAdapters: jest.fn(),
+      abortSignal: vi.fn() as unknown as Mocked<AbortSignal>,
+      getSearchContext: vi.fn().mockReturnValue({}),
+      getSearchSessionId: vi.fn().mockReturnValue('abc123'),
+      getExecutionContext: vi.fn(),
+      inspectorAdapters: vi.fn(),
       variables: {},
       types: {},
     };
     startDependencies = {
       aggs: {
-        createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
-      } as unknown as jest.Mocked<AggsStart>,
+        createAggConfigs: vi.fn().mockReturnValue({ foo: 'bar' }),
+      } as unknown as Mocked<AggsStart>,
       dataViews: {
-        create: jest.fn().mockResolvedValue({}),
-      } as unknown as jest.Mocked<DataViewsContract>,
-      searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
+        create: vi.fn().mockResolvedValue({}),
+      } as unknown as Mocked<DataViewsContract>,
+      searchSource: {} as unknown as Mocked<ISearchStartSearchSource>,
     };
-    getStartDependencies = jest.fn().mockResolvedValue(startDependencies);
+    getStartDependencies = vi.fn().mockResolvedValue(startDependencies);
     definition = getFunctionDefinition({ getStartDependencies });
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { listHealthScans } from './list_health_scans';
@@ -59,7 +61,7 @@ describe('listHealthScans', () => {
     deps.scopedClusterClient = scopedClusterClient;
     deps.taskManager = taskManager;
     taskManager.fetch.mockResolvedValue({ docs: [], versionMap: new Map() });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('space filtering', () => {

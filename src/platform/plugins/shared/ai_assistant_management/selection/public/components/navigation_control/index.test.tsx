@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -30,7 +32,7 @@ HTMLElement.prototype.matches = function (this: HTMLElement, query: string) {
 describe('AIAssistantHeaderButton', () => {
   const mockCoreStart = coreMock.createStart();
 
-  const mockTriggerOpenChat = jest.fn();
+  const mockTriggerOpenChat = vi.fn();
 
   const defaultProps = {
     coreStart: mockCoreStart,
@@ -48,7 +50,7 @@ describe('AIAssistantHeaderButton', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart.settings.client.set.mockResolvedValue(true);
     mockCoreStart.application.capabilities = {
       ...mockCoreStart.application.capabilities,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { createOpenInDiscoverAction } from './open_in_discover';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
@@ -22,14 +24,14 @@ const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
 
 const makeDeps = () => ({
   application: applicationServiceMock.createStartContract(),
-  getDiscoverHref: jest.fn<
+  getDiscoverHref: vi.fn<
     string | undefined | Promise<string | undefined>,
     [{ episodeIsoTimestamp: string; ruleId: string }]
   >((_args) => '/discover?query=...'),
 });
 
 describe('createOpenInDiscoverAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('compatible when episodes.length === 1', () => {
     expect(createOpenInDiscoverAction(makeDeps()).isCompatible({ episodes: [makeEpisode()] })).toBe(

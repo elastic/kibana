@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { UpdateQueryInFormButton } from '.';
 
-const mockUseAssistantContext = { codeBlockRef: { current: jest.fn() } };
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: () => mockUseAssistantContext,
-}));
+const mockUseAssistantContext = { codeBlockRef: { current: vi.fn() } };
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: () => mockUseAssistantContext,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('UpdateQueryInFormButton', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls codeBlockRef callback on click', async () => {

@@ -5,113 +5,145 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { AlertsInsights } from '.';
 import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
-const mockOpenSystemFlyout = jest.fn();
+const mockOpenSystemFlyout = vi.fn();
 
-jest.mock('../../../../shared/components/tools_flyout_header', () => ({
-  ToolsFlyoutHeader: ({
-    title,
-    label,
-    iconType,
-    onTitleClick,
-  }: {
-    title: string;
-    label?: string;
-    iconType?: string;
-    onTitleClick?: () => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="mockToolsFlyoutHeader"
-      data-title={title}
-      data-label={label}
-      data-icon-type={iconType}
-      onClick={onTitleClick}
-    />
-  ),
-}));
+vi.mock('../../../../shared/components/tools_flyout_header', () => {
+      const mocked = {
+      ToolsFlyoutHeader: ({
+        title,
+        label,
+        iconType,
+        onTitleClick,
+      }: {
+        title: string;
+        label?: string;
+        iconType?: string;
+        onTitleClick?: () => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="mockToolsFlyoutHeader"
+          data-title={title}
+          data-label={label}
+          data-icon-type={iconType}
+          onClick={onTitleClick}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../cloud_security_posture/components/csp_details/alerts_findings_details_table',
-  () => ({
-    AlertsDetailsTable: ({
-      field,
-      value,
-      entityId,
-      entityType,
-      onShowAlert,
-    }: {
-      field: string;
-      value: string;
-      entityId?: string;
-      entityType?: string;
-      onShowAlert?: (eventId: string, indexName: string, ruleName?: string) => void;
-    }) => (
-      <button
-        type="button"
-        data-test-subj="mockAlertsDetailsTable"
-        data-field={field}
-        data-value={value}
-        data-entity-id={entityId ?? ''}
-        data-entity-type={entityType ?? ''}
-        onClick={() => onShowAlert?.('event-1', '.alerts-security', 'My Alert Rule')}
-      >
-        {'alerts-table'}
-      </button>
-    ),
-  })
+  () => {
+      const mocked = {
+        AlertsDetailsTable: ({
+          field,
+          value,
+          entityId,
+          entityType,
+          onShowAlert,
+        }: {
+          field: string;
+          value: string;
+          entityId?: string;
+          entityType?: string;
+          onShowAlert?: (eventId: string, indexName: string, ruleName?: string) => void;
+        }) => (
+          <button
+            type="button"
+            data-test-subj="mockAlertsDetailsTable"
+            data-field={field}
+            data-value={value}
+            data-entity-id={entityId ?? ''}
+            data-entity-type={entityType ?? ''}
+            onClick={() => onShowAlert?.('event-1', '.alerts-security', 'My Alert Rule')}
+          >
+            {'alerts-table'}
+          </button>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../document/main/document_flyout_wrapper', () => ({
-  DocumentFlyoutWrapper: () => <div data-test-subj="mockDocumentFlyoutWrapper" />,
-}));
+vi.mock('../../../../document/main/document_flyout_wrapper', () => {
+      const mocked = {
+      DocumentFlyoutWrapper: () => <div data-test-subj="mockDocumentFlyoutWrapper" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../shared/components/cell_actions', () => ({
-  cellActionRenderer: jest.fn(),
-}));
+vi.mock('../../../../shared/components/cell_actions', () => {
+      const mocked = {
+      cellActionRenderer: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../shared/hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
-  useDefaultToolsFlyoutProperties: () => ({ minWidth: 384, size: 'm' }),
-}));
+vi.mock('../../../../shared/hooks/use_default_flyout_properties', () => {
+      const mocked = {
+      useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
+      useDefaultToolsFlyoutProperties: () => ({ minWidth: 384, size: 'm' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => true,
-}));
+vi.mock('../../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useStore: () => ({}),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useStore: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({ push: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      overlays: { openSystemFlyout: mockOpenSystemFlyout },
-      storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
-      telemetry: { reportEvent: jest.fn() },
-    },
-  }),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          overlays: { openSystemFlyout: mockOpenSystemFlyout },
+          storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
+          telemetry: { reportEvent: vi.fn() },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<AlertsInsights /> host', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+    vi.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
   });
 
   it('renders the header with the title, host label and storage icon', () => {
@@ -141,7 +173,7 @@ describe('<AlertsInsights /> host', () => {
   });
 
   it('forwards onShowEntity to the header click handler', () => {
-    const onShowEntity = jest.fn();
+    const onShowEntity = vi.fn();
     const { getByTestId } = render(
       <AlertsInsights entityType={EntityType.host} value="my-host" onShowEntity={onShowEntity} />
     );
@@ -162,7 +194,7 @@ describe('<AlertsInsights /> host', () => {
 
 describe('<AlertsInsights /> user', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the header with the user label and user icon', () => {

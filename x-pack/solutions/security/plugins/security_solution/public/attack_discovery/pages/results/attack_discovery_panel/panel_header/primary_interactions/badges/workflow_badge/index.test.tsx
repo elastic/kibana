@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -12,9 +15,12 @@ import { WorkflowBadge } from '.';
 import { getMockAttackDiscoveryAlerts } from '../../../../../../mock/mock_attack_discovery_alerts';
 import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
 
-jest.mock('../../../../../../utils/is_attack_discovery_alert', () => ({
-  isAttackDiscoveryAlert: jest.fn(),
-}));
+vi.mock('../../../../../../utils/is_attack_discovery_alert', () => {
+      const mocked = {
+      isAttackDiscoveryAlert: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowBadge', () => {
   const defaultProps = {
@@ -22,11 +28,11 @@ describe('WorkflowBadge', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the badge when attackDiscovery is an alert with a workflow status', () => {
-    (isAttackDiscoveryAlert as unknown as jest.Mock).mockReturnValue(true);
+    (isAttackDiscoveryAlert as unknown as Mock).mockReturnValue(true);
 
     const { getByText } = render(<WorkflowBadge {...defaultProps} />);
 
@@ -34,7 +40,7 @@ describe('WorkflowBadge', () => {
   });
 
   it('does NOT render the badge when attackDiscovery is NOT an alert', () => {
-    (isAttackDiscoveryAlert as unknown as jest.Mock).mockReturnValue(false);
+    (isAttackDiscoveryAlert as unknown as Mock).mockReturnValue(false);
 
     const { queryByTestId } = render(<WorkflowBadge {...defaultProps} />);
 
@@ -42,7 +48,7 @@ describe('WorkflowBadge', () => {
   });
 
   it('does NOT render the badge when alertWorkflowStatus is null', () => {
-    (isAttackDiscoveryAlert as unknown as jest.Mock).mockReturnValue(true);
+    (isAttackDiscoveryAlert as unknown as Mock).mockReturnValue(true);
     const props = {
       ...defaultProps,
       attackDiscovery: { ...defaultProps.attackDiscovery, alertWorkflowStatus: null },

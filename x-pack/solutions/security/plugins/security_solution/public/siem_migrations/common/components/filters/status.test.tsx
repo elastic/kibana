@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { StatusFilterButton } from './status';
 
 describe('StatusFilterButton', () => {
-  const onStatusChanged = jest.fn();
+  const onStatusChanged = vi.fn();
   const statusFilterOptions = [
     {
       label: 'All',

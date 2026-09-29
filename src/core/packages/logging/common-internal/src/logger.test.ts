@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { Appender, LogMeta, LogRecord, MetaFilterConfig } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { getLoggerContext } from '..';
@@ -16,12 +19,12 @@ import { AbstractLogger } from './logger';
 describe('AbstractLogger', () => {
   const context = getLoggerContext(['context', 'parent', 'child']);
   const factory = {
-    get: jest.fn().mockImplementation(() => logger),
+    get: vi.fn().mockImplementation(() => logger),
   };
 
   let appenderMocks: Appender[];
 
-  const createLogRecordSpy: jest.MockedFunction<CreateLogRecordFn> = jest.fn();
+  const createLogRecordSpy: MockedFunction<CreateLogRecordFn> = vi.fn();
 
   class TestLogger extends AbstractLogger {
     createLogRecord<Meta extends LogMeta>(
@@ -36,7 +39,7 @@ describe('AbstractLogger', () => {
   let logger: TestLogger;
 
   beforeEach(() => {
-    appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
+    appenderMocks = [{ append: vi.fn() }, { append: vi.fn() }];
     logger = new TestLogger(context, LogLevel.All, appenderMocks, factory, []);
 
     createLogRecordSpy.mockImplementation((level, message, meta) => {
@@ -276,14 +279,14 @@ describe('AbstractLogger', () => {
     for (const logLevel of orderedLogLevels) {
       it(`evaluates the log function for '${logLevel.id}' level if enabled`, () => {
         logger = new TestLogger(context, LogLevel.All, appenderMocks, factory);
-        const logFn = jest.fn(() => 'some message');
+        const logFn = vi.fn(() => 'some message');
         logger.trace(logFn);
         expect(logFn).toHaveBeenCalledTimes(1);
       });
 
       it(`does not evaluate the log function for '${logLevel.id}' level if not enabled`, () => {
         logger = new TestLogger(context, LogLevel.Off, appenderMocks, factory);
-        const logFn = jest.fn(() => 'some message');
+        const logFn = vi.fn(() => 'some message');
         logger.trace(logFn);
         expect(logFn).not.toHaveBeenCalled();
       });
@@ -356,7 +359,7 @@ describe('AbstractLogger', () => {
 
     it('does not evaluate a closure message when meta does not match the filter', () => {
       logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
-      const messageFn = jest.fn(() => 'expensive message');
+      const messageFn = vi.fn(() => 'expensive message');
 
       logger.debug(messageFn, nonMatchingMeta);
 
@@ -368,7 +371,7 @@ describe('AbstractLogger', () => {
 
     it('evaluates a closure message when meta matches the filter', () => {
       logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
-      const messageFn = jest.fn(() => 'expensive message');
+      const messageFn = vi.fn(() => 'expensive message');
 
       logger.debug(messageFn, matchingMeta);
 
@@ -446,7 +449,7 @@ describe('AbstractLogger', () => {
         expect(appenderMock.append).not.toHaveBeenCalled();
       }
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       logger.debug('debug message', { labels: { ruleType: 'esql', scope: 'background' } });
       for (const appenderMock of appenderMocks) {
@@ -482,7 +485,7 @@ describe('AbstractLogger', () => {
         expect(appenderMock.append).toHaveBeenCalledTimes(1);
       }
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       logger.log({ ...baseRecord, level: LogLevel.Debug, meta: nonMatchingMeta });
       for (const appenderMock of appenderMocks) {

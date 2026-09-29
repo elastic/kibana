@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
+const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as Mock;
 
 const kibanaVersion = 'v7.10.0';
 const ruleName = 'fakeRuleName';
@@ -33,7 +39,7 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
@@ -558,9 +564,9 @@ describe('updateRuleApiKey()', () => {
     };
 
     const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
@@ -685,7 +691,7 @@ describe('updateRuleApiKey()', () => {
     });
 
     test('logs the change only after the OCC retry succeeds (no logging on the failed attempt)', async () => {
-      const { SavedObjectsErrorHelpers } = jest.requireActual('@kbn/core/server');
+      const { SavedObjectsErrorHelpers } = (await vi.importActual('@kbn/core/server'));
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();

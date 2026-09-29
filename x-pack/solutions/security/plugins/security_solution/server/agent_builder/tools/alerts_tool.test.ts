@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
@@ -19,22 +22,25 @@ import {
 } from '../__mocks__/test_helpers';
 import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
 
-jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
-  runSearchTool: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils/tools', () => {
+      const mocked = {
+      runSearchTool: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('alertsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const mockModelProvider = agentBuilderMocks.createModelProvider();
   mockModelProvider.getDefaultModel.mockResolvedValue({ model: 'test-model' } as never);
   const mockEvents = {
-    reportProgress: jest.fn(),
-    sendUiEvent: jest.fn(),
+    reportProgress: vi.fn(),
+    sendUiEvent: vi.fn(),
   };
   const tool = alertsTool(mockCore, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
     // Existing handler tests assume the space alerts alias is present.
     mockEsClient.asInternalUser.indices.exists.mockResolvedValue(true);
@@ -148,7 +154,7 @@ describe('alertsTool', () => {
 
     it('calls runSearchTool with the current space alerts alias', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
+      (runSearchTool as Mock).mockResolvedValue({ results: mockResults });
 
       await tool.handler(
         { query: 'find all alerts' },
@@ -172,7 +178,7 @@ describe('alertsTool', () => {
     });
 
     it('enhances the query with a KEEP clause for essential alert fields', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as Mock).mockResolvedValue({ results: [] });
       const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
 
       await tool.handler(
@@ -183,12 +189,12 @@ describe('alertsTool', () => {
         })
       );
 
-      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      const callArgs = (runSearchTool as Mock).mock.calls[0][0];
       expect(callArgs.nlQuery).toContain(fieldsList);
     });
 
     it('uses handler context spaceId when building the alerts alias', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
         { query: 'find all alerts' },
@@ -199,12 +205,12 @@ describe('alertsTool', () => {
         })
       );
 
-      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      const callArgs = (runSearchTool as Mock).mock.calls[0][0];
       expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-custom-space`);
     });
 
     it('forwards time_window_hours to runSearchTool as a time range', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
         { query: 'find alerts', time_window_hours: 72 },
@@ -214,12 +220,12 @@ describe('alertsTool', () => {
         })
       );
 
-      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      const callArgs = (runSearchTool as Mock).mock.calls[0][0];
       expect(callArgs.timeRange).toEqual({ from: 'now-72h', to: 'now' });
     });
 
     it('leaves the time range unset when time_window_hours is not provided (24h default preserved)', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
         { query: 'find alerts' },
@@ -229,12 +235,12 @@ describe('alertsTool', () => {
         })
       );
 
-      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      const callArgs = (runSearchTool as Mock).mock.calls[0][0];
       expect(callArgs.timeRange).toBeUndefined();
     });
 
     it('ignores a caller-supplied index and still uses the space alias', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
         // Simulate a stale model/tool call that still sends index; schema strips it,
@@ -247,12 +253,12 @@ describe('alertsTool', () => {
         })
       );
 
-      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      const callArgs = (runSearchTool as Mock).mock.calls[0][0];
       expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-qa`);
     });
 
     it('enhances query with count instructions when isCount is true', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
         { query: 'how many alerts', isCount: true },
@@ -262,12 +268,12 @@ describe('alertsTool', () => {
         })
       );
 
-      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      const callArgs = (runSearchTool as Mock).mock.calls[0][0];
       expect(callArgs.nlQuery).toContain('STATS count = COUNT(*)');
     });
 
     it('logs debug message with correct parameters', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
         { query: 'test query', isCount: true },
@@ -285,7 +291,7 @@ describe('alertsTool', () => {
     it('returns results from runSearchTool', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       const runSearchToolResult = { results: mockResults };
-      (runSearchTool as jest.Mock).mockResolvedValue(runSearchToolResult);
+      (runSearchTool as Mock).mockResolvedValue(runSearchToolResult);
 
       const result = await tool.handler(
         { query: 'find alerts' },

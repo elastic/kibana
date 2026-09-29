@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockReactDomRender = jest.fn();
-export const mockReactDomUnmount = jest.fn();
-jest.mock('react-dom', () => ({
-  render: mockReactDomRender,
-  unmountComponentAtNode: mockReactDomUnmount,
-}));
+import { vi } from 'vitest';
+
+export const mockReactDomRender = vi.fn();
+export const mockReactDomUnmount = vi.fn();
+vi.mock('react-dom', () => {
+      const mocked = {
+      render: mockReactDomRender,
+      unmountComponentAtNode: mockReactDomUnmount,
+    };
+      return { ...mocked, default: mocked };
+    });

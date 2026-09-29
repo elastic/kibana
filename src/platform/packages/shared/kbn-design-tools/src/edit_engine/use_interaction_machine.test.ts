@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '../lib/tests/mocks';
 import { renderHook, act } from '@testing-library/react';
 import { useInteractionMachine } from './use_interaction_machine';
@@ -26,7 +28,7 @@ describe('useInteractionMachine', () => {
       return 0;
     };
     // Provide elementsFromPoint
-    document.elementsFromPoint = jest.fn().mockReturnValue([]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([]);
   });
 
   afterEach(() => {
@@ -43,7 +45,7 @@ describe('useInteractionMachine', () => {
   it('should transition to pending-drag on pointer down over a targetable element', () => {
     const target = document.createElement('div');
     document.body.appendChild(target);
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     const opts = makeInteractionOptions();
     const { result } = renderHook(() => useInteractionMachine(opts));
@@ -58,7 +60,7 @@ describe('useInteractionMachine', () => {
   });
 
   it('should not transition to pending-drag when no element is under pointer', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([]);
 
     const opts = makeInteractionOptions();
     const { result } = renderHook(() => useInteractionMachine(opts));
@@ -75,7 +77,7 @@ describe('useInteractionMachine', () => {
   it('should cancel pending-drag on pointer up (no drag committed)', () => {
     const target = document.createElement('div');
     document.body.appendChild(target);
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     const opts = makeInteractionOptions();
     const { result } = renderHook(() => useInteractionMachine(opts));
@@ -97,7 +99,7 @@ describe('useInteractionMachine', () => {
     const target = document.createElement('div');
     target.getBoundingClientRect = () => new DOMRect(50, 50, 100, 50);
     document.body.appendChild(target);
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     const opts = makeInteractionOptions();
     const { result } = renderHook(() => useInteractionMachine(opts));
@@ -124,7 +126,7 @@ describe('useInteractionMachine', () => {
   it('should not promote pending-drag below 3px threshold', () => {
     const target = document.createElement('div');
     document.body.appendChild(target);
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     const opts = makeInteractionOptions();
     const { result } = renderHook(() => useInteractionMachine(opts));
@@ -150,7 +152,7 @@ describe('useInteractionMachine', () => {
   it('should abortDrag resets from pending-drag to idle', () => {
     const target = document.createElement('div');
     document.body.appendChild(target);
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     const opts = makeInteractionOptions();
     const { result } = renderHook(() => useInteractionMachine(opts));
@@ -172,7 +174,7 @@ describe('useInteractionMachine', () => {
     const target = document.createElement('div');
     target.getBoundingClientRect = () => new DOMRect(50, 50, 100, 50);
     document.body.appendChild(target);
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     const opts = makeInteractionOptions();
     const { result } = renderHook(() => useInteractionMachine(opts));
@@ -201,7 +203,7 @@ describe('useInteractionMachine', () => {
   it('should forceIdle resets to idle from any state', () => {
     const target = document.createElement('div');
     document.body.appendChild(target);
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     const opts = makeInteractionOptions();
     const { result } = renderHook(() => useInteractionMachine(opts));
@@ -258,12 +260,12 @@ describe('useInteractionMachine', () => {
     const target = document.createElement('div');
     target.getBoundingClientRect = () => new DOMRect(50, 50, 100, 50);
     document.body.appendChild(target);
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     const effects = {
-      setCursor: jest.fn(),
-      updateHoverTarget: jest.fn(),
-      notifyCount: jest.fn(),
+      setCursor: vi.fn(),
+      updateHoverTarget: vi.fn(),
+      notifyCount: vi.fn(),
     };
     const opts = makeInteractionOptions({ effects });
     const { result } = renderHook(() => useInteractionMachine(opts));

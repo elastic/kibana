@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { MAX_OPEN_CASES_DEFAULT_MAXIMUM } from '../../../../common/constants';
 import { getConnectorType } from './cases';
 import { MAX_CASES_TO_OPEN_ERROR } from './translations';
 import { KibanaServices } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 const CONNECTOR_TYPE_ID = '.cases';
 const MAX_CASES_ERROR_MESSAGE = MAX_CASES_TO_OPEN_ERROR(MAX_OPEN_CASES_DEFAULT_MAXIMUM);
 let connectorTypeModel: ActionTypeModel;
-const mockKibanaServices = jest.mocked(KibanaServices);
+const mockKibanaServices = vi.mocked(KibanaServices);
 
 beforeAll(() => {
   connectorTypeModel = getConnectorType();
@@ -25,7 +27,7 @@ beforeAll(() => {
 beforeEach(() => {
   mockKibanaServices.get.mockReturnValue({
     uiSettings: {
-      get: jest.fn().mockReturnValue(MAX_OPEN_CASES_DEFAULT_MAXIMUM),
+      get: vi.fn().mockReturnValue(MAX_OPEN_CASES_DEFAULT_MAXIMUM),
     },
   } as never);
 });
@@ -136,7 +138,7 @@ describe('action params validation', () => {
   test('params validation uses the configured advanced setting ceiling', async () => {
     mockKibanaServices.get.mockReturnValue({
       uiSettings: {
-        get: jest.fn().mockReturnValue(30),
+        get: vi.fn().mockReturnValue(30),
       },
     } as never);
 

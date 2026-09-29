@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EngineStatusHeaderAction } from './engine_status_header_action';
@@ -15,12 +18,12 @@ import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../../../../common/mock';
 import type { EngineComponentStatus } from '../../../../../../../common/api/entity_analytics';
 
-jest.mock('../../../hooks/use_entity_store');
-jest.mock('../helpers');
+vi.mock('../../../hooks/use_entity_store');
+vi.mock('../helpers');
 
-const mockUseInstallEntityStoreMutation = useInstallEntityStoreMutation as jest.Mock;
+const mockUseInstallEntityStoreMutation = useInstallEntityStoreMutation as Mock;
 // @ts-expect-error upgrade typescript v5.9.3
-const mockIsEngineLoading = isEngineLoading as jest.Mock;
+const mockIsEngineLoading = isEngineLoading as Mock;
 
 const defaultComponent: EngineComponentStatus = {
   id: 'component1',
@@ -42,7 +45,7 @@ const defaultEngineResponse: GetEntityStoreStatusResponse['engines'][0] = {
 describe('EngineStatusHeaderAction', () => {
   beforeEach(() => {
     mockUseInstallEntityStoreMutation.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
       isLoading: false,
     });
     mockIsEngineLoading.mockReturnValue(false);
@@ -50,7 +53,7 @@ describe('EngineStatusHeaderAction', () => {
 
   it('renders loading spinner when loading', () => {
     mockUseInstallEntityStoreMutation.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
       isLoading: true,
     });
 
@@ -68,7 +71,7 @@ describe('EngineStatusHeaderAction', () => {
   });
 
   it('calls installEntityStore when install button is clicked', () => {
-    const mutate = jest.fn();
+    const mutate = vi.fn();
     mockUseInstallEntityStoreMutation.mockReturnValue({
       mutate,
       isLoading: false,
@@ -86,7 +89,7 @@ describe('EngineStatusHeaderAction', () => {
       ...defaultEngineResponse,
       components: [{ ...defaultComponent, installed: false }],
     };
-    const mutate = jest.fn();
+    const mutate = vi.fn();
     mockUseInstallEntityStoreMutation.mockReturnValue({
       mutate,
       isLoading: false,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { stringify as yamlStringify } from 'yaml';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils';
@@ -121,13 +124,13 @@ describe('applicable_fields', () => {
       },
     });
 
-    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
-    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+    let templatesService: Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
 
     beforeEach(() => {
-      templatesService = { getTemplate: jest.fn() };
+      templatesService = { getTemplate: vi.fn() };
       fieldDefinitionsService = {
-        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
+        getFieldDefinitions: vi.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
       };
     });
 

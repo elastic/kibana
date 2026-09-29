@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   APM_SOURCE_FIELDS,
@@ -15,7 +17,7 @@ import { buildSlo } from '../../data/slo/slo';
 import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
 
 const mockLocator = {
-  getRedirectUrl: jest.fn((params: Record<string, unknown>) => JSON.stringify(params)),
+  getRedirectUrl: vi.fn((params: Record<string, unknown>) => JSON.stringify(params)),
 };
 
 const baseArgs = {
@@ -74,7 +76,7 @@ describe('getResolvedApmParams', () => {
 });
 
 describe('getApmSourceFieldLink', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns undefined when locator is not found', () => {
     expect(

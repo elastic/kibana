@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { ActionStatusOptions } from '../../types';
@@ -12,9 +15,12 @@ import type { ActionStatusOptions } from '../../types';
 import { getPage, getPerPage, hasRolloutPeriodPassed, getActionStatuses } from './action_status';
 
 // Needed by getActionStatuses → getActions → addNamespaceFilteringToQuery
-jest.mock('../spaces/query_namespaces_filtering', () => ({
-  addNamespaceFilteringToQuery: jest.fn((query: object) => Promise.resolve(query)),
-}));
+vi.mock('../spaces/query_namespaces_filtering', () => {
+      const mocked = {
+      addNamespaceFilteringToQuery: vi.fn((query: object) => Promise.resolve(query)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getPage', () => {
   it('should return the default value when there are no pagination options', () => {
@@ -119,7 +125,7 @@ describe('getActionStatuses with scheduledOnly', () => {
       },
     };
     return {
-      search: jest
+      search: vi
         .fn()
         .mockResolvedValueOnce({ hits: { hits } })
         .mockResolvedValue(emptyPolicyAggResponse),
@@ -135,7 +141,7 @@ describe('getActionStatuses with scheduledOnly', () => {
 
     await getActionStatuses(esClient, options);
 
-    const call = (esClient.search as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as Mock).mock.calls[0][0];
     const filters: object[] = call.query.bool.filter ?? [];
     const hasStartTimeFilter = filters.some((f: any) => f?.range?.start_time?.gt === 'now');
     expect(hasStartTimeFilter).toBe(true);
@@ -150,7 +156,7 @@ describe('getActionStatuses with scheduledOnly', () => {
 
     await getActionStatuses(esClient, options);
 
-    const call = (esClient.search as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as Mock).mock.calls[0][0];
     const filters: object[] = call.query.bool.filter ?? [];
     const hasStartTimeFilter = filters.some((f: any) => f?.range?.start_time !== undefined);
     expect(hasStartTimeFilter).toBe(false);
@@ -166,7 +172,7 @@ describe('getActionStatuses with scheduledOnly', () => {
 
     await getActionStatuses(esClient, options);
 
-    const call = (esClient.search as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as Mock).mock.calls[0][0];
     const filters: object[] = call.query.bool.filter ?? [];
     const hasTimestampFilter = filters.some((f: any) => f?.range?.['@timestamp'] !== undefined);
     const hasStartTimeFilter = filters.some((f: any) => f?.range?.start_time?.gt === 'now');

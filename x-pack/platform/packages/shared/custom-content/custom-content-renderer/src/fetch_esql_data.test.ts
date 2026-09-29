@@ -5,23 +5,32 @@
  * 2.0.
  */
 
-jest.mock('@kbn/datemath', () => ({
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('@kbn/datemath', () => ({
   __esModule: true,
   default: {
-    parse: jest.fn((val: string, opts?: { roundUp?: boolean }) => ({
+    parse: vi.fn((val: string, opts?: { roundUp?: boolean }) => ({
       toISOString: () => (opts?.roundUp ? '2024-01-08T00:00:00.000Z' : '2024-01-01T00:00:00.000Z'),
     })),
   },
 }));
 
-jest.mock('@kbn/es-query', () => ({
-  buildEsQuery: jest.fn(),
-}));
+vi.mock('@kbn/es-query', () => {
+      const mocked = {
+      buildEsQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
-  getESQLTimeField: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLResults: vi.fn(),
+      getESQLTimeField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { HttpStart } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';
@@ -30,12 +39,12 @@ import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { fetchEsqlData } from './fetch_esql_data';
 
-const mockBuildEsQuery = buildEsQuery as jest.MockedFunction<typeof buildEsQuery>;
-const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
-const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
+const mockBuildEsQuery = buildEsQuery as MockedFunction<typeof buildEsQuery>;
+const mockGetESQLResults = getESQLResults as MockedFunction<typeof getESQLResults>;
+const mockGetESQLTimeField = getESQLTimeField as MockedFunction<typeof getESQLTimeField>;
 
 const mockHttp = {} as HttpStart;
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 const mockSignal = new AbortController().signal;
 const esqlQuery = 'FROM logs | STATS count = COUNT(*)';
 const mockResponse = { columns: [], values: [], all_columns: [] };
@@ -45,7 +54,7 @@ const emptyBoolQuery = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockBuildEsQuery.mockReturnValue(emptyBoolQuery as ReturnType<typeof buildEsQuery>);
   mockGetESQLResults.mockResolvedValue({
     response: mockResponse,

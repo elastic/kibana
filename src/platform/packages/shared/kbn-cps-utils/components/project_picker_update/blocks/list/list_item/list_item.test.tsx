@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -31,9 +33,9 @@ const createDefaultProps = (
   isToggleDisabled: false,
   project: defaultProject,
   toggleDisabledMessage: 'You must be searching a minimum of one project.',
-  onContextMenu: jest.fn() as ProjectPickerListItemProps['onContextMenu'],
-  onToggle: jest.fn() as ProjectPickerListItemProps['onToggle'],
-  onLabelClick: jest.fn() as ProjectPickerListItemProps['onLabelClick'],
+  onContextMenu: vi.fn() as ProjectPickerListItemProps['onContextMenu'],
+  onToggle: vi.fn() as ProjectPickerListItemProps['onToggle'],
+  onLabelClick: vi.fn() as ProjectPickerListItemProps['onLabelClick'],
   ...props,
 });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
@@ -15,25 +18,28 @@ import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import type { AlertSubtitleProps } from './alert_subtitle';
 import { AlertSubtitle } from './alert_subtitle';
 
-jest.mock('../../../utils/kibana_react');
+vi.mock('../../../utils/kibana_react');
 
-const mockAuthorizedToReadRuleType = jest.fn(() => true);
-const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+const mockAuthorizedToReadRuleType = vi.fn(() => true);
+const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToReadRuleType: mockAuthorizedToReadRuleType,
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
-  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract().services,
       http: {
         basePath: {
-          prepend: jest.fn((path: string) => path),
+          prepend: vi.fn((path: string) => path),
         },
       },
     },
@@ -46,7 +52,7 @@ describe('Alert subtitle', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
     mockAuthorizedToReadRuleType.mockReturnValue(true);
     mockUseGetRuleTypesPermissions.mockReturnValue({

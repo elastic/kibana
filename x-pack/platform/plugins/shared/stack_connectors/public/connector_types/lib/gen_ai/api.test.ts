@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { getDashboard } from './api';
 import { SUB_ACTION } from '@kbn/connector-schemas/openai/constants';
@@ -15,7 +17,7 @@ const response = {
 describe('Gen AI Dashboard API', () => {
   const http = httpServiceMock.createStartContract();
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
   describe('getDashboard', () => {
     test('should call get dashboard API', async () => {
       const abortCtrl = new AbortController();

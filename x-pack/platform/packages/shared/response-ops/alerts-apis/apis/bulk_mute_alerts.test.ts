@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { bulkMuteAlerts } from './bulk_mute_alerts';
 
@@ -12,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('bulkMuteAlerts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call bulk mute alerts API with correct parameters', async () => {

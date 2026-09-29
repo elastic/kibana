@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
@@ -31,9 +34,9 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
-  setSelectedSettingsTab: jest.fn(),
+  setSelectedSettingsTab: vi.fn(),
   http: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
   docLinks: docLinksServiceMock.createStartContract(),
   selectedSettingsTab: null,
@@ -42,24 +45,24 @@ const mockContext = {
     hasManageGlobalKnowledgeBase: true,
   },
 };
-jest.mock('../../assistant_context');
-jest.mock('../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry');
-jest.mock('../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries');
-jest.mock('../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries');
+vi.mock('../../assistant_context');
+vi.mock('../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry');
+vi.mock('../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries');
+vi.mock('../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries');
 
-jest.mock('../../assistant/settings/use_settings_updater/use_knowledge_base_updater');
-jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_status');
-jest.mock('../../assistant/api/knowledge_base/entries/use_knowledge_base_entries');
-jest.mock(
+vi.mock('../../assistant/settings/use_settings_updater/use_knowledge_base_updater');
+vi.mock('../../assistant/api/knowledge_base/use_knowledge_base_status');
+vi.mock('../../assistant/api/knowledge_base/entries/use_knowledge_base_entries');
+vi.mock(
   '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility'
 );
 const mockDataViews = {
-  getFieldsForWildcard: jest.fn().mockResolvedValue([
+  getFieldsForWildcard: vi.fn().mockResolvedValue([
     { name: 'field-1', esTypes: ['semantic_text'] },
     { name: 'field-2', esTypes: ['text'] },
     { name: 'field-3', esTypes: ['semantic_text'] },
   ]),
-  getExistingIndices: jest.fn().mockResolvedValue(['index-2']),
+  getExistingIndices: vi.fn().mockResolvedValue(['index-2']),
 } as unknown as DataViewsContract;
 const queryClient = new QueryClient();
 const Wrapper = ({
@@ -78,9 +81,9 @@ const Wrapper = ({
   </I18nProvider>
 );
 describe('KnowledgeBaseSettingsManagement', () => {
-  const mockCreateEntry = jest.fn();
-  const mockUpdateEntry = jest.fn();
-  const mockDeleteEntry = jest.fn();
+  const mockCreateEntry = vi.fn();
+  const mockUpdateEntry = vi.fn();
+  const mockDeleteEntry = vi.fn();
   const mockData = [
     {
       id: '1',
@@ -147,47 +150,47 @@ describe('KnowledgeBaseSettingsManagement', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockImplementation(() => mockContext);
-    (useKnowledgeBaseUpdater as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockImplementation(() => mockContext);
+    (useKnowledgeBaseUpdater as Mock).mockReturnValue({
       knowledgeBaseSettings: { latestAlerts: 20 },
-      setUpdatedKnowledgeBaseSettings: jest.fn(),
-      resetKnowledgeBaseSettings: jest.fn(),
-      saveKnowledgeBaseSettings: jest.fn(),
+      setUpdatedKnowledgeBaseSettings: vi.fn(),
+      resetKnowledgeBaseSettings: vi.fn(),
+      saveKnowledgeBaseSettings: vi.fn(),
     });
-    (isKnowledgeBaseSetup as jest.Mock).mockReturnValue(true);
-    (useKnowledgeBaseStatus as jest.Mock).mockReturnValue({
+    (isKnowledgeBaseSetup as Mock).mockReturnValue(true);
+    (useKnowledgeBaseStatus as Mock).mockReturnValue({
       data: {
         elser_exists: true,
         security_labs_exists: true,
       },
       isFetched: true,
     });
-    (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
+    (useKnowledgeBaseEntries as Mock).mockReturnValue({
       data: { data: mockData },
       isFetching: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
-    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+    (useFlyoutModalVisibility as Mock).mockReturnValue({
       isFlyoutOpen: false,
-      openFlyout: jest.fn(),
-      closeFlyout: jest.fn(),
+      openFlyout: vi.fn(),
+      closeFlyout: vi.fn(),
     });
-    (useCreateKnowledgeBaseEntry as jest.Mock).mockReturnValue({
+    (useCreateKnowledgeBaseEntry as Mock).mockReturnValue({
       mutateAsync: mockCreateEntry,
       isLoading: false,
     });
-    (useUpdateKnowledgeBaseEntries as jest.Mock).mockReturnValue({
+    (useUpdateKnowledgeBaseEntries as Mock).mockReturnValue({
       mutateAsync: mockUpdateEntry,
       isLoading: false,
     });
-    (useDeleteKnowledgeBaseEntries as jest.Mock).mockReturnValue({
+    (useDeleteKnowledgeBaseEntries as Mock).mockReturnValue({
       mutateAsync: mockDeleteEntry,
       isLoading: false,
     });
   });
   it('renders loading spinner when data is not fetched', async () => {
-    (useKnowledgeBaseStatus as jest.Mock).mockReturnValue({ data: {}, isFetched: false });
+    (useKnowledgeBaseStatus as Mock).mockReturnValue({ data: {}, isFetched: false });
     await act(async () => {
       render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
         wrapper: Wrapper,
@@ -198,14 +201,14 @@ describe('KnowledgeBaseSettingsManagement', () => {
   });
 
   it('Prompts user to set up knowledge base when isKbSetup', async () => {
-    (useKnowledgeBaseStatus as jest.Mock).mockReturnValue({
+    (useKnowledgeBaseStatus as Mock).mockReturnValue({
       data: {
         elser_exists: false,
         security_labs_exists: false,
       },
       isFetched: true,
     });
-    (isKnowledgeBaseSetup as jest.Mock).mockReturnValue(false);
+    (isKnowledgeBaseSetup as Mock).mockReturnValue(false);
     await act(async () => {
       render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
         wrapper: Wrapper,
@@ -228,7 +231,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
   });
 
   it('renders entries in correct order', async () => {
-    (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
+    (useKnowledgeBaseEntries as Mock).mockReturnValue({
       data: {
         data: [
           {
@@ -297,7 +300,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
         ],
       },
       isFetching: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     await act(async () => {
@@ -342,11 +345,11 @@ describe('KnowledgeBaseSettingsManagement', () => {
   });
 
   it('opens the flyout when add document button is clicked', async () => {
-    const openFlyoutMock = jest.fn();
-    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+    const openFlyoutMock = vi.fn();
+    (useFlyoutModalVisibility as Mock).mockReturnValue({
       isFlyoutOpen: false,
       openFlyout: openFlyoutMock,
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
     });
 
     await act(async () => {
@@ -384,8 +387,8 @@ describe('KnowledgeBaseSettingsManagement', () => {
   });
 
   it('refreshes table on refresh button click', async () => {
-    const refetchMock = jest.fn();
-    (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
+    const refetchMock = vi.fn();
+    (useKnowledgeBaseEntries as Mock).mockReturnValue({
       data: { data: mockData },
       isFetching: false,
       refetch: refetchMock,
@@ -404,10 +407,10 @@ describe('KnowledgeBaseSettingsManagement', () => {
   });
 
   it('handles save and cancel actions for the flyout', async () => {
-    const closeFlyoutMock = jest.fn();
-    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+    const closeFlyoutMock = vi.fn();
+    (useFlyoutModalVisibility as Mock).mockReturnValue({
       isFlyoutOpen: true,
-      openFlyout: jest.fn(),
+      openFlyout: vi.fn(),
       closeFlyout: closeFlyoutMock,
     });
     await act(async () => {
@@ -452,10 +455,10 @@ describe('KnowledgeBaseSettingsManagement', () => {
   });
 
   it('does not create a duplicate document entry when switching sharing option twice', async () => {
-    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+    (useFlyoutModalVisibility as Mock).mockReturnValue({
       isFlyoutOpen: true,
-      openFlyout: jest.fn(),
-      closeFlyout: jest.fn(),
+      openFlyout: vi.fn(),
+      closeFlyout: vi.fn(),
     });
     await act(async () => {
       render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
@@ -494,10 +497,10 @@ describe('KnowledgeBaseSettingsManagement', () => {
   }, 100000000);
 
   it('does not create a duplicate index entry when switching sharing option twice', async () => {
-    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+    (useFlyoutModalVisibility as Mock).mockReturnValue({
       isFlyoutOpen: true,
-      openFlyout: jest.fn(),
-      closeFlyout: jest.fn(),
+      openFlyout: vi.fn(),
+      closeFlyout: vi.fn(),
     });
     await act(async () => {
       render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
@@ -536,10 +539,10 @@ describe('KnowledgeBaseSettingsManagement', () => {
   });
 
   it('shows duplicate entry modal when making global to private entry update', async () => {
-    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+    (useFlyoutModalVisibility as Mock).mockReturnValue({
       isFlyoutOpen: true,
-      openFlyout: jest.fn(),
-      closeFlyout: jest.fn(),
+      openFlyout: vi.fn(),
+      closeFlyout: vi.fn(),
     });
     await act(async () => {
       render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
@@ -581,10 +584,10 @@ describe('KnowledgeBaseSettingsManagement', () => {
 
   it('does not show duplicate entry modal on new document entry creation', async () => {
     // Covers the BUG: https://github.com/elastic/kibana/issues/198892
-    const closeFlyoutMock = jest.fn();
-    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+    const closeFlyoutMock = vi.fn();
+    (useFlyoutModalVisibility as Mock).mockReturnValue({
       isFlyoutOpen: true,
-      openFlyout: jest.fn(),
+      openFlyout: vi.fn(),
       closeFlyout: closeFlyoutMock,
     });
     await act(async () => {

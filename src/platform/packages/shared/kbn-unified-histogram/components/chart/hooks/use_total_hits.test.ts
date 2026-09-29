@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Filter } from '@kbn/es-query';
 import type { UnifiedHistogramFetch$ } from '../../../types';
 import { UnifiedHistogramFetchStatus } from '../../../types';
@@ -23,8 +25,8 @@ import { DataViewType } from '@kbn/data-plugin/common';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { getFetchParamsMock, getFetch$Mock } from '../../../__mocks__/fetch_params';
 
-jest.mock('react-use/lib/useDebounce', () => {
-  return jest.fn((...args) => {
+vi.mock('react-use/lib/useDebounce', () => {
+  return vi.fn((...args) => {
     mockUseEffect(args[0], args[2]);
   });
 });
@@ -36,7 +38,7 @@ describe('useTotalHits', () => {
       data: dataPluginMock.createStartContract(),
       expressions: {
         ...expressionsPluginMock.createStartContract(),
-        run: jest.fn(() =>
+        run: vi.fn(() =>
           of({
             partial: false,
             result: {
@@ -53,7 +55,7 @@ describe('useTotalHits', () => {
     chartVisible: false,
     fetch$,
     abortController: new AbortController(),
-    onTotalHitsChange: jest.fn(),
+    onTotalHitsChange: vi.fn(),
   });
 
   beforeEach(() => {
@@ -61,9 +63,9 @@ describe('useTotalHits', () => {
   });
 
   it('should fetch total hits on first execution', async () => {
-    const onTotalHitsChange = jest.fn();
+    const onTotalHitsChange = vi.fn();
     let fetchOptions: SearchSourceSearchOptions | undefined;
-    const fetchSpy = jest
+    const fetchSpy = vi
       .spyOn(searchSourceInstanceMock, 'fetch$')
       .mockClear()
       .mockImplementation((options) => {
@@ -78,7 +80,7 @@ describe('useTotalHits', () => {
           },
         }) as any;
       });
-    const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const setFieldSpy = vi.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const data = dataPluginMock.createStartContract();
     const adapter = new RequestAdapter();
     const fetchParams = getFetchParamsMock({
@@ -87,7 +89,7 @@ describe('useTotalHits', () => {
       searchSessionId: '123',
       requestAdapter: adapter,
     });
-    jest
+    vi
       .spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
       .mockReturnValue(fetchParams.timeRange as any);
@@ -122,7 +124,7 @@ describe('useTotalHits', () => {
   });
 
   it('should not fetch total hits if isPlainRecord is true', async () => {
-    const onTotalHitsChange = jest.fn();
+    const onTotalHitsChange = vi.fn();
     const fetchParams = getFetchParamsMock({
       query: { esql: 'from test' },
     });
@@ -137,9 +139,9 @@ describe('useTotalHits', () => {
   });
 
   it('should not fetch total hits if chartVisible is true', async () => {
-    const onTotalHitsChange = jest.fn();
-    const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
-    const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const onTotalHitsChange = vi.fn();
+    const fetchSpy = vi.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
+    const setFieldSpy = vi.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     renderHook(() => useTotalHits({ ...getDeps(), chartVisible: true, onTotalHitsChange }));
     expect(onTotalHitsChange).toHaveBeenCalledTimes(0);
     expect(setFieldSpy).not.toHaveBeenCalled();
@@ -147,9 +149,9 @@ describe('useTotalHits', () => {
   });
 
   it('should not fetch total hits if hits is undefined', async () => {
-    const onTotalHitsChange = jest.fn();
-    const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
-    const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const onTotalHitsChange = vi.fn();
+    const fetchSpy = vi.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
+    const setFieldSpy = vi.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     renderHook(() => useTotalHits({ ...getDeps(), hits: undefined, onTotalHitsChange }));
     expect(onTotalHitsChange).toHaveBeenCalledTimes(0);
     expect(setFieldSpy).not.toHaveBeenCalled();
@@ -157,9 +159,9 @@ describe('useTotalHits', () => {
   });
 
   it('should not fetch if fetch$ is not triggered', async () => {
-    const onTotalHitsChange = jest.fn();
-    const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
-    const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const onTotalHitsChange = vi.fn();
+    const fetchSpy = vi.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
+    const setFieldSpy = vi.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
     rerender();
@@ -169,10 +171,10 @@ describe('useTotalHits', () => {
   });
 
   it('should fetch a second time if fetch$ is triggered', async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, 'abort').mockClear();
-    const onTotalHitsChange = jest.fn();
-    const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
-    const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort').mockClear();
+    const onTotalHitsChange = vi.fn();
+    const fetchSpy = vi.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
+    const setFieldSpy = vi.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
     fetch$.next({ fetchParams: getFetchParamsMock(), lensVisServiceState: undefined });
@@ -195,9 +197,9 @@ describe('useTotalHits', () => {
   });
 
   it('should call onTotalHitsChange with an error status if fetch fails', async () => {
-    const onTotalHitsChange = jest.fn();
+    const onTotalHitsChange = vi.fn();
     const error = new Error('test error');
-    jest
+    vi
       .spyOn(searchSourceInstanceMock, 'fetch$')
       .mockClear()
       .mockReturnValue(throwError(() => error));
@@ -212,10 +214,10 @@ describe('useTotalHits', () => {
   });
 
   it('should call searchSource.setOverwriteDataViewType if dataView is a rollup', async () => {
-    const setOverwriteDataViewTypeSpy = jest
+    const setOverwriteDataViewTypeSpy = vi
       .spyOn(searchSourceInstanceMock, 'setOverwriteDataViewType')
       .mockClear();
-    const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const setFieldSpy = vi.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const fetchParams = getFetchParamsMock({
       filters: [{ meta: { index: 'test' }, query: { match_all: {} } }],
       dataView: {
@@ -224,7 +226,7 @@ describe('useTotalHits', () => {
       } as any,
     });
     const data = dataPluginMock.createStartContract();
-    jest
+    vi
       .spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
       .mockReturnValue(fetchParams.timeRange as any);

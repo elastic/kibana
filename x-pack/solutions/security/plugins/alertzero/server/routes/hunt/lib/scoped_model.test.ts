@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { resolveScopedModel } from './scoped_model';
@@ -14,30 +16,30 @@ const logger = loggingSystemMock.createLogger();
 const mockRequest = {} as KibanaRequest;
 
 const mockUiSettingsClient = {
-  get: jest.fn().mockResolvedValue(undefined),
+  get: vi.fn().mockResolvedValue(undefined),
 };
 
-const mockChatModel = { invoke: jest.fn() };
+const mockChatModel = { invoke: vi.fn() };
 const mockInferenceClient = {};
 const mockConnector = { connectorId: 'test-connector', name: 'Test', actionTypeId: '.gen-ai' };
 
 const mockInference = {
-  getDefaultConnector: jest.fn(),
-  getChatModel: jest.fn().mockResolvedValue(mockChatModel),
-  getClient: jest.fn().mockReturnValue(mockInferenceClient),
-  getConnectorById: jest.fn().mockResolvedValue(mockConnector),
+  getDefaultConnector: vi.fn(),
+  getChatModel: vi.fn().mockResolvedValue(mockChatModel),
+  getClient: vi.fn().mockReturnValue(mockInferenceClient),
+  getConnectorById: vi.fn().mockResolvedValue(mockConnector),
 };
 
 const mockSearchInferenceEndpoints = {
   endpoints: {
-    getForFeature: jest.fn(),
+    getForFeature: vi.fn(),
   },
 };
 
 const featureId = 'alertzero_reasoning';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUiSettingsClient.get.mockResolvedValue(undefined);
   mockInference.getDefaultConnector.mockResolvedValue(undefined);
   mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({ endpoints: [] });

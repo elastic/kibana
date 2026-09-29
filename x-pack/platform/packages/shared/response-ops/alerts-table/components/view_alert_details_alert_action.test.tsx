@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -32,8 +34,8 @@ const mockAlertNoUuid = {
   'kibana.alert.status': ['active'],
 } as unknown as Alert;
 
-const mockOnExpandedAlertIndexChange = jest.fn();
-const mockOnActionExecuted = jest.fn();
+const mockOnExpandedAlertIndexChange = vi.fn();
+const mockOnActionExecuted = vi.fn();
 
 const application = applicationServiceMock.createStartContract();
 
@@ -61,7 +63,7 @@ const renderWithContext = (props: Partial<AlertActionsProps> = {}) =>
 
 describe('ViewAlertDetailsAlertAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     application.getUrlForApp.mockReturnValue(`/app/observability/alerts/${mockAlertId}`);
   });
 

@@ -5,46 +5,58 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createWriteStream } from '@kbn/fs';
 import { open } from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import { download } from './download';
 
-jest.mock('@kbn/fs', () => ({
-  createWriteStream: jest.fn(() => ({
-    on: jest.fn((event, callback) => {
-      if (event === 'finish') {
-        callback();
-      }
-    }),
-    pipe: jest.fn(),
-  })),
-  getSafePath: jest
-    .fn()
-    .mockReturnValue({ fullPath: 'artifacts/file.zip', alias: 'disk:artifacts/file.zip' }),
-}));
+vi.mock('@kbn/fs', () => {
+      const mocked = {
+      createWriteStream: vi.fn(() => ({
+        on: vi.fn((event, callback) => {
+          if (event === 'finish') {
+            callback();
+          }
+        }),
+        pipe: vi.fn(),
+      })),
+      getSafePath: vi
+        .fn()
+        .mockReturnValue({ fullPath: 'artifacts/file.zip', alias: 'disk:artifacts/file.zip' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('fs/promises', () => ({
-  open: jest.fn(),
-}));
+vi.mock('fs/promises', () => {
+      const mocked = {
+      open: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('stream/promises', () => ({
-  pipeline: jest.fn(),
-}));
+vi.mock('stream/promises', () => {
+      const mocked = {
+      pipeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock Readable.fromWeb to return the mock body directly since pipeline is already mocked
-jest.mock('stream', () => {
-  const actual = jest.requireActual('stream');
+vi.mock('stream', () => {
+  const actual = require('stream');
   return {
     ...actual,
     Readable: {
       ...actual.Readable,
-      fromWeb: jest.fn((webStream) => webStream),
+      fromWeb: vi.fn((webStream) => webStream),
     },
   };
 });
 
-const fetchMock = jest.spyOn(global, 'fetch');
+const fetchMock = vi.spyOn(global, 'fetch');
 
 describe('download', () => {
   const mockFileUrl = 'http://example.com/file.zip';
@@ -52,14 +64,14 @@ describe('download', () => {
   const mockMimeType = 'application/zip';
 
   const mockFileHandle = {
-    read: jest.fn(),
-    close: jest.fn(),
+    read: vi.fn(),
+    close: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (open as jest.Mock).mockResolvedValue(mockFileHandle);
+    (open as Mock).mockResolvedValue(mockFileHandle);
     mockFileHandle.read.mockResolvedValue({
       bytesRead: 8,
     });
@@ -68,14 +80,14 @@ describe('download', () => {
 
   it('should download and validate a ZIP file successfully', async () => {
     const mockResponseBody = {
-      pipe: jest.fn(),
-      on: jest.fn(),
+      pipe: vi.fn(),
+      on: vi.fn(),
     };
 
     fetchMock.mockResolvedValue({
       ok: true,
       headers: {
-        get: jest.fn().mockReturnValue('application/zip'),
+        get: vi.fn().mockReturnValue('application/zip'),
       },
       body: mockResponseBody,
     } as unknown as Response);
@@ -105,7 +117,7 @@ describe('download', () => {
     fetchMock.mockResolvedValue({
       ok: true,
       headers: {
-        get: jest.fn().mockReturnValue('text/plain'),
+        get: vi.fn().mockReturnValue('text/plain'),
       },
       body: {},
     } as unknown as Response);
@@ -117,14 +129,14 @@ describe('download', () => {
 
   it('should throw error for invalid file signature', async () => {
     const mockResponseBody = {
-      pipe: jest.fn(),
-      on: jest.fn(),
+      pipe: vi.fn(),
+      on: vi.fn(),
     };
 
     fetchMock.mockResolvedValue({
       ok: true,
       headers: {
-        get: jest.fn().mockReturnValue('application/zip'),
+        get: vi.fn().mockReturnValue('application/zip'),
       },
       body: mockResponseBody,
     } as unknown as Response);
@@ -159,7 +171,7 @@ describe('download', () => {
     fetchMock.mockResolvedValue({
       ok: true,
       headers: {
-        get: jest.fn().mockReturnValue(null),
+        get: vi.fn().mockReturnValue(null),
       },
       body: {},
     } as unknown as Response);
@@ -172,9 +184,9 @@ describe('download', () => {
   it('should handle path traversal attempts', async () => {
     const maliciousPaths = ['../../../etc/passwd', 'file/../../../config', './test/../../secret'];
 
-    const realKbnFs = jest.requireActual<typeof import('@kbn/fs')>('@kbn/fs');
+    const realKbnFs = (await vi.importActual<typeof import('@kbn/fs')>('@kbn/fs'));
 
-    (createWriteStream as jest.Mock).mockImplementation(realKbnFs.createWriteStream);
+    (createWriteStream as Mock).mockImplementation(realKbnFs.createWriteStream);
 
     for (const maliciousPath of maliciousPaths) {
       try {

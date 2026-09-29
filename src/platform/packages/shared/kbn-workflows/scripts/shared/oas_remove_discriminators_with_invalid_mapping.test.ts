@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { OpenAPIV3 } from 'openapi-types';
 import { removeDiscriminatorsWithInvalidMapping } from './oas_remove_discriminators_with_invalid_mapping';
 
@@ -30,7 +32,7 @@ describe('removeDiscriminatorsWithInvalidMapping', () => {
   });
 
   it('should remove discriminator when mapping count does not match oneOf count', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation();
     const doc = makeDocument({
       MySchema: {
         oneOf: [{ $ref: '#/components/schemas/A' }, { $ref: '#/components/schemas/B' }],

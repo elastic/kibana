@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
@@ -12,8 +14,8 @@ import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import { AssistantSettingsModal } from './assistant_settings_modal';
 import { welcomeConvo } from '../../mock/conversation';
 
-const setIsSettingsModalVisible = jest.fn();
-const onConversationSelected = jest.fn();
+const setIsSettingsModalVisible = vi.fn();
+const onConversationSelected = vi.fn();
 
 const testProps = {
   defaultConnectorId: '123',
@@ -24,19 +26,19 @@ const testProps = {
   onConversationSelected,
   conversations: {},
   conversationsLoaded: true,
-  refetchCurrentConversation: jest.fn(),
-  refetchCurrentUserConversations: jest.fn(),
+  refetchCurrentConversation: vi.fn(),
+  refetchCurrentUserConversations: vi.fn(),
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
-  refetchAnonymizationFieldsResults: jest.fn(),
-  setPaginationObserver: jest.fn(),
+  refetchAnonymizationFieldsResults: vi.fn(),
+  setPaginationObserver: vi.fn(),
 };
-const setSelectedSettingsTab = jest.fn();
+const setSelectedSettingsTab = vi.fn();
 const mockUseAssistantContext = {
   setSelectedSettingsTab,
   assistantFeatures: {},
 };
-jest.mock('../../assistant_context', () => {
-  const original = jest.requireActual('../../assistant_context');
+vi.mock('../../assistant_context', async () => {
+  const original = (await vi.importActual('../../assistant_context'));
 
   return {
     ...original,
@@ -44,20 +46,23 @@ jest.mock('../../assistant_context', () => {
   };
 });
 
-jest.mock('./assistant_settings', () => ({
-  ...jest.requireActual('./assistant_settings'),
-  // @ts-ignore
-  AssistantSettings: ({ onClose, onSave }) => (
-    <>
-      <button type="button" data-test-subj="on-close" onClick={onClose} />
-      <button type="button" data-test-subj="on-save" onClick={onSave} />
-    </>
-  ),
-}));
+vi.mock('./assistant_settings', async () => {
+      const mocked = {
+      ...(await vi.importActual('./assistant_settings')),
+      // @ts-ignore
+      AssistantSettings: ({ onClose, onSave }) => (
+        <>
+          <button type="button" data-test-subj="on-close" onClick={onClose} />
+          <button type="button" data-test-subj="on-save" onClick={onSave} />
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AssistantSettingsModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Settings modal is visible and calls correct actions per click', () => {

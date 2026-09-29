@@ -56,9 +56,9 @@ describe('FeatureCatalogueRegistry', () => {
         catalogue.register(DASHBOARD_FEATURE);
         await firstValueFrom(service.getFeatures$());
       };
-      expect(getFeaturesBeforeStart).rejects.toEqual(
-        new Error(`Catalogue entries are only available after start phase`)
-      );
+      await expect(getFeaturesBeforeStart).rejects.toEqual(
+                new Error(`Catalogue entries are only available after start phase`)
+              );
     });
   });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -72,7 +74,7 @@ const availableProjects = [originProject, linkedProjectOne, linkedProjectTwo];
  * Test double for server filter search: returns catalog projects matching simple tag:value clauses.
  */
 const createFetchProjectsByRouting = (projects: CPSProject[] = availableProjects) =>
-  jest.fn(async (routing?: ProjectRouting) => {
+  vi.fn(async (routing?: ProjectRouting) => {
     if (!routing) {
       return { origin: projects[0] ?? null, linkedProjects: projects.slice(1) };
     }
@@ -111,14 +113,14 @@ const defaultProviderProps: Omit<ProjectPickerStateProviderProps, 'children'> = 
   originProjectId: originProject._id,
   defaultProjectRoutingGetter: () => '',
   currentProjectRoutingGetter: () => '',
-  onProjectRoutingChange: jest.fn(),
+  onProjectRoutingChange: vi.fn(),
   fetchProjectsByRouting: createFetchProjectsByRouting(),
 };
 
 const renderProjectPicker = (
   props: Partial<Omit<ProjectPickerStateProviderProps, 'children'>> = {}
 ) => {
-  const onProjectRoutingChange = props.onProjectRoutingChange ?? jest.fn();
+  const onProjectRoutingChange = props.onProjectRoutingChange ?? vi.fn();
 
   const buildTree = (currentProps: Partial<Omit<ProjectPickerStateProviderProps, 'children'>>) => (
     <ProjectPickerStateProvider
@@ -142,7 +144,7 @@ const renderProjectPicker = (
 const renderFullProjectPicker = (
   props: Partial<Omit<ProjectPickerStateProviderProps, 'children'>> = {}
 ) => {
-  const onProjectRoutingChange = props.onProjectRoutingChange ?? jest.fn();
+  const onProjectRoutingChange = props.onProjectRoutingChange ?? vi.fn();
 
   render(
     <ProjectPickerStateProvider
@@ -209,7 +211,7 @@ const ReadPickerState = ({
 
 describe('ProjectPickerStateProvider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('projectRoutingStrategy', () => {
@@ -226,8 +228,8 @@ describe('ProjectPickerStateProvider', () => {
       });
 
       it('prefills the default tag filter on mount', async () => {
-        const onProjectRoutingChange = jest.fn();
-        const onStateChange = jest.fn();
+        const onProjectRoutingChange = vi.fn();
+        const onStateChange = vi.fn();
 
         render(
           <ProjectPickerStateProvider
@@ -257,7 +259,7 @@ describe('ProjectPickerStateProvider', () => {
       it('calls onProjectRoutingChange with exclusions when a project is deselected', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
 
@@ -277,7 +279,7 @@ describe('ProjectPickerStateProvider', () => {
       it('includes encoded filter expressions without _id clauses until a project is excluded', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
         const securityTypeFilter = {
@@ -310,7 +312,7 @@ describe('ProjectPickerStateProvider', () => {
       it('does not call onProjectRoutingChange on mount and emits clauses for all projects once the user makes a change', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
         renderProjectPicker({
@@ -335,7 +337,7 @@ describe('ProjectPickerStateProvider', () => {
       it('omits deselected projects from the explicit id clauses once exclusions exist', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
         renderProjectPicker({
@@ -354,7 +356,7 @@ describe('ProjectPickerStateProvider', () => {
       it('emits `_id:origin` when only the origin project remains selected with no filters', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
         renderProjectPicker({
@@ -374,7 +376,7 @@ describe('ProjectPickerStateProvider', () => {
       it('emits PROJECT_ROUTING.ORIGIN when exists `_alias` is the only filter and origin is the only selection', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
         const aliasExistsFilter = {
@@ -412,7 +414,7 @@ describe('ProjectPickerStateProvider', () => {
       it('includes encoded filter expressions with explicit id clauses that omit a project when it is excluded', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
         const securityTypeFilter = {
@@ -454,7 +456,7 @@ describe('ProjectPickerStateProvider', () => {
           projectRoutingStrategy: 'dynamic',
         });
 
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
 
@@ -489,7 +491,7 @@ describe('ProjectPickerStateProvider', () => {
           projectRoutingStrategy: 'snapshot',
         });
 
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
 
@@ -523,7 +525,7 @@ describe('ProjectPickerStateProvider', () => {
       it('re-encodes the routing with the new strategy when the prop changes after a user edit', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
-        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
 
@@ -563,7 +565,7 @@ describe('ProjectPickerStateProvider', () => {
 
   describe('isUsingSpaceDefaults', () => {
     it('is true on mount when current routing matches the default', async () => {
-      const onStateChange = jest.fn();
+      const onStateChange = vi.fn();
 
       render(
         <ProjectPickerStateProvider
@@ -588,9 +590,9 @@ describe('ProjectPickerStateProvider', () => {
 
     it('recovers after a snapshot-mode revert and reports the default routing verbatim', async () => {
       const user = userEvent.setup();
-      const onStateChange = jest.fn();
+      const onStateChange = vi.fn();
       let currentRouting: ProjectRouting = '_organisation:test-org';
-      const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+      const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
         currentRouting = routing;
       });
 
@@ -640,7 +642,7 @@ describe('ProjectPickerStateProvider', () => {
 
     it('becomes false when the user changes project exclusions', async () => {
       const user = userEvent.setup();
-      const onStateChange = jest.fn();
+      const onStateChange = vi.fn();
 
       render(
         <ProjectPickerStateProvider
@@ -716,7 +718,7 @@ describe('ProjectPickerStateProvider', () => {
     it('keeps the current list and warning-free while a proposal is in flight, then applies the result atomically once it resolves', async () => {
       const user = userEvent.setup();
       const deferred = createDeferred<ProjectsData>();
-      const fetchProjectsByRouting = jest.fn(() => deferred.promise);
+      const fetchProjectsByRouting = vi.fn(() => deferred.promise);
 
       renderFullProjectPicker({
         defaultProjectRoutingGetter: () => '_type:security',
@@ -767,7 +769,7 @@ describe('ProjectPickerStateProvider', () => {
     it('leaves the proposal and current list intact and shows an error callout when the search fails', async () => {
       const user = userEvent.setup();
       const deferred = createDeferred<ProjectsData>();
-      const fetchProjectsByRouting = jest.fn(() => deferred.promise);
+      const fetchProjectsByRouting = vi.fn(() => deferred.promise);
 
       renderFullProjectPicker({
         defaultProjectRoutingGetter: () => '_type:security',

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -24,24 +26,24 @@ import * as useKibanaModule from './use_kibana';
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 
 const mockChatService: MockedChatService = {
-  chat: jest.fn(),
-  complete: jest.fn(),
-  sendAnalyticsEvent: jest.fn(),
+  chat: vi.fn(),
+  complete: vi.fn(),
+  sendAnalyticsEvent: vi.fn(),
   functions$: new BehaviorSubject<FunctionDefinition[]>([]) as MockedChatService['functions$'],
-  getFunctions: jest.fn().mockReturnValue([]),
-  hasFunction: jest.fn().mockReturnValue(false),
-  hasRenderFunction: jest.fn().mockReturnValue(true),
-  renderFunction: jest.fn(),
-  getSystemMessage: jest.fn().mockReturnValue('system'),
-  getScopes: jest.fn(),
+  getFunctions: vi.fn().mockReturnValue([]),
+  hasFunction: vi.fn().mockReturnValue(false),
+  hasRenderFunction: vi.fn().mockReturnValue(true),
+  renderFunction: vi.fn(),
+  getSystemMessage: vi.fn().mockReturnValue('system'),
+  getScopes: vi.fn(),
 };
 
-const addErrorMock = jest.fn();
+const addErrorMock = vi.fn();
 
-jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
+vi.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
   services: {
     uiSettings: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
     notifications: {
       toasts: {
@@ -55,7 +57,7 @@ let hookResult: RenderHookResult<UseChatResult, UseChatProps>;
 
 describe('useChat', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initially', () => {

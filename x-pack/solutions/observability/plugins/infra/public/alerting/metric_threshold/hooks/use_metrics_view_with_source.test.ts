@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useMetricsViewWithSource } from './use_metrics_view_with_source';
 
-const mockLoadSource = jest.fn();
-const mockRefetchMetricsView = jest.fn();
+const mockLoadSource = vi.fn();
+const mockRefetchMetricsView = vi.fn();
 
-const mockUseSourceContext = jest.fn();
-const mockUseMetricsDataViewContext = jest.fn();
+const mockUseSourceContext = vi.fn();
+const mockUseMetricsDataViewContext = vi.fn();
 
-jest.mock('../../../containers/metrics_source', () => ({
-  useSourceContext: () => mockUseSourceContext(),
-  useMetricsDataViewContext: () => mockUseMetricsDataViewContext(),
-}));
+vi.mock('../../../containers/metrics_source', () => {
+      const mocked = {
+      useSourceContext: () => mockUseSourceContext(),
+      useMetricsDataViewContext: () => mockUseMetricsDataViewContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildSourceContext = (overrides: Record<string, unknown> = {}) => ({
   source: { id: 'default' },
@@ -37,7 +42,7 @@ const buildMetricsDataViewContext = (overrides: Record<string, unknown> = {}) =>
 
 describe('useMetricsViewWithSource', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSourceContext.mockReturnValue(buildSourceContext());
     mockUseMetricsDataViewContext.mockReturnValue(buildMetricsDataViewContext());
   });

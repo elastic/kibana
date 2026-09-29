@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../../common/mock';
@@ -14,9 +16,9 @@ import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import { pinEvent } from '../../../../../timelines/store/actions';
 import type { State } from '../../../../../common/store';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -69,7 +71,7 @@ const renderUseTimelineConfig = (
 
 describe('useTimelineConfig', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when not in the timeline flyout', () => {

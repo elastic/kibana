@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,25 +15,28 @@ import type { GetPersistedAiSummaryResponse } from '@kbn/entity-store/common';
 import { useFetchPersistedAiSummary } from './use_fetch_persisted_ai_summary';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 
-const mockAddError = jest.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../../../api/api');
+vi.mock('../../../api/api');
 
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchPersistedAiSummary', () => {
-  const fetchPersistedAiSummary = jest.fn();
+  const fetchPersistedAiSummary = vi.fn();
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useEntityAnalyticsRoutes as jest.Mock).mockReturnValue({ fetchPersistedAiSummary });
+    vi.clearAllMocks();
+    (useEntityAnalyticsRoutes as Mock).mockReturnValue({ fetchPersistedAiSummary });
   });
 
   const persisted: GetPersistedAiSummaryResponse = {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerComponentTemplateRoutes } from '.';
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
@@ -13,7 +15,7 @@ import { RouterMock, routeDependencies, withStubbedHandleEsError } from '../../.
 const router = new RouterMock();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   // Ensure errors are collected instead of thrown by stubbing the shared error handler.
   const restore = withStubbedHandleEsError(routeDependencies, () => ({
     status: 500,

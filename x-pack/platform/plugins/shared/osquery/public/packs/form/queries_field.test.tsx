@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /**
  * Pins the pack uploader's current behavior: an uploaded pack JSON injects each
  * query's `interval` from the file (or the hardcoded '3600' default). The
@@ -25,22 +27,25 @@ import { allowedExperimentalValues } from '../../../common/experimental_features
 // Stubs for heavy child components
 // ---------------------------------------------------------------------------
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          osquery: {
-            writeSavedQueries: true,
-            readSavedQueries: true,
-            writeLiveQueries: true,
-            runSavedQueries: true,
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              osquery: {
+                writeSavedQueries: true,
+                readSavedQueries: true,
+                writeLiveQueries: true,
+                runSavedQueries: true,
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // QueriesField transitively pulls in QueryFlyout / PackQueriesTable via lazy
 // children — stub them out so we only render the uploader + field-array shell.
@@ -54,47 +59,56 @@ let capturedTableProps: {
   setSelectedItems?: (items: Array<Record<string, unknown>>) => void;
 } | null = null;
 
-jest.mock('../queries/query_flyout', () => ({
-  QueryFlyout: ({
-    onSave,
-  }: {
-    onSave: (query: Record<string, unknown>) => Promise<void> | void;
-  }) => {
-    capturedFlyoutOnSave = onSave;
+vi.mock('../queries/query_flyout', () => {
+      const mocked = {
+      QueryFlyout: ({
+        onSave,
+      }: {
+        onSave: (query: Record<string, unknown>) => Promise<void> | void;
+      }) => {
+        capturedFlyoutOnSave = onSave;
 
-    return <div data-test-subj="query-flyout-stub" />;
-  },
-}));
+        return <div data-test-subj="query-flyout-stub" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pack_queries_table', () => ({
-  PackQueriesTable: (props: {
-    data: Array<Record<string, unknown>>;
-    onToggleEnabled?: (item: Record<string, unknown>, enabled: boolean) => void;
-    onEditClick?: (item: Record<string, unknown>) => void;
-    setSelectedItems?: (items: Array<Record<string, unknown>>) => void;
-  }) => {
-    capturedTableProps = props;
+vi.mock('../pack_queries_table', () => {
+      const mocked = {
+      PackQueriesTable: (props: {
+        data: Array<Record<string, unknown>>;
+        onToggleEnabled?: (item: Record<string, unknown>, enabled: boolean) => void;
+        onEditClick?: (item: Record<string, unknown>) => void;
+        setSelectedItems?: (items: Array<Record<string, unknown>>) => void;
+      }) => {
+        capturedTableProps = props;
 
-    return <div data-test-subj="pack-queries-table">{`rows: ${props.data.length}`}</div>;
-  },
-}));
+        return <div data-test-subj="pack-queries-table">{`rows: ${props.data.length}`}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Capture the onChange callback from OsqueryPackUploader so we can trigger
 // an upload from the test without filesystem interaction.
 let capturedUploaderOnChange: ((content: Record<string, unknown>, name: string) => void) | null =
   null;
 
-jest.mock('./pack_uploader', () => ({
-  OsqueryPackUploader: ({
-    onChange,
-  }: {
-    onChange: (content: Record<string, unknown>, name: string) => void;
-  }) => {
-    capturedUploaderOnChange = onChange;
+vi.mock('./pack_uploader', () => {
+      const mocked = {
+      OsqueryPackUploader: ({
+        onChange,
+      }: {
+        onChange: (content: Record<string, unknown>, name: string) => void;
+      }) => {
+        capturedUploaderOnChange = onChange;
 
-    return <div data-test-subj="osquery-pack-uploader">Upload</div>;
-  },
-}));
+        return <div data-test-subj="osquery-pack-uploader">Upload</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ---------------------------------------------------------------------------
 // Import after mocks are set up
@@ -175,7 +189,7 @@ describe('QueriesField', () => {
     capturedQueriesState = [];
     capturedFlyoutOnSave = null;
     capturedTableProps = null;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('pack uploader', () => {

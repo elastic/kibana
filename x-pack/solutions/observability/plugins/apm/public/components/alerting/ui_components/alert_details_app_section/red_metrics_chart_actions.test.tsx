@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
@@ -15,21 +17,24 @@ import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn().mockReturnValue({ services: {} }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useKibana: vi.fn().mockReturnValue({ services: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_fetcher');
+vi.mock('../../../../hooks/use_fetcher');
 
-const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
-const { useFetcher } = jest.requireMock('../../../../hooks/use_fetcher');
+const { useKibana } = (await vi.importMock('@kbn/kibana-react-plugin/public'));
+const { useFetcher } = (await vi.importMock('../../../../hooks/use_fetcher'));
 
 const MOCK_TRACES_INDEX = 'traces-apm-*';
 const MOCK_ERROR_INDEX = 'logs-apm.error-*';
 
-const mockApmGetRedirectUrl = jest.fn().mockReturnValue('http://test-apm-url');
-const mockDiscoverGetRedirectUrl = jest.fn().mockReturnValue('http://test-discover-url');
+const mockApmGetRedirectUrl = vi.fn().mockReturnValue('http://test-apm-url');
+const mockDiscoverGetRedirectUrl = vi.fn().mockReturnValue('http://test-discover-url');
 
 const defaultProps = {
   queryParams: {
@@ -66,7 +71,7 @@ const setupMocks = ({
           },
         },
         apmSourcesAccess: {
-          getApmIndexSettings: jest.fn(),
+          getApmIndexSettings: vi.fn(),
         },
       },
     });
@@ -99,7 +104,7 @@ const setupMocks = ({
 
 describe('RedMetricsChartActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the "Open" dropdown button', () => {

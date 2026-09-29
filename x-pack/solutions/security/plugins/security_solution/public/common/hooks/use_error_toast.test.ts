@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useErrorToast } from './use_error_toast';
 
-jest.mock('./use_app_toasts');
+vi.mock('./use_app_toasts');
 
 import { useAppToasts } from './use_app_toasts';
 
 describe('useErrorToast', () => {
-  let addErrorMock: jest.Mock;
+  let addErrorMock: Mock;
 
   beforeEach(() => {
-    addErrorMock = jest.fn();
-    (useAppToasts as jest.Mock).mockImplementation(() => ({
+    addErrorMock = vi.fn();
+    (useAppToasts as Mock).mockImplementation(() => ({
       addError: addErrorMock,
     }));
   });

@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatWithYourDataSection } from './chat_with_data_section';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 describe('ChatWithYourDataSection', () => {
-  const openChat = jest.fn();
+  const openChat = vi.fn();
 
   const renderSection = () =>
     render(
@@ -26,7 +32,7 @@ describe('ChatWithYourDataSection', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({ services: { agentBuilder: { openChat } } });
   });
 

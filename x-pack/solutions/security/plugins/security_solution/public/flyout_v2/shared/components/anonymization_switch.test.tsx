@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import {
@@ -19,7 +22,7 @@ const renderAnonymizedSwitch = ({
 }: {
   hasSummary: boolean;
   showAnonymizedValues: boolean | undefined;
-  onChange: jest.Mock;
+  onChange: Mock;
 }) =>
   render(
     <AnonymizationSwitch
@@ -30,11 +33,11 @@ const renderAnonymizedSwitch = ({
   );
 
 describe('AnonymizationSwitch', () => {
-  let mockOnChange: jest.Mock;
+  let mockOnChange: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOnChange = jest.fn();
+    vi.clearAllMocks();
+    mockOnChange = vi.fn();
   });
 
   it('should render the switch in the unchecked state by default', () => {

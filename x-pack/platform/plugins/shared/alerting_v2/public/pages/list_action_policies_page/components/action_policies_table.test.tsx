@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,19 +17,19 @@ import { createMockLocators, ListPageTestProviders } from '../../../test_utils/t
 import { ActionPoliciesTable } from './action_policies_table';
 
 const mockLocators = createMockLocators();
-const mockNavigateToUrl = jest.fn();
-const mockNavigateToApp = jest.fn();
-const mockGetUrlForApp = jest.fn();
-const mockFindItems = jest.fn();
-const mockCreateActionPolicy = jest.fn();
-const mockDeleteActionPolicy = jest.fn();
-const mockEnableActionPolicy = jest.fn();
-const mockDisableActionPolicy = jest.fn();
-const mockSnoozeActionPolicy = jest.fn();
-const mockUnsnoozeActionPolicy = jest.fn();
-const mockSettingsClientGet = jest.fn();
-const mockUseFetchWorkflow = jest.fn();
-const mockBulkGet = jest.fn();
+const mockNavigateToUrl = vi.fn();
+const mockNavigateToApp = vi.fn();
+const mockGetUrlForApp = vi.fn();
+const mockFindItems = vi.fn();
+const mockCreateActionPolicy = vi.fn();
+const mockDeleteActionPolicy = vi.fn();
+const mockEnableActionPolicy = vi.fn();
+const mockDisableActionPolicy = vi.fn();
+const mockSnoozeActionPolicy = vi.fn();
+const mockUnsnoozeActionPolicy = vi.fn();
+const mockSettingsClientGet = vi.fn();
+const mockUseFetchWorkflow = vi.fn();
+const mockBulkGet = vi.fn();
 
 const WRITE_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: false } };
@@ -37,14 +39,15 @@ let mockExperimentalFeaturesEnabled = true;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockIsLicenseValid = true;
 
-jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-}));
+vi.mock('../../../hooks/use_is_action_policies_license_valid', () => {
+      const mocked = {
+      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../../../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../../services/user_capabilities'));
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -61,7 +64,7 @@ jest.mock('@kbn/core-di-browser', () => {
         };
       }
       if (token === 'chrome') {
-        return { docTitle: { change: jest.fn() } };
+        return { docTitle: { change: vi.fn() } };
       }
       if (token === 'http') {
         return { basePath: { prepend: (path: string) => path } };
@@ -88,90 +91,138 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../../hooks/use_create_action_policy', () => ({
-  useCreateActionPolicy: () => ({ mutate: mockCreateActionPolicy }),
-}));
+vi.mock('../../../hooks/use_create_action_policy', () => {
+      const mocked = {
+      useCreateActionPolicy: () => ({ mutate: mockCreateActionPolicy }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_delete_action_policy', () => ({
-  useDeleteActionPolicy: () => ({ mutate: mockDeleteActionPolicy, isLoading: false }),
-}));
+vi.mock('../../../hooks/use_delete_action_policy', () => {
+      const mocked = {
+      useDeleteActionPolicy: () => ({ mutate: mockDeleteActionPolicy, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_enable_action_policy', () => ({
-  useEnableActionPolicy: () => ({
-    mutate: mockEnableActionPolicy,
-    isLoading: false,
-    variables: undefined,
-  }),
-}));
+vi.mock('../../../hooks/use_enable_action_policy', () => {
+      const mocked = {
+      useEnableActionPolicy: () => ({
+        mutate: mockEnableActionPolicy,
+        isLoading: false,
+        variables: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_disable_action_policy', () => ({
-  useDisableActionPolicy: () => ({
-    mutate: mockDisableActionPolicy,
-    isLoading: false,
-    variables: undefined,
-  }),
-}));
+vi.mock('../../../hooks/use_disable_action_policy', () => {
+      const mocked = {
+      useDisableActionPolicy: () => ({
+        mutate: mockDisableActionPolicy,
+        isLoading: false,
+        variables: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_snooze_action_policy', () => ({
-  useSnoozeActionPolicy: () => ({
-    mutate: mockSnoozeActionPolicy,
-    isLoading: false,
-    variables: undefined,
-  }),
-}));
+vi.mock('../../../hooks/use_snooze_action_policy', () => {
+      const mocked = {
+      useSnoozeActionPolicy: () => ({
+        mutate: mockSnoozeActionPolicy,
+        isLoading: false,
+        variables: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_unsnooze_action_policy', () => ({
-  useUnsnoozeActionPolicy: () => ({
-    mutate: mockUnsnoozeActionPolicy,
-    isLoading: false,
-    variables: undefined,
-  }),
-}));
+vi.mock('../../../hooks/use_unsnooze_action_policy', () => {
+      const mocked = {
+      useUnsnoozeActionPolicy: () => ({
+        mutate: mockUnsnoozeActionPolicy,
+        isLoading: false,
+        variables: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUpdateActionPolicyApiKey = jest.fn();
-jest.mock('../../../hooks/use_update_action_policy_api_key', () => ({
-  useUpdateActionPolicyApiKey: () => ({ mutate: mockUpdateActionPolicyApiKey }),
-}));
+const mockUpdateActionPolicyApiKey = vi.fn();
+vi.mock('../../../hooks/use_update_action_policy_api_key', () => {
+      const mocked = {
+      useUpdateActionPolicyApiKey: () => ({ mutate: mockUpdateActionPolicyApiKey }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBulkAction = jest.fn();
-jest.mock('../../../hooks/use_bulk_action_action_policies', () => ({
-  useBulkActionActionPolicies: () => ({ mutate: mockBulkAction, isLoading: false }),
-}));
+const mockBulkAction = vi.fn();
+vi.mock('../../../hooks/use_bulk_action_action_policies', () => {
+      const mocked = {
+      useBulkActionActionPolicies: () => ({ mutate: mockBulkAction, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_workflow', () => ({
-  useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
-}));
+vi.mock('../../../hooks/use_fetch_workflow', () => {
+      const mocked = {
+      useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_bulk_get_user_profiles', () => ({
-  useBulkGetUserProfiles: () => ({ data: undefined, isLoading: false }),
-}));
+vi.mock('../../../hooks/use_bulk_get_user_profiles', () => {
+      const mocked = {
+      useBulkGetUserProfiles: () => ({ data: undefined, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../action_policies_data_source', () => ({
-  ...jest.requireActual('../action_policies_data_source'),
-  useActionPoliciesDataSource: () => ({ findItems: mockFindItems, debounceMs: 0 }),
-}));
+vi.mock('../action_policies_data_source', async () => {
+      const mocked = {
+      ...(await vi.importActual('../action_policies_data_source')),
+      useActionPoliciesDataSource: () => ({ findItems: mockFindItems, debounceMs: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/action_policy/delete_confirmation_modal', () => ({
-  DeleteActionPolicyConfirmModal: () => null,
-}));
+vi.mock('../../../components/action_policy/delete_confirmation_modal', () => {
+      const mocked = {
+      DeleteActionPolicyConfirmModal: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/action_policy/action_policy_snooze_button', () => ({
-  ActionPolicySnoozeButton: () => <span>Snooze button</span>,
-}));
+vi.mock('../../../components/action_policy/action_policy_snooze_button', () => {
+      const mocked = {
+      ActionPolicySnoozeButton: () => <span>Snooze button</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/action_policy/action_policy_state_badge', () => ({
-  ActionPolicyStateBadge: () => <span>State badge</span>,
-}));
+vi.mock('../../../components/action_policy/action_policy_state_badge', () => {
+      const mocked = {
+      ActionPolicyStateBadge: () => <span>State badge</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./action_policy_actions_cell', () => ({
-  ActionPolicyActionsCell: () => <span>Actions cell</span>,
-}));
+vi.mock('./action_policy_actions_cell', () => {
+      const mocked = {
+      ActionPolicyActionsCell: () => <span>Actions cell</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/action_policy/details_flyout/action_policy_details_flyout', () => ({
-  ActionPolicyDetailsFlyout: ({ policy }: { policy: ActionPolicyResponse }) => (
-    <div data-test-subj="mockedDetailsFlyout">Details flyout for {policy.id}</div>
-  ),
-}));
+vi.mock('../../../components/action_policy/details_flyout/action_policy_details_flyout', () => {
+      const mocked = {
+      ActionPolicyDetailsFlyout: ({ policy }: { policy: ActionPolicyResponse }) => (
+        <div data-test-subj="mockedDetailsFlyout">Details flyout for {policy.id}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
@@ -201,7 +252,7 @@ const renderTable = () =>
 
 describe('ActionPoliciesTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;

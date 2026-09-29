@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { DELETE_NOTE_ERROR, DeleteNoteButtonIcon } from './delete_note_button';
@@ -14,23 +17,26 @@ import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import { ReqStatus } from '..';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
 
-const mockAddError = jest.fn();
-jest.mock('../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+const mockAddError = vi.fn();
+vi.mock('../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/user_privileges');
+vi.mock('../../common/components/user_privileges');
 
 const note: Note = {
   eventId: '1',
@@ -47,8 +53,8 @@ const index = 0;
 
 describe('DeleteNoteButtonIcon', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: true },
     });
   });
@@ -157,7 +163,7 @@ describe('DeleteNoteButtonIcon', () => {
   });
 
   it('should not render the icon if user does not have crud privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: false },
     });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { PackageNotFoundError } from '../../errors';
 import { outputService } from '../../services';
 
@@ -15,27 +18,27 @@ import type { SyncIntegrationsData } from './model';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
-jest.mock('../../services');
-jest.mock('./custom_assets');
-jest.mock('../../services/epm/packages/install_errors_helpers');
+vi.mock('../../services');
+vi.mock('./custom_assets');
+vi.mock('../../services/epm/packages/install_errors_helpers');
 
-const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
-const createOrUpdateFailedInstallStatusMock = createOrUpdateFailedInstallStatus as jest.Mocked<
+const outputServiceMock = outputService as Mocked<typeof outputService>;
+const createOrUpdateFailedInstallStatusMock = createOrUpdateFailedInstallStatus as Mocked<
   typeof createOrUpdateFailedInstallStatus
 >;
 
 describe('syncIntegrationsOnRemote', () => {
   const { signal } = new AbortController();
   let esClientMock: any;
-  let getIndicesMock: jest.Mock;
-  let searchMock: jest.Mock;
+  let getIndicesMock: Mock;
+  let searchMock: Mock;
   let packageClientMock: any;
   let loggerMock: any;
   let soClientMock: any;
 
   beforeEach(() => {
-    getIndicesMock = jest.fn();
-    searchMock = jest.fn();
+    getIndicesMock = vi.fn();
+    searchMock = vi.fn();
     esClientMock = {
       indices: {
         get: getIndicesMock,
@@ -51,19 +54,19 @@ describe('syncIntegrationsOnRemote', () => {
       ],
     } as any);
     packageClientMock = {
-      getInstallation: jest.fn(),
-      installPackage: jest.fn(),
-      rollbackPackage: jest.fn(),
+      getInstallation: vi.fn(),
+      installPackage: vi.fn(),
+      rollbackPackage: vi.fn(),
     };
     loggerMock = {
-      debug: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      info: vi.fn(),
     };
-    (installCustomAsset as jest.Mock).mockClear();
+    (installCustomAsset as Mock).mockClear();
     soClientMock = {
-      update: jest.fn(),
+      update: vi.fn(),
     };
   });
 

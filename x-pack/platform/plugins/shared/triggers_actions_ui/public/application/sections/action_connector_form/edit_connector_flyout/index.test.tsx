@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { lazy } from 'react';
 
 import userEvent from '@testing-library/user-event';
@@ -18,20 +20,20 @@ import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
-    connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
-    connectorTypeHasInboundEvents: jest.fn(
+    connectorTypeIsDual: vi.fn((id: string) => id === '.dual'),
+    connectorTypeIsInboundOnly: vi.fn((id: string) => id === '.inboundWebhook'),
+    connectorTypeHasInboundEvents: vi.fn(
       (id: string) =>
         id === '.dual' || id === '.inboundWebhook' || actual.connectorTypeHasInboundEvents(id)
     ),
   };
 });
 
-jest.setTimeout(15_000);
+vi.setConfig({ testTimeout: 15_000 });
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -59,8 +61,8 @@ const connector: ActionConnector = createMockActionConnector({
 
 describe('EditConnectorFlyout', () => {
   let appMockRenderer: AppMockRenderer;
-  const onClose = jest.fn();
-  const onConnectorUpdated = jest.fn();
+  const onClose = vi.fn();
+  const onConnectorUpdated = vi.fn();
 
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     actionConnectorFields: lazy(() => import('../connector_mock')),
@@ -73,7 +75,7 @@ describe('EditConnectorFlyout', () => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     appMockRenderer = createAppMockRenderer();
@@ -81,7 +83,7 @@ describe('EditConnectorFlyout', () => {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
+    appMockRenderer.coreStart.http.get = vi.fn().mockResolvedValue([
       {
         id: '.test',
         name: 'Test',
@@ -94,8 +96,8 @@ describe('EditConnectorFlyout', () => {
         is_deprecated: false,
       },
     ]);
-    appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
-    appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
+    appMockRenderer.coreStart.http.put = vi.fn().mockResolvedValue(updateConnectorResponse);
+    appMockRenderer.coreStart.http.post = vi.fn().mockResolvedValue(executeConnectorResponse);
   });
 
   it('renders', async () => {
@@ -416,7 +418,7 @@ describe('EditConnectorFlyout', () => {
     });
     actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
     appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-    appMockRenderer.coreStart.http.put = jest
+    appMockRenderer.coreStart.http.put = vi
       .fn()
       .mockImplementation((_path: string, opts?: { body?: string }) => {
         const body = opts?.body ? JSON.parse(opts.body) : {};
@@ -429,7 +431,7 @@ describe('EditConnectorFlyout', () => {
           is_inbound_events_enabled: body.is_inbound_events_enabled === true,
         });
       });
-    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+    appMockRenderer.coreStart.http.post = vi.fn().mockImplementation((path: string) => {
       if (String(path).includes('_rotate_event_token')) {
         return Promise.resolve({ ingest_token: 'once-token' });
       }
@@ -493,7 +495,7 @@ describe('EditConnectorFlyout', () => {
     });
     actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
     appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-    appMockRenderer.coreStart.http.put = jest
+    appMockRenderer.coreStart.http.put = vi
       .fn()
       .mockImplementation((_path: string, opts?: { body?: string }) => {
         const body = opts?.body ? JSON.parse(opts.body) : {};
@@ -506,7 +508,7 @@ describe('EditConnectorFlyout', () => {
           is_inbound_events_enabled: body.is_inbound_events_enabled === true,
         });
       });
-    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+    appMockRenderer.coreStart.http.post = vi.fn().mockImplementation((path: string) => {
       if (String(path).includes('_rotate_event_token')) {
         return Promise.resolve({ ingest_token: 'once-token' });
       }
@@ -566,7 +568,7 @@ describe('EditConnectorFlyout', () => {
     });
     actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
     appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-    appMockRenderer.coreStart.http.put = jest
+    appMockRenderer.coreStart.http.put = vi
       .fn()
       .mockImplementation((_path: string, opts?: { body?: string }) => {
         const body = opts?.body ? JSON.parse(opts.body) : {};
@@ -580,7 +582,7 @@ describe('EditConnectorFlyout', () => {
         });
       });
     let rotateCount = 0;
-    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+    appMockRenderer.coreStart.http.post = vi.fn().mockImplementation((path: string) => {
       if (String(path).includes('_rotate_event_token')) {
         rotateCount += 1;
         return Promise.resolve({
@@ -636,7 +638,7 @@ describe('EditConnectorFlyout', () => {
     });
     actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
     appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-    appMockRenderer.coreStart.http.put = jest
+    appMockRenderer.coreStart.http.put = vi
       .fn()
       .mockImplementation((_path: string, opts?: { body?: string }) => {
         const body = opts?.body ? JSON.parse(opts.body) : {};
@@ -649,7 +651,7 @@ describe('EditConnectorFlyout', () => {
           is_inbound_events_enabled: body.is_inbound_events_enabled === true,
         });
       });
-    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+    appMockRenderer.coreStart.http.post = vi.fn().mockImplementation((path: string) => {
       if (String(path).includes('_rotate_event_token')) {
         return Promise.resolve({ ingest_token: 'once-token' });
       }
@@ -715,7 +717,7 @@ describe('EditConnectorFlyout', () => {
     });
     actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
     appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-    appMockRenderer.coreStart.http.put = jest
+    appMockRenderer.coreStart.http.put = vi
       .fn()
       .mockImplementation((_path: string, opts?: { body?: string }) => {
         const body = opts?.body ? JSON.parse(opts.body) : {};
@@ -728,7 +730,7 @@ describe('EditConnectorFlyout', () => {
           is_inbound_events_enabled: body.is_inbound_events_enabled === true,
         });
       });
-    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+    appMockRenderer.coreStart.http.post = vi.fn().mockImplementation((path: string) => {
       if (String(path).includes('_rotate_event_token')) {
         return Promise.resolve({ ingest_token: 'once-token' });
       }
@@ -791,7 +793,7 @@ describe('EditConnectorFlyout', () => {
     });
     actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
     appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-    appMockRenderer.coreStart.http.put = jest
+    appMockRenderer.coreStart.http.put = vi
       .fn()
       .mockImplementation((_path: string, opts?: { body?: string }) => {
         const body = opts?.body ? JSON.parse(opts.body) : {};
@@ -837,7 +839,7 @@ describe('EditConnectorFlyout', () => {
   });
 
   it('passes the saved connector config to the test tab', async () => {
-    const validateParams = jest.fn().mockResolvedValue({ errors: {} });
+    const validateParams = vi.fn().mockResolvedValue({ errors: {} });
     const dualConnector = createMockActionConnector({
       id: 'dd-1',
       name: 'Datadog',
@@ -853,7 +855,7 @@ describe('EditConnectorFlyout', () => {
     });
     actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
     appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-    appMockRenderer.coreStart.http.put = jest
+    appMockRenderer.coreStart.http.put = vi
       .fn()
       .mockImplementation((_path: string, opts?: { body?: string }) => {
         const body = opts?.body ? JSON.parse(opts.body) : {};
@@ -866,7 +868,7 @@ describe('EditConnectorFlyout', () => {
           is_inbound_events_enabled: body.is_inbound_events_enabled === true,
         });
       });
-    appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+    appMockRenderer.coreStart.http.post = vi.fn().mockImplementation((path: string) => {
       if (String(path).includes('_rotate_event_token')) {
         return Promise.resolve({ ingest_token: 'once-token' });
       }
@@ -1199,7 +1201,7 @@ describe('EditConnectorFlyout', () => {
 
     it('updates connector form field with latest value', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const { getByTestId } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
@@ -1415,7 +1417,7 @@ describe('EditConnectorFlyout', () => {
     });
 
     it('throws an error correctly', async () => {
-      appMockRenderer.coreStart.http.post = jest
+      appMockRenderer.coreStart.http.post = vi
         .fn()
         .mockRejectedValue(new Error('error executing'));
 

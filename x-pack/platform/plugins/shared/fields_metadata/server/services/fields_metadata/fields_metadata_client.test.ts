@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { TEcsFields, TMetadataFields, TOtelFields } from '../../../common';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -223,10 +225,10 @@ describe('FieldsMetadataClient class', () => {
     otelFields: otelFields as TOtelFields,
   });
   const streamsFieldsRepository = StreamsFieldsRepository.create({
-    streamsFieldsExtractor: jest.fn(),
+    streamsFieldsExtractor: vi.fn(),
   });
-  const integrationFieldsExtractor = jest.fn();
-  const integrationListExtractor = jest.fn();
+  const integrationFieldsExtractor = vi.fn();
+  const integrationListExtractor = vi.fn();
   integrationFieldsExtractor.mockImplementation(
     ({ integration, dataset }: { integration: string; dataset?: string }) => {
       if (integration === 'system') {

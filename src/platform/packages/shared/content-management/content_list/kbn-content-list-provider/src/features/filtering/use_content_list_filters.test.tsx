@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
@@ -16,17 +18,17 @@ import { useContentListFilters } from './use_content_list_filters';
 import { useContentListSearch } from '../search/use_content_list_search';
 
 const mockFavoritesClient: FavoritesClientPublic = {
-  getFavorites: jest.fn().mockResolvedValue({ favoriteIds: [] }),
-  addFavorite: jest.fn(),
-  removeFavorite: jest.fn(),
-  isAvailable: jest.fn().mockResolvedValue(true),
-  getFavoriteType: jest.fn().mockReturnValue('dashboard'),
-  reportAddFavoriteClick: jest.fn(),
-  reportRemoveFavoriteClick: jest.fn(),
+  getFavorites: vi.fn().mockResolvedValue({ favoriteIds: [] }),
+  addFavorite: vi.fn(),
+  removeFavorite: vi.fn(),
+  isAvailable: vi.fn().mockResolvedValue(true),
+  getFavoriteType: vi.fn().mockReturnValue('dashboard'),
+  reportAddFavoriteClick: vi.fn(),
+  reportRemoveFavoriteClick: vi.fn(),
 };
 
 describe('useContentListFilters', () => {
-  const mockFindItems = jest.fn(
+  const mockFindItems = vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: [],
       total: 0,
@@ -48,7 +50,7 @@ describe('useContentListFilters', () => {
       );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -109,7 +111,7 @@ describe('useContentListFilters', () => {
 
   describe('error handling', () => {
     it('throws when used outside provider', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       expect(() => {
         renderHook(() => useContentListFilters());

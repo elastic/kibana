@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import type { ActionContext } from '../../connector_spec';
 import {
@@ -19,11 +22,11 @@ import {
 } from './relay';
 
 const createLogger = () =>
-  ({ debug: jest.fn(), error: jest.fn() } as unknown as jest.Mocked<Logger>);
+  ({ debug: vi.fn(), error: vi.fn() } as unknown as Mocked<Logger>);
 
 const createContext = (
   secrets: Record<string, unknown>,
-  relay?: { trigger?: jest.Mock; listBindings?: jest.Mock }
+  relay?: { trigger?: Mock; listBindings?: Mock }
 ): ActionContext =>
   ({
     log: createLogger(),
@@ -44,7 +47,7 @@ describe('getRelayConnection', () => {
   });
 
   it('returns the client and tenant key under relay auth', () => {
-    const relay = { trigger: jest.fn() };
+    const relay = { trigger: vi.fn() };
 
     expect(getRelayConnection(createContext(relaySecrets, relay))).toEqual({
       client: relay,
@@ -60,7 +63,7 @@ describe('getRelayConnection', () => {
 
   it('throws when the connector is no longer linked to a workspace', () => {
     expect(() =>
-      getRelayConnection(createContext({ authType: 'relay' }, { trigger: jest.fn() }))
+      getRelayConnection(createContext({ authType: 'relay' }, { trigger: vi.fn() }))
     ).toThrow(/not linked to a Slack workspace/);
   });
 });
@@ -70,7 +73,7 @@ describe('relaySendMessage', () => {
 
   const send = async (
     input: Record<string, unknown>,
-    deps: { trigger: jest.Mock; listBindings?: jest.Mock }
+    deps: { trigger: Mock; listBindings?: Mock }
   ) => {
     const relay = { trigger: deps.trigger, listBindings: deps.listBindings };
     const ctx = createContext(relaySecrets, relay);
@@ -82,12 +85,12 @@ describe('relaySendMessage', () => {
   };
 
   it("forwards a channel id and returns Relay's resolved channel", async () => {
-    const trigger = jest.fn().mockResolvedValue({
+    const trigger = vi.fn().mockResolvedValue({
       ref: '1700.0001',
       tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
-    const listBindings = jest.fn();
+    const listBindings = vi.fn();
 
     await expect(
       send({ channel: CHANNEL_ID, text: 'hello' }, { trigger, listBindings })
@@ -105,12 +108,12 @@ describe('relaySendMessage', () => {
   });
 
   it("forwards a channel name and returns Relay's resolved channel id", async () => {
-    const trigger = jest.fn().mockResolvedValue({
+    const trigger = vi.fn().mockResolvedValue({
       ref: '1700.0003',
       tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
-    const listBindings = jest.fn();
+    const listBindings = vi.fn();
 
     await expect(
       send({ channel: '#general', text: 'hello' }, { trigger, listBindings })
@@ -128,7 +131,7 @@ describe('relaySendMessage', () => {
   });
 
   it('forwards threadTs when replying in a thread', async () => {
-    const trigger = jest.fn().mockResolvedValue({
+    const trigger = vi.fn().mockResolvedValue({
       ref: '1700.0002',
       tenantKey: 'team-A',
       channel: CHANNEL_ID,
@@ -140,7 +143,7 @@ describe('relaySendMessage', () => {
   });
 
   it('rejects a blank channel before calling Relay', async () => {
-    const trigger = jest.fn();
+    const trigger = vi.fn();
 
     await expect(send({ channel: '   ', text: 'hello' }, { trigger })).rejects.toThrow(
       'Channel is required.'
@@ -152,7 +155,7 @@ describe('relaySendMessage', () => {
   });
 
   it('trims the channel before forwarding it', async () => {
-    const trigger = jest.fn().mockResolvedValue({
+    const trigger = vi.fn().mockResolvedValue({
       ref: '1700.0004',
       tenantKey: 'team-A',
       channel: CHANNEL_ID,
@@ -168,7 +171,7 @@ describe('relaySendMessage', () => {
   });
 
   it('restates a 403 as an unconnected channel', async () => {
-    const trigger = jest.fn().mockRejectedValue(relayError(403));
+    const trigger = vi.fn().mockRejectedValue(relayError(403));
 
     await expect(send({ channel: CHANNEL_ID, text: 'hello' }, { trigger })).rejects.toThrow(
       `Channel ${CHANNEL_ID} is not connected. Connect it in the Elastic Slack app settings.`
@@ -179,7 +182,7 @@ describe('relaySendMessage', () => {
   });
 
   it('restates a 409 as an uninstalled app', async () => {
-    const trigger = jest.fn().mockRejectedValue(relayError(409));
+    const trigger = vi.fn().mockRejectedValue(relayError(409));
 
     await expect(send({ channel: CHANNEL_ID, text: 'hello' }, { trigger })).rejects.toThrow(
       /no longer installed/
@@ -187,7 +190,7 @@ describe('relaySendMessage', () => {
   });
 
   it('restates a 429 as a rate limit', async () => {
-    const trigger = jest.fn().mockRejectedValue(relayError(429));
+    const trigger = vi.fn().mockRejectedValue(relayError(429));
 
     await expect(send({ channel: '#alerts', text: 'hello' }, { trigger })).rejects.toThrow(
       'Slack rate-limited this request. Try again shortly.'
@@ -196,14 +199,14 @@ describe('relaySendMessage', () => {
 
   it('passes other failures through untouched', async () => {
     const cause = relayError(502);
-    const trigger = jest.fn().mockRejectedValue(cause);
+    const trigger = vi.fn().mockRejectedValue(cause);
 
     await expect(send({ channel: CHANNEL_ID, text: 'hello' }, { trigger })).rejects.toBe(cause);
   });
 });
 
 describe('relayListChannels', () => {
-  const list = async (input: Record<string, unknown>, listBindings: jest.Mock) =>
+  const list = async (input: Record<string, unknown>, listBindings: Mock) =>
     relayListChannels(
       { client: { listBindings } as never, tenantKey: 'team-A' },
       createContext(relaySecrets, { listBindings }),
@@ -211,7 +214,7 @@ describe('relayListChannels', () => {
     );
 
   it('maps connected bindings onto conversations.list-shaped channels', async () => {
-    const listBindings = jest.fn().mockResolvedValue({
+    const listBindings = vi.fn().mockResolvedValue({
       bindings: [
         { scope_id: 'C123', display_name: 'general', visibility: 'public' },
         { scope_id: 'C456', display_name: 'secrets', visibility: 'private' },
@@ -231,7 +234,7 @@ describe('relayListChannels', () => {
   });
 
   it('falls back to the channel id when a binding has no display snapshot', async () => {
-    const listBindings = jest.fn().mockResolvedValue({ bindings: [{ scope_id: 'C123' }] });
+    const listBindings = vi.fn().mockResolvedValue({ bindings: [{ scope_id: 'C123' }] });
 
     await expect(list({}, listBindings)).resolves.toMatchObject({
       channels: [{ id: 'C123', name: 'C123', is_private: false }],
@@ -239,7 +242,7 @@ describe('relayListChannels', () => {
   });
 
   it('drops a binding carrying no channel id', async () => {
-    const listBindings = jest
+    const listBindings = vi
       .fn()
       .mockResolvedValue({ bindings: [{ display_name: 'orphan' }, { scope_id: 'C123' }] });
 
@@ -249,7 +252,7 @@ describe('relayListChannels', () => {
   });
 
   it('keeps a private channel even when types asks for public only', async () => {
-    const listBindings = jest
+    const listBindings = vi
       .fn()
       .mockResolvedValue({ bindings: [{ scope_id: 'C456', visibility: 'private' }] });
 
@@ -259,7 +262,7 @@ describe('relayListChannels', () => {
   });
 
   it('reports more pages and forwards the cursor back', async () => {
-    const listBindings = jest
+    const listBindings = vi
       .fn()
       .mockResolvedValue({ bindings: [{ scope_id: 'C123' }], nextCursor: 'page-2' });
 
@@ -271,7 +274,7 @@ describe('relayListChannels', () => {
   });
 
   it('clamps a limit above the Relay page maximum', async () => {
-    const listBindings = jest.fn().mockResolvedValue({ bindings: [] });
+    const listBindings = vi.fn().mockResolvedValue({ bindings: [] });
 
     await list({ limit: 1000 }, listBindings);
 
@@ -279,7 +282,7 @@ describe('relayListChannels', () => {
   });
 
   it('ignores raw and still returns the compact channel shape', async () => {
-    const listBindings = jest.fn().mockResolvedValue({
+    const listBindings = vi.fn().mockResolvedValue({
       bindings: [{ scope_id: 'C123', display_name: 'general', visibility: 'public' }],
       nextCursor: 'page-2',
     });
@@ -294,7 +297,7 @@ describe('relayListChannels', () => {
   });
 
   it('restates a 403 without naming a channel', async () => {
-    const listBindings = jest.fn().mockRejectedValue(relayError(403));
+    const listBindings = vi.fn().mockRejectedValue(relayError(403));
 
     await expect(list({}, listBindings)).rejects.toThrow(
       'Not allowed to read the connected channels. Reconnect the Elastic Slack app.'
@@ -302,21 +305,21 @@ describe('relayListChannels', () => {
   });
 
   it('restates a 409 as an uninstalled app', async () => {
-    const listBindings = jest.fn().mockRejectedValue(relayError(409));
+    const listBindings = vi.fn().mockRejectedValue(relayError(409));
 
     await expect(list({}, listBindings)).rejects.toThrow(/no longer installed/);
   });
 
   it('passes other failures through untouched', async () => {
     const cause = relayError(502);
-    const listBindings = jest.fn().mockRejectedValue(cause);
+    const listBindings = vi.fn().mockRejectedValue(cause);
 
     await expect(list({}, listBindings)).rejects.toBe(cause);
   });
 });
 
 describe('relayResolveChannelId', () => {
-  const resolve = async (input: Record<string, unknown>, listBindings: jest.Mock) =>
+  const resolve = async (input: Record<string, unknown>, listBindings: Mock) =>
     relayResolveChannelId(
       { client: { listBindings } as never, tenantKey: 'team-A' },
       createContext(relaySecrets, { listBindings }),
@@ -326,7 +329,7 @@ describe('relayResolveChannelId', () => {
     );
 
   it('resolves an exact name, ignoring a leading hash and case', async () => {
-    const listBindings = jest
+    const listBindings = vi
       .fn()
       .mockResolvedValue({ bindings: [{ scope_id: 'C123', display_name: 'General' }] });
 
@@ -342,7 +345,7 @@ describe('relayResolveChannelId', () => {
   });
 
   it('does not match a partial name under exact', async () => {
-    const listBindings = jest
+    const listBindings = vi
       .fn()
       .mockResolvedValue({ bindings: [{ scope_id: 'C123', display_name: 'general-alerts' }] });
 
@@ -352,7 +355,7 @@ describe('relayResolveChannelId', () => {
   });
 
   it('matches a partial name under contains', async () => {
-    const listBindings = jest
+    const listBindings = vi
       .fn()
       .mockResolvedValue({ bindings: [{ scope_id: 'C123', display_name: 'general-alerts' }] });
 
@@ -362,7 +365,7 @@ describe('relayResolveChannelId', () => {
   });
 
   it('walks to a later page to find the channel', async () => {
-    const listBindings = jest
+    const listBindings = vi
       .fn()
       .mockResolvedValueOnce({
         bindings: [{ scope_id: 'C111', display_name: 'other' }],
@@ -379,7 +382,7 @@ describe('relayResolveChannelId', () => {
   });
 
   it('stops at maxPages and reports where it got to', async () => {
-    const listBindings = jest.fn().mockResolvedValue({
+    const listBindings = vi.fn().mockResolvedValue({
       bindings: [{ scope_id: 'C111', display_name: 'other' }],
       nextCursor: 'next',
     });
@@ -395,7 +398,7 @@ describe('relayResolveChannelId', () => {
   });
 
   it('reports not found without a cursor once the pages run out', async () => {
-    const listBindings = jest.fn().mockResolvedValue({ bindings: [] });
+    const listBindings = vi.fn().mockResolvedValue({ bindings: [] });
 
     await expect(resolve({ name: 'general' }, listBindings)).resolves.toMatchObject({
       found: false,
@@ -407,7 +410,7 @@ describe('relayResolveChannelId', () => {
 
 describe('relayTest', () => {
   it('proves the Relay path by reading a single binding', async () => {
-    const listBindings = jest.fn().mockResolvedValue({ bindings: [{ scope_id: 'C123' }] });
+    const listBindings = vi.fn().mockResolvedValue({ bindings: [{ scope_id: 'C123' }] });
 
     await expect(
       relayTest(
@@ -419,7 +422,7 @@ describe('relayTest', () => {
   });
 
   it('fails with the restated reason when the workspace is gone', async () => {
-    const listBindings = jest.fn().mockRejectedValue(relayError(409));
+    const listBindings = vi.fn().mockRejectedValue(relayError(409));
 
     await expect(
       relayTest(
@@ -441,7 +444,7 @@ describe('slackRelay.assertNotSupported', () => {
   it('throws naming the action and the supported list under relay auth', () => {
     expect(() =>
       slackRelay.assertNotSupported(
-        createContext(relaySecrets, { trigger: jest.fn() }),
+        createContext(relaySecrets, { trigger: vi.fn() }),
         'searchMessages'
       )
     ).toThrow(

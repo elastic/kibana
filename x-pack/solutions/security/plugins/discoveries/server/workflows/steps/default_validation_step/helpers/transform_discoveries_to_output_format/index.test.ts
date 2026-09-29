@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { transformDiscoveriesToOutputFormat } from '.';
 
 const mockUuid = 'mock-generated-uuid';
-jest.mock('uuid', () => ({
-  v4: () => mockUuid,
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => mockUuid,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('transformDiscoveriesToOutputFormat', () => {
   const baseParams = {
@@ -89,8 +94,8 @@ describe('transformDiscoveriesToOutputFormat', () => {
   });
 
   it('generates a timestamp when the discovery has no timestamp', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-07-01T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-07-01T12:00:00.000Z'));
 
     const result = transformDiscoveriesToOutputFormat({
       ...baseParams,
@@ -99,7 +104,7 @@ describe('transformDiscoveriesToOutputFormat', () => {
 
     expect(result[0].timestamp).toBe('2025-07-01T12:00:00.000Z');
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('uses the discovery timestamp when present', () => {

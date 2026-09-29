@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -14,13 +16,13 @@ import { TestProviders } from '../../../../../common/mock';
 import * as i18n from '../translations';
 
 const defaultProps = {
-  onMethodChange: jest.fn(),
+  onMethodChange: vi.fn(),
   selectedMethod: 'legacy' as const,
 };
 
 describe('RetrievalMethodSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the retrieval method label', () => {
@@ -112,7 +114,7 @@ describe('RetrievalMethodSelector', () => {
   });
 
   it('calls onMethodChange with workflows when clicking the Workflows card', async () => {
-    const onMethodChange = jest.fn();
+    const onMethodChange = vi.fn();
 
     render(
       <TestProviders>
@@ -131,7 +133,7 @@ describe('RetrievalMethodSelector', () => {
   });
 
   it('calls onMethodChange with legacy when clicking the Built-in (legacy) card', async () => {
-    const onMethodChange = jest.fn();
+    const onMethodChange = vi.fn();
 
     render(
       <TestProviders>
@@ -150,7 +152,7 @@ describe('RetrievalMethodSelector', () => {
   });
 
   it('calls onMethodChange exactly once per click', async () => {
-    const onMethodChange = jest.fn();
+    const onMethodChange = vi.fn();
 
     render(
       <TestProviders>
@@ -169,7 +171,7 @@ describe('RetrievalMethodSelector', () => {
   });
 
   it('does not call onMethodChange on initial render', () => {
-    const onMethodChange = jest.fn();
+    const onMethodChange = vi.fn();
 
     render(
       <TestProviders>

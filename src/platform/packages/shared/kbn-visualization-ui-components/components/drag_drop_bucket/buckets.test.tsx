@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiIcon } from '@elastic/eui';
 import { DragDropBuckets, DraggableBucketContainer } from './buckets';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiDragDropContext: 'eui-drag-drop-context',
@@ -29,8 +31,8 @@ describe('buckets shared components', () => {
       const items = [<div key="1">first</div>, <div key="2">second</div>, <div key="3">third</div>];
       const defaultProps = {
         items,
-        onDragStart: jest.fn(),
-        onDragEnd: jest.fn(),
+        onDragStart: vi.fn(),
+        onDragEnd: vi.fn(),
         droppableId: 'TEST_ID',
         children: items,
       };
@@ -51,7 +53,7 @@ describe('buckets shared components', () => {
     const defaultProps = {
       isInvalid: false,
       invalidMessage: 'invalid',
-      onRemoveClick: jest.fn(),
+      onRemoveClick: vi.fn(),
       removeTitle: 'remove',
       children: <div data-test-subj="popover">popover</div>,
       id: '0',

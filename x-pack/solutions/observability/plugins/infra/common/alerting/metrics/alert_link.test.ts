@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import rison from '@kbn/rison';
@@ -22,35 +25,35 @@ import type {
   MetricsExplorerLocator,
 } from '@kbn/observability-shared-plugin/common';
 
-jest.mock('@kbn/observability-shared-plugin/common');
+vi.mock('@kbn/observability-shared-plugin/common');
 
 const mockInventoryLocator = {
-  getRedirectUrl: jest
+  getRedirectUrl: vi
     .fn()
     .mockImplementation(
       (params: InventoryLocatorParams) =>
         `/inventory-mock?receivedParams=${rison.encodeUnknown(params)}`
     ),
-} as unknown as jest.Mocked<InventoryLocator>;
+} as unknown as Mocked<InventoryLocator>;
 
 const mockAssetDetailsLocator = {
-  getRedirectUrl: jest
+  getRedirectUrl: vi
     .fn()
     .mockImplementation(
       ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
         `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
-} as unknown as jest.Mocked<AssetDetailsLocator>;
+} as unknown as Mocked<AssetDetailsLocator>;
 
 const mockMetricsExplorerLocator = {
-  getRedirectUrl: jest
+  getRedirectUrl: vi
     .fn()
     .mockImplementation(({}: MetricsExplorerLocatorParams) => `/metrics-mock`),
-} as unknown as jest.Mocked<MetricsExplorerLocator>;
+} as unknown as Mocked<MetricsExplorerLocator>;
 
 describe('Inventory Threshold Rule', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('flatAlertRuleParams', () => {
     it('flat ALERT_RULE_PARAMETERS', () => {
@@ -256,7 +259,7 @@ describe('Inventory Threshold Rule', () => {
 
 describe('Metrics Rule', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getMetricsViewInAppUrl', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -26,44 +29,62 @@ import type { OpenFlyoutLinkRenderer } from '../../shared/components/open_flyout
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../common/hooks/is_in_security_app');
+vi.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../common/hooks/is_in_security_app');
 // The Table tab is mocked, but it captures the `renderFlyoutLink` prop so the source event link
 // behavior (built in DocumentFlyout) can be exercised in isolation.
-const mockTableTab = jest.fn(
+const mockTableTab = vi.fn(
   (_props: { renderFlyoutLink?: OpenFlyoutLinkRenderer }): JSX.Element => (
     <div data-test-subj="mock-table-tab" />
   )
 );
-jest.mock('./tabs/table_tab', () => ({
-  TableTab: (props: { renderFlyoutLink?: OpenFlyoutLinkRenderer }) => mockTableTab(props),
-}));
-jest.mock('./tabs/json_tab', () => ({
-  JsonTab: () => <div data-test-subj="mock-json-tab" />,
-}));
-jest.mock('./header', () => ({
-  Header: ({
-    onAlertUpdated,
-    onShowNotes,
-  }: {
-    onAlertUpdated: () => void;
-    onShowNotes: () => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="mock-header"
-      data-has-on-assignees-updated={String(onAlertUpdated != null)}
-      onClick={onShowNotes}
-    />
-  ),
-}));
-jest.mock('./tabs/overview_tab', () => ({
-  OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
-}));
-jest.mock('./footer', () => ({ Footer: () => <div data-test-subj="mock-footer" /> }));
-jest.mock('../../shared/tools/notes', () => ({
-  NotesDetails: () => <div data-test-subj="mock-notes-details" />,
-}));
+vi.mock('./tabs/table_tab', () => {
+      const mocked = {
+      TableTab: (props: { renderFlyoutLink?: OpenFlyoutLinkRenderer }) => mockTableTab(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tabs/json_tab', () => {
+      const mocked = {
+      JsonTab: () => <div data-test-subj="mock-json-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./header', () => {
+      const mocked = {
+      Header: ({
+        onAlertUpdated,
+        onShowNotes,
+      }: {
+        onAlertUpdated: () => void;
+        onShowNotes: () => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="mock-header"
+          data-has-on-assignees-updated={String(onAlertUpdated != null)}
+          onClick={onShowNotes}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tabs/overview_tab', () => {
+      const mocked = {
+      OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./footer', () => {
+      const mocked = { Footer: () => <div data-test-subj="mock-footer" /> };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../shared/tools/notes', () => {
+      const mocked = {
+      NotesDetails: () => <div data-test-subj="mock-notes-details" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createAlertHit = (
   extra: DataTableRecord['flattened'] = {},
@@ -81,19 +102,19 @@ describe('<DocumentFlyout />', () => {
   const startServices = createStartServicesMock();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (useIsInSecurityApp as Mock).mockReturnValue(true);
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
 
     const { getByTestId } = render(
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
-          onAlertUpdated={jest.fn()}
-          renderCellActions={jest.fn()}
+          onAlertUpdated={vi.fn()}
+          renderCellActions={vi.fn()}
         />
       </TestProviders>
     );
@@ -102,14 +123,14 @@ describe('<DocumentFlyout />', () => {
   });
 
   it('renders loading while alerts privileges are loading for an alert', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
-          onAlertUpdated={jest.fn()}
-          renderCellActions={jest.fn()}
+          onAlertUpdated={vi.fn()}
+          renderCellActions={vi.fn()}
         />
       </TestProviders>
     );
@@ -119,14 +140,14 @@ describe('<DocumentFlyout />', () => {
   });
 
   it('renders the header, overview tab and footer', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
     const { getByTestId } = render(
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
-          renderCellActions={jest.fn()}
-          onAlertUpdated={jest.fn()}
+          renderCellActions={vi.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </TestProviders>
     );
@@ -137,14 +158,14 @@ describe('<DocumentFlyout />', () => {
   });
 
   it('applies the optional test subject to the existing flyout header', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
     const { getByTestId } = render(
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
-          renderCellActions={jest.fn()}
-          onAlertUpdated={jest.fn()}
+          renderCellActions={vi.fn()}
+          onAlertUpdated={vi.fn()}
           dataTestSubj="childDocumentFlyout"
         />
       </TestProviders>
@@ -154,14 +175,14 @@ describe('<DocumentFlyout />', () => {
   });
 
   it('renders Overview, Table and JSON tabs and switches between them in Security Solution', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
-          renderCellActions={jest.fn()}
-          onAlertUpdated={jest.fn()}
+          renderCellActions={vi.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </TestProviders>
     );
@@ -187,15 +208,15 @@ describe('<DocumentFlyout />', () => {
   });
 
   it('does not render the Table and JSON tabs outside Security Solution (e.g. Discover)', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useIsInSecurityApp as Mock).mockReturnValue(false);
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
-          renderCellActions={jest.fn()}
-          onAlertUpdated={jest.fn()}
+          renderCellActions={vi.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </TestProviders>
     );
@@ -206,19 +227,19 @@ describe('<DocumentFlyout />', () => {
   });
 
   it('opens notes in a system flyout when notes action is clicked', () => {
-    const openSystemFlyout = jest.fn();
+    const openSystemFlyout = vi.fn();
     startServices.overlays = {
       ...startServices.overlays,
       openSystemFlyout,
     };
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
     const { getByTestId } = render(
       <TestProviders startServices={startServices}>
         <DocumentFlyout
           hit={createAlertHit()}
-          renderCellActions={jest.fn()}
-          onAlertUpdated={jest.fn()}
+          renderCellActions={vi.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </TestProviders>
     );
@@ -237,14 +258,14 @@ describe('<DocumentFlyout />', () => {
   });
 
   it('passes assignee updates callback to the header', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
     const { getByTestId } = render(
       <TestProviders startServices={startServices}>
         <DocumentFlyout
           hit={createAlertHit()}
-          renderCellActions={jest.fn()}
-          onAlertUpdated={jest.fn()}
+          renderCellActions={vi.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </TestProviders>
     );
@@ -254,14 +275,14 @@ describe('<DocumentFlyout />', () => {
 
   describe('remote document callout', () => {
     it('shows the callout for remote alerts', () => {
-      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+      (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
       const { getByText } = render(
         <TestProviders>
           <DocumentFlyout
             hit={createAlertHit({ _index: 'remote-cluster:.alerts-security.alerts-default' })}
-            renderCellActions={jest.fn()}
-            onAlertUpdated={jest.fn()}
+            renderCellActions={vi.fn()}
+            onAlertUpdated={vi.fn()}
           />
         </TestProviders>
       );
@@ -274,7 +295,7 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('shows the callout for remote non-alert documents', () => {
-      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+      (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
       const remoteEventHit: DataTableRecord = {
         id: '1',
@@ -287,8 +308,8 @@ describe('<DocumentFlyout />', () => {
         <TestProviders>
           <DocumentFlyout
             hit={remoteEventHit}
-            renderCellActions={jest.fn()}
-            onAlertUpdated={jest.fn()}
+            renderCellActions={vi.fn()}
+            onAlertUpdated={vi.fn()}
           />
         </TestProviders>
       );
@@ -301,14 +322,14 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('does not show the callout for local documents', () => {
-      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+      (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
       const { queryByText } = render(
         <TestProviders>
           <DocumentFlyout
             hit={createAlertHit({ _index: '.alerts-security.alerts-default' })}
-            renderCellActions={jest.fn()}
-            onAlertUpdated={jest.fn()}
+            renderCellActions={vi.fn()}
+            onAlertUpdated={vi.fn()}
           />
         </TestProviders>
       );
@@ -333,8 +354,8 @@ describe('<DocumentFlyout />', () => {
         <TestProviders startServices={startServices}>
           <DocumentFlyout
             hit={createAlertHit(extraFlattened, source)}
-            renderCellActions={jest.fn()}
-            onAlertUpdated={jest.fn()}
+            renderCellActions={vi.fn()}
+            onAlertUpdated={vi.fn()}
           />
         </TestProviders>
       );
@@ -344,11 +365,11 @@ describe('<DocumentFlyout />', () => {
     };
 
     beforeEach(() => {
-      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+      (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
     });
 
     it('opens the ancestor document in a new flyout when a source event value is clicked', () => {
-      const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
+      const openSystemFlyout = vi.fn(() => ({ onClose: Promise.resolve(), close: vi.fn() }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
       const renderFlyoutLink = renderAndGetRenderFlyoutLink({
         'kibana.alert.ancestors': [{ id: 'ancestor-1', index: '.ds-logs-source-1' }],
@@ -373,7 +394,7 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('opens the ancestor document for the legacy signal.ancestors.id field', () => {
-      const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
+      const openSystemFlyout = vi.fn(() => ({ onClose: Promise.resolve(), close: vi.fn() }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
       const renderFlyoutLink = renderAndGetRenderFlyoutLink({
         'signal.ancestors': [{ id: 'ancestor-1', index: '.ds-logs-source-1' }],
@@ -398,7 +419,7 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('aligns each ancestor value with its own index', () => {
-      const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
+      const openSystemFlyout = vi.fn(() => ({ onClose: Promise.resolve(), close: vi.fn() }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
       const renderFlyoutLink = renderAndGetRenderFlyoutLink({
         'kibana.alert.ancestors': [

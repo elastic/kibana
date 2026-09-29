@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { checkConnectorIdAvailability } from './check_connector_id';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('checkConnectorIdAvailability', () => {
   it('calls HEAD on the get connector path with the correct parameters', async () => {

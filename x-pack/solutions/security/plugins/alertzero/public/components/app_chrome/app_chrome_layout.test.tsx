@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -24,7 +27,7 @@ const coreStartStub = {
 
 const makeChromeWithFeedback = (openFeedback?: () => void) => {
   const chrome = chromeServiceMock.createStartContract();
-  (chrome.help.getFeedbackHandler$ as unknown as jest.Mock) = jest.fn(() => of(openFeedback));
+  (chrome.help.getFeedbackHandler$ as unknown as Mock) = vi.fn(() => of(openFeedback));
   return chrome as never;
 };
 
@@ -61,14 +64,14 @@ const renderLayout = async (chrome: never, expectOverflow = true) => {
 
 describe('AppChromeLayout header menu', () => {
   it('renders Documentation and Feedback items when a feedback handler is registered', async () => {
-    await renderLayout(makeChromeWithFeedback(jest.fn()));
+    await renderLayout(makeChromeWithFeedback(vi.fn()));
 
     expect(await screen.findByText('Documentation')).toBeInTheDocument();
     expect(screen.getByText('Feedback')).toBeInTheDocument();
   });
 
   it('invokes the feedback handler when Feedback is clicked', async () => {
-    const openFeedback = jest.fn();
+    const openFeedback = vi.fn();
     await renderLayout(makeChromeWithFeedback(openFeedback));
 
     fireEvent.click(await screen.findByText('Feedback'));
@@ -76,7 +79,7 @@ describe('AppChromeLayout header menu', () => {
   });
 
   it('links Documentation to the Security solution guide', async () => {
-    await renderLayout(makeChromeWithFeedback(jest.fn()));
+    await renderLayout(makeChromeWithFeedback(vi.fn()));
 
     const link = (await screen.findByText('Documentation')).closest('a');
     expect(link?.getAttribute('href')).toBe('https://www.elastic.co/guide');

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
@@ -15,22 +18,22 @@ import { getHistoryUsersRoute } from './get_history_users_route';
 describe('getHistoryUsersRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
-  let mockEsClient: { search: jest.Mock; indices: { exists: jest.Mock } };
+  let mockEsClient: { search: Mock; indices: { exists: Mock } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEsClient = {
-      search: jest.fn(),
-      indices: { exists: jest.fn().mockResolvedValue(true) },
+      search: vi.fn(),
+      indices: { exists: vi.fn().mockResolvedValue(true) },
     };
 
     mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      isCpsActive: vi.fn().mockResolvedValue(false),
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
       },
-      getStartServices: jest
+      getStartServices: vi
         .fn()
         .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: mockEsClient } } }]),
     } as unknown as OsqueryAppContext;
@@ -207,7 +210,7 @@ describe('getHistoryUsersRoute', () => {
   });
 
   it('applies correct space filter for custom space', async () => {
-    (mockOsqueryContext.service.getActiveSpace as jest.Mock).mockResolvedValue({
+    (mockOsqueryContext.service.getActiveSpace as Mock).mockResolvedValue({
       id: 'my-space',
     });
 
@@ -245,23 +248,23 @@ describe('getHistoryUsersRoute', () => {
   });
 
   describe('when CPS is enabled', () => {
-    let mockScopedEsClient: { search: jest.Mock };
+    let mockScopedEsClient: { search: Mock };
 
     beforeEach(() => {
       mockScopedEsClient = {
-        search: jest.fn().mockResolvedValue({ aggregations: { unique_users: { buckets: [] } } }),
+        search: vi.fn().mockResolvedValue({ aggregations: { unique_users: { buckets: [] } } }),
       };
       mockEsClient.search.mockResolvedValue({ aggregations: { unique_users: { buckets: [] } } });
 
       mockOsqueryContext = {
         ...mockOsqueryContext,
-        isCpsActive: jest.fn().mockResolvedValue(true),
-        getStartServices: jest.fn().mockResolvedValue([
+        isCpsActive: vi.fn().mockResolvedValue(true),
+        getStartServices: vi.fn().mockResolvedValue([
           {
             elasticsearch: {
               client: {
                 asInternalUser: mockEsClient,
-                asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
+                asScoped: vi.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
               },
             },
           },

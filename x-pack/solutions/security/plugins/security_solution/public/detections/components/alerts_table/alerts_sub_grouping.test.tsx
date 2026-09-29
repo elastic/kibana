@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -25,23 +28,26 @@ import {
   fetchQueryUnifiedAlerts,
 } from '../../containers/detection_engine/alerts/api';
 
-jest.mock('../../containers/detection_engine/alerts/use_query');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../containers/detection_engine/alerts/api', () => ({
-  fetchQueryAlerts: jest.fn(),
-  fetchQueryUnifiedAlerts: jest.fn(),
-}));
+vi.mock('../../containers/detection_engine/alerts/use_query');
+vi.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../containers/detection_engine/alerts/api', () => {
+      const mocked = {
+      fetchQueryAlerts: vi.fn(),
+      fetchQueryUnifiedAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 const mockedTelemetry = createTelemetryServiceMock();
-(useKibana as jest.Mock).mockReturnValue({
+(useKibana as Mock).mockReturnValue({
   services: {
     telemetry: mockedTelemetry,
     storage: {
-      get: jest.fn(),
-      set: jest.fn(),
+      get: vi.fn(),
+      set: vi.fn(),
     },
     uiSettings: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   },
 });
@@ -51,7 +57,7 @@ const mockDate = {
   to: '2020-07-08T08:20:18.966Z',
 };
 
-const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
+const mockUseQueryAlerts = useQueryAlerts as Mock;
 const mockQueryResponse = {
   loading: false,
   data: {},
@@ -65,7 +71,7 @@ const dataView: DataView = getMockDataViewWithMatchedIndices(['test']);
 
 const testProps: AlertsTableComponentProps = {
   ...mockDate,
-  getGrouping: jest.fn(() => <div>{'getGrouping output'}</div>),
+  getGrouping: vi.fn(() => <div>{'getGrouping output'}</div>),
   groupStatsAggregations: defaultGroupStatsAggregations,
   defaultFilters: [],
   globalFilters: [],
@@ -74,22 +80,22 @@ const testProps: AlertsTableComponentProps = {
     language: 'language',
   },
   loading: false,
-  onGroupClose: jest.fn(),
+  onGroupClose: vi.fn(),
   pageIndex: 0,
   pageSize: 10,
-  renderChildComponent: jest.fn(),
+  renderChildComponent: vi.fn(),
   runtimeMappings: {},
   selectedGroup: 'kibana.alert.rule.name',
-  setPageIndex: jest.fn(),
-  setPageSize: jest.fn(),
+  setPageIndex: vi.fn(),
+  setPageSize: vi.fn(),
   signalIndexName: 'test-index',
   tableId: TableId.test,
 };
 
 describe('GroupedSubLevelComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDataView as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useDataView as Mock).mockReturnValue({
       status: 'ready',
       dataView,
     });
@@ -118,7 +124,7 @@ describe('GroupedSubLevelComponent', () => {
   });
 
   it('calls onAggregationsChange when aggregations are updated', async () => {
-    const onAggregationsChange = jest.fn();
+    const onAggregationsChange = vi.fn();
     render(
       <TestProviders>
         <GroupedSubLevelComponent
@@ -177,7 +183,7 @@ describe('GroupedSubLevelComponent', () => {
       expect(testProps.getGrouping).toHaveBeenCalled();
     });
 
-    const getGroupingProps = (testProps.getGrouping as jest.Mock).mock.calls[0][0];
+    const getGroupingProps = (testProps.getGrouping as Mock).mock.calls[0][0];
     getGroupingProps.onChangeGroupsPage(2);
     getGroupingProps.onChangeGroupsItemsPerPage(50);
 
@@ -186,7 +192,7 @@ describe('GroupedSubLevelComponent', () => {
   });
 
   it('processes groupTakeActionItems correctly', async () => {
-    const groupTakeActionItems = jest.fn(() => undefined);
+    const groupTakeActionItems = vi.fn(() => undefined);
     render(
       <TestProviders>
         <GroupedSubLevelComponent {...testProps} groupTakeActionItems={groupTakeActionItems} />
@@ -201,7 +207,7 @@ describe('GroupedSubLevelComponent', () => {
       );
     });
 
-    const getGroupingProps = (testProps.getGrouping as jest.Mock).mock.calls[0][0];
+    const getGroupingProps = (testProps.getGrouping as Mock).mock.calls[0][0];
     getGroupingProps.takeActionItems([], 0);
 
     expect(groupTakeActionItems).toHaveBeenCalled();

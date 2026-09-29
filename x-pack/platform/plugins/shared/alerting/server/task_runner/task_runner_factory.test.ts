@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -51,8 +54,8 @@ const uiSettingsService = uiSettingsServiceMock.createStartContract();
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const dataPlugin = dataPluginMock.createStartContract();
 const dataViewsMock = {
-  dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
-  getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+  dataViewsServiceFactory: vi.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+  getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
 } as DataViewsServerPluginStart;
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
@@ -65,7 +68,7 @@ const ruleType: UntypedNormalizedRuleType = {
     id: 'recovered',
     name: 'Recovered',
   },
-  executor: jest.fn(),
+  executor: vi.fn(),
   category: 'test',
   producer: 'alerts',
   solution: 'stack',
@@ -106,7 +109,7 @@ describe('Task Runner Factory', () => {
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
-  const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
+  const taskRunnerFactoryInitializerParams: Mocked<TaskRunnerContext> = {
     actionsConfigMap: { default: { max: 1000 } },
     actionsPlugin: actionsMock.createStart(),
     alertsService: mockAlertService,
@@ -127,16 +130,16 @@ describe('Task Runner Factory', () => {
     rulesSettingsService,
     savedObjects: savedObjectsService,
     share: {} as SharePluginStart,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    spaceIdToNamespace: vi.fn().mockReturnValue(undefined),
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
     isServerless: false,
-    getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    getEventLogClient: vi.fn().mockReturnValue(eventLogClientMock.create()),
     apiKeyType: ApiKeyType.ES,
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test(`throws an error if factory is initialized multiple times`, () => {

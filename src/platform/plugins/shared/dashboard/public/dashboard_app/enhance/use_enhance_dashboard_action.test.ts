@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
@@ -25,15 +28,15 @@ const createDashboardApi = (): TestDashboardApi =>
   } as unknown as TestDashboardApi);
 
 describe('useEnhanceDashboardAction', () => {
-  const mockExecute = jest.fn();
-  const mockIsCompatible = jest.fn(async () => true);
+  const mockExecute = vi.fn();
+  const mockIsCompatible = vi.fn(async () => true);
 
   beforeEach(() => {
     mockExecute.mockClear();
     mockIsCompatible.mockReset();
     mockIsCompatible.mockResolvedValue(true);
-    (uiActionsService.hasAction as jest.Mock).mockReturnValue(true);
-    (uiActionsService.getAction as jest.Mock).mockResolvedValue({
+    (uiActionsService.hasAction as Mock).mockReturnValue(true);
+    (uiActionsService.getAction as Mock).mockResolvedValue({
       isCompatible: mockIsCompatible,
       execute: mockExecute,
       getCompatibilityChangesSubject: ({ dashboardApi }: { dashboardApi: DashboardApi }) =>
@@ -45,7 +48,7 @@ describe('useEnhanceDashboardAction', () => {
   });
 
   it('returns null when the action is not registered', () => {
-    (uiActionsService.hasAction as jest.Mock).mockReturnValue(false);
+    (uiActionsService.hasAction as Mock).mockReturnValue(false);
     const dashboardApi = createDashboardApi();
 
     const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));

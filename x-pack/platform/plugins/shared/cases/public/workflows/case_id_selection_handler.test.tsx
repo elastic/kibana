@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SelectionContext } from '@kbn/workflows/types/latest';
 import { SortFieldCase } from '../../common/ui';
 import { getCases, resolveCase } from '../containers/api';
@@ -18,14 +20,17 @@ const mockContext: SelectionContext = {
   values: { config: {}, input: {} },
 };
 
-jest.mock('../containers/api', () => ({
-  getCases: jest.fn(),
-  resolveCase: jest.fn(),
-}));
+vi.mock('../containers/api', () => {
+      const mocked = {
+      getCases: vi.fn(),
+      resolveCase: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('caseIdSelection', () => {
-  const getCasesMock = jest.mocked(getCases);
-  const resolveCaseMock = jest.mocked(resolveCase);
+  const getCasesMock = vi.mocked(getCases);
+  const resolveCaseMock = vi.mocked(resolveCase);
 
   afterEach(() => {
     getCasesMock.mockReset();

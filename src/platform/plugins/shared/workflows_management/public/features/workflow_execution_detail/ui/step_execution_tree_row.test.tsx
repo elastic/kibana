@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,43 +21,49 @@ import {
   TREE_ROW_CHEVRON_SLOT_PX,
 } from './step_execution_tree_row';
 
-jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
-  StepIcon: ({
-    stepType,
-    color,
-    iconColor,
-  }: {
-    stepType: string;
-    color?: string;
-    iconColor?: string;
-  }) => (
-    <span
-      data-test-subj="mock-step-icon"
-      data-step-type={stepType}
-      data-icon-color={color ?? iconColor ?? ''}
-    />
-  ),
-}));
+vi.mock('../../../shared/ui/step_icons/step_icon', () => {
+      const mocked = {
+      StepIcon: ({
+        stepType,
+        color,
+        iconColor,
+      }: {
+        stepType: string;
+        color?: string;
+        iconColor?: string;
+      }) => (
+        <span
+          data-test-subj="mock-step-icon"
+          data-step-type={stepType}
+          data-icon-color={color ?? iconColor ?? ''}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/ui/token_usage_badge/token_usage_badge', () => ({
-  TokenUsageBadge: ({ usage }: { usage: { totalTokens: number } }) => (
-    <span data-test-subj="workflowStepTreeTokenUsage">
-      {usage.totalTokens}
-      {' tokens'}
-    </span>
-  ),
-}));
+vi.mock('../../../shared/ui/token_usage_badge/token_usage_badge', () => {
+      const mocked = {
+      TokenUsageBadge: ({ usage }: { usage: { totalTokens: number } }) => (
+        <span data-test-subj="workflowStepTreeTokenUsage">
+          {usage.totalTokens}
+          {' tokens'}
+        </span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
-    getStepIconType: jest.fn((type: string) => actual.getStepIconType(type)),
+    getStepIconType: vi.fn((type: string) => actual.getStepIconType(type)),
   };
 });
 
 const renderRow = (props: Partial<StepExecutionTreeRowProps> = {}) => {
-  const onSelect = jest.fn();
+  const onSelect = vi.fn();
   const result = render(
     <I18nProvider>
       <StepExecutionTreeRow
@@ -104,7 +113,7 @@ describe('StepExecutionTreeRow', () => {
   });
 
   it('renders an expand chevron for parent rows', () => {
-    const onToggleExpand = jest.fn();
+    const onToggleExpand = vi.fn();
     renderRow({ isExpandable: true, isExpanded: false, onToggleExpand });
     fireEvent.click(screen.getByTestId('workflowStepTreeChevron'));
     expect(onToggleExpand).toHaveBeenCalled();
@@ -127,7 +136,7 @@ describe('StepExecutionTreeRow', () => {
     renderRow({
       status: ExecutionStatus.RUNNING,
       isExpandable: true,
-      onToggleExpand: jest.fn(),
+      onToggleExpand: vi.fn(),
     });
     const inner = screen.getByTestId('workflowStepTreeRowInner');
     const items = Array.from(inner.children) as HTMLElement[];
@@ -165,7 +174,7 @@ describe('StepExecutionTreeRow', () => {
   });
 
   it('renders iteration pin tags for failed and latest exemplars', () => {
-    const onToggleExpand = jest.fn();
+    const onToggleExpand = vi.fn();
     renderRow({
       stepId: 'Iteration #46',
       stepType: 'foreach-iteration',
@@ -208,7 +217,7 @@ describe('StepExecutionTreeRow', () => {
       stateTags: ['recovered'],
       isExpandable: true,
       isExpanded: true,
-      onToggleExpand: jest.fn(),
+      onToggleExpand: vi.fn(),
     });
 
     expect(screen.getByTestId('workflowStepTreeAttemptsBadge')).toHaveTextContent(
@@ -222,7 +231,7 @@ describe('StepExecutionTreeRow', () => {
   });
 
   it('shows the error panel only on the final failed attempt', () => {
-    const onView = jest.fn();
+    const onView = vi.fn();
     renderRow({
       stepId: 'Attempt #4',
       isRetryAttempt: true,
@@ -248,7 +257,7 @@ describe('StepExecutionTreeRow', () => {
       isRetryAttempt: true,
       status: ExecutionStatus.FAILED,
       error: { type: 'Error', message: 'boom' },
-      onViewFailedStepInput: jest.fn(),
+      onViewFailedStepInput: vi.fn(),
     });
 
     expect(screen.queryByTestId('workflowFailedStepErrorPanel')).not.toBeInTheDocument();
@@ -324,7 +333,7 @@ describe('StepExecutionTreeRow', () => {
       stateTags: ['final'],
       showDangerSelectionBorder: true,
       error: { type: 'Error', message: 'boom' },
-      onViewFailedStepInput: jest.fn(),
+      onViewFailedStepInput: vi.fn(),
     });
     const row = container.querySelector('[data-danger-selected="true"]');
     expect(row).toBeTruthy();
@@ -350,9 +359,9 @@ describe('StepExecutionTreeRow', () => {
     );
   });
 
-  it('omits the trailing hourglass when the waitForInput type icon is already hourglass-shaped', () => {
-    const { getStepIconType } = jest.requireMock('@kbn/workflows-ui') as {
-      getStepIconType: jest.Mock;
+  it('omits the trailing hourglass when the waitForInput type icon is already hourglass-shaped', async () => {
+    const { getStepIconType } = (await vi.importMock('@kbn/workflows-ui')) as {
+      getStepIconType: Mock;
     };
     getStepIconType.mockReturnValueOnce('hourglass');
 
@@ -384,7 +393,7 @@ describe('StepExecutionTreeRow', () => {
       executionTimeMs: 40,
       isExpandable: true,
       isExpanded: false,
-      onToggleExpand: jest.fn(),
+      onToggleExpand: vi.fn(),
     });
     expect(screen.queryByText('Not run')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepTreeDuration')).toHaveTextContent('40ms');

@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ValueReportSettings } from './value_report_settings';
 import { useNavigation } from '@kbn/security-solution-navigation';
-jest.mock('@kbn/security-solution-navigation', () => ({
-  useNavigation: jest.fn(),
-}));
+vi.mock('@kbn/security-solution-navigation', () => {
+      const mocked = {
+      useNavigation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseNavigation = useNavigation as jest.MockedFunction<typeof useNavigation>;
+const mockUseNavigation = useNavigation as MockedFunction<typeof useNavigation>;
 
 const defaultProps = {
   minutesPerAlert: 10,
@@ -21,13 +27,13 @@ const defaultProps = {
 };
 
 describe('ValueReportSettings', () => {
-  const mockNavigateTo = jest.fn();
+  const mockNavigateTo = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseNavigation.mockReturnValue({
       navigateTo: mockNavigateTo,
-      getAppUrl: jest.fn(),
+      getAppUrl: vi.fn(),
     });
   });
 

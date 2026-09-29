@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -39,11 +42,11 @@ interface EsqlResponse {
 
 const makeEsClient = (): {
   esClient: ElasticsearchClient;
-  search: jest.Mock<Promise<SearchResponse>>;
-  esql: jest.Mock<Promise<EsqlResponse>>;
+  search: Mock<Promise<SearchResponse>>;
+  esql: Mock<Promise<EsqlResponse>>;
 } => {
-  const search = jest.fn<Promise<SearchResponse>, unknown[]>();
-  const esql = jest.fn<Promise<EsqlResponse>, unknown[]>();
+  const search = vi.fn<Promise<SearchResponse>, unknown[]>();
+  const esql = vi.fn<Promise<EsqlResponse>, unknown[]>();
   const esClient = {
     search,
     esql: { query: esql },
@@ -57,13 +60,13 @@ const makeClients = (
   crudClient: EntityUpdateClient;
   entityMetadataClient: EntityMetadataClient;
   relationshipsClient: RelationshipsClient;
-  bulkUpdate: jest.Mock;
-  bulkAppend: jest.Mock;
+  bulkUpdate: Mock;
+  bulkAppend: Mock;
 } => {
-  const bulkUpdate = jest.fn().mockResolvedValue(errors);
+  const bulkUpdate = vi.fn().mockResolvedValue(errors);
   // After writeEntityIds, runIntegration calls the metadata append path on
   // the EntityMetadataClient. Mocked here so tests can assert on the second write.
-  const bulkAppend = jest
+  const bulkAppend = vi
     .fn()
     .mockImplementation(async (docs: unknown[]) => ({ successful: docs.length, failed: 0 }));
   const crudClient = {
@@ -73,7 +76,7 @@ const makeClients = (
     bulkAppendMetadata: bulkAppend,
   } as unknown as EntityMetadataClient;
   const relationshipsClient = {
-    clearRelationshipIds: jest.fn().mockResolvedValue({ updated: 0, total: 0 }),
+    clearRelationshipIds: vi.fn().mockResolvedValue({ updated: 0, total: 0 }),
   } as unknown as RelationshipsClient;
   return { crudClient, entityMetadataClient, relationshipsClient, bulkUpdate, bulkAppend };
 };
@@ -1123,7 +1126,7 @@ describe('runRelationshipMaintainer', () => {
         { key: { 'manager.email': null, 'manager.id': '002' }, doc_count: 1 },
       ];
       const makeOverrideConfig = (
-        esqlQueryOverride: jest.Mock,
+        esqlQueryOverride: Mock,
         scopeToPageActorValues?: true
       ): RelationshipIntegrationConfig => ({
         kind: 'override',
@@ -1155,7 +1158,7 @@ describe('runRelationshipMaintainer', () => {
       };
 
       it('passes the page actor values to the override and binds the same array as params', async () => {
-        const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
+        const override = vi.fn().mockReturnValue('FROM test | LIMIT 1');
         const esqlArg = await runWith(makeOverrideConfig(override, true));
 
         const [, pageActorValues] = override.mock.calls[0];
@@ -1164,7 +1167,7 @@ describe('runRelationshipMaintainer', () => {
       });
 
       it('sends no params and no page values when the config does not opt in', async () => {
-        const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
+        const override = vi.fn().mockReturnValue('FROM test | LIMIT 1');
         const esqlArg = await runWith(makeOverrideConfig(override));
 
         expect(override.mock.calls[0][1]).toBeUndefined();
@@ -1174,7 +1177,7 @@ describe('runRelationshipMaintainer', () => {
   });
 
   describe('write-path wiring (bulkAppendMetadata)', () => {
-    const oneActorOneTarget = (esql: jest.Mock) => {
+    const oneActorOneTarget = (esql: Mock) => {
       esql.mockResolvedValueOnce({
         columns: [
           { name: 'actorUserId', type: 'keyword' },
@@ -1236,7 +1239,7 @@ describe('runRelationshipMaintainer', () => {
       const aliceHash = hashEntityId('user:alice@corp');
       const { entityMetadataClient, relationshipsClient, bulkAppend } = makeClients();
       const crudClient = {
-        bulkUpdateEntity: jest
+        bulkUpdateEntity: vi
           .fn()
           .mockResolvedValue([{ _id: aliceHash, status: 404, type: 'not_found', reason: '' }]),
       } as unknown as EntityUpdateClient;
@@ -1848,16 +1851,16 @@ describe('runRelationshipMaintainer', () => {
       });
 
       expect(
-        (relationshipsClient as unknown as { clearRelationshipIds: jest.Mock }).clearRelationshipIds
+        (relationshipsClient as unknown as { clearRelationshipIds: Mock }).clearRelationshipIds
       ).not.toHaveBeenCalled();
     });
 
     it('clears once per integration, before any write', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
-      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: jest.Mock })
+      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: Mock })
         .clearRelationshipIds;
-      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: jest.Mock })
+      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: Mock })
         .bulkUpdateEntity;
       const callOrder: string[] = [];
       clearMock.mockImplementation(async () => {
@@ -1917,7 +1920,7 @@ describe('runRelationshipMaintainer', () => {
     it('clears both threshold keys for a bucketed config with resetRelationshipsBeforeRun', async () => {
       const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
-      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: jest.Mock })
+      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: Mock })
         .clearRelationshipIds;
       // Pre-flight source check passes, then the composite agg returns no buckets.
       search.mockResolvedValueOnce(sourcePresenceResponse(1));
@@ -1954,9 +1957,9 @@ describe('runRelationshipMaintainer', () => {
     it('skips the integration when the clear fails, without touching writes', async () => {
       const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
-      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: jest.Mock })
+      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: Mock })
         .clearRelationshipIds;
-      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: jest.Mock })
+      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: Mock })
         .bulkUpdateEntity;
       clearMock.mockRejectedValue(new Error('boom'));
       // Pre-flight passes so the run reaches the clear, which is what fails here.
@@ -1999,7 +2002,7 @@ describe('runRelationshipMaintainer', () => {
     it('does not clear when the source has no documents to repopulate from', async () => {
       const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
-      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: jest.Mock })
+      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: Mock })
         .clearRelationshipIds;
       // A feed that has stopped emitting is not evidence that every
       // relationship ended — clearing here would destroy data with nothing
@@ -2023,7 +2026,7 @@ describe('runRelationshipMaintainer', () => {
     it('does not clear when the source index is missing', async () => {
       const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
-      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: jest.Mock })
+      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: Mock })
         .clearRelationshipIds;
       search.mockRejectedValue(indexNotFoundError());
 
@@ -2044,7 +2047,7 @@ describe('runRelationshipMaintainer', () => {
     it('does not clear when the source cannot be reached', async () => {
       const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
-      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: jest.Mock })
+      const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: Mock })
         .clearRelationshipIds;
       // A transport failure tells us nothing about the source's contents, so
       // the destructive path must not be taken.

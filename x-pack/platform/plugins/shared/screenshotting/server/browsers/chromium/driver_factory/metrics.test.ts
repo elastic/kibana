@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-jest.mock('os');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('os');
 
 import { cpus } from 'os';
 import type { Metrics } from './metrics';
@@ -28,7 +31,7 @@ describe('getMetrics', () => {
   } as Metrics;
 
   beforeEach(() => {
-    (cpus as jest.MockedFunction<typeof cpus>).mockReturnValue([{} as any]);
+    (cpus as MockedFunction<typeof cpus>).mockReturnValue([{} as any]);
   });
 
   describe('cpu', () => {
@@ -39,7 +42,7 @@ describe('getMetrics', () => {
     });
 
     it('should respect a number of virtual cores available', () => {
-      (cpus as jest.MockedFunction<typeof cpus>).mockReturnValue([{} as any, {} as any]);
+      (cpus as MockedFunction<typeof cpus>).mockReturnValue([{} as any, {} as any]);
       const { cpu } = getMetrics(start, end);
 
       expect(cpu).toBe(0.05);

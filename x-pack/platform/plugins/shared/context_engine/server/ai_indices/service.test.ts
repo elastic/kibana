@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -22,12 +25,15 @@ import {
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
 
-jest.mock('./storage', () => ({
-  ...jest.requireActual('./storage'),
-  createAiIndexStorageClient: jest.fn(),
-}));
+vi.mock('./storage', async () => {
+      const mocked = {
+      ...(await vi.importActual('./storage')),
+      createAiIndexStorageClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createAiIndexStorageClientMock = createAiIndexStorageClient as jest.Mock;
+const createAiIndexStorageClientMock = createAiIndexStorageClient as Mock;
 
 const createNotFoundError = () =>
   new errors.ResponseError({
@@ -115,7 +121,7 @@ const storedHit = (
 
 describe('AiIndexService', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let storageClient: jest.Mocked<Pick<AiIndexStorageClient, 'index' | 'search' | 'delete'>>;
+  let storageClient: Mocked<Pick<AiIndexStorageClient, 'index' | 'search' | 'delete'>>;
   let service: AiIndexService;
 
   const mockSearchHits = (...hits: SearchHitInput[]) => {
@@ -131,7 +137,7 @@ describe('AiIndexService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.resolveIndex.mockResponse({
       indices: [],
@@ -146,9 +152,9 @@ describe('AiIndexService', () => {
     });
 
     storageClient = {
-      index: jest.fn(),
-      search: jest.fn(),
-      delete: jest.fn(),
+      index: vi.fn(),
+      search: vi.fn(),
+      delete: vi.fn(),
     };
     createAiIndexStorageClientMock.mockReturnValue(storageClient);
     mockSearchHits();
@@ -204,7 +210,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'elastic',
           getManagedIds: () => ['elastic'],
-          ensure: jest.fn(),
+          ensure: vi.fn(),
         },
       });
 
@@ -454,7 +460,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'elastic',
           getManagedIds: () => ['elastic'],
-          ensure: jest.fn(),
+          ensure: vi.fn(),
         },
       });
 
@@ -1048,7 +1054,7 @@ describe('AiIndexService', () => {
         id: 'elastic',
         managed: true,
       };
-      const ensure = jest.fn().mockImplementation(async () => {
+      const ensure = vi.fn().mockImplementation(async () => {
         mockSearchHits(
           storedHit(managedDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') })
         );
@@ -1071,7 +1077,7 @@ describe('AiIndexService', () => {
     });
 
     it('throws AiIndexNotFoundError when managed ensure succeeds but the document is still missing', async () => {
-      const ensure = jest.fn().mockResolvedValue(undefined);
+      const ensure = vi.fn().mockResolvedValue(undefined);
       service = new AiIndexService({
         esClient,
         logger: loggingSystemMock.createLogger(),
@@ -1089,7 +1095,7 @@ describe('AiIndexService', () => {
     });
 
     it('rethrows when managed ensure fails', async () => {
-      const ensure = jest.fn().mockRejectedValue(new InvalidAiIndexDestError('dest not ready'));
+      const ensure = vi.fn().mockRejectedValue(new InvalidAiIndexDestError('dest not ready'));
       service = new AiIndexService({
         esClient,
         logger: loggingSystemMock.createLogger(),
@@ -1156,7 +1162,7 @@ describe('AiIndexService', () => {
         id: 'elastic',
         managed: true,
       };
-      const ensure = jest.fn().mockResolvedValue(undefined);
+      const ensure = vi.fn().mockResolvedValue(undefined);
       mockSearchHitsOnce();
       mockSearchHitsOnce(
         storedHit(managedDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') })
@@ -1181,7 +1187,7 @@ describe('AiIndexService', () => {
       mockSearchHitsOnce();
       mockSearchHitsOnce(storedHit(okDocument, { id: 'ok' }));
       const logger = loggingSystemMock.createLogger();
-      const ensure = jest.fn().mockImplementation(async (id: string) => {
+      const ensure = vi.fn().mockImplementation(async (id: string) => {
         if (id === 'broken') {
           throw new InvalidAiIndexDestError('dest is invalid');
         }

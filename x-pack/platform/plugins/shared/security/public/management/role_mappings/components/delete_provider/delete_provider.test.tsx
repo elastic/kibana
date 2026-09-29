@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiConfirmModal } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
@@ -18,7 +20,7 @@ import { roleMappingsAPIClientMock } from '../../index.mock';
 
 describe('DeleteProvider', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('allows a single role mapping to be deleted', async () => {
@@ -38,7 +40,7 @@ describe('DeleteProvider', () => {
       },
     ] as RoleMapping[];
 
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
@@ -111,7 +113,7 @@ describe('DeleteProvider', () => {
       },
     ] as RoleMapping[];
 
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
@@ -188,7 +190,7 @@ describe('DeleteProvider', () => {
       },
     ] as RoleMapping[];
 
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
@@ -253,7 +255,7 @@ describe('DeleteProvider', () => {
       },
     ] as RoleMapping[];
 
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>

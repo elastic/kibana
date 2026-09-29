@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { parseDocument, Scalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 
 // Mock getScalarValueAtOffset to control what scalar value is found at a given offset
-jest.mock('@kbn/workflows-yaml', () => ({
-  ...jest.requireActual('@kbn/workflows-yaml'),
-  getScalarValueAtOffset: jest.fn(),
-}));
+vi.mock('@kbn/workflows-yaml', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-yaml')),
+      getScalarValueAtOffset: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getScalarValueAtOffset } = jest.requireMock<{
-  getScalarValueAtOffset: jest.Mock;
-}>('@kbn/workflows-yaml');
+const { getScalarValueAtOffset } = (await vi.importMock<{
+  getScalarValueAtOffset: Mock;
+}>('@kbn/workflows-yaml'));
 
 type IMarkerData = monaco.editor.IMarkerData;
 type ITextModel = monaco.editor.ITextModel;
@@ -38,13 +44,13 @@ function createMarker(overrides: Partial<IMarkerData> = {}): IMarkerData {
 
 function createEditorModel(): ITextModel {
   return {
-    getOffsetAt: jest.fn().mockReturnValue(0),
+    getOffsetAt: vi.fn().mockReturnValue(0),
   } as unknown as ITextModel;
 }
 
 describe('filterMonacoYamlMarkers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('keeps markers that have no source', () => {
@@ -173,7 +179,7 @@ describe('filterMonacoYamlMarkers', () => {
       startColumn: 5,
     });
     const model = createEditorModel();
-    (model.getOffsetAt as jest.Mock).mockReturnValue(42);
+    (model.getOffsetAt as Mock).mockReturnValue(42);
     const yamlDoc = parseDocument('key: value');
 
     filterMonacoYamlMarkers([marker], model, yamlDoc);

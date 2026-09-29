@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -14,15 +17,15 @@ import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useApplyAttackAssignees } from '../apply_actions/use_apply_attack_assignees';
 
-jest.mock('../use_attacks_privileges');
-jest.mock('../../../../../common/hooks/use_license');
-jest.mock('../apply_actions/use_apply_attack_assignees');
+vi.mock('../use_attacks_privileges');
+vi.mock('../../../../../common/hooks/use_license');
+vi.mock('../apply_actions/use_apply_attack_assignees');
 
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
-const mockUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
-const mockUseApplyAttackAssignees = useApplyAttackAssignees as jest.MockedFunction<
+const mockUseLicense = useLicense as MockedFunction<typeof useLicense>;
+const mockUseApplyAttackAssignees = useApplyAttackAssignees as MockedFunction<
   typeof useApplyAttackAssignees
 >;
 
@@ -33,10 +36,10 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useBulkAttackAssigneesItems', () => {
-  const mockApplyAssignees = jest.fn();
+  const mockApplyAssignees = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
 
     mockUseAttacksPrivileges.mockReturnValue({
@@ -46,7 +49,7 @@ describe('useBulkAttackAssigneesItems', () => {
     });
 
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: jest.fn().mockReturnValue(true),
+      isPlatinumPlus: vi.fn().mockReturnValue(true),
     } as unknown as ReturnType<typeof useLicense>);
 
     mockUseApplyAttackAssignees.mockReturnValue({
@@ -68,7 +71,7 @@ describe('useBulkAttackAssigneesItems', () => {
 
   it('should return empty items when not platinum plus', () => {
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: jest.fn().mockReturnValue(false),
+      isPlatinumPlus: vi.fn().mockReturnValue(false),
     } as unknown as ReturnType<typeof useLicense>);
 
     const { result } = renderHook(() => useBulkAttackAssigneesItems(), { wrapper });
@@ -132,9 +135,9 @@ describe('useBulkAttackAssigneesItems', () => {
             },
           ],
           false,
-          jest.fn(),
-          jest.fn(),
-          jest.fn()
+          vi.fn(),
+          vi.fn(),
+          vi.fn()
         );
       }
 

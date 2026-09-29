@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { type PropsWithChildren } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -19,9 +22,12 @@ import {
 import { useKibana } from './use_kibana';
 import { useDeploymentStats } from './use_deployment_stats';
 
-jest.mock('./use_kibana', () => ({ useKibana: jest.fn() }));
+vi.mock('./use_kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const FAVORITES_PATH = '/internal/content_management/favorites/dashboard';
 
@@ -83,7 +89,7 @@ describe('useDeploymentStats', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http = httpServiceMock.createStartContract();
     userProfile = userProfileServiceMock.createStart();
     userProfile.getEnabled$.mockReturnValue(of(true));

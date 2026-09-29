@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, act } from '@testing-library/react';
@@ -64,19 +66,19 @@ const renderComponent = (
 
 describe('ConfirmTemplateDetailsSection', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   describe('rendering', () => {
@@ -125,7 +127,7 @@ describe('ConfirmTemplateDetailsSection', () => {
   describe('index mode display', () => {
     it('displays Standard index mode by default from simulated template', async () => {
       const template = createMockTemplate();
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
@@ -137,7 +139,7 @@ describe('ConfirmTemplateDetailsSection', () => {
 
     it('displays LogsDB index mode from simulated template', async () => {
       const template = createMockTemplate();
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('logsdb'));
 
@@ -148,7 +150,7 @@ describe('ConfirmTemplateDetailsSection', () => {
 
     it('displays Lookup index mode from simulated template', async () => {
       const template = createMockTemplate();
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('lookup'));
 
@@ -159,7 +161,7 @@ describe('ConfirmTemplateDetailsSection', () => {
 
     it('displays Time series index mode from simulated template', async () => {
       const template = createMockTemplate();
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('time_series'));
 
@@ -180,7 +182,7 @@ describe('ConfirmTemplateDetailsSection', () => {
     describe('ILM policy retention from simulated template', () => {
       it('displays ILM policy name with badge from simulated template', async () => {
         const template = createMockTemplate();
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createMockSimulatedTemplate('standard', 'my-ilm-policy'));
 
@@ -193,7 +195,7 @@ describe('ConfirmTemplateDetailsSection', () => {
 
       it('does not display ILM retention when simulated template has no ILM policy', async () => {
         const template = createMockTemplate({ lifecycle: undefined });
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
@@ -214,7 +216,7 @@ describe('ConfirmTemplateDetailsSection', () => {
         const template = createMockTemplate({
           lifecycle: { enabled: true, value: 30, unit: 'd' },
         });
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
@@ -228,7 +230,7 @@ describe('ConfirmTemplateDetailsSection', () => {
         const template = createMockTemplate({
           lifecycle: { enabled: true, value: 2, unit: 'h' },
         });
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
@@ -241,7 +243,7 @@ describe('ConfirmTemplateDetailsSection', () => {
         const template = createMockTemplate({
           lifecycle: { enabled: true, value: 30, unit: 'd' },
         });
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createMockSimulatedTemplate('standard', 'my-policy'));
 
@@ -301,13 +303,13 @@ describe('ConfirmTemplateDetailsSection', () => {
       createMockSimulatedTemplate('standard', policyName);
 
     it('fetches ILM policy when simulated template has ILM policy and getIlmPolicy is provided', async () => {
-      const mockGetIlmPolicy = jest.fn().mockResolvedValue(
+      const mockGetIlmPolicy = vi.fn().mockResolvedValue(
         createMockIlmPolicy({
           hot: { actions: {} },
           warm: { min_age: '7d', actions: {} },
         })
       );
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -327,8 +329,8 @@ describe('ConfirmTemplateDetailsSection', () => {
     });
 
     it('does not fetch ILM policy when simulated template has no ILM policy', async () => {
-      const mockGetIlmPolicy = jest.fn();
-      const mockGetSimulatedTemplate = jest
+      const mockGetIlmPolicy = vi.fn();
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
@@ -342,7 +344,7 @@ describe('ConfirmTemplateDetailsSection', () => {
     });
 
     it('does not fetch ILM policy when getIlmPolicy is not provided', async () => {
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -354,12 +356,12 @@ describe('ConfirmTemplateDetailsSection', () => {
 
     describe('loading state', () => {
       it('shows loading spinner while fetching ILM policy', async () => {
-        const mockGetIlmPolicy = jest.fn().mockImplementation(() => {
+        const mockGetIlmPolicy = vi.fn().mockImplementation(() => {
           return new Promise((resolve) => {
             setTimeout(() => resolve(createMockIlmPolicy({ hot: { actions: {} } })), 1000);
           });
         });
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -382,10 +384,10 @@ describe('ConfirmTemplateDetailsSection', () => {
       });
 
       it('hides loading spinner after fetching completes', async () => {
-        const mockGetIlmPolicy = jest
+        const mockGetIlmPolicy = vi
           .fn()
           .mockResolvedValue(createMockIlmPolicy({ hot: { actions: {} } }));
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -407,14 +409,14 @@ describe('ConfirmTemplateDetailsSection', () => {
 
     describe('phase display', () => {
       it('displays ILM phases after successful fetch', async () => {
-        const mockGetIlmPolicy = jest.fn().mockResolvedValue(
+        const mockGetIlmPolicy = vi.fn().mockResolvedValue(
           createMockIlmPolicy({
             hot: { actions: {} },
             warm: { min_age: '7d', actions: {} },
             cold: { min_age: '30d', actions: {} },
           })
         );
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -431,12 +433,12 @@ describe('ConfirmTemplateDetailsSection', () => {
       });
 
       it('displays single phase correctly', async () => {
-        const mockGetIlmPolicy = jest.fn().mockResolvedValue(
+        const mockGetIlmPolicy = vi.fn().mockResolvedValue(
           createMockIlmPolicy({
             hot: { actions: {} },
           })
         );
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -451,8 +453,8 @@ describe('ConfirmTemplateDetailsSection', () => {
       });
 
       it('does not display phases when policy has no phases', async () => {
-        const mockGetIlmPolicy = jest.fn().mockResolvedValue(createMockIlmPolicy({}));
-        const mockGetSimulatedTemplate = jest
+        const mockGetIlmPolicy = vi.fn().mockResolvedValue(createMockIlmPolicy({}));
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -477,8 +479,8 @@ describe('ConfirmTemplateDetailsSection', () => {
 
     describe('error handling', () => {
       it('shows error message when ILM policy fetch fails', async () => {
-        const mockGetIlmPolicy = jest.fn().mockRejectedValue(new Error('Network error'));
-        const mockGetSimulatedTemplate = jest
+        const mockGetIlmPolicy = vi.fn().mockRejectedValue(new Error('Network error'));
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -493,8 +495,8 @@ describe('ConfirmTemplateDetailsSection', () => {
       });
 
       it('does not crash and displays policy name on error', async () => {
-        const mockGetIlmPolicy = jest.fn().mockRejectedValue(new Error('Network error'));
-        const mockGetSimulatedTemplate = jest
+        const mockGetIlmPolicy = vi.fn().mockRejectedValue(new Error('Network error'));
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -516,13 +518,13 @@ describe('ConfirmTemplateDetailsSection', () => {
     describe('AbortController handling', () => {
       it('passes abort signal to getIlmPolicy', async () => {
         let capturedSignal: AbortSignal | undefined;
-        const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
+        const mockGetIlmPolicy = vi.fn().mockImplementation((policyName, signal) => {
           capturedSignal = signal;
           return new Promise((resolve) => {
             setTimeout(() => resolve(createMockIlmPolicy({ hot: { actions: {} } })), 1000);
           });
         });
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -540,13 +542,13 @@ describe('ConfirmTemplateDetailsSection', () => {
 
       it('aborts ILM policy fetch on unmount', async () => {
         let capturedSignal: AbortSignal | undefined;
-        const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
+        const mockGetIlmPolicy = vi.fn().mockImplementation((policyName, signal) => {
           capturedSignal = signal;
           return new Promise((resolve) => {
             setTimeout(() => resolve(createMockIlmPolicy({ hot: { actions: {} } })), 10000);
           });
         });
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -566,10 +568,10 @@ describe('ConfirmTemplateDetailsSection', () => {
 
     describe('policy changes', () => {
       it('fetches new policy when template changes', async () => {
-        const mockGetIlmPolicy = jest
+        const mockGetIlmPolicy = vi
           .fn()
           .mockResolvedValue(createMockIlmPolicy({ hot: { actions: {} } }));
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('policy-1'));
 
@@ -616,7 +618,7 @@ describe('ConfirmTemplateDetailsSection', () => {
         let secondSignal: AbortSignal | undefined;
         let ilmCallCount = 0;
 
-        const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
+        const mockGetIlmPolicy = vi.fn().mockImplementation((policyName, signal) => {
           ilmCallCount++;
           if (ilmCallCount === 1) {
             firstSignal = signal;
@@ -627,7 +629,7 @@ describe('ConfirmTemplateDetailsSection', () => {
             setTimeout(() => resolve(createMockIlmPolicy({ hot: { actions: {} } })), 10000);
           });
         });
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('policy-1'));
 
@@ -668,13 +670,13 @@ describe('ConfirmTemplateDetailsSection', () => {
       });
 
       it('clears policy data when simulated template changes to one without ILM', async () => {
-        const mockGetIlmPolicy = jest.fn().mockResolvedValue(
+        const mockGetIlmPolicy = vi.fn().mockResolvedValue(
           createMockIlmPolicy({
             hot: { actions: {} },
             warm: { min_age: '7d', actions: {} },
           })
         );
-        const mockGetSimulatedTemplate = jest
+        const mockGetSimulatedTemplate = vi
           .fn()
           .mockResolvedValue(createSimulatedTemplateWithIlm('test-policy'));
 
@@ -716,7 +718,7 @@ describe('ConfirmTemplateDetailsSection', () => {
 
   describe('simulated template fetching', () => {
     it('calls getSimulatedTemplate with template name', async () => {
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('standard'));
 
@@ -732,7 +734,7 @@ describe('ConfirmTemplateDetailsSection', () => {
     });
 
     it('shows error message when simulated template fetch fails', async () => {
-      const mockGetSimulatedTemplate = jest.fn().mockRejectedValue(new Error('Network error'));
+      const mockGetSimulatedTemplate = vi.fn().mockRejectedValue(new Error('Network error'));
 
       const template = createMockTemplate();
       const { findByText, queryByText } = renderComponent(
@@ -746,7 +748,7 @@ describe('ConfirmTemplateDetailsSection', () => {
     });
 
     it('shows loading state while fetching simulated template', async () => {
-      const mockGetSimulatedTemplate = jest.fn().mockImplementation(() => {
+      const mockGetSimulatedTemplate = vi.fn().mockImplementation(() => {
         return new Promise((resolve) => {
           setTimeout(() => resolve(createMockSimulatedTemplate('standard')), 1000);
         });
@@ -771,7 +773,7 @@ describe('ConfirmTemplateDetailsSection', () => {
 
     it('aborts simulated template fetch on unmount', async () => {
       let capturedSignal: AbortSignal | undefined;
-      const mockGetSimulatedTemplate = jest.fn().mockImplementation((templateName, signal) => {
+      const mockGetSimulatedTemplate = vi.fn().mockImplementation((templateName, signal) => {
         capturedSignal = signal;
         return new Promise((resolve) => {
           setTimeout(() => resolve(createMockSimulatedTemplate('standard')), 10000);
@@ -794,13 +796,13 @@ describe('ConfirmTemplateDetailsSection', () => {
 
   describe('combined template details', () => {
     it('displays all template details together', async () => {
-      const mockGetIlmPolicy = jest.fn().mockResolvedValue(
+      const mockGetIlmPolicy = vi.fn().mockResolvedValue(
         createMockIlmPolicy({
           hot: { actions: {} },
           warm: { min_age: '7d', actions: {} },
         })
       );
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('logsdb', 'comprehensive-policy'));
 
@@ -836,7 +838,7 @@ describe('ConfirmTemplateDetailsSection', () => {
     });
 
     it('displays minimal template details correctly', async () => {
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('standard'));
 

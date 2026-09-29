@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   buildDiscoverEsqlUrl,
@@ -30,7 +32,7 @@ describe('buildDiscoverEsqlUrl', () => {
     const share = {
       url: {
         locators: {
-          get: () => ({ getRedirectUrl: jest.fn() }),
+          get: () => ({ getRedirectUrl: vi.fn() }),
         },
       },
     } as unknown as SharePluginStart;
@@ -38,7 +40,7 @@ describe('buildDiscoverEsqlUrl', () => {
   });
 
   it('returns redirect url from DISCOVER_APP_LOCATOR with a wide default time range', () => {
-    const getRedirectUrl = jest.fn().mockReturnValue('/app/discover#/?_a=esql');
+    const getRedirectUrl = vi.fn().mockReturnValue('/app/discover#/?_a=esql');
     const share = {
       url: {
         locators: {
@@ -57,7 +59,7 @@ describe('buildDiscoverEsqlUrl', () => {
   });
 
   it('allows overriding the Discover time range', () => {
-    const getRedirectUrl = jest.fn().mockReturnValue('/app/discover#/?_a=esql');
+    const getRedirectUrl = vi.fn().mockReturnValue('/app/discover#/?_a=esql');
     const share = {
       url: {
         locators: {
@@ -81,7 +83,7 @@ describe('buildDiscoverThreatReportNestedIocUrl', () => {
       buildDiscoverThreatReportNestedIocUrl({ iocType: 'hash', value: 'abc', spaceId: 'default' })
     ).toBeUndefined();
     const share = {
-      url: { locators: { get: () => ({ getRedirectUrl: jest.fn() }) } },
+      url: { locators: { get: () => ({ getRedirectUrl: vi.fn() }) } },
     } as unknown as SharePluginStart;
     expect(
       buildDiscoverThreatReportNestedIocUrl({
@@ -94,7 +96,7 @@ describe('buildDiscoverThreatReportNestedIocUrl', () => {
   });
 
   it('opens classic Discover with a nested extracted.iocs filter on threat reports', () => {
-    const getRedirectUrl = jest.fn().mockReturnValue('/app/discover#/?_a=nested');
+    const getRedirectUrl = vi.fn().mockReturnValue('/app/discover#/?_a=nested');
     const share = {
       url: {
         locators: {

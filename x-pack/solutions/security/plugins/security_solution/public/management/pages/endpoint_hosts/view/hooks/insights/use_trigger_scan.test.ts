@@ -5,42 +5,54 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useTriggerScan } from './use_trigger_scan';
 import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
 
-const mockHttpPost = jest.fn();
+const mockHttpPost = vi.fn();
 
-jest.mock('../../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: { http: { post: mockHttpPost } },
-  }),
-  useToasts: () => ({
-    addWarning: jest.fn(),
-    addDanger: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { http: { post: mockHttpPost } },
+      }),
+      useToasts: () => ({
+        addWarning: vi.fn(),
+        addDanger: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
-  () => ({
-    useFetchAnonymizationFields: () => ({ data: { data: [] } }),
-  })
+  () => {
+      const mocked = {
+        useFetchAnonymizationFields: () => ({ data: { data: [] } }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('@kbn/react-query', () => ({
-  useMutation: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useMutation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMutation = jest.requireMock('@kbn/react-query').useMutation;
+const mockUseMutation = (await vi.importMock('@kbn/react-query')).useMutation;
 
 describe('useTriggerScan', () => {
-  const mockOnSuccess = jest.fn();
-  let mockMutate: jest.Mock;
+  const mockOnSuccess = vi.fn();
+  let mockMutate: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockMutate = jest.fn();
+    vi.clearAllMocks();
+    mockMutate = vi.fn();
     mockUseMutation.mockImplementation((mutationFn: (payload: unknown) => Promise<unknown>) => {
       mockMutate.mockImplementation(async (payload) => {
         return mutationFn(payload);

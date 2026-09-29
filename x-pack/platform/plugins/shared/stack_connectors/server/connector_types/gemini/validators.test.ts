@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateGeminiSecrets } from './validators';
 import type { Secrets } from '@kbn/connector-schemas/gemini';
 
 // Mock i18n
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('validateGeminiSecrets', () => {
   const validServiceAccount = {

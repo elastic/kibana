@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
@@ -29,7 +31,7 @@ const sampleError: YamlValidationResult = {
 function renderAccordion(
   overrides: Partial<React.ComponentProps<typeof WorkflowYamlValidationAccordion>> = {}
 ) {
-  const onErrorClick = jest.fn();
+  const onErrorClick = vi.fn();
   const result = render(
     <WorkflowYamlValidationAccordion
       isMounted={true}
@@ -58,12 +60,12 @@ function selectText(node: Node) {
 
 describe('WorkflowYamlValidationAccordion', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    document.execCommand = jest.fn(() => true);
+    vi.clearAllMocks();
+    document.execCommand = vi.fn(() => true);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders selectable error text and a copy button', () => {
@@ -81,7 +83,7 @@ describe('WorkflowYamlValidationAccordion', () => {
   });
 
   it('renders a Fix with AI button when onFixWithAi is provided', () => {
-    const onFixWithAi = jest.fn();
+    const onFixWithAi = vi.fn();
     renderAccordion({ onFixWithAi });
     expandAccordion();
 
@@ -136,8 +138,8 @@ describe('WorkflowYamlValidationAccordion', () => {
   });
 
   it('calls onFixWithAi without navigating', () => {
-    const onErrorClick = jest.fn();
-    const onFixWithAi = jest.fn();
+    const onErrorClick = vi.fn();
+    const onFixWithAi = vi.fn();
     renderAccordion({ onErrorClick, onFixWithAi });
     expandAccordion();
 
@@ -183,7 +185,7 @@ describe('WorkflowYamlValidationAccordion', () => {
         isLoading={false}
         error={null}
         validationErrors={[sampleError]}
-        onErrorClick={jest.fn()}
+        onErrorClick={vi.fn()}
       />
     );
 

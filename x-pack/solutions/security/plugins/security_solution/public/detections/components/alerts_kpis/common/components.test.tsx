@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -14,20 +17,20 @@ import { TestProviders } from '../../../../common/mock';
 import { KpiPanel, StackByComboBox } from './components';
 import { useStackByFields } from './hooks';
 
-jest.mock('./hooks');
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('./hooks');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
   return {
     ...originalModule,
-    createHref: jest.fn(),
-    useHistory: jest.fn(),
-    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
+    createHref: vi.fn(),
+    useHistory: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({ pathname: '' }),
   };
 });
 
-const mockNavigateToApp = jest.fn();
-jest.mock('../../../../common/lib/kibana/kibana_react', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/kibana_react');
+const mockNavigateToApp = vi.fn();
+vi.mock('../../../../common/lib/kibana/kibana_react', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana/kibana_react'));
 
   return {
     ...original,
@@ -35,22 +38,22 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
       services: {
         application: {
           navigateToApp: mockNavigateToApp,
-          getUrlForApp: jest.fn(),
+          getUrlForApp: vi.fn(),
         },
         data: {
           search: {
-            search: jest.fn(),
+            search: vi.fn(),
           },
         },
         uiSettings: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
         notifications: {
           toasts: {
-            addWarning: jest.fn(),
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
-            remove: jest.fn(),
+            addWarning: vi.fn(),
+            addError: vi.fn(),
+            addSuccess: vi.fn(),
+            remove: vi.fn(),
           },
         },
       },
@@ -60,8 +63,8 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
 
 describe('components', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useStackByFields as jest.Mock).mockReturnValue(jest.fn());
+    vi.clearAllMocks();
+    (useStackByFields as Mock).mockReturnValue(vi.fn());
   });
 
   describe('KpiPanel', () => {
@@ -104,7 +107,7 @@ describe('components', () => {
 
   describe('StackByComboBox', () => {
     test('it invokes onSelect when a field is selected', async () => {
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       const optionToSelect = 'agent.hostname';
 
       const { getByTestId } = render(
@@ -135,7 +138,7 @@ describe('components', () => {
         <TestProviders>
           <StackByComboBox
             data-test-subj="stackByComboBox"
-            onSelect={jest.fn()}
+            onSelect={vi.fn()}
             selected="agent.ephemeral_id"
           />
         </TestProviders>
@@ -151,7 +154,7 @@ describe('components', () => {
           <StackByComboBox
             data-test-subj="stackByComboBox"
             isDisabled={true}
-            onSelect={jest.fn()}
+            onSelect={vi.fn()}
             selected="agent.ephemeral_id"
           />
         </TestProviders>
@@ -170,7 +173,7 @@ describe('components', () => {
             aria-label={customAccessibleName}
             data-test-subj="stackByComboBox"
             isDisabled={true}
-            onSelect={jest.fn()}
+            onSelect={vi.fn()}
             selected="agent.ephemeral_id"
           />
         </TestProviders>
@@ -189,7 +192,7 @@ describe('components', () => {
         <TestProviders>
           <StackByComboBox
             data-test-subj="stackByComboBox"
-            onSelect={jest.fn()}
+            onSelect={vi.fn()}
             selected="agent.ephemeral_id"
           />
         </TestProviders>
@@ -205,7 +208,7 @@ describe('components', () => {
         <TestProviders>
           <StackByComboBox
             data-test-subj="stackByComboBox"
-            onSelect={jest.fn()}
+            onSelect={vi.fn()}
             prepend={prepend}
             selected="agent.ephemeral_id"
           />

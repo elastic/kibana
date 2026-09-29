@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { Filter, Query } from '@kbn/es-query';
 import { useAttacksListData } from './use_attacks_list_data';
@@ -14,9 +17,9 @@ import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/aler
 import { getAttacksListAggregations } from './aggregations';
 import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
 
-jest.mock('./use_attack_titles');
-jest.mock('../common/use_alerts_aggregation');
-jest.mock('./aggregations');
+vi.mock('./use_attack_titles');
+vi.mock('../common/use_alerts_aggregation');
+vi.mock('./aggregations');
 
 describe('useAttacksListData', () => {
   const mockFilters = [{ meta: {}, query: {} }] as Filter[];
@@ -52,14 +55,14 @@ describe('useAttacksListData', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getAttacksListAggregations as jest.Mock).mockReturnValue({ some: 'agg' });
-    (useAlertsAggregation as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (getAttacksListAggregations as Mock).mockReturnValue({ some: 'agg' });
+    (useAlertsAggregation as Mock).mockReturnValue({
       data: { aggregations: mockAggregations },
       loading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
-    (useAttackTitles as jest.Mock).mockReturnValue({
+    (useAttackTitles as Mock).mockReturnValue({
       attackDetails: {
         'attack-1': { title: 'Title attack-1', count: 10 },
         'attack-2': { title: 'Title attack-2', count: 8 },
@@ -116,10 +119,10 @@ describe('useAttacksListData', () => {
   });
 
   it('handles loading state', () => {
-    (useAlertsAggregation as jest.Mock).mockReturnValue({
+    (useAlertsAggregation as Mock).mockReturnValue({
       data: undefined,
       loading: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() =>
@@ -130,7 +133,7 @@ describe('useAttacksListData', () => {
   });
 
   it('handles attack loading state', () => {
-    (useAttackTitles as jest.Mock).mockReturnValue({
+    (useAttackTitles as Mock).mockReturnValue({
       attackDetails: {
         'attack-1': 'Title attack-1',
       },

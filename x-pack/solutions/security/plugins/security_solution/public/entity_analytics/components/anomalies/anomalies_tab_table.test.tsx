@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -12,8 +14,8 @@ import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytic
 import { AnomalyTabTableSection } from './anomalies_tab_table';
 import { ENTITY_ANOMALY_TABLE_EMPTY_MESSAGE } from './translations';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -28,41 +30,62 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../common/components/ml/hooks/use_get_jobs', () => ({
-  useGetInstalledJob: () => ({ jobs: [] }),
-}));
+vi.mock('../../../common/components/ml/hooks/use_get_jobs', () => {
+      const mocked = {
+      useGetInstalledJob: () => ({ jobs: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table/anomaly_job_name', () => ({
-  AnomalyJobName: ({ jobName }: { jobName: string }) => (
-    <span data-test-subj="mock-job-name">{jobName}</span>
-  ),
-}));
+vi.mock('./table/anomaly_job_name', () => {
+      const mocked = {
+      AnomalyJobName: ({ jobName }: { jobName: string }) => (
+        <span data-test-subj="mock-job-name">{jobName}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table/anomaly_tactic_badges', () => ({
-  AnomalyTacticBadges: ({ tactics }: { tactics: string[] }) => (
-    <span data-test-subj="mock-tactic-badges">{tactics.join(', ')}</span>
-  ),
-}));
+vi.mock('./table/anomaly_tactic_badges', () => {
+      const mocked = {
+      AnomalyTacticBadges: ({ tactics }: { tactics: string[] }) => (
+        <span data-test-subj="mock-tactic-badges">{tactics.join(', ')}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table/anomaly_timestamp', () => ({
-  AnomalyTimestamp: ({ timestamp }: { timestamp: number }) => (
-    <span data-test-subj="mock-timestamp">{timestamp}</span>
-  ),
-}));
+vi.mock('./table/anomaly_timestamp', () => {
+      const mocked = {
+      AnomalyTimestamp: ({ timestamp }: { timestamp: number }) => (
+        <span data-test-subj="mock-timestamp">{timestamp}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table/anomaly_expanded_row', () => ({
-  AnomalyExpandedRow: () => <div data-test-subj="mock-expanded-row">{'Expanded content'}</div>,
-}));
+vi.mock('./table/anomaly_expanded_row', () => {
+      const mocked = {
+      AnomalyExpandedRow: () => <div data-test-subj="mock-expanded-row">{'Expanded content'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table/anomaly_score_badge', () => ({
-  AnomalyScoreBadge: ({ score }: { score: number }) => (
-    <span data-test-subj="mock-score-badge">{score}</span>
-  ),
-}));
+vi.mock('./table/anomaly_score_badge', () => {
+      const mocked = {
+      AnomalyScoreBadge: ({ score }: { score: number }) => (
+        <span data-test-subj="mock-score-badge">{score}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table/anomaly_row_actions_menu', () => ({
-  AnomalyRowActionsMenu: () => <div data-test-subj="mock-row-actions-menu" />,
-}));
+vi.mock('./table/anomaly_row_actions_menu', () => {
+      const mocked = {
+      AnomalyRowActionsMenu: () => <div data-test-subj="mock-row-actions-menu" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -95,7 +118,7 @@ const defaultProps = {
   anomalies: [makeAnomaly()],
   entityToAttach: { id: 'entity-1', name: 'host-1', type: 'host' as const },
   entityType: 'host' as const,
-  onTableChange: jest.fn(),
+  onTableChange: vi.fn(),
   page: 1,
   pageSize: 10,
   sortField: 'timestamp' as const,
@@ -106,7 +129,7 @@ const defaultProps = {
 
 describe('AnomalyTabTableSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('structure', () => {
@@ -242,7 +265,7 @@ describe('AnomalyTabTableSection', () => {
 
   describe('onTableChange', () => {
     it('calls onTableChange with sort info when a sortable column header is clicked', () => {
-      const onTableChange = jest.fn();
+      const onTableChange = vi.fn();
       render(
         <AnomalyTabTableSection
           {...defaultProps}

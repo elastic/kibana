@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import { startTrackingHistory } from './history';
 
 const setupHistory = ({ initial, maxSize = 10 }: { initial?: object; maxSize?: number }) => {
   const state$ = new BehaviorSubject<object | undefined>(initial);
-  const setState = jest.fn(async (state: object) => {
+  const setState = vi.fn(async (state: object) => {
     state$.next(state);
   });
   const { api, cleanup } = startTrackingHistory<object>({

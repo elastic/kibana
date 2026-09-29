@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
@@ -20,20 +22,20 @@ describe('useFiltersValidation', () => {
   let services: ReturnType<typeof createDiscoverServicesMock>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     filterUpdates$ = new Subject<void>();
     services = createDiscoverServicesMock();
-    jest.spyOn(services.filterManager, 'getUpdates$').mockReturnValue(filterUpdates$);
-    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue([]);
+    vi.spyOn(services.filterManager, 'getUpdates$').mockReturnValue(filterUpdates$);
+    vi.spyOn(services.filterManager, 'getFilters').mockReturnValue([]);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should show warning when ad-hoc data view has mismatched filter index', () => {
     const filters: Filter[] = [{ meta: { index: 'different-id' } } as Filter];
-    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
+    vi.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
 
     renderHook(() =>
       useFiltersValidation({
@@ -44,7 +46,7 @@ describe('useFiltersValidation', () => {
     );
 
     filterUpdates$.next();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -55,7 +57,7 @@ describe('useFiltersValidation', () => {
 
   it('should not show warning when data view is persisted', () => {
     const filters: Filter[] = [{ meta: { index: 'different-id' } } as Filter];
-    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
+    vi.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
 
     renderHook(() =>
       useFiltersValidation({
@@ -66,14 +68,14 @@ describe('useFiltersValidation', () => {
     );
 
     filterUpdates$.next();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
 
   it('should not show warning when all filter indices match data view id', () => {
     const filters: Filter[] = [{ meta: { index: dataViewAdHoc.id } } as Filter];
-    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
+    vi.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
 
     renderHook(() =>
       useFiltersValidation({
@@ -84,7 +86,7 @@ describe('useFiltersValidation', () => {
     );
 
     filterUpdates$.next();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
@@ -99,14 +101,14 @@ describe('useFiltersValidation', () => {
     );
 
     filterUpdates$.next();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
 
   it('should unsubscribe on unmount', () => {
     const filters: Filter[] = [{ meta: { index: 'different-id' } } as Filter];
-    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
+    vi.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
 
     const { unmount } = renderHook(() =>
       useFiltersValidation({
@@ -119,7 +121,7 @@ describe('useFiltersValidation', () => {
     unmount();
 
     filterUpdates$.next();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
   });

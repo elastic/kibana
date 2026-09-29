@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
@@ -14,8 +16,8 @@ import { getAllEndpointPackagePolicies } from './endpoint_package_policies';
 
 describe('endpoint_package_policies', () => {
   describe('getAllEndpointPackagePolicies', () => {
-    let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-    let mockPackagePolicyService: jest.Mocked<PackagePolicyClient>;
+    let mockSavedObjectClient: Mocked<SavedObjectsClientContract>;
+    let mockPackagePolicyService: Mocked<PackagePolicyClient>;
 
     beforeEach(() => {
       mockSavedObjectClient = savedObjectsClientMock.create();

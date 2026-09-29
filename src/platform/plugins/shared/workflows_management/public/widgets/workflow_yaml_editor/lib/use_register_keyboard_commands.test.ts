@@ -7,46 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/monaco';
 import { useRegisterKeyboardCommands } from './use_register_keyboard_commands';
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    KeyMod: { CtrlCmd: 2048, Shift: 1024 },
-    KeyCode: {
-      Slash: 85,
-      Digit7: 38,
-      KeyK: 46,
-      KeyS: 54,
-      KeyF: 36,
-      Enter: 3,
-    },
-    editor: {
-      EditorOption: { readOnly: 81 },
-    },
-  },
-}));
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      monaco: {
+        KeyMod: { CtrlCmd: 2048, Shift: 1024 },
+        KeyCode: {
+          Slash: 85,
+          Digit7: 38,
+          KeyK: 46,
+          KeyS: 54,
+          KeyF: 36,
+          Enter: 3,
+        },
+        editor: {
+          EditorOption: { readOnly: 81 },
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockDisposable = (): monaco.IDisposable => ({
-  dispose: jest.fn(),
+  dispose: vi.fn(),
 });
 
 const createMockEditor = (readOnly = false) => {
   const actions: Array<{ id: string; run: (...args: unknown[]) => void }> = [];
   return {
-    addAction: jest.fn((action: { id: string; run: (...args: unknown[]) => void }) => {
+    addAction: vi.fn((action: { id: string; run: (...args: unknown[]) => void }) => {
       actions.push(action);
       return createMockDisposable();
     }),
-    getOption: jest.fn(() => readOnly),
-    trigger: jest.fn(),
+    getOption: vi.fn(() => readOnly),
+    trigger: vi.fn(),
     _actions: actions,
   } as unknown as monaco.editor.IStandaloneCodeEditor & {
     _actions: Array<{ id: string; run: (...args: unknown[]) => void }>;
@@ -68,10 +76,10 @@ describe('useRegisterKeyboardCommands', () => {
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
-        openActionsPopover: jest.fn(),
-        save: jest.fn(),
-        run: jest.fn(),
-        saveAndRun: jest.fn(),
+        openActionsPopover: vi.fn(),
+        save: vi.fn(),
+        run: vi.fn(),
+        saveAndRun: vi.fn(),
       });
     });
 
@@ -81,15 +89,15 @@ describe('useRegisterKeyboardCommands', () => {
   it('calls save callback when save action runs on a writable editor', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const editor = createMockEditor(false);
-    const save = jest.fn();
+    const save = vi.fn();
 
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
-        openActionsPopover: jest.fn(),
+        openActionsPopover: vi.fn(),
         save,
-        run: jest.fn(),
-        saveAndRun: jest.fn(),
+        run: vi.fn(),
+        saveAndRun: vi.fn(),
       });
     });
 
@@ -106,15 +114,15 @@ describe('useRegisterKeyboardCommands', () => {
   it('calls run callback when run action is triggered', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const editor = createMockEditor(false);
-    const run = jest.fn();
+    const run = vi.fn();
 
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
-        openActionsPopover: jest.fn(),
-        save: jest.fn(),
+        openActionsPopover: vi.fn(),
+        save: vi.fn(),
         run,
-        saveAndRun: jest.fn(),
+        saveAndRun: vi.fn(),
       });
     });
 
@@ -129,14 +137,14 @@ describe('useRegisterKeyboardCommands', () => {
   it('calls saveAndRun callback when save-and-run action is triggered', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const editor = createMockEditor(false);
-    const saveAndRun = jest.fn();
+    const saveAndRun = vi.fn();
 
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
-        openActionsPopover: jest.fn(),
-        save: jest.fn(),
-        run: jest.fn(),
+        openActionsPopover: vi.fn(),
+        save: vi.fn(),
+        run: vi.fn(),
         saveAndRun,
       });
     });
@@ -154,15 +162,15 @@ describe('useRegisterKeyboardCommands', () => {
   it('calls openActionsPopover callback when popover action is triggered', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const editor = createMockEditor(false);
-    const openActionsPopover = jest.fn();
+    const openActionsPopover = vi.fn();
 
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
         openActionsPopover,
-        save: jest.fn(),
-        run: jest.fn(),
-        saveAndRun: jest.fn(),
+        save: vi.fn(),
+        run: vi.fn(),
+        saveAndRun: vi.fn(),
       });
     });
 
@@ -179,16 +187,16 @@ describe('useRegisterKeyboardCommands', () => {
   it('does not call callbacks when editor is read-only', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const editor = createMockEditor(true);
-    const save = jest.fn();
-    const run = jest.fn();
+    const save = vi.fn();
+    const run = vi.fn();
 
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
-        openActionsPopover: jest.fn(),
+        openActionsPopover: vi.fn(),
         save,
         run,
-        saveAndRun: jest.fn(),
+        saveAndRun: vi.fn(),
       });
     });
 
@@ -205,18 +213,18 @@ describe('useRegisterKeyboardCommands', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const disposable1 = createMockDisposable();
     const editor = {
-      addAction: jest.fn(() => disposable1),
-      getOption: jest.fn(() => false),
-      trigger: jest.fn(),
+      addAction: vi.fn(() => disposable1),
+      getOption: vi.fn(() => false),
+      trigger: vi.fn(),
       _actions: [],
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     const params = {
       editor,
-      openActionsPopover: jest.fn(),
-      save: jest.fn(),
-      run: jest.fn(),
-      saveAndRun: jest.fn(),
+      openActionsPopover: vi.fn(),
+      save: vi.fn(),
+      run: vi.fn(),
+      saveAndRun: vi.fn(),
     };
 
     act(() => {
@@ -235,18 +243,18 @@ describe('useRegisterKeyboardCommands', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const disposable = createMockDisposable();
     const editor = {
-      addAction: jest.fn(() => disposable),
-      getOption: jest.fn(() => false),
-      trigger: jest.fn(),
+      addAction: vi.fn(() => disposable),
+      getOption: vi.fn(() => false),
+      trigger: vi.fn(),
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
-        openActionsPopover: jest.fn(),
-        save: jest.fn(),
-        run: jest.fn(),
-        saveAndRun: jest.fn(),
+        openActionsPopover: vi.fn(),
+        save: vi.fn(),
+        run: vi.fn(),
+        saveAndRun: vi.fn(),
       });
     });
 
@@ -261,21 +269,21 @@ describe('useRegisterKeyboardCommands', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const actions: Array<{ id: string; run: (...args: unknown[]) => void }> = [];
     const editor = {
-      addAction: jest.fn((action: { id: string; run: (...args: unknown[]) => void }) => {
+      addAction: vi.fn((action: { id: string; run: (...args: unknown[]) => void }) => {
         actions.push(action);
         return createMockDisposable();
       }),
-      getOption: jest.fn(() => false),
-      trigger: jest.fn(),
+      getOption: vi.fn(() => false),
+      trigger: vi.fn(),
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
-        openActionsPopover: jest.fn(),
-        save: jest.fn(),
-        run: jest.fn(),
-        saveAndRun: jest.fn(),
+        openActionsPopover: vi.fn(),
+        save: vi.fn(),
+        run: vi.fn(),
+        saveAndRun: vi.fn(),
       });
     });
 
@@ -298,10 +306,10 @@ describe('useRegisterKeyboardCommands', () => {
     act(() => {
       result.current.registerKeyboardCommands({
         editor,
-        openActionsPopover: jest.fn(),
-        save: jest.fn(),
-        run: jest.fn(),
-        saveAndRun: jest.fn(),
+        openActionsPopover: vi.fn(),
+        save: vi.fn(),
+        run: vi.fn(),
+        saveAndRun: vi.fn(),
       });
     });
 

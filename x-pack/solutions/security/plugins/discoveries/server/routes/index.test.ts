@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AnalyticsServiceSetup, IRouter } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerRoutes } from '.';
@@ -20,32 +22,32 @@ import * as disableScheduleModule from './post/schedules/disable_schedule';
 import * as enableScheduleModule from './post/schedules/enable_schedule';
 import * as updateScheduleModule from './put/schedules/update_schedule';
 
-jest.mock('./delete/schedules/delete_schedule');
-jest.mock('./generate/post_generate');
-jest.mock('./get/default_esql_query/get_default_esql_query');
-jest.mock('./get/execution_tracking/get_execution_tracking');
-jest.mock('./get/schedules/find_schedules');
-jest.mock('./get/schedules/get_schedule');
-jest.mock('./get/pipeline_data/get_pipeline_data');
-jest.mock('./post/schedules/create_schedule');
-jest.mock('./post/schedules/disable_schedule');
-jest.mock('./post/schedules/enable_schedule');
-jest.mock('./put/schedules/update_schedule');
+vi.mock('./delete/schedules/delete_schedule');
+vi.mock('./generate/post_generate');
+vi.mock('./get/default_esql_query/get_default_esql_query');
+vi.mock('./get/execution_tracking/get_execution_tracking');
+vi.mock('./get/schedules/find_schedules');
+vi.mock('./get/schedules/get_schedule');
+vi.mock('./get/pipeline_data/get_pipeline_data');
+vi.mock('./post/schedules/create_schedule');
+vi.mock('./post/schedules/disable_schedule');
+vi.mock('./post/schedules/enable_schedule');
+vi.mock('./put/schedules/update_schedule');
 
 describe('registerRoutes', () => {
   const mockRouter = {} as IRouter;
   const mockLogger = loggerMock.create();
   const mockAnalytics = {} as AnalyticsServiceSetup;
-  const mockGetEventLogIndex = jest.fn();
-  const mockGetEventLogger = jest.fn();
-  const mockGetStartServices = jest.fn();
+  const mockGetEventLogIndex = vi.fn();
+  const mockGetEventLogger = vi.fn();
+  const mockGetStartServices = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers generate route', () => {
-    const registerGenerateRouteSpy = jest.spyOn(generateModule, 'registerGenerateRoute');
+    const registerGenerateRouteSpy = vi.spyOn(generateModule, 'registerGenerateRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -64,7 +66,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers get pipeline data route', () => {
-    const registerGetPipelineDataRouteSpy = jest.spyOn(
+    const registerGetPipelineDataRouteSpy = vi.spyOn(
       getPipelineDataModule,
       'registerGetPipelineDataRoute'
     );
@@ -84,7 +86,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers get default esql query route', () => {
-    const spy = jest.spyOn(getDefaultEsqlQueryModule, 'registerGetDefaultEsqlQueryRoute');
+    const spy = vi.spyOn(getDefaultEsqlQueryModule, 'registerGetDefaultEsqlQueryRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -99,7 +101,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers get execution tracking route', () => {
-    const spy = jest.spyOn(getExecutionTrackingModule, 'registerGetExecutionTrackingRoute');
+    const spy = vi.spyOn(getExecutionTrackingModule, 'registerGetExecutionTrackingRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -115,7 +117,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers create schedule route', () => {
-    const spy = jest.spyOn(createScheduleModule, 'registerCreateScheduleRoute');
+    const spy = vi.spyOn(createScheduleModule, 'registerCreateScheduleRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -132,7 +134,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers delete schedule route', () => {
-    const spy = jest.spyOn(deleteScheduleModule, 'registerDeleteScheduleRoute');
+    const spy = vi.spyOn(deleteScheduleModule, 'registerDeleteScheduleRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -149,7 +151,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers disable schedule route', () => {
-    const spy = jest.spyOn(disableScheduleModule, 'registerDisableScheduleRoute');
+    const spy = vi.spyOn(disableScheduleModule, 'registerDisableScheduleRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -166,7 +168,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers enable schedule route', () => {
-    const spy = jest.spyOn(enableScheduleModule, 'registerEnableScheduleRoute');
+    const spy = vi.spyOn(enableScheduleModule, 'registerEnableScheduleRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -183,7 +185,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers find schedules route', () => {
-    const spy = jest.spyOn(findSchedulesModule, 'registerFindSchedulesRoute');
+    const spy = vi.spyOn(findSchedulesModule, 'registerFindSchedulesRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -199,7 +201,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers get schedule route', () => {
-    const spy = jest.spyOn(getScheduleModule, 'registerGetScheduleRoute');
+    const spy = vi.spyOn(getScheduleModule, 'registerGetScheduleRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,
@@ -215,7 +217,7 @@ describe('registerRoutes', () => {
   });
 
   it('registers update schedule route', () => {
-    const spy = jest.spyOn(updateScheduleModule, 'registerUpdateScheduleRoute');
+    const spy = vi.spyOn(updateScheduleModule, 'registerUpdateScheduleRoute');
 
     registerRoutes(mockRouter, mockLogger, {
       analytics: mockAnalytics,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createEvent, fireEvent, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -14,7 +16,7 @@ import { CASE_SETTINGS_TITLE } from './translations';
 import { useAllCasesNavigation } from '../../common/navigation/hooks';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/navigation/hooks');
 
 describe('ConfigureCasesAppHeader', () => {
   it('renders the app header with the settings title', () => {

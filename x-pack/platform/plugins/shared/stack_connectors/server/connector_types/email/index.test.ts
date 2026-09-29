@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-jest.mock('./send_email', () => {
-  const actual = jest.requireActual('./send_email');
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
+vi.mock('./send_email', async () => {
+  const actual = (await vi.importActual('./send_email'));
   return {
     ...actual,
-    sendEmail: jest.fn(),
+    sendEmail: vi.fn(),
   };
 });
 
@@ -47,13 +50,13 @@ import { AdditionalEmailServices } from '../../../common';
 import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email';
 import type { ActionsConfig } from '@kbn/actions-plugin/server/config';
 
-const sendEmailMock = sendEmail as jest.Mock;
+const sendEmailMock = sendEmail as Mock;
 
 const services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 let connectorType: EmailConnectorType;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 
 const getConfig = (overrides?: {}) => ({
   service: 'gmail',
@@ -69,7 +72,7 @@ const getConfig = (overrides?: {}) => ({
 });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType({});
 });
@@ -822,7 +825,7 @@ describe('params validation', () => {
 
   test('error when using a service that is not enabled', async () => {
     const configUtils = actionsConfigMock.create();
-    configUtils.getEnabledEmailServices = jest
+    configUtils.getEnabledEmailServices = vi
       .fn()
       .mockReturnValue([
         serviceParamValueToKbnSettingMap.gmail,
@@ -847,7 +850,7 @@ describe('params validation', () => {
 
   test('no error using enabled services = *', async () => {
     const configUtils = actionsConfigMock.create();
-    configUtils.getEnabledEmailServices = jest.fn().mockReturnValue(['*']);
+    configUtils.getEnabledEmailServices = vi.fn().mockReturnValue(['*']);
 
     expect(() =>
       validateConfig(
@@ -865,7 +868,7 @@ describe('params validation', () => {
 
   test('does not throw when fetching service enabled in config', () => {
     const configUtils = actionsConfigMock.create();
-    configUtils.getEnabledEmailServices = jest
+    configUtils.getEnabledEmailServices = vi
       .fn()
       .mockReturnValue([serviceParamValueToKbnSettingMap.elastic_cloud]);
 
@@ -2082,7 +2085,7 @@ describe('execute()', () => {
       ...executorOptions,
       configurationUtilities: {
         ...configurationUtilities,
-        enableFooterInEmail: jest.fn().mockReturnValue(false),
+        enableFooterInEmail: vi.fn().mockReturnValue(false),
       },
     };
 
@@ -2205,7 +2208,7 @@ describe('execute()', () => {
 
   test('parameters are as expected when using ses service and ses kbn config', async () => {
     const mockedActionsConfig = actionsConfigMock.create();
-    mockedActionsConfig.getAwsSesConfig = jest.fn().mockReturnValue({
+    mockedActionsConfig.getAwsSesConfig = vi.fn().mockReturnValue({
       host: 'aws-ses-host',
       port: 5555,
       secure: true,
@@ -2239,7 +2242,7 @@ describe('execute()', () => {
 
   test('message parameter is trimmed to the maximum allowed length', async () => {
     const mockedActionsConfig = actionsConfigMock.create();
-    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(MaxEmailBodyLength);
+    mockedActionsConfig.getMaxEmailBodyLength = vi.fn().mockReturnValue(MaxEmailBodyLength);
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       params: {
@@ -2268,7 +2271,7 @@ describe('execute()', () => {
 
   test('message parameter is trimmed to 0 length if configured', async () => {
     const mockedActionsConfig = actionsConfigMock.create();
-    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(0);
+    mockedActionsConfig.getMaxEmailBodyLength = vi.fn().mockReturnValue(0);
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       params: {
@@ -2295,7 +2298,7 @@ describe('execute()', () => {
 
   test('messageHTML parameter is trimmed to the maximum allowed length', async () => {
     const mockedActionsConfig = actionsConfigMock.create();
-    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(MaxEmailBodyLength);
+    mockedActionsConfig.getMaxEmailBodyLength = vi.fn().mockReturnValue(MaxEmailBodyLength);
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
@@ -2323,7 +2326,7 @@ describe('execute()', () => {
 
   test('messageHTML parameter is trimmed to 0 length if configured', async () => {
     const mockedActionsConfig = actionsConfigMock.create();
-    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(0);
+    mockedActionsConfig.getMaxEmailBodyLength = vi.fn().mockReturnValue(0);
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
@@ -2496,13 +2499,13 @@ describe('validateConfig AWS SES specific checks', () => {
     ...overrides,
   });
 
-  let configUtilsWithSes: jest.Mocked<ActionsConfigurationUtilities>;
+  let configUtilsWithSes: Mocked<ActionsConfigurationUtilities>;
 
   beforeEach(() => {
     configUtilsWithSes = {
       ...actionsConfigMock.create(),
-      getAwsSesConfig: jest.fn(() => getSesConfig()),
-    } as unknown as jest.Mocked<ActionsConfigurationUtilities>;
+      getAwsSesConfig: vi.fn(() => getSesConfig()),
+    } as unknown as Mocked<ActionsConfigurationUtilities>;
   });
 
   test('throws if both host and port do not match AWS SES config', () => {

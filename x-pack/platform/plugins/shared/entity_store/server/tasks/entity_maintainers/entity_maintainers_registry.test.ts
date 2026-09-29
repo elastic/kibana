@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EntityMaintainersRegistry } from './entity_maintainers_registry';
 
 describe('EntityMaintainersRegistry', () => {
   let registry: EntityMaintainersRegistry;
-  const run = jest.fn().mockResolvedValue({});
+  const run = vi.fn().mockResolvedValue({});
 
   beforeEach(() => {
     registry = new EntityMaintainersRegistry();
@@ -114,7 +116,7 @@ describe('EntityMaintainersRegistry', () => {
     });
 
     it('should store and retrieve lifecycle config', () => {
-      const setup = jest.fn().mockResolvedValue({});
+      const setup = vi.fn().mockResolvedValue({});
       const initialState = { count: 0 };
       registry.register({
         id: 'maintainer-a',

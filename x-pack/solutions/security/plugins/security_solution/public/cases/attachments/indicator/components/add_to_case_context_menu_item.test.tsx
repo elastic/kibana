@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -19,10 +21,10 @@ import { IndicatorAddToCaseContextMenuItem } from './add_to_case_context_menu_it
 
 const TEST_ID = 'test';
 const indicator: Indicator = generateMockFileIndicator();
-const onClick = jest.fn();
+const onClick = vi.fn();
 
 const casesServiceMock = casesPluginMock.createStartContract();
-const mockCanUseCases = jest.fn();
+const mockCanUseCases = vi.fn();
 
 const getMockedServices = (permissions: object) => ({
   cases: {
@@ -46,7 +48,7 @@ const renderWithPermissions = (permissions: object, element: ReactNode) =>
 
 describe('IndicatorAddToCaseContextMenuItem', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the singular add-to-case action', () => {

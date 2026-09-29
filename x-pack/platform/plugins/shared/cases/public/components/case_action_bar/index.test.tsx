@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,15 +26,15 @@ import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_pa
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { CaseMetricsFeature } from '../../../common/types/api';
 
-jest.mock('../../containers/use_get_case_connectors');
-jest.mock('../case_view/use_on_refresh_case_view_page');
+vi.mock('../../containers/use_get_case_connectors');
+vi.mock('../case_view/use_on_refresh_case_view_page');
 
-const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as Mock;
 
 describe('CaseActionBar', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
 
-  const onUpdateField = jest.fn();
+  const onUpdateField = vi.fn();
   const defaultProps: CaseActionBarProps = {
     caseData: basicCase,
     isLoading: false,
@@ -39,7 +42,7 @@ describe('CaseActionBar', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetCaseConnectorsMock.mockReturnValue({
       isLoading: false,
       data: caseConnectors,

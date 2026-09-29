@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, waitFor } from '@testing-library/react';
@@ -18,30 +21,30 @@ import { sendGetAgents, useMultipleAgentPolicies } from '../hooks';
 
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
-jest.mock('../hooks', () => {
-  const mutateAsyncMock = jest.fn().mockResolvedValue({ data: [] });
+vi.mock('../hooks', async () => {
+  const mutateAsyncMock = vi.fn().mockResolvedValue({ data: [] });
 
   return {
-    ...jest.requireActual('../hooks'),
-    useMultipleAgentPolicies: jest.fn(),
-    useStartServices: jest.fn().mockReturnValue({
+    ...(await vi.importActual('../hooks')),
+    useMultipleAgentPolicies: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
       notifications: {
-        toasts: { addSuccess: jest.fn(), addDanger: jest.fn() },
+        toasts: { addSuccess: vi.fn(), addDanger: vi.fn() },
       },
     }),
-    sendGetAgents: jest.fn(),
-    useConfig: jest.fn().mockReturnValue({
+    sendGetAgents: vi.fn(),
+    useConfig: vi.fn().mockReturnValue({
       agents: { enabled: true },
     }),
-    useDeletePackagePolicyMutation: jest.fn().mockReturnValue({ mutateAsync: mutateAsyncMock }),
-    sendDeleteAgentPolicy: jest.fn().mockResolvedValue({ data: [] }),
+    useDeletePackagePolicyMutation: vi.fn().mockReturnValue({ mutateAsync: mutateAsyncMock }),
+    sendDeleteAgentPolicy: vi.fn().mockResolvedValue({ data: [] }),
   };
 });
 
-const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as MockedFunction<
   typeof useMultipleAgentPolicies
 >;
-const sendGetAgentsMock = sendGetAgents as jest.MockedFunction<typeof sendGetAgents>;
+const sendGetAgentsMock = sendGetAgents as MockedFunction<typeof sendGetAgents>;
 
 function renderMenu({
   agentPolicies,

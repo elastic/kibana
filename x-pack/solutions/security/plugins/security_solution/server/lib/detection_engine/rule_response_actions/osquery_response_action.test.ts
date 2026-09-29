@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RuleResponseOsqueryAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
@@ -25,9 +27,9 @@ const createMockAlert = (overrides: Partial<AlertWithAgent> = {}): AlertWithAgen
   } as AlertWithAgent);
 
 const createMockService = () => ({
-  create: jest.fn().mockResolvedValue({}),
-  stop: jest.fn(),
-  logger: { error: jest.fn() } as unknown as Logger,
+  create: vi.fn().mockResolvedValue({}),
+  stop: vi.fn(),
+  logger: { error: vi.fn() } as unknown as Logger,
 });
 
 describe('osqueryResponseAction', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -47,7 +49,7 @@ describe('ExpandRowColumn', () => {
     ...defaultPing,
     type: 'browser',
   };
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const defaultExpandedRows = {
     test: <p>Test row</p>,
   };

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import fs from 'node:fs';
 import { Readable } from 'node:stream';
 
@@ -15,45 +18,54 @@ import { uploadAllEventsFromPath, nonThrowingUploadAllEventsFromPath } from './u
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutReportDataStream } from '../reporting';
 
-jest.mock('node:fs');
+vi.mock('node:fs');
 
-jest.mock('@kbn/scout-info', () => ({
-  SCOUT_REPORT_OUTPUT_ROOT: 'scout/reports/directory',
-}));
-
-jest.mock('../helpers/elasticsearch', () => ({
-  getValidatedESClient: jest.fn(),
-}));
-
-const mockAddEventsFromFile = jest.fn();
-
-jest.mock('../reporting/report/events', () => ({
-  ScoutReportDataStream: jest.fn().mockImplementation(() => {
-    return {
-      addEventsFromFile: mockAddEventsFromFile,
+vi.mock('@kbn/scout-info', () => {
+      const mocked = {
+      SCOUT_REPORT_OUTPUT_ROOT: 'scout/reports/directory',
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../helpers/elasticsearch', () => {
+      const mocked = {
+      getValidatedESClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+const mockAddEventsFromFile = vi.fn();
+
+vi.mock('../reporting/report/events', () => {
+      const mocked = {
+      ScoutReportDataStream: vi.fn().mockImplementation(() => {
+        return {
+          addEventsFromFile: mockAddEventsFromFile,
+        };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('uploadAllEventsFromPath', () => {
-  let log: jest.Mocked<ToolingLog>;
+  let log: Mocked<ToolingLog>;
 
   const spies = {
-    existsSync: jest.spyOn(fs, 'existsSync'),
-    statSync: jest.spyOn(fs, 'statSync'),
-    readdirSync: jest.spyOn(fs, 'readdirSync') as any as jest.Mock<string[], [string, any]>,
+    existsSync: vi.spyOn(fs, 'existsSync'),
+    statSync: vi.spyOn(fs, 'statSync'),
+    readdirSync: vi.spyOn(fs, 'readdirSync') as any as Mock<string[], [string, any]>,
   };
 
   beforeEach(() => {
     log = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warning: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
     } as any;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     Object.values(spies).forEach((spy) => spy.mockRestore());
   });
 
@@ -94,14 +106,14 @@ describe('uploadAllEventsFromPath', () => {
     spies.existsSync.mockReturnValue(true);
 
     // Simulate directory contents: 1 .txt file
-    (fs.readdirSync as jest.Mock).mockImplementation((directoryPath: string) => {
+    (fs.readdirSync as Mock).mockImplementation((directoryPath: string) => {
       if (directoryPath === 'mocked_directory') {
         return ['not_events.txt'];
       }
       return [];
     });
 
-    (fs.statSync as jest.Mock).mockImplementation((filePath: string) => {
+    (fs.statSync as Mock).mockImplementation((filePath: string) => {
       if (filePath === 'mocked_directory') {
         return { isDirectory: () => true, isFile: () => false };
       }
@@ -147,7 +159,7 @@ describe('uploadAllEventsFromPath', () => {
   it('should find event log files recursively', async () => {
     spies.existsSync.mockReturnValue(true);
 
-    (fs.readdirSync as jest.Mock).mockImplementation((directoryPath: string) => {
+    (fs.readdirSync as Mock).mockImplementation((directoryPath: string) => {
       if (directoryPath === 'mocked_directory') {
         return ['sub_directory', 'no_events_here.txt'];
       }
@@ -159,7 +171,7 @@ describe('uploadAllEventsFromPath', () => {
       return [];
     });
 
-    (fs.statSync as jest.Mock).mockImplementation((filePath: string) => {
+    (fs.statSync as Mock).mockImplementation((filePath: string) => {
       if (filePath === 'mocked_directory') {
         return { isDirectory: () => true, isFile: () => false } as fs.Stats;
       }
@@ -190,14 +202,14 @@ describe('uploadAllEventsFromPath', () => {
     spies.existsSync.mockReturnValue(true);
 
     // Simulate directory contents: 2 .ndjson files, 1 .txt file
-    (fs.readdirSync as jest.Mock).mockImplementation((directoryPath: string) => {
+    (fs.readdirSync as Mock).mockImplementation((directoryPath: string) => {
       if (directoryPath === 'mocked_directory') {
         return ['file1.ndjson', 'file2.ndjson', 'not_events.txt'];
       }
       return [];
     });
 
-    (fs.statSync as jest.Mock).mockImplementation((filePath: string) => {
+    (fs.statSync as Mock).mockImplementation((filePath: string) => {
       if (filePath === 'mocked_directory') {
         return { isDirectory: () => true, isFile: () => false };
       }
@@ -226,9 +238,7 @@ describe('uploadAllEventsFromPath', () => {
 
   it('addEventsFromFile should concatenate lines from multiple files in order and pass a single datasource to bulk helper', async () => {
     // Use the real implementation of ScoutReportDataStream for this test
-    const { ScoutReportDataStream: RealScoutReportDataStream } = jest.requireActual(
-      '../reporting/report/events'
-    ) as { ScoutReportDataStream: typeof ScoutReportDataStream };
+    const { ScoutReportDataStream: RealScoutReportDataStream } = (await vi.importActual('../reporting/report/events')) as { ScoutReportDataStream: typeof ScoutReportDataStream };
 
     // Mock file contents for two .ndjson files
     const fileContents: Record<string, string> = {
@@ -236,7 +246,7 @@ describe('uploadAllEventsFromPath', () => {
       'file2.ndjson': 'b1\n',
     };
 
-    const createReadStreamMock = jest
+    const createReadStreamMock = vi
       .spyOn(fs, 'createReadStream')
       .mockImplementation((filePath) => {
         const filePathStr = String(filePath);
@@ -250,7 +260,7 @@ describe('uploadAllEventsFromPath', () => {
       });
 
     // Mock ES client bulk helper and assert datasource yields concatenated lines in order
-    const bulkMock = jest.fn(async (opts: any) => {
+    const bulkMock = vi.fn(async (opts: any) => {
       const lines: string[] = [];
       for await (const line of opts.datasource as AsyncIterable<string>) {
         lines.push(line);
@@ -263,10 +273,10 @@ describe('uploadAllEventsFromPath', () => {
 
     const es: any = { helpers: { bulk: bulkMock } };
     const localLog = {
-      info: jest.fn(),
-      warning: jest.fn(),
-      error: jest.fn(),
-    } as Partial<jest.Mock<ToolingLog>> as ToolingLog;
+      info: vi.fn(),
+      warning: vi.fn(),
+      error: vi.fn(),
+    } as Partial<Mock<ToolingLog>> as ToolingLog;
 
     const dataStream = new RealScoutReportDataStream(es, localLog);
 
@@ -274,11 +284,11 @@ describe('uploadAllEventsFromPath', () => {
 
     expect(bulkMock).toHaveBeenCalledTimes(1);
 
-    expect(bulkMock.mock.results[0].value).resolves.toEqual({
-      total: 3,
-      time: 1000,
-      failed: 0,
-    });
+    await expect(bulkMock.mock.results[0].value).resolves.toEqual({
+            total: 3,
+            time: 1000,
+            failed: 0,
+          });
 
     createReadStreamMock.mockRestore();
   });
@@ -286,10 +296,10 @@ describe('uploadAllEventsFromPath', () => {
 
 describe('nonThrowingUploadAllEventsFromPath', () => {
   it('should not throw and only log a warning', async () => {
-    const log: jest.Mocked<ToolingLog> = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warning: jest.fn(),
+    const log: Mocked<ToolingLog> = {
+      info: vi.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
     } as any;
 
     const eventLogPath = '/some/path/that/does/not/exist';

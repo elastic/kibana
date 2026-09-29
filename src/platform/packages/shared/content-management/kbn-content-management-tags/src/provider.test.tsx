@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import type { Tag, ParsedQuery } from './types';
@@ -24,8 +26,8 @@ describe('ContentManagementTagsContextProvider', () => {
     { id: 'tag-2', name: 'Urgent', description: 'Urgent items', color: '#FFA500', managed: false },
   ];
 
-  const mockGetTagList = jest.fn(() => mockTags);
-  const mockParseSearchQuery = jest.fn(
+  const mockGetTagList = vi.fn(() => mockTags);
+  const mockParseSearchQuery = vi.fn(
     (query: string): ParsedQuery => ({
       searchQuery: query,
       tagIds: undefined,
@@ -45,7 +47,7 @@ describe('ContentManagementTagsContextProvider', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('context provision', () => {
@@ -141,7 +143,7 @@ describe('ContentManagementTagsContextProvider', () => {
 
   describe('edge cases', () => {
     it('handles getTagList returning empty array', () => {
-      const emptyGetTagList = jest.fn(() => []);
+      const emptyGetTagList = vi.fn(() => []);
       const Wrapper = ({ children }: { children: React.ReactNode }) => (
         <ContentManagementTagsProvider
           getTagList={emptyGetTagList}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
@@ -26,12 +29,12 @@ import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_mana
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../hooks/use_paginated_alerts');
-jest.mock('../../../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../../../common/hooks/is_in_security_app');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../hooks/use_paginated_alerts');
+vi.mock('../../../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../../../common/hooks/is_in_security_app');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
-const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
+const useAlertsPrivilegesMock = useAlertsPrivileges as Mock;
 
 const attackIds = ['attack-id-1'];
 const scopeId = 'scopeId';
@@ -68,8 +71,8 @@ describe('<RelatedAttacks />', () => {
     useAlertsPrivilegesMock.mockReturnValue({
       hasAlertsRead: true,
     });
-    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
-    jest.mocked(useDataView).mockReturnValue({
+    vi.mocked(useIsInSecurityApp).mockReturnValue(true);
+    vi.mocked(useDataView).mockReturnValue({
       dataView: getMockDataViewWithMatchedIndices([
         '.alerts-security.attack.discovery.alerts-default',
       ]),
@@ -78,8 +81,8 @@ describe('<RelatedAttacks />', () => {
   });
 
   it('should render related attacks correctly', () => {
-    const mockOnShowAttack = jest.fn();
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    const mockOnShowAttack = vi.fn();
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -124,7 +127,7 @@ describe('<RelatedAttacks />', () => {
   });
 
   it('should not render preview button when onShowAttack is not provided', () => {
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -145,7 +148,7 @@ describe('<RelatedAttacks />', () => {
   });
 
   it('should render no data message', () => {
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -159,7 +162,7 @@ describe('<RelatedAttacks />', () => {
     useAlertsPrivilegesMock.mockReturnValue({
       hasAlertsRead: false,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [

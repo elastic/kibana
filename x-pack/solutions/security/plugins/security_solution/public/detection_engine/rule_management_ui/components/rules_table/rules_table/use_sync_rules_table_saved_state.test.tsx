@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -27,12 +30,15 @@ import { RuleSource } from './rules_table_saved_state';
 import { useSyncRulesTableSavedState } from './use_sync_rules_table_saved_state';
 import { omit } from 'lodash';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/utils/global_query_string/helpers', () => ({
-  useReplaceUrlParams: jest.fn(),
-  encodeRisonUrlState: jest.fn().mockImplementation((value) => value),
-}));
-jest.mock('./rules_table_context');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/utils/global_query_string/helpers', () => {
+      const mocked = {
+      useReplaceUrlParams: vi.fn(),
+      encodeRisonUrlState: vi.fn().mockImplementation((value) => value),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./rules_table_context');
 
 describe('useSyncRulesTableSavedState', () => {
   const defaultState = {
@@ -51,7 +57,7 @@ describe('useSyncRulesTableSavedState', () => {
   ) => {
     const rulesTableContext = useRulesTableContextMock.create();
     rulesTableContext.state = { ...rulesTableContext.state, ...rulesTableState };
-    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+    (useRulesTableContext as Mock).mockReturnValue(rulesTableContext);
 
     renderHook(() => useSyncRulesTableSavedState());
 
@@ -66,30 +72,30 @@ describe('useSyncRulesTableSavedState', () => {
   ) => {
     const rulesTableContext = useRulesTableContextMock.create();
     rulesTableContext.state = { ...rulesTableContext.state, ...rulesTableState };
-    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+    (useRulesTableContext as Mock).mockReturnValue(rulesTableContext);
 
     renderHook(() => useSyncRulesTableSavedState());
 
     expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expectedStorageState);
   };
 
-  let replaceUrlParams: jest.Mock;
-  let setStorage: jest.Mock;
-  let removeStorage: jest.Mock;
+  let replaceUrlParams: Mock;
+  let setStorage: Mock;
+  let removeStorage: Mock;
 
   beforeEach(() => {
-    replaceUrlParams = jest.fn();
-    setStorage = jest.fn();
-    removeStorage = jest.fn();
+    replaceUrlParams = vi.fn();
+    setStorage = vi.fn();
+    removeStorage = vi.fn();
 
-    (useReplaceUrlParams as jest.Mock).mockReturnValue(replaceUrlParams);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useReplaceUrlParams as Mock).mockReturnValue(replaceUrlParams);
+    (useKibana as Mock).mockReturnValue({
       services: { sessionStorage: { set: setStorage, remove: removeStorage } },
     });
   });
 
   it('clears the default state when there is nothing to sync', () => {
-    (useRulesTableContext as jest.Mock).mockReturnValue({ state: defaultState });
+    (useRulesTableContext as Mock).mockReturnValue({ state: defaultState });
 
     renderHook(() => useSyncRulesTableSavedState());
 
@@ -131,7 +137,7 @@ describe('useSyncRulesTableSavedState', () => {
 
     const rulesTableContext = useRulesTableContextMock.create();
     rulesTableContext.state = { ...rulesTableContext.state, ...state };
-    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+    (useRulesTableContext as Mock).mockReturnValue(rulesTableContext);
 
     renderHook(() => useSyncRulesTableSavedState());
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { StepSelectionValues } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { StepPropertyItem } from '@kbn/workflows-yaml';
@@ -20,52 +23,54 @@ import { stepSchemas } from '../../../../common/step_schemas';
 import * as stepPropertySelectionCache from '../../../shared/lib/step_property_selection_cache';
 
 // Mock the dependencies
-jest.mock('../../../../common/step_schemas', () => ({
-  stepSchemas: {
-    getAllConnectorsMapCache: jest.fn(),
-  },
-}));
+vi.mock('../../../../common/step_schemas', () => {
+      const mocked = {
+      stepSchemas: {
+        getAllConnectorsMapCache: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => ({
-  getSchemaAtPath: jest.fn(),
-}));
+vi.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => {
+      const mocked = {
+      getSchemaAtPath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/lib/step_property_selection_cache', () => {
-  const actual = jest.requireActual<
-    typeof import('../../../shared/lib/step_property_selection_cache')
-  >('../../../shared/lib/step_property_selection_cache');
+vi.mock('../../../shared/lib/step_property_selection_cache', async () => {
+  const actual = (await vi.importActual<typeof import('../../../shared/lib/step_property_selection_cache')>('../../../shared/lib/step_property_selection_cache'));
   return {
     ...actual,
-    getCachedSearchOption: jest.fn(actual.getCachedSearchOption),
+    getCachedSearchOption: vi.fn(actual.getCachedSearchOption),
   };
 });
 
 const EMPTY_VALUES: StepSelectionValues = { config: {}, input: {} };
 
-const mockGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache as jest.MockedFunction<
+const mockGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache as MockedFunction<
   typeof stepSchemas.getAllConnectorsMapCache
 >;
-const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
+const mockGetSchemaAtPath = getSchemaAtPath as MockedFunction<typeof getSchemaAtPath>;
 const mockGetCachedSearchOption =
-  stepPropertySelectionCache.getCachedSearchOption as jest.MockedFunction<
+  stepPropertySelectionCache.getCachedSearchOption as MockedFunction<
     typeof stepPropertySelectionCache.getCachedSearchOption
   >;
 
 describe('validateStepProperties', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     clearStepPropertyValidationOutcomeCache();
-    jest.clearAllMocks();
-    const actual = jest.requireActual<
-      typeof import('../../../shared/lib/step_property_selection_cache')
-    >('../../../shared/lib/step_property_selection_cache');
+    vi.clearAllMocks();
+    const actual = (await vi.importActual<typeof import('../../../shared/lib/step_property_selection_cache')>('../../../shared/lib/step_property_selection_cache'));
     mockGetCachedSearchOption.mockImplementation(actual.getCachedSearchOption);
   });
 
   it('should return error when resolve returns null and getDetails returns error message', async () => {
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn().mockResolvedValue(null),
-      getDetails: jest.fn().mockResolvedValue({
+      search: vi.fn(),
+      resolve: vi.fn().mockResolvedValue(null),
+      getDetails: vi.fn().mockResolvedValue({
         message: 'Error',
         links: [{ text: 'Link', path: '/link' }],
       }),
@@ -139,9 +144,9 @@ describe('validateStepProperties', () => {
       description: 'Description 2',
     };
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn().mockResolvedValue(resolvedOption),
-      getDetails: jest.fn().mockResolvedValue({
+      search: vi.fn(),
+      resolve: vi.fn().mockResolvedValue(resolvedOption),
+      getDetails: vi.fn().mockResolvedValue({
         message: 'Valid',
       }),
     };
@@ -215,9 +220,9 @@ describe('validateStepProperties', () => {
       description: 'Cached Description',
     };
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn().mockResolvedValue({
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn().mockResolvedValue({
         message: 'Valid',
       }),
     };
@@ -281,9 +286,9 @@ describe('validateStepProperties', () => {
 
   it('should skip validation when schema validation fails', async () => {
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
 
     const mockConnector = {
@@ -327,9 +332,9 @@ describe('validateStepProperties', () => {
 
   it('should skip selection validation for Liquid template values and not call resolve or getDetails', async () => {
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
 
     const mockConnector = {
@@ -373,9 +378,9 @@ describe('validateStepProperties', () => {
 
   it('should skip validation when connector is not found', async () => {
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
 
     mockGetAllConnectorsMapCache.mockReturnValue(new Map());
@@ -414,21 +419,21 @@ describe('validateStepProperties', () => {
 
   it('should handle multiple custom properties with different outcomes', async () => {
     const selectionHandler1 = {
-      search: jest.fn(),
-      resolve: jest.fn().mockResolvedValue(null),
-      getDetails: jest.fn().mockResolvedValue({
+      search: vi.fn(),
+      resolve: vi.fn().mockResolvedValue(null),
+      getDetails: vi.fn().mockResolvedValue({
         message: 'Error',
         links: [{ text: 'Link', path: '/link' }],
       }),
     };
     const selectionHandler2 = {
-      search: jest.fn(),
-      resolve: jest.fn().mockResolvedValue({
+      search: vi.fn(),
+      resolve: vi.fn().mockResolvedValue({
         value: '2',
         label: 'Option 2',
         description: 'Description 2',
       }),
-      getDetails: jest.fn().mockResolvedValue({
+      getDetails: vi.fn().mockResolvedValue({
         message: 'Valid',
       }),
     };
@@ -519,9 +524,9 @@ describe('validateStepProperties', () => {
 
   it('should skip resolve and getDetails on a second validation when semantic inputs are unchanged', async () => {
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn().mockResolvedValue(null),
-      getDetails: jest.fn().mockResolvedValue({
+      search: vi.fn(),
+      resolve: vi.fn().mockResolvedValue(null),
+      getDetails: vi.fn().mockResolvedValue({
         message: 'Unresolved',
       }),
     };

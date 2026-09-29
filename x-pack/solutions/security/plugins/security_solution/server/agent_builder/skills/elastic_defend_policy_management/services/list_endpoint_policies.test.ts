@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -42,8 +44,8 @@ const createReadAccess = async () => {
     })
   );
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+  const getStartServices = vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
   ]) as unknown as StartServicesAccessor;
   const access = await createPolicyAccessContext(
     endpointAppContextService,
@@ -52,7 +54,7 @@ const createReadAccess = async () => {
     getStartServices
   );
   const soClient = access.fleet.getSoClient();
-  const listPolicies = jest.spyOn(access.fleet.packagePolicy, 'list');
+  const listPolicies = vi.spyOn(access.fleet.packagePolicy, 'list');
 
   return {
     access,
@@ -70,7 +72,7 @@ const createPage = (items: PackagePolicy[], total: number, page: number, perPage
 
 describe('listEndpointPolicies', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns has_more false when Fleet total equals the requested page', async () => {
@@ -172,7 +174,7 @@ describe('listEndpointPolicies', () => {
   it('propagates unexpected conversion failures instead of counting them invalid', async () => {
     const { access, listPolicies } = await createReadAccess();
     const boom = new RangeError('unexpected conversion failure');
-    const spy = jest
+    const spy = vi
       .spyOn(normalizedEndpointPolicyModule, 'normalizeEndpointPolicy')
       .mockImplementation(() => {
         throw boom;

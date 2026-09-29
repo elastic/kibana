@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-jest.mock('../logic/search/get_gap_filtered_rule_ids');
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
+vi.mock('../logic/search/get_gap_filtered_rule_ids');
 
 import { partition } from 'lodash/fp';
 import { Readable } from 'stream';
@@ -47,7 +50,7 @@ import { getGapFilteredRuleIds } from '../logic/search/get_gap_filtered_rule_ids
 
 type PromiseFromStreams = RuleToImport | Error;
 
-const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as jest.MockedFunction<
+const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as MockedFunction<
   typeof getGapFilteredRuleIds
 >;
 
@@ -68,8 +71,8 @@ const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchema
 describe('utils', () => {
   const { clients } = requestContextMock.createTools();
   const actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-  } as unknown as jest.Mocked<ActionsClient>;
+    isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as Mocked<ActionsClient>;
 
   describe('internalRuleToAPIResponse', () => {
     test('should work with a full data set', () => {
@@ -328,7 +331,7 @@ describe('utils', () => {
 
   describe('resolveGapPreFilter', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('returns rule ids and empty warnings when results are not truncated', async () => {

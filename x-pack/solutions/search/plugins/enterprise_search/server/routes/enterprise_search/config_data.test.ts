@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
@@ -14,7 +16,7 @@ describe('Enterprise Search Config Data API', () => {
   let mockRouter: MockRouter;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     mockDependencies.getStartServices.mockResolvedValue([{}, {}]);
   });

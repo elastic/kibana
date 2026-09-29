@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,15 +17,21 @@ import { useLocation } from 'react-router-dom';
 import { reportAwsOnboardingDeployClicked } from '@kbn/fleet-plugin/common';
 import { ElbLogsPanel } from './elb_logs_panel';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(() => ({ state: null })),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(() => ({ state: null })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/fleet-plugin/common', () => ({
-  ...jest.requireActual('@kbn/fleet-plugin/common'),
-  reportAwsOnboardingDeployClicked: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/common', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/fleet-plugin/common')),
+      reportAwsOnboardingDeployClicked: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockFlowData = {
   onboardingId: 'test-id',
@@ -31,7 +40,7 @@ const mockFlowData = {
 };
 
 const createMockHttp = (flowData = mockFlowData): Pick<HttpStart, 'post'> => ({
-  post: jest.fn().mockResolvedValue(flowData) as HttpStart['post'],
+  post: vi.fn().mockResolvedValue(flowData) as HttpStart['post'],
 });
 
 describe('ElbLogsPanel', () => {
@@ -149,7 +158,7 @@ describe('ElbLogsPanel', () => {
 
   it('shows an error callout and retry button when the API call fails', async () => {
     const http: Pick<HttpStart, 'post'> = {
-      post: jest.fn().mockRejectedValue(new Error('Network error')) as HttpStart['post'],
+      post: vi.fn().mockRejectedValue(new Error('Network error')) as HttpStart['post'],
     };
     render(<ElbLogsPanel http={http} />);
 
@@ -163,15 +172,15 @@ describe('ElbLogsPanel', () => {
 });
 
 describe('ElbLogsPanel — CloudFormation path telemetry', () => {
-  const mockAnalytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+  const mockAnalytics = { reportEvent: vi.fn() } as unknown as AnalyticsServiceStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useLocation as jest.Mock).mockReturnValue({ state: null });
+    vi.clearAllMocks();
+    (useLocation as Mock).mockReturnValue({ state: null });
   });
 
   it('emits deploy_clicked (cloudformation path) when launch button is clicked on quickstart entry', async () => {
-    (useLocation as jest.Mock).mockReturnValue({ state: { telemetrySource: 'aws_quickstart' } });
+    (useLocation as Mock).mockReturnValue({ state: { telemetrySource: 'aws_quickstart' } });
     const http = createMockHttp();
     render(<ElbLogsPanel http={http} analytics={mockAnalytics} />);
 

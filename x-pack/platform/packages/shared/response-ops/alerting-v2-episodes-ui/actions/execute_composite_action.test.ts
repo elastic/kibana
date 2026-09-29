@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { AlertEpisode } from '../queries/episodes_query';
@@ -36,11 +38,11 @@ const makeDeps = () => ({
 });
 
 describe('executeCompositeAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('calls nativeExecute only for native episodes when no extension is provided', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn().mockResolvedValue({ affected_count: 2, errors: [] });
+    const nativeExecute = vi.fn().mockResolvedValue({ affected_count: 2, errors: [] });
 
     await executeCompositeAction({
       episodes: [makeEpisode('e1'), makeEpisode('e2'), makeSourceEpisode('s1')],
@@ -63,8 +65,8 @@ describe('executeCompositeAction', () => {
 
   it('calls extension.execute for source episodes when extension is provided', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn().mockResolvedValue({ affected_count: 1, errors: [] });
-    const extensionExecute = jest.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
+    const nativeExecute = vi.fn().mockResolvedValue({ affected_count: 1, errors: [] });
+    const extensionExecute = vi.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
     const extension: EpisodeActionExtension = {
       actionId: 'test',
       isCompatible: () => true,
@@ -89,8 +91,8 @@ describe('executeCompositeAction', () => {
 
   it('filters source episodes by extension.isCompatible', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn().mockResolvedValue(null);
-    const extensionExecute = jest.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
+    const nativeExecute = vi.fn().mockResolvedValue(null);
+    const extensionExecute = vi.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
     const extension: EpisodeActionExtension = {
       actionId: 'test',
       isCompatible: (ep) => ep['episode.id'] === 's2',
@@ -114,7 +116,7 @@ describe('executeCompositeAction', () => {
 
   it('shows success toast when all succeed', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn().mockResolvedValue({ affected_count: 2, errors: [] });
+    const nativeExecute = vi.fn().mockResolvedValue({ affected_count: 2, errors: [] });
 
     await executeCompositeAction({
       episodes: [makeEpisode('e1'), makeEpisode('e2')],
@@ -129,7 +131,7 @@ describe('executeCompositeAction', () => {
 
   it('shows warning toast on partial failure from BulkResponse errors', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest
+    const nativeExecute = vi
       .fn()
       .mockResolvedValue({ affected_count: 1, errors: [{ message: 'err' }] });
 
@@ -146,7 +148,7 @@ describe('executeCompositeAction', () => {
 
   it('shows no toast when there are no episodes to process', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn();
+    const nativeExecute = vi.fn();
 
     await executeCompositeAction({
       episodes: [],
@@ -160,8 +162,8 @@ describe('executeCompositeAction', () => {
 
   it('forwards extensionContext to extension.execute', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn().mockResolvedValue(null);
-    const extensionExecute = jest.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
+    const nativeExecute = vi.fn().mockResolvedValue(null);
+    const extensionExecute = vi.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
     const extension: EpisodeActionExtension<{ tags: string[] }> = {
       actionId: 'test',
       isCompatible: () => true,
@@ -183,8 +185,8 @@ describe('executeCompositeAction', () => {
 
   it('combines native and source results in success toast', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn().mockResolvedValue({ affected_count: 2, errors: [] });
-    const extensionExecute = jest.fn().mockResolvedValue({ succeeded: 3, failed: 0 });
+    const nativeExecute = vi.fn().mockResolvedValue({ affected_count: 2, errors: [] });
+    const extensionExecute = vi.fn().mockResolvedValue({ succeeded: 3, failed: 0 });
     const extension: EpisodeActionExtension = {
       actionId: 'test',
       isCompatible: () => true,
@@ -205,8 +207,8 @@ describe('executeCompositeAction', () => {
 
   it('shows warning toast when one side succeeds and the other rejects', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn().mockResolvedValue({ affected_count: 1, errors: [] });
-    const extensionExecute = jest.fn().mockRejectedValue(new Error('source failed'));
+    const nativeExecute = vi.fn().mockResolvedValue({ affected_count: 1, errors: [] });
+    const extensionExecute = vi.fn().mockRejectedValue(new Error('source failed'));
     const extension: EpisodeActionExtension = {
       actionId: 'test',
       isCompatible: () => true,
@@ -227,7 +229,7 @@ describe('executeCompositeAction', () => {
 
   it('throws when all operations fail', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest.fn().mockRejectedValue(new Error('native failed'));
+    const nativeExecute = vi.fn().mockRejectedValue(new Error('native failed'));
 
     await expect(
       executeCompositeAction({

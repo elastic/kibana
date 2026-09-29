@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
@@ -26,17 +29,17 @@ import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 
-const mockSave = jest.fn();
+const mockSave = vi.fn();
 
 const getMockEventAnnotationService = (savedId?: string) =>
   ({
-    createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
-    groupExistsWithTitle: jest.fn(() => Promise.resolve(false)),
-    updateAnnotationGroup: jest.fn(),
-    loadAnnotationGroup: jest.fn(),
-    toExpression: jest.fn(),
-    toFetchExpression: jest.fn(),
-    renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
+    createAnnotationGroup: vi.fn(() => Promise.resolve({ id: savedId })),
+    groupExistsWithTitle: vi.fn(() => Promise.resolve(false)),
+    updateAnnotationGroup: vi.fn(),
+    loadAnnotationGroup: vi.fn(),
+    toExpression: vi.fn(),
+    toFetchExpression: vi.fn(),
+    renderEventAnnotationGroupSavedObjectFinder: vi.fn(),
   } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType);
 
 describe('annotation group save action', () => {
@@ -46,7 +49,7 @@ describe('annotation group save action', () => {
     };
 
     it('reports new saved object attributes', async () => {
-      const onSaveMock = jest.fn();
+      const onSaveMock = vi.fn();
       const savedObjectsTagging = taggingApiMock.create();
       const wrapper = shallowWithIntl(
         <SaveModal
@@ -163,14 +166,14 @@ describe('annotation group save action', () => {
           layers: [{ layerId } as XYAnnotationLayerConfig],
         } as XYVisualizationState,
         layer: byValueLayer,
-        registerLibraryAnnotationGroup: jest.fn(),
-        setState: jest.fn(),
+        registerLibraryAnnotationGroup: vi.fn(),
+        setState: vi.fn(),
         eventAnnotationService: getMockEventAnnotationService(savedId),
         toasts: toastsServiceMock.createStartContract(),
         modalOnSaveProps: {
           newTitle: 'my title',
           newDescription: 'my description',
-          closeModal: jest.fn(),
+          closeModal: vi.fn(),
           newTags: ['my-tag'],
           newCopyOnSave: false,
         },
@@ -208,7 +211,7 @@ describe('annotation group save action', () => {
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
 
-      expect((props.setState as jest.Mock).mock.calls).toMatchSnapshot();
+      expect((props.setState as Mock).mock.calls).toMatchSnapshot();
 
       expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
     });
@@ -218,7 +221,7 @@ describe('annotation group save action', () => {
         id: 'some-adhoc-data-view-id',
       } as DataViewSpec;
 
-      (props.dataViews.get as jest.Mock).mockResolvedValueOnce({
+      (props.dataViews.get as Mock).mockResolvedValueOnce({
         isPersisted: () => false, // ad-hoc
         toSpec: () => dataViewSpec,
       } as Partial<DataView>);
@@ -246,13 +249,13 @@ describe('annotation group save action', () => {
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
 
-      expect((props.setState as jest.Mock).mock.calls).toMatchSnapshot();
+      expect((props.setState as Mock).mock.calls).toMatchSnapshot();
 
       expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
     });
 
     test('failed initial save', async () => {
-      (props.eventAnnotationService.createAnnotationGroup as jest.Mock).mockRejectedValue(
+      (props.eventAnnotationService.createAnnotationGroup as Mock).mockRejectedValue(
         new Error('oh noooooo')
       );
 
@@ -310,7 +313,7 @@ describe('annotation group save action', () => {
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
 
-      expect((props.setState as jest.Mock).mock.calls).toMatchSnapshot();
+      expect((props.setState as Mock).mock.calls).toMatchSnapshot();
 
       expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
     });
@@ -357,7 +360,7 @@ describe('annotation group save action', () => {
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
 
-      expect((props.setState as jest.Mock).mock.calls).toMatchSnapshot();
+      expect((props.setState as Mock).mock.calls).toMatchSnapshot();
 
       expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
     });

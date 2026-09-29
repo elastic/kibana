@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -14,11 +16,11 @@ import { EditObservableModal, type EditObservableModalProps } from './edit_obser
 import { mockCase } from '../../containers/mock';
 import { patchObservable } from '../../containers/api';
 
-jest.mock('../../containers/api');
+vi.mock('../../containers/api');
 
 describe('EditObservableModal', () => {
   const props: EditObservableModalProps = {
-    onCloseModal: jest.fn(),
+    onCloseModal: vi.fn(),
     caseData: mockCase,
     observable: {
       value: 'test',
@@ -31,7 +33,7 @@ describe('EditObservableModal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

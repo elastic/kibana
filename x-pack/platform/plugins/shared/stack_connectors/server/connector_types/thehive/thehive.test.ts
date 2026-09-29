@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TheHiveConnector } from './thehive';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -37,24 +40,24 @@ describe('TheHiveConnector', () => {
     PushToServiceIncidentSchema
   );
 
-  let mockRequest: jest.Mock;
-  let mockError: jest.Mock;
+  let mockRequest: Mock;
+  let mockError: Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockTime);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockTime);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    mockError = jest.fn().mockImplementation(() => {
+    mockError = vi.fn().mockImplementation(() => {
       throw new Error('API Error');
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
@@ -117,10 +120,10 @@ describe('TheHiveConnector', () => {
     };
 
     beforeEach(() => {
-      mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const incident: Incident = {
@@ -171,10 +174,10 @@ describe('TheHiveConnector', () => {
     };
 
     beforeEach(() => {
-      mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const incident: Incident = {
@@ -236,10 +239,10 @@ describe('TheHiveConnector', () => {
     };
 
     beforeEach(() => {
-      mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('TheHive API call is successful with correct parameters', async () => {
@@ -335,10 +338,10 @@ describe('TheHiveConnector', () => {
     };
 
     beforeEach(() => {
-      mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('TheHive API call is successful with correct parameters', async () => {
@@ -400,10 +403,10 @@ describe('TheHiveConnector', () => {
     };
 
     beforeEach(() => {
-      mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const alert: ExecutorSubActionCreateAlertParams = {

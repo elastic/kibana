@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, within } from '@testing-library/react';
 import React, { type ComponentProps } from 'react';
 
@@ -27,10 +29,10 @@ const defaultProps: Pick<
     name: 'Odyssey',
     disabledFeatures: [],
   },
-  onClickBulkRemove: jest.fn(),
-  onClickRowEditAction: jest.fn(),
-  onClickAssignNewRole: jest.fn(),
-  onClickRemoveRoleConfirm: jest.fn(),
+  onClickBulkRemove: vi.fn(),
+  onClickRowEditAction: vi.fn(),
+  onClickAssignNewRole: vi.fn(),
+  onClickRemoveRoleConfirm: vi.fn(),
 };
 
 const renderTestComponent = (

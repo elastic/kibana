@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -17,12 +19,12 @@ const DISCOVER_APP_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';
 const DISCOVER_HREF = '/app/discover#/';
 
 function createDiscoverLocatorMock() {
-  const getRedirectUrl = jest.fn(
+  const getRedirectUrl = vi.fn(
     (params: { query?: { esql?: string }; timeRange?: unknown; breakdownField?: string }) => {
       return params?.query?.esql ? DISCOVER_HREF : '#';
     }
   );
-  const navigate = jest.fn();
+  const navigate = vi.fn();
   return { getRedirectUrl, navigate };
 }
 
@@ -60,7 +62,7 @@ const defaultProps = {
 
 describe('AnalyzeMetricButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the compare metrics button', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { VIEW_MODE } from '../../../common/constants';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { MutableRefObject } from 'react';
@@ -24,16 +26,16 @@ describe('Document view mode toggle component', () => {
     showFieldStatistics = true,
     viewMode = VIEW_MODE.DOCUMENT_LEVEL,
     isEsqlMode = false,
-    setDiscoverViewMode = jest.fn(),
+    setDiscoverViewMode = vi.fn(),
     useDataViewWithTextFields = true,
     focusOnMountRef = { current: false },
   } = {}) => {
     const services = createDiscoverServicesMock();
 
-    services.uiSettings.get = jest.fn().mockReturnValue(showFieldStatistics);
-    services.aiops!.getPatternAnalysisAvailable = jest
+    services.uiSettings.get = vi.fn().mockReturnValue(showFieldStatistics);
+    services.aiops!.getPatternAnalysisAvailable = vi
       .fn()
-      .mockResolvedValue(jest.fn(() => useDataViewWithTextFields));
+      .mockResolvedValue(vi.fn(() => useDataViewWithTextFields));
 
     const dataView = buildDataViewMock({ name: 'logs-*' });
 
@@ -116,7 +118,7 @@ describe('Document view mode toggle component', () => {
   });
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when the Documents option is clicked', async () => {
-    const setDiscoverViewMode = jest.fn();
+    const setDiscoverViewMode = vi.fn();
 
     await renderComponent({ setDiscoverViewMode, viewMode: VIEW_MODE.PATTERN_LEVEL });
     openSelector();
@@ -128,7 +130,7 @@ describe('Document view mode toggle component', () => {
   });
 
   it('should set the view mode to VIEW_MODE.PATTERN_LEVEL when the Patterns option is clicked', async () => {
-    const setDiscoverViewMode = jest.fn();
+    const setDiscoverViewMode = vi.fn();
 
     await renderComponent({ setDiscoverViewMode });
     openSelector();
@@ -140,7 +142,7 @@ describe('Document view mode toggle component', () => {
   });
 
   it('should set the view mode to VIEW_MODE.AGGREGATED_LEVEL when the Field statistics option is clicked', async () => {
-    const setDiscoverViewMode = jest.fn();
+    const setDiscoverViewMode = vi.fn();
 
     await renderComponent({ setDiscoverViewMode });
     openSelector();
@@ -216,7 +218,7 @@ describe('Document view mode toggle component', () => {
   });
 
   it('should switch to document and hide pattern option when there are no text fields', async () => {
-    const setDiscoverViewMode = jest.fn();
+    const setDiscoverViewMode = vi.fn();
 
     await renderComponent({
       viewMode: VIEW_MODE.PATTERN_LEVEL,
@@ -237,7 +239,7 @@ describe('Document view mode toggle component', () => {
   it('should not show Pattern Analysis option when aiops service is unavailable (basic license)', async () => {
     const services = createDiscoverServicesMock();
 
-    services.uiSettings.get = jest.fn().mockReturnValue(true); // showFieldStatistics = true
+    services.uiSettings.get = vi.fn().mockReturnValue(true); // showFieldStatistics = true
     services.aiops = undefined; // Simulate basic license - aiops not available
 
     const dataView = buildDataViewMock({ name: 'logs-*' });
@@ -259,7 +261,7 @@ describe('Document view mode toggle component', () => {
         <DocumentViewModeToggle
           viewMode={VIEW_MODE.DOCUMENT_LEVEL}
           isEsqlMode={false}
-          setDiscoverViewMode={jest.fn()}
+          setDiscoverViewMode={vi.fn()}
           dataView={dataView}
           focusOnMountRef={{ current: false }}
         />

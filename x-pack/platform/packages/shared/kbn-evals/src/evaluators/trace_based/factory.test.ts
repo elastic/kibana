@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { createTraceBasedEvaluator, type TraceBasedEvaluatorConfig } from './factory';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -15,14 +18,14 @@ const evaluateWith = (evaluator: ReturnType<typeof createTraceBasedEvaluator>, t
   evaluator.evaluate({ input: {}, output: { traceId }, expected: {}, metadata: {} });
 
 describe('createTraceBasedEvaluator', () => {
-  let mockEsClient: jest.Mocked<EsClient>;
-  let mockLog: jest.Mocked<ToolingLog>;
+  let mockEsClient: Mocked<EsClient>;
+  let mockLog: Mocked<ToolingLog>;
   let mockConfig: TraceBasedEvaluatorConfig;
   let exhaustRetries: () => Promise<void>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    const mockQuery = jest.fn();
+    vi.useFakeTimers();
+    const mockQuery = vi.fn();
     mockEsClient = {
       esql: {
         query: mockQuery,
@@ -30,14 +33,14 @@ describe('createTraceBasedEvaluator', () => {
     } as any;
 
     mockLog = {
-      error: jest.fn(),
-      warning: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
     } as any;
 
     // Longer than the factory's full 62s backoff, so the retry budget is always drained.
-    exhaustRetries = () => jest.advanceTimersByTimeAsync(300_000);
+    exhaustRetries = () => vi.advanceTimersByTimeAsync(300_000);
 
     mockConfig = {
       name: 'Test Evaluator',
@@ -48,7 +51,7 @@ describe('createTraceBasedEvaluator', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should construct valid ES|QL query with sanitized trace ID', async () => {
@@ -58,14 +61,14 @@ describe('createTraceBasedEvaluator', () => {
       config: mockConfig,
     });
 
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [{ name: 'result', type: 'number' }],
       values: [[42]],
     } as any);
 
     await evaluateWith(evaluator, VALID_TRACE_ID);
 
-    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledWith({
+    expect(mockEsClient.esql.query as Mock).toHaveBeenCalledWith({
       query: `FROM traces-* | WHERE trace.id == "${VALID_TRACE_ID}"`,
     });
   });
@@ -77,7 +80,7 @@ describe('createTraceBasedEvaluator', () => {
       config: mockConfig,
     });
 
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [{ name: 'result', type: 'number' }],
       values: [[100]],
     } as any);
@@ -94,7 +97,7 @@ describe('createTraceBasedEvaluator', () => {
       config: { ...mockConfig, isNotReported: () => true },
     });
 
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [{ name: 'result', type: 'number' }],
       values: [[null]],
     } as any);
@@ -103,7 +106,7 @@ describe('createTraceBasedEvaluator', () => {
 
     expect(result.score).toBeNull();
     expect(result.label).toBe('unavailable');
-    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.esql.query as Mock).toHaveBeenCalledTimes(1);
     expect(mockLog.error).not.toHaveBeenCalled();
     expect(mockLog.warning).not.toHaveBeenCalled();
   });
@@ -115,7 +118,7 @@ describe('createTraceBasedEvaluator', () => {
       config: { ...mockConfig, isNotReported: () => false },
     });
 
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce({ columns: [{ name: 'result', type: 'number' }], values: [[null]] })
       .mockResolvedValueOnce({ columns: [{ name: 'result', type: 'number' }], values: [[7]] });
 
@@ -124,7 +127,7 @@ describe('createTraceBasedEvaluator', () => {
     const result = await promise;
 
     expect(result.score).toBe(7);
-    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(2);
+    expect(mockEsClient.esql.query as Mock).toHaveBeenCalledTimes(2);
   });
 
   it('should return error for invalid trace ID', async () => {
@@ -141,7 +144,7 @@ describe('createTraceBasedEvaluator', () => {
   });
 
   it('should retry when extractResult returns null (default validation)', async () => {
-    const query = mockEsClient.esql.query as jest.Mock;
+    const query = mockEsClient.esql.query as Mock;
     query
       .mockResolvedValueOnce({ columns: [{ name: 'r', type: 'number' }], values: [[null]] })
       .mockResolvedValueOnce({ columns: [{ name: 'r', type: 'number' }], values: [[42]] });
@@ -161,7 +164,7 @@ describe('createTraceBasedEvaluator', () => {
   });
 
   it('should retry when custom isResultValid returns false', async () => {
-    const query = mockEsClient.esql.query as jest.Mock;
+    const query = mockEsClient.esql.query as Mock;
     query
       .mockResolvedValueOnce({ columns: [{ name: 'r', type: 'number' }], values: [[0]] })
       .mockResolvedValueOnce({ columns: [{ name: 'r', type: 'number' }], values: [[150]] });
@@ -184,7 +187,7 @@ describe('createTraceBasedEvaluator', () => {
   });
 
   it('should return potentially_incomplete when retries exhaust with an incomplete result', async () => {
-    const query = mockEsClient.esql.query as jest.Mock;
+    const query = mockEsClient.esql.query as Mock;
     query.mockResolvedValue({
       columns: [{ name: 'r', type: 'number' }],
       values: [[null]],
@@ -206,7 +209,7 @@ describe('createTraceBasedEvaluator', () => {
   });
 
   it('should not log an error when a usable result is still returned', async () => {
-    const query = mockEsClient.esql.query as jest.Mock;
+    const query = mockEsClient.esql.query as Mock;
     query.mockResolvedValue({
       columns: [{ name: 'r', type: 'number' }],
       values: [[null]],
@@ -229,7 +232,7 @@ describe('createTraceBasedEvaluator', () => {
   });
 
   it('should return error when retries exhaust with no data at all', async () => {
-    const query = mockEsClient.esql.query as jest.Mock;
+    const query = mockEsClient.esql.query as Mock;
     query.mockResolvedValue({
       columns: [{ name: 'r', type: 'number' }],
       values: [],

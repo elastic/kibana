@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { createHash } from 'crypto';
 
 import { SPACES_EXTENSION_ID, type SavedObjectsClientContract } from '@kbn/core/server';
@@ -42,18 +45,18 @@ interface TokenSO {
   created_at: string;
 }
 
-jest.mock('../../spaces/helpers');
+vi.mock('../../spaces/helpers');
 
 describe('UninstallTokenService', () => {
   const now = new Date().toISOString();
   const aDayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
 
-  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
-  let esoClientMock: jest.Mocked<EncryptedSavedObjectsClient>;
+  let soClientMock: Mocked<SavedObjectsClientContract>;
+  let esoClientMock: Mocked<EncryptedSavedObjectsClient>;
   let mockContext: MockedFleetAppContext;
   let mockBuckets: any[] = [];
   let uninstallTokenService: UninstallTokenServiceInterface;
-  let getAgentPoliciesByIDsMock: jest.Mock;
+  let getAgentPoliciesByIDsMock: Mock;
 
   function getDefaultSO(encrypted: boolean = true): TokenSO {
     return encrypted
@@ -151,7 +154,7 @@ describe('UninstallTokenService', () => {
   }
 
   function mockFind(encrypted: boolean = true, savedObjects?: any[]) {
-    soClientMock.find = jest.fn().mockResolvedValue({
+    soClientMock.find = vi.fn().mockResolvedValue({
       saved_objects:
         savedObjects ?? getDefaultBuckets(encrypted).map((bucket) => ({ id: bucket.key })),
     });
@@ -160,8 +163,8 @@ describe('UninstallTokenService', () => {
   function mockCreatePointInTimeFinder(encrypted: boolean = true, buckets?: any[]) {
     mockBuckets = buckets ?? getDefaultBuckets(encrypted);
 
-    soClientMock.createPointInTimeFinder = jest.fn().mockReturnValue({
-      close: jest.fn(),
+    soClientMock.createPointInTimeFinder = vi.fn().mockReturnValue({
+      close: vi.fn(),
       find: function* asyncGenerator() {
         yield {
           aggregations: {
@@ -175,8 +178,8 @@ describe('UninstallTokenService', () => {
   }
 
   function mockCreatePointInTimeFinderAsInternalUser(savedObjects?: any[]) {
-    esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
-      close: jest.fn(),
+    esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockResolvedValue({
+      close: vi.fn(),
       find: function* asyncGenerator() {
         yield {
           saved_objects: savedObjects ?? mockBuckets.map(({ latest }) => latest.hits.hits[0]),
@@ -189,8 +192,8 @@ describe('UninstallTokenService', () => {
     const so = getDefaultSO(canEncrypt);
     const so2 = getDefaultSO2(canEncrypt);
 
-    agentPolicyService.fetchAllAgentPolicyIds = jest.fn().mockResolvedValue(
-      jest.fn(async function* () {
+    agentPolicyService.fetchAllAgentPolicyIds = vi.fn().mockResolvedValue(
+      vi.fn(async function* () {
         yield items || [so.attributes.policy_id, so2.attributes.policy_id];
       })()
     );
@@ -203,13 +206,13 @@ describe('UninstallTokenService', () => {
     });
     appContextService.start(mockContext);
     esoClientMock =
-      mockContext.encryptedSavedObjectsStart!.getClient() as jest.Mocked<EncryptedSavedObjectsClient>;
+      mockContext.encryptedSavedObjectsStart!.getClient() as Mocked<EncryptedSavedObjectsClient>;
     soClientMock = appContextService.getSavedObjects().getUnsafeInternalClient({
       excludedExtensions: [SPACES_EXTENSION_ID],
-    }) as jest.Mocked<SavedObjectsClientContract>;
-    agentPolicyService.deployPolicies = jest.fn();
+    }) as Mocked<SavedObjectsClientContract>;
+    agentPolicyService.deployPolicies = vi.fn();
 
-    getAgentPoliciesByIDsMock = jest.fn().mockResolvedValue([]);
+    getAgentPoliciesByIDsMock = vi.fn().mockResolvedValue([]);
     agentPolicyService.getByIds = getAgentPoliciesByIDsMock;
 
     if (scoppedInSpace) {
@@ -236,7 +239,7 @@ describe('UninstallTokenService', () => {
 
   afterEach(() => {
     mockBuckets = [];
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe.each([
@@ -249,7 +252,7 @@ describe('UninstallTokenService', () => {
 
     beforeEach(() => {
       setupMocks(canEncrypt);
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     });
 
     describe('get uninstall tokens', () => {
@@ -288,7 +291,7 @@ describe('UninstallTokenService', () => {
         });
 
         it('filter namespace with scopped service and space awareneness enabled', async () => {
-          jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+          vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
           setupMocks(canEncrypt, 'test');
 
           const so = getDefaultSO(canEncrypt);
@@ -324,7 +327,7 @@ describe('UninstallTokenService', () => {
         });
 
         it('do not filter namespace with scopped service and space awareneness disabled', async () => {
-          jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+          vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
           setupMocks(canEncrypt, 'test');
 
           const so = getDefaultSO(canEncrypt);
@@ -425,7 +428,7 @@ describe('UninstallTokenService', () => {
 
         it('filter by namespace if service is scopped and space awareness is enabled', async () => {
           setupMocks(canEncrypt, 'test');
-          jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+          vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
           const so = getDefaultSO(canEncrypt);
           const so2 = getDefaultSO2(canEncrypt);
           getAgentPoliciesByIDsMock.mockResolvedValue([
@@ -458,7 +461,7 @@ describe('UninstallTokenService', () => {
 
         it('do not filter by namespace if service is scopped and space awareness is disabled', async () => {
           setupMocks(canEncrypt, 'test');
-          jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+          vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
           const so = getDefaultSO(canEncrypt);
           const so2 = getDefaultSO2(canEncrypt);
           getAgentPoliciesByIDsMock.mockResolvedValue([
@@ -899,7 +902,7 @@ describe('UninstallTokenService', () => {
         });
 
         it('throws error in case of unknown error', async () => {
-          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = vi
             .fn()
             .mockRejectedValueOnce('some error');
 
@@ -949,7 +952,7 @@ describe('UninstallTokenService', () => {
           const responseError = new errors.ResponseError({});
           responseError.message = 'this is a too_many_nested_clauses error';
 
-          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = vi
             .fn()
             .mockRejectedValueOnce(responseError);
 
@@ -967,7 +970,7 @@ describe('UninstallTokenService', () => {
         });
 
         it('throws error in case of unknown error', async () => {
-          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = vi
             .fn()
             .mockRejectedValueOnce('some error');
 

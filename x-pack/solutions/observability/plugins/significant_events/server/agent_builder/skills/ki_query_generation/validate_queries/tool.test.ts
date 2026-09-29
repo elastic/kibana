@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import {
@@ -16,16 +19,19 @@ import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../ro
 import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
 
-jest.mock('@kbn/nightshift-ai', () => ({
-  ...jest.requireActual('@kbn/nightshift-ai'),
-  createQueryValidationContext: jest.fn(),
-  validateKIQueries: jest.fn(),
-}));
+vi.mock('@kbn/nightshift-ai', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/nightshift-ai')),
+      createQueryValidationContext: vi.fn(),
+      validateKIQueries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createQueryValidationContextMock = createQueryValidationContext as jest.MockedFunction<
+const createQueryValidationContextMock = createQueryValidationContext as MockedFunction<
   typeof createQueryValidationContext
 >;
-const validateKIQueriesMock = validateKIQueries as jest.MockedFunction<typeof validateKIQueries>;
+const validateKIQueriesMock = validateKIQueries as MockedFunction<typeof validateKIQueries>;
 
 describe('ki_queries_validate tool', () => {
   const logger = loggingSystemMock.createLogger();
@@ -39,21 +45,21 @@ describe('ki_queries_validate tool', () => {
       esql: 'FROM $.logs.test',
     },
   };
-  const streamDataEsClient = { esql: { query: jest.fn() } };
-  const getStream = jest.fn().mockResolvedValue(stream);
-  const getFeatures = jest.fn();
-  const getStreamToQueryLinksMap = jest.fn();
-  const getScopedClients = jest.fn(async () => {
+  const streamDataEsClient = { esql: { query: vi.fn() } };
+  const getStream = vi.fn().mockResolvedValue(stream);
+  const getFeatures = vi.fn();
+  const getStreamToQueryLinksMap = vi.fn();
+  const getScopedClients = vi.fn(async () => {
     return {
       streamsClient: { getStream },
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+      getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({
         getFeatures,
         getStreamToQueryLinksMap,
       }),
       streamDataEsClient,
       tuningConfig: { query_validation_timeout_ms: 12_000 },
     } as unknown as RouteHandlerScopedClients;
-  }) as unknown as jest.MockedFunction<GetScopedClients>;
+  }) as unknown as MockedFunction<GetScopedClients>;
 
   const candidate = {
     esql: 'FROM logs | WHERE message:"failure"',
@@ -77,7 +83,7 @@ describe('ki_queries_validate tool', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getFeatures.mockResolvedValue({
       hits: [{ id: 'feature-1', run_id: 'run-1', type: 'entity' }],
     });

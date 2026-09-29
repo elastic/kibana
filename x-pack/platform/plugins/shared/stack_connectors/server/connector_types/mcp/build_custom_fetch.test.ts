@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { Agent, ProxyAgent } from 'undici';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { buildCustomFetch } from './build_custom_fetch';
 
-jest.mock('undici', () => {
-  const MockAgent = jest.fn();
-  const MockProxyAgent = jest.fn();
+vi.mock('undici', () => {
+  const MockAgent = vi.fn();
+  const MockProxyAgent = vi.fn();
   return {
     Agent: MockAgent,
     ProxyAgent: MockProxyAgent,
@@ -26,7 +29,7 @@ describe('buildCustomFetch', () => {
   let configurationUtilities: ReturnType<typeof actionsConfigMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     configurationUtilities = actionsConfigMock.create();
   });
 
@@ -81,7 +84,7 @@ describe('buildCustomFetch', () => {
 
       buildCustomFetch(configurationUtilities, logger, targetUrl);
 
-      const connectOpts = (Agent as unknown as jest.Mock).mock.calls[0][0].connect;
+      const connectOpts = (Agent as unknown as Mock).mock.calls[0][0].connect;
       expect(connectOpts.rejectUnauthorized).toBe(true);
       expect(typeof connectOpts.checkServerIdentity).toBe('function');
       expect(connectOpts.checkServerIdentity()).toBeUndefined();
@@ -139,7 +142,7 @@ describe('buildCustomFetch', () => {
 
       buildCustomFetch(configurationUtilities, logger, targetUrl);
 
-      const connectOpts = (Agent as unknown as jest.Mock).mock.calls[0][0].connect;
+      const connectOpts = (Agent as unknown as Mock).mock.calls[0][0].connect;
       expect(connectOpts.rejectUnauthorized).toBe(true);
       expect(typeof connectOpts.checkServerIdentity).toBe('function');
     });
@@ -276,7 +279,7 @@ describe('buildCustomFetch', () => {
       const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       const mockResponse = new Response('ok');
-      const globalFetchSpy = jest.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse);
+      const globalFetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse);
 
       const result = await customFetch('https://mcp-server.example.com/v1/mcp', {
         method: 'POST',
@@ -299,7 +302,7 @@ describe('buildCustomFetch', () => {
   });
 
   describe('handles redirects', () => {
-    let globalFetchSpy: jest.SpyInstance;
+    let globalFetchSpy: MockInstance;
 
     const allowedHosts = ['mcp-server.example.com', 'allowed.example.com'];
 
@@ -312,7 +315,7 @@ describe('buildCustomFetch', () => {
     };
 
     beforeEach(() => {
-      globalFetchSpy = jest.spyOn(globalThis, 'fetch');
+      globalFetchSpy = vi.spyOn(globalThis, 'fetch');
 
       configurationUtilities.getSSLSettings.mockReturnValue({});
       configurationUtilities.getProxySettings.mockReturnValue(undefined);

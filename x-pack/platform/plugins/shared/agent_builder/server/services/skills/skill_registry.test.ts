@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -30,14 +33,14 @@ const createMockInternalSkillDefinition = (
 
 const createMockBuiltinProvider = (
   skills: InternalSkillDefinition[]
-): jest.Mocked<ReadonlySkillProvider> => {
+): Mocked<ReadonlySkillProvider> => {
   const skillsMap = new Map(skills.map((s) => [s.id, s]));
   return {
     id: 'builtin',
     readonly: true,
-    has: jest.fn(async (id: string) => skillsMap.has(id)),
-    get: jest.fn(async (id: string) => skillsMap.get(id)),
-    bulkGet: jest.fn(async (ids: string[]) => {
+    has: vi.fn(async (id: string) => skillsMap.has(id)),
+    get: vi.fn(async (id: string) => skillsMap.get(id)),
+    bulkGet: vi.fn(async (ids: string[]) => {
       const result = new Map<string, InternalSkillDefinition>();
       for (const id of ids) {
         const skill = skillsMap.get(id);
@@ -45,20 +48,20 @@ const createMockBuiltinProvider = (
       }
       return result;
     }),
-    list: jest.fn(async () => skills),
+    list: vi.fn(async () => skills),
   };
 };
 
 const createMockPersistedProvider = (
   skills: InternalSkillDefinition[]
-): jest.Mocked<WritableSkillProvider> => {
+): Mocked<WritableSkillProvider> => {
   const skillsMap = new Map(skills.map((s) => [s.id, s]));
   return {
     id: 'persisted',
     readonly: false,
-    has: jest.fn(async (id: string) => skillsMap.has(id)),
-    get: jest.fn(async (id: string) => skillsMap.get(id)),
-    bulkGet: jest.fn(async (ids: string[]) => {
+    has: vi.fn(async (id: string) => skillsMap.has(id)),
+    get: vi.fn(async (id: string) => skillsMap.get(id)),
+    bulkGet: vi.fn(async (ids: string[]) => {
       const result = new Map<string, InternalSkillDefinition>();
       for (const id of ids) {
         const skill = skillsMap.get(id);
@@ -66,8 +69,8 @@ const createMockPersistedProvider = (
       }
       return result;
     }),
-    list: jest.fn(async () => skills),
-    create: jest.fn(async (params) => ({
+    list: vi.fn(async () => skills),
+    create: vi.fn(async (params) => ({
       ...params,
       readonly: false,
       basePath: '/skills',
@@ -75,7 +78,7 @@ const createMockPersistedProvider = (
       referencedContentCount: params.referenced_content?.length ?? 0,
       experimental: false,
     })),
-    update: jest.fn(async (id, update) => ({
+    update: vi.fn(async (id, update) => ({
       id,
       name: update.name ?? 'original-name',
       description: update.description ?? 'original-description',
@@ -86,13 +89,13 @@ const createMockPersistedProvider = (
       referencedContentCount: 0,
       experimental: false,
     })),
-    delete: jest.fn(async (_skillId: string) => undefined),
+    delete: vi.fn(async (_skillId: string) => undefined),
   };
 };
 
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
-    has: jest.fn(async (id: string) => toolIds.includes(id)),
+    has: vi.fn(async (id: string) => toolIds.includes(id)),
   } as unknown as ToolRegistry);
 
 describe('createSkillRegistry', () => {
@@ -847,13 +850,13 @@ describe('createSkillRegistry', () => {
     const availableSkill = createMockInternalSkillDefinition({
       id: 'available-skill',
       name: 'available-skill',
-      isAvailable: jest.fn().mockResolvedValue({ status: 'available' }),
+      isAvailable: vi.fn().mockResolvedValue({ status: 'available' }),
     });
 
     const unavailableSkill = createMockInternalSkillDefinition({
       id: 'unavailable-skill',
       name: 'unavailable-skill',
-      isAvailable: jest
+      isAvailable: vi
         .fn()
         .mockResolvedValue({ status: 'unavailable', reason: 'not in this space' }),
     });

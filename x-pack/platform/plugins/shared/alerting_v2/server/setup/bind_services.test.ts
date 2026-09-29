@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Container, ContainerModule } from 'inversify';
 import { Logger } from '@kbn/core-di';
 import {
@@ -99,7 +101,7 @@ describe('bindServices - SpaceUiSettingsClientToken', () => {
     const request = httpServerMock.createKibanaRequest();
     const uiSettings = uiSettingsServiceMock.createStartContract();
     const scopedSoClient = savedObjectsClientMock.create();
-    const savedObjectsClientFactory = jest.fn().mockReturnValue(scopedSoClient);
+    const savedObjectsClientFactory = vi.fn().mockReturnValue(scopedSoClient);
 
     container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
     container.bind(Request).toConstantValue(request);

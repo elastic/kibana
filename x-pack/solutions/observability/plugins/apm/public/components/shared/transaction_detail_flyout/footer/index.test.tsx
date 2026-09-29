@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TransactionDetailFlyoutFooter } from '.';
 
-const mockUseTransactionDetailFlyoutLinks = jest.fn();
-jest.mock('../hooks/use_transaction_detail_flyout_links', () => ({
-  useTransactionDetailFlyoutLinks: () => mockUseTransactionDetailFlyoutLinks(),
-}));
+const mockUseTransactionDetailFlyoutLinks = vi.fn();
+vi.mock('../hooks/use_transaction_detail_flyout_links', () => {
+      const mocked = {
+      useTransactionDetailFlyoutLinks: () => mockUseTransactionDetailFlyoutLinks(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function makeLinks(
   overrides: {
@@ -51,7 +56,7 @@ function openActionsMenu() {
 
 describe('TransactionDetailFlyoutFooter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseTransactionDetailFlyoutLinks.mockReturnValue(makeLinks());
   });
 
@@ -154,7 +159,7 @@ describe('TransactionDetailFlyoutFooter', () => {
   });
 
   it('uses the Discover tab label and onClick when openInDiscoverTab is provided', () => {
-    const openInDiscoverTab = jest.fn();
+    const openInDiscoverTab = vi.fn();
     mockUseTransactionDetailFlyoutLinks.mockReturnValue(makeLinks({ openInDiscoverTab }));
 
     renderFooter();

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
@@ -78,9 +80,9 @@ describe('fetchIndexPattern', () => {
     mockedIndices = [];
 
     indexPatternsService = {
-      getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
-      get: jest.fn(() => Promise.resolve(mockedIndices[0])),
-      find: jest.fn((search: string, size: number) => {
+      getDefault: vi.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
+      get: vi.fn(() => Promise.resolve(mockedIndices[0])),
+      find: vi.fn((search: string, size: number) => {
         if (size !== 1) {
           // shouldn't request more than one data view since there is a significant performance penalty
           throw new Error('trying to fetch too many data views');

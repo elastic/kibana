@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { Logger, SavedObjectsFindResponse } from '@kbn/core/server';
 import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import {
@@ -19,7 +21,7 @@ describe('getDashboardsByTagsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
 
-  const logger = { error: jest.fn() } as unknown as Logger;
+  const logger = { error: vi.fn() } as unknown as Logger;
 
   const mockRequest = requestMock.create({
     method: 'post',
@@ -32,7 +34,7 @@ describe('getDashboardsByTagsRoute', () => {
   } as SavedObjectsFindResponse;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
@@ -40,8 +42,8 @@ describe('getDashboardsByTagsRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return dashboards with Security Solution tags', async () => {

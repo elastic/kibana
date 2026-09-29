@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
@@ -13,13 +16,19 @@ import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
 import { getPolicyResponseFailurePrompt } from './policy_response_failure';
 import { getDefendInsightsPrompt } from '.';
 
-jest.mock('./incompatible_antivirus', () => ({
-  getIncompatibleAntivirusPrompt: jest.fn(),
-}));
+vi.mock('./incompatible_antivirus', () => {
+      const mocked = {
+      getIncompatibleAntivirusPrompt: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./policy_response_failure', () => ({
-  getPolicyResponseFailurePrompt: jest.fn(),
-}));
+vi.mock('./policy_response_failure', () => {
+      const mocked = {
+      getPolicyResponseFailurePrompt: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getDefendInsightsPrompt', () => {
   const mockArgs = {
@@ -41,7 +50,7 @@ describe('getDefendInsightsPrompt', () => {
       eventsEndpointId: 'endpoint id',
       eventsValue: 'events value content',
     };
-    (getIncompatibleAntivirusPrompt as jest.Mock).mockResolvedValue(mockResponse);
+    (getIncompatibleAntivirusPrompt as Mock).mockResolvedValue(mockResponse);
 
     const result = await getDefendInsightsPrompt({
       type: DefendInsightType.enum.incompatible_antivirus,
@@ -63,7 +72,7 @@ describe('getDefendInsightsPrompt', () => {
       eventsEndpointId: 'endpoint id',
       eventsValue: 'events value content',
     };
-    (getPolicyResponseFailurePrompt as jest.Mock).mockResolvedValue(mockResponse);
+    (getPolicyResponseFailurePrompt as Mock).mockResolvedValue(mockResponse);
 
     const result = await getDefendInsightsPrompt({
       type: DefendInsightType.enum.policy_response_failure,

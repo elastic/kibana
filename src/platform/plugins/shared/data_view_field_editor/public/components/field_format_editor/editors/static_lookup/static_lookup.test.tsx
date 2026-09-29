@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { StaticLookupFormatEditorFormatParams } from './static_lookup';
 import React from 'react';
@@ -18,7 +20,7 @@ import { StaticLookupFormatEditor } from './static_lookup';
 const fieldType = 'string';
 
 const format = {
-  convertToReact: jest.fn(),
+  convertToReact: vi.fn(),
 };
 
 const formatParams = {
@@ -26,8 +28,8 @@ const formatParams = {
   unknownKeyValue: '',
 };
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const renderEditor = (params: StaticLookupFormatEditorFormatParams = formatParams) =>
   renderWithI18n(

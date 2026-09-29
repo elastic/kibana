@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import TeamsParamsFields from './teams_params';
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('TeamsParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -35,7 +37,7 @@ describe('TeamsParamsFields renders', () => {
       message: 'not the default message',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <TeamsParamsFields
         actionParams={actionParams}
@@ -68,7 +70,7 @@ describe('TeamsParamsFields renders', () => {
       message: 'not the default message',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <TeamsParamsFields
         actionParams={actionParams}

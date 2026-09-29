@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   agentBuilderDefaultAgentId,
   createAgentNotFoundError,
@@ -23,14 +26,14 @@ import { createConversationPublicClient } from './conversation_public_client';
 
 describe('createConversationPublicClient', () => {
   let internalClient: ConversationClientMock;
-  let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
+  let agentRegistry: Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
   let publicClient: ConversationPublicClient;
 
   beforeEach(() => {
     internalClient = createConversationClientMock();
     agentRegistry = {
-      get: jest.fn().mockResolvedValue({ id: agentBuilderDefaultAgentId }),
-      getIds: jest.fn().mockResolvedValue([agentBuilderDefaultAgentId]),
+      get: vi.fn().mockResolvedValue({ id: agentBuilderDefaultAgentId }),
+      getIds: vi.fn().mockResolvedValue([agentBuilderDefaultAgentId]),
     };
     publicClient = createConversationPublicClient({
       client: internalClient,

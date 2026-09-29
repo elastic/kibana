@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AnomaliesSection } from './anomalies_section';
 import type { GetAnomalyOverviewResponse } from '../../../../common/api/entity_analytics';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -25,11 +27,14 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('./anomalies_overview', () => ({
-  AnomaliesOverview: (props: Record<string, unknown>) => (
-    <div data-test-subj="mock-anomalies-overview" data-props={JSON.stringify(props)} />
-  ),
-}));
+vi.mock('./anomalies_overview', () => {
+      const mocked = {
+      AnomaliesOverview: (props: Record<string, unknown>) => (
+        <div data-test-subj="mock-anomalies-overview" data-props={JSON.stringify(props)} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeData = (
   overrides: Partial<GetAnomalyOverviewResponse> = {}
@@ -49,7 +54,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 
-const openDetailsPanel = jest.fn();
+const openDetailsPanel = vi.fn();
 
 const defaultProps = {
   data: makeData({ totalAnomaliesCount: 3 }),
@@ -59,7 +64,7 @@ const defaultProps = {
 
 describe('AnomaliesSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the accordion container', () => {

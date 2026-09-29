@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { range } from 'lodash';
 import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
 import type { replace as urlHelpersReplace } from '../../shared/links/url_helpers';
@@ -22,7 +25,7 @@ describe('maybeRedirectToAvailableSpanSample', () => {
   }));
 
   let defaultParams: Omit<Parameters<typeof maybeRedirectToAvailableSpanSample>[0], 'replace'> & {
-    replace: jest.MockedFunction<typeof urlHelpersReplace>;
+    replace: MockedFunction<typeof urlHelpersReplace>;
   };
 
   beforeEach(() => {
@@ -36,7 +39,7 @@ describe('maybeRedirectToAvailableSpanSample', () => {
         },
       } as History,
       spanFetchStatus: FETCH_STATUS.SUCCESS,
-      replace: jest.fn(),
+      replace: vi.fn(),
     };
   });
 

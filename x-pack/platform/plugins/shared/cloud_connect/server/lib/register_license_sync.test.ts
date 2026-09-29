@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Subject } from 'rxjs';
 import { registerCloudConnectLicenseSync } from './register_license_sync';
@@ -14,12 +17,15 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { SavedObjectsServiceStart, ElasticsearchClient } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
-jest.mock('@kbn/core/server', () => ({
-  SavedObjectsClient: jest.fn().mockImplementation(() => ({})),
-}));
+vi.mock('@kbn/core/server', () => {
+      const mocked = {
+      SavedObjectsClient: vi.fn().mockImplementation(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../services/storage');
-jest.mock('../services/cloud_connect_client');
+vi.mock('../services/storage');
+vi.mock('../services/cloud_connect_client');
 
 const flushPromises = async () => await new Promise((resolve) => setImmediate(resolve));
 
@@ -30,26 +36,26 @@ describe('registerCloudConnectLicenseSync', () => {
 
   beforeEach(() => {
     licensing.license$ = new Subject();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not call Cloud Connect when there is no stored api key', async () => {
     const logger = loggingSystemMock.createLogger();
 
-    const esInfo = jest.fn().mockResolvedValue({ version: { number: '8.0.0' } });
-    const getApiKey = jest.fn().mockResolvedValue(undefined);
-    (StorageService as jest.Mock).mockImplementation(() => ({ getApiKey }));
+    const esInfo = vi.fn().mockResolvedValue({ version: { number: '8.0.0' } });
+    const getApiKey = vi.fn().mockResolvedValue(undefined);
+    (StorageService as Mock).mockImplementation(() => ({ getApiKey }));
 
-    const updateCluster = jest.fn();
-    (CloudConnectClient as jest.Mock).mockImplementation(() => ({ updateCluster }));
+    const updateCluster = vi.fn();
+    (CloudConnectClient as Mock).mockImplementation(() => ({ updateCluster }));
 
     const sub = registerCloudConnectLicenseSync({
       savedObjects: {
-        createInternalRepository: jest.fn(() => ({})),
+        createInternalRepository: vi.fn(() => ({})),
       } as unknown as SavedObjectsServiceStart,
       elasticsearchClient: { info: esInfo } as unknown as ElasticsearchClient,
       encryptedSavedObjects: {
-        getClient: jest.fn(),
+        getClient: vi.fn(),
       } as unknown as EncryptedSavedObjectsPluginStart,
       licensing: licensing as unknown as LicensingPluginStart,
       logger,
@@ -69,25 +75,25 @@ describe('registerCloudConnectLicenseSync', () => {
   it('syncs license changes to Cloud Connect when api key is present', async () => {
     const logger = loggingSystemMock.createLogger();
 
-    const esInfo = jest.fn().mockResolvedValue({ version: { number: '8.0.0' } });
-    const getApiKey = jest.fn().mockResolvedValue({
+    const esInfo = vi.fn().mockResolvedValue({ version: { number: '8.0.0' } });
+    const getApiKey = vi.fn().mockResolvedValue({
       apiKey: 'k-123',
       clusterId: 'c-456',
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
     });
-    (StorageService as jest.Mock).mockImplementation(() => ({ getApiKey }));
+    (StorageService as Mock).mockImplementation(() => ({ getApiKey }));
 
-    const updateCluster = jest.fn().mockResolvedValue(undefined);
-    (CloudConnectClient as jest.Mock).mockImplementation(() => ({ updateCluster }));
+    const updateCluster = vi.fn().mockResolvedValue(undefined);
+    (CloudConnectClient as Mock).mockImplementation(() => ({ updateCluster }));
 
     const sub = registerCloudConnectLicenseSync({
       savedObjects: {
-        createInternalRepository: jest.fn(() => ({})),
+        createInternalRepository: vi.fn(() => ({})),
       } as unknown as SavedObjectsServiceStart,
       elasticsearchClient: { info: esInfo } as unknown as ElasticsearchClient,
       encryptedSavedObjects: {
-        getClient: jest.fn(),
+        getClient: vi.fn(),
       } as unknown as EncryptedSavedObjectsPluginStart,
       licensing: licensing as unknown as LicensingPluginStart,
       logger,
@@ -115,26 +121,26 @@ describe('registerCloudConnectLicenseSync', () => {
   it('logs a warning when sync fails', async () => {
     const logger = loggingSystemMock.createLogger();
 
-    const esInfo = jest.fn().mockResolvedValue({ version: { number: '8.0.0' } });
-    const getApiKey = jest.fn().mockResolvedValue({
+    const esInfo = vi.fn().mockResolvedValue({ version: { number: '8.0.0' } });
+    const getApiKey = vi.fn().mockResolvedValue({
       apiKey: 'k-123',
       clusterId: 'c-456',
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
     });
-    (StorageService as jest.Mock).mockImplementation(() => ({ getApiKey }));
+    (StorageService as Mock).mockImplementation(() => ({ getApiKey }));
 
     const err = new Error('boom');
-    const updateCluster = jest.fn().mockRejectedValue(err);
-    (CloudConnectClient as jest.Mock).mockImplementation(() => ({ updateCluster }));
+    const updateCluster = vi.fn().mockRejectedValue(err);
+    (CloudConnectClient as Mock).mockImplementation(() => ({ updateCluster }));
 
     const sub = registerCloudConnectLicenseSync({
       savedObjects: {
-        createInternalRepository: jest.fn(() => ({})),
+        createInternalRepository: vi.fn(() => ({})),
       } as unknown as SavedObjectsServiceStart,
       elasticsearchClient: { info: esInfo } as unknown as ElasticsearchClient,
       encryptedSavedObjects: {
-        getClient: jest.fn(),
+        getClient: vi.fn(),
       } as unknown as EncryptedSavedObjectsPluginStart,
       licensing: licensing as unknown as LicensingPluginStart,
       logger,

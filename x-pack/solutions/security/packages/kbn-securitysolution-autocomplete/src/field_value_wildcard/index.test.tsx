@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -17,19 +20,22 @@ import { fields, getField } from '../fields/index.mock';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
 import { WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils';
 
-jest.mock('../hooks/use_field_value_autocomplete');
-jest.mock('../translations', () => ({
-  FIELD_SPACE_WARNING: 'Warning: there is a space',
-}));
+vi.mock('../hooks/use_field_value_autocomplete');
+vi.mock('../translations', () => {
+      const mocked = {
+      FIELD_SPACE_WARNING: 'Warning: there is a space',
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('AutocompleteFieldWildcardComponent', () => {
   let wrapper: ReactWrapper;
 
-  const getValueSuggestionsMock = jest
+  const getValueSuggestionsMock = vi
     .fn()
-    .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
+    .mockResolvedValue([false, true, ['value 3', 'value 4'], vi.fn()]);
 
   beforeEach(() => {
-    (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
+    (useFieldValueAutocomplete as Mock).mockReturnValue([
       false,
       true,
       ['value 1', 'value 2'],
@@ -38,7 +44,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     wrapper.unmount();
   });
 
@@ -54,9 +60,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('file.path.text')}
@@ -81,9 +87,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="/opt/*/app.dmg"
@@ -107,9 +113,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="/opt/*/app.dmg"
@@ -135,9 +141,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={true}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="/opt/*/app.dmg"
@@ -159,9 +165,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="/opt/*/app.dmg"
@@ -174,7 +180,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
   });
 
   test('it invokes "onChange" when new value created', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
@@ -187,8 +193,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isDisabled={false}
         isLoading={false}
         onChange={mockOnChange}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue=""
@@ -205,7 +211,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
   });
 
   test('it invokes "onChange" when new value selected', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
@@ -218,8 +224,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isDisabled={false}
         isLoading={false}
         onChange={mockOnChange}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue=""
@@ -247,9 +253,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue=""
@@ -278,7 +284,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
   });
 
   test('it invokes "onChange" with empty value when user paste-searches to modify an existing value', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
@@ -291,8 +297,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isDisabled={false}
         isLoading={false}
         onChange={mockOnChange}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="/opt/*/app.dmg"
@@ -311,7 +317,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
   });
 
   test('it does not invoke "onWarning" when no warning exists', () => {
-    const mockOnWarning = jest.fn();
+    const mockOnWarning = vi.fn();
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
@@ -323,8 +329,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
         onWarning={mockOnWarning}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
@@ -344,7 +350,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
   });
 
   test('it invokes "onWarning" when warning exists', () => {
-    const mockOnWarning = jest.fn();
+    const mockOnWarning = vi.fn();
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
@@ -356,8 +362,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
         onWarning={mockOnWarning}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
@@ -384,7 +390,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
   });
 
   test('it invokes "onWarning" when warning exists and is wildcard warning', () => {
-    const mockOnWarning = jest.fn();
+    const mockOnWarning = vi.fn();
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
@@ -396,8 +402,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
         onWarning={mockOnWarning}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
@@ -422,13 +428,13 @@ describe('AutocompleteFieldWildcardComponent', () => {
     expect(helpText.find('.euiToolTipAnchor')).toBeTruthy();
   });
   test('should show the warning helper text if the new value contains spaces when change', async () => {
-    (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
+    (useFieldValueAutocomplete as Mock).mockReturnValue([
       false,
       true,
       [' value 1 ', 'value 2'],
       getValueSuggestionsMock,
     ]);
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
@@ -441,8 +447,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isDisabled={false}
         isLoading={false}
         onChange={mockOnChange}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="invalid path"
@@ -475,9 +481,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="invalid path"
@@ -509,9 +515,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue=" leading space"
@@ -534,9 +540,9 @@ describe('AutocompleteFieldWildcardComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
-        onWarning={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onWarning={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue=""

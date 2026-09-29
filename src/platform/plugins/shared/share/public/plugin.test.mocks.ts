@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { shareMenuRegistryMock } from './services/share_menu_registry.mock';
 import { shareMenuManagerMock } from './services/share_menu_manager.mock';
 
 export const registryMock = shareMenuRegistryMock.create();
 export const managerMock = shareMenuManagerMock.create();
-jest.doMock('./services', () => ({
-  ShareRegistry: jest.fn(() => registryMock),
-  ShareMenuManager: jest.fn(() => managerMock),
-}));
+vi.doMock('./services', () => {
+      const mocked = {
+      ShareRegistry: vi.fn(() => registryMock),
+      ShareMenuManager: vi.fn(() => managerMock),
+    };
+      return { ...mocked, default: mocked };
+    });

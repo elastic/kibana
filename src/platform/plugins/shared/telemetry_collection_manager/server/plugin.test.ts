@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 import type { BasicStatsPayload, CollectionStrategyConfig, StatsGetterConfig } from './types';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
-function createCollectionStrategy(priority: number): jest.Mocked<CollectionStrategyConfig> {
+function createCollectionStrategy(priority: number): Mocked<CollectionStrategyConfig> {
   return {
     title: 'test_collection',
     priority,
-    statsGetter: jest.fn(),
-    clusterDetailsGetter: jest.fn(),
+    statsGetter: vi.fn(),
+    clusterDetailsGetter: vi.fn(),
   };
 }
 
@@ -145,10 +148,10 @@ describe('Telemetry Collection Manager', () => {
           });
 
           it('calls getStats with passed refreshCache config', async () => {
-            const getStatsCollectionConfig: jest.SpyInstance<
+            const getStatsCollectionConfig: MockInstance<
               TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
               // @ts-expect-error spying on private method.
-            > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
+            > = vi.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);
             await setupApi.getStats({ ...config, refreshCache: false });
             await setupApi.getStats({ ...config, refreshCache: true });
@@ -259,10 +262,10 @@ describe('Telemetry Collection Manager', () => {
           });
 
           it('calls getStats with config { refreshCache: true } even if set to false', async () => {
-            const getStatsCollectionConfig: jest.SpyInstance<
+            const getStatsCollectionConfig: MockInstance<
               TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
               // @ts-expect-error spying on private method.
-            > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
+            > = vi.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);
 
             expect(getStatsCollectionConfig).toHaveBeenCalledTimes(1);

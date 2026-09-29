@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Chance from 'chance';
 import {
   DEFAULT_NO_DATA_TEST_SUBJECT,
@@ -25,14 +27,14 @@ import { NoDataPage } from '@kbn/shared-ux-page-no-data';
 
 const chance = new Chance();
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-jest.mock('../common/api/use_license_management_locator_api');
-jest.mock('../common/hooks/use_is_subscription_status_valid');
-jest.mock('../common/navigation/use_csp_integration_link');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
+vi.mock('../common/api/use_license_management_locator_api');
+vi.mock('../common/hooks/use_is_subscription_status_valid');
+vi.mock('../common/navigation/use_csp_integration_link');
 
 describe('<CloudPosturePage />', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const renderCloudPosturePage = (

@@ -7,25 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiButton } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaContentListPage } from './kibana_content_list_page';
 
-jest.mock('@kbn/shared-ux-page-kibana-template', () => {
-  const actual = jest.requireActual('@kbn/shared-ux-page-kibana-template');
+vi.mock('@kbn/shared-ux-page-kibana-template', async () => {
+  const actual = (await vi.importActual('@kbn/shared-ux-page-kibana-template'));
   // Wrap the real `KibanaPageTemplate` in a jest.fn so callers can assert
   // forwarded props (`restrictWidth`, etc.) without losing the real
   // sub-component slots (`Header`, `Section`).
-  const KibanaPageTemplateMock = jest.fn(actual.KibanaPageTemplate);
+  const KibanaPageTemplateMock = vi.fn(actual.KibanaPageTemplate);
   // Preserve the compound API EUI exposes via `Object.assign` in the
   // upstream module.
   Object.assign(KibanaPageTemplateMock, actual.KibanaPageTemplate);
   return { ...actual, KibanaPageTemplate: KibanaPageTemplateMock };
 });
 
-const KibanaPageTemplateMock = KibanaPageTemplate as unknown as jest.Mock;
+const KibanaPageTemplateMock = KibanaPageTemplate as unknown as Mock;
 
 beforeEach(() => {
   KibanaPageTemplateMock.mockClear();
@@ -118,7 +121,7 @@ describe('KibanaContentListPage', () => {
     });
 
     it('throws when rendered outside a `KibanaContentListPage`', () => {
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       expect(() => render(<KibanaContentListPage.Header title="Maps" />)).toThrow(
         /must be rendered inside `<KibanaContentListPage>`/
       );
@@ -176,7 +179,7 @@ describe('KibanaContentListPage', () => {
     });
 
     it('throws when rendered outside a `KibanaContentListPage`', () => {
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       expect(() =>
         render(
           <KibanaContentListPage.Section>

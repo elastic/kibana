@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useJourneySteps } from './use_journey_steps';
 import { fetchJourneyAction } from '../../../state';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,
@@ -19,21 +21,27 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ checkGroupId: 'cg-from-url', stepIndex: '1' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => ({ checkGroupId: 'cg-from-url', stepIndex: '1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUrlParams = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useJourneySteps', () => {
   beforeEach(() => {
     mockUrlParams.mockReturnValue({});
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   // `fetchJourneyAction.get` stamps `meta.dispatchedAt` with `Date.now()` via
   // its `prepareForTimestamp` helper, so two invocations of `.get(payload)`

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
@@ -15,28 +18,34 @@ import {
 } from '../../../common/feature_flags';
 import { useApiEndpoints } from './use_api_endpoints';
 
-jest.mock('../../hooks/use_fetcher', () => {
-  const actual = jest.requireActual('../../hooks/use_fetcher');
+vi.mock('../../hooks/use_fetcher', async () => {
+  const actual = (await vi.importActual('../../hooks/use_fetcher'));
   return {
     ...actual,
-    useFetcher: jest.fn(),
+    useFetcher: vi.fn(),
   };
 });
 
-jest.mock('../shared/use_managed_otlp_service_availability', () => ({
-  useManagedOtlpServiceAvailability: jest.fn(),
-}));
+vi.mock('../shared/use_managed_otlp_service_availability', () => {
+      const mocked = {
+      useManagedOtlpServiceAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetcher = useFetcher as jest.MockedFunction<typeof useFetcher>;
+const mockUseFetcher = useFetcher as MockedFunction<typeof useFetcher>;
 const mockUseManagedOtlpServiceAvailability =
-  useManagedOtlpServiceAvailability as jest.MockedFunction<
+  useManagedOtlpServiceAvailability as MockedFunction<
     typeof useManagedOtlpServiceAvailability
   >;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 interface Options {
   isManagedOtlpServiceAvailable?: boolean;
@@ -62,7 +71,7 @@ const setup = ({
     services: {
       context: { isServerless },
       featureFlags: {
-        useBooleanValue: jest.fn().mockImplementation((key: string) => {
+        useBooleanValue: vi.fn().mockImplementation((key: string) => {
           if (key === IS_VENDOR_ENDPOINTS_ENABLED) {
             return vendorEndpointsEnabled;
           }
@@ -77,7 +86,7 @@ const setup = ({
   mockUseFetcher.mockReturnValue({
     data: { elasticsearchUrl, managedOtlpServiceUrl },
     status,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   });
 
   return renderHook(() => useApiEndpoints());
@@ -88,7 +97,7 @@ const findEndpoint = (result: ReturnType<typeof setup>['result'], id: string) =>
 
 describe('useApiEndpoints', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('exposes the Elasticsearch URL returned by the server', () => {

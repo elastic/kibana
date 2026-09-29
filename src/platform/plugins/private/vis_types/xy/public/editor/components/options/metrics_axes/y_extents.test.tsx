@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
@@ -16,14 +19,14 @@ import { YExtents } from './y_extents';
 import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
 
 describe('YExtents component', () => {
-  let setMultipleValidity: jest.Mock;
-  let setScale: jest.Mock;
+  let setMultipleValidity: Mock;
+  let setScale: Mock;
   let defaultProps: YExtentsProps;
   const Y_EXTENTS = 'yExtents';
 
   beforeEach(() => {
-    setMultipleValidity = jest.fn();
-    setScale = jest.fn();
+    setMultipleValidity = vi.fn();
+    setScale = vi.fn();
 
     defaultProps = {
       scale: {

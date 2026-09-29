@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
@@ -15,7 +17,7 @@ describe('ChartsToggle component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  const handleToggleHideCharts = jest.fn();
+  const handleToggleHideCharts = vi.fn();
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();

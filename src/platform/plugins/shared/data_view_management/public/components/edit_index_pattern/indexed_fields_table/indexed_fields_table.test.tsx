@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -67,8 +69,8 @@ const fields = [
 const fieldsMap = Object.fromEntries(fields.map((field) => [field.name, field.spec]));
 
 const helpers = {
-  editField: jest.fn(),
-  deleteField: jest.fn(),
+  editField: vi.fn(),
+  deleteField: vi.fn(),
   // getFieldInfo handles non rollups as well
   getFieldInfo,
 };
@@ -144,7 +146,7 @@ const renderIndexedFieldsTable = (
       compositeRuntimeFields={{}}
       fieldFilter=""
       fields={fields}
-      fieldWildcardMatcher={jest.fn(() => () => false)}
+      fieldWildcardMatcher={vi.fn(() => () => false)}
       helpers={helpers}
       indexedFieldTypeFilter={[]}
       indexPattern={indexPattern}
@@ -158,11 +160,11 @@ const renderIndexedFieldsTable = (
 
 describe('IndexedFieldsTable', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
+    vi.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should render normally', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { renderHook, act } from '@testing-library/react';
 
@@ -16,19 +19,25 @@ import { useGlobalInlineFields } from './use_global_inline_fields';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import React from 'react';
 
-jest.mock('./use_cases_columns_configuration');
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useCasesConfig: jest.fn(),
-}));
-jest.mock('./use_global_inline_fields', () => ({
-  ...jest.requireActual('./use_global_inline_fields'),
-  useGlobalInlineFields: jest.fn(),
-}));
+vi.mock('./use_cases_columns_configuration');
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useCasesConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_global_inline_fields', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_global_inline_fields')),
+      useGlobalInlineFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as jest.Mock;
-const useCasesConfigMock = useCasesConfig as jest.Mock;
-const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
+const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as Mock;
+const useCasesConfigMock = useCasesConfig as Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as Mock;
 
 const localStorageKey = 'securitySolution.cases.list.tableColumns';
 const casesColumnsConfig = {
@@ -63,7 +72,7 @@ describe('useCasesColumnsSelection ', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the expected selectedColumns when the localstorage is empty', async () => {
@@ -163,7 +172,7 @@ describe('useCasesColumnsSelection — global field sync (Bug 19099)', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reads global field checked state from the shared key', () => {

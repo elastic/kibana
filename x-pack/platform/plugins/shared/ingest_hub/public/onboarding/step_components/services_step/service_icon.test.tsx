@@ -5,35 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  useGetPackageInfoByKeyQuery: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      useGetPackageInfoByKeyQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/fleet-plugin/common', () => ({
-  epmRouteService: {
-    getFilePath: (path: string) => `/api/fleet/epm${path.replace('/package', '/packages')}`,
-  },
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        basePath: { prepend: (path: string) => path },
+vi.mock('@kbn/fleet-plugin/common', () => {
+      const mocked = {
+      epmRouteService: {
+        getFilePath: (path: string) => `/api/fleet/epm${path.replace('/package', '/packages')}`,
       },
-    },
-  }),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {
+            basePath: { prepend: (path: string) => path },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import { ServiceIcon } from './service_icon';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
-const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
+const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as Mock;
 
 const BASE_SERVICE: AwsServiceMatrixEntry = {
   id: 's3',

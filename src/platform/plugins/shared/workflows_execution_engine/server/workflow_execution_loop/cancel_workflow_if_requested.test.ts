@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
@@ -20,10 +23,10 @@ import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/types';
 
 describe('cancelWorkflowIfRequested', () => {
-  let workflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;
-  let workflowExecutionState: jest.Mocked<WorkflowExecutionState>;
-  let monitoredStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let workflowLogger: jest.Mocked<IWorkflowEventLogger>;
+  let workflowExecutionRepository: Mocked<WorkflowExecutionRepository>;
+  let workflowExecutionState: Mocked<WorkflowExecutionState>;
+  let monitoredStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let workflowLogger: Mocked<IWorkflowEventLogger>;
   let workflowExecutionCursor: ReturnType<typeof createMockWorkflowExecutionCursor>;
   let monitorAbortController: AbortController;
   let workflowExecution: EsWorkflowExecution;
@@ -42,15 +45,15 @@ describe('cancelWorkflowIfRequested', () => {
     } as EsWorkflowExecution;
 
     workflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn(),
-    } as unknown as jest.Mocked<WorkflowExecutionRepository>;
+      getWorkflowExecutionById: vi.fn(),
+    } as unknown as Mocked<WorkflowExecutionRepository>;
 
     workflowExecutionState = {
-      getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-      updateWorkflowExecution: jest.fn(),
-      getStepExecution: jest.fn(),
-      upsertStep: jest.fn(),
-    } as unknown as jest.Mocked<WorkflowExecutionState>;
+      getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+      updateWorkflowExecution: vi.fn(),
+      getStepExecution: vi.fn(),
+      upsertStep: vi.fn(),
+    } as unknown as Mocked<WorkflowExecutionState>;
 
     const mockNode = {
       id: 'node1',
@@ -66,7 +69,7 @@ describe('cancelWorkflowIfRequested', () => {
       node: mockNode,
       scopeStack,
       abortController: new AbortController(),
-    } as unknown as jest.Mocked<StepExecutionRuntime>;
+    } as unknown as Mocked<StepExecutionRuntime>;
 
     workflowExecutionCursor = createMockWorkflowExecutionCursor();
   });

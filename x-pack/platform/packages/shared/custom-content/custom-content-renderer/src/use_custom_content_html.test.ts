@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
 // DOMPurify requires a real DOM — pass-through in Jest
-jest.mock('dompurify', () => ({
+vi.mock('dompurify', () => ({
   __esModule: true,
   default: { sanitize: (html: string) => html },
 }));
 
-jest.mock('./fetch_esql_data');
-jest.mock('./fill_template');
-jest.mock('@kbn/data-service', () => ({
-  getEsQueryConfig: jest.fn(),
-}));
+vi.mock('./fetch_esql_data');
+vi.mock('./fill_template');
+vi.mock('@kbn/data-service', () => {
+      const mocked = {
+      getEsQueryConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -30,12 +36,12 @@ import { fillTemplate } from './fill_template';
 import { useCustomContentHtml } from './use_custom_content_html';
 import type { CustomContentRendererServices } from './types';
 
-const mockGetEsQueryConfig = getEsQueryConfig as jest.MockedFunction<typeof getEsQueryConfig>;
-const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
-const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
+const mockGetEsQueryConfig = getEsQueryConfig as MockedFunction<typeof getEsQueryConfig>;
+const mockFetchEsqlData = fetchEsqlData as MockedFunction<typeof fetchEsqlData>;
+const mockFillTemplate = fillTemplate as MockedFunction<typeof fillTemplate>;
 
 const mockHttp = {} as unknown as HttpStart;
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
 const defaultEsQueryConfig: EsQueryConfig = {
   allowLeadingWildcards: false,
@@ -70,7 +76,7 @@ const mockEuiTheme = {
 } as unknown as EuiThemeComputed;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockGetEsQueryConfig.mockReturnValue(defaultEsQueryConfig);
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
   mockFillTemplate.mockResolvedValue('<div>rendered</div>');

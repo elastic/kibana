@@ -5,23 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { CustomContentContextAttachmentData } from '../../common/panel_context_attachment';
 import { RenderPanelContext, resolvePreviewHeight } from './render_panel_context';
 
-const mockComponentProps = jest.fn();
-jest.mock('@kbn/custom-content-renderer', () => ({
-  CustomContentComponent: (props: Record<string, unknown>) => {
-    mockComponentProps(props);
-    return <span data-test-subj="custom-content" />;
-  },
-}));
+const mockComponentProps = vi.fn();
+vi.mock('@kbn/custom-content-renderer', () => {
+      const mocked = {
+      CustomContentComponent: (props: Record<string, unknown>) => {
+        mockComponentProps(props);
+        return <span data-test-subj="custom-content" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../services', () => ({
-  getServices: () => ({ core: { http: {}, uiSettings: {} }, search: jest.fn() }),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getServices: () => ({ core: { http: {}, uiSettings: {} }, search: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeData = (
   data: Partial<CustomContentContextAttachmentData> = {}
@@ -52,7 +60,7 @@ describe('resolvePreviewHeight', () => {
 });
 
 describe('RenderPanelContext', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the snapshot the attachment carries', () => {
     render(<RenderPanelContext data={makeData()} />);

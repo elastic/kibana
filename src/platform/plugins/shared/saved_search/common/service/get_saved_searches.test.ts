@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getSavedSearch } from './get_saved_searches';
@@ -18,12 +20,12 @@ describe('getSavedSearch', () => {
   let getSavedSrch: GetSavedSearchDependencies['getSavedSrch'];
 
   beforeEach(() => {
-    getSavedSrch = jest.fn();
+    getSavedSrch = vi.fn();
     searchSourceCreate = dataPluginMock.createStartContract().search.searchSource.create;
   });
 
   test('should find saved search', async () => {
-    getSavedSrch = jest.fn().mockReturnValue({
+    getSavedSrch = vi.fn().mockReturnValue({
       item: {
         attributes: {
           kibanaSavedObjectMeta: {
@@ -179,7 +181,7 @@ describe('getSavedSearch', () => {
   });
 
   test('should find saved search with sql mode', async () => {
-    getSavedSrch = jest.fn().mockReturnValue({
+    getSavedSrch = vi.fn().mockReturnValue({
       item: {
         attributes: {
           kibanaSavedObjectMeta: {
@@ -335,7 +337,7 @@ describe('getSavedSearch', () => {
   });
 
   test('should initialize searchSource from tab if kibanaSavedObjectMeta only exists in tab', async () => {
-    getSavedSrch = jest.fn().mockReturnValue({
+    getSavedSrch = vi.fn().mockReturnValue({
       item: {
         attributes: {
           title: 'test3',
@@ -401,7 +403,7 @@ describe('getSavedSearch', () => {
   });
 
   it('should call savedObjectsTagging.ui.getTagIdsFromReferences', async () => {
-    getSavedSrch = jest.fn().mockReturnValue({
+    getSavedSrch = vi.fn().mockReturnValue({
       item: {
         attributes: {
           kibanaSavedObjectMeta: {
@@ -455,7 +457,7 @@ describe('getSavedSearch', () => {
     });
     const savedObjectsTagging = {
       ui: {
-        getTagIdsFromReferences: jest.fn((_, tags) => tags),
+        getTagIdsFromReferences: vi.fn((_, tags) => tags),
       },
     } as unknown as SavedObjectsTaggingApi;
     await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {

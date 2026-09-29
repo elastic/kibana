@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   AuthenticatedUser,
   ElasticsearchClient,
@@ -23,32 +26,41 @@ import type {
 import type { GenerationWorkflowResult } from './invoke_generation_workflow';
 import { invokeValidationWorkflow } from './invoke_validation_workflow';
 
-const mockDeduplicateScheduledDiscoveries = jest.fn();
+const mockDeduplicateScheduledDiscoveries = vi.fn();
 
-jest.mock('./deduplicate_scheduled_discoveries', () => ({
-  deduplicateScheduledDiscoveries: (...args: unknown[]) =>
-    mockDeduplicateScheduledDiscoveries(...args),
-}));
+vi.mock('./deduplicate_scheduled_discoveries', () => {
+      const mocked = {
+      deduplicateScheduledDiscoveries: (...args: unknown[]) =>
+        mockDeduplicateScheduledDiscoveries(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockWriteAttackDiscoveryEvent = jest.fn();
+const mockWriteAttackDiscoveryEvent = vi.fn();
 
-jest.mock('../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED: 'validation-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED: 'validation-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED: 'validation-succeeded',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED: 'validation-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED: 'validation-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED: 'validation-succeeded',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/persistence', () => ({
-  getDurationNanoseconds: jest.fn().mockReturnValue(1000000),
-}));
+vi.mock('../../lib/persistence', () => {
+      const mocked = {
+      getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('invokeValidationWorkflow', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockRequest = {} as KibanaRequest;
@@ -60,14 +72,14 @@ describe('invokeValidationWorkflow', () => {
   } as AuthenticatedUser;
 
   const mockEventLogger = {
-    logEvent: jest.fn(),
+    logEvent: vi.fn(),
   } as unknown as IEventLogger;
 
   const mockWorkflowsManagementApi: WorkflowsManagementApi = {
-    getWorkflow: jest.fn(),
-    getWorkflowExecution: jest.fn(),
-    runWorkflow: jest.fn(),
-    scheduleWorkflow: jest.fn(),
+    getWorkflow: vi.fn(),
+    getWorkflowExecution: vi.fn(),
+    runWorkflow: vi.fn(),
+    scheduleWorkflow: vi.fn(),
   };
 
   const defaultValidationWorkflowId = 'workflow-validate-default';
@@ -194,19 +206,19 @@ describe('invokeValidationWorkflow', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('when workflow executes successfully', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -404,7 +416,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('sets newAlerts to persistedCount (Bug 1 fix)', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -430,7 +442,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('embeds validationSummary in the validation-succeeded event (Bug 4 fix)', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -464,7 +476,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns validationSummary with correct stats', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -503,9 +515,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('polling with includeOutput', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -523,8 +535,8 @@ describe('invokeValidationWorkflow', () => {
 
   describe('validatedDiscoveries extraction from step output', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
     });
 
     it('extracts validatedDiscoveries from the validation step output', async () => {
@@ -533,7 +545,7 @@ describe('invokeValidationWorkflow', () => {
         { alert_ids: ['a2'], title: 'Discovery 2' },
       ];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -561,7 +573,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined validatedDiscoveries when no validation step exists', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -581,7 +593,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined validatedDiscoveries when step output is null', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -605,7 +617,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined validatedDiscoveries when validated_discoveries is not an array', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -632,7 +644,7 @@ describe('invokeValidationWorkflow', () => {
       const contextDiscoveries = [{ alert_ids: ['ctx-1'], title: 'Context Discovery' }];
       const stepDiscoveries = [{ alert_ids: ['step-1'], title: 'Step Discovery' }];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: { duplicates_dropped_count: 1, validated_discoveries: contextDiscoveries },
         stepExecutions: [
@@ -663,7 +675,7 @@ describe('invokeValidationWorkflow', () => {
     it('falls back to step type search when context has no validated_discoveries', async () => {
       const stepDiscoveries = [{ alert_ids: ['step-1'], title: 'Step Discovery' }];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: { some_other_key: 'value' },
         stepExecutions: [
@@ -694,7 +706,7 @@ describe('invokeValidationWorkflow', () => {
     it('falls back to step type search when context validated_discoveries is not an array', async () => {
       const stepDiscoveries = [{ alert_ids: ['step-1'], title: 'Step Discovery' }];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: { validated_discoveries: 'not-an-array' },
         stepExecutions: [
@@ -725,7 +737,7 @@ describe('invokeValidationWorkflow', () => {
     it('extracts from context for custom workflows without matching step type', async () => {
       const contextDiscoveries = [{ alert_ids: ['custom-1'], title: 'Custom Discovery' }];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: {
           duplicates_dropped_count: 2,
@@ -753,7 +765,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined when neither context nor step type has validated_discoveries', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: {},
         stepExecutions: [
@@ -780,9 +792,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when validation_workflow_id is empty string', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -823,9 +835,9 @@ describe('invokeValidationWorkflow', () => {
   describe('when using custom validation workflow ID', () => {
     beforeEach(() => {
       const customWorkflow = { ...mockWorkflow, id: 'custom-validation-workflow' };
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(customWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(customWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -881,7 +893,7 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when workflow is not found', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(null);
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(null);
     });
 
     it('throws an AttackDiscoveryError', async () => {
@@ -916,7 +928,7 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when workflow has no definition', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         definition: null,
       });
@@ -944,7 +956,7 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when workflow is not valid', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         valid: false,
       });
@@ -972,7 +984,7 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when workflow is not enabled', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         enabled: false,
       });
@@ -1006,9 +1018,9 @@ describe('invokeValidationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockFailedExecution
       );
     });
@@ -1039,9 +1051,9 @@ describe('invokeValidationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCancelledExecution
       );
     });
@@ -1073,9 +1085,9 @@ describe('invokeValidationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockTimedOutExecution
       );
     });
@@ -1102,9 +1114,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when execution is not found during polling', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(null);
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(null);
     });
 
     it('throws an error', async () => {
@@ -1116,8 +1128,8 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when runWorkflow throws', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockRejectedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockRejectedValue(
         new Error('Failed to run workflow')
       );
     });
@@ -1170,9 +1182,9 @@ describe('invokeValidationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock)
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock)
         .mockResolvedValueOnce(mockRunningExecution)
         .mockResolvedValue(mockCompletedExecution);
     });
@@ -1181,7 +1193,7 @@ describe('invokeValidationWorkflow', () => {
       const promise = invokeValidationWorkflow(defaultProps);
 
       // Advance timers to trigger polling
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
       const result = await promise;
 
@@ -1192,13 +1204,13 @@ describe('invokeValidationWorkflow', () => {
       const promise = invokeValidationWorkflow(defaultProps);
 
       // Advance timers to trigger polling
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
       await promise;
 
       expect(mockLogger.debug).toHaveBeenCalledWith(expect.any(Function));
 
-      const debugCalls = (mockLogger.debug as jest.Mock).mock.calls;
+      const debugCalls = (mockLogger.debug as Mock).mock.calls;
       const pollingDebugCall = debugCalls.find((call) => {
         const arg = call[0];
         return typeof arg === 'function' && arg().includes('Waiting for workflow to complete');
@@ -1210,9 +1222,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when writeAttackDiscoveryEvent fails for started event', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
       mockWriteAttackDiscoveryEvent.mockRejectedValueOnce(new Error('Event logging failed'));
@@ -1230,9 +1242,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when writeAttackDiscoveryEvent fails for succeeded event', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
       mockWriteAttackDiscoveryEvent
@@ -1252,8 +1264,8 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when writeAttackDiscoveryEvent fails for failed event', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockRejectedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockRejectedValue(
         new Error('Workflow error')
       );
       mockWriteAttackDiscoveryEvent.mockRejectedValue(new Error('Event logging failed'));
@@ -1275,11 +1287,11 @@ describe('invokeValidationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
       // The execution never reaches a terminal status, so the poll must give up
       // once the max wait time is exceeded.
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockPendingExecution
       );
     });
@@ -1310,9 +1322,9 @@ describe('invokeValidationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockFailedExecutionNoMessage
       );
     });
@@ -1326,9 +1338,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when enableFieldRendering is false', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -1351,9 +1363,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when withReplacements is false', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -1376,9 +1388,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('when generation result has empty discoveries', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -1398,7 +1410,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('logs completion with zero discoveries', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1430,9 +1442,9 @@ describe('invokeValidationWorkflow', () => {
       // duplicate was dropped on write and counted in duplicates_dropped_count.
       const newDiscoveries = [{ alert_ids: ['a1'], title: 'Only One Survived' }];
 
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1461,9 +1473,9 @@ describe('invokeValidationWorkflow', () => {
       // duplicate was dropped on write and counted in duplicates_dropped_count.
       const newDiscoveries = [{ alert_ids: ['a1'], title: 'Only One Survived' }];
 
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1487,9 +1499,9 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('uses empty persisted_discoveries array length (not generatedCount) when persist step returns [] (Bug 2 fix)', async () => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1521,9 +1533,9 @@ describe('invokeValidationWorkflow', () => {
       const generatedDiscoveries = Array.from({ length: 8 }, (_, i) => ({ title: `D${i + 1}` }));
       const newDiscoveries = generatedDiscoveries.slice(0, 3);
 
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1549,9 +1561,9 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('falls back to generatedCount when the persist step ran but persisted_discoveries is absent and no counters are available', async () => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1573,9 +1585,9 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('falls back to generatedCount - duplicatesDroppedCount when persisted_discoveries is absent', async () => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1606,9 +1618,9 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('falls back to generatedCount - duplicatesDroppedCount - hallucinationsFilteredCount when persisted_discoveries is absent', async () => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1641,12 +1653,12 @@ describe('invokeValidationWorkflow', () => {
 
   describe('extractHallucinationsFilteredCount', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
     });
 
     it('extracts filtered_count from defaultValidation step output', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1666,7 +1678,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('extracts filtered_count from workflow context when present', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: { filtered_count: 5 },
         stepExecutions: [
@@ -1683,7 +1695,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined when no validation step exists', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1699,7 +1711,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined when validation step output is null', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1719,7 +1731,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined when filtered_count is not a number', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1741,12 +1753,12 @@ describe('invokeValidationWorkflow', () => {
 
   describe('extractFilterReason', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
     });
 
     it('extracts filter_reason from defaultValidation step output', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1766,7 +1778,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('extracts filter_reason from workflow context when present', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: { filter_reason: 'context reason' },
         stepExecutions: [
@@ -1783,7 +1795,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined when no filter_reason exists', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1799,7 +1811,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined when filter_reason is not a string', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1821,14 +1833,14 @@ describe('invokeValidationWorkflow', () => {
 
   describe('extractPersistedDiscoveries', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
     });
 
     it('extracts persisted_discoveries from persist step output', async () => {
       const discoveries = [{ title: 'D1' }, { title: 'D2' }];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1846,7 +1858,7 @@ describe('invokeValidationWorkflow', () => {
     it('extracts persisted_discoveries from workflow context', async () => {
       const discoveries = [{ title: 'D1' }];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: { persisted_discoveries: discoveries },
         stepExecutions: [
@@ -1863,7 +1875,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('falls back to generatedCount when persist step ran but has no persisted_discoveries', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1880,7 +1892,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns zero persistedCount when persisted_discoveries is empty array', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1896,7 +1908,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('returns undefined persistedCount fallback when persist step output is null', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1915,14 +1927,14 @@ describe('invokeValidationWorkflow', () => {
 
   describe('extractDiscoveriesToPersist (persist step handover)', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
     });
 
     it('extracts discoveriesToPersist from the persist step discoveries_to_persist output', async () => {
       const handover = [{ alert_ids: ['a1'], title: 'Handover 1' }];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1942,7 +1954,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('defaults discoveriesToPersist to an empty array when the persist step omits the field', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1961,7 +1973,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('defaults discoveriesToPersist to an empty array when no persist step ran (R1)', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1977,7 +1989,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('logs a warning when no persist step ran (R1)', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -1995,7 +2007,7 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('does not log a warning when the persist step ran', async () => {
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -2020,7 +2032,7 @@ describe('invokeValidationWorkflow', () => {
         { alert_ids: ['a2'], title: 'Handover 2' },
       ];
 
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
@@ -2044,11 +2056,11 @@ describe('invokeValidationWorkflow', () => {
 
   describe('R1 no-persist (noop) reports persistedCount of 0 (kibana-az5 fix)', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
       // A validation workflow that completed but never invoked the persist step and
       // produced no persisted output or handover: nothing was persisted (noop).
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
         ...mockCompletedExecution,
         context: {},
         stepExecutions: [
@@ -2088,9 +2100,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('debug logging (lazy evaluation - Bug 5 fix)', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -2098,7 +2110,7 @@ describe('invokeValidationWorkflow', () => {
     it('calls logger.debug with a function (lazy evaluation)', async () => {
       await invokeValidationWorkflow(defaultProps);
 
-      const debugCalls = (mockLogger.debug as jest.Mock).mock.calls;
+      const debugCalls = (mockLogger.debug as Mock).mock.calls;
       const lazyInputsCall = debugCalls.find((call) => {
         const arg = call[0];
         return typeof arg === 'function' && arg().includes('Validation workflow inputs');
@@ -2110,7 +2122,7 @@ describe('invokeValidationWorkflow', () => {
     it('includes alertsContextCount in lazy debug log', async () => {
       await invokeValidationWorkflow(defaultProps);
 
-      const debugCalls = (mockLogger.debug as jest.Mock).mock.calls;
+      const debugCalls = (mockLogger.debug as Mock).mock.calls;
       const lazyCall = debugCalls.find((call) => {
         const arg = call[0];
         return typeof arg === 'function' && arg().includes('alertsContextCount');
@@ -2122,7 +2134,7 @@ describe('invokeValidationWorkflow', () => {
     it('includes connectorName in lazy debug log', async () => {
       await invokeValidationWorkflow(defaultProps);
 
-      const debugCalls = (mockLogger.debug as jest.Mock).mock.calls;
+      const debugCalls = (mockLogger.debug as Mock).mock.calls;
       const lazyCall = debugCalls.find((call) => {
         const arg = call[0];
         return typeof arg === 'function' && arg().includes('Test Connector');
@@ -2134,7 +2146,7 @@ describe('invokeValidationWorkflow', () => {
     it('includes generatedCount (not discoveryCount) in lazy debug log', async () => {
       await invokeValidationWorkflow(defaultProps);
 
-      const debugCalls = (mockLogger.debug as jest.Mock).mock.calls;
+      const debugCalls = (mockLogger.debug as Mock).mock.calls;
       const lazyCall = debugCalls.find((call) => {
         const arg = call[0];
         return typeof arg === 'function' && arg().includes('generatedCount');
@@ -2179,9 +2191,9 @@ describe('invokeValidationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockScheduledExecution
       );
       // Default: drop the two known duplicates, keep one survivor.

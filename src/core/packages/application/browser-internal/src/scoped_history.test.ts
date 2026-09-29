@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { CoreScopedHistory as ScopedHistory } from './scoped_history';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
@@ -37,7 +40,7 @@ describe('ScopedHistory', () => {
     it('supports push', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
-      const pushSpy = jest.spyOn(gh, 'push');
+      const pushSpy = vi.spyOn(gh, 'push');
       const h = new ScopedHistory(gh, '/app/wow');
       h.push('/new-page', { some: 'state' });
       expect(pushSpy).toHaveBeenCalledWith('/app/wow/new-page', { some: 'state' });
@@ -48,7 +51,7 @@ describe('ScopedHistory', () => {
     it('supports unbound push', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
-      const pushSpy = jest.spyOn(gh, 'push');
+      const pushSpy = vi.spyOn(gh, 'push');
       const h = new ScopedHistory(gh, '/app/wow');
       const { push } = h;
       push('/new-page', { some: 'state' });
@@ -60,7 +63,7 @@ describe('ScopedHistory', () => {
     it('supports replace', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
-      const replaceSpy = jest.spyOn(gh, 'replace');
+      const replaceSpy = vi.spyOn(gh, 'replace');
       const h = new ScopedHistory(gh, '/app/wow'); // ['']
       h.push('/first-page'); // ['', '/first-page']
       h.push('/second-page'); // ['', '/first-page', '/second-page']
@@ -322,10 +325,10 @@ describe('ScopedHistory', () => {
     it('supports push', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
-      const ghPushSpy = jest.spyOn(gh, 'push');
+      const ghPushSpy = vi.spyOn(gh, 'push');
       const h1 = new ScopedHistory(gh, '/app/wow');
       h1.push('/new-page');
-      const h1PushSpy = jest.spyOn(h1, 'push');
+      const h1PushSpy = vi.spyOn(h1, 'push');
       const h2 = h1.createSubHistory('/new-page');
       h2.push('/sub-page', { some: 'state' });
       expect(h1PushSpy).toHaveBeenCalledWith('/new-page/sub-page', { some: 'state' });
@@ -338,10 +341,10 @@ describe('ScopedHistory', () => {
     it('supports replace', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
-      const ghReplaceSpy = jest.spyOn(gh, 'replace');
+      const ghReplaceSpy = vi.spyOn(gh, 'replace');
       const h1 = new ScopedHistory(gh, '/app/wow');
       h1.push('/new-page');
-      const h1ReplaceSpy = jest.spyOn(h1, 'replace');
+      const h1ReplaceSpy = vi.spyOn(h1, 'replace');
       const h2 = h1.createSubHistory('/new-page');
       h2.push('/sub-page');
       h2.replace('/other-sub-page', { some: 'state' });
@@ -378,7 +381,7 @@ describe('ScopedHistory', () => {
     it('calls block on the global history', () => {
       initHistory();
 
-      const blockSpy = jest.spyOn(gh, 'block');
+      const blockSpy = vi.spyOn(gh, 'block');
       h.block('confirm');
 
       expect(blockSpy).toHaveBeenCalledTimes(1);
@@ -388,8 +391,8 @@ describe('ScopedHistory', () => {
     it('returns a wrapped unregister function', () => {
       initHistory();
 
-      const blockSpy = jest.spyOn(gh, 'block');
-      const unregister = jest.fn();
+      const blockSpy = vi.spyOn(gh, 'block');
+      const unregister = vi.fn();
       blockSpy.mockReturnValue(unregister);
 
       const wrapperUnregister = h.block('confirm');
@@ -404,7 +407,7 @@ describe('ScopedHistory', () => {
     it('calls the block handler when navigating to another app', () => {
       initHistory();
 
-      const blockHandler = jest.fn().mockReturnValue(true);
+      const blockHandler = vi.fn().mockReturnValue(true);
 
       h.block(blockHandler);
 
@@ -417,7 +420,7 @@ describe('ScopedHistory', () => {
     it('calls the block handler when navigating inside the current app', () => {
       initHistory();
 
-      const blockHandler = jest.fn().mockReturnValue(true);
+      const blockHandler = vi.fn().mockReturnValue(true);
 
       h.block(blockHandler);
 
@@ -430,7 +433,7 @@ describe('ScopedHistory', () => {
     it('can block the navigation', () => {
       initHistory();
 
-      const blockHandler = jest.fn().mockReturnValue(false);
+      const blockHandler = vi.fn().mockReturnValue(false);
 
       h.block(blockHandler);
 
@@ -443,7 +446,7 @@ describe('ScopedHistory', () => {
     it('no longer blocks the navigation when unregistered', () => {
       initHistory();
 
-      const blockHandler = jest.fn().mockReturnValue(false);
+      const blockHandler = vi.fn().mockReturnValue(false);
 
       const unregister = h.block(blockHandler);
 
@@ -471,8 +474,8 @@ describe('ScopedHistory', () => {
     it('unregisters the block handler when the history is no longer active', () => {
       initHistory();
 
-      const blockSpy = jest.spyOn(gh, 'block');
-      const unregister = jest.fn();
+      const blockSpy = vi.spyOn(gh, 'block');
+      const unregister = vi.fn();
       blockSpy.mockReturnValue(unregister);
 
       h.block('confirm');
@@ -485,7 +488,7 @@ describe('ScopedHistory', () => {
     });
 
     it('calls the defined global history confirm handler', () => {
-      const confirmHandler: jest.MockedFunction<ConfirmHandler> = jest
+      const confirmHandler: MockedFunction<ConfirmHandler> = vi
         .fn()
         .mockImplementation((message, callback) => {
           callback(true);

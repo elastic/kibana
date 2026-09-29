@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteConfig } from '@kbn/core/server';
@@ -62,8 +65,8 @@ import {
 } from './handlers';
 import { registerRoutes } from '.';
 
-const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const packagePolicyServiceMock = packagePolicyService as Mocked<PackagePolicyClient>;
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 
 function mockAgentPolicy(data: Partial<AgentPolicy>) {
   mockedAgentPolicyService.get.mockResolvedValue({
@@ -81,19 +84,19 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
   });
 }
 
-jest.mock(
+vi.mock(
   '../../services/package_policy',
   (): {
-    packagePolicyService: jest.Mocked<PackagePolicyClient>;
+    packagePolicyService: Mocked<PackagePolicyClient>;
   } => {
     return {
       packagePolicyService: {
-        _compilePackagePolicyInputs: jest.fn((packageInfo, vars, dataInputs) =>
+        _compilePackagePolicyInputs: vi.fn((packageInfo, vars, dataInputs) =>
           Promise.resolve(dataInputs)
         ),
-        buildPackagePolicyFromPackage: jest.fn(),
-        bulkCreate: jest.fn(),
-        create: jest.fn((soClient, esClient, newData) =>
+        buildPackagePolicyFromPackage: vi.fn(),
+        bulkCreate: vi.fn(),
+        create: vi.fn((soClient, esClient, newData) =>
           Promise.resolve({
             ...newData,
             inputs: newData.inputs.map((input) => ({
@@ -111,22 +114,22 @@ jest.mock(
             created_by: 'elastic',
           })
         ),
-        delete: jest.fn(),
-        get: jest.fn(),
-        getByIDs: jest.fn(),
-        list: jest.fn(),
-        listIds: jest.fn(),
-        update: jest.fn(),
+        delete: vi.fn(),
+        get: vi.fn(),
+        getByIDs: vi.fn(),
+        list: vi.fn(),
+        listIds: vi.fn(),
+        update: vi.fn(),
         // @ts-ignore
-        runExternalCallbacks: jest.fn((callbackType, packagePolicy, context, request) =>
+        runExternalCallbacks: vi.fn((callbackType, packagePolicy, context, request) =>
           callbackType === 'packagePolicyPostDelete'
             ? Promise.resolve(undefined)
             : Promise.resolve(packagePolicy)
         ),
-        upgrade: jest.fn(),
-        bulkUpgrade: jest.fn(),
-        getUpgradeDryRunDiff: jest.fn(),
-        enrichPolicyWithDefaultsFromPackage: jest
+        upgrade: vi.fn(),
+        bulkUpgrade: vi.fn(),
+        getUpgradeDryRunDiff: vi.fn(),
+        enrichPolicyWithDefaultsFromPackage: vi
           .fn()
           .mockImplementation((soClient, newPolicy) => newPolicy),
       },
@@ -134,24 +137,24 @@ jest.mock(
   }
 );
 
-jest.mock('../../services/agent_policy', () => {
+vi.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
-      get: jest.fn(),
-      getByIds: jest.fn(),
-      update: jest.fn(),
-      list: jest.fn(),
+      get: vi.fn(),
+      getByIds: vi.fn(),
+      update: vi.fn(),
+      list: vi.fn(),
     },
   };
 });
 
-jest.mock('../../services/epm/packages', () => {
+vi.mock('../../services/epm/packages', () => {
   return {
-    ensureInstalledPackage: jest.fn(() => Promise.resolve()),
-    getPackageInfo: jest.fn(() => Promise.resolve()),
-    getInstallation: jest.fn(),
-    removeInstallation: jest.fn(),
-    getInstallations: jest.fn().mockResolvedValue({
+    ensureInstalledPackage: vi.fn(() => Promise.resolve()),
+    getPackageInfo: vi.fn(() => Promise.resolve()),
+    getInstallation: vi.fn(),
+    removeInstallation: vi.fn(),
+    getInstallations: vi.fn().mockResolvedValue({
       saved_objects: [
         {
           attributes: { name: 'a-package', version: '1.0.0' },
@@ -164,14 +167,14 @@ jest.mock('../../services/epm/packages', () => {
 let testPackagePolicy: PackagePolicy;
 
 describe('When calling package policy', () => {
-  let routerMock: jest.Mocked<FleetAuthzRouter>;
+  let routerMock: Mocked<FleetAuthzRouter>;
   let routeHandler: FleetRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   beforeEach(() => {
-    routerMock = httpServiceMock.createRouter() as unknown as jest.Mocked<FleetAuthzRouter>;
+    routerMock = httpServiceMock.createRouter() as unknown as Mocked<FleetAuthzRouter>;
     registerRoutes(routerMock);
   });
 
@@ -179,7 +182,7 @@ describe('When calling package policy', () => {
     appContextService.start(createAppContextStartContractMock());
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>;
+    (await context.fleet).packagePolicyService.asCurrentUser as Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
     testPackagePolicy = {
       agents: 100,
@@ -243,7 +246,7 @@ describe('When calling package policy', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appContextService.stop();
   });
 
@@ -317,7 +320,7 @@ describe('When calling package policy', () => {
     });
 
     beforeEach(() => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockClear();
+      vi.spyOn(licenseService, 'hasAtLeast').mockClear();
       packagePolicyServiceMock.update.mockImplementation((soClient, esClient, policyId, newData) =>
         Promise.resolve({ ...existingPolicy, ...newData } as PackagePolicy)
       );
@@ -336,8 +339,8 @@ describe('When calling package policy', () => {
           },
         ],
       });
-      (agentPolicyService.get as jest.Mock).mockResolvedValue({ inputs: [] });
-      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: false }]);
+      (agentPolicyService.get as Mock).mockResolvedValue({ inputs: [] });
+      (agentPolicyService.getByIds as Mock).mockResolvedValue([{ is_managed: false }]);
     });
 
     it('should use existing package policy props if not provided by request', async () => {
@@ -460,11 +463,11 @@ describe('When calling package policy', () => {
     });
 
     it('should throw if policy_ids changed on agentless integration', async () => {
-      (agentPolicyService.get as jest.Mock).mockResolvedValue({
+      (agentPolicyService.get as Mock).mockResolvedValue({
         supports_agentless: true,
         inputs: [],
       });
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
 
       await expect(() => routeHandler(context, request, response)).rejects.toThrow(
@@ -473,7 +476,7 @@ describe('When calling package policy', () => {
     });
 
     it('should throw if output_id changed on a managed agent policy', async () => {
-      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: true }]);
+      (agentPolicyService.getByIds as Mock).mockResolvedValue([{ is_managed: true }]);
       const request = getUpdateKibanaRequest({ output_id: 'new-output' } as any);
 
       await expect(() => routeHandler(context, request, response)).rejects.toThrow(
@@ -482,7 +485,7 @@ describe('When calling package policy', () => {
     });
 
     it('should not throw if output_id unchanged on a managed agent policy', async () => {
-      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: true }]);
+      (agentPolicyService.getByIds as Mock).mockResolvedValue([{ is_managed: true }]);
       // existingPolicy has no output_id, so passing undefined should not trigger the check
       const request = getUpdateKibanaRequest({ name: 'endpoint-2' } as any);
 
@@ -491,7 +494,7 @@ describe('When calling package policy', () => {
     });
 
     it('should allow output_id change on a non-managed agent policy', async () => {
-      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: false }]);
+      (agentPolicyService.getByIds as Mock).mockResolvedValue([{ is_managed: false }]);
       const request = getUpdateKibanaRequest({ output_id: 'new-output' } as any);
 
       await routeHandler(context, request, response);
@@ -499,8 +502,8 @@ describe('When calling package policy', () => {
     });
 
     it('should rename the agentless agent policy to sync with the package policy name if agentless is enabled', async () => {
-      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
 
@@ -520,8 +523,8 @@ describe('When calling package policy', () => {
       );
     });
     it('should not rename the agentless agent policy if agentless is not enabled in cloud environment', async () => {
-      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: false },
       } as any);
 
@@ -535,7 +538,7 @@ describe('When calling package policy', () => {
       expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
     });
     it('should not rename the agentless agent policy if cloud is not enabled', async () => {
-      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
 
       mockAgentPolicy({
         supports_agentless: true,
@@ -547,8 +550,8 @@ describe('When calling package policy', () => {
       expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
     });
     it('should not rename the agentless agent policy if the package policy name has not changed', async () => {
-      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
 
@@ -563,8 +566,8 @@ describe('When calling package policy', () => {
       expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
     });
     it('should not rename the agentless agent policy if the agent policy does not support agentless', async () => {
-      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
 
@@ -659,7 +662,7 @@ describe('When calling package policy', () => {
       });
 
       it('should reject when request policy_ids target an agentless agent policy', async () => {
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           { id: 'agentless', is_managed: false, supports_agentless: true },
         ]);
 
@@ -676,7 +679,7 @@ describe('When calling package policy', () => {
       });
 
       it('should reject when request policy_id targets an agentless agent policy', async () => {
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           { id: 'agentless', is_managed: false, supports_agentless: true },
         ]);
 
@@ -687,7 +690,7 @@ describe('When calling package policy', () => {
       });
 
       it('should reject when a parent agent policy is agentless', async () => {
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           { id: '2', is_managed: false, supports_agentless: true },
         ]);
 
@@ -744,7 +747,7 @@ describe('When calling package policy', () => {
         },
       });
       (
-        (await context.core).elasticsearch.client.asInternalUser.search as jest.Mock
+        (await context.core).elasticsearch.client.asInternalUser.search as Mock
       ).mockImplementation(() => {
         return {
           took: 3,
@@ -926,7 +929,7 @@ describe('When calling package policy', () => {
     it('should return valid response', async () => {
       packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
       (
-        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+        (await context.fleet).packagePolicyService.asCurrentUser as Mocked<PackagePolicyClient>
       ).create.mockResolvedValue(testPackagePolicy);
       const request = httpServerMock.createKibanaRequest({
         body: testPackagePolicy,
@@ -956,14 +959,14 @@ describe('When calling package policy', () => {
             disableAgentlessLegacyAPI: true,
           })
         );
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: false }]);
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([{ is_managed: false }]);
       });
 
       it('should reject packages that only support agentless deployment', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           policy_templates: [agentlessOnlyTemplate],
         });
-        (getInstallation as jest.Mock).mockResolvedValue({ install_status: 'installing' });
+        (getInstallation as Mock).mockResolvedValue({ install_status: 'installing' });
 
         const request = httpServerMock.createKibanaRequest({
           body: testPackagePolicy,
@@ -979,10 +982,10 @@ describe('When calling package policy', () => {
       });
 
       it('should reject when a target agent policy is agentless', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           policy_templates: [mixedTemplate],
         });
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           { supports_agentless: true },
         ]);
 
@@ -996,12 +999,12 @@ describe('When calling package policy', () => {
       });
 
       it('should allow mixed-deployment packages in default mode', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           policy_templates: [mixedTemplate],
         });
         (
           (await context.fleet).packagePolicyService
-            .asCurrentUser as jest.Mocked<PackagePolicyClient>
+            .asCurrentUser as Mocked<PackagePolicyClient>
         ).create.mockResolvedValue(testPackagePolicy);
 
         const request = httpServerMock.createKibanaRequest({
@@ -1014,12 +1017,12 @@ describe('When calling package policy', () => {
       });
 
       it('should resolve the agentless-only check with skipArchive to avoid a full archive download', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           policy_templates: [mixedTemplate],
         });
         (
           (await context.fleet).packagePolicyService
-            .asCurrentUser as jest.Mocked<PackagePolicyClient>
+            .asCurrentUser as Mocked<PackagePolicyClient>
         ).create.mockResolvedValue(testPackagePolicy);
 
         const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
@@ -1035,7 +1038,7 @@ describe('When calling package policy', () => {
 
     it('should allow to create agentless package policies when disableAgentlessLegacyAPI is disabled', async () => {
       (
-        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+        (await context.fleet).packagePolicyService.asCurrentUser as Mocked<PackagePolicyClient>
       ).create.mockResolvedValue(testPackagePolicy);
 
       const request = httpServerMock.createKibanaRequest({
@@ -1057,7 +1060,7 @@ describe('When calling package policy', () => {
     it('should not log the legacy agentless deprecation for non-agentless creates when the flag is disabled', async () => {
       packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
       (
-        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+        (await context.fleet).packagePolicyService.asCurrentUser as Mocked<PackagePolicyClient>
       ).create.mockResolvedValue(testPackagePolicy);
 
       const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
@@ -1247,7 +1250,7 @@ describe('When calling package policy', () => {
         packagePolicyServiceMock.getByIDs.mockResolvedValue([
           { id: '1', policy_ids: ['agentless-ap'] },
         ] as unknown as PackagePolicy[]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           { id: 'agentless-ap', supports_agentless: true },
         ]);
 
@@ -1267,7 +1270,7 @@ describe('When calling package policy', () => {
         packagePolicyServiceMock.getByIDs.mockResolvedValue([
           { id: '1', policy_ids: ['regular-ap'] },
         ] as unknown as PackagePolicy[]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ id: 'regular-ap' }]);
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([{ id: 'regular-ap' }]);
         packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
 
         const request = httpServerMock.createKibanaRequest({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
@@ -16,37 +19,49 @@ import { useLocations } from '../../../../hooks/use_locations';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { BulkLocationsFlyout } from './bulk_locations_flyout';
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  useGetUrlParams: jest.fn(),
-}));
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      useGetUrlParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_locations', () => ({
-  useLocations: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_locations', () => {
+      const mocked = {
+      useLocations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../state', () => ({
-  ...jest.requireActual('../../../../state'),
-  fetchBulkUpdateMonitors: jest.fn(),
-}));
+vi.mock('../../../../state', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../state')),
+      fetchBulkUpdateMonitors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The real combobox is an EuiComboBox; a lightweight stand-in keeps these tests
 // focused on the flyout's add/remove/overwrite payload logic. Clicking it selects
 // the "us_east" location.
-jest.mock('../../../monitor_add_edit/form/field_wrappers', () => ({
-  LocationsComboBox: ({ onChange }: { onChange: (val: unknown[]) => void }) => (
-    <button
-      data-test-subj="syntheticsBulkLocationsComboBox"
-      onClick={() => onChange([{ id: 'us_east', label: 'US East', isServiceManaged: true }])}
-    >
-      {'select us_east'}
-    </button>
-  ),
-}));
+vi.mock('../../../monitor_add_edit/form/field_wrappers', () => {
+      const mocked = {
+      LocationsComboBox: ({ onChange }: { onChange: (val: unknown[]) => void }) => (
+        <button
+          data-test-subj="syntheticsBulkLocationsComboBox"
+          onClick={() => onChange([{ id: 'us_east', label: 'US East', isServiceManaged: true }])}
+        >
+          {'select us_east'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useGetUrlParamsMock = useGetUrlParams as jest.MockedFunction<typeof useGetUrlParams>;
-const useLocationsMock = useLocations as jest.MockedFunction<typeof useLocations>;
-const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as jest.MockedFunction<
+const useGetUrlParamsMock = useGetUrlParams as MockedFunction<typeof useGetUrlParams>;
+const useLocationsMock = useLocations as MockedFunction<typeof useLocations>;
+const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as MockedFunction<
   typeof fetchBulkUpdateMonitors
 >;
 
@@ -74,11 +89,11 @@ const makeMonitor = (
   } as unknown as EncryptedSyntheticsSavedMonitor);
 
 describe('<BulkLocationsFlyout />', () => {
-  const onClose = jest.fn();
-  const reloadPage = jest.fn();
+  const onClose = vi.fn();
+  const reloadPage = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetUrlParamsMock.mockReturnValue({ spaceId: 'default' } as ReturnType<
       typeof useGetUrlParams
     >);

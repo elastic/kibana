@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AwaitedProperties } from '@kbn/utility-types';
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
@@ -30,9 +32,12 @@ const mockRouteContext = {
 const workpad = workpads[0];
 const now = new Date();
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123abc'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123abc'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PUT workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -49,7 +54,7 @@ describe('PUT workpad', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     clock.restore();
   });
 

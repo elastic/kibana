@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 import 'jest-canvas-mock';
@@ -13,9 +15,9 @@ import { FILTER_REQUESTS_LABEL } from '../translations';
 import { render } from '../../../../../utils/testing';
 
 describe('waterfall filter', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   const query = '';
-  const setQuery = jest.fn();
+  const setQuery = vi.fn();
   const defaultProps = {
     query,
     setQuery,
@@ -25,11 +27,11 @@ describe('waterfall filter', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {
@@ -50,7 +52,7 @@ describe('waterfall filter', () => {
 
     // input has debounce effect so hence the timer
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     expect(setQuery).toHaveBeenCalledWith(testText);

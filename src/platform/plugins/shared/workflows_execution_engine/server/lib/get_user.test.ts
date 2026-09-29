@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
 import { getAuthenticatedUser } from './get_user';
 
@@ -14,13 +16,13 @@ const createRequest = (): KibanaRequest => ({ headers: {} } as KibanaRequest);
 
 const createClusterClient = (): IClusterClient =>
   ({
-    asScoped: jest.fn(),
+    asScoped: vi.fn(),
   } as unknown as IClusterClient);
 
 const createSecurity = (user: unknown): SecurityServiceStart =>
   ({
     authc: {
-      getCurrentUser: jest.fn().mockReturnValue(user),
+      getCurrentUser: vi.fn().mockReturnValue(user),
     },
   } as unknown as SecurityServiceStart);
 

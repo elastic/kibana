@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
@@ -13,17 +16,23 @@ import { getTagsByName } from '../../common/containers/tags/api';
 import React from 'react';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('@kbn/security-solution-navigation/src/context');
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../common/containers/tags/api');
-jest.mock('../../common/lib/apm/use_track_http_request');
-jest.mock('../../common/components/link_to', () => ({
-  useGetSecuritySolutionUrl: jest
-    .fn()
-    .mockReturnValue(jest.fn().mockReturnValue('/app/security/dashboards/create')),
-}));
+vi.mock('@kbn/security-solution-navigation/src/context');
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/containers/tags/api');
+vi.mock('../../common/lib/apm/use_track_http_request');
+vi.mock('../../common/components/link_to', () => {
+      const mocked = {
+      useGetSecuritySolutionUrl: vi
+        .fn()
+        .mockReturnValue(vi.fn().mockReturnValue('/app/security/dashboards/create')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderUseCreateSecurityDashboardLink = () =>
   renderHook(() => useCreateSecurityDashboardLink(), {
@@ -36,18 +45,18 @@ const renderUseCreateSecurityDashboardLink = () =>
 
 describe('useCreateSecurityDashboardLink', () => {
   beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         savedObjectsTagging: {
-          create: jest.fn(),
+          create: vi.fn(),
         },
-        http: { get: jest.fn() },
+        http: { get: vi.fn() },
       },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useSecurityDashboardsTableItems', () => {

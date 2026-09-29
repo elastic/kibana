@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { TelemetryService } from './telemetry_service';
 import { TrainedModelsTelemetryEventTypes } from './types';
@@ -23,7 +25,7 @@ describe('TelemetryService', () => {
     it('registers all trained models event types', () => {
       telemetryService.setup({ analytics: analyticsMock });
 
-      const registeredEventTypes = (analyticsMock.registerEventType as jest.Mock).mock.calls.map(
+      const registeredEventTypes = (analyticsMock.registerEventType as Mock).mock.calls.map(
         ([eventDef]) => eventDef.eventType
       );
 

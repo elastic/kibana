@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { findSourceComponent } from './find_source_component';
 import { getFiberType } from './get_fiber_type';
 import type { ReactFiberNode } from './types';
 
-jest.mock('./get_fiber_type');
+vi.mock('./get_fiber_type');
 
-const mockGetFiberType = getFiberType as jest.MockedFunction<typeof getFiberType>;
+const mockGetFiberType = getFiberType as MockedFunction<typeof getFiberType>;
 
 describe('findSourceComponent', () => {
   let mockElement: HTMLElement;
   let mockParentElement: HTMLElement;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockElement = document.createElement('div');
     mockParentElement = document.createElement('div');
     mockParentElement.appendChild(mockElement);

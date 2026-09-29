@@ -7,27 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useLogFlyoutData } from './use_log_flyout_data';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
-const mockUseFetchLog = jest.fn();
-const mockUseAdhocDataView = jest.fn();
+const mockUseFetchLog = vi.fn();
+const mockUseAdhocDataView = vi.fn();
 
-jest.mock('../../hooks/use_fetch_log', () => ({
-  useFetchLog: (params: { id: string; index?: string }) => mockUseFetchLog(params),
-}));
+vi.mock('../../hooks/use_fetch_log', () => {
+      const mocked = {
+      useFetchLog: (params: { id: string; index?: string }) => mockUseFetchLog(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_adhoc_data_view', () => ({
-  useAdhocDataView: (params: { index: string | null }) => mockUseAdhocDataView(params),
-}));
+vi.mock('../../hooks/use_adhoc_data_view', () => {
+      const mocked = {
+      useAdhocDataView: (params: { index: string | null }) => mockUseAdhocDataView(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useLogFlyoutData', () => {
   const id = 'test-log-id';
   const index = 'logs-*';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return loading true when fetching log', () => {

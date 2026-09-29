@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import dateMath from '@kbn/datemath';
 import { evaluateKql } from './eval_kql';
 
@@ -284,12 +286,12 @@ describe('evaluateKql', () => {
 
   describe('datemath expressions', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(FAKE_NOW);
+      vi.useFakeTimers();
+      vi.setSystemTime(FAKE_NOW);
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     describe('"is" expressions with datemath', () => {

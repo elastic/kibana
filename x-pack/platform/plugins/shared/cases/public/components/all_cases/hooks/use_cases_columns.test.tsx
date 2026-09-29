@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
@@ -25,9 +28,9 @@ import { useGetCaseConfiguration } from '../../../containers/configure/use_get_c
 import { coreMock } from '@kbn/core/public/mocks';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('../../../containers/configure/use_get_case_configuration');
+vi.mock('../../../containers/configure/use_get_case_configuration');
 
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
 
 const DEFAULT_SELECTED_COLUMNS = [
   { field: 'title', name: 'title', isChecked: true },
@@ -53,7 +56,7 @@ describe('useCasesColumns ', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });

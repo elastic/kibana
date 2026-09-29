@@ -7,31 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { buildMockDashboardApi } from '../../../mocks';
 import { useMenuItemGroups } from './use_menu_item_groups';
 import { Subject } from 'rxjs';
 
-const mockGetTriggerCompatibleActions = jest.fn();
-const mockGetAction = jest.fn();
-jest.mock('../../../services/kibana_services', () => {
-  const actual = jest.requireActual('../../../services/kibana_services');
+const mockGetTriggerCompatibleActions = vi.fn();
+const mockGetAction = vi.fn();
+vi.mock('../../../services/kibana_services', async () => {
+  const actual = (await vi.importActual('../../../services/kibana_services'));
   return {
     ...actual,
     uiActionsService: {
-      getTriggerCompatibleActions: jest
+      getTriggerCompatibleActions: vi
         .fn()
         .mockImplementation(() => mockGetTriggerCompatibleActions()),
-      getAction: jest.fn().mockImplementation((id: string) => mockGetAction(id)),
+      getAction: vi.fn().mockImplementation((id: string) => mockGetAction(id)),
     },
   };
 });
 
 describe('useMenuItemGroups', () => {
   test('opens the selected panel editor without waiting for Add to be enabled', async () => {
-    const execute = jest.fn();
-    const returnFocus = jest.fn();
+    const execute = vi.fn();
+    const returnFocus = vi.fn();
     mockGetTriggerCompatibleActions.mockResolvedValueOnce([
       {
         id: 'mockAddPanelAction',
@@ -53,7 +55,7 @@ describe('useMenuItemGroups', () => {
     const api = {
       ...buildMockDashboardApi().api,
       openOverlay: () => {},
-      clearOverlays: jest.fn(),
+      clearOverlays: vi.fn(),
     };
     const { result } = renderHook(() => useMenuItemGroups({ dashboardApi: api, returnFocus }));
     await waitFor(() => expect(result.current.groups).toBeDefined());
@@ -141,7 +143,7 @@ describe('useMenuItemGroups', () => {
         getIconType: (): string => 'controls',
         execute: () => {},
         isCompatible: async (): Promise<boolean> => true,
-        isDisabled: jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(false),
+        isDisabled: vi.fn().mockReturnValueOnce(true).mockReturnValueOnce(false),
         getDisabledStateChangesSubject: () => disabledStateSubject,
       },
     ]);

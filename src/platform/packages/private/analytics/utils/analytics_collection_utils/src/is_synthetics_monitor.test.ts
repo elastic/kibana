@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isSyntheticsMonitor } from './is_synthetics_monitor';
 
 describe('isSyntheticsMonitor', () => {
@@ -15,7 +17,7 @@ describe('isSyntheticsMonitor', () => {
   });
 
   test('returns true for when the user agent contains "Elastic/Synthetics"', () => {
-    jest
+    vi
       .spyOn(window.navigator, 'userAgent', 'get')
       .mockReturnValue(window.navigator.userAgent + 'Elastic/Synthetics');
     expect(isSyntheticsMonitor()).toBe(true);

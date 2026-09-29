@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   getInferenceExecutorMock,
   getInferenceAdapterMock,
@@ -50,7 +52,7 @@ describe('createChatCompleteApi', () => {
 
   let chatComplete: ChatCompleteAPI;
   const mockEsClient = {
-    get: jest.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({
       _source: {
         id: 'existing-replacements-id',
         namespace: 'default',
@@ -60,17 +62,17 @@ describe('createChatCompleteApi', () => {
         created_by: 'inference',
       },
     }),
-    index: jest.fn().mockResolvedValue({}),
-    update: jest.fn().mockResolvedValue({}),
+    index: vi.fn().mockResolvedValue({}),
+    update: vi.fn().mockResolvedValue({}),
     indices: {
-      exists: jest.fn().mockResolvedValue(true),
-      create: jest.fn().mockResolvedValue({}),
+      exists: vi.fn().mockResolvedValue(true),
+      create: vi.fn().mockResolvedValue({}),
     },
     ml: {
-      inferTrainedModel: jest.fn(),
+      inferTrainedModel: vi.fn(),
     },
     inference: {
-      get: jest.fn().mockResolvedValue({ endpoints: [] }),
+      get: vi.fn().mockResolvedValue({ endpoints: [] }),
     },
   } as any;
   beforeEach(() => {
@@ -634,8 +636,8 @@ describe('createChatCompleteApi', () => {
     };
 
     it('blocks the call when the setting is enabled and another connector is used', async () => {
-      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
-      const getDefaultConnectorId = jest.fn().mockResolvedValue('default-connector-id');
+      const isDefaultConnectorOnly = vi.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = vi.fn().mockResolvedValue('default-connector-id');
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
@@ -658,8 +660,8 @@ describe('createChatCompleteApi', () => {
     });
 
     it('allows the call when the connector matches the default connector', async () => {
-      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
-      const getDefaultConnectorId = jest.fn().mockResolvedValue('connectorId');
+      const isDefaultConnectorOnly = vi.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = vi.fn().mockResolvedValue('connectorId');
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
@@ -677,8 +679,8 @@ describe('createChatCompleteApi', () => {
     });
 
     it('allows other connectors when the setting is disabled', async () => {
-      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(false);
-      const getDefaultConnectorId = jest.fn().mockResolvedValue('default-connector-id');
+      const isDefaultConnectorOnly = vi.fn().mockResolvedValue(false);
+      const getDefaultConnectorId = vi.fn().mockResolvedValue('default-connector-id');
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
@@ -697,8 +699,8 @@ describe('createChatCompleteApi', () => {
     });
 
     it('blocks the call when the setting is enabled and no default connector resolves', async () => {
-      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
-      const getDefaultConnectorId = jest.fn().mockResolvedValue(undefined);
+      const isDefaultConnectorOnly = vi.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = vi.fn().mockResolvedValue(undefined);
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
@@ -730,11 +732,11 @@ describe('createChatCompleteApi', () => {
         modelId: 'gpt-4o',
         taskType: 'chat_completion',
       });
-      createInferenceEndpointExecutorMock.mockReturnValue({ invoke: jest.fn() });
+      createInferenceEndpointExecutorMock.mockReturnValue({ invoke: vi.fn() });
       inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
 
-      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
-      const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
+      const isDefaultConnectorOnly = vi.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = vi.fn().mockResolvedValue('my-endpoint');
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
@@ -751,8 +753,8 @@ describe('createChatCompleteApi', () => {
     });
 
     it('fails closed when reading the setting fails', async () => {
-      const isDefaultConnectorOnly = jest.fn().mockRejectedValue(new Error('ui settings down'));
-      const getDefaultConnectorId = jest.fn().mockResolvedValue('connectorId');
+      const isDefaultConnectorOnly = vi.fn().mockRejectedValue(new Error('ui settings down'));
+      const getDefaultConnectorId = vi.fn().mockResolvedValue('connectorId');
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
@@ -773,8 +775,8 @@ describe('createChatCompleteApi', () => {
     });
 
     it('fails closed when resolving the default connector fails', async () => {
-      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
-      const getDefaultConnectorId = jest.fn().mockRejectedValue(new Error('so client down'));
+      const isDefaultConnectorOnly = vi.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = vi.fn().mockRejectedValue(new Error('so client down'));
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
@@ -795,8 +797,8 @@ describe('createChatCompleteApi', () => {
     });
 
     it('blocks an inference endpoint whose id differs from the default connector id', async () => {
-      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
-      const getDefaultConnectorId = jest.fn().mockResolvedValue('other-endpoint');
+      const isDefaultConnectorOnly = vi.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = vi.fn().mockResolvedValue('other-endpoint');
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
@@ -841,7 +843,7 @@ describe('createChatCompleteApi', () => {
   });
 
   describe('stack connector resolving to inference endpoint', () => {
-    const mockEndpointExecutor = { invoke: jest.fn() };
+    const mockEndpointExecutor = { invoke: vi.fn() };
 
     beforeEach(() => {
       const endpointConnector = createInferenceConnectorMock({
@@ -906,7 +908,7 @@ describe('createChatCompleteApi', () => {
   });
 
   describe('inference endpoint path (via connectorId resolution)', () => {
-    const mockEndpointExecutor = { invoke: jest.fn() };
+    const mockEndpointExecutor = { invoke: vi.fn() };
 
     beforeEach(() => {
       mockEsClient.inference.get.mockResolvedValue({

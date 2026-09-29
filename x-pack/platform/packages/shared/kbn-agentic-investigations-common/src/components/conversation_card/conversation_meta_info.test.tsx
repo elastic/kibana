@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -13,15 +15,15 @@ import { ConversationMetaInfo } from './conversation_meta_info';
 const agedBy = (ms: number) => new Date(Date.now() - ms).toISOString();
 
 describe('ConversationMetaInfo', () => {
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
 
   it('ages on its own, without the card re-rendering', () => {
     renderWithKibanaRenderContext(<ConversationMetaInfo createdAt={agedBy(90 * 1000)} />);
 
     expect(screen.getByText('1 minute ago')).toBeInTheDocument();
 
-    act(() => jest.advanceTimersByTime(60 * 1000));
+    act(() => vi.advanceTimersByTime(60 * 1000));
 
     expect(screen.getByText('2 minutes ago')).toBeInTheDocument();
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type React from 'react';
 import { useRef } from 'react';
@@ -13,9 +15,9 @@ import { useElementHeight } from './use_element_height';
 // Mock ResizeObserver
 class MockResizeObserver {
   callback: ResizeObserverCallback;
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
 
   constructor(callback: ResizeObserverCallback) {
     this.callback = callback;
@@ -35,7 +37,7 @@ describe('useElementHeight', () => {
 
   beforeEach(() => {
     originalResizeObserver = global.ResizeObserver;
-    global.ResizeObserver = jest.fn((callback: ResizeObserverCallback) => {
+    global.ResizeObserver = vi.fn((callback: ResizeObserverCallback) => {
       mockResizeObserver = new MockResizeObserver(callback);
       return mockResizeObserver as unknown as ResizeObserver;
     }) as unknown as typeof ResizeObserver;
@@ -43,7 +45,7 @@ describe('useElementHeight', () => {
 
   afterEach(() => {
     global.ResizeObserver = originalResizeObserver;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns 0 initially when ref is null', () => {
@@ -71,7 +73,7 @@ describe('useElementHeight', () => {
   it('measures height correctly when element is observed', () => {
     const mockElement = document.createElement('div');
     const mockBoundingRect = { height: 100, width: 200 } as DOMRect;
-    jest.spyOn(mockElement, 'getBoundingClientRect').mockReturnValue(mockBoundingRect);
+    vi.spyOn(mockElement, 'getBoundingClientRect').mockReturnValue(mockBoundingRect);
 
     const { result } = renderHook(() => {
       const ref = useRef<HTMLDivElement>(mockElement);
@@ -99,7 +101,7 @@ describe('useElementHeight', () => {
   it('updates height when element size changes via ResizeObserver', () => {
     const mockElement = document.createElement('div');
     let currentHeight = 100;
-    jest.spyOn(mockElement, 'getBoundingClientRect').mockImplementation(
+    vi.spyOn(mockElement, 'getBoundingClientRect').mockImplementation(
       () =>
         ({
           height: currentHeight,
@@ -180,7 +182,7 @@ describe('useElementHeight', () => {
   it('handles multiple resize events correctly', () => {
     const mockElement = document.createElement('div');
     let height = 50;
-    jest.spyOn(mockElement, 'getBoundingClientRect').mockImplementation(
+    vi.spyOn(mockElement, 'getBoundingClientRect').mockImplementation(
       () =>
         ({
           height,
@@ -245,7 +247,7 @@ describe('useElementHeight', () => {
 
   it('updates when ref changes from null to element', () => {
     const mockElement = document.createElement('div');
-    jest.spyOn(mockElement, 'getBoundingClientRect').mockReturnValue({
+    vi.spyOn(mockElement, 'getBoundingClientRect').mockReturnValue({
       height: 150,
       width: 200,
     } as DOMRect);

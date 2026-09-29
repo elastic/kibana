@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -18,7 +20,7 @@ import * as api from '../../containers/user_profiles/api';
 import type { UserProfile } from '@kbn/user-profile-components';
 import { renderWithTestingProviders } from '../../common/mock';
 
-jest.mock('../../containers/user_profiles/api');
+vi.mock('../../containers/user_profiles/api');
 
 const currentUserProfile = userProfiles[0];
 
@@ -34,7 +36,7 @@ describe('Assignees', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', async () => {
@@ -52,7 +54,7 @@ describe('Assignees', () => {
   });
 
   it('does not render the assign yourself link when the current user profile is undefined', async () => {
-    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    const spyOnGetCurrentUserProfile = vi.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(undefined as unknown as UserProfile);
 
     renderWithTestingProviders(
@@ -70,7 +72,7 @@ describe('Assignees', () => {
   });
 
   it('selects the current user correctly', async () => {
-    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    const spyOnGetCurrentUserProfile = vi.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(currentUserProfile);
 
     renderWithTestingProviders(
@@ -89,7 +91,7 @@ describe('Assignees', () => {
   });
 
   it('disables the assign yourself button if the current user is already selected', async () => {
-    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    const spyOnGetCurrentUserProfile = vi.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(currentUserProfile);
 
     renderWithTestingProviders(
@@ -159,7 +161,7 @@ describe('Assignees', () => {
       },
     ];
 
-    const spyOnSuggestUserProfiles = jest.spyOn(api, 'suggestUserProfiles');
+    const spyOnSuggestUserProfiles = vi.spyOn(api, 'suggestUserProfiles');
     spyOnSuggestUserProfiles.mockResolvedValue(similarProfiles);
 
     renderWithTestingProviders(
@@ -196,7 +198,7 @@ describe('Assignees', () => {
       },
     };
 
-    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+    const spyOnBulkGetUserProfiles = vi.spyOn(api, 'bulkGetUserProfiles');
     spyOnBulkGetUserProfiles.mockResolvedValue([userProfile]);
 
     renderWithTestingProviders(

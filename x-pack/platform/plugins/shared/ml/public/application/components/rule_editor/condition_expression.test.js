@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Mock the mlJobService that is imported for saving rules.
-jest.mock('../../services/job_service', () => 'mlJobService');
+vi.mock('../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -16,8 +18,8 @@ import { ML_DETECTOR_RULE_APPLIES_TO, ML_DETECTOR_RULE_OPERATOR } from '@kbn/ml-
 import { ConditionExpression } from './condition_expression';
 
 describe('ConditionExpression', () => {
-  const updateCondition = jest.fn();
-  const deleteCondition = jest.fn();
+  const updateCondition = vi.fn();
+  const deleteCondition = vi.fn();
 
   const requiredProps = {
     index: 0,

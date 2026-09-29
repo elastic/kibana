@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Either from 'fp-ts/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
@@ -63,7 +65,7 @@ const appMappings: IndexMapping = {
 
 describe('checkTargetTypesMappings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when index mappings are missing required properties', () => {

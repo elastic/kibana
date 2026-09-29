@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { of, toArray, lastValueFrom } from 'rxjs';
 import { chunkEvent, tokensEvent } from '../../../test_utils';
 import type { OpenAIRequest } from './types';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 
-jest.mock('./manually_count_tokens');
+vi.mock('./manually_count_tokens');
 import { manuallyCountPromptTokens, manuallyCountCompletionTokens } from './manually_count_tokens';
-const manuallyCountPromptTokensMock = manuallyCountPromptTokens as jest.MockedFn<
+const manuallyCountPromptTokensMock = manuallyCountPromptTokens as MockedFunction<
   typeof manuallyCountPromptTokens
 >;
-const manuallyCountCompletionTokensMock = manuallyCountCompletionTokens as jest.MockedFn<
+const manuallyCountCompletionTokensMock = manuallyCountCompletionTokens as MockedFunction<
   typeof manuallyCountCompletionTokens
 >;
 

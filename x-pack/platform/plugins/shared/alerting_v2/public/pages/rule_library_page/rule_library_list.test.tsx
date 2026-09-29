@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,16 +15,14 @@ import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RuleLibraryList } from './rule_library_list';
 
-const mockFindItems = jest.fn();
-const mockInstallMutate = jest.fn();
+const mockFindItems = vi.fn();
+const mockInstallMutate = vi.fn();
 let mockCanWriteRules = true;
 let mockInstallIsLoading = false;
 let mockInstallVariables: { id: string } | undefined;
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -34,7 +34,7 @@ jest.mock('@kbn/core-di-browser', () => {
       }
 
       const services: Record<string, unknown> = {
-        notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+        notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
       };
 
       return services[token as string] ?? {};
@@ -43,21 +43,27 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('./rule_templates_data_source', () => ({
-  ...jest.requireActual('./rule_templates_data_source'),
-  useRuleTemplatesDataSource: () => ({
-    findItems: mockFindItems,
-    debounceMs: 0,
-  }),
-}));
+vi.mock('./rule_templates_data_source', async () => {
+      const mocked = {
+      ...(await vi.importActual('./rule_templates_data_source')),
+      useRuleTemplatesDataSource: () => ({
+        findItems: mockFindItems,
+        debounceMs: 0,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_install_rule_template', () => ({
-  useInstallRuleTemplate: () => ({
-    mutate: mockInstallMutate,
-    isLoading: mockInstallIsLoading,
-    variables: mockInstallVariables,
-  }),
-}));
+vi.mock('../../hooks/use_install_rule_template', () => {
+      const mocked = {
+      useInstallRuleTemplate: () => ({
+        mutate: mockInstallMutate,
+        isLoading: mockInstallIsLoading,
+        variables: mockInstallVariables,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createRulePayload = (overrides: Partial<CreateRuleData> = {}): CreateRuleData =>
   ({
@@ -85,7 +91,7 @@ const renderList = () =>
 
 describe('RuleLibraryList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCanWriteRules = true;
     mockInstallIsLoading = false;
     mockInstallVariables = undefined;

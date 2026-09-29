@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fetchStaleStatus } from './api';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 
-jest.mock('../../../../utils/api_service', () => ({
-  apiService: { get: jest.fn(), post: jest.fn() },
-}));
+vi.mock('../../../../utils/api_service', () => {
+      const mocked = {
+      apiService: { get: vi.fn(), post: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('fetchStaleStatus', () => {
-  const mockPost = apiService.post as jest.Mock;
+  const mockPost = apiService.post as Mock;
 
   beforeEach(() => {
     mockPost.mockReset();

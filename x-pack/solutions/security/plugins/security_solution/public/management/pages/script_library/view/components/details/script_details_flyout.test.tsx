@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import {
   type AppContextTestRender,
@@ -40,7 +42,7 @@ describe('EndpointScriptDetailsFlyout', () => {
         updatedBy: 'elastic',
         updatedAt: '2026-02-04T12:23:37Z',
       }),
-      onClickAction: jest.fn(),
+      onClickAction: vi.fn(),
       'data-test-subj': 'test',
     };
 
@@ -53,7 +55,7 @@ describe('EndpointScriptDetailsFlyout', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should render correctly', () => {

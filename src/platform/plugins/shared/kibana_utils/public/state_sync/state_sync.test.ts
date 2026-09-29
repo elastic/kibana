@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { BaseState, BaseStateContainer } from '../../common/state_containers';
 import { createStateContainer } from '../../common/state_containers';
 import type { TodoActions, TodoState } from '../../demos/state_containers/todomvc';
@@ -36,8 +39,8 @@ describe('state_sync', () => {
 
     beforeEach(() => {
       testStateStorage = {
-        set: jest.fn(),
-        get: jest.fn(),
+        set: vi.fn(),
+        get: vi.fn(),
         change$: <State>(key: string) => storageChange$.asObservable() as Observable<State | null>,
       };
     });
@@ -66,7 +69,7 @@ describe('state_sync', () => {
     it('should sync storage to state', () => {
       const key = '_s';
       const storageState1 = [{ id: 1, text: 'todo', completed: false }];
-      (testStateStorage.get as jest.Mock).mockImplementation(() => storageState1);
+      (testStateStorage.get as Mock).mockImplementation(() => storageState1);
       const { stop, start } = syncState({
         stateContainer: withDefaultState(container, defaultState),
         storageKey: key,
@@ -78,7 +81,7 @@ describe('state_sync', () => {
       expect(container.getState()).toEqual(defaultState);
 
       const storageState2 = { todos: [{ id: 1, text: 'todo', completed: true }] };
-      (testStateStorage.get as jest.Mock).mockImplementation(() => storageState2);
+      (testStateStorage.get as Mock).mockImplementation(() => storageState2);
       storageChange$.next(storageState2);
 
       expect(container.getState()).toEqual(storageState2);
@@ -94,7 +97,7 @@ describe('state_sync', () => {
         stateStorage: testStateStorage,
       });
       start();
-      (testStateStorage.set as jest.Mock).mockClear();
+      (testStateStorage.set as Mock).mockClear();
 
       container.set(defaultState);
       expect(testStateStorage.set).not.toHaveBeenCalled();
@@ -113,7 +116,7 @@ describe('state_sync', () => {
 
       const originalState = container.getState();
       const storageState = { ...originalState };
-      (testStateStorage.get as jest.Mock).mockImplementation(() => storageState);
+      (testStateStorage.get as Mock).mockImplementation(() => storageState);
       storageChange$.next(storageState);
 
       expect(container.getState()).toBe(originalState);
@@ -132,7 +135,7 @@ describe('state_sync', () => {
       ]);
       start();
 
-      (testStateStorage.get as jest.Mock).mockImplementation(() => null);
+      (testStateStorage.get as Mock).mockImplementation(() => null);
       storageChange$.next(null);
 
       expect(container.getState()).toEqual(defaultState);
@@ -154,7 +157,7 @@ describe('state_sync', () => {
       const differentlyShapedObject = {
         different: 'test',
       };
-      (testStateStorage.get as jest.Mock).mockImplementation(() => differentlyShapedObject);
+      (testStateStorage.get as Mock).mockImplementation(() => differentlyShapedObject);
       storageChange$.next(differentlyShapedObject as any);
 
       expect(container.getState()).toStrictEqual(differentlyShapedObject);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import JiraParamsFields from './jira_params';
 import { useGetIssueTypes } from './use_get_issue_types';
@@ -16,16 +19,16 @@ import { act, fireEvent, render, waitFor, within, screen } from '@testing-librar
 import userEvent from '@testing-library/user-event';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('./use_get_issue_types');
-jest.mock('./use_get_fields_by_issue_type');
-jest.mock('./use_get_issues');
-jest.mock('./use_get_single_issue');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('./use_get_issue_types');
+vi.mock('./use_get_fields_by_issue_type');
+vi.mock('./use_get_issues');
+vi.mock('./use_get_single_issue');
 
-const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
-const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
-const useGetIssuesMock = useGetIssues as jest.Mock;
-const useGetSingleIssueMock = useGetSingleIssue as jest.Mock;
+const useGetIssueTypesMock = useGetIssueTypes as Mock;
+const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as Mock;
+const useGetIssuesMock = useGetIssues as Mock;
+const useGetSingleIssueMock = useGetSingleIssue as Mock;
 
 const actionParams = {
   subAction: 'pushToService',
@@ -50,7 +53,7 @@ const connector: ActionConnector = createMockActionConnector({
   name: 'Test',
 });
 
-const editAction = jest.fn();
+const editAction = vi.fn();
 const defaultProps = {
   actionConnector: connector,
   actionParams,
@@ -122,7 +125,7 @@ describe('JiraParamsFields renders', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetIssuesMock.mockReturnValue(useGetIssuesResponse);

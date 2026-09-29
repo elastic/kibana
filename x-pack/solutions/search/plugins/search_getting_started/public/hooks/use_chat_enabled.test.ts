@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useGettingStartChatEnabled } from './use_chat_enabled';
 import { useKibana } from './use_kibana';
 import { SEARCH_GETTING_STARTED_CHAT_FEATURE_FLAG } from '@kbn/search-shared-ui';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const mockServices = (
   overrides: Partial<{
@@ -29,7 +32,7 @@ const mockServices = (
       agentBuilder,
       cloud: { isServerlessEnabled },
       featureFlags: {
-        useBooleanValue: jest
+        useBooleanValue: vi
           .fn()
           .mockImplementation((flag: string, defaultValue: boolean) =>
             flag === SEARCH_GETTING_STARTED_CHAT_FEATURE_FLAG ? featureFlagValue : defaultValue
@@ -49,7 +52,7 @@ describe('useGettingStartChatEnabled', () => {
   });
 
   it('returns false when cloud is not available', () => {
-    const useBooleanValue = jest.fn().mockReturnValue(true);
+    const useBooleanValue = vi.fn().mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {},

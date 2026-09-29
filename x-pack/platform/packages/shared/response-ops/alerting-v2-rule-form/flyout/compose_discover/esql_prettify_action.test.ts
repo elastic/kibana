@@ -5,45 +5,54 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { monaco } from '@kbn/code-editor';
 import { prettifyQuery } from '@kbn/esql-utils';
 import { addPrettifyAction } from './esql_prettify_action';
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    KeyMod: { CtrlCmd: 2048 },
-    KeyCode: { KeyI: 39 },
-    editor: { EditorOption: { fontInfo: 0 } },
-  },
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      monaco: {
+        KeyMod: { CtrlCmd: 2048 },
+        KeyCode: { KeyI: 39 },
+        editor: { EditorOption: { fontInfo: 0 } },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  prettifyQuery: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      prettifyQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const fullRange = { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 10 };
 
 const makeEditor = (value: string) => {
   const model = { getFullModelRange: () => fullRange };
   const editor = {
-    addAction: jest.fn(),
+    addAction: vi.fn(),
     getModel: () => model,
     getValue: () => value,
     getLayoutInfo: () => ({ contentWidth: 800 }),
     getOption: () => ({ typicalHalfwidthCharacterWidth: 8 }),
-    executeEdits: jest.fn(),
+    executeEdits: vi.fn(),
   };
   return editor as unknown as monaco.editor.IStandaloneCodeEditor & {
-    addAction: jest.Mock;
-    executeEdits: jest.Mock;
+    addAction: Mock;
+    executeEdits: Mock;
   };
 };
 
-const getRegisteredRun = (editor: { addAction: jest.Mock }) =>
+const getRegisteredRun = (editor: { addAction: Mock }) =>
   editor.addAction.mock.calls[0][0].run;
 
 describe('addPrettifyAction', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('registers a Cmd/Ctrl+I action', () => {
     const editor = makeEditor('FROM logs | WHERE a > 1');
@@ -58,7 +67,7 @@ describe('addPrettifyAction', () => {
 
   it('applies the prettified query when it differs', () => {
     const editor = makeEditor('FROM logs|WHERE a>1');
-    jest.mocked(prettifyQuery).mockReturnValue('FROM logs\n| WHERE a > 1');
+    vi.mocked(prettifyQuery).mockReturnValue('FROM logs\n| WHERE a > 1');
     addPrettifyAction(editor);
 
     getRegisteredRun(editor)(editor);
@@ -71,7 +80,7 @@ describe('addPrettifyAction', () => {
   it('does nothing when the query is already formatted', () => {
     const query = 'FROM logs\n| WHERE a > 1';
     const editor = makeEditor(query);
-    jest.mocked(prettifyQuery).mockReturnValue(query);
+    vi.mocked(prettifyQuery).mockReturnValue(query);
     addPrettifyAction(editor);
 
     getRegisteredRun(editor)(editor);
@@ -81,7 +90,7 @@ describe('addPrettifyAction', () => {
 
   it('does not wipe a fragment when prettifyQuery returns an empty string', () => {
     const editor = makeEditor('| WHERE delay > 15');
-    jest.mocked(prettifyQuery).mockReturnValue('');
+    vi.mocked(prettifyQuery).mockReturnValue('');
     addPrettifyAction(editor);
 
     getRegisteredRun(editor)(editor);
@@ -91,7 +100,7 @@ describe('addPrettifyAction', () => {
 
   it('leaves the content untouched when prettifying throws (e.g. a fragment)', () => {
     const editor = makeEditor('| WHERE a > 1');
-    jest.mocked(prettifyQuery).mockImplementation(() => {
+    vi.mocked(prettifyQuery).mockImplementation(() => {
       throw new Error('parse error');
     });
     addPrettifyAction(editor);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Capabilities, CoreSetup, CoreStart } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createAdminPrivilegeSwitcher } from './admin_privilege_switcher';
@@ -14,7 +16,7 @@ function createStartServicesWithScopedEsClient(
   asCurrentUser: object
 ): Awaited<ReturnType<CoreSetup['getStartServices']>> {
   const coreStart: CoreStart = coreMock.createStart();
-  const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
+  const asScoped = vi.fn().mockReturnValue({ asCurrentUser });
   Object.assign(coreStart.elasticsearch.client, { asScoped });
   return [coreStart, {}, {}];
 }
@@ -25,11 +27,14 @@ const minimalCapabilities: Capabilities = {
   catalogue: {},
 };
 
-jest.mock('../services/utils', () => ({
-  isAdminFromRequest: jest.fn(),
-}));
+vi.mock('../services/utils', () => {
+      const mocked = {
+      isAdminFromRequest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsAdminFromRequest = jest.mocked(isAdminFromRequest);
+const mockIsAdminFromRequest = vi.mocked(isAdminFromRequest);
 
 describe('createAdminPrivilegeSwitcher', () => {
   const logger = loggingSystemMock.createLogger();
@@ -38,11 +43,11 @@ describe('createAdminPrivilegeSwitcher', () => {
     createAdminPrivilegeSwitcher(getStartServices, logger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty object when useDefaultCapabilities is true', async () => {
-    const getStartServices = jest.fn().mockResolvedValue([coreMock.createStart(), {}, {}]);
+    const getStartServices = vi.fn().mockResolvedValue([coreMock.createStart(), {}, {}]);
     const switcher = createSwitcher(getStartServices);
     const request = httpServerMock.createKibanaRequest();
 
@@ -56,7 +61,7 @@ describe('createAdminPrivilegeSwitcher', () => {
   it('returns agentBuilder.isAdmin true when privilege check grants admin', async () => {
     mockIsAdminFromRequest.mockResolvedValue(true);
     const asCurrentUser = {};
-    const getStartServices = jest
+    const getStartServices = vi
       .fn()
       .mockResolvedValue(createStartServicesWithScopedEsClient(asCurrentUser));
     const switcher = createSwitcher(getStartServices);
@@ -78,7 +83,7 @@ describe('createAdminPrivilegeSwitcher', () => {
   it('returns empty object when privilege check does not grant admin', async () => {
     mockIsAdminFromRequest.mockResolvedValue(false);
     const asCurrentUser = {};
-    const getStartServices = jest
+    const getStartServices = vi
       .fn()
       .mockResolvedValue(createStartServicesWithScopedEsClient(asCurrentUser));
     const switcher = createSwitcher(getStartServices);
@@ -91,7 +96,7 @@ describe('createAdminPrivilegeSwitcher', () => {
   });
 
   it('returns agentBuilder.isAdmin false and logs when getStartServices rejects', async () => {
-    const getStartServices = jest.fn().mockRejectedValue(new Error('Core not ready'));
+    const getStartServices = vi.fn().mockRejectedValue(new Error('Core not ready'));
     const switcher = createSwitcher(getStartServices);
     const request = httpServerMock.createKibanaRequest();
 
@@ -111,7 +116,7 @@ describe('createAdminPrivilegeSwitcher', () => {
   it('returns agentBuilder.isAdmin false and logs when privilege check throws', async () => {
     mockIsAdminFromRequest.mockRejectedValue(new Error('Elasticsearch unavailable'));
     const asCurrentUser = {};
-    const getStartServices = jest
+    const getStartServices = vi
       .fn()
       .mockResolvedValue(createStartServicesWithScopedEsClient(asCurrentUser));
     const switcher = createSwitcher(getStartServices);

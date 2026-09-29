@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -19,7 +22,7 @@ import { RuntimeFieldEditor } from './runtime_field_editor';
 const docLinks = docLinksServiceMock.createStartContract();
 
 describe('Runtime field editor', () => {
-  let onChange: jest.Mock<Props['onChange']> = jest.fn();
+  let onChange: Mock<Props['onChange']> = vi.fn();
 
   const lastOnChangeCall = (): FormState =>
     onChange.mock.calls[onChange.mock.calls.length - 1][0] as FormState;
@@ -32,7 +35,7 @@ describe('Runtime field editor', () => {
     );
 
   beforeEach(() => {
-    onChange = jest.fn();
+    onChange = vi.fn();
   });
 
   test('should render the form fields and a link derived from docLinks', () => {

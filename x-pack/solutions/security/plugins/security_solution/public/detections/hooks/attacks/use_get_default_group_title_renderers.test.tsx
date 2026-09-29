@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
@@ -20,50 +23,65 @@ import {
   EXPAND_ATTACK_BUTTON_TEST_ID,
 } from '../../components/attacks/table/attack_group_content';
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({
-  AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
-    <div data-test-subj="mock-markdown-formatter">{markdown}</div>
-  )),
-}));
+vi.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
+      const mocked = {
+      AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }) => (
+        <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time',
-  () => ({
-    getFormattedDate: jest.fn(() => '2023-10-27 10:00:00'),
-  })
+  () => {
+      const mocked = {
+        getFormattedDate: vi.fn(() => '2023-10-27 10:00:00'),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockReportEvent = jest.fn();
-jest.mock('../../../common/lib/kibana', () => ({
-  useDateFormat: jest.fn(() => jest.fn()),
-  useToasts: jest.fn(() => ({
-    addDanger: jest.fn(),
-    addSuccess: jest.fn(),
-  })),
-  useKibana: () => ({
-    services: {
-      telemetry: {
-        reportEvent: mockReportEvent,
-      },
-    },
-  }),
-}));
+const mockReportEvent = vi.fn();
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useDateFormat: vi.fn(() => vi.fn()),
+      useToasts: vi.fn(() => ({
+        addDanger: vi.fn(),
+        addSuccess: vi.fn(),
+      })),
+      useKibana: () => ({
+        services: {
+          telemetry: {
+            reportEvent: mockReportEvent,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
-  useBulkGetUserProfiles: jest.fn(() => ({ data: [] })),
-}));
+vi.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
+      const mocked = {
+      useBulkGetUserProfiles: vi.fn(() => ({ data: [] })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAttacks = getMockAttackDiscoveryAlerts();
 
 describe('useGetDefaultGroupTitleRenderers', () => {
-  const mockGetAttack = jest.fn();
+  const mockGetAttack = vi.fn();
 
   beforeEach(() => {
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       assistantAvailability: { isAssistantEnabled: true },
       http: {},
     });
@@ -76,7 +94,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
     const { result } = renderHook(() =>
       useGetDefaultGroupTitleRenderers({
         getAttack: mockGetAttack,
-        openAttackDetailsFlyout: jest.fn(),
+        openAttackDetailsFlyout: vi.fn(),
       })
     );
 
@@ -98,7 +116,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
     const { result } = renderHook(() =>
       useGetDefaultGroupTitleRenderers({
         getAttack: mockGetAttack,
-        openAttackDetailsFlyout: jest.fn(),
+        openAttackDetailsFlyout: vi.fn(),
       })
     );
 
@@ -118,7 +136,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           showAnonymized: true,
-          openAttackDetailsFlyout: jest.fn(),
+          openAttackDetailsFlyout: vi.fn(),
         })
       );
 
@@ -140,7 +158,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           showAnonymized: false,
-          openAttackDetailsFlyout: jest.fn(),
+          openAttackDetailsFlyout: vi.fn(),
         })
       );
 
@@ -160,7 +178,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
       const { result } = renderHook(() =>
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
-          openAttackDetailsFlyout: jest.fn(),
+          openAttackDetailsFlyout: vi.fn(),
         })
       );
 
@@ -181,7 +199,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           isLoading: true,
-          openAttackDetailsFlyout: jest.fn(),
+          openAttackDetailsFlyout: vi.fn(),
         })
       );
 
@@ -199,7 +217,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           isLoading: false,
-          openAttackDetailsFlyout: jest.fn(),
+          openAttackDetailsFlyout: vi.fn(),
         })
       );
 
@@ -218,7 +236,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           isLoading: true,
-          openAttackDetailsFlyout: jest.fn(),
+          openAttackDetailsFlyout: vi.fn(),
         })
       );
 
@@ -234,7 +252,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
   describe('openAttackDetailsFlyout prop', () => {
     it('should be called when the attack title button is clicked', () => {
       mockGetAttack.mockReturnValue(mockAttacks[0]);
-      const openAttackDetailsFlyout = jest.fn();
+      const openAttackDetailsFlyout = vi.fn();
 
       const { result } = renderHook(() =>
         useGetDefaultGroupTitleRenderers({

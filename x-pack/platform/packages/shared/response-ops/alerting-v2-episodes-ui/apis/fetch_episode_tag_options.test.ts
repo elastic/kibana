@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { fetchEpisodeTagOptions } from './fetch_episode_tag_options';
 
-jest.mock('../utils/execute_esql_query');
-const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
+vi.mock('../utils/execute_esql_query');
+const mockExecuteEsqlQuery = vi.mocked(executeEsqlQuery);
 
 describe('fetchEpisodeTagOptions', () => {
   it('reads the tag actions without a time filter, like the episodes list does', async () => {

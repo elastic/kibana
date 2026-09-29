@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useNavigateToServiceDetails } from './use_navigate_to_service_details';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -15,11 +18,11 @@ import {
 import { ServiceDetailsPanelKey } from '../../service_details_left';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
-jest.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -45,13 +48,13 @@ const mockProps = {
 const tab = EntityDetailsLeftPanelTab.RISK_INPUTS;
 const subTab = CspInsightLeftPanelSubTab.MISCONFIGURATIONS;
 
-const mockOpenLeftPanel = jest.fn();
-const mockOpenFlyout = jest.fn();
+const mockOpenLeftPanel = vi.fn();
+const mockOpenFlyout = vi.fn();
 
 describe('useNavigateToServiceDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useExpandableFlyoutApi as Mock).mockReturnValue({
       openLeftPanel: mockOpenLeftPanel,
       openFlyout: mockOpenFlyout,
     });

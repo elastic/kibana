@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { relevanceSearch } from './relevance_search';
 import { resolveResource } from './utils/resources';
 import { performMatchSearch } from './steps';
 
-jest.mock('./utils/resources');
-jest.mock('./steps');
+vi.mock('./utils/resources');
+vi.mock('./steps');
 
-const resolveResourceMock = resolveResource as jest.Mock;
-const performMatchSearchMock = performMatchSearch as jest.Mock;
+const resolveResourceMock = resolveResource as Mock;
+const performMatchSearchMock = performMatchSearch as Mock;
 
 describe('relevanceSearch', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -23,7 +26,7 @@ describe('relevanceSearch', () => {
   let model: ScopedModel;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
     model = {} as ScopedModel;

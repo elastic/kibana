@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { MetricsTracker } from '../../../../../types';
 import { getCurlRequest, replaceRequestVariables, trackSentRequests } from './request_actions';
 
@@ -202,7 +205,7 @@ describe('request_actions', () => {
         { method: 'GET', url: '_search', data: [] },
         { method: 'POST', url: '_test', data: [] },
       ];
-      const mockMetricsTracker: jest.Mocked<MetricsTracker> = { count: jest.fn(), load: jest.fn() };
+      const mockMetricsTracker: Mocked<MetricsTracker> = { count: vi.fn(), load: vi.fn() };
       trackSentRequests(requests, mockMetricsTracker);
       expect(mockMetricsTracker.count).toHaveBeenCalledTimes(2);
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(1, 'GET__search');

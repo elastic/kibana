@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -18,11 +21,11 @@ import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
 
-jest.mock('../../hooks/use_eis_models');
-jest.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_eis_models');
+vi.mock('../../hooks/use_kibana');
 
-const { useKibana } = jest.requireMock('../../hooks/use_kibana');
-const mockUseKibana = useKibana as jest.Mock;
+const { useKibana } = (await vi.importMock('../../hooks/use_kibana'));
+const mockUseKibana = useKibana as Mock;
 
 const mockKibanaReturn = ({
   manage = true,
@@ -30,7 +33,7 @@ const mockKibanaReturn = ({
 }: { manage?: boolean; toursEnabled?: boolean } = {}) => ({
   services: {
     notifications: {
-      toasts: { addSuccess: jest.fn(), addDanger: jest.fn() },
+      toasts: { addSuccess: vi.fn(), addDanger: vi.fn() },
       tours: { isEnabled: () => toursEnabled },
     },
     application: {
@@ -41,12 +44,15 @@ const mockKibanaReturn = ({
 
 // The Content List provider owns its own React Query client, so only
 // `useQueryClient` (used for endpoint-save invalidation) is stubbed.
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
-}));
+vi.mock('@kbn/react-query', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-query')),
+      useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEisModels = useEisModels as jest.Mock;
+const mockUseEisModels = useEisModels as Mock;
 
 const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
 
@@ -77,7 +83,7 @@ const renderPopulatedPage = async () => {
 
 describe('ElasticInferenceServiceModelsPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue(mockKibanaReturn());
     window.localStorage.clear();
   });

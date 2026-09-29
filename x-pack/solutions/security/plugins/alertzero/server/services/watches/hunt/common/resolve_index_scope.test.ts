@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { resolveIndexScope, resolveHuntScope, parseTechnologyInput } from './resolve_index_scope';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
@@ -16,7 +19,7 @@ const absent = { indices: [], aliases: [], data_streams: [] };
 const createMockEsClient = (presentPatterns: Set<string>): ElasticsearchClient =>
   ({
     indices: {
-      resolveIndex: jest
+      resolveIndex: vi
         .fn()
         .mockImplementation(({ name }: { name: string }) =>
           Promise.resolve(presentPatterns.has(name) ? present : absent)
@@ -95,7 +98,7 @@ describe('resolveIndexScope', () => {
 
   it('treats a 404 on a concrete index name as absent instead of failing the resolution', async () => {
     const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-endpoint.events.*']));
-    (esClient.indices.resolveIndex as jest.Mock).mockImplementation(({ name }: { name: string }) =>
+    (esClient.indices.resolveIndex as Mock).mockImplementation(({ name }: { name: string }) =>
       name === alertsPattern
         ? Promise.reject(Object.assign(new Error('index_not_found_exception'), { statusCode: 404 }))
         : Promise.resolve(
@@ -111,7 +114,7 @@ describe('resolveIndexScope', () => {
 
   it('treats a name that resolves only as an alias as present, since the alerts pattern is an alias over a hidden index', async () => {
     const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-endpoint.events.*']));
-    (esClient.indices.resolveIndex as jest.Mock).mockImplementation(({ name }: { name: string }) =>
+    (esClient.indices.resolveIndex as Mock).mockImplementation(({ name }: { name: string }) =>
       Promise.resolve(
         name === alertsPattern
           ? {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -21,51 +24,64 @@ import RulesPage from './rules_page_container';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/get_experimental_features');
-jest.mock('../../lib/capabilities');
-jest.mock('../../locator_context', () => ({
-  useLocators: () => ({
-    rules: { useUrl: () => '/bound-rules' },
-    ruleDetails: { useUrl: () => '/bound-rules' },
-  }),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/get_experimental_features');
+vi.mock('../../lib/capabilities');
+vi.mock('../../locator_context', () => {
+      const mocked = {
+      useLocators: () => ({
+        rules: { useUrl: () => '/bound-rules' },
+        ruleDetails: { useUrl: () => '/bound-rules' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../rules_list/components/rules_list', () => {
+vi.mock('../rules_list/components/rules_list', () => {
   return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
 });
 
-jest.mock('../rule_details/components/global_rule_event_log_list', () => {
+vi.mock('../rule_details/components/global_rule_event_log_list', () => {
   return () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>;
 });
 
-jest.mock('../../components/rules_setting/rules_settings_flyout', () => ({
-  RulesSettingsFlyout: ({ isVisible }: { isVisible: boolean }) =>
-    isVisible ? (
-      <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
-    ) : null,
-}));
+vi.mock('../../components/rules_setting/rules_settings_flyout', () => {
+      const mocked = {
+      RulesSettingsFlyout: ({ isVisible }: { isVisible: boolean }) =>
+        isVisible ? (
+          <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
+        ) : null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-rule-form', () => ({
-  RuleTypeModal: () => <div data-test-subj="ruleTypeModal">{'Render Rule Type Modal'}</div>,
-}));
+vi.mock('@kbn/response-ops-rule-form', () => {
+      const mocked = {
+      RuleTypeModal: () => <div data-test-subj="ruleTypeModal">{'Render Rule Type Modal'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ebt-tools', () => ({
-  PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
-  useGetRuleTypesPermissions: jest.fn().mockReturnValue({
-    authorizedToReadAnyRules: true,
-    authorizedToCreateAnyRules: true,
-  }),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => {
+      const mocked = {
+      useGetRuleTypesPermissions: vi.fn().mockReturnValue({
+        authorizedToReadAnyRules: true,
+        authorizedToCreateAnyRules: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useGetRuleTypesPermissions } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
+const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const MOCK_BASE_PATH = '/mock-base';
 const BOUND_RULES_HREF = '/bound-rules';
@@ -85,14 +101,14 @@ const renderRulesPage = (history = createMemoryHistory({ initialEntries: ['/'] }
 
 describe('rulesPage', () => {
   beforeEach(() => {
-    (hasShowActionsCapability as jest.Mock).mockClear();
-    (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => false);
+    (hasShowActionsCapability as Mock).mockClear();
+    (getIsExperimentalFeatureEnabled as Mock).mockImplementation(() => false);
     useGetRuleTypesPermissions.mockReturnValue({
       authorizedToReadAnyRules: true,
       authorizedToCreateAnyRules: true,
     });
     // Non-empty so the V2 tab href assertion proves it is run through `basePath.prepend`.
-    useKibanaMock().services.http.basePath.prepend = jest.fn(
+    useKibanaMock().services.http.basePath.prepend = vi.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
     useKibanaMock().services.hideListBackButton = undefined;
@@ -143,7 +159,7 @@ describe('rulesPage', () => {
   });
 
   it('points the back button at Alerts on the rules list', async () => {
-    useKibanaMock().services.application.getUrlForApp = jest.fn(
+    useKibanaMock().services.application.getUrlForApp = vi.fn(
       () => '/app/observability-overview/alerts'
     );
     const history = createMemoryHistory({ initialEntries: ['/'] });
@@ -155,7 +171,7 @@ describe('rulesPage', () => {
   });
 
   it('keeps classic Logs on the Rules heading with a back button to Alerts', async () => {
-    useKibanaMock().services.application.getUrlForApp = jest.fn(
+    useKibanaMock().services.application.getUrlForApp = vi.fn(
       () => '/app/observability-overview/alerts'
     );
     const history = createMemoryHistory({ initialEntries: ['/logs'] });
@@ -240,7 +256,7 @@ describe('rulesPage', () => {
 
   describe('when alerting v2 is enabled', () => {
     beforeEach(() => {
-      (useKibanaMock().services.settings.globalClient.get as jest.Mock).mockReturnValue(true);
+      (useKibanaMock().services.settings.globalClient.get as Mock).mockReturnValue(true);
     });
 
     describe('and the user can read v2 rules', () => {

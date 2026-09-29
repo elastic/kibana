@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Readable } from 'stream';
 import pRetry from 'p-retry';
 import { MicrosoftDefenderEndpointActionsClient } from './ms_defender_endpoint_actions_client';
@@ -38,22 +41,22 @@ import {
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
 } from '../../../../../../../lib/telemetry/event_based/events';
 
-jest.mock('../../../../action_details_by_id', () => {
-  const originalMod = jest.requireActual('../../../../action_details_by_id');
+vi.mock('../../../../action_details_by_id', async () => {
+  const originalMod = (await vi.importActual('../../../../action_details_by_id'));
 
   return {
     ...originalMod,
-    getActionDetailsById: jest.fn(originalMod.getActionDetailsById),
+    getActionDetailsById: vi.fn(originalMod.getActionDetailsById),
   };
 });
 
-jest.mock('p-retry', () => {
-  const originalPRetry = jest.requireActual('p-retry');
-  return jest.fn().mockImplementation((fn, options) => originalPRetry(fn, options));
+vi.mock('p-retry', () => {
+  const originalPRetry = require('p-retry');
+  return vi.fn().mockImplementation((fn, options) => originalPRetry(fn, options));
 });
 
-const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
-const pRetryMock = jest.mocked(pRetry);
+const getActionDetailsByIdMock = _getActionDetailsById as Mock;
+const pRetryMock = vi.mocked(pRetry);
 
 describe('MS Defender response actions client', () => {
   let clientConstructorOptionsMock: MicrosoftDefenderActionsClientOptionsMock;
@@ -68,7 +71,7 @@ describe('MS Defender response actions client', () => {
 
     // Mock ensureInCurrentSpace to avoid space validation issues in tests
     const fleetServices = clientConstructorOptionsMock.endpointService.getInternalFleetServices();
-    jest.spyOn(fleetServices, 'ensureInCurrentSpace').mockResolvedValue(undefined);
+    vi.spyOn(fleetServices, 'ensureInCurrentSpace').mockResolvedValue(undefined);
 
     getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
       return new EndpointActionGenerator('seed').generateActionDetails({
@@ -476,7 +479,7 @@ describe('MS Defender response actions client', () => {
       it('should throw error when MDE returns action with different script name (throttling)', async () => {
         // Access the underlying ActionsClient mock to preserve NormalizedExternalConnectorClient context
         const underlyingClient = (
-          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+          connectorActionsMock as unknown as { connectorsClient: { execute: Mock } }
         ).connectorsClient;
         const defaultMockImpl = underlyingClient.execute.getMockImplementation();
 
@@ -544,7 +547,7 @@ describe('MS Defender response actions client', () => {
 
       it('should throw error when MDE returns action without our action ID in comment', async () => {
         const underlyingClient = (
-          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+          connectorActionsMock as unknown as { connectorsClient: { execute: Mock } }
         ).connectorsClient;
         const defaultMockImpl = underlyingClient.execute.getMockImplementation();
 
@@ -612,7 +615,7 @@ describe('MS Defender response actions client', () => {
 
       it('should throw error when GET_ACTIONS returns no action details after retry', async () => {
         const underlyingClient = (
-          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+          connectorActionsMock as unknown as { connectorsClient: { execute: Mock } }
         ).connectorsClient;
         const defaultMockImpl = underlyingClient.execute.getMockImplementation();
 
@@ -652,7 +655,7 @@ describe('MS Defender response actions client', () => {
 
       it('should throw error when GET_ACTIONS call fails', async () => {
         const underlyingClient = (
-          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+          connectorActionsMock as unknown as { connectorsClient: { execute: Mock } }
         ).connectorsClient;
         const defaultMockImpl = underlyingClient.execute.getMockImplementation();
 
@@ -698,7 +701,7 @@ describe('MS Defender response actions client', () => {
         );
 
         // Verify GET_ACTIONS was called (validation occurred)
-        const getActionsCalls = (connectorActionsMock.execute as jest.Mock).mock.calls.filter(
+        const getActionsCalls = (connectorActionsMock.execute as Mock).mock.calls.filter(
           (call) => call[0].params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS
         );
         expect(getActionsCalls.length).toBeGreaterThanOrEqual(1);
@@ -706,7 +709,7 @@ describe('MS Defender response actions client', () => {
 
       it('should throw 409 error when action has no commands array', async () => {
         const underlyingClient = (
-          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+          connectorActionsMock as unknown as { connectorsClient: { execute: Mock } }
         ).connectorsClient;
         const defaultMockImpl = underlyingClient.execute.getMockImplementation();
 
@@ -762,7 +765,7 @@ describe('MS Defender response actions client', () => {
 
       it('should throw 409 error when script name param is missing from action', async () => {
         const underlyingClient = (
-          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+          connectorActionsMock as unknown as { connectorsClient: { execute: Mock } }
         ).connectorsClient;
         const defaultMockImpl = underlyingClient.execute.getMockImplementation();
 
@@ -965,7 +968,7 @@ describe('MS Defender response actions client', () => {
 
     it('should handle ES client errors properly', async () => {
       // Mock the ES client to throw an error
-      (clientConstructorOptionsMock.esClient.search as unknown as jest.Mock).mockRejectedValueOnce(
+      (clientConstructorOptionsMock.esClient.search as unknown as Mock).mockRejectedValueOnce(
         new Error('ES client error')
       );
 
@@ -1067,10 +1070,10 @@ describe('MS Defender response actions client', () => {
 
     it('should throw error when Microsoft Defender GET_ACTION_RESULTS API returns no data', async () => {
       // Clear any previous mocks first
-      (connectorActionsMock.execute as jest.Mock).mockReset();
+      (connectorActionsMock.execute as Mock).mockReset();
 
       // Mock the connector to return undefined data
-      (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce({
+      (connectorActionsMock.execute as Mock).mockResolvedValueOnce({
         data: undefined,
       });
 
@@ -1144,7 +1147,7 @@ describe('MS Defender response actions client', () => {
       );
 
       // Mock the connector to throw an error
-      (connectorActionsMock.execute as jest.Mock).mockRejectedValueOnce(
+      (connectorActionsMock.execute as Mock).mockRejectedValueOnce(
         new Error('Microsoft Defender API error')
       );
 
@@ -1480,7 +1483,7 @@ describe('MS Defender response actions client', () => {
       // Mock ES client to throw error specifically when searching for original action
       const originalEsClientSearch = clientConstructorOptionsMock.esClient.search;
 
-      (clientConstructorOptionsMock.esClient.search as unknown as jest.Mock).mockImplementation(
+      (clientConstructorOptionsMock.esClient.search as unknown as Mock).mockImplementation(
         (searchRequest: Parameters<typeof clientConstructorOptionsMock.esClient.search>[0]) => {
           if (!searchRequest) {
             return Promise.resolve(generator.toEsSearchResponse([]));
@@ -1540,7 +1543,7 @@ describe('MS Defender response actions client', () => {
       ).rejects.toThrow("Action with id 'original-action-id' not found.");
 
       // Restore original mock
-      (clientConstructorOptionsMock.esClient.search as unknown as jest.Mock).mockImplementation(
+      (clientConstructorOptionsMock.esClient.search as unknown as Mock).mockImplementation(
         originalEsClientSearch
       );
     });
@@ -1945,9 +1948,9 @@ describe('MS Defender response actions client', () => {
       script_errors?: string;
       exit_code?: number;
     }) => {
-      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+      const executeMockFn = (connectorActionsMock.execute as Mock).getMockImplementation();
 
-      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+      (connectorActionsMock.execute as Mock).mockImplementation(async (options) => {
         if (
           options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS
         ) {
@@ -1969,7 +1972,7 @@ describe('MS Defender response actions client', () => {
       abortController = new AbortController();
       processPendingActionsOptions = {
         abortSignal: abortController.signal,
-        addToQueue: jest.fn(),
+        addToQueue: vi.fn(),
       };
     });
 
@@ -1997,7 +2000,7 @@ describe('MS Defender response actions client', () => {
         applyEsClientSearchMock({
           esClientMock: clientConstructorOptionsMock.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: jest
+          response: vi
             .fn(() => generator.toEsSearchResponse([]))
             .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
@@ -2121,7 +2124,7 @@ describe('MS Defender response actions client', () => {
         applyEsClientSearchMock({
           esClientMock: clientConstructorOptionsMock.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: jest
+          response: vi
             .fn(() => generator.toEsSearchResponse([]))
             .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
@@ -2343,7 +2346,7 @@ describe('MS Defender response actions client', () => {
           applyEsClientSearchMock({
             esClientMock: clientConstructorOptionsMock.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: jest
+            response: vi
               .fn(() => generator.toEsSearchResponse([]))
               .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
@@ -2421,7 +2424,7 @@ describe('MS Defender response actions client', () => {
           applyEsClientSearchMock({
             esClientMock: clientConstructorOptionsMock.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: jest
+            response: vi
               .fn(() => generator.toEsSearchResponse([]))
               .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
@@ -2532,7 +2535,7 @@ describe('MS Defender response actions client', () => {
         applyEsClientSearchMock({
           esClientMock: clientConstructorOptionsMock.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: jest
+          response: vi
             .fn(() => generator.toEsSearchResponse([]))
             .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
@@ -2594,7 +2597,7 @@ describe('MS Defender response actions client', () => {
         applyEsClientSearchMock({
           esClientMock: clientConstructorOptionsMock.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: jest
+          response: vi
             .fn(() => generator.toEsSearchResponse([]))
             .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
@@ -2721,7 +2724,7 @@ describe('MS Defender response actions client', () => {
       async (methodName) => {
         (
           clientConstructorOptionsMock.endpointService.getInternalFleetServices().agent
-            .getByIds as jest.Mock
+            .getByIds as Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -14,7 +16,7 @@ import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
 const logger = loggingSystemMock.createLogger();
 
 const searchBodyOf = (esClient: ElasticsearchClient, page = 0) =>
-  (esClient.search as jest.Mock).mock.calls[page][0];
+  (esClient.search as Mock).mock.calls[page][0];
 
 /** Builds a minimal, fully-typed SearchResponse from just the hit ids the test cares about. */
 const searchResponseOf = (ids: string[], total?: number): SearchResponse<unknown, unknown> => ({

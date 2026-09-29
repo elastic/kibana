@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -43,39 +46,51 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 import { useGetTemplate } from '../../../templates_v2/hooks/use_get_template';
 import { useGetFieldDefinitions } from '../../../field_library/hooks/use_get_field_definitions';
 
-jest.mock('../template_fields', () => ({
-  TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
-}));
+vi.mock('../template_fields', () => {
+      const mocked = {
+      TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../global_case_fields', () => ({
-  GlobalCaseFields: () => <div data-test-subj="case-view-global-case-fields" />,
-}));
+vi.mock('../global_case_fields', () => {
+      const mocked = {
+      GlobalCaseFields: () => <div data-test-subj="case-view-global-case-fields" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../templates_v2/hooks/use_get_template', () => ({
-  useGetTemplate: jest.fn().mockReturnValue({ data: undefined }),
-}));
+vi.mock('../../../templates_v2/hooks/use_get_template', () => {
+      const mocked = {
+      useGetTemplate: vi.fn().mockReturnValue({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../field_library/hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: jest.fn(),
-}));
+vi.mock('../../../field_library/hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../../../common/navigation/hooks');
-jest.mock('../../../../containers/use_get_tags');
-jest.mock('../../../../containers/use_get_categories');
-jest.mock('../../../../containers/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../../../containers/use_get_case_connectors');
-jest.mock('../../../../containers/use_get_case_users');
-jest.mock('../../../../containers/use_replace_custom_field');
-jest.mock('../../use_on_update_field');
-jest.mock('../../../../common/use_cases_features');
-jest.mock('../../../../containers/configure/use_get_case_configuration');
-jest.mock('../../../../containers/user_profiles/use_get_current_user_profile');
+vi.mock('../../../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../../../common/navigation/hooks');
+vi.mock('../../../../containers/use_get_tags');
+vi.mock('../../../../containers/use_get_categories');
+vi.mock('../../../../containers/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../containers/use_get_case_connectors');
+vi.mock('../../../../containers/use_get_case_users');
+vi.mock('../../../../containers/use_replace_custom_field');
+vi.mock('../../use_on_update_field');
+vi.mock('../../../../common/use_cases_features');
+vi.mock('../../../../containers/configure/use_get_case_configuration');
+vi.mock('../../../../containers/user_profiles/use_get_current_user_profile');
 
-(useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
-(useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
-(useGetCaseConfiguration as jest.Mock).mockReturnValue({ data: { observableTypes: [] } });
-(useGetCurrentUserProfile as jest.Mock).mockReturnValue({ data: {}, isFetching: false });
+(useGetTags as Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: vi.fn() });
+(useGetCategories as Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: vi.fn() });
+(useGetCaseConfiguration as Mock).mockReturnValue({ data: { observableTypes: [] } });
+(useGetCurrentUserProfile as Mock).mockReturnValue({ data: {}, isFetching: false });
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -96,18 +111,18 @@ const useGetCasesFeaturesRes = {
   isSyncAlertsEnabled: true,
 };
 
-const replaceCustomField = jest.fn();
-const replaceCustomFieldAsync = jest.fn().mockResolvedValue(undefined);
-const onUpdateField = jest.fn();
+const replaceCustomField = vi.fn();
+const replaceCustomFieldAsync = vi.fn().mockResolvedValue(undefined);
+const onUpdateField = vi.fn();
 
-const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
-const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
-const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
-const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
-const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
-const useGetTemplateMock = useGetTemplate as jest.Mock;
-const useGetFieldDefinitionsMock = useGetFieldDefinitions as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as Mock;
+const useGetCaseUsersMock = useGetCaseUsers as Mock;
+const useOnUpdateFieldMock = useOnUpdateField as Mock;
+const useCasesFeaturesMock = useCasesFeatures as Mock;
+const useReplaceCustomFieldMock = useReplaceCustomField as Mock;
+const useGetTemplateMock = useGetTemplate as Mock;
+const useGetFieldDefinitionsMock = useGetFieldDefinitions as Mock;
 
 describe('CaseViewSidebar (redesign)', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -137,7 +152,7 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
     useCasesFeaturesMock.mockReturnValue(useGetCasesFeaturesRes);
@@ -295,7 +310,7 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('should call useReplaceCustomField correctly', async () => {
-    jest
+    vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig
@@ -310,7 +325,7 @@ describe('CaseViewSidebar (redesign)', () => {
         connectors: true,
       })
     );
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
         observableTypes: [],
@@ -355,13 +370,13 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('does not render legacy custom fields accordion when the show-legacy switch is off', async () => {
-    jest
+    vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig
       >);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'false');
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
         observableTypes: [],
@@ -380,8 +395,8 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('renders legacy custom fields accordion when templates v2 is disabled and fields are configured', async () => {
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
         observableTypes: [],
@@ -400,13 +415,13 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('renders legacy custom fields accordion closed by default when the switch is on', async () => {
-    jest
+    vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig
       >);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
         observableTypes: [],
@@ -426,13 +441,13 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('shows settings and custom fields links in the deprecation callout when the user has settings permission', async () => {
-    jest
+    vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig
       >);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
         observableTypes: [],
@@ -455,13 +470,13 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('shows the administrator message in the deprecation callout when the user lacks settings permission', async () => {
-    jest
+    vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig
       >);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
         observableTypes: [],
@@ -533,7 +548,7 @@ describe('CaseViewSidebar (redesign)', () => {
 
   describe('TemplateFields', () => {
     it('does not render the template fields section when templates v2 is disabled', async () => {
-      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
 
       renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
 
@@ -551,7 +566,7 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     it('renders TemplateFields when templates v2 is enabled and a template is applied', async () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -579,7 +594,7 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     it('shows the no-template subtitle when no template is applied', async () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -598,7 +613,7 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     it('shows an empty state when no template is applied and no global fields exist', async () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -616,7 +631,7 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     it('does not render the template settings popover for users without update permissions', async () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig

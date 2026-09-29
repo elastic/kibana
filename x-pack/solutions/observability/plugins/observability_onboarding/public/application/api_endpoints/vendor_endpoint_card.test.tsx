@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -13,9 +15,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { VendorEndpointCard } from './vendor_endpoint_card';
 
-jest.mock('../shared/logo_icon', () => ({
-  LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
-}));
+vi.mock('../shared/logo_icon', () => {
+      const mocked = {
+      LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const vercelVendor = {
   id: ApiEndpointId.Vercel,
@@ -40,7 +45,7 @@ const defaultProps = {
   canCreate: true,
   wasKeyCreatedBefore: false,
   isLoading: false,
-  onCreateApiKey: jest.fn(),
+  onCreateApiKey: vi.fn(),
 };
 
 const renderCard = (
@@ -96,7 +101,7 @@ describe('VendorEndpointCard', () => {
   });
 
   it('starts with the no-key placeholder and creates a key on click', () => {
-    const onCreateApiKey = jest.fn();
+    const onCreateApiKey = vi.fn();
     renderCard({ onCreateApiKey });
 
     expect(screen.getByPlaceholderText('No API key yet')).toBeInTheDocument();

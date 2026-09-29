@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getVisualizeInformation } from './visualize_trigger_utils';
@@ -23,7 +25,7 @@ const field = {
   visualizable: true,
 } as DataViewField;
 
-const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
+const mockGetActions = vi.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
 );
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
@@ -12,15 +15,18 @@ import { ShowLastRunToggle } from './show_last_run_toggle';
 import { useOverviewStatusState } from '../hooks/use_overview_status';
 import { SHOW_LAST_RUN_STORAGE_KEY } from '../../../state/utils/get_initial_show_last_run';
 
-jest.mock('../hooks/use_overview_status', () => ({
-  useOverviewStatusState: jest.fn(),
-}));
+vi.mock('../hooks/use_overview_status', () => {
+      const mocked = {
+      useOverviewStatusState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseOverviewStatusState = useOverviewStatusState as jest.Mock;
+const mockUseOverviewStatusState = useOverviewStatusState as Mock;
 
 describe('ShowLastRunToggle', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 

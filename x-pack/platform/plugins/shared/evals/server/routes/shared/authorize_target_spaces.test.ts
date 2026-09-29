@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { findUnauthorizedTargetSpaces } from './authorize_target_spaces';
 
@@ -12,7 +14,7 @@ const request = {} as KibanaRequest;
 
 describe('findUnauthorizedTargetSpaces', () => {
   it('returns nothing when no spaces are requested', async () => {
-    const checkManageEvalsPrivileges = jest.fn();
+    const checkManageEvalsPrivileges = vi.fn();
 
     const result = await findUnauthorizedTargetSpaces({
       request,
@@ -26,7 +28,7 @@ describe('findUnauthorizedTargetSpaces', () => {
   });
 
   it('does not check when the only requested space is the active space', async () => {
-    const checkManageEvalsPrivileges = jest.fn();
+    const checkManageEvalsPrivileges = vi.fn();
 
     const result = await findUnauthorizedTargetSpaces({
       request,
@@ -40,7 +42,7 @@ describe('findUnauthorizedTargetSpaces', () => {
   });
 
   it('authorizes foreign spaces against the privilege checker (deduplicated)', async () => {
-    const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(true);
+    const checkManageEvalsPrivileges = vi.fn().mockResolvedValue(true);
 
     const result = await findUnauthorizedTargetSpaces({
       request,
@@ -54,7 +56,7 @@ describe('findUnauthorizedTargetSpaces', () => {
   });
 
   it('returns the foreign spaces when the caller is not authorized', async () => {
-    const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(false);
+    const checkManageEvalsPrivileges = vi.fn().mockResolvedValue(false);
 
     const result = await findUnauthorizedTargetSpaces({
       request,

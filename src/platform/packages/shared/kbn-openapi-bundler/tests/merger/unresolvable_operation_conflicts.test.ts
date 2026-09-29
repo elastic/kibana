@@ -245,12 +245,12 @@ describe('OpenAPI Merger - unresolvable operation object conflicts', () => {
       }),
     ],
   ])('throws an error when operations %s do not match', async (_, spec1, spec2) => {
-    expect(
-      mergeSpecs({
-        1: spec1,
-        2: spec2,
-      })
-    ).rejects.toThrow('"Operation objects are incompatible"');
+    await expect(
+            mergeSpecs({
+              1: spec1,
+              2: spec2,
+            })
+          ).rejects.toThrow('"Operation objects are incompatible"');
   });
 
   it("throws an error when operation's request body has a top level $ref", async () => {
@@ -281,12 +281,12 @@ describe('OpenAPI Merger - unresolvable operation object conflicts', () => {
       },
     });
 
-    expect(
-      mergeSpecs({
-        1: spec1,
-        2: spec2,
-      })
-    ).rejects.toThrow('Request body top level $ref is not supported');
+    await expect(
+            mergeSpecs({
+              1: spec1,
+              2: spec2,
+            })
+          ).rejects.toThrow('Request body top level $ref is not supported');
   });
 
   it("throws an error when one of operation's responses has a top level $ref", async () => {
@@ -318,11 +318,11 @@ describe('OpenAPI Merger - unresolvable operation object conflicts', () => {
       },
     });
 
-    expect(
-      mergeSpecs({
-        1: spec1,
-        2: spec2,
-      })
-    ).rejects.toThrow('Response object top level $ref is not supported');
+    await expect(
+            mergeSpecs({
+              1: spec1,
+              2: spec2,
+            })
+          ).rejects.toThrow('Response object top level $ref is not supported');
   });
 });

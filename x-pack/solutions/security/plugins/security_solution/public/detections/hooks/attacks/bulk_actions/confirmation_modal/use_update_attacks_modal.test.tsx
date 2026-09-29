@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 
@@ -12,53 +15,56 @@ import { useUpdateAttacksModal } from './use_update_attacks_modal';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../assistant/use_assistant_availability');
-jest.mock('./update_attacks_modal', () => ({
-  UpdateAttacksModal: (props: {
-    alertsCount: number;
-    attackDiscoveriesCount: number;
-    onCancel: () => void;
-    onClose: () => void;
-    onConfirm: (params: { updateAlerts: boolean }) => Promise<void>;
-  }) => (
-    <div
-      data-test-subj="updateAttacksModal"
-      data-alerts-count={props.alertsCount}
-      data-attack-discoveries-count={props.attackDiscoveriesCount}
-    >
-      <button type="button" data-test-subj="cancel" onClick={props.onCancel}>
-        {'Cancel'}
-      </button>
-      <button type="button" data-test-subj="close" onClick={props.onClose}>
-        {'Close'}
-      </button>
-      <button
-        type="button"
-        data-test-subj="confirm-update-alerts-false"
-        onClick={() => props.onConfirm({ updateAlerts: false })}
-      >
-        {'Update attacks only'}
-      </button>
-      <button
-        type="button"
-        data-test-subj="confirm-update-alerts-true"
-        onClick={() => props.onConfirm({ updateAlerts: true })}
-      >
-        {'Update attacks and alerts'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../assistant/use_assistant_availability');
+vi.mock('./update_attacks_modal', () => {
+      const mocked = {
+      UpdateAttacksModal: (props: {
+        alertsCount: number;
+        attackDiscoveriesCount: number;
+        onCancel: () => void;
+        onClose: () => void;
+        onConfirm: (params: { updateAlerts: boolean }) => Promise<void>;
+      }) => (
+        <div
+          data-test-subj="updateAttacksModal"
+          data-alerts-count={props.alertsCount}
+          data-attack-discoveries-count={props.attackDiscoveriesCount}
+        >
+          <button type="button" data-test-subj="cancel" onClick={props.onCancel}>
+            {'Cancel'}
+          </button>
+          <button type="button" data-test-subj="close" onClick={props.onClose}>
+            {'Close'}
+          </button>
+          <button
+            type="button"
+            data-test-subj="confirm-update-alerts-false"
+            onClick={() => props.onConfirm({ updateAlerts: false })}
+          >
+            {'Update attacks only'}
+          </button>
+          <button
+            type="button"
+            data-test-subj="confirm-update-alerts-true"
+            onClick={() => props.onConfirm({ updateAlerts: true })}
+          >
+            {'Update attacks and alerts'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseAssistantAvailability = useAssistantAvailability as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseAssistantAvailability = useAssistantAvailability as MockedFunction<
   typeof useAssistantAvailability
 >;
 
-const mockClose = jest.fn();
+const mockClose = vi.fn();
 const mockOverlays = {
-  openModal: jest.fn((_component: React.ReactElement) => ({
+  openModal: vi.fn((_component: React.ReactElement) => ({
     close: mockClose,
   })),
 };
@@ -67,7 +73,7 @@ const mockServices = {};
 
 describe('useUpdateAttacksModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Reset to default implementation
     mockOverlays.openModal.mockImplementation((_component: React.ReactElement) => ({
       close: mockClose,

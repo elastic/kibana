@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -21,8 +23,8 @@ import {
 import type { ColumnBuilderContext } from '../types';
 import { buildStarredColumn, type StarredColumnProps } from './starred_builder';
 
-jest.mock('@kbn/content-management-favorites-public', () => {
-  const actual = jest.requireActual('@kbn/content-management-favorites-public');
+vi.mock('@kbn/content-management-favorites-public', async () => {
+  const actual = (await vi.importActual('@kbn/content-management-favorites-public'));
 
   return {
     ...actual,
@@ -36,7 +38,7 @@ jest.mock('@kbn/content-management-favorites-public', () => {
 
 type StarredColumn = EuiTableFieldDataColumnType<ContentListItem>;
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -60,7 +63,7 @@ const mockHttpGet = (
     types?: unknown | Error;
   }
 ) => {
-  (core.http.get as jest.Mock).mockImplementation((path: string) => {
+  (core.http.get as Mock).mockImplementation((path: string) => {
     if (path === ACTION_CONNECTOR_TYPES_PATH) {
       if (types instanceof Error) return Promise.reject(types);
       return Promise.resolve(types ?? buildSupportedTypesResponse());
@@ -90,7 +93,7 @@ const renderDataConnectors = (
 
 describe('useDataConnectors', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('requests /api/actions/connector_types with the contextEngine feature id', async () => {
@@ -124,7 +127,7 @@ describe('useDataConnectors', () => {
 
   it('returns isLoading: true and an empty connectors array before the requests resolve', () => {
     const core = coreMock.createStart();
-    (core.http.get as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (core.http.get as Mock).mockReturnValue(new Promise(() => {}));
     const { result } = renderDataConnectors(core);
 
     expect(result.current.isLoading).toBe(true);
@@ -234,7 +237,7 @@ describe('useDataConnectors', () => {
 
   it('does not fetch connectors when enabled is false', () => {
     const core = coreMock.createStart();
-    (core.http.get as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (core.http.get as Mock).mockReturnValue(new Promise(() => {}));
     const { result } = renderDataConnectors(core, { enabled: false });
 
     expect(core.http.get).not.toHaveBeenCalled();

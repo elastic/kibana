@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -112,20 +115,20 @@ const stubDualSourceFinds = (
   });
 };
 
-const makeAttachmentsWriterMock = (): jest.Mocked<CasesAttachmentsV2WriterContract> => ({
-  upsertAttachment: jest.fn(),
-  deleteAttachment: jest.fn(),
-  bulkUpsertAttachments: jest.fn(),
-  bulkDeleteAttachments: jest.fn(),
-  bulkDeleteAttachmentsByCaseIds: jest.fn(),
-  bulkUpsertAttachmentsAwait: jest.fn().mockResolvedValue(undefined),
+const makeAttachmentsWriterMock = (): Mocked<CasesAttachmentsV2WriterContract> => ({
+  upsertAttachment: vi.fn(),
+  deleteAttachment: vi.fn(),
+  bulkUpsertAttachments: vi.fn(),
+  bulkDeleteAttachments: vi.fn(),
+  bulkDeleteAttachmentsByCaseIds: vi.fn(),
+  bulkUpsertAttachmentsAwait: vi.fn().mockResolvedValue(undefined),
 });
 
 describe('runAttachmentsReconciliation', () => {
   const logger = loggerMock.create();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('walks BOTH cases-comments and cases-attachments SOs in a single tick', async () => {
@@ -164,7 +167,7 @@ describe('runAttachmentsReconciliation', () => {
 
     // Bulk-upsert was called with each source type's SOs.
     expect(writer.bulkUpsertAttachmentsAwait).toHaveBeenCalledTimes(2);
-    const allUpsertedIds = (writer.bulkUpsertAttachmentsAwait as jest.Mock).mock.calls
+    const allUpsertedIds = (writer.bulkUpsertAttachmentsAwait as Mock).mock.calls
       .flatMap((call) => call[0] as Array<SavedObject<unknown>>)
       .map((so) => so.id);
     expect(allUpsertedIds).toEqual(expect.arrayContaining(['legacy-1', 'unified-1']));
@@ -225,7 +228,7 @@ describe('runAttachmentsReconciliation', () => {
     // OR-NULL filter shape — same shape as the cases runner because
     // attachments are mutable + carry the never-patched-`updated_at`
     // null branch.
-    const findCalls = (client.find as jest.Mock).mock.calls;
+    const findCalls = (client.find as Mock).mock.calls;
     expect(findCalls.length).toBeGreaterThanOrEqual(2);
 
     for (const call of findCalls) {
@@ -265,7 +268,7 @@ describe('runAttachmentsReconciliation', () => {
     });
 
     // No cursor → no filter on either find call.
-    for (const call of (client.find as jest.Mock).mock.calls) {
+    for (const call of (client.find as Mock).mock.calls) {
       const arg = call[0] as { filter?: KueryNode };
       expect(arg.filter).toBeUndefined();
     }
@@ -349,7 +352,7 @@ describe('runAttachmentsReconciliation', () => {
       expect.objectContaining({ namespaces: ['*'] })
     );
     // Both source types are queried via `find`.
-    const findTypes = (client.find as jest.Mock).mock.calls.map(
+    const findTypes = (client.find as Mock).mock.calls.map(
       (call) => (call[0] as { type: string }).type
     );
     expect(findTypes).toContain(CASE_COMMENT_SAVED_OBJECT);

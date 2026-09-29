@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
@@ -12,8 +14,8 @@ import { DependencyNode } from './dependency_node';
 import type { DependencyNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({
@@ -24,9 +26,12 @@ jest.mock('@elastic/eui', () => {
 });
 
 // Mock the span icon
-jest.mock('@kbn/apm-ui-shared', () => ({
-  getSpanIcon: jest.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
-}));
+vi.mock('@kbn/apm-ui-shared', () => {
+      const mocked = {
+      getSpanIcon: vi.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultNodeProps = {
   id: 'test-dependency',

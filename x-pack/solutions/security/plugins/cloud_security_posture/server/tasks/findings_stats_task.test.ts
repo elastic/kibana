@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { validateBenchmarkScoreTemplate } from './findings_stats_task';
 import { createBenchmarkScoreIndex } from '../create_indices/create_indices';
 import { benchmarkScoreMapping } from '../create_indices/benchmark_score_mapping';
 
-jest.mock('../create_indices/create_indices', () => ({
-  createBenchmarkScoreIndex: jest.fn(),
-}));
+vi.mock('../create_indices/create_indices', () => {
+      const mocked = {
+      createBenchmarkScoreIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateBenchmarkScoreIndex = createBenchmarkScoreIndex as jest.MockedFunction<
+const mockCreateBenchmarkScoreIndex = createBenchmarkScoreIndex as MockedFunction<
   typeof createBenchmarkScoreIndex
 >;
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
@@ -39,7 +42,7 @@ const makeDeps = () => ({
 });
 
 describe('createEditTagsAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('compatible when episodes.length > 0', () => {
     expect(createEditTagsAction(makeDeps()).isCompatible({ episodes: [makeEpisode()] })).toBe(true);
@@ -51,8 +54,8 @@ describe('createEditTagsAction', () => {
 
   it('execute: cancelled flyout (resolves undefined) is a no-op', async () => {
     const deps = makeDeps();
-    jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(undefined);
-    const onSuccess = jest.fn();
+    vi.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(undefined);
+    const onSuccess = vi.fn();
     await createEditTagsAction(deps).execute({ episodes: [makeEpisode()], onSuccess });
     expect(deps.http.post).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
@@ -60,9 +63,9 @@ describe('createEditTagsAction', () => {
 
   it('execute: opens flyout, POSTs one TAG item per episode with tags array, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha', 'beta']);
-    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
-    const onSuccess = jest.fn();
+    vi.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha', 'beta']);
+    vi.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
+    const onSuccess = vi.fn();
 
     await createEditTagsAction(deps).execute({
       // Two episodes in the same group — both get tagged (episode-scoped)
@@ -88,8 +91,8 @@ describe('createEditTagsAction', () => {
 
   it('execute: passes last_tags into flyout when a single episode is selected', async () => {
     const deps = makeDeps();
-    jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
-    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
+    vi.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
+    vi.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
 
     await createEditTagsAction(deps).execute({
       episodes: [makeEpisode({ last_tags: ['existing', 'tags'] })],
@@ -109,8 +112,8 @@ describe('createEditTagsAction', () => {
 
   it('execute: passes empty tags into flyout when multiple episodes are selected', async () => {
     const deps = makeDeps();
-    jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
-    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
+    vi.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
+    vi.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
 
     await createEditTagsAction(deps).execute({
       episodes: [
@@ -119,15 +122,15 @@ describe('createEditTagsAction', () => {
       ],
     });
 
-    const passedTags = (flyout.openTagsFlyout as jest.Mock).mock.calls[0][2] as string[];
+    const passedTags = (flyout.openTagsFlyout as Mock).mock.calls[0][2] as string[];
     expect(passedTags).toHaveLength(0);
   });
 
   it('execute: error path calls notifications.toasts.addDanger', async () => {
     const deps = makeDeps();
-    jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
-    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockRejectedValue(new Error('network error'));
-    const onSuccess = jest.fn();
+    vi.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
+    vi.spyOn(bulk, 'bulkTagEpisodeActions').mockRejectedValue(new Error('network error'));
+    const onSuccess = vi.fn();
 
     await createEditTagsAction(deps).execute({ episodes: [makeEpisode()], onSuccess });
 

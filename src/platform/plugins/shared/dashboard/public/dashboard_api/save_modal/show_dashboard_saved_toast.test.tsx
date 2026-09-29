@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of, type Observable } from 'rxjs';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import { coreServices } from '../../services/kibana_services';
@@ -18,7 +21,7 @@ const setCurrentAppId = (appId: string | undefined) => {
 };
 
 const getLastToastInput = () => {
-  const calls = (coreServices.notifications.toasts.addSuccess as jest.Mock).mock.calls;
+  const calls = (coreServices.notifications.toasts.addSuccess as Mock).mock.calls;
   return calls[calls.length - 1][0] as {
     title: string;
     actionProps?: {
@@ -29,7 +32,7 @@ const getLastToastInput = () => {
 
 describe('showDashboardSavedToast', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     setCurrentAppId(DASHBOARD_APP_ID);
   });
 
@@ -63,7 +66,7 @@ describe('showDashboardSavedToast', () => {
     setCurrentAppId('agentBuilder');
 
     const mockToast = { id: 'mock-toast-id' };
-    (coreServices.notifications.toasts.addSuccess as jest.Mock).mockReturnValue(mockToast);
+    (coreServices.notifications.toasts.addSuccess as Mock).mockReturnValue(mockToast);
 
     showDashboardSavedToast({
       savedDashboardId: 'saved-id',

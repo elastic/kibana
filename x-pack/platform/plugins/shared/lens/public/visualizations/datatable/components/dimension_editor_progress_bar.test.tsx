@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -36,8 +39,8 @@ interface MockColorMappingByValuesProps {
   dataBounds: { min: number; max: number };
 }
 
-jest.mock('../../../shared_components/coloring/color_mapping_by_values', () => {
-  const ReactLib = jest.requireActual<typeof import('react')>('react');
+vi.mock('../../../shared_components/coloring/color_mapping_by_values', () => {
+  const ReactLib = (require('react') as typeof import('react'));
 
   return {
     ColorMappingByValues: ({ palette, setPalette, dataBounds }: MockColorMappingByValuesProps) => {
@@ -78,7 +81,7 @@ describe('data table progress bar regressions', () => {
   let frame: FramePublicAPI;
   let state: DatatableVisualizationState;
   let props: TableDimensionEditorProps;
-  let setState: jest.Mock<void, [DatatableVisualizationState]>;
+  let setState: Mock<void, [DatatableVisualizationState]>;
 
   const setFooRows = (rows: Array<{ foo: number }>) => {
     const activeData = frame.activeData;
@@ -95,7 +98,7 @@ describe('data table progress bar regressions', () => {
       throw new Error('Expected the first datasource layer to exist');
     }
 
-    firstDatasource.getOperationForColumnId = jest.fn().mockReturnValue({
+    firstDatasource.getOperationForColumnId = vi.fn().mockReturnValue({
       label: 'label',
       isBucketed: false,
       dataType: 'number',
@@ -120,16 +123,16 @@ describe('data table progress bar regressions', () => {
   }
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     state = {
       layerId: 'first',
       layerType: LayerTypes.DATA,
@@ -156,7 +159,7 @@ describe('data table progress bar regressions', () => {
         rows: [],
       },
     };
-    setState = jest.fn();
+    setState = vi.fn();
     props = {
       accessor: 'foo',
       frame,
@@ -168,8 +171,8 @@ describe('data table progress bar regressions', () => {
       paletteService: chartPluginMock.createPaletteRegistry(),
       palettes: getKbnPalettes({ name: 'amsterdam', darkMode: false }),
       panelRef: React.createRef(),
-      addLayer: jest.fn(),
-      removeLayer: jest.fn(),
+      addLayer: vi.fn(),
+      removeLayer: vi.fn(),
       datasource: datasource.publicAPIMock,
       formatFactory: fieldFormatsMock.deserialize,
     };
@@ -211,7 +214,7 @@ describe('data table progress bar regressions', () => {
 
     fireEvent.focus(minInput);
     fireEvent.change(minInput, { target: { value: '200' } });
-    await act(async () => jest.advanceTimersByTime(300));
+    await act(async () => vi.advanceTimersByTime(300));
 
     expect(minInput).toHaveValue(200);
     expect(maxInput).toHaveValue(100);
@@ -252,14 +255,14 @@ describe('data table progress bar regressions', () => {
 
     fireEvent.focus(maxInput);
     fireEvent.change(maxInput, { target: { value: '900' } });
-    await act(async () => jest.advanceTimersByTime(300));
+    await act(async () => vi.advanceTimersByTime(300));
 
     expect(minInput).toHaveValue(20000);
     expect(maxInput).toHaveValue(900);
     expect(setState).not.toHaveBeenCalled();
 
     fireEvent.change(maxInput, { target: { value: '90000' } });
-    await act(async () => jest.advanceTimersByTime(300));
+    await act(async () => vi.advanceTimersByTime(300));
 
     expect(minInput).toHaveValue(20000);
     expect(maxInput).toHaveValue(90000);
@@ -296,7 +299,7 @@ describe('data table progress bar regressions', () => {
 
     fireEvent.focus(maxInput);
     fireEvent.change(maxInput, { target: { value: '90000' } });
-    await act(async () => jest.advanceTimersByTime(300));
+    await act(async () => vi.advanceTimersByTime(300));
 
     expect(slider).toHaveAttribute('max', '891000');
 
@@ -321,7 +324,7 @@ describe('data table progress bar regressions', () => {
 
     fireEvent.focus(maxInput);
     fireEvent.change(maxInput, { target: { value: '2000' } });
-    await act(async () => jest.advanceTimersByTime(300));
+    await act(async () => vi.advanceTimersByTime(300));
 
     expect(minInput).toHaveValue(-100);
     expect(maxInput).toHaveValue(2000);
@@ -348,7 +351,7 @@ describe('data table progress bar regressions', () => {
     renderEditor();
 
     await user.click(screen.getByTestId('lnsDatatable_progressBar_valueRange_custom'));
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
 
     expect(setState).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -376,7 +379,7 @@ describe('data table progress bar regressions', () => {
     renderEditor();
 
     await user.click(screen.getByTestId('lnsDatatable_progressBar_valueRange_custom'));
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
 
     expect(setState).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -417,7 +420,7 @@ describe('data table progress bar regressions', () => {
     await user.click(hideSwitch);
     expect(screen.getByTestId('mock-current-palette')).toHaveTextContent('status');
 
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
 
     const finalState = setState.mock.calls[setState.mock.calls.length - 1]?.[0];
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -25,9 +28,12 @@ import {
   UPCOMING_MAINTENANCE_WINDOW,
 } from './mock';
 
-jest.mock('./api', () => ({
-  fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TestProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const queryClient = new QueryClient();
@@ -38,7 +44,7 @@ const TestProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   );
 };
 
-const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
+const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as Mock;
 const platinumLicense = licensingMock.createLicense({
   license: { type: 'platinum', mode: 'platinum' },
 });
@@ -58,22 +64,22 @@ const kibanaServicesMock: KibanaServices = {
   },
   notifications: {
     toasts: {
-      addError: jest.fn(),
-      add: jest.fn(),
-      remove: jest.fn(),
-      get$: jest.fn(),
-      addInfo: jest.fn(),
-      addWarning: jest.fn(),
-      addDanger: jest.fn(),
-      addSuccess: jest.fn(),
+      addError: vi.fn(),
+      add: vi.fn(),
+      remove: vi.fn(),
+      get$: vi.fn(),
+      addInfo: vi.fn(),
+      addWarning: vi.fn(),
+      addDanger: vi.fn(),
+      addSuccess: vi.fn(),
     },
   },
   http: {
-    fetch: jest.fn(),
+    fetch: vi.fn(),
     basePath: {
-      prepend: jest.fn((path) => path),
-      get: jest.fn(),
-      remove: jest.fn(),
+      prepend: vi.fn((path) => path),
+      get: vi.fn(),
+      remove: vi.fn(),
       serverBasePath: '',
       assetsHrefBase: '',
     },
@@ -85,13 +91,13 @@ const kibanaServicesMock: KibanaServices = {
 
 describe('MaintenanceWindowCallout', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     license$.next(platinumLicense);
   });
 
   afterEach(() => {
     cleanup();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should be visible if currently there is at least one "running" maintenance window', async () => {

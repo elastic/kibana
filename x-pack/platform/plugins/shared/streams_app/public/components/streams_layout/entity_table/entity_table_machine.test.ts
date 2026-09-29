@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createActor, fromPromise, waitFor } from 'xstate';
@@ -35,8 +37,8 @@ const createTestActor = ({
   urlStateValues?: unknown;
   fetchItems?: () => Promise<TestItem[]>;
 } = {}) => {
-  const get = jest.fn().mockReturnValue(urlStateValues);
-  const set = jest.fn();
+  const get = vi.fn().mockReturnValue(urlStateValues);
+  const set = vi.fn();
   const urlStateStorageContainer = { get, set } as unknown as IKbnUrlStateStorage;
 
   const machine = createEntityTableMachine<TestItem>();
@@ -106,7 +108,7 @@ describe('entityTableMachine', () => {
   });
 
   it('moves to failure when the fetch fails and recovers on refresh', async () => {
-    const fetchItems = jest
+    const fetchItems = vi
       .fn<Promise<TestItem[]>, []>()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce([{ name: 'item-2' }]);
@@ -124,7 +126,7 @@ describe('entityTableMachine', () => {
   });
 
   it('refetches items on refresh while staying in ready afterwards', async () => {
-    const fetchItems = jest
+    const fetchItems = vi
       .fn<Promise<TestItem[]>, []>()
       .mockResolvedValueOnce([{ name: 'item-1' }])
       .mockResolvedValueOnce([{ name: 'item-1' }, { name: 'item-2' }]);

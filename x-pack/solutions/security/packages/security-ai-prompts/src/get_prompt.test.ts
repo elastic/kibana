@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { getPrompt, getPromptsByGroupId } from './get_prompt';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { localPrompts, promptDictionary, promptGroupId } from './mock_prompts';
 
-jest.mock('@kbn/core-saved-objects-api-server');
+vi.mock('@kbn/core-saved-objects-api-server');
 
 const bedrockConnector = {
   type: '.bedrock' as const,
@@ -98,12 +101,12 @@ const inferenceElasticConnectorRainbow = {
 };
 
 describe('get_prompt', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     savedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         page: 1,
         per_page: 20,
         total: 3,
@@ -244,12 +247,12 @@ describe('get_prompt', () => {
           },
         ],
       }),
-    } as unknown as jest.Mocked<SavedObjectsClientContract>;
+    } as unknown as Mocked<SavedObjectsClientContract>;
   });
 
   describe('getPrompt', () => {
     it('returns the prompt matching provider and model (no connector lookup needed)', async () => {
-      const getInferenceConnectorById = jest.fn();
+      const getInferenceConnectorById = vi.fn();
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -277,7 +280,7 @@ describe('get_prompt', () => {
     });
 
     it('calls getInferenceConnectorById when only provider is given', async () => {
-      const getInferenceConnectorById = jest.fn().mockResolvedValue(openaiConnector);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(openaiConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -303,7 +306,7 @@ describe('get_prompt', () => {
     });
 
     it('resolves the real provider when provider is "inference" via getInferenceConnectorById', async () => {
-      const getInferenceConnectorById = jest.fn().mockResolvedValue(inferenceBedrockConnector);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(inferenceBedrockConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -319,7 +322,7 @@ describe('get_prompt', () => {
     });
 
     it('returns the expected prompt when provider is "elastic" and model matches in elasticModelDictionary', async () => {
-      const getInferenceConnectorById = jest.fn().mockResolvedValue(inferenceElasticConnector);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(inferenceElasticConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -333,7 +336,7 @@ describe('get_prompt', () => {
     });
 
     it('returns the bedrock prompt when provider is "elastic" but model does not match elasticModelDictionary', async () => {
-      const getInferenceConnectorById = jest
+      const getInferenceConnectorById = vi
         .fn()
         .mockResolvedValue(inferenceElasticUnknownConnector);
       const result = await getPrompt({
@@ -349,7 +352,7 @@ describe('get_prompt', () => {
     });
 
     it('returns the provider-specific prompt when connector has no model', async () => {
-      const getInferenceConnectorById = jest
+      const getInferenceConnectorById = vi
         .fn()
         .mockResolvedValue({ ...bedrockConnector, config: {} });
       const result = await getPrompt({
@@ -402,7 +405,7 @@ describe('get_prompt', () => {
     });
 
     it('handles empty connector config gracefully when provider is "inference"', async () => {
-      const getInferenceConnectorById = jest
+      const getInferenceConnectorById = vi
         .fn()
         .mockResolvedValue({ ...inferenceBedrockConnector, config: {} });
       const result = await getPrompt({
@@ -418,7 +421,7 @@ describe('get_prompt', () => {
     });
 
     it('resolves provider and model from getInferenceConnectorById when none are provided', async () => {
-      const getInferenceConnectorById = jest.fn().mockResolvedValue(bedrockConnector);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(bedrockConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -442,7 +445,7 @@ describe('get_prompt', () => {
     });
 
     it('uses getInferenceConnectorById for native ES inference endpoints', async () => {
-      const getInferenceConnectorById = jest.fn().mockResolvedValue(inferenceEndpointAmazonBedrock);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(inferenceEndpointAmazonBedrock);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -456,7 +459,7 @@ describe('get_prompt', () => {
     });
 
     it('falls back to default prompts when getInferenceConnectorById fails', async () => {
-      const getInferenceConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
+      const getInferenceConnectorById = vi.fn().mockRejectedValue(new Error('Not found'));
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -526,7 +529,7 @@ describe('get_prompt', () => {
     });
 
     it('returns prompts using getInferenceConnectorById for gemini connector', async () => {
-      const getInferenceConnectorById = jest.fn().mockResolvedValue(geminiConnector);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(geminiConnector);
       const result = await getPromptsByGroupId({
         savedObjectsClient,
         localPrompts,
@@ -548,7 +551,7 @@ describe('get_prompt', () => {
     });
 
     it('returns prompts using getInferenceConnectorById for inference connector with elastic provider', async () => {
-      const getInferenceConnectorById = jest
+      const getInferenceConnectorById = vi
         .fn()
         .mockResolvedValue(inferenceElasticConnectorRainbow);
       const result = await getPromptsByGroupId({

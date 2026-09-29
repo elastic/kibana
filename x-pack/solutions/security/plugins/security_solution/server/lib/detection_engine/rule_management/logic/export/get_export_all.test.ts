@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FindHit } from '../../../routes/__mocks__/request_responses';
 import {
   getRuleMock,
@@ -241,9 +243,9 @@ describe('getExportAll', () => {
     });
 
     const exporterMockWithConnector = {
-      exportByObjects: () => jest.fn().mockReturnValueOnce(readable),
+      exportByObjects: () => vi.fn().mockReturnValueOnce(readable),
 
-      exportByTypes: jest.fn(),
+      exportByTypes: vi.fn(),
     };
     const exports = await getExportAll(
       rulesClient,
@@ -385,9 +387,9 @@ describe('getExportAll', () => {
     });
 
     const exporterMockWithConnector = {
-      exportByObjects: () => jest.fn().mockReturnValueOnce(readable),
+      exportByObjects: () => vi.fn().mockReturnValueOnce(readable),
 
-      exportByTypes: jest.fn(),
+      exportByTypes: vi.fn(),
     };
     const exports = await getExportAll(
       rulesClient,

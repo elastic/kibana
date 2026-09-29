@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -19,14 +22,17 @@ import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unifie
 import type { WorkflowAttachmentValidationContext } from '../../attachment_framework/types';
 import { createCasesWorkflowOperations } from '../../client/workflows/operations';
 
-jest.mock('../../client/cases/ensure_authorized_to_run_workflow', () => ({
-  ...jest.requireActual('../../client/cases/ensure_authorized_to_run_workflow'),
-  ensureAuthorizedToRunWorkflow: jest.fn(),
-}));
+vi.mock('../../client/cases/ensure_authorized_to_run_workflow', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../client/cases/ensure_authorized_to_run_workflow')),
+      ensureAuthorizedToRunWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ensureAuthorizedToRunWorkflow } from '../../client/cases/ensure_authorized_to_run_workflow';
 
-const mockEnsureAuthorizedToRunWorkflow = ensureAuthorizedToRunWorkflow as jest.MockedFunction<
+const mockEnsureAuthorizedToRunWorkflow = ensureAuthorizedToRunWorkflow as MockedFunction<
   typeof ensureAuthorizedToRunWorkflow
 >;
 
@@ -35,7 +41,7 @@ describe('CasesWorkflowRunService', () => {
   const logger = loggingSystemMock.createLogger();
   const audit = securityMock.createSetup().audit;
   const auditLogger = audit.asScoped(request);
-  const auditLog = auditLogger.log as jest.MockedFunction<typeof auditLogger.log>;
+  const auditLog = auditLogger.log as MockedFunction<typeof auditLogger.log>;
   const casesClient = createCasesClientMock();
   const clientArgs = createCasesClientMockArgs();
   const workflowOperations = createCasesWorkflowOperations(clientArgs);
@@ -44,7 +50,7 @@ describe('CasesWorkflowRunService', () => {
   const license = {
     isAvailable: true,
     isActive: true,
-    hasAtLeast: jest.fn(() => licenseValid),
+    hasAtLeast: vi.fn(() => licenseValid),
   };
   const context = {
     licensing: Promise.resolve({ license }),
@@ -53,9 +59,9 @@ describe('CasesWorkflowRunService', () => {
     get isWorkflowsAvailable() {
       return workflowsAvailable;
     },
-    getWorkflow: jest.fn(),
-    runWorkflowWithAlertPreprocessing: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+    getWorkflow: vi.fn(),
+    runWorkflowWithAlertPreprocessing: vi.fn(),
+  } as unknown as Mocked<WorkflowsServerPluginSetup['management']>;
   const attachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
   const validateAlertTargets = ({ targets, inputs }: WorkflowAttachmentValidationContext): void => {
     const event = inputs.event as Record<string, unknown> | undefined;
@@ -147,7 +153,7 @@ describe('CasesWorkflowRunService', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     workflowsAvailable = true;
     licenseValid = true;
     // Default: authorization succeeds for case-1 with the security solution owner.
@@ -181,7 +187,7 @@ describe('CasesWorkflowRunService', () => {
     expect(management.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default', request);
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
     expect(
-      (mockEnsureAuthorizedToRunWorkflow as jest.Mock).mock.invocationCallOrder[0]
+      (mockEnsureAuthorizedToRunWorkflow as Mock).mock.invocationCallOrder[0]
     ).toBeLessThan(management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]);
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
       workflow: expect.objectContaining({ id: 'workflow-1', name: 'Investigate case' }),

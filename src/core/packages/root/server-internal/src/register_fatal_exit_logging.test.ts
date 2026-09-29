@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { FatalExitLogging } from './register_fatal_exit_logging';
@@ -18,12 +21,12 @@ const emitUncaughtExceptionMonitor = (error: Error, origin = 'uncaughtException'
 
 describe('registerFatalExitLogging', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let consoleErrorSpy: jest.SpyInstance;
+  let consoleErrorSpy: MockInstance;
   let fatalExitLogging: FatalExitLogging;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     fatalExitLogging = registerFatalExitLogging({ logger });
   });
 

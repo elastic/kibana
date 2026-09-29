@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useConversationsByDate } from './use_conversations_by_date';
 import { getAbsoluteTime, isValidDateMath } from '../utils/date';
 import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 
-jest.mock('../utils/date', () => ({
-  getAbsoluteTime: jest.fn(),
-  isValidDateMath: jest.fn(),
-}));
+vi.mock('../utils/date', () => {
+      const mocked = {
+      getAbsoluteTime: vi.fn(),
+      isValidDateMath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.unmock('./use_conversations_by_date');
+vi.unmock('./use_conversations_by_date');
 
 export const getDisplayedConversation = (conversation: Conversation) => {
   return {
@@ -38,10 +44,10 @@ describe('useConversationsByDate', () => {
   const startOfThisYear = new Date('2025-01-01T00:00:00Z').valueOf();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
-    (getAbsoluteTime as jest.Mock).mockImplementation((range: string) => {
+    (getAbsoluteTime as Mock).mockImplementation((range: string) => {
       switch (range) {
         case 'now/d':
           return startOfToday;
@@ -62,7 +68,7 @@ describe('useConversationsByDate', () => {
       }
     });
 
-    (isValidDateMath as jest.Mock).mockImplementation((value: string) => {
+    (isValidDateMath as Mock).mockImplementation((value: string) => {
       const validTimestamps = [
         new Date(startOfToday + 5 * 60 * 60 * 1000).toISOString(),
         new Date(startOfYesterday + 5 * 60 * 60 * 1000).toISOString(),
@@ -75,7 +81,7 @@ describe('useConversationsByDate', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const mockConversations = [

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -19,12 +22,12 @@ import {
 } from './service';
 
 describe('Workflows Service', () => {
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let mockRequest: KibanaRequest;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+    vi.resetAllMocks();
+    mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
     mockRequest = {} as KibanaRequest;
   });
 
@@ -35,8 +38,8 @@ describe('Workflows Service', () => {
     const mockConnectorUsageCollector = {} as any;
 
     it('should create external service with all dependencies', () => {
-      const mockWorkflowService: WorkflowsServiceFunction = jest.fn();
-      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest.fn();
+      const mockWorkflowService: WorkflowsServiceFunction = vi.fn();
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = vi.fn();
 
       const service = createExternalService(
         actionId,
@@ -74,7 +77,7 @@ describe('Workflows Service', () => {
     const mockConnectorUsageCollector = {} as any;
 
     it('should successfully run workflow', async () => {
-      const mockWorkflowService: WorkflowsServiceFunction = jest
+      const mockWorkflowService: WorkflowsServiceFunction = vi
         .fn()
         .mockResolvedValue('workflow-run-123');
 
@@ -178,7 +181,7 @@ describe('Workflows Service', () => {
     });
 
     it('should handle workflow service errors', async () => {
-      const mockWorkflowService: WorkflowsServiceFunction = jest
+      const mockWorkflowService: WorkflowsServiceFunction = vi
         .fn()
         .mockRejectedValue(new Error('Workflow execution failed'));
 
@@ -220,7 +223,7 @@ describe('Workflows Service', () => {
     });
 
     it('runWorkflow classifies disabled workflow error as user error', async () => {
-      const mockWorkflowService: WorkflowsServiceFunction = jest
+      const mockWorkflowService: WorkflowsServiceFunction = vi
         .fn()
         .mockRejectedValue(new WorkflowDisabledError('test-workflow-id'));
 
@@ -259,7 +262,7 @@ describe('Workflows Service', () => {
     });
 
     it('runWorkflow classifies missing workflow error as user error', async () => {
-      const mockWorkflowService: WorkflowsServiceFunction = jest
+      const mockWorkflowService: WorkflowsServiceFunction = vi
         .fn()
         .mockRejectedValue(new WorkflowNotFoundError('test-workflow-id'));
 
@@ -298,7 +301,7 @@ describe('Workflows Service', () => {
     });
 
     it('should handle empty workflow run response', async () => {
-      const mockWorkflowService: WorkflowsServiceFunction = jest.fn().mockResolvedValue('');
+      const mockWorkflowService: WorkflowsServiceFunction = vi.fn().mockResolvedValue('');
 
       const service = createExternalService(
         actionId,
@@ -334,7 +337,7 @@ describe('Workflows Service', () => {
     });
 
     it('should handle missing inputs parameter', async () => {
-      const mockWorkflowService: WorkflowsServiceFunction = jest
+      const mockWorkflowService: WorkflowsServiceFunction = vi
         .fn()
         .mockResolvedValue('workflow-run-123');
 
@@ -401,7 +404,7 @@ describe('Workflows Service', () => {
     const mockConnectorUsageCollector = {} as any;
 
     it('should successfully schedule workflow', async () => {
-      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = vi
         .fn()
         .mockResolvedValue('workflow-run-123');
 
@@ -494,7 +497,7 @@ describe('Workflows Service', () => {
     });
 
     it('should handle schedule workflow service errors', async () => {
-      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = vi
         .fn()
         .mockRejectedValue(new Error('Scheduling failed'));
 
@@ -537,7 +540,7 @@ describe('Workflows Service', () => {
     });
 
     it('scheduleWorkflow classifies disabled workflow error as user error', async () => {
-      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = vi
         .fn()
         .mockRejectedValue(new WorkflowDisabledError('new-workflow'));
 
@@ -577,7 +580,7 @@ describe('Workflows Service', () => {
     });
 
     it('scheduleWorkflow classifies missing workflow error as user error', async () => {
-      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = vi
         .fn()
         .mockRejectedValue(new WorkflowNotFoundError('test-workflow-id'));
 
@@ -617,7 +620,7 @@ describe('Workflows Service', () => {
     });
 
     it('should handle empty workflow run response', async () => {
-      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = vi
         .fn()
         .mockResolvedValue('');
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server/task';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
@@ -15,15 +17,15 @@ import { getAlertStats } from './lib/get_alert_stats';
 import { TelemetryTaskRunner } from './task_runner';
 import { emptyState } from './task_state';
 
-jest.mock('./lib/get_rule_stats');
-jest.mock('./lib/get_execution_stats');
-jest.mock('./lib/get_action_policy_stats');
-jest.mock('./lib/get_alert_stats');
+vi.mock('./lib/get_rule_stats');
+vi.mock('./lib/get_execution_stats');
+vi.mock('./lib/get_action_policy_stats');
+vi.mock('./lib/get_alert_stats');
 
-const getRuleStatsMock = jest.mocked(getRuleStats);
-const getExecutionStatsMock = jest.mocked(getExecutionStats);
-const getActionPolicyStatsMock = jest.mocked(getActionPolicyStats);
-const getAlertStatsMock = jest.mocked(getAlertStats);
+const getRuleStatsMock = vi.mocked(getRuleStats);
+const getExecutionStatsMock = vi.mocked(getExecutionStats);
+const getActionPolicyStatsMock = vi.mocked(getActionPolicyStats);
+const getAlertStatsMock = vi.mocked(getAlertStats);
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
@@ -36,7 +38,7 @@ const createRunParams = (state = emptyState): Pick<RunContext, 'taskInstance' | 
 
 describe('TelemetryTaskRunner', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     getRuleStatsMock.mockResolvedValue({ count_total: 10, count_enabled: 5 });
     getExecutionStatsMock.mockResolvedValue({ executions_count_24hr: 20 });

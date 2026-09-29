@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,7 +16,7 @@ import * as useUpsellingModule from '../../../common/hooks/use_upselling';
 import type { ArrayItem } from '../../../shared_imports';
 
 // Mock useKibana with configurable osquery service
-const mockFetchInstallationStatus = jest.fn();
+const mockFetchInstallationStatus = vi.fn();
 const mockCapabilities = {
   osquery: {
     writeLiveQueries: true,
@@ -24,37 +26,49 @@ const mockCapabilities = {
   },
 };
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      osquery: {
-        fetchInstallationStatus: mockFetchInstallationStatus,
-        LiveQueryField: jest.fn(() => null),
-      },
-      application: {
-        capabilities: mockCapabilities,
-      },
-    },
-  }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          osquery: {
+            fetchInstallationStatus: mockFetchInstallationStatus,
+            LiveQueryField: vi.fn(() => null),
+          },
+          application: {
+            capabilities: mockCapabilities,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useIsMounted to always return true
-jest.mock('@kbn/securitysolution-hook-utils', () => ({
-  useIsMounted: () => () => true,
-}));
+vi.mock('@kbn/securitysolution-hook-utils', () => {
+      const mocked = {
+      useIsMounted: () => () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock shared_imports to avoid form context dependency
-jest.mock('../../../shared_imports', () => ({
-  UseField: ({ component: Component }: { component: React.ComponentType }) =>
-    Component ? <Component /> : null,
-}));
+vi.mock('../../../shared_imports', () => {
+      const mocked = {
+      UseField: ({ component: Component }: { component: React.ComponentType }) =>
+        Component ? <Component /> : null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the form field to avoid deep osquery plugin dependencies
-jest.mock('./osquery_response_action_form_field', () => ({
-  ResponseActionFormField: () => <div data-test-subj="osquery-response-action-form" />,
-}));
+vi.mock('./osquery_response_action_form_field', () => {
+      const mocked = {
+      ResponseActionFormField: () => <div data-test-subj="osquery-response-action-form" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useUpsellingComponentSpy = jest.spyOn(useUpsellingModule, 'useUpsellingComponent');
+const useUpsellingComponentSpy = vi.spyOn(useUpsellingModule, 'useUpsellingComponent');
 
 const mockItem: ArrayItem = {
   id: 0,
@@ -71,7 +85,7 @@ const renderComponent = () =>
 
 describe('OsqueryResponseAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchInstallationStatus.mockReturnValue({ disabled: false, permissionDenied: false });
     useUpsellingComponentSpy.mockReturnValue(null);
   });

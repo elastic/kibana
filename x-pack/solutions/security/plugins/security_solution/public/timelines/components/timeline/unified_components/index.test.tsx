@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ComponentProps, FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import type QueryTabContent from '.';
@@ -38,36 +41,45 @@ import type { ColumnHeaderType } from '../../../../../common/types';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-jest.mock('../../../containers', () => ({
-  useTimelineEvents: jest.fn(),
-}));
+vi.mock('../../../containers', () => {
+      const mocked = {
+      useTimelineEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/details');
+vi.mock('../../../containers/details');
 
-jest.mock('../../fields_browser', () => ({
-  useFieldBrowserOptions: jest.fn(),
-}));
+vi.mock('../../fields_browser', () => {
+      const mocked = {
+      useFieldBrowserOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kuery');
+vi.mock('../../../../common/lib/kuery');
 
-jest.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../common/hooks/use_experimental_features');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(() => ({
-    pathname: '',
-    search: '',
-  })),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(() => ({
+        pathname: '',
+        search: '',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
+const useIsExperimentalFeatureEnabledMock = vi.fn((feature: keyof ExperimentalFeatures) => {
   return allowedExperimentalValues[feature];
 });
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
-jest.mock(`@elastic/ebt/client`);
+vi.mock(`@elastic/ebt/client`);
 
 const columnsToDisplay = [
   ...defaultUdtHeaders,
@@ -109,13 +121,13 @@ const TestComponent = (
       },
     ],
     events: localMockedTimelineData,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     totalCount: localMockedTimelineData.length,
-    onFetchMoreRecords: jest.fn(),
+    onFetchMoreRecords: vi.fn(),
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),
     isTextBasedQuery: false,
-    onUpdatePageIndex: jest.fn(),
+    onUpdatePageIndex: vi.fn(),
   };
 
   const dispatch = useDispatch();
@@ -161,9 +173,9 @@ const getTimelineFromStore = (
   return store.getState().timeline.timelineById[timelineId];
 };
 
-const loadPageMock = jest.fn();
+const loadPageMock = vi.fn();
 
-const useTimelineEventsMock = jest.fn(() => [
+const useTimelineEventsMock = vi.fn(() => [
   false,
   {
     events: localMockedTimelineData,
@@ -186,14 +198,14 @@ describe('unified timeline', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     storageMock.clear();
     cleanup();
     localStorage.clear();
   });
 
   beforeEach(() => {
-    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+    HTMLElement.prototype.getBoundingClientRect = vi.fn(() => {
       return {
         width: 1000,
         height: 1000,
@@ -202,17 +214,17 @@ describe('unified timeline', () => {
       } as DOMRect;
     });
 
-    (useKibana as jest.Mock).mockImplementation(() => {
+    (useKibana as Mock).mockImplementation(() => {
       return {
         services: kibanaServiceMock,
       };
     });
 
-    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
+    (useTimelineEvents as Mock).mockImplementation(useTimelineEventsMock);
 
-    (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
+    (useTimelineEventsDetails as Mock).mockImplementation(() => [false, {}]);
 
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+    (useIsExperimentalFeatureEnabled as Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock
     );
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiProgress, EuiButtonGroup } from '@elastic/eui';
@@ -21,12 +24,12 @@ import type { AboutStepRule } from '../../../common/types';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { useRuleCustomizationsContext } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock(
+vi.mock('../../../../common/lib/kibana');
+vi.mock(
   '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context'
 );
 
-const useRuleCustomizationsContextMock = useRuleCustomizationsContext as jest.Mock;
+const useRuleCustomizationsContextMock = useRuleCustomizationsContext as Mock;
 
 const mockTheme = getMockTheme({
   eui: { euiSizeL: '10px', euiBreakpoints: { s: '450px' }, euiSizeM: '10px' },
@@ -38,7 +41,7 @@ describe('StepAboutRuleToggleDetails', () => {
   beforeEach(() => {
     stepDataMock = mockAboutStepRule();
     useRuleCustomizationsContextMock.mockReturnValue({
-      actions: { openCustomizationsPreviewFlyout: jest.fn() },
+      actions: { openCustomizationsPreviewFlyout: vi.fn() },
       state: { doesBaseVersionExist: true, modifiedFields: new Set() },
     });
   });

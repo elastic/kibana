@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
@@ -64,7 +67,7 @@ describe('set unified alerts workflow status', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.uiSettings.client.get.mockResolvedValue([]);
@@ -78,8 +81,8 @@ describe('set unified alerts workflow status', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status on unified alerts', () => {
@@ -280,13 +283,13 @@ describe('set unified alerts workflow status', () => {
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitAlertStatusChanged: jest.Mock; emitAttackStatusChanged: jest.Mock };
+    let mockEventBus: { emitAlertStatusChanged: Mock; emitAttackStatusChanged: Mock };
 
     beforeEach(() => {
       server = serverMock.create();
       mockEventBus = {
-        emitAlertStatusChanged: jest.fn(),
-        emitAttackStatusChanged: jest.fn(),
+        emitAlertStatusChanged: vi.fn(),
+        emitAttackStatusChanged: vi.fn(),
       };
       setUnifiedAlertsWorkflowStatusRoute(
         server.router,
@@ -625,7 +628,7 @@ describe('set unified alerts workflow status', () => {
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
 
-      const call = (mockEventBus.emitAlertStatusChanged as jest.Mock).mock.calls[0][1];
+      const call = (mockEventBus.emitAlertStatusChanged as Mock).mock.calls[0][1];
       expect(call.alertIds).not.toContain('no-status-doc');
       expect(call.alertIds).toContain('has-status-doc');
     });

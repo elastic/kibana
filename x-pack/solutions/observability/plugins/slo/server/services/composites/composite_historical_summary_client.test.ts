@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 import { createSLO, createAPMTransactionErrorRateIndicator } from '../fixtures/slo';
@@ -24,15 +27,15 @@ const buildHistoricalPoint = (date: string, sliValue: number, status: string = '
 });
 
 describe('CompositeHistoricalSummaryClient', () => {
-  let mockCompositeRepo: jest.Mocked<CompositeSLORepository>;
-  let mockSloRepo: jest.Mocked<SLODefinitionRepository>;
-  let mockHistoricalProvider: jest.Mocked<HistoricalSummaryProvider>;
+  let mockCompositeRepo: Mocked<CompositeSLORepository>;
+  let mockSloRepo: Mocked<SLODefinitionRepository>;
+  let mockHistoricalProvider: Mocked<HistoricalSummaryProvider>;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
     mockCompositeRepo = createCompositeSLORepositoryMock();
     mockSloRepo = createSLORepositoryMock();
-    mockHistoricalProvider = { fetch: jest.fn() };
+    mockHistoricalProvider = { fetch: vi.fn() };
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 

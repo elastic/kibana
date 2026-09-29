@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { Store } from 'redux-v4';
 import { screen, render, waitFor } from '@testing-library/react';
@@ -17,8 +20,8 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import type { VisualizationTablesWithMeta } from './types';
 
-jest.mock('./lens_embeddable');
-jest.mock('../page/use_refetch_by_session');
+vi.mock('./lens_embeddable');
+vi.mock('../page/use_refetch_by_session');
 
 const mockSearchSessionId = 'searchSessionId';
 const mockTables: VisualizationTablesWithMeta = {
@@ -56,12 +59,12 @@ const mockTables: VisualizationTablesWithMeta = {
   },
 };
 
-const mockRefetchByRestartingSession = jest.fn();
-const mockRefetchByDeletingSession = jest.fn();
+const mockRefetchByRestartingSession = vi.fn();
+const mockRefetchByDeletingSession = vi.fn();
 
 const getSpies = () => {
-  const mockSetQuery = jest.spyOn(inputActions, 'setQuery');
-  const mockDeleteQuery = jest.spyOn(inputActions, 'deleteOneQuery');
+  const mockSetQuery = vi.spyOn(inputActions, 'setQuery');
+  const mockDeleteQuery = vi.spyOn(inputActions, 'deleteOneQuery');
   return { mockSetQuery, mockDeleteQuery };
 };
 
@@ -85,7 +88,7 @@ const renderWithSpies = (mockStore?: Store) => {
   };
 };
 
-(useRefetchByRestartingSession as jest.Mock).mockReturnValue({
+(useRefetchByRestartingSession as Mock).mockReturnValue({
   session: {
     current: {
       start: () => mockSearchSessionId,
@@ -97,8 +100,8 @@ const renderWithSpies = (mockStore?: Store) => {
 
 describe('VisualizationEmbeddable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
   describe('when isDonut = false', () => {
     it('should render LensEmbeddable', async () => {
@@ -150,7 +153,7 @@ describe('VisualizationEmbeddable', () => {
               loading: false,
               selectedInspectIndex: 0,
               searchSessionId: undefined,
-              refetch: jest.fn(),
+              refetch: vi.fn(),
               tables: mockTables,
             },
           ],

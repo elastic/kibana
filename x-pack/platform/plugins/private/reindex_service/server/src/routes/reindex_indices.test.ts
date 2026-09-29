@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   loggingSystemMock,
@@ -23,21 +25,24 @@ import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 
 const mockReindexService = {
-  hasRequiredPrivileges: jest.fn(),
-  detectReindexWarnings: jest.fn(),
-  createReindexOperation: jest.fn(),
-  findAllInProgressOperations: jest.fn(),
-  findReindexOperation: jest.fn(),
-  processNextStep: jest.fn(),
-  resumeReindexOperation: jest.fn(),
-  cancelReindexing: jest.fn(),
-  getIndexAliases: jest.fn().mockResolvedValue({}),
-  getIndexInfo: jest.fn().mockResolvedValue({ aliases: {}, settings: {} }),
+  hasRequiredPrivileges: vi.fn(),
+  detectReindexWarnings: vi.fn(),
+  createReindexOperation: vi.fn(),
+  findAllInProgressOperations: vi.fn(),
+  findReindexOperation: vi.fn(),
+  processNextStep: vi.fn(),
+  resumeReindexOperation: vi.fn(),
+  cancelReindexing: vi.fn(),
+  getIndexAliases: vi.fn().mockResolvedValue({}),
+  getIndexInfo: vi.fn().mockResolvedValue({ aliases: {}, settings: {} }),
 };
 
-jest.mock('../lib/reindex_service', () => ({
-  reindexServiceFactory: () => mockReindexService,
-}));
+vi.mock('../lib/reindex_service', () => {
+      const mocked = {
+      reindexServiceFactory: () => mockReindexService,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexSavedObject } from '../lib/types';
@@ -57,8 +62,8 @@ describe('reindex API', () => {
 
   const credentialStore = credentialStoreFactory(logMock.get());
   const worker = {
-    includes: jest.fn(),
-    forceRefresh: jest.fn(),
+    includes: vi.fn(),
+    forceRefresh: vi.fn(),
   } as any;
 
   beforeEach(() => {
@@ -104,7 +109,7 @@ describe('reindex API', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe(`GET ${REINDEX_SERVICE_BASE_PATH}/{indexName}`, () => {

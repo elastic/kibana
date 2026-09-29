@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -13,14 +16,14 @@ import { StatusContextMenu } from './status_context_menu';
 import { TestProviders } from '../../common/mock';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 
-jest.mock('../actions/status/use_should_disable_status');
+vi.mock('../actions/status/use_should_disable_status');
 
 describe('StatusContextMenu', () => {
-  const onStatusChanged = jest.fn();
+  const onStatusChanged = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
+    vi.clearAllMocks();
+    (useShouldDisableStatus as Mock).mockReturnValue(() => false);
   });
 
   it('renders', async () => {
@@ -93,7 +96,7 @@ describe('StatusContextMenu', () => {
   });
 
   it('does not render the button at all if the status cannot change', async () => {
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
+    (useShouldDisableStatus as Mock).mockReturnValue(() => true);
     const wrapper = mount(
       <TestProviders>
         <StatusContextMenu
@@ -114,8 +117,8 @@ describe('StatusContextMenu', () => {
   });
 
   it('updates menu items when shouldDisableStatus changes', async () => {
-    const mockShouldDisableStatus = jest.fn().mockReturnValue(false);
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(mockShouldDisableStatus);
+    const mockShouldDisableStatus = vi.fn().mockReturnValue(false);
+    (useShouldDisableStatus as Mock).mockReturnValue(mockShouldDisableStatus);
 
     const wrapper = mount(
       <TestProviders>
@@ -134,7 +137,7 @@ describe('StatusContextMenu', () => {
   });
 
   it('handles all statuses being disabled', async () => {
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
+    (useShouldDisableStatus as Mock).mockReturnValue(() => true);
 
     const wrapper = mount(
       <TestProviders>
@@ -152,7 +155,7 @@ describe('StatusContextMenu', () => {
   });
 
   it('correctly evaluates each status option', async () => {
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(false);
+    (useShouldDisableStatus as Mock).mockReturnValue(false);
 
     const wrapper = mount(
       <TestProviders>

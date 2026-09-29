@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ATTACK_DISCOVERY_AD_HOC_RULE_ID } from '@kbn/elastic-assistant-common';
@@ -19,33 +21,45 @@ import {
   EXPAND_ATTACK_BUTTON_TEST_ID,
 } from '.';
 
-const mockReportEvent = jest.fn();
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      telemetry: {
-        reportEvent: mockReportEvent,
-      },
-    },
-  }),
-}));
+const mockReportEvent = vi.fn();
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          telemetry: {
+            reportEvent: mockReportEvent,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../attack_discovery/pages/settings_flyout/schedule/details_flyout', () => ({
-  DetailsFlyout: jest.fn(() => <div data-test-subj="mock-details-flyout" />),
-}));
+vi.mock('../../../../../attack_discovery/pages/settings_flyout/schedule/details_flyout', () => {
+      const mocked = {
+      DetailsFlyout: vi.fn(() => <div data-test-subj="mock-details-flyout" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
-  () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
-      <div data-test-subj="mock-markdown-formatter">{markdown}</div>
-    )),
-  })
+  () => {
+      const mocked = {
+        AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }) => (
+          <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+        )),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('./subtitle', () => ({
-  Subtitle: jest.fn(() => <div data-test-subj="mock-subtitle" />),
-}));
+vi.mock('./subtitle', () => {
+      const mocked = {
+      Subtitle: vi.fn(() => <div data-test-subj="mock-subtitle" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
@@ -55,7 +69,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent
         attack={mockAttack}
         dataTestSubj="test_id"
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 
@@ -72,7 +86,7 @@ describe('AttackGroupContent', () => {
   });
 
   it('should call openAttackDetailsFlyout when "Open attack details" button is clicked', () => {
-    const openAttackDetailsFlyoutMock = jest.fn();
+    const openAttackDetailsFlyoutMock = vi.fn();
     const { getByTestId } = render(
       <AttackGroupContent
         attack={mockAttack}
@@ -95,7 +109,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent
         attack={attackWithEmptyTitle}
         dataTestSubj="test_id"
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 
@@ -108,7 +122,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent
         attack={attackWithTags}
         dataTestSubj="test_id"
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 
@@ -122,7 +136,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent
         attack={attackWithNoTags}
         dataTestSubj="test_id"
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 
@@ -135,7 +149,7 @@ describe('AttackGroupContent', () => {
         attack={mockAttack}
         dataTestSubj="test_id"
         showAnonymized
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 
@@ -150,7 +164,7 @@ describe('AttackGroupContent', () => {
         attack={mockAttack}
         dataTestSubj="test_id"
         showAnonymized={false}
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 
@@ -165,7 +179,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent
         attack={scheduledAttack}
         dataTestSubj="test_id"
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 
@@ -178,7 +192,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent
         attack={adHocAttack}
         dataTestSubj="test_id"
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 
@@ -191,7 +205,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent
         attack={scheduledAttack}
         dataTestSubj="test_id"
-        openAttackDetailsFlyout={jest.fn()}
+        openAttackDetailsFlyout={vi.fn()}
       />
     );
 

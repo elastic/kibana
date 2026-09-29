@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type {
   ConnectorStep,
@@ -27,39 +30,45 @@ import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 const dependencies = mockContextDependencies();
 
-jest.mock('../../lib/call_kibana_api', () => ({
-  callKibanaApi: jest.fn(),
-}));
+vi.mock('../../lib/call_kibana_api', () => {
+      const mocked = {
+      callKibanaApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual<typeof import('../../utils')>('../../utils'),
-  buildStepExecutionId: jest.fn().mockImplementation((executionId: string, stepId: string) => {
-    return `${stepId}_generated`;
-  }),
-  getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
-  buildWorkflowExecutionUrl: jest
-    .fn()
-    .mockImplementation(
-      (
-        kibanaUrl: string,
-        spaceId: string,
-        workflowId: string,
-        executionId: string,
-        stepExecutionId?: string
-      ) => {
-        const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-        const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
-        const params = new URLSearchParams({
-          executionId,
-          tab: 'executions',
-        });
-        if (stepExecutionId) {
-          params.set('stepExecutionId', stepExecutionId);
-        }
-        return `${baseUrl}?${params.toString()}`;
-      }
-    ),
-}));
+vi.mock('../../utils', async () => {
+      const mocked = {
+      ...(await vi.importActual<typeof import('../../utils')>('../../utils')),
+      buildStepExecutionId: vi.fn().mockImplementation((executionId: string, stepId: string) => {
+        return `${stepId}_generated`;
+      }),
+      getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
+      buildWorkflowExecutionUrl: vi
+        .fn()
+        .mockImplementation(
+          (
+            kibanaUrl: string,
+            spaceId: string,
+            workflowId: string,
+            executionId: string,
+            stepExecutionId?: string
+          ) => {
+            const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+            const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
+            const params = new URLSearchParams({
+              executionId,
+              tab: 'executions',
+            });
+            if (stepExecutionId) {
+              params.set('stepExecutionId', stepExecutionId);
+            }
+            return `${baseUrl}?${params.toString()}`;
+          }
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowContextManager', () => {
   const fakeNode: AtomicGraphNode = {
@@ -78,37 +87,37 @@ describe('WorkflowContextManager', () => {
     const stackFrames = options.stackFrames ?? fakeStackFrames;
     const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
     const workflowExecutionState: WorkflowExecutionState = {} as WorkflowExecutionState;
-    workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+    workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
       scopeStack: [] as StackFrame[],
       workflowDefinition: workflow,
     } as EsWorkflowExecution);
-    workflowExecutionState.getStepExecution = jest
+    workflowExecutionState.getStepExecution = vi
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
-    workflowExecutionState.getLatestStepExecution = jest
+    workflowExecutionState.getLatestStepExecution = vi
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
     const templatingEngineMock = {} as unknown as WorkflowTemplatingEngine;
-    templatingEngineMock.render = jest.fn().mockImplementation((...args: unknown[]) => args[0]);
-    templatingEngineMock.evaluateExpression = jest
+    templatingEngineMock.render = vi.fn().mockImplementation((...args: unknown[]) => args[0]);
+    templatingEngineMock.evaluateExpression = vi
       .fn()
       .mockImplementation((...args: unknown[]) => args[0]);
-    templatingEngineMock.extractGlobalVariableSegments = jest.fn().mockReturnValue([]);
+    templatingEngineMock.extractGlobalVariableSegments = vi.fn().mockReturnValue([]);
 
     // Provide a dummy esClient as required by ContextManagerInit
     const esClient = {
       // Add only the minimal mock implementation needed for tests
-      search: jest.fn(),
-      index: jest.fn(),
-      get: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+      search: vi.fn(),
+      index: vi.fn(),
+      get: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     } as any;
 
-    workflowExecutionState.getLatestStepExecution = jest
+    workflowExecutionState.getLatestStepExecution = vi
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
-    workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+    workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([]);
 
     // Service is sovereign over IO. The mock keeps its own input/output
     // maps but also falls back to reading IO directly off the state mock
@@ -126,17 +135,17 @@ describe('WorkflowContextManager', () => {
       return exec?.[field];
     };
     const stepIoService = {
-      hasEvictedOutputs: jest.fn().mockReturnValue(false),
-      prepareForRead: jest.fn().mockResolvedValue(undefined),
-      rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
-      releaseReadPins: jest.fn(),
-      releaseTransientlyRehydratedOutputs: jest.fn(),
-      setStepInput: jest.fn((id: string, input: unknown) => stepInputs.set(id, input)),
-      setStepOutput: jest.fn((id: string, output: unknown) => stepOutputs.set(id, output)),
-      getStepInput: jest.fn((id: string) => readIo(id, 'input')),
-      getStepOutput: jest.fn((id: string) => readIo(id, 'output')),
-      getStepError: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),
-      getLatestStepIO: jest.fn((stepId: string) => {
+      hasEvictedOutputs: vi.fn().mockReturnValue(false),
+      prepareForRead: vi.fn().mockResolvedValue(undefined),
+      rehydrateOutputs: vi.fn().mockResolvedValue(undefined),
+      releaseReadPins: vi.fn(),
+      releaseTransientlyRehydratedOutputs: vi.fn(),
+      setStepInput: vi.fn((id: string, input: unknown) => stepInputs.set(id, input)),
+      setStepOutput: vi.fn((id: string, output: unknown) => stepOutputs.set(id, output)),
+      getStepInput: vi.fn((id: string) => readIo(id, 'input')),
+      getStepOutput: vi.fn((id: string) => readIo(id, 'output')),
+      getStepError: vi.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),
+      getLatestStepIO: vi.fn((stepId: string) => {
         const latest = workflowExecutionState.getLatestStepExecution(stepId) as
           | { id?: string; input?: unknown; output?: unknown; error?: unknown }
           | undefined;
@@ -149,7 +158,7 @@ describe('WorkflowContextManager', () => {
           error: latest.error,
         };
       }),
-      getDataSetVariables: jest.fn((): Record<string, unknown> => {
+      getDataSetVariables: vi.fn((): Record<string, unknown> => {
         // Aggregate from data.set steps the test mocked into state. Falls
         // back to reading `output` directly off the mocked exec when the
         // mock didn't bother to attach an id, so old fixtures keep working.
@@ -219,7 +228,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should override consts with mocked data', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -258,7 +267,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should have event from execution context', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         scopeStack: [] as StackFrame[],
         workflowDefinition: workflow,
         context: {
@@ -276,7 +285,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should override event context with mocked data', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -328,7 +337,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should have inputs from execution context', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         scopeStack: [] as StackFrame[],
         workflowDefinition: workflow,
         context: {
@@ -344,7 +353,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should override inputs from mock', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -385,7 +394,7 @@ describe('WorkflowContextManager', () => {
 
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -407,7 +416,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should override variables with mocked data', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -443,7 +452,7 @@ describe('WorkflowContextManager', () => {
 
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         workflowId: 'fake-workflow-id',
         spaceId: 'fake-space-id',
@@ -481,7 +490,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should override workflow context with mocked data', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         workflowId: 'fake-workflow-id',
         spaceId: 'fake-space-id',
@@ -520,7 +529,7 @@ describe('WorkflowContextManager', () => {
 
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         id: 'fake-execution-id',
         scopeStack: [] as StackFrame[],
@@ -540,7 +549,7 @@ describe('WorkflowContextManager', () => {
 
     describe('isTestRun flag', () => {
       it('should return true in isTestRun flag if isTestRun in workflow execution is true', () => {
-        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
           workflowDefinition: workflow,
           scopeStack: [] as StackFrame[],
           isTestRun: true,
@@ -552,7 +561,7 @@ describe('WorkflowContextManager', () => {
       it.each([undefined, null, false])(
         'should return false in isTestRun flag if isTestRun in workflow execution is %s',
         (isTestRun) => {
-          testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+          testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
             workflowDefinition: workflow,
             scopeStack: [] as StackFrame[],
             isTestRun,
@@ -563,7 +572,7 @@ describe('WorkflowContextManager', () => {
       );
 
       it('should enrich execution context with mocked data', () => {
-        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
           workflowDefinition: workflow,
           id: 'fake-execution-id',
           scopeStack: [] as StackFrame[],
@@ -644,10 +653,10 @@ describe('WorkflowContextManager', () => {
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
       } as EsWorkflowExecution);
-      testContainer.workflowExecutionState.getStepExecution = jest
+      testContainer.workflowExecutionState.getStepExecution = vi
         .fn()
         .mockImplementation((stepExecutionId) => {
           if (stepExecutionId === 'outerForeachStep_generated') {
@@ -686,7 +695,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should have foreach scope undefined for step lastLogStep', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
       } as EsWorkflowExecution);
@@ -696,7 +705,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should override foreach context', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -730,7 +739,7 @@ describe('WorkflowContextManager', () => {
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         context: {
           contextOverride: {
@@ -742,7 +751,7 @@ describe('WorkflowContextManager', () => {
           },
         } as Record<string, any>,
       } as EsWorkflowExecution);
-      testContainer.workflowExecutionState.getStepExecution = jest
+      testContainer.workflowExecutionState.getStepExecution = vi
         .fn()
         .mockImplementation((stepExecutionId) => {
           if (stepExecutionId === 'outerForeachStep_generated') {
@@ -776,10 +785,10 @@ describe('WorkflowContextManager', () => {
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
       } as EsWorkflowExecution);
-      testContainer.workflowExecutionState.getStepExecution = jest
+      testContainer.workflowExecutionState.getStepExecution = vi
         .fn()
         .mockImplementation((stepExecutionId) => {
           if (stepExecutionId === 'outerForeachStep_generated') {
@@ -814,10 +823,10 @@ describe('WorkflowContextManager', () => {
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
       } as EsWorkflowExecution);
-      testContainer.workflowExecutionState.getStepExecution = jest
+      testContainer.workflowExecutionState.getStepExecution = vi
         .fn()
         .mockImplementation((stepExecutionId) => {
           if (stepExecutionId === 'outerForeachStep_generated') {
@@ -834,11 +843,11 @@ describe('WorkflowContextManager', () => {
           }
           return undefined;
         });
-      (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockReturnValue([
+      (testContainer.templatingEngineMock.evaluateExpression as Mock).mockReturnValue([
         'x',
         'y',
       ]);
-      (testContainer.templatingEngineMock.render as jest.Mock).mockReturnValue(['x', 'y']);
+      (testContainer.templatingEngineMock.render as Mock).mockReturnValue(['x', 'y']);
 
       const context = testContainer.underTest.getContext();
 
@@ -871,10 +880,10 @@ describe('WorkflowContextManager', () => {
           },
         ];
         testContainer = createTestContainer(workflow, { stackFrames });
-        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
           workflowDefinition: workflow,
         } as EsWorkflowExecution);
-        testContainer.workflowExecutionState.getStepExecution = jest
+        testContainer.workflowExecutionState.getStepExecution = vi
           .fn()
           .mockImplementation((stepExecutionId) => {
             if (stepExecutionId === 'outerForeachStep_generated') {
@@ -900,7 +909,7 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should resolve inner foreach items from outer current item when inner expression is {{foreach.item}}', () => {
-        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.evaluateExpression as Mock).mockImplementation(
           (expr: string, ctx: Record<string, unknown>) => {
             if (expr.includes('foreach.item')) {
               return (ctx as { foreach?: { item: unknown } }).foreach?.item;
@@ -908,7 +917,7 @@ describe('WorkflowContextManager', () => {
             return expr;
           }
         );
-        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.render as Mock).mockImplementation(
           (...args: unknown[]) => args[0]
         );
 
@@ -923,7 +932,7 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should expose innermost foreach as context.foreach (current loop)', () => {
-        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.evaluateExpression as Mock).mockImplementation(
           (expr: string, ctx: Record<string, unknown>) => {
             if (expr.includes('foreach.item')) {
               return (ctx as { foreach?: { item: unknown } }).foreach?.item;
@@ -931,7 +940,7 @@ describe('WorkflowContextManager', () => {
             return expr;
           }
         );
-        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.render as Mock).mockImplementation(
           (...args: unknown[]) => args[0]
         );
 
@@ -944,7 +953,7 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should populate steps[outerForeachStep] with item, items, index, total', () => {
-        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.evaluateExpression as Mock).mockImplementation(
           (expr: string, ctx: Record<string, unknown>) => {
             if (expr.includes('foreach.item')) {
               return (ctx as { foreach?: { item: unknown } }).foreach?.item;
@@ -952,7 +961,7 @@ describe('WorkflowContextManager', () => {
             return expr;
           }
         );
-        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.render as Mock).mockImplementation(
           (...args: unknown[]) => args[0]
         );
 
@@ -969,7 +978,7 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should populate steps[innerForeachStep] with item, items, index, total', () => {
-        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.evaluateExpression as Mock).mockImplementation(
           (expr: string, ctx: Record<string, unknown>) => {
             if (expr.includes('foreach.item')) {
               return (ctx as { foreach?: { item: unknown } }).foreach?.item;
@@ -977,7 +986,7 @@ describe('WorkflowContextManager', () => {
             return expr;
           }
         );
-        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.render as Mock).mockImplementation(
           (...args: unknown[]) => args[0]
         );
 
@@ -994,7 +1003,7 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should not overwrite existing step output/input when merging foreach context', () => {
-        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.evaluateExpression as Mock).mockImplementation(
           (expr: string, ctx: Record<string, unknown>) => {
             if (expr.includes('foreach.item')) {
               return (ctx as { foreach?: { item: unknown } }).foreach?.item;
@@ -1002,17 +1011,17 @@ describe('WorkflowContextManager', () => {
             return expr;
           }
         );
-        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+        (testContainer.templatingEngineMock.render as Mock).mockImplementation(
           (...args: unknown[]) => args[0]
         );
-        jest.spyOn(testContainer.workflowExecutionGraph, 'getAllPredecessors').mockReturnValue([
+        vi.spyOn(testContainer.workflowExecutionGraph, 'getAllPredecessors').mockReturnValue([
           {
             id: 'outerForeachStep',
             stepId: 'outerForeachStep',
             type: 'enter-foreach',
           } as any,
         ]);
-        testContainer.workflowExecutionState.getLatestStepExecution = jest
+        testContainer.workflowExecutionState.getLatestStepExecution = vi
           .fn()
           .mockImplementation((stepId: string) => {
             if (stepId === 'outerForeachStep') {
@@ -1064,10 +1073,10 @@ describe('WorkflowContextManager', () => {
           },
         ];
         testContainer = createTestContainer(workflow, { stackFrames });
-        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
           workflowDefinition: workflow,
         } as EsWorkflowExecution);
-        testContainer.workflowExecutionState.getStepExecution = jest
+        testContainer.workflowExecutionState.getStepExecution = vi
           .fn()
           .mockImplementation((stepExecutionId) => {
             if (stepExecutionId === 'outerForeachStep_generated') {
@@ -1155,10 +1164,10 @@ describe('WorkflowContextManager', () => {
           },
         ];
         testContainer = createTestContainer(workflow, { stackFrames });
-        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
           workflowDefinition: workflow,
         } as EsWorkflowExecution);
-        testContainer.workflowExecutionState.getStepExecution = jest
+        testContainer.workflowExecutionState.getStepExecution = vi
           .fn()
           .mockImplementation((stepExecutionId) => {
             if (stepExecutionId === 'outerForeachStep_generated') {
@@ -1186,10 +1195,10 @@ describe('WorkflowContextManager', () => {
           },
         ];
         testContainer = createTestContainer(workflow, { stackFrames });
-        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
           workflowDefinition: workflow,
         } as EsWorkflowExecution);
-        testContainer.workflowExecutionState.getStepExecution = jest
+        testContainer.workflowExecutionState.getStepExecution = vi
           .fn()
           .mockImplementation((stepExecutionId) => {
             if (stepExecutionId === 'outerForeachStep_generated') {
@@ -1248,11 +1257,11 @@ describe('WorkflowContextManager', () => {
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
       } as EsWorkflowExecution);
 
-      testContainer.workflowExecutionState.getStepExecution = jest
+      testContainer.workflowExecutionState.getStepExecution = vi
         .fn()
         .mockImplementation((stepExecutionId: string) => {
           if (stepExecutionId === 'poll_loop_generated') {
@@ -1279,11 +1288,11 @@ describe('WorkflowContextManager', () => {
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
       } as EsWorkflowExecution);
 
-      testContainer.workflowExecutionState.getStepExecution = jest
+      testContainer.workflowExecutionState.getStepExecution = vi
         .fn()
         .mockImplementation((stepExecutionId: string) => {
           if (stepExecutionId === 'poll_loop_generated') {
@@ -1310,11 +1319,11 @@ describe('WorkflowContextManager', () => {
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
       } as EsWorkflowExecution);
 
-      testContainer.workflowExecutionState.getStepExecution = jest
+      testContainer.workflowExecutionState.getStepExecution = vi
         .fn()
         .mockImplementation((stepExecutionId: string) => {
           if (stepExecutionId === 'poll_loop_generated') {
@@ -1334,7 +1343,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should have while undefined when no while scope is active', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
       } as EsWorkflowExecution);
@@ -1355,11 +1364,11 @@ describe('WorkflowContextManager', () => {
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
       } as EsWorkflowExecution);
 
-      testContainer.workflowExecutionState.getStepExecution = jest
+      testContainer.workflowExecutionState.getStepExecution = vi
         .fn()
         .mockImplementation((stepExecutionId: string) => {
           if (stepExecutionId === 'outer_loop_generated') {
@@ -1435,12 +1444,12 @@ describe('WorkflowContextManager', () => {
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
       fakeNode.id = 'thirdLogStep';
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
       } as EsWorkflowExecution);
 
-      testContainer.workflowExecutionState.getLatestStepExecution = jest
+      testContainer.workflowExecutionState.getLatestStepExecution = vi
         .fn()
         .mockImplementation((stepId) => {
           switch (stepId) {
@@ -1495,7 +1504,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should cache predecessors and call getAllPredecessors only once across multiple getContext calls', () => {
-      const spy = jest.spyOn(testContainer.workflowExecutionGraph, 'getAllPredecessors');
+      const spy = vi.spyOn(testContainer.workflowExecutionGraph, 'getAllPredecessors');
 
       testContainer.underTest.getContext();
       testContainer.underTest.getContext();
@@ -1506,7 +1515,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should enrich steps context with mocked data', () => {
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -1569,7 +1578,7 @@ describe('WorkflowContextManager', () => {
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
       fakeNode.id = 'processData';
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         workflowDefinition: workflow,
         id: 'exec-123',
         workflowId: 'workflow-456',
@@ -1584,7 +1593,7 @@ describe('WorkflowContextManager', () => {
         } as Record<string, any>,
       } as EsWorkflowExecution);
 
-      testContainer.workflowExecutionState.getLatestStepExecution = jest
+      testContainer.workflowExecutionState.getLatestStepExecution = vi
         .fn()
         .mockImplementation((stepId) => {
           if (stepId === 'fetchData') {
@@ -1600,7 +1609,7 @@ describe('WorkflowContextManager', () => {
 
     describe('string rendering', () => {
       it('should render a string with multiple template expressions', () => {
-        testContainer.templatingEngineMock.render = jest
+        testContainer.templatingEngineMock.render = vi
           .fn()
           .mockImplementation((template) => `rendered(${template})`);
         const result = testContainer.underTest.renderValueAccordingToContext(
@@ -1613,7 +1622,7 @@ describe('WorkflowContextManager', () => {
         testContainer.underTest.renderValueAccordingToContext(
           'Workflow {{workflow.name}} in space {{workflow.spaceId}}'
         );
-        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock
           .calls[0][1];
         expect(renderArgs).toEqual(
           expect.objectContaining({
@@ -1654,13 +1663,13 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should provide rendering function with only the referenced step paths', () => {
-        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = vi
           .fn()
           .mockReturnValue([['steps', 'fetchData', 'output', 'total']]);
 
         testContainer.underTest.renderValueAccordingToContext('{{ steps.fetchData.output.total }}');
 
-        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock
           .calls[0][1];
         expect(renderArgs.steps).toEqual({
           fetchData: {
@@ -1672,13 +1681,13 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should fall back to full context when template path extraction is unsupported', () => {
-        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = vi
           .fn()
           .mockReturnValue(null);
 
         testContainer.underTest.renderValueAccordingToContext('{{ steps.fetchData.output.total }}');
 
-        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock
           .calls[0][1];
         expect(renderArgs.steps).toEqual({
           fetchData: {
@@ -1706,7 +1715,7 @@ describe('WorkflowContextManager', () => {
       });
 
       it('preserves array shape when both the collection and an indexed item are referenced', () => {
-        testContainer.workflowExecutionState.getLatestStepExecution = jest
+        testContainer.workflowExecutionState.getLatestStepExecution = vi
           .fn()
           .mockImplementation((stepId) => {
             if (stepId === 'fetchData') {
@@ -1718,7 +1727,7 @@ describe('WorkflowContextManager', () => {
             }
             return undefined;
           });
-        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = vi
           .fn()
           .mockReturnValue([
             ['steps', 'fetchData', 'output', 'hits'],
@@ -1729,7 +1738,7 @@ describe('WorkflowContextManager', () => {
           '{{ steps.fetchData.output.hits | size }} - {{ steps.fetchData.output.hits[0].id }}'
         );
 
-        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock
           .calls[0][1];
         const hits = renderArgs.steps.fetchData.output.hits;
         expect(Array.isArray(hits)).toBe(true);
@@ -1755,7 +1764,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should return empty object when no data.set steps exist', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([]);
 
       const variables = testContainer.underTest.getVariables();
 
@@ -1763,7 +1772,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should return empty object when no data.set steps with output', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'running',
@@ -1784,7 +1793,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should return variables from a single completed data.set step', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -1807,7 +1816,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should merge variables from multiple completed data.set steps', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -1839,7 +1848,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should allow later steps to override variables from earlier steps', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -1870,7 +1879,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should filter out non-data.set steps', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'connector',
           status: 'completed',
@@ -1899,7 +1908,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should filter out data.set steps without output', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -1929,7 +1938,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should ignore steps with array output', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -1952,7 +1961,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should ignore steps with primitive output', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -1987,7 +1996,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should handle empty object output', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -2002,7 +2011,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should handle nested object values in variables', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -2041,7 +2050,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should be called by getContext and include variables in context', () => {
-      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+      testContainer.workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'completed',
@@ -2103,7 +2112,7 @@ describe('WorkflowContextManager', () => {
     it('passes a predecessorsResolver that returns predecessors from the graph', async () => {
       await testContainer.underTest.ensureContextReady();
 
-      const args = (testContainer.stepIoService.prepareForRead as jest.Mock).mock.calls[0][0];
+      const args = (testContainer.stepIoService.prepareForRead as Mock).mock.calls[0][0];
       expect(typeof args.predecessorsResolver).toBe('function');
       // Resolver delegates to graph.getAllPredecessors — for step_a (no
       // predecessors) the resolver returns [].
@@ -2122,18 +2131,18 @@ describe('WorkflowContextManager', () => {
     };
 
     beforeEach(() => {
-      (callKibanaApi as jest.Mock).mockReset();
+      (callKibanaApi as Mock).mockReset();
     });
 
     it('forwards the fake request, core start, cloud setup, and workflow run id to the helper', async () => {
       const testContainer = createTestContainer(workflow);
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         id: 'workflow-run-123',
         scopeStack: [] as StackFrame[],
         workflowDefinition: workflow,
       } as unknown as EsWorkflowExecution);
 
-      (callKibanaApi as jest.Mock).mockResolvedValue({
+      (callKibanaApi as Mock).mockResolvedValue({
         status: 200,
         headers: {},
         body: { ok: true },
@@ -2146,7 +2155,7 @@ describe('WorkflowContextManager', () => {
 
       expect(result).toEqual({ status: 200, headers: {}, body: { ok: true } });
       expect(callKibanaApi).toHaveBeenCalledTimes(1);
-      const [deps, params] = (callKibanaApi as jest.Mock).mock.calls[0];
+      const [deps, params] = (callKibanaApi as Mock).mock.calls[0];
       expect(deps.fakeRequest).toBe(
         (testContainer.underTest as unknown as { fakeRequest: unknown }).fakeRequest
       );
@@ -2159,13 +2168,13 @@ describe('WorkflowContextManager', () => {
 
     it('propagates errors from the helper', async () => {
       const testContainer = createTestContainer(workflow);
-      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         id: 'workflow-run-err',
         scopeStack: [] as StackFrame[],
         workflowDefinition: workflow,
       } as unknown as EsWorkflowExecution);
 
-      (callKibanaApi as jest.Mock).mockRejectedValue(new Error('HTTP 403: forbidden'));
+      (callKibanaApi as Mock).mockRejectedValue(new Error('HTTP 403: forbidden'));
 
       await expect(
         testContainer.underTest.callKibanaApi({ method: 'GET', path: '/api/forbidden' })

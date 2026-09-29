@@ -5,26 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
 
-const mockMgetWorkflows = jest.fn();
-const mockUseQuery = jest.fn();
+const mockMgetWorkflows = vi.fn();
+const mockUseQuery = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({ mgetWorkflows: mockMgetWorkflows }),
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: () => ({ mgetWorkflows: mockMgetWorkflows }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  WorkflowApi: 'mock.WorkflowApi',
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      WorkflowApi: 'mock.WorkflowApi',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: (options: unknown) => mockUseQuery(options),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: (options: unknown) => mockUseQuery(options),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const emailWorkflow = { steps: [{ type: '.email', name: 'email' }] } as unknown as WorkflowYaml;
 const slackWorkflow = { steps: [{ type: '.slack', name: 'slack' }] } as unknown as WorkflowYaml;
@@ -38,7 +49,7 @@ const policy = (id: string, workflowIds: string[]): ActionPolicyResponse =>
 
 describe('useActionPolicyConnectorTypes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQuery.mockReturnValue({ data: undefined, isLoading: false });
   });
 

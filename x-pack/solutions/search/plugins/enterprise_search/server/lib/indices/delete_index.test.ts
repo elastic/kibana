@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { deleteIndex } from './delete_index';
@@ -13,14 +15,14 @@ describe('deleteIndex lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
-        delete: jest.fn(),
+        delete: vi.fn(),
       },
     },
     asInternalUser: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should delete index', async () => {

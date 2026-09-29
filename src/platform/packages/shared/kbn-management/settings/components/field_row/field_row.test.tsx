@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
@@ -177,11 +179,11 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
   },
 };
 
-const handleChange = jest.fn();
+const handleChange = vi.fn();
 
 describe('Field', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   (Object.keys(settings) as SettingType[]).forEach((type) => {

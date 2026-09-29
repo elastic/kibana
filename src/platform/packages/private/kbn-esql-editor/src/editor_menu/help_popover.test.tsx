@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
@@ -19,36 +22,45 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { HelpPopover } from './help_popover';
 import { getESQLAdHocDataview, getEditorExtensions } from '@kbn/esql-utils';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn(),
-  getEditorExtensions: jest
-    .fn()
-    .mockResolvedValue({ recommendedQueries: [], recommendedFields: [] }),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLAdHocDataview: vi.fn(),
+      getEditorExtensions: vi
+        .fn()
+        .mockResolvedValue({ recommendedQueries: [], recommendedFields: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/language-documentation', () => ({
-  LanguageDocumentationFlyout: ({ isHelpMenuOpen }: { isHelpMenuOpen: boolean }) =>
-    isHelpMenuOpen ? <div data-test-subj="esqlInlineDocumentationFlyout" /> : null,
-}));
+vi.mock('@kbn/language-documentation', () => {
+      const mocked = {
+      LanguageDocumentationFlyout: ({ isHelpMenuOpen }: { isHelpMenuOpen: boolean }) =>
+        isHelpMenuOpen ? <div data-test-subj="esqlInlineDocumentationFlyout" /> : null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockToggleLanguageComponent = jest.fn();
+const mockToggleLanguageComponent = vi.fn();
 const mockEditorActions = {
   currentQuery: 'FROM logstash-*',
-  submitEsqlQuery: jest.fn(),
+  submitEsqlQuery: vi.fn(),
   editorIsInline: false,
   toggleLanguageComponent: mockToggleLanguageComponent,
 };
 
-jest.mock('../editor_actions_context', () => ({
-  useEsqlEditorActions: () => mockEditorActions,
-}));
+vi.mock('../editor_actions_context', () => {
+      const mocked = {
+      useEsqlEditorActions: () => mockEditorActions,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const startMock = coreMock.createStart();
 const notificationsMock = notificationServiceMock.createStartContract();
 
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
-startMock.http.get = jest.fn().mockResolvedValue({ recommendedQueries: [] });
+startMock.http.get = vi.fn().mockResolvedValue({ recommendedQueries: [] });
 startMock.notifications = notificationsMock;
 
 const services = {
@@ -63,7 +75,7 @@ describe('HelpPopover', () => {
     adHocDataView?: DataView | null,
     props: React.ComponentProps<typeof HelpPopover> = {}
   ) => {
-    (getESQLAdHocDataview as jest.Mock).mockResolvedValue(adHocDataView ?? null);
+    (getESQLAdHocDataview as Mock).mockResolvedValue(adHocDataView ?? null);
     return await act(async () => {
       render(
         <KibanaContextProvider services={services as any}>
@@ -75,8 +87,8 @@ describe('HelpPopover', () => {
 
   beforeEach(() => {
     startMock.http.get.mockClear();
-    (getESQLAdHocDataview as jest.Mock).mockClear();
-    (getEditorExtensions as jest.Mock).mockClear();
+    (getESQLAdHocDataview as Mock).mockClear();
+    (getEditorExtensions as Mock).mockClear();
     notificationsMock.feedback.isEnabled.mockReturnValue(true);
     mockEditorActions.editorIsInline = false;
     mockToggleLanguageComponent.mockClear();
@@ -125,7 +137,7 @@ describe('HelpPopover', () => {
       { name: 'Average bytes', query: 'FROM logstash2 | STATS AVG(bytes) BY log.level' },
     ];
 
-    (getEditorExtensions as jest.Mock).mockResolvedValueOnce({
+    (getEditorExtensions as Mock).mockResolvedValueOnce({
       recommendedQueries: mockQueries,
       recommendedFields: [],
     });
@@ -149,7 +161,7 @@ describe('HelpPopover', () => {
   });
 
   it('should handle API call failure gracefully', async () => {
-    (getEditorExtensions as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    (getEditorExtensions as Mock).mockRejectedValueOnce(new Error('Network error'));
 
     await renderHelpPopover(stubIndexPattern);
     await userEvent.click(screen.getByTestId('esql-help-popover-button'));

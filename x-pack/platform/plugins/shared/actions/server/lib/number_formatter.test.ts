@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { formatNumber } from './number_formatter';
 
@@ -12,7 +14,7 @@ const logger = loggingSystemMock.create().get();
 
 describe('formatNumber()', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('using defaults is successful', () => {

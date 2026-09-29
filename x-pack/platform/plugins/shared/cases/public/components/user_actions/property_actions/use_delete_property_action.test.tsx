@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useDeletePropertyAction } from './use_delete_property_action';
 import { TestProviders } from '../../../common/mock';
 
 describe('UserActionPropertyActions', () => {
-  const onDelete = jest.fn();
+  const onDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('init', async () => {

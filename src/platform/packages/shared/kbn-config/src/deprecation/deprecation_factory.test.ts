@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DeprecatedConfigDetails } from './types';
 import { createMockedContext } from '../internal_mocks';
 import { configDeprecationFactory } from './deprecation_factory';
@@ -16,7 +18,7 @@ describe('DeprecationFactory', () => {
     configDeprecationFactory;
   const context = createMockedContext();
 
-  const addDeprecation = jest.fn<void, [DeprecatedConfigDetails]>();
+  const addDeprecation = vi.fn<void, [DeprecatedConfigDetails]>();
 
   beforeEach(() => {
     addDeprecation.mockClear();

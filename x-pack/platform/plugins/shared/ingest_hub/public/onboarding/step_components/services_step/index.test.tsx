@@ -5,57 +5,75 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 
-jest.mock('../../onboarding_flow_context', () => ({
-  useOnboardingFlow: jest.fn(),
-}));
+vi.mock('../../onboarding_flow_context', () => {
+      const mocked = {
+      useOnboardingFlow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_services_step', () => ({
-  useServicesStep: jest.fn(),
-}));
+vi.mock('./use_services_step', () => {
+      const mocked = {
+      useServicesStep: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./data_format_select', () => ({
-  DataFormatSelect: ({ disabled }: { disabled: boolean }) => (
-    <div data-test-subj="mock-data-format-select" data-disabled={String(disabled)} />
-  ),
-}));
+vi.mock('./data_format_select', () => {
+      const mocked = {
+      DataFormatSelect: ({ disabled }: { disabled: boolean }) => (
+        <div data-test-subj="mock-data-format-select" data-disabled={String(disabled)} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_row', () => ({ ServiceRow: () => null }));
-jest.mock('../service_search_filter', () => ({ ServiceSearchFilter: () => null }));
+vi.mock('./service_row', () => {
+      const mocked = { ServiceRow: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../service_search_filter', () => {
+      const mocked = { ServiceSearchFilter: () => null };
+      return { ...mocked, default: mocked };
+    });
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServicesStep } from './use_services_step';
 import { ServicesStep } from '.';
 
-const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
-const mockUseServicesStep = useServicesStep as jest.Mock;
+const mockUseOnboardingFlow = useOnboardingFlow as Mock;
+const mockUseServicesStep = useServicesStep as Mock;
 
 function makeServicesStepReturn(): ReturnType<typeof useServicesStep> {
   return {
     signalFilter: 'all',
-    setSignalFilter: jest.fn(),
+    setSignalFilter: vi.fn(),
     searchQuery: '',
-    setSearchQuery: jest.fn(),
+    setSearchQuery: vi.fn(),
     filteredServices: [],
     categories: [],
     activeCategory: 'analytics',
-    setSelectedCategory: jest.fn(),
+    setSelectedCategory: vi.fn(),
     servicesInCategory: [],
     duplicateNamesInCategory: new Set(),
     selectedSet: new Set(),
     categoryStats: new Map(),
     isReady: true,
-    handleToggle: jest.fn(),
+    handleToggle: vi.fn(),
     allInCategorySelected: false,
-    handleSelectAllInCategory: jest.fn(),
-    handleDeselectAllInCategory: jest.fn(),
-    handleNext: jest.fn(),
+    handleSelectAllInCategory: vi.fn(),
+    handleDeselectAllInCategory: vi.fn(),
+    handleNext: vi.fn(),
     dataFormat: 'ecs',
-    setDataFormat: jest.fn(),
+    setDataFormat: vi.fn(),
   };
 }
 
@@ -63,7 +81,7 @@ function renderStep(initialEntries = ['/']) {
   return render(
     <MemoryRouter initialEntries={initialEntries}>
       <I18nProvider>
-        <ServicesStep onContinue={jest.fn()} />
+        <ServicesStep onContinue={vi.fn()} />
       </I18nProvider>
     </MemoryRouter>
   );
@@ -71,7 +89,7 @@ function renderStep(initialEntries = ['/']) {
 
 describe('ServicesStep — isFormatDisabled', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseServicesStep.mockReturnValue(makeServicesStepReturn());
   });
 

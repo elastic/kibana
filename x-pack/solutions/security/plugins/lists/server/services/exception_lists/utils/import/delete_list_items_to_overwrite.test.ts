@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -13,14 +16,14 @@ import { deleteExceptionListItemByList } from '../../delete_exception_list_items
 
 import { deleteListItemsToBeOverwritten } from './delete_list_items_to_overwrite';
 
-jest.mock('../../delete_exception_list_items_by_list');
+vi.mock('../../delete_exception_list_items_by_list');
 
 describe('deleteListItemsToBeOverwritten', () => {
   const sampleListItemsToDelete: Array<[string, NamespaceType]> = [
     ['list-id', 'single'],
     ['list-id-2', 'agnostic'],
   ];
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();

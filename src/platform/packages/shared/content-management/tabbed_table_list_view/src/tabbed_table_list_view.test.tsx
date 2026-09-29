@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
@@ -111,7 +113,7 @@ describe('TabbedTableListView', () => {
   });
 
   it('should switch tabs when props change', async () => {
-    const changeActiveTab = jest.fn();
+    const changeActiveTab = vi.fn();
 
     let wrapper: ReactWrapper | undefined;
     await act(async () => {

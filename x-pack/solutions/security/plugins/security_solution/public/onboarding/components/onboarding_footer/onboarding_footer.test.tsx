@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FooterLinkItem } from './onboarding_footer';
 import { OnboardingFooterLinkItemId, TELEMETRY_FOOTER_LINK } from './constants';
 import { mockReportLinkClick } from '../__mocks__/mocks';
 
-jest.mock('../lib/telemetry');
-jest.mock('../onboarding_context');
+vi.mock('../lib/telemetry');
+vi.mock('../onboarding_context');
 
 describe('OnboardingFooterComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('FooterLinkItems should render the title and description', () => {

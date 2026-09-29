@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_WORKFLOW_CONFIGURATION } from '../constants';
 import {
   clearWorkflowSettings,
@@ -27,7 +29,7 @@ describe('workflow configuration local storage', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getWorkflowConfigStorageKey', () => {
@@ -64,7 +66,7 @@ describe('workflow configuration local storage', () => {
       const key = getWorkflowConfigStorageKey(testSpaceId);
       localStorage.setItem(key, 'invalid-json{');
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
       const result = getWorkflowSettings(testSpaceId);
 
@@ -81,7 +83,7 @@ describe('workflow configuration local storage', () => {
       const key = getWorkflowConfigStorageKey(testSpaceId);
       localStorage.setItem(key, JSON.stringify({ invalid: 'structure' }));
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
       const result = getWorkflowSettings(testSpaceId);
 
@@ -105,7 +107,7 @@ describe('workflow configuration local storage', () => {
       };
       localStorage.setItem(key, JSON.stringify(invalidConfig));
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
       const result = getWorkflowSettings(testSpaceId);
 
@@ -126,7 +128,7 @@ describe('workflow configuration local storage', () => {
       };
       localStorage.setItem(key, JSON.stringify(invalidConfig));
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
       const result = getWorkflowSettings(testSpaceId);
 
@@ -233,14 +235,14 @@ describe('workflow configuration local storage', () => {
     });
 
     it('returns false when storage quota is exceeded', () => {
-      const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
       const quotaError = new Error('QuotaExceededError');
       quotaError.name = 'QuotaExceededError';
       setItemSpy.mockImplementation(() => {
         throw quotaError;
       });
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
       const success = setWorkflowSettings(testSpaceId, testConfig);
 
@@ -254,13 +256,13 @@ describe('workflow configuration local storage', () => {
     });
 
     it('returns false on other storage errors', () => {
-      const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
       const error = new Error('Storage error');
       setItemSpy.mockImplementation(() => {
         throw error;
       });
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
       const success = setWorkflowSettings(testSpaceId, testConfig);
 
@@ -286,13 +288,13 @@ describe('workflow configuration local storage', () => {
     });
 
     it('handles errors gracefully', () => {
-      const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
+      const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem');
       const error = new Error('Storage error');
       removeItemSpy.mockImplementation(() => {
         throw error;
       });
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
       clearWorkflowSettings(testSpaceId);
 

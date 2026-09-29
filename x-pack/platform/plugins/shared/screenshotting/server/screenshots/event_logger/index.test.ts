@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
@@ -13,9 +16,12 @@ import type { ScreenshottingAction } from '.';
 import { Actions, EventLogger, Transactions } from '.';
 import type { ElementPosition } from '../get_element_position_data';
 
-jest.mock('uuid', () => ({
-  v4: () => 'NEW_UUID',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'NEW_UUID',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let otelExporter: tracing.InMemorySpanExporter;
 let otelProvider: tracing.BasicTracerProvider;
@@ -35,21 +41,21 @@ afterAll(async () => {
 type EventLoggerArgs = [message: string, meta: ScreenshottingAction];
 describe('Event Logger', () => {
   let eventLogger: EventLogger;
-  let logSpy: jest.SpyInstance<void, EventLoggerArgs>;
+  let logSpy: MockInstance<void, EventLoggerArgs>;
 
   beforeEach(() => {
     otelExporter?.reset();
     const testDate = moment(new Date('2021-04-12T16:00:00.000Z'));
     let delaySeconds = 1;
 
-    jest.spyOn(global.Date, 'now').mockImplementation(() => {
+    vi.spyOn(global.Date, 'now').mockImplementation(() => {
       return testDate.add(delaySeconds++, 'seconds').valueOf();
     });
 
     const logger = loggingSystemMock.createLogger();
     eventLogger = new EventLogger(logger);
 
-    logSpy = jest.spyOn(logger, 'debug') as jest.SpyInstance<void, EventLoggerArgs>;
+    logSpy = vi.spyOn(logger, 'debug') as MockInstance<void, EventLoggerArgs>;
   });
 
   it('creates logs for the events and includes durations and event payload data', () => {

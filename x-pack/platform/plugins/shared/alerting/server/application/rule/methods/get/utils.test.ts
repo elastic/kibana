@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RecoveredActionGroup } from '../../../../../common';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import type { RulesClientContext } from '../../../../rules_client/types';
@@ -16,13 +19,13 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 type RuleSo = Awaited<ReturnType<typeof getRuleSo>>;
 
-jest.mock('../../../../rules_client/lib', () => {
+vi.mock('../../../../rules_client/lib', () => {
   return {
-    formatLegacyActions: jest.fn(),
+    formatLegacyActions: vi.fn(),
   };
 });
 
-const formatLegacyActionsMock = formatLegacyActions as jest.Mock;
+const formatLegacyActionsMock = formatLegacyActions as Mock;
 
 const getTestRule = (overrides?: { consumer?: string }) => {
   const attributes = {
@@ -106,14 +109,14 @@ let result: Awaited<ReturnType<typeof transformToSanitizedRule>>;
 
 describe('transformToSanitizedRule', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     rulesClientContext = rulesClientContextMock.create();
-    const injectReferencesFn = jest.fn().mockReturnValue({
+    const injectReferencesFn = vi.fn().mockReturnValue({
       bar: true,
       parameterThatIsSavedObjectId: '9',
     });
-    const getRuleTypeRegistryMock = rulesClientContext.ruleTypeRegistry.get as jest.Mock;
+    const getRuleTypeRegistryMock = rulesClientContext.ruleTypeRegistry.get as Mock;
     getRuleTypeRegistryMock.mockImplementation(() => ({
       id: '123',
       name: 'Test',
@@ -129,7 +132,7 @@ describe('transformToSanitizedRule', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
+        extractReferences: vi.fn(),
         injectReferences: injectReferencesFn,
       },
       validate: {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SaveTimelineButton } from './save_timeline_button';
@@ -13,12 +16,12 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../hooks/use_create_timeline');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../hooks/use_create_timeline');
 
-const mockGetState = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockGetState = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,7 +47,7 @@ const renderSaveTimelineButton = () =>
 
 describe('SaveTimelineButton', () => {
   it('should render components', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true },
     });
     mockGetState.mockReturnValue({
@@ -52,7 +55,7 @@ describe('SaveTimelineButton', () => {
       status: TimelineStatusEnum.active,
       isSaving: false,
     });
-    (useCreateTimeline as jest.Mock).mockReturnValue({});
+    (useCreateTimeline as Mock).mockReturnValue({});
 
     const { getByTestId, getByText, queryByTestId } = renderSaveTimelineButton();
 
@@ -64,7 +67,7 @@ describe('SaveTimelineButton', () => {
   });
 
   it('should override the default text and color of the button', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true },
     });
     mockGetState.mockReturnValue({
@@ -72,7 +75,7 @@ describe('SaveTimelineButton', () => {
       status: TimelineStatusEnum.active,
       isSaving: false,
     });
-    (useCreateTimeline as jest.Mock).mockReturnValue({});
+    (useCreateTimeline as Mock).mockReturnValue({});
 
     const { getByTestId, getByText, queryByText } = render(
       <TestProviders>
@@ -91,7 +94,7 @@ describe('SaveTimelineButton', () => {
   });
 
   it('should open the timeline save modal', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true },
     });
     mockGetState.mockReturnValue({
@@ -99,7 +102,7 @@ describe('SaveTimelineButton', () => {
       status: TimelineStatusEnum.active,
       isSaving: false,
     });
-    (useCreateTimeline as jest.Mock).mockReturnValue({});
+    (useCreateTimeline as Mock).mockReturnValue({});
 
     const { getByTestId } = renderSaveTimelineButton();
 
@@ -112,7 +115,7 @@ describe('SaveTimelineButton', () => {
   });
 
   it('should disable the save timeline button when the user does not have write access', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: false },
     });
     mockGetState.mockReturnValue(mockTimelineModel);
@@ -123,7 +126,7 @@ describe('SaveTimelineButton', () => {
   });
 
   it('should disable the save timeline button when the timeline is immutable', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true },
     });
     mockGetState.mockReturnValue({ ...mockTimelineModel, status: TimelineStatusEnum.immutable });

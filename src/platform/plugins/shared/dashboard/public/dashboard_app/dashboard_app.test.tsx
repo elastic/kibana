@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
@@ -22,29 +25,29 @@ import { DashboardApp } from './dashboard_app';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 
-jest.mock('../dashboard_renderer/dashboard_renderer');
-jest.mock('../dashboard_top_nav');
+vi.mock('../dashboard_renderer/dashboard_renderer');
+vi.mock('../dashboard_top_nav');
 
 describe('Dashboard App', () => {
-  dataService.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);
+  dataService.query.filterManager.getFilters = vi.fn().mockImplementation(() => []);
 
   const { api: dashboardApi, internalApi: dashboardInternalApi, cleanup } = buildMockDashboardApi();
   let mockHistory: MemoryHistory;
   // this is in url_utils dashboardApi expandedPanel subscription
-  let historySpy: jest.SpyInstance;
+  let historySpy: MockInstance;
   // this is in the dashboard app for the renderer when provided an expanded panel id
-  const expandPanelSpy = jest.spyOn(dashboardApi, 'expandPanel');
+  const expandPanelSpy = vi.spyOn(dashboardApi, 'expandPanel');
 
   beforeAll(() => {
     mockHistory = createMemoryHistory();
-    historySpy = jest.spyOn(mockHistory, 'replace');
+    historySpy = vi.spyOn(mockHistory, 'replace');
 
     /**
      * Mock the DashboardTopNav + LazyDashboardRenderer component to avoid rendering the actual dashboard
      * and hitting errors that aren't relevant
      */
-    (DashboardTopNav as jest.Mock).mockImplementation(() => <>Top nav</>);
-    (DashboardRenderer as jest.Mock).mockImplementation(
+    (DashboardTopNav as Mock).mockImplementation(() => <>Top nav</>);
+    (DashboardRenderer as Mock).mockImplementation(
       ({ onApiAvailable }: DashboardRendererProps) => {
         // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
         useEffect(() => {
@@ -68,7 +71,7 @@ describe('Dashboard App', () => {
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
     render(
-      <DashboardApp redirectTo={jest.fn()} history={mockHistory} setDashboardAppApi={jest.fn()} />
+      <DashboardApp redirectTo={vi.fn()} history={mockHistory} setDashboardAppApi={vi.fn()} />
     );
 
     await waitFor(() => {
@@ -93,10 +96,10 @@ describe('Dashboard App', () => {
   it('test that the expanded panel behavior subject and history is called when passed as a prop to the DashboardApp', async () => {
     render(
       <DashboardApp
-        redirectTo={jest.fn()}
+        redirectTo={vi.fn()}
         history={mockHistory}
         expandedPanelId="456"
-        setDashboardAppApi={jest.fn()}
+        setDashboardAppApi={vi.fn()}
       />
     );
 
@@ -116,16 +119,16 @@ describe('Dashboard App', () => {
   });
 
   describe('same-dashboard incoming embeddables', () => {
-    const addIncomingEmbeddablesSpy = jest.spyOn(dashboardApi, 'addIncomingEmbeddables');
-    const setViewModeSpy = jest.spyOn(dashboardApi, 'setViewMode');
+    const addIncomingEmbeddablesSpy = vi.spyOn(dashboardApi, 'addIncomingEmbeddables');
+    const setViewModeSpy = vi.spyOn(dashboardApi, 'setViewMode');
     const stateTransferMock = embeddableService.getStateTransfer();
     const transferSubject$ = new Subject<unknown>();
 
     beforeAll(() => {
-      (stateTransferMock.onTransferEmbeddablePackage$ as jest.Mock).mockReturnValue(
+      (stateTransferMock.onTransferEmbeddablePackage$ as Mock).mockReturnValue(
         transferSubject$
       );
-      (embeddableService.getStateTransfer as jest.Mock).mockReturnValue(stateTransferMock);
+      (embeddableService.getStateTransfer as Mock).mockReturnValue(stateTransferMock);
     });
 
     beforeEach(() => {
@@ -139,10 +142,10 @@ describe('Dashboard App', () => {
     it('adds incoming embeddables when received via the state transfer observable', async () => {
       render(
         <DashboardApp
-          redirectTo={jest.fn()}
+          redirectTo={vi.fn()}
           history={mockHistory}
           savedDashboardId="test-dashboard-123"
-          setDashboardAppApi={jest.fn()}
+          setDashboardAppApi={vi.fn()}
         />
       );
 
@@ -171,10 +174,10 @@ describe('Dashboard App', () => {
 
       render(
         <DashboardApp
-          redirectTo={jest.fn()}
+          redirectTo={vi.fn()}
           history={mockHistory}
           savedDashboardId="test-dashboard-123"
-          setDashboardAppApi={jest.fn()}
+          setDashboardAppApi={vi.fn()}
         />
       );
 
@@ -201,10 +204,10 @@ describe('Dashboard App', () => {
     it('does nothing when the state transfer observable emits undefined', async () => {
       render(
         <DashboardApp
-          redirectTo={jest.fn()}
+          redirectTo={vi.fn()}
           history={mockHistory}
           savedDashboardId="test-dashboard-456"
-          setDashboardAppApi={jest.fn()}
+          setDashboardAppApi={vi.fn()}
         />
       );
 
@@ -223,10 +226,10 @@ describe('Dashboard App', () => {
     it('does nothing when the state transfer observable emits an empty array', async () => {
       render(
         <DashboardApp
-          redirectTo={jest.fn()}
+          redirectTo={vi.fn()}
           history={mockHistory}
           savedDashboardId="test-dashboard-789"
-          setDashboardAppApi={jest.fn()}
+          setDashboardAppApi={vi.fn()}
         />
       );
 
@@ -244,7 +247,7 @@ describe('Dashboard App', () => {
   });
 
   describe('showNoDataPage', () => {
-    const mockIsDashboardAppInNoDataState = jest.fn();
+    const mockIsDashboardAppInNoDataState = vi.fn();
 
     beforeAll(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -259,8 +262,8 @@ describe('Dashboard App', () => {
        * Mock the DashboardTopNav + LazyDashboardRenderer component to avoid rendering the actual dashboard
        * and hitting errors that aren't relevant
        */
-      (DashboardTopNav as jest.Mock).mockImplementation(() => <>Top nav</>);
-      (DashboardRenderer as jest.Mock).mockImplementation(() => <>mock DashboardRenderer</>);
+      (DashboardTopNav as Mock).mockImplementation(() => <>Top nav</>);
+      (DashboardRenderer as Mock).mockImplementation(() => <>mock DashboardRenderer</>);
     });
 
     beforeEach(() => {
@@ -270,10 +273,10 @@ describe('Dashboard App', () => {
     test('should render dashboard when savedDashboardId is provided', async () => {
       render(
         <DashboardApp
-          redirectTo={jest.fn()}
+          redirectTo={vi.fn()}
           history={createMemoryHistory()}
           savedDashboardId={'1'}
-          setDashboardAppApi={jest.fn()}
+          setDashboardAppApi={vi.fn()}
         />
       );
 
@@ -284,7 +287,7 @@ describe('Dashboard App', () => {
     });
 
     test('should render dashboard when incoming embeddables are provided', async () => {
-      const stateTransferSpy = jest.spyOn(embeddableService, 'getStateTransfer');
+      const stateTransferSpy = vi.spyOn(embeddableService, 'getStateTransfer');
       stateTransferSpy.mockImplementationOnce(
         () =>
           ({
@@ -299,9 +302,9 @@ describe('Dashboard App', () => {
       );
       render(
         <DashboardApp
-          redirectTo={jest.fn()}
+          redirectTo={vi.fn()}
           history={createMemoryHistory()}
-          setDashboardAppApi={jest.fn()}
+          setDashboardAppApi={vi.fn()}
         />
       );
 
@@ -315,9 +318,9 @@ describe('Dashboard App', () => {
       mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
       render(
         <DashboardApp
-          redirectTo={jest.fn()}
+          redirectTo={vi.fn()}
           history={createMemoryHistory()}
-          setDashboardAppApi={jest.fn()}
+          setDashboardAppApi={vi.fn()}
         />
       );
 

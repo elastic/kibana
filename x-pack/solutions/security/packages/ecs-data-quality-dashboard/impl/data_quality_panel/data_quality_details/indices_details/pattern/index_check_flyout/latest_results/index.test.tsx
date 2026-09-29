@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import numeral from '@elastic/numeral';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -71,7 +73,7 @@ describe('LatestResults', () => {
     const error = 'simulated fetch mappings error';
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     test('it displays the expected empty prompt content', async () => {
@@ -112,7 +114,7 @@ describe('LatestResults', () => {
     const error = 'simulated fetch unallowed values error';
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     test('it displays the expected empty prompt content', async () => {
@@ -148,7 +150,7 @@ describe('LatestResults', () => {
 
   describe('when mappings are loading', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     test('it displays the expected loading prompt content', async () => {
@@ -182,7 +184,7 @@ describe('LatestResults', () => {
 
   describe('when unallowed values are loading', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     test('it displays the expected loading prompt content', async () => {

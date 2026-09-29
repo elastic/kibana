@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,8 +18,8 @@ describe('tag selector', () => {
     tags: [],
     selected: [],
     allowCreate: true,
-    openCreateModal: jest.fn(),
-    onTagsSelected: jest.fn(),
+    openCreateModal: vi.fn(),
+    onTagsSelected: vi.fn(),
   };
 
   it('should exclude managed tags from the selection', async () => {

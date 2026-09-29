@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -36,7 +38,7 @@ describe('LaunchCloudFormationButton', () => {
 
   it('calls onClick when given onClick props', async () => {
     const user = userEvent.setup();
-    const onClick = jest.fn().mockResolvedValue(undefined);
+    const onClick = vi.fn().mockResolvedValue(undefined);
     renderButton({ launchButtonProps: { onClick } });
 
     const button = screen.getByTestId(BUTTON_TEST_SUBJ);

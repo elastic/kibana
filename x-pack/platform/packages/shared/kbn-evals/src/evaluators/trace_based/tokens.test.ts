@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createCachedTokensEvaluator } from './tokens';
@@ -17,8 +20,8 @@ const COLUMNS = [
 ];
 
 describe('createCachedTokensEvaluator', () => {
-  let mockEsClient: jest.Mocked<EsClient>;
-  let mockLog: jest.Mocked<ToolingLog>;
+  let mockEsClient: Mocked<EsClient>;
+  let mockLog: Mocked<ToolingLog>;
 
   const evaluate = () =>
     createCachedTokensEvaluator({ traceEsClient: mockEsClient, log: mockLog }).evaluate({
@@ -29,21 +32,21 @@ describe('createCachedTokensEvaluator', () => {
     });
 
   const mockResponse = (values: Array<Array<number | null>>) =>
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({ columns: COLUMNS, values });
+    (mockEsClient.esql.query as Mock).mockResolvedValue({ columns: COLUMNS, values });
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    mockEsClient = { esql: { query: jest.fn() } } as any;
+    vi.useFakeTimers();
+    mockEsClient = { esql: { query: vi.fn() } } as any;
     mockLog = {
-      error: jest.fn(),
-      warning: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
     } as any;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns the summed cached tokens when the provider reports them', async () => {
@@ -52,7 +55,7 @@ describe('createCachedTokensEvaluator', () => {
     const result = await evaluate();
 
     expect(result.score).toBe(120);
-    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.esql.query as Mock).toHaveBeenCalledTimes(1);
   });
 
   it('scores a reported cache miss as 0', async () => {
@@ -62,7 +65,7 @@ describe('createCachedTokensEvaluator', () => {
 
     expect(result.score).toBe(0);
     expect(result.label).toBeUndefined();
-    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.esql.query as Mock).toHaveBeenCalledTimes(1);
   });
 
   it('reports no score without retrying when the provider never reports cached tokens', async () => {
@@ -72,19 +75,19 @@ describe('createCachedTokensEvaluator', () => {
 
     expect(result.score).toBeNull();
     expect(result.label).toBe('unavailable');
-    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.esql.query as Mock).toHaveBeenCalledTimes(1);
     expect(mockLog.error).not.toHaveBeenCalled();
     expect(mockLog.warning).not.toHaveBeenCalled();
   });
 
   it('retries when the trace has no token data at all', async () => {
-    const query = mockEsClient.esql.query as jest.Mock;
+    const query = mockEsClient.esql.query as Mock;
     query
       .mockResolvedValueOnce({ columns: COLUMNS, values: [[null, null]] })
       .mockResolvedValueOnce({ columns: COLUMNS, values: [[50, 4000]] });
 
     const promise = evaluate();
-    await jest.advanceTimersByTimeAsync(60_000);
+    await vi.advanceTimersByTimeAsync(60_000);
     const result = await promise;
 
     expect(result.score).toBe(50);
@@ -102,7 +105,7 @@ describe('createCachedTokensEvaluator', () => {
     const INPUT_ONLY_COLUMNS = [{ name: 'input_tokens', type: 'long' }];
 
     it('reports no score once the probe shows the trace is otherwise complete', async () => {
-      const query = mockEsClient.esql.query as jest.Mock;
+      const query = mockEsClient.esql.query as Mock;
       query
         .mockRejectedValueOnce(unknownColumnError())
         .mockResolvedValueOnce({ columns: INPUT_ONLY_COLUMNS, values: [[4000]] });
@@ -117,14 +120,14 @@ describe('createCachedTokensEvaluator', () => {
     });
 
     it('retries instead when the probe shows the trace has not been indexed yet', async () => {
-      const query = mockEsClient.esql.query as jest.Mock;
+      const query = mockEsClient.esql.query as Mock;
       query
         .mockRejectedValueOnce(unknownColumnError())
         .mockResolvedValueOnce({ columns: INPUT_ONLY_COLUMNS, values: [[null]] })
         .mockResolvedValueOnce({ columns: COLUMNS, values: [[75, 4000]] });
 
       const promise = evaluate();
-      await jest.advanceTimersByTimeAsync(60_000);
+      await vi.advanceTimersByTimeAsync(60_000);
       const result = await promise;
 
       expect(result.score).toBe(75);
@@ -132,11 +135,11 @@ describe('createCachedTokensEvaluator', () => {
     });
 
     it('keeps an unknown column that is not cache_read a hard failure', async () => {
-      const query = mockEsClient.esql.query as jest.Mock;
+      const query = mockEsClient.esql.query as Mock;
       query.mockRejectedValue(new Error('verification_exception: Unknown column [typo_column]'));
 
       const promise = evaluate();
-      await jest.advanceTimersByTimeAsync(300_000);
+      await vi.advanceTimersByTimeAsync(300_000);
       const result = await promise;
 
       expect(result.label).toBe('error');

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
 import { HostsType } from '../../../../explore/hosts/store/model';
 import * as i18n from './translations';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 
 const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../mocks';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -20,10 +23,10 @@ import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/servi
 import { within } from '@testing-library/react';
 import { set } from '@kbn/safer-lodash-set';
 
-jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
-jest.mock('../../../../../../common/hooks/use_license');
+vi.setConfig({ testTimeout: 15_000 }); // Costly tests, hitting 2 seconds execution time locally
+vi.mock('../../../../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 const CUSTOM_YARA_RESCAN_INTERVAL_KEYS = [
   'windows.advanced.memory_protection.user_yara_rescan_interval_seconds',
@@ -52,7 +55,7 @@ describe('Policy Advanced Settings section', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.container,
     };
@@ -252,7 +255,7 @@ describe('Policy Advanced Settings section', () => {
         await userEvent.click(input);
         await userEvent.paste('45');
 
-        const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].updatedPolicy;
+        const updatedPolicy = (formProps.onChange as Mock).mock.calls.at(-1)[0].updatedPolicy;
         expect(
           updatedPolicy.windows.advanced.memory_protection.user_yara_rescan_interval_seconds
         ).toBe('45');

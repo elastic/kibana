@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext, RouteValidatorConfig } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, kibanaResponseFactory } from '@kbn/core/server';
@@ -14,9 +16,9 @@ import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { setPostCloudSolutionDataRoute } from './set_cloud_data_route';
 import type { RouteOptions } from '.';
 
-const mockSavedObjectsClientGet = jest.fn();
-const mockSavedObjectsClientCreate = jest.fn();
-const mockSavedObjectsClientUpdate = jest.fn();
+const mockSavedObjectsClientGet = vi.fn();
+const mockSavedObjectsClientCreate = vi.fn();
+const mockSavedObjectsClientUpdate = vi.fn();
 
 const mockRouteContext = {
   core: {
@@ -48,7 +50,7 @@ describe('POST /internal/cloud/solution', () => {
     };
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create cloud data if it does not exist', async () => {

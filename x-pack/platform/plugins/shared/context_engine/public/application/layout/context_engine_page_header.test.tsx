@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -26,7 +28,7 @@ const renderHeader = (services: ReturnType<typeof coreMock.createStart>) =>
             <ContextEngineSubPageHeader
               backLabel="Cancel"
               backHref="/app/context_engine/"
-              onBackClick={jest.fn()}
+              onBackClick={vi.fn()}
               pageTitle="Create AI index"
             />
           </KibanaContextProvider>
@@ -43,7 +45,7 @@ describe('ContextEngineSubPageHeader', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('always shows the in-page back button in the project layout', () => {
@@ -57,7 +59,7 @@ describe('ContextEngineSubPageHeader', () => {
 
   it('suppresses the chrome fallback back button in the project layout', () => {
     services.chrome.getChromeStyle.mockReturnValue('project');
-    services.chrome.appHeader.set.mockReturnValue(jest.fn());
+    services.chrome.appHeader.set.mockReturnValue(vi.fn());
 
     renderHeader(services);
 

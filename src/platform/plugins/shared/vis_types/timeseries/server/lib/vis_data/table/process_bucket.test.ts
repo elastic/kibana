@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { processBucket } from './process_bucket';
 
 import type { Panel, Series } from '../../../../common/types';
@@ -86,7 +88,7 @@ function trendChecker(trend: string, slope: number) {
 }
 
 describe('processBucket(panel)', () => {
-  const extractFields = jest.fn() as ReturnType<typeof createFieldsFetcher>;
+  const extractFields = vi.fn() as ReturnType<typeof createFieldsFetcher>;
   let panel: Panel;
 
   describe('single metric panel', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../__mocks__';
 import { mockHistory } from '../../../__mocks__/react_router';
 import { resetContext } from 'kea';
@@ -29,7 +31,7 @@ describe('FlashMessagesLogic', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has default values', () => {
@@ -119,10 +121,10 @@ describe('FlashMessagesLogic', () => {
         expect(history.listen).toHaveBeenCalled();
 
         FlashMessagesLogic.actions.setQueuedMessages(['queuedMessages'] as any);
-        jest.spyOn(FlashMessagesLogic.actions, 'clearFlashMessages');
-        jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
-        jest.spyOn(FlashMessagesLogic.actions, 'clearQueuedMessages');
-        jest.spyOn(FlashMessagesLogic.actions, 'setHistoryListener');
+        vi.spyOn(FlashMessagesLogic.actions, 'clearFlashMessages');
+        vi.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
+        vi.spyOn(FlashMessagesLogic.actions, 'clearQueuedMessages');
+        vi.spyOn(FlashMessagesLogic.actions, 'setHistoryListener');
 
         const mockHistoryChange = (history.listen.mock.calls[0] as any)[0];
         mockHistoryChange();
@@ -136,7 +138,7 @@ describe('FlashMessagesLogic', () => {
 
     describe('on unmount', () => {
       it('removes history listener', () => {
-        const mockUnlistener = jest.fn();
+        const mockUnlistener = vi.fn();
         history.listen.mockReturnValueOnce(mockUnlistener);
 
         const unmount = mount();

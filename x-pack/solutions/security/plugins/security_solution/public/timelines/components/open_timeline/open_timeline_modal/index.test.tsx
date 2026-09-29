@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mount } from 'enzyme';
 import type { ReactElement } from 'react';
 import React from 'react';
@@ -16,62 +19,68 @@ import { useTimelineStatus } from '../use_timeline_status';
 import { OpenTimelineModal } from '.';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
-    useNavigation: jest.fn().mockReturnValue({
-      getAppUrl: jest.fn(),
-      navigateTo: jest.fn(),
+    useNavigation: vi.fn().mockReturnValue({
+      getAppUrl: vi.fn(),
+      navigateTo: vi.fn(),
     }),
   };
 });
 
-jest.mock('../../../containers/all', () => {
-  const originalModule = jest.requireActual('../../../containers/all');
+vi.mock('../../../containers/all', async () => {
+  const originalModule = (await vi.importActual('../../../containers/all'));
   return {
-    useGetAllTimeline: jest.fn(),
+    useGetAllTimeline: vi.fn(),
     getAllTimeline: originalModule.getAllTimeline,
   };
 });
-jest.mock('../use_timeline_types', () => ({
-  useTimelineTypes: jest.fn(() => ({
-    timelineType: 'default',
-    timelineTabs: <div />,
-    timelineFilters: <div />,
-  })),
-}));
+vi.mock('../use_timeline_types', () => {
+      const mocked = {
+      useTimelineTypes: vi.fn(() => ({
+        timelineType: 'default',
+        timelineTabs: <div />,
+        timelineFilters: <div />,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_timeline_status', () => ({
-  useTimelineStatus: jest.fn(),
-}));
+vi.mock('../use_timeline_status', () => {
+      const mocked = {
+      useTimelineStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // mock for EuiSelectable's virtualization
-jest.mock(
+vi.mock(
   'react-virtualized-auto-sizer',
   () =>
     ({ children }: { children: (dimensions: { width: number; height: number }) => ReactElement }) =>
       children({ width: 100, height: 500 })
 );
 
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/user_privileges');
 
 describe('OpenTimelineModal', () => {
-  const mockInstallPrepackagedTimelines = jest.fn();
+  const mockInstallPrepackagedTimelines = vi.fn();
   beforeEach(() => {
-    (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
-      fetchAllTimeline: jest.fn(),
+    (useGetAllTimeline as unknown as Mock).mockReturnValue({
+      fetchAllTimeline: vi.fn(),
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
       totalCount: mockOpenTimelineQueryResults.totalCount,
     });
-    (useTimelineStatus as unknown as jest.Mock).mockReturnValue({
+    (useTimelineStatus as unknown as Mock).mockReturnValue({
       timelineStatus: null,
       templateTimelineType: null,
       templateTimelineFilter: <div />,
       installPrepackagedTimelines: mockInstallPrepackagedTimelines,
     });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true },
     });
   });
@@ -83,7 +92,7 @@ describe('OpenTimelineModal', () => {
   test('it renders the expected modal', async () => {
     const wrapper = mount(
       <TestProviders>
-        <OpenTimelineModal onClose={jest.fn()} />
+        <OpenTimelineModal onClose={vi.fn()} />
       </TestProviders>
     );
 
@@ -95,7 +104,7 @@ describe('OpenTimelineModal', () => {
   test('it installs elastic prebuilt templates', async () => {
     const wrapper = mount(
       <TestProviders>
-        <OpenTimelineModal onClose={jest.fn()} />
+        <OpenTimelineModal onClose={vi.fn()} />
       </TestProviders>
     );
 

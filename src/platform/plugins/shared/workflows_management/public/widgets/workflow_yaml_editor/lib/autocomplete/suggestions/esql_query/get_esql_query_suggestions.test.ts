@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { monaco } from '@kbn/monaco';
 import { getEsqlQuerySuggestions } from './get_esql_query_suggestions';
 import { findEsqlStepRegionsFromText } from '../../../esql_validation/extract_esql_region';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
-const mockSuggest = jest.fn();
+const mockSuggest = vi.fn();
 
-jest.mock('@kbn/esql-language', () => ({
+vi.mock('@kbn/esql-language', () => ({
   __esModule: true,
   suggest: (...args: unknown[]) => mockSuggest(...args),
   // @kbn/monaco's Console ES|QL lexer reads this eagerly at module-load time to build its

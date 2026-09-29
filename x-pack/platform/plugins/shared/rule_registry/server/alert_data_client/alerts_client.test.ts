@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
@@ -20,13 +22,13 @@ describe('AlertsClient', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
   const esClientScopedMock = requestHandlerContext.elasticsearch.client.asCurrentUser;
   const esClientMock = requestHandlerContext.elasticsearch.client.asInternalUser;
-  const getRuleListMock = jest.fn();
-  const getAlertIndicesAliasMock = jest.fn();
+  const getRuleListMock = vi.fn();
+  const getAlertIndicesAliasMock = vi.fn();
 
   let alertsClient: AlertsClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     alertingAuthMock.getSpaceId.mockReturnValue('space-1');
     alertingAuthMock.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
       new Map([
@@ -44,7 +46,7 @@ describe('AlertsClient', () => {
       filter: fromKueryExpression(
         'alert.attributes.alertTypeId: test-rule-type-1 AND alert.attributes.consumer: foo'
       ),
-      ensureRuleTypeIsAuthorized: jest.fn(),
+      ensureRuleTypeIsAuthorized: vi.fn(),
     });
 
     const alertsClientParams: ConstructorOptions = {
@@ -53,7 +55,7 @@ describe('AlertsClient', () => {
       esClient: esClientMock,
       esClientScoped: esClientScopedMock,
       ruleDataService,
-      getRuleType: jest.fn(),
+      getRuleType: vi.fn(),
       getRuleList: getRuleListMock,
       getAlertIndicesAlias: getAlertIndicesAliasMock,
     };
@@ -261,25 +263,25 @@ describe('AlertsClient', () => {
 
   describe('getAlertFields', () => {
     beforeEach(async () => {
-      jest.spyOn({ getRuleList: getRuleListMock }, 'getRuleList').mockReturnValue(new Map([]));
-      jest
+      vi.spyOn({ getRuleList: getRuleListMock }, 'getRuleList').mockReturnValue(new Map([]));
+      vi
         .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
         .mockResolvedValue(new Map([]));
 
-      jest
+      vi
         .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
         .mockImplementation((ruleTypeIds: string[]) => {
           return [];
         });
 
-      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest.fn().mockResolvedValue({
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = vi.fn().mockResolvedValue({
         fields: [],
         indices: [],
       });
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('should fetch all rule types when ruleTypeIds is empty array', async () => {
@@ -289,7 +291,7 @@ describe('AlertsClient', () => {
     });
 
     test('should fetch alert indices separately for siem and other rule types', async () => {
-      jest.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+      vi.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
         // @ts-expect-error: mocking only necessary methods
         new Map([
           ['.es-query', {}],
@@ -315,7 +317,7 @@ describe('AlertsClient', () => {
     });
 
     test('should fetch alert fields correctly', async () => {
-      jest.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+      vi.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
         // @ts-expect-error: mocking only necessary methods
         new Map([
           ['.es-query', {}],
@@ -324,7 +326,7 @@ describe('AlertsClient', () => {
         ])
       );
 
-      jest
+      vi
         .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
         .mockImplementation((ruleTypeIds: string[]) => {
           if (ruleTypeIds.includes('siem.esqlRule')) {
@@ -334,7 +336,7 @@ describe('AlertsClient', () => {
           }
         });
 
-      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = vi
         .fn()
         .mockResolvedValueOnce({
           fields: [
@@ -383,11 +385,11 @@ describe('AlertsClient', () => {
 
     test('returns only SIEM fields when no other rule types are authorized', async () => {
       // Mock authorization to return only SIEM rule types
-      jest
+      vi
         .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
         .mockResolvedValueOnce(new Map([['siem.esqlRule', { authorizedConsumers: {} }]]));
 
-      jest
+      vi
         .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
         .mockImplementation((ruleTypeIds: string[]) => {
           if (ruleTypeIds.includes('siem.esqlRule')) {
@@ -397,7 +399,7 @@ describe('AlertsClient', () => {
           }
         });
 
-      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = vi
         .fn()
         .mockResolvedValueOnce({
           fields: [
@@ -444,7 +446,7 @@ describe('AlertsClient', () => {
     });
 
     test('merges fields and removes duplicates', async () => {
-      jest.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+      vi.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
         // @ts-expect-error: mocking only necessary methods
         new Map([
           ['.es-query', {}],
@@ -453,7 +455,7 @@ describe('AlertsClient', () => {
         ])
       );
 
-      jest
+      vi
         .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
         .mockImplementation((ruleTypeIds: string[]) => {
           if (ruleTypeIds.includes('siem.esqlRule')) {
@@ -463,7 +465,7 @@ describe('AlertsClient', () => {
           }
         });
 
-      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = vi
         .fn()
         .mockResolvedValueOnce({
           fields: [
@@ -491,7 +493,7 @@ describe('AlertsClient', () => {
     });
 
     test('returns empty fields when no rule types are authorized', async () => {
-      jest
+      vi
         .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
         .mockResolvedValueOnce(new Map());
       const response = await alertsClient.getAlertFields(['siem.esqlRule']);
@@ -499,12 +501,12 @@ describe('AlertsClient', () => {
     });
 
     test('returns empty fields when no indices are found', async () => {
-      jest.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+      vi.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
         // @ts-expect-error: mocking only necessary methods
         new Map([['siem.esqlRule', {}]])
       );
 
-      jest
+      vi
         .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
         .mockImplementation(() => []);
 

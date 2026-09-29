@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_DATA_SOURCE_URL } from '../../../../../../../common/constants';
 import {
@@ -13,23 +16,24 @@ import {
   requestMock,
 } from '../../../../../detection_engine/routes/__mocks__';
 
-const mockRemoveEntitySourceReference = jest.fn();
-jest.mock('../../watchlist_config', () => ({
-  WatchlistConfigClient: jest.fn().mockImplementation(() => ({
-    removeEntitySourceReference: mockRemoveEntitySourceReference,
-  })),
-}));
+const mockRemoveEntitySourceReference = vi.fn();
+vi.mock('../../watchlist_config', () => {
+      const mocked = {
+      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+        removeEntitySourceReference: mockRemoveEntitySourceReference,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entity_sources/infra/entity_source_client');
+vi.mock('../../../entity_sources/infra/entity_source_client');
 
-const { mockGetEntitySource, mockDeleteEntitySource } = jest.requireMock(
-  '../../../entity_sources/infra/entity_source_client'
-) as {
-  mockGetEntitySource: jest.Mock;
-  mockDeleteEntitySource: jest.Mock;
+const { mockGetEntitySource, mockDeleteEntitySource } = (await vi.importMock('../../../entity_sources/infra/entity_source_client')) as {
+  mockGetEntitySource: Mock;
+  mockDeleteEntitySource: Mock;
 };
 
-const mockGetStartServices = jest.fn();
+const mockGetStartServices = vi.fn();
 
 import { deleteEntitySourceRoute } from './delete';
 
@@ -52,14 +56,14 @@ describe('DELETE entity source route - deleteEntitySourceRoute', () => {
     mockDeleteEntitySource.mockReset();
     mockRemoveEntitySourceReference.mockReset().mockResolvedValue(undefined);
 
-    const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
+    const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: vi.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
 
     deleteEntitySourceRoute(server.router, logger, mockGetStartServices, true);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (id = SOURCE_ID) =>

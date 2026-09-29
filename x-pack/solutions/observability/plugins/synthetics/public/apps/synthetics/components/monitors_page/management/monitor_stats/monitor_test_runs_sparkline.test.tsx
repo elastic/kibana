@@ -5,35 +5,52 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MonitorTestRunsSparkline } from './monitor_test_runs_sparkline';
 
-const mockEmbeddable = jest.fn((_props: Record<string, unknown>) => null);
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      exploratoryView: { ExploratoryViewEmbeddable: mockEmbeddable },
-    },
-  }),
-}));
+const mockEmbeddable = vi.fn((_props: Record<string, unknown>) => null);
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          exploratoryView: { ExploratoryViewEmbeddable: mockEmbeddable },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: () => ({ euiTheme: { colors: { vis: { euiColorVis0: '#000' } } } }),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: () => ({ euiTheme: { colors: { vis: { euiColorVis0: '#000' } } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks', () => ({
-  useRefreshedRange: () => ({ from: 'now-30d/d', to: 'now' }),
-}));
+vi.mock('../../../../hooks', () => {
+      const mocked = {
+      useRefreshedRange: () => ({ from: 'now-30d/d', to: 'now' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMonitorFilters = jest.fn();
-jest.mock('../../hooks/use_monitor_filters', () => ({
-  useMonitorFilters: () => mockUseMonitorFilters(),
-}));
+const mockUseMonitorFilters = vi.fn();
+vi.mock('../../hooks/use_monitor_filters', () => {
+      const mocked = {
+      useMonitorFilters: () => mockUseMonitorFilters(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_monitor_query_filters', () => ({
-  useMonitorQueryFilters: () => ({ queryFilter: [] }),
-}));
+vi.mock('../../hooks/use_monitor_query_filters', () => {
+      const mocked = {
+      useMonitorQueryFilters: () => ({ queryFilter: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MonitorTestRunsSparkline', () => {
   const spaceFilter = { field: 'meta.space_id', values: ['default'] };

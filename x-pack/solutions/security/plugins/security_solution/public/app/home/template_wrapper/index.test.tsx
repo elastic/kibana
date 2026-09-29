@@ -5,35 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { SecuritySolutionTemplateWrapper, type SecuritySolutionTemplateWrapperProps } from '.';
 import { SecurityPageName } from '../../types';
 
-const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
-jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
-  ...jest.requireActual('../../../common/utils/timeline/use_show_timeline'),
-  useShowTimeline: () => mockUseShowTimeline(),
-}));
+const mockUseShowTimeline = vi.fn((): [boolean] => [false]);
+vi.mock('../../../common/utils/timeline/use_show_timeline', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/utils/timeline/use_show_timeline')),
+      useShowTimeline: () => mockUseShowTimeline(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./timeline', () => ({
-  ...jest.requireActual('./timeline'),
-  Timeline: () => <div>{'Timeline'}</div>,
-}));
+vi.mock('./timeline', async () => {
+      const mocked = {
+      ...(await vi.importActual('./timeline')),
+      Timeline: () => <div>{'Timeline'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const navProps = { icon: 'logoSecurity', items: [], name: 'Security' };
-const mockUseSecuritySolutionNavigation = jest.fn();
-jest.mock('../../../common/components/navigation/use_security_solution_navigation', () => ({
-  useSecuritySolutionNavigation: () => mockUseSecuritySolutionNavigation(),
-}));
+const mockUseSecuritySolutionNavigation = vi.fn();
+vi.mock('../../../common/components/navigation/use_security_solution_navigation', () => {
+      const mocked = {
+      useSecuritySolutionNavigation: () => mockUseSecuritySolutionNavigation(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRouteSpy = jest.fn((): [{ pageName: string }] => [
+const mockUseRouteSpy = vi.fn((): [{ pageName: string }] => [
   { pageName: SecurityPageName.alerts },
 ]);
-jest.mock('../../../common/utils/route/use_route_spy', () => ({
-  useRouteSpy: () => mockUseRouteSpy(),
-}));
+vi.mock('../../../common/utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: () => mockUseRouteSpy(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = ({
   children = <div>{'child of wrapper'}</div>,
@@ -47,7 +61,7 @@ const renderComponent = ({
 
 describe('SecuritySolutionTemplateWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSecuritySolutionNavigation.mockReturnValue(navProps);
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
@@ -34,7 +36,7 @@ describe('Read rule route', () => {
 
   const myFakeId = '99403909-ca9b-49ba-9d7a-7e5320e68d05';
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
@@ -52,8 +54,8 @@ describe('Read rule route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from 'react-dom/test-utils';
 import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -51,7 +53,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
 
   describe('Poll for new status', () => {
     beforeEach(async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       // First request should make the step be incomplete
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
@@ -70,10 +72,10 @@ describe('Overview - Migrate system indices - Step completion', () => {
 
     afterEach(async () => {
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
-      jest.clearAllTimers();
-      jest.useRealTimers();
+      vi.clearAllTimers();
+      vi.useRealTimers();
     });
 
     test('renders step as complete when a upgraded needed status is followed by a no upgrade needed', async () => {

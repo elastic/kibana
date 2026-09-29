@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as buildQuery from './query.tls_network.dsl';
 import { networkTls } from '.';
 import {
@@ -14,7 +16,7 @@ import {
 } from './__mocks__';
 
 describe('networkTls search strategy', () => {
-  const buildNetworkTlsQuery = jest.spyOn(buildQuery, 'buildNetworkTlsQuery');
+  const buildNetworkTlsQuery = vi.spyOn(buildQuery, 'buildNetworkTlsQuery');
 
   afterEach(() => {
     buildNetworkTlsQuery.mockClear();

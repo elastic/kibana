@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { act } from '@testing-library/react';
 import type { AttackDiscoveryScheduleCreateProps } from '@kbn/discoveries-schemas';
 
@@ -15,17 +18,17 @@ import { renderMutation } from '../../../../../management/hooks/test_utils';
 import { useInvalidateFindWorkflowSchedules } from './use_find_workflow_schedules';
 import { createWorkflowSchedule } from '../api/internal';
 
-jest.mock('./use_find_workflow_schedules');
-jest.mock('../api/internal');
-jest.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('./use_find_workflow_schedules');
+vi.mock('../api/internal');
+vi.mock('../../../../../common/hooks/use_app_toasts');
 
-const createWorkflowScheduleMock = createWorkflowSchedule as jest.MockedFunction<
+const createWorkflowScheduleMock = createWorkflowSchedule as MockedFunction<
   typeof createWorkflowSchedule
 >;
 
-const invalidateFindWorkflowSchedulesMock = jest.fn();
+const invalidateFindWorkflowSchedulesMock = vi.fn();
 const mockUseInvalidateFindWorkflowSchedules =
-  useInvalidateFindWorkflowSchedules as jest.MockedFunction<
+  useInvalidateFindWorkflowSchedules as MockedFunction<
     typeof useInvalidateFindWorkflowSchedules
   >;
 
@@ -44,20 +47,20 @@ const mockScheduleToCreate: AttackDiscoveryScheduleCreateProps = {
 };
 
 describe('useCreateWorkflowSchedule', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
 
     createWorkflowScheduleMock.mockReturnValue(
-      {} as unknown as jest.Mocked<ReturnType<typeof createWorkflowSchedule>>
+      {} as unknown as Mocked<ReturnType<typeof createWorkflowSchedule>>
     );
 
     mockUseInvalidateFindWorkflowSchedules.mockReturnValue(
-      invalidateFindWorkflowSchedulesMock as unknown as jest.Mocked<
+      invalidateFindWorkflowSchedulesMock as unknown as Mocked<
         ReturnType<typeof useInvalidateFindWorkflowSchedules>
       >
     );

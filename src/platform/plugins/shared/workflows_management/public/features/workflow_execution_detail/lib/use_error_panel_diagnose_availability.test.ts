@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
 import {
@@ -15,42 +17,51 @@ import {
 } from './diagnose_pending_handoff';
 import { useErrorPanelDiagnoseAvailability } from './use_error_panel_diagnose_availability';
 
-const mockOpenFailureDiagnosisChat = jest.fn();
-const mockAddError = jest.fn();
-const mockHttpGet = jest.fn();
-const mockGetAgentBuilderAccess = jest.fn();
+const mockOpenFailureDiagnosisChat = vi.fn();
+const mockAddError = vi.fn();
+const mockHttpGet = vi.fn();
+const mockGetAgentBuilderAccess = vi.fn();
 
 const mockAgentBuilder = {
-  openChat: jest.fn(),
+  openChat: vi.fn(),
   getAgentBuilderAccess: mockGetAgentBuilderAccess,
   events: { chat$: { subscribe: () => ({ unsubscribe: () => undefined }) } },
 };
 
-jest.mock('./open_failure_diagnosis_chat', () => ({
-  openFailureDiagnosisChat: (...args: unknown[]) => mockOpenFailureDiagnosisChat(...args),
-  diagnoseHandoffErrorToastTitle: () => 'Unable to start AI diagnosis',
-}));
+vi.mock('./open_failure_diagnosis_chat', () => {
+      const mocked = {
+      openFailureDiagnosisChat: (...args: unknown[]) => mockOpenFailureDiagnosisChat(...args),
+      diagnoseHandoffErrorToastTitle: () => 'Unable to start AI diagnosis',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: () => true,
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: { get: mockHttpGet, post: jest.fn() },
-      notifications: { toasts: { addError: mockAddError } },
-      application: {
-        capabilities: { agentBuilder: { show: true } },
-        navigateToApp: jest.fn(),
-        getUrlForApp: () => '/app/management/license_management',
-      },
-      workflowsManagement: {
-        agentBuilder: mockAgentBuilder,
-      },
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: { get: mockHttpGet, post: vi.fn() },
+          notifications: { toasts: { addError: mockAddError } },
+          application: {
+            capabilities: { agentBuilder: { show: true } },
+            navigateToApp: vi.fn(),
+            getUrlForApp: () => '/app/management/license_management',
+          },
+          workflowsManagement: {
+            agentBuilder: mockAgentBuilder,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const contextPackage: DiagnosisContextPackage = {
   error: { type: 'Error', message: 'ECONNREFUSED' },

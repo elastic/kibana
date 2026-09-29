@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -23,20 +26,23 @@ import { RulesPage } from './rules';
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 const mockApplication = {
-  navigateToApp: jest.fn(),
-  navigateToUrl: jest.fn(),
+  navigateToApp: vi.fn(),
+  navigateToUrl: vi.fn(),
 };
 
 const queryClient = new QueryClient();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/kibana_react', () => ({
+vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => ({
+  useKibana: vi.fn(() => ({
     ...mockUseKibanaReturnValue,
     services: {
       ...mockUseKibanaReturnValue.services,
@@ -50,24 +56,30 @@ jest.mock('../../utils/kibana_react', () => ({
   })),
 }));
 
-jest.mock('../../hooks/use_get_available_rules_with_descriptions', () => ({
-  useGetAvailableRulesWithDescriptions: jest.fn(),
-}));
+vi.mock('../../hooks/use_get_available_rules_with_descriptions', () => {
+      const mocked = {
+      useGetAvailableRulesWithDescriptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/observability-shared-plugin/public');
 
-jest.mock('@kbn/response-ops-rule-form/src/rule_type_modal', () => ({
-  RuleTypeModal: ({ onSelectRuleType }: RuleTypeModalProps) => (
-    <div data-test-subj="ruleTypeModal">
-      RuleTypeModal
-      <button onClick={() => onSelectRuleType('1')}>Rule type 1</button>
-    </div>
-  ),
-}));
+vi.mock('@kbn/response-ops-rule-form/src/rule_type_modal', () => {
+      const mocked = {
+      RuleTypeModal: ({ onSelectRuleType }: RuleTypeModalProps) => (
+        <div data-test-subj="ruleTypeModal">
+          RuleTypeModal
+          <button onClick={() => onSelectRuleType('1')}>Rule type 1</button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useLocationMock = useLocation as jest.Mock;
+const useLocationMock = useLocation as Mock;
 
-jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
+vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {
     setHeaderActionMenu: () => {},
   } as unknown as AppMountParameters,
@@ -88,8 +100,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   plugins: {} as ObservabilityPublicPluginsStart,
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks');
-const { useGetRuleTypesPermissions } = jest.requireMock('@kbn/alerts-ui-shared/src/common/hooks');
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks');
+const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks'));
 
 describe('RulesPage with all capabilities', () => {
   beforeEach(() => {

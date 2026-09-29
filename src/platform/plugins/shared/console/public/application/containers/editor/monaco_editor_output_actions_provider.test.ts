@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { CSSProperties } from 'react';
 import type { monaco } from '@kbn/monaco';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
@@ -37,53 +40,53 @@ const createMockModel = (value: string): monaco.editor.ITextModel => {
 };
 
 describe('MonacoEditorOutputActionsProvider', () => {
-  let editor: jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
-  let setEditorActionsCss: jest.Mock<void, [CSSProperties]>;
+  let editor: Mocked<monaco.editor.IStandaloneCodeEditor>;
+  let setEditorActionsCss: Mock<void, [CSSProperties]>;
   let triggerCursorPositionChange: () => Promise<void>;
   let triggerCursorSelectionChange: () => Promise<void>;
   let provider: MonacoEditorOutputActionsProvider;
   // Mutable focus state so blurring the editor's focused input flips hasTextFocus()
   // to false, mirroring the browser.
   let hasFocus: boolean;
-  let activeElement: { blur: jest.Mock };
+  let activeElement: { blur: Mock };
 
   beforeEach(() => {
-    setEditorActionsCss = jest.fn();
+    setEditorActionsCss = vi.fn();
     hasFocus = true;
     activeElement = {
-      blur: jest.fn(() => {
+      blur: vi.fn(() => {
         hasFocus = false;
       }),
     };
 
     editor = {
-      createDecorationsCollection: jest.fn(() => ({
-        clear: jest.fn(),
-        set: jest.fn(),
+      createDecorationsCollection: vi.fn(() => ({
+        clear: vi.fn(),
+        set: vi.fn(),
       })),
-      getModel: jest.fn(() => createMockModel(RESPONSE_VALUE)),
-      getSelection: jest.fn(() => ({ startLineNumber: 1, endLineNumber: 1 })),
-      getTopForLineNumber: jest.fn(() => 0),
-      getScrollTop: jest.fn(() => 0),
-      hasTextFocus: jest.fn(() => hasFocus),
-      getDomNode: jest.fn(() => ({
+      getModel: vi.fn(() => createMockModel(RESPONSE_VALUE)),
+      getSelection: vi.fn(() => ({ startLineNumber: 1, endLineNumber: 1 })),
+      getTopForLineNumber: vi.fn(() => 0),
+      getScrollTop: vi.fn(() => 0),
+      hasTextFocus: vi.fn(() => hasFocus),
+      getDomNode: vi.fn(() => ({
         ownerDocument: {
           get activeElement() {
             return hasFocus ? activeElement : null;
           },
         },
       })),
-      onDidBlurEditorText: jest.fn(),
-      onDidChangeCursorPosition: jest.fn((callback: () => Promise<void>) => {
+      onDidBlurEditorText: vi.fn(),
+      onDidChangeCursorPosition: vi.fn((callback: () => Promise<void>) => {
         triggerCursorPositionChange = callback;
       }),
-      onDidChangeCursorSelection: jest.fn((callback: () => Promise<void>) => {
+      onDidChangeCursorSelection: vi.fn((callback: () => Promise<void>) => {
         triggerCursorSelectionChange = callback;
       }),
-      onDidContentSizeChange: jest.fn(),
-      onDidScrollChange: jest.fn(),
-      setSelection: jest.fn(),
-    } as unknown as jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
+      onDidContentSizeChange: vi.fn(),
+      onDidScrollChange: vi.fn(),
+      setSelection: vi.fn(),
+    } as unknown as Mocked<monaco.editor.IStandaloneCodeEditor>;
 
     provider = new MonacoEditorOutputActionsProvider(
       editor,
@@ -93,7 +96,7 @@ describe('MonacoEditorOutputActionsProvider', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const getLastActionsCss = (): CSSProperties =>
@@ -126,13 +129,13 @@ describe('MonacoEditorOutputActionsProvider', () => {
   });
 
   it('keeps the actions hidden when a highlight recomputation follows copy completion', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     await triggerCursorSelectionChange();
     await triggerCursorSelectionChange();
     provider.resetOutputActions();
 
-    await jest.advanceTimersByTimeAsync(200);
+    await vi.advanceTimersByTimeAsync(200);
 
     expect(getLastActionsCss()).toEqual({ visibility: 'hidden' });
 
@@ -147,7 +150,7 @@ describe('MonacoEditorOutputActionsProvider', () => {
   });
 
   it('does not blur another element when the editor no longer has text focus', () => {
-    const otherActiveElement = { blur: jest.fn() };
+    const otherActiveElement = { blur: vi.fn() };
     editor.hasTextFocus.mockReturnValue(false);
     editor.getDomNode.mockReturnValue({
       ownerDocument: { activeElement: otherActiveElement },

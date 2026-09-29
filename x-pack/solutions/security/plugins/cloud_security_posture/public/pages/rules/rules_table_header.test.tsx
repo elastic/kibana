@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -19,7 +22,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { selectRulesMock } from './__mocks__';
 import { SECURITY_FEATURE_ID } from '../../test/constants';
 
-jest.mock('./use_change_csp_rule_state');
+vi.mock('./use_change_csp_rule_state');
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,25 +57,25 @@ describe('RulesTableHeader', () => {
   const Wrapper = getWrapper();
 
   const mockProps = {
-    search: jest.fn(),
+    search: vi.fn(),
     searchValue: '',
     isSearching: false,
     totalRulesCount: 2,
     pageSize: 25,
-    onSectionChange: jest.fn(),
-    onRuleNumberChange: jest.fn(),
+    onSectionChange: vi.fn(),
+    onRuleNumberChange: vi.fn(),
     sectionSelectOptions: ['Logging', 'Worker Node Configuration Files'],
     ruleNumberSelectOptions: ['2.1.1', '3.1.1'],
     selectedRules: selectRulesMock as CspBenchmarkRulesWithStates[],
-    setEnabledDisabledItemsFilter: jest.fn(),
+    setEnabledDisabledItemsFilter: vi.fn(),
     enabledDisabledItemsFilterState: 'no-filter',
-    setSelectAllRules: jest.fn(),
-    setSelectedRules: jest.fn(),
+    setSelectAllRules: vi.fn(),
+    setSelectedRules: vi.fn(),
   };
 
   beforeEach(() => {
-    (useChangeCspRuleState as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
+    (useChangeCspRuleState as Mock).mockReturnValue({
+      mutate: vi.fn(),
       isLoading: false,
     });
   });

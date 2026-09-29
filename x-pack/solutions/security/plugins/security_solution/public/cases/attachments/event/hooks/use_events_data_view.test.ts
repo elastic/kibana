@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -14,10 +17,10 @@ const render = () =>
     wrapper: TestProviders,
   });
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const mockCreate = jest.fn();
-const mockAddError = jest.fn();
+const mockCreate = vi.fn();
+const mockAddError = vi.fn();
 
 const mockDataView = new DataView({
   spec: { id: '1', title: 'test' },
@@ -30,8 +33,8 @@ import { useCaseEventsDataView } from './use_events_data_view';
 
 describe('useEventsDataView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (kibanaLib.useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (kibanaLib.useKibana as Mock).mockReturnValue({
       services: {
         data: {
           dataViews: {
@@ -41,7 +44,7 @@ describe('useEventsDataView', () => {
         fieldFormats: {},
       },
     });
-    (kibanaLib.useToasts as jest.Mock).mockReturnValue({
+    (kibanaLib.useToasts as Mock).mockReturnValue({
       addError: mockAddError,
     });
   });

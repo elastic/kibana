@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,19 +26,19 @@ import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
-jest.mock('./upgrade_prebuilt_rules_table_context');
-jest.mock(
+vi.mock('./upgrade_prebuilt_rules_table_context');
+vi.mock(
   '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status'
 );
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-const mockUseUpgradePrebuiltRulesTableContext = useUpgradePrebuiltRulesTableContext as jest.Mock;
-const mockUsePrebuiltRulesCustomizationStatus = usePrebuiltRulesCustomizationStatus as jest.Mock;
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseUpgradePrebuiltRulesTableContext = useUpgradePrebuiltRulesTableContext as Mock;
+const mockUsePrebuiltRulesCustomizationStatus = usePrebuiltRulesCustomizationStatus as Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 describe('UpgradePrebuiltRulesTableButtons', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUsePrebuiltRulesCustomizationStatus.mockReturnValue({ isRulesCustomizationEnabled: true });
     mockUseUserPrivileges.mockReturnValue({
       ...initialUserPrivilegesState(),
@@ -49,8 +52,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
   describe('Selected scope (upgrade to TARGET)', () => {
     it('sends every selected rule to upgradeRulesToTarget after confirming the danger modal', async () => {
       const user = userEvent.setup();
-      const upgradeRulesToTarget = jest.fn();
-      const getSelectedRulesCustomizationCounts = jest
+      const upgradeRulesToTarget = vi.fn();
+      const getSelectedRulesCustomizationCounts = vi
         .fn()
         .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 });
       const selectedRules = [
@@ -73,7 +76,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('includes the non-customized rule id alongside the customized one, no filtering to the customized subset', async () => {
       const user = userEvent.setup();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [
         createRuleUpgradeStateMock({ ruleId: 'rule-customized', isCustomized: true }),
         createRuleUpgradeStateMock({ ruleId: 'rule-plain', isCustomized: false }),
@@ -81,7 +84,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       mockContext({
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
       });
@@ -106,7 +109,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       ];
 
       mockContext({
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 3, customizedCount: 2, ruleTypeChangeCount: 0 }),
       });
@@ -125,7 +128,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('shows the modal with a rule type change warning for an uncustomized selection whose Elastic version changes the rule type', async () => {
       const user = userEvent.setup();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [
         createRuleUpgradeStateMock({ ruleId: 'rule-1' }),
         createRuleUpgradeStateMock({ ruleId: 'rule-2' }),
@@ -133,7 +136,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       mockContext({
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 2, customizedCount: 0, ruleTypeChangeCount: 1 }),
       });
@@ -159,7 +162,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-plain' })];
 
       mockContext({
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 0, ruleTypeChangeCount: 0 }),
       });
@@ -173,7 +176,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('a zero-customized target set upgrades immediately with no modal', async () => {
       const user = userEvent.setup();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [
         createRuleUpgradeStateMock({ ruleId: 'rule-1' }),
         createRuleUpgradeStateMock({ ruleId: 'rule-2' }),
@@ -182,7 +185,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       mockContext({
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 3, customizedCount: 0, ruleTypeChangeCount: 0 }),
       });
@@ -201,7 +204,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('cancelling the confirmation modal does not upgrade rules', async () => {
       const user = userEvent.setup();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [
         createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true }),
         createRuleUpgradeStateMock({ ruleId: 'rule-2', isCustomized: true }),
@@ -209,7 +212,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       mockContext({
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 2, customizedCount: 2, ruleTypeChangeCount: 0 }),
       });
@@ -229,7 +232,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('the secondary segment stays enabled when the primary is disabled by non-solvable conflicts, and still reaches upgradeRulesToTarget', async () => {
       const user = userEvent.setup();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [
         createRuleUpgradeStateMock({
           ruleId: 'rule-1',
@@ -245,7 +248,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       mockContext({
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 2, customizedCount: 2, ruleTypeChangeCount: 0 }),
       });
@@ -265,8 +268,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('clicking the primary segment calls upgradeRules with the selected ids and never calls upgradeRulesToTarget', async () => {
       const user = userEvent.setup();
-      const upgradeRules = jest.fn();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeRules = vi.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1' })];
 
       mockContext({ upgradeRules, upgradeRulesToTarget });
@@ -367,8 +370,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
   describe('All scope (upgrade to TARGET)', () => {
     it('confirming the All modal upgrades the whole filtered set with no arguments', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
+      const upgradeRulesToTarget = vi.fn();
 
       mockContext({
         upgradeAllRulesToTarget,
@@ -397,8 +400,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('confirms against freshly fetched counts', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
-      const fetchAllRulesCustomizationCounts = jest
+      const upgradeAllRulesToTarget = vi.fn();
+      const fetchAllRulesCustomizationCounts = vi
         .fn()
         .mockResolvedValue({ total: 4, customizedCount: 2, ruleTypeChangeCount: undefined });
 
@@ -415,11 +418,11 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('does not force-upgrade when the fresh review fetch returns no data', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
 
       mockContext({
         upgradeAllRulesToTarget,
-        fetchAllRulesCustomizationCounts: jest.fn().mockResolvedValue(null),
+        fetchAllRulesCustomizationCounts: vi.fn().mockResolvedValue(null),
       });
       renderButtons([]);
 
@@ -436,7 +439,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('still confirms a zero-customized target set because rule type changes cannot be ruled out for the whole set', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
 
       mockContext({
         upgradeAllRulesToTarget,
@@ -467,7 +470,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('cancelling the confirmation modal does not upgrade rules', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
 
       mockContext({
         upgradeAllRulesToTarget,
@@ -493,8 +496,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('clicking the primary All segment calls upgradeAllRules and never upgradeAllRulesToTarget', async () => {
       const user = userEvent.setup();
-      const upgradeAllRules = jest.fn();
-      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeAllRules = vi.fn();
+      const upgradeAllRulesToTarget = vi.fn();
 
       mockContext({ upgradeAllRules, upgradeAllRulesToTarget });
       renderButtons([]);
@@ -531,7 +534,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('never force-upgrades while the upgrade review has not loaded yet', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
 
       mockContext({ upgradeAllRulesToTarget, isFetched: false });
       renderButtons([]);
@@ -581,8 +584,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('primary buttons still call upgradeRules and upgradeAllRules', async () => {
       const user = userEvent.setup();
-      const upgradeRules = jest.fn();
-      const upgradeAllRules = jest.fn();
+      const upgradeRules = vi.fn();
+      const upgradeAllRules = vi.fn();
 
       mockContext({ upgradeRules, upgradeAllRules });
       renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
@@ -619,14 +622,14 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
   describe('confirmation-gate independence', () => {
     it('confirming the All modal while the Selected modal is open only calls upgradeAllRulesToTarget, and the Selected modal is unaffected', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true })];
 
       mockContext({
         upgradeAllRulesToTarget,
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
         fetchedCounts: {
@@ -655,14 +658,14 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('cancelling the Selected modal while the All modal is open leaves both upgrade functions uncalled, and confirming the All modal afterwards only fires the All action', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true })];
 
       mockContext({
         upgradeAllRulesToTarget,
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
         fetchedCounts: {
@@ -701,12 +704,12 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('does not suppress a repeat invocation of the same scope: the Selected modal reappears on the second invocation', async () => {
       const user = userEvent.setup();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true })];
 
       mockContext({
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
       });
@@ -737,14 +740,14 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('running the All flow before the Selected flow produces the same per-scope outcomes as the forward order', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true })];
 
       mockContext({
         upgradeAllRulesToTarget,
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
         fetchedCounts: {
@@ -778,8 +781,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('the Selected call receives every selected id and the All call receives no arguments at all', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [
         createRuleUpgradeStateMock({ ruleId: 'rule-customized', isCustomized: true }),
         createRuleUpgradeStateMock({ ruleId: 'rule-plain', isCustomized: false }),
@@ -788,7 +791,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       mockContext({
         upgradeAllRulesToTarget,
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
         fetchedCounts: {
@@ -820,14 +823,14 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
     it('skips the Selected confirmation modal when no selected rules are customized while the All flow still shows its confirmation modal for customized rules', async () => {
       const user = userEvent.setup();
-      const upgradeAllRulesToTarget = jest.fn();
-      const upgradeRulesToTarget = jest.fn();
+      const upgradeAllRulesToTarget = vi.fn();
+      const upgradeRulesToTarget = vi.fn();
       const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: false })];
 
       mockContext({
         upgradeAllRulesToTarget,
         upgradeRulesToTarget,
-        getSelectedRulesCustomizationCounts: jest
+        getSelectedRulesCustomizationCounts: vi
           .fn()
           .mockReturnValue({ total: 1, customizedCount: 0, ruleTypeChangeCount: 0 }),
         fetchedCounts: {
@@ -884,14 +887,14 @@ function mockContext({
   isInitializingPrebuiltRulesPackage = false,
   isFetched = true,
   fetchedCounts = { total: 0, customizedCount: 0, ruleTypeChangeCount: undefined },
-  upgradeRules = jest.fn(),
-  upgradeAllRules = jest.fn(),
-  upgradeRulesToTarget = jest.fn(),
-  upgradeAllRulesToTarget = jest.fn(),
-  getSelectedRulesCustomizationCounts = jest
+  upgradeRules = vi.fn(),
+  upgradeAllRules = vi.fn(),
+  upgradeRulesToTarget = vi.fn(),
+  upgradeAllRulesToTarget = vi.fn(),
+  getSelectedRulesCustomizationCounts = vi
     .fn()
     .mockReturnValue({ total: 0, customizedCount: 0, ruleTypeChangeCount: 0 }),
-  fetchAllRulesCustomizationCounts = jest.fn().mockResolvedValue(fetchedCounts),
+  fetchAllRulesCustomizationCounts = vi.fn().mockResolvedValue(fetchedCounts),
 }: {
   hasRulesToUpgrade?: boolean;
   loadingRules?: string[];
@@ -899,12 +902,12 @@ function mockContext({
   isInitializingPrebuiltRulesPackage?: boolean;
   isFetched?: boolean;
   fetchedCounts?: RuleUpgradeCustomizationCounts | null;
-  upgradeRules?: jest.Mock;
-  upgradeAllRules?: jest.Mock;
-  upgradeRulesToTarget?: jest.Mock;
-  upgradeAllRulesToTarget?: jest.Mock;
-  getSelectedRulesCustomizationCounts?: jest.Mock;
-  fetchAllRulesCustomizationCounts?: jest.Mock;
+  upgradeRules?: Mock;
+  upgradeAllRules?: Mock;
+  upgradeRulesToTarget?: Mock;
+  upgradeAllRulesToTarget?: Mock;
+  getSelectedRulesCustomizationCounts?: Mock;
+  fetchAllRulesCustomizationCounts?: Mock;
 } = {}) {
   mockUseUpgradePrebuiltRulesTableContext.mockReturnValue({
     state: {

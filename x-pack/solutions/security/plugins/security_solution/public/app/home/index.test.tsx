@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { HomePage } from '.';
@@ -28,17 +30,20 @@ import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { TopValuesPopoverService } from '../components/top_values_popover/top_values_popover_service';
 
-jest.mock('../../common/store/inputs/actions');
+vi.mock('../../common/store/inputs/actions');
 
-const mockRouteSpy = jest.fn().mockReturnValue([{ pageName: 'hosts' }]);
+const mockRouteSpy = vi.fn().mockReturnValue([{ pageName: 'hosts' }]);
 
-jest.mock('../../common/utils/route/use_route_spy', () => ({
-  useRouteSpy: () => mockRouteSpy(),
-}));
+vi.mock('../../common/utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: () => mockRouteSpy(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DummyComponent = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
-const mockedUseInitializeUrlParam = jest.fn();
+const mockedUseInitializeUrlParam = vi.fn();
 
 const mockUseInitializeUrlParam = (urlParamKey: string, state: unknown) => {
   mockedUseInitializeUrlParam.mockImplementation((key, fn) => {
@@ -48,68 +53,86 @@ const mockUseInitializeUrlParam = (urlParamKey: string, state: unknown) => {
   });
 };
 
-const mockUpdateUrlParam = jest.fn();
+const mockUpdateUrlParam = vi.fn();
 
-jest.mock('../../common/utils/global_query_string', () => {
-  const original = jest.requireActual('../../common/utils/global_query_string');
+vi.mock('../../common/utils/global_query_string', async () => {
+  const original = (await vi.importActual('../../common/utils/global_query_string'));
   return {
     ...original,
     useInitializeUrlParam: (...params: unknown[]) => mockedUseInitializeUrlParam(...params),
-    useSyncGlobalQueryString: jest.fn(),
+    useSyncGlobalQueryString: vi.fn(),
     useUpdateUrlParam: () => mockUpdateUrlParam,
   };
 });
 
-jest.mock('../../common/components/drag_and_drop/drag_drop_context_wrapper', () => ({
-  DragDropContextWrapper: DummyComponent,
-}));
+vi.mock('../../common/components/drag_and_drop/drag_drop_context_wrapper', () => {
+      const mocked = {
+      DragDropContextWrapper: DummyComponent,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./template_wrapper', () => ({
-  SecuritySolutionTemplateWrapper: DummyComponent,
-}));
+vi.mock('./template_wrapper', () => {
+      const mocked = {
+      SecuritySolutionTemplateWrapper: DummyComponent,
+    };
+      return { ...mocked, default: mocked };
+    });
 const DATE_TIME_NOW = '2020-01-01T00:00:00.000Z';
-jest.mock('../../common/components/super_date_picker', () => ({
-  formatDate: (date: string) => DATE_TIME_NOW,
-}));
+vi.mock('../../common/components/super_date_picker', () => {
+      const mocked = {
+      formatDate: (date: string) => DATE_TIME_NOW,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
-    useLocation: jest.fn().mockReturnValue({ pathname: '/test', search: '?' }),
+    useLocation: vi.fn().mockReturnValue({ pathname: '/test', search: '?' }),
   };
 });
 
 // HomePage wires up flyoutV2 URL restoration/interop, whose restore logic (including its
 // `useEsDocSearch` calls) is covered by dedicated unit tests in `flyout_v2/shared/url_state`.
 // Mocked here as no-ops so this suite doesn't need a `UnifiedDocViewerServices` registration.
-jest.mock('../../flyout_v2/shared/url_state/use_flyout_v2_restore', () => ({
-  useFlyoutV2RestoreFromUrl: jest.fn(),
-}));
-jest.mock('../../flyout_v2/shared/url_state/use_expandable_flyout_url_interop', () => ({
-  useLegacyFlyoutUrlInterop: jest.fn(),
-}));
+vi.mock('../../flyout_v2/shared/url_state/use_flyout_v2_restore', () => {
+      const mocked = {
+      useFlyoutV2RestoreFromUrl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../flyout_v2/shared/url_state/use_expandable_flyout_url_interop', () => {
+      const mocked = {
+      useLegacyFlyoutUrlInterop: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockQueryTimelineById = jest.fn();
-jest.mock('../../timelines/components/open_timeline/helpers', () => {
-  const original = jest.requireActual('../../timelines/components/open_timeline/helpers');
+const mockQueryTimelineById = vi.fn();
+vi.mock('../../timelines/components/open_timeline/helpers', async () => {
+  const original = (await vi.importActual('../../timelines/components/open_timeline/helpers'));
   return {
     ...original,
     useQueryTimelineById: () => mockQueryTimelineById,
   };
 });
 
-const mockGetTimeline = jest.fn();
+const mockGetTimeline = vi.fn();
 
-jest.mock('../../timelines/store', () => ({
-  timelineSelectors: {
-    getTimelineByIdSelector: () => mockGetTimeline,
-  },
-}));
+vi.mock('../../timelines/store', () => {
+      const mocked = {
+      timelineSelectors: {
+        getTimelineByIdSelector: () => mockGetTimeline,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedFilterManager = new FilterManager(coreMock.createStart().uiSettings);
-const mockGetSavedQuery = jest.fn();
-const mockSetHeaderActionMenu = jest.fn();
+const mockGetSavedQuery = vi.fn();
+const mockSetHeaderActionMenu = vi.fn();
 
 const dummyFilter: Filter = {
   meta: {
@@ -131,8 +154,8 @@ const dummyFilter: Filter = {
 
 const mockTopValuesPopoverService = new TopValuesPopoverService();
 
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -143,7 +166,7 @@ jest.mock('../../common/lib/kibana', () => {
         data: {
           ...original.useKibana().services.data,
           dataViews: {
-            get: jest
+            get: vi
               .fn()
               .mockImplementation(
                 async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
@@ -206,15 +229,15 @@ jest.mock('../../common/lib/kibana', () => {
       },
     }),
     KibanaServices: {
-      get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
+      get: vi.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
     },
   };
 });
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -223,8 +246,8 @@ jest.mock('react-redux-v7', () => {
 
 describe('HomePage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockedUseInitializeUrlParam.mockImplementation(jest.fn());
+    vi.clearAllMocks();
+    mockedUseInitializeUrlParam.mockImplementation(vi.fn());
     mockedFilterManager.setFilters([]);
   });
 
@@ -327,7 +350,7 @@ describe('HomePage', () => {
     it('sets filter initial value in the store and filterManager', () => {
       const state = [{ testFilter: 'test' }];
       mockUseInitializeUrlParam(URL_PARAM_KEY.filters, state);
-      const spySetFilters = jest.spyOn(mockedFilterManager, 'setFilters');
+      const spySetFilters = vi.spyOn(mockedFilterManager, 'setFilters');
 
       render(
         <TestProviders>
@@ -348,7 +371,7 @@ describe('HomePage', () => {
     it('sets filter from store when URL param has no value', () => {
       const state = null;
       mockUseInitializeUrlParam(URL_PARAM_KEY.filters, state);
-      const spySetAppFilters = jest.spyOn(mockedFilterManager, 'setAppFilters');
+      const spySetAppFilters = vi.spyOn(mockedFilterManager, 'setAppFilters');
 
       const mockstate = {
         ...mockGlobalState,
@@ -533,7 +556,7 @@ describe('HomePage', () => {
       );
 
       const { rerender } = render(<TestComponent />);
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // simulate page navigation
       mockRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.alerts }]);
@@ -589,7 +612,7 @@ describe('HomePage', () => {
       );
 
       const { rerender } = render(<TestComponent />);
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // simulate page navigation
       mockRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.hosts }]);
@@ -652,7 +675,7 @@ describe('HomePage', () => {
 
       const { rerender } = render(<TestComponent />);
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockGetTimeline.mockReturnValue({ ...timelineDefaults, savedObjectId: null });
 
       rerender(<TestComponent />);
@@ -685,7 +708,7 @@ describe('HomePage', () => {
 
       const { rerender } = render(<TestComponent />);
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockGetTimeline.mockReturnValue({ ...timelineDefaults, savedObjectId });
 
       rerender(<TestComponent />);

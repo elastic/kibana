@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter, mockHttpValues } from '../../__mocks__/kea_logic';
 
 import { JSON_HEADER as headers } from '../../../../common/constants';
@@ -16,7 +18,7 @@ describe('Telemetry logic', () => {
   const { http } = mockHttpValues;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mount();
   });
 
@@ -48,7 +50,7 @@ describe('Telemetry logic', () => {
     const telemetryEvent = { action: 'viewed', metric: 'overview' };
 
     beforeEach(() => {
-      jest.spyOn(TelemetryLogic.actions, 'sendTelemetry');
+      vi.spyOn(TelemetryLogic.actions, 'sendTelemetry');
     });
 
     describe('sendEnterpriseSearchTelemetry', () => {

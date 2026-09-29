@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-jest.mock('crypto', () => ({
-  randomBytes: jest.fn(),
-  constants: jest.requireActual('crypto').constants,
-  createHash: jest.requireActual('crypto').createHash,
-}));
+import { vi } from 'vitest';
 
-jest.mock('@kbn/utils', () => ({
-  getLogsPath: () => '/mock/kibana/logs/path',
-}));
+vi.mock('crypto', () => {
+      const mocked = {
+      randomBytes: vi.fn(),
+      constants: require('crypto').constants,
+      createHash: require('crypto').createHash,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/utils', () => {
+      const mocked = {
+      getLogsPath: () => '/mock/kibana/logs/path',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -1990,7 +1998,7 @@ describe('config schema', () => {
 
 describe('createConfig()', () => {
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
-    const mockRandomBytes = jest.requireMock('crypto').randomBytes;
+    const mockRandomBytes = (await vi.importMock('crypto')).randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(32));
 
     const logger = loggingSystemMock.create().get();

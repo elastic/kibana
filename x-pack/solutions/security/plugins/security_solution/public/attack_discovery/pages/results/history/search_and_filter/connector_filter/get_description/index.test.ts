@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDescription } from '.';
 
-jest.mock('../translations', () => ({
-  AMAZON_BEDROCK: 'Amazon Bedrock',
-  GOOGLE_GEMINI: 'Google Gemini',
-  OPENAI: 'OpenAI',
-}));
+vi.mock('../translations', () => {
+      const mocked = {
+      AMAZON_BEDROCK: 'Amazon Bedrock',
+      GOOGLE_GEMINI: 'Google Gemini',
+      OPENAI: 'OpenAI',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getDescription', () => {
   it("returns the expected description for '.bedrock'", () => {

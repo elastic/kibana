@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedClass, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -12,61 +15,67 @@ import { BehaviorSubject } from 'rxjs';
 import { MappingEditor } from './mapping_editor';
 import { MappingEditorService } from './mapping_editor_service';
 
-jest.mock('../../../use_file_upload', () => ({
-  useFileUploadContext: () => ({
-    fileUploadManager: {
-      getMappings: jest.fn(() => ({
-        json: {
-          properties: {
-            field1: { type: 'text' },
-            field2: { type: 'keyword' },
-          },
+vi.mock('../../../use_file_upload', () => {
+      const mocked = {
+      useFileUploadContext: () => ({
+        fileUploadManager: {
+          getMappings: vi.fn(() => ({
+            json: {
+              properties: {
+                field1: { type: 'text' },
+                field2: { type: 'keyword' },
+              },
+            },
+          })),
+          updateMappings: vi.fn(),
+          renamePipelineTargetFields: vi.fn(),
         },
-      })),
-      updateMappings: jest.fn(),
-      renamePipelineTargetFields: jest.fn(),
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/field-utils/src/components/field_select/field_select', () => ({
-  FieldSelect: ({
-    selectedType,
-    onTypeChange,
-  }: {
-    selectedType: string | null;
-    onTypeChange: (type: string) => void;
-  }) => {
-    return (
-      <select
-        data-test-subj="field-type-select"
-        value={selectedType || ''}
-        onChange={(e) => onTypeChange(e.target.value)}
-      >
-        <option value="">Select type</option>
-        <option value="text">text</option>
-        <option value="keyword">keyword</option>
-        <option value="long">long</option>
-        <option value="double">double</option>
-        <option value="boolean">boolean</option>
-        <option value="date">date</option>
-      </select>
-    );
-  },
-}));
+vi.mock('@kbn/field-utils/src/components/field_select/field_select', () => {
+      const mocked = {
+      FieldSelect: ({
+        selectedType,
+        onTypeChange,
+      }: {
+        selectedType: string | null;
+        onTypeChange: (type: string) => void;
+      }) => {
+        return (
+          <select
+            data-test-subj="field-type-select"
+            value={selectedType || ''}
+            onChange={(e) => onTypeChange(e.target.value)}
+          >
+            <option value="">Select type</option>
+            <option value="text">text</option>
+            <option value="keyword">keyword</option>
+            <option value="long">long</option>
+            <option value="double">double</option>
+            <option value="boolean">boolean</option>
+            <option value="date">date</option>
+          </select>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./mapping_editor_service');
+vi.mock('./mapping_editor_service');
 
-const MockMappingEditorService = MappingEditorService as jest.MockedClass<
+const MockMappingEditorService = MappingEditorService as MockedClass<
   typeof MappingEditorService
 >;
 
 describe('MappingEditor', () => {
-  let mockService: jest.Mocked<MappingEditorService>;
-  let onImportClick: jest.MockedFunction<() => void>;
+  let mockService: Mocked<MappingEditorService>;
+  let onImportClick: MockedFunction<() => void>;
 
   beforeEach(() => {
-    onImportClick = jest.fn();
+    onImportClick = vi.fn();
 
     const mockMappings = [
       {
@@ -87,19 +96,19 @@ describe('MappingEditor', () => {
       mappings$: new BehaviorSubject(mockMappings).asObservable(),
       mappingsError$: new BehaviorSubject<string | null>(null).asObservable(),
       mappingsEdited$: new BehaviorSubject<boolean>(false).asObservable(),
-      getMappings: jest.fn(() => mockMappings),
-      getMappingsError: jest.fn(() => null),
-      getMappingsEdited: jest.fn(() => false),
-      updateMapping: jest.fn(),
-      reset: jest.fn(),
-      destroy: jest.fn(),
-    } as Partial<MappingEditorService> as jest.Mocked<MappingEditorService>;
+      getMappings: vi.fn(() => mockMappings),
+      getMappingsError: vi.fn(() => null),
+      getMappingsEdited: vi.fn(() => false),
+      updateMapping: vi.fn(),
+      reset: vi.fn(),
+      destroy: vi.fn(),
+    } as Partial<MappingEditorService> as Mocked<MappingEditorService>;
 
     MockMappingEditorService.mockImplementation(() => mockService);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders field count and mappings correctly', () => {
@@ -137,7 +146,7 @@ describe('MappingEditor', () => {
       errors: [{ index: 1, nameError: false, typeError: true }],
     };
     (mockService.mappingsError$ as any) = new BehaviorSubject(errorObj).asObservable();
-    (mockService.getMappingsError as jest.Mock).mockReturnValue(errorObj);
+    (mockService.getMappingsError as Mock).mockReturnValue(errorObj);
 
     renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
@@ -160,7 +169,7 @@ describe('MappingEditor', () => {
   });
 
   it('handles empty mappings array', () => {
-    mockService.getMappings = jest.fn(() => []);
+    mockService.getMappings = vi.fn(() => []);
     mockService.mappings$ = new BehaviorSubject([]).asObservable();
 
     renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
@@ -180,7 +189,7 @@ describe('MappingEditor', () => {
     ]);
 
     (mockService.mappings$ as any) = mappingsSubject.asObservable();
-    (mockService.getMappings as jest.Mock).mockImplementation(() => mappingsSubject.getValue());
+    (mockService.getMappings as Mock).mockImplementation(() => mappingsSubject.getValue());
 
     renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
@@ -207,7 +216,7 @@ describe('MappingEditor', () => {
   it('renders reset button and calls reset method when clicked', async () => {
     const mappingsEditedSubject = new BehaviorSubject(true);
     (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
-    (mockService.getMappingsEdited as jest.Mock).mockReturnValue(true);
+    (mockService.getMappingsEdited as Mock).mockReturnValue(true);
 
     renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
@@ -224,7 +233,7 @@ describe('MappingEditor', () => {
   it('disables reset button when mappings are not edited', () => {
     const mappingsEditedSubject = new BehaviorSubject(false);
     (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
-    (mockService.getMappingsEdited as jest.Mock).mockReturnValue(false);
+    (mockService.getMappingsEdited as Mock).mockReturnValue(false);
 
     renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
@@ -258,8 +267,8 @@ describe('MappingEditor', () => {
 
     (mockService.mappings$ as any) = mappingsSubject.asObservable();
     (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
-    (mockService.getMappings as jest.Mock).mockImplementation(() => mappingsSubject.getValue());
-    (mockService.getMappingsEdited as jest.Mock).mockImplementation(() =>
+    (mockService.getMappings as Mock).mockImplementation(() => mappingsSubject.getValue());
+    (mockService.getMappingsEdited as Mock).mockImplementation(() =>
       mappingsEditedSubject.getValue()
     );
 
@@ -298,7 +307,7 @@ describe('MappingEditor', () => {
     const resetButton = screen.getByRole('button', { name: 'Reset to default' });
     expect(resetButton).toBeEnabled();
 
-    (mockService.reset as jest.Mock).mockImplementation(() => {
+    (mockService.reset as Mock).mockImplementation(() => {
       mappingsSubject.next(initialMappings);
       mappingsEditedSubject.next(false);
     });

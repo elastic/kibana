@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiDragDropContext: jest.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
-  EuiDroppable: jest.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
-  EuiDraggable: jest.fn(({ children }: { children: (provided: object) => React.ReactNode }) => (
-    <>{children({ dragHandleProps: {} })}</>
-  )),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiDragDropContext: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+      EuiDroppable: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+      EuiDraggable: vi.fn(({ children }: { children: (provided: object) => React.ReactNode }) => (
+        <>{children({ dragHandleProps: {} })}</>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -31,10 +36,10 @@ describe('ReorderableTable', () => {
   const items: Foo[] = [{ id: 1 }, { id: 2 }];
   const columns: Array<Column<Foo>> = [];
 
-  const MockEuiDragDropContext = jest.mocked(EuiDragDropContext);
+  const MockEuiDragDropContext = vi.mocked(EuiDragDropContext);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the table is reorderable', () => {
@@ -89,7 +94,7 @@ describe('ReorderableTable', () => {
     });
 
     it('will accept a callback which will be triggered every time a row is reordered', () => {
-      const onReorder = jest.fn();
+      const onReorder = vi.fn();
       renderWithKibanaRenderContext(
         <ReorderableTable
           noItemsMessage={<p>No Items</p>}

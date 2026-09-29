@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ProfilesRepository } from '../repository';
 import {
@@ -16,13 +19,13 @@ import {
 describe('ensureGlobalAnonymizationProfile', () => {
   const logger = loggingSystemMock.createLogger();
   const mockProfilesRepo = {
-    findByTarget: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-  } as unknown as jest.Mocked<ProfilesRepository>;
+    findByTarget: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  } as unknown as Mocked<ProfilesRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates the global profile when it does not exist', async () => {

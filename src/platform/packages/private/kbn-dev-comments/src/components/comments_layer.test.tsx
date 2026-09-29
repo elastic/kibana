@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import {
@@ -226,7 +228,7 @@ describe('CommentsLayer', () => {
 
   it('shows that comments are loading, then a failed load with a retry, and the empty state only once loaded', async () => {
     const first = deferred<Comment[]>();
-    const list = jest.fn().mockReturnValueOnce(first.promise).mockResolvedValueOnce([]);
+    const list = vi.fn().mockReturnValueOnce(first.promise).mockResolvedValueOnce([]);
     const controller = await renderLayer({ api: { ...createInMemoryCommentsApi(), list } });
     act(() => controller.setActive(true));
 
@@ -250,7 +252,7 @@ describe('CommentsLayer', () => {
 
   it('shows when the comments were fetched, and fetches them again on request without dropping a reply being written', async () => {
     const api = createInMemoryCommentsApi([seeded]);
-    const list = jest.spyOn(api, 'list');
+    const list = vi.spyOn(api, 'list');
     const controller = await renderLayer({
       api,
       RelativeTime: ({ value }) => <>{`at ${value}`}</>,
@@ -281,7 +283,7 @@ describe('CommentsLayer', () => {
   it('copies the text of a comment, and nothing else, to the clipboard', async () => {
     const copied: string[] = [];
     // jsdom has no clipboard; EUI copies through a selection and this command.
-    document.execCommand = jest.fn(() => {
+    document.execCommand = vi.fn(() => {
       copied.push(String(window.getSelection()));
       return true;
     });
@@ -387,7 +389,7 @@ describe('CommentsLayer', () => {
       `<button id="target">Target</button><div id="host"><button id="hostButton">Host</button></div>`
     );
     // How EUI's popovers and flyouts notice a click outside of them.
-    const outsideClick = jest.fn();
+    const outsideClick = vi.fn();
     document.addEventListener('mouseup', outsideClick);
     const controller = await renderLayer({ ignoreSelectors: ['#host'] });
     act(() => controller.setActive(true));
@@ -427,7 +429,7 @@ describe('CommentsLayer', () => {
         snapshot: { mimeType: 'image/jpeg', width: 800, height: 600, image: 'AAAA' },
       }),
     ]);
-    const getSnapshot = jest.spyOn(api, 'getSnapshot').mockRejectedValueOnce(new Error('offline'));
+    const getSnapshot = vi.spyOn(api, 'getSnapshot').mockRejectedValueOnce(new Error('offline'));
     const controller = await renderLayer({ api });
     act(() => controller.setActive(true));
     act(() => controller.openThread('a'));
@@ -536,18 +538,18 @@ describe('CommentsLayer', () => {
     const controller = await renderLayer();
     act(() => controller.setActive(true));
     // Timers are faked before the guide starts, so that its settle time can be passed.
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       await act(() => controller.guideTo(seeded));
       expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent('Looking for the comment…');
-      act(() => jest.advanceTimersByTime(SETTLE_MS));
+      act(() => vi.advanceTimersByTime(SETTLE_MS));
       expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent(
         'The commented element is behind other UI, like a dialog or menu: close it to get to the comment.'
       );
       expect(screen.getByTestId('devCommentsGuideStop')).toHaveTextContent('Cancel');
       expect(controller.store.getState().activeThreadId).toBeNull();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
 
     act(() => dialog.remove());
@@ -639,13 +641,13 @@ describe('CommentsLayer', () => {
     act(() => controller.setActive(true));
     const guide = () => screen.getByTestId('devCommentsGuide');
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       await act(() => controller.guideTo(guided));
       expect(guide()).toHaveTextContent('Click “Open” to get to the comment');
 
       await act(async () => fireEvent.click(query('#open')));
-      act(() => jest.advanceTimersByTime(SETTLE_MS));
+      act(() => vi.advanceTimersByTime(SETTLE_MS));
       expect(guide()).toHaveTextContent(
         '“Tab B” is behind other UI, like a dialog or menu: close it to get to the comment.'
       );
@@ -658,7 +660,7 @@ describe('CommentsLayer', () => {
       await waitFor(() => expect(controller.store.getState().activeThreadId).toBe('guided'));
       expect(screen.queryByTestId('devCommentsGuide')).not.toBeInTheDocument();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -666,7 +668,7 @@ describe('CommentsLayer', () => {
     // The page key does not tell the two states apart, and the element is already there.
     const { location, navigate } = createLocation('/page?state=1');
     const navigation = deferred<void>();
-    const navigateToPath = jest.fn(async (path: string) => {
+    const navigateToPath = vi.fn(async (path: string) => {
       await navigation.promise;
       navigate(path);
     });

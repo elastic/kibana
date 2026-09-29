@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { validatePlaywrightConfig } from './config_validator';
 import * as configLoader from './config_loader';
 import Fs from 'fs';
 import { VALID_CONFIG_MARKER } from '../types';
 
-jest.mock('fs');
+vi.mock('fs');
 
-const existsSyncMock = jest.spyOn(Fs, 'existsSync');
-const loadConfigModuleMock = jest.spyOn(configLoader, 'loadConfigModule');
+const existsSyncMock = vi.spyOn(Fs, 'existsSync');
+const loadConfigModuleMock = vi.spyOn(configLoader, 'loadConfigModule');
 
 describe('validatePlaywrightConfig', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should pass validation for a valid config file', async () => {

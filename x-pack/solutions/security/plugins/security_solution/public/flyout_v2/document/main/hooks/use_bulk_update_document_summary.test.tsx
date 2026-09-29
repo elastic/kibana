@@ -4,26 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useBulkUpdateDocumentSummary } from './use_bulk_update_document_summary';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useBulkUpdateDocumentSummary', () => {
   const mockHttp = {
-    fetch: jest.fn(),
+    fetch: vi.fn(),
   };
   const mockToasts = {
-    addDanger: jest.fn(),
-    addError: jest.fn(),
+    addDanger: vi.fn(),
+    addError: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockReturnValue({
       http: mockHttp,
       toasts: mockToasts,
     });

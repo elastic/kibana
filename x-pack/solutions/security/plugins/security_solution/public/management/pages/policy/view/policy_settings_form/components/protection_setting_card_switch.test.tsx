@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -20,9 +23,9 @@ import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('Policy form ProtectionSettingCardSwitch component', () => {
   let formProps: ProtectionSettingCardSwitchProps;
@@ -35,7 +38,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': 'test',
       protection: 'malware',
@@ -110,7 +113,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
   });
 
   it('should invoke `additionalOnSwitchChange` callback if one was defined', async () => {
-    formProps.additionalOnSwitchChange = jest.fn(({ policyConfigData }) => {
+    formProps.additionalOnSwitchChange = vi.fn(({ policyConfigData }) => {
       const updated = cloneDeep(policyConfigData);
       updated.windows.popup.malware.message = 'foo';
       return updated;

@@ -7,17 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { merge, getFlattenedObject } from '@kbn/std';
 
-export const mockStreamWrite = jest.fn();
-jest.doMock('fs', () => ({
-  ...(jest.requireActual('fs') as any),
-  constants: {},
-  createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
-}));
+export const mockStreamWrite = vi.fn();
+vi.doMock('fs', () => {
+      const mocked = {
+      ...(require('fs') as any),
+      constants: {},
+      createWriteStream: vi.fn(() => ({ write: mockStreamWrite })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const mockGetFlattenedObject = jest.fn().mockImplementation(getFlattenedObject);
-jest.doMock('@kbn/std', () => ({
-  merge: jest.fn().mockImplementation(merge),
-  getFlattenedObject: mockGetFlattenedObject,
-}));
+export const mockGetFlattenedObject = vi.fn().mockImplementation(getFlattenedObject);
+vi.doMock('@kbn/std', () => {
+      const mocked = {
+      merge: vi.fn().mockImplementation(merge),
+      getFlattenedObject: mockGetFlattenedObject,
+    };
+      return { ...mocked, default: mocked };
+    });

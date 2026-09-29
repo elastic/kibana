@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -29,22 +32,22 @@ describe('approveIntegrationRoute telemetry', () => {
 
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let reportTelemetryEvent: jest.Mock;
-  let approveIntegration: jest.Mock;
-  let getIntegrationById: jest.Mock;
-  let getAllDataStreams: jest.Mock;
-  let getCurrentUser: jest.Mock;
+  let reportTelemetryEvent: Mock;
+  let approveIntegration: Mock;
+  let getIntegrationById: Mock;
+  let getAllDataStreams: Mock;
+  let getCurrentUser: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     logger = loggerMock.create();
 
-    reportTelemetryEvent = jest.fn();
-    approveIntegration = jest.fn().mockResolvedValue(undefined);
-    getIntegrationById = jest.fn().mockResolvedValue({ title: 'My Integration' });
-    getAllDataStreams = jest.fn();
-    getCurrentUser = jest.fn().mockResolvedValue({ username: 'test-user' });
+    reportTelemetryEvent = vi.fn();
+    approveIntegration = vi.fn().mockResolvedValue(undefined);
+    getIntegrationById = vi.fn().mockResolvedValue({ title: 'My Integration' });
+    getAllDataStreams = vi.fn();
+    getCurrentUser = vi.fn().mockResolvedValue({ username: 'test-user' });
 
     registerIntegrationRoutes(
       router as unknown as IRouter<AutomaticImportPluginRequestHandlerContext>,
@@ -114,22 +117,22 @@ describe('downloadIntegrationRoute telemetry', () => {
 
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let reportTelemetryEvent: jest.Mock;
-  let buildIntegrationPackage: jest.Mock;
-  let getIntegrationById: jest.Mock;
-  let getAllDataStreams: jest.Mock;
+  let reportTelemetryEvent: Mock;
+  let buildIntegrationPackage: Mock;
+  let getIntegrationById: Mock;
+  let getAllDataStreams: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     logger = loggerMock.create();
 
-    reportTelemetryEvent = jest.fn();
-    buildIntegrationPackage = jest
+    reportTelemetryEvent = vi.fn();
+    buildIntegrationPackage = vi
       .fn()
       .mockResolvedValue({ buffer: Buffer.alloc(0), packageName: 'my-package' });
-    getIntegrationById = jest.fn().mockResolvedValue({ title: 'My Integration', version: '1.0.0' });
-    getAllDataStreams = jest.fn().mockResolvedValue([{ title: 'DS One' }, { title: 'DS Two' }]);
+    getIntegrationById = vi.fn().mockResolvedValue({ title: 'My Integration', version: '1.0.0' });
+    getAllDataStreams = vi.fn().mockResolvedValue([{ title: 'DS One' }, { title: 'DS Two' }]);
 
     registerIntegrationRoutes(
       router as unknown as IRouter<AutomaticImportPluginRequestHandlerContext>,

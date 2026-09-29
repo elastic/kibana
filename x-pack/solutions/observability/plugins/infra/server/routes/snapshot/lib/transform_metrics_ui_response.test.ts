@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api';
 import moment from 'moment';
 import { transformMetricsApiResponseToSnapshotResponse } from './transform_metrics_ui_response';
 import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 
-jest.mock('./apply_metadata_to_last_path', () => ({
-  applyMetadataToLastPath: (series: any) => [{ label: series.id }],
-}));
+vi.mock('./apply_metadata_to_last_path', () => {
+      const mocked = {
+      applyMetadataToLastPath: (series: any) => [{ label: series.id }],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const now = moment('2020-01-01T00:00:00Z').add(5, 'minute').valueOf();
 

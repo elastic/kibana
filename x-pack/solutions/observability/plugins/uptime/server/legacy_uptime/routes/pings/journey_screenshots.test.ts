@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { ClientContract } from './journey_screenshots';
 import { createJourneyScreenshotRoute } from './journey_screenshots';
@@ -14,7 +16,7 @@ describe('journey screenshot route', () => {
   beforeEach(() => {
     handlerContext = {
       uptimeEsClient: {
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           body: {
             hits: {
               hits: [],
@@ -29,8 +31,8 @@ describe('journey screenshot route', () => {
         },
       },
       response: {
-        ok: jest.fn((responseData) => ({ ...responseData, status: 200, message: 'Ok' })),
-        notFound: jest.fn().mockReturnValue({ status: 404, message: 'Not found.' }),
+        ok: vi.fn((responseData) => ({ ...responseData, status: 200, message: 'Ok' })),
+        notFound: vi.fn().mockReturnValue({ status: 404, message: 'Not found.' }),
       },
     };
   });
@@ -38,7 +40,7 @@ describe('journey screenshot route', () => {
   it('will 404 for missing screenshot', async () => {
     const route = createJourneyScreenshotRoute({
       requests: {
-        getJourneyScreenshot: jest.fn(),
+        getJourneyScreenshot: vi.fn(),
       },
     } as unknown as UMServerLibs);
 
@@ -72,7 +74,7 @@ describe('journey screenshot route', () => {
       totalSteps: 3,
     };
 
-    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+    handlerContext.uptimeEsClient.search = vi.fn().mockResolvedValue({
       body: {
         hits: {
           total: {
@@ -86,7 +88,7 @@ describe('journey screenshot route', () => {
 
     const route = createJourneyScreenshotRoute({
       requests: {
-        getJourneyScreenshot: jest.fn().mockReturnValue(mock),
+        getJourneyScreenshot: vi.fn().mockReturnValue(mock),
       },
     } as unknown as UMServerLibs);
 
@@ -109,7 +111,7 @@ describe('journey screenshot route', () => {
   it('returns 404 for screenshot missing blob', async () => {
     const route = createJourneyScreenshotRoute({
       requests: {
-        getJourneyScreenshot: jest.fn().mockReturnValue({
+        getJourneyScreenshot: vi.fn().mockReturnValue({
           synthetics: {
             step: {
               name: 'a step name',

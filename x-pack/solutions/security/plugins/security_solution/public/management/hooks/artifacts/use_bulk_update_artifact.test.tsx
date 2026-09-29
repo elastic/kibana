@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { useBulkUpdateArtifact } from './use_bulk_update_artifact';
 import type { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -22,7 +25,7 @@ const apiVersion = '2023-10-31';
 describe('Bulk update artifact hook', () => {
   let result: ReturnType<typeof useBulkUpdateArtifact>;
 
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let instance: ExceptionsListApiClient;
 
   beforeEach(() => {
@@ -41,7 +44,7 @@ describe('Bulk update artifact hook', () => {
     fakeHttpServices.put.mockClear();
     fakeHttpServices.put.mockResolvedValueOnce(exceptionItem1);
     fakeHttpServices.put.mockResolvedValueOnce(exceptionItem2);
-    const onSuccessMock: jest.Mock = jest.fn();
+    const onSuccessMock: Mock = vi.fn();
 
     result = await renderMutation(() =>
       useBulkUpdateArtifact(instance, {
@@ -79,7 +82,7 @@ describe('Bulk update artifact hook', () => {
     fakeHttpServices.put.mockClear();
     fakeHttpServices.put.mockRejectedValue(error);
 
-    const onErrorMock: jest.Mock = jest.fn();
+    const onErrorMock: Mock = vi.fn();
 
     result = await renderMutation(() =>
       useBulkUpdateArtifact(instance, {

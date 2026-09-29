@@ -7,55 +7,70 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 
-const mockRoots: Array<{ unmount: jest.Mock }> = [];
-jest.mock('react-dom/client', () => ({
-  createRoot: jest.fn((container: HTMLElement) => {
-    const { createRoot: actualCreateRoot } = jest.requireActual('react-dom/client');
-    const root = actualCreateRoot(container);
-    const mockRoot = {
-      render: (element: React.ReactNode) => root.render(element),
-      unmount: jest.fn(() => root.unmount()),
+const mockRoots: Array<{ unmount: Mock }> = [];
+vi.mock('react-dom/client', () => {
+      const mocked = {
+      createRoot: vi.fn((container: HTMLElement) => {
+        const { createRoot: actualCreateRoot } = require('react-dom/client');
+        const root = actualCreateRoot(container);
+        const mockRoot = {
+          render: (element: React.ReactNode) => root.render(element),
+          unmount: vi.fn(() => root.unmount()),
+        };
+        mockRoots.push(mockRoot);
+        return mockRoot;
+      }),
     };
-    mockRoots.push(mockRoot);
-    return mockRoot;
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
-const mockLegacyRender = jest.fn();
-jest.mock('react-dom', () => ({
-  ...jest.requireActual('react-dom'),
-  render: (...args: unknown[]) => {
-    mockLegacyRender(...args);
-    return jest.requireActual('react-dom').render(...args);
-  },
-}));
+const mockLegacyRender = vi.fn();
+vi.mock('react-dom', () => {
+      const mocked = {
+      ...require('react-dom'),
+      render: (...args: unknown[]) => {
+        mockLegacyRender(...args);
+        return require('react-dom').render(...args);
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-kibana-context-render', () => ({
-  KibanaRenderContextProvider: jest.fn(({ children }) => (
-    <div data-test-subj="kibana-render-context">{children}</div>
-  )),
-}));
-jest.mock('@kbn/core-chrome-browser-components', () => ({
-  ChromeComponentsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ClassicHeader: () => <div>Hello chrome!</div>,
-  ChromeHeader: () => <div>Project chrome!</div>,
-  ChromeAppHeaderRenderer: () => null,
-  GridLayoutProjectSideNav: () => <div>Side nav!</div>,
-  HeaderTopBanner: () => <div>Banner!</div>,
-  ChromelessHeader: () => <div>Chromeless!</div>,
-  Sidebar: () => <div>Sidebar!</div>,
-  useHasInlineAppHeader: () => false,
-  useHasChromeAppHeaderContent: () => false,
-}));
+vi.mock('@kbn/react-kibana-context-render', () => {
+      const mocked = {
+      KibanaRenderContextProvider: vi.fn(({ children }) => (
+        <div data-test-subj="kibana-render-context">{children}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/core-chrome-browser-components', () => {
+      const mocked = {
+      ChromeComponentsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      ClassicHeader: () => <div>Hello chrome!</div>,
+      ChromeHeader: () => <div>Project chrome!</div>,
+      ChromeAppHeaderRenderer: () => null,
+      GridLayoutProjectSideNav: () => <div>Side nav!</div>,
+      HeaderTopBanner: () => <div>Banner!</div>,
+      ChromelessHeader: () => <div>Chromeless!</div>,
+      Sidebar: () => <div>Sidebar!</div>,
+      useHasInlineAppHeader: () => false,
+      useHasChromeAppHeaderContent: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockChromeVisible$ = new BehaviorSubject(false);
-jest.mock('@kbn/core-chrome-browser-hooks', () => {
-  const { useObservable } = jest.requireActual('@kbn/use-observable');
+vi.mock('@kbn/core-chrome-browser-hooks', async () => {
+  const { useObservable } = (await vi.importActual('@kbn/use-observable'));
   return {
     useChromeStyle: () => 'classic',
     useIsChromeVisible: () => useObservable(mockChromeVisible$, mockChromeVisible$.getValue()),
@@ -63,15 +78,18 @@ jest.mock('@kbn/core-chrome-browser-hooks', () => {
     useSideNavWidth: () => 0,
   };
 });
-jest.mock('@kbn/core-chrome-browser-hooks/internal', () => ({
-  useGlobalFooter: () => null,
-  useHasHeaderBanner: () => false,
-}));
-jest.mock('@elastic/eui', () => {
-  const actualEui = jest.requireActual('@elastic/eui');
+vi.mock('@kbn/core-chrome-browser-hooks/internal', () => {
+      const mocked = {
+      useGlobalFooter: () => null,
+      useHasHeaderBanner: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@elastic/eui', async () => {
+  const actualEui = (await vi.importActual('@elastic/eui'));
   return {
     ...actualEui,
-    EuiLoadingSpinner: jest.fn(() => <div>Loading...</div>),
+    EuiLoadingSpinner: vi.fn(() => <div>Loading...</div>),
   };
 });
 
@@ -229,8 +247,8 @@ describe('RenderingService', () => {
     });
 
     it('uses createRoot when isCoreRenderingInReactConcurrentMode is true', async () => {
-      const { createRoot } = jest.requireMock('react-dom/client');
-      (createRoot as jest.Mock).mockClear();
+      const { createRoot } = (await vi.importMock('react-dom/client'));
+      (createRoot as Mock).mockClear();
 
       const service = startService({ isCoreRenderingInReactConcurrentMode: true });
       await act(async () => {
@@ -242,8 +260,8 @@ describe('RenderingService', () => {
     });
 
     it('uses legacy ReactDOM.render when isCoreRenderingInReactConcurrentMode is false', async () => {
-      const { createRoot } = jest.requireMock('react-dom/client');
-      (createRoot as jest.Mock).mockClear();
+      const { createRoot } = (await vi.importMock('react-dom/client'));
+      (createRoot as Mock).mockClear();
 
       const service = startService({ isCoreRenderingInReactConcurrentMode: false });
       await act(async () => {

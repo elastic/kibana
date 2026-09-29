@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHasGraphVisualizationLicense } from '../../../common/hooks/use_has_graph_visualization_license';
 import { useShouldShowGraph } from './use_should_show_graph';
 
-jest.mock('../../../common/hooks/use_has_graph_visualization_license');
-const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
+vi.mock('../../../common/hooks/use_has_graph_visualization_license');
+const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as Mock;
 
-jest.mock('./use_is_entity_store_v2_available');
+vi.mock('./use_is_entity_store_v2_available');
 import { useIsEntityStoreV2Available } from './use_is_entity_store_v2_available';
-const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as jest.Mock;
+const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as Mock;
 
 describe('useShouldShowGraph', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default mock: graph visualization feature is available
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
     // Default mock: entity store v2 entities index exists

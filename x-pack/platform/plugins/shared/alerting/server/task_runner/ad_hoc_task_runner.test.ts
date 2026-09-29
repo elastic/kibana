@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import sinon from 'sinon';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -106,19 +109,25 @@ import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { backfillInitiator } from '../../common/constants';
 
-jest.mock('../lib/rule_gaps/update/update_gaps');
+vi.mock('../lib/rule_gaps/update/update_gaps');
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 
-jest.mock('uuid', () => ({
-  v4: () => UUID,
-}));
-jest.mock('../lib/wrap_scoped_cluster_client', () => ({
-  createWrappedScopedClusterClientFactory: jest.fn(),
-}));
-jest.mock('../lib/alerting_event_logger/alerting_event_logger');
-jest.mock('../lib/rule_run_metrics_store');
-jest.mock('../lib/validate_rule_type_params');
-const mockValidateRuleTypeParams = validateRuleTypeParams as jest.MockedFunction<
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => UUID,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/wrap_scoped_cluster_client', () => {
+      const mocked = {
+      createWrappedScopedClusterClientFactory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerting_event_logger/alerting_event_logger');
+vi.mock('../lib/rule_run_metrics_store');
+vi.mock('../lib/validate_rule_type_params');
+const mockValidateRuleTypeParams = validateRuleTypeParams as MockedFunction<
   typeof validateRuleTypeParams
 >;
 
@@ -128,9 +137,9 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 
 let fakeTimer: sinon.SinonFakeTimers;
-type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
-  actionsPlugin: jest.Mocked<ActionsPluginStart>;
-  eventLogger: jest.Mocked<IEventLogger>;
+type TaskRunnerFactoryInitializerParamsType = Mocked<TaskRunnerContext> & {
+  actionsPlugin: Mocked<ActionsPluginStart>;
+  eventLogger: Mocked<IEventLogger>;
   executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
 };
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -151,8 +160,8 @@ const actionsClient = actionsClientMock.create();
 const backfillClient = backfillClientMock.create();
 const dataPlugin = dataPluginMock.createStartContract();
 const dataViewsMock = {
-  dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
-  getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+  dataViewsServiceFactory: vi.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+  getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
 } as DataViewsServerPluginStart;
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
@@ -187,11 +196,11 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   rulesSettingsService,
   savedObjects: savedObjectsService,
   share: {} as SharePluginStart,
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  spaceIdToNamespace: vi.fn().mockReturnValue(undefined),
   uiSettings: uiSettingsService,
   usageCounter: mockUsageCounter,
   isServerless: false,
-  getEventLogClient: jest.fn(),
+  getEventLogClient: vi.fn(),
   apiKeyType: ApiKeyType.ES,
 };
 
@@ -213,7 +222,7 @@ const mockedTaskInstance: ConcreteTaskInstance = {
   },
   ownerId: null,
 };
-const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleTypeWithAlerts: Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
   alerts: {
     context: 'test',
@@ -252,7 +261,7 @@ describe('Ad Hoc Task Runner', () => {
   let schedule4: AdHocRunSchedule;
   let schedule5: AdHocRunSchedule;
   let alertingEventLoggerInitializer: ContextOpts;
-  const mockUpdateGaps = updateGaps as jest.MockedFunction<typeof updateGaps>;
+  const mockUpdateGaps = updateGaps as MockedFunction<typeof updateGaps>;
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
@@ -265,7 +274,7 @@ describe('Ad Hoc Task Runner', () => {
     };
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     schedule1 = {
       runAt: '2024-03-01T01:00:00.000Z',
       status: adHocRunStatus.PENDING,
@@ -360,9 +369,8 @@ describe('Ad Hoc Task Runner', () => {
         schedule: [schedule1, schedule2, schedule3, schedule4, schedule5],
       },
     };
-    jest.resetAllMocks();
-    jest
-      .requireMock('../lib/wrap_scoped_cluster_client')
+    vi.resetAllMocks();
+    (await vi.importMock('../lib/wrap_scoped_cluster_client'))
       .createWrappedScopedClusterClientFactory.mockReturnValue({
         client: () => services.scopedClusterClient,
         getMetrics: () => ({
@@ -371,12 +379,12 @@ describe('Ad Hoc Task Runner', () => {
           totalSearchDurationMs: 23423,
         }),
       });
-    jest
+    vi
       .spyOn(alertsService, 'getContextInitializationPromise')
       .mockResolvedValue({ result: true });
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
-    (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
+    (AlertingEventLogger as Mock).mockImplementation(() => alertingEventLogger);
     ruleRunMetricsStore.getMetrics.mockReturnValue({
       numSearches: 3,
       totalSearchDurationMs: 23423,
@@ -389,7 +397,7 @@ describe('Ad Hoc Task Runner', () => {
       hasReachedAlertLimit: false,
       triggeredActionsStatus: 'complete',
     });
-    (RuleRunMetricsStore as jest.Mock).mockImplementation(() => ruleRunMetricsStore);
+    (RuleRunMetricsStore as Mock).mockImplementation(() => ruleRunMetricsStore);
     logger.isLevelEnabled.mockReturnValue(true);
     logger.get.mockImplementation(() => logger);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
@@ -426,7 +434,7 @@ describe('Ad Hoc Task Runner', () => {
   afterAll(() => fakeTimer.restore());
 
   test('successfully executes the task', async () => {
-    const addFrameworkMetricsSpy = jest.spyOn(
+    const addFrameworkMetricsSpy = vi.spyOn(
       RuleMonitoringService.prototype,
       'addFrameworkMetrics'
     );
@@ -1046,7 +1054,7 @@ describe('Ad Hoc Task Runner', () => {
   });
 
   test('should delete ad hoc run SO and not return a new runAt date when all schedules have been processed ', async () => {
-    taskRunnerFactoryInitializerParams.getEventLogClient = jest
+    taskRunnerFactoryInitializerParams.getEventLogClient = vi
       .fn()
       .mockResolvedValue(eventLogClient);
     ruleTypeWithAlerts.executor.mockImplementation(

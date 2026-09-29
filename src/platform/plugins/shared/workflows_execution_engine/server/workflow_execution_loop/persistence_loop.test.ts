@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
@@ -16,7 +19,7 @@ const makeParams = (
     isExecuting: boolean;
     flushDelay?: number;
   }> = {}
-): jest.Mocked<WorkflowExecutionLoopParams> => {
+): Mocked<WorkflowExecutionLoopParams> => {
   const { isExecuting = true, flushDelay = 0 } = overrides;
   const workflowExecutionCursor = createMockWorkflowExecutionCursor({ isExecuting });
   return {
@@ -25,24 +28,24 @@ const makeParams = (
       executionCursor: workflowExecutionCursor,
     },
     stepIoService: {
-      flush: jest
+      flush: vi
         .fn()
         .mockImplementation(() => new Promise<void>((resolve) => setTimeout(resolve, flushDelay))),
     },
     workflowLogger: {
-      flushEvents: jest.fn().mockResolvedValue(undefined),
+      flushEvents: vi.fn().mockResolvedValue(undefined),
     },
     signal: new AbortController().signal,
-  } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
+  } as unknown as Mocked<WorkflowExecutionLoopParams>;
 };
 
 describe('persistenceLoop', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('exits immediately when the execution cursor is not executing', async () => {
@@ -59,9 +62,9 @@ describe('persistenceLoop', () => {
 
     // Flush is synchronous (0 ms delay), so after one tick it's waiting on the 500 ms interval.
     // Advance timers a little, then abort.
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     abortController.abort();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await expect(loopPromise).resolves.toBeUndefined();
   });
@@ -77,7 +80,7 @@ describe('persistenceLoop', () => {
     });
 
     abortController.abort();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await expect(loopPromise).resolves.toBeUndefined();
   });
@@ -92,17 +95,17 @@ describe('persistenceLoop', () => {
     // flushState takes 50 ms — long enough for us to fire abort mid-flush
     const params = makeParams({ isExecuting: true, flushDelay: 50 });
 
-    const unhandledRejectionSpy = jest.fn();
+    const unhandledRejectionSpy = vi.fn();
     process.on('unhandledRejection', unhandledRejectionSpy);
 
     const loopPromise = persistenceLoop(params, abortController.signal);
 
     // Fire abort while flush is in progress (before the 50 ms resolve)
-    jest.advanceTimersByTime(10);
+    vi.advanceTimersByTime(10);
     abortController.abort();
 
     // Let flush complete and the loop settle
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
     await loopPromise;
 
     // Give Node.js one more microtask tick to surface any unhandled rejection

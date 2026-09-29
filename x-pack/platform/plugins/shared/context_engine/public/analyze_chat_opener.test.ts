@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createAnalyzeChatOpener } from './analyze_chat_opener';
@@ -41,8 +43,8 @@ const mockAgentBuilder = (
   overrides: Partial<AgentBuilderPluginStart> = {}
 ): AgentBuilderPluginStart =>
   ({
-    openChat: jest.fn(),
-    getAgentBuilderAccess: jest.fn(async () => ({
+    openChat: vi.fn(),
+    getAgentBuilderAccess: vi.fn(async () => ({
       hasRequiredLicense: true,
       hasLlmConnector: true,
     })),
@@ -97,7 +99,7 @@ describe('createAnalyzeChatOpener', () => {
   it('does not open a chat (and warns) when Agent Builder runtime access is unavailable', async () => {
     const coreStart = coreWithCapability(true);
     const agentBuilder = mockAgentBuilder({
-      getAgentBuilderAccess: jest.fn(async () => ({
+      getAgentBuilderAccess: vi.fn(async () => ({
         hasRequiredLicense: false,
         hasLlmConnector: true,
       })),

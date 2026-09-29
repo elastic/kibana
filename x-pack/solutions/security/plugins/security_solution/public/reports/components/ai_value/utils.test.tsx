@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { getExcludeAlertsFilters, getPercentInfo } from './utils';
@@ -12,16 +15,19 @@ import { getPercChange } from './helpers';
 import type { EuiThemeComputed } from '@elastic/eui';
 
 // Mock dependencies
-jest.mock('./helpers', () => ({
-  getPercChange: jest.fn(),
-}));
+vi.mock('./helpers', () => {
+      const mocked = {
+      getPercChange: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetPercChange = getPercChange as jest.MockedFunction<typeof getPercChange>;
+const mockGetPercChange = getPercChange as MockedFunction<typeof getPercChange>;
 const renderNote = (note: React.ReactNode) => render(<>{note}</>);
 
 describe('utils', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getPercentInfo', () => {

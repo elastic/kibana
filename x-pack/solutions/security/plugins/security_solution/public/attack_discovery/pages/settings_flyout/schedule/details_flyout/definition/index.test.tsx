@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -14,10 +17,10 @@ import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../../../../common/hooks/use_create_data_view');
-jest.mock('../../../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../../../common/hooks/use_create_data_view');
+vi.mock('../../../../../../common/hooks/use_experimental_features');
 
-const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;
+const mockUseCreateDataView = useCreateDataView as MockedFunction<typeof useCreateDataView>;
 
 const renderComponent = async (schedule = mockAttackDiscoverySchedule) => {
   render(<TestProviders>{<ScheduleDefinition schedule={schedule} />}</TestProviders>);
@@ -25,13 +28,13 @@ const renderComponent = async (schedule = mockAttackDiscoverySchedule) => {
 
 describe('ScheduleDefinition', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(false);
     mockUseCreateDataView.mockReturnValue({
       getIndexPattern: () => 'logstash-*',
       fields: [{ name: '_type' }],
-    } as unknown as jest.Mocked<ReturnType<typeof useCreateDataView>>);
+    } as unknown as Mocked<ReturnType<typeof useCreateDataView>>);
   });
 
   it('should render definition title', async () => {

@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { throwError } from 'rxjs';
 import { apm } from '@elastic/apm-rum';
 import { fetchLogDocumentById, FETCH_LOG_BY_ID_OPERATION_ID } from './fetch_log_document_by_id';
 
-jest.mock('@elastic/apm-rum', () => ({
-  apm: {
-    captureError: jest.fn(),
-  },
-}));
+vi.mock('@elastic/apm-rum', () => {
+      const mocked = {
+      apm: {
+        captureError: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
 const mockData = {
   search: {
@@ -24,14 +29,14 @@ const mockData = {
 } as any;
 
 const mockLogSourcesService = {
-  getLogSources: jest.fn(),
+  getLogSources: vi.fn(),
 } as any;
 
 const signal = new AbortController().signal;
 
 describe('fetchLogDocumentById', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('captures APM error with kibana_meta_operation_id label and re-throws when search fails', async () => {

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -27,14 +30,14 @@ const generateFailedAttempt = (version: string) => ({
     message: 'test',
   },
 });
-let mockedLogger: jest.Mocked<Logger>;
+let mockedLogger: Mocked<Logger>;
 
-jest.mock('../../audit_logging');
-jest.mock('./get', () => {
-  return { getInstallationObject: jest.fn() };
+vi.mock('../../audit_logging');
+vi.mock('./get', () => {
+  return { getInstallationObject: vi.fn() };
 });
 
-const getInstallationObjectMock = getInstallationObject as jest.MockedFunction<
+const getInstallationObjectMock = getInstallationObject as MockedFunction<
   typeof getInstallationObject
 >;
 

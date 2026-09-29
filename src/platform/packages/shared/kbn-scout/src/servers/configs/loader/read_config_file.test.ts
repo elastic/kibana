@@ -7,27 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import path from 'path';
 import { Config } from '../config';
 import { readConfigFile } from './read_config_file';
 
-jest.mock('path', () => ({
-  resolve: jest.fn(),
-}));
+vi.mock('path', () => {
+      const mocked = {
+      resolve: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../config', () => ({
-  Config: jest.fn(),
-}));
+vi.mock('../config', () => {
+      const mocked = {
+      Config: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('readConfigFile', () => {
   const configPath = '/mock/config/path';
   const resolvedPath = '/resolved/config/path';
-  const mockPathResolve = path.resolve as jest.Mock;
-  const mockConfigConstructor = Config as jest.Mock;
+  const mockPathResolve = path.resolve as Mock;
+  const mockConfigConstructor = Config as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.resetModules();
+    vi.clearAllMocks();
+    vi.resetModules();
   });
 
   it(`should load and return a valid 'Config' instance when the config file exports 'servers'`, async () => {
@@ -36,7 +45,7 @@ describe('readConfigFile', () => {
     mockPathResolve.mockReturnValueOnce(resolvedPath);
 
     jest.isolateModules(async () => {
-      jest.mock(resolvedPath, () => mockConfigModule, { virtual: true });
+      vi.doMock(resolvedPath, () => mockConfigModule, { virtual: true });
       mockConfigConstructor.mockImplementation((servers) => ({ servers }));
 
       const result = await readConfigFile(configPath);
@@ -52,7 +61,7 @@ describe('readConfigFile', () => {
     mockPathResolve.mockReturnValueOnce(resolvedPath);
 
     jest.isolateModules(async () => {
-      jest.mock(resolvedPath, () => mockConfigModule, { virtual: true });
+      vi.doMock(resolvedPath, () => mockConfigModule, { virtual: true });
 
       await expect(readConfigFile(configPath)).rejects.toThrow(
         `No 'servers' found in the config file at path: ${resolvedPath}`
@@ -66,7 +75,7 @@ describe('readConfigFile', () => {
 
     jest.isolateModules(async () => {
       const message = 'Module not found';
-      jest.mock(
+      vi.doMock(
         resolvedPath,
         () => {
           throw new Error(message);

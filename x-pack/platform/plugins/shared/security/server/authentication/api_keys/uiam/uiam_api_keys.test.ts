@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
@@ -28,9 +31,9 @@ describe('UiamAPIKeys', () => {
   let mockScopedClusterClient: ReturnType<
     typeof elasticsearchServiceMock.createScopedClusterClient
   >;
-  let mockLicense: jest.Mocked<SecurityLicense>;
-  let mockUiam: jest.Mocked<UiamServicePublic>;
-  let mockGetCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
+  let mockLicense: Mocked<SecurityLicense>;
+  let mockUiam: Mocked<UiamServicePublic>;
+  let mockGetCurrentUser: Mock<AuthenticatedUser | null, [KibanaRequest]>;
   let logger: Logger;
 
   /** Mimics what Elasticsearch reports for a request authenticated with a UIAM API key. */
@@ -53,35 +56,35 @@ describe('UiamAPIKeys', () => {
     logger = loggingSystemMock.create().get('uiam-api-keys');
 
     mockUiam = {
-      getAuthenticationHeaders: jest.fn(),
-      getClientAuthentication: jest.fn(),
-      getInternalCallerAttestationHeaders: jest.fn(),
-      refreshSessionTokens: jest.fn(),
-      invalidateSessionTokens: jest.fn(),
-      grantApiKey: jest.fn(),
-      revokeApiKey: jest.fn(),
-      convertApiKeys: jest.fn(),
-      exchangeOAuthToken: jest.fn(),
-      createServiceAccount: jest.fn(),
-      listServiceAccounts: jest.fn(),
-      getServiceAccount: jest.fn(),
-      exchangeServiceAccountToken: jest.fn(),
-      authenticateAsKibana: jest.fn(),
-      createOAuthClient: jest.fn(),
-      listOAuthClients: jest.fn(),
-      updateOAuthClient: jest.fn(),
-      revokeOAuthClient: jest.fn(),
-      deleteOAuthClient: jest.fn(),
-      listOAuthConnections: jest.fn(),
-      updateOAuthConnection: jest.fn(),
-      revokeOAuthConnection: jest.fn(),
-      deleteOAuthConnection: jest.fn(),
-      resolveUsers: jest.fn(),
+      getAuthenticationHeaders: vi.fn(),
+      getClientAuthentication: vi.fn(),
+      getInternalCallerAttestationHeaders: vi.fn(),
+      refreshSessionTokens: vi.fn(),
+      invalidateSessionTokens: vi.fn(),
+      grantApiKey: vi.fn(),
+      revokeApiKey: vi.fn(),
+      convertApiKeys: vi.fn(),
+      exchangeOAuthToken: vi.fn(),
+      createServiceAccount: vi.fn(),
+      listServiceAccounts: vi.fn(),
+      getServiceAccount: vi.fn(),
+      exchangeServiceAccountToken: vi.fn(),
+      authenticateAsKibana: vi.fn(),
+      createOAuthClient: vi.fn(),
+      listOAuthClients: vi.fn(),
+      updateOAuthClient: vi.fn(),
+      revokeOAuthClient: vi.fn(),
+      deleteOAuthClient: vi.fn(),
+      listOAuthConnections: vi.fn(),
+      updateOAuthConnection: vi.fn(),
+      revokeOAuthConnection: vi.fn(),
+      deleteOAuthConnection: vi.fn(),
+      resolveUsers: vi.fn(),
     };
 
     // Defaults to a session-authenticated user, which is not an API key and therefore still needs
     // Kibana's client authentication.
-    mockGetCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser() as AuthenticatedUser);
+    mockGetCurrentUser = vi.fn().mockReturnValue(mockAuthenticatedUser() as AuthenticatedUser);
 
     uiamApiKeys = new UiamAPIKeys({
       logger,

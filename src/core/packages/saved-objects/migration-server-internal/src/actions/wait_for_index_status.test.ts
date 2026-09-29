@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { waitForIndexStatus } from './wait_for_index_status';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
-jest.mock('./catch_retryable_es_client_errors');
+vi.mock('./catch_retryable_es_client_errors');
 
 describe('waitForIndexStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Create a mock client that rejects all methods with a 503 status code

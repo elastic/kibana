@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // eslint-disable-next-line max-classes-per-file
 import type { ResponseActionsClient } from './types';
 import type {
@@ -48,31 +51,29 @@ import {
 } from '../../../../../lib/telemetry/event_based/events';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-jest.mock('../../action_details_by_id', () => {
-  const original = jest.requireActual('../../action_details_by_id');
+vi.mock('../../action_details_by_id', async () => {
+  const original = (await vi.importActual('../../action_details_by_id'));
 
   return {
     ...original,
-    getActionDetailsById: jest.fn(original.getActionDetailsById),
+    getActionDetailsById: vi.fn(original.getActionDetailsById),
   };
 });
 
-jest.mock(
+vi.mock(
   '../../../../../../common/endpoint/service/response_actions/is_response_action_supported',
-  () => {
-    const original = jest.requireActual(
-      '../../../../../../common/endpoint/service/response_actions/is_response_action_supported'
-    );
+  async () => {
+    const original = (await vi.importActual('../../../../../../common/endpoint/service/response_actions/is_response_action_supported'));
 
     return {
       ...original,
-      isActionSupportedByAgentType: jest.fn(original.isActionSupportedByAgentType),
+      isActionSupportedByAgentType: vi.fn(original.isActionSupportedByAgentType),
     };
   }
 );
 
-const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
-const isActionSupportedByAgentTypeMock = _isActionSupportedByAgentType as jest.Mock;
+const getActionDetailsByIdMock = _getActionDetailsById as Mock;
+const isActionSupportedByAgentTypeMock = _isActionSupportedByAgentType as Mock;
 
 describe('ResponseActionsClientImpl base class', () => {
   let constructorOptions: ReturnType<typeof responseActionsClientMock.createConstructorOptions>;
@@ -92,13 +93,11 @@ describe('ResponseActionsClientImpl base class', () => {
     baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     getActionDetailsByIdMock.mockClear();
     isActionSupportedByAgentTypeMock.mockReset();
     isActionSupportedByAgentTypeMock.mockImplementation(
-      jest.requireActual(
-        '../../../../../../common/endpoint/service/response_actions/is_response_action_supported'
-      ).isActionSupportedByAgentType
+      (await vi.importActual('../../../../../../common/endpoint/service/response_actions/is_response_action_supported')).isActionSupportedByAgentType
     );
   });
 
@@ -133,7 +132,7 @@ describe('ResponseActionsClientImpl base class', () => {
     let updateCasesOptions: Required<ResponseActionsClientUpdateCasesOptions>;
 
     beforeEach(async () => {
-      (casesClient.cases.getCasesByAlertID as jest.Mock).mockImplementation(
+      (casesClient.cases.getCasesByAlertID as Mock).mockImplementation(
         async ({ alertID }: CasesByAlertIDParams) => {
           if (alertID === KNOWN_ALERT_ID_1) {
             return [{ id: 'case-1' }, { id: 'case-2' }, { id: 'case-3' }];
@@ -267,7 +266,7 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should not error if update to a case fails', async () => {
-      (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(async (options) => {
+      (casesClient.attachments.bulkCreate as Mock).mockImplementation(async (options) => {
         if (options.caseId === 'case-2') {
           throw new Error('update failed to case-2');
         }
@@ -535,7 +534,7 @@ describe('ResponseActionsClientImpl base class', () => {
 
         it('should write doc with error when license is not Enterprise', async () => {
           (
-            constructorOptions.endpointService.getLicenseService().isEnterprise as jest.Mock
+            constructorOptions.endpointService.getLicenseService().isEnterprise as Mock
           ).mockReturnValue(false);
 
           await expect(
@@ -582,7 +581,7 @@ describe('ResponseActionsClientImpl base class', () => {
       describe('#writeActionRequestToEndpointIndex()', () => {
         it("should NOT require an Enterprise license (license enforcement for manual actions is the caller's responsibility — e.g. route-level `withEndpointAuthz`, which sets the privilege's license floor)", async () => {
           (
-            constructorOptions.endpointService.getLicenseService().isEnterprise as jest.Mock
+            constructorOptions.endpointService.getLicenseService().isEnterprise as Mock
           ).mockReturnValue(false);
 
           await expect(

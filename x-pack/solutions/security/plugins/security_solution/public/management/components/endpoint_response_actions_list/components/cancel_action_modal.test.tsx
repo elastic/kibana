@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,13 +22,13 @@ import { UX_MESSAGES } from '../translations';
 import type { ActionDetails } from '../../../../../common/endpoint/types';
 import type { DeepPartial } from 'utility-types';
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../hooks/response_actions/use_send_cancel_request');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../hooks/response_actions/use_send_cancel_request');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
-const useToastsMock = useToasts as jest.Mock;
-const useSendCancelRequestMock = _useSendCancelRequest as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
+const useToastsMock = useToasts as Mock;
+const useSendCancelRequestMock = _useSendCancelRequest as Mock;
 
 const makePendingAgentState = (): ActionDetails['agentState'][string] => ({
   isCompleted: false,
@@ -47,10 +50,10 @@ describe('CancelActionModal', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let generator: EndpointActionGenerator;
-  let onClose: jest.Mock;
+  let onClose: Mock;
   let setUserPrivileges: ReturnType<AppContextTestRender['getUserPrivilegesMockSetter']>;
-  let addSuccess: jest.Mock;
-  let mutateAsync: jest.Mock;
+  let addSuccess: Mock;
+  let mutateAsync: Mock;
 
   const buildSingleAgentPendingAction = (
     overrides: DeepPartial<ActionDetails> = {}
@@ -77,9 +80,9 @@ describe('CancelActionModal', () => {
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
     generator = new EndpointActionGenerator('test');
-    onClose = jest.fn();
-    addSuccess = jest.fn();
-    mutateAsync = jest.fn().mockResolvedValue({});
+    onClose = vi.fn();
+    addSuccess = vi.fn();
+    mutateAsync = vi.fn().mockResolvedValue({});
     useToastsMock.mockReturnValue({ addSuccess });
     setUserPrivileges = appTestContext.getUserPrivilegesMockSetter(useUserPrivilegesMock);
     setUserPrivileges.set({});
@@ -353,7 +356,7 @@ describe('CancelActionModal', () => {
       useSendCancelRequestMock.mockReturnValue({
         error: new Error('API failure'),
         isLoading: false,
-        mutateAsync: jest.fn(),
+        mutateAsync: vi.fn(),
       });
       renderModal();
       expect(
@@ -365,7 +368,7 @@ describe('CancelActionModal', () => {
       useSendCancelRequestMock.mockReturnValue({
         error: new Error('API failure'),
         isLoading: false,
-        mutateAsync: jest.fn(),
+        mutateAsync: vi.fn(),
       });
       renderModal();
       expect(addSuccess).not.toHaveBeenCalled();

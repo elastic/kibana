@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { MutableRefObject } from 'react';
 import { parseDocument } from 'yaml';
@@ -16,24 +19,30 @@ import {
   useTriggerTypeDecorations,
 } from './use_trigger_type_decorations';
 
-jest.mock('@kbn/workflows', () => ({
-  ...jest.requireActual('@kbn/workflows'),
-  isTriggerType: jest.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
-}));
+vi.mock('@kbn/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows')),
+      isTriggerType: vi.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getTriggerDefinition: jest.fn(() => undefined),
-    getRegisteredIds: jest.fn(() => []),
-  },
-}));
+vi.mock('../../../../trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: {
+        getTriggerDefinition: vi.fn(() => undefined),
+        getRegisteredIds: vi.fn(() => []),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockModel = (value: string) => {
   const lines = value.split('\n');
   return {
-    getValue: jest.fn(() => value),
-    getLineContent: jest.fn((lineNum: number) => lines[lineNum - 1] ?? ''),
-    getPositionAt: jest.fn((offset: number) => {
+    getValue: vi.fn(() => value),
+    getLineContent: vi.fn((lineNum: number) => lines[lineNum - 1] ?? ''),
+    getPositionAt: vi.fn((offset: number) => {
       let remaining = offset;
       for (let i = 0; i < lines.length; i++) {
         // +1 for newline character
@@ -44,20 +53,20 @@ const createMockModel = (value: string) => {
       }
       return { lineNumber: lines.length, column: (lines[lines.length - 1]?.length ?? 0) + 1 };
     }),
-    onDidChangeContent: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChangeContent: vi.fn(() => ({ dispose: vi.fn() })),
   } as unknown as monaco.editor.ITextModel;
 };
 
 const createMockEditor = (value: string) => {
   const model = createMockModel(value);
   const decorationsCollection = {
-    clear: jest.fn(),
-    set: jest.fn(),
+    clear: vi.fn(),
+    set: vi.fn(),
   };
   return {
     editor: {
-      createDecorationsCollection: jest.fn(() => decorationsCollection),
-      getModel: jest.fn(() => model),
+      createDecorationsCollection: vi.fn(() => decorationsCollection),
+      getModel: vi.fn(() => model),
     } as unknown as monaco.editor.IStandaloneCodeEditor,
     decorationsCollection,
     model,
@@ -83,7 +92,7 @@ describe('applyTriggerTypeDecorations', () => {
     applyTriggerTypeDecorations(editor, collectionRef, doc);
 
     expect(editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
-    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
+    const decorations = (editor.createDecorationsCollection as Mock).mock.calls[0][0];
     expect(decorations.length).toBeGreaterThan(0);
     expect(decorations[0].options.inlineClassName).toContain('type-inline-highlight');
     expect(decorations[0].options.inlineClassName).toContain('type-alert');
@@ -93,7 +102,7 @@ describe('applyTriggerTypeDecorations', () => {
     const yamlString = ['version: "1"', 'name: test', 'steps: []'].join('\n');
 
     const { editor } = createMockEditor(yamlString);
-    const mockCollection = { set: jest.fn(), clear: jest.fn() };
+    const mockCollection = { set: vi.fn(), clear: vi.fn() };
     const collectionRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null> = {
       current: mockCollection as unknown as monaco.editor.IEditorDecorationsCollection,
     };
@@ -114,7 +123,7 @@ describe('applyTriggerTypeDecorations', () => {
     ].join('\n');
 
     const { editor } = createMockEditor(yamlString);
-    const mockCollection = { set: jest.fn(), clear: jest.fn() };
+    const mockCollection = { set: vi.fn(), clear: vi.fn() };
     const collectionRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null> = {
       current: mockCollection as unknown as monaco.editor.IEditorDecorationsCollection,
     };
@@ -129,8 +138,8 @@ describe('applyTriggerTypeDecorations', () => {
 
   it('does nothing when editor model is null', () => {
     const editor = {
-      createDecorationsCollection: jest.fn(),
-      getModel: jest.fn(() => null),
+      createDecorationsCollection: vi.fn(),
+      getModel: vi.fn(() => null),
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     const collectionRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null> = {
@@ -145,11 +154,11 @@ describe('applyTriggerTypeDecorations', () => {
 
 describe('useTriggerTypeDecorations', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not apply decorations when editor is null', () => {
@@ -164,7 +173,7 @@ describe('useTriggerTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
     // No error thrown, ref stays null
   });
 
@@ -188,7 +197,7 @@ describe('useTriggerTypeDecorations', () => {
     );
 
     // Advance past the 100ms initial setTimeout
-    jest.advanceTimersByTime(150);
+    vi.advanceTimersByTime(150);
 
     expect(editor.createDecorationsCollection).toHaveBeenCalled();
   });

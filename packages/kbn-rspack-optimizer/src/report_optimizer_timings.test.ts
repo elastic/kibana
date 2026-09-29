@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 
 import { reportOptimizerTimings } from './report_optimizer_timings';
 
-jest.mock('@kbn/ci-stats-reporter');
+vi.mock('@kbn/ci-stats-reporter');
 
 describe('reportOptimizerTimings', () => {
-  const timings = jest.fn();
+  const timings = vi.fn();
   const log = new ToolingLog();
 
   beforeEach(() => {
     timings.mockReset();
-    jest
+    vi
       .mocked(CiStatsReporter.fromEnv)
       .mockReturnValue({ isEnabled: () => true, timings } as unknown as CiStatsReporter);
   });
@@ -65,7 +67,7 @@ describe('reportOptimizerTimings', () => {
   });
 
   it('does nothing when ci-stats is not configured', async () => {
-    jest
+    vi
       .mocked(CiStatsReporter.fromEnv)
       .mockReturnValue({ isEnabled: () => false, timings } as unknown as CiStatsReporter);
 

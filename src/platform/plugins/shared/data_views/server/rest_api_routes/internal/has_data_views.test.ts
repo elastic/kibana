@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -36,10 +38,10 @@ describe('preview has_data_views route', () => {
     };
     const mockESClient = {
       indices: {
-        resolveIndex: jest.fn().mockResolvedValue(mockESClientResolveIndexResponse),
+        resolveIndex: vi.fn().mockResolvedValue(mockESClientResolveIndexResponse),
       },
     };
-    const mockSOClient = { find: jest.fn().mockResolvedValue(mockSOClientFindResponse) };
+    const mockSOClient = { find: vi.fn().mockResolvedValue(mockSOClientFindResponse) };
     const mockContext = {
       core: {
         elasticsearch: { client: { asCurrentUser: mockESClient } },

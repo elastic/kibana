@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,24 +15,27 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormFlyout } from './action_policy_form_flyout';
 
-const mockGetUrlForApp = jest.fn(
+const mockGetUrlForApp = vi.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return {
-        getUrlForApp: mockGetUrlForApp,
-      };
-    }
-    if (token === 'uiSettings') {
-      return { get: () => true };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'application') {
+          return {
+            getUrlForApp: mockGetUrlForApp,
+          };
+        }
+        if (token === 'uiSettings') {
+          return { get: () => true };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const INLINE_DEFS = [
   {
@@ -48,73 +54,91 @@ const INLINE_DEFS = [
   },
 ];
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
-  getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-  isActionValid: () => true,
-  InlineWorkflowEditor: ({
-    value,
-    connectorCreationConfig,
-  }: {
-    value: { id: string };
-    connectorCreationConfig?: { mode: string; href?: string };
-  }) => (
-    <div
-      data-test-subj={`inlineWorkflowEditor-${value.id}`}
-      data-connector-creation-mode={connectorCreationConfig?.mode}
-      data-connector-creation-href={connectorCreationConfig?.href}
-    />
-  ),
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+      getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+      isActionValid: () => true,
+      InlineWorkflowEditor: ({
+        value,
+        connectorCreationConfig,
+      }: {
+        value: { id: string };
+        connectorCreationConfig?: { mode: string; href?: string };
+      }) => (
+        <div
+          data-test-subj={`inlineWorkflowEditor-${value.id}`}
+          data-connector-creation-mode={connectorCreationConfig?.mode}
+          data-connector-creation-href={connectorCreationConfig?.href}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../form/components/matcher_input', () => ({
-  MatcherInput: (props: {
-    value: string;
-    onChange: (v: string) => void;
-    'data-test-subj'?: string;
-  }) => (
-    <input
-      data-test-subj={props['data-test-subj']}
-      value={props.value}
-      onChange={(e) => props.onChange(e.target.value)}
-    />
-  ),
-}));
+vi.mock('../form/components/matcher_input', () => {
+      const mocked = {
+      MatcherInput: (props: {
+        value: string;
+        onChange: (v: string) => void;
+        'data-test-subj'?: string;
+      }) => (
+        <input
+          data-test-subj={props['data-test-subj']}
+          value={props.value}
+          onChange={(e) => props.onChange(e.target.value)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_rule_event_fields', () => ({
-  useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
-}));
+vi.mock('../../../hooks/use_fetch_rule_event_fields', () => {
+      const mocked = {
+      useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_rules', () => ({
-  useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
-}));
+vi.mock('../../../hooks/use_fetch_rules', () => {
+      const mocked = {
+      useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
-}));
+vi.mock('../../../hooks/use_fetch_rule_tags', () => {
+      const mocked = {
+      useFetchRuleTags: () => ({ data: [], isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_workflows', () => ({
-  useFetchWorkflows: () => ({
-    data: {
-      results: [
-        {
-          id: 'wf-1',
-          name: 'Test Workflow',
-          description: '',
-          enabled: true,
-          definition: null,
-          createdAt: '',
-          history: [],
-          valid: true,
+vi.mock('../../../hooks/use_fetch_workflows', () => {
+      const mocked = {
+      useFetchWorkflows: () => ({
+        data: {
+          results: [
+            {
+              id: 'wf-1',
+              name: 'Test Workflow',
+              description: '',
+              enabled: true,
+              definition: null,
+              createdAt: '',
+              history: [],
+              valid: true,
+            },
+          ],
+          total: 1,
+          page: 1,
+          size: 100,
         },
-      ],
-      total: 1,
-      page: 1,
-      size: 100,
-    },
-    isLoading: false,
-  }),
-}));
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_SUBJ = {
   title: 'title',
@@ -125,14 +149,14 @@ const TEST_SUBJ = {
 } as const;
 
 const renderFlyout = ({
-  onClose = jest.fn(),
+  onClose = vi.fn(),
   onSave,
   onUpdate,
   initialValues,
 }: {
-  onClose?: jest.Mock;
-  onSave?: jest.Mock;
-  onUpdate?: jest.Mock;
+  onClose?: Mock;
+  onSave?: Mock;
+  onUpdate?: Mock;
   initialValues?: ActionPolicyResponse;
 }) => {
   return render(
@@ -150,9 +174,9 @@ const renderFlyout = ({
 describe('ActionPolicyFormFlyout', () => {
   it('renders create mode and closes on cancel', async () => {
     const user = userEvent.setup({ delay: null });
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
-    renderFlyout({ onClose, onSave: jest.fn() });
+    renderFlyout({ onClose, onSave: vi.fn() });
 
     expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Create action policy');
     expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
@@ -162,7 +186,7 @@ describe('ActionPolicyFormFlyout', () => {
   });
 
   it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
-    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+    renderFlyout({ onClose: vi.fn(), onSave: vi.fn() });
 
     expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
     expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
@@ -175,7 +199,7 @@ describe('ActionPolicyFormFlyout', () => {
 
   it('opens connector creation in a new tab for inline workflows', async () => {
     const user = userEvent.setup();
-    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+    renderFlyout({ onClose: vi.fn(), onSave: vi.fn() });
 
     await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
 
@@ -195,9 +219,9 @@ describe('ActionPolicyFormFlyout', () => {
 
   it('forwards the raw form state (not a payload) to onSave so the host can build it', async () => {
     const user = userEvent.setup({ delay: null });
-    const onSave = jest.fn();
+    const onSave = vi.fn();
 
-    renderFlyout({ onClose: jest.fn(), onSave });
+    renderFlyout({ onClose: vi.fn(), onSave });
 
     await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
     await user.tab();
@@ -229,9 +253,9 @@ describe('ActionPolicyFormFlyout', () => {
 
   it('forwards inline "simple workflow" drafts to onSave instead of dropping them', async () => {
     const user = userEvent.setup({ delay: null });
-    const onSave = jest.fn();
+    const onSave = vi.fn();
 
-    renderFlyout({ onClose: jest.fn(), onSave });
+    renderFlyout({ onClose: vi.fn(), onSave });
 
     await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
     await user.tab();
@@ -254,7 +278,7 @@ describe('ActionPolicyFormFlyout', () => {
 
   it('renders edit mode and submits update payload with optional fields and version', async () => {
     const user = userEvent.setup({ delay: null });
-    const onUpdate = jest.fn();
+    const onUpdate = vi.fn();
     const initialValues: ActionPolicyResponse = {
       id: 'policy-1',
       version: 'WzEsMV0=',
@@ -273,7 +297,7 @@ describe('ActionPolicyFormFlyout', () => {
       updated_at: '2026-03-01T10:00:00.000Z',
     };
 
-    renderFlyout({ onClose: jest.fn(), onUpdate, initialValues });
+    renderFlyout({ onClose: vi.fn(), onUpdate, initialValues });
 
     expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit action policy');
     expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');

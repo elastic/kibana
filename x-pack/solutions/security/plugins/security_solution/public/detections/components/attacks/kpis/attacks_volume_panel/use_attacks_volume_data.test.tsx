@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import dateMath from '@elastic/datemath';
 import type { Moment } from 'moment';
@@ -17,39 +20,54 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 
-jest.mock('../common/use_alerts_aggregation', () => ({
-  useAlertsAggregation: jest.fn(),
-}));
+vi.mock('../common/use_alerts_aggregation', () => {
+      const mocked = {
+      useAlertsAggregation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_attack_timestamps', () => ({
-  useAttackTimestamps: jest.fn(),
-}));
+vi.mock('./use_attack_timestamps', () => {
+      const mocked = {
+      useAttackTimestamps: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers', () => ({
-  parseAttacksVolumeData: jest.fn(),
-  getInterval: jest.fn(() => 3600000), // Mock returning 1 hour by default
-}));
+vi.mock('./helpers', () => {
+      const mocked = {
+      parseAttacksVolumeData: vi.fn(),
+      getInterval: vi.fn(() => 3600000), // Mock returning 1 hour by default
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn(),
-}));
+vi.mock('../../../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./aggregations', () => ({
-  getAttacksVolumeAggregations: jest.fn(() => ({ some: 'agg' })),
-}));
+vi.mock('./aggregations', () => {
+      const mocked = {
+      getAttacksVolumeAggregations: vi.fn(() => ({ some: 'agg' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAttacksVolumeData', () => {
-  const mockRefetchAgg = jest.fn();
-  const mockRefetchDetails = jest.fn();
+  const mockRefetchAgg = vi.fn();
+  const mockRefetchDetails = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGlobalTime as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGlobalTime as Mock).mockReturnValue({
       from: 'now-15m',
       to: 'now',
     });
     // Mock dateMath parsing
-    jest.spyOn(dateMath, 'parse').mockImplementation((val) => {
+    vi.spyOn(dateMath, 'parse').mockImplementation((val) => {
       if (val === 'now-15m') return { valueOf: () => 1000 } as unknown as Moment;
       if (val === 'now') return { valueOf: () => 2000 } as unknown as Moment;
       return undefined;
@@ -60,15 +78,15 @@ describe('useAttacksVolumeData', () => {
     const mockFilters = [{ meta: {}, query: {} }] as Filter[];
     const mockQuery = { query: 'test' } as unknown as Query;
 
-    (useAlertsAggregation as jest.Mock).mockReturnValue({
+    (useAlertsAggregation as Mock).mockReturnValue({
       data: undefined,
       loading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
-    (useAttackTimestamps as jest.Mock).mockReturnValue({
+    (useAttackTimestamps as Mock).mockReturnValue({
       attackStartTimes: {},
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderHook(() => useAttacksVolumeData({ filters: mockFilters, query: mockQuery }));
@@ -83,7 +101,7 @@ describe('useAttacksVolumeData', () => {
   });
 
   it('orchestrates fetching and parsing of data', () => {
-    (useAlertsAggregation as jest.Mock).mockReturnValue({
+    (useAlertsAggregation as Mock).mockReturnValue({
       data: {
         aggregations: {
           attacks: {
@@ -94,12 +112,12 @@ describe('useAttacksVolumeData', () => {
       loading: false,
       refetch: mockRefetchAgg,
     });
-    (useAttackTimestamps as jest.Mock).mockReturnValue({
+    (useAttackTimestamps as Mock).mockReturnValue({
       attackStartTimes: { '1': 1500, '2': 1600 },
       isLoading: false,
       refetch: mockRefetchDetails,
     });
-    (parseAttacksVolumeData as jest.Mock).mockReturnValue([{ x: 1, y: 1 }]);
+    (parseAttacksVolumeData as Mock).mockReturnValue([{ x: 1, y: 1 }]);
 
     const { result } = renderHook(() => useAttacksVolumeData({}));
 
@@ -114,12 +132,12 @@ describe('useAttacksVolumeData', () => {
   });
 
   it('indicates loading when aggregation query is loading', () => {
-    (useAlertsAggregation as jest.Mock).mockReturnValue({
+    (useAlertsAggregation as Mock).mockReturnValue({
       data: undefined,
       loading: true,
       refetch: mockRefetchAgg,
     });
-    (useAttackTimestamps as jest.Mock).mockReturnValue({
+    (useAttackTimestamps as Mock).mockReturnValue({
       attackStartTimes: {},
       isLoading: false,
       refetch: mockRefetchDetails,
@@ -130,7 +148,7 @@ describe('useAttacksVolumeData', () => {
   });
 
   it('indicates loading when details query is loading and attack IDs exist', () => {
-    (useAlertsAggregation as jest.Mock).mockReturnValue({
+    (useAlertsAggregation as Mock).mockReturnValue({
       data: {
         aggregations: {
           attacks: {
@@ -141,7 +159,7 @@ describe('useAttacksVolumeData', () => {
       loading: false,
       refetch: mockRefetchAgg,
     });
-    (useAttackTimestamps as jest.Mock).mockReturnValue({
+    (useAttackTimestamps as Mock).mockReturnValue({
       attackStartTimes: {},
       isLoading: true,
       refetch: mockRefetchDetails,
@@ -152,12 +170,12 @@ describe('useAttacksVolumeData', () => {
   });
 
   it('calls both refetch functions when refetch is called', () => {
-    (useAlertsAggregation as jest.Mock).mockReturnValue({
+    (useAlertsAggregation as Mock).mockReturnValue({
       data: undefined,
       loading: false,
       refetch: mockRefetchAgg,
     });
-    (useAttackTimestamps as jest.Mock).mockReturnValue({
+    (useAttackTimestamps as Mock).mockReturnValue({
       attackStartTimes: {},
       isLoading: false,
       refetch: mockRefetchDetails,

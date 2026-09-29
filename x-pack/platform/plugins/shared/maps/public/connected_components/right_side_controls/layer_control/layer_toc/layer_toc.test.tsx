@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-jest.mock('./toc_entry', () => ({
-  TOCEntry: () => {
-    return <div>mockTOCEntry</div>;
-  },
-}));
+import { vi } from 'vitest';
+
+vi.mock('./toc_entry', () => {
+      const mocked = {
+      TOCEntry: () => {
+        return <div>mockTOCEntry</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { shallow } from 'enzyme';

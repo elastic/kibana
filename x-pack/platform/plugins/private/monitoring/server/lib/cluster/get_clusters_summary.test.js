@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import clusters from './__fixtures__/clusters.json';
 import { getClustersSummary } from './get_clusters_summary';
 
-const mockLog = jest.fn();
+const mockLog = vi.fn();
 const mockServer = {
   log: {
     error: mockLog,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useRouteSpy } from '../../../../utils/route/use_route_spy';
 import { wrapper } from '../../mocks';
@@ -15,34 +18,40 @@ import { getEventsHistogramLensAttributes, stackByFieldAccessorId } from './even
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValue('0039eb0c-9a1a-4687-ae54-0f4e239bec75')
-    .mockReturnValue('34919782-4546-43a5-b668-06ac934d3acd')
-    .mockReturnValue('aac9d7d0-13a3-480a-892b-08207a787926')
-    .mockReturnValue('e09e0380-0740-4105-becc-0a4ca12e3944'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi
+        .fn()
+        .mockReturnValue('0039eb0c-9a1a-4687-ae54-0f4e239bec75')
+        .mockReturnValue('34919782-4546-43a5-b668-06ac934d3acd')
+        .mockReturnValue('aac9d7d0-13a3-480a-892b-08207a787926')
+        .mockReturnValue('e09e0380-0740-4105-becc-0a4ca12e3944'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockHost',
-      pageName: 'hosts',
-      tabName: 'events',
-    },
-  ]),
-}));
+vi.mock('../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          detailName: 'mockHost',
+          pageName: 'hosts',
+          tabName: 'events',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getEventsHistogramLensAttributes', () => {
   beforeAll(() => {
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
   });
 
   it('should render query and filters for hosts events histogram', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: undefined,
         pageName: 'hosts',
@@ -182,7 +191,7 @@ describe('getEventsHistogramLensAttributes', () => {
   });
 
   it('should render attributes for network events histogram', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: undefined,
         pageName: 'network',
@@ -260,7 +269,7 @@ describe('getEventsHistogramLensAttributes', () => {
   });
 
   it('should render attributes for network details events histogram', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: 'mockIp',
         pageName: 'network',
@@ -361,7 +370,7 @@ describe('getEventsHistogramLensAttributes', () => {
   });
 
   it('should render attributes for users events histogram', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: undefined,
         pageName: 'users',
@@ -433,7 +442,7 @@ describe('getEventsHistogramLensAttributes', () => {
     );
   });
   it('should render attributes for user details events histogram', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: 'mockUser',
         pageName: 'users',

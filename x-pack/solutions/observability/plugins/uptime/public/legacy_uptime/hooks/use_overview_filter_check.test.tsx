@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import type { FC, PropsWithChildren } from 'react';
@@ -37,7 +39,7 @@ const SEARCH_WITH_KUERY = '?search=monitor.id%20%3A%20"header-test"';
 
 describe('useOverviewFilterCheck', () => {
   beforeEach(() => {
-    jest.spyOn(reactRedux, 'useSelector').mockImplementation(() => false);
+    vi.spyOn(reactRedux, 'useSelector').mockImplementation(() => false);
   });
 
   it('returns a function that will run code when there are no filters', () => {
@@ -45,7 +47,7 @@ describe('useOverviewFilterCheck', () => {
       result: { current },
     } = renderHook(() => useOverviewFilterCheck(), { wrapper: getWrapper() });
 
-    const fn = jest.fn();
+    const fn = vi.fn();
     current.filterCheck(fn);
     expect(fn).toHaveBeenCalledTimes(1);
   });
@@ -57,46 +59,46 @@ describe('useOverviewFilterCheck', () => {
       wrapper: getWrapper(SEARCH_WITH_FILTERS),
     });
 
-    const fn = jest.fn();
+    const fn = vi.fn();
     current.filterCheck(fn);
     expect(fn).not.toHaveBeenCalled();
   });
 
   it('returns a function that will run code if filters are initialized', () => {
-    jest.spyOn(reactRedux, 'useSelector').mockImplementation(() => true);
+    vi.spyOn(reactRedux, 'useSelector').mockImplementation(() => true);
     const {
       result: { current },
     } = renderHook(() => useOverviewFilterCheck(), {
       wrapper: getWrapper(SEARCH_WITH_FILTERS),
     });
 
-    const fn = jest.fn();
+    const fn = vi.fn();
     current.filterCheck(fn);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it('returns a function that will not run code if search is uninitialized', () => {
-    jest.spyOn(reactRedux, 'useSelector').mockImplementation(() => '');
+    vi.spyOn(reactRedux, 'useSelector').mockImplementation(() => '');
     const {
       result: { current },
     } = renderHook(() => useOverviewFilterCheck(), {
       wrapper: getWrapper(SEARCH_WITH_KUERY),
     });
 
-    const fn = jest.fn();
+    const fn = vi.fn();
     current.filterCheck(fn);
     expect(fn).not.toHaveBeenCalledTimes(1);
   });
 
   it('returns a function that will run if search is initialized', () => {
-    jest.spyOn(reactRedux, 'useSelector').mockImplementation(() => 'search is initialized');
+    vi.spyOn(reactRedux, 'useSelector').mockImplementation(() => 'search is initialized');
     const {
       result: { current },
     } = renderHook(() => useOverviewFilterCheck(), {
       wrapper: getWrapper(SEARCH_WITH_KUERY),
     });
 
-    const fn = jest.fn();
+    const fn = vi.fn();
     current.filterCheck(fn);
     expect(fn).toHaveBeenCalledTimes(1);
   });

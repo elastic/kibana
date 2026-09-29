@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
@@ -35,13 +38,13 @@ import { licenseService as licenseServiceMocked } from '../../../../common/hooks
 import { useHostIsolationExceptionsAccess } from '../../../hooks/artifacts/use_host_isolation_exceptions_access';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../hooks/artifacts/use_host_isolation_exceptions_access');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/hooks/use_license');
+vi.mock('../../../hooks/artifacts/use_host_isolation_exceptions_access');
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useLicenseMock = _useLicense as jest.Mock;
-const useHostIsolationExceptionsAccessMock = useHostIsolationExceptionsAccess as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
+const useLicenseMock = _useLicense as Mock;
+const useHostIsolationExceptionsAccessMock = useHostIsolationExceptionsAccess as Mock;
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');

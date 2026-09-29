@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { screen } from '@testing-library/react';
@@ -16,7 +18,7 @@ describe('TriggerButton', () => {
   describe('base version (no icons)', () => {
     it('should render the basic button', () => {
       renderWithProviders(
-        <TriggerButton togglePopover={jest.fn()} label={'Trigger label'} dataTestSubj="test-id" />
+        <TriggerButton togglePopover={vi.fn()} label={'Trigger label'} dataTestSubj="test-id" />
       );
       expect(screen.getByText('Trigger label')).toBeInTheDocument();
     });
@@ -24,7 +26,7 @@ describe('TriggerButton', () => {
     it('should render the title if provided', () => {
       renderWithProviders(
         <TriggerButton
-          togglePopover={jest.fn()}
+          togglePopover={vi.fn()}
           label={'Trigger'}
           dataTestSubj="test-id"
           title="My title"
@@ -34,7 +36,7 @@ describe('TriggerButton', () => {
     });
 
     it('should call the toggle callback on click', async () => {
-      const toggleFn = jest.fn();
+      const toggleFn = vi.fn();
       renderWithProviders(
         <TriggerButton
           togglePopover={toggleFn}
@@ -49,10 +51,10 @@ describe('TriggerButton', () => {
     });
 
     it('should render the main label as red if missing', () => {
-      const ToolbarButtonSpy = jest.spyOn(ToolbarButtonFile, 'ToolbarButton');
+      const ToolbarButtonSpy = vi.spyOn(ToolbarButtonFile, 'ToolbarButton');
       renderWithProviders(
         <TriggerButton
-          togglePopover={jest.fn()}
+          togglePopover={vi.fn()}
           label={'Trigger'}
           dataTestSubj="test-id"
           title="My title"
@@ -70,7 +72,7 @@ describe('TriggerButton', () => {
     it('should render one icon', () => {
       renderWithProviders(
         <TriggerButton
-          togglePopover={jest.fn()}
+          togglePopover={vi.fn()}
           label={'Trigger label'}
           dataTestSubj="test-id"
           extraIcons={[
@@ -90,7 +92,7 @@ describe('TriggerButton', () => {
       const indexes = [1, 2, 3];
       renderWithProviders(
         <TriggerButton
-          togglePopover={jest.fn()}
+          togglePopover={vi.fn()}
           label={'Trigger label'}
           dataTestSubj="test-id"
           extraIcons={indexes.map((index) => ({
@@ -109,7 +111,7 @@ describe('TriggerButton', () => {
     it('should render the value together with the provided component', () => {
       renderWithProviders(
         <TriggerButton
-          togglePopover={jest.fn()}
+          togglePopover={vi.fn()}
           label={'Trigger label'}
           dataTestSubj="test-id"
           extraIcons={[

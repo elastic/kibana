@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
@@ -14,16 +16,16 @@ import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { IntegrationManagement } from './integration_management';
 import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/types';
 
-const mockNavigateToApp = jest.fn();
-const mockNavigateToUrl = jest.fn();
-const mockGetUrlForApp = jest.fn(() => '/mock-integrations-url');
-const mockReportCancelButtonClicked = jest.fn();
-const mockReportDoneButtonClicked = jest.fn();
-const mockReportEvent = jest.fn();
-const mockUseGetIntegrationById = jest.fn();
-const mockDeleteIntegrationMutateAsync = jest.fn().mockResolvedValue(undefined);
-const mockCreateUpdateIntegrationMutateAsync = jest.fn().mockResolvedValue(undefined);
-const mockSubmit = jest.fn();
+const mockNavigateToApp = vi.fn();
+const mockNavigateToUrl = vi.fn();
+const mockGetUrlForApp = vi.fn(() => '/mock-integrations-url');
+const mockReportCancelButtonClicked = vi.fn();
+const mockReportDoneButtonClicked = vi.fn();
+const mockReportEvent = vi.fn();
+const mockUseGetIntegrationById = vi.fn();
+const mockDeleteIntegrationMutateAsync = vi.fn().mockResolvedValue(undefined);
+const mockCreateUpdateIntegrationMutateAsync = vi.fn().mockResolvedValue(undefined);
+const mockSubmit = vi.fn();
 
 const mockEnterpriseLicense = {
   isAvailable: true,
@@ -33,108 +35,129 @@ const mockEnterpriseLicense = {
 
 const mockLicense$ = new BehaviorSubject(mockEnterpriseLicense);
 
-jest.mock('react-use/lib/useObservable', () => ({
+vi.mock('react-use/lib/useObservable', () => ({
   __esModule: true,
   default: (obs$: { getValue?: () => unknown }) =>
     typeof obs$?.getValue === 'function' ? obs$.getValue() : undefined,
 }));
 
-jest.mock('../../common/hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: mockNavigateToApp,
-        getUrlForApp: mockGetUrlForApp,
-        navigateToUrl: mockNavigateToUrl,
-      },
-      licensing: {
-        license$: mockLicense$,
-      },
-      telemetry: {
-        reportEvent: mockReportEvent,
-      },
-    },
-  }),
-}));
+vi.mock('../../common/hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: mockNavigateToApp,
+            getUrlForApp: mockGetUrlForApp,
+            navigateToUrl: mockNavigateToUrl,
+          },
+          licensing: {
+            license$: mockLicense$,
+          },
+          telemetry: {
+            reportEvent: mockReportEvent,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common', () => ({
-  useGetIntegrationById: (integrationId: string | undefined) =>
-    mockUseGetIntegrationById(integrationId),
-  useDeleteIntegration: () => ({
-    deleteIntegrationMutation: {
-      mutateAsync: mockDeleteIntegrationMutateAsync,
-      isLoading: false,
-    },
-  }),
-  useCreateUpdateIntegration: () => ({
-    createUpdateIntegrationMutation: {
-      mutateAsync: mockCreateUpdateIntegrationMutateAsync,
-      isLoading: false,
-    },
-  }),
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: mockNavigateToApp,
-        getUrlForApp: mockGetUrlForApp,
-        navigateToUrl: mockNavigateToUrl,
-      },
-      licensing: {
-        license$: mockLicense$,
-      },
-      telemetry: {
-        reportEvent: mockReportEvent,
-      },
-    },
-  }),
-}));
+vi.mock('../../common', () => {
+      const mocked = {
+      useGetIntegrationById: (integrationId: string | undefined) =>
+        mockUseGetIntegrationById(integrationId),
+      useDeleteIntegration: () => ({
+        deleteIntegrationMutation: {
+          mutateAsync: mockDeleteIntegrationMutateAsync,
+          isLoading: false,
+        },
+      }),
+      useCreateUpdateIntegration: () => ({
+        createUpdateIntegrationMutation: {
+          mutateAsync: mockCreateUpdateIntegrationMutateAsync,
+          isLoading: false,
+        },
+      }),
+      useKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: mockNavigateToApp,
+            getUrlForApp: mockGetUrlForApp,
+            navigateToUrl: mockNavigateToUrl,
+          },
+          licensing: {
+            license$: mockLicense$,
+          },
+          telemetry: {
+            reportEvent: mockReportEvent,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../telemetry_context', () => ({
-  useTelemetry: () => ({
-    sessionId: 'test-session-id',
-    reportCancelButtonClicked: mockReportCancelButtonClicked,
-    reportDoneButtonClicked: mockReportDoneButtonClicked,
-  }),
-}));
+vi.mock('../telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        sessionId: 'test-session-id',
+        reportCancelButtonClicked: mockReportCancelButtonClicked,
+        reportDoneButtonClicked: mockReportDoneButtonClicked,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./management_contents/management_contents', () => ({
-  ManagementContents: () => <div data-test-subj="managementContentsMock" />,
-}));
+vi.mock('./management_contents/management_contents', () => {
+      const mocked = {
+      ManagementContents: () => <div data-test-subj="managementContentsMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/connector_selector', () => ({
-  ConnectorSelector: () => <div data-test-subj="connectorSelectorMock" />,
-}));
+vi.mock('../../common/components/connector_selector', () => {
+      const mocked = {
+      ConnectorSelector: () => <div data-test-subj="connectorSelectorMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./forms/integration_form', () => ({
-  IntegrationFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit, isFormModified: true }),
-}));
+vi.mock('./forms/integration_form', () => {
+      const mocked = {
+      IntegrationFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit, isFormModified: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/button_footer', () => ({
-  ButtonsFooter: ({
-    onAction,
-    onCancel,
-    isActionDisabled,
-  }: {
-    onAction: () => void;
-    onCancel: () => void;
-    isActionDisabled?: boolean;
-  }) => (
-    <div>
-      <button
-        type="button"
-        data-test-subj="doneButton"
-        onClick={onAction}
-        disabled={Boolean(isActionDisabled)}
-      >
-        {'Done'}
-      </button>
-      <button type="button" data-test-subj="cancelButton" onClick={onCancel}>
-        {'Cancel'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../common/components/button_footer', () => {
+      const mocked = {
+      ButtonsFooter: ({
+        onAction,
+        onCancel,
+        isActionDisabled,
+      }: {
+        onAction: () => void;
+        onCancel: () => void;
+        isActionDisabled?: boolean;
+      }) => (
+        <div>
+          <button
+            type="button"
+            data-test-subj="doneButton"
+            onClick={onAction}
+            disabled={Boolean(isActionDisabled)}
+          >
+            {'Done'}
+          </button>
+          <button type="button" data-test-subj="cancelButton" onClick={onCancel}>
+            {'Cancel'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = (path = '/create') =>
   render(
@@ -151,7 +174,7 @@ const renderComponent = (path = '/create') =>
 
 describe('IntegrationManagement telemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetIntegrationById.mockReturnValue({
       integration: undefined,
       isLoading: false,

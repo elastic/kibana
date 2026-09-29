@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -16,12 +18,12 @@ import * as i18n from '../translations';
 const defaultProps = {
   children: <div data-test-subj="mockChildren">{'Mock Children Content'}</div>,
   isEnabled: true,
-  onToggle: jest.fn(),
+  onToggle: vi.fn(),
 };
 
 describe('DefaultAlertRetrievalAccordion', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('toggle switch rendering', () => {
@@ -90,7 +92,7 @@ describe('DefaultAlertRetrievalAccordion', () => {
 
   describe('toggle switch interaction', () => {
     it('calls onToggle with true when switched on', async () => {
-      const onToggle = jest.fn();
+      const onToggle = vi.fn();
       render(
         <TestProviders>
           <DefaultAlertRetrievalAccordion {...defaultProps} isEnabled={false} onToggle={onToggle} />
@@ -104,7 +106,7 @@ describe('DefaultAlertRetrievalAccordion', () => {
     });
 
     it('calls onToggle with false when switched off', async () => {
-      const onToggle = jest.fn();
+      const onToggle = vi.fn();
       render(
         <TestProviders>
           <DefaultAlertRetrievalAccordion {...defaultProps} isEnabled onToggle={onToggle} />
@@ -118,7 +120,7 @@ describe('DefaultAlertRetrievalAccordion', () => {
     });
 
     it('calls onToggle only once per click', async () => {
-      const onToggle = jest.fn();
+      const onToggle = vi.fn();
       render(
         <TestProviders>
           <DefaultAlertRetrievalAccordion {...defaultProps} isEnabled={false} onToggle={onToggle} />
@@ -274,7 +276,7 @@ describe('DefaultAlertRetrievalAccordion', () => {
 
   describe('callback stability', () => {
     it('does not call onToggle on initial render', () => {
-      const onToggle = jest.fn();
+      const onToggle = vi.fn();
 
       render(
         <TestProviders>
@@ -286,7 +288,7 @@ describe('DefaultAlertRetrievalAccordion', () => {
     });
 
     it('does not call onToggle when isEnabled prop changes', () => {
-      const onToggle = jest.fn();
+      const onToggle = vi.fn();
       const { rerender } = render(
         <TestProviders>
           <DefaultAlertRetrievalAccordion {...defaultProps} isEnabled={false} onToggle={onToggle} />

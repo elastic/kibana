@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,11 +18,11 @@ describe('<NoDataViewsPromptComponent />', () => {
   test('is rendered correctly', () => {
     render(
       <NoDataViewsPrompt
-        onClickCreate={jest.fn()}
+        onClickCreate={vi.fn()}
         canCreateNewDataView={true}
         dataViewsDocLink="doc-link-data-views"
         esqlDocLink="doc-link-esql"
-        onTryESQL={jest.fn()}
+        onTryESQL={vi.fn()}
       />
     );
 
@@ -46,7 +48,7 @@ describe('<NoDataViewsPromptComponent />', () => {
 
   test('onClickCreate', async () => {
     const user = userEvent.setup();
-    const onClickCreate = jest.fn();
+    const onClickCreate = vi.fn();
 
     render(
       <NoDataViewsPrompt
@@ -63,7 +65,7 @@ describe('<NoDataViewsPromptComponent />', () => {
 
   test('onClickTryEsql', async () => {
     const user = userEvent.setup();
-    const onClickTryEsql = jest.fn();
+    const onClickTryEsql = vi.fn();
 
     render(
       <NoDataViewsPrompt

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { PackResultsHeader } from './pack_results_header';
@@ -13,40 +15,64 @@ import {
   createMockKibanaServices,
 } from '../../__test_helpers__/create_mock_kibana_services';
 
-const mockAddToCaseWrapper = jest.fn();
+const mockAddToCaseWrapper = vi.fn();
 
-jest.mock('../../common/experimental_features_context', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../results/export_filters_context', () => ({
-  useExportFilters: jest.fn().mockReturnValue(undefined),
-}));
-jest.mock('../../results/export_results_button', () => ({
-  ExportResultsButton: () => null,
-}));
-jest.mock('../../cases/add_to_cases', () => ({
-  AddToCaseWrapper: (props: Record<string, unknown>) => {
-    mockAddToCaseWrapper(props);
+vi.mock('../../common/experimental_features_context', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../results/export_filters_context', () => {
+      const mocked = {
+      useExportFilters: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../results/export_results_button', () => {
+      const mocked = {
+      ExportResultsButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../cases/add_to_cases', () => {
+      const mocked = {
+      AddToCaseWrapper: (props: Record<string, unknown>) => {
+        mockAddToCaseWrapper(props);
 
-    return null;
-  },
-}));
-jest.mock('../../timelines/add_to_timeline_button', () => ({
-  AddToTimelineButton: () => null,
-}));
-jest.mock('../../actions/components/add_tags_flyout', () => ({
-  AddTagsFlyout: () => null,
-}));
-jest.mock('../../actions/use_live_query_details', () => ({
-  useLiveQueryDetails: jest.fn().mockReturnValue({ data: undefined }),
-}));
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../timelines/add_to_timeline_button', () => {
+      const mocked = {
+      AddToTimelineButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../actions/components/add_tags_flyout', () => {
+      const mocked = {
+      AddTagsFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../actions/use_live_query_details', () => {
+      const mocked = {
+      useLiveQueryDetails: vi.fn().mockReturnValue({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderHeader = (props: Partial<Parameters<typeof PackResultsHeader>[0]> = {}) => {
   const services = createMockKibanaServices({
@@ -63,7 +89,7 @@ const renderHeader = (props: Partial<Parameters<typeof PackResultsHeader>[0]> = 
 
 describe('PackResultsHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Add to case', () => {

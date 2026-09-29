@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { NodesChangedRule } from './nodes_changed_rule';
 import { RULE_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
@@ -14,26 +17,35 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_nodes_from_cluster_stats', () => ({
-  fetchNodesFromClusterStats: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_nodes_from_cluster_stats', () => {
+      const mocked = {
+      fetchNodesFromClusterStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('NodesChangedAlert', () => {
   it('should have defaults', () => {
@@ -132,18 +144,18 @@ describe('NodesChangedAlert', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action when nodes change', async () => {
-      (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
+      (fetchNodesFromClusterStats as Mock).mockImplementation(() => {
         return nodesChanged;
       });
       const rule = new NodesChangedRule();
@@ -218,7 +230,7 @@ describe('NodesChangedAlert', () => {
       });
     });
     it('should fire action when nodes added, changed, and removed', async () => {
-      (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
+      (fetchNodesFromClusterStats as Mock).mockImplementation(() => {
         return nodesAddedChangedRemoved;
       });
       const rule = new NodesChangedRule();
@@ -304,7 +316,7 @@ describe('NodesChangedAlert', () => {
     });
 
     it('should not fire actions if no nodes have changed', async () => {
-      (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
+      (fetchNodesFromClusterStats as Mock).mockImplementation(() => {
         return [
           {
             recentNodes: [

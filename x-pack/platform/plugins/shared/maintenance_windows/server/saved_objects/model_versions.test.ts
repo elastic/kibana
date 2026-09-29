@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { maintenanceWindowModelVersions } from './model_versions';
 import {
   rawMaintenanceWindowSchemaV1,
@@ -13,7 +15,7 @@ import {
 } from './schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 
-jest.mock('./schema');
+vi.mock('./schema');
 
 describe('maintenanceWindowModelVersions', () => {
   describe('version 1', () => {

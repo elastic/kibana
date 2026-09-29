@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -17,11 +20,17 @@ import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import type { HuntCoordinatorResult } from '../../services/watches/hunt/hunt_coordinator';
 import { emptyHuntForThreatResult } from '../../services/watches/hunt/tier1/hunt_for_threat';
 
-jest.mock('./lib/scoped_model', () => ({ resolveScopedModel: jest.fn() }));
-jest.mock('../../services/watches/hunt/hunt_coordinator', () => ({ huntCoordinator: jest.fn() }));
+vi.mock('./lib/scoped_model', () => {
+      const mocked = { resolveScopedModel: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../services/watches/hunt/hunt_coordinator', () => {
+      const mocked = { huntCoordinator: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
-const huntCoordinatorMock = huntCoordinator as jest.MockedFunction<typeof huntCoordinator>;
+const resolveScopedModelMock = resolveScopedModel as MockedFunction<typeof resolveScopedModel>;
+const huntCoordinatorMock = huntCoordinator as MockedFunction<typeof huntCoordinator>;
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
 
@@ -42,8 +51,8 @@ const coordinatorResult: HuntCoordinatorResult = {
 };
 
 const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
-  const addVersion = jest.fn();
-  const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
+  const addVersion = vi.fn();
+  const router = { versioned: { post: vi.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
 
   registerHuntCoordinatorRoute({
@@ -57,12 +66,12 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
       } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
+  const asCurrentUser = { search: vi.fn() };
+  const asInternalUser = { search: vi.fn() };
   const context = {
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser, asInternalUser } },
-      uiSettings: { client: { get: jest.fn() } },
+      uiSettings: { client: { get: vi.fn() } },
     }),
   };
 

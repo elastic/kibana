@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
@@ -27,15 +30,15 @@ const converter: AttachmentConverter<TestItem> = {
 };
 
 describe('useManualAddToChat', () => {
-  let openChat: jest.Mock;
-  let addAttachment: jest.Mock;
+  let openChat: Mock;
+  let addAttachment: Mock;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let services: ManualAddToChatServices;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    openChat = jest.fn();
-    addAttachment = jest.fn();
+    vi.clearAllMocks();
+    openChat = vi.fn();
+    addAttachment = vi.fn();
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
 
     services = {

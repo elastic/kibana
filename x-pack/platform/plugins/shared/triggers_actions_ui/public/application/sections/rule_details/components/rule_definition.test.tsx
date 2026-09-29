@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -14,27 +17,36 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as capabilities from '../../../lib/capabilities';
 
-jest.mock('./rule_actions', () => ({
-  RuleActions: () => {
-    return <></>;
-  },
-}));
+vi.mock('./rule_actions', () => {
+      const mocked = {
+      RuleActions: () => {
+        return <></>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/capabilities', () => ({
-  hasAllPrivilege: jest.fn(() => true),
-  hasSaveRulesCapability: jest.fn(() => true),
-  hasShowActionsCapability: jest.fn(() => true),
-  hasExecuteActionsCapability: jest.fn(() => true),
-  hasManageApiKeysCapability: jest.fn(() => true),
-}));
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../lib/capabilities', () => {
+      const mocked = {
+      hasAllPrivilege: vi.fn(() => true),
+      hasSaveRulesCapability: vi.fn(() => true),
+      hasShowActionsCapability: vi.fn(() => true),
+      hasExecuteActionsCapability: vi.fn(() => true),
+      hasManageApiKeysCapability: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks');
-const { useGetRuleTypesPermissions } = jest.requireMock('@kbn/alerts-ui-shared/src/common/hooks');
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks');
+const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks'));
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({
@@ -110,7 +122,7 @@ describe('Rule Definition', () => {
       validate: () => {
         return { errors: {} };
       },
-      ruleParamsExpression: jest.fn(),
+      ruleParamsExpression: vi.fn(),
       requiresAppContext: false,
     };
 
@@ -134,7 +146,7 @@ describe('Rule Definition', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders rule definition ', async () => {
@@ -143,7 +155,7 @@ describe('Rule Definition', () => {
         <RuleDefinition
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
@@ -158,7 +170,7 @@ describe('Rule Definition', () => {
         <RuleDefinition
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
@@ -176,7 +188,7 @@ describe('Rule Definition', () => {
         <RuleDefinition
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
@@ -192,7 +204,7 @@ describe('Rule Definition', () => {
         <RuleDefinition
           rule={mockRule({ consumer: 'siem', ruleTypeId: 'siem_rule' })}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
@@ -208,7 +220,7 @@ describe('Rule Definition', () => {
         <RuleDefinition
           rule={mockRule({ consumer: 'siem', ruleTypeId: 'attack-discovery' })}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
@@ -224,7 +236,7 @@ describe('Rule Definition', () => {
         <RuleDefinition
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
@@ -240,7 +252,7 @@ describe('Rule Definition', () => {
         <RuleDefinition
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
@@ -256,7 +268,7 @@ describe('Rule Definition', () => {
         <RuleDefinition
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
@@ -266,13 +278,13 @@ describe('Rule Definition', () => {
   });
 
   it('hide edit button when user DOES NOT have permissions', async () => {
-    (capabilities.hasAllPrivilege as jest.Mock).mockReturnValue(false);
+    (capabilities.hasAllPrivilege as Mock).mockReturnValue(false);
     render(
       <QueryClientProvider client={new QueryClient()}>
         <RuleDefinition
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
+          onEditRule={vi.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>

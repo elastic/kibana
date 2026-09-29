@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { findFirstFiberWithDebugSource } from './find_first_fiber_with_debug_source';
 import { getFiberFromHtmlElement } from './get_fiber_from_html_element';
 import type { DebugSource, ReactFiberNode } from './types';
 
-jest.mock('./get_fiber_from_html_element');
+vi.mock('./get_fiber_from_html_element');
 
 describe('findFirstFiberWithDebugSource', () => {
   let mockElement: HTMLElement;
@@ -26,11 +29,11 @@ describe('findFirstFiberWithDebugSource', () => {
       _debugOwner: undefined,
     } as ReactFiberNode;
 
-    (getFiberFromHtmlElement as jest.Mock).mockReset();
+    (getFiberFromHtmlElement as Mock).mockReset();
   });
 
   it('should return null when no Fiber is found', () => {
-    (getFiberFromHtmlElement as jest.Mock).mockReturnValue(undefined);
+    (getFiberFromHtmlElement as Mock).mockReturnValue(undefined);
 
     const result = findFirstFiberWithDebugSource(mockElement);
 
@@ -40,7 +43,7 @@ describe('findFirstFiberWithDebugSource', () => {
 
   it('should return Fiber with debug source and HTML element from the direct Fiber', () => {
     mockFiber._debugSource = mockDebugSource;
-    (getFiberFromHtmlElement as jest.Mock).mockReturnValue(mockFiber);
+    (getFiberFromHtmlElement as Mock).mockReturnValue(mockFiber);
 
     const result = findFirstFiberWithDebugSource(mockElement);
 
@@ -57,7 +60,7 @@ describe('findFirstFiberWithDebugSource', () => {
     } as ReactFiberNode;
 
     mockFiber._debugOwner = ownerFiber;
-    (getFiberFromHtmlElement as jest.Mock).mockReturnValue(mockFiber);
+    (getFiberFromHtmlElement as Mock).mockReturnValue(mockFiber);
 
     const result = findFirstFiberWithDebugSource(mockElement);
 
@@ -86,7 +89,7 @@ describe('findFirstFiberWithDebugSource', () => {
       _debugOwner: undefined,
     } as ReactFiberNode;
 
-    (getFiberFromHtmlElement as jest.Mock)
+    (getFiberFromHtmlElement as Mock)
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(grandParentFiber);
@@ -113,7 +116,7 @@ describe('findFirstFiberWithDebugSource', () => {
       writable: true,
     });
 
-    (getFiberFromHtmlElement as jest.Mock)
+    (getFiberFromHtmlElement as Mock)
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(undefined);
 

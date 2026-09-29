@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { LargeShardSizeRule } from './large_shard_size_rule';
 import { RULE_LARGE_SHARD_SIZE } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
@@ -26,27 +29,36 @@ type ILargeShardSizeRuleMock = LargeShardSizeRule & {
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_index_shard_size', () => ({
-  fetchIndexShardSize: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_index_shard_size', () => {
+      const mocked = {
+      fetchIndexShardSize: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      url: 'http://localhost:5601',
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          url: 'http://localhost:5601',
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('LargeShardSizeRule', () => {
   it('should have defaults', () => {
@@ -96,17 +108,17 @@ describe('LargeShardSizeRule', () => {
 
     beforeEach(() => {
       Date = FakeDate as DateConstructor;
-      (fetchIndexShardSize as jest.Mock).mockImplementation(() => {
+      (fetchIndexShardSize as Mock).mockImplementation(() => {
         return [stat];
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -223,7 +235,7 @@ describe('LargeShardSizeRule', () => {
 
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
-      (fetchIndexShardSize as jest.Mock).mockImplementation(() => {
+      (fetchIndexShardSize as Mock).mockImplementation(() => {
         return [
           {
             ...stat,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { createRef } from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -24,7 +26,7 @@ const renderWithProvider = (ui: React.ReactElement) => {
 describe('CommandMenuList', () => {
   it('renders all options', () => {
     renderWithProvider(
-      <CommandMenuList options={mockOptions} isLoading={false} onSelect={jest.fn()} />
+      <CommandMenuList options={mockOptions} isLoading={false} onSelect={vi.fn()} />
     );
 
     expect(screen.getByText('Alpha')).toBeInTheDocument();
@@ -33,13 +35,13 @@ describe('CommandMenuList', () => {
   });
 
   it('shows empty message when no options', () => {
-    renderWithProvider(<CommandMenuList options={[]} isLoading={false} onSelect={jest.fn()} />);
+    renderWithProvider(<CommandMenuList options={[]} isLoading={false} onSelect={vi.fn()} />);
 
     expect(screen.getByText('No matching results')).toBeInTheDocument();
   });
 
   it('shows loading spinner when loading', () => {
-    renderWithProvider(<CommandMenuList options={[]} isLoading={true} onSelect={jest.fn()} />);
+    renderWithProvider(<CommandMenuList options={[]} isLoading={true} onSelect={vi.fn()} />);
 
     expect(screen.getByTestId('commandMenuList-loading')).toBeInTheDocument();
   });
@@ -55,7 +57,7 @@ describe('CommandMenuList', () => {
           },
         ]}
         isLoading={false}
-        onSelect={jest.fn()}
+        onSelect={vi.fn()}
       />
     );
 
@@ -78,7 +80,7 @@ describe('CommandMenuList', () => {
           },
         ]}
         isLoading={false}
-        onSelect={jest.fn()}
+        onSelect={vi.fn()}
       />
     );
 
@@ -88,7 +90,7 @@ describe('CommandMenuList', () => {
   });
 
   it('calls onSelect when the first option is clicked', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     renderWithProvider(
       <CommandMenuList options={mockOptions} isLoading={false} onSelect={onSelect} />
     );
@@ -99,7 +101,7 @@ describe('CommandMenuList', () => {
   });
 
   it('calls onSelect when a non-first option is clicked', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     renderWithProvider(
       <CommandMenuList options={mockOptions} isLoading={false} onSelect={onSelect} />
     );
@@ -112,7 +114,7 @@ describe('CommandMenuList', () => {
   describe('keyboard navigation', () => {
     it('selects first item with Enter', () => {
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(
         <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={onSelect} />
       );
@@ -126,7 +128,7 @@ describe('CommandMenuList', () => {
 
     it('navigates down and selects with Enter', () => {
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(
         <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={onSelect} />
       );
@@ -143,7 +145,7 @@ describe('CommandMenuList', () => {
 
     it('resets the highlight when options reorder, even at the same length', () => {
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       const { rerender } = renderWithProvider(
         <CommandMenuList
           ref={ref}
@@ -184,7 +186,7 @@ describe('CommandMenuList', () => {
 
     it('navigates up from second item', () => {
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(
         <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={onSelect} />
       );
@@ -204,7 +206,7 @@ describe('CommandMenuList', () => {
 
     it('clamps at end of list', () => {
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(
         <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={onSelect} />
       );
@@ -224,7 +226,7 @@ describe('CommandMenuList', () => {
 
     it('clamps at start of list', () => {
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(
         <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={onSelect} />
       );
@@ -241,7 +243,7 @@ describe('CommandMenuList', () => {
 
     it('selects with Tab', () => {
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(
         <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={onSelect} />
       );
@@ -256,7 +258,7 @@ describe('CommandMenuList', () => {
     it('reports handled keys via isKeyDownEventHandled', () => {
       const ref = createRef<CommandMenuHandle>();
       renderWithProvider(
-        <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={jest.fn()} />
+        <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={vi.fn()} />
       );
 
       expect(ref.current!.isKeyDownEventHandled({ key: 'ArrowDown' } as React.KeyboardEvent)).toBe(
@@ -274,7 +276,7 @@ describe('CommandMenuList', () => {
     it('returns false for unhandled keys', () => {
       const ref = createRef<CommandMenuHandle>();
       renderWithProvider(
-        <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={jest.fn()} />
+        <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={vi.fn()} />
       );
 
       expect(ref.current!.isKeyDownEventHandled({ key: 'a' } as React.KeyboardEvent)).toBe(false);
@@ -283,7 +285,7 @@ describe('CommandMenuList', () => {
     describe('spaceSelection', () => {
       it('does not treat Space as handled by default', () => {
         const ref = createRef<CommandMenuHandle>();
-        const onSelect = jest.fn();
+        const onSelect = vi.fn();
         renderWithProvider(
           <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={onSelect} />
         );
@@ -297,7 +299,7 @@ describe('CommandMenuList', () => {
 
       it('selects the highlighted option on Space when enabled and options exist', () => {
         const ref = createRef<CommandMenuHandle>();
-        const onSelect = jest.fn();
+        const onSelect = vi.fn();
         renderWithProvider(
           <CommandMenuList
             ref={ref}
@@ -317,7 +319,7 @@ describe('CommandMenuList', () => {
 
       it('selects the arrow-navigated option on Space, not just the first', () => {
         const ref = createRef<CommandMenuHandle>();
-        const onSelect = jest.fn();
+        const onSelect = vi.fn();
         renderWithProvider(
           <CommandMenuList
             ref={ref}
@@ -339,7 +341,7 @@ describe('CommandMenuList', () => {
 
       it('still claims Space with zero options, so it never leaks through as a literal character', () => {
         const ref = createRef<CommandMenuHandle>();
-        const onSelect = jest.fn();
+        const onSelect = vi.fn();
         renderWithProvider(
           <CommandMenuList
             ref={ref}

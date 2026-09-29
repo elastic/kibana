@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
@@ -25,7 +28,10 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 
-jest.mock('uuid', () => ({ v4: jest.fn(() => 'test-uuid') }));
+vi.mock('uuid', () => {
+      const mocked = { v4: vi.fn(() => 'test-uuid') };
+      return { ...mocked, default: mocked };
+    });
 
 const getSaveDiscoverSessionParams = (
   overrides: Partial<SaveDiscoverSessionThunkParams> = {}
@@ -46,7 +52,7 @@ const setup = async ({
   initializeTab?: boolean;
 } = {}) => {
   const services = createDiscoverServicesMock();
-  const saveDiscoverSessionSpy = jest
+  const saveDiscoverSessionSpy = vi
     .spyOn(services.savedSearch, 'saveDiscoverSession')
     .mockImplementation((discoverSession) =>
       Promise.resolve({
@@ -55,8 +61,8 @@ const setup = async ({
         managed: false,
       })
     );
-  const dataViewCreateSpy = jest.spyOn(services.dataViews, 'create');
-  const dataViewsClearCacheSpy = jest.spyOn(services.dataViews, 'clearInstanceCache');
+  const dataViewCreateSpy = vi.spyOn(services.dataViews, 'create');
+  const dataViewsClearCacheSpy = vi.spyOn(services.dataViews, 'clearInstanceCache');
 
   const toolkit = getDiscoverInternalStateMock({
     services,
@@ -95,7 +101,7 @@ const setup = async ({
 
 describe('saveDiscoverSession', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call saveDiscoverSession with the expected params', async () => {
@@ -147,13 +153,13 @@ describe('saveDiscoverSession', () => {
       })
     );
 
-    const resetOnSavedSearchChangeSpy = jest.spyOn(
+    const resetOnSavedSearchChangeSpy = vi.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const setDataViewSpy = jest.spyOn(tabStateDataViewActions, 'setDataView');
+    const setDataViewSpy = vi.spyOn(tabStateDataViewActions, 'setDataView');
 
-    jest
+    vi
       .spyOn(services.data.search.searchSource, 'create')
       .mockResolvedValue(createSearchSourceMock({ index: dataViewMockWithTimeField }));
 
@@ -198,7 +204,7 @@ describe('saveDiscoverSession', () => {
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
-    const resetOnSavedSearchChangeSpy = jest.spyOn(
+    const resetOnSavedSearchChangeSpy = vi.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
@@ -216,7 +222,7 @@ describe('saveDiscoverSession', () => {
   });
 
   it('should allow errors thrown at the persistence layer to bubble up and not modify local state', async () => {
-    const resetOnSavedSearchChangeSpy = jest.spyOn(
+    const resetOnSavedSearchChangeSpy = vi.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
@@ -246,7 +252,7 @@ describe('saveDiscoverSession', () => {
     const REFRESH_INTERVAL_30S = { value: 30000, pause: true };
 
     const findSavedTab = (
-      saveDiscoverSessionSpy: jest.SpyInstance,
+      saveDiscoverSessionSpy: MockInstance,
       tabId: string
     ): { timeRestore?: boolean; timeRange?: unknown; refreshInterval?: unknown } | undefined =>
       saveDiscoverSessionSpy.mock.calls[0][0].tabs.find((t: { id: string }) => t.id === tabId);

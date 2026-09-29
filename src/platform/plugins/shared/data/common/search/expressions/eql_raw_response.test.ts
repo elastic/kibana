@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EqlRawResponse } from './eql_raw_response';
 import { eqlRawResponse } from './eql_raw_response';
 
-jest.mock('@kbn/i18n', () => {
+vi.mock('@kbn/i18n', () => {
   return {
     i18n: {
       translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,

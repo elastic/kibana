@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LifecycleBar } from './lifecycle_bar';
@@ -90,7 +92,7 @@ describe('LifecycleBar', () => {
           gridTemplateColumns="5fr 3fr"
           phaseColumnSpans={[1, 1]}
           showPhaseActions
-          onRemovePhase={jest.fn()}
+          onRemovePhase={vi.fn()}
           canManageLifecycle
         />
       );
@@ -106,7 +108,7 @@ describe('LifecycleBar', () => {
 
   describe('Click handling', () => {
     it('should call onPhaseClick when phase is clicked', () => {
-      const onPhaseClick = jest.fn();
+      const onPhaseClick = vi.fn();
       const phases: LifecyclePhase[] = [
         { grow: true, name: 'hot', label: 'hot', color: '#FF0000' },
       ];
@@ -128,7 +130,7 @@ describe('LifecycleBar', () => {
     });
 
     it('should call onPhaseClick with correct index for multiple phases', () => {
-      const onPhaseClick = jest.fn();
+      const onPhaseClick = vi.fn();
       const phases: LifecyclePhase[] = [
         { grow: 5, name: 'hot', label: 'hot', color: '#FF0000' },
         { grow: 3, name: 'warm', label: 'warm', color: '#FFA500' },

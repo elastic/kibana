@@ -5,26 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useServiceHasSystemMetrics } from './use_service_has_system_metrics';
 
-const mockUseAbortableAsync = jest.fn();
+const mockUseAbortableAsync = vi.fn();
 
-jest.mock('@kbn/react-hooks', () => ({
-  useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    start: '2024-01-01T00:00:00.000Z',
-    end: '2024-01-01T01:00:00.000Z',
-  }),
-}));
+vi.mock('../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        start: '2024-01-01T00:00:00.000Z',
+        end: '2024-01-01T01:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCallApmApi = jest.fn();
-jest.mock('../../../../plugin', () => ({
-  getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
-}));
+const mockCallApmApi = vi.fn();
+vi.mock('../../../../plugin', () => {
+      const mocked = {
+      getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseParams = {
   serviceName: 'opbeans-java',

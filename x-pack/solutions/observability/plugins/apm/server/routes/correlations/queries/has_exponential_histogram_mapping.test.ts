@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { hasExponentialHistogramMapping } from './has_exponential_histogram_mapping';
@@ -17,7 +19,7 @@ describe('hasExponentialHistogramMapping', () => {
 
   it('returns false when the field is not mapped', async () => {
     const apmEventClient = {
-      fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+      fieldCaps: vi.fn().mockResolvedValue({ fields: {} }),
     } as unknown as APMEventClient;
 
     await expect(hasExponentialHistogramMapping({ ...baseParams, apmEventClient })).resolves.toBe(
@@ -27,7 +29,7 @@ describe('hasExponentialHistogramMapping', () => {
 
   it('returns false for classic histogram mappings', async () => {
     const apmEventClient = {
-      fieldCaps: jest.fn().mockResolvedValue({
+      fieldCaps: vi.fn().mockResolvedValue({
         fields: {
           'transaction.duration.histogram': {
             histogram: { type: 'histogram' },
@@ -43,7 +45,7 @@ describe('hasExponentialHistogramMapping', () => {
 
   it('returns true when any mapping is exponential_histogram', async () => {
     const apmEventClient = {
-      fieldCaps: jest.fn().mockResolvedValue({
+      fieldCaps: vi.fn().mockResolvedValue({
         fields: {
           'transaction.duration.histogram': {
             histogram: { type: 'histogram' },
@@ -60,7 +62,7 @@ describe('hasExponentialHistogramMapping', () => {
 
   it('requests empty-field mappings without a time filter', async () => {
     const apmEventClient = {
-      fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+      fieldCaps: vi.fn().mockResolvedValue({ fields: {} }),
     } as unknown as APMEventClient;
 
     await hasExponentialHistogramMapping({ ...baseParams, apmEventClient });

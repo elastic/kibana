@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { UserActionMoveToReference } from './move_to_reference';
 
-const outlineComment = jest.fn();
+const outlineComment = vi.fn();
 const props = {
   id: 'move-to-ref-id',
   outlineComment,

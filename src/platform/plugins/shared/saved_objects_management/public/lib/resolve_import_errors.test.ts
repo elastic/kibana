@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsImportUnknownError } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { resolveImportErrors } from './resolve_import_errors';
@@ -24,12 +26,12 @@ function getFormData(form: Map<string, any>) {
 }
 
 describe('resolveImportErrors', () => {
-  const getConflictResolutions = jest.fn();
+  const getConflictResolutions = vi.fn();
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
 
   beforeEach(() => {
     httpMock = httpServiceMock.createSetupContract();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const extractBodyFromCall = (index: number): Map<string, any> => {

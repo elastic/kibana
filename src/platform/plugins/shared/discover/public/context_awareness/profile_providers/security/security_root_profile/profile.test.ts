@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
@@ -28,7 +30,7 @@ const createProvider = (
   ) => FunctionComponent<DataGridCellValueElementProps> | undefined
 ) => {
   const services = createProfileProviderSharedServicesMock();
-  jest.spyOn(services.discoverShared.features.registry, 'getById').mockReturnValue(
+  vi.spyOn(services.discoverShared.features.registry, 'getById').mockReturnValue(
     cellRendererFn
       ? ({
           id: 'security-solution-cell-renderer',

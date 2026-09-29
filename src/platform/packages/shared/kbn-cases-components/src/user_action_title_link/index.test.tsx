@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -17,13 +19,13 @@ const defaultProps = {
   dataTestSubj: 'test-id',
   targetId: 'entity-123',
   label: 'My Entity',
-  getHref: jest.fn().mockReturnValue('https://example.com'),
-  onClick: jest.fn(),
+  getHref: vi.fn().mockReturnValue('https://example.com'),
+  onClick: vi.fn(),
 };
 
 describe('UserActionTitleLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a clickable link when targetId and getHref are provided', () => {

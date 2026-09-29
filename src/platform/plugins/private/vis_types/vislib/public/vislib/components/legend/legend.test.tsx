@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -19,36 +21,39 @@ import { VisLegend } from './legend';
 import { legendColors } from './models';
 import { act } from '@testing-library/react';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
-    htmlIdGenerator: jest.fn().mockReturnValue(() => 'legendId'),
+    htmlIdGenerator: vi.fn().mockReturnValue(() => 'legendId'),
   };
 });
 
-jest.mock('../../../services', () => ({
-  getDataActions: () => ({
-    createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
-  }),
-}));
+vi.mock('../../../services', () => {
+      const mocked = {
+      getDataActions: () => ({
+        createFiltersFromValueClickAction: vi.fn().mockResolvedValue(['yes']),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const fireEvent = jest.fn();
-const hasCompatibleActions = jest.fn().mockReturnValue(true);
+const fireEvent = vi.fn();
+const hasCompatibleActions = vi.fn().mockReturnValue(true);
 
 const vislibVis = {
   handler: {
-    highlight: jest.fn(),
-    unHighlight: jest.fn(),
+    highlight: vi.fn(),
+    unHighlight: vi.fn(),
   },
-  getLegendLabels: jest.fn(),
+  getLegendLabels: vi.fn(),
   visConfigArgs: {
     type: 'area',
   },
   visConfig: {
     data: {
-      getColorFunc: jest.fn().mockReturnValue(() => 'red'),
+      getColorFunc: vi.fn().mockReturnValue(() => 'red'),
     },
   },
 };
@@ -76,12 +81,12 @@ const visData = {
 
 const mockState = new Map();
 const uiState = {
-  get: jest
+  get: vi
     .fn()
     .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
-  set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
-  emit: jest.fn(),
-  setSilent: jest.fn(),
+  set: vi.fn().mockImplementation((key, value) => mockState.set(key, value)),
+  emit: vi.fn(),
+  setSilent: vi.fn(),
 } as any;
 
 const getWrapper = async (props?: Partial<VisLegendProps>) => {
@@ -114,7 +119,7 @@ describe('VisLegend Component', () => {
 
   afterEach(() => {
     mockState.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Legend open', () => {

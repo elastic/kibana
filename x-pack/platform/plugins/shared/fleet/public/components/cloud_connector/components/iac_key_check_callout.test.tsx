@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,7 +21,7 @@ const renderWithIntl = (element: React.ReactElement) =>
   render(<I18nProvider>{element}</I18nProvider>);
 
 const baseProps = {
-  onUpdateStack: jest.fn(),
+  onUpdateStack: vi.fn(),
   isUpdating: false,
 };
 
@@ -27,7 +29,7 @@ const baseProps = {
 const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123:stack/my-stack/abc';
 
 describe('IacKeyCheckCallout', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders null when result.matches is true', () => {
     const { container } = renderWithIntl(
@@ -148,7 +150,7 @@ describe('IacKeyCheckCallout', () => {
   });
 
   it('calls onUpdateStack when the Update button is clicked', async () => {
-    const onUpdateStack = jest.fn();
+    const onUpdateStack = vi.fn();
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -188,7 +190,7 @@ describe('IacKeyCheckCallout', () => {
     });
 
     it('keeps the Update button available to relaunch', async () => {
-      const onUpdateStack = jest.fn();
+      const onUpdateStack = vi.fn();
       renderWithIntl(
         <IacKeyCheckCallout
           {...baseProps}

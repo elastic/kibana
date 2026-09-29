@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import type { RuleDomain } from '../../types';
@@ -13,15 +16,18 @@ import { getRulesClientMockParams } from '../../../../test_utils';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 
-jest.mock('../get_schedule_frequency', () => ({
-  validateScheduleLimit: jest.fn(),
-}));
+vi.mock('../get_schedule_frequency', () => {
+      const mocked = {
+      validateScheduleLimit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('clone', () => {
   const kibanaVersion = 'v8.2.0';
-  const createAPIKeyMock = jest.fn();
-  const isAuthenticationTypeApiKeyMock = jest.fn();
-  const getAuthenticationApiKeyMock = jest.fn();
+  const createAPIKeyMock = vi.fn();
+  const isAuthenticationTypeApiKeyMock = vi.fn();
+  const getAuthenticationApiKeyMock = vi.fn();
 
   const {
     rulesClientParams,
@@ -39,8 +45,8 @@ describe('clone', () => {
   let rulesClient: RulesClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (validateScheduleLimit as jest.Mock).mockResolvedValue(null);
+    vi.clearAllMocks();
+    (validateScheduleLimit as Mock).mockResolvedValue(null);
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
     rulesClient = new RulesClient(rulesClientParams);
   });
@@ -261,7 +267,7 @@ describe('clone', () => {
     });
 
     it('throws a circuit breaker error when the schedule limit is exceeded', async () => {
-      (validateScheduleLimit as jest.Mock).mockResolvedValue({
+      (validateScheduleLimit as Mock).mockResolvedValue({
         interval: 100,
         intervalAvailable: 50,
       });

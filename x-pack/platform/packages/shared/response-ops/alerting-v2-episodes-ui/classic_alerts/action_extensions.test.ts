@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { bulkUpdateAlertWorkflowStatus } from '@kbn/response-ops-alerts-apis/apis/bulk_update_alert_workflow_status';
 import { bulkUpdateAlertTags } from '@kbn/response-ops-alerts-apis/apis/bulk_update_alert_tags';
@@ -18,23 +21,23 @@ import type { AlertEpisode } from '../queries/episodes_query';
 import type { ClassicAlertActionContext } from './utils/map_alert';
 import { classicActionExtensions } from './action_extensions';
 
-jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_update_alert_workflow_status');
-jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_update_alert_tags');
-jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_untrack_alerts');
-jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_mute_alerts');
-jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_unmute_alerts');
-jest.mock('@kbn/response-ops-alerts-apis/apis/snooze_alert_instance');
-jest.mock('@kbn/response-ops-alerts-apis/apis/unsnooze_alert_instance');
+vi.mock('@kbn/response-ops-alerts-apis/apis/bulk_update_alert_workflow_status');
+vi.mock('@kbn/response-ops-alerts-apis/apis/bulk_update_alert_tags');
+vi.mock('@kbn/response-ops-alerts-apis/apis/bulk_untrack_alerts');
+vi.mock('@kbn/response-ops-alerts-apis/apis/bulk_mute_alerts');
+vi.mock('@kbn/response-ops-alerts-apis/apis/bulk_unmute_alerts');
+vi.mock('@kbn/response-ops-alerts-apis/apis/snooze_alert_instance');
+vi.mock('@kbn/response-ops-alerts-apis/apis/unsnooze_alert_instance');
 
-const mockedBulkUpdate = bulkUpdateAlertWorkflowStatus as jest.MockedFunction<
+const mockedBulkUpdate = bulkUpdateAlertWorkflowStatus as MockedFunction<
   typeof bulkUpdateAlertWorkflowStatus
 >;
-const mockedBulkUpdateTags = bulkUpdateAlertTags as jest.MockedFunction<typeof bulkUpdateAlertTags>;
-const mockedBulkUntrack = bulkUntrackAlerts as jest.MockedFunction<typeof bulkUntrackAlerts>;
-const mockedBulkMute = bulkMuteAlerts as jest.MockedFunction<typeof bulkMuteAlerts>;
-const mockedBulkUnmute = bulkUnmuteAlerts as jest.MockedFunction<typeof bulkUnmuteAlerts>;
-const mockedSnooze = snoozeAlertInstance as jest.MockedFunction<typeof snoozeAlertInstance>;
-const mockedUnsnooze = unsnoozeAlertInstance as jest.MockedFunction<typeof unsnoozeAlertInstance>;
+const mockedBulkUpdateTags = bulkUpdateAlertTags as MockedFunction<typeof bulkUpdateAlertTags>;
+const mockedBulkUntrack = bulkUntrackAlerts as MockedFunction<typeof bulkUntrackAlerts>;
+const mockedBulkMute = bulkMuteAlerts as MockedFunction<typeof bulkMuteAlerts>;
+const mockedBulkUnmute = bulkUnmuteAlerts as MockedFunction<typeof bulkUnmuteAlerts>;
+const mockedSnooze = snoozeAlertInstance as MockedFunction<typeof snoozeAlertInstance>;
+const mockedUnsnooze = unsnoozeAlertInstance as MockedFunction<typeof unsnoozeAlertInstance>;
 
 const makeClassicEpisode = (
   id: string,
@@ -89,7 +92,7 @@ describe('classicActionExtensions', () => {
   const http = httpServiceMock.createStartContract();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedBulkUpdate.mockResolvedValue(undefined);
     mockedBulkUpdateTags.mockResolvedValue(undefined);
     mockedBulkUntrack.mockResolvedValue(undefined);

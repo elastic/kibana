@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import {
   ToolResultType,
@@ -19,23 +21,23 @@ import { createSmlAttachTool } from './sml_attach';
 const buildAvailabilityContext = (flags: Record<string, boolean>) =>
   ({
     uiSettings: {
-      get: jest.fn(async (key: string) => flags[key]),
+      get: vi.fn(async (key: string) => flags[key]),
     },
   } as unknown as ToolAvailabilityContext);
 
-const mockResolveSmlAttachItems = jest.fn();
-const mockAttachmentsAdd = jest.fn();
+const mockResolveSmlAttachItems = vi.fn();
+const mockAttachmentsAdd = vi.fn();
 
-const getAgentBuilderSml = jest.fn(() => ({
-  search: jest.fn(),
-  indexAttachment: jest.fn(),
-  deleteAttachment: jest.fn(),
-  getDocuments: jest.fn(),
-  getTypeDefinition: jest.fn(),
+const getAgentBuilderSml = vi.fn(() => ({
+  search: vi.fn(),
+  indexAttachment: vi.fn(),
+  deleteAttachment: vi.fn(),
+  getDocuments: vi.fn(),
+  getTypeDefinition: vi.fn(),
   resolveSmlAttachItems: mockResolveSmlAttachItems,
 }));
 
-const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
+const mockLogger = { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() };
 
 const mockContext = {
   spaceId: 'default',
@@ -48,7 +50,7 @@ const mockContext = {
 
 describe('createSmlAttachTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has correct id and tags', () => {

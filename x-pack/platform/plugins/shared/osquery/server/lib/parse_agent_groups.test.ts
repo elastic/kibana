@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { fromKueryExpression } from '@kbn/es-query';
 import { aggregateResults, parseAgentSelection } from './parse_agent_groups';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -17,7 +20,7 @@ import type { OsqueryAppContext } from './osquery_app_context_services';
 function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
   const agentIds = Array.from({ length: totalAgents }, (_, i) => `agent-${i + 1}`);
 
-  return jest.fn(
+  return vi.fn(
     ({
       searchAfter,
       pitId,
@@ -46,7 +49,7 @@ function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
 }
 
 function createSimpleMockResponse(agentIds: string[]) {
-  return jest.fn().mockResolvedValue({
+  return vi.fn().mockResolvedValue({
     agents: agentIds.map((id, index) => ({
       id,
       sort: [index],
@@ -57,7 +60,7 @@ function createSimpleMockResponse(agentIds: string[]) {
 
 function createMockContext(
   mockAgentService: {
-    listAgents: jest.MockedFunction<
+    listAgents: MockedFunction<
       (params: {
         searchAfter?: SortResults;
         kuery?: string;
@@ -67,12 +70,12 @@ function createMockContext(
         page?: number;
       }) => Promise<{ agents: Agent[]; total: number }>
     >;
-    getByIds: jest.MockedFunction<
+    getByIds: MockedFunction<
       (agentIds: string[], options?: { ignoreMissing?: boolean }) => Promise<Agent[]>
     >;
   },
   mockPackagePolicyService: {
-    list: jest.MockedFunction<
+    list: MockedFunction<
       (
         soClient: SavedObjectsClientContract,
         options: { kuery?: string; perPage?: number; page?: number }
@@ -84,17 +87,17 @@ function createMockContext(
   return {
     logFactory: mockLogFactory,
     service: {
-      getAgentService: jest.fn().mockReturnValue({
-        asInternalScopedUser: jest.fn().mockReturnValue(mockAgentService),
+      getAgentService: vi.fn().mockReturnValue({
+        asInternalScopedUser: vi.fn().mockReturnValue(mockAgentService),
       }),
-      getPackagePolicyService: jest.fn().mockReturnValue(mockPackagePolicyService),
+      getPackagePolicyService: vi.fn().mockReturnValue(mockPackagePolicyService),
       ...serviceOverrides,
     },
   } as unknown as OsqueryAppContext;
 }
 
-const mockOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mockedPitId' });
-const mockClosePointInTime = jest.fn();
+const mockOpenPointInTime = vi.fn().mockResolvedValue({ id: 'mockedPitId' });
+const mockClosePointInTime = vi.fn();
 
 const mockElasticsearchClient = {
   openPointInTime: mockOpenPointInTime,
@@ -102,10 +105,10 @@ const mockElasticsearchClient = {
 } as unknown as ElasticsearchClientMock;
 
 const mockLogFactory = {
-  get: jest.fn().mockReturnValue({
-    warn: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
+  get: vi.fn().mockReturnValue({
+    warn: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   }),
 };
 
@@ -115,7 +118,7 @@ const mockContext = {
 
 describe('aggregateResults', () => {
   it('should handle one page of results', async () => {
-    const generatorMock = jest.fn().mockResolvedValue({
+    const generatorMock = vi.fn().mockResolvedValue({
       results: ['result1', 'result2'],
       total: 2,
     });
@@ -133,7 +136,7 @@ describe('aggregateResults', () => {
     const generateResults = (run = 1, length = 9000) =>
       Array.from({ length }, (_, index) => `result_${index + 1 + (run - 1) * length}`);
 
-    const generatorMock = jest
+    const generatorMock = vi
       .fn()
       .mockResolvedValueOnce({
         results: generateResults(),
@@ -181,9 +184,9 @@ describe('aggregateResults', () => {
 });
 
 describe('parseAgentSelection', () => {
-  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSoClient: Mocked<SavedObjectsClientContract>;
   let mockAgentService: {
-    listAgents: jest.MockedFunction<
+    listAgents: MockedFunction<
       (params: {
         searchAfter?: SortResults;
         kuery?: string;
@@ -193,12 +196,12 @@ describe('parseAgentSelection', () => {
         page?: number;
       }) => Promise<{ agents: Agent[]; total: number }>
     >;
-    getByIds: jest.MockedFunction<
+    getByIds: MockedFunction<
       (agentIds: string[], options?: { ignoreMissing?: boolean }) => Promise<Agent[]>
     >;
   };
   let mockPackagePolicyService: {
-    list: jest.MockedFunction<
+    list: MockedFunction<
       (
         soClient: SavedObjectsClientContract,
         options: { kuery?: string; perPage?: number; page?: number }
@@ -208,19 +211,19 @@ describe('parseAgentSelection', () => {
   let mockContextWithServices: OsqueryAppContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockSoClient = {
-      find: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsClientContract>;
+      find: vi.fn(),
+    } as unknown as Mocked<SavedObjectsClientContract>;
 
     mockAgentService = {
-      listAgents: jest.fn(),
-      getByIds: jest.fn(async (ids: string[]) => ids.map((id) => ({ id } as Agent))),
+      listAgents: vi.fn(),
+      getByIds: vi.fn(async (ids: string[]) => ids.map((id) => ({ id } as Agent))),
     };
 
     mockPackagePolicyService = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         items: [
           { policy_ids: ['policy-1', 'policy-2'] } as PackagePolicy,
           { policy_ids: ['policy-3'] } as PackagePolicy,
@@ -324,17 +327,17 @@ describe('parseAgentSelection', () => {
       {
         name: 'agent service unavailable',
         serviceOverrides: {
-          getAgentService: jest.fn().mockReturnValue(undefined),
-          getPackagePolicyService: jest.fn().mockReturnValue(undefined),
+          getAgentService: vi.fn().mockReturnValue(undefined),
+          getPackagePolicyService: vi.fn().mockReturnValue(undefined),
         },
       },
       {
         name: 'package policy service unavailable',
         serviceOverrides: {
-          getAgentService: jest.fn().mockReturnValue({
-            asInternalScopedUser: jest.fn().mockReturnValue(mockAgentService),
+          getAgentService: vi.fn().mockReturnValue({
+            asInternalScopedUser: vi.fn().mockReturnValue(mockAgentService),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue(undefined),
+          getPackagePolicyService: vi.fn().mockReturnValue(undefined),
         },
       },
     ])('should return empty array when $name', async ({ serviceOverrides }) => {
@@ -398,15 +401,15 @@ describe('parseAgentSelection', () => {
   describe('space isolation verification', () => {
     it('should use space-scoped agent service', async () => {
       const spaceId = 'custom-space';
-      const mockAsInternalScopedUser = jest.fn().mockReturnValue(mockAgentService);
+      const mockAsInternalScopedUser = vi.fn().mockReturnValue(mockAgentService);
 
       const contextWithSpaceService = {
         ...mockContext,
         service: {
-          getAgentService: jest.fn().mockReturnValue({
+          getAgentService: vi.fn().mockReturnValue({
             asInternalScopedUser: mockAsInternalScopedUser,
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue(mockPackagePolicyService),
+          getPackagePolicyService: vi.fn().mockReturnValue(mockPackagePolicyService),
         },
       } as unknown as OsqueryAppContext;
 
@@ -422,15 +425,15 @@ describe('parseAgentSelection', () => {
 
     it('should omit explicitly provided agent IDs that the agent service does not return', async () => {
       const spaceId = 'space-A';
-      const mockAsInternalScopedUser = jest.fn().mockReturnValue(mockAgentService);
+      const mockAsInternalScopedUser = vi.fn().mockReturnValue(mockAgentService);
 
       const contextWithSpaceService = {
         ...mockContext,
         service: {
-          getAgentService: jest.fn().mockReturnValue({
+          getAgentService: vi.fn().mockReturnValue({
             asInternalScopedUser: mockAsInternalScopedUser,
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue(mockPackagePolicyService),
+          getPackagePolicyService: vi.fn().mockReturnValue(mockPackagePolicyService),
         },
       } as unknown as OsqueryAppContext;
 

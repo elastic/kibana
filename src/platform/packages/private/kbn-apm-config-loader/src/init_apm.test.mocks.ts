@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockLoadConfiguration = jest.fn();
-jest.doMock('./config_loader', () => ({
-  loadConfiguration: mockLoadConfiguration,
-}));
+import { vi } from 'vitest';
+
+export const mockLoadConfiguration = vi.fn();
+vi.doMock('./config_loader', () => {
+      const mocked = {
+      loadConfiguration: mockLoadConfiguration,
+    };
+      return { ...mocked, default: mocked };
+    });

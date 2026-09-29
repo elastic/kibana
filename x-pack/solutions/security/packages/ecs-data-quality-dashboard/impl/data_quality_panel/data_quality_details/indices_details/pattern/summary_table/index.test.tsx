@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -67,17 +69,17 @@ const defaultProps: Props = {
   pageIndex: 0,
   pageSize: 10,
   pattern,
-  setPageIndex: jest.fn(),
-  setPageSize: jest.fn(),
-  setSorting: jest.fn(),
+  setPageIndex: vi.fn(),
+  setPageSize: vi.fn(),
+  setSorting: vi.fn(),
   sorting: defaultSort,
-  onCheckNowAction: jest.fn(),
-  onViewHistoryAction: jest.fn(),
+  onCheckNowAction: vi.fn(),
+  onViewHistoryAction: vi.fn(),
 };
 
 describe('SummaryTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     render(
       <TestExternalProviders>

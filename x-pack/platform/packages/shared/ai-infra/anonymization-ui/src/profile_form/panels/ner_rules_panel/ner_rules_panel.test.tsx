@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NER_MODEL_ID } from '@kbn/anonymization-common';
@@ -12,13 +14,16 @@ import { NerRulesPanel } from './ner_rules_panel';
 import { useProfileFormContext } from '../../profile_form_context';
 import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
-jest.mock('../../profile_form_context', () => ({
-  useProfileFormContext: jest.fn(),
-}));
+vi.mock('../../profile_form_context', () => {
+      const mocked = {
+      useProfileFormContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setContext = (overrides: Parameters<typeof buildProfileFormContextValue>[0] = {}) => {
-  const onNerRulesChange = jest.fn();
-  jest.mocked(useProfileFormContext).mockReturnValue({
+  const onNerRulesChange = vi.fn();
+  vi.mocked(useProfileFormContext).mockReturnValue({
     ...buildProfileFormContextValue({
       nerRules: [
         {
@@ -39,7 +44,7 @@ const setContext = (overrides: Parameters<typeof buildProfileFormContextValue>[0
 
 describe('NerRulesPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows fields for creating new rules', () => {
@@ -75,7 +80,7 @@ describe('NerRulesPanel', () => {
 
   it('uses trusted model provider options when multiple models are available', async () => {
     setContext({
-      listTrustedNerModels: jest.fn().mockResolvedValue([
+      listTrustedNerModels: vi.fn().mockResolvedValue([
         { id: 'trusted-ner-v1', label: 'trusted-ner-v1' },
         { id: 'trusted-ner-v2', label: 'trusted-ner-v2' },
       ]),
@@ -99,7 +104,7 @@ describe('NerRulesPanel', () => {
           enabled: true,
         },
       ],
-      listTrustedNerModels: jest
+      listTrustedNerModels: vi
         .fn()
         .mockResolvedValue([{ id: 'trusted-ner-v1', label: 'trusted-ner-v1' }]),
     });
@@ -156,7 +161,7 @@ describe('NerRulesPanel', () => {
 
   it('shows trusted model unavailable warning when provider returns no models', async () => {
     setContext({
-      listTrustedNerModels: jest.fn().mockResolvedValue([]),
+      listTrustedNerModels: vi.fn().mockResolvedValue([]),
     });
     render(<NerRulesPanel />);
 

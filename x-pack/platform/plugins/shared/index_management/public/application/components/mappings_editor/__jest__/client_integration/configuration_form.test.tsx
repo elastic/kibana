@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -14,12 +16,15 @@ import { ConfigurationForm } from '../../components/configuration_form';
 import { WithAppDependencies } from './helpers/setup_environment';
 import { loadSyntheticSourceStatus } from '../../../../services/api';
 
-jest.mock('../../../../services/api', () => ({
-  loadSyntheticSourceStatus: jest.fn(),
-}));
+vi.mock('../../../../services/api', () => {
+      const mocked = {
+      loadSyntheticSourceStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/components', () => {
-  const original = jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/components');
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/components', async () => {
+  const original = (await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/components'));
   return {
     ...original,
     // JsonEditorField pulls in the shared-ux code editor (Monaco) which requires Canvas/Suspense.
@@ -33,7 +38,7 @@ jest.mock('@kbn/es-ui-shared-plugin/static/forms/components', () => {
 });
 
 type ConfigurationFormProps = ComponentProps<typeof ConfigurationForm>;
-const loadSyntheticSourceStatusMock = jest.mocked(loadSyntheticSourceStatus);
+const loadSyntheticSourceStatusMock = vi.mocked(loadSyntheticSourceStatus);
 
 const setup = (
   props: Partial<ConfigurationFormProps> = { esNodesPlugins: [] },

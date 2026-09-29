@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEntityRelationships } from './fetch_entity_relationships_graph';
 import {
@@ -26,26 +28,26 @@ describe('fetchEntityRelationships', () => {
 
   beforeEach(() => {
     logger = {
-      trace: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      error: jest.fn(),
+      trace: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as Logger;
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('successful queries', () => {
     it('should NOT use LOOKUP JOIN and should query when entities index exists', async () => {
       const indexName = getEntitiesLatestIndexName('default');
 
-      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      const toRecordsMock = vi.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       });
 
       const entityIds: EntityId[] = [{ id: 'entity-1', isOrigin: false }];
@@ -88,11 +90,11 @@ describe('fetchEntityRelationships', () => {
     });
 
     it('should never set project_routing — entity store queries are always origin-only', async () => {
-      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      const toRecordsMock = vi.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       });
 
       await fetchEntityRelationships({
@@ -109,11 +111,11 @@ describe('fetchEntityRelationships', () => {
 
   describe('DSL filter building', () => {
     it('should build correct terms filter from entityIds', async () => {
-      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      const toRecordsMock = vi.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       });
 
       const entityIds: EntityId[] = [
@@ -165,11 +167,11 @@ describe('fetchEntityRelationships', () => {
     });
 
     it('should handle empty entityIds array', async () => {
-      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      const toRecordsMock = vi.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       });
 
       const entityIds: EntityId[] = [];
@@ -196,9 +198,9 @@ describe('fetchEntityRelationships', () => {
     it('should propagate ESQL errors to the caller', async () => {
       const genericError = new Error('Connection refused');
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
-        toRecords: jest.fn().mockRejectedValue(genericError),
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toRecords: vi.fn().mockRejectedValue(genericError),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       });
 
       const entityIds: EntityId[] = [{ id: 'entity-1', isOrigin: true }];
@@ -218,12 +220,12 @@ describe('fetchEntityRelationships', () => {
       const genericError = new Error('Batch 2 failed');
       let call = 0;
       esClient.asCurrentUser.helpers.esql.mockImplementation(() => ({
-        toRecords: jest.fn().mockImplementation(() => {
+        toRecords: vi.fn().mockImplementation(() => {
           call += 1;
           return call === 1 ? Promise.resolve(goodBatch) : Promise.reject(genericError);
         }),
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       }));
 
       await expect(
@@ -239,11 +241,11 @@ describe('fetchEntityRelationships', () => {
 
   describe('FORK branch-limit batching', () => {
     it('splits ENTITY_RELATIONSHIP_FIELDS into multiple ES|QL queries bounded by the FORK branch limit', async () => {
-      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      const toRecordsMock = vi.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       });
 
       await fetchEntityRelationships({
@@ -277,15 +279,15 @@ describe('fetchEntityRelationships', () => {
       const batch2Records = [{ relationship: 'administers' } as unknown as RelationshipEsqlRow];
       let call = 0;
       esClient.asCurrentUser.helpers.esql.mockImplementation(() => ({
-        toRecords: jest.fn().mockImplementation(() => {
+        toRecords: vi.fn().mockImplementation(() => {
           call += 1;
           return Promise.resolve({
             columns: [{ name: `col${call}`, type: 'keyword' }],
             records: call === 1 ? batch1Records : batch2Records,
           });
         }),
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       }));
 
       const result = await fetchEntityRelationships({
@@ -301,11 +303,11 @@ describe('fetchEntityRelationships', () => {
 
   describe('query structure', () => {
     it('pre-aggregates rows via STATS BY actor/relationship/target for TypeScript-side regrouping', async () => {
-      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      const toRecordsMock = vi.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
+        toArrowTable: vi.fn(),
+        toArrowReader: vi.fn(),
       });
 
       const entityIds: EntityId[] = [{ id: 'entity-1', isOrigin: true }];

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
@@ -39,8 +42,8 @@ describe('fleet metrics task', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: FleetMetricsTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  let mockFetchAgentMetrics: jest.Mock;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
+  let mockFetchAgentMetrics: Mock;
 
   let esClient: ElasticsearchClientMock;
   beforeEach(async () => {
@@ -50,12 +53,12 @@ describe('fleet metrics task', () => {
     mockTaskManagerSetup = tmSetupMock();
     const [{ elasticsearch }] = await mockCore.getStartServices();
     esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-    mockFetchAgentMetrics = jest.fn();
+    mockFetchAgentMetrics = vi.fn();
     mockTask = new FleetMetricsTask(mockTaskManagerSetup, async () => mockFetchAgentMetrics());
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('task lifecycle', () => {
@@ -114,7 +117,7 @@ describe('fleet metrics task', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     const runTask = async (taskInstance = MOCK_TASK_INSTANCE) => {

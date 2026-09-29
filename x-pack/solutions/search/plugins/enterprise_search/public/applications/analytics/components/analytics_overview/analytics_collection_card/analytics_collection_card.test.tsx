@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -17,15 +19,18 @@ import { FilterBy } from '../../../utils/get_formula_by_filter';
 
 import { AnalyticsCollectionCard } from './analytics_collection_card';
 
-jest.mock('@elastic/charts', () => ({
-  ...jest.requireActual('@elastic/charts'),
-  AreaSeries: () => <div data-test-subj="areaSeries" />,
-  Chart: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="enterpriseSearchAnalyticsCollectionCardChart">{children}</div>
-  ),
-  Settings: () => null,
-  Tooltip: () => null,
-}));
+vi.mock('@elastic/charts', () => {
+      const mocked = {
+      ...require('@elastic/charts'),
+      AreaSeries: () => <div data-test-subj="areaSeries" />,
+      Chart: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="enterpriseSearchAnalyticsCollectionCardChart">{children}</div>
+      ),
+      Settings: () => null,
+      Tooltip: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCollection = {
   event_retention_day_length: 180,
@@ -36,7 +41,7 @@ const mockCollection = {
 
 describe('AnalyticsCollectionCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('loading charts', async () => {

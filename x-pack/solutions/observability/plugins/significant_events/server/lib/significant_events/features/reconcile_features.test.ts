@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BaseFeature, Feature } from '@kbn/significant-events-schema';
 import { reconcileInferredFeatures } from './reconcile_features';
@@ -58,7 +60,7 @@ const reconcile = (overrides: Partial<Parameters<typeof reconcileInferredFeature
 
 describe('reconcileInferredFeatures', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('adopts the existing identity when a fingerprint matches', () => {

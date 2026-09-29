@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { AlertEpisode } from '../queries/episodes_query';
@@ -46,12 +48,12 @@ const makeDef = (overrides: Partial<CompositeActionDef> = {}): CompositeActionDe
   displayName: 'Test',
   iconType: 'check',
   isCompatible: () => true,
-  execute: jest.fn().mockResolvedValue({ affected_count: 1, errors: [] }),
+  execute: vi.fn().mockResolvedValue({ affected_count: 1, errors: [] }),
   ...overrides,
 });
 
 describe('createCompositeEpisodeAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('returns an EpisodeAction with the correct static properties', () => {
     const action = createCompositeEpisodeAction(makeDef(), undefined, makeDeps());
@@ -86,7 +88,7 @@ describe('createCompositeEpisodeAction', () => {
       const extension: EpisodeActionExtension = {
         actionId: 'TEST_ACTION',
         isCompatible: () => true,
-        execute: jest.fn(),
+        execute: vi.fn(),
       };
       const action = createCompositeEpisodeAction(
         makeDef({ isCompatible: () => false }),
@@ -104,10 +106,10 @@ describe('createCompositeEpisodeAction', () => {
 
   describe('execute', () => {
     it('calls executeCompositeAction with eligible episodes', async () => {
-      const spy = jest.spyOn(composite, 'executeCompositeAction').mockResolvedValue(undefined);
+      const spy = vi.spyOn(composite, 'executeCompositeAction').mockResolvedValue(undefined);
       const deps = makeDeps();
       const def = makeDef();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const action = createCompositeEpisodeAction(def, undefined, deps);
 
       await action.execute({ episodes: [makeEpisode('e1')], onSuccess });
@@ -124,13 +126,13 @@ describe('createCompositeEpisodeAction', () => {
     });
 
     it('skips execution when no episodes are eligible', async () => {
-      const spy = jest.spyOn(composite, 'executeCompositeAction');
+      const spy = vi.spyOn(composite, 'executeCompositeAction');
       const action = createCompositeEpisodeAction(
         makeDef({ isCompatible: () => false }),
         undefined,
         makeDeps()
       );
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
 
       await action.execute({ episodes: [makeEpisode('e1')], onSuccess });
 
@@ -139,9 +141,9 @@ describe('createCompositeEpisodeAction', () => {
     });
 
     it('shows danger toast on error and does not call onSuccess', async () => {
-      jest.spyOn(composite, 'executeCompositeAction').mockRejectedValue(new Error('fail'));
+      vi.spyOn(composite, 'executeCompositeAction').mockRejectedValue(new Error('fail'));
       const deps = makeDeps();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const action = createCompositeEpisodeAction(makeDef(), undefined, deps);
 
       await action.execute({ episodes: [makeEpisode('e1')], onSuccess });
@@ -151,11 +153,11 @@ describe('createCompositeEpisodeAction', () => {
     });
 
     it('filters eligible episodes correctly for mixed selection', async () => {
-      const spy = jest.spyOn(composite, 'executeCompositeAction').mockResolvedValue(undefined);
+      const spy = vi.spyOn(composite, 'executeCompositeAction').mockResolvedValue(undefined);
       const extension: EpisodeActionExtension = {
         actionId: 'TEST_ACTION',
         isCompatible: (ep) => ep['episode.id'] === 's1',
-        execute: jest.fn(),
+        execute: vi.fn(),
       };
       const action = createCompositeEpisodeAction(
         makeDef({ isCompatible: (ep) => ep['episode.id'] === 'e1' }),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
@@ -26,20 +29,20 @@ describe('remove cases from alerts', () => {
       },
     ];
 
-    const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+    const alertsClientParams: Mocked<ConstructorOptions> = {
       logger: loggingSystemMock.create().get(),
       authorization: alertingAuthMock,
       esClient: esClientMock,
       esClientScoped: esClientMock,
       auditLogger,
       ruleDataService: ruleDataServiceMock.create(),
-      getRuleType: jest.fn(),
-      getRuleList: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
+      getRuleType: vi.fn(),
+      getRuleList: vi.fn(),
+      getAlertIndicesAlias: vi.fn(),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('removes alerts from a case', async () => {
@@ -86,20 +89,20 @@ describe('remove cases from alerts', () => {
     const auditLogger = auditLoggerMock.create();
     const caseIds = ['test-case-1', 'test-case-2'];
 
-    const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+    const alertsClientParams: Mocked<ConstructorOptions> = {
       logger: loggingSystemMock.create().get(),
       authorization: alertingAuthMock,
       esClient: esClientMock,
       esClientScoped: esClientMock,
       auditLogger,
       ruleDataService: ruleDataServiceMock.create(),
-      getRuleType: jest.fn(),
-      getRuleList: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
+      getRuleType: vi.fn(),
+      getRuleList: vi.fn(),
+      getAlertIndicesAlias: vi.fn(),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('removes alerts from a case', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Subject } from 'rxjs';
 import { firstValueFrom, ReplaySubject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
@@ -12,13 +14,13 @@ import { registerAnalyticsContextProvider } from './register_analytics_context_p
 
 describe('registerAnalyticsContextProvider', () => {
   const analyticsClientMock = {
-    registerContextProvider: jest.fn(),
+    registerContextProvider: vi.fn(),
   };
 
   let license$: Subject<ILicense>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     license$ = new ReplaySubject<ILicense>(1);
     registerAnalyticsContextProvider(analyticsClientMock, license$);
   });
@@ -35,11 +37,11 @@ describe('registerAnalyticsContextProvider', () => {
       type: 'basic',
       signature: 'signature',
       isAvailable: true,
-      toJSON: jest.fn(),
-      getUnavailableReason: jest.fn(),
-      hasAtLeast: jest.fn(),
-      check: jest.fn(),
-      getFeature: jest.fn(),
+      toJSON: vi.fn(),
+      getUnavailableReason: vi.fn(),
+      hasAtLeast: vi.fn(),
+      check: vi.fn(),
+      getFeature: vi.fn(),
     });
     await expect(
       firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)

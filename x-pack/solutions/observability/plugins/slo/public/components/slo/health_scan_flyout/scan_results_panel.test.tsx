@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -14,13 +17,13 @@ import { useGetHealthScanResults } from '../../../hooks/use_get_health_scan_resu
 import { useKibana } from '../../../hooks/use_kibana';
 import { render } from '../../../utils/test_helper';
 
-jest.mock('../../../hooks/use_get_health_scan_results');
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_get_health_scan_results');
+vi.mock('../../../hooks/use_kibana');
 
-const mockUseGetHealthScanResults = useGetHealthScanResults as jest.MockedFunction<
+const mockUseGetHealthScanResults = useGetHealthScanResults as MockedFunction<
   typeof useGetHealthScanResults
 >;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const healthyTransform = {
   isProblematic: false,
@@ -58,13 +61,13 @@ const completedScan = (
 
 describe('ScanResultsPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
-        uiSettings: { get: jest.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS') },
+        uiSettings: { get: vi.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS') },
         http: { basePath: { prepend: (path: string) => path } },
-        notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+        notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
       },
     } as any);
 

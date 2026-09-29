@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -13,7 +15,7 @@ import type { Logger } from '@kbn/logging';
 
 describe('migrateLegacyPrivateLocations', () => {
   let loggerMockVal: Logger;
-  let repositoryMock: jest.Mocked<ISavedObjectsRepository>;
+  let repositoryMock: Mocked<ISavedObjectsRepository>;
   beforeEach(() => {
     repositoryMock = savedObjectsRepositoryMock.create();
     loggerMockVal = loggerMock.create();

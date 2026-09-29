@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { nightshiftInvestigationsRouteRepository } from '.';
 import { InvestigationNotFoundError } from '../client/errors';
@@ -14,7 +17,7 @@ const { handler } = nightshiftInvestigationsRouteRepository[endpoint];
 const mockRequest = {} as KibanaRequest;
 
 const makeClient = (overrides: Record<string, unknown> = {}) => ({
-  get: jest.fn().mockResolvedValue({
+  get: vi.fn().mockResolvedValue({
     investigation_id: 'exec-1',
     subject: { type: 'alert', id: 'alert-1' },
     trigger_type: 'manual',
@@ -25,18 +28,18 @@ const makeClient = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const makeResources = (
-  emitter: jest.Mock | undefined,
+  emitter: Mock | undefined,
   params: Record<string, unknown>,
   client?: Record<string, unknown>
 ) => ({
   request: mockRequest,
   params,
-  getInvestigationsClient: jest.fn().mockReturnValue(client ?? makeClient()),
-  getTriggerEmitter: jest.fn().mockReturnValue(emitter),
+  getInvestigationsClient: vi.fn().mockReturnValue(client ?? makeClient()),
+  getTriggerEmitter: vi.fn().mockReturnValue(emitter),
 });
 
 it('emits the started trigger with identity taken from the execution', async () => {
-  const emitter = jest.fn();
+  const emitter = vi.fn();
   const resources = makeResources(emitter, {
     path: { id: 'exec-1' },
     body: { status: 'running' },
@@ -55,7 +58,7 @@ it('emits the started trigger with identity taken from the execution', async () 
 });
 
 it('defaults trigger_type to manual for executions started before it was tracked', async () => {
-  const emitter = jest.fn();
+  const emitter = vi.fn();
   const client = makeClient({ trigger_type: undefined });
   const resources = makeResources(
     emitter,
@@ -75,7 +78,7 @@ it('defaults trigger_type to manual for executions started before it was tracked
 });
 
 it('emits the completed trigger with a completed_at timestamp', async () => {
-  const emitter = jest.fn();
+  const emitter = vi.fn();
   const resources = makeResources(emitter, {
     path: { id: 'exec-1' },
     body: { status: 'completed' },
@@ -91,7 +94,7 @@ it('emits the completed trigger with a completed_at timestamp', async () => {
 });
 
 it('emits the failed trigger when status is failed', async () => {
-  const emitter = jest.fn();
+  const emitter = vi.fn();
   const resources = makeResources(emitter, {
     path: { id: 'exec-1' },
     body: { status: 'failed' },
@@ -107,7 +110,7 @@ it('emits the failed trigger when status is failed', async () => {
 });
 
 it('does not emit when the execution has no subject (bare manual run)', async () => {
-  const emitter = jest.fn();
+  const emitter = vi.fn();
   const client = makeClient();
   client.get.mockResolvedValue({
     investigation_id: 'exec-1',
@@ -134,7 +137,7 @@ it('rejects with 404 when the execution is not an investigation', async () => {
   const client = makeClient();
   client.get.mockRejectedValue(new InvestigationNotFoundError('nope'));
   const resources = makeResources(
-    jest.fn(),
+    vi.fn(),
     {
       path: { id: 'not-an-investigation' },
       body: { status: 'completed' },

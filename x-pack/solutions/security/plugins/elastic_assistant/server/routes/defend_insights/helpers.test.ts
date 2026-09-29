@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Document } from '@langchain/core/documents';
@@ -31,20 +34,23 @@ import {
 } from './helpers';
 import { appContextService } from '../../services/app_context';
 
-jest.mock('../../services/app_context', () => ({
-  appContextService: {
-    getRegisteredCallbacks: jest.fn(),
-  },
-}));
+vi.mock('../../services/app_context', () => {
+      const mocked = {
+      appContextService: {
+        getRegisteredCallbacks: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('defend insights route helpers', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getAssistantTool', () => {
     it('should return the defend-insights tool', () => {
-      const getRegisteredTools = jest.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_ID }]);
+      const getRegisteredTools = vi.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_ID }]);
       const result = getAssistantTool(getRegisteredTools, 'pluginName');
       expect(result).toEqual({ id: DEFEND_INSIGHTS_ID });
     });
@@ -65,7 +71,7 @@ describe('defend insights route helpers', () => {
         langSmithApiKey: 'apiKey',
         logger: {} as any,
         latestReplacements: {},
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         request: {} as any,
         contentReferencesStore: {} as ContentReferencesStore,
       };
@@ -89,16 +95,16 @@ describe('defend insights route helpers', () => {
         defendInsightId: 'id',
         authenticatedUser: {} as any,
         dataClient: {
-          getDefendInsight: jest.fn().mockResolvedValueOnce({
+          getDefendInsight: vi.fn().mockResolvedValueOnce({
             status: DefendInsightStatus.enum.running,
             backingIndex: 'index',
           }),
-          updateDefendInsight: jest.fn(),
+          updateDefendInsight: vi.fn(),
         } as any,
         err: new Error('error'),
         latestReplacements: {},
-        logger: { error: jest.fn() } as any,
-        telemetry: { reportEvent: jest.fn() } as any,
+        logger: { error: vi.fn() } as any,
+        telemetry: { reportEvent: vi.fn() } as any,
       };
       await handleToolError(params);
 
@@ -124,18 +130,18 @@ describe('defend insights route helpers', () => {
         insights: ['insight1', 'insight2'] as any as DefendInsights,
         authenticatedUser: {} as any,
         dataClient: {
-          getDefendInsight: jest.fn().mockResolvedValueOnce({
+          getDefendInsight: vi.fn().mockResolvedValueOnce({
             status: DefendInsightStatus.enum.running,
             backingIndex: 'backing-index-name',
             generationIntervals: [],
           }),
-          updateDefendInsight: jest.fn(),
+          updateDefendInsight: vi.fn(),
         } as any,
         latestReplacements: {},
-        logger: { error: jest.fn() } as any,
+        logger: { error: vi.fn() } as any,
         rawDefendInsights: '{"eventsContextCount": 5, "insights": ["insight1", "insight2"]}',
         startTime: moment(),
-        telemetry: { reportEvent: jest.fn() } as any,
+        telemetry: { reportEvent: vi.fn() } as any,
         insightType: DefendInsightType.enum.incompatible_antivirus,
       };
       await updateDefendInsights(params);
@@ -186,7 +192,7 @@ describe('defend insights route helpers', () => {
         defendInsights: [insight],
         authenticatedUser: {} as any,
         dataClient: {
-          updateDefendInsights: jest.fn().mockResolvedValueOnce([{ id: insightId }]),
+          updateDefendInsights: vi.fn().mockResolvedValueOnce([{ id: insightId }]),
         } as any,
       };
 
@@ -217,7 +223,7 @@ describe('defend insights route helpers', () => {
         defendInsights: [],
         authenticatedUser: {} as any,
         dataClient: {
-          updateDefendInsights: jest.fn(),
+          updateDefendInsights: vi.fn(),
         } as any,
       };
 
@@ -230,11 +236,11 @@ describe('defend insights route helpers', () => {
 
   describe('runExternalCallbacks', () => {
     it('should call all registered callbacks with provided arguments', async () => {
-      const mockCallback1 = jest.fn();
-      const mockCallback2 = jest.fn();
+      const mockCallback1 = vi.fn();
+      const mockCallback2 = vi.fn();
       const mockRequest = {} as any;
 
-      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([
+      (appContextService.getRegisteredCallbacks as Mock).mockReturnValue([
         mockCallback1,
         mockCallback2,
       ]);
@@ -246,11 +252,11 @@ describe('defend insights route helpers', () => {
     });
 
     it('should support callbacks with two arguments', async () => {
-      const mockCallback = jest.fn();
+      const mockCallback = vi.fn();
       const mockRequest = {} as any;
       const mockArg = { extra: true };
 
-      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([mockCallback]);
+      (appContextService.getRegisteredCallbacks as Mock).mockReturnValue([mockCallback]);
 
       await runExternalCallbacks('some-callback-id' as any, mockRequest, mockArg);
 
@@ -260,7 +266,7 @@ describe('defend insights route helpers', () => {
     it('should handle empty callback list gracefully', async () => {
       const mockRequest = {} as any;
 
-      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([]);
+      (appContextService.getRegisteredCallbacks as Mock).mockReturnValue([]);
 
       await expect(
         runExternalCallbacks('some-callback-id' as any, mockRequest)

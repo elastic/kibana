@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SearchSessionStatus, SearchStatus } from '../../../../common';
 import moment from 'moment';
@@ -17,8 +19,8 @@ import {
 import { getSessionStatus } from './get_session_status';
 import { getSearchStatus } from './get_search_status';
 
-jest.mock('./get_search_status');
-const mockGetSearchStatus = jest.mocked(getSearchStatus);
+vi.mock('./get_search_status');
+const mockGetSearchStatus = vi.mocked(getSearchStatus);
 
 const getDeps = () => {
   return {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 import { Markdown } from '@kbn/shared-ux-markdown';
@@ -16,8 +18,8 @@ const mockMarkDownDescription = () => (
   <Markdown markdownContent="Section three item 1 blah blah blah" />
 );
 
-jest.mock('../../sections', () => {
-  const module = jest.requireActual('../../sections');
+vi.mock('../../sections', async () => {
+  const module = (await vi.importActual('../../sections'));
   return {
     ...module,
     getESQLDocsSections: () => ({

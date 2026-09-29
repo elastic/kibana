@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -21,13 +23,16 @@ const mockApplication = {
   currentLocation$,
 };
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: mockApplication,
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: mockApplication,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useIsOnManagementLlmConnectorsPage', () => {
   beforeEach(() => {

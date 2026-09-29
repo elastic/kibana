@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { screen, fireEvent, act } from '@testing-library/react';
 
@@ -51,7 +53,7 @@ const mockPackagePolicies = [
 
 const mockPagination = {
   pagination: { currentPage: 1, pageSize: 10, totalItemCount: 1, pageSizeOptions: [10, 20, 50] },
-  setPagination: jest.fn(),
+  setPagination: vi.fn(),
   pageSizeOptions: [10, 20, 50],
 };
 
@@ -64,7 +66,7 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
         isLoading={false}
         packagePolicies={mockPackagePolicies}
         packagePoliciesTotal={1}
-        refreshPackagePolicies={jest.fn()}
+        refreshPackagePolicies={vi.fn()}
         pagination={mockPagination}
       />
     );
@@ -82,7 +84,7 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
         isLoading={true}
         packagePolicies={[]}
         packagePoliciesTotal={0}
-        refreshPackagePolicies={jest.fn()}
+        refreshPackagePolicies={vi.fn()}
         pagination={mockPagination}
       />
     );
@@ -98,7 +100,7 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
         isLoading={false}
         packagePolicies={[]}
         packagePoliciesTotal={0}
-        refreshPackagePolicies={jest.fn()}
+        refreshPackagePolicies={vi.fn()}
         pagination={mockPagination}
       />
     );
@@ -114,7 +116,7 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
         isLoading={false}
         packagePolicies={mockPackagePolicies}
         packagePoliciesTotal={1}
-        refreshPackagePolicies={jest.fn()}
+        refreshPackagePolicies={vi.fn()}
         pagination={mockPagination}
       />
     );

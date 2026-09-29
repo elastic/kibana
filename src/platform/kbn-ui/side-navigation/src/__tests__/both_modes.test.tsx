@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor, within, act, render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -62,7 +64,7 @@ describe('Both modes', () => {
 
   beforeEach(() => {
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
   });

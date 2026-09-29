@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -16,10 +18,10 @@ import { unifiedHistogramServicesMock } from '../../../__mocks__/services';
 import { useEditVisualization } from './use_edit_visualization';
 
 const getTriggerCompatibleActions = unifiedHistogramServicesMock.uiActions
-  .getTriggerCompatibleActions as jest.Mock;
+  .getTriggerCompatibleActions as Mock;
 
 const navigateToPrefilledEditor = unifiedHistogramServicesMock.lens
-  .navigateToPrefilledEditor as jest.Mock;
+  .navigateToPrefilledEditor as Mock;
 
 describe('useEditVisualization', () => {
   beforeEach(() => {

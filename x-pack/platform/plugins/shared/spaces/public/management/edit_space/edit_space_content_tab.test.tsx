@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -30,7 +32,7 @@ import { getRolesAPIClientMock } from '../roles_api_client.mock';
 import { getSecurityLicenseMock } from '../security_license.mock';
 
 const getUrlForApp = (appId: string) => appId;
-const navigateToUrl = jest.fn();
+const navigateToUrl = vi.fn();
 const spacesManager = spacesManagerMock.create();
 const getRolesAPIClient = getRolesAPIClientMock;
 const getPrivilegeAPIClient = getPrivilegeAPIClientMock;
@@ -83,10 +85,10 @@ describe('EditSpaceContentTab', () => {
     disabledFeatures: [],
   };
 
-  const getSpaceContentSpy = jest.spyOn(spacesManager, 'getContentForSpace');
+  const getSpaceContentSpy = vi.spyOn(spacesManager, 'getContentForSpace');
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render with a loading indicator initially', () => {

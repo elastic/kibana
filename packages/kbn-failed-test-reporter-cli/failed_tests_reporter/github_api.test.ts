@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { GithubApi, nextPageUrl } from './github_api';
@@ -22,14 +24,14 @@ function jsonResponse(data: unknown): Response {
 
 describe('GithubApi#getIssueComments()', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('follows pagination until a short page and normalizes missing bodies', async () => {
     const page1 = Array.from({ length: 100 }, (_, i) => ({ body: `comment ${i}` }));
     const page2 = [{ body: 'last comment' }, {}];
 
-    const fetchMock = jest
+    const fetchMock = vi
       .spyOn(global, 'fetch')
       .mockImplementation(async (url) =>
         jsonResponse(new URL(String(url)).searchParams.get('page') === '1' ? page1 : page2)
@@ -50,7 +52,7 @@ describe('GithubApi#getIssueComments()', () => {
   });
 
   it('stops after a single page when it is not full', async () => {
-    const fetchMock = jest
+    const fetchMock = vi
       .spyOn(global, 'fetch')
       .mockResolvedValue(jsonResponse([{ body: 'only comment' }]));
 
@@ -62,7 +64,7 @@ describe('GithubApi#getIssueComments()', () => {
   });
 
   it('returns an empty list without requests in dry-run mode', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch');
+    const fetchMock = vi.spyOn(global, 'fetch');
 
     const api = new GithubApi({ log, token: undefined, dryRun: true });
 
@@ -73,12 +75,12 @@ describe('GithubApi#getIssueComments()', () => {
 
 describe('GithubApi writes', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
-    jest.useRealTimers();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it('logs writes without sending them in dry-run mode', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch');
+    const fetchMock = vi.spyOn(global, 'fetch');
     const api = new GithubApi({ log, token: undefined, dryRun: true });
 
     await api.editIssueBodyAndEnsureOpen(7, 'body');
@@ -89,25 +91,25 @@ describe('GithubApi writes', () => {
   });
 
   it('spaces consecutive writes a second apart but never delays reads', async () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-09-09T09:00:00.000Z'));
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () => jsonResponse([]));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-09T09:00:00.000Z'));
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async () => jsonResponse([]));
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
 
     const first = api.addIssueComment(1, 'a');
-    await jest.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(0);
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     await first;
     const second = api.addIssueComment(2, 'b');
-    await jest.advanceTimersByTimeAsync(999);
+    await vi.advanceTimersByTimeAsync(999);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    await jest.advanceTimersByTimeAsync(1);
+    await vi.advanceTimersByTimeAsync(1);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     await second;
 
     const read = api.getIssueComments(3);
-    await jest.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(0);
     expect(fetchMock).toHaveBeenCalledTimes(3);
     await read;
   });
@@ -134,8 +136,8 @@ describe('nextPageUrl()', () => {
 
 describe('GithubApi#listIssues()', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
-    jest.useRealTimers();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   const issue = (number: number, extra: Record<string, unknown> = {}) => ({
@@ -163,7 +165,7 @@ describe('GithubApi#listIssues()', () => {
     api.listIssues({ state: 'open', pageIntervalMs: 0, ...options });
 
   it('lists the issues of the repository with the given filters, 100 a page', async () => {
-    const fetchMock = jest
+    const fetchMock = vi
       .spyOn(global, 'fetch')
       .mockImplementation(async () => page([issue(5), issue(6)]));
 
@@ -191,7 +193,7 @@ describe('GithubApi#listIssues()', () => {
   });
 
   it('sends only the state and page size when no filter is given', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () => page([]));
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async () => page([]));
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
     await list(api);
@@ -201,7 +203,7 @@ describe('GithubApi#listIssues()', () => {
   });
 
   it('follows the Link header, drops pull requests and normalizes missing bodies', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async (url) => {
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async (url) => {
       if (new URL(String(url)).searchParams.get('page') === '2') {
         return page([issue(3, { body: null })]);
       }
@@ -223,8 +225,8 @@ describe('GithubApi#listIssues()', () => {
   });
 
   it('pauses between pages but not before the first one', async () => {
-    jest.useFakeTimers();
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async (url) => {
+    vi.useFakeTimers();
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async (url) => {
       const pageNumber = new URL(String(url)).searchParams.get('page') ?? '1';
       return pageNumber === '3'
         ? page([issue(3)])
@@ -237,18 +239,18 @@ describe('GithubApi#listIssues()', () => {
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
     const pending = api.listIssues({ state: 'open', pageIntervalMs: 300 });
 
-    await jest.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(0);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    await jest.advanceTimersByTimeAsync(300);
+    await vi.advanceTimersByTimeAsync(300);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    await jest.advanceTimersByTimeAsync(300);
+    await vi.advanceTimersByTimeAsync(300);
     expect(fetchMock).toHaveBeenCalledTimes(3);
 
     expect((await pending).map(({ number }) => number)).toEqual([1, 2, 3]);
   });
 
   it('still fetches in dry-run mode because listing is read-only', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () => page([issue(1)]));
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async () => page([issue(1)]));
 
     const api = new GithubApi({ log, token: undefined, dryRun: true });
     const issues = await list(api);
@@ -258,18 +260,18 @@ describe('GithubApi#listIssues()', () => {
   });
 
   it('waits as long as retry-after says when rate limited', async () => {
-    jest.useFakeTimers();
-    const fetchMock = jest
+    vi.useFakeTimers();
+    const fetchMock = vi
       .spyOn(global, 'fetch')
       .mockImplementationOnce(
         async () => new Response('rate limited', { status: 403, headers: { 'Retry-After': '7' } })
       )
       .mockImplementationOnce(async () => page([issue(1)]));
-    jest.spyOn(log, 'warning').mockImplementation(() => {});
+    vi.spyOn(log, 'warning').mockImplementation(() => {});
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
     const pending = list(api);
-    await jest.advanceTimersByTimeAsync(7000);
+    await vi.advanceTimersByTimeAsync(7000);
     const issues = await pending;
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -277,9 +279,9 @@ describe('GithubApi#listIssues()', () => {
   });
 
   it('waits until the primary rate limit resets when only the x-ratelimit headers are sent', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const resetInSeconds = 20;
-    const fetchMock = jest
+    const fetchMock = vi
       .spyOn(global, 'fetch')
       .mockImplementationOnce(
         async () =>
@@ -292,13 +294,13 @@ describe('GithubApi#listIssues()', () => {
           })
       )
       .mockImplementationOnce(async () => page([issue(1)]));
-    const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
+    const warning = vi.spyOn(log, 'warning').mockImplementation(() => {});
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
     const pending = list(api);
-    await jest.advanceTimersByTimeAsync(resetInSeconds * 1000);
+    await vi.advanceTimersByTimeAsync(resetInSeconds * 1000);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    await jest.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(2000);
     const issues = await pending;
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -307,7 +309,7 @@ describe('GithubApi#listIssues()', () => {
   });
 
   it('backs off from a minute when a secondary rate limit sends no headers at all', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const secondaryLimit = () =>
       new Response(
         JSON.stringify({
@@ -316,19 +318,19 @@ describe('GithubApi#listIssues()', () => {
         }),
         { status: 403 }
       );
-    const fetchMock = jest
+    const fetchMock = vi
       .spyOn(global, 'fetch')
       .mockImplementationOnce(async () => secondaryLimit())
       .mockImplementationOnce(async () => secondaryLimit())
       .mockImplementationOnce(async () => page([issue(1)]));
-    const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
+    const warning = vi.spyOn(log, 'warning').mockImplementation(() => {});
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
     const pending = list(api);
 
-    await jest.advanceTimersByTimeAsync(60_000);
+    await vi.advanceTimersByTimeAsync(60_000);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    await jest.advanceTimersByTimeAsync(120_000);
+    await vi.advanceTimersByTimeAsync(120_000);
     const issues = await pending;
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
@@ -338,7 +340,7 @@ describe('GithubApi#listIssues()', () => {
   });
 
   it('does not retry a 403 that is not a rate limit', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(
       async () =>
         new Response(JSON.stringify({ message: 'Resource not accessible by integration' }), {
           status: 403,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,8 +14,8 @@ import { TestProviders } from '../../../../common/mock';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 import { DefaultFieldRenderer, DefaultFieldRendererOverflow } from '.';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/security-solution-navigation/src/context');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('@kbn/security-solution-navigation/src/context');
 mockGetUrlForApp.mockImplementation(
   (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
     `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`

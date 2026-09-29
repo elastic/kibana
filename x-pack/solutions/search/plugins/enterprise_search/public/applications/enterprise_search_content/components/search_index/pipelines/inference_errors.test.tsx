@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -22,9 +24,9 @@ describe('InferenceErrors', () => {
     isLoading: true,
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(defaultValues);
-    setMockActions({ makeRequest: jest.fn() });
+    setMockActions({ makeRequest: vi.fn() });
   });
 
   it('renders spinner when loading data', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
@@ -16,15 +19,21 @@ import {
   decodeMultipleRisonParams,
 } from '@kbn/cloud-security-posture/src/utils/query_utils';
 
-jest.mock('@kbn/cloud-security-posture/src/utils/query_utils', () => ({
-  decodeMultipleRisonParams: jest.fn(() => ({})),
-}));
+vi.mock('@kbn/cloud-security-posture/src/utils/query_utils', () => {
+      const mocked = {
+      decodeMultipleRisonParams: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cloud-security-posture', () => ({
-  encodeQuery: jest.fn(() => `cspq=mocked-cspq-string`),
-}));
+vi.mock('@kbn/cloud-security-posture', () => {
+      const mocked = {
+      encodeQuery: vi.fn(() => `cspq=mocked-cspq-string`),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDecodeMultipleRisonParams = decodeMultipleRisonParams as jest.MockedFunction<
+const mockDecodeMultipleRisonParams = decodeMultipleRisonParams as MockedFunction<
   typeof decodeMultipleRisonParams
 >;
 
@@ -44,7 +53,7 @@ describe('useUrlQuery', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return default query when no URL parameters exist', () => {

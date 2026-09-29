@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { AnomalySeverityBadge } from './anomaly_severity_badge';
 
-jest.mock('@kbn/ml-anomaly-utils', () => {
-  const { getSeverityColor } = jest.requireActual('@kbn/ml-anomaly-utils/get_severity_color');
+vi.mock('@kbn/ml-anomaly-utils', async () => {
+  const { getSeverityColor } = (await vi.importActual('@kbn/ml-anomaly-utils/get_severity_color'));
 
   return {
     useSeverityColor: getSeverityColor,

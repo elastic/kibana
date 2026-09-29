@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -15,8 +17,8 @@ import { UpsellingProvider } from '../components/upselling_provider';
 
 const mockUpselling = new UpsellingService();
 
-jest.mock('../lib/kibana', () => {
-  const original = jest.requireActual('../lib/kibana');
+vi.mock('../lib/kibana', async () => {
+  const original = (await vi.importActual('../lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -36,7 +38,7 @@ const RenderWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
 
 describe('use_upselling', () => {
   test('useUpsellingComponent returns sections', () => {
-    const getSectionsValueSpy = jest.spyOn(mockUpselling, 'getSectionsValue');
+    const getSectionsValueSpy = vi.spyOn(mockUpselling, 'getSectionsValue');
 
     mockUpselling.setSections({
       entity_analytics_panel: TestComponent,
@@ -61,7 +63,7 @@ describe('use_upselling', () => {
   });
 
   test('useUpsellingMessage returns messages', () => {
-    const getMessagesValueSpy = jest.spyOn(mockUpselling, 'getMessagesValue');
+    const getMessagesValueSpy = vi.spyOn(mockUpselling, 'getMessagesValue');
 
     const testMessage = 'test message';
     mockUpselling.setMessages({

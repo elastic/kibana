@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole, type Prompt, type ToolCall, type ToolMessage } from '@kbn/inference-common';
 import type { Span } from '@opentelemetry/api';
@@ -12,35 +14,38 @@ import { markToolSpanAsError } from '@kbn/inference-tracing';
 import { executeUntilValid } from './execute_until_valid';
 
 const mockToolSpan = {
-  recordException: jest.fn(),
-  setAttribute: jest.fn(),
-  setStatus: jest.fn(),
-  end: jest.fn(),
+  recordException: vi.fn(),
+  setAttribute: vi.fn(),
+  setStatus: vi.fn(),
+  end: vi.fn(),
 } as unknown as Span;
 
-jest.mock('@kbn/inference-tracing', () => ({
-  ElasticGenAIAttributes: {
-    InferenceSpanKind: 'CHAIN',
-  },
-  markToolSpanAsError: jest.fn(),
-  withActiveInferenceSpan: jest.fn(async (_name: string, _options: unknown, fn: () => unknown) =>
-    fn()
-  ),
-  withExecuteToolSpan: jest.fn(
-    async (_toolName: string, _attributes: unknown, fn: (span?: Span) => Promise<unknown>) =>
-      fn(mockToolSpan)
-  ),
-}));
+vi.mock('@kbn/inference-tracing', () => {
+      const mocked = {
+      ElasticGenAIAttributes: {
+        InferenceSpanKind: 'CHAIN',
+      },
+      markToolSpanAsError: vi.fn(),
+      withActiveInferenceSpan: vi.fn(async (_name: string, _options: unknown, fn: () => unknown) =>
+        fn()
+      ),
+      withExecuteToolSpan: vi.fn(
+        async (_toolName: string, _attributes: unknown, fn: (span?: Span) => Promise<unknown>) =>
+          fn(mockToolSpan)
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('executeUntilValid', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('resolves with the first prompt response when no tool errors occur', async () => {
     const mockContent = [{ text: 'complete' }];
 
-    const promptSpy = jest.fn().mockResolvedValue({
+    const promptSpy = vi.fn().mockResolvedValue({
       content: mockContent,
       toolCalls: [],
       tokens: { completion: 10 },
@@ -79,14 +84,14 @@ describe('executeUntilValid', () => {
       tokens: { completion: 2 },
     };
 
-    const promptSpy = jest
+    const promptSpy = vi
       .fn()
       .mockResolvedValueOnce(firstPromptResponse)
       .mockResolvedValueOnce(successfulPromptResponse);
 
     const toolCallbackError = new Error('tool failure');
 
-    const toolCallback = jest.fn().mockRejectedValueOnce(toolCallbackError);
+    const toolCallback = vi.fn().mockRejectedValueOnce(toolCallbackError);
 
     const result = await executeUntilValid({
       finalToolChoice: { function: 'repair' } as any,
@@ -124,7 +129,7 @@ describe('executeUntilValid', () => {
       toolCallId: 'call-1',
     } as unknown as ToolCall;
 
-    const promptSpy = jest.fn().mockResolvedValue({
+    const promptSpy = vi.fn().mockResolvedValue({
       content: [],
       toolCalls: [persistentToolCall],
       tokens: { completion: 1 },
@@ -137,7 +142,7 @@ describe('executeUntilValid', () => {
       inferenceClient: { prompt: promptSpy } as unknown as BoundInferenceClient,
       maxRetries: 0,
       prompt: {} as unknown as Prompt,
-      toolCallbacks: { retry: jest.fn().mockRejectedValue(persistentError) },
+      toolCallbacks: { retry: vi.fn().mockRejectedValue(persistentError) },
       input: {},
     } as unknown as Parameters<typeof executeUntilValid>[0];
 

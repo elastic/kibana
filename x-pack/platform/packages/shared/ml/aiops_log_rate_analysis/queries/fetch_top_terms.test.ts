@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { paramsMock } from './__mocks__/params_match_all';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -15,14 +17,14 @@ import { topTermsResult } from './__mocks__/top_terms_result';
 import { fetchTopTerms } from './fetch_top_terms';
 
 const esClientMock = {
-  search: jest.fn().mockImplementation(() => topTermsSearchResponseMock),
+  search: vi.fn().mockImplementation(() => topTermsSearchResponseMock),
 } as unknown as ElasticsearchClient;
 
 const loggerMock = {} as unknown as Logger;
 
 describe('fetchTopTerms', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should fetch top terms successfully', async () => {
@@ -31,7 +33,7 @@ describe('fetchTopTerms', () => {
     const result = await fetchTopTerms({
       esClient: esClientMock,
       logger: loggerMock,
-      emitError: jest.fn(),
+      emitError: vi.fn(),
       abortSignal,
       arguments: {
         ...paramsMock,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -29,9 +31,9 @@ describe('AuditLogService', () => {
   } = {}) => {
     const security = {
       audit: {
-        asScoped: jest.fn(() => {
+        asScoped: vi.fn(() => {
           if (asScopedThrows) throw asScopedThrows;
-          return auditLogger ?? { log: jest.fn() };
+          return auditLogger ?? { log: vi.fn() };
         }),
       },
     } as unknown as SecurityServiceStart;
@@ -44,7 +46,7 @@ describe('AuditLogService', () => {
   };
 
   it('logs agent create event', () => {
-    const auditLogger = { log: jest.fn() };
+    const auditLogger = { log: vi.fn() };
     const { service } = createService({ auditLogger });
     const request = {} as KibanaRequest;
 
@@ -58,7 +60,7 @@ describe('AuditLogService', () => {
   });
 
   it('logs agent update event', () => {
-    const auditLogger = { log: jest.fn() };
+    const auditLogger = { log: vi.fn() };
     const { service } = createService({ auditLogger });
     const request = {} as KibanaRequest;
 
@@ -72,7 +74,7 @@ describe('AuditLogService', () => {
   });
 
   it('logs agent delete event', () => {
-    const auditLogger = { log: jest.fn() };
+    const auditLogger = { log: vi.fn() };
     const { service } = createService({ auditLogger });
     const request = {} as KibanaRequest;
 
@@ -86,7 +88,7 @@ describe('AuditLogService', () => {
   });
 
   it('logs tool create event', () => {
-    const auditLogger = { log: jest.fn() };
+    const auditLogger = { log: vi.fn() };
     const { service } = createService({ auditLogger });
     const request = {} as KibanaRequest;
 
@@ -100,7 +102,7 @@ describe('AuditLogService', () => {
   });
 
   it('logs tool update event', () => {
-    const auditLogger = { log: jest.fn() };
+    const auditLogger = { log: vi.fn() };
     const { service } = createService({ auditLogger });
     const request = {} as KibanaRequest;
 
@@ -114,7 +116,7 @@ describe('AuditLogService', () => {
   });
 
   it('logs tool delete event', () => {
-    const auditLogger = { log: jest.fn() };
+    const auditLogger = { log: vi.fn() };
     const { service } = createService({ auditLogger });
     const request = {} as KibanaRequest;
 
@@ -129,7 +131,7 @@ describe('AuditLogService', () => {
 
   it('swallows errors when audit logger throws', () => {
     const auditLogger = {
-      log: jest.fn(() => {
+      log: vi.fn(() => {
         throw new Error('boom');
       }),
     };
@@ -159,7 +161,7 @@ describe('AuditLogService', () => {
   it('skips bulk tool events when skipped=true', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolCreatedSpy = jest.spyOn(service, 'logToolCreated').mockImplementation(() => {});
+    const logToolCreatedSpy = vi.spyOn(service, 'logToolCreated').mockImplementation(() => {});
 
     service.logBulkToolEvents(request, AgentBuilderAuditAction.TOOL_CREATE, [
       { toolId: 't1', skipped: true },
@@ -172,7 +174,7 @@ describe('AuditLogService', () => {
   it('uses tool delete handler for bulk delete action', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolDeletedSpy = jest.spyOn(service, 'logToolDeleted').mockImplementation(() => {});
+    const logToolDeletedSpy = vi.spyOn(service, 'logToolDeleted').mockImplementation(() => {});
 
     service.logBulkToolEvents(request, AgentBuilderAuditAction.TOOL_DELETE, [{ toolId: 't1' }]);
 
@@ -182,7 +184,7 @@ describe('AuditLogService', () => {
   it('maps bulk delete fulfilled true to success tool delete audit', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolDeletedSpy = jest.spyOn(service, 'logToolDeleted').mockImplementation(() => {});
+    const logToolDeletedSpy = vi.spyOn(service, 'logToolDeleted').mockImplementation(() => {});
 
     service.logBulkToolDeleteResults(request, {
       ids: ['t1'],
@@ -195,7 +197,7 @@ describe('AuditLogService', () => {
   it('maps bulk delete fulfilled false to failure tool delete audit', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolDeletedSpy = jest.spyOn(service, 'logToolDeleted').mockImplementation(() => {});
+    const logToolDeletedSpy = vi.spyOn(service, 'logToolDeleted').mockImplementation(() => {});
 
     service.logBulkToolDeleteResults(request, {
       ids: ['t1'],
@@ -214,7 +216,7 @@ describe('AuditLogService', () => {
   it('maps bulk delete rejected to failure tool delete audit', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolDeletedSpy = jest.spyOn(service, 'logToolDeleted').mockImplementation(() => {});
+    const logToolDeletedSpy = vi.spyOn(service, 'logToolDeleted').mockImplementation(() => {});
 
     service.logBulkToolDeleteResults(request, {
       ids: ['t1'],
@@ -233,7 +235,7 @@ describe('AuditLogService', () => {
   it('maps bulk skill delete fulfilled true to success skill delete audit', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logSkillDeletedSpy = jest.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
+    const logSkillDeletedSpy = vi.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
 
     service.logBulkSkillDeleteResults(request, {
       ids: ['s1'],
@@ -246,7 +248,7 @@ describe('AuditLogService', () => {
   it('maps bulk skill delete fulfilled false to failure skill delete audit', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logSkillDeletedSpy = jest.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
+    const logSkillDeletedSpy = vi.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
 
     service.logBulkSkillDeleteResults(request, {
       ids: ['s1'],
@@ -265,7 +267,7 @@ describe('AuditLogService', () => {
   it('maps bulk skill delete rejected to failure skill delete audit', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logSkillDeletedSpy = jest.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
+    const logSkillDeletedSpy = vi.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
 
     service.logBulkSkillDeleteResults(request, {
       ids: ['s1'],
@@ -284,7 +286,7 @@ describe('AuditLogService', () => {
   it('maps bulk create MCP success to tool create audit', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolCreatedSpy = jest.spyOn(service, 'logToolCreated').mockImplementation(() => {});
+    const logToolCreatedSpy = vi.spyOn(service, 'logToolCreated').mockImplementation(() => {});
 
     service.logBulkCreateMcpToolResults(request, {
       results: [{ toolId: 'n.t1', mcpToolName: 't1', success: true }],
@@ -296,7 +298,7 @@ describe('AuditLogService', () => {
   it('does not log bulk create MCP skipped results', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolCreatedSpy = jest.spyOn(service, 'logToolCreated').mockImplementation(() => {});
+    const logToolCreatedSpy = vi.spyOn(service, 'logToolCreated').mockImplementation(() => {});
 
     service.logBulkCreateMcpToolResults(request, {
       results: [{ toolId: 'n.t1', mcpToolName: 't1', success: true, skipped: true }],
@@ -308,7 +310,7 @@ describe('AuditLogService', () => {
   it('maps bulk create MCP failure to tool create audit with serialized message', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolCreatedSpy = jest.spyOn(service, 'logToolCreated').mockImplementation(() => {});
+    const logToolCreatedSpy = vi.spyOn(service, 'logToolCreated').mockImplementation(() => {});
 
     service.logBulkCreateMcpToolResults(request, {
       results: [
@@ -334,7 +336,7 @@ describe('AuditLogService', () => {
   it('maps bulk create MCP failure to tool create audit with unknown message fallback', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
-    const logToolCreatedSpy = jest.spyOn(service, 'logToolCreated').mockImplementation(() => {});
+    const logToolCreatedSpy = vi.spyOn(service, 'logToolCreated').mockImplementation(() => {});
 
     // This should be a SerializedAgentBuilderError, but we intentionally simulate a malformed
     // runtime payload to verify the fallback behavior.

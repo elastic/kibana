@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CreateAlert } from '.';
@@ -12,9 +14,9 @@ import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
 
 describe('CreateAlert', () => {
-  const editSubAction = jest.fn();
-  const editAction = jest.fn();
-  const editOptionalSubAction = jest.fn();
+  const editSubAction = vi.fn();
+  const editAction = vi.fn();
+  const editOptionalSubAction = vi.fn();
 
   const options = {
     showSaveError: false,
@@ -28,7 +30,7 @@ describe('CreateAlert', () => {
     editOptionalSubAction,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('does not render the json editor by default', () => {
     render(<CreateAlert {...options} />);

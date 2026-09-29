@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,12 +16,12 @@ import { renderWithTestingProviders } from '../../../common/mock';
 describe('TemplateResetModal', () => {
   const user = userEvent.setup({ pointerEventsCheck: 0 });
   const defaultProps = {
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the modal with correct title', () => {

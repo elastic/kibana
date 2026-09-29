@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import moment from 'moment-timezone';
 
 import {
@@ -32,9 +35,9 @@ const updatedMetadata = {
   updatedBy: 'updated-user',
 };
 
-const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
+const mockContext: Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
-  getModificationMetadata: jest.fn(),
+  getModificationMetadata: vi.fn(),
   savedObjectsClient,
   uiSettings,
 };
@@ -45,15 +48,15 @@ describe('MaintenanceWindowClient - create', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should create maintenance window with the correct parameters', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -109,7 +112,7 @@ describe('MaintenanceWindowClient - create', () => {
   });
 
   it('should create maintenance window with category ids', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -156,7 +159,7 @@ describe('MaintenanceWindowClient - create', () => {
   });
 
   it('should create maintenance window with scope', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -272,7 +275,7 @@ describe('MaintenanceWindowClient - create', () => {
   ])(
     'should generate wildcard query for keyword fields with KQL pattern: %s',
     async (kqlPattern, expectedWildcardValue) => {
-      jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+      vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
       const mockMaintenanceWindow = getMockMaintenanceWindow({
         expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -323,7 +326,7 @@ describe('MaintenanceWindowClient - create', () => {
   );
 
   it('should throw if trying to create a maintenance window with invalid scope', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -354,7 +357,7 @@ describe('MaintenanceWindowClient - create', () => {
   });
 
   it('should include attributes.scopeErrors with scope "alerting" for invalid alerting kql', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
     });
@@ -385,7 +388,7 @@ describe('MaintenanceWindowClient - create', () => {
   });
 
   it('should include attributes.scopeErrors with scope "alertingV2" for invalid alertingV2 kql', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
     });
@@ -416,7 +419,7 @@ describe('MaintenanceWindowClient - create', () => {
   });
 
   it('should throw if trying to create a maintenance window with invalid category ids', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -442,7 +445,7 @@ describe('MaintenanceWindowClient - create', () => {
     `);
   });
   it('should pass Query DSL wildcard filter through unchanged without requiring index pattern', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -500,7 +503,7 @@ describe('MaintenanceWindowClient - create', () => {
   });
 
   it('should mirror a filters-only alerting scope into scopedQuery', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),

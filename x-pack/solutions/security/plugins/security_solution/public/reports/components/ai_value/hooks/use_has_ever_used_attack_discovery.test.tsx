@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHasEverUsedAttackDiscovery } from './use_has_ever_used_attack_discovery';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
@@ -14,23 +17,29 @@ const mockedUseKibana = {
   ...mockUseKibana(),
 };
 
-jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => mockedUseKibana,
-}));
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: () => ({
-    assistantAvailability: { isAssistantEnabled: true },
-  }),
-}));
+vi.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => mockedUseKibana,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: () => ({
+        assistantAvailability: { isAssistantEnabled: true },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseFindAttackDiscoveries = useFindAttackDiscoveries as jest.MockedFunction<
+const mockedUseFindAttackDiscoveries = useFindAttackDiscoveries as MockedFunction<
   typeof useFindAttackDiscoveries
 >;
 
 describe('useHasEverUsedAttackDiscovery', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('queries with no date range (all-time) and includes all statuses', () => {

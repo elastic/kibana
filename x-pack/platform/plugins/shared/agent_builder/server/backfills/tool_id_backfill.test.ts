@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   AgentProfileStorage,
@@ -57,23 +60,23 @@ const makeHit = <T>(source: T, id: string, seqNo = 1, primaryTerm = 1) => ({
 
 const buildAgentStorageMock = (pages: AgentProperties[][]): AgentProfileStorage => {
   let pageIndex = 0;
-  const search = jest.fn().mockImplementation(() => {
+  const search = vi.fn().mockImplementation(() => {
     const hits = (pages[pageIndex] ?? []).map((s) => makeHit(s, s.id));
     pageIndex++;
     return Promise.resolve({ hits: { hits } });
   });
-  const bulk = jest.fn().mockResolvedValue({ items: [], errors: false });
+  const bulk = vi.fn().mockResolvedValue({ items: [], errors: false });
   return { getClient: () => ({ search, bulk }) } as unknown as AgentProfileStorage;
 };
 
 const buildSkillStorageMock = (pages: SkillProperties[][]): SkillStorage => {
   let pageIndex = 0;
-  const search = jest.fn().mockImplementation(() => {
+  const search = vi.fn().mockImplementation(() => {
     const hits = (pages[pageIndex] ?? []).map((s) => makeHit(s, s.id));
     pageIndex++;
     return Promise.resolve({ hits: { hits } });
   });
-  const bulk = jest.fn().mockResolvedValue({ items: [], errors: false });
+  const bulk = vi.fn().mockResolvedValue({ items: [], errors: false });
   return { getClient: () => ({ search, bulk }) } as unknown as SkillStorage;
 };
 
@@ -217,8 +220,8 @@ describe('backfillAgentToolIds', () => {
 
     await backfillAgentToolIds({ storage, logger });
 
-    expect((client.bulk as jest.Mock).mock.calls).toHaveLength(1);
-    const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
+    expect((client.bulk as Mock).mock.calls).toHaveLength(1);
+    const ops = (client.bulk as Mock).mock.calls[0][0].operations;
     expect(ops).toHaveLength(1);
     const { document } = ops[0].index;
     const toolIds = (document.config ?? document.configuration).tools[0].tool_ids;
@@ -233,7 +236,7 @@ describe('backfillAgentToolIds', () => {
 
     await backfillAgentToolIds({ storage, logger });
 
-    expect(client.bulk as jest.Mock).not.toHaveBeenCalled();
+    expect(client.bulk as Mock).not.toHaveBeenCalled();
   });
 
   it('reads the old tool ID from the legacy configuration field', async () => {
@@ -247,8 +250,8 @@ describe('backfillAgentToolIds', () => {
 
     await backfillAgentToolIds({ storage, logger });
 
-    expect((client.bulk as jest.Mock).mock.calls).toHaveLength(1);
-    const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
+    expect((client.bulk as Mock).mock.calls).toHaveLength(1);
+    const ops = (client.bulk as Mock).mock.calls[0][0].operations;
     expect(ops).toHaveLength(1);
   });
 
@@ -265,8 +268,8 @@ describe('backfillAgentToolIds', () => {
 
     await backfillAgentToolIds({ storage, logger });
 
-    expect((client.search as jest.Mock).mock.calls).toHaveLength(2);
-    const totalBulkOps = (client.bulk as jest.Mock).mock.calls.flatMap(([req]) => req.operations);
+    expect((client.search as Mock).mock.calls).toHaveLength(2);
+    const totalBulkOps = (client.bulk as Mock).mock.calls.flatMap(([req]) => req.operations);
     expect(totalBulkOps).toHaveLength(2);
   });
 
@@ -277,7 +280,7 @@ describe('backfillAgentToolIds', () => {
 
     await backfillAgentToolIds({ storage, logger });
 
-    const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
+    const ops = (client.bulk as Mock).mock.calls[0][0].operations;
     const toolIds = (ops[0].index.document.config ?? ops[0].index.document.configuration).tools[0]
       .tool_ids;
     expect(
@@ -292,7 +295,7 @@ describe('backfillAgentToolIds', () => {
 
     await backfillAgentToolIds({ storage, logger });
 
-    expect(client.bulk as jest.Mock).not.toHaveBeenCalled();
+    expect(client.bulk as Mock).not.toHaveBeenCalled();
   });
 
   it('sorts on (id, space) for unambiguous search_after across spaces', async () => {
@@ -302,7 +305,7 @@ describe('backfillAgentToolIds', () => {
 
     await backfillAgentToolIds({ storage, logger });
 
-    const searchReq = (client.search as jest.Mock).mock.calls[0][0];
+    const searchReq = (client.search as Mock).mock.calls[0][0];
     expect(searchReq.sort).toEqual([{ id: 'asc' }, { space: 'asc' }]);
   });
 
@@ -313,7 +316,7 @@ describe('backfillAgentToolIds', () => {
 
     await backfillAgentToolIds({ storage, logger });
 
-    const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
+    const ops = (client.bulk as Mock).mock.calls[0][0].operations;
     expect(ops[0].index.if_seq_no).toBe(1);
     expect(ops[0].index.if_primary_term).toBe(1);
   });
@@ -329,8 +332,8 @@ describe('backfillSkillToolIds', () => {
 
     await backfillSkillToolIds({ storage, logger });
 
-    expect((client.bulk as jest.Mock).mock.calls).toHaveLength(1);
-    const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
+    expect((client.bulk as Mock).mock.calls).toHaveLength(1);
+    const ops = (client.bulk as Mock).mock.calls[0][0].operations;
     expect(ops).toHaveLength(1);
     const { document } = ops[0].index;
     expect(document.tool_ids).toEqual(expect.arrayContaining(SUPPLEMENTAL_IDS));
@@ -344,7 +347,7 @@ describe('backfillSkillToolIds', () => {
 
     await backfillSkillToolIds({ storage, logger });
 
-    expect(client.bulk as jest.Mock).not.toHaveBeenCalled();
+    expect(client.bulk as Mock).not.toHaveBeenCalled();
   });
 
   it('paginates across multiple pages', async () => {
@@ -360,8 +363,8 @@ describe('backfillSkillToolIds', () => {
 
     await backfillSkillToolIds({ storage, logger });
 
-    expect((client.search as jest.Mock).mock.calls).toHaveLength(2);
-    const totalBulkOps = (client.bulk as jest.Mock).mock.calls.flatMap(([req]) => req.operations);
+    expect((client.search as Mock).mock.calls).toHaveLength(2);
+    const totalBulkOps = (client.bulk as Mock).mock.calls.flatMap(([req]) => req.operations);
     expect(totalBulkOps).toHaveLength(2);
   });
 
@@ -372,7 +375,7 @@ describe('backfillSkillToolIds', () => {
 
     await backfillSkillToolIds({ storage, logger });
 
-    expect(client.bulk as jest.Mock).not.toHaveBeenCalled();
+    expect(client.bulk as Mock).not.toHaveBeenCalled();
   });
 
   it('sorts on (id, space) for unambiguous search_after across spaces', async () => {
@@ -382,7 +385,7 @@ describe('backfillSkillToolIds', () => {
 
     await backfillSkillToolIds({ storage, logger });
 
-    const searchReq = (client.search as jest.Mock).mock.calls[0][0];
+    const searchReq = (client.search as Mock).mock.calls[0][0];
     expect(searchReq.sort).toEqual([{ id: 'asc' }, { space: 'asc' }]);
   });
 
@@ -393,7 +396,7 @@ describe('backfillSkillToolIds', () => {
 
     await backfillSkillToolIds({ storage, logger });
 
-    const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
+    const ops = (client.bulk as Mock).mock.calls[0][0].operations;
     expect(ops[0].index.if_seq_no).toBe(1);
     expect(ops[0].index.if_primary_term).toBe(1);
   });

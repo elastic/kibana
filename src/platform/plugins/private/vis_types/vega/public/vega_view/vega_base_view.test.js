@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { VegaBaseView } from './vega_base_view';
 import { setInjectedVars } from '../services';
 
@@ -23,13 +25,13 @@ function createMockView(spec) {
       tooltips: false,
       searchAPI: { inspectorAdapters: {} },
     },
-    fireEvent: jest.fn(),
-    filterManager: { getFilters: jest.fn(() => []) },
+    fireEvent: vi.fn(),
+    filterManager: { getFilters: vi.fn(() => []) },
     externalUrl: {
-      isInternalUrl: jest.fn(() => true),
-      validateUrl: jest.fn(() => true),
+      isInternalUrl: vi.fn(() => true),
+      validateUrl: vi.fn(() => true),
     },
-    vegaStateRestorer: { save: jest.fn(), restore: jest.fn() },
+    vegaStateRestorer: { save: vi.fn(), restore: vi.fn() },
   });
 }
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -25,13 +28,13 @@ import {
   getFleetServerPolicies,
 } from '.';
 
-jest.mock('../agent_policy');
-jest.mock('../agents');
+vi.mock('../agent_policy');
+vi.mock('../agents');
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
-const mockedGetAgentStatusById = getAgentStatusById as jest.MockedFunction<
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+const mockedGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
+const mockedGetAgentStatusById = getAgentStatusById as MockedFunction<
   typeof getAgentStatusById
 >;
 
@@ -45,8 +48,8 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
 
   afterEach(() => {
     appContextService.stop();
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
@@ -55,7 +58,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
   it('should return true if all fleet server versions are at least the specified version and there are no managed policies', async () => {
     const version = '1.0.0';
 
-    jest
+    vi
       .spyOn(mockedPackagePolicyService, 'list')
       .mockResolvedValueOnce({
         items: [
@@ -131,7 +134,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
   it('should return true if there are no fleet servers', async () => {
     const version = '1.0.0';
 
-    jest
+    vi
       .spyOn(mockedPackagePolicyService, 'list')
       .mockResolvedValueOnce({
         items: [
@@ -169,7 +172,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
   it('should query versioned policy_id variants when Fleet Server agent is reassigned', async () => {
     const version = '1.0.0';
 
-    jest
+    vi
       .spyOn(mockedPackagePolicyService, 'list')
       .mockResolvedValueOnce({
         items: [
@@ -216,7 +219,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
     // The comparison must strip the version suffix before matching.
     const version = '10.0.0';
 
-    jest
+    vi
       .spyOn(mockedPackagePolicyService, 'list')
       .mockResolvedValueOnce({
         items: [
@@ -316,7 +319,7 @@ describe('getFleetServerPolicies', () => {
   ];
 
   it('should return no policies if there are no fleet server package policies', async () => {
-    jest.spyOn(mockedPackagePolicyService, 'list').mockResolvedValueOnce({
+    vi.spyOn(mockedPackagePolicyService, 'list').mockResolvedValueOnce({
       items: [],
       total: 0,
       page: 1,
@@ -327,13 +330,13 @@ describe('getFleetServerPolicies', () => {
   });
 
   it('should return agent policies with fleet server package policies', async () => {
-    jest.spyOn(mockedPackagePolicyService, 'list').mockResolvedValueOnce({
+    vi.spyOn(mockedPackagePolicyService, 'list').mockResolvedValueOnce({
       items: mockPackagePolicies,
       total: mockPackagePolicies.length,
       page: 1,
       perPage: mockPackagePolicies.length,
     });
-    (mockedAgentPolicyService.getByIds as jest.Mock).mockResolvedValueOnce(mockFleetServerPolicies);
+    (mockedAgentPolicyService.getByIds as Mock).mockResolvedValueOnce(mockFleetServerPolicies);
     const result = await getFleetServerPolicies(soClient);
     expect(result).toEqual(mockFleetServerPolicies);
   });
@@ -350,7 +353,7 @@ describe('hasActiveFleetServersForPolicies', () => {
 
   describe('activeOnly is true', () => {
     it('returns true when at least one agent is online', async () => {
-      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+      (getAgentStatusForAgentPolicy as Mock).mockResolvedValueOnce({
         other: 0,
         events: 0,
         total: 1,
@@ -373,7 +376,7 @@ describe('hasActiveFleetServersForPolicies', () => {
     });
 
     it('returns true when at least one agent is updating', async () => {
-      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+      (getAgentStatusForAgentPolicy as Mock).mockResolvedValueOnce({
         other: 0,
         events: 0,
         total: 1,
@@ -396,7 +399,7 @@ describe('hasActiveFleetServersForPolicies', () => {
     });
 
     it('returns false when no agents are updating or online', async () => {
-      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+      (getAgentStatusForAgentPolicy as Mock).mockResolvedValueOnce({
         other: 0,
         events: 0,
         total: 3,
@@ -421,7 +424,7 @@ describe('hasActiveFleetServersForPolicies', () => {
 
   describe('activeOnly is false', () => {
     it('returns true when at least one agent is found regardless of its status', async () => {
-      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+      (getAgentStatusForAgentPolicy as Mock).mockResolvedValueOnce({
         other: 0,
         events: 0,
         total: 0,
@@ -443,7 +446,7 @@ describe('hasActiveFleetServersForPolicies', () => {
 
   describe('kuery uses policy_base_id fallback pattern', () => {
     it('passes a kuery using policy_base_id term with policy_id fallback for un-migrated agents', async () => {
-      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+      (getAgentStatusForAgentPolicy as Mock).mockResolvedValueOnce({
         other: 0,
         events: 0,
         total: 1,
@@ -459,7 +462,7 @@ describe('hasActiveFleetServersForPolicies', () => {
 
       await hasFleetServersForPolicies(mockEsClient, mockSoClient, [{ id: 'fleet-server-policy' }]);
 
-      const kuery = (getAgentStatusForAgentPolicy as jest.Mock).mock.calls.at(-1)![3] as string;
+      const kuery = (getAgentStatusForAgentPolicy as Mock).mock.calls.at(-1)![3] as string;
       // Uses cheap term query on policy_base_id (no prefix/wildcard)
       expect(kuery).toContain('policy_base_id:"fleet-server-policy"');
       // Falls back to exact policy_id match for un-migrated agents

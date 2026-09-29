@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { useTracesEditor } from './use_traces_editor';
 
-const mockSaveTraces = jest.fn();
+const mockSaveTraces = vi.fn();
 let mockIsSaving = false;
 
-jest.mock('./use_save_ai_index_traces', () => ({
-  useSaveAiIndexTraces: () => ({
-    saveTraces: mockSaveTraces,
-    isSaving: mockIsSaving,
-  }),
-}));
+vi.mock('./use_save_ai_index_traces', () => {
+      const mocked = {
+      useSaveAiIndexTraces: () => ({
+        saveTraces: mockSaveTraces,
+        isSaving: mockIsSaving,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -33,7 +38,7 @@ const aiIndex: GetAiIndexResponse = {
 const renderEditor = (
   { index }: { index: GetAiIndexResponse | undefined } = { index: aiIndex }
 ) => {
-  const onSaved = jest.fn();
+  const onSaved = vi.fn();
   const view = renderHook(
     ({ aiIndex: current }) => useTracesEditor({ aiIndex: current, onSaved }),
     {
@@ -50,7 +55,7 @@ describe('useTracesEditor', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('starts idle and exposes the persisted trace', () => {

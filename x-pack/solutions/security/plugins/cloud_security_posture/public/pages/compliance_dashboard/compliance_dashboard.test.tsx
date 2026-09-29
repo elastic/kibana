@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -37,37 +40,37 @@ import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-jest.mock('../../common/api/use_stats_api');
-jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_is_subscription_status_valid');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
-jest.mock('../../common/navigation/use_csp_integration_link');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
+vi.mock('../../common/api/use_stats_api');
+vi.mock('../../common/api/use_license_management_locator_api');
+vi.mock('../../common/hooks/use_is_subscription_status_valid');
+vi.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
+vi.mock('../../common/navigation/use_csp_integration_link');
 
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: { status: 'indexed', installedPackageVersion: '1.2.13' },
       })
     );
 
-    (useCspmStatsApi as jest.Mock).mockImplementation(() =>
+    (useCspmStatsApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
       })
     );
 
-    (useKspmStatsApi as jest.Mock).mockImplementation(() =>
+    (useKspmStatsApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
       })
     );
 
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+    (useLicenseManagementLocatorApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
       })
@@ -103,7 +106,7 @@ describe('<ComplianceDashboard />', () => {
   };
 
   it('shows package not installed page instead of tabs', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -120,12 +123,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
@@ -147,7 +150,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('no findings state: not-deployed - shows NotDeployed instead of dashboard', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -164,12 +167,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
@@ -190,7 +193,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('no findings state: indexing - shows Indexing instead of dashboard', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -207,12 +210,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 1 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 1 } },
@@ -233,7 +236,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('no findings state: indexing - shows Indexing instead of dashboard when waiting_for_results', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -250,12 +253,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 1 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 1 } },
@@ -276,7 +279,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('no findings state: index-timeout - shows IndexTimeout instead of dashboard', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -293,12 +296,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
@@ -319,7 +322,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('no findings state: unprivileged - shows Unprivileged instead of dashboard', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -336,12 +339,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
@@ -362,7 +365,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('shows dashboard when there are findings in latest findings index', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -379,12 +382,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: mockDashboardData,
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: mockDashboardData,
@@ -404,7 +407,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show Kubernetes dashboard if there are KSPM findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -421,12 +424,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: mockDashboardData,
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: undefined,
@@ -447,7 +450,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show Cloud dashboard if there are CSPM findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -463,12 +466,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: undefined,
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: mockDashboardData,
@@ -489,7 +492,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show Cloud dashboard "no findings prompt" if the CSPM integration is installed without findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -505,12 +508,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
@@ -531,7 +534,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show Kubernetes dashboard "no findings prompt" if the KSPM integration is installed without findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -548,12 +551,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
@@ -574,7 +577,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Prefer Cloud dashboard if both integration are installed', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -591,12 +594,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
@@ -617,7 +620,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Prefer Cloud dashboard if both integration have findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -634,12 +637,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: mockDashboardData,
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: mockDashboardData,
@@ -660,7 +663,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -677,12 +680,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
@@ -705,7 +708,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -722,12 +725,12 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useCspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },
     }));
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    (useKspmStatsApi as Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: { stats: { totalFindings: 0 } },

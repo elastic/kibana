@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { MissingMonitoringDataRule } from './missing_monitoring_data_rule';
 import { RULE_MISSING_MONITORING_DATA } from '../../common/constants';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
@@ -14,28 +17,37 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_missing_monitoring_data', () => ({
-  fetchMissingMonitoringData: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_missing_monitoring_data', () => {
+      const mocked = {
+      fetchMissingMonitoringData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      url: 'http://localhost:5601',
-      config: {
-        ui: {
-          show_license_expiration: true,
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          url: 'http://localhost:5601',
+          config: {
+            ui: {
+              show_license_expiration: true,
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MissingMonitoringDataRule', () => {
   it('should have defaults', () => {
@@ -88,17 +100,17 @@ describe('MissingMonitoringDataRule', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchMissingMonitoringData as jest.Mock).mockImplementation(() => {
+      (fetchMissingMonitoringData as Mock).mockImplementation(() => {
         return missingData;
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -189,7 +201,7 @@ describe('MissingMonitoringDataRule', () => {
     });
 
     it('should not fire actions if under threshold', async () => {
-      (fetchMissingMonitoringData as jest.Mock).mockImplementation(() => {
+      (fetchMissingMonitoringData as Mock).mockImplementation(() => {
         return [
           {
             ...missingData[0],
@@ -209,7 +221,7 @@ describe('MissingMonitoringDataRule', () => {
 
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
-      (fetchMissingMonitoringData as jest.Mock).mockImplementation(() => {
+      (fetchMissingMonitoringData as Mock).mockImplementation(() => {
         return [
           {
             ...missingData[0],

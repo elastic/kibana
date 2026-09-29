@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 
 import { getCriteriaFromHostType } from './get_criteria_from_host_type';
@@ -37,9 +39,9 @@ describe('get_criteria_from_host_type', () => {
   test('with EUID API, uses identifier map when scoped DSL is unavailable', () => {
     const euid = {
       dsl: {
-        getEuidFilterBasedOnDocument: jest.fn().mockReturnValue(undefined),
+        getEuidFilterBasedOnDocument: vi.fn().mockReturnValue(undefined),
       },
-      getEntityIdentifiersFromDocument: jest.fn().mockReturnValue({
+      getEntityIdentifiersFromDocument: vi.fn().mockReturnValue({
         'host.id': 'hid-1',
         'host.name': 'zeek-iowa',
       }),

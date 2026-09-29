@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
@@ -20,42 +23,48 @@ import { usePermissions } from '../../hooks/use_permissions';
 import { render } from '../../utils/test_helper';
 import { SlosWelcomePage } from './slos_welcome';
 
-const mockHistoryReplace = jest.fn();
-const mockUseHistory = jest.fn();
+const mockHistoryReplace = vi.fn();
+const mockUseHistory = vi.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-  useHistory: () => mockUseHistory(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+      useHistory: () => mockUseHistory(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/use_has_slos');
-jest.mock('../../hooks/use_permissions');
-jest.mock('../../hooks/use_fetch_slo_templates');
-jest.mock('../../hooks/use_fetch_slo_template_tags');
-jest.mock('@elastic/eui-illustrations', () => ({
-  monitoringLogs: {
-    id: 'monitoringLogs',
-    title: 'Monitoring logs',
-    light: '<svg></svg>',
-    dark: '<svg></svg>',
-  },
-}));
+vi.mock('@kbn/observability-shared-plugin/public');
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_license');
+vi.mock('../../hooks/use_has_slos');
+vi.mock('../../hooks/use_permissions');
+vi.mock('../../hooks/use_fetch_slo_templates');
+vi.mock('../../hooks/use_fetch_slo_template_tags');
+vi.mock('@elastic/eui-illustrations', () => {
+      const mocked = {
+      monitoringLogs: {
+        id: 'monitoringLogs',
+        title: 'Monitoring logs',
+        light: '<svg></svg>',
+        dark: '<svg></svg>',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
+const HeaderMenuPortalMock = HeaderMenuPortal as Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
-const useKibanaMock = useKibana as jest.Mock;
-const useLicenseMock = useLicense as jest.Mock;
-const useHasSlosMock = useHasSlos as jest.Mock;
-const usePermissionsMock = usePermissions as jest.Mock;
-const useFetchSloTemplatesMock = useFetchSloTemplates as jest.Mock;
-const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useLicenseMock = useLicense as Mock;
+const useHasSlosMock = useHasSlos as Mock;
+const usePermissionsMock = usePermissions as Mock;
+const useFetchSloTemplatesMock = useFetchSloTemplates as Mock;
+const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as Mock;
 
-const mockNavigate = jest.fn();
+const mockNavigate = vi.fn();
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
@@ -77,7 +86,7 @@ const mockKibana = () => {
           },
         },
       },
-      inspector: { open: jest.fn() },
+      inspector: { open: vi.fn() },
       uiSettings: { get: () => false },
       observabilityAIAssistant: mockObservabilityAIAssistant,
     },
@@ -86,7 +95,7 @@ const mockKibana = () => {
 
 describe('SLOs Welcome Page', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHistoryReplace.mockClear();
     mockUseHistory.mockReturnValue({
       replace: mockHistoryReplace,
@@ -107,7 +116,7 @@ describe('SLOs Welcome Page', () => {
       isLoading: false,
       isError: false,
     });
-    jest
+    vi
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos/welcome', search: '', state: '', hash: '' });
   });

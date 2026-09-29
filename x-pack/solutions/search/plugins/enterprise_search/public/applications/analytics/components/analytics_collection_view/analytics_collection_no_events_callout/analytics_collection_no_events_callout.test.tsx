@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -26,15 +28,15 @@ const mockValues = {
 };
 
 const mockActions = {
-  fetchAnalyticsCollection: jest.fn(),
-  fetchAnalyticsCollectionDataViewId: jest.fn(),
-  analyticsEventsExist: jest.fn(),
-  setTimeRange: jest.fn(),
+  fetchAnalyticsCollection: vi.fn(),
+  fetchAnalyticsCollectionDataViewId: vi.fn(),
+  analyticsEventsExist: vi.fn(),
+  setTimeRange: vi.fn(),
 };
 
 describe('AnalyticsCollectionNoEventsCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders no events Callout when the collection has no events', () => {

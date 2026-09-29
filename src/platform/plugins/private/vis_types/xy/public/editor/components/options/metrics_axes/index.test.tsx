@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
@@ -23,20 +26,32 @@ import { CategoryAxisPanel } from './category_axis_panel';
 import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';
 import { mapPosition, mapPositionOpposite } from './utils';
 
-jest.mock('./series_panel', () => ({
-  SeriesPanel: () => 'SeriesPanel',
-}));
-jest.mock('./category_axis_panel', () => ({
-  CategoryAxisPanel: () => 'CategoryAxisPanel',
-}));
-jest.mock('./value_axes_panel', () => ({
-  ValueAxesPanel: () => 'ValueAxesPanel',
-}));
-jest.mock('../../../../services', () => ({
-  getUISettings: jest.fn(() => ({
-    get: jest.fn((key: string, defaultOverride?: unknown) => defaultOverride),
-  })),
-}));
+vi.mock('./series_panel', () => {
+      const mocked = {
+      SeriesPanel: () => 'SeriesPanel',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./category_axis_panel', () => {
+      const mocked = {
+      CategoryAxisPanel: () => 'CategoryAxisPanel',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./value_axes_panel', () => {
+      const mocked = {
+      ValueAxesPanel: () => 'ValueAxesPanel',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../services', () => {
+      const mocked = {
+      getUISettings: vi.fn(() => ({
+        get: vi.fn((key: string, defaultOverride?: unknown) => defaultOverride),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SERIES_PARAMS = 'seriesParams';
 const VALUE_AXES = 'valueAxes';
@@ -59,14 +74,14 @@ const createAggs = (aggs: any[]) => ({
 });
 
 describe('MetricsAxisOptions component', () => {
-  let setValue: jest.Mock;
+  let setValue: Mock;
   let defaultProps: ValidationVisOptionsProps<VisParams>;
   let axis: ValueAxis;
   let axisRight: ValueAxis;
   let chart: SeriesParam;
 
   beforeEach(() => {
-    setValue = jest.fn();
+    setValue = vi.fn();
 
     axis = {
       ...valueAxis,
@@ -92,8 +107,8 @@ describe('MetricsAxisOptions component', () => {
           type: ChartType.Area,
           schemas: { metrics: [{ name: 'metric' }] },
         },
-        setState: jest.fn(),
-        serialize: jest.fn(),
+        setState: vi.fn(),
+        serialize: vi.fn(),
       },
       stateParams: {
         valueAxes: [axis],

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -31,15 +34,15 @@ type Router = ReturnType<typeof httpServiceMock.createRouter>;
 const fakeProvider = (
   sourceApp: string,
   actions = createStubInboxActions(3, { source_app: sourceApp })
-): jest.Mocked<InboxActionProvider> => ({
+): Mocked<InboxActionProvider> => ({
   sourceApp,
-  list: jest.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
+  list: vi.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
     async ({ status }) => {
       const filtered = actions.filter((action) => !status || action.status === status);
       return { actions: filtered, total: filtered.length };
     }
   ),
-  respond: jest.fn<
+  respond: vi.fn<
     ReturnType<InboxActionProvider['respond']>,
     Parameters<InboxActionProvider['respond']>
   >(async () => {}),
@@ -118,11 +121,11 @@ describe('GET /internal/inbox/actions', () => {
       const captured: string[] = [];
       const capturingProvider: InboxActionProvider = {
         sourceApp: 'workflows',
-        list: jest.fn(async (_params, ctx) => {
+        list: vi.fn(async (_params, ctx) => {
           captured.push(ctx.spaceId);
           return { actions: [], total: 0 };
         }),
-        respond: jest.fn(async () => {}),
+        respond: vi.fn(async () => {}),
       };
       const dedicatedRouter = httpServiceMock.createRouter();
       const dedicatedRegistry = new InboxActionRegistry(logger);
@@ -240,7 +243,7 @@ describe('GET /internal/inbox/actions', () => {
       // list() errors are swallowed inside the registry; force the registry
       // itself to throw so we can exercise the route's catch branch.
       const registryThatThrows = new InboxActionRegistry(logger);
-      jest.spyOn(registryThatThrows, 'list').mockRejectedValueOnce(new Error('boom'));
+      vi.spyOn(registryThatThrows, 'list').mockRejectedValueOnce(new Error('boom'));
       registryThatThrows.register(broken);
 
       const dedicatedRouter = httpServiceMock.createRouter();

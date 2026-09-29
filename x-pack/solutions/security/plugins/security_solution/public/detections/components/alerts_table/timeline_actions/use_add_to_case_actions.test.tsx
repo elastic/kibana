@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { allCasesPermissions } from '../../../../cases_test_utils';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const refetch = jest.fn();
-const submit = jest.fn();
-const open = jest.fn().mockImplementation(() => {
+const refetch = vi.fn();
+const submit = vi.fn();
+const open = vi.fn().mockImplementation(() => {
   refetch();
 });
 
 const caseHooksReturnedValue = {
   open,
-  close: jest.fn(),
+  close: vi.fn(),
   submit,
 };
 
@@ -45,8 +48,8 @@ const defaultProps = {
   refetch,
 };
 
-const addToCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
-const useKibanaMock = useKibana as jest.Mock;
+const addToCase = vi.fn().mockReturnValue(caseHooksReturnedValue);
+const useKibanaMock = useKibana as Mock;
 
 describe('useAddToCaseActions', () => {
   beforeEach(() => {
@@ -58,12 +61,12 @@ describe('useAddToCaseActions', () => {
           },
           helpers: {
             getRuleIdFromEvent: () => null,
-            canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
+            canUseCases: vi.fn().mockReturnValue(allCasesPermissions()),
           },
         },
       },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render one case action when event is alert', () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
@@ -26,7 +29,7 @@ const createObj = (
 
 const createTransform = (
   implementation: SavedObjectsExportTransform = (ctx, objs) => objs
-): jest.MockedFunction<SavedObjectsExportTransform> => jest.fn(implementation);
+): MockedFunction<SavedObjectsExportTransform> => vi.fn(implementation);
 
 const toMap = <V>(record: Record<string, V>): Map<string, V> => new Map(Object.entries(record));
 

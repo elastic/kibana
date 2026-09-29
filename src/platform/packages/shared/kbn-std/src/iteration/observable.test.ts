@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs';
 
@@ -14,7 +16,7 @@ import { map$, mapWithLimit$ } from './observable';
 import { list, sleep, generator } from './test_helpers';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('mapWithLimit$', () => {
@@ -49,7 +51,7 @@ describe('mapWithLimit$', () => {
     ['set', new Set([5, 4, 3, 2, 1]), [5, 4, 3, 2, 1]] as const,
     ['observable', Rx.of(1, 2, 3, 4, 5), [1, 2, 3, 4, 5]] as const,
   ])('works with %p', async (_, iter, expected) => {
-    const mock = jest.fn(async (n) => n);
+    const mock = vi.fn(async (n) => n);
     const results = await Rx.lastValueFrom(mapWithLimit$(iter, 1, mock).pipe(toArray()));
     expect(results).toEqual(expected);
   });

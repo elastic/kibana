@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { AzureFunctions } from './azure_functions';
@@ -23,17 +25,17 @@ const APP_REF = { resourceGroupName: RG, functionAppName: APP };
 
 describe('AzureFunctions', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
-    request: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+    request: vi.fn(),
     // `getAllPages` resolves a continuation link against the URL axios would
     // request. Every handler here passes an absolute ARM URL, which is the
     // branch where axios returns `url` untouched rather than combining it with
     // a `baseURL`.
-    getUri: jest.fn(({ url }: { url: string }) => url),
+    getUri: vi.fn(({ url }: { url: string }) => url),
   };
 
   const mockContext = {
@@ -44,11 +46,11 @@ describe('AzureFunctions', () => {
       clientId: 'client-id',
       clientSecret: 'client-secret',
     },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import {
   getTemplateLifecycle,
   simulateClassicStreamTemplate,
@@ -18,11 +21,11 @@ import type { Streams } from '@kbn/streams-schema';
 
 type MockLogger = Pick<Logger, 'debug' | 'error' | 'info' | 'warn'>;
 
-const createMockLogger = (): jest.Mocked<MockLogger> => ({
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+const createMockLogger = (): Mocked<MockLogger> => ({
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 });
 
 const createMockWiredStream = (name: string): Streams.WiredStream.Definition => ({
@@ -180,13 +183,13 @@ describe('updateDataStreamsLifecycle downsampling', () => {
     indices: Pick<ElasticsearchClient['indices'], 'putDataLifecycle'>;
   }
 
-  let mockEsClient: jest.Mocked<DownsamplingEsClient>;
-  let mockLogger: jest.Mocked<MockLogger>;
+  let mockEsClient: Mocked<DownsamplingEsClient>;
+  let mockLogger: Mocked<MockLogger>;
 
   beforeEach(() => {
     mockEsClient = {
       indices: {
-        putDataLifecycle: jest.fn().mockResolvedValue({}),
+        putDataLifecycle: vi.fn().mockResolvedValue({}),
       },
     };
 
@@ -290,18 +293,18 @@ describe('updateDataStreamsLifecycle inherit', () => {
     >;
   }
 
-  let mockEsClient: jest.Mocked<InheritEsClient>;
-  let mockLogger: jest.Mocked<MockLogger>;
+  let mockEsClient: Mocked<InheritEsClient>;
+  let mockLogger: Mocked<MockLogger>;
 
   beforeEach(() => {
     mockEsClient = {
       indices: {
-        getDataStream: jest.fn().mockResolvedValue({
+        getDataStream: vi.fn().mockResolvedValue({
           data_streams: [{ name: 'logs-foo-default', template: 'logs-foo-template' }],
         }),
         // Simulating the template by name returns the pristine template lifecycle
         // without the data stream's lingering ILM overrides.
-        simulateTemplate: jest.fn().mockResolvedValue({
+        simulateTemplate: vi.fn().mockResolvedValue({
           template: {
             settings: { index: { lifecycle: { prefer_ilm: false } } },
             lifecycle: {
@@ -312,10 +315,10 @@ describe('updateDataStreamsLifecycle inherit', () => {
             },
           },
         }),
-        simulateIndexTemplate: jest.fn().mockResolvedValue({}),
-        putDataLifecycle: jest.fn().mockResolvedValue({}),
-        deleteDataLifecycle: jest.fn().mockResolvedValue({}),
-        putDataStreamSettings: jest.fn().mockResolvedValue({ data_streams: [] }),
+        simulateIndexTemplate: vi.fn().mockResolvedValue({}),
+        putDataLifecycle: vi.fn().mockResolvedValue({}),
+        deleteDataLifecycle: vi.fn().mockResolvedValue({}),
+        putDataStreamSettings: vi.fn().mockResolvedValue({ data_streams: [] }),
       },
     };
 
@@ -346,7 +349,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
   });
 
   it('fails closed when the backing template cannot be simulated', async () => {
-    mockEsClient.indices.simulateTemplate = jest.fn().mockResolvedValue({});
+    mockEsClient.indices.simulateTemplate = vi.fn().mockResolvedValue({});
 
     await expect(
       updateDataStreamsLifecycle({
@@ -368,24 +371,24 @@ describe('updateDataStreamsFailureStore', () => {
     >;
   }
 
-  let mockEsClient: jest.Mocked<FailureStoreEsClient>;
-  let mockLogger: jest.Mocked<MockLogger>;
+  let mockEsClient: Mocked<FailureStoreEsClient>;
+  let mockLogger: Mocked<MockLogger>;
 
   beforeEach(() => {
     mockEsClient = {
       indices: {
-        putDataStreamOptions: jest.fn().mockResolvedValue({}),
-        getDataStream: jest.fn().mockResolvedValue({
+        putDataStreamOptions: vi.fn().mockResolvedValue({}),
+        getDataStream: vi.fn().mockResolvedValue({
           data_streams: [{ name: 'test-stream', template: 'test-stream-template' }],
         }),
-        simulateTemplate: jest.fn().mockResolvedValue({
+        simulateTemplate: vi.fn().mockResolvedValue({
           template: {
             data_stream_options: {
               failure_store: { enabled: true, lifecycle: { enabled: true, data_retention: '7d' } },
             },
           },
         }),
-        simulateIndexTemplate: jest.fn().mockResolvedValue({}),
+        simulateIndexTemplate: vi.fn().mockResolvedValue({}),
       },
     };
 
@@ -542,7 +545,7 @@ describe('updateDataStreamsFailureStore', () => {
   });
 
   it('disables failure store when failureStore is set to inherit and template has no failure store config', async () => {
-    mockEsClient.indices.simulateTemplate = jest.fn().mockResolvedValue({
+    mockEsClient.indices.simulateTemplate = vi.fn().mockResolvedValue({
       template: {},
     });
 
@@ -579,7 +582,7 @@ describe('updateDataStreamsFailureStore', () => {
     };
 
     const error = new Error('Elasticsearch error');
-    mockEsClient.indices.putDataStreamOptions = jest.fn().mockRejectedValue(error);
+    mockEsClient.indices.putDataStreamOptions = vi.fn().mockRejectedValue(error);
 
     await expect(
       updateDataStreamsFailureStore({
@@ -597,7 +600,7 @@ describe('updateDataStreamsFailureStore', () => {
   });
 
   it('fails closed (does not change failure store) when the template cannot be simulated', async () => {
-    mockEsClient.indices.simulateTemplate = jest
+    mockEsClient.indices.simulateTemplate = vi
       .fn()
       .mockRejectedValue(new Error('Template simulation error'));
 
@@ -618,28 +621,28 @@ describe('updateDataStreamsFailureStore', () => {
 });
 
 describe('simulateClassicStreamTemplate', () => {
-  let mockGetDataStream: jest.Mock;
-  let mockSimulateTemplate: jest.Mock;
-  let mockSimulateIndexTemplate: jest.Mock;
+  let mockGetDataStream: Mock;
+  let mockSimulateTemplate: Mock;
+  let mockSimulateIndexTemplate: Mock;
   let mockEsClient: {
     indices: {
-      getDataStream: jest.Mock;
-      simulateTemplate: jest.Mock;
-      simulateIndexTemplate: jest.Mock;
+      getDataStream: Mock;
+      simulateTemplate: Mock;
+      simulateIndexTemplate: Mock;
     };
   };
-  let mockLogger: jest.Mocked<MockLogger>;
+  let mockLogger: Mocked<MockLogger>;
 
   beforeEach(() => {
-    mockGetDataStream = jest.fn().mockResolvedValue({
+    mockGetDataStream = vi.fn().mockResolvedValue({
       data_streams: [{ name: 'logs-foo-default', template: 'logs-foo-template' }],
     });
-    mockSimulateTemplate = jest.fn().mockResolvedValue({
+    mockSimulateTemplate = vi.fn().mockResolvedValue({
       template: {
         settings: { index: { lifecycle: { name: 'my-ilm-policy', prefer_ilm: true } } },
       },
     });
-    mockSimulateIndexTemplate = jest.fn().mockResolvedValue({
+    mockSimulateIndexTemplate = vi.fn().mockResolvedValue({
       template: {
         settings: { index: { lifecycle: { name: 'my-ilm-policy', prefer_ilm: true } } },
       },
@@ -718,22 +721,22 @@ describe('simulateClassicStreamTemplate', () => {
 
 describe('updateDataStreamsMappings', () => {
   interface MappingsEsClient {
-    transport: { request: jest.Mock };
-    indices: { rollover: jest.Mock };
+    transport: { request: Mock };
+    indices: { rollover: Mock };
   }
 
   let mockEsClient: MappingsEsClient;
-  let mockLogger: jest.Mocked<MockLogger>;
+  let mockLogger: Mocked<MockLogger>;
 
   beforeEach(() => {
     mockEsClient = {
       transport: {
-        request: jest.fn().mockResolvedValue({
+        request: vi.fn().mockResolvedValue({
           data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
         }),
       },
       indices: {
-        rollover: jest.fn().mockResolvedValue({}),
+        rollover: vi.fn().mockResolvedValue({}),
       },
     };
     mockLogger = createMockLogger();

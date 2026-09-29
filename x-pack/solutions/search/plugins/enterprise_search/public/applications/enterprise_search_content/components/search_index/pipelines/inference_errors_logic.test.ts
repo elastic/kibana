@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../../common/types/api';
@@ -25,7 +27,7 @@ describe('InferenceErrorsLogic', () => {
     FetchMlInferenceErrorsApiLogic
   );
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mountFetchInferenceErrorsApiLogic();
     mount();
   });

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -16,30 +19,30 @@ import { getWorkflowNextExecutionTime } from '../../../lib/next_execution_time';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
-jest.mock('../../../lib/next_execution_time');
-jest.mock('../../../shared/ui/use_formatted_date');
+vi.mock('../../../lib/next_execution_time');
+vi.mock('../../../shared/ui/use_formatted_date');
 
 describe('WorkflowTriggersAndSteps', () => {
-  const mockGetWorkflowNextExecutionTime = jest.fn();
-  const mockGetFormattedDateTime = jest.fn();
+  const mockGetWorkflowNextExecutionTime = vi.fn();
+  const mockGetFormattedDateTime = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    (getWorkflowNextExecutionTime as jest.Mock).mockImplementation(
+    vi.clearAllMocks();
+    vi.useFakeTimers({ legacyFakeTimers: true });
+    (getWorkflowNextExecutionTime as Mock).mockImplementation(
       mockGetWorkflowNextExecutionTime
     );
-    (useGetFormattedDateTime as jest.Mock).mockReturnValue(mockGetFormattedDateTime);
+    (useGetFormattedDateTime as Mock).mockReturnValue(mockGetFormattedDateTime);
 
-    global.ResizeObserver = jest.fn().mockImplementation(() => ({
-      observe: jest.fn(),
-      disconnect: jest.fn(),
-      unobserve: jest.fn(),
+    global.ResizeObserver = vi.fn().mockImplementation(() => ({
+      observe: vi.fn(),
+      disconnect: vi.fn(),
+      unobserve: vi.fn(),
     }));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should render scheduled label tooltip when next execution cannot be computed', () => {
@@ -62,7 +65,7 @@ describe('WorkflowTriggersAndSteps', () => {
   });
 
   it('should render scheduled label and next execution in tooltip when data is available', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(jest) });
     const nextExecutionTime = new Date('2025-01-15T11:00:00Z');
     mockGetWorkflowNextExecutionTime.mockReturnValue(nextExecutionTime);
     mockGetFormattedDateTime.mockReturnValue('Jan 15, 2025 11:00 AM');
@@ -89,7 +92,7 @@ describe('WorkflowTriggersAndSteps', () => {
     const anchor = container.querySelector('.euiToolTipAnchor');
     expect(anchor).toBeInTheDocument();
     await user.hover(anchor!);
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(await screen.findByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Next execution: Jan 15, 2025 11:00 AM')).toBeInTheDocument();

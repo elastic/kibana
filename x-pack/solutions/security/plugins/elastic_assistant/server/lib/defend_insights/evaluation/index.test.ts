@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -20,39 +22,51 @@ import { getLlmType } from '../../../routes/utils';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 import { evaluateDefendInsights } from '.';
 
-jest.mock('./run_evaluations');
-jest.mock('@kbn/langchain/server', () => ({
-  ActionsClientLlm: jest.fn(),
-}));
-jest.mock('@kbn/langchain/server/tracers/langsmith', () => ({
-  getLangSmithTracer: jest.fn().mockReturnValue(['mockTracer']),
-}));
-jest.mock('../../../routes/utils', () => ({
-  getLlmType: jest.fn().mockReturnValue('mock-llm-type'),
-}));
-jest.mock('../prompts', () => ({
-  getDefendInsightsPrompt: jest.fn().mockReturnValue({
-    default: 'default',
-    refine: 'refine',
-    continue: 'continue',
-    group: 'group',
-    events: 'events',
-    eventsId: 'eventsId',
-    eventsEndpointId: 'eventsEndpointId',
-    eventsValue: 'eventsValue',
-  }),
-}));
+vi.mock('./run_evaluations');
+vi.mock('@kbn/langchain/server', () => {
+      const mocked = {
+      ActionsClientLlm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/langchain/server/tracers/langsmith', () => {
+      const mocked = {
+      getLangSmithTracer: vi.fn().mockReturnValue(['mockTracer']),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../routes/utils', () => {
+      const mocked = {
+      getLlmType: vi.fn().mockReturnValue('mock-llm-type'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../prompts', () => {
+      const mocked = {
+      getDefendInsightsPrompt: vi.fn().mockReturnValue({
+        default: 'default',
+        refine: 'refine',
+        continue: 'continue',
+        group: 'group',
+        events: 'events',
+        eventsId: 'eventsId',
+        eventsEndpointId: 'eventsEndpointId',
+        eventsValue: 'eventsValue',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockLogger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn(), info: jest.fn() };
+const mockLogger = { debug: vi.fn(), error: vi.fn(), warn: vi.fn(), info: vi.fn() };
 
 describe('evaluateDefendInsights', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('graph creation and evaluation', () => {
     const mockGraph = { mock: 'graph' };
-    const mockGetDefaultDefendInsightsGraph = jest.fn().mockReturnValue(mockGraph);
+    const mockGetDefaultDefendInsightsGraph = vi.fn().mockReturnValue(mockGraph);
 
     const mockGraphMetadata = [
       {
@@ -78,7 +92,7 @@ describe('evaluateDefendInsights', () => {
     const mockEsClient = {} as unknown as ElasticsearchClient;
     const mockSoClient = savedObjectsClientMock.create();
     const mockEsClientInternalUser = {} as unknown as ElasticsearchClient;
-    const mockGetInferenceConnectorById = jest.fn();
+    const mockGetInferenceConnectorById = vi.fn();
 
     beforeEach(async () => {
       await evaluateDefendInsights({

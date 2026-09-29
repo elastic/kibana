@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { SecurityAppStore } from '../../../../common/store/types';
@@ -19,14 +21,14 @@ import type { LensApi } from '@kbn/lens-plugin/public';
 import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 import { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
-const mockWarningToast = jest.fn();
-const mockSuccessToast = jest.fn();
+const mockWarningToast = vi.fn();
+const mockSuccessToast = vi.fn();
 KibanaServices.get().notifications.toasts.addWarning = mockWarningToast;
 KibanaServices.get().notifications.toasts.addSuccess = mockSuccessToast;
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 const store = {
   dispatch: mockDispatch,
 } as unknown as SecurityAppStore;
@@ -36,14 +38,14 @@ const getMockLensApi = (
 ): LensApi =>
   getLensApiMock({
     timeRange$: new BehaviorSubject<TimeRange | undefined>({ from, to }),
-    getViewUnderlyingDataArgs: jest.fn(() => ({
+    getViewUnderlyingDataArgs: vi.fn(() => ({
       dataViewSpec: { id: 'index-pattern-id' },
       timeRange: { from: 'now-7d', to: 'now' },
       filters: [],
       query: undefined,
       columns: [],
     })),
-    saveToLibrary: jest.fn(async () => 'saved-id'),
+    saveToLibrary: vi.fn(async () => 'saved-id'),
   });
 
 const lensEmbeddable = getMockLensApi();
@@ -68,7 +70,7 @@ describe('createAddToTimelineLensAction', () => {
 
   beforeEach(() => {
     currentAppId$.next(APP_UI_ID);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

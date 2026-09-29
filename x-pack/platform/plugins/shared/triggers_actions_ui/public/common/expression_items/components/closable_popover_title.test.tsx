@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ClosablePopoverTitle } from './closable_popover_title';
@@ -12,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 
 describe('closable popover title', () => {
   it('renders with defined options', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const children = <div data-test-subj="data_test_subj" />;
     render(<ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>);
 
@@ -23,7 +25,7 @@ describe('closable popover title', () => {
   it('onClose function gets called', async () => {
     const user = userEvent.setup();
 
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const children = <div />;
     render(<ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>);
 

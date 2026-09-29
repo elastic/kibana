@@ -5,28 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { internalMaintenanceRoutes } from './route';
 
-jest.mock('../../utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const route =
   internalMaintenanceRoutes['POST /internal/significant_events/maintenance/cleanup/_bootstrap'];
 type HandlerParams = Parameters<typeof route.handler>[0];
 
 describe('cleanup workflow bootstrap route', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
-  const createHandlerParams = (ensureEnabled = jest.fn().mockResolvedValue(undefined)) => {
+  const createHandlerParams = (ensureEnabled = vi.fn().mockResolvedValue(undefined)) => {
     const request = {};
     const licensing = {};
     const server = {};
-    const logger = { warn: jest.fn() };
-    const maintenanceService = { getState: jest.fn().mockResolvedValue('enabled') };
-    const getSpaceId = jest.fn().mockResolvedValue('space-a');
+    const logger = { warn: vi.fn() };
+    const maintenanceService = { getState: vi.fn().mockResolvedValue('enabled') };
+    const getSpaceId = vi.fn().mockResolvedValue('space-a');
 
     return {
       request,
@@ -41,7 +46,7 @@ describe('cleanup workflow bootstrap route', () => {
         maintenanceService,
         getSpaceId,
         cleanupWorkflowService: { ensureEnabled },
-        getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+        getScopedClients: vi.fn().mockResolvedValue({ licensing }),
       } as unknown as HandlerParams,
     };
   };
@@ -66,7 +71,7 @@ describe('cleanup workflow bootstrap route', () => {
 
   it('returns success when cleanup enablement fails', async () => {
     const params = createHandlerParams(
-      jest.fn().mockRejectedValue(new Error('workflow unavailable'))
+      vi.fn().mockRejectedValue(new Error('workflow unavailable'))
     );
 
     await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
@@ -78,19 +83,19 @@ describe('cleanup workflow bootstrap route', () => {
 });
 
 describe('pause, resume, and status routes', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('keeps pause and status reachable while the feature flag is off, but not resume', async () => {
     const licensing = {};
-    const server = { core: { security: { authc: { getCurrentUser: jest.fn() } } } };
+    const server = { core: { security: { authc: { getCurrentUser: vi.fn() } } } };
     const handlerParams = {
       request: {},
       server,
-      getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+      getScopedClients: vi.fn().mockResolvedValue({ licensing }),
       maintenanceService: {
-        pause: jest.fn(),
-        resume: jest.fn(),
-        getStatus: jest.fn(),
+        pause: vi.fn(),
+        resume: vi.fn(),
+        getStatus: vi.fn(),
       },
     };
     const accessChecks = [
@@ -104,7 +109,7 @@ describe('pause, resume, and status routes', () => {
       await handler(handlerParams as unknown as Parameters<typeof handler>[0]);
     }
 
-    expect(jest.mocked(assertSignificantEventsAccess).mock.calls).toEqual([
+    expect(vi.mocked(assertSignificantEventsAccess).mock.calls).toEqual([
       [{ server, licensing, ignore: ['feature_flag'] }],
       [{ server, licensing, ignore: ['feature_flag'] }],
       [{ server, licensing }],

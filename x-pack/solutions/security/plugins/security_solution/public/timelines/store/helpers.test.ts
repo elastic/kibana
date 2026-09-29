@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../common/types/timeline';
 import { TimelineTabs } from '../../../common/types/timeline';
@@ -53,9 +55,9 @@ import {
   setStoredTimelineColumnsConfig,
 } from './middlewares/timeline_localstorage';
 
-jest.mock('../../common/utils/normalize_time_range');
-jest.mock('../../common/utils/default_date_settings', () => {
-  const actual = jest.requireActual('../../common/utils/default_date_settings');
+vi.mock('../../common/utils/normalize_time_range');
+vi.mock('../../common/utils/default_date_settings', async () => {
+  const actual = (await vi.importActual('../../common/utils/default_date_settings'));
   return {
     ...actual,
     DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),

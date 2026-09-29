@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -32,33 +35,33 @@ import {
   cleanUpUnusedKibanaAssetsStep,
 } from './step_install_kibana_assets';
 
-jest.mock('../../../kibana/assets/saved_objects', () => {
+vi.mock('../../../kibana/assets/saved_objects', () => {
   return {
-    getSpaceAwareSaveobjectsClients: jest.fn().mockReturnValue({
-      savedObjectClientWithSpace: jest.fn(),
-      savedObjectsImporter: jest.fn(),
-      savedObjectTagAssignmentService: jest.fn(),
-      savedObjectTagClient: jest.fn(),
+    getSpaceAwareSaveobjectsClients: vi.fn().mockReturnValue({
+      savedObjectClientWithSpace: vi.fn(),
+      savedObjectsImporter: vi.fn(),
+      savedObjectTagAssignmentService: vi.fn(),
+      savedObjectTagClient: vi.fn(),
     }),
   };
 });
-jest.mock('../../../kibana/assets/install');
-jest.mock('../../remove', () => {
+vi.mock('../../../kibana/assets/install');
+vi.mock('../../remove', async () => {
   return {
-    ...jest.requireActual('../../remove'),
-    deleteKibanaAssets: jest.fn(),
+    ...(await vi.importActual('../../remove')),
+    deleteKibanaAssets: vi.fn(),
   };
 });
 
-const mockedInstallKibanaAssetsAndReferencesMultispace = jest.mocked(
+const mockedInstallKibanaAssetsAndReferencesMultispace = vi.mocked(
   installKibanaAssetsAndReferencesMultispace
 );
-const mockedDeleteKibanaAssets = deleteKibanaAssets as jest.MockedFunction<
+const mockedDeleteKibanaAssets = deleteKibanaAssets as MockedFunction<
   typeof deleteKibanaAssets
 >;
 
-let soClient: jest.Mocked<SavedObjectsClientContract>;
-let esClient: jest.Mocked<ElasticsearchClient>;
+let soClient: Mocked<SavedObjectsClientContract>;
+let esClient: Mocked<ElasticsearchClient>;
 
 const packageInstallContext = {
   packageInfo: {
@@ -133,7 +136,7 @@ describe('stepInstallKibanaAssets', () => {
     const installationPromise = stepInstallKibanaAssets({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext: {
@@ -170,12 +173,12 @@ describe('stepInstallKibanaAssetsWithStreaming', () => {
 
   it('should rely on archiveIterator instead of in-memory assetsMap', async () => {
     const assetsMap = new Map();
-    assetsMap.get = jest.fn();
-    assetsMap.set = jest.fn();
+    assetsMap.get = vi.fn();
+    assetsMap.set = vi.fn();
 
     const archiveIterator = {
-      traverseEntries: jest.fn(),
-      getPaths: jest.fn(),
+      traverseEntries: vi.fn(),
+      getPaths: vi.fn(),
     };
 
     const result = await stepInstallKibanaAssetsWithStreaming({
@@ -247,7 +250,7 @@ describe('cleanUpKibanaAssetsStep', () => {
     await cleanUpKibanaAssetsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -278,7 +281,7 @@ describe('cleanUpKibanaAssetsStep', () => {
     await cleanUpKibanaAssetsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -305,7 +308,7 @@ describe('cleanUpKibanaAssetsStep', () => {
     await cleanUpKibanaAssetsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -330,7 +333,7 @@ describe('cleanUpKibanaAssetsStep', () => {
     await cleanUpKibanaAssetsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -356,7 +359,7 @@ describe('cleanUpKibanaAssetsStep', () => {
     await cleanUpKibanaAssetsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -395,7 +398,7 @@ describe('cleanUpUnusedKibanaAssetsStep', () => {
 
   const installationContext = {
     savedObjectsClient: soClient,
-    savedObjectsImporter: jest.fn(),
+    savedObjectsImporter: vi.fn(),
     esClient,
     logger: loggerMock.create(),
     packageInstallContext,

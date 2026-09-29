@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { type ReactElement } from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -27,9 +30,9 @@ const experimentalFeatures = {
   newFlyoutSystemDisabled: false,
 } as ExperimentalFeatures;
 
-jest.mock('@elastic/eui', () => {
-  const React_ = jest.requireActual('react');
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const React_ = require('react');
+  const actual = (await vi.importActual('@elastic/eui'));
 
   const EuiResizeObserver = ({
     onResize,
@@ -85,21 +88,33 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../entity_analytics/components/home/risk_level_breakdown_table', () => ({
-  RiskLevelBreakdownTable: () => <div data-test-subj="riskLevelBreakdownTableMock" />,
-}));
+vi.mock('../../entity_analytics/components/home/risk_level_breakdown_table', () => {
+      const mocked = {
+      RiskLevelBreakdownTable: () => <div data-test-subj="riskLevelBreakdownTableMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity_analytics/components/risk_score_donut_chart', () => ({
-  RiskScoreDonutChart: () => <div data-test-subj="riskScoreDonutChartMock" />,
-}));
+vi.mock('../../entity_analytics/components/risk_score_donut_chart', () => {
+      const mocked = {
+      RiskScoreDonutChart: () => <div data-test-subj="riskScoreDonutChartMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./entity_list_table', () => ({
-  EntityListTable: () => <div data-test-subj="entityListTableMock" />,
-}));
+vi.mock('./entity_list_table', () => {
+      const mocked = {
+      EntityListTable: () => <div data-test-subj="entityListTableMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./entity_explore_navigation', () => ({
-  navigateToEntityAnalyticsHomePageInApp: jest.fn(),
-}));
+vi.mock('./entity_explore_navigation', () => {
+      const mocked = {
+      navigateToEntityAnalyticsHomePageInApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const triggerResize = (dimensions: ResizeDimensions) => {
   const onResize = (global as unknown as Record<string, unknown>)[RESIZE_CALLBACK_KEY] as
@@ -146,8 +161,8 @@ const renderCanvas = (
           attachment: makeAttachment(),
         } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
         {
-          closeCanvas: overrides.closeCanvas ?? jest.fn(),
-          registerActionButtons: jest.fn(),
+          closeCanvas: overrides.closeCanvas ?? vi.fn(),
+          registerActionButtons: vi.fn(),
         } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
       )}
     </I18nProvider>
@@ -157,12 +172,12 @@ const renderCanvas = (
 describe('EntityAnalyticsDashboardCanvasContent', () => {
   afterEach(() => {
     delete (global as unknown as Record<string, unknown>)[RESIZE_CALLBACK_KEY];
-    (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
+    (navigateToEntityAnalyticsHomePageInApp as Mock).mockClear();
   });
 
   it('returns an "Open in Security" action from getActionButtons in canvas mode and closes the canvas before navigating', () => {
-    const searchSession = { clear: jest.fn() } as unknown as ISessionService;
-    const closeCanvas = jest.fn();
+    const searchSession = { clear: vi.fn() } as unknown as ISessionService;
+    const closeCanvas = vi.fn();
     const application = applicationServiceMock.createStartContract();
     const definition = createEntityAnalyticsDashboardAttachmentDefinition({
       application,
@@ -174,7 +189,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
       attachment: makeAttachment(),
       isSidebar: false,
       isCanvas: true,
-      updateOrigin: jest.fn(),
+      updateOrigin: vi.fn(),
       closeCanvas,
     });
 
@@ -186,7 +201,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
 
     expect(closeCanvas).toHaveBeenCalledTimes(1);
     expect(closeCanvas.mock.invocationCallOrder[0]).toBeLessThan(
-      (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mock.invocationCallOrder[0]
+      (navigateToEntityAnalyticsHomePageInApp as Mock).mock.invocationCallOrder[0]
     );
     expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledTimes(1);
     expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledWith(
@@ -196,7 +211,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
 
   it('returns a Preview action from getActionButtons when not in canvas mode', () => {
     const application = applicationServiceMock.createStartContract();
-    const openCanvas = jest.fn();
+    const openCanvas = vi.fn();
     const definition = createEntityAnalyticsDashboardAttachmentDefinition({
       application,
       experimentalFeatures,
@@ -207,7 +222,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
       isSidebar: false,
       isCanvas: false,
       openCanvas,
-      updateOrigin: jest.fn(),
+      updateOrigin: vi.fn(),
     });
 
     expect(buttons).toHaveLength(1);
@@ -260,7 +275,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
   });
 
   it('forwards closeCanvas from the canvas render callbacks into the navigation provider so per-row navigation can dismiss the canvas overlay', () => {
-    const closeCanvas = jest.fn();
+    const closeCanvas = vi.fn();
     const application = applicationServiceMock.createStartContract();
     const definition = createEntityAnalyticsDashboardAttachmentDefinition({
       application,
@@ -273,7 +288,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
       } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
       {
         closeCanvas,
-        registerActionButtons: jest.fn(),
+        registerActionButtons: vi.fn(),
       } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
     ) as ReactElement<{ closeCanvas?: () => void }>;
 
@@ -283,7 +298,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
   it('forwards the new flyout setting to entity navigation in the canvas preview', () => {
     const application = applicationServiceMock.createStartContract();
     const uiSettings = {
-      get: jest.fn(() => true),
+      get: vi.fn(() => true),
     } as unknown as IUiSettingsClient;
     const definition = createEntityAnalyticsDashboardAttachmentDefinition({
       application,
@@ -296,8 +311,8 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
         attachment: makeAttachment(),
       } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
       {
-        closeCanvas: jest.fn(),
-        registerActionButtons: jest.fn(),
+        closeCanvas: vi.fn(),
+        registerActionButtons: vi.fn(),
       } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
     ) as ReactElement<{ isNewFlyoutEnabled?: boolean }>;
 

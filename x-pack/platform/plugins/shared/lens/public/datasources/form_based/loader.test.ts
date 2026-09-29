@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   loadInitialState,
   changeIndexPattern,
@@ -23,10 +25,10 @@ import { sampleIndexPatterns } from '../../data_views_service/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
-    get: jest.fn().mockImplementation(() => lastData),
-    set: jest.fn(),
-    remove: jest.fn(),
-    clear: jest.fn(),
+    get: vi.fn().mockImplementation(() => lastData),
+    set: vi.fn(),
+    remove: vi.fn(),
+    clear: vi.fn(),
   };
 };
 

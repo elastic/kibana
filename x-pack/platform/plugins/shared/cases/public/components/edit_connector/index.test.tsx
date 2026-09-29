@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -24,18 +27,18 @@ import { usePushToService } from '../use_push_to_service';
 import { ConnectorTypes } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...original,
     KibanaServices: {
       ...original.KibanaServices,
-      getConfig: jest.fn(),
+      getConfig: vi.fn(),
     },
   };
 });
 
-const onSubmit = jest.fn();
+const onSubmit = vi.fn();
 const caseConnectors = getCaseConnectorsMockResponse();
 
 const defaultProps: EditConnectorProps = {
@@ -46,10 +49,10 @@ const defaultProps: EditConnectorProps = {
   onSubmit,
 };
 
-jest.mock('../use_push_to_service');
+vi.mock('../use_push_to_service');
 
-const handlePushToService = jest.fn();
-const usePushToServiceMock = usePushToService as jest.Mock;
+const handlePushToService = vi.fn();
+const usePushToServiceMock = usePushToService as Mock;
 
 const errorMsg = { id: 'test-error-msg', title: 'My error msg', description: 'My error desc' };
 
@@ -68,17 +71,17 @@ describe('EditConnector ', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
 
     usePushToServiceMock.mockReturnValue(usePushToServiceMockRes);
   });

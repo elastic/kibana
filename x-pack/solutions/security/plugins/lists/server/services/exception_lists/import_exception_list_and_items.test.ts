@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
@@ -16,8 +19,8 @@ import { importExceptionListItems } from './utils/import/import_exception_list_i
 import { getExceptionListSavedObjectClientMock, toReadable } from './exception_list_client.mock';
 import { ExceptionListClient } from './exception_list_client';
 
-jest.mock('./utils/import/import_exception_lists');
-jest.mock('./utils/import/import_exception_list_items');
+vi.mock('./utils/import/import_exception_lists');
+vi.mock('./utils/import/import_exception_list_items');
 
 describe('import_exception_list_and_items', () => {
   let exceptionListClient: ExceptionListClient;
@@ -32,12 +35,12 @@ describe('import_exception_list_and_items', () => {
   });
 
   beforeEach(() => {
-    (importExceptionLists as jest.Mock).mockResolvedValue({
+    (importExceptionLists as Mock).mockResolvedValue({
       errors: [],
       success: true,
       success_count: 1,
     });
-    (importExceptionListItems as jest.Mock).mockResolvedValue({
+    (importExceptionListItems as Mock).mockResolvedValue({
       errors: [],
       success: true,
       success_count: 1,
@@ -45,7 +48,7 @@ describe('import_exception_list_and_items', () => {
   });
 
   test('it should report success false if an error occurred importing lists', async () => {
-    (importExceptionLists as jest.Mock).mockResolvedValue({
+    (importExceptionLists as Mock).mockResolvedValue({
       errors: [{ error: { message: 'some error occurred', status_code: 400 } }],
       success: false,
       success_count: 1,
@@ -72,7 +75,7 @@ describe('import_exception_list_and_items', () => {
   });
 
   test('it should report success false if an error occurred importing items', async () => {
-    (importExceptionListItems as jest.Mock).mockResolvedValue({
+    (importExceptionListItems as Mock).mockResolvedValue({
       errors: [{ error: { message: 'some error occurred', status_code: 400 } }],
       success: false,
       success_count: 1,

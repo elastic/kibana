@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
@@ -13,14 +15,14 @@ import { resolveConnectorDetails } from '.';
 
 describe('resolveConnectorDetails', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockActionsClient = {
-    get: jest.fn(),
+    get: vi.fn(),
   };
 
   const mockRequest = {} as KibanaRequest;
@@ -28,7 +30,7 @@ describe('resolveConnectorDetails', () => {
   const connectorId = 'connector-1';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockActionsClient.get.mockResolvedValue({
       actionTypeId: '.gen-ai',
@@ -55,7 +57,7 @@ describe('resolveConnectorDetails', () => {
     });
 
     it('does not call inference.getConnectorById when both values are already provided', async () => {
-      const mockGetConnectorById = jest.fn();
+      const mockGetConnectorById = vi.fn();
       const mockInference = {
         getConnectorById: mockGetConnectorById,
       } as unknown as InferenceServerStart;
@@ -74,7 +76,7 @@ describe('resolveConnectorDetails', () => {
     });
 
     it('triggers inference lookup when actionTypeId is asNonEmpty("") (i.e. undefined)', async () => {
-      const mockGetConnectorById = jest.fn().mockResolvedValue({
+      const mockGetConnectorById = vi.fn().mockResolvedValue({
         type: '.inference',
         name: 'EIS Connector',
       });
@@ -97,7 +99,7 @@ describe('resolveConnectorDetails', () => {
     });
 
     it('triggers inference lookup when connectorName is asNonEmpty("") (i.e. undefined)', async () => {
-      const mockGetConnectorById = jest.fn().mockResolvedValue({
+      const mockGetConnectorById = vi.fn().mockResolvedValue({
         type: '.inference',
         name: 'EIS Connector',
       });
@@ -202,7 +204,7 @@ describe('resolveConnectorDetails', () => {
   });
 
   describe('when inference plugin is available', () => {
-    const mockGetConnectorById = jest.fn();
+    const mockGetConnectorById = vi.fn();
     let mockInference: InferenceServerStart;
 
     beforeEach(() => {
@@ -298,7 +300,7 @@ describe('resolveConnectorDetails', () => {
 
   describe('when inference plugin is available but request is missing', () => {
     it('falls back to actionsClient.get when request is not provided', async () => {
-      const mockGetConnectorById = jest.fn();
+      const mockGetConnectorById = vi.fn();
       const mockInference = {
         getConnectorById: mockGetConnectorById,
       } as unknown as InferenceServerStart;

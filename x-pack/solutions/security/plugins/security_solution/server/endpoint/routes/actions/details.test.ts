@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { TypeOf } from '@kbn/config-schema';
 import type { ElasticsearchClientMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -19,25 +22,25 @@ import type { ActionDetailsRequestSchema } from '../../../../common/api/endpoint
 
 describe('when calling the Action Details route handler', () => {
   let mockScopedEsClient: ScopedClusterClientMock;
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockSavedObjectClient: Mocked<SavedObjectsClientContract>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
   let actionDetailsRouteHandler: ReturnType<typeof getActionDetailsRequestHandler>;
 
   beforeEach(() => {
     const mockContext = createMockEndpointAppContext();
 
-    (mockContext.service.getEndpointMetadataService as jest.Mock) = jest.fn().mockReturnValue({
-      findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+    (mockContext.service.getEndpointMetadataService as Mock) = vi.fn().mockReturnValue({
+      findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
     });
     mockScopedEsClient = elasticsearchServiceMock.createScopedClusterClient();
     mockScopedEsClient.asInternalUser =
       mockContext.service.getInternalEsClient() as ElasticsearchClientMock;
     mockSavedObjectClient =
-      mockContext.service.savedObjects.createInternalScopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
+      mockContext.service.savedObjects.createInternalScopedSoClient() as Mocked<SavedObjectsClientContract>;
     mockResponse = httpServerMock.createResponseFactory();
     actionDetailsRouteHandler = getActionDetailsRequestHandler(mockContext);
     (
-      mockContext.service.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      mockContext.service.getInternalFleetServices().ensureInCurrentSpace as Mock
     ).mockResolvedValue(undefined);
   });
 

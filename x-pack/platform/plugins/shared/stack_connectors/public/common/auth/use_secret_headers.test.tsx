@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /* eslint-disable no-console */
 
 import React from 'react';
@@ -14,9 +17,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from './use_secret_headers';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
-  useKibana: jest.fn().mockReturnValue({}),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const customWrapper = () => {
   const queryClient = new QueryClient({
@@ -38,8 +44,8 @@ const customWrapper = () => {
 };
 
 describe('useSecretHeaders', () => {
-  const addErrorMock = jest.fn();
-  const getMock = jest.fn();
+  const addErrorMock = vi.fn();
+  const getMock = vi.fn();
 
   const mockServices = {
     http: { get: getMock },
@@ -47,8 +53,8 @@ describe('useSecretHeaders', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: mockServices,
     });
   });

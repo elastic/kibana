@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -19,7 +21,7 @@ const nonDefaultMin = MIN_LATEST_ALERTS + 5000;
 const nonDefaultMax = nonDefaultMin + 5000;
 
 describe('AlertsRange', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the expected default min alerts', () => {
     render(<AlertsRange value={200} />);
@@ -50,7 +52,7 @@ describe('AlertsRange', () => {
   });
 
   it('calls onChange when the range value changes', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     render(<AlertsRange onChange={mockOnChange} value={MIN_LATEST_ALERTS} />);
 
     fireEvent.click(screen.getByText(`${MAX_LATEST_ALERTS}`));
@@ -59,7 +61,7 @@ describe('AlertsRange', () => {
   });
 
   it('calls setUpdatedKnowledgeBaseSettings with the expected arguments', () => {
-    const mockSetUpdatedKnowledgeBaseSettings = jest.fn();
+    const mockSetUpdatedKnowledgeBaseSettings = vi.fn();
     const knowledgeBase: KnowledgeBaseConfig = { latestAlerts: 150 };
 
     render(

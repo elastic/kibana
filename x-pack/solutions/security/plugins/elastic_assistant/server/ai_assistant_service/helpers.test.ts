@@ -5,27 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ensureProductDocumentationInstalled } from './helpers';
 import { loggerMock } from '@kbn/logging-mocks';
 
 const mockLogger = loggerMock.create();
 const mockProductDocManager = {
-  getStatus: jest.fn(),
-  getStatuses: jest.fn(),
-  install: jest.fn(),
-  installSecurityLabs: jest.fn(),
-  uninstall: jest.fn(),
-  uninstallSecurityLabs: jest.fn(),
-  update: jest.fn(),
-  updateAll: jest.fn(),
-  updateSecurityLabsAll: jest.fn().mockResolvedValue({ inferenceIds: [] }),
-  getSecurityLabsStatus: jest.fn(),
+  getStatus: vi.fn(),
+  getStatuses: vi.fn(),
+  install: vi.fn(),
+  installSecurityLabs: vi.fn(),
+  uninstall: vi.fn(),
+  uninstallSecurityLabs: vi.fn(),
+  update: vi.fn(),
+  updateAll: vi.fn(),
+  updateSecurityLabsAll: vi.fn().mockResolvedValue({ inferenceIds: [] }),
+  getSecurityLabsStatus: vi.fn(),
 };
 
 describe('helpers', () => {
   describe('ensureProductDocumentationInstalled', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should install product documentation if not installed', async () => {
@@ -34,7 +36,7 @@ describe('helpers', () => {
 
       await ensureProductDocumentationInstalled({
         productDocManager: mockProductDocManager,
-        setIsProductDocumentationInProgress: jest.fn(),
+        setIsProductDocumentationInProgress: vi.fn(),
         logger: mockLogger,
       });
 
@@ -54,7 +56,7 @@ describe('helpers', () => {
 
       await ensureProductDocumentationInstalled({
         productDocManager: mockProductDocManager,
-        setIsProductDocumentationInProgress: jest.fn(),
+        setIsProductDocumentationInProgress: vi.fn(),
         logger: mockLogger,
       });
 
@@ -70,7 +72,7 @@ describe('helpers', () => {
 
       await ensureProductDocumentationInstalled({
         productDocManager: mockProductDocManager,
-        setIsProductDocumentationInProgress: jest.fn(),
+        setIsProductDocumentationInProgress: vi.fn(),
         logger: mockLogger,
       });
 
@@ -87,7 +89,7 @@ describe('helpers', () => {
 
       await ensureProductDocumentationInstalled({
         productDocManager: mockProductDocManager,
-        setIsProductDocumentationInProgress: jest.fn(),
+        setIsProductDocumentationInProgress: vi.fn(),
         logger: mockLogger,
       });
 

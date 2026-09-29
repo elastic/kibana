@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -26,18 +28,24 @@ import {
   storedPackagePolicyToAgentInputs,
 } from './package_policies_to_agent_inputs';
 
-jest.mock('../app_context');
-jest.mock('../epm/packages/get', () => ({
-  getAgentTemplateAssetsMap: jest.fn(),
-}));
+vi.mock('../app_context');
+vi.mock('../epm/packages/get', () => {
+      const mocked = {
+      getAgentTemplateAssetsMap: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 // `package_policy` imports `recompileInputsWithAgentVersion` back from this module, so a
 // `jest.requireActual` factory here re-enters this mock while it is still being built and hands the
 // module under test a different set of mock functions than the ones these tests configure. Only
 // these two exports are used from `package_policy`, so declare them directly instead.
-jest.mock('../package_policy', () => ({
-  _compilePackagePolicyInputs: jest.fn(),
-  getPackagePolicySavedObjectType: jest.fn(),
-}));
+vi.mock('../package_policy', () => {
+      const mocked = {
+      _compilePackagePolicyInputs: vi.fn(),
+      getPackagePolicySavedObjectType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
@@ -1498,19 +1506,19 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    jest.mocked(appContextService.getLogger).mockReturnValue(logger);
-    jest
+    vi.mocked(appContextService.getLogger).mockReturnValue(logger);
+    vi
       .mocked(appContextService.getExperimentalFeatures)
       .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
-    jest
+    vi
       .mocked(getPackagePolicySavedObjectType)
       .mockResolvedValue(LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE);
-    jest.mocked(getAgentTemplateAssetsMap).mockResolvedValue(new Map() as any);
-    jest.mocked(_compilePackagePolicyInputs).mockReturnValue(recompiledInputs);
+    vi.mocked(getAgentTemplateAssetsMap).mockResolvedValue(new Map() as any);
+    vi.mocked(_compilePackagePolicyInputs).mockReturnValue(recompiledInputs);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('recompiles and persists inputs for an agent version missing from inputs_for_versions instead of throwing', async () => {
@@ -1585,7 +1593,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
   });
 
   it('falls back to the default inputs when the recompile itself throws', async () => {
-    jest.mocked(_compilePackagePolicyInputs).mockImplementation(() => {
+    vi.mocked(_compilePackagePolicyInputs).mockImplementation(() => {
       throw new Error('missing package assets');
     });
     const soClient = makeSoClient({ '9.5': storedInputsFor95 });
@@ -1894,7 +1902,7 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('integration-level condition fans out to inputs', () => {

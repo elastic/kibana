@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
@@ -66,7 +68,7 @@ describe('ensureGlobalFieldDefinitions', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     fieldDefinitionsService = createFieldDefinitionsServiceMock();
     fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([]);
     // The create return value is ignored by ensureGlobalFieldDefinitions — the

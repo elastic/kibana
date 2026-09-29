@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import type { CustomWorkflowAlertResult } from '../../../../../extract_custom_workflow_result';
 import { resolveCustomSettledResults } from '.';
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const mockCustomResults: CustomWorkflowAlertResult[] = [
@@ -28,7 +30,7 @@ const mockCustomResults: CustomWorkflowAlertResult[] = [
 
 describe('resolveCustomSettledResults', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the results when fulfilled', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -20,7 +23,7 @@ import type { AlertingConfig } from '../config';
 
 describe('createGetAlertIndicesAliasFn', () => {
   const logger = loggingSystemMock.create().get();
-  const mockedLicenseState: jest.Mocked<ILicenseState> = licenseStateMock.create();
+  const mockedLicenseState: Mocked<ILicenseState> = licenseStateMock.create();
   const taskManager = taskManagerMock.createSetup();
   const inMemoryMetrics = inMemoryMetricsMock.create();
 
@@ -48,7 +51,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: jest.fn(),
+    executor: vi.fn(),
     category: 'test',
     producer: 'alerts',
     solution: 'stack',
@@ -72,7 +75,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: jest.fn(),
+    executor: vi.fn(),
     category: 'test',
     producer: 'alerts',
     solution: 'stack',
@@ -97,7 +100,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: jest.fn(),
+    executor: vi.fn(),
     category: 'test',
     producer: 'alerts',
     solution: 'stack',

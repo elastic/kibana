@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockFlagEvaluationCounterAdd = jest.fn();
+import { vi } from 'vitest';
 
-const mockCreateCounter = jest.fn(() => ({ add: mockFlagEvaluationCounterAdd }));
-const mockGetMeter = jest.fn(() => ({ createCounter: mockCreateCounter }));
+export const mockFlagEvaluationCounterAdd = vi.fn();
 
-jest.mock('@opentelemetry/api', () => {
-  const actual = jest.requireActual('@opentelemetry/api');
+const mockCreateCounter = vi.fn(() => ({ add: mockFlagEvaluationCounterAdd }));
+const mockGetMeter = vi.fn(() => ({ createCounter: mockCreateCounter }));
+
+vi.mock('@opentelemetry/api', () => {
+  const actual = require('@opentelemetry/api');
   return {
     ...actual,
     metrics: {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   downloadAndStoreAgent,
   isAgentDownloadFromDiskAvailable,
@@ -14,47 +17,59 @@ import {
 import fs from 'fs';
 import { readFile, unlink, writeFile } from 'fs/promises';
 
-const mockedFetch = jest.spyOn(global, 'fetch');
-const mockDigest = jest.fn();
+const mockedFetch = vi.spyOn(global, 'fetch');
+const mockDigest = vi.fn();
 
-jest.mock('fs');
-jest.mock('fs/promises', () => ({
-  mkdir: jest.fn().mockResolvedValue(undefined),
-  readdir: jest.fn().mockResolvedValue([]),
-  stat: jest.fn(),
-  unlink: jest.fn().mockResolvedValue(undefined),
-  writeFile: jest.fn().mockResolvedValue(undefined),
-  readFile: jest.fn(),
-}));
-jest.mock('stream/promises', () => ({
-  finished: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('stream', () => {
-  const actual = jest.requireActual('stream');
+vi.mock('fs');
+vi.mock('fs/promises', () => {
+      const mocked = {
+      mkdir: vi.fn().mockResolvedValue(undefined),
+      readdir: vi.fn().mockResolvedValue([]),
+      stat: vi.fn(),
+      unlink: vi.fn().mockResolvedValue(undefined),
+      writeFile: vi.fn().mockResolvedValue(undefined),
+      readFile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('stream/promises', () => {
+      const mocked = {
+      finished: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('stream', () => {
+  const actual = require('stream');
   return {
     ...actual,
     Readable: {
       ...actual.Readable,
-      fromWeb: jest.fn().mockReturnValue({
-        pipe: jest.fn().mockReturnThis(),
+      fromWeb: vi.fn().mockReturnValue({
+        pipe: vi.fn().mockReturnThis(),
       }),
     },
   };
 });
-jest.mock('crypto', () => ({
-  createHash: jest.fn(() => ({
-    digest: mockDigest,
-    update: jest.fn(),
-  })),
-}));
-jest.mock('../../../common/endpoint/data_loaders/utils', () => ({
-  createToolingLogger: jest.fn(() => ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-  })),
-}));
+vi.mock('crypto', () => {
+      const mocked = {
+      createHash: vi.fn(() => ({
+        digest: mockDigest,
+        update: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/endpoint/data_loaders/utils', () => {
+      const mocked = {
+      createToolingLogger: vi.fn(() => ({
+        debug: vi.fn(),
+        info: vi.fn(),
+        warning: vi.fn(),
+        error: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const settingsJson = JSON.stringify({
   lastCleanup: new Date(0).toISOString(),
@@ -67,13 +82,13 @@ const fileName = 'elastic-agent-7.10.0.tar.gz';
 const expectedHash = 'abc123def456';
 
 const mockWriteStream = {
-  on: jest.fn().mockReturnThis(),
-  once: jest.fn().mockReturnThis(),
-  emit: jest.fn().mockReturnThis(),
-  end: jest.fn(),
-  write: jest.fn().mockReturnValue(true),
-  removeListener: jest.fn().mockReturnThis(),
-  removeAllListeners: jest.fn().mockReturnThis(),
+  on: vi.fn().mockReturnThis(),
+  once: vi.fn().mockReturnThis(),
+  emit: vi.fn().mockReturnThis(),
+  end: vi.fn(),
+  write: vi.fn().mockReturnValue(true),
+  removeListener: vi.fn().mockReturnThis(),
+  removeAllListeners: vi.fn().mockReturnThis(),
   writable: true,
 };
 
@@ -82,7 +97,7 @@ const mockWriteStream = {
  * Returns a function that checks the path against the provided map.
  */
 const mockExistsSync = (pathResults: Record<string, boolean>) => {
-  (fs.existsSync as unknown as jest.Mock).mockImplementation((path: string) => {
+  (fs.existsSync as unknown as Mock).mockImplementation((path: string) => {
     for (const [pattern, result] of Object.entries(pathResults)) {
       if (path.includes(pattern)) return result;
     }
@@ -94,7 +109,7 @@ const mockExistsSync = (pathResults: Record<string, boolean>) => {
  * Helper to mock readFile based on path patterns.
  */
 const mockReadFile = (pathResults: Record<string, string>) => {
-  (readFile as unknown as jest.Mock).mockImplementation((path: string) => {
+  (readFile as unknown as Mock).mockImplementation((path: string) => {
     for (const [pattern, result] of Object.entries(pathResults)) {
       if (path.includes(pattern)) return Promise.resolve(result);
     }
@@ -104,7 +119,7 @@ const mockReadFile = (pathResults: Record<string, string>) => {
 
 describe('AgentDownloadStorage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDigest.mockReturnValue(expectedHash);
     // Mock createReadStream used by computeFileHash — supports async iteration
     const mockReadStream = {
@@ -112,13 +127,13 @@ describe('AgentDownloadStorage', () => {
         yield Buffer.from('mock-data');
       },
     };
-    (fs.createReadStream as unknown as jest.Mock).mockReturnValue(mockReadStream);
+    (fs.createReadStream as unknown as Mock).mockReturnValue(mockReadStream);
   });
 
   describe('downloadAndStoreAgent', () => {
     it('downloads and stores the agent if not cached', async () => {
       mockExistsSync({ [fileName]: false });
-      (fs.createWriteStream as unknown as jest.Mock).mockReturnValue(mockWriteStream);
+      (fs.createWriteStream as unknown as Mock).mockReturnValue(mockWriteStream);
       mockReadFile({});
       mockedFetch.mockResolvedValue({
         ok: true,
@@ -156,19 +171,19 @@ describe('AgentDownloadStorage', () => {
     it('re-downloads when cached file hash does not match sidecar', async () => {
       // First call: cache check finds file + sidecar. After delete, they're gone.
       let deleted = false;
-      (fs.existsSync as unknown as jest.Mock).mockImplementation((path: string) => {
+      (fs.existsSync as unknown as Mock).mockImplementation((path: string) => {
         if (deleted) return false;
         if (path.includes(fileName) || path.includes('.sha512')) return true;
         return false;
       });
-      (unlink as unknown as jest.Mock).mockImplementation(() => {
+      (unlink as unknown as Mock).mockImplementation(() => {
         deleted = true;
         return Promise.resolve();
       });
 
       mockReadFile({ '.sha512': expectedHash });
       mockDigest.mockReturnValue('wrong_hash');
-      (fs.createWriteStream as unknown as jest.Mock).mockReturnValue(mockWriteStream);
+      (fs.createWriteStream as unknown as Mock).mockReturnValue(mockWriteStream);
 
       mockedFetch.mockResolvedValue({
         ok: true,
@@ -190,17 +205,17 @@ describe('AgentDownloadStorage', () => {
 
     it('re-downloads when sidecar file is missing', async () => {
       let deleted = false;
-      (fs.existsSync as unknown as jest.Mock).mockImplementation((path: string) => {
+      (fs.existsSync as unknown as Mock).mockImplementation((path: string) => {
         if (deleted) return false;
         if (path.includes('.sha512')) return false;
         if (path.includes(fileName)) return true;
         return false;
       });
-      (unlink as unknown as jest.Mock).mockImplementation(() => {
+      (unlink as unknown as Mock).mockImplementation(() => {
         deleted = true;
         return Promise.resolve();
       });
-      (fs.createWriteStream as unknown as jest.Mock).mockReturnValue(mockWriteStream);
+      (fs.createWriteStream as unknown as Mock).mockReturnValue(mockWriteStream);
       mockReadFile({});
 
       mockedFetch.mockResolvedValue({
@@ -223,14 +238,14 @@ describe('AgentDownloadStorage', () => {
 
     it('validates hash after fresh download with shaUrl', async () => {
       mockExistsSync({ [fileName]: false });
-      (fs.createWriteStream as unknown as jest.Mock).mockReturnValue(mockWriteStream);
+      (fs.createWriteStream as unknown as Mock).mockReturnValue(mockWriteStream);
       mockDigest.mockReturnValue(expectedHash);
       mockReadFile({});
 
       mockedFetch
         .mockResolvedValueOnce({
           ok: true,
-          text: jest.fn().mockResolvedValue(`${expectedHash}  agent.tar.gz`),
+          text: vi.fn().mockResolvedValue(`${expectedHash}  agent.tar.gz`),
         } as unknown as Response)
         .mockResolvedValueOnce({
           ok: true,
@@ -257,7 +272,7 @@ describe('AgentDownloadStorage', () => {
 
     it('throws after all retry attempts fail hash validation', async () => {
       mockExistsSync({ [fileName]: false });
-      (fs.createWriteStream as unknown as jest.Mock).mockReturnValue(mockWriteStream);
+      (fs.createWriteStream as unknown as Mock).mockReturnValue(mockWriteStream);
       mockDigest.mockReturnValue('wrong_hash_every_time');
       mockReadFile({});
 
@@ -265,7 +280,7 @@ describe('AgentDownloadStorage', () => {
       mockedFetch
         .mockResolvedValueOnce({
           ok: true,
-          text: jest.fn().mockResolvedValue(`${expectedHash}  agent.tar.gz`),
+          text: vi.fn().mockResolvedValue(`${expectedHash}  agent.tar.gz`),
         } as unknown as Response)
         .mockResolvedValue({
           ok: true,
@@ -281,7 +296,7 @@ describe('AgentDownloadStorage', () => {
 
     it('proceeds without validation when sha_url fetch fails but still writes local hash sidecar', async () => {
       mockExistsSync({ [fileName]: false });
-      (fs.createWriteStream as unknown as jest.Mock).mockReturnValue(mockWriteStream);
+      (fs.createWriteStream as unknown as Mock).mockReturnValue(mockWriteStream);
       mockReadFile({});
       mockDigest.mockReturnValue(expectedHash);
 
@@ -329,7 +344,7 @@ describe('AgentDownloadStorage', () => {
     });
 
     it('returns undefined when file exists but sidecar is missing', () => {
-      (fs.existsSync as unknown as jest.Mock).mockImplementation((path: string) => {
+      (fs.existsSync as unknown as Mock).mockImplementation((path: string) => {
         if (path.includes('.sha512')) return false;
         if (path.includes(fileName)) return true;
         return false;
@@ -351,7 +366,7 @@ describe('AgentDownloadStorage', () => {
 
   describe('cleanupDownloads', () => {
     it('deletes sidecar file alongside expired tarball', async () => {
-      const { readdir, stat } = jest.requireMock('fs/promises');
+      const { readdir, stat } = (await vi.importMock('fs/promises'));
       const oldDate = new Date(Date.now() - 1.728e8 - 1000); // older than maxFileAge
 
       // Settings with old lastCleanup to trigger cleanup
@@ -359,11 +374,11 @@ describe('AgentDownloadStorage', () => {
         lastCleanup: new Date(0).toISOString(),
         maxFileAge: 1.728e8,
       });
-      (readFile as unknown as jest.Mock).mockResolvedValue(oldSettings);
+      (readFile as unknown as Mock).mockResolvedValue(oldSettings);
       readdir.mockResolvedValue([fileName, `${fileName}.sha512`]);
       stat.mockResolvedValue({ isFile: () => true, birthtime: oldDate });
-      (unlink as unknown as jest.Mock).mockResolvedValue(undefined);
-      (writeFile as unknown as jest.Mock).mockResolvedValue(undefined);
+      (unlink as unknown as Mock).mockResolvedValue(undefined);
+      (writeFile as unknown as Mock).mockResolvedValue(undefined);
 
       const result = await cleanupDownloads();
 
@@ -371,7 +386,7 @@ describe('AgentDownloadStorage', () => {
       expect(result.deleted.length).toBe(1);
       expect(result.deleted[0]).toContain(fileName);
       // Should have also attempted to delete the sidecar
-      const unlinkCalls = (unlink as unknown as jest.Mock).mock.calls.map(
+      const unlinkCalls = (unlink as unknown as Mock).mock.calls.map(
         (call: string[]) => call[0]
       );
       expect(unlinkCalls.some((path: string) => path.endsWith('.sha512'))).toBe(true);
@@ -382,7 +397,7 @@ describe('AgentDownloadStorage', () => {
     it('parses hash from sha_url response', async () => {
       mockedFetch.mockResolvedValue({
         ok: true,
-        text: jest
+        text: vi
           .fn()
           .mockResolvedValue(`${expectedHash}  elastic-agent-8.15.0-linux-x86_64.tar.gz`),
       } as unknown as Response);

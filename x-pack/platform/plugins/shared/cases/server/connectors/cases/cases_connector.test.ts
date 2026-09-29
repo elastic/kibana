@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -24,11 +27,11 @@ import { CaseError } from '../../common/error';
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
-jest.mock('./cases_connector_executor');
-jest.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
+vi.mock('./cases_connector_executor');
+vi.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
 
-const CasesConnectorExecutorMock = CasesConnectorExecutor as jest.Mock;
-const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
+const CasesConnectorExecutorMock = CasesConnectorExecutor as Mock;
+const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as Mock;
 
 describe('CasesConnector', () => {
   const services = actionsMock.createServices();
@@ -53,16 +56,16 @@ describe('CasesConnector', () => {
   const templateVersion = null;
   const autoPushCase = null;
 
-  const mockExecute = jest.fn();
-  const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
-  const getSpaceId = jest.fn().mockReturnValue('default');
-  const getUnsecuredSavedObjectsClient = jest.fn();
-  const mockUiSettingsGet = jest.fn().mockResolvedValue(20);
-  const getUiSettingsClient = jest.fn().mockResolvedValue({
+  const mockExecute = vi.fn();
+  const getCasesClient = vi.fn().mockResolvedValue({ foo: 'bar' });
+  const getSpaceId = vi.fn().mockReturnValue('default');
+  const getUnsecuredSavedObjectsClient = vi.fn();
+  const mockUiSettingsGet = vi.fn().mockResolvedValue(20);
+  const getUiSettingsClient = vi.fn().mockResolvedValue({
     get: mockUiSettingsGet,
   });
   // 1ms delay before retrying
-  const nextBackOff = jest.fn().mockReturnValue(1);
+  const nextBackOff = vi.fn().mockReturnValue(1);
 
   const backOffFactory = {
     create: () => ({ nextBackOff }),
@@ -70,13 +73,13 @@ describe('CasesConnector', () => {
 
   const casesParams = {
     getCasesClient,
-    getActionsClient: jest.fn().mockResolvedValue({}),
+    getActionsClient: vi.fn().mockResolvedValue({}),
     getSpaceId,
     getUnsecuredSavedObjectsClient,
     getUiSettingsClient,
     isCasesAttachmentsEnabled: false,
     isTemplatesEnabled: false,
-    isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
+    isAtLeastPlatinum: vi.fn().mockResolvedValue(true),
   };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
@@ -93,7 +96,7 @@ describe('CasesConnector', () => {
   let caughtError: CasesConnectorError;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExecute.mockResolvedValue({});
     mockUiSettingsGet.mockResolvedValue(20);
 
@@ -166,7 +169,7 @@ describe('CasesConnector', () => {
   });
 
   it('threads isAtLeastPlatinum through to the CasesConnectorExecutor', async () => {
-    const isAtLeastPlatinum = jest.fn().mockResolvedValue(false);
+    const isAtLeastPlatinum = vi.fn().mockResolvedValue(false);
     const connectorWithLicenseCheck = new CasesConnector({
       casesParams: { ...casesParams, isAtLeastPlatinum },
       connectorParams,

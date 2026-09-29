@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { fetchProvider } from './collector_fetch';
 
 const getMockFetchClients = (hits?: unknown[]) => {
   const fetchParamsMock = createCollectorFetchContextMock();
-  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ hits: { hits } });
+  fetchParamsMock.esClient.search = vi.fn().mockResolvedValue({ hits: { hits } });
   return fetchParamsMock;
 };
 

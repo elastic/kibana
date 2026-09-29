@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockVisData } from '../mocks';
@@ -15,7 +17,7 @@ import type { BucketColumns } from '../../common/types';
 
 describe('generateFormatters', () => {
   const visData = createMockVisData();
-  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const defaultFormatter = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
   beforeEach(() => {
     defaultFormatter.mockClear();
   });
@@ -66,9 +68,9 @@ describe('generateFormatters', () => {
 describe('getAvailableFormatter', () => {
   const visData = createMockVisData();
 
-  const preparedFormatter1 = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
-  const preparedFormatter2 = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
-  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const preparedFormatter1 = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const preparedFormatter2 = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const defaultFormatter = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
 
   beforeEach(() => {
     defaultFormatter.mockClear();
@@ -120,9 +122,9 @@ describe('getAvailableFormatter', () => {
 describe('getFormatter', () => {
   const visData = createMockVisData();
 
-  const preparedFormatter1 = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
-  const preparedFormatter2 = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
-  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const preparedFormatter1 = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const preparedFormatter2 = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const defaultFormatter = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
 
   beforeEach(() => {
     defaultFormatter.mockClear();

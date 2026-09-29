@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useServiceMap } from './use_service_map';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -14,36 +16,45 @@ import { transformToReactFlow } from '../../../../common/service_map';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
 
-jest.mock('../../../context/license/use_license_context', () => ({
-  useLicenseContext: jest.fn(),
-}));
+vi.mock('../../../context/license/use_license_context', () => {
+      const mocked = {
+      useLicenseContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: jest.fn(),
-}));
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetcher = jest.fn();
-jest.mock('../../../hooks/use_fetcher', () => ({
-  useFetcher: () => mockUseFetcher(),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-}));
+const mockUseFetcher = vi.fn();
+vi.mock('../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: () => mockUseFetcher(),
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/service_map', () => {
-  const original = jest.requireActual('../../../../common/service_map');
+vi.mock('../../../../common/service_map', async () => {
+  const original = (await vi.importActual('../../../../common/service_map'));
   return {
     ...original,
-    transformToReactFlow: jest.fn(),
+    transformToReactFlow: vi.fn(),
   };
 });
 
-const mockedUseLicenseContext = jest.mocked(useLicenseContext);
-const mockedUseApmPluginContext = jest.mocked(useApmPluginContext);
-const mockedTransformToReactFlow = jest.mocked(transformToReactFlow);
+const mockedUseLicenseContext = vi.mocked(useLicenseContext);
+const mockedUseApmPluginContext = vi.mocked(useApmPluginContext);
+const mockedTransformToReactFlow = vi.mocked(transformToReactFlow);
 const defaultParams: Parameters<typeof useServiceMap>[0] = {
   start: '2026-01-01T00:00:00.000Z',
   end: '2026-01-01T01:00:00.000Z',
@@ -53,7 +64,7 @@ const defaultParams: Parameters<typeof useServiceMap>[0] = {
 
 describe('useServiceMap()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockedUseLicenseContext.mockReturnValue({
       isActive: true,

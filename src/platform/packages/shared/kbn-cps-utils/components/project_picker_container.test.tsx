@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
@@ -45,21 +47,21 @@ describe('ProjectPickerContainer', () => {
       ProjectRoutingAccess.EDITABLE
     );
     const cpsManager = {
-      fetchProjects: jest.fn().mockResolvedValue({
+      fetchProjects: vi.fn().mockResolvedValue({
         origin: mockOriginProject,
         linkedProjects: mockLinkedProjects,
       }),
-      whenReady: jest.fn().mockResolvedValue(undefined),
-      getProjectRouting: jest.fn(() => undefined),
-      getProjectRouting$: jest.fn(() => mockProjectRouting$),
-      setProjectRouting: jest.fn(),
-      getProjectPickerAccess$: jest.fn(() => mockProjectPickerAccess$),
-      getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
-      getTotalProjectCount: jest.fn(() => 2),
-      hasLinkedProjects: jest.fn(() => true),
-      updateDefaultProjectRouting: jest.fn(),
-      registerAppAccess: jest.fn(),
-      getConfigurationLinks: jest.fn(() => ({
+      whenReady: vi.fn().mockResolvedValue(undefined),
+      getProjectRouting: vi.fn(() => undefined),
+      getProjectRouting$: vi.fn(() => mockProjectRouting$),
+      setProjectRouting: vi.fn(),
+      getProjectPickerAccess$: vi.fn(() => mockProjectPickerAccess$),
+      getDefaultProjectRouting: vi.fn(() => PROJECT_ROUTING.ALL),
+      getTotalProjectCount: vi.fn(() => 2),
+      hasLinkedProjects: vi.fn(() => true),
+      updateDefaultProjectRouting: vi.fn(),
+      registerAppAccess: vi.fn(),
+      getConfigurationLinks: vi.fn(() => ({
         currentSpace: {
           icon: 'controls',
           label: 'Adjust space defaults',
@@ -80,7 +82,7 @@ describe('ProjectPickerContainer', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering conditions', () => {
@@ -90,7 +92,7 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should call fetchProjects with the full catalog routing on mount', async () => {
-      const fetchProjects = jest.fn().mockResolvedValue({
+      const fetchProjects = vi.fn().mockResolvedValue({
         origin: mockOriginProject,
         linkedProjects: mockLinkedProjects,
       });
@@ -106,7 +108,7 @@ describe('ProjectPickerContainer', () => {
     it('should not render when there is no origin project', async () => {
       await renderProjectPicker({
         cpsManager: {
-          fetchProjects: jest.fn().mockResolvedValue({
+          fetchProjects: vi.fn().mockResolvedValue({
             origin: null,
             linkedProjects: mockLinkedProjects,
           }),
@@ -119,11 +121,11 @@ describe('ProjectPickerContainer', () => {
     it('should not render when there are no linked projects', async () => {
       await renderProjectPicker({
         cpsManager: {
-          fetchProjects: jest.fn().mockResolvedValue({
+          fetchProjects: vi.fn().mockResolvedValue({
             origin: mockOriginProject,
             linkedProjects: [],
           }),
-          getTotalProjectCount: jest.fn(() => 1),
+          getTotalProjectCount: vi.fn(() => 1),
         },
       });
       expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
@@ -134,7 +136,7 @@ describe('ProjectPickerContainer', () => {
     it('should have EDITABLE access when on dashboard create page', async () => {
       await renderProjectPicker({
         cpsManager: {
-          getProjectPickerAccess$: jest.fn(
+          getProjectPickerAccess$: vi.fn(
             () => new BehaviorSubject(ProjectRoutingAccess.EDITABLE)
           ),
         },
@@ -144,14 +146,14 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should have DISABLED access when on a different app', async () => {
-      const fetchProjects = jest.fn().mockResolvedValue({
+      const fetchProjects = vi.fn().mockResolvedValue({
         origin: mockOriginProject,
         linkedProjects: mockLinkedProjects,
       });
       await renderProjectPicker({
         cpsManager: {
           fetchProjects,
-          getProjectPickerAccess$: jest.fn(
+          getProjectPickerAccess$: vi.fn(
             () => new BehaviorSubject(ProjectRoutingAccess.DISABLED)
           ),
         },
@@ -164,7 +166,7 @@ describe('ProjectPickerContainer', () => {
     it('should have READONLY access when on Lens editor page', async () => {
       await renderProjectPicker({
         cpsManager: {
-          getProjectPickerAccess$: jest.fn(
+          getProjectPickerAccess$: vi.fn(
             () => new BehaviorSubject(ProjectRoutingAccess.READONLY)
           ),
         },

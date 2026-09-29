@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { InactivityTimeouts } from './build_status_runtime_field';
 import { _buildStatusRuntimeField } from './build_status_runtime_field';
 
 describe('buildStatusRuntimeField', () => {
   const now = 1234567890123;
   beforeAll(() => {
-    global.Date.now = jest.fn(() => now);
+    global.Date.now = vi.fn(() => now);
   });
   it('should build the correct runtime field if there are no inactivity timeouts', () => {
     const inactivityTimeouts: InactivityTimeouts = [];

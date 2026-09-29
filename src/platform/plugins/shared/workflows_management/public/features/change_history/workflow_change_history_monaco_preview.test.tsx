@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -15,69 +18,78 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useDefineWorkflowsMonacoTheme: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useDefineWorkflowsMonacoTheme: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockValidationResults: YamlValidationResult[] = [];
 let mockIsValidationLoading = false;
-const mockHandleValidationErrorClick = jest.fn();
+const mockHandleValidationErrorClick = vi.fn();
 
-jest.mock('./use_workflow_change_history_preview_validation', () => ({
-  useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
-    validationResults: mockValidationResults,
-    isValidationLoading: mockIsValidationLoading,
-    validationError: null,
-    handleValidationErrorClick: mockHandleValidationErrorClick,
-  })),
-}));
+vi.mock('./use_workflow_change_history_preview_validation', () => {
+      const mocked = {
+      useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
+        validationResults: mockValidationResults,
+        isValidationLoading: mockIsValidationLoading,
+        validationError: null,
+        handleValidationErrorClick: mockHandleValidationErrorClick,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => ({
-  WorkflowYamlValidationAccordion: ({
-    extraAction,
-    validationErrors,
-    isLoading,
-    onErrorClick,
-  }: {
-    extraAction?: React.ReactNode;
-    validationErrors?: YamlValidationResult[] | null;
-    isLoading?: boolean;
-    onErrorClick?: (error: YamlValidationResult) => void;
-  }) => (
-    <div data-test-subj="workflowYamlEditorValidationErrorsList">
-      {isLoading
-        ? 'Initializing validation...'
-        : (validationErrors ?? []).length === 0
-        ? 'No validation errors'
-        : (validationErrors ?? []).map((error) => (
-            <button
-              key={error.id}
-              type="button"
-              data-test-subj={`workflowYamlValidationError-${error.id}`}
-              onClick={() => onErrorClick?.(error)}
-            >
-              {error.message}
-            </button>
-          ))}
-      {extraAction}
-    </div>
-  ),
-}));
+vi.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => {
+      const mocked = {
+      WorkflowYamlValidationAccordion: ({
+        extraAction,
+        validationErrors,
+        isLoading,
+        onErrorClick,
+      }: {
+        extraAction?: React.ReactNode;
+        validationErrors?: YamlValidationResult[] | null;
+        isLoading?: boolean;
+        onErrorClick?: (error: YamlValidationResult) => void;
+      }) => (
+        <div data-test-subj="workflowYamlEditorValidationErrorsList">
+          {isLoading
+            ? 'Initializing validation...'
+            : (validationErrors ?? []).length === 0
+            ? 'No validation errors'
+            : (validationErrors ?? []).map((error) => (
+                <button
+                  key={error.id}
+                  type="button"
+                  data-test-subj={`workflowYamlValidationError-${error.id}`}
+                  onClick={() => onErrorClick?.(error)}
+                >
+                  {error.message}
+                </button>
+              ))}
+          {extraAction}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockYamlModel = {
-  getLineLength: jest.fn(() => 10),
-  getLineCount: jest.fn(() => 1),
-  getValue: jest.fn(() => 'name: current\n'),
+  getLineLength: vi.fn(() => 10),
+  getLineCount: vi.fn(() => 1),
+  getValue: vi.fn(() => 'name: current\n'),
   uri: { toString: () => 'inmemory://model/current.yaml' },
 };
 
-const mockRevealLineInCenter = jest.fn();
-const mockRevealLinesInCenter = jest.fn();
-const mockSetPosition = jest.fn();
-const mockDiffUpdateOptions = jest.fn();
-const mockOriginalUpdateOptions = jest.fn();
-const mockModifiedUpdateOptions = jest.fn();
+const mockRevealLineInCenter = vi.fn();
+const mockRevealLinesInCenter = vi.fn();
+const mockSetPosition = vi.fn();
+const mockDiffUpdateOptions = vi.fn();
+const mockOriginalUpdateOptions = vi.fn();
+const mockModifiedUpdateOptions = vi.fn();
 const onDidUpdateDiffCallbacks: Array<() => void> = [];
 let mockLineChanges: Array<{
   originalStartLineNumber: number;
@@ -93,47 +105,50 @@ let mockLineChanges: Array<{
   },
 ];
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    MarkerSeverity: { Error: 8 },
-    editor: {
-      createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
-      create: jest.fn(() => ({
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        getModel: jest.fn(() => mockYamlModel),
-        updateOptions: jest.fn(),
-        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-      })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        updateOptions: mockDiffUpdateOptions,
-        getLineChanges: jest.fn(() => mockLineChanges),
-        onDidUpdateDiff: jest.fn((listener: () => void) => {
-          onDidUpdateDiffCallbacks.push(listener);
-          return { dispose: jest.fn() };
-        }),
-        setPosition: mockSetPosition,
-        revealLineInCenter: mockRevealLineInCenter,
-        revealLinesInCenter: mockRevealLinesInCenter,
-        getOriginalEditor: jest.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
-        getModifiedEditor: jest.fn(() => ({
-          updateOptions: mockModifiedUpdateOptions,
-          revealLineInCenter: jest.fn(),
-          getModel: jest.fn(() => mockYamlModel),
-          createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-        })),
-      })),
-      setModelMarkers: jest.fn(),
-      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
-    },
-  },
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      monaco: {
+        MarkerSeverity: { Error: 8 },
+        editor: {
+          createModel: vi.fn((value: string) => ({ value, dispose: vi.fn() })),
+          create: vi.fn(() => ({
+            dispose: vi.fn(),
+            layout: vi.fn(),
+            getModel: vi.fn(() => mockYamlModel),
+            updateOptions: vi.fn(),
+            createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+          })),
+          createDiffEditor: vi.fn(() => ({
+            setModel: vi.fn(),
+            dispose: vi.fn(),
+            layout: vi.fn(),
+            updateOptions: mockDiffUpdateOptions,
+            getLineChanges: vi.fn(() => mockLineChanges),
+            onDidUpdateDiff: vi.fn((listener: () => void) => {
+              onDidUpdateDiffCallbacks.push(listener);
+              return { dispose: vi.fn() };
+            }),
+            setPosition: mockSetPosition,
+            revealLineInCenter: mockRevealLineInCenter,
+            revealLinesInCenter: mockRevealLinesInCenter,
+            getOriginalEditor: vi.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
+            getModifiedEditor: vi.fn(() => ({
+              updateOptions: mockModifiedUpdateOptions,
+              revealLineInCenter: vi.fn(),
+              getModel: vi.fn(() => mockYamlModel),
+              createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+            })),
+          })),
+          setModelMarkers: vi.fn(),
+          onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateEditor = monaco.editor.create as jest.Mock;
-const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
+const mockCreateEditor = monaco.editor.create as Mock;
+const mockCreateDiffEditor = monaco.editor.createDiffEditor as Mock;
 
 const sampleValidationError: YamlValidationResult = {
   id: 'preview-validation-error',
@@ -157,7 +172,7 @@ const renderPreview = (props: React.ComponentProps<typeof WorkflowChangeHistoryM
 
 describe('WorkflowChangeHistoryMonacoPreview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockValidationResults = [];
     mockIsValidationLoading = false;
     onDidUpdateDiffCallbacks.length = 0;
@@ -173,13 +188,13 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
 
   afterEach(() => {
     act(() => {
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders a read-only editor when no compare yaml is provided', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({ targetYaml: 'name: current\n' });
 
     expect(screen.getByTestId('workflowChangeHistoryMonacoPreview')).toBeInTheDocument();
@@ -190,7 +205,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('renders a diff editor when compare yaml is identical', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockLineChanges = [];
     renderPreview({
       targetYaml: 'name: same\n',
@@ -205,7 +220,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('shows the comparing-with indicator when identical versions are compared', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockLineChanges = [];
     renderPreview({
       targetYaml: 'name: same\n',
@@ -232,7 +247,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('renders a diff editor when compare yaml is empty and current yaml is not', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({
       targetYaml: 'name: v2\n',
       baselineYaml: '',
@@ -249,17 +264,17 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('calls reportDiffViewed when compare yaml differs', () => {
-    jest.useFakeTimers();
-    const reportDiffViewed = jest.fn();
+    vi.useFakeTimers();
+    const reportDiffViewed = vi.fn();
 
     renderPreview({
       targetYaml: 'name: current\n',
       baselineYaml: 'name: original\n',
       diffTelemetry: {
         compareMode: 'unified',
-        setCompareMode: jest.fn(),
+        setCompareMode: vi.fn(),
         reportDiffViewed,
-        reportDiffChangeNavigated: jest.fn(),
+        reportDiffChangeNavigated: vi.fn(),
       },
     });
 
@@ -267,8 +282,8 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('does not call reportDiffViewed when compare yaml is identical', () => {
-    jest.useFakeTimers();
-    const reportDiffViewed = jest.fn();
+    vi.useFakeTimers();
+    const reportDiffViewed = vi.fn();
     mockLineChanges = [];
 
     renderPreview({
@@ -276,9 +291,9 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
       baselineYaml: 'name: same\n',
       diffTelemetry: {
         compareMode: 'unified',
-        setCompareMode: jest.fn(),
+        setCompareMode: vi.fn(),
         reportDiffViewed,
-        reportDiffChangeNavigated: jest.fn(),
+        reportDiffChangeNavigated: vi.fn(),
       },
     });
 
@@ -286,7 +301,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('renders a diff editor when compare yaml differs', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({
       targetYaml: 'name: current\n',
       baselineYaml: 'name: original\n',
@@ -311,7 +326,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('shows the comparing-with indicator when compare labels are provided', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({
       targetYaml: 'name: current\n',
       baselineYaml: 'name: original\n',
@@ -329,7 +344,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('shows split pane labels when compare mode is split', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({
       targetYaml: 'name: current\n',
       baselineYaml: 'name: original\n',
@@ -355,7 +370,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('shows the unsaved changes badge for the selected pane when there is no version', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({
       targetYaml: 'name: draft\n',
       baselineYaml: 'name: original\n',
@@ -376,7 +391,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('scrolls to the first diff when diff computation completes', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({
       targetYaml: 'name: current\nsteps:\n  - name: updated\n',
       baselineYaml: 'name: original\nsteps:\n  - name: old\n',
@@ -392,7 +407,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('updates diff layout via updateOptions when compare mode changes', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({
       targetYaml: 'name: current\n',
       baselineYaml: 'name: original\n',
@@ -454,7 +469,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('does not show compare mode settings when yaml has no diff baseline', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({ targetYaml: 'name: current\n' });
 
     fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
@@ -464,15 +479,15 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('shows the validation accordion when highlight validation is enabled', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({ targetYaml: 'name: current\n' });
 
     fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
     fireEvent.click(screen.getByTestId('workflowChangeHistoryHighlightValidationErrors'));
 
     await act(async () => {
-      jest.advanceTimersByTime(150);
-      jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(150);
+      vi.runOnlyPendingTimers();
       await Promise.resolve();
     });
 
@@ -501,7 +516,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   it('moves compare mode selection and focus with arrow keys', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPreview({
       targetYaml: 'name: current\n',
       baselineYaml: 'name: original\n',

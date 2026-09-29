@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { screen } from '@testing-library/react';
@@ -13,20 +16,23 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
-jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
-  loadActionErrorLog: jest.fn(),
-}));
+vi.mock('../../../lib/rule_api/load_action_error_log', () => {
+      const mocked = {
+      loadActionErrorLog: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseIsWithinBreakpoints = jest.fn();
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+const mockUseIsWithinBreakpoints = vi.fn();
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useIsWithinBreakpoints: () => mockUseIsWithinBreakpoints(),
   };
 });
 
-const loadActionErrorLogMock = loadActionErrorLog as unknown as jest.MockedFunction<
+const loadActionErrorLogMock = loadActionErrorLog as unknown as MockedFunction<
   typeof loadActionErrorLog
 >;
 
@@ -63,11 +69,11 @@ const mockExecution: any = {
   timed_out: false,
 };
 
-const mockClose = jest.fn();
+const mockClose = vi.fn();
 
 describe('rule_action_error_log_flyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     loadActionErrorLogMock.mockResolvedValue(mockErrorLogResponse);
     mockUseIsWithinBreakpoints.mockReturnValue(true);
   });

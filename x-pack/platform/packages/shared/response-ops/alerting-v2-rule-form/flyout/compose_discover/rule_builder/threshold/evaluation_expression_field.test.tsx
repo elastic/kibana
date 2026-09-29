@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EvaluationExpressionField } from './evaluation_expression_field';
@@ -69,7 +71,7 @@ describe('EvaluationExpressionField', () => {
       <EvaluationExpressionField
         index={0}
         currentEvaluation={evaluations[0]}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         stats={stats}
         evaluations={evaluations}
         evaluationInvalidRefs={new Map([['e1', ['unknown_total']]])}

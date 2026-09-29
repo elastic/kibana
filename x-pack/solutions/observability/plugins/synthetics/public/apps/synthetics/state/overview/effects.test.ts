@@ -64,49 +64,81 @@ describe('overview effects', () => {
       fetchTrendEffect(trendStatsBatch.get(trendRequests)) as IterableIterator<TrendTable>
     );
 
-    it('calls the `trendsApi` with the first chunk of trend requests', (callResult) => {
-      expect(callResult).toEqual(call(trendsApi, firstChunk));
-      return firstChunkResponse;
-    });
+    it('calls the `trendsApi` with the first chunk of trend requests', () =>
+        new Promise<void>((resolve, reject) => {
+        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    it('sends trends stats success action', (putResult) => {
-      expect(putResult).toEqual(
-        put(trendStatsBatch.success({ trendStats: firstChunkResponse, batch: firstChunk }))
-      );
-    });
+              expect(callResult).toEqual(call(trendsApi, firstChunk));
+              return firstChunkResponse;
+            
+        }));
 
-    it('calls the api for the second chunk', (callResult) => {
-      expect(callResult).toEqual(call(trendsApi, secondChunk));
-      return secondChunkResponse;
-    });
+    it('sends trends stats success action', () =>
+        new Promise<void>((resolve, reject) => {
+        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    it('sends trends stats success action', (putResult) => {
-      expect(putResult).toEqual(
-        put(trendStatsBatch.success({ trendStats: secondChunkResponse, batch: secondChunk }))
-      );
-    });
+              expect(putResult).toEqual(
+                put(trendStatsBatch.success({ trendStats: firstChunkResponse, batch: firstChunk }))
+              );
+            
+        }));
 
-    it('terminates', (result) => {
-      expect(result).toBeUndefined();
-    });
+    it('calls the api for the second chunk', () =>
+        new Promise<void>((resolve, reject) => {
+        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              expect(callResult).toEqual(call(trendsApi, secondChunk));
+              return secondChunkResponse;
+            
+        }));
+
+    it('sends trends stats success action', () =>
+        new Promise<void>((resolve, reject) => {
+        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              expect(putResult).toEqual(
+                put(trendStatsBatch.success({ trendStats: secondChunkResponse, batch: secondChunk }))
+              );
+            
+        }));
+
+    it('terminates', () =>
+        new Promise<void>((resolve, reject) => {
+        const result = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              expect(result).toBeUndefined();
+            
+        }));
   });
 
   describe('refreshTrends with no data', () => {
     const it = sagaHelper(refreshTrends() as IterableIterator<TrendTable>);
 
-    it('selects the trends in the table', (selectResult) => {
-      expect(selectResult).toEqual(select(selectOverviewTrends));
-      return { monitor1: null, monitor2: null, monitor3: null };
-    });
+    it('selects the trends in the table', () =>
+        new Promise<void>((resolve, reject) => {
+        const selectResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    it('selects the overview state', (selectResult) => {
-      expect(selectResult).toEqual(select(selectOverviewStatus));
-      return { allConfigs: {} };
-    });
+              expect(selectResult).toEqual(select(selectOverviewTrends));
+              return { monitor1: null, monitor2: null, monitor3: null };
+            
+        }));
 
-    it('skips the API if the data is null', (result) => {
-      expect(result).toBeUndefined();
-    });
+    it('selects the overview state', () =>
+        new Promise<void>((resolve, reject) => {
+        const selectResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              expect(selectResult).toEqual(select(selectOverviewStatus));
+              return { allConfigs: {} };
+            
+        }));
+
+    it('skips the API if the data is null', () =>
+        new Promise<void>((resolve, reject) => {
+        const result = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              expect(result).toBeUndefined();
+            
+        }));
   });
 
   describe('refreshTrends with data', () => {
@@ -177,30 +209,46 @@ describe('overview effects', () => {
       batch,
     };
 
-    it('selects the trends in the table', (selectResult) => {
-      expect(selectResult).toEqual(select(selectOverviewTrends));
+    it('selects the trends in the table', () =>
+        new Promise<void>((resolve, reject) => {
+        const selectResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      return table;
-    });
+              expect(selectResult).toEqual(select(selectOverviewTrends));
 
-    it('selects the overview state', (selectResults) => {
-      expect(selectResults).toEqual(select(selectOverviewStatus));
-      return {
-        allConfigs: {
-          monitor1: { configId: 'monitor1', schedule: '3' },
-          monitor3: { configId: 'monitor3', schedule: '3' },
-        },
-      };
-    });
+              return table;
+            
+        }));
 
-    it('calls the api for the first chunk', (callResult) => {
-      expect(callResult).toEqual(call(trendsApi, batch));
+    it('selects the overview state', () =>
+        new Promise<void>((resolve, reject) => {
+        const selectResults = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      return apiResponse;
-    });
+              expect(selectResults).toEqual(select(selectOverviewStatus));
+              return {
+                allConfigs: {
+                  monitor1: { configId: 'monitor1', schedule: '3' },
+                  monitor3: { configId: 'monitor3', schedule: '3' },
+                },
+              };
+            
+        }));
 
-    it('sends trends stats success action', (putResult) => {
-      expect(putResult).toEqual(put(trendStatsBatch.success(successPayload)));
-    });
+    it('calls the api for the first chunk', () =>
+        new Promise<void>((resolve, reject) => {
+        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              expect(callResult).toEqual(call(trendsApi, batch));
+
+              return apiResponse;
+            
+        }));
+
+    it('sends trends stats success action', () =>
+        new Promise<void>((resolve, reject) => {
+        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              expect(putResult).toEqual(put(trendStatsBatch.success(successPayload)));
+            
+        }));
   });
 });

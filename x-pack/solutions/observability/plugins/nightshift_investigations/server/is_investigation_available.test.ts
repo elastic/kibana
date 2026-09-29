@@ -5,29 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import type { FeatureFlagsStart, KibanaRequest } from '@kbn/core/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { isInvestigationAvailable } from './is_investigation_available';
 
 const request = {} as KibanaRequest;
-const warn = jest.fn();
+const warn = vi.fn();
 const logger = { warn } as never;
 const workflow = { enabled: true, valid: true, definition: {} };
 const agentBuilder = {} as never;
 const workflowsExtensions = {} as never;
 const workflowsManagement = {
-  management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue(workflow) }) },
+  management: { getClient: () => ({ getWorkflow: vi.fn().mockResolvedValue(workflow) }) },
 } as never;
 
 const createFeatureFlagsMock = (enabled = true): FeatureFlagsStart =>
   ({
-    getBooleanValue$: jest.fn().mockReturnValue(of(enabled)),
+    getBooleanValue$: vi.fn().mockReturnValue(of(enabled)),
   } as unknown as FeatureFlagsStart);
 
 it('returns true when every start requirement is available', async () => {
   const featureFlags = createFeatureFlagsMock(true);
-  const getForFeature = jest
+  const getForFeature = vi
     .fn()
     .mockResolvedValue({ endpoints: [{ connectorId: 'connector-1' }] });
 
@@ -56,7 +58,7 @@ it('returns false when feature flag is disabled', async () => {
       agentBuilder,
       logger,
       searchInferenceEndpoints: {
-        endpoints: { getForFeature: jest.fn() },
+        endpoints: { getForFeature: vi.fn() },
       } as never,
       workflowsExtensions,
       workflowsManagement,
@@ -68,7 +70,7 @@ it('returns false when feature flag is disabled', async () => {
 
 it('returns false when any dependency, connector, or workflow definition is unavailable', async () => {
   const featureFlags = createFeatureFlagsMock(true);
-  const getForFeature = jest.fn().mockResolvedValue({ endpoints: [] });
+  const getForFeature = vi.fn().mockResolvedValue({ endpoints: [] });
 
   await expect(
     isInvestigationAvailable({
@@ -90,14 +92,14 @@ it('returns false when any dependency, connector, or workflow definition is unav
       logger,
       searchInferenceEndpoints: {
         endpoints: {
-          getForFeature: jest
+          getForFeature: vi
             .fn()
             .mockResolvedValue({ endpoints: [{ connectorId: 'connector-1' }] }),
         },
       } as never,
       workflowsExtensions,
       workflowsManagement: {
-        management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue({}) }) },
+        management: { getClient: () => ({ getWorkflow: vi.fn().mockResolvedValue({}) }) },
       } as never,
     })
   ).resolves.toBe(false);
@@ -113,7 +115,7 @@ it('returns false when a requirement probe fails', async () => {
       agentBuilder,
       logger,
       searchInferenceEndpoints: {
-        endpoints: { getForFeature: jest.fn().mockRejectedValue(new Error('unavailable')) },
+        endpoints: { getForFeature: vi.fn().mockRejectedValue(new Error('unavailable')) },
       } as never,
       workflowsExtensions,
       workflowsManagement,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
@@ -23,63 +26,69 @@ const MOCK_DEFAULT_STATE = {
   groupings: [],
 };
 
-jest.mock('../../../hooks/use_timefilter_service', () => ({
-  useTimefilterService: jest.fn(),
-}));
+vi.mock('../../../hooks/use_timefilter_service', () => {
+      const mocked = {
+      useTimefilterService: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => ({
-  createKbnUrlStateStorage: jest.fn(),
-  syncState: jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })),
-  useContainerSelector: jest.fn(() => {
-    return MOCK_DEFAULT_STATE;
-  }),
-  createStateContainer: jest.fn(() => ({
-    get: jest.fn(),
-    set: jest.fn(),
-    state$: { subscribe: jest.fn() },
-    transitions: {
-      setRangeFrom: jest.fn(),
-      setRangeTo: jest.fn(),
-      setKuery: jest.fn(),
-      setStatus: jest.fn(),
-      setFilters: jest.fn(),
-      setSavedQueryId: jest.fn(),
-      setControlConfigs: jest.fn(),
-      setGroupings: jest.fn(),
-    },
-  })),
-  createStateContainerReactHelpers: jest.fn(() => ({
-    useContainer: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/kibana-utils-plugin/public', () => {
+      const mocked = {
+      createKbnUrlStateStorage: vi.fn(),
+      syncState: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
+      useContainerSelector: vi.fn(() => {
+        return MOCK_DEFAULT_STATE;
+      }),
+      createStateContainer: vi.fn(() => ({
+        get: vi.fn(),
+        set: vi.fn(),
+        state$: { subscribe: vi.fn() },
+        transitions: {
+          setRangeFrom: vi.fn(),
+          setRangeTo: vi.fn(),
+          setKuery: vi.fn(),
+          setStatus: vi.fn(),
+          setFilters: vi.fn(),
+          setSavedQueryId: vi.fn(),
+          setControlConfigs: vi.fn(),
+          setGroupings: vi.fn(),
+        },
+      })),
+      createStateContainerReactHelpers: vi.fn(() => ({
+        useContainer: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAlertSearchBarStateContainer', () => {
-  const mockSet = jest.fn();
+  const mockSet = vi.fn();
   const mockTransitions = {
-    setRangeFrom: jest.fn(),
-    setRangeTo: jest.fn(),
-    setKuery: jest.fn(),
-    setStatus: jest.fn(),
-    setFilters: jest.fn(),
-    setSavedQueryId: jest.fn(),
-    setControlConfigs: jest.fn(),
-    setGroupings: jest.fn(),
+    setRangeFrom: vi.fn(),
+    setRangeTo: vi.fn(),
+    setKuery: vi.fn(),
+    setStatus: vi.fn(),
+    setFilters: vi.fn(),
+    setSavedQueryId: vi.fn(),
+    setControlConfigs: vi.fn(),
+    setGroupings: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useContainer as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useContainer as Mock).mockReturnValue({
       transitions: mockTransitions,
       set: mockSet,
     });
-    (useTimefilterService as jest.Mock).mockReturnValue({
-      getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
-      isTimeTouched: jest.fn(() => false),
+    (useTimefilterService as Mock).mockReturnValue({
+      getTime: vi.fn(() => ({ from: 'now-15m', to: 'now' })),
+      isTimeTouched: vi.fn(() => false),
     });
-    (createKbnUrlStateStorage as jest.Mock).mockReturnValue({
-      get: jest.fn(),
-      set: jest.fn(),
-      kbnUrlControls: { flush: jest.fn() },
+    (createKbnUrlStateStorage as Mock).mockReturnValue({
+      get: vi.fn(),
+      set: vi.fn(),
+      kbnUrlControls: { flush: vi.fn() },
     });
   });
 

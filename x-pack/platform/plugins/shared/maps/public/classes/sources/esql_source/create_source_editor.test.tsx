@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { CreateSourceEditor } from './create_source_editor';
 
-jest.mock('../../../kibana_services', () => {
+vi.mock('../../../kibana_services', () => {
   const DEFAULT_DATA_VIEW_INDEX_PATTERN = 'logs';
   const defaultDataView = {
     fields: [
@@ -58,13 +60,13 @@ jest.mock('../../../kibana_services', () => {
         },
       };
     },
-    getHttp: jest.fn(),
+    getHttp: vi.fn(),
   };
 });
 
 describe('CreateSourceEditor', () => {
   test('should preview default data view on load', async () => {
-    const onSourceConfigChange = jest.fn();
+    const onSourceConfigChange = vi.fn();
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
     await waitFor(() =>
       expect(onSourceConfigChange).toHaveBeenCalledWith({
@@ -79,7 +81,7 @@ describe('CreateSourceEditor', () => {
   });
 
   test('should preview requested data view on load when mostCommonDataViewId prop provided', async () => {
-    const onSourceConfigChange = jest.fn();
+    const onSourceConfigChange = vi.fn();
     render(
       <CreateSourceEditor
         onSourceConfigChange={onSourceConfigChange}

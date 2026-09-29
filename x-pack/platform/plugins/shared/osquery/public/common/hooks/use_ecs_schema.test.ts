@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
@@ -12,11 +15,11 @@ import { useKibana } from '../lib/kibana';
 import { useEcsSchema } from './use_ecs_schema';
 import { ECS_SCHEMA_API_ROUTE } from '../../../common/constants';
 
-jest.mock('../lib/kibana');
+vi.mock('../lib/kibana');
 
 // Mock the fallback JSON so tests are deterministic and don't read from disk.
 // Path must match `v${FALLBACK_ECS_VERSION}.json` from common/constants.
-jest.mock('../../../common/schemas/ecs/v9.2.0.json', () => [
+vi.mock('../../../common/schemas/ecs/v9.2.0.json', () => [
   {
     field: '@timestamp',
     type: 'date',
@@ -33,7 +36,7 @@ jest.mock('../../../common/schemas/ecs/v9.2.0.json', () => [
   },
 ]);
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -71,13 +74,13 @@ const MOCK_API_RESPONSE = {
 };
 
 describe('useEcsSchema', () => {
-  let mockHttp: { get: jest.Mock };
+  let mockHttp: { get: Mock };
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockHttp = { get: jest.fn().mockResolvedValue(MOCK_API_RESPONSE) };
+    mockHttp = { get: vi.fn().mockResolvedValue(MOCK_API_RESPONSE) };
     queryClient = createFreshQueryClient();
 
     useKibanaMock.mockReturnValue({

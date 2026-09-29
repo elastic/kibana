@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -16,44 +19,50 @@ import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
-jest.mock('../spaces/helpers');
-jest.mock('../app_context', () => {
-  const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
+vi.mock('../spaces/helpers');
+vi.mock('../app_context', async () => {
+  const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
   return {
     appContextService: {
       getLogger: () => loggerMock.create(),
       getConfig: () => {},
-      getMessageSigningService: jest.fn(),
-      getExperimentalFeatures: jest.fn().mockResolvedValue({}),
-      getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+      getMessageSigningService: vi.fn(),
+      getExperimentalFeatures: vi.fn().mockResolvedValue({}),
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
     },
   };
 });
-jest.mock('../audit_logging');
-jest.mock('../agent_policy', () => {
+vi.mock('../audit_logging');
+vi.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
-      getInactivityTimeouts: jest.fn().mockResolvedValue([]),
-      getByIds: jest.fn().mockResolvedValue([{ id: 'hosted-agent-policy', is_managed: true }]),
-      list: jest.fn().mockResolvedValue({ items: [] }),
+      getInactivityTimeouts: vi.fn().mockResolvedValue([]),
+      getByIds: vi.fn().mockResolvedValue([{ id: 'hosted-agent-policy', is_managed: true }]),
+      list: vi.fn().mockResolvedValue({ items: [] }),
     },
   };
 });
-jest.mock('../secrets', () => ({
-  isActionSecretStorageEnabled: jest.fn(),
-}));
+vi.mock('../secrets', () => {
+      const mocked = {
+      isActionSecretStorageEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRunAsync = jest.fn().mockResolvedValue({});
-jest.mock('./update_agent_tags_action_runner', () => ({
-  ...jest.requireActual('./update_agent_tags_action_runner'),
-  UpdateAgentTagsActionRunner: jest.fn().mockImplementation(() => {
-    return { runActionAsyncWithRetry: mockRunAsync, runActionAsyncTask: mockRunAsync };
-  }),
-}));
+const mockRunAsync = vi.fn().mockResolvedValue({});
+vi.mock('./update_agent_tags_action_runner', async () => {
+      const mocked = {
+      ...(await vi.importActual('./update_agent_tags_action_runner')),
+      UpdateAgentTagsActionRunner: vi.fn().mockImplementation(() => {
+        return { runActionAsyncWithRetry: mockRunAsync, runActionAsyncTask: mockRunAsync };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('update_agent_tags', () => {
   let esClient: ElasticsearchClientMock;
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createInternalClient();
@@ -82,7 +91,7 @@ describe('update_agent_tags', () => {
     esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1 } as any);
 
     mockRunAsync.mockClear();
-    (UpdateAgentTagsActionRunner as jest.Mock).mockClear();
+    (UpdateAgentTagsActionRunner as Mock).mockClear();
   });
 
   it('should remove duplicate tags', async () => {
@@ -423,7 +432,7 @@ describe('update_agent_tags', () => {
 
   describe('with isSpaceAwarenessEnabled return true', () => {
     beforeEach(() => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
     it('should add namespace filter to kuery in the default space', async () => {

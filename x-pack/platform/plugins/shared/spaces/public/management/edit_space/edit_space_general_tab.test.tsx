@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
@@ -39,11 +41,11 @@ import { getSecurityLicenseMock } from '../security_license.mock';
 const space = { id: asSpaceId('default'), name: 'Default', disabledFeatures: [], _reserved: true };
 const history = scopedHistoryMock.create();
 const getUrlForApp = (appId: string) => appId;
-const navigateToUrl = jest.fn();
+const navigateToUrl = vi.fn();
 const spacesManager = spacesManagerMock.create();
 const getRolesAPIClient = getRolesAPIClientMock;
 const getPrivilegeAPIClient = getPrivilegeAPIClientMock;
-const reloadWindow = jest.fn();
+const reloadWindow = vi.fn();
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -53,11 +55,11 @@ const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
 
-const navigateSpy = jest.spyOn(history, 'push').mockImplementation(() => {});
-const updateSpaceSpy = jest
+const navigateSpy = vi.spyOn(history, 'push').mockImplementation(() => {});
+const updateSpaceSpy = vi
   .spyOn(spacesManager, 'updateSpace')
   .mockImplementation(() => Promise.resolve());
-const deleteSpaceSpy = jest
+const deleteSpaceSpy = vi
   .spyOn(spacesManager, 'deleteSpace')
   .mockImplementation(() => Promise.resolve());
 
@@ -956,7 +958,7 @@ describe('EditSpaceSettings', () => {
     };
 
     // Mock getActiveSpace to return the space being edited
-    const getActiveSpaceSpy = jest
+    const getActiveSpaceSpy = vi
       .spyOn(spacesManager, 'getActiveSpace')
       .mockResolvedValue(spaceToUpdate);
 

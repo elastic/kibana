@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
@@ -30,18 +33,18 @@ const converter: AttachmentConverter<TestItem> = {
 };
 
 describe('useAutoAttach', () => {
-  let addAttachment: jest.Mock;
-  let removeAttachment: jest.Mock;
+  let addAttachment: Mock;
+  let removeAttachment: Mock;
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let chatEvents$: Subject<ChatEvent>;
   let services: AutoAttachServices;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
-    addAttachment = jest.fn();
-    removeAttachment = jest.fn();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+    addAttachment = vi.fn();
+    removeAttachment = vi.fn();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     chatEvents$ = new Subject<ChatEvent>();
@@ -64,7 +67,7 @@ describe('useAutoAttach', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('stages the item when sidebar is open on mount', () => {
@@ -72,7 +75,7 @@ describe('useAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useAutoAttach({ id: 'item-1' }, converter, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenCalledWith(
@@ -84,7 +87,7 @@ describe('useAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useAutoAttach({ id: 'item-1' }, converter, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -93,13 +96,13 @@ describe('useAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useAutoAttach({ id: 'item-1' }, converter, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
 
     act(() => {
       currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -112,12 +115,12 @@ describe('useAutoAttach', () => {
     const { rerender } = renderHook(({ item }) => useAutoAttach(item, converter, services), {
       initialProps: { item: { id: 'item-1' } as TestItem | undefined },
     });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     rerender({ item: { id: 'item-2' } });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'test:item-2' }));
@@ -128,7 +131,7 @@ describe('useAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useAutoAttach(undefined, converter, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -139,7 +142,7 @@ describe('useAutoAttach', () => {
     renderHook(() =>
       useAutoAttach({ id: 'item-1' }, converter, { ...services, agentBuilder: undefined })
     );
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -152,7 +155,7 @@ describe('useAutoAttach', () => {
 
     act(() => {
       currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(addAttachment).not.toHaveBeenCalled();

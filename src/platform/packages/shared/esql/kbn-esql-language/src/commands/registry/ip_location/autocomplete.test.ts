@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { suggest } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
@@ -38,12 +41,12 @@ const expectIpLocationSuggestions = async (
 
 describe('IP_LOCATION Autocomplete', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('suggests target field after command keyword', async () => {
     const mockCallbacks = getMockCallbacks();
-    mockCallbacks.getSuggestedUserDefinedColumnName = jest.fn(() => 'col0');
+    mockCallbacks.getSuggestedUserDefinedColumnName = vi.fn(() => 'col0');
 
     await expectIpLocationSuggestions(
       'FROM a | IP_LOCATION ',
@@ -58,7 +61,7 @@ describe('IP_LOCATION Autocomplete', () => {
 
   it('suggests IP and string fields after the assignment operator', async () => {
     const mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getByType as Mock).mockResolvedValue([
       { label: 'ipField', text: 'ipField ' },
       { label: 'keywordField', text: 'keywordField ' },
     ]);

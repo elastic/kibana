@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -32,7 +34,7 @@ import { createCircuitBreakerError } from '../api/routes/utils/__fixtures__/circ
  */
 
 const makeDeps = () => {
-  const storageClient = { search: jest.fn() };
+  const storageClient = { search: vi.fn() };
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggerMock.create();
   const deps: WorkflowSearchDeps = {
@@ -89,7 +91,7 @@ describe('WorkflowSearchService — circuit breaker resilience', () => {
   describe('getWorkflowAggs', () => {
     it('lets a circuit breaker rejection from the storage client propagate uncaught', async () => {
       const { deps } = makeDeps();
-      const storageClient = { search: jest.fn().mockRejectedValue(createCircuitBreakerError()) };
+      const storageClient = { search: vi.fn().mockRejectedValue(createCircuitBreakerError()) };
       const depsWithFailingStorage: WorkflowSearchDeps = {
         ...deps,
         workflowStorage: {

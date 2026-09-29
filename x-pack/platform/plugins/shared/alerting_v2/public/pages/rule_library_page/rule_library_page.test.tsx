@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -12,34 +14,38 @@ import type { CreateRuleData, RuleTemplateResponse } from '@kbn/alerting-v2-sche
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RuleLibraryPage } from './rule_library_page';
 
-jest.mock('../../application/breadcrumb_context', () => ({
-  useSetBreadcrumbs: () => jest.fn(),
-}));
+vi.mock('../../application/breadcrumb_context', () => {
+      const mocked = {
+      useSetBreadcrumbs: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/app-header', () => ({
-  APP_HEADER_TEST_SUBJECTS: { title: 'appHeaderTitle' },
-  AppHeader: ({ title }: { title: string }) => (
-    <div>
-      <h1 data-test-subj="appHeaderTitle">{title}</h1>
-      <span data-test-subj="alertingV2ExperimentalBadge" />
-    </div>
-  ),
-}));
+vi.mock('@kbn/app-header', () => {
+      const mocked = {
+      APP_HEADER_TEST_SUBJECTS: { title: 'appHeaderTitle' },
+      AppHeader: ({ title }: { title: string }) => (
+        <div>
+          <h1 data-test-subj="appHeaderTitle">{title}</h1>
+          <span data-test-subj="alertingV2ExperimentalBadge" />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRuleTemplate = jest.fn();
-const mockOpenCreateFromTemplateFlyout = jest.fn();
+const mockGetRuleTemplate = vi.fn();
+const mockOpenCreateFromTemplateFlyout = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { RuleTemplatesApi: ActualRuleTemplatesApi } = jest.requireActual(
-    '../../services/rule_templates_api'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { RuleTemplatesApi: ActualRuleTemplatesApi } = (await vi.importActual('../../services/rule_templates_api'));
   return {
     useService: (token: unknown) => {
       if (token === ActualRuleTemplatesApi) {
         return { getRuleTemplate: mockGetRuleTemplate };
       }
       const services: Record<string, unknown> = {
-        chrome: { docTitle: { change: jest.fn() } },
+        chrome: { docTitle: { change: vi.fn() } },
       };
       return services[token as string] ?? {};
     },
@@ -47,8 +53,8 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../hooks/use_compose_discover_flyout', () => {
-  const ReactActual = jest.requireActual('react') as typeof React;
+vi.mock('../../hooks/use_compose_discover_flyout', () => {
+  const ReactActual = require('react') as typeof React;
   return {
     useComposeDiscoverFlyout: () => {
       const [flyout, setFlyout] = ReactActual.useState<React.ReactNode>(null);
@@ -65,9 +71,12 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => {
   };
 });
 
-jest.mock('./rule_library_list', () => ({
-  RuleLibraryList: () => <div data-test-subj="mockedRuleLibraryList" />,
-}));
+vi.mock('./rule_library_list', () => {
+      const mocked = {
+      RuleLibraryList: () => <div data-test-subj="mockedRuleLibraryList" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCreatePayload: CreateRuleData = {
   kind: 'signal',
@@ -92,7 +101,7 @@ const renderPage = (initialEntries?: string[]) =>
 
 describe('RuleLibraryPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetRuleTemplate.mockResolvedValue(mockTemplate);
   });
 

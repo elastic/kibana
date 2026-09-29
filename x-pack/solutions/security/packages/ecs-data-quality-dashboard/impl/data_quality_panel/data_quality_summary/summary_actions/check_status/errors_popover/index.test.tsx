@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -12,9 +14,9 @@ import React from 'react';
 import { TestExternalProviders } from '../../../../mock/test_providers/test_providers';
 import { ErrorsPopover } from '.';
 
-const mockCopyToClipboard = jest.fn((value) => true);
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+const mockCopyToClipboard = vi.fn((value) => true);
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     copyToClipboard: (value: string) => mockCopyToClipboard(value),
@@ -31,13 +33,13 @@ const errorSummary = [
 
 describe('ErrorsPopover', () => {
   beforeEach(() => {
-    document.execCommand = jest.fn();
+    document.execCommand = vi.fn();
   });
 
   test('it disables the view errors button when `errorSummary` is empty', () => {
     render(
       <TestExternalProviders>
-        <ErrorsPopover addSuccessToast={jest.fn()} errorSummary={[]} />
+        <ErrorsPopover addSuccessToast={vi.fn()} errorSummary={[]} />
       </TestExternalProviders>
     );
 
@@ -47,7 +49,7 @@ describe('ErrorsPopover', () => {
   test('it enables the view errors button when `errorSummary` is NOT empty', () => {
     render(
       <TestExternalProviders>
-        <ErrorsPopover addSuccessToast={jest.fn()} errorSummary={errorSummary} />
+        <ErrorsPopover addSuccessToast={vi.fn()} errorSummary={errorSummary} />
       </TestExternalProviders>
     );
 
@@ -55,10 +57,10 @@ describe('ErrorsPopover', () => {
   });
 
   describe('popover content', () => {
-    const addSuccessToast = jest.fn();
+    const addSuccessToast = vi.fn();
 
     beforeEach(async () => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
 
       render(
         <TestExternalProviders>

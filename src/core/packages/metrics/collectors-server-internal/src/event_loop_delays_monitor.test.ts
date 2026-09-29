@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable dot-notation */
-jest.mock('perf_hooks');
+vi.mock('perf_hooks');
 import { monitorEventLoopDelay } from 'perf_hooks';
 import { EventLoopDelaysMonitor, nsToMs } from './event_loop_delays_monitor';
 import { mocked } from './mocks_internal';
 
 describe('EventLoopDelaysMonitor', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    const mockNow = jest.getRealSystemTime();
-    jest.setSystemTime(mockNow);
+    vi.useFakeTimers();
+    const mockNow = vi.getRealSystemTime();
+    vi.setSystemTime(mockNow);
   });
-  afterEach(() => jest.clearAllMocks());
-  afterAll(() => jest.useRealTimers());
+  afterEach(() => vi.clearAllMocks());
+  afterAll(() => vi.useRealTimers());
 
   test('#constructor enables monitoring', () => {
     const eventLoopDelaysMonitor = new EventLoopDelaysMonitor();

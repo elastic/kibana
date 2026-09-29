@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useGetCase } from './use_get_case';
 import * as api from './api';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useToasts } from '../common/lib/kibana';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 // Failing: See https://github.com/elastic/kibana/issues/189634
 describe('Use get case hook', () => {
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'resolveCase');
+    const spy = vi.spyOn(api, 'resolveCase');
     renderHook(() => useGetCase('case-1'), { wrapper: TestProviders });
 
     await waitFor(() =>
@@ -29,9 +32,9 @@ describe('Use get case hook', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
-    jest.spyOn(api, 'resolveCase').mockRejectedValue(new Error("C'est la vie"));
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
+    vi.spyOn(api, 'resolveCase').mockRejectedValue(new Error("C'est la vie"));
 
     renderHook(() => useGetCase('case-1'), { wrapper: TestProviders });
 

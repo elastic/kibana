@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -19,27 +22,42 @@ import { alertsToAttachmentGroup } from '../../../../agent_builder/helpers';
 import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { Table } from './table';
 
-jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn(() => null),
-}));
-jest.mock('../../../../agent_builder/hooks/use_report_add_to_chat');
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: jest.fn(() => ({
-    isAgentBuilderEnabled: true,
-    hasAgentBuilderPrivilege: true,
-    isAgentChatExperienceEnabled: true,
-    hasValidAgentBuilderLicense: false,
-  })),
-}));
-jest.mock('../../../../agent_builder/helpers', () => ({
-  alertsToAttachmentGroup: jest.fn(() => []),
-}));
-jest.mock('../../../../data_view_manager/hooks/use_browser_fields', () => ({
-  useBrowserFields: jest.fn(() => ({})),
-}));
-jest.mock('../../../hooks/alert_summary/use_additional_bulk_actions', () => ({
-  useAdditionalBulkActions: jest.fn(() => []),
-}));
+vi.mock('@kbn/response-ops-alerts-table', () => {
+      const mocked = {
+      AlertsTable: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../agent_builder/hooks/use_report_add_to_chat');
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: vi.fn(() => ({
+        isAgentBuilderEnabled: true,
+        hasAgentBuilderPrivilege: true,
+        isAgentChatExperienceEnabled: true,
+        hasValidAgentBuilderLicense: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../agent_builder/helpers', () => {
+      const mocked = {
+      alertsToAttachmentGroup: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../data_view_manager/hooks/use_browser_fields', () => {
+      const mocked = {
+      useBrowserFields: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/alert_summary/use_additional_bulk_actions', () => {
+      const mocked = {
+      useAdditionalBulkActions: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeItem = (id: string): TimelineItem =>
   ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as TimelineItem);
@@ -57,12 +75,12 @@ const packages: PackageListItem[] = [
 ];
 
 describe('Alert Summary Table — bulkAddToChatConfig', () => {
-  let mockReportAddToChat: jest.Mock;
+  let mockReportAddToChat: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockReportAddToChat = jest.fn();
-    (useReportAddToChat as jest.Mock).mockReturnValue(mockReportAddToChat);
+    vi.clearAllMocks();
+    mockReportAddToChat = vi.fn();
+    (useReportAddToChat as Mock).mockReturnValue(mockReportAddToChat);
   });
 
   const renderAndGetBulkConfig = () => {
@@ -71,7 +89,7 @@ describe('Alert Summary Table — bulkAddToChatConfig', () => {
         <Table dataView={dataView} groupingFilters={[]} packages={packages} />
       </TestProviders>
     );
-    return (AlertsTable as jest.Mock).mock.calls[0][0].bulkAddToChatConfig;
+    return (AlertsTable as Mock).mock.calls[0][0].bulkAddToChatConfig;
   };
 
   it('passes BULK_ALERTS_ATTACHMENT_PROMPT as initialMessage', () => {
@@ -92,7 +110,7 @@ describe('Alert Summary Table — bulkAddToChatConfig', () => {
 
   it('delegates to alertsToAttachmentGroup and returns its result', () => {
     const mockGroup = { type: 'group', id: 'x', label: '1 Alert', items: [] };
-    (alertsToAttachmentGroup as jest.Mock).mockReturnValueOnce(mockGroup);
+    (alertsToAttachmentGroup as Mock).mockReturnValueOnce(mockGroup);
     const { convertAlertToAttachment } = renderAndGetBulkConfig();
     const items = [makeItem('a')];
     const result = convertAlertToAttachment(items);

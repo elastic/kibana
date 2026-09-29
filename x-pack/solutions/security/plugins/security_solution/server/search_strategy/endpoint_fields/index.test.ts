@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields.json';
@@ -17,16 +20,19 @@ import { EndpointAuthorizationError } from '../../endpoint/errors';
 import type { IndexFieldsStrategyRequestByIndices } from '@kbn/timelines-plugin/common/search_strategy';
 import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 
-jest.mock('../../../common/endpoint/utils/index_name_utilities', () => ({
-  buildIndexNameWithNamespace: jest.fn(),
-}));
+vi.mock('../../../common/endpoint/utils/index_name_utilities', () => {
+      const mocked = {
+      buildIndexNameWithNamespace: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as jest.Mock;
+const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as Mock;
 
 describe('Endpoint fields', () => {
-  const getFieldsForWildcardMock = jest.fn();
-  const esClientSearchMock = jest.fn();
-  const esClientFieldCapsMock = jest.fn();
+  const getFieldsForWildcardMock = vi.fn();
+  const esClientSearchMock = vi.fn();
+  const esClientFieldCapsMock = vi.fn();
   const endpointAppContextService = createMockEndpointAppContextService();
   let IndexPatterns: DataViewsServerPluginStart;
 
@@ -52,13 +58,13 @@ describe('Endpoint fields', () => {
       runtimeFieldMap: { runtimeField: { type: 'keyword' } },
     }),
   };
-  const getStartServices = jest.fn().mockReturnValue([
+  const getStartServices = vi.fn().mockReturnValue([
     null,
     {
       data: {
         indexPatterns: {
           dataViewsServiceFactory: () => ({
-            get: jest.fn().mockReturnValue(mockPattern),
+            get: vi.fn().mockReturnValue(mockPattern),
           }),
         },
       },
@@ -86,17 +92,17 @@ describe('Endpoint fields', () => {
     buildIndexNameWithNamespaceMock.mockClear();
 
     // Reset all mocks on endpointAppContextService
-    (endpointAppContextService.isCcsEnabled as jest.Mock).mockResolvedValue(false);
-    (endpointAppContextService.getActiveSpace as jest.Mock).mockClear();
-    (endpointAppContextService.getInternalFleetServices as jest.Mock).mockClear();
-    (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
+    (endpointAppContextService.isCcsEnabled as Mock).mockResolvedValue(false);
+    (endpointAppContextService.getActiveSpace as Mock).mockClear();
+    (endpointAppContextService.getInternalFleetServices as Mock).mockClear();
+    (endpointAppContextService.getEndpointAuthz as Mock).mockResolvedValue(
       getEndpointAuthzInitialStateMock()
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   afterAll(() => {
@@ -156,13 +162,13 @@ describe('Endpoint fields', () => {
         };
 
         // Mock getActiveSpace
-        (endpointAppContextService.getActiveSpace as jest.Mock).mockResolvedValue({ id: spaceId });
+        (endpointAppContextService.getActiveSpace as Mock).mockResolvedValue({ id: spaceId });
 
         // Mock getInternalFleetServices
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        (endpointAppContextService.getInternalFleetServices as jest.Mock).mockReturnValue(
+        (endpointAppContextService.getInternalFleetServices as Mock).mockReturnValue(
           mockFleetServices
         );
 
@@ -199,13 +205,13 @@ describe('Endpoint fields', () => {
         };
 
         // Mock getActiveSpace
-        (endpointAppContextService.getActiveSpace as jest.Mock).mockResolvedValue({ id: spaceId });
+        (endpointAppContextService.getActiveSpace as Mock).mockResolvedValue({ id: spaceId });
 
         // Mock getInternalFleetServices
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue(mockIntegrationNamespaces),
         };
-        (endpointAppContextService.getInternalFleetServices as jest.Mock).mockReturnValue(
+        (endpointAppContextService.getInternalFleetServices as Mock).mockReturnValue(
           mockFleetServices
         );
 
@@ -253,15 +259,15 @@ describe('Endpoint fields', () => {
 
     describe('when CCS is enabled', () => {
       beforeEach(() => {
-        (endpointAppContextService.isCcsEnabled as jest.Mock).mockResolvedValue(true);
+        (endpointAppContextService.isCcsEnabled as Mock).mockResolvedValue(true);
       });
 
       afterEach(() => {
-        (endpointAppContextService.isCcsEnabled as jest.Mock).mockResolvedValue(false);
+        (endpointAppContextService.isCcsEnabled as Mock).mockResolvedValue(false);
         // Restore benign namespace mocks so the events-branch setup above does not leak
         // namespace expansion into later order-dependent tests in this file.
-        (endpointAppContextService.getInternalFleetServices as jest.Mock).mockReturnValue({
-          getIntegrationNamespaces: jest.fn().mockResolvedValue({ endpoint: [] }),
+        (endpointAppContextService.getInternalFleetServices as Mock).mockReturnValue({
+          getIntegrationNamespaces: vi.fn().mockResolvedValue({ endpoint: [] }),
         });
         buildIndexNameWithNamespaceMock.mockReturnValue(null);
       });
@@ -302,11 +308,11 @@ describe('Endpoint fields', () => {
           onlyCheckIfIndicesExist: false,
         };
 
-        (endpointAppContextService.getActiveSpace as jest.Mock).mockResolvedValue({ id: spaceId });
+        (endpointAppContextService.getActiveSpace as Mock).mockResolvedValue({ id: spaceId });
         const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue({ endpoint: [spaceId] }),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue({ endpoint: [spaceId] }),
         };
-        (endpointAppContextService.getInternalFleetServices as jest.Mock).mockReturnValue(
+        (endpointAppContextService.getInternalFleetServices as Mock).mockReturnValue(
           mockFleetServices
         );
         buildIndexNameWithNamespaceMock.mockReturnValue(namespacedEventsPattern);
@@ -464,13 +470,13 @@ describe('Endpoint fields', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('without right privileges', () => {
     it('should throw because not enough privileges for event filters', async () => {
-      (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
+      (endpointAppContextService.getEndpointAuthz as Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({ canReadEventFilters: true, canWriteEventFilters: false })
       );
       const indices = [eventsIndexPattern];
@@ -491,7 +497,7 @@ describe('Endpoint fields', () => {
     });
 
     it('should throw because not enough privileges for endpoints list', async () => {
-      (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
+      (endpointAppContextService.getEndpointAuthz as Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({ canReadEndpointList: false })
       );
       const indices = [METADATA_UNITED_INDEX];

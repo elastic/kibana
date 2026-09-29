@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { postEvaluation } from './evaluate';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
-jest.mock('@kbn/core-http-browser');
+vi.mock('@kbn/core-http-browser');
 
 const mockHttp = {
-  post: jest.fn(),
+  post: vi.fn(),
 } as unknown as HttpSetup;
 
 describe('postEvaluation', () => {
@@ -25,7 +28,7 @@ describe('postEvaluation', () => {
   };
 
   it('calls the evaluate API when correct resource path', async () => {
-    (mockHttp.post as jest.Mock).mockResolvedValue({ success: true });
+    (mockHttp.post as Mock).mockResolvedValue({ success: true });
 
     const testProps = {
       http: mockHttp,
@@ -43,7 +46,7 @@ describe('postEvaluation', () => {
   });
   it('returns error when error is an error', async () => {
     const error = 'simulated error';
-    (mockHttp.post as jest.Mock).mockImplementation(() => {
+    (mockHttp.post as Mock).mockImplementation(() => {
       throw new Error(error);
     });
 

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-jest.mock('./browsers/install');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('./browsers/install');
 
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -40,7 +43,7 @@ describe('ScreenshottingPlugin', () => {
     });
 
     test('handles setup issues', async () => {
-      (install as jest.Mock).mockRejectedValue(`Unsupported platform!!!`);
+      (install as Mock).mockRejectedValue(`Unsupported platform!!!`);
 
       const setupContract = plugin.setup(coreSetup, setupDeps);
       expect(setupContract).toEqual({});

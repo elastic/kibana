@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import {
@@ -20,8 +23,8 @@ import userEvent from '@testing-library/user-event';
 import { useDateFormat } from '../../hooks';
 import { GET_TOTAL_IO_BYTES_ROUTE, PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 
-jest.mock('../../hooks/use_date_format');
-const mockUseDateFormat = useDateFormat as jest.Mock;
+vi.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as Mock;
 
 describe('SessionView component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -38,9 +41,9 @@ describe('SessionView component', () => {
           index={TEST_PROCESS_INDEX}
           sessionStartTime={TEST_SESSION_START_TIME}
           sessionEntityId="test-entity-id"
-          trackEvent={jest.fn()}
-          openDetails={jest.fn()}
-          closeDetails={jest.fn()}
+          trackEvent={vi.fn()}
+          openDetails={vi.fn()}
+          closeDetails={vi.fn()}
         />
       ));
     mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');

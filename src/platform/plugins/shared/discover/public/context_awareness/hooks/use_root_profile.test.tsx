@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -18,7 +20,7 @@ import { SolutionType } from '../profiles';
 
 const mockSolutionNavId$ = new BehaviorSubject<SolutionId>(SolutionType.Search);
 
-jest
+vi
   .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
   .mockReturnValue(mockSolutionNavId$);
 

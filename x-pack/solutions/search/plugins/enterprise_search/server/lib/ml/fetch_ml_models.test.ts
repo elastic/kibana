@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockLogger } from '../../__mocks__';
 
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
@@ -22,13 +24,13 @@ import { fetchMlModels } from './fetch_ml_models';
 
 describe('fetchMlModels', () => {
   const mockTrainedModelsProvider = {
-    getTrainedModels: jest.fn(),
-    getTrainedModelsStats: jest.fn(),
-    getCuratedModelConfig: jest.fn(),
+    getTrainedModels: vi.fn(),
+    getTrainedModelsStats: vi.fn(),
+    getCuratedModelConfig: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // getCuratedModelConfig() default behavior is to return the cross-platform models
     mockTrainedModelsProvider.getCuratedModelConfig.mockImplementation((modelName) => ({
       model_id: modelName === 'elser' ? ELSER_MODEL_ID : E5_MODEL_ID,

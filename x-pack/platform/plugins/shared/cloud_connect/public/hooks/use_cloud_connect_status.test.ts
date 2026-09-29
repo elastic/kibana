@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 import { createUseCloudConnectStatusHook } from './use_cloud_connect_status';
 import type { ClusterDetails } from '../types';
 
 describe('useCloudConnectStatus', () => {
-  const createMockHttp = (mockGet: jest.Mock): HttpSetup =>
+  const createMockHttp = (mockGet: Mock): HttpSetup =>
     ({
       get: mockGet,
     } as unknown as HttpSetup);
@@ -41,11 +44,11 @@ describe('useCloudConnectStatus', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return loading state initially', () => {
-    const mockGet = jest.fn().mockReturnValue(new Promise(() => {})); // Never resolves
+    const mockGet = vi.fn().mockReturnValue(new Promise(() => {})); // Never resolves
     const http = createMockHttp(mockGet);
     const useCloudConnectStatus = createUseCloudConnectStatusHook({ http });
 
@@ -65,7 +68,7 @@ describe('useCloudConnectStatus', () => {
         auto_ops: { enabled: false },
       },
     });
-    const mockGet = jest.fn().mockResolvedValue(clusterDetails);
+    const mockGet = vi.fn().mockResolvedValue(clusterDetails);
     const http = createMockHttp(mockGet);
     const useCloudConnectStatus = createUseCloudConnectStatusHook({ http });
 
@@ -93,7 +96,7 @@ describe('useCloudConnectStatus', () => {
         },
       },
     });
-    const mockGet = jest.fn().mockResolvedValue(clusterDetails);
+    const mockGet = vi.fn().mockResolvedValue(clusterDetails);
     const http = createMockHttp(mockGet);
     const useCloudConnectStatus = createUseCloudConnectStatusHook({ http });
 
@@ -121,7 +124,7 @@ describe('useCloudConnectStatus', () => {
         },
       },
     });
-    const mockGet = jest.fn().mockResolvedValue(clusterDetails);
+    const mockGet = vi.fn().mockResolvedValue(clusterDetails);
     const http = createMockHttp(mockGet);
     const useCloudConnectStatus = createUseCloudConnectStatusHook({
       http,
@@ -147,7 +150,7 @@ describe('useCloudConnectStatus', () => {
         auto_ops: { enabled: true },
       },
     });
-    const mockGet = jest.fn().mockResolvedValue(clusterDetails);
+    const mockGet = vi.fn().mockResolvedValue(clusterDetails);
     const http = createMockHttp(mockGet);
     const useCloudConnectStatus = createUseCloudConnectStatusHook({ http });
 
@@ -165,7 +168,7 @@ describe('useCloudConnectStatus', () => {
   it('should return error state on errors', async () => {
     const error500 = new Error('Internal server error');
     (error500 as any).response = { status: 500 };
-    const mockGet = jest.fn().mockRejectedValue(error500);
+    const mockGet = vi.fn().mockRejectedValue(error500);
     const http = createMockHttp(mockGet);
     const useCloudConnectStatus = createUseCloudConnectStatusHook({ http });
 

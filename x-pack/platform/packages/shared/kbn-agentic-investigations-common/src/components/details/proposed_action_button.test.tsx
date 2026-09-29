@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -50,8 +52,8 @@ const FakeDismissModal: React.FC<{
 
 const baseProps: ProposedActionButtonProps = {
   proposal: mockProposal,
-  onConfirm: jest.fn().mockResolvedValue(undefined),
-  onDismiss: jest.fn().mockResolvedValue(undefined),
+  onConfirm: vi.fn().mockResolvedValue(undefined),
+  onDismiss: vi.fn().mockResolvedValue(undefined),
   renderDismissModal: ({ onClose, onConfirm }) => (
     <FakeDismissModal onClose={onClose} onConfirm={onConfirm} />
   ),
@@ -63,7 +65,7 @@ const renderButton = (props: Partial<ProposedActionButtonProps> = {}) =>
 
 describe('ProposedActionButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the proposal title, the needs-review badge, and the category/reversibility caption', () => {

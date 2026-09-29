@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type React from 'react';
 
 import { getStepIconType, HardcodedIconDataUrls, HardcodedIcons } from '@kbn/workflows-ui';
@@ -18,30 +21,42 @@ import {
 } from './get_icon_base64';
 
 // Mock renderToStaticMarkup from react-dom/server
-jest.mock('react-dom/server', () => ({
-  renderToStaticMarkup: jest.fn(),
-}));
+vi.mock('react-dom/server', () => {
+      const mocked = {
+      renderToStaticMarkup: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the SVG component imports - they are React components
-jest.mock('./icons/elasticsearch.svg', () => ({
-  ElasticsearchLogo: () => 'ElasticsearchLogo',
-}));
-jest.mock('./icons/kibana.svg', () => ({
-  KibanaLogo: () => 'KibanaLogo',
-}));
-jest.mock('@kbn/connector-specs/icons', () => ({
-  ConnectorIconsMap: new Map([['.notion', () => null]]),
-}));
+vi.mock('./icons/elasticsearch.svg', () => {
+      const mocked = {
+      ElasticsearchLogo: () => 'ElasticsearchLogo',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./icons/kibana.svg', () => {
+      const mocked = {
+      KibanaLogo: () => 'KibanaLogo',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/connector-specs/icons', () => {
+      const mocked = {
+      ConnectorIconsMap: new Map([['.notion', () => null]]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { renderToStaticMarkup } = jest.requireMock('react-dom/server') as {
-  renderToStaticMarkup: jest.Mock;
+const { renderToStaticMarkup } = (await vi.importMock('react-dom/server')) as {
+  renderToStaticMarkup: Mock;
 };
 
 const FALLBACK_URL = 'data:image/svg+xml;base64,ZmFsbGJhY2s=';
 
 describe('getDataUrlFromReactComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('converts an SVG component to a base64 data URL', () => {
@@ -103,7 +118,7 @@ describe('getDataUrlFromReactComponent', () => {
 
 describe('resolveIconToDataUrl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns fallback when icon is undefined', async () => {
@@ -142,7 +157,7 @@ describe('resolveIconToDataUrl', () => {
     const lazyComponent = {
       $$typeof: Symbol.for('react.lazy'),
       _payload: {
-        _result: jest.fn().mockResolvedValue({ default: InnerComponent }),
+        _result: vi.fn().mockResolvedValue({ default: InnerComponent }),
       },
     };
 
@@ -178,7 +193,7 @@ describe('resolveIconToDataUrl', () => {
 
 describe('getIconBase64', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Clear the module-level cache between tests by re-importing
     // We cannot clear the cache directly so we test caching behavior sequentially
   });

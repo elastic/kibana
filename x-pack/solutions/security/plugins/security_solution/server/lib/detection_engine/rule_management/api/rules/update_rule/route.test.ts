@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import {
   getEmptyFindResult,
   getRuleMock,
@@ -38,7 +41,7 @@ describe('Update rule route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -56,8 +59,8 @@ describe('Update rule route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -233,8 +236,8 @@ describe('Update rule route', () => {
     );
 
     test('fails when isolate rbac is set to false', async () => {
-      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
-        canIsolateHost: jest.fn().mockReturnValue(false),
+      (context.securitySolution.getEndpointAuthz as Mock).mockReturnValue(() => ({
+        canIsolateHost: vi.fn().mockReturnValue(false),
       }));
 
       const request = requestMock.create({
@@ -253,8 +256,8 @@ describe('Update rule route', () => {
       );
     });
     test('fails when isolate rbac and response action is being removed to finish as empty array', async () => {
-      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
-        canIsolateHost: jest.fn().mockReturnValue(false),
+      (context.securitySolution.getEndpointAuthz as Mock).mockReturnValue(() => ({
+        canIsolateHost: vi.fn().mockReturnValue(false),
       }));
       clients.rulesClient.find.mockResolvedValue({
         page: 1,

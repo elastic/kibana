@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject, of, throwError } from 'rxjs';
 import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
 import { EventsService } from '../events';
@@ -20,10 +22,10 @@ const setup = () => {
   const eventsService = new EventsService();
   const propagated: Array<[string, ChatEvent]> = [];
   const runsEnded: string[] = [];
-  jest
+  vi
     .spyOn(eventsService, 'propagateChatEvent')
     .mockImplementation((conversationId, event) => propagated.push([conversationId, event]));
-  jest
+  vi
     .spyOn(eventsService, 'notifyStreamEnded')
     .mockImplementation((conversationId) => runsEnded.push(conversationId));
   return {

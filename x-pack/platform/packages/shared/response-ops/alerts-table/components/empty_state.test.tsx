@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -87,7 +89,7 @@ describe('EmptyState', () => {
   });
 
   it('renders the reset button with Reset text when error has no field name', async () => {
-    const mockReset = jest.fn();
+    const mockReset = vi.fn();
     const error = new Error('Test error message');
     render(
       <IntlProvider locale="en">
@@ -104,7 +106,7 @@ describe('EmptyState', () => {
     const fieldWithError: SortCombinations = {
       ['kibana.alert.title']: { order: 'asc' },
     };
-    const mockReset = jest.fn();
+    const mockReset = vi.fn();
     const error = new Error('Test error message on field kibana.alert.title');
     render(
       <IntlProvider locale="en">
@@ -118,7 +120,7 @@ describe('EmptyState', () => {
   });
 
   it('calls onReset correctly', async () => {
-    const mockReset = jest.fn();
+    const mockReset = vi.fn();
     const error = new Error('Test error message');
     render(
       <IntlProvider locale="en">
@@ -136,7 +138,7 @@ describe('EmptyState', () => {
   });
 
   it('does not show reset button when it is not error', async () => {
-    const mockReset = jest.fn();
+    const mockReset = vi.fn();
     render(
       <IntlProvider locale="en">
         <EmptyState

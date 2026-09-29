@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ExternalsListContents } from './externals_list_contents';
@@ -19,7 +21,7 @@ const defaultProps = {
   kuery: '',
   start: '2024-01-01T00:00:00.000Z',
   end: '2024-01-01T01:00:00.000Z',
-  onFocusClick: jest.fn(),
+  onFocusClick: vi.fn(),
 };
 
 function groupedNode(data: {

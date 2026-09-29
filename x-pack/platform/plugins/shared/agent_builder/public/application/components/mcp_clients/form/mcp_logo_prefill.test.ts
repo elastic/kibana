@@ -5,29 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { parseDataUrl } from '../../../utils/data_url';
 import { LOGO_OPTIONS } from './mcp_logo_options';
 import { resolveClientLogoFormValue } from './mcp_logo_prefill';
 
 // Jest resolves image imports to a shared stub, so the real preset assets are
 // not data URLs here and every option would appear to hold identical bytes.
-jest.mock('./mcp_logo_options', () => ({
-  LOGO_OPTIONS: {
-    mcp_client: {
-      label: 'MCP client logo',
-      isDefault: true,
-      loadIconUrl: () => Promise.resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB'),
-    },
-    claude: {
-      label: 'Claude',
-      loadIconUrl: () => Promise.resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAC'),
-    },
-    unavailable: {
-      label: 'Unavailable',
-      loadIconUrl: () => Promise.reject(new Error('failed to load')),
-    },
-  },
-}));
+vi.mock('./mcp_logo_options', () => {
+      const mocked = {
+      LOGO_OPTIONS: {
+        mcp_client: {
+          label: 'MCP client logo',
+          isDefault: true,
+          loadIconUrl: () => Promise.resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB'),
+        },
+        claude: {
+          label: 'Claude',
+          loadIconUrl: () => Promise.resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAC'),
+        },
+        unavailable: {
+          label: 'Unavailable',
+          loadIconUrl: () => Promise.reject(new Error('failed to load')),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const presetLogoData = async (id: string): Promise<string> => {
   const dataUrl = await LOGO_OPTIONS[id].loadIconUrl();

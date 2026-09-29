@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EnvironmentSelect } from '.';
@@ -12,14 +14,17 @@ import userEvent from '@testing-library/user-event';
 
 const DEFAULT_ENVIRONMENT = 'production';
 
-const mockOnSearchChange = jest.fn();
-jest.mock('./use_environment_select', () => ({
-  useEnvironmentSelect: jest.fn(() => ({
-    data: { terms: [] },
-    searchStatus: 'success',
-    onSearchChange: mockOnSearchChange,
-  })),
-}));
+const mockOnSearchChange = vi.fn();
+vi.mock('./use_environment_select', () => {
+      const mocked = {
+      useEnvironmentSelect: vi.fn(() => ({
+        data: { terms: [] },
+        searchStatus: 'success',
+        onSearchChange: mockOnSearchChange,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EnvironmentSelect', () => {
   async function clearInputValue(input: HTMLInputElement) {
@@ -39,11 +44,11 @@ describe('EnvironmentSelect', () => {
     serviceName: 'test-service',
     rangeFrom: 'now-15m',
     rangeTo: 'now',
-    onChange: jest.fn(),
+    onChange: vi.fn(),
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cleanup();
   });
 

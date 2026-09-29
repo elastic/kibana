@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { createUnauthorizedToolResult, ensureToolPrivilege } from './unauthorized_tool_result';
@@ -62,8 +64,8 @@ describe('ensureToolPrivilege', () => {
     canWrite?: boolean;
   } = {}): PrivilegeChecker =>
     ({
-      canRead: jest.fn().mockResolvedValue(canRead),
-      canWrite: jest.fn().mockResolvedValue(canWrite),
+      canRead: vi.fn().mockResolvedValue(canRead),
+      canWrite: vi.fn().mockResolvedValue(canWrite),
     } as unknown as PrivilegeChecker);
 
   it('returns undefined when the user is authorized', async () => {

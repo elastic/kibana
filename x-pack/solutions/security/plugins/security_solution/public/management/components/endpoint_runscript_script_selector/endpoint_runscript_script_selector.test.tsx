@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -24,9 +27,9 @@ import { EndpointScriptsGenerator } from '../../../../common/endpoint/data_gener
 import { userEvent } from '@testing-library/user-event/dist/cjs/index.js';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('EndpointRunscriptScriptSelector', () => {
   let testContext: AppContextTestRender;
@@ -43,7 +46,7 @@ describe('EndpointRunscriptScriptSelector', () => {
     });
     props = {
       selectedScriptId: undefined,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       'data-test-subj': 'test',
     };
     scriptListApiResponse = {
@@ -95,7 +98,7 @@ describe('EndpointRunscriptScriptSelector', () => {
   });
 
   it('should display list of scripts available and call onScriptsLoaded', async () => {
-    props.onScriptsLoaded = jest.fn();
+    props.onScriptsLoaded = vi.fn();
     const { getByTestId, getAllByTestId } = render();
     await waitFor(() => {
       expect(apiMocks.responseProvider.fetchScriptList).toHaveBeenCalled();

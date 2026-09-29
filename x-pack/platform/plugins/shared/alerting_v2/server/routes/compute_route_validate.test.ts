@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { computeRouteValidate } from './compute_route_validate';
 
@@ -59,7 +61,7 @@ describe('computeRouteValidate', () => {
   });
 
   it('passes the onRequestValidationError handler through when declared', () => {
-    const onRequestValidationError = jest.fn();
+    const onRequestValidationError = vi.fn();
     const validate = computeRouteValidate({
       request: { body: z.object({ name: z.string() }) },
       onRequestValidationError,

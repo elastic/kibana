@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
 import { createRuleChangeHistoryAdapter } from './rule_change_history_adapter';
 
 const createApiMock = () =>
   ({
-    listRuleChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    getRuleChangeEvent: jest.fn().mockResolvedValue({
+    listRuleChanges: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    getRuleChangeEvent: vi.fn().mockResolvedValue({
       id: 'evt-1',
       created_at: '2026-01-01T00:00:00.000Z',
       actor: { name: 'elastic' },
       action: 'rule_update',
       snapshot: {},
     }),
-  } as unknown as jest.Mocked<RuleChangeHistoryApi>);
+  } as unknown as Mocked<RuleChangeHistoryApi>);
 
 describe('createRuleChangeHistoryAdapter', () => {
   describe('listChanges', () => {

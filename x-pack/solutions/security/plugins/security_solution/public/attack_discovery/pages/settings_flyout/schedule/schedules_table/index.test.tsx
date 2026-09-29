@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 
@@ -19,39 +22,39 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../logic/use_find_schedules');
-jest.mock('../logic/use_enable_schedule');
-jest.mock('../logic/use_disable_schedule');
-jest.mock('../logic/use_delete_schedule');
-jest.mock('../logic/use_schedule_api');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../logic/use_find_schedules');
+vi.mock('../logic/use_enable_schedule');
+vi.mock('../logic/use_disable_schedule');
+vi.mock('../logic/use_delete_schedule');
+vi.mock('../logic/use_schedule_api');
 
-const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
+const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as MockedFunction<
   typeof useFindAttackDiscoverySchedules
 >;
-const mockUseScheduleApi = useScheduleApi as jest.MockedFunction<typeof useScheduleApi>;
+const mockUseScheduleApi = useScheduleApi as MockedFunction<typeof useScheduleApi>;
 
-const enableAttackDiscoveryScheduleMock = jest.fn();
+const enableAttackDiscoveryScheduleMock = vi.fn();
 const mockUseEnableAttackDiscoverySchedule =
-  useEnableAttackDiscoverySchedule as jest.MockedFunction<typeof useEnableAttackDiscoverySchedule>;
-const disableAttackDiscoveryScheduleMock = jest.fn();
+  useEnableAttackDiscoverySchedule as MockedFunction<typeof useEnableAttackDiscoverySchedule>;
+const disableAttackDiscoveryScheduleMock = vi.fn();
 const mockUseDisableAttackDiscoverySchedule =
-  useDisableAttackDiscoverySchedule as jest.MockedFunction<
+  useDisableAttackDiscoverySchedule as MockedFunction<
     typeof useDisableAttackDiscoverySchedule
   >;
-const deleteAttackDiscoveryScheduleMock = jest.fn();
+const deleteAttackDiscoveryScheduleMock = vi.fn();
 const mockUseDeleteAttackDiscoverySchedule =
-  useDeleteAttackDiscoverySchedule as jest.MockedFunction<typeof useDeleteAttackDiscoverySchedule>;
-const refetchSchedulesMock = jest.fn();
-const bulkEnableAttackDiscoverySchedulesMock = jest.fn();
-const bulkDisableAttackDiscoverySchedulesMock = jest.fn();
-const bulkDeleteAttackDiscoverySchedulesMock = jest.fn();
+  useDeleteAttackDiscoverySchedule as MockedFunction<typeof useDeleteAttackDiscoverySchedule>;
+const refetchSchedulesMock = vi.fn();
+const bulkEnableAttackDiscoverySchedulesMock = vi.fn();
+const bulkDisableAttackDiscoverySchedulesMock = vi.fn();
+const bulkDeleteAttackDiscoverySchedulesMock = vi.fn();
 
 describe('SchedulesTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -61,7 +64,7 @@ describe('SchedulesTable', () => {
           },
         },
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(false),
+          useBooleanValue: vi.fn().mockReturnValue(false),
         },
       },
     });
@@ -70,42 +73,42 @@ describe('SchedulesTable', () => {
       data: mockFindAttackDiscoverySchedules,
       isLoading: false,
       refetch: refetchSchedulesMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
+    } as unknown as Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
     mockUseEnableAttackDiscoverySchedule.mockReturnValue({
       mutateAsync: enableAttackDiscoveryScheduleMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useEnableAttackDiscoverySchedule>>);
+    } as unknown as Mocked<ReturnType<typeof useEnableAttackDiscoverySchedule>>);
     mockUseDisableAttackDiscoverySchedule.mockReturnValue({
       mutateAsync: disableAttackDiscoveryScheduleMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useDisableAttackDiscoverySchedule>>);
+    } as unknown as Mocked<ReturnType<typeof useDisableAttackDiscoverySchedule>>);
     mockUseDeleteAttackDiscoverySchedule.mockReturnValue({
       mutateAsync: deleteAttackDiscoveryScheduleMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useDeleteAttackDiscoverySchedule>>);
+    } as unknown as Mocked<ReturnType<typeof useDeleteAttackDiscoverySchedule>>);
 
     mockUseScheduleApi.mockReturnValue({
       isWorkflowsEnabled: false,
-      useBulkDeleteSchedules: jest
+      useBulkDeleteSchedules: vi
         .fn()
         .mockReturnValue({ mutateAsync: bulkDeleteAttackDiscoverySchedulesMock }),
-      useBulkDisableSchedules: jest
+      useBulkDisableSchedules: vi
         .fn()
         .mockReturnValue({ mutateAsync: bulkDisableAttackDiscoverySchedulesMock }),
-      useBulkEnableSchedules: jest
+      useBulkEnableSchedules: vi
         .fn()
         .mockReturnValue({ mutateAsync: bulkEnableAttackDiscoverySchedulesMock }),
-      useCreateSchedule: jest.fn(),
-      useDeleteSchedule: jest
+      useCreateSchedule: vi.fn(),
+      useDeleteSchedule: vi
         .fn()
         .mockReturnValue({ mutateAsync: deleteAttackDiscoveryScheduleMock }),
-      useDisableSchedule: jest
+      useDisableSchedule: vi
         .fn()
         .mockReturnValue({ mutateAsync: disableAttackDiscoveryScheduleMock }),
-      useEnableSchedule: jest
+      useEnableSchedule: vi
         .fn()
         .mockReturnValue({ mutateAsync: enableAttackDiscoveryScheduleMock }),
       useFindSchedules: mockUseFindAttackDiscoverySchedules,
-      useGetSchedule: jest.fn(),
-      useUpdateSchedule: jest.fn(),
+      useGetSchedule: vi.fn(),
+      useUpdateSchedule: vi.fn(),
     } as unknown as ReturnType<typeof useScheduleApi>);
   });
 
@@ -247,7 +250,7 @@ describe('SchedulesTable', () => {
       data: { total: schedules.length, schedules },
       isLoading: false,
       refetch: refetchSchedulesMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
+    } as unknown as Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
     const { getAllByTestId } = renderTable();
 
@@ -287,7 +290,7 @@ describe('SchedulesTable', () => {
       data: { total: schedules.length, schedules },
       isLoading: false,
       refetch: refetchSchedulesMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
+    } as unknown as Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
     const { container, getByTestId } = renderTable();
 
@@ -344,13 +347,13 @@ describe('SchedulesTable', () => {
   });
 
   describe('when workflows feature flag is enabled', () => {
-    const mockWorkflowDeleteMutateAsync = jest.fn();
-    const mockWorkflowDisableMutateAsync = jest.fn();
-    const mockWorkflowEnableMutateAsync = jest.fn();
-    const mockWorkflowBulkDeleteMutateAsync = jest.fn();
-    const mockWorkflowBulkDisableMutateAsync = jest.fn();
-    const mockWorkflowBulkEnableMutateAsync = jest.fn();
-    const mockUseFindWorkflowSchedules = jest.fn();
+    const mockWorkflowDeleteMutateAsync = vi.fn();
+    const mockWorkflowDisableMutateAsync = vi.fn();
+    const mockWorkflowEnableMutateAsync = vi.fn();
+    const mockWorkflowBulkDeleteMutateAsync = vi.fn();
+    const mockWorkflowBulkDisableMutateAsync = vi.fn();
+    const mockWorkflowBulkEnableMutateAsync = vi.fn();
+    const mockUseFindWorkflowSchedules = vi.fn();
 
     beforeEach(() => {
       // Simulate the public API having no schedules (different storage from the internal API)
@@ -358,7 +361,7 @@ describe('SchedulesTable', () => {
         data: { schedules: [], total: 0 },
         isLoading: false,
         refetch: refetchSchedulesMock,
-      } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
+      } as unknown as Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
       // The internal (workflow) find hook returns the schedules
       mockUseFindWorkflowSchedules.mockReturnValue({
@@ -369,28 +372,28 @@ describe('SchedulesTable', () => {
 
       mockUseScheduleApi.mockReturnValue({
         isWorkflowsEnabled: true,
-        useBulkDeleteSchedules: jest
+        useBulkDeleteSchedules: vi
           .fn()
           .mockReturnValue({ mutateAsync: mockWorkflowBulkDeleteMutateAsync }),
-        useBulkDisableSchedules: jest
+        useBulkDisableSchedules: vi
           .fn()
           .mockReturnValue({ mutateAsync: mockWorkflowBulkDisableMutateAsync }),
-        useBulkEnableSchedules: jest
+        useBulkEnableSchedules: vi
           .fn()
           .mockReturnValue({ mutateAsync: mockWorkflowBulkEnableMutateAsync }),
-        useCreateSchedule: jest.fn(),
-        useDeleteSchedule: jest
+        useCreateSchedule: vi.fn(),
+        useDeleteSchedule: vi
           .fn()
           .mockReturnValue({ mutateAsync: mockWorkflowDeleteMutateAsync }),
-        useDisableSchedule: jest
+        useDisableSchedule: vi
           .fn()
           .mockReturnValue({ mutateAsync: mockWorkflowDisableMutateAsync }),
-        useEnableSchedule: jest
+        useEnableSchedule: vi
           .fn()
           .mockReturnValue({ mutateAsync: mockWorkflowEnableMutateAsync }),
         useFindSchedules: mockUseFindWorkflowSchedules,
-        useGetSchedule: jest.fn(),
-        useUpdateSchedule: jest.fn(),
+        useGetSchedule: vi.fn(),
+        useUpdateSchedule: vi.fn(),
       } as unknown as ReturnType<typeof useScheduleApi>);
     });
 

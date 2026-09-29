@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { DisabledLinkPanel } from './disabled_link_panel';
 import { ThreatIntelPanelView as TestView } from '../overview_cti_links/threat_intel_panel_view';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('DisabledLinkPanel', () => {
   const defaultProps = {

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getMetricValueProps } from './metric_item';
 import type { OverviewTrend } from '../../../../../../../../common/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: jest.fn(),
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      FormattedMessage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getMetricValueProps', () => {
   it('returns loading state props when trendData is loading', () => {

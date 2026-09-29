@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { isBoom } from '@hapi/boom';
 import { getTypedApiErrorAttributes } from '../api_errors';
@@ -34,7 +36,7 @@ describe('throwIfMalformedFieldLinkage', () => {
 describe('logUnresolvedMirrorKeys', () => {
   const logger = loggingSystemMock.createLogger();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('does not log for an empty list', () => {
     logUnresolvedMirrorKeys([], { owner: 'cases', logger });

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDefaultStaticProperties } from '../../../../styles/vector/vector_style_defaults';
 
-jest.mock('../../../../../kibana_services', () => {
+vi.mock('../../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;
@@ -25,9 +27,12 @@ jest.mock('../../../../../kibana_services', () => {
   };
 });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('12345'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('12345'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 

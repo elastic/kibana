@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { generateSecretsSchema } from './generate_secrets_schema';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -14,7 +16,7 @@ const mockConfigUtils = actionsConfigMock.create();
 const validatorServices = { configurationUtilities: mockConfigUtils };
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   mockConfigUtils.getWebhookSettings.mockReturnValue({ ssl: { pfx: { enabled: false } } });
 });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 
@@ -14,22 +16,25 @@ import { getKpiUniqueIpsAreaLensAttributes } from './kpi_unique_ips_area';
 import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
-jest.mock('../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockHost',
-      pageName: 'hosts',
-      tabName: 'events',
-    },
-  ]),
-}));
+vi.mock('../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          detailName: 'mockHost',
+          pageName: 'hosts',
+          tabName: 'events',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getKpiUniqueIpsAreaLensAttributes', () => {
   beforeAll(() => {
     const dataView = getMockDataViewWithMatchedIndices(['auditbeat-mytest-*']);
     dataView.id = 'security-solution-my-test';
 
-    jest.mocked(useDataView).mockReturnValue({
+    vi.mocked(useDataView).mockReturnValue({
       dataView,
       status: 'ready',
     });

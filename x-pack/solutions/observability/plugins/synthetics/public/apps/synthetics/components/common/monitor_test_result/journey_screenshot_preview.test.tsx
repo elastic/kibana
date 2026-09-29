@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { StepImagePopoverProps } from './journey_screenshot_preview';
@@ -13,25 +15,28 @@ import { render } from '../../../utils/testing';
 import { THUMBNAIL_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
 
 let dialogProps: Record<string, unknown> = {};
-jest.mock('../screenshot/journey_screenshot_dialog', () => ({
-  ...jest.requireActual('../screenshot/journey_screenshot_dialog'),
-  JourneyScreenshotDialog: (props: {
-    checkGroup: string | undefined;
-    initialImgSrc: string | undefined;
-    initialStepNumber: number;
-    maxSteps: number | undefined;
-    isOpen: boolean;
-    onClose: () => void;
-  }) => {
-    dialogProps = props;
-    return (
-      <div>
-        {props.isOpen ? <img alt="img-in-dialog" src={props.initialImgSrc} /> : null}
-        <button onClick={props.onClose}>Close dialog</button>
-      </div>
-    );
-  },
-}));
+vi.mock('../screenshot/journey_screenshot_dialog', async () => {
+      const mocked = {
+      ...(await vi.importActual('../screenshot/journey_screenshot_dialog')),
+      JourneyScreenshotDialog: (props: {
+        checkGroup: string | undefined;
+        initialImgSrc: string | undefined;
+        initialStepNumber: number;
+        maxSteps: number | undefined;
+        isOpen: boolean;
+        onClose: () => void;
+      }) => {
+        dialogProps = props;
+        return (
+          <div>
+            {props.isOpen ? <img alt="img-in-dialog" src={props.initialImgSrc} /> : null}
+            <button onClick={props.onClose}>Close dialog</button>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('JourneyScreenshotPreview', () => {
   const testCheckGroup = 'test-check-group';
@@ -56,7 +61,7 @@ describe('JourneyScreenshotPreview', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('opens displays full-size image on click, hides after close is clicked', async () => {

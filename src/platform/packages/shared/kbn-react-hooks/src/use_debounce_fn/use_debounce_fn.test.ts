@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useDebounceFn } from '../..';
 
 describe('useDebounceFn hook', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   it('should debounce the function call', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useDebounceFn(fn, { wait: 200 }));
 
     act(() => {
@@ -25,14 +27,14 @@ describe('useDebounceFn hook', () => {
     expect(fn).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it('should cancel the debounced function call', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useDebounceFn(fn, { wait: 200 }));
 
     act(() => {
@@ -41,14 +43,14 @@ describe('useDebounceFn hook', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(fn).not.toHaveBeenCalled();
   });
 
   it('should flush the debounced function call', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useDebounceFn(fn, { wait: 200 }));
 
     act(() => {
@@ -60,7 +62,7 @@ describe('useDebounceFn hook', () => {
   });
 
   it('should handle leading option correctly', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useDebounceFn(fn, { wait: 200, leading: true }));
 
     act(() => {
@@ -70,7 +72,7 @@ describe('useDebounceFn hook', () => {
     expect(fn).toHaveBeenCalledTimes(1);
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     act(() => {
@@ -81,7 +83,7 @@ describe('useDebounceFn hook', () => {
   });
 
   it('should handle trailing option correctly', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useDebounceFn(fn, { wait: 200, trailing: true }));
 
     act(() => {
@@ -92,7 +94,7 @@ describe('useDebounceFn hook', () => {
     expect(fn).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(fn).toHaveBeenCalledTimes(1);

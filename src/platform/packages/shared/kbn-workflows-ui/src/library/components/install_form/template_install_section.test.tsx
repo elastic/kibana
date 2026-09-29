@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -17,40 +20,52 @@ import { TemplateInstallSection } from './template_install_section';
 import { createMockWorkflowApi } from '../../../api/workflows_api.mock';
 import { testQueryClientConfig } from '../../../test_utils';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWorkflowApi = createMockWorkflowApi();
-jest.mock('../../../api/use_workflows_api', () => ({
-  useWorkflowsApi: () => mockWorkflowApi,
-}));
+vi.mock('../../../api/use_workflows_api', () => {
+      const mocked = {
+      useWorkflowsApi: () => mockWorkflowApi,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The connector picker has its own test (it needs the services provider and
 // the connectors fetch); a button stub keeps this test self-contained.
-jest.mock('./connector_field', () => ({
-  ConnectorField: ({
-    onChange,
-    'data-test-subj': dataTestSubj,
-  }: {
-    onChange: (id: string) => void;
-    'data-test-subj'?: string;
-  }) => (
-    <button type="button" data-test-subj={dataTestSubj} onClick={() => onChange('connector-1')} />
-  ),
-}));
+vi.mock('./connector_field', () => {
+      const mocked = {
+      ConnectorField: ({
+        onChange,
+        'data-test-subj': dataTestSubj,
+      }: {
+        onChange: (id: string) => void;
+        'data-test-subj'?: string;
+      }) => (
+        <button type="button" data-test-subj={dataTestSubj} onClick={() => onChange('connector-1')} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Same for the requirements summary (it resolves connector labels through the
 // services provider); its own test covers the rendering.
-jest.mock('./template_requirements', () => ({
-  TemplateRequirements: ({ fields }: { fields: Array<{ name: string }> }) => (
-    <div data-test-subj="workflowLibraryTemplateRequirements">
-      {fields.map((field) => field.name).join(',')}
-    </div>
-  ),
-}));
+vi.mock('./template_requirements', () => {
+      const mocked = {
+      TemplateRequirements: ({ fields }: { fields: Array<{ name: string }> }) => (
+        <div data-test-subj="workflowLibraryTemplateRequirements">
+          {fields.map((field) => field.name).join(',')}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const TEMPLATE: TemplateBody = {
   metadata: {
@@ -79,10 +94,10 @@ const TEMPLATE: TemplateBody = {
 const queryClient = new QueryClient(testQueryClientConfig);
 
 describe('TemplateInstallSection', () => {
-  let navigateToApp: jest.Mock;
-  let addSuccessToast: jest.Mock;
-  let onPreviewValuesChange: jest.Mock;
-  let onStepChange: jest.Mock;
+  let navigateToApp: Mock;
+  let addSuccessToast: Mock;
+  let onPreviewValuesChange: Mock;
+  let onStepChange: Mock;
 
   const setCapabilities = (canCreate: boolean) => {
     mockUseKibana.mockReturnValue({
@@ -116,12 +131,12 @@ describe('TemplateInstallSection', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
-    navigateToApp = jest.fn();
-    addSuccessToast = jest.fn();
-    onPreviewValuesChange = jest.fn();
-    onStepChange = jest.fn();
+    navigateToApp = vi.fn();
+    addSuccessToast = vi.fn();
+    onPreviewValuesChange = vi.fn();
+    onStepChange = vi.fn();
     setCapabilities(true);
   });
 

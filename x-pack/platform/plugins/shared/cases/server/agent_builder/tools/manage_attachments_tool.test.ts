@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
@@ -16,11 +18,11 @@ import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 
 const buildMockAttachments = () => ({
-  add: jest.fn().mockResolvedValue({ id: 'att-1' }),
-  get: jest.fn(),
-  delete: jest.fn(),
-  update: jest.fn(),
-  list: jest.fn(),
+  add: vi.fn().mockResolvedValue({ id: 'att-1' }),
+  get: vi.fn(),
+  delete: vi.fn(),
+  update: vi.fn(),
+  list: vi.fn(),
 });
 
 const buildToolContext = (attachments = buildMockAttachments()): ToolHandlerContext =>
@@ -50,7 +52,7 @@ describe('manageAttachmentsTool', () => {
   });
 
   const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) => {
-    return manageAttachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, enabled);
+    return manageAttachmentsTool(vi.fn().mockResolvedValue(casesClient), registry, enabled);
   };
 
   it('has the correct tool id', () => {
@@ -158,7 +160,7 @@ describe('manageAttachmentsTool availability', () => {
     const coreSetup = makeCoreWithSolution('es');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
     const tool = {
-      ...manageAttachmentsTool(jest.fn(), buildRegistry([]), true),
+      ...manageAttachmentsTool(vi.fn(), buildRegistry([]), true),
       availability,
     };
     const request = httpServerMock.createKibanaRequest();
@@ -170,7 +172,7 @@ describe('manageAttachmentsTool availability', () => {
     const coreSetup = makeCoreWithSolution('security');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
     const tool = {
-      ...manageAttachmentsTool(jest.fn(), buildRegistry([]), true),
+      ...manageAttachmentsTool(vi.fn(), buildRegistry([]), true),
       availability,
     };
     const request = httpServerMock.createKibanaRequest();
@@ -183,7 +185,7 @@ describe('manageAttachmentsTool availability', () => {
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
     const tool = {
-      ...manageAttachmentsTool(jest.fn(), buildRegistry([]), true),
+      ...manageAttachmentsTool(vi.fn(), buildRegistry([]), true),
       availability,
     };
     expect(tool.availability?.cacheMode).toBe('space');

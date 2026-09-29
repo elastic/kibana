@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
@@ -12,9 +14,9 @@ import type { AlertEpisodeAction } from '../queries/episode_actions_query';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeActions } from './use_fetch_episode_actions';
 
-jest.mock('../apis/fetch_episode_actions');
+vi.mock('../apis/fetch_episode_actions');
 
-const fetchEpisodeActionsMock = jest.mocked(fetchEpisodeActions);
+const fetchEpisodeActionsMock = vi.mocked(fetchEpisodeActions);
 const mockExpressions = {} as ExpressionsStart;
 const mockSpaces = createMockSpaces();
 
@@ -23,7 +25,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchEpisodeActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

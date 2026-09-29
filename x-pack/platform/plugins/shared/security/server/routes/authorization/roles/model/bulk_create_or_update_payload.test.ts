@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getBulkCreateOrUpdatePayloadSchema } from './bulk_create_or_update_payload';
 
 describe('getBulkCreateOrUpdatePayloadSchema', () => {
-  const mockGetBasePrivilegeNames = jest.fn(() => ({
+  const mockGetBasePrivilegeNames = vi.fn(() => ({
     global: ['all', 'read'],
     space: ['all', 'read'],
   }));

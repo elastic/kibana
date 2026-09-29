@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useInstallProductDoc } from './use_install_product_doc';
 import { useAssistantContext } from '../../../..';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
-jest.mock('../../../..', () => ({
-  useAssistantContext: jest.fn(),
-}));
+vi.mock('../../../..', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useInstallProductDoc', () => {
-  const mockInstall = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
+  const mockInstall = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddError = vi.fn();
 
   beforeEach(() => {
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       productDocBase: {
         installation: {
           install: mockInstall,

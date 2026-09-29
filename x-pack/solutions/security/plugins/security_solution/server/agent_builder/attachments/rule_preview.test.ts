@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -14,7 +16,7 @@ import { DEFAULT_PREVIEW_INDEX, SecurityAgentBuilderAttachments } from '../../..
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
 
 describe('createRulePreviewAttachmentType', () => {
-  const getAlertCount = jest.fn();
+  const getAlertCount = vi.fn();
   const attachmentType = createRulePreviewAttachmentType({ getAlertCount });
   const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
@@ -74,7 +76,7 @@ describe('createRulePreviewAttachmentType', () => {
       const formatted = await attachmentType.format(attachment, formatContext);
       const tools = await formatted.getBoundedTools?.();
       const tool = tools?.[0];
-      const search = jest.fn().mockResolvedValue({
+      const search = vi.fn().mockResolvedValue({
         hits: {
           total: { value: 1 },
           hits: [{ _id: 'alert-1', _source: { [ALERT_RULE_UUID]: 'preview-1' } }],
@@ -162,7 +164,7 @@ describe('createRulePreviewAttachmentType', () => {
 
 describe('getRulePreviewAlertCount', () => {
   it('counts alerts generated for a preview id in the current space', async () => {
-    const count = jest.fn().mockResolvedValue({ count: 7 });
+    const count = vi.fn().mockResolvedValue({ count: 7 });
 
     const result = await getRulePreviewAlertCount({
       esClient: { count } as never,

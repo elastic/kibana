@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -14,7 +16,7 @@ import { getExceptionListSummary } from './get_exception_list_summary';
 
 describe('get_exception_list_summary', () => {
   describe('getExceptionListSummary', () => {
-    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
       savedObjectsClient = savedObjectsClientMock.create();

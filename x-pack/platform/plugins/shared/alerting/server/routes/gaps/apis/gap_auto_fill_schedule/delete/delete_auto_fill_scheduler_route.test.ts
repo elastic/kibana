@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
@@ -14,13 +17,16 @@ import { deleteAutoFillSchedulerRoute } from './delete_auto_fill_scheduler_route
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('deleteAutoFillSchedulerRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should call delete gap fill auto scheduler with proper parameters', async () => {
@@ -51,7 +57,7 @@ describe('deleteAutoFillSchedulerRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    rulesClient.deleteGapAutoFillScheduler = jest.fn();
+    rulesClient.deleteGapAutoFillScheduler = vi.fn();
 
     deleteAutoFillSchedulerRoute(router, licenseState);
 
@@ -69,11 +75,11 @@ describe('deleteAutoFillSchedulerRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    rulesClient.deleteGapAutoFillScheduler = jest.fn();
+    rulesClient.deleteGapAutoFillScheduler = vi.fn();
 
     deleteAutoFillSchedulerRoute(router, licenseState);
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('License check failed');
     });
     const [, handler] = router.delete.mock.calls[0];

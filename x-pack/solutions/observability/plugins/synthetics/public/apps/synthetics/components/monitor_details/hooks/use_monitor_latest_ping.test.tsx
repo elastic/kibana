@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import * as reactRedux from 'react-redux-v7';
@@ -13,52 +16,73 @@ import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/
 import { getMonitorLastRunAction } from '../../../state';
 import { fetchLatestTestRun } from '../../../state/monitor_details/api';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  // Mirror of the real FETCH_STATUS enum values; test bodies read it back off
-  // the mocked module below so there is a single source of truth.
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    PENDING: 'pending',
-  },
-  useFetcher: jest.fn().mockReturnValue({ data: undefined, status: 'pending', loading: false }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      // Mirror of the real FETCH_STATUS enum values; test bodies read it back off
+      // the mocked module below so there is a single source of truth.
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        PENDING: 'pending',
+      },
+      useFetcher: vi.fn().mockReturnValue({ data: undefined, status: 'pending', loading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { FETCH_STATUS } = observabilitySharedPublic;
 
-jest.mock('../../../state/monitor_details/api', () => ({
-  fetchLatestTestRun: jest.fn().mockResolvedValue({ ping: undefined }),
-}));
+vi.mock('../../../state/monitor_details/api', () => {
+      const mocked = {
+      fetchLatestTestRun: vi.fn().mockResolvedValue({ ping: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUrlParams = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseParams = jest.fn();
-jest.mock('react-router-dom', () => ({
-  useParams: () => mockUseParams(),
-}));
+const mockUseParams = vi.fn();
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => mockUseParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSelectedMonitor = jest.fn();
-jest.mock('./use_selected_monitor', () => ({
-  useSelectedMonitor: () => mockUseSelectedMonitor(),
-}));
+const mockUseSelectedMonitor = vi.fn();
+vi.mock('./use_selected_monitor', () => {
+      const mocked = {
+      useSelectedMonitor: () => mockUseSelectedMonitor(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSelectedLocation = jest.fn();
-jest.mock('./use_selected_location', () => ({
-  useSelectedLocation: () => mockUseSelectedLocation(),
-}));
+const mockUseSelectedLocation = vi.fn();
+vi.mock('./use_selected_location', () => {
+      const mocked = {
+      useSelectedLocation: () => mockUseSelectedLocation(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-const mockLatestPingState = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+const mockLatestPingState = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,
@@ -69,8 +93,8 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-const useFetcherMock = observabilitySharedPublic.useFetcher as jest.Mock;
-const fetchLatestTestRunMock = fetchLatestTestRun as jest.Mock;
+const useFetcherMock = observabilitySharedPublic.useFetcher as Mock;
+const fetchLatestTestRunMock = fetchLatestTestRun as Mock;
 
 // Sentinel objects used by tests to assert hook plumbing without coupling to
 // the full Ping/Monitor shapes.
@@ -106,7 +130,7 @@ describe('useMonitorLatestPing', () => {
     fetchLatestTestRunMock.mockResolvedValue({ ping: undefined });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('local path (no remoteName)', () => {
     it('dispatches getMonitorLastRunAction with monitorId + locationLabel', () => {

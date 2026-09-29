@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useBreadcrumbs } from './use_breadcrumbs';
 
-const mockSetBreadcrumbs = jest.fn();
-const mockDocTitleChange = jest.fn();
-const mockPrepend = jest.fn((path: string) => path);
+const mockSetBreadcrumbs = vi.fn();
+const mockDocTitleChange = vi.fn();
+const mockPrepend = vi.fn((path: string) => path);
 
-jest.mock('../lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      chrome: {
-        setBreadcrumbs: mockSetBreadcrumbs,
-        docTitle: { change: mockDocTitleChange },
-      },
-      http: { basePath: { prepend: mockPrepend } },
-      application: { navigateToUrl: jest.fn() },
-    },
-  }),
-}));
+vi.mock('../lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          chrome: {
+            setBreadcrumbs: mockSetBreadcrumbs,
+            docTitle: { change: mockDocTitleChange },
+          },
+          http: { basePath: { prepend: mockPrepend } },
+          application: { navigateToUrl: vi.fn() },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const lastBreadcrumbText = () => {
   const breadcrumbs = mockSetBreadcrumbs.mock.calls.at(-1)?.[0] ?? [];
@@ -34,7 +39,7 @@ const lastBreadcrumbText = () => {
 
 describe('useBreadcrumbs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('pack_edit', () => {

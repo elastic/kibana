@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ShallowWrapper } from 'enzyme';
 import { ReactWrapper } from 'enzyme';
 import type { ChangeEvent } from 'react';
@@ -44,42 +47,51 @@ import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
 import { mountWithProviders, renderWithProviders } from '../../../test_utils/test_utils';
 
-jest.mock('./reference_editor', () => ({
-  ReferenceEditor: () => null,
-}));
-jest.mock('../loader');
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  QueryStringInput: () => null,
-}));
+vi.mock('./reference_editor', () => {
+      const mocked = {
+      ReferenceEditor: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../loader');
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      QueryStringInput: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../operations');
+vi.mock('../operations');
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
     debounce: (fn: unknown) => fn,
   };
 });
-jest.mock('../../../id_generator');
+vi.mock('../../../id_generator');
 // Mock the Monaco Editor component
-jest.mock('../operations/definitions/formula/editor/formula_editor', () => {
+vi.mock('../operations/definitions/formula/editor/formula_editor', () => {
   return {
     WrappedFormulaEditor: () => <div />,
     FormulaEditor: () => <div />,
   };
 });
 
-jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
-  useExistingFieldsReader: jest.fn(() => {
-    return {
-      hasFieldData: (dataViewId: string, fieldName: string) => {
-        return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
-      },
+vi.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => {
+      const mocked = {
+      useExistingFieldsReader: vi.fn(() => {
+        return {
+          hasFieldData: (dataViewId: string, fieldName: string) => {
+            return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+          },
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const getFieldSelectComboBox = (wrapper: ReactWrapper) =>
   wrapper
@@ -181,7 +193,7 @@ const lastValueColumn = (
  */
 describe('FormBasedDimensionEditor', () => {
   let state: FormBasedPrivateState;
-  let setState: jest.Mock;
+  let setState: Mock;
   let defaultProps: FormBasedDimensionEditorProps;
 
   function getStateWithColumns(columns: Record<string, GenericIndexPatternColumn>) {
@@ -218,7 +230,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     };
 
-    setState = jest.fn().mockImplementation((newState) => {
+    setState = vi.fn().mockImplementation((newState) => {
       if (wrapper instanceof ReactWrapper) {
         wrapper.setProps({
           state: typeof newState === 'function' ? newState(wrapper.prop('state')) : newState,
@@ -246,21 +258,21 @@ describe('FormBasedDimensionEditor', () => {
       notifications: {} as NotificationsStart,
       data: {
         fieldFormats: {
-          getType: jest.fn().mockReturnValue({
+          getType: vi.fn().mockReturnValue({
             id: 'number',
             title: 'Number',
           }),
-          getDefaultType: jest.fn().mockReturnValue({
+          getDefaultType: vi.fn().mockReturnValue({
             id: 'bytes',
             title: 'Bytes',
           }),
-          deserialize: jest.fn().mockReturnValue({
+          deserialize: vi.fn().mockReturnValue({
             convertToText: () => 'formatted',
           }),
         },
         search: {
           aggs: {
-            calculateAutoTimeExpression: jest.fn(),
+            calculateAutoTimeExpression: vi.fn(),
           },
         },
       } as unknown as DataPublicPluginStart,
@@ -269,11 +281,11 @@ describe('FormBasedDimensionEditor', () => {
       groupId: 'a',
       isFullscreen: false,
       supportStaticValue: false,
-      toggleFullscreen: jest.fn(),
+      toggleFullscreen: vi.fn(),
       enableFormatSelector: true,
     };
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderDimensionPanel = (propsOverrides = {}) => {
@@ -299,7 +311,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should call the filterOperations function', () => {
-    const filterOperations = jest.fn().mockReturnValue(true);
+    const filterOperations = vi.fn().mockReturnValue(true);
 
     renderDimensionPanel({ filterOperations });
     expect(filterOperations).toHaveBeenCalled();
@@ -362,7 +374,7 @@ describe('FormBasedDimensionEditor', () => {
   }, 10000);
 
   it('should hide fields that have no data', () => {
-    (useExistingFieldsReader as jest.Mock).mockImplementationOnce(() => {
+    (useExistingFieldsReader as Mock).mockImplementationOnce(() => {
       return {
         hasFieldData: (dataViewId: string, fieldName: string) => {
           return ['timestamp', 'source'].includes(fieldName);
@@ -1393,7 +1405,7 @@ describe('FormBasedDimensionEditor', () => {
           { value: '1h', label: '' },
         ]);
       });
-      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+      expect((props.setState as Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
           first: {
@@ -1420,7 +1432,7 @@ describe('FormBasedDimensionEditor', () => {
       act(() => {
         wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       });
-      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+      expect((props.setState as Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
           first: {
@@ -1444,7 +1456,7 @@ describe('FormBasedDimensionEditor', () => {
       act(() => {
         wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onCreateOption')!('7m', []);
       });
-      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+      expect((props.setState as Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
           first: {
@@ -1567,7 +1579,7 @@ describe('FormBasedDimensionEditor', () => {
       act(() => {
         wrapper.find(TimeShift).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
       });
-      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+      expect((props.setState as Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
           first: {
@@ -1594,7 +1606,7 @@ describe('FormBasedDimensionEditor', () => {
       act(() => {
         wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       });
-      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+      expect((props.setState as Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
           first: {
@@ -1618,7 +1630,7 @@ describe('FormBasedDimensionEditor', () => {
       act(() => {
         wrapper.find(TimeShift).find(EuiComboBox).prop('onCreateOption')!('1h', []);
       });
-      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+      expect((props.setState as Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
           first: {
@@ -2259,7 +2271,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should hide the top level field selector when switching from non-reference to reference', async () => {
-    (generateId as jest.Mock).mockReturnValue(`second`);
+    (generateId as Mock).mockReturnValue(`second`);
     wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     expect(wrapper.find('ReferenceEditor')).toHaveLength(0);
@@ -2393,7 +2405,7 @@ describe('FormBasedDimensionEditor', () => {
 
     const props = {
       ...defaultProps,
-      filterOperations: jest.fn((op) => {
+      filterOperations: vi.fn((op) => {
         // the formula operation will fall into this metadata category
         return !(op.dataType === 'number' && op.scale === 'ratio');
       }),

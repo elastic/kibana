@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createHash } from 'node:crypto';
 import { stableStringify } from '@kbn/std';
 
@@ -16,7 +18,7 @@ describe('CasesService', () => {
   let service: CasesService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     service = new CasesService();
   });
 

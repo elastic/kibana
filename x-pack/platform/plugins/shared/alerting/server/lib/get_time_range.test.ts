@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getTimeRange } from './get_time_range';
 
@@ -12,16 +14,16 @@ describe('getTimeRange', () => {
   const logger = loggingSystemMock.create().get();
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2023-10-04T00:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2023-10-04T00:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test(`returns time range with no options`, () => {

@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 
-jest.mock('../../../common/use_cases_features');
+vi.mock('../../../common/use_cases_features');
 
-const mockUseCasesFeatures = useCasesFeatures as jest.Mock;
+const mockUseCasesFeatures = useCasesFeatures as Mock;
 
 describe('useCanSyncCloseReasonToAlerts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns false when alert sync feature is disabled', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -35,7 +37,7 @@ describe('TheHiveParamsFields renders', () => {
     name: 'Test',
   });
 
-  const editAction = jest.fn();
+  const editAction = vi.fn();
   const defaultProps = {
     actionConnector: connector,
     actionParams,
@@ -46,7 +48,7 @@ describe('TheHiveParamsFields renders', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('all Params fields is rendered', () => {

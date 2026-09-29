@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
@@ -18,8 +20,8 @@ describe('User profiles API', () => {
     const { http } = createStartServicesMock();
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      http.post = jest.fn().mockResolvedValue(userProfiles);
+      vi.clearAllMocks();
+      http.post = vi.fn().mockResolvedValue(userProfiles);
     });
 
     it('returns the user profiles correctly', async () => {
@@ -52,9 +54,9 @@ describe('User profiles API', () => {
     let security: SecurityPluginStart;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       security = securityMock.createStart();
-      security.userProfiles.bulkGet = jest.fn().mockResolvedValue(userProfiles);
+      security.userProfiles.bulkGet = vi.fn().mockResolvedValue(userProfiles);
     });
 
     it('returns the user profiles correctly', async () => {
@@ -98,9 +100,9 @@ describe('User profiles API', () => {
     const currentProfile = userProfiles[0];
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       security = securityMock.createStart();
-      security.userProfiles.getCurrent = jest.fn().mockResolvedValue(currentProfile);
+      security.userProfiles.getCurrent = vi.fn().mockResolvedValue(currentProfile);
     });
 
     it('returns the current user profile correctly', async () => {

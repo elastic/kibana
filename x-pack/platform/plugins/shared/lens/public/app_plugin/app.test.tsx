@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
@@ -44,32 +47,44 @@ import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn: unknown) => fn,
-}));
+vi.mock('lodash', () => {
+      const mocked = {
+      ...require('lodash'),
+      debounce: (fn: unknown) => fn,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Force wide breakpoints so the AppHeader app menu renders its items inline
 // instead of collapsing them into the overflow popover (jsdom defaults smaller).
-jest.mock('@kbn/ui-chrome-layout', () => ({
-  ...jest.requireActual('@kbn/ui-chrome-layout'),
-  useCurrentChromeApplicationBreakpoint: () => 'xl',
-}));
+vi.mock('@kbn/ui-chrome-layout', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/ui-chrome-layout')),
+      useCurrentChromeApplicationBreakpoint: () => 'xl',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useCurrentEuiBreakpoint: () => 'xl',
-  useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useCurrentEuiBreakpoint: () => 'xl',
+      useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // AppMenu only registers with chrome and returns null.
 // Render AppHeader inline in unit tests so menu item test subjects remain assertable.
-jest.mock('@kbn/core-chrome-app-menu', () => ({
-  AppMenu: ({ config }: { config?: unknown }) => {
-    const { AppHeader } = jest.requireActual('@kbn/app-header');
-    return <AppHeader title="lens" menu={config} />;
-  },
-}));
+vi.mock('@kbn/core-chrome-app-menu', () => {
+      const mocked = {
+      AppMenu: async ({ config }: { config?: unknown }) => {
+        const { AppHeader } = (await vi.importActual('@kbn/app-header'));
+        return <AppHeader title="lens" menu={config} />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultSavedObjectId: string = faker.string.uuid();
 
@@ -81,23 +96,23 @@ function getLensDocumentMock(propsOverrides?: Partial<LensDocument>) {
 }
 
 describe('Lens App', () => {
-  let props: jest.Mocked<LensAppProps>;
+  let props: Mocked<LensAppProps>;
   let chrome: ReturnType<typeof chromeServiceMock.createStartContract>;
-  let services: jest.Mocked<LensAppServices>;
+  let services: Mocked<LensAppServices>;
   beforeAll(() => setMockedPresentationUtilServices());
 
   beforeEach(() => {
     props = {
       editorFrame: {
-        EditorFrameContainer: jest.fn((_) => <div>Editor frame</div>),
+        EditorFrameContainer: vi.fn((_) => <div>Editor frame</div>),
         datasourceMap,
         visualizationMap,
       },
       history: createMemoryHistory(),
-      redirectTo: jest.fn(),
-      redirectToOrigin: jest.fn(),
-      onAppLeave: jest.fn(),
-      setHeaderActionMenu: jest.fn(),
+      redirectTo: vi.fn(),
+      redirectToOrigin: vi.fn(),
+      onAppLeave: vi.fn(),
+      setHeaderActionMenu: vi.fn(),
       topNavMenuEntryGenerators: [],
       theme$: new Observable(),
       coreStart: coreMock.createStart(),
@@ -111,7 +126,7 @@ describe('Lens App', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   async function renderApp({
@@ -167,7 +182,7 @@ describe('Lens App', () => {
     function enableProjectChrome() {
       chrome.getChromeStyle.mockReturnValue('project');
       chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-      chrome.appHeader.set.mockReturnValue(jest.fn());
+      chrome.appHeader.set.mockReturnValue(vi.fn());
     }
 
     it('registers title and leaves the search bar separate', async () => {
@@ -234,12 +249,12 @@ describe('Lens App', () => {
 
     it('registers an explicit back to the originating dashboard when editing from a panel', async () => {
       enableProjectChrome();
-      props.redirectToOrigin = jest.fn();
+      props.redirectToOrigin = vi.fn();
       props.incomingState = {
         originatingApp: 'dashboards',
         originatingPath: '/view/abc',
       };
-      services.getOriginatingAppName = jest.fn(() => 'Dashboards');
+      services.getOriginatingAppName = vi.fn(() => 'Dashboards');
 
       await renderApp();
 
@@ -259,8 +274,8 @@ describe('Lens App', () => {
     const pinnedField = createMockedField({ name: 'pinnedField', type: '' });
     const indexPattern = createMockedIndexPattern({ id: 'index1' }, [pinnedField]);
     const pinnedFilter = buildExistsFilter(pinnedField, indexPattern);
-    services.data.query.filterManager.getFilters = jest.fn().mockReturnValue([]);
-    services.data.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([pinnedFilter]);
+    services.data.query.filterManager.getFilters = vi.fn().mockReturnValue([]);
+    services.data.query.filterManager.getGlobalFilters = vi.fn().mockReturnValue([pinnedFilter]);
     const { lensStore } = await renderApp();
 
     expect(lensStore.getState()).toEqual({
@@ -279,7 +294,7 @@ describe('Lens App', () => {
 
   describe('extra nav menu entries', () => {
     it('shows custom menu entry', async () => {
-      const runFn = jest.fn();
+      const runFn = vi.fn();
       props.topNavMenuEntryGenerators = [
         () => ({
           label: 'My entry',
@@ -295,7 +310,7 @@ describe('Lens App', () => {
     });
 
     it('passes current state, filter, query timerange and initial context into getter', async () => {
-      const getterFn = jest.fn();
+      const getterFn = vi.fn();
       const preloadedState = {
         visualization: {
           activeId: 'lensXY',
@@ -362,7 +377,7 @@ describe('Lens App', () => {
 
     it('sets breadcrumbs when the document title changes', async () => {
       // Override the default mock to ensure no originating app
-      services.getOriginatingAppName = jest.fn(() => undefined);
+      services.getOriginatingAppName = vi.fn(() => undefined);
       const { lensStore } = await renderApp();
 
       const dashboardsBreadcrumb = {
@@ -402,7 +417,7 @@ describe('Lens App', () => {
 
     it('sets originatingApp breadcrumb when the document title changes', async () => {
       props.incomingState = { originatingApp: 'dashboards' };
-      services.getOriginatingAppName = jest.fn(() => 'The Coolest Container Ever Made');
+      services.getOriginatingAppName = vi.fn(() => 'The Coolest Container Ever Made');
       const { lensStore, rerender } = await renderApp({
         preloadedState: { isLinkedToOriginatingApp: false },
       });
@@ -469,7 +484,7 @@ describe('Lens App', () => {
         originatingApp: 'dashboards',
         breadcrumbs: incomingBreadcrumbs,
       };
-      services.getOriginatingAppName = jest.fn(() => 'My Dashboard');
+      services.getOriginatingAppName = vi.fn(() => 'My Dashboard');
       const { lensStore } = await renderApp();
 
       const expectedCreateBreadcrumbs = [...incomingBreadcrumbs, { text: 'Create' }];
@@ -497,7 +512,7 @@ describe('Lens App', () => {
         isVisualizeAction: true,
         breadcrumbs: contextBreadcrumbs,
       } as VisualizeEditorContext;
-      services.getOriginatingAppName = jest.fn(() => undefined);
+      services.getOriginatingAppName = vi.fn(() => undefined);
       const { lensStore } = await renderApp();
 
       const expectedCreateBreadcrumbs = [...contextBreadcrumbs, { text: 'Create' }];
@@ -526,7 +541,7 @@ describe('Lens App', () => {
         isVisualizeAction: true,
         breadcrumbs: contextBreadcrumbs,
       } as VisualizeEditorContext;
-      services.getOriginatingAppName = jest.fn(() => 'From State');
+      services.getOriginatingAppName = vi.fn(() => 'From State');
       await renderApp();
 
       const expectedBreadcrumbs = [...stateBreadcrumbs, { text: 'Create' }];
@@ -542,7 +557,7 @@ describe('Lens App', () => {
 
     it('shows "Edit visualization" title in by-value mode (linked to origin, no savedObjectId)', async () => {
       props.incomingState = { originatingApp: 'dashboards', originatingPath: '/view/123' };
-      services.getOriginatingAppName = jest.fn(() => 'My Dashboard');
+      services.getOriginatingAppName = vi.fn(() => 'My Dashboard');
       const { lensStore } = await renderApp({
         preloadedState: { isLinkedToOriginatingApp: true },
       });
@@ -563,7 +578,7 @@ describe('Lens App', () => {
     });
 
     it('does not update breadcrumbs when savedObjectId is set but persistedDoc has not loaded yet', async () => {
-      services.getOriginatingAppName = jest.fn(() => undefined);
+      services.getOriginatingAppName = vi.fn(() => undefined);
       props.initialInput = { ref_id: breadcrumbDocSavedObjectId };
       await renderApp({ preloadedState: { persistedDoc: undefined } });
 
@@ -573,7 +588,7 @@ describe('Lens App', () => {
 
   describe('TopNavMenu#showDatePicker', () => {
     it('shows date picker if any used index pattern isTimeBased', async () => {
-      services.dataViews.get = jest
+      services.dataViews.get = vi
         .fn()
         .mockImplementation(
           async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
@@ -585,7 +600,7 @@ describe('Lens App', () => {
       );
     });
     it('shows date picker if active datasource isTimeBased', async () => {
-      services.dataViews.get = jest
+      services.dataViews.get = vi
         .fn()
         .mockImplementation(
           async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
@@ -596,7 +611,7 @@ describe('Lens App', () => {
           ...datasourceMap,
           formBased: {
             ...datasourceMap.formBased,
-            isTimeBased: jest.fn((_state, _indexPatterns) => true),
+            isTimeBased: vi.fn((_state, _indexPatterns) => true),
           },
         },
       });
@@ -606,7 +621,7 @@ describe('Lens App', () => {
       );
     });
     it('does not show date picker if index pattern nor active datasource is not time based', async () => {
-      services.dataViews.get = jest
+      services.dataViews.get = vi
         .fn()
         .mockImplementation(
           async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
@@ -617,7 +632,7 @@ describe('Lens App', () => {
           ...datasourceMap,
           formBased: {
             ...datasourceMap.formBased,
-            isTimeBased: jest.fn((_state, _indexPatterns) => false),
+            isTimeBased: vi.fn((_state, _indexPatterns) => false),
           },
         },
       });
@@ -641,7 +656,7 @@ describe('Lens App', () => {
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       } as unknown as LensDocument;
 
-      (services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock).mockClear();
+      (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock).mockClear();
       act(() => {
         lensStore.dispatch(
           setState({
@@ -704,7 +719,7 @@ describe('Lens App', () => {
       );
     });
     it('handles rejected index pattern', async () => {
-      services.dataViews.get = jest
+      services.dataViews.get = vi
         .fn()
         .mockResolvedValue(Promise.reject({ reason: 'Could not locate that data view' }));
       await renderApp();
@@ -749,8 +764,8 @@ describe('Lens App', () => {
         comesFromDashboard?: boolean;
         switchToAddToDashboardNone?: boolean;
       }) {
-        services.attributeService.saveToLibrary = jest.fn().mockResolvedValue(savedObjectId);
-        services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+        services.attributeService.saveToLibrary = vi.fn().mockResolvedValue(savedObjectId);
+        services.attributeService.loadFromLibrary = vi.fn().mockResolvedValue({
           sharingSavedObjectProps: {
             outcome: 'exactMatch',
           },
@@ -1017,7 +1032,7 @@ describe('Lens App', () => {
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
-        services.attributeService.saveToLibrary = jest
+        services.attributeService.saveToLibrary = vi
           .fn()
           .mockRejectedValue({ message: 'failed' });
 
@@ -1182,11 +1197,11 @@ describe('Lens App', () => {
 
     it('updates the editor frame when the user changes query or time in the search bar', async () => {
       const { lensStore } = await renderApp();
-      (services.data.query.timefilter.timefilter.calculateBounds as jest.Mock).mockReturnValue({
+      (services.data.query.timefilter.timefilter.calculateBounds as Mock).mockReturnValue({
         min: moment('2021-01-09T04:00:00.000Z'),
         max: moment('2021-01-09T08:00:00.000Z'),
       });
-      const onQuerySubmit = (services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock).mock
+      const onQuerySubmit = (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock).mock
         .calls[0][0].onQuerySubmit;
       await act(async () =>
         onQuerySubmit({
@@ -1250,7 +1265,7 @@ describe('Lens App', () => {
       });
 
       const AggregateQuerySearchBar = services.unifiedSearch.ui
-        .AggregateQuerySearchBar as jest.Mock;
+        .AggregateQuerySearchBar as Mock;
       const onQuerySubmit = AggregateQuerySearchBar.mock.calls[0][0].onQuerySubmit;
       act(() =>
         onQuerySubmit({
@@ -1305,7 +1320,7 @@ describe('Lens App', () => {
         {}
       );
 
-      const onSaved = (services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock).mock
+      const onSaved = (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock).mock
         .calls[0][0].onSaved;
       act(() => {
         onSaved({
@@ -1337,7 +1352,7 @@ describe('Lens App', () => {
     it('changes the saved query ID when the query is updated', async () => {
       await renderApp();
       const { onSaved, onSavedQueryUpdated } = (
-        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as Mock
       ).mock.calls[0][0];
       act(() => {
         onSaved({
@@ -1380,7 +1395,7 @@ describe('Lens App', () => {
     it('updates the query if saved query is selected', async () => {
       await renderApp();
       const { onSavedQueryUpdated } = (
-        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as Mock
       ).mock.calls[0][0];
       act(() => {
         onSavedQueryUpdated({
@@ -1404,7 +1419,7 @@ describe('Lens App', () => {
     it('clears all existing unpinned filters when the active saved query is cleared', async () => {
       const { lensStore } = await renderApp();
       const { onQuerySubmit, onClearSavedQuery } = (
-        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as Mock
       ).mock.calls[0][0];
       act(() =>
         onQuerySubmit({
@@ -1432,7 +1447,7 @@ describe('Lens App', () => {
     it('updates the searchSessionId when the query is updated', async () => {
       const { lensStore } = await renderApp();
       const { onSaved, onSavedQueryUpdated } = (
-        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as Mock
       ).mock.calls[0][0];
       act(() => {
         onSaved({
@@ -1466,7 +1481,7 @@ describe('Lens App', () => {
     it('updates the searchSessionId when the active saved query is cleared', async () => {
       const { lensStore } = await renderApp();
       const { onQuerySubmit, onClearSavedQuery } = (
-        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as Mock
       ).mock.calls[0][0];
       act(() =>
         onQuerySubmit({
@@ -1491,7 +1506,7 @@ describe('Lens App', () => {
 
     it('dispatches update to searchSessionId and dateRange when the user hits refresh', async () => {
       const { lensStore } = await renderApp();
-      const { onQuerySubmit } = (services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock)
+      const { onQuerySubmit } = (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock)
         .mock.calls[0][0];
       act(() =>
         onQuerySubmit({
@@ -1536,16 +1551,16 @@ describe('Lens App', () => {
   });
 
   describe('showing a confirm message when leaving', () => {
-    const defaultLeave = jest.fn();
-    const confirmLeave = jest.fn();
+    const defaultLeave = vi.fn();
+    const confirmLeave = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should not show a confirm message if there is no expression to save', async () => {
       await renderApp();
-      const lastCall = (props.onAppLeave as jest.Mock).mock.lastCall![0];
+      const lastCall = (props.onAppLeave as Mock).mock.lastCall![0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();
       expect(confirmLeave).not.toHaveBeenCalled();
@@ -1559,7 +1574,7 @@ describe('Lens App', () => {
       await renderApp({
         preloadedState: { isSaveable: true },
       });
-      const lastCall = (props.onAppLeave as jest.Mock).mock.lastCall![0];
+      const lastCall = (props.onAppLeave as Mock).mock.lastCall![0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();
       expect(confirmLeave).not.toHaveBeenCalled();
@@ -1576,8 +1591,8 @@ describe('Lens App', () => {
           isSaveable: true,
         },
       });
-      const lastCall = (props.onAppLeave as jest.Mock).mock.calls[
-        (props.onAppLeave as jest.Mock).mock.calls.length - 1
+      const lastCall = (props.onAppLeave as Mock).mock.calls[
+        (props.onAppLeave as Mock).mock.calls.length - 1
       ][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
@@ -1596,7 +1611,7 @@ describe('Lens App', () => {
           isSaveable: true,
         },
       });
-      const lastCall = (props.onAppLeave as jest.Mock).mock.lastCall![0];
+      const lastCall = (props.onAppLeave as Mock).mock.lastCall![0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
@@ -1643,7 +1658,7 @@ describe('Lens App', () => {
           isSaveable: true,
         },
       });
-      const lastCall = (props.onAppLeave as jest.Mock).mock.lastCall![0];
+      const lastCall = (props.onAppLeave as Mock).mock.lastCall![0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).not.toHaveBeenCalled();
       expect(confirmLeave).toHaveBeenCalled();
@@ -1677,7 +1692,7 @@ describe('Lens App', () => {
           ...datasourceMap,
           formBased: {
             ...datasourceMap.formBased,
-            isEqual: jest.fn().mockReturnValue(true), // if this returns false, the documents won't be accounted equal
+            isEqual: vi.fn().mockReturnValue(true), // if this returns false, the documents won't be accounted equal
           },
         },
       });
@@ -1698,7 +1713,7 @@ describe('Lens App', () => {
           })
         );
       });
-      const lastCall = (props.onAppLeave as jest.Mock).mock.lastCall![0];
+      const lastCall = (props.onAppLeave as Mock).mock.lastCall![0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();

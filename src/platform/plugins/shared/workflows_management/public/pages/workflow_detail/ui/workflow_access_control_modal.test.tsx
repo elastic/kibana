@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,16 +22,19 @@ import {
 import { createMockWorkflowDetailDto } from '../../../shared/test_utils/mock_workflow_factories';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
-const mockHttp = { put: jest.fn(), get: jest.fn() };
-const mockUserProfile = { getCurrent: jest.fn(), bulkGet: jest.fn(), suggest: jest.fn() };
+const mockHttp = { put: vi.fn(), get: vi.fn() };
+const mockUserProfile = { getCurrent: vi.fn(), bulkGet: vi.fn(), suggest: vi.fn() };
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: { http: mockHttp, userProfile: mockUserProfile } }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: { http: mockHttp, userProfile: mockUserProfile } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowAccessControlModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUserProfile.getCurrent.mockResolvedValue({ uid: 'owner', user: { username: 'owner' } });
     mockUserProfile.bulkGet.mockResolvedValue([]);
     mockUserProfile.suggest.mockResolvedValue([]);
@@ -54,7 +59,7 @@ describe('WorkflowAccessControlModal', () => {
       const store = createMockStore();
       store.dispatch(setWorkflow(workflow));
       store.dispatch(setYamlString('name: unsaved changes'));
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(
         <TestWrapper store={store}>
           <EuiProvider>

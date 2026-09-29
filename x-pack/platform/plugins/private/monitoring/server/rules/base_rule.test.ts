@@ -5,30 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BaseRule } from './base_rule';
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-    },
-  },
-}));
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('BaseRule', () => {
   describe('create', () => {
     it('should create a rule if it does not exist', async () => {
       const rule = new BaseRule();
       const rulesClient = {
-        create: jest.fn(),
-        find: jest.fn().mockImplementation(() => {
+        create: vi.fn(),
+        find: vi.fn().mockImplementation(() => {
           return {
             total: 0,
           };
         }),
       };
       const actionsClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           return {
             actionTypeId: 'foo',
           };
@@ -77,8 +82,8 @@ describe('BaseRule', () => {
     it('should not create a rule if it exists', async () => {
       const rule = new BaseRule();
       const rulesClient = {
-        create: jest.fn(),
-        find: jest.fn().mockImplementation(() => {
+        create: vi.fn(),
+        find: vi.fn().mockImplementation(() => {
           return {
             total: 1,
             data: [],
@@ -86,7 +91,7 @@ describe('BaseRule', () => {
         }),
       };
       const actionsClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           return {
             actionTypeId: 'foo',
           };
@@ -107,7 +112,7 @@ describe('BaseRule', () => {
   describe('getStates', () => {
     it('should get alert states', async () => {
       const rulesClient = {
-        getAlertState: jest.fn().mockImplementation(() => {
+        getAlertState: vi.fn().mockImplementation(() => {
           return {
             alertInstances: {
               abc123: {
@@ -130,7 +135,7 @@ describe('BaseRule', () => {
 
     it('should return nothing if no states are available', async () => {
       const rulesClient = {
-        getAlertState: jest.fn().mockImplementation(() => {
+        getAlertState: vi.fn().mockImplementation(() => {
           return null;
         }),
       };

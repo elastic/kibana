@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import { writeAttackDiscoveryEvent, type EventLogRefresher } from './write_attack_discovery_event';
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from './constants';
 
 describe('writeAttackDiscoveryEvent', () => {
-  const mockEventLogger: jest.Mocked<IEventLogger> = {
-    logEvent: jest.fn(),
-  } as unknown as jest.Mocked<IEventLogger>;
+  const mockEventLogger: Mocked<IEventLogger> = {
+    logEvent: vi.fn(),
+  } as unknown as Mocked<IEventLogger>;
 
-  const mockDataClient: jest.Mocked<EventLogRefresher> = {
-    refreshEventLogIndex: jest.fn().mockResolvedValue(undefined),
+  const mockDataClient: Mocked<EventLogRefresher> = {
+    refreshEventLogIndex: vi.fn().mockResolvedValue(undefined),
   };
 
   const mockAuthenticatedUser: AuthenticatedUser = {
@@ -50,7 +53,7 @@ describe('writeAttackDiscoveryEvent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('logs event with all required fields', async () => {

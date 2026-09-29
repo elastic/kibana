@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   fetchArtifactVersionsMock,
   validateArtifactArchiveMock,
@@ -22,7 +24,7 @@ import { getArtifactName } from '@kbn/product-doc-common';
 import { DatasetSampleType } from '../../../common';
 import { ArtifactManager } from './artifact_manager';
 
-jest.mock('@kbn/fs');
+vi.mock('@kbn/fs');
 
 const artifactsFolder = '/tmp/artifacts';
 const artifactRepositoryUrl = 'https://artifacts.elastic.co';
@@ -33,7 +35,7 @@ describe('ArtifactManager', () => {
   let artifactManager: ArtifactManager;
 
   const mockArchive = {
-    close: jest.fn(),
+    close: vi.fn(),
     entries: new Map(),
   };
 
@@ -78,7 +80,7 @@ describe('ArtifactManager', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('prepareArtifact', () => {

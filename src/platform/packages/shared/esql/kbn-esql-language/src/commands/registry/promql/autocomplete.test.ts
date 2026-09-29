@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { suggest } from '../../../__tests__/commands/autocomplete';
@@ -38,7 +41,7 @@ const promqlFunctionWrappedTexts = promqlFunctionSuggestions
 let mockCallbacks: ICommandCallbacks;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockCallbacks = getMockCallbacks();
 });
 
@@ -87,7 +90,7 @@ const expectPromqlSuggestions = async (
 
 describe('after PROMQL keyword', () => {
   test('suggests all after PROMQL keyword without params', async () => {
-    (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+    (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
 
     await expectPromqlSuggestions(
       'PROMQL ',
@@ -100,7 +103,7 @@ describe('after PROMQL keyword', () => {
   });
 
   test('suggests column when params are present', async () => {
-    (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+    (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
 
     await expectPromqlSuggestions(
       'PROMQL index=metrics step=5m start=?_tstart end=?_tend ',
@@ -110,7 +113,7 @@ describe('after PROMQL keyword', () => {
   });
 
   test('does not suggest column when cursor is before a param (editing middle of query)', async () => {
-    (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+    (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
     const query = 'PROMQL index=metrics step=5m start=?_tstart end=?_tend rate(http_requests[5m])';
     const cursorPosition = 'PROMQL index=metrics '.length;
 
@@ -749,7 +752,7 @@ describe('aggregation functions (by clause)', () => {
 
 describe('after params (before query)', () => {
   test('suggests remaining params without column after index param (required params missing)', async () => {
-    (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+    (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
 
     await expectPromqlSuggestions(
       'PROMQL index=metrics ',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { createAlertDeleteSchedule } from './create_alert_delete_schedule';
 
@@ -12,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('alertDeletePreviewApiCall', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sends the correct HTTP request and parses the response is empty', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,9 +14,9 @@ import { SourcesToolbar } from './sources_toolbar';
 
 describe('SourcesToolbar', () => {
   it('wires search, refresh, and source creation actions', async () => {
-    const onQueryChange = jest.fn();
-    const onRefresh = jest.fn();
-    const onAddSource = jest.fn();
+    const onQueryChange = vi.fn();
+    const onRefresh = vi.fn();
+    const onAddSource = vi.fn();
 
     render(
       <SourcesToolbar
@@ -25,8 +27,8 @@ describe('SourcesToolbar', () => {
         selectedStatuses={[]}
         isRefreshing={false}
         onQueryChange={onQueryChange}
-        onSelectedTypesChange={jest.fn()}
-        onSelectedStatusesChange={jest.fn()}
+        onSelectedTypesChange={vi.fn()}
+        onSelectedStatusesChange={vi.fn()}
         onRefresh={onRefresh}
         onAddSource={onAddSource}
       />

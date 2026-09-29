@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { LensByValueSerializedState } from '@kbn/lens-common';
 
@@ -19,7 +21,7 @@ const getDurationFormat = (result: unknown) =>
   (result as MetricPanelWithDurationFormat).layers?.[0]?.metrics?.[0]?.format;
 
 describe('getTransformOut', () => {
-  const transformDrilldownsOut = jest.fn(<T extends { drilldowns?: unknown }>(state: T) => state);
+  const transformDrilldownsOut = vi.fn(<T extends { drilldowns?: unknown }>(state: T) => state);
 
   // A defined panel-level title (including an explicit empty string) always wins over the
   // attributes title.
@@ -136,7 +138,7 @@ describe('getTransformOut', () => {
 
   it('emits GA duration units', () => {
     const builder = new LensConfigBuilder(undefined, true);
-    const toAPIFormatSpy = jest.spyOn(builder, 'toAPIFormat').mockReturnValue({
+    const toAPIFormatSpy = vi.spyOn(builder, 'toAPIFormat').mockReturnValue({
       title: 'Attributes title',
       description: '',
       type: 'metric',

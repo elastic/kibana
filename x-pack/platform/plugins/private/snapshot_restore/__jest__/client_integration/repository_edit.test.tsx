@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import './helpers/mocks';
 
 import React from 'react';
@@ -21,7 +23,7 @@ type Repository = ReturnType<typeof getRepository>;
 
 describe('<RepositoryEdit />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const setupPage = async (
@@ -29,9 +31,9 @@ describe('<RepositoryEdit />', () => {
     { isManagedRepository }: { isManagedRepository?: boolean } = {}
   ) => {
     const { httpSetup } = setupEnvironment();
-    const clearSaveError = jest.fn();
-    const onSave = jest.fn();
-    const onCancel = jest.fn();
+    const clearSaveError = vi.fn();
+    const onSave = vi.fn();
+    const onCancel = vi.fn();
 
     const RepositoryFormWithDeps = WithAppDependencies(RepositoryForm, httpSetup);
     render(

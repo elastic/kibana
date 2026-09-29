@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { pluginServiceMock } from '@kbn/core-plugins-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -28,135 +30,204 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 
 export const mockHttpService = httpServiceMock.create();
-jest.doMock('@kbn/core-http-server-internal', () => ({
-  HttpService: jest.fn(() => mockHttpService),
-}));
+vi.doMock('@kbn/core-http-server-internal', () => {
+      const mocked = {
+      HttpService: vi.fn(() => mockHttpService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockPluginsService = pluginServiceMock.create();
-jest.doMock('@kbn/core-plugins-server-internal', () => ({
-  PluginsService: jest.fn(() => mockPluginsService),
-}));
+vi.doMock('@kbn/core-plugins-server-internal', () => {
+      const mocked = {
+      PluginsService: vi.fn(() => mockPluginsService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockElasticsearchService = elasticsearchServiceMock.create();
-jest.doMock('@kbn/core-elasticsearch-server-internal', () => ({
-  ElasticsearchService: jest.fn(() => mockElasticsearchService),
-}));
+vi.doMock('@kbn/core-elasticsearch-server-internal', () => {
+      const mocked = {
+      ElasticsearchService: vi.fn(() => mockElasticsearchService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockConfigService = configServiceMock.create();
-jest.doMock('@kbn/config', () => {
-  const realKbnConfig = jest.requireActual('@kbn/config');
+vi.doMock('@kbn/config', async () => {
+  const realKbnConfig = (await vi.importActual('@kbn/config'));
   return {
     ...realKbnConfig,
-    ConfigService: jest.fn(() => mockConfigService),
+    ConfigService: vi.fn(() => mockConfigService),
   };
 });
 
 export const mockSavedObjectsService = savedObjectsServiceMock.create();
-jest.doMock('@kbn/core-saved-objects-server-internal', () => ({
-  SavedObjectsService: jest.fn(() => mockSavedObjectsService),
-}));
+vi.doMock('@kbn/core-saved-objects-server-internal', () => {
+      const mocked = {
+      SavedObjectsService: vi.fn(() => mockSavedObjectsService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
 export const mockContextService = contextServiceMock.create();
-jest.doMock('@kbn/core-http-context-server-internal', () => ({
-  ContextService: jest.fn(() => mockContextService),
-}));
+vi.doMock('@kbn/core-http-context-server-internal', () => {
+      const mocked = {
+      ContextService: vi.fn(() => mockContextService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 
 export const mockUiSettingsService = uiSettingsServiceMock.create();
-jest.doMock('@kbn/core-ui-settings-server-internal', () => ({
-  UiSettingsService: jest.fn(() => mockUiSettingsService),
-}));
+vi.doMock('@kbn/core-ui-settings-server-internal', () => {
+      const mocked = {
+      UiSettingsService: vi.fn(() => mockUiSettingsService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 
 export const mockCustomBrandingService = customBrandingServiceMock.create();
-jest.doMock('@kbn/core-custom-branding-server-internal', () => ({
-  CustomBrandingService: jest.fn(() => mockCustomBrandingService),
-}));
+vi.doMock('@kbn/core-custom-branding-server-internal', () => {
+      const mocked = {
+      CustomBrandingService: vi.fn(() => mockCustomBrandingService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockUserSettingsService = userSettingsServiceMock.create();
-jest.doMock('@kbn/core-user-settings-server-internal', () => ({
-  UserSettingsService: jest.fn(() => mockUserSettingsService),
-}));
+vi.doMock('@kbn/core-user-settings-server-internal', () => {
+      const mocked = {
+      UserSettingsService: vi.fn(() => mockUserSettingsService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const mockEnsureValidConfiguration = jest.fn();
-jest.doMock('@kbn/core-config-server-internal', () => ({
-  ensureValidConfiguration: mockEnsureValidConfiguration,
-}));
+export const mockEnsureValidConfiguration = vi.fn();
+vi.doMock('@kbn/core-config-server-internal', () => {
+      const mocked = {
+      ensureValidConfiguration: mockEnsureValidConfiguration,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockRenderingService = renderingServiceMock.create();
-jest.doMock('@kbn/core-rendering-server-internal', () => ({
-  RenderingService: jest.fn(() => mockRenderingService),
-}));
+vi.doMock('@kbn/core-rendering-server-internal', () => {
+      const mocked = {
+      RenderingService: vi.fn(() => mockRenderingService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockEnvironmentService = environmentServiceMock.create();
-jest.doMock('@kbn/core-environment-server-internal', () => ({
-  EnvironmentService: jest.fn(() => mockEnvironmentService),
-}));
+vi.doMock('@kbn/core-environment-server-internal', () => {
+      const mocked = {
+      EnvironmentService: vi.fn(() => mockEnvironmentService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockNodeService = nodeServiceMock.create();
-jest.doMock('@kbn/core-node-server-internal', () => ({
-  NodeService: jest.fn(() => mockNodeService),
-}));
+vi.doMock('@kbn/core-node-server-internal', () => {
+      const mocked = {
+      NodeService: vi.fn(() => mockNodeService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockMetricsService = metricsServiceMock.create();
-jest.doMock('@kbn/core-metrics-server-internal', () => ({
-  MetricsService: jest.fn(() => mockMetricsService),
-}));
+vi.doMock('@kbn/core-metrics-server-internal', () => {
+      const mocked = {
+      MetricsService: vi.fn(() => mockMetricsService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockStatusService = statusServiceMock.create();
-jest.doMock('@kbn/core-status-server-internal', () => ({
-  StatusService: jest.fn(() => mockStatusService),
-}));
+vi.doMock('@kbn/core-status-server-internal', () => {
+      const mocked = {
+      StatusService: vi.fn(() => mockStatusService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockLoggingService = loggingServiceMock.create();
-jest.doMock('@kbn/core-logging-server-internal', () => ({
-  ...jest.requireActual('@kbn/core-logging-server-internal'),
-  LoggingService: jest.fn(() => mockLoggingService),
-}));
+vi.doMock('@kbn/core-logging-server-internal', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/core-logging-server-internal')),
+      LoggingService: vi.fn(() => mockLoggingService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockI18nService = i18nServiceMock.create();
-jest.doMock('@kbn/core-i18n-server-internal', () => ({
-  I18nService: jest.fn(() => mockI18nService),
-}));
+vi.doMock('@kbn/core-i18n-server-internal', () => {
+      const mocked = {
+      I18nService: vi.fn(() => mockI18nService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockPrebootService = prebootServiceMock.create();
-jest.doMock('@kbn/core-preboot-server-internal', () => ({
-  PrebootService: jest.fn(() => mockPrebootService),
-}));
+vi.doMock('@kbn/core-preboot-server-internal', () => {
+      const mocked = {
+      PrebootService: vi.fn(() => mockPrebootService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockDeprecationService = deprecationsServiceMock.create();
-jest.doMock('@kbn/core-deprecations-server-internal', () => ({
-  DeprecationsService: jest.fn(() => mockDeprecationService),
-}));
+vi.doMock('@kbn/core-deprecations-server-internal', () => {
+      const mocked = {
+      DeprecationsService: vi.fn(() => mockDeprecationService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockDocLinksService = docLinksServiceMock.create();
-jest.doMock('@kbn/core-doc-links-server-internal', () => ({
-  DocLinksService: jest.fn(() => mockDocLinksService),
-}));
+vi.doMock('@kbn/core-doc-links-server-internal', () => {
+      const mocked = {
+      DocLinksService: vi.fn(() => mockDocLinksService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockSecurityService = securityServiceMock.create();
-jest.doMock('@kbn/core-security-server-internal', () => ({
-  ...jest.requireActual('@kbn/core-security-server-internal'),
-  SecurityService: jest.fn(() => mockSecurityService),
-}));
+vi.doMock('@kbn/core-security-server-internal', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/core-security-server-internal')),
+      SecurityService: vi.fn(() => mockSecurityService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockUserProfileService = userProfileServiceMock.create();
-jest.doMock('@kbn/core-user-profile-server-internal', () => ({
-  UserProfileService: jest.fn(() => mockUserProfileService),
-}));
+vi.doMock('@kbn/core-user-profile-server-internal', () => {
+      const mocked = {
+      UserProfileService: vi.fn(() => mockUserProfileService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockUsageDataService = coreUsageDataServiceMock.create();
-jest.doMock('@kbn/core-usage-data-server-internal', () => ({
-  CoreUsageDataService: jest.fn(() => mockUsageDataService),
-}));
+vi.doMock('@kbn/core-usage-data-server-internal', () => {
+      const mocked = {
+      CoreUsageDataService: vi.fn(() => mockUsageDataService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockInjectionService = injectionServiceMock.create();
-jest.doMock('@kbn/core-di-internal', () => ({
-  ...jest.requireActual('@kbn/core-di-internal'),
-  CoreInjectionService: jest.fn(() => mockInjectionService),
-}));
+vi.doMock('@kbn/core-di-internal', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/core-di-internal')),
+      CoreInjectionService: vi.fn(() => mockInjectionService),
+    };
+      return { ...mocked, default: mocked };
+    });

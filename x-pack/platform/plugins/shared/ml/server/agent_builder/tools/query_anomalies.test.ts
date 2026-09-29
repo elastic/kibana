@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
@@ -16,13 +18,13 @@ import {
 } from './query_anomalies';
 import { QUERY_ANOMALIES_TOOL_ID } from './tool_ids';
 
-const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+const resolveMlCapabilities = vi.fn().mockResolvedValue(getAdminCapabilities());
 const queryAnomaliesTool = createQueryAnomaliesTool(resolveMlCapabilities);
 
 const createEsClientMock = () => ({
   asInternalUser: {
     esql: {
-      query: jest.fn().mockResolvedValue({
+      query: vi.fn().mockResolvedValue({
         columns: [{ name: 'job_id', type: 'keyword' }],
         values: [['my-job']],
       }),
@@ -30,7 +32,7 @@ const createEsClientMock = () => ({
   },
   asCurrentUser: {
     esql: {
-      query: jest.fn(),
+      query: vi.fn(),
     },
   },
 });

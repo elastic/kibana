@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchTagUsageData } from './fetch_tag_usage_data';
 
@@ -29,7 +31,7 @@ const mockSearch = (buckets: ReturnType<typeof makeBucket>[]) => {
 
 describe('fetchTagUsageData', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('passes kibanaIndices to the ES search query', async () => {

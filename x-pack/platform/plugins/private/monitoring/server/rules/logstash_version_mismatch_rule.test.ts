@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { LogstashVersionMismatchRule } from './logstash_version_mismatch_rule';
 import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
@@ -14,28 +17,37 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_logstash_versions', () => ({
-  fetchLogstashVersions: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_logstash_versions', () => {
+      const mocked = {
+      fetchLogstashVersions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      url: 'UNIT_TEST_URL',
-      getLogger: () => ({ debug: jest.fn() }),
-      config: {
-        ui: {
-          show_license_expiration: true,
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          url: 'UNIT_TEST_URL',
+          getLogger: () => ({ debug: vi.fn() }),
+          config: {
+            ui: {
+              show_license_expiration: true,
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('LogstashVersionMismatchRule', () => {
   it('should have defaults', () => {
@@ -87,17 +99,17 @@ describe('LogstashVersionMismatchRule', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchLogstashVersions as jest.Mock).mockImplementation(() => {
+      (fetchLogstashVersions as Mock).mockImplementation(() => {
         return logstashVersions;
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -158,7 +170,7 @@ describe('LogstashVersionMismatchRule', () => {
     });
 
     it('should not fire actions if there is no mismatch', async () => {
-      (fetchLogstashVersions as jest.Mock).mockImplementation(() => {
+      (fetchLogstashVersions as Mock).mockImplementation(() => {
         return [
           {
             versions: ['8.0.0'],

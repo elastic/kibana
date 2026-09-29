@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AttackHeaderActions } from './header_actions';
@@ -12,22 +14,31 @@ import { HEADER_SHARE_BUTTON_TEST_ID } from '../constants/test_ids';
 import { TestProvidersComponent } from '../../../common/mock';
 import { useGetAttackFlyoutLink } from '../hooks/use_get_attack_flyout_link';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../hooks/use_get_attack_flyout_link');
-jest.mock('../context', () => ({
-  useAttackDetailsContext: () => ({
-    attackId: 'a1',
-    indexName: '.alerts-attack',
-  }),
-}));
-jest.mock('../hooks/use_header_data', () => ({
-  useHeaderData: () => ({ timestamp: '2024-01-01T00:00:00.000Z' }),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../hooks/use_get_attack_flyout_link');
+vi.mock('../context', () => {
+      const mocked = {
+      useAttackDetailsContext: () => ({
+        attackId: 'a1',
+        indexName: '.alerts-attack',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_header_data', () => {
+      const mocked = {
+      useHeaderData: () => ({ timestamp: '2024-01-01T00:00:00.000Z' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCopy: jest.fn(({ children: functionAsChild }) => functionAsChild(jest.fn())),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCopy: vi.fn(({ children: functionAsChild }) => functionAsChild(vi.fn())),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const attackUrl = 'https://example.com/attack';
 
@@ -40,7 +51,7 @@ const renderAttackHeaderActions = () =>
 
 describe('<AttackHeaderActions />', () => {
   beforeEach(() => {
-    jest.mocked(useGetAttackFlyoutLink).mockReturnValue(attackUrl);
+    vi.mocked(useGetAttackFlyoutLink).mockReturnValue(attackUrl);
   });
 
   it('renders share button when url is available', () => {
@@ -49,7 +60,7 @@ describe('<AttackHeaderActions />', () => {
   });
 
   it('does not render share button when url is null', () => {
-    jest.mocked(useGetAttackFlyoutLink).mockReturnValue(null);
+    vi.mocked(useGetAttackFlyoutLink).mockReturnValue(null);
     const { queryByTestId } = renderAttackHeaderActions();
     expect(queryByTestId(HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });

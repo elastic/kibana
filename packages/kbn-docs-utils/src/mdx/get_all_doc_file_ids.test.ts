@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import Fsp from 'fs/promises';
 import { globby } from 'globby';
 import { getAllDocFileIds } from './get_all_doc_file_ids';
 
-jest.mock('fs/promises');
-jest.mock('globby', () => ({ globby: jest.fn() }));
+vi.mock('fs/promises');
+vi.mock('globby', () => {
+      const mocked = { globby: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFsp = Fsp as jest.Mocked<typeof Fsp>;
-const mockGlobby = globby as jest.MockedFunction<typeof globby>;
+const mockFsp = Fsp as Mocked<typeof Fsp>;
+const mockGlobby = globby as MockedFunction<typeof globby>;
 
 describe('getAllDocFileIds', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns doc IDs from mdx files with valid frontmatter', async () => {

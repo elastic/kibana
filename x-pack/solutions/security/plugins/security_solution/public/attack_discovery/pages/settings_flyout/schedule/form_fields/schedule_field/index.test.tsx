@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -15,13 +17,13 @@ import { type FieldHook } from '../../../../../../shared_imports';
 const defaultField = {
   errors: [],
   label: 'Test run',
-  setValue: jest.fn(),
+  setValue: vi.fn(),
   value: '5h',
 } as unknown as FieldHook<string>;
 
 describe('ScheduleField', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     act(() => {
       render(

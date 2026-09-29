@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,7 +15,7 @@ import { ExtractObservablesSwitch } from './extract_observables_switch';
 describe('ExtractObservablesSwitch', () => {
   it('it renders', () => {
     render(
-      <ExtractObservablesSwitch disabled={false} isEnabled={false} onSwitchChange={jest.fn()} />
+      <ExtractObservablesSwitch disabled={false} isEnabled={false} onSwitchChange={vi.fn()} />
     );
     const toggle = screen.getByTestId('extract-observables-switch');
     expect(toggle).toHaveAttribute('aria-checked', 'false');
@@ -21,7 +23,7 @@ describe('ExtractObservablesSwitch', () => {
 
   it('it toggles the switch', async () => {
     render(
-      <ExtractObservablesSwitch disabled={false} isEnabled={false} onSwitchChange={jest.fn()} />
+      <ExtractObservablesSwitch disabled={false} isEnabled={false} onSwitchChange={vi.fn()} />
     );
     const toggle = screen.getByTestId('extract-observables-switch');
     expect(toggle).toHaveAttribute('aria-checked', 'false');
@@ -31,7 +33,7 @@ describe('ExtractObservablesSwitch', () => {
   });
 
   it('calls onSwitchChange with the new value, not the previous one', async () => {
-    const onSwitchChange = jest.fn();
+    const onSwitchChange = vi.fn();
     render(
       <ExtractObservablesSwitch
         disabled={false}
@@ -50,7 +52,7 @@ describe('ExtractObservablesSwitch', () => {
 
   it('it disables the switch', async () => {
     render(
-      <ExtractObservablesSwitch disabled={true} isEnabled={false} onSwitchChange={jest.fn()} />
+      <ExtractObservablesSwitch disabled={true} isEnabled={false} onSwitchChange={vi.fn()} />
     );
 
     expect(await screen.findByTestId('extract-observables-switch')).toHaveProperty(
@@ -65,7 +67,7 @@ describe('ExtractObservablesSwitch', () => {
         disabled={false}
         isEnabled={false}
         showLabel={true}
-        onSwitchChange={jest.fn()}
+        onSwitchChange={vi.fn()}
       />
     );
 
@@ -75,13 +77,13 @@ describe('ExtractObservablesSwitch', () => {
 
   it('syncs to isEnabled when it changes externally, e.g. from another instance of the toggle', async () => {
     const { rerender } = render(
-      <ExtractObservablesSwitch disabled={false} isEnabled={false} onSwitchChange={jest.fn()} />
+      <ExtractObservablesSwitch disabled={false} isEnabled={false} onSwitchChange={vi.fn()} />
     );
     const toggle = screen.getByTestId('extract-observables-switch');
     expect(toggle).toHaveAttribute('aria-checked', 'false');
 
     rerender(
-      <ExtractObservablesSwitch disabled={false} isEnabled={true} onSwitchChange={jest.fn()} />
+      <ExtractObservablesSwitch disabled={false} isEnabled={true} onSwitchChange={vi.fn()} />
     );
 
     expect(toggle).toHaveAttribute('aria-checked', 'true');
@@ -93,7 +95,7 @@ describe('ExtractObservablesSwitch', () => {
         disabled={false}
         isEnabled={true}
         showLabel={true}
-        onSwitchChange={jest.fn()}
+        onSwitchChange={vi.fn()}
       />
     );
 

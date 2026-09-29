@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,21 +15,30 @@ import { useFetchSignalFirings } from './use_fetch_signal_firings';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
-jest.mock('@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search', () => ({
-  runEsqlAsyncSearch: jest.fn(),
-}));
-jest.mock('@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows', () => ({
-  esqlResponseToObjectRows: jest.fn(),
-}));
-jest.mock('@kbn/alerting-v2-episodes-ui/utils/histogram_utils', () => ({
-  computeBucketInterval: jest.fn(() => '1h'),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search', () => {
+      const mocked = {
+      runEsqlAsyncSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows', () => {
+      const mocked = {
+      esqlResponseToObjectRows: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/alerting-v2-episodes-ui/utils/histogram_utils', () => {
+      const mocked = {
+      computeBucketInterval: vi.fn(() => '1h'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { runEsqlAsyncSearch } from '@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search';
 import { esqlResponseToObjectRows } from '@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows';
 
-const mockRunEsqlAsyncSearch = runEsqlAsyncSearch as jest.MockedFunction<typeof runEsqlAsyncSearch>;
-const mockEsqlResponseToObjectRows = esqlResponseToObjectRows as jest.MockedFunction<
+const mockRunEsqlAsyncSearch = runEsqlAsyncSearch as MockedFunction<typeof runEsqlAsyncSearch>;
+const mockEsqlResponseToObjectRows = esqlResponseToObjectRows as MockedFunction<
   typeof esqlResponseToObjectRows
 >;
 
@@ -49,7 +61,7 @@ const defaultOptions = { ruleId: RULE_ID, gteMs: GTE_MS, lteMs: LTE_MS, data: mo
 
 describe('useFetchSignalFirings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not fetch when ruleId is undefined', async () => {

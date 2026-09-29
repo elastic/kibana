@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { ActionPolicyOperationValidationError } from './operations';
@@ -18,19 +20,19 @@ const createMockAttachments = (
   }> = []
 ): AttachmentStateManager =>
   ({
-    getActive: jest.fn().mockReturnValue(active),
+    getActive: vi.fn().mockReturnValue(active),
   } as unknown as AttachmentStateManager);
 
 const createMockWorkflowLookup = (
   workflows: Map<string, { id: string; name?: string }> = new Map()
 ) => ({
-  getWorkflow: jest.fn(async (id: string) => workflows.get(id) ?? null),
+  getWorkflow: vi.fn(async (id: string) => workflows.get(id) ?? null),
 });
 
 const createMockConnectorLookup = (
   connectors: Map<string, { id: string; name: string }> = new Map()
 ) => ({
-  findConnectorById: jest.fn(async (id: string) => connectors.get(id) ?? null),
+  findConnectorById: vi.fn(async (id: string) => connectors.get(id) ?? null),
 });
 
 describe('validateDestinations', () => {

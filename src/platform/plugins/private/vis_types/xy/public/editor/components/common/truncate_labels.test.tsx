@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
@@ -22,7 +24,7 @@ describe('TruncateLabelsOption', function () {
     props = {
       disabled: false,
       value: 20,
-      setValue: jest.fn(),
+      setValue: vi.fn(),
     };
   });
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import { ChangeHistoryClient } from '@kbn/change-history';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -20,30 +23,30 @@ import {
   WorkflowChangeHistoryAction,
 } from '../../common/lib/workflow_change_history/constants';
 
-jest.mock('@kbn/change-history', () => {
-  const actual = jest.requireActual('@kbn/change-history');
+vi.mock('@kbn/change-history', async () => {
+  const actual = (await vi.importActual('@kbn/change-history'));
   return {
     ...actual,
-    ChangeHistoryClient: jest.fn(),
+    ChangeHistoryClient: vi.fn(),
   };
 });
 
-const MockedChangeHistoryClient = ChangeHistoryClient as jest.MockedClass<
+const MockedChangeHistoryClient = ChangeHistoryClient as MockedClass<
   typeof ChangeHistoryClient
 >;
 
 describe('WorkflowChangeHistoryService', () => {
   const logger = loggerMock.create();
   const clientMock = {
-    isInitialized: jest.fn().mockReturnValue(false),
-    initialize: jest.fn().mockResolvedValue(undefined),
-    log: jest.fn().mockResolvedValue(undefined),
-    logBulk: jest.fn().mockResolvedValue(undefined),
-    getHistory: jest.fn().mockResolvedValue({ total: 0, items: [] }),
+    isInitialized: vi.fn().mockReturnValue(false),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    log: vi.fn().mockResolvedValue(undefined),
+    logBulk: vi.fn().mockResolvedValue(undefined),
+    getHistory: vi.fn().mockResolvedValue({ total: 0, items: [] }),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     MockedChangeHistoryClient.mockImplementation(
       () => clientMock as unknown as ChangeHistoryClient
     );
@@ -66,7 +69,7 @@ describe('WorkflowChangeHistoryService', () => {
     const service = new WorkflowChangeHistoryService(logger, '9.0.0');
     const elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
     const authService = {
-      getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
+      getCurrentUser: vi.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
     };
 
     await service.initialize({ elasticsearchClient, authService: authService as any });
@@ -84,7 +87,7 @@ describe('WorkflowChangeHistoryService', () => {
     const service = new WorkflowChangeHistoryService(logger, '9.0.0');
     const elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
     const authService = {
-      getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
+      getCurrentUser: vi.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
     };
 
     let ready = false;
@@ -109,7 +112,7 @@ describe('WorkflowChangeHistoryService', () => {
     const service = new WorkflowChangeHistoryService(logger, '9.0.0');
     const elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
     const authService = {
-      getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
+      getCurrentUser: vi.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
     };
 
     await expect(
@@ -143,7 +146,7 @@ describe('WorkflowChangeHistoryService', () => {
   it('asScoped injects username and userProfileId from the request', async () => {
     const service = new WorkflowChangeHistoryService(logger, '9.0.0');
     const authService = {
-      getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
+      getCurrentUser: vi.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
     };
     await service.initialize({
       elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),

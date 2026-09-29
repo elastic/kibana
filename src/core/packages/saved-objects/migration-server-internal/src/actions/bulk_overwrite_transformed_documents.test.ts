@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import * as Either from 'fp-ts/Either';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -15,11 +18,11 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 import { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
 import { DEFAULT_TIMEOUT } from './constants';
 
-jest.mock('./catch_retryable_es_client_errors');
+vi.mock('./catch_retryable_es_client_errors');
 
 describe('bulkOverwriteTransformedDocuments', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes DEFAULT_TIMEOUT to client.bulk by default', async () => {
@@ -181,7 +184,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
   });
 
   it('throws an error if any error is not a write block exceptions', async () => {
-    (catchRetryableEsClientErrors as jest.Mock).mockImplementation((e) => {
+    (catchRetryableEsClientErrors as Mock).mockImplementation((e) => {
       throw e;
     });
 
@@ -574,7 +577,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
   });
 
   it('throws if errors are a mix of unavailable_shards_exception and other non-retryable errors', async () => {
-    (catchRetryableEsClientErrors as jest.Mock).mockImplementation((e) => {
+    (catchRetryableEsClientErrors as Mock).mockImplementation((e) => {
       throw e;
     });
 

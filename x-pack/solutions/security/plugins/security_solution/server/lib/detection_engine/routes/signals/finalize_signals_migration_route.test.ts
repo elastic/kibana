@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { serverMock } from '../__mocks__';
 import { getFinalizeSignalsMigrationRequest } from '../__mocks__/request_responses';
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
@@ -14,7 +17,7 @@ import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
-jest.mock('../../migrations/get_migration_saved_objects_by_id');
+vi.mock('../../migrations/get_migration_saved_objects_by_id');
 
 describe('finalizing signals migrations', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -29,7 +32,7 @@ describe('finalizing signals migrations', () => {
   });
 
   it('returns an empty array error if no migrations exists', async () => {
-    (getMigrationSavedObjectsById as jest.Mock).mockResolvedValue([]);
+    (getMigrationSavedObjectsById as Mock).mockResolvedValue([]);
     const response = await server.inject(getFinalizeSignalsMigrationRequest());
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
@@ -42,7 +45,7 @@ describe('finalizing signals migrations', () => {
       getSignalsMigrationSavedObjectMock({ status: 'failure' }),
       getSignalsMigrationSavedObjectMock(),
     ];
-    (getMigrationSavedObjectsById as jest.Mock).mockResolvedValue(mockMigrations);
+    (getMigrationSavedObjectsById as Mock).mockResolvedValue(mockMigrations);
 
     const response = await server.inject(getFinalizeSignalsMigrationRequest());
     expect(response.status).toEqual(200);

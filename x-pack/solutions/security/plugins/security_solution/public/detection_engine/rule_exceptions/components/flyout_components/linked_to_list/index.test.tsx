@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { ExceptionsLinkedToLists } from '.';
@@ -13,7 +15,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { mount } from 'enzyme';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
-jest.mock('../../../logic/use_find_references');
+vi.mock('../../../logic/use_find_references');
 
 // TODO change the test to RTl react testing library
 describe('ExceptionsLinkedToLists', () => {

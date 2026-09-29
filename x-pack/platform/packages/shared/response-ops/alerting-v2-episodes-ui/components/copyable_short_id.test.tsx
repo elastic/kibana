@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,7 +35,7 @@ describe('CopyableShortId', () => {
 
   it('copies the full id on click and announces it', async () => {
     const user = userEvent.setup();
-    const mockExecCommand = jest.fn().mockReturnValue(true);
+    const mockExecCommand = vi.fn().mockReturnValue(true);
     document.execCommand = mockExecCommand;
 
     renderComponent();

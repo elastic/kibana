@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
@@ -19,22 +22,25 @@ import {
 } from './components/constants';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
-jest.mock('../../hooks/use_load_alert_summary', () => ({
-  useLoadAlertSummary: jest.fn().mockReturnValue({
-    alertSummary: {
-      activeAlertCount: 1,
-      recoveredAlertCount: 7,
-      activeAlerts: [
-        { key: 1671321600000, doc_count: 0 },
-        { key: 1671408000000, doc_count: 1 },
-      ],
-    },
-  }),
-}));
+vi.mock('../../hooks/use_load_alert_summary', () => {
+      const mocked = {
+      useLoadAlertSummary: vi.fn().mockReturnValue({
+        alertSummary: {
+          activeAlertCount: 1,
+          recoveredAlertCount: 7,
+          activeAlerts: [
+            { key: 1671321600000, doc_count: 0 },
+            { key: 1671408000000, doc_count: 1 },
+          ],
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TITLE_DATA_TEST_SUBJ = 'mockedTimeRangeTitle';
 
-const useLoadAlertSummaryMock = useLoadAlertSummary as jest.Mock;
+const useLoadAlertSummaryMock = useLoadAlertSummary as Mock;
 
 const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
   charts: chartPluginMock.createStartContract(),
@@ -53,7 +59,7 @@ describe('AlertSummaryWidget', () => {
         <AlertSummaryWidget
           chartProps={mockedChartProps}
           ruleTypeIds={['apm', 'uptime', 'logs']}
-          onClick={jest.fn}
+          onClick={vi.fn}
           timeRange={mockedTimeRange}
           dependencies={dependencies}
           {...props}

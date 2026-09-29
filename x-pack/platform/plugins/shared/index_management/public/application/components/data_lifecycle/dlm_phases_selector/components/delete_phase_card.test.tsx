@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,7 +16,7 @@ import { DeletePhaseCard } from './delete_phase_card';
 const defaultDuration = { enabled: true, value: '60', unit: 'd' };
 
 const renderDeletePhaseCard = (props?: Partial<React.ComponentProps<typeof DeletePhaseCard>>) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   const result = render(
     <IntlProvider>
@@ -34,7 +36,7 @@ const renderDeletePhaseCard = (props?: Partial<React.ComponentProps<typeof Delet
 
 describe('DeletePhaseCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('hides duration fields when the phase is disabled', () => {

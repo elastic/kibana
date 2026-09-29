@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { buildActionResultsQuery } from './query.action_results.dsl';
 
@@ -24,13 +26,16 @@ import {
   type ActionResultsRequestOptions,
 } from '../../../../../../common/search_strategy';
 
-jest.mock('../../../../../utils/build_query', () => ({
-  getQueryFilter: jest.fn(({ filter }: { filter: string }) => ({
-    query_string: {
-      query: filter,
-    },
-  })),
-}));
+vi.mock('../../../../../utils/build_query', () => {
+      const mocked = {
+      getQueryFilter: vi.fn(({ filter }: { filter: string }) => ({
+        query_string: {
+          query: filter,
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('buildActionResultsQuery', () => {
   describe('basic functionality', () => {

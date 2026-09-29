@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Agent as HttpsAgent } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
@@ -12,7 +15,7 @@ import type { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 const targetHost = 'elastic.co';
 const targetUrl = `https://${targetHost}/foo/bar/baz`;
@@ -23,7 +26,7 @@ describe('getCustomAgents', () => {
   let configurationUtilities = actionsConfigMock.create();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     configurationUtilities = actionsConfigMock.create();
   });
 

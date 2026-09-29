@@ -5,54 +5,86 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
-const mockUseBrowseIntegrationHook = jest.fn();
-const mockUseSetUrlCategory = jest.fn();
-const mockUseSetUrlDefaultCategories = jest.fn();
-const mockUseUrlDefaultCategories = jest.fn();
-const mockUseStartServices = jest.fn();
+const mockUseBrowseIntegrationHook = vi.fn();
+const mockUseSetUrlCategory = vi.fn();
+const mockUseSetUrlDefaultCategories = vi.fn();
+const mockUseUrlDefaultCategories = vi.fn();
+const mockUseStartServices = vi.fn();
 
-jest.mock('./hooks', () => ({
-  useBrowseIntegrationHook: () => mockUseBrowseIntegrationHook(),
-}));
+vi.mock('./hooks', () => {
+      const mocked = {
+      useBrowseIntegrationHook: () => mockUseBrowseIntegrationHook(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/url_categories', () => ({
-  useSetUrlCategory: () => mockUseSetUrlCategory(),
-  useSetUrlDefaultCategories: () => mockUseSetUrlDefaultCategories(),
-  useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
-}));
+vi.mock('./hooks/url_categories', () => {
+      const mocked = {
+      useSetUrlCategory: () => mockUseSetUrlCategory(),
+      useSetUrlDefaultCategories: () => mockUseSetUrlDefaultCategories(),
+      useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks', () => ({
-  useStartServices: () => mockUseStartServices(),
-  useBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../../hooks', () => {
+      const mocked = {
+      useStartServices: () => mockUseStartServices(),
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLocation = jest.fn();
-const mockHistoryReplace = jest.fn();
-jest.mock('react-router-dom', () => ({
-  useLocation: () => mockUseLocation(),
-  useHistory: () => ({ push: jest.fn(), replace: mockHistoryReplace }),
-}));
+const mockUseLocation = vi.fn();
+const mockHistoryReplace = vi.fn();
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: () => mockUseLocation(),
+      useHistory: () => ({ push: vi.fn(), replace: mockHistoryReplace }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Capture the items prop so tests can invoke injected onCardClick handlers directly.
 let capturedFilteredCards: Array<{ isCollectionCard?: boolean; onCardClick?: () => void }> = [];
-jest.mock('./components/responsive_package_grid', () => ({
-  ResponsivePackageGrid: ({ items }: { items: any[] }) => {
-    capturedFilteredCards = items;
-    return null;
-  },
-}));
-jest.mock('./components/search_and_filters_bar', () => ({ SearchAndFiltersBar: () => null }));
-jest.mock('./components/side_bar', () => ({ Sidebar: () => null }));
-jest.mock('./components/no_data_prompt', () => ({ NoDataPrompt: () => null }));
-jest.mock('./components/manage_integrations_table', () => ({
-  ManageIntegrationsTable: () => null,
-}));
-jest.mock('../../components/no_epr_callout', () => ({ NoEprCallout: () => null }));
+vi.mock('./components/responsive_package_grid', () => {
+      const mocked = {
+      ResponsivePackageGrid: ({ items }: { items: any[] }) => {
+        capturedFilteredCards = items;
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components/search_and_filters_bar', () => {
+      const mocked = { SearchAndFiltersBar: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components/side_bar', () => {
+      const mocked = { Sidebar: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components/no_data_prompt', () => {
+      const mocked = { NoDataPrompt: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components/manage_integrations_table', () => {
+      const mocked = {
+      ManageIntegrationsTable: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/no_epr_callout', () => {
+      const mocked = { NoEprCallout: () => null };
+      return { ...mocked, default: mocked };
+    });
 
 import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
 import { BrowseIntegrationsPage } from '.';
@@ -74,7 +106,7 @@ const makeDefaultHookReturn = (overrides = {}) => ({
   eprCategoryLoadingError: undefined,
   filteredCards: [],
   allCards: [],
-  onCategoryChange: jest.fn(),
+  onCategoryChange: vi.fn(),
   availableSubCategories: [],
   ...overrides,
 });
@@ -86,11 +118,11 @@ const observabilityStartServices = {
 };
 
 describe('BrowseIntegrationsPage', () => {
-  const mockSetUrlDefaultCategoriesFn = jest.fn();
-  const mockSetUrlCategoryFn = jest.fn();
+  const mockSetUrlDefaultCategoriesFn = vi.fn();
+  const mockSetUrlCategoryFn = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedFilteredCards = [];
     mockUseBrowseIntegrationHook.mockReturnValue(makeDefaultHookReturn());
     mockUseSetUrlDefaultCategories.mockReturnValue(mockSetUrlDefaultCategoriesFn);

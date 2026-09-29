@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,52 +16,61 @@ import { SELECTABLE_LIST_MAX_HEIGHT } from './manage_dashboards_popover';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import type { RuleSummaryData } from '../../../rule/types';
 
-const mockResolveDashboardsByIds = jest.fn();
-const mockSearchRelatedDashboard = jest.fn();
-const mockMapArtifacts = jest.fn(
+const mockResolveDashboardsByIds = vi.fn();
+const mockSearchRelatedDashboard = vi.fn();
+const mockMapArtifacts = vi.fn(
   (artifacts: Array<{ id: string; type: string; data: Record<string, unknown> }> | undefined) =>
     artifacts?.length ? artifacts : undefined
 );
-const mockResolveArtifactId = jest.fn(
+const mockResolveArtifactId = vi.fn(
   (type: string, existingId?: string) => existingId?.trim() || `generated-${type}`
 );
 
-jest.mock('@kbn/alerting-v2-utils', () => ({
-  ...jest.requireActual('@kbn/alerting-v2-utils'),
-  resolveArtifactId: (type: string, existingId?: string) => mockResolveArtifactId(type, existingId),
-}));
+vi.mock('@kbn/alerting-v2-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerting-v2-utils')),
+      resolveArtifactId: (type: string, existingId?: string) => mockResolveArtifactId(type, existingId),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  getDashboardId: (artifact: { data: Record<string, unknown> }) =>
-    typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
-  resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
-  searchRelatedDashboard: (...args: unknown[]) => mockSearchRelatedDashboard(...args),
-  mapArtifacts: (artifacts: unknown) =>
-    mockMapArtifacts(
-      artifacts as Array<{ id: string; type: string; data: Record<string, unknown> }> | undefined
-    ),
-  partitionArtifactsByDashboardType: (
-    artifacts: Array<{ id: string; type: string; data: Record<string, unknown> }>
-  ) => ({
-    dashboardArtifacts: artifacts.filter((artifact) => artifact.type === 'dashboard'),
-    otherArtifacts: artifacts.filter((artifact) => artifact.type !== 'dashboard'),
-  }),
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      getDashboardId: (artifact: { data: Record<string, unknown> }) =>
+        typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
+      resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
+      searchRelatedDashboard: (...args: unknown[]) => mockSearchRelatedDashboard(...args),
+      mapArtifacts: (artifacts: unknown) =>
+        mockMapArtifacts(
+          artifacts as Array<{ id: string; type: string; data: Record<string, unknown> }> | undefined
+        ),
+      partitionArtifactsByDashboardType: (
+        artifacts: Array<{ id: string; type: string; data: Record<string, unknown> }>
+      ) => ({
+        dashboardArtifacts: artifacts.filter((artifact) => artifact.type === 'dashboard'),
+        otherArtifacts: artifacts.filter((artifact) => artifact.type !== 'dashboard'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUpdateRule = jest.fn();
-const mockUseUpdateRule = jest.fn(() => ({
+const mockUpdateRule = vi.fn();
+const mockUseUpdateRule = vi.fn(() => ({
   mutate: mockUpdateRule,
   isLoading: false,
 }));
-jest.mock('../../../../hooks/use_update_rule', () => ({
-  useUpdateRule: () => mockUseUpdateRule(),
-}));
+vi.mock('../../../../hooks/use_update_rule', () => {
+      const mocked = {
+      useUpdateRule: () => mockUseUpdateRule(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDashboardService = { findDashboardsService: jest.fn() };
+const mockDashboardService = { findDashboardsService: vi.fn() };
 const mockShareService = {
   url: {
     locators: {
-      get: jest.fn(() => ({
+      get: vi.fn(() => ({
         getRedirectUrl: ({ dashboardId }: { dashboardId: string }) =>
           `/app/dashboards#/view/${dashboardId}`,
       })),
@@ -75,36 +86,42 @@ const mockHttpService = {
 let mockDashboardServiceOverride: typeof mockDashboardService | undefined = mockDashboardService;
 let mockCanWriteRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown, options?: { optional?: boolean }) => {
-    if (token === 'http') {
-      return mockHttpService;
-    }
-    if (token === 'share') {
-      return mockShareService;
-    }
-    if (token === 'dashboard') {
-      if (mockDashboardServiceOverride === undefined && !options?.optional) {
-        throw new Error('Required service "dashboard" is not bound');
-      }
-      return mockDashboardServiceOverride;
-    }
-    if (typeof token === 'function') {
-      // UserCapabilities service token
-      return {
-        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
-        canRead: () => true,
-        can: () => mockCanWriteRules,
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown, options?: { optional?: boolean }) => {
+        if (token === 'http') {
+          return mockHttpService;
+        }
+        if (token === 'share') {
+          return mockShareService;
+        }
+        if (token === 'dashboard') {
+          if (mockDashboardServiceOverride === undefined && !options?.optional) {
+            throw new Error('Required service "dashboard" is not bound');
+          }
+          return mockDashboardServiceOverride;
+        }
+        if (typeof token === 'function') {
+          // UserCapabilities service token
+          return {
+            canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+            canRead: () => true,
+            can: () => mockCanWriteRules,
+          };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di', () => {
+      const mocked = {
+      PluginStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
@@ -129,7 +146,7 @@ const renderSubsection = (rule: RuleSummaryData) =>
 
 describe('DashboardArtifactsSubsection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDashboardServiceOverride = mockDashboardService;
     mockCanWriteRules = true;
     mockUseUpdateRule.mockReturnValue({

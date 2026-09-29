@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-jest.mock('net');
-jest.mock('tls');
+import { vi } from 'vitest';
+
+vi.mock('net');
+vi.mock('tls');
 
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
@@ -78,11 +80,11 @@ function getMockSocket({
   if (!authorized) {
     socket.authorizationError = new Error('mock authorization error');
   }
-  const mockGetPeerCertificate = jest.fn().mockReturnValue(peerCertificate);
-  const mockRenegotiate = jest.fn().mockImplementation((_, callback) => callback(renegotiateError));
+  const mockGetPeerCertificate = vi.fn().mockReturnValue(peerCertificate);
+  const mockRenegotiate = vi.fn().mockImplementation((_, callback) => callback(renegotiateError));
   socket.getPeerCertificate = mockGetPeerCertificate;
   socket.renegotiate = mockRenegotiate;
-  socket.getProtocol = jest.fn().mockReturnValue(protocol);
+  socket.getProtocol = vi.fn().mockReturnValue(protocol);
   return { socket, mockGetPeerCertificate, mockRenegotiate };
 }
 
@@ -105,7 +107,7 @@ describe('PKIAuthenticationProvider', () => {
     provider = new PKIAuthenticationProvider(mockOptions);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   function expectDebugLogs(...messages: string[]) {
     for (const message of messages) {

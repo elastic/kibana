@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { HeaderActions } from './header_actions';
@@ -15,46 +18,64 @@ import {
 } from '../../../__test_helpers__/create_mock_kibana_services';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
 
-const mockExportResultsButton = jest.fn();
-const mockAddToCaseWrapper = jest.fn();
-const mockViewInDropdown = jest.fn();
+const mockExportResultsButton = vi.fn();
+const mockAddToCaseWrapper = vi.fn();
+const mockViewInDropdown = vi.fn();
 
-jest.mock('../../../common/experimental_features_context', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../results/export_filters_context', () => ({
-  useExportFilters: jest.fn().mockReturnValue(undefined),
-}));
-jest.mock('../../../results/export_results_button', () => ({
-  ExportResultsButton: (props: Record<string, unknown>) => {
-    mockExportResultsButton(props);
+vi.mock('../../../common/experimental_features_context', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../results/export_filters_context', () => {
+      const mocked = {
+      useExportFilters: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../results/export_results_button', () => {
+      const mocked = {
+      ExportResultsButton: (props: Record<string, unknown>) => {
+        mockExportResultsButton(props);
 
-    return null;
-  },
-}));
-jest.mock('../../../cases/add_to_cases', () => ({
-  AddToCaseWrapper: (props: Record<string, unknown>) => {
-    mockAddToCaseWrapper(props);
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../cases/add_to_cases', () => {
+      const mocked = {
+      AddToCaseWrapper: (props: Record<string, unknown>) => {
+        mockAddToCaseWrapper(props);
 
-    return null;
-  },
-}));
-jest.mock('./view_in_dropdown', () => ({
-  ViewInDropdown: (props: Record<string, unknown>) => {
-    mockViewInDropdown(props);
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./view_in_dropdown', () => {
+      const mocked = {
+      ViewInDropdown: (props: Record<string, unknown>) => {
+        mockViewInDropdown(props);
 
-    return null;
-  },
-}));
-const mockUseKibana = jest.fn();
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseKibana = vi.fn();
 
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-  useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
-}));
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.MockedFunction<
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as MockedFunction<
   typeof useIsExperimentalFeatureEnabled
 >;
 
@@ -92,7 +113,7 @@ const renderActions = (props: Partial<Parameters<typeof HeaderActions>[0]> = {})
 
 describe('HeaderActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 

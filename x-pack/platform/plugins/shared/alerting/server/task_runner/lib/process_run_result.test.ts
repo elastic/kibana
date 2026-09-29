@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { processRunResults } from './process_run_result';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ruleResultServiceMock } from '../../monitoring/rule_result_service.mock';
@@ -31,7 +33,7 @@ const executionMetrics = {
 
 describe('processRunResults', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger.isLevelEnabled.mockReturnValue(true);
   });
 

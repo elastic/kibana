@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Observable, throwError, of, Subject } from 'rxjs';
 import { toArray } from 'rxjs';
 
@@ -25,14 +27,14 @@ describe('LoadingCountService', () => {
     it('subscribes to passed in sources, unsubscribes on stop', () => {
       const { service, loadingCount } = setup();
 
-      const unsubA = jest.fn();
-      const subA = jest.fn().mockReturnValue(unsubA);
+      const unsubA = vi.fn();
+      const subA = vi.fn().mockReturnValue(unsubA);
       loadingCount.addLoadingCountSource(new Observable(subA));
       expect(subA).toHaveBeenCalledTimes(1);
       expect(unsubA).not.toHaveBeenCalled();
 
-      const unsubB = jest.fn();
-      const subB = jest.fn().mockReturnValue(unsubB);
+      const unsubB = vi.fn();
+      const subB = vi.fn().mockReturnValue(unsubB);
       loadingCount.addLoadingCountSource(new Observable(subB));
       expect(subB).toHaveBeenCalledTimes(1);
       expect(unsubB).not.toHaveBeenCalled();

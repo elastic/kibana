@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
@@ -115,7 +118,7 @@ describe('Actions Plugin', () => {
     let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
-    let pluginsSetup: jest.Mocked<ActionsPluginsSetup>;
+    let pluginsSetup: Mocked<ActionsPluginsSetup>;
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
@@ -207,10 +210,10 @@ describe('Actions Plugin', () => {
 
     it('allows only one connector event emitter registration', async () => {
       const setupContract = await plugin.setup(coreSetup, pluginsSetup);
-      const emitter = { emit: jest.fn() };
+      const emitter = { emit: vi.fn() };
 
       setupContract.registerConnectorEventEmitter(emitter);
-      expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
+      expect(() => setupContract.registerConnectorEventEmitter({ emit: vi.fn() })).toThrow(
         /only one emitter is supported/
       );
     });
@@ -239,7 +242,7 @@ describe('Actions Plugin', () => {
                 client: {},
               },
               elasticsearch: {
-                client: jest.fn(),
+                client: vi.fn(),
               },
             },
           } as unknown as RequestHandlerContext,
@@ -324,7 +327,7 @@ describe('Actions Plugin', () => {
                 client: {},
               },
               elasticsearch: {
-                client: jest.fn(),
+                client: vi.fn(),
               },
             },
           } as unknown as RequestHandlerContext,
@@ -552,8 +555,8 @@ describe('Actions Plugin', () => {
     let plugin: ActionsPlugin;
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let coreStart: ReturnType<typeof coreMock.createStart>;
-    let pluginsSetup: jest.Mocked<ActionsPluginsSetup>;
-    let pluginsStart: jest.Mocked<ActionsPluginsStart>;
+    let pluginsSetup: Mocked<ActionsPluginsSetup>;
+    let pluginsStart: Mocked<ActionsPluginsStart>;
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
@@ -826,7 +829,7 @@ describe('Actions Plugin', () => {
         it('should not modify inMemoryConnectors when there are no conflicts', async () => {
           setup(getConfig());
 
-          const mockSearch = jest.fn().mockResolvedValue({
+          const mockSearch = vi.fn().mockResolvedValue({
             hits: { hits: [] },
           });
           coreStart.savedObjects.createInternalRepository.mockReturnValue({
@@ -847,7 +850,7 @@ describe('Actions Plugin', () => {
         it('should remove conflicting preconfigured connector from inMemoryConnectors and log error', async () => {
           setup(getConfig());
 
-          const mockSearch = jest.fn().mockResolvedValue({
+          const mockSearch = vi.fn().mockResolvedValue({
             hits: { hits: [{ _id: 'action:preconfiguredServerLog', _source: { type: 'action' } }] },
           });
           coreStart.savedObjects.createInternalRepository.mockReturnValue({
@@ -873,7 +876,7 @@ describe('Actions Plugin', () => {
         it('should log debug when savedObjects search throws', async () => {
           setup(getConfig());
 
-          const mockSearch = jest.fn().mockRejectedValue(new Error('SO error'));
+          const mockSearch = vi.fn().mockRejectedValue(new Error('SO error'));
           coreStart.savedObjects.createInternalRepository.mockReturnValue({
             search: mockSearch,
           } as any);
@@ -1007,7 +1010,7 @@ describe('Actions Plugin', () => {
           // connectors share one revision sentinel, so the lease key alone cannot invalidate a
           // stale client. Unregistering has to evict.
           const pool = pluginSetup.getClientLeasePool();
-          const terminate = jest.fn().mockResolvedValue(undefined);
+          const terminate = vi.fn().mockResolvedValue(undefined);
           await pool.lease(
             `${newDynamicConnector.id}:fake:shared:in-memory`,
             async () => ({}),
@@ -1079,7 +1082,7 @@ describe('Actions Plugin', () => {
 
     describe('listTypes()', () => {
       it('passes through feature ID and sets exposeValidation to true', async () => {
-        const actionTypeRegistryListMock = jest.spyOn(ActionTypeRegistry.prototype, 'list');
+        const actionTypeRegistryListMock = vi.spyOn(ActionTypeRegistry.prototype, 'list');
         const pluginSetup = await plugin.setup(coreSetup, pluginsSetup);
         pluginSetup.registerType(
           getConnectorType({

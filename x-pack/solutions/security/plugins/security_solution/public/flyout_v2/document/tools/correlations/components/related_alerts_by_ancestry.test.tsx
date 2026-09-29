@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
@@ -31,21 +34,21 @@ import { useAlertsPrivileges } from '../../../../../detections/containers/detect
 import { useKibana } from '../../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../../main/constants/local_storage';
 
-jest.mock('../../../main/hooks/use_fetch_related_alerts_by_ancestry');
-jest.mock('../hooks/use_paginated_alerts');
-jest.mock('../../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('../../../../../common/hooks/is_in_security_app');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../main/hooks/use_fetch_related_alerts_by_ancestry');
+vi.mock('../hooks/use_paginated_alerts');
+vi.mock('../../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('../../../../../common/hooks/is_in_security_app');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../../common/lib/kibana');
 
-const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
-const mockStorageGet = jest.fn();
-const mockStorageSet = jest.fn();
+const useAlertsPrivilegesMock = useAlertsPrivileges as Mock;
+const mockStorageGet = vi.fn();
+const mockStorageSet = vi.fn();
 
 const documentId = 'documentId';
 const scopeId = 'scopeId';
-const mockOnShowAlert = jest.fn();
+const mockOnShowAlert = vi.fn();
 
 const TOGGLE_ICON = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
@@ -74,15 +77,15 @@ const renderRelatedAlertsByAncestry = (documentIndex?: string) =>
 
 describe('<RelatedAlertsByAncestry />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useAlertsPrivilegesMock.mockReturnValue({
       hasAlertsRead: true,
     });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({ indexPatterns: ['index1'] });
-    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({ indexPatterns: ['index1'] });
+    vi.mocked(useIsInSecurityApp).mockReturnValue(true);
     mockStorageGet.mockReturnValue(undefined);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: {
           get: mockStorageGet,
@@ -93,13 +96,13 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should render many related alerts correctly', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: ['1', '2'],
       dataCount: 2,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -137,7 +140,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should render an inline error and keep the date picker mounted when the query errors', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: true,
     });
@@ -153,13 +156,13 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should render no data message', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -170,13 +173,13 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should render the date picker above the table', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -189,13 +192,13 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('passes the default patterns unchanged when no document index is provided', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -209,13 +212,13 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('prepends the project-qualified document index to the ancestry search indices', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -231,13 +234,13 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should use the default time range when nothing is persisted in local storage', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -254,13 +257,13 @@ describe('<RelatedAlertsByAncestry />', () => {
 
   it('should use the time range persisted in local storage', () => {
     mockStorageGet.mockReturnValue({ start: 'now-7d', end: 'now-3d' });
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -276,13 +279,13 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should persist the selected time range to local storage when changed', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -307,15 +310,15 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should call refetch when the refresh button is clicked without changing the range', () => {
-    const refetchMock = jest.fn();
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    const refetchMock = vi.fn();
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
       refetch: refetchMock,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],

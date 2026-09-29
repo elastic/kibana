@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
@@ -19,7 +21,7 @@ describe('EmptyPrompt', () => {
   const handleClickCreate = () => {};
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

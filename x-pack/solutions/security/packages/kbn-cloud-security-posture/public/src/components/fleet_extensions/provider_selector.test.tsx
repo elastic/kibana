@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,33 +14,36 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ProviderSelector } from './provider_selector';
 
 // Mock the CloudSetup context hook
-jest.mock('./hooks/use_cloud_setup_context', () => ({
-  useCloudSetup: () => ({
-    templateInputOptions: [
-      {
-        id: 'aws',
-        label: 'AWS',
-        icon: 'logoAWS',
-        tooltip: 'Amazon Web Services',
-        testId: 'aws-radio-option',
-      },
-      {
-        id: 'azure',
-        label: 'Azure',
-        icon: 'logoAzure',
-        tooltip: 'Microsoft Azure',
-        testId: 'azure-radio-option',
-      },
-      {
-        id: 'gcp',
-        label: 'GCP',
-        icon: 'logoGCP',
-        tooltip: 'Google Cloud Platform',
-        testId: 'gcp-radio-option',
-      },
-    ],
-  }),
-}));
+vi.mock('./hooks/use_cloud_setup_context', () => {
+      const mocked = {
+      useCloudSetup: () => ({
+        templateInputOptions: [
+          {
+            id: 'aws',
+            label: 'AWS',
+            icon: 'logoAWS',
+            tooltip: 'Amazon Web Services',
+            testId: 'aws-radio-option',
+          },
+          {
+            id: 'azure',
+            label: 'Azure',
+            icon: 'logoAzure',
+            tooltip: 'Microsoft Azure',
+            testId: 'azure-radio-option',
+          },
+          {
+            id: 'gcp',
+            label: 'GCP',
+            icon: 'logoGCP',
+            tooltip: 'Google Cloud Platform',
+            testId: 'gcp-radio-option',
+          },
+        ],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
@@ -47,11 +52,11 @@ describe('<ProviderSelector />', () => {
   const defaultProps = {
     selectedProvider: 'aws' as const,
     disabled: false,
-    setSelectedProvider: jest.fn(),
+    setSelectedProvider: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Rendering Tests', () => {
@@ -87,7 +92,7 @@ describe('<ProviderSelector />', () => {
 
   describe('Interaction Tests', () => {
     it('calls setSelectedProvider when AWS is clicked', async () => {
-      const mockSetProvider = jest.fn();
+      const mockSetProvider = vi.fn();
       const props = {
         ...defaultProps,
         selectedProvider: 'azure' as const,
@@ -102,7 +107,7 @@ describe('<ProviderSelector />', () => {
     });
 
     it('calls setSelectedProvider when Azure is clicked', async () => {
-      const mockSetProvider = jest.fn();
+      const mockSetProvider = vi.fn();
       const props = { ...defaultProps, setSelectedProvider: mockSetProvider };
       const { getByTestId } = renderWithIntl(<ProviderSelector {...props} />);
 
@@ -113,7 +118,7 @@ describe('<ProviderSelector />', () => {
     });
 
     it('calls setSelectedProvider when GCP is clicked', async () => {
-      const mockSetProvider = jest.fn();
+      const mockSetProvider = vi.fn();
       const props = { ...defaultProps, setSelectedProvider: mockSetProvider };
       const { getByTestId } = renderWithIntl(<ProviderSelector {...props} />);
 
@@ -124,7 +129,7 @@ describe('<ProviderSelector />', () => {
     });
 
     it('does not call setSelectedProvider when clicking already selected option', async () => {
-      const mockSetProvider = jest.fn();
+      const mockSetProvider = vi.fn();
       const props = { ...defaultProps, setSelectedProvider: mockSetProvider };
       const { getByTestId } = renderWithIntl(<ProviderSelector {...props} />);
 
@@ -151,7 +156,7 @@ describe('<ProviderSelector />', () => {
     });
 
     it('does not call setSelectedProvider when disabled and clicked', async () => {
-      const mockSetProvider = jest.fn();
+      const mockSetProvider = vi.fn();
       const props = { ...defaultProps, disabled: true, setSelectedProvider: mockSetProvider };
       const { getByTestId } = renderWithIntl(<ProviderSelector {...props} />);
 
@@ -188,7 +193,7 @@ describe('<ProviderSelector />', () => {
 
   describe('Provider Selection State Tests', () => {
     it('changes selection from AWS to Azure', async () => {
-      const mockSetProvider = jest.fn();
+      const mockSetProvider = vi.fn();
       const props = { ...defaultProps, setSelectedProvider: mockSetProvider };
       const { getByTestId, rerender } = renderWithIntl(<ProviderSelector {...props} />);
 
@@ -220,30 +225,36 @@ describe('<ProviderSelector />', () => {
 
   describe('Edge Cases', () => {
     it('handles empty templateInputOptions gracefully', () => {
-      jest.doMock('./hooks/use_cloud_setup_context', () => ({
-        useCloudSetup: () => ({
-          templateInputOptions: [],
-        }),
-      }));
+      vi.doMock('./hooks/use_cloud_setup_context', () => {
+            const mocked = {
+                  useCloudSetup: () => ({
+                    templateInputOptions: [],
+                  }),
+                };
+            return { ...mocked, default: mocked };
+          });
 
       // Should render without throwing
       renderWithIntl(<ProviderSelector {...defaultProps} />);
     });
 
     it('handles provider with no testId', () => {
-      jest.doMock('./hooks/use_cloud_setup_context', () => ({
-        useCloudSetup: () => ({
-          templateInputOptions: [
-            {
-              id: 'aws',
-              label: 'AWS',
-              icon: 'logoAWS',
-              tooltip: 'Amazon Web Services',
-              // No testId
-            },
-          ],
-        }),
-      }));
+      vi.doMock('./hooks/use_cloud_setup_context', () => {
+            const mocked = {
+                  useCloudSetup: () => ({
+                    templateInputOptions: [
+                      {
+                        id: 'aws',
+                        label: 'AWS',
+                        icon: 'logoAWS',
+                        tooltip: 'Amazon Web Services',
+                        // No testId
+                      },
+                    ],
+                  }),
+                };
+            return { ...mocked, default: mocked };
+          });
 
       // Should render without throwing
       renderWithIntl(<ProviderSelector {...defaultProps} />);

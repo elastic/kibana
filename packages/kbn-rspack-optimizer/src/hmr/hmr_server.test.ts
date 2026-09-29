@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import http from 'http';
 import { HmrServer } from './hmr_server';
 
@@ -214,7 +216,7 @@ describe('HmrServer', () => {
     });
 
     it('emits a warning explaining the fallback when a log is provided', async () => {
-      const warning = jest.fn();
+      const warning = vi.fn();
       const log = { warning } as unknown as ConstructorParameters<typeof HmrServer>[1];
 
       server = new HmrServer(undefined, log);

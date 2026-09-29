@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import {
@@ -19,11 +22,14 @@ import { act, renderHook } from '@testing-library/react';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addWarning: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addWarning: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePrebuiltRulesUpgradeState', () => {
   it('returns rule upgrade state', () => {
@@ -448,8 +454,8 @@ describe('usePrebuiltRulesUpgradeState', () => {
       });
 
       it('shows a notification', () => {
-        const addWarningMock = jest.fn();
-        (useAppToasts as jest.Mock).mockImplementation(() => ({
+        const addWarningMock = vi.fn();
+        (useAppToasts as Mock).mockImplementation(() => ({
           addWarning: addWarningMock,
         }));
 
@@ -503,8 +509,8 @@ describe('usePrebuiltRulesUpgradeState', () => {
       ];
 
       it('invalidates resolved conflicts upon version change', () => {
-        const addWarningMock = jest.fn();
-        (useAppToasts as jest.Mock).mockImplementation(() => ({
+        const addWarningMock = vi.fn();
+        (useAppToasts as Mock).mockImplementation(() => ({
           addWarning: addWarningMock,
         }));
 
@@ -541,8 +547,8 @@ describe('usePrebuiltRulesUpgradeState', () => {
       });
 
       it('shows a notification', () => {
-        const addWarningMock = jest.fn();
-        (useAppToasts as jest.Mock).mockImplementation(() => ({
+        const addWarningMock = vi.fn();
+        (useAppToasts as Mock).mockImplementation(() => ({
           addWarning: addWarningMock,
         }));
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
@@ -13,11 +16,11 @@ import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 import { usePackQueryLastResults } from './use_pack_query_last_results';
 
-jest.mock('../common/lib/kibana');
-jest.mock('../common/hooks/use_logs_data_view');
+vi.mock('../common/lib/kibana');
+vi.mock('../common/hooks/use_logs_data_view');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const useLogsDataViewMock = useLogsDataView as jest.MockedFunction<typeof useLogsDataView>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
+const useLogsDataViewMock = useLogsDataView as MockedFunction<typeof useLogsDataView>;
 
 const MOCK_LOGS_DATA_VIEW = { id: 'logs-*', title: 'logs-osquery_manager.result-*' };
 
@@ -36,13 +39,13 @@ const createQueryClient = () =>
 
 describe('usePackQueryLastResults', () => {
   let mockSearchSource: {
-    create: jest.Mock;
-    setField: jest.Mock;
-    fetch$: jest.Mock;
+    create: Mock;
+    setField: Mock;
+    fetch$: Mock;
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useLogsDataViewMock.mockReturnValue({
       data: MOCK_LOGS_DATA_VIEW,
@@ -50,9 +53,9 @@ describe('usePackQueryLastResults', () => {
     } as unknown as ReturnType<typeof useLogsDataView>);
 
     mockSearchSource = {
-      create: jest.fn(),
-      setField: jest.fn(),
-      fetch$: jest.fn(),
+      create: vi.fn(),
+      setField: vi.fn(),
+      fetch$: vi.fn(),
     };
 
     mockSearchSource.create.mockResolvedValue(mockSearchSource);

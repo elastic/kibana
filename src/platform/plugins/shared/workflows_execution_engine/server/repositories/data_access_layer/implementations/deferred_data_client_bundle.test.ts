@@ -7,25 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DeferredDataClientBundle } from './deferred_data_client_bundle';
 import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
 import { createMockStepDataClient, createMockWorkflowDataClient } from '../mocks';
 
-jest.mock('./plain_index/plain_index_data_client_bundle');
+vi.mock('./plain_index/plain_index_data_client_bundle');
 
-const MockBundle = PlainIndexDataClientBundle as jest.MockedClass<
+const MockBundle = PlainIndexDataClientBundle as MockedClass<
   typeof PlainIndexDataClientBundle
 >;
 
 describe('DeferredDataClientBundle', () => {
   let innerBundle: {
-    initSetup: jest.Mock;
-    initStart: jest.Mock;
-    stop: jest.Mock;
-    createWorkflowDataClient: jest.Mock;
-    createStepDataClient: jest.Mock;
+    initSetup: Mock;
+    initStart: Mock;
+    stop: Mock;
+    createWorkflowDataClient: Mock;
+    createStepDataClient: Mock;
   };
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
@@ -33,11 +36,11 @@ describe('DeferredDataClientBundle', () => {
 
   beforeEach(() => {
     innerBundle = {
-      initSetup: jest.fn().mockResolvedValue(undefined),
-      initStart: jest.fn().mockResolvedValue(undefined),
-      stop: jest.fn().mockResolvedValue(undefined),
-      createWorkflowDataClient: jest.fn().mockReturnValue(createMockWorkflowDataClient()),
-      createStepDataClient: jest.fn().mockReturnValue(createMockStepDataClient()),
+      initSetup: vi.fn().mockResolvedValue(undefined),
+      initStart: vi.fn().mockResolvedValue(undefined),
+      stop: vi.fn().mockResolvedValue(undefined),
+      createWorkflowDataClient: vi.fn().mockReturnValue(createMockWorkflowDataClient()),
+      createStepDataClient: vi.fn().mockReturnValue(createMockStepDataClient()),
     };
 
     MockBundle.mockImplementation(() => innerBundle as unknown as PlainIndexDataClientBundle);

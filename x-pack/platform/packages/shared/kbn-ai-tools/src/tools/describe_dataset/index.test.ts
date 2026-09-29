@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { describeDataset } from '.';
 
 const createEsClient = () => {
-  const query = jest.fn();
+  const query = vi.fn();
   return {
     esClient: { esql: { query } } as unknown as ElasticsearchClient,
     query,
@@ -51,7 +53,7 @@ const countResponse = (total: number) => ({
 
 describe('describeDataset', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('merges ES|QL schema columns with sampled documents', async () => {

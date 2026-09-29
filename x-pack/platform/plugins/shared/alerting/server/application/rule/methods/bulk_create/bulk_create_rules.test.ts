@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -21,20 +24,26 @@ import {
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
 } from '../../../../rules_client/common/constants';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../get_schedule_frequency', () => ({
-  validateScheduleLimit: jest.fn(),
-}));
+vi.mock('../get_schedule_frequency', () => {
+      const mocked = {
+      validateScheduleLimit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
-      generateId: jest.fn(),
+      generateId: vi.fn(),
     },
   };
 });
@@ -106,18 +115,18 @@ const buildBulkResponse = (
 
 describe('bulkCreateRules', () => {
   let rulesClient: RulesClient;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
   let idCounter = 0;
 
   beforeEach(async () => {
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-    (auditLogger.log as jest.Mock).mockClear();
-    (bulkMarkApiKeysForInvalidation as jest.Mock).mockReset();
-    (validateScheduleLimit as jest.Mock).mockReset();
+    (auditLogger.log as Mock).mockClear();
+    (bulkMarkApiKeysForInvalidation as Mock).mockReset();
+    (validateScheduleLimit as Mock).mockReset();
     idCounter = 0;
-    (SavedObjectsUtils.generateId as jest.Mock).mockImplementation(() => `mock-id-${++idCounter}`);
+    (SavedObjectsUtils.generateId as Mock).mockImplementation(() => `mock-id-${++idCounter}`);
     rulesClient = new RulesClient(rulesClientParams);
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient = (await rulesClientParams.getActionsClient()) as Mocked<ActionsClient>;
     actionsClient.getBulk.mockResolvedValue([
       createMockConnector({ id: '1', actionTypeId: 'test', name: 'a' }),
     ]);
@@ -403,7 +412,7 @@ describe('bulkCreateRules', () => {
           rules: [{ data: baseRule({ name: 'fast', schedule: { interval: '30s' } }) }],
         });
 
-        const warnCalls = (rulesClientParams.logger.warn as jest.Mock).mock.calls
+        const warnCalls = (rulesClientParams.logger.warn as Mock).mock.calls
           .map((c) => c[0])
           .filter((m: string) => m?.includes?.('less than the minimum value'));
         expect(warnCalls).toHaveLength(1);
@@ -434,7 +443,7 @@ describe('bulkCreateRules', () => {
         });
 
         expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
-        const callArg = (authorization.bulkEnsureAuthorized as jest.Mock).mock.calls[0][0];
+        const callArg = (authorization.bulkEnsureAuthorized as Mock).mock.calls[0][0];
         expect(callArg.ruleTypeIdConsumersPairs).toEqual([
           { ruleTypeId: '123', consumers: ['siem', 'other'] },
           { ruleTypeId: '456', consumers: ['siem'] },
@@ -442,7 +451,7 @@ describe('bulkCreateRules', () => {
       });
 
       test('bulk authz rejection: throws, single audit event, zero writes', async () => {
-        (authorization.bulkEnsureAuthorized as jest.Mock).mockRejectedValueOnce(
+        (authorization.bulkEnsureAuthorized as Mock).mockRejectedValueOnce(
           new Error('not authorized')
         );
 
@@ -459,7 +468,7 @@ describe('bulkCreateRules', () => {
         expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
         expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
 
-        const failAudits = (auditLogger.log as jest.Mock).mock.calls
+        const failAudits = (auditLogger.log as Mock).mock.calls
           .map(([event]) => event)
           .filter(
             (e: { event?: { action: string; outcome?: string } }) =>
@@ -472,7 +481,7 @@ describe('bulkCreateRules', () => {
 
     describe('schedule limit (A3)', () => {
       test('schedule-limit overflow: throws 400, zero ES writes', async () => {
-        (validateScheduleLimit as jest.Mock).mockResolvedValue({
+        (validateScheduleLimit as Mock).mockResolvedValue({
           interval: 100,
           intervalAvailable: 50,
         });
@@ -503,7 +512,7 @@ describe('bulkCreateRules', () => {
         });
 
         expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
-        const callArg = (validateScheduleLimit as jest.Mock).mock.calls[0][0];
+        const callArg = (validateScheduleLimit as Mock).mock.calls[0][0];
         expect(callArg.updatedInterval).toHaveLength(20);
       });
     });
@@ -829,7 +838,7 @@ describe('bulkCreateRules', () => {
         });
 
         expect(taskManager.bulkRemove).toHaveBeenCalled();
-        expect((rulesClientParams.logger.error as jest.Mock).mock.calls).toEqual(
+        expect((rulesClientParams.logger.error as Mock).mock.calls).toEqual(
           expect.arrayContaining([
             expect.arrayContaining([expect.stringContaining('TM cleanup error')]),
           ])
@@ -840,7 +849,7 @@ describe('bulkCreateRules', () => {
       });
 
       test('bulkMarkApiKeysForInvalidation failure: error propagates when key invalidation rejects', async () => {
-        (bulkMarkApiKeysForInvalidation as jest.Mock).mockRejectedValueOnce(
+        (bulkMarkApiKeysForInvalidation as Mock).mockRejectedValueOnce(
           new Error('invalidation write failed')
         );
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
@@ -869,7 +878,7 @@ describe('bulkCreateRules', () => {
         ],
       });
 
-      const actions = (auditLogger.log as jest.Mock).mock.calls
+      const actions = (auditLogger.log as Mock).mock.calls
         .map(([event]) => event?.event?.action)
         .filter(Boolean);
       expect(actions.filter((a) => a === RuleAuditAction.BULK_CREATE)).toHaveLength(2);
@@ -896,7 +905,7 @@ describe('bulkCreateRules', () => {
     });
 
     test('Phase A3 schedule-limit overflow: throws before any ES writes', async () => {
-      (validateScheduleLimit as jest.Mock).mockResolvedValueOnce({
+      (validateScheduleLimit as Mock).mockResolvedValueOnce({
         interval: 100,
         intervalAvailable: 50,
       });
@@ -1046,14 +1055,14 @@ describe('bulkCreateRules', () => {
 
   describe('change tracking', () => {
     const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     beforeEach(() => {
-      (rulesClientParams.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
-        get: jest.fn().mockResolvedValue(true),
+      (rulesClientParams.uiSettings.asScopedToClient as Mock).mockReturnValue({
+        get: vi.fn().mockResolvedValue(true),
       });
     });
 
@@ -1066,7 +1075,7 @@ describe('bulkCreateRules', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        executor: jest.fn(),
+        executor: vi.fn(),
         category: 'test',
         validate: { params: { validate: (params: unknown) => params } },
         solution: 'security',
@@ -1270,7 +1279,7 @@ describe('bulkCreateRules', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
         buildBulkResponse([{ id: 'mock-id-1' }])
       );
-      (rulesClientParams.analytics!.reportEvent as jest.Mock).mockImplementationOnce(() => {
+      (rulesClientParams.analytics!.reportEvent as Mock).mockImplementationOnce(() => {
         throw new Error('telemetry failure');
       });
 

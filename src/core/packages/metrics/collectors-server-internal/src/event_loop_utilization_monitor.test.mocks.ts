@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const eventLoopUtilizationMock = jest.fn().mockImplementation(() => ({
+import { vi } from 'vitest';
+
+export const eventLoopUtilizationMock = vi.fn().mockImplementation(() => ({
   active: 1,
   idle: 1,
   utilization: 1,
 }));
 
-jest.doMock('perf_hooks', () => ({
-  performance: {
-    eventLoopUtilization: eventLoopUtilizationMock,
-  },
-}));
+vi.doMock('perf_hooks', () => {
+      const mocked = {
+      performance: {
+        eventLoopUtilization: eventLoopUtilizationMock,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });

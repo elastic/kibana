@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerKibanaFunction } from './kibana';
 import type { FunctionRegistrationParameters } from '.';
 
@@ -14,8 +16,8 @@ function registerFunction(
     fetchError?: Error;
   } = {}
 ) {
-  const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
-  const fetch = jest.fn().mockImplementation((pathname: string) => {
+  const logger = { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() };
+  const fetch = vi.fn().mockImplementation((pathname: string) => {
     if (overrides.fetchError) {
       throw overrides.fetchError;
     }
@@ -29,7 +31,7 @@ function registerFunction(
   const coreStart = {
     http: {
       selfClient: {
-        asScoped: jest.fn().mockReturnValue(scopedClient),
+        asScoped: vi.fn().mockReturnValue(scopedClient),
       },
     },
   };
@@ -47,12 +49,12 @@ function registerFunction(
     logger,
     plugins: {
       core: {
-        start: jest.fn().mockResolvedValue(coreStart),
+        start: vi.fn().mockResolvedValue(coreStart),
       },
     },
   };
 
-  const functions = { registerFunction: jest.fn() };
+  const functions = { registerFunction: vi.fn() };
   registerKibanaFunction({ functions, resources } as unknown as FunctionRegistrationParameters);
 
   return {
@@ -65,7 +67,7 @@ function registerFunction(
 
 describe('kibana tool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls Kibana through the Core scoped self client with internal access', async () => {

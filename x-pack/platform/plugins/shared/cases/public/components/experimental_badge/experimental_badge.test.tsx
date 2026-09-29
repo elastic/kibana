@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -13,7 +15,7 @@ import { ExperimentalBadge } from './experimental_badge';
 
 describe('ExperimentalBadge', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the experimental badge', () => {

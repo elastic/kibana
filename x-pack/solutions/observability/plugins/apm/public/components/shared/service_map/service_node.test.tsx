@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
@@ -15,8 +17,8 @@ import { useServiceMapAlertsNavigate } from './service_map_alerts_navigate_conte
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({
@@ -27,34 +29,46 @@ jest.mock('@elastic/eui', () => {
 });
 
 // Mock the agent icon
-jest.mock('@kbn/custom-icons', () => ({
-  getAgentIcon: jest.fn(() => 'mock-icon-url.svg'),
-}));
+vi.mock('@kbn/custom-icons', () => {
+      const mocked = {
+      getAgentIcon: vi.fn(() => 'mock-icon-url.svg'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {
-      application: {
-        capabilities: {
-          slo: { read: true },
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {
+          application: {
+            capabilities: {
+              slo: { read: true },
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_map_alerts_navigate_context', () => ({
-  ...jest.requireActual('./service_map_alerts_navigate_context'),
-  useServiceMapAlertsNavigate: jest.fn(() => jest.fn()),
-}));
+vi.mock('./service_map_alerts_navigate_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('./service_map_alerts_navigate_context')),
+      useServiceMapAlertsNavigate: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_map_search_context', () => ({
-  ...jest.requireActual('./service_map_search_context'),
-  useServiceMapSearchHighlight: jest.fn(() => ({
-    isSearchMatch: false,
-    isActiveSearchMatch: false,
-  })),
-}));
+vi.mock('./service_map_search_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('./service_map_search_context')),
+      useServiceMapSearchHighlight: vi.fn(() => ({
+        isSearchMatch: false,
+        isActiveSearchMatch: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultNodeProps = {
   id: 'test-service',
@@ -199,7 +213,7 @@ describe('ServiceNode', () => {
     });
 
     it('calls onSloBadgeClick with service name and agent when the badge is clicked', () => {
-      const onSloBadgeClick = jest.fn();
+      const onSloBadgeClick = vi.fn();
       render(
         <ReactFlowProvider>
           <ServiceMapSloFlyoutProvider onSloBadgeClick={onSloBadgeClick}>
@@ -219,12 +233,12 @@ describe('ServiceNode', () => {
 
   describe('Alerts badge', () => {
     afterEach(() => {
-      jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(jest.fn());
+      vi.mocked(useServiceMapAlertsNavigate).mockReturnValue(vi.fn());
     });
 
     it('calls the alerts navigation handler when the alerts badge is clicked', () => {
-      const navigateCb = jest.fn();
-      jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(navigateCb);
+      const navigateCb = vi.fn();
+      vi.mocked(useServiceMapAlertsNavigate).mockReturnValue(navigateCb);
 
       renderServiceNode(createServiceNodeData({ alertsCount: 2 }));
       fireEvent.click(screen.getByTestId('serviceMapNodeAlertsBadge'));
@@ -232,7 +246,7 @@ describe('ServiceNode', () => {
     });
 
     it('renders a non-interactive badge when no navigate handler is injected via context', () => {
-      jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(undefined);
+      vi.mocked(useServiceMapAlertsNavigate).mockReturnValue(undefined);
 
       renderServiceNode(createServiceNodeData({ alertsCount: 3 }));
       const badge = screen.getByTestId('serviceMapNodeAlertsBadge');
@@ -252,7 +266,7 @@ describe('ServiceNode', () => {
     };
 
     afterEach(() => {
-      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+      vi.mocked(useServiceMapSearchHighlight).mockReturnValue({
         isSearchMatch: false,
         isActiveSearchMatch: false,
       });
@@ -266,7 +280,7 @@ describe('ServiceNode', () => {
     });
 
     it('sets data-search-match when the node is an inactive search match', () => {
-      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+      vi.mocked(useServiceMapSearchHighlight).mockReturnValue({
         isSearchMatch: true,
         isActiveSearchMatch: false,
       });
@@ -277,7 +291,7 @@ describe('ServiceNode', () => {
     });
 
     it('sets both data attributes when the node is the active search match', () => {
-      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+      vi.mocked(useServiceMapSearchHighlight).mockReturnValue({
         isSearchMatch: true,
         isActiveSearchMatch: true,
       });

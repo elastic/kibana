@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { TestRenderer } from '../../../../../mock';
@@ -18,8 +20,8 @@ describe('ConfirmDeployAgentPolicyModal', () => {
   const render = (props: any) =>
     (renderResult = testRenderer.render(
       <ConfirmDeployAgentPolicyModal
-        onConfirm={jest.fn()}
-        onCancel={jest.fn()}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
         agentCount={0}
         agentPolicies={[{ name: 'Agent policy 1' }, { name: 'Agent policy 2' }]}
         agentPoliciesToAdd={[]}

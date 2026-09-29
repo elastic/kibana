@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -36,24 +39,27 @@ import { ANALYZER_PREVIEW_BANNER } from '../../../../resolver/view/resolver_with
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
-jest.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
-jest.mock('../../shared/hooks/use_which_flyout');
-jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
-jest.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
+vi.mock('../../shared/hooks/use_which_flyout');
+vi.mock('../../../../detections/hooks/use_is_analyzer_enabled');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+vi.mock('../../../../flyout_v2/use_flyout_api');
 
-const mockUiSettingsGet = jest.fn();
+const mockUiSettingsGet = vi.fn();
 let mockServerless: unknown;
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
     useKibana: () => ({
@@ -67,18 +73,18 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
-const mockUseFlyoutApi = jest.mocked(useFlyoutApi);
+const mockUseWhichFlyout = useWhichFlyout as Mock;
+const mockUseFlyoutApi = vi.mocked(useFlyoutApi);
 const FLYOUT_KEY = 'securitySolution';
 const mockExperimentalFeatureFlags = (flags: Record<string, boolean>) => {
-  (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+  (useIsExperimentalFeatureEnabled as Mock).mockImplementation(
     (flag: string) => flags[flag] ?? false
   );
 };
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
@@ -116,21 +122,21 @@ const renderAnalyzer = (
 
 describe('<AnalyzeGraph />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetAnalyzerColdFrozenTierCalloutDismissedStateForTests();
     mockServerless = undefined;
     mockUiSettingsGet.mockReturnValue(true);
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     mockUseFlyoutApi.mockReturnValue(createFlyoutApiMock());
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockExperimentalFeatureFlags({});
-    (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
-    (useDataView as jest.Mock).mockReturnValue({
+    (useSelectedPatterns as Mock).mockReturnValue(['index']);
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(true);
+    (useDataView as Mock).mockReturnValue({
       status: 'ready',
       dataView: {
         ...dataView,
-        hasMatchedIndices: jest.fn().mockReturnValue(true),
+        hasMatchedIndices: vi.fn().mockReturnValue(true),
       },
     });
   });
@@ -208,7 +214,7 @@ describe('<AnalyzeGraph />', () => {
   });
 
   it('should render no data message when analyzer is not enabled', () => {
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(false);
 
     const contextValue = {
       eventId: 'eventId',
@@ -222,7 +228,7 @@ describe('<AnalyzeGraph />', () => {
   });
 
   it('should show loading spinner while data view is loading', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'loading',
     });
 
@@ -232,7 +238,7 @@ describe('<AnalyzeGraph />', () => {
   });
 
   it('should show loading spinner while data view is pristine', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'pristine',
     });
 
@@ -242,7 +248,7 @@ describe('<AnalyzeGraph />', () => {
   });
 
   it('should show error message if data view is error', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'error',
     });
 
@@ -254,11 +260,11 @@ describe('<AnalyzeGraph />', () => {
   });
 
   it('should show error message if data view is ready but no matched indices', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'ready',
       dataView: {
         ...dataView,
-        hasMatchedIndices: jest.fn().mockReturnValue(false),
+        hasMatchedIndices: vi.fn().mockReturnValue(false),
       },
     });
 

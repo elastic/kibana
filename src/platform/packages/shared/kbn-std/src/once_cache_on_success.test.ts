@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fc } from '@fast-check/jest';
 import { onceCacheOnSuccess } from './once_cache_on_success';
 
 describe('onceCacheOnSuccess', () => {
   it('calls the factory once and caches the result on success', () => {
-    const factory = jest.fn(() => ({ value: 'success' }));
+    const factory = vi.fn(() => ({ value: 'success' }));
     const memoized = onceCacheOnSuccess(factory);
 
     const result1 = memoized();
@@ -29,7 +31,7 @@ describe('onceCacheOnSuccess', () => {
 
   it('retries on failure instead of caching undefined', () => {
     let attemptCount = 0;
-    const factory = jest.fn(() => {
+    const factory = vi.fn(() => {
       attemptCount++;
       if (attemptCount < 3) {
         throw new Error(`Attempt ${attemptCount} failed`);
@@ -57,7 +59,7 @@ describe('onceCacheOnSuccess', () => {
   });
 
   it('consistently retries when factory always throws', () => {
-    const factory = jest.fn(() => {
+    const factory = vi.fn(() => {
       throw new Error('Always fails');
     });
 
@@ -73,7 +75,7 @@ describe('onceCacheOnSuccess', () => {
   it('property: caches any successful value and calls factory exactly once', () => {
     fc.assert(
       fc.property(fc.anything(), fc.integer({ min: 1, max: 10 }), (value, callCount) => {
-        const factory = jest.fn(() => value);
+        const factory = vi.fn(() => value);
         const memoized = onceCacheOnSuccess(factory);
 
         const results = Array.from({ length: callCount }, () => memoized());
@@ -88,7 +90,7 @@ describe('onceCacheOnSuccess', () => {
     fc.assert(
       fc.property(fc.integer({ min: 0, max: 5 }), fc.anything(), (failCount, successValue) => {
         let calls = 0;
-        const factory = jest.fn(() => {
+        const factory = vi.fn(() => {
           calls++;
           if (calls <= failCount) {
             throw new Error(`fail ${calls}`);

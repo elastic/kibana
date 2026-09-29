@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { IStorageWrapper, IStorage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageWrapper } from './local_storage_wrapper';
@@ -12,10 +14,10 @@ import { LocalStorageWrapper } from './local_storage_wrapper';
 const createMockStore = (): MockedKeys<IStorage> => {
   let store: Record<string, any> = {};
   return {
-    getItem: jest.fn().mockImplementation((key) => store[key]),
-    setItem: jest.fn().mockImplementation((key, value) => (store[key] = value)),
-    removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
-    clear: jest.fn().mockImplementation(() => (store = {})),
+    getItem: vi.fn().mockImplementation((key) => store[key]),
+    setItem: vi.fn().mockImplementation((key, value) => (store[key] = value)),
+    removeItem: vi.fn().mockImplementation((key: string) => delete store[key]),
+    clear: vi.fn().mockImplementation(() => (store = {})),
   };
 };
 
@@ -24,7 +26,7 @@ describe('LocalStorageWrapper', () => {
   let mockStore: MockedKeys<IStorage>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockStore = createMockStore();
     storage = new LocalStorageWrapper(mockStore);
   });

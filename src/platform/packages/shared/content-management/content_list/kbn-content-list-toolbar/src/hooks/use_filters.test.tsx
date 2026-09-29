@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { type SearchFilterConfig } from '@elastic/eui';
@@ -20,7 +22,7 @@ import { Filters } from '../filters/filters';
 import { SortFilter } from '../filters/sort';
 import { useFilters } from './use_filters';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
@@ -52,7 +54,7 @@ const findCustomComponentFilter = (filters: SearchFilterConfig[]) =>
 
 describe('useFilters', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-jest.mock('../asset_criticality/asset_criticality_migration_client', () => ({
-  AssetCriticalityMigrationClient: jest.fn().mockImplementation(() => ({
-    copyTimestampToEventIngestedForAssetCriticality: jest
-      .fn()
-      .mockResolvedValue({ updated: 0, failures: [] }),
-  })),
-}));
+import { vi } from 'vitest';
+
+vi.mock('../asset_criticality/asset_criticality_migration_client', () => {
+      const mocked = {
+      AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
+        copyTimestampToEventIngestedForAssetCriticality: vi
+          .fn()
+          .mockResolvedValue({ updated: 0, failures: [] }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -28,16 +33,16 @@ describe('assetCrticalityCopyTimestampToEventIngested — execution context wrap
   const auditLogger = auditLoggerMock.create();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('wraps the migration run in coreStart.executionContext.withContext with the expected label and id', async () => {
-    const withContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+    const withContext = vi.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
     const mockCoreStart = {
       elasticsearch: { client: elasticsearchServiceMock.createClusterClient() },
       executionContext: { withContext },
     };
-    const getStartServices = jest.fn().mockResolvedValue([mockCoreStart, {}]);
+    const getStartServices = vi.fn().mockResolvedValue([mockCoreStart, {}]);
 
     const migrationTask = createMigrationTask({ getStartServices, logger, auditLogger })({
       signal: new AbortController().signal,

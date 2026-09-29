@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { useCallback } from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
@@ -34,10 +37,10 @@ import {
 import { LayerTabsWrapper } from './layer_tabs';
 import type { LayerTabsProps } from './types';
 
-jest.mock('../../../id_generator');
+vi.mock('../../../id_generator');
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
+vi.mock('@kbn/kibana-utils-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
   return {
     ...original,
     Storage: class Storage {
@@ -107,7 +110,7 @@ describe('LayerTabs', () => {
     props: ReturnType<typeof getDefaultProps>,
     customStoreProps?: Partial<MountStoreProps>
   ) {
-    (generateId as jest.Mock).mockReturnValue(`newId`);
+    (generateId as Mock).mockReturnValue(`newId`);
     const { visualizationMap, datasourceMap, ...rest } = props;
     return mountWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
@@ -191,8 +194,8 @@ describe('LayerTabs', () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
 
-      visualizationMap.testVis.setDimension = jest.fn();
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+      visualizationMap.testVis.setDimension = vi.fn();
+      visualizationMap.testVis.getSupportedLayers = vi.fn(() => [
         {
           type: LayerTypes.DATA,
           label: 'Data Layer',
@@ -222,7 +225,7 @@ describe('LayerTabs', () => {
         },
       ]);
 
-      datasourceMap.formBased.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = vi.fn();
       const props = getDefaultProps({ visualizationMap, datasourceMap });
       const { instance, lensStore } = await prepareAndMountComponent(props);
 
@@ -263,14 +266,14 @@ describe('LayerTabs', () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
 
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+      visualizationMap.testVis.getSupportedLayers = vi.fn(() => [
         { type: LayerTypes.DATA, label: 'Data Layer' },
         {
           type: LayerTypes.REFERENCELINE,
           label: 'Reference layer',
         },
       ]);
-      datasourceMap.formBased.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = vi.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
       const { instance, lensStore } = await prepareAndMountComponent(props);
@@ -284,9 +287,9 @@ describe('LayerTabs', () => {
     it('should not add an initial dimension when initialDimensions are not available for the given layer type', async () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
-      datasourceMap.formBased.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = vi.fn();
 
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+      visualizationMap.testVis.getSupportedLayers = vi.fn(() => [
         {
           type: LayerTypes.DATA,
           label: 'Data Layer',
@@ -317,8 +320,8 @@ describe('LayerTabs', () => {
       const visualizationMap = mockVisualizationMap();
 
       // Set up visualization to return 2 layers initially so tabs render
-      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1', 'layer2']);
-      visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+      visualizationMap.testVis.getLayerIds = vi.fn(() => ['layer1', 'layer2']);
+      visualizationMap.testVis.getConfiguration = vi.fn(() => ({
         groups: [
           {
             layerId: 'layer1',
@@ -332,7 +335,7 @@ describe('LayerTabs', () => {
         ],
       }));
 
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+      visualizationMap.testVis.getSupportedLayers = vi.fn(() => [
         { type: LayerTypes.DATA, label: 'Data Layer' },
         {
           type: LayerTypes.REFERENCELINE,
@@ -346,7 +349,7 @@ describe('LayerTabs', () => {
           ],
         },
       ]);
-      datasourceMap.formBased.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = vi.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
       const { instance, lensStore } = await prepareAndMountComponent(props);
@@ -384,8 +387,8 @@ describe('LayerTabs', () => {
       const visualizationMap = mockVisualizationMap();
 
       // Set up visualization to return a single layer
-      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1']);
-      visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+      visualizationMap.testVis.getLayerIds = vi.fn(() => ['layer1']);
+      visualizationMap.testVis.getConfiguration = vi.fn(() => ({
         groups: [
           {
             layerId: 'layer1',
@@ -415,8 +418,8 @@ describe('LayerTabs', () => {
       const visualizationMap = mockVisualizationMap();
 
       // Mock multiple layers
-      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1', 'layer2']);
-      visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+      visualizationMap.testVis.getLayerIds = vi.fn(() => ['layer1', 'layer2']);
+      visualizationMap.testVis.getConfiguration = vi.fn(() => ({
         groups: [
           {
             layerId: 'layer1',
@@ -471,8 +474,8 @@ describe('LayerTabs', () => {
       const visualizationMap = mockVisualizationMap();
 
       // Set up visualization to return 2 layers (tabs visible, shows "Delete layer")
-      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1', 'layer2']);
-      visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+      visualizationMap.testVis.getLayerIds = vi.fn(() => ['layer1', 'layer2']);
+      visualizationMap.testVis.getConfiguration = vi.fn(() => ({
         groups: [
           {
             layerId: 'layer1',

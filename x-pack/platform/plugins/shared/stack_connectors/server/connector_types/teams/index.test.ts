@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -19,24 +22,24 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/teams';
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
+    request: vi.fn(),
+    patch: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
+axios.create = vi.fn(() => axios);
 
-const requestMock = utils.request as jest.Mock;
+const requestMock = utils.request as Mock;
 const services: Services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 let connectorType: TeamsConnectorType;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
@@ -159,7 +162,7 @@ describe('execute()', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     requestMock.mockReset();
     requestMock.mockResolvedValue({
       status: 200,

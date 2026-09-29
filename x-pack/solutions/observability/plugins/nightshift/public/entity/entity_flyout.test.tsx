@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -16,17 +18,20 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { EntityFlyout } from './entity_flyout';
 
-const mockOpenChat = jest.fn();
+const mockOpenChat = vi.fn();
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      agentBuilder: {
-        openChat: mockOpenChat,
-      },
-    },
-  }),
-}));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          agentBuilder: {
+            openChat: mockOpenChat,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockFeature: Feature = {
   uuid: 'feature-uuid-1',
@@ -59,7 +64,7 @@ describe('EntityFlyout', () => {
     render(
       <I18nProvider>
         <EuiProvider>
-          <EntityFlyout feature={mockFeature} onClose={jest.fn()} {...props} />
+          <EntityFlyout feature={mockFeature} onClose={vi.fn()} {...props} />
         </EuiProvider>
       </I18nProvider>
     );
@@ -135,7 +140,7 @@ describe('EntityFlyout', () => {
   });
 
   it('calls onClose when the flyout is closed', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderFlyout({ onClose });
 
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));

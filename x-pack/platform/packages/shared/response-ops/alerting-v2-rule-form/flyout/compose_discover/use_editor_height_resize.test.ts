@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { INITIAL_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT, MIN_EDITOR_HEIGHT } from './constants';
 import { useEditorHeightResize } from './use_editor_height_resize';
@@ -21,7 +23,7 @@ describe('useEditorHeightResize', () => {
     act(() => {
       result.current.onResizeKeyDown({
         key: 'ArrowDown',
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.KeyboardEvent<HTMLButtonElement>);
     });
     expect(result.current.editorHeight).toBe(INITIAL_EDITOR_HEIGHT + 16);
@@ -29,7 +31,7 @@ describe('useEditorHeightResize', () => {
     act(() => {
       result.current.onResizeKeyDown({
         key: 'ArrowUp',
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.KeyboardEvent<HTMLButtonElement>);
     });
     expect(result.current.editorHeight).toBe(INITIAL_EDITOR_HEIGHT);
@@ -38,7 +40,7 @@ describe('useEditorHeightResize', () => {
       act(() => {
         result.current.onResizeKeyDown({
           key: 'ArrowUp',
-          preventDefault: jest.fn(),
+          preventDefault: vi.fn(),
         } as unknown as React.KeyboardEvent<HTMLButtonElement>);
       });
     }
@@ -48,7 +50,7 @@ describe('useEditorHeightResize', () => {
       act(() => {
         result.current.onResizeKeyDown({
           key: 'ArrowDown',
-          preventDefault: jest.fn(),
+          preventDefault: vi.fn(),
         } as unknown as React.KeyboardEvent<HTMLButtonElement>);
       });
     }

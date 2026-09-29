@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 import { getDataStreams } from '.';
 
-const mockGetMockMatchingDataStreams = jest.fn().mockImplementation(() => MATCHING_DATA_STREAMS);
-const mockGetDatasetPrivileges = jest.fn().mockImplementation(() => ({
+const mockGetMockMatchingDataStreams = vi.fn().mockImplementation(() => MATCHING_DATA_STREAMS);
+const mockGetDatasetPrivileges = vi.fn().mockImplementation(() => ({
   datasetsPrivilages: {
     'logs-*-*': {
       canRead: true,
@@ -25,24 +27,24 @@ const mockGetDatasetPrivileges = jest.fn().mockImplementation(() => ({
     },
   },
 }));
-const mockGetMockDataStreamPrivileges = jest.fn().mockImplementation(() => DATA_STREAMS_PRIVILEGES);
+const mockGetMockDataStreamPrivileges = vi.fn().mockImplementation(() => DATA_STREAMS_PRIVILEGES);
 
 describe('getDataStreams', () => {
   beforeAll(() => {
     // Mock dataStreamService
-    jest
+    vi
       .spyOn(dataStreamService, 'getMatchingDataStreams')
       .mockImplementation(mockGetMockMatchingDataStreams);
-    jest
+    vi
       .spyOn(datasetQualityPrivileges, 'getDatasetPrivileges')
       .mockImplementation(mockGetDatasetPrivileges);
-    jest
+    vi
       .spyOn(datasetQualityPrivileges, 'getHasIndexPrivileges')
       .mockImplementation(mockGetMockDataStreamPrivileges);
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('Passes the correct parameters to the DataStreamService', async () => {

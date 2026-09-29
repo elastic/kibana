@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, render } from '@testing-library/react';
 import MarkdownVisComponent from './markdown_vis_controller';
@@ -23,7 +25,7 @@ describe('markdown vis controller', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
+      <MarkdownVisComponent {...vis.params} renderComplete={vi.fn()} />
     );
 
     await waitFor(() => getByTestId('markdownBody'));
@@ -47,7 +49,7 @@ describe('markdown vis controller', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
+      <MarkdownVisComponent {...vis.params} renderComplete={vi.fn()} />
     );
 
     await waitFor(() => getByTestId('markdownBody'));
@@ -69,7 +71,7 @@ describe('markdown vis controller', () => {
     };
 
     const { getByTestId, getByText, rerender } = render(
-      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
+      <MarkdownVisComponent {...vis.params} renderComplete={vi.fn()} />
     );
 
     await waitFor(() => getByTestId('markdownBody'));
@@ -77,7 +79,7 @@ describe('markdown vis controller', () => {
     expect(getByText(/initial/i)).toBeInTheDocument();
 
     vis.params.markdown = 'Updated';
-    rerender(<MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />);
+    rerender(<MarkdownVisComponent {...vis.params} renderComplete={vi.fn()} />);
 
     expect(getByText(/Updated/i)).toBeInTheDocument();
   });
@@ -91,7 +93,7 @@ describe('markdown vis controller', () => {
       },
     };
 
-    const renderComplete = jest.fn();
+    const renderComplete = vi.fn();
 
     beforeEach(() => {
       renderComplete.mockClear();

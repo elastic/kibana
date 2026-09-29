@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -72,7 +74,7 @@ describe('RequestDetails', () => {
   });
 
   test('should show the Clusters tab and no Projects tab when there are no linked projects', async () => {
-    const cpsManager = cpsPluginMock.createStartContract().cpsManager as jest.Mocked<ICPSManager>;
+    const cpsManager = cpsPluginMock.createStartContract().cpsManager as Mocked<ICPSManager>;
 
     renderRequestDetails(cpsManager);
 
@@ -81,7 +83,7 @@ describe('RequestDetails', () => {
   });
 
   test('should show the Projects tab instead of the Clusters tab when there are linked projects', async () => {
-    const cpsManager = cpsPluginMock.createStartContract().cpsManager as jest.Mocked<ICPSManager>;
+    const cpsManager = cpsPluginMock.createStartContract().cpsManager as Mocked<ICPSManager>;
     cpsManager.hasLinkedProjects.mockReturnValue(true);
 
     renderRequestDetails(cpsManager);
@@ -91,7 +93,7 @@ describe('RequestDetails', () => {
   });
 
   test('should swap the Clusters tab for the Projects tab once CPS reports linked projects', async () => {
-    const cpsManager = cpsPluginMock.createStartContract().cpsManager as jest.Mocked<ICPSManager>;
+    const cpsManager = cpsPluginMock.createStartContract().cpsManager as Mocked<ICPSManager>;
     let resolveReady!: () => void;
     cpsManager.whenReady.mockReturnValue(
       new Promise<void>((resolve) => {

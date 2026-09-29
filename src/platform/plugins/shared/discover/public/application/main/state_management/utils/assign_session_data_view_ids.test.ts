@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
@@ -16,9 +18,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import { assignSessionDataViewIds } from './assign_session_data_view_ids';
 
-jest.mock('uuid', () => ({ v4: jest.fn(() => 'runtime-inline-id') }));
+vi.mock('uuid', () => {
+      const mocked = { v4: vi.fn(() => 'runtime-inline-id') };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUuidv4 = jest.mocked<() => string>(uuidv4);
+const mockedUuidv4 = vi.mocked<() => string>(uuidv4);
 
 const inlineDataView: DataViewSpec = {
   title: 'logs-*',

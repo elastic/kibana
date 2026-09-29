@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { queryMonitorHeatmap } from './monitor_status_heatmap';
 import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../../common/runtime_types/heartbeat_monitor';
 
 const runQuery = async (location: string) => {
-  const search = jest
+  const search = vi
     .fn()
     .mockResolvedValue({ body: { aggregations: { heatmap: { buckets: [] } } } });
   await queryMonitorHeatmap({
@@ -25,7 +27,7 @@ const runQuery = async (location: string) => {
 };
 
 describe('queryMonitorHeatmap', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('filters by observer.geo.name for a real location', async () => {
     const filters = await runQuery('North America - US East');

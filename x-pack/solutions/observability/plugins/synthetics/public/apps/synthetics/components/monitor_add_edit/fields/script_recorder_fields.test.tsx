@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { ScriptRecorderFields } from './script_recorder_fields';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
-  htmlIdGenerator: () => () => `id-${Math.random()}`,
-}));
+vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
+      htmlIdGenerator: () => () => `id-${Math.random()}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onChange = jest.fn();
+const onChange = vi.fn();
 
 describe('<ScriptRecorderFields />', () => {
   let file: File;
@@ -40,7 +45,7 @@ describe('<ScriptRecorderFields />', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     file = new File([testScript], 'samplescript.js', { type: 'text/javascript' });
   });
 

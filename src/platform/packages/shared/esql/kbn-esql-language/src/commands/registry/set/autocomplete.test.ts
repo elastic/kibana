@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { getMockCallbacks, mockContext } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import type { ICommandCallbacks } from '../types';
@@ -14,8 +16,8 @@ import { settings } from '../../definitions/generated/settings';
 import { parseMapParams } from '../../definitions/utils/maps';
 import { Settings } from '../../definitions/keywords';
 
-jest.mock('../../definitions/generated/settings', () => {
-  const originalModule = jest.requireActual('../../definitions/generated/settings');
+vi.mock('../../definitions/generated/settings', async () => {
+  const originalModule = (await vi.importActual('../../definitions/generated/settings'));
   return {
     ...originalModule,
     settings: originalModule.settings.map((s: { name: string; ignoreAsSuggestion?: boolean }) =>
@@ -51,7 +53,7 @@ describe('SET Autocomplete', () => {
   describe('Setting name suggestions -- Serverless', () => {
     let mockCallbacks: ICommandCallbacks;
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       // Reset mocks before each test to ensure isolation
       mockCallbacks = getMockCallbacks();
       mockCallbacks.isServerless = true;

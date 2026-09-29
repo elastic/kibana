@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { Metadata } from './metadata';
 import { render, waitFor } from '@testing-library/react';
@@ -18,30 +21,30 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
-jest.mock('../../hooks/use_metadata_state');
-jest.mock('../../hooks/use_asset_details_render_props');
-jest.mock('../../hooks/use_asset_details_url_state');
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../pages/metrics/hosts/hooks/use_unified_search');
-jest.mock('../../hooks/use_data_views');
+vi.mock('../../hooks/use_metadata_state');
+vi.mock('../../hooks/use_asset_details_render_props');
+vi.mock('../../hooks/use_asset_details_url_state');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../pages/metrics/hosts/hooks/use_unified_search');
+vi.mock('../../hooks/use_data_views');
 
-const useMetadataStateContextMock = useMetadataStateContext as jest.MockedFunction<
+const useMetadataStateContextMock = useMetadataStateContext as MockedFunction<
   typeof useMetadataStateContext
 >;
 const useAssetDetailsRenderPropsContextMock =
-  useAssetDetailsRenderPropsContext as jest.MockedFunction<
+  useAssetDetailsRenderPropsContext as MockedFunction<
     typeof useAssetDetailsRenderPropsContext
   >;
-const useAssetDetailsUrlStateMock = useAssetDetailsUrlState as jest.MockedFunction<
+const useAssetDetailsUrlStateMock = useAssetDetailsUrlState as MockedFunction<
   typeof useAssetDetailsUrlState
 >;
-const useKibanaMock = useKibanaContextForPlugin as jest.MockedFunction<
+const useKibanaMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
-const useUnifiedSearchContextMock = useUnifiedSearchContext as jest.MockedFunction<
+const useUnifiedSearchContextMock = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext
 >;
-const useDataViewsContextMock = useDataViewsContext as jest.MockedFunction<
+const useDataViewsContextMock = useDataViewsContext as MockedFunction<
   typeof useDataViewsContext
 >;
 
@@ -61,7 +64,7 @@ const mockRenderPropsContext = (overrides: Partial<typeof defaultRenderProps> = 
 };
 
 const mockUrlState = (urlState: Record<string, unknown> | null = null) => {
-  useAssetDetailsUrlStateMock.mockReturnValue([urlState, jest.fn()] as ReturnType<
+  useAssetDetailsUrlStateMock.mockReturnValue([urlState, vi.fn()] as ReturnType<
     typeof useAssetDetailsUrlState
   >);
 };
@@ -82,7 +85,7 @@ const mockMetadataState = (props: Partial<ReturnType<typeof useMetadataStateCont
         },
       },
     },
-    refresh: jest.fn(),
+    refresh: vi.fn(),
   };
   useMetadataStateContextMock.mockReturnValue({ ...defaults, ...props });
 };
@@ -117,7 +120,7 @@ const renderHostMetadata = () =>
 
 describe('Single Host Metadata (Hosts View)', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeEach(() => {
@@ -130,8 +133,8 @@ describe('Single Host Metadata (Hosts View)', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('should show an error if fetching the metadata returns error', async () => {

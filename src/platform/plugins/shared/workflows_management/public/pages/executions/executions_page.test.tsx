@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowExecutionsPage } from './executions_page';
@@ -14,36 +16,48 @@ import { EXECUTION_TABLE_DEFAULT_PAGE_SIZE } from './workflow_executions_page_co
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
-jest.mock('../../shared/ui/filter_controls', () => ({
-  FilterControls: () => <div data-test-subj="filterControlsStub" />,
-}));
+vi.mock('../../shared/ui/filter_controls', () => {
+      const mocked = {
+      FilterControls: () => <div data-test-subj="filterControlsStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_executions_data_grid', () => ({
-  WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
-}));
+vi.mock('./workflow_executions_data_grid', () => {
+      const mocked = {
+      WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_execution_detail_flyout', () => ({
-  WorkflowExecutionDetailFlyout: ({ executionId }: { executionId: string }) => (
-    <div data-test-subj="workflowExecutionFlyout">{executionId}</div>
-  ),
-}));
+vi.mock('./workflow_execution_detail_flyout', () => {
+      const mocked = {
+      WorkflowExecutionDetailFlyout: ({ executionId }: { executionId: string }) => (
+        <div data-test-subj="workflowExecutionFlyout">{executionId}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetSelectedExecution = jest.fn();
-const mockUseWorkflowUrlState = jest.fn(() => ({
+const mockSetSelectedExecution = vi.fn();
+const mockUseWorkflowUrlState = vi.fn(() => ({
   selectedExecutionId: undefined as string | undefined,
   setSelectedExecution: mockSetSelectedExecution,
 }));
-jest.mock('../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-}));
+vi.mock('../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowExecutionsPage', () => {
   const renderPage = () => {
     const services = createStartServicesMock();
-    services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
+    services.spaces.getActiveSpace = vi.fn().mockResolvedValue({ id: 'default' });
     const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
     services.unifiedSearch.ui.SearchBar = SearchBarStub;
-    jest.mocked(services.http.get).mockResolvedValue({
+    vi.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
       size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
@@ -56,7 +70,7 @@ describe('WorkflowExecutionsPage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowUrlState.mockReturnValue({
       selectedExecutionId: undefined,
       setSelectedExecution: mockSetSelectedExecution,

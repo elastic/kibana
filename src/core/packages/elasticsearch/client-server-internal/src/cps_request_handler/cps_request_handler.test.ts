@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
@@ -30,20 +33,20 @@ const noProjectRouting = {
 } as const;
 
 // Mock logger for all tests
-const createMockLogger = (): jest.Mocked<Logger> => ({
-  info: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-  error: jest.fn(),
-  trace: jest.fn(),
-  fatal: jest.fn(),
-  log: jest.fn(),
-  get: jest.fn(() => createMockLogger()),
-  isLevelEnabled: jest.fn((level) => true),
+const createMockLogger = (): Mocked<Logger> => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  trace: vi.fn(),
+  fatal: vi.fn(),
+  log: vi.fn(),
+  get: vi.fn(() => createMockLogger()),
+  isLevelEnabled: vi.fn((level) => true),
 });
 
 describe('getCpsRequestHandler', () => {
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
 
   beforeEach(() => {
     mockLogger = createMockLogger();

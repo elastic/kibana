@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../app_context';
@@ -18,62 +21,62 @@ import {
   getManagedBulkEndpoint,
 } from './agentless';
 
-jest.mock('../app_context');
+vi.mock('../app_context');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
 describe('isAgentlessEnabled', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getConfig.mockReset();
   });
   it('should return false if cloud is not enabled', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: false,
       },
     } as any);
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
 
     expect(isAgentlessEnabled()).toBe(false);
   });
 
   it('should return false if cloud is enabled but agentless is not', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: false,
       },
     } as any);
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
     expect(isAgentlessEnabled()).toBe(false);
   });
 
   it('should return true if cloud is enabled and agentless is enabled', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
       },
     } as any);
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
     expect(isAgentlessEnabled()).toBe(true);
   });
 });
 
 describe('logLegacyAgentlessWriteDeprecation', () => {
-  const warn = jest.fn();
+  const warn = vi.fn();
 
   beforeEach(() => {
     warn.mockReset();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue({ warn } as any);
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue({ warn } as any);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('warns with the stable marker and the operation', () => {
@@ -88,33 +91,33 @@ describe('logLegacyAgentlessWriteDeprecation', () => {
 
 describe('isManagedBulkEnabled', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getConfig.mockReset();
   });
 
   it('should return false if managedOtlp url is absent and flag is false', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: { managedBulk: { enabled: false } },
     } as any);
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
 
     expect(isManagedBulkEnabled()).toBe(false);
   });
 
   it('should return false if managedOtlp url is absent and flag is true', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: { managedBulk: { enabled: true } },
     } as any);
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
 
     expect(isManagedBulkEnabled()).toBe(false);
   });
 
   it('should return false if managedOtlp url is present but flag is false', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: { managedBulk: { enabled: false } },
     } as any);
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
 
@@ -122,10 +125,10 @@ describe('isManagedBulkEnabled', () => {
   });
 
   it('should return true if managedOtlp url is present and flag is true', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: { managedBulk: { enabled: true } },
     } as any);
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
 
@@ -135,17 +138,17 @@ describe('isManagedBulkEnabled', () => {
 
 describe('getManagedBulkEndpoint', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return undefined if managedOtlp url is absent', () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
 
     expect(getManagedBulkEndpoint()).toBeUndefined();
   });
 
   it('should append /_es to the managedOtlp url when present', () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
 
@@ -153,7 +156,7 @@ describe('getManagedBulkEndpoint', () => {
   });
 
   it('should strip a trailing slash before appending /_es', () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com/' } } as any);
 
@@ -163,11 +166,11 @@ describe('getManagedBulkEndpoint', () => {
 
 describe('prependAgentlessApiBasePathToEndpoint', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should prepend the agentless api base path to the endpoint with ess if in cloud', () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
     const agentlessConfig = {
@@ -183,7 +186,7 @@ describe('prependAgentlessApiBasePathToEndpoint', () => {
   });
 
   it('should prepend the agentless api base path to the endpoint with serverless if in serverless', () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
     const agentlessConfig = {
@@ -199,7 +202,7 @@ describe('prependAgentlessApiBasePathToEndpoint', () => {
   });
 
   it('should prepend the agentless api base path to the endpoint with a dynamic path', () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
 

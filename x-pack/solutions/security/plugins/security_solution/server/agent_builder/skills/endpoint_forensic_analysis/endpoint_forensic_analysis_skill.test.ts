@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { platformCoreTools, ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
@@ -68,7 +70,7 @@ describe('endpointForensicAnalysisSkill', () => {
   });
 
   describe(`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID} handler`, () => {
-    const catIndices = jest.fn();
+    const catIndices = vi.fn();
     const context = {
       esClient: { asCurrentUser: { cat: { indices: catIndices } } },
     } as unknown as ToolHandlerContext;

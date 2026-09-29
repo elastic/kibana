@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { LensClient } from './lens_client';
@@ -12,15 +14,15 @@ import { LensDocumentService } from './lens_document_service';
 import type { LensDocument } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
-jest.mock('./lens_client', () => {
+vi.mock('./lens_client', () => {
   const mockClient = {
-    create: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-    search: jest.fn(),
+    create: vi.fn(),
+    get: vi.fn(),
+    update: vi.fn(),
+    search: vi.fn(),
   };
   return {
-    LensClient: jest.fn(() => mockClient),
+    LensClient: vi.fn(() => mockClient),
   };
 });
 
@@ -54,7 +56,7 @@ describe('LensStore', () => {
         version: LENS_ITEM_LATEST_VERSION,
       };
 
-      jest.mocked(client.create).mockImplementation(async (item, references) => ({
+      vi.mocked(client.create).mockImplementation(async (item, references) => ({
         item: {
           id: 'new-id',
           ...item,
@@ -89,7 +91,7 @@ describe('LensStore', () => {
         version: LENS_ITEM_LATEST_VERSION,
       };
 
-      jest.mocked(client.update).mockImplementation(async (id, item, references) => ({
+      vi.mocked(client.update).mockImplementation(async (id, item, references) => ({
         item: {
           id,
           ...item,
@@ -113,7 +115,7 @@ describe('LensStore', () => {
   describe('load', () => {
     test('throws if an error is returned', async () => {
       const { client, service } = testStore();
-      jest.mocked(client.get).mockRejectedValue(new Error('shoot dang!'));
+      vi.mocked(client.get).mockRejectedValue(new Error('shoot dang!'));
 
       await expect(service.load('123')).rejects.toThrow('shoot dang!');
     });

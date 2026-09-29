@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -23,7 +25,7 @@ import {
 
 const staticAssetsHelperMock = httpServiceMock.createSetupContract().staticAssets;
 
-const mockPerformanceMark = jest.fn(
+const mockPerformanceMark = vi.fn(
   (name) =>
     ({
       name,
@@ -35,7 +37,7 @@ const mockPerformanceMark = jest.fn(
     } as PerformanceMark)
 );
 
-const mockPerformanceMeasure = jest.fn(
+const mockPerformanceMeasure = vi.fn(
   (name) =>
     ({
       name,
@@ -56,7 +58,7 @@ describe('InterceptDialogService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('exposes a setup and start method', () => {
@@ -88,9 +90,9 @@ describe('InterceptDialogService', () => {
         analytics: analyticsServiceMock.createAnalyticsServiceStart(),
         rendering: renderingServiceMock.create(),
         targetDomElement: document.createElement('div'),
-        persistInterceptRunId: jest.fn(),
+        persistInterceptRunId: vi.fn(),
         staticAssetsHelper: staticAssetsHelperMock,
-        resetInterceptTimingRecord: jest.fn(),
+        resetInterceptTimingRecord: vi.fn(),
       };
 
       // append the target dom element to the body
@@ -139,7 +141,7 @@ describe('InterceptDialogService', () => {
         startContract.add({
           id: 'test-intercept',
           runId: 1,
-          onFinish: jest.fn(),
+          onFinish: vi.fn(),
           steps: [
             { id: 'start', title: 'Welcome Survey', content: () => 'Fill out our survey' },
             {
@@ -197,7 +199,7 @@ describe('InterceptDialogService', () => {
             {
               id: 'upgrade-intercept',
               runId: 1,
-              onFinish: jest.fn(),
+              onFinish: vi.fn(),
               steps: [
                 {
                   id: 'start',
@@ -218,7 +220,7 @@ describe('InterceptDialogService', () => {
             {
               id: 'security-intercept',
               runId: 1,
-              onFinish: jest.fn(),
+              onFinish: vi.fn(),
               steps: [
                 {
                   id: 'start',
@@ -294,7 +296,7 @@ describe('InterceptDialogService', () => {
         startContract.add({
           id: 'test-intercept',
           runId: 1,
-          onFinish: jest.fn(),
+          onFinish: vi.fn(),
           steps: [
             { id: 'start', title: 'Survey', content: () => 'Fill out our survey' },
             {

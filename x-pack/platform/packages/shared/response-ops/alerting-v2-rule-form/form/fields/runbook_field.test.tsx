@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -34,7 +36,7 @@ const createDefaultValues = (runbook: string = ''): Partial<FormValues> => ({
 
 describe('RunbookField', () => {
   it('does not render when closed', () => {
-    render(<RunbookField isOpen={false} onClose={jest.fn()} />, {
+    render(<RunbookField isOpen={false} onClose={vi.fn()} />, {
       wrapper: createFormWrapper(createDefaultValues()),
     });
 
@@ -43,7 +45,7 @@ describe('RunbookField', () => {
   });
 
   it('renders modal content when open', () => {
-    render(<RunbookField isOpen={true} onClose={jest.fn()} />, {
+    render(<RunbookField isOpen={true} onClose={vi.fn()} />, {
       wrapper: createFormWrapper(createDefaultValues()),
     });
 
@@ -54,7 +56,7 @@ describe('RunbookField', () => {
   });
 
   it('prefills editor from runbook artifact value', () => {
-    render(<RunbookField isOpen={true} onClose={jest.fn()} />, {
+    render(<RunbookField isOpen={true} onClose={vi.fn()} />, {
       wrapper: createFormWrapper(createDefaultValues('Existing runbook content')),
     });
 
@@ -63,7 +65,7 @@ describe('RunbookField', () => {
 
   it('calls onClose and does not save draft when cancel is clicked', async () => {
     const user = userEvent.setup();
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     render(
       <>
@@ -84,7 +86,7 @@ describe('RunbookField', () => {
 
   it('saves runbook and calls onClose when add runbook is clicked', async () => {
     const user = userEvent.setup();
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     render(
       <>
@@ -105,7 +107,7 @@ describe('RunbookField', () => {
 
   it('clears runbook artifact when saved with empty value', async () => {
     const user = userEvent.setup();
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     render(
       <>
@@ -126,7 +128,7 @@ describe('RunbookField', () => {
 
   it('refreshes draft from form value when reopened', async () => {
     const user = userEvent.setup();
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const wrapper = createFormWrapper(createDefaultValues('Persisted runbook'));
     const { rerender } = render(
       <>

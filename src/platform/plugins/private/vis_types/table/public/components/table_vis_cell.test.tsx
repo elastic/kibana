@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
@@ -19,7 +21,7 @@ describe('table vis cell', () => {
     const formattedColumns = {
       second: {
         formatter: {
-          convertToReact: jest.fn().mockReturnValue('formatted value'),
+          convertToReact: vi.fn().mockReturnValue('formatted value'),
         },
       },
     } as unknown as FormattedColumns;

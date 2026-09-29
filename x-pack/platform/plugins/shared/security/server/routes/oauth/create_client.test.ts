@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { RequestHandler } from '@kbn/core/server';
@@ -42,7 +45,7 @@ describe('Create OAuth Client route', () => {
     const coreContext = coreMock.createRequestHandlerContext();
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
 
@@ -70,13 +73,13 @@ describe('Create OAuth Client route', () => {
     return {
       routeHandler: handler as RequestHandler<any, any, any, any>,
       authc: authcMock,
-      oauthMock: authcMock.oauth as jest.Mocked<UiamOAuthType>,
+      oauthMock: authcMock.oauth as Mocked<UiamOAuthType>,
     };
   }
 
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
-  let oauthMock: jest.Mocked<UiamOAuthType>;
+  let oauthMock: Mocked<UiamOAuthType>;
 
   beforeEach(() => {
     ({ routeHandler, authc, oauthMock } = setup());

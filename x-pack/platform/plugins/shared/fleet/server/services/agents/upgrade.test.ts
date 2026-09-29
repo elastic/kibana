@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 
 import { appContextService } from '../app_context';
@@ -21,18 +24,18 @@ import { getRollingUpgradeOptions, upgradeBatch } from './upgrade_action_runner'
 import * as upgradeActionRunner from './upgrade_action_runner';
 import * as crud from './crud';
 
-jest.mock('./versions', () => {
+vi.mock('./versions', () => {
   return {
-    getAvailableVersions: jest
+    getAvailableVersions: vi
       .fn()
       .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
-    getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('8.8.0'),
+    getLatestAvailableAgentVersion: vi.fn().mockResolvedValue('8.8.0'),
   };
 });
 
-jest.mock('./action_status', () => {
+vi.mock('./action_status', () => {
   return {
-    getCancelledActions: jest.fn().mockResolvedValue([
+    getCancelledActions: vi.fn().mockResolvedValue([
       {
         actionId: 'cancelled-action',
       },
@@ -174,8 +177,8 @@ describe('getRollingUpgradeOptions', () => {
 
 describe('sendUpgradeAgentsActions kuery construction', () => {
   let upgradeMocks: ReturnType<typeof createClientMock>;
-  let mockGetAgentsByKuery: jest.SpyInstance;
-  let mockAgentsKueryNamespaceFilter: jest.SpyInstance;
+  let mockGetAgentsByKuery: MockInstance;
+  let mockAgentsKueryNamespaceFilter: MockInstance;
 
   beforeEach(async () => {
     upgradeMocks = createClientMock();
@@ -185,13 +188,13 @@ describe('sendUpgradeAgentsActions kuery construction', () => {
         withoutSpaceExtensions: upgradeMocks.soClient,
       })
     );
-    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
+    mockGetAgentsByKuery = vi.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
       agents: [],
       total: 0,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
     });
-    mockAgentsKueryNamespaceFilter = jest
+    mockAgentsKueryNamespaceFilter = vi
       .spyOn(agentNamespaces, 'agentsKueryNamespaceFilter')
       .mockResolvedValue('namespaces:custom_space');
   });
@@ -220,10 +223,10 @@ describe('sendUpgradeAgentsActions kuery construction', () => {
 
 describe('sendUpgradeAgentsActions kuery path — cheap count and sync/async branching', () => {
   let upgradeMocks: ReturnType<typeof createClientMock>;
-  let mockGetAgentsByKuery: jest.SpyInstance;
-  let mockOpenPointInTime: jest.SpyInstance;
-  let mockUpgradeBatch: jest.SpyInstance;
-  let mockUpgradeActionRunner: jest.SpyInstance;
+  let mockGetAgentsByKuery: MockInstance;
+  let mockOpenPointInTime: MockInstance;
+  let mockUpgradeBatch: MockInstance;
+  let mockUpgradeActionRunner: MockInstance;
 
   beforeEach(async () => {
     upgradeMocks = createClientMock();
@@ -233,17 +236,17 @@ describe('sendUpgradeAgentsActions kuery path — cheap count and sync/async bra
         withoutSpaceExtensions: upgradeMocks.soClient,
       })
     );
-    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery');
-    mockOpenPointInTime = jest.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
-    mockUpgradeBatch = jest
+    mockGetAgentsByKuery = vi.spyOn(crud, 'getAgentsByKuery');
+    mockOpenPointInTime = vi.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
+    mockUpgradeBatch = vi
       .spyOn(upgradeActionRunner, 'upgradeBatch')
       .mockResolvedValue({ actionId: 'test-action-id' });
-    mockUpgradeActionRunner = jest
+    mockUpgradeActionRunner = vi
       .spyOn(upgradeActionRunner, 'UpgradeActionRunner')
       .mockImplementation(
         () =>
           ({
-            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+            runActionAsyncTask: vi.fn().mockResolvedValue({ actionId: 'async-action-id' }),
           } as any)
       );
   });
@@ -357,7 +360,7 @@ describe('sendUpgradeAgentsActions kuery path — cheap count and sync/async bra
 
   it('dry run (agentIds) returns count of found agents only', async () => {
     const { soClient, esClient } = upgradeMocks;
-    const mockGetAgentsById = jest
+    const mockGetAgentsById = vi
       .spyOn(crud, 'getAgentsById')
       .mockResolvedValue([{ id: 'a1' } as Agent, { notFound: true, id: 'missing' }] as any);
 

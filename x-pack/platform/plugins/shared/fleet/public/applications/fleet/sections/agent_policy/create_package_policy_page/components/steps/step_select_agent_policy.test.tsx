@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act } from '@testing-library/react';
 
@@ -21,12 +24,12 @@ import {
 
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    useGetAgentPolicies: jest.fn(),
-    useMultipleAgentPolicies: jest.fn(),
-    useGetOutputs: jest.fn().mockReturnValue({
+    ...(await vi.importActual('../../../../../hooks')),
+    useGetAgentPolicies: vi.fn(),
+    useMultipleAgentPolicies: vi.fn(),
+    useGetOutputs: vi.fn().mockReturnValue({
       data: {
         items: [
           {
@@ -37,16 +40,16 @@ jest.mock('../../../../../hooks', () => {
       },
       isLoading: false,
     }),
-    sendBulkGetAgentPolicies: jest.fn().mockImplementation((ids) =>
+    sendBulkGetAgentPolicies: vi.fn().mockImplementation((ids) =>
       Promise.resolve({
         data: { items: ids.map((id: string) => ({ id, package_policies: [] })) },
       })
     ),
-    useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
-    sendGetFleetStatus: jest
+    useFleetStatus: vi.fn().mockReturnValue({ isReady: true } as any),
+    sendGetFleetStatus: vi
       .fn()
       .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
-    useGetPackagePolicies: jest.fn().mockImplementation((query) => ({
+    useGetPackagePolicies: vi.fn().mockImplementation((query) => ({
       data: {
         items: query.kuery.includes('osquery_manager')
           ? [{ policy_ids: ['policy-1'] }]
@@ -56,26 +59,26 @@ jest.mock('../../../../../hooks', () => {
       },
       error: undefined,
       isLoading: false,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     })),
   };
 });
 
-const useGetAgentPoliciesMock = useGetAgentPolicies as jest.MockedFunction<
+const useGetAgentPoliciesMock = useGetAgentPolicies as MockedFunction<
   typeof useGetAgentPolicies
 >;
-const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as MockedFunction<
   typeof useMultipleAgentPolicies
 >;
-const sendBulkGetAgentPoliciesMock = sendBulkGetAgentPolicies as jest.MockedFunction<
+const sendBulkGetAgentPoliciesMock = sendBulkGetAgentPolicies as MockedFunction<
   typeof sendBulkGetAgentPolicies
 >;
 
 describe('stepStepSelectAgentPolicy', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const mockSetHasAgentPolicyError = jest.fn();
-  const updateAgentPoliciesMock = jest.fn();
+  const mockSetHasAgentPolicyError = vi.fn();
+  const updateAgentPoliciesMock = vi.fn();
   const render = (packageInfo?: PackageInfo, selectedAgentPolicyIds: string[] = []) =>
     (renderResult = testRenderer.render(
       <StepSelectAgentPolicy
@@ -107,7 +110,7 @@ describe('stepStepSelectAgentPolicy', () => {
         },
         error: undefined,
         isLoading: false,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
       } as any);
 
       render();
@@ -122,7 +125,7 @@ describe('stepStepSelectAgentPolicy', () => {
         data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
         error: undefined,
         isLoading: false,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
       } as any);
       sendBulkGetAgentPoliciesMock.mockResolvedValueOnce({
         data: {
@@ -153,7 +156,7 @@ describe('stepStepSelectAgentPolicy', () => {
         data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
         error: undefined,
         isLoading: false,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
       } as any);
 
       render();
@@ -181,7 +184,7 @@ describe('stepStepSelectAgentPolicy', () => {
         },
         error: undefined,
         isLoading: false,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
       } as any);
     });
     afterEach(() => {
@@ -194,7 +197,7 @@ describe('stepStepSelectAgentPolicy', () => {
         data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
         error: undefined,
         isLoading: false,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
       } as any);
 
       render();
@@ -216,7 +219,7 @@ describe('stepStepSelectAgentPolicy', () => {
         },
         error: undefined,
         isLoading: false,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
       } as any);
 
       render();
@@ -269,7 +272,7 @@ describe('stepStepSelectAgentPolicy', () => {
         },
         error: undefined,
         isLoading: false,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
       } as any);
       const result = render({
         name: 'osquery_manager',
@@ -295,7 +298,7 @@ describe('stepStepSelectAgentPolicy', () => {
         },
         error: undefined,
         isLoading: false,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
       } as any);
       const result = render({
         name: 'apm',

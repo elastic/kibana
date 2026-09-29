@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createMemoryHistory } from 'history';
 import {
   firstValueFrom,
@@ -28,8 +31,8 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
-jest.mock('rxjs', () => {
-  const original = jest.requireActual('rxjs');
+vi.mock('rxjs', () => {
+  const original = require('rxjs');
   return {
     ...original,
     debounceTime: () => (source: Observable<any>) => source,
@@ -49,11 +52,11 @@ const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
 const getNavLinksService = (ids: Readonly<string[]> = []) => {
   const navLinks = ids.map((id) => getNavLink({ id, title: id.toUpperCase() }));
 
-  const navLinksMock: jest.Mocked<ChromeNavLinks> = {
-    getNavLinks$: jest.fn().mockReturnValue(of(navLinks)),
-    has: jest.fn(),
-    get: jest.fn(),
-    getAll: jest.fn().mockReturnValue(navLinks),
+  const navLinksMock: Mocked<ChromeNavLinks> = {
+    getNavLinks$: vi.fn().mockReturnValue(of(navLinks)),
+    has: vi.fn(),
+    get: vi.fn(),
+    getAll: vi.fn().mockReturnValue(navLinks),
   };
   return navLinksMock;
 };

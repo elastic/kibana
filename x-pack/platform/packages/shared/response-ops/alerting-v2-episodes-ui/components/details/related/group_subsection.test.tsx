@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,31 +15,43 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RuleStateStatus, type LoadedRuleState } from '../../../types/rule_state';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
 import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
-jest.mock('../../../hooks/use_fetch_same_group_episodes_query');
+vi.mock('../../../hooks/use_fetch_same_group_episodes_query');
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: { toasts: { addDanger: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          notifications: { toasts: { addDanger: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_episode_actions', () => ({
-  useFetchEpisodeActions: () => ({ data: undefined }),
-}));
+vi.mock('../../../hooks/use_fetch_episode_actions', () => {
+      const mocked = {
+      useFetchEpisodeActions: () => ({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_group_actions', () => ({
-  useFetchGroupActions: () => ({ data: undefined }),
-}));
+vi.mock('../../../hooks/use_fetch_group_actions', () => {
+      const mocked = {
+      useFetchGroupActions: () => ({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./related_list', () => ({
-  RelatedAlertEpisodesList: ({ rows }: { rows: AlertEpisode[] }) => (
-    <div data-test-subj="mockEpisodesList">{rows.length} episodes</div>
-  ),
-}));
+vi.mock('./related_list', () => {
+      const mocked = {
+      RelatedAlertEpisodesList: ({ rows }: { rows: AlertEpisode[] }) => (
+        <div data-test-subj="mockEpisodesList">{rows.length} episodes</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetch = jest.mocked(useFetchSameGroupEpisodesQuery);
+const mockUseFetch = vi.mocked(useFetchSameGroupEpisodesQuery);
 
 const loadedRuleState: LoadedRuleState = {
   status: RuleStateStatus.loaded,
@@ -52,7 +66,7 @@ const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
 
 describe('RelatedEpisodesGroupSubsection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders as expected when episodes are returned', () => {

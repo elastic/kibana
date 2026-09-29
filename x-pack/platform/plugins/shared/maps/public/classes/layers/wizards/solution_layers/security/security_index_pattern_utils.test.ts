@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getSecurityIndexPatterns } from './security_index_pattern_utils';
 
-jest.mock('../../../../../kibana_services', () => {
+vi.mock('../../../../../kibana_services', () => {
   return {
     getUiSettings() {
       return {
@@ -98,7 +100,7 @@ jest.mock('../../../../../kibana_services', () => {
 
 describe('getSecurityIndexPatterns', () => {
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   it('returns logs, apm and security index patterns only', async () => {
     const resp = await getSecurityIndexPatterns();

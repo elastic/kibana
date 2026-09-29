@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { type Container, ContainerModule } from 'inversify';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import {
@@ -22,7 +25,7 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { loadUiSettings } from './ui_settings';
 
 describe('loadUiSettings', () => {
-  let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
+  let injection: Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
   let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   let savedObjectsClient: SavedObjectsClientContract;
@@ -30,7 +33,7 @@ describe('loadUiSettings', () => {
   let globalUiSettingsClient: IUiSettingsClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
     savedObjectsClient = savedObjectsClientMock.create();
     uiSettingsClient = uiSettingsServiceMock.createClient();

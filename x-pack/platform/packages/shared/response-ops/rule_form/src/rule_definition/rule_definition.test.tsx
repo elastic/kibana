@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type ReactNode } from 'react';
 import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 
@@ -22,31 +24,40 @@ import { ALERT_FLAPPING_DETECTION_TITLE } from '../translations';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../constants/rule_flapping', () => ({
-  IS_RULE_SPECIFIC_FLAPPING_ENABLED: true,
-}));
+vi.mock('../constants/rule_flapping', () => {
+      const mocked = {
+      IS_RULE_SPECIFIC_FLAPPING_ENABLED: true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form', () => ({
-  RuleSettingsFlappingForm: (props: RuleSettingsFlappingFormProps) => (
-    <div data-test-subj="ruleSettingsFlappingForm">
-      <button
-        onClick={() =>
-          props.onFlappingChange({
-            lookBackWindow: 15,
-            statusChangeThreshold: 15,
-          })
-        }
-      >
-        onFlappingChange
-      </button>
-    </div>
-  ),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form', () => {
+      const mocked = {
+      RuleSettingsFlappingForm: (props: RuleSettingsFlappingFormProps) => (
+        <div data-test-subj="ruleSettingsFlappingForm">
+          <button
+            onClick={() =>
+              props.onFlappingChange({
+                lookBackWindow: 15,
+                statusChangeThreshold: 15,
+              })
+            }
+          >
+            onFlappingChange
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ruleType = {
   id: '.es-query',
@@ -106,9 +117,9 @@ const plugins = {
   },
 };
 
-const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
 const render = (toRender: ReactNode) => rtlRender(toRender, { wrapper: IntlProvider });
 
@@ -118,7 +129,7 @@ describe('Rule Definition', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Renders correctly', () => {

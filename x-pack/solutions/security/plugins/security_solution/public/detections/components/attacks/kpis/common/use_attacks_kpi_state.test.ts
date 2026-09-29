@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useLocalStorage } from '../../../../../common/components/local_storage';
 import { KpiViewSelection } from '../kpi_view_select/helpers';
@@ -12,19 +15,22 @@ import type { GroupBySelection } from '../../../alerts_kpis/alerts_progress_bar_
 import { useAttacksKpiState } from './use_attacks_kpi_state';
 
 // Mock useLocalStorage
-jest.mock('../../../../../common/components/local_storage', () => ({
-  useLocalStorage: jest.fn(),
-}));
+vi.mock('../../../../../common/components/local_storage', () => {
+      const mocked = {
+      useLocalStorage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAttacksKpiState', () => {
-  const mockSetViewSelection = jest.fn();
-  const mockSetStackBy0 = jest.fn();
-  const mockSetStackBy1 = jest.fn();
-  const mockSetGroupBySelection = jest.fn();
+  const mockSetViewSelection = vi.fn();
+  const mockSetStackBy0 = vi.fn();
+  const mockSetStackBy1 = vi.fn();
+  const mockSetGroupBySelection = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useLocalStorage as jest.Mock).mockImplementation(({ key }) => {
+    vi.clearAllMocks();
+    (useLocalStorage as Mock).mockImplementation(({ key }) => {
       if (key.includes('alert-view-selection')) {
         return ['summary', mockSetViewSelection];
       }
@@ -37,7 +43,7 @@ describe('useAttacksKpiState', () => {
       if (key.includes('group-by')) {
         return ['host.name', mockSetGroupBySelection];
       }
-      return [null, jest.fn()];
+      return [null, vi.fn()];
     });
   });
 

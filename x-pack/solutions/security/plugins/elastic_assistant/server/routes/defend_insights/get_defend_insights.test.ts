@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -21,7 +24,7 @@ import { updateDefendInsightsLastViewedAt } from './helpers';
 import { getDefendInsightsRoute } from './get_defend_insights';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-jest.mock('./helpers');
+vi.mock('./helpers');
 
 describe('getDefendInsightsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -49,31 +52,31 @@ describe('getDefendInsightsRoute', () => {
     mockUser = getDefaultUser();
     mockCurrentInsights = transformESSearchToDefendInsights(getDefendInsightsSearchEsMock());
     mockDataClient = {
-      findDefendInsightByConnectorId: jest.fn(),
-      findDefendInsightsByParams: jest.fn().mockResolvedValue(mockCurrentInsights),
-      updateDefendInsight: jest.fn(),
-      createDefendInsight: jest.fn(),
-      getDefendInsight: jest.fn(),
-      updateDefendInsights: jest.fn(),
+      findDefendInsightByConnectorId: vi.fn(),
+      findDefendInsightsByParams: vi.fn().mockResolvedValue(mockCurrentInsights),
+      updateDefendInsight: vi.fn(),
+      createDefendInsight: vi.fn(),
+      getDefendInsight: vi.fn(),
+      updateDefendInsights: vi.fn(),
     } as unknown as DefendInsightsDataClient;
 
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getDefendInsightsDataClient.mockResolvedValue(mockDataClient);
     getDefendInsightsRoute(server.router);
-    (updateDefendInsightsLastViewedAt as jest.Mock).mockImplementation(
+    (updateDefendInsightsLastViewedAt as Mock).mockImplementation(
       async ({ defendInsights }) => defendInsights
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Insufficient license', async () => {
     const insufficientLicense = licensingMock.createLicense({ license: { type: 'basic' } });
     const tools = requestContextMock.createTools();
     tools.context.licensing.license = insufficientLicense;
-    jest.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
+    vi.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
 
     const response = await server.inject(
       getDefendInsightsRequest({ connector_id: 'connector-id1' }),
@@ -125,7 +128,7 @@ describe('getDefendInsightsRoute', () => {
     });
   });
   it('should call updateDefendInsightsLastViewedAt with results from findDefendInsightsByParams', async () => {
-    const updateMock = updateDefendInsightsLastViewedAt as jest.Mock;
+    const updateMock = updateDefendInsightsLastViewedAt as Mock;
 
     await server.inject(
       getDefendInsightsRequest({ connector_id: 'connector-id1' }),
@@ -152,7 +155,7 @@ describe('getDefendInsightsRoute', () => {
   });
 
   it('should handle updateDefendInsightsLastViewedAt empty array', async () => {
-    (updateDefendInsightsLastViewedAt as jest.Mock).mockResolvedValueOnce([]);
+    (updateDefendInsightsLastViewedAt as Mock).mockResolvedValueOnce([]);
     const response = await server.inject(
       getDefendInsightsRequest({ connector_id: 'connector-id1' }),
       requestContextMock.convertContext(context)
@@ -162,7 +165,7 @@ describe('getDefendInsightsRoute', () => {
   });
 
   it('should handle updateDefendInsightsLastViewedAt error', async () => {
-    (updateDefendInsightsLastViewedAt as jest.Mock).mockRejectedValueOnce(new Error('Oh no!'));
+    (updateDefendInsightsLastViewedAt as Mock).mockRejectedValueOnce(new Error('Oh no!'));
     const response = await server.inject(
       getDefendInsightsRequest({ connector_id: 'connector-id1' }),
       requestContextMock.convertContext(context)
@@ -178,7 +181,7 @@ describe('getDefendInsightsRoute', () => {
   });
   describe('runExternalCallbacks', () => {
     it('should call runExternalCallbacks if defendInsights are returned', async () => {
-      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      const runExternalCallbacks = (await vi.importMock('./helpers')).runExternalCallbacks as Mock;
       runExternalCallbacks.mockResolvedValue(undefined);
 
       const response = await server.inject(
@@ -200,7 +203,7 @@ describe('getDefendInsightsRoute', () => {
     });
 
     it('should handle error thrown by runExternalCallbacks', async () => {
-      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      const runExternalCallbacks = (await vi.importMock('./helpers')).runExternalCallbacks as Mock;
       runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
 
       const response = await server.inject(
@@ -219,10 +222,10 @@ describe('getDefendInsightsRoute', () => {
     });
 
     it('should not call runExternalCallbacks if no defendInsights are returned', async () => {
-      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      const runExternalCallbacks = (await vi.importMock('./helpers')).runExternalCallbacks as Mock;
 
-      mockDataClient.findDefendInsightsByParams = jest.fn().mockResolvedValueOnce([]);
-      (updateDefendInsightsLastViewedAt as jest.Mock).mockResolvedValueOnce([]);
+      mockDataClient.findDefendInsightsByParams = vi.fn().mockResolvedValueOnce([]);
+      (updateDefendInsightsLastViewedAt as Mock).mockResolvedValueOnce([]);
 
       const response = await server.inject(
         getDefendInsightsRequest({ connector_id: 'connector-id1' }),

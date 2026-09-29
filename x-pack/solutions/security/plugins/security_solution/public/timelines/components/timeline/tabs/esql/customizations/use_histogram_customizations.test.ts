@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TestProviders } from '../../../../../../common/mock';
 import type {
   BrushTriggerEvent,
@@ -42,7 +45,7 @@ const mockUIActions = {
   ...uiActionsPluginMock.createStartContract(),
 } as UiActionsStart;
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
 const renderHookWithContext = () => {
   return renderHook(() => useHistogramCustomization(), {
@@ -86,7 +89,7 @@ const mockStateContainer = {} as ExtendedDiscoverStateContainer;
 describe('useHistogramCustomization', () => {
   const startServices = createStartServicesMock();
   beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         ...startServices,
         customDataService: mockDataService,
@@ -95,10 +98,10 @@ describe('useHistogramCustomization', () => {
     });
   });
   describe('onFilterCallback', () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => vi.clearAllMocks());
     it('should apply filter correctly, in case of single value click Trigger', async () => {
       (
-        mockDataService.actions.createFiltersFromValueClickAction as jest.Mock
+        mockDataService.actions.createFiltersFromValueClickAction as Mock
       ).mockResolvedValueOnce('some_filter');
 
       const renderHookResult = renderHookWithContext();
@@ -135,7 +138,7 @@ describe('useHistogramCustomization', () => {
 
     it('should apply filter correctly, in case of multi value click Trigger', async () => {
       (
-        mockDataService.actions.createFiltersFromMultiValueClickAction as jest.Mock
+        mockDataService.actions.createFiltersFromMultiValueClickAction as Mock
       ).mockResolvedValueOnce(['some_filter']);
 
       const renderHookResult = renderHookWithContext();
@@ -170,7 +173,7 @@ describe('useHistogramCustomization', () => {
   });
 
   describe('onBrushEndCallback', () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => vi.clearAllMocks());
     it('should apply timerange in correctly in case of brush end event', async () => {
       const renderHookResult = renderHookWithContext();
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { snoozeAlertInstance } from './snooze_alert_instance';
 
@@ -12,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('snoozeAlertInstance', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('calls the snooze API with correct URL (URL-encodes slashes)', async () => {

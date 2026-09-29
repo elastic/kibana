@@ -5,43 +5,45 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
-jest.mock('../../hooks', () => {
+vi.mock('../../hooks', async () => {
   return {
-    ...jest.requireActual('../../hooks'),
-    useFleetServerStandalone: jest.fn(),
-    useAgentEnrollmentFlyoutData: jest.fn(),
-    useAgentVersion: jest.fn().mockReturnValue('8.1.0'),
-    useAuthz: jest.fn().mockReturnValue({
+    ...(await vi.importActual('../../hooks')),
+    useFleetServerStandalone: vi.fn(),
+    useAgentEnrollmentFlyoutData: vi.fn(),
+    useAgentVersion: vi.fn().mockReturnValue('8.1.0'),
+    useAuthz: vi.fn().mockReturnValue({
       fleet: {
         addAgents: true,
         addFleetServers: true,
       },
       integrations: {},
     }),
-    useFleetStatus: jest.fn().mockReturnValue({ isReady: true }),
+    useFleetStatus: vi.fn().mockReturnValue({ isReady: true }),
   };
 });
 
-jest.mock('../../hooks/use_request', () => {
-  const module = jest.requireActual('../../hooks/use_request');
+vi.mock('../../hooks/use_request', async () => {
+  const module = (await vi.importActual('../../hooks/use_request'));
   return {
     ...module,
-    useGetFleetProxies: jest.fn().mockReturnValue({
+    useGetFleetProxies: vi.fn().mockReturnValue({
       data: { items: [] },
       isLoading: false,
       isInitialRequest: false,
     }),
-    useGetSettings: jest.fn().mockReturnValue({
+    useGetSettings: vi.fn().mockReturnValue({
       data: { item: { fleet_server_hosts: ['test'] } },
     }),
-    sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
+    sendGetOneAgentPolicy: vi.fn().mockResolvedValue({
       data: { item: { package_policies: [] } },
     }),
-    useGetSpaceSettings: jest.fn().mockReturnValue({}),
-    useGetAgentPolicies: jest.fn(),
-    useGetEnrollmentSettings: jest.fn().mockReturnValue({
+    useGetSpaceSettings: vi.fn().mockReturnValue({}),
+    useGetAgentPolicies: vi.fn(),
+    useGetEnrollmentSettings: vi.fn().mockReturnValue({
       isLoading: false,
       data: {
         fleet_server: {
@@ -53,76 +55,70 @@ jest.mock('../../hooks/use_request', () => {
   };
 });
 
-jest.mock('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy', () => {
-  const module = jest.requireActual(
-    '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy'
-  );
+vi.mock('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy', async () => {
+  const module = (await vi.importActual('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy'));
   return {
     ...module,
-    useFleetServerUnhealthy: jest.fn(),
+    useFleetServerUnhealthy: vi.fn(),
   };
 });
 
-jest.mock(
+vi.mock(
   '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form',
-  () => {
-    const module = jest.requireActual(
-      '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form'
-    );
+  async () => {
+    const module = (await vi.importActual('../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form'));
     return {
       ...module,
-      useAdvancedForm: jest.fn(),
+      useAdvancedForm: vi.fn(),
     };
   }
 );
 
-jest.mock(
+vi.mock(
   '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page',
-  () => {
-    const module = jest.requireActual(
-      '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page'
-    );
+  async () => {
+    const module = (await vi.importActual('../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page'));
     return {
       ...module,
-      FleetServerRequirementPage: jest.fn(),
+      FleetServerRequirementPage: vi.fn(),
     };
   }
 );
 
-jest.mock('../../applications/fleet/components/fleet_server_instructions/advanced_tab', () => {
+vi.mock('../../applications/fleet/components/fleet_server_instructions/advanced_tab', () => {
   return {
-    AdvancedTab: jest.fn(() => <div data-test-subj="advanced-tab">Advanced Tab</div>),
+    AdvancedTab: vi.fn(() => <div data-test-subj="advanced-tab">Advanced Tab</div>),
   };
 });
 
 /**
  * These steps functions use hooks inside useMemo which is not compatible with jest currently
  */
-jest.mock('./steps', () => {
-  const module = jest.requireActual('./steps');
+vi.mock('./steps', async () => {
+  const module = (await vi.importActual('./steps'));
   return {
     ...module,
-    AgentPolicySelectionStep: jest.fn().mockReturnValue({
+    AgentPolicySelectionStep: vi.fn().mockReturnValue({
       'data-test-subj': 'agent-policy-selection-step',
       title: 'agent-policy-selection-step',
       children: <>TEST</>,
     }),
-    AgentEnrollmentKeySelectionStep: jest.fn().mockReturnValue({
+    AgentEnrollmentKeySelectionStep: vi.fn().mockReturnValue({
       'data-test-subj': 'agent-enrollment-key-selection-step',
       title: 'agent-enrollment-key-selection-step',
       children: <>TEST</>,
     }),
-    ConfigureStandaloneAgentStep: jest.fn().mockReturnValue({
+    ConfigureStandaloneAgentStep: vi.fn().mockReturnValue({
       'data-test-subj': 'configure-standalone-step',
       title: 'configure-standalone-step',
       children: <>TEST</>,
     }),
-    DownloadStep: jest.fn().mockReturnValue({
+    DownloadStep: vi.fn().mockReturnValue({
       'data-test-subj': 'download-step',
       title: 'download-step',
       children: <>TEST</>,
     }),
-    IncomingDataConfirmationStep: jest.fn().mockReturnValue({
+    IncomingDataConfirmationStep: vi.fn().mockReturnValue({
       'data-test-subj': 'incoming-data-confirmation-step',
       title: 'incoming-data-confirmation-step',
       children: <>TEST</>,
@@ -130,8 +126,8 @@ jest.mock('./steps', () => {
   };
 });
 
-jest.mock('../../../common/services/agent_policies_helpers', () => {
+vi.mock('../../../common/services/agent_policies_helpers', () => {
   return {
-    policyHasFleetServer: jest.fn().mockReturnValue(true),
+    policyHasFleetServer: vi.fn().mockReturnValue(true),
   };
 });

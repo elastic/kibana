@@ -5,29 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows'),
-  getExecutionState: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agent-builder-tools-base/workflows')),
+      getExecutionState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getExecutionState } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { getExecutionState } = (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
 
 const createWorkflowsManagement = () => ({
   management: {
-    getWorkflowExecution: jest.fn(),
+    getWorkflowExecution: vi.fn(),
   },
 });
 
 const createSecurity = (hasAllRequested = true) => ({
   authz: {
-    actions: { api: { get: jest.fn((priv: string) => `api:${priv}`) } },
-    checkPrivilegesWithRequest: jest.fn().mockReturnValue({
-      atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
+    actions: { api: { get: vi.fn((priv: string) => `api:${priv}`) } },
+    checkPrivilegesWithRequest: vi.fn().mockReturnValue({
+      atSpace: vi.fn().mockResolvedValue({ hasAllRequested }),
     }),
   },
 });
@@ -45,7 +50,7 @@ const mockContext = {
 
 describe('getWorkflowExecutionStatusTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have the correct tool id', () => {

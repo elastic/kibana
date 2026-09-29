@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
@@ -19,19 +22,22 @@ import {
 import { ReqStatus } from '../../../../../notes';
 import type { State } from '../../../../../common/store';
 
-jest.mock('../../../../../common/components/user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+vi.mock('../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
-const mockAddError = jest.fn();
-jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+const mockAddError = vi.fn();
+vi.mock('../../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -64,7 +70,7 @@ const defaultUserPrivileges = {
 
 describe('NotesDetailsContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUserPrivilegesMock.mockReturnValue(defaultUserPrivileges);
   });
 
@@ -234,9 +240,9 @@ describe('NotesDetailsContent', () => {
     const timelineConfig = {
       timelineSavedObjectId: 'timeline-1',
       isTimelineSaved: true,
-      onNoteAddInTimeline: jest.fn(),
+      onNoteAddInTimeline: vi.fn(),
       attachToTimeline: true,
-      setAttachToTimeline: jest.fn(),
+      setAttachToTimeline: vi.fn(),
       attachToTimelineElement: attachElement,
     };
 
@@ -273,7 +279,7 @@ describe('NotesDetailsContent hideTimelineIcon prop', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUserPrivilegesMock.mockReturnValue(defaultUserPrivileges);
   });
 

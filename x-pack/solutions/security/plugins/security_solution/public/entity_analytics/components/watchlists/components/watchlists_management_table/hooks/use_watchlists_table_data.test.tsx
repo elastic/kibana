@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../../../common/mock';
 import { useWatchlistsTableData } from './use_watchlists_table_data';
 
-const mockFetchWatchlists = jest.fn();
-const mockListWatchlistEntitySources = jest.fn();
+const mockFetchWatchlists = vi.fn();
+const mockListWatchlistEntitySources = vi.fn();
 
-jest.mock('../../../../../api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    fetchWatchlists: mockFetchWatchlists,
-    listWatchlistEntitySources: mockListWatchlistEntitySources,
-  }),
-}));
+vi.mock('../../../../../api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        fetchWatchlists: mockFetchWatchlists,
+        listWatchlistEntitySources: mockListWatchlistEntitySources,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useWatchlistsTableData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchWatchlists.mockResolvedValue([
       {
         id: 'manual-only',

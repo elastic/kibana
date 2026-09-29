@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('node-fetch');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('node-fetch');
 import fetch from 'node-fetch';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 import type { StatsGetterConfig } from '@kbn/telemetry-collection-manager-plugin/server';
@@ -16,13 +19,13 @@ describe('sendTelemetryOptInStatus', () => {
   const mockClusterUuid = 'mk_uuid';
   const mockStatsGetterConfig = { unencrypted: false } as StatsGetterConfig;
   const mockTelemetryCollectionManager = {
-    getOptInStats: jest
+    getOptInStats: vi
       .fn()
       .mockResolvedValue([{ clusterUuid: mockClusterUuid, stats: 'mock_opt_in_hashed_value' }]),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls fetch with the opt in status returned from the telemetryCollectionManager', async () => {
@@ -40,7 +43,7 @@ describe('sendTelemetryOptInStatus', () => {
     );
     expect(result).toBeUndefined();
     expect(fetch).toHaveBeenCalledTimes(1);
-    expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
+    expect((fetch as MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://telemetry.elastic.co/v3/send/kibana-opt-in-reports",
         Object {
@@ -72,7 +75,7 @@ describe('sendTelemetryOptInStatus', () => {
     );
 
     expect(fetch).toHaveBeenCalledTimes(1);
-    expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
+    expect((fetch as MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://telemetry-staging.elastic.co/v3/send/kibana-opt-in-reports",
         Object {

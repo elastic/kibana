@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,49 +19,55 @@ import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../consta
 import { formatDateRange, formatInputDateRange } from '../utils';
 import { textToTimeRange } from '../parse';
 
-const mockUseDateRangePickerContext = jest.fn();
-const mockCalendarRangeSpy = jest.fn();
+const mockUseDateRangePickerContext = vi.fn();
+const mockCalendarRangeSpy = vi.fn();
 
-jest.mock('../date_range_picker_context', () => ({
-  useDateRangePickerContext: () => mockUseDateRangePickerContext(),
-}));
+vi.mock('../date_range_picker_context', () => {
+      const mocked = {
+      useDateRangePickerContext: () => mockUseDateRangePickerContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../date_range_picker_panel_ui', () => ({
-  PanelContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  PanelHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  PanelBody: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  PanelFooter: ({
-    children,
-    primaryAction,
-  }: {
-    children: React.ReactNode;
-    primaryAction?: React.ReactNode;
-  }) => (
-    <>
-      {primaryAction}
-      {children}
-    </>
-  ),
-  SubPanelHeading: ({
-    children,
-    onGoBack,
-  }: {
-    children: React.ReactNode;
-    onGoBack?: () => void;
-  }) => (
-    <button data-test-subj="back-button" onClick={onGoBack}>
-      {children}
-    </button>
-  ),
-}));
+vi.mock('../date_range_picker_panel_ui', () => {
+      const mocked = {
+      PanelContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      PanelHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      PanelBody: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      PanelFooter: ({
+        children,
+        primaryAction,
+      }: {
+        children: React.ReactNode;
+        primaryAction?: React.ReactNode;
+      }) => (
+        <>
+          {primaryAction}
+          {children}
+        </>
+      ),
+      SubPanelHeading: ({
+        children,
+        onGoBack,
+      }: {
+        children: React.ReactNode;
+        onGoBack?: () => void;
+      }) => (
+        <button data-test-subj="back-button" onClick={onGoBack}>
+          {children}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Calendar mock: renders numbered day buttons for February 2026 (days 1-28).
  * Clicking a day simulates DayPicker's range selection state machine using the
  * current `range` prop.
  */
-jest.mock('../calendar', () => {
-  const mockReact = jest.requireActual('react');
+vi.mock('../calendar', () => {
+  const mockReact = require('react');
 
   function MockCalendar({
     range,
@@ -102,9 +110,9 @@ describe('CalendarPanel', () => {
   /** Click a day by its number in the February 2026 calendar. */
   const clickDay = (day: number) => user.click(screen.getByRole('button', { name: String(day) }));
 
-  const applyRange = jest.fn();
-  const onPresetSave = jest.fn();
-  const setText = jest.fn((newText: string) => {
+  const applyRange = vi.fn();
+  const onPresetSave = vi.fn();
+  const setText = vi.fn((newText: string) => {
     const parsed = textToTimeRange(newText);
     const current = mockUseDateRangePickerContext();
 

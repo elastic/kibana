@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { stringify as yamlStringify } from 'yaml';
@@ -13,45 +15,60 @@ import { CreateCaseTemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../common/mock';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 
-const mockUseFormData = jest.fn();
-const mockUseFormContext = jest.fn();
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
-  ...jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib'),
-  useFormData: (...args: unknown[]) => mockUseFormData(...args),
-  useFormContext: () => mockUseFormContext(),
-  UseField: () => null,
-}));
+const mockUseFormData = vi.fn();
+const mockUseFormContext = vi.fn();
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib')),
+      useFormData: (...args: unknown[]) => mockUseFormData(...args),
+      useFormContext: () => mockUseFormContext(),
+      UseField: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseTemplateFormSync = jest.fn();
-jest.mock('./use_template_form_sync', () => ({
-  useTemplateFormSync: (...args: unknown[]) => mockUseTemplateFormSync(...args),
-}));
+const mockUseTemplateFormSync = vi.fn();
+vi.mock('./use_template_form_sync', () => {
+      const mocked = {
+      useTemplateFormSync: (...args: unknown[]) => mockUseTemplateFormSync(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetFieldDefinitions = jest.fn();
-jest.mock('../field_library/hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-}));
+const mockUseGetFieldDefinitions = vi.fn();
+vi.mock('../field_library/hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../templates_v2/field_types/field_types_registry', () => ({
-  controlRegistry: {
-    INPUT_TEXT: ({ name, label }: { name: string; label?: string }) => (
-      <div data-test-subj={`control-${name}`}>{label ?? name}</div>
-    ),
-    INPUT_NUMBER: ({ name, label }: { name: string; label?: string }) => (
-      <div data-test-subj={`control-${name}`}>{label ?? name}</div>
-    ),
-  },
-}));
+vi.mock('../templates_v2/field_types/field_types_registry', () => {
+      const mocked = {
+      controlRegistry: {
+        INPUT_TEXT: ({ name, label }: { name: string; label?: string }) => (
+          <div data-test-subj={`control-${name}`}>{label ?? name}</div>
+        ),
+        INPUT_NUMBER: ({ name, label }: { name: string; label?: string }) => (
+          <div data-test-subj={`control-${name}`}>{label ?? name}</div>
+        ),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseResolvedFields = jest.fn();
-jest.mock('../field_library/hooks/use_resolved_fields', () => ({
-  useResolvedFields: (...args: unknown[]) => mockUseResolvedFields(...args),
-}));
+const mockUseResolvedFields = vi.fn();
+vi.mock('../field_library/hooks/use_resolved_fields', () => {
+      const mocked = {
+      useResolvedFields: (...args: unknown[]) => mockUseResolvedFields(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CreateCaseTemplateFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseFormContext.mockReturnValue({ setFieldValue: jest.fn() });
+    vi.clearAllMocks();
+    mockUseFormContext.mockReturnValue({ setFieldValue: vi.fn() });
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [] },
       isLoading: false,
@@ -529,7 +546,7 @@ describe('CreateCaseTemplateFields', () => {
     // configuration finishes loading and reveals a required field without a default). Any
     // default already applied for the linked definition must be scrubbed from the mirrored
     // extended_fields, or it would submit alongside the legacy input.
-    const setFieldValue = jest.fn();
+    const setFieldValue = vi.fn();
     mockUseFormContext.mockReturnValue({ setFieldValue });
     mockUseFormData.mockReturnValue([{ templateId: undefined }]);
     mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
@@ -650,7 +667,7 @@ describe('CreateCaseTemplateFields', () => {
   });
 
   it('applies global field defaults to the form when definitions load', async () => {
-    const setFieldValue = jest.fn();
+    const setFieldValue = vi.fn();
     mockUseFormContext.mockReturnValue({ setFieldValue });
     mockUseFormData.mockReturnValue([{ templateId: undefined }]);
     mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
@@ -688,7 +705,7 @@ describe('CreateCaseTemplateFields', () => {
   });
 
   it('syncs inner form changes to parent form under the CASE_EXTENDED_FIELDS key', () => {
-    const setFieldValue = jest.fn();
+    const setFieldValue = vi.fn();
     mockUseFormContext.mockReturnValue({ setFieldValue });
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseTemplateFormSync.mockReturnValue({

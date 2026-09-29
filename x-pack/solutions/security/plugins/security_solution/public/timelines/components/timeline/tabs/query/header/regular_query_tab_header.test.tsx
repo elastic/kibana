@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,31 +19,49 @@ import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alert
 import { RegularQueryTabHeader } from './regular_query_tab_header';
 import { useQueryTabHeaderData } from './use_query_tab_header_data';
 
-jest.mock('./use_query_tab_header_data', () => ({
-  useQueryTabHeaderData: jest.fn(),
-}));
-jest.mock('../hooks/use_show_alerts_only_migration_message', () => ({
-  useShouldShowAlertsOnlyMigrationMessage: jest.fn(),
-}));
+vi.mock('./use_query_tab_header_data', () => {
+      const mocked = {
+      useQueryTabHeaderData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_show_alerts_only_migration_message', () => {
+      const mocked = {
+      useShouldShowAlertsOnlyMigrationMessage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../search_or_filter', () => ({
-  StatefulSearchOrFilter: () => <div data-test-subj="mock-search-or-filter" />,
-}));
+vi.mock('../../../search_or_filter', () => {
+      const mocked = {
+      StatefulSearchOrFilter: () => <div data-test-subj="mock-search-or-filter" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../data_providers', () => ({
-  DataProviders: () => <div data-test-subj="mock-data-providers" />,
-}));
+vi.mock('../../../data_providers', () => {
+      const mocked = {
+      DataProviders: () => <div data-test-subj="mock-data-providers" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./migration_message_callout', () => ({
-  MigrationMessageCallout: () => <div data-test-subj="mock-migration-callout" />,
-}));
+vi.mock('./migration_message_callout', () => {
+      const mocked = {
+      MigrationMessageCallout: () => <div data-test-subj="mock-migration-callout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // InPortal renders children directly in tests.
-jest.mock('react-reverse-portal', () => ({
-  InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('react-reverse-portal', () => {
+      const mocked = {
+      InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQueryTabHeaderData = useQueryTabHeaderData as jest.MockedFunction<
+const mockUseQueryTabHeaderData = useQueryTabHeaderData as MockedFunction<
   typeof useQueryTabHeaderData
 >;
 
@@ -63,12 +84,12 @@ describe('RegularQueryTabHeader', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryTabHeaderData.mockReturnValue({
       timelineEventsCountPortalNode: null as never,
       shouldShowQueryBuilder: false,
     });
-    (useShouldShowAlertsOnlyMigrationMessage as jest.Mock).mockReturnValue(false);
+    (useShouldShowAlertsOnlyMigrationMessage as Mock).mockReturnValue(false);
   });
 
   it('renders StatefulSearchOrFilter', () => {

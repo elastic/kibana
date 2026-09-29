@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import {
@@ -106,7 +108,7 @@ const legacyUrlAliasForObj1 = createLegacyUrlAliasObject(obj1.originId!, obj1.id
 const legacyUrlAliasForObj10 = createLegacyUrlAliasObject(obj10.originId!, obj10.id, obj10.type);
 
 describe('#createSavedObjects', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
   let bulkCreate: (typeof savedObjectsClient)['bulkCreate'];
 
   /**

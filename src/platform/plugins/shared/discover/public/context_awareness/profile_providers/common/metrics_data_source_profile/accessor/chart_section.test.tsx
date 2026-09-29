@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
@@ -54,12 +57,15 @@ type UnifiedGridProps = ChartSectionProps & {
 
 let unifiedGridProps: UnifiedGridProps | undefined;
 
-jest.mock('@kbn/unified-chart-section-viewer', () => ({
-  UnifiedMetricsExperienceGrid: (props: UnifiedGridProps) => {
-    unifiedGridProps = props;
-    return null;
-  },
-}));
+vi.mock('@kbn/unified-chart-section-viewer', () => {
+      const mocked = {
+      UnifiedMetricsExperienceGrid: (props: UnifiedGridProps) => {
+        unifiedGridProps = props;
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createFakeMetricsStateAdapter = (initialState: MetricsState) => {
   const subject = new BehaviorSubject(initialState);
@@ -67,61 +73,67 @@ const createFakeMetricsStateAdapter = (initialState: MetricsState) => {
     getState: () => subject.getValue(),
     getState$: () => subject.asObservable(),
     setState: (state: MetricsState) => subject.next(state),
-    updateState: jest.fn((update: Partial<MetricsState>) =>
+    updateState: vi.fn((update: Partial<MetricsState>) =>
       subject.next({ ...subject.getValue(), ...update })
     ),
   };
 };
 
-jest.mock('../../../../../application/main/state_management/redux', () => ({
-  useAppStateSelector: jest.fn(),
-}));
+vi.mock('../../../../../application/main/state_management/redux', () => {
+      const mocked = {
+      useAppStateSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDiscoverShared = { __sentinel: 'discoverShared' };
 const mockDataViews = { __sentinel: 'dataViews' };
-const mockShowErrorDialog = jest.fn();
+const mockShowErrorDialog = vi.fn();
 const mockEsqlReferenceHref = 'https://www.elastic.co/docs/reference/esql';
 const mockScopedLogger = { __sentinel: 'scopedLogger' };
-const mockLogger = { __sentinel: 'logger', get: jest.fn(() => mockScopedLogger) };
+const mockLogger = { __sentinel: 'logger', get: vi.fn(() => mockScopedLogger) };
 const mockFeatureFlags = { __sentinel: 'featureFlags' };
 const mockStorage = {
-  get: jest.fn((): unknown => null),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn((): unknown => null),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 };
 // Stable references so the memoized RecentMetricsStorage instance survives re-renders.
 const mockHttp = { basePath: { get: () => '' } };
 
-jest.mock('../../../../../hooks/use_discover_services', () => ({
-  useDiscoverServices: jest.fn(() => ({
-    discoverShared: mockDiscoverShared,
-    dataViews: mockDataViews,
-    notifications: {
-      showErrorDialog: mockShowErrorDialog,
-    },
-    docLinks: {
-      links: {
-        query: {
-          queryESQL: mockEsqlReferenceHref,
+vi.mock('../../../../../hooks/use_discover_services', () => {
+      const mocked = {
+      useDiscoverServices: vi.fn(() => ({
+        discoverShared: mockDiscoverShared,
+        dataViews: mockDataViews,
+        notifications: {
+          showErrorDialog: mockShowErrorDialog,
         },
-      },
-    },
-    logger: mockLogger,
-    core: {
-      featureFlags: mockFeatureFlags,
-      http: mockHttp,
-    },
-    storage: mockStorage,
-  })),
-}));
+        docLinks: {
+          links: {
+            query: {
+              queryESQL: mockEsqlReferenceHref,
+            },
+          },
+        },
+        logger: mockLogger,
+        core: {
+          featureFlags: mockFeatureFlags,
+          http: mockHttp,
+        },
+        storage: mockStorage,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): ChartSectionProps => {
   const fetch$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1) as UnifiedHistogramFetch$;
 
   return {
     services: {
-      data: { search: { search: jest.fn() } },
+      data: { search: { search: vi.fn() } },
       uiSettings: {},
     } as unknown as UnifiedHistogramServices,
     renderToggleActions: () => undefined,
@@ -135,7 +147,7 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
 
 const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
   const toolkitActions: ContextAwarenessToolkitActions = {
-    addFilter: jest.fn(),
+    addFilter: vi.fn(),
   };
   const metricsStateAdapter = createFakeMetricsStateAdapter({
     ...METRICS_GRID_SETTINGS_DEFAULTS,
@@ -154,7 +166,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
       toolkit: {
         ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: toolkitActions,
-        getStateAdapter: jest.fn(
+        getStateAdapter: vi.fn(
           () => metricsStateAdapter
         ) as unknown as ContextAwarenessToolkit['getStateAdapter'],
       },
@@ -179,14 +191,14 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
 describe('MetricsExperienceGridWrapper', () => {
   beforeEach(() => {
     unifiedGridProps = undefined;
-    (useAppStateSelector as jest.Mock).mockImplementation((selector) =>
+    (useAppStateSelector as Mock).mockImplementation((selector) =>
       selector({ breakdownField: 'host.name' })
     );
   });
 
   it('should not prevent default when onFilter is provided', () => {
-    const onFilter = jest.fn();
-    const preventDefault = jest.fn();
+    const onFilter = vi.fn();
+    const preventDefault = vi.fn();
     const event = { preventDefault } as unknown as ExpressionRendererEvent['data'];
 
     renderChartSection({ onFilter });

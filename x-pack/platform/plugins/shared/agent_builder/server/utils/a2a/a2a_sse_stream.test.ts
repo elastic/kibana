@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { JSONRPCResponse } from '@a2a-js/sdk';
 import { asyncGeneratorToA2ASSE } from './a2a_sse_stream';
 
@@ -26,7 +28,7 @@ const collect = (
 const buildResponse = (id: number, result: object): JSONRPCResponse =>
   ({ jsonrpc: '2.0', id, result } as unknown as JSONRPCResponse);
 
-const buildLogger = () => ({ debug: jest.fn(), error: jest.fn() });
+const buildLogger = () => ({ debug: vi.fn(), error: vi.fn() });
 
 describe('asyncGeneratorToA2ASSE', () => {
   const runGenerator = async function* (events: JSONRPCResponse[]) {
@@ -139,7 +141,7 @@ describe('asyncGeneratorToA2ASSE', () => {
   });
 
   it('ends the stream immediately when the signal is already aborted at entry, without consuming the source', async () => {
-    const gen = jest.fn(async function* (): AsyncGenerator<JSONRPCResponse, void, undefined> {
+    const gen = vi.fn(async function* (): AsyncGenerator<JSONRPCResponse, void, undefined> {
       yield buildResponse(1, { shouldNotBeSeen: true });
     });
     const controller = new AbortController();

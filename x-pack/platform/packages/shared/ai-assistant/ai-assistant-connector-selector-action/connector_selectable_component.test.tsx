@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -20,9 +22,9 @@ describe('ConnectorSelectableComponent', () => {
     const renderComponent = (props: ConnectorSelectableComponentProps) =>
       render(<ConnectorSelectableComponent {...props} />, { wrapper: EuiThemeProvider });
 
-    const onValueChange = jest.fn();
-    const onAddConnectorClick = jest.fn();
-    const onManageConnectorsClick = jest.fn();
+    const onValueChange = vi.fn();
+    const onAddConnectorClick = vi.fn();
+    const onManageConnectorsClick = vi.fn();
 
     const defaultProps: ConnectorSelectableProps = {
       preConfiguredConnectors: [
@@ -42,7 +44,7 @@ describe('ConnectorSelectableComponent', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders panel with pre-configured and custom connectors', async () => {
@@ -227,7 +229,7 @@ describe('ConnectorSelectableComponent', () => {
     const renderComponent = (props: ConnectorSelectableComponentProps) =>
       render(<ConnectorSelectableComponent {...props} />, { wrapper: EuiThemeProvider });
 
-    const onValueChange = jest.fn();
+    const onValueChange = vi.fn();
 
     const baseProps: ConnectorSelectableComponentProps = {
       preConfiguredConnectors: [
@@ -241,7 +243,7 @@ describe('ConnectorSelectableComponent', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('sets initial selection from defaultValue without firing callbacks', () => {

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import * as React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionTypeForm } from './action_type_form';
@@ -73,41 +76,48 @@ const mockedRuleTypeIndex = new Map(
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
-  useGetRuleTypesPermissions: jest.fn(),
-}));
-const { useGetRuleTypesPermissions } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => {
+      const mocked = {
+      useGetRuleTypesPermissions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
 
-jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
-  const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
+vi.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', async () => {
+  const original = (await vi.importActual('@kbn/alerts-ui-shared/src/action_variables/transforms'));
   return {
     ...original,
-    transformActionVariables: jest.fn(),
+    transformActionVariables: vi.fn(),
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
-}));
+vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
+      const mocked = {
+      useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_rule_alert_fields', () => ({
-  useRuleTypeAlertFields: () => ({
-    isLoading: false,
-    fields: [],
-  }),
-}));
+vi.mock('../../hooks/use_rule_alert_fields', () => {
+      const mocked = {
+      useRuleTypeAlertFields: () => ({
+        isLoading: false,
+        fields: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('action_type_form', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // some tests rely on fake timers, so we need to clear them
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   useGetRuleTypesPermissions.mockReturnValue({
@@ -169,7 +179,7 @@ describe('action_type_form', () => {
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
-    const setActionParamsProperty = jest.fn();
+    const setActionParamsProperty = vi.fn();
 
     render(
       <I18nProvider>
@@ -317,7 +327,7 @@ describe('action_type_form', () => {
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
-    const setActionParamsProperty = jest.fn();
+    const setActionParamsProperty = vi.fn();
 
     render(
       <I18nProvider>
@@ -410,22 +420,22 @@ describe('action_type_form', () => {
 
     // Verify that the tooltip content is accessible via aria
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
+    vi.useFakeTimers({ legacyFakeTimers: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(jest) });
     await user.hover(screen.getByTestId('action-group-error-icon'));
     // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     await waitFor(() => {
       expect(document.querySelector('.euiToolTipPopover')).toHaveTextContent(
         'Action contains errors.'
       );
     });
     // Clearing all mocks will also reset fake timers.
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('resets action variables when the actionItem.frequency.summary changes', async () => {
-    const mockTransformActionVariables = transformActionVariables as jest.Mock;
+    const mockTransformActionVariables = transformActionVariables as Mock;
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
       iconClass: 'test',
@@ -719,13 +729,13 @@ function getActionTypeForm({
         actionConnector={actionConnector ?? actionConnectorDefault}
         actionItem={actionItem ?? actionItemDefault}
         connectors={connectors ?? connectorsDefault}
-        onAddConnector={onAddConnector ?? jest.fn()}
-        onDeleteAction={onDeleteAction ?? jest.fn()}
-        onConnectorSelected={onConnectorSelected ?? jest.fn()}
+        onAddConnector={onAddConnector ?? vi.fn()}
+        onDeleteAction={onDeleteAction ?? vi.fn()}
+        onConnectorSelected={onConnectorSelected ?? vi.fn()}
         defaultActionGroupId={defaultActionGroupId ?? 'default'}
-        setActionParamsProperty={setActionParamsProperty ?? jest.fn()}
-        setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
-        setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
+        setActionParamsProperty={setActionParamsProperty ?? vi.fn()}
+        setActionFrequencyProperty={setActionFrequencyProperty ?? vi.fn()}
+        setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? vi.fn()}
         index={index ?? 1}
         actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
         actionTypeRegistry={actionTypeRegistry}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { merge } from 'lodash';
 
@@ -28,18 +31,21 @@ import {
 
 import { bulkUpdateAgents } from './crud';
 
-jest.mock('./crud');
-jest.mock('../audit_logging');
-jest.mock('../agent_policy');
-jest.mock('../secrets', () => ({
-  isActionSecretStorageEnabled: jest.fn(),
-  toCompiledSecretRef: jest.fn((id: string) => `$co.elastic.secret{${id}}`),
-}));
+vi.mock('./crud');
+vi.mock('../audit_logging');
+vi.mock('../agent_policy');
+vi.mock('../secrets', () => {
+      const mocked = {
+      isActionSecretStorageEnabled: vi.fn(),
+      toCompiledSecretRef: vi.fn((id: string) => `$co.elastic.secret{${id}}`),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 
-const mockedBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedBulkUpdateAgents = bulkUpdateAgents as MockedFunction<typeof bulkUpdateAgents>;
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
 describe('Agent actions', () => {
   let mockContext: MockedFleetAppContext;
@@ -83,7 +89,7 @@ describe('Agent actions', () => {
 
   describe('createAgentAction', () => {
     beforeEach(() => {
-      mockContext.messageSigningService.sign = jest
+      mockContext.messageSigningService.sign = vi
         .fn()
         .mockImplementation((message: Record<string, unknown>) =>
           Promise.resolve({
@@ -324,7 +330,7 @@ describe('Agent actions', () => {
 
   describe('cancelAgentAction', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should throw if the target action is not found', async () => {
@@ -462,7 +468,7 @@ describe('Agent actions', () => {
         } as any)
         .mockResolvedValueOnce({ hits: { hits: [] } } as any); // no other pending batches
 
-      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+      mockedAgentPolicyService.update = vi.fn().mockResolvedValue({});
 
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'unenroll-action-1');
@@ -512,7 +518,7 @@ describe('Agent actions', () => {
         } as any);
       // No policy IDs found so cancel-other-batches step is skipped (no searches 4/5)
 
-      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+      mockedAgentPolicyService.update = vi.fn().mockResolvedValue({});
 
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'unenroll-action-1');
@@ -559,7 +565,7 @@ describe('Agent actions', () => {
         } as any)
         .mockResolvedValueOnce({ hits: { hits: [] } } as any); // no other pending batches
 
-      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+      mockedAgentPolicyService.update = vi.fn().mockResolvedValue({});
 
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, scheduledActionId);
@@ -625,7 +631,7 @@ describe('Agent actions', () => {
           },
         } as any); // another pending batch for same policy
 
-      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+      mockedAgentPolicyService.update = vi.fn().mockResolvedValue({});
 
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'ScheduledUnenrollInactiveAgents-batch-1');
@@ -681,7 +687,7 @@ describe('Agent actions', () => {
         } as any);
       // No searches 4/5 — cancelPendingBatches must NOT be called
 
-      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+      mockedAgentPolicyService.update = vi.fn().mockResolvedValue({});
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'manual-unenroll-action-1');
 
@@ -717,7 +723,7 @@ describe('Agent actions', () => {
         },
       } as any);
 
-      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+      mockedAgentPolicyService.update = vi.fn().mockResolvedValue({});
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
 

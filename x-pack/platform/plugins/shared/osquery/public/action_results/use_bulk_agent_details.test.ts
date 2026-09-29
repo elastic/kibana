@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,9 +15,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useBulkAgentDetails } from './use_bulk_agent_details';
 import { useKibana } from '../common/lib/kibana';
 
-jest.mock('../common/lib/kibana');
+vi.mock('../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const BULK_AGENT_DETAILS_ROUTE = '/internal/osquery/fleet_wrapper/agents/_bulk';
 
@@ -32,17 +35,17 @@ const createFreshQueryClient = () =>
   });
 
 describe('useBulkAgentDetails', () => {
-  let mockHttpPost: jest.Mock;
-  let mockAddError: jest.Mock;
-  let mockRemoveToast: jest.Mock;
+  let mockHttpPost: Mock;
+  let mockAddError: Mock;
+  let mockRemoveToast: Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockHttpPost = jest.fn().mockResolvedValue({ agents: [] });
-    mockAddError = jest.fn();
-    mockRemoveToast = jest.fn();
+    mockHttpPost = vi.fn().mockResolvedValue({ agents: [] });
+    mockAddError = vi.fn();
+    mockRemoveToast = vi.fn();
     queryClient = createFreshQueryClient();
 
     useKibanaMock.mockReturnValue({

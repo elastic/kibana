@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -43,9 +45,9 @@ import { CoreUsageStatsClient } from '.';
 
 describe('CoreUsageStatsClient', () => {
   const stop$ = new Subject<void>();
-  const incrementUsageCounterMock = jest.fn();
+  const incrementUsageCounterMock = vi.fn();
   const setup = (namespace?: string) => {
-    const debugLoggerMock = jest.fn();
+    const debugLoggerMock = vi.fn();
     const basePathMock = httpServiceMock.createBasePath();
     // we could mock a return value for basePathMock.get, but it isn't necessary for testing purposes
     basePathMock.remove.mockReturnValue(namespace ? `/s/${namespace}` : '/');
@@ -54,7 +56,7 @@ describe('CoreUsageStatsClient', () => {
       debugLogger: debugLoggerMock,
       basePath: basePathMock,
       repositoryPromise: Promise.resolve(repositoryMock),
-      fetchDeprecatedUsageStats: jest.fn(),
+      fetchDeprecatedUsageStats: vi.fn(),
       stop$,
       incrementUsageCounter: incrementUsageCounterMock,
     });
@@ -68,7 +70,7 @@ describe('CoreUsageStatsClient', () => {
   const incrementOptions = { refresh: false };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeEach(() => {
@@ -81,7 +83,7 @@ describe('CoreUsageStatsClient', () => {
 
   describe('Request-batching', () => {
     it.each([
-      { triggerName: 'timer-based', triggerFn: async () => await jest.runOnlyPendingTimersAsync() },
+      { triggerName: 'timer-based', triggerFn: async () => await vi.runOnlyPendingTimersAsync() },
       {
         triggerName: 'forced-flush',
         triggerFn: (usageStatsClient: CoreUsageStatsClient) => {
@@ -160,7 +162,7 @@ describe('CoreUsageStatsClient', () => {
       );
 
       // After timer, it sends the remainder event
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
 
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
       expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
@@ -215,7 +217,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -226,7 +228,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkCreate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -250,7 +252,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkCreate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -274,7 +276,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkCreate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -298,7 +300,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
         types: ['type1', 'type2'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${BULK_CREATE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
@@ -320,7 +322,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -331,7 +333,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkGet({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -355,7 +357,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkGet({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -379,7 +381,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkGet({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -403,7 +405,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest(),
         types: ['type1', 'type2'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${BULK_GET_STATS_PREFIX}.kibanaRequest.no.types.type1`,
@@ -425,7 +427,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -436,7 +438,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkResolve({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -460,7 +462,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkResolve({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -484,7 +486,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkResolve({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -508,7 +510,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
         types: ['type1', 'type2'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${BULK_RESOLVE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
@@ -530,7 +532,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -541,7 +543,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkUpdate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -565,7 +567,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkUpdate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -589,7 +591,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkUpdate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -613,7 +615,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest(),
         types: ['type1', 'type2'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${BULK_UPDATE_STATS_PREFIX}.kibanaRequest.no.types.type1`,
@@ -635,7 +637,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -646,7 +648,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsCreate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -670,7 +672,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsCreate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -694,7 +696,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsCreate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -715,7 +717,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
         types: ['type1'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${CREATE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
@@ -734,7 +736,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -745,7 +747,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkDelete({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -769,7 +771,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkDelete({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -793,7 +795,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkDelete({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -817,7 +819,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest(),
         types: ['type1', 'type2'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${BULK_DELETE_STATS_PREFIX}.kibanaRequest.no.types.type1`,
@@ -839,7 +841,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -850,7 +852,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsDelete({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -874,7 +876,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsDelete({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -898,7 +900,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsDelete({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -919,7 +921,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
         types: ['type1'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${DELETE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
@@ -938,7 +940,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -949,7 +951,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsFind({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -970,7 +972,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsFind({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -991,7 +993,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsFind({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1012,7 +1014,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest(),
         types: ['type1'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${FIND_STATS_PREFIX}.kibanaRequest.no.types.type1`,
@@ -1031,7 +1033,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1042,7 +1044,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsGet({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1063,7 +1065,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsGet({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1084,7 +1086,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsGet({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1105,7 +1107,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
         types: ['type1'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${GET_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
@@ -1124,7 +1126,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1135,7 +1137,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolve({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1159,7 +1161,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolve({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1183,7 +1185,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolve({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1207,7 +1209,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest(),
         types: ['type1'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${RESOLVE_STATS_PREFIX}.kibanaRequest.no.types.type1`,
@@ -1226,7 +1228,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1237,7 +1239,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsUpdate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1261,7 +1263,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsUpdate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1285,7 +1287,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsUpdate({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1306,7 +1308,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
         types: ['type1'],
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${UPDATE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
@@ -1325,7 +1327,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as IncrementSavedObjectsImportOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
     });
 
@@ -1336,7 +1338,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsImport({
         request,
       } as IncrementSavedObjectsImportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1366,14 +1368,14 @@ describe('CoreUsageStatsClient', () => {
         overwrite: true,
         compatibilityMode: true,
       } as IncrementSavedObjectsImportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       await usageStatsClient.incrementSavedObjectsImport({
         request,
         createNewCopies: false,
         overwrite: true,
         compatibilityMode: true,
       } as IncrementSavedObjectsImportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
       expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
         1,
@@ -1418,7 +1420,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsImport({
         request,
       } as IncrementSavedObjectsImportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1442,7 +1444,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest(),
         types: ['type1', 'type2'],
       } as IncrementSavedObjectsImportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${IMPORT_STATS_PREFIX}.kibanaRequest.no.types.type1`,
@@ -1464,7 +1466,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as IncrementSavedObjectsResolveImportErrorsOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1475,7 +1477,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         request,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1506,13 +1508,13 @@ describe('CoreUsageStatsClient', () => {
         createNewCopies: true,
         compatibilityMode: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         request,
         createNewCopies: false,
         compatibilityMode: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
       expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
         1,
@@ -1561,7 +1563,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         request,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1590,7 +1592,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
         types: ['type1', 'type2'],
       } as IncrementSavedObjectsImportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
@@ -1612,7 +1614,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as IncrementSavedObjectsExportOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1625,7 +1627,7 @@ describe('CoreUsageStatsClient', () => {
         types: undefined,
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1652,7 +1654,7 @@ describe('CoreUsageStatsClient', () => {
         types: ['foo', 'bar'],
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1677,7 +1679,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsExport({
         request,
       } as IncrementSavedObjectsExportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1700,7 +1702,7 @@ describe('CoreUsageStatsClient', () => {
         types: ['type1', 'type2'],
         supportedTypes: ['type1', 'type2', 'type3'],
       } as IncrementSavedObjectsExportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${EXPORT_STATS_PREFIX}.kibanaRequest.no.types.type1`,
@@ -1722,7 +1724,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1733,7 +1735,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementLegacyDashboardsImport({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1760,7 +1762,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementLegacyDashboardsImport({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1787,7 +1789,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest(),
         types: ['type1', 'type2'],
       } as IncrementSavedObjectsImportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.kibanaRequest.no.types.type1`,
@@ -1809,7 +1811,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1820,7 +1822,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementLegacyDashboardsExport({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1847,7 +1849,7 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementLegacyDashboardsExport({
         request,
       } as BaseIncrementOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
@@ -1874,7 +1876,7 @@ describe('CoreUsageStatsClient', () => {
         request: httpServerMock.createKibanaRequest(),
         types: ['type1', 'type2'],
       } as IncrementSavedObjectsImportOptions);
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
       expect(incrementUsageCounterMock).toHaveBeenCalledWith({
         counterName: `savedObjects.${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.kibanaRequest.no.types.type1`,

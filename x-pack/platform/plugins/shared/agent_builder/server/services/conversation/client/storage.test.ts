@@ -5,40 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createStorage } from './storage';
 
-const createLoggerMock = (): jest.Mocked<Logger> => {
+const createLoggerMock = (): Mocked<Logger> => {
   const logger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    error: jest.fn(),
-    get: jest.fn(),
-  } as unknown as jest.Mocked<Logger>;
+    debug: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    get: vi.fn(),
+  } as unknown as Mocked<Logger>;
 
   logger.get.mockReturnValue(logger);
 
   return logger;
 };
 
-const createMockEsClient = (): jest.Mocked<ElasticsearchClient> => {
+const createMockEsClient = (): Mocked<ElasticsearchClient> => {
   return {
-    info: jest.fn().mockResolvedValue({
+    info: vi.fn().mockResolvedValue({
       version: { build_flavor: 'default' },
     }),
-    index: jest.fn().mockResolvedValue({
+    index: vi.fn().mockResolvedValue({
       _id: 'conversation-1',
       _index: '.kibana-elastic-ai-agent-builder-conversations-000001',
       _shards: { successful: 1 },
       result: 'created',
     }),
     indices: {
-      putIndexTemplate: jest.fn().mockResolvedValue({}),
-      getAlias: jest.fn().mockResolvedValue({}),
-      get: jest.fn().mockResolvedValue({}),
-      create: jest.fn().mockResolvedValue({}),
+      putIndexTemplate: vi.fn().mockResolvedValue({}),
+      getAlias: vi.fn().mockResolvedValue({}),
+      get: vi.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({}),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+  } as unknown as Mocked<ElasticsearchClient>;
 };
 
 describe('conversation storage mapping', () => {

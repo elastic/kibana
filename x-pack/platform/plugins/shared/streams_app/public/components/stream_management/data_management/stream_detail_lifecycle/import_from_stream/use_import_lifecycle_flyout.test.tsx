@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { Streams } from '@kbn/streams-schema';
@@ -15,16 +18,16 @@ import {
 } from './import_lifecycle_flyout_context';
 import { useImportLifecycleFlyout } from './use_import_lifecycle_flyout';
 
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 const mockStreamsRepositoryClient = { fetch: mockFetch };
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockTrackRetentionChanged = jest.fn();
-const mockGetIlmPolicies = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockTrackRetentionChanged = vi.fn();
+const mockGetIlmPolicies = vi.fn();
 
 const mockKibana = {
   core: {
-    application: { navigateToApp: jest.fn() },
+    application: { navigateToApp: vi.fn() },
     http: { get: mockGetIlmPolicies },
     notifications: {
       toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
@@ -39,17 +42,23 @@ const mockKibana = {
   isServerless: false,
 };
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => mockKibana,
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockKibana,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
-jest.mock('../../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_streams_app_fetch', () => {
+      const mocked = {
+      useStreamsAppFetch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseStreamsAppFetch = useStreamsAppFetch as jest.Mock;
+const mockUseStreamsAppFetch = useStreamsAppFetch as Mock;
 
 const otherStream = {
   stream: { name: 'other-stream' },
@@ -116,14 +125,14 @@ const definition = {
 
 describe('useImportLifecycleFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseStreamsAppFetch.mockReturnValue({ value: [otherStream], loading: false });
     mockFetch.mockResolvedValue(undefined);
     mockGetIlmPolicies.mockReturnValue(new Promise(() => {}));
   });
 
   const renderImportFlyout = (
-    refreshDefinition = jest.fn(),
+    refreshDefinition = vi.fn(),
     streamDefinition: Streams.ingest.all.GetResponse = definition
   ) =>
     renderHook(
@@ -204,7 +213,7 @@ describe('useImportLifecycleFlyout', () => {
   });
 
   it('applies the selected stream lifecycle and closes on success', async () => {
-    const refreshDefinition = jest.fn();
+    const refreshDefinition = vi.fn();
     const { result } = renderImportFlyout(refreshDefinition);
 
     await act(async () => {

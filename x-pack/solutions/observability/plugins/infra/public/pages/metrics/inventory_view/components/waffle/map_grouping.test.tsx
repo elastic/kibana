@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Map } from './map';
@@ -16,15 +18,18 @@ import type { AutoSizerProps } from '../../../../../components/auto_sizer';
 import { EuiProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 
-jest.mock('../../../../../components/auto_sizer', () => ({
-  AutoSizer: ({ children }: AutoSizerProps) => {
-    return children({
-      bounds: { height: 800, width: 1200 },
-      content: { height: 800, width: 1200 },
-      measureRef: jest.fn(),
+vi.mock('../../../../../components/auto_sizer', () => {
+      const mocked = {
+      AutoSizer: ({ children }: AutoSizerProps) => {
+        return children({
+          bounds: { height: 800, width: 1200 },
+          content: { height: 800, width: 1200 },
+          measureRef: vi.fn(),
+        });
+      },
+    };
+      return { ...mocked, default: mocked };
     });
-  },
-}));
 
 const renderWithProviders = (children: React.ReactNode) =>
   render(<EuiProvider>{children}</EuiProvider>);
@@ -70,7 +75,7 @@ const defaultProps = {
   nodeType: 'host' as InventoryItemType,
   formatter: (value: string | number) => `${value}`,
   currentTime: Date.now(),
-  onFilter: jest.fn(),
+  onFilter: vi.fn(),
   bounds: { min: 0, max: 1, legend: { min: 0, max: 1 } },
   bottomMargin: 0,
   staticHeight: false,
@@ -79,7 +84,7 @@ const defaultProps = {
 
 describe('Map sorting', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders nodes in correct groups when grouped by a single value', () => {

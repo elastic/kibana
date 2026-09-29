@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -14,11 +16,11 @@ import { AnalyticsService } from '../../analytics';
 describe('logoutApp', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'sessionStorage', {
-      value: { clear: jest.fn() },
+      value: { clear: vi.fn() },
       writable: true,
     });
     Object.defineProperty(window, 'localStorage', {
-      value: { removeItem: jest.fn() },
+      value: { removeItem: vi.fn() },
       writable: true,
     });
     Object.defineProperty(window, 'location', {
@@ -57,8 +59,8 @@ describe('logoutApp', () => {
     await (mount as AppMount)({
       element: containerMock,
       appBasePath: '',
-      onAppLeave: jest.fn(),
-      setHeaderActionMenu: jest.fn(),
+      onAppLeave: vi.fn(),
+      setHeaderActionMenu: vi.fn(),
       history: scopedHistoryMock.create(),
       theme$: themeServiceMock.createTheme$(),
     });

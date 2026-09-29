@@ -7,31 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createVisualizeAppState } from './create_visualize_app_state';
 import { migrateAppState } from './migrate_app_state';
 import { visualizeAppStateStub } from './stubs';
 
-const mockStartStateSync = jest.fn();
-const mockStopStateSync = jest.fn();
+const mockStartStateSync = vi.fn();
+const mockStopStateSync = vi.fn();
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => ({
-  createStateContainer: jest.fn(() => 'stateContainer'),
-  syncState: jest.fn(() => ({
-    start: mockStartStateSync,
-    stop: mockStopStateSync,
-  })),
-}));
-jest.mock('./migrate_app_state', () => ({
-  migrateAppState: jest.fn(() => 'migratedAppState'),
-}));
+vi.mock('@kbn/kibana-utils-plugin/public', () => {
+      const mocked = {
+      createStateContainer: vi.fn(() => 'stateContainer'),
+      syncState: vi.fn(() => ({
+        start: mockStartStateSync,
+        stop: mockStopStateSync,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./migrate_app_state', () => {
+      const mocked = {
+      migrateAppState: vi.fn(() => 'migratedAppState'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { createStateContainer, syncState } = jest.requireMock('@kbn/kibana-utils-plugin/public');
+const { createStateContainer, syncState } = (await vi.importMock('@kbn/kibana-utils-plugin/public'));
 
 describe('createVisualizeAppState', () => {
   const kbnUrlStateStorage = {
-    set: jest.fn(),
-    get: jest.fn(() => ({ linked: false })),
+    set: vi.fn(),
+    get: vi.fn(() => ({ linked: false })),
   } as unknown as IKbnUrlStateStorage;
 
   const { stateContainer, stopStateSync } = createVisualizeAppState({

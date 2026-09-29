@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -70,7 +72,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   loaded: 2,
 };
 
-const searchMock = jest.fn();
+const searchMock = vi.fn();
 const ALERT_INDEX_PATTERN = '.test-alerts-security.alerts';
 const TEST_SPACE_ID = 'test-default';
 const mockDeps = {
@@ -96,10 +98,10 @@ export const mockOptions: RiskScoreRequestOptions = {
 };
 
 describe('buildRiskScoreQuery search strategy', () => {
-  const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildRiskScoreQuery');
+  const buildKpiRiskScoreQuery = vi.spyOn(buildQuery, 'buildRiskScoreQuery');
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('buildDsl', () => {

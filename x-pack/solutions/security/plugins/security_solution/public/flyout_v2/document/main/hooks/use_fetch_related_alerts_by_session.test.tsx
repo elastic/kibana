@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 
@@ -15,7 +18,7 @@ import type {
 import { useFetchRelatedAlertsBySession } from './use_fetch_related_alerts_by_session';
 import { useAlertPrevalence } from './use_alert_prevalence';
 
-jest.mock('./use_alert_prevalence');
+vi.mock('./use_alert_prevalence');
 
 const entityId = 'entityId';
 const scopeId = 'scopeId';
@@ -27,7 +30,7 @@ describe('useFetchRelatedAlertsBySession', () => {
   >;
 
   it('should return loading true while data is loading', () => {
-    (useAlertPrevalence as jest.Mock).mockReturnValue({
+    (useAlertPrevalence as Mock).mockReturnValue({
       loading: true,
       error: false,
       alertIds: [],
@@ -42,7 +45,7 @@ describe('useFetchRelatedAlertsBySession', () => {
   });
 
   it('should return error true while data has errored out', () => {
-    (useAlertPrevalence as jest.Mock).mockReturnValue({
+    (useAlertPrevalence as Mock).mockReturnValue({
       loading: false,
       error: true,
       alertIds: [],
@@ -57,7 +60,7 @@ describe('useFetchRelatedAlertsBySession', () => {
   });
 
   it('should return data and count when data fetching is successful', () => {
-    (useAlertPrevalence as jest.Mock).mockReturnValue({
+    (useAlertPrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       alertIds: ['1', '2'],

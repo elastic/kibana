@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import { UntrackAlertsModal } from './untrack_alerts_modal';
 
-const onConfirmMock = jest.fn();
+const onConfirmMock = vi.fn();
 
-const onCancelMock = jest.fn();
+const onCancelMock = vi.fn();
 
 describe('Untrack alerts modal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render correctly', () => {

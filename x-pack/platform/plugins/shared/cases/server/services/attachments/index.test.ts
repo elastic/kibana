@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { unset } from 'lodash';
 
 import type { SavedObjectsBulkResponse } from '@kbn/core/server';
@@ -45,7 +47,7 @@ describe('AttachmentService', () => {
   let service: AttachmentService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new AttachmentService({
       log: mockLogger,
       unsecuredSavedObjectsClient,
@@ -933,12 +935,12 @@ describe('AttachmentService', () => {
     const REREAD_CREATED_AT = '2020-06-06T06:06:06.666Z';
 
     const makeMirrorWriter = () => ({
-      upsertAttachment: jest.fn(),
-      deleteAttachment: jest.fn(),
-      bulkUpsertAttachments: jest.fn(),
-      bulkDeleteAttachments: jest.fn(),
-      bulkDeleteAttachmentsByCaseIds: jest.fn(),
-      bulkUpsertAttachmentsAwait: jest.fn(async () => {}),
+      upsertAttachment: vi.fn(),
+      deleteAttachment: vi.fn(),
+      bulkUpsertAttachments: vi.fn(),
+      bulkDeleteAttachments: vi.fn(),
+      bulkDeleteAttachmentsByCaseIds: vi.fn(),
+      bulkUpsertAttachmentsAwait: vi.fn(async () => {}),
     });
 
     const makeService = (writer: ReturnType<typeof makeMirrorWriter>, attachmentsEnabled = false) =>
@@ -1108,12 +1110,12 @@ describe('AttachmentService', () => {
     // shape, partial-failure entries are excluded, and it can NEVER fail the
     // primary SO write (the core safety property).
     const makeMirrorWriter = () => ({
-      upsertAttachment: jest.fn(),
-      deleteAttachment: jest.fn(),
-      bulkUpsertAttachments: jest.fn(),
-      bulkDeleteAttachments: jest.fn(),
-      bulkDeleteAttachmentsByCaseIds: jest.fn(),
-      bulkUpsertAttachmentsAwait: jest.fn(async () => {}),
+      upsertAttachment: vi.fn(),
+      deleteAttachment: vi.fn(),
+      bulkUpsertAttachments: vi.fn(),
+      bulkDeleteAttachments: vi.fn(),
+      bulkDeleteAttachmentsByCaseIds: vi.fn(),
+      bulkUpsertAttachmentsAwait: vi.fn(async () => {}),
     });
 
     const makeService = (writer: ReturnType<typeof makeMirrorWriter>, attachmentsEnabled = false) =>

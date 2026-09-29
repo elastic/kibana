@@ -5,42 +5,54 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { PossibleDegradedFieldMitigations } from '.';
 
-jest.mock('../../../../../hooks/use_dataset_quality_details_state', () => ({
-  useDatasetQualityDetailsState: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_dataset_quality_details_state', () => {
+      const mocked = {
+      useDatasetQualityDetailsState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_quality_issues', () => ({
-  useQualityIssues: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_quality_issues', () => {
+      const mocked = {
+      useQualityIssues: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../utils', () => ({
-  useKibanaContextForPlugin: jest.fn(),
-}));
+vi.mock('../../../../../utils', () => {
+      const mocked = {
+      useKibanaContextForPlugin: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useDatasetQualityDetailsState } from '../../../../../hooks/use_dataset_quality_details_state';
 import { useQualityIssues } from '../../../../../hooks/use_quality_issues';
 import { useKibanaContextForPlugin } from '../../../../../utils';
 
 describe('PossibleDegradedFieldMitigations', () => {
-  const mockUseQualityIssues = useQualityIssues as jest.Mock;
-  const mockUseDatasetQualityDetailsState = useDatasetQualityDetailsState as jest.Mock;
-  const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.Mock;
+  const mockUseQualityIssues = useQualityIssues as Mock;
+  const mockUseDatasetQualityDetailsState = useDatasetQualityDetailsState as Mock;
+  const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as Mock;
 
   const mockStreamsLocator = {
-    getRedirectUrl: jest.fn(() => 'http://test-url'),
+    getRedirectUrl: vi.fn(() => 'http://test-url'),
   };
 
   const mockIngestPipelineLocator = {
-    useUrl: jest.fn(() => 'http://test-pipeline-url'),
+    useUrl: vi.fn(() => 'http://test-pipeline-url'),
   };
 
   const mockIndexManagementLocator = {
-    getLocation: jest.fn(() => Promise.resolve({ path: '/test-path' })),
+    getLocation: vi.fn(() => Promise.resolve({ path: '/test-path' })),
   };
 
   const defaultQualityIssuesData = {
@@ -53,7 +65,7 @@ describe('PossibleDegradedFieldMitigations', () => {
     degradedFieldAnalysis: {
       totalFieldLimit: 0,
     },
-    updateNewFieldLimit: jest.fn(),
+    updateNewFieldLimit: vi.fn(),
     isMitigationInProgress: false,
   };
 
@@ -80,17 +92,17 @@ describe('PossibleDegradedFieldMitigations', () => {
   const defaultKibanaContext = {
     services: {
       application: {
-        navigateToApp: jest.fn(),
+        navigateToApp: vi.fn(),
       },
       notifications: {
         toasts: {
-          addSuccess: jest.fn(),
+          addSuccess: vi.fn(),
         },
       },
       share: {
         url: {
           locators: {
-            get: jest.fn((id: string) => {
+            get: vi.fn((id: string) => {
               switch (id) {
                 case 'STREAMS_APP_LOCATOR_ID':
                   return mockStreamsLocator;
@@ -117,7 +129,7 @@ describe('PossibleDegradedFieldMitigations', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQualityIssues.mockReturnValue(defaultQualityIssuesData);
     mockUseDatasetQualityDetailsState.mockReturnValue(defaultDetailsState);
     mockUseKibanaContextForPlugin.mockReturnValue(defaultKibanaContext);

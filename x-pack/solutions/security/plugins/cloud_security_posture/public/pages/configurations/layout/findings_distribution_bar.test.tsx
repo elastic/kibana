@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,7 +16,7 @@ import { TestProvider } from '../../../test/test_provider';
 const defaultProps = {
   passed: 123,
   failed: 456,
-  distributionOnClick: jest.fn(),
+  distributionOnClick: vi.fn(),
 };
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -23,7 +25,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('FindingsDistributionBar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render passed and failed filter buttons with correct accessibility labels', () => {
@@ -58,7 +60,7 @@ describe('FindingsDistributionBar', () => {
 
   it('should call distributionOnClick with correct evaluation when passed button is clicked', async () => {
     const user = userEvent.setup();
-    const mockOnClick = jest.fn();
+    const mockOnClick = vi.fn();
 
     render(
       <TestWrapper>
@@ -74,7 +76,7 @@ describe('FindingsDistributionBar', () => {
 
   it('should call distributionOnClick with correct evaluation when failed button is clicked', async () => {
     const user = userEvent.setup();
-    const mockOnClick = jest.fn();
+    const mockOnClick = vi.fn();
 
     render(
       <TestWrapper>

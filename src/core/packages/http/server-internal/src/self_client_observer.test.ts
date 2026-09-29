@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import type { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -57,7 +59,7 @@ describe('self-call observer', () => {
 
     expect(invoke(preResponse, request)).toBe(responseToolkit.continue);
     expect(log.info).toHaveBeenCalledTimes(1);
-    const serializedLog = JSON.stringify((log.info as jest.Mock).mock.calls);
+    const serializedLog = JSON.stringify((log.info as Mock).mock.calls);
     expect(serializedLog).not.toContain('raw-id');
     expect(serializedLog).not.toContain('filter=raw-value');
   });

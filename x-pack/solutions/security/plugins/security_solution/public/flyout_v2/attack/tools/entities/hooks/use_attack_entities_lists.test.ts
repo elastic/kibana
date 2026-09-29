@@ -5,32 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAttackEntitiesLists } from './use_attack_entities_lists';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
 
-jest.mock('@kbn/entity-store/public', () => {
-  const actual = jest.requireActual('@kbn/entity-store/public');
-  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+vi.mock('@kbn/entity-store/public', async () => {
+  const actual = (await vi.importActual('@kbn/entity-store/public'));
+  const { euid } = (await vi.importActual('@kbn/entity-store/common/euid_helpers'));
   return {
     ...actual,
-    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+    useEntityStoreEuidApi: vi.fn(() => ({ euid })),
   };
 });
 
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: jest.fn(),
-}));
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_query', () => {
+      const mocked = {
+      useQueryAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAttackEntitiesLists', () => {
-  const mockUseQueryAlerts = jest.mocked(useQueryAlerts);
+  const mockUseQueryAlerts = vi.mocked(useQueryAlerts);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: null,
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
       refetch: null,
@@ -161,7 +166,7 @@ describe('useAttackEntitiesLists', () => {
           },
         },
       },
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
       refetch: null,
@@ -217,7 +222,7 @@ describe('useAttackEntitiesLists', () => {
         timeout: false,
         aggregations: {},
       },
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
       refetch: null,
@@ -274,7 +279,7 @@ describe('useAttackEntitiesLists', () => {
           },
         },
       },
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
       refetch: null,

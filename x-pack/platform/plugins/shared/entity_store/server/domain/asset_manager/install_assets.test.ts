@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { uninstallElasticsearchAssets } from './install_assets';
@@ -29,14 +32,14 @@ import {
 } from './metadata_data_stream';
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
-jest.mock('../../infra/elasticsearch');
+vi.mock('../../infra/elasticsearch');
 
 const { deleteIndex, deleteDataStream, deleteIndexTemplate, deleteComponentTemplate } =
-  jest.requireMock('../../infra/elasticsearch') as {
-    deleteIndex: jest.Mock;
-    deleteDataStream: jest.Mock;
-    deleteIndexTemplate: jest.Mock;
-    deleteComponentTemplate: jest.Mock;
+  (await vi.importMock('../../infra/elasticsearch')) as {
+    deleteIndex: Mock;
+    deleteDataStream: Mock;
+    deleteIndexTemplate: Mock;
+    deleteComponentTemplate: Mock;
   };
 
 describe('uninstallElasticsearchAssets', () => {
@@ -48,8 +51,8 @@ describe('uninstallElasticsearchAssets', () => {
 
   const createEsClient = (historyIndices: string[] = [historyIndexA, historyIndexB]) => ({
     indices: {
-      getAlias: jest.fn().mockRejectedValue({ meta: { statusCode: 404 } }),
-      resolveIndex: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+      getAlias: vi.fn().mockRejectedValue({ meta: { statusCode: 404 } }),
+      resolveIndex: vi.fn().mockImplementation(async ({ name }: { name: string }) => {
         if (name === historyPattern) {
           return {
             indices: historyIndices.map((indexName) => ({ name: indexName })),
@@ -63,7 +66,7 @@ describe('uninstallElasticsearchAssets', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     deleteIndex.mockResolvedValue(undefined);
     deleteDataStream.mockResolvedValue(undefined);
     deleteIndexTemplate.mockResolvedValue(undefined);

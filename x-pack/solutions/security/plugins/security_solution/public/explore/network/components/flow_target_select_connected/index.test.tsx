@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -14,16 +17,19 @@ import { FlowTargetSelectConnectedComponent } from '.';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import { FlowTargetSelect } from '../flow_controls/flow_target_select';
 
-jest.mock('../flow_controls/flow_target_select', () => ({
-  ...jest.requireActual('../flow_controls/flow_target_select'),
-  FlowTargetSelect: jest.fn(() => <div data-test-subj="flow-target-select-mock" />),
-}));
+vi.mock('../flow_controls/flow_target_select', async () => {
+      const mocked = {
+      ...(await vi.importActual('../flow_controls/flow_target_select')),
+      FlowTargetSelect: vi.fn(() => <div data-test-subj="flow-target-select-mock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const FlowTargetSelectMocked = FlowTargetSelect as jest.MockedFunction<typeof FlowTargetSelect>;
+const FlowTargetSelectMocked = FlowTargetSelect as MockedFunction<typeof FlowTargetSelect>;
 
 describe('Flow Target Select Connected', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('renders correctly against snapshot flowTarget source', () => {
     render(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,35 +22,38 @@ import type { EnrollmentSettingsFleetServerPolicy } from '../../../types';
 import { getSelectAgentPolicyStep } from './select_agent_policy';
 
 // Variables prefixed with 'mock' are exempted from babel-jest's TDZ guard for hoisted jest.mock factories
-const mockSendGetEnrollmentAPIKeys = jest.fn();
-const mockSendCreateEnrollmentAPIKey = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockSendGetEnrollmentAPIKeys = vi.fn();
+const mockSendCreateEnrollmentAPIKey = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
 // Blanket-mock the hooks module so we control exactly what each hook returns.
 // Note: jest.requireActual is avoided because loading the full hooks module triggers
 // a circular dependency through fleet/app.tsx → mock/create_test_renderer.tsx → this file.
-jest.mock('../../../hooks');
+vi.mock('../../../hooks');
 
 // Stub out SelectCreateAgentPolicy via its barrel export so the barrel itself is replaced.
 // A leaf-module mock on agent_policy_select_create does not propagate reliably through
 // the re-export chain in the Jest module registry, but replacing the barrel directly works.
-jest.mock('../..', () => ({
-  SelectCreateAgentPolicy: ({
-    selectedPolicyId,
-    setSelectedPolicyId,
-  }: {
-    selectedPolicyId?: string;
-    setSelectedPolicyId: (id?: string) => void;
-  }) => (
-    <div data-test-subj="selectCreateAgentPolicy">
-      <span>{selectedPolicyId ?? 'no-policy'}</span>
-      <button data-test-subj="selectPolicy" onClick={() => setSelectedPolicyId('policy-1')}>
-        Select Policy
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../..', () => {
+      const mocked = {
+      SelectCreateAgentPolicy: ({
+        selectedPolicyId,
+        setSelectedPolicyId,
+      }: {
+        selectedPolicyId?: string;
+        setSelectedPolicyId: (id?: string) => void;
+      }) => (
+        <div data-test-subj="selectCreateAgentPolicy">
+          <span>{selectedPolicyId ?? 'no-policy'}</span>
+          <button data-test-subj="selectPolicy" onClick={() => setSelectedPolicyId('policy-1')}>
+            Select Policy
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const POLICIES: EnrollmentSettingsFleetServerPolicy[] = [
   { id: 'policy-1', name: 'Fleet Server Policy', is_managed: false },
@@ -81,7 +86,7 @@ const Harness: React.FunctionComponent<{
     policyId,
     setPolicyId,
     eligibleFleetServerPolicies: policies,
-    refreshEligibleFleetServerPolicies: jest.fn(),
+    refreshEligibleFleetServerPolicies: vi.fn(),
   });
   return <>{step.children}</>;
 };
@@ -96,9 +101,9 @@ describe('getSelectAgentPolicyStep — enrollment token callout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jest.mocked(useStartServices).mockReturnValue({
+    vi.mocked(useStartServices).mockReturnValue({
       notifications: {
         toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
       },
@@ -106,8 +111,8 @@ describe('getSelectAgentPolicyStep — enrollment token callout', () => {
 
     // Route auto-mock calls through the 'mock'-prefixed outer variables so we can
     // configure return values per-test with mockResolvedValue on those variables.
-    jest.mocked(sendGetEnrollmentAPIKeys).mockImplementation(mockSendGetEnrollmentAPIKeys);
-    jest.mocked(sendCreateEnrollmentAPIKey).mockImplementation(mockSendCreateEnrollmentAPIKey);
+    vi.mocked(sendGetEnrollmentAPIKeys).mockImplementation(mockSendGetEnrollmentAPIKeys);
+    vi.mocked(sendCreateEnrollmentAPIKey).mockImplementation(mockSendCreateEnrollmentAPIKey);
   });
 
   it('does not show the callout when no policy is selected', () => {

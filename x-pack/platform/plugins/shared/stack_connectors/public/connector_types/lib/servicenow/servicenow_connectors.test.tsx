@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { act, within, render, screen, waitFor } from '@testing-library/react';
 
@@ -16,13 +19,13 @@ import { getAppInfo } from './api';
 import { ConnectorFormTestProvider } from '../test_utils';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api');
-jest.mock('./api');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api');
+vi.mock('./api');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const getAppInfoMock = getAppInfo as jest.Mock;
-const updateActionConnectorMock = updateActionConnector as jest.Mock;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const getAppInfoMock = getAppInfo as Mock;
+const updateActionConnectorMock = updateActionConnector as Mock;
 
 describe('ServiceNowActionConnectorFields renders', () => {
   const usesTableApiConnector = {
@@ -136,7 +139,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
   });
 
   it('sets the OAuth fields correctly', async () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const connector = {
       id: 'test',
       actionTypeId: '.servicenow',
@@ -209,7 +212,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should render the correct callouts when the connectors needs the application', () => {
@@ -462,10 +465,10 @@ describe('ServiceNowActionConnectorFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const basicAuthTests: Array<[string, string]> = [

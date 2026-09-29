@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { render } from '@testing-library/react';
@@ -16,24 +18,30 @@ import { getRawData } from '../../../../assistant/helpers';
 
 const MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID = 'document-summary-section-stub';
 
-const mockDocumentSummarySection = jest.fn();
+const mockDocumentSummarySection = vi.fn();
 
-jest.mock('./document_summary_section', () => ({
-  DocumentSummarySection: (props: Record<string, unknown>) => {
-    mockDocumentSummarySection(props);
-    return (
-      <div
-        data-test-subj={
-          (props['data-test-subj'] as string) ?? MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID
-        }
-      />
-    );
-  },
-}));
+vi.mock('./document_summary_section', () => {
+      const mocked = {
+      DocumentSummarySection: (props: Record<string, unknown>) => {
+        mockDocumentSummarySection(props);
+        return (
+          <div
+            data-test-subj={
+              (props['data-test-subj'] as string) ?? MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID
+            }
+          />
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => ({
-  useEventDetails: jest.fn(),
-}));
+vi.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => {
+      const mocked = {
+      useEventDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
   {
@@ -67,17 +75,17 @@ const createMockHit = (overrides: Record<string, unknown> = {}): DataTableRecord
   } as unknown as DataTableRecord);
 
 describe('AISummarySection', () => {
-  const mockUseEventDetails = jest.mocked(useEventDetails);
+  const mockUseEventDetails = vi.mocked(useEventDetails);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEventDetails.mockReturnValue({
       browserFields: {},
       dataAsNestedObject: null,
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       loading: false,
-      refetchFlyoutData: jest.fn(),
+      refetchFlyoutData: vi.fn(),
       searchHit: undefined,
     });
   });
@@ -109,9 +117,9 @@ describe('AISummarySection', () => {
       browserFields: {},
       dataAsNestedObject: null,
       dataFormattedForFieldBrowser: null,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       loading: false,
-      refetchFlyoutData: jest.fn(),
+      refetchFlyoutData: vi.fn(),
       searchHit: undefined,
     });
 

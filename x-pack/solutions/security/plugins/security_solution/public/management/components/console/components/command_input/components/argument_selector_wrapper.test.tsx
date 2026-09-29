@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import type { ConsoleTestSetup } from '../../../mocks';
@@ -16,7 +18,7 @@ describe('Console: ArgumentSelectorWrapper', () => {
   let renderResult: ReturnType<ConsoleTestSetup['renderConsole']>;
   let selectorProps: CommandArgumentValueSelectorProps | undefined;
 
-  const SelectorComponentMock = jest.fn((props: CommandArgumentValueSelectorProps) => {
+  const SelectorComponentMock = vi.fn((props: CommandArgumentValueSelectorProps) => {
     selectorProps = props;
     return <span data-test-subj="test-argSelector">{props.valueText}</span>;
   });

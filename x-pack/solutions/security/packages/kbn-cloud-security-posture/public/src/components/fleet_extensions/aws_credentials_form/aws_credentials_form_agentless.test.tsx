@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,33 +24,45 @@ import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { createAwsCloudSetupMock } from '../test/cloud_setup_mocks';
 
 // Mock child components - they have their own tests
-const mockAwsInputVarFields = jest.fn(() => <div data-test-subj="aws-input-var-fields-mock" />);
-const mockAwsCredentialTypeSelector = jest.fn(() => (
+const mockAwsInputVarFields = vi.fn(() => <div data-test-subj="aws-input-var-fields-mock" />);
+const mockAwsCredentialTypeSelector = vi.fn(() => (
   <div data-test-subj="aws-credential-type-selector-mock" />
 ));
-const mockCloudConnectorSetup = jest.fn(() => <div data-test-subj="cloud-connector-setup-mock" />);
-const mockAWSSetupInfoContent = jest.fn(() => <div data-test-subj="aws-setup-info-mock" />);
+const mockCloudConnectorSetup = vi.fn(() => <div data-test-subj="cloud-connector-setup-mock" />);
+const mockAWSSetupInfoContent = vi.fn(() => <div data-test-subj="aws-setup-info-mock" />);
 
-jest.mock('./aws_input_var_fields', () => ({
-  AwsInputVarFields: (props: unknown) => mockAwsInputVarFields(),
-}));
+vi.mock('./aws_input_var_fields', () => {
+      const mocked = {
+      AwsInputVarFields: (props: unknown) => mockAwsInputVarFields(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./aws_credential_type_selector', () => ({
-  AwsCredentialTypeSelector: (props: unknown) => mockAwsCredentialTypeSelector(),
-}));
+vi.mock('./aws_credential_type_selector', () => {
+      const mocked = {
+      AwsCredentialTypeSelector: (props: unknown) => mockAwsCredentialTypeSelector(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock CloudConnectorSetup (lazy loaded from Fleet)
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  ...jest.requireActual('@kbn/fleet-plugin/public'),
-  LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
-}));
+vi.mock('@kbn/fleet-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/fleet-plugin/public')),
+      LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./aws_setup_info', () => ({
-  AWSSetupInfoContent: (props: unknown) => mockAWSSetupInfoContent(),
-}));
+vi.mock('./aws_setup_info', () => {
+      const mocked = {
+      AWSSetupInfoContent: (props: unknown) => mockAWSSetupInfoContent(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_cloud_setup_context');
-const mockUseCloudSetup = useCloudSetup as jest.MockedFunction<typeof useCloudSetup>;
+vi.mock('../hooks/use_cloud_setup_context');
+const mockUseCloudSetup = useCloudSetup as MockedFunction<typeof useCloudSetup>;
 
 const mockPackageInfo = {
   name: 'cloud_security_posture',
@@ -92,11 +107,11 @@ const defaultProps = {
   newPolicy: mockPackagePolicy,
   input: mockInput,
   packageInfo: mockPackageInfo,
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   setupTechnology: 'agentless' as SetupTechnology,
   cloud: cloudMock.createSetup(),
   disabled: false,
-  updatePolicy: jest.fn(),
+  updatePolicy: vi.fn(),
   hasInvalidRequiredVars: false,
 };
 
@@ -215,7 +230,7 @@ describe('AwsCredentialsFormAgentless', () => {
     });
 
     it('should only set supports_cloud_connector to false when NOT using cloud_connectors', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithSupport = {
         ...mockPackagePolicy,
         supports_cloud_connector: true,
@@ -248,7 +263,7 @@ describe('AwsCredentialsFormAgentless', () => {
     });
 
     it('should NOT set supports_cloud_connector to true when using cloud_connectors (handled by CloudConnectorSetup)', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithoutSupport = {
         ...mockPackagePolicy,
         supports_cloud_connector: false, // Start false
@@ -282,7 +297,7 @@ describe('AwsCredentialsFormAgentless', () => {
     });
 
     it('should not call updatePolicy when supports_cloud_connector is already false with non-cloud_connectors credential', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithoutSupport = {
         ...mockPackagePolicy,
         supports_cloud_connector: false, // Already correct

@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-const mockEuiFlyout = jest.fn();
+const mockEuiFlyout = vi.fn();
 
 // EUI's test-env `EuiFlyout` renders a stub that keeps only `data-test-subj`, `role`, and
 // `onKeyDown`, so a prop the root forwards is not observable in the DOM. Record the props and
 // delegate to that stub: forwarding is the template's half of the contract, rendering is EUI's.
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const react = jest.requireActual('react');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
+  const react = require('react');
   return {
     ...actual,
     EuiFlyout: (props: Record<string, unknown>) => {
@@ -92,8 +94,8 @@ describe('FlyoutTemplate', () => {
   });
 
   it('accepts resizable/minWidth/onResize/ownFocus/onActive without altering zone rendering', () => {
-    const onResize = jest.fn();
-    const onActive = jest.fn();
+    const onResize = vi.fn();
+    const onActive = vi.fn();
     renderTemplate(
       <FlyoutTemplate
         onClose={noop}
@@ -120,7 +122,7 @@ describe('FlyoutTemplate', () => {
   });
 
   it('is valid without a header (body is the only required zone)', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(noop);
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Body>
@@ -135,7 +137,7 @@ describe('FlyoutTemplate', () => {
   });
 
   it('warns and renders only the first zone when a singleton zone is duplicated', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(noop);
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="First title" />

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
@@ -14,16 +16,16 @@ import type { Platform } from '../../lib';
 import { Config } from '../../lib';
 import { DownloadNodeBuilds } from './download_node_builds_task';
 
-jest.mock('./node_shasums');
-jest.mock('./node_download_info');
-jest.mock('../../lib/download');
-jest.mock('../../lib/get_build_number');
+vi.mock('./node_shasums');
+vi.mock('./node_download_info');
+vi.mock('../../lib/download');
+vi.mock('../../lib/get_build_number');
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
-const { getNodeDownloadInfo } = jest.requireMock('./node_download_info');
-const { getNodeShasums } = jest.requireMock('./node_shasums');
-const { downloadToDisk } = jest.requireMock('../../lib/download');
+const { getNodeDownloadInfo } = (await vi.importMock('./node_download_info'));
+const { getNodeShasums } = (await vi.importMock('./node_shasums'));
+const { downloadToDisk } = (await vi.importMock('../../lib/download'));
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
@@ -31,7 +33,7 @@ log.setWriters([testWriter]);
 
 beforeEach(() => {
   testWriter.messages.length = 0;
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {

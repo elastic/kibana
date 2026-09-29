@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { AccessModeContainer } from './access_mode_container';
@@ -15,16 +17,16 @@ import { act, waitFor, screen } from '@testing-library/react';
 
 describe('Access Mode Container', () => {
   const mockAccessControlClient = {
-    canManageAccessControl: jest.fn(),
-    isInEditAccessMode: jest.fn(),
-    checkGlobalPrivilege: jest.fn(),
-    changeAccessMode: jest.fn(),
-    checkUserAccessControl: jest.fn(),
-    isAccessControlEnabled: jest.fn(),
+    canManageAccessControl: vi.fn(),
+    isInEditAccessMode: vi.fn(),
+    checkGlobalPrivilege: vi.fn(),
+    changeAccessMode: vi.fn(),
+    checkUserAccessControl: vi.fn(),
+    isAccessControlEnabled: vi.fn(),
   } as any;
 
-  const mockGetActiveSpace = jest.fn();
-  const mockGetCurrentUser = jest.fn();
+  const mockGetActiveSpace = vi.fn();
+  const mockGetCurrentUser = vi.fn();
 
   beforeAll(() => {
     mockGetActiveSpace.mockResolvedValue({
@@ -39,11 +41,11 @@ describe('Access Mode Container', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const getDefaultProps = (accessControl?: Partial<SavedObjectAccessControl>) => ({
-    onChangeAccessMode: jest.fn(),
+    onChangeAccessMode: vi.fn(),
     accessControl,
     getCurrentUser: mockGetCurrentUser,
     accessControlClient: mockAccessControlClient,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -23,12 +26,12 @@ import {
   useCoverageOverviewDashboardContext,
 } from './coverage_overview_dashboard_context';
 
-jest.mock('./coverage_overview_dashboard_context');
+vi.mock('./coverage_overview_dashboard_context');
 
-const setShowExpandedCells = jest.fn();
-const setRuleActivityFilter = jest.fn();
-const setRuleSourceFilter = jest.fn();
-const setRuleSearchFilter = jest.fn();
+const setShowExpandedCells = vi.fn();
+const setRuleActivityFilter = vi.fn();
+const setRuleSourceFilter = vi.fn();
+const setRuleSearchFilter = vi.fn();
 
 const mockCoverageOverviewContextReturn = {
   state: initialState,
@@ -40,7 +43,7 @@ const mockCoverageOverviewContextReturn = {
   },
 };
 
-(useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue(
+(useCoverageOverviewDashboardContext as Mock).mockReturnValue(
   mockCoverageOverviewContextReturn
 );
 

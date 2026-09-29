@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import { AgentBuilderEvaluationChatClient } from './chat_client';
 
-jest.mock('p-retry', () => (fn: () => Promise<unknown>) => fn());
+vi.mock('p-retry', () => (fn: () => Promise<unknown>) => fn());
 
 const makeResponse = (prompts: Array<{ id: string; type: string }> = [], message = 'ok') => ({
   conversation_id: 'conv-1',
@@ -19,13 +21,13 @@ const makeResponse = (prompts: Array<{ id: string; type: string }> = [], message
 
 const makeFetch = (responses: object[]) => {
   let call = 0;
-  return jest.fn().mockImplementation(() => Promise.resolve(responses[call++]));
+  return vi.fn().mockImplementation(() => Promise.resolve(responses[call++]));
 };
 
 const mockLog: ToolingLog = {
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
 } as unknown as ToolingLog;
 
 describe('AgentBuilderEvaluationChatClient autoConfirm', () => {

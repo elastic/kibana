@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 
 import { mergeAllFieldsWithSource } from './merge_all_fields_with_source';
@@ -16,11 +18,11 @@ import { emptyEsResult } from '../../../__mocks__/empty_signal_source_hit';
  */
 describe('merge_all_fields_with_source', () => {
   beforeAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   /** Get the return type of the mergeAllFieldsWithSource for TypeScript checks against expected */

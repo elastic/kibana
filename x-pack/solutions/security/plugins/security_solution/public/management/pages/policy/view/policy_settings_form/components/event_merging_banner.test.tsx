@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -18,7 +20,7 @@ describe('EventMergingBanner component', () => {
     const mockedContext = createAppRootMockRenderer();
 
     formProps = {
-      onDismiss: jest.fn(),
+      onDismiss: vi.fn(),
     };
 
     renderResult = mockedContext.render(<EventMergingBanner {...formProps} />);

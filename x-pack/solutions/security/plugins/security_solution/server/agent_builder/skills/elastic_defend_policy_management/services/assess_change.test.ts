@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers, type StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -72,7 +74,7 @@ const Enterprise = licenseMock.createLicense({ license: { type: 'enterprise' } }
 const createCountAccess = async () => {
   const endpointAppContextService = createMockEndpointAppContextService();
   const request = httpServerMock.createKibanaRequest();
-  const getHostMetadataList = jest.fn().mockResolvedValue({
+  const getHostMetadataList = vi.fn().mockResolvedValue({
     data: Array.from({ length: 10 }, (_, index) => ({ id: `host-${index}` })),
     total: 11,
   });
@@ -84,12 +86,12 @@ const createCountAccess = async () => {
       canWritePolicyManagement: false,
     })
   );
-  jest.mocked(endpointAppContextService.getEndpointMetadataService).mockReturnValue({
+  vi.mocked(endpointAppContextService.getEndpointMetadataService).mockReturnValue({
     getHostMetadataList,
   } as unknown as ReturnType<typeof endpointAppContextService.getEndpointMetadataService>);
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+  const getStartServices = vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
   ]) as unknown as StartServicesAccessor;
   const access = await createPolicyAccessContext(
     endpointAppContextService,
@@ -98,14 +100,14 @@ const createCountAccess = async () => {
     getStartServices
   );
   const licenseService = endpointAppContextService.getLicenseService();
-  licenseService.getLicenseType = jest.fn(() => 'enterprise');
-  licenseService.getLicenseInformation = jest.fn(() => Enterprise);
-  licenseService.isPlatinumPlus = jest.fn(() => true);
-  licenseService.isEnterprise = jest.fn(() => true);
-  const getById = jest.spyOn(access.fleet.packagePolicy, 'get');
-  const listByName = jest.spyOn(access.fleet.packagePolicy, 'list');
-  const ensureInCurrentSpace = jest.spyOn(access.fleet, 'ensureInCurrentSpace');
-  const getAgentStatusForAgentPolicy = jest.spyOn(
+  licenseService.getLicenseType = vi.fn(() => 'enterprise');
+  licenseService.getLicenseInformation = vi.fn(() => Enterprise);
+  licenseService.isPlatinumPlus = vi.fn(() => true);
+  licenseService.isEnterprise = vi.fn(() => true);
+  const getById = vi.spyOn(access.fleet.packagePolicy, 'get');
+  const listByName = vi.spyOn(access.fleet.packagePolicy, 'list');
+  const ensureInCurrentSpace = vi.spyOn(access.fleet, 'ensureInCurrentSpace');
+  const getAgentStatusForAgentPolicy = vi.spyOn(
     access.fleet.agent,
     'getAgentStatusForAgentPolicy'
   );
@@ -123,7 +125,7 @@ const createCountAccess = async () => {
 
 describe('assessChange', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('counts the resolved policy id after a name lookup and preserves mixed statuses above 20', async () => {
@@ -146,7 +148,7 @@ describe('assessChange', () => {
       perPage: 11,
     });
     getAgentStatusForAgentPolicy.mockResolvedValue(asFleetAgentStatus(MIXED_STATUS_ABOVE_PAGE));
-    const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
+    const countSpy = vi.spyOn(countEndpointsModule, 'countEndpoints');
 
     const result = await assessChange(access, endpointAppContextService, rawParams('Exact Name'));
 
@@ -172,7 +174,7 @@ describe('assessChange', () => {
         policy_ids: ['agent-policy-a'],
       })
     );
-    const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
+    const countSpy = vi.spyOn(countEndpointsModule, 'countEndpoints');
 
     await expect(
       assessChange(access, endpointAppContextService, {
@@ -200,7 +202,7 @@ describe('assessChange', () => {
       source: 'fleet_status_aggregation',
       status: MIXED_STATUS_ABOVE_PAGE,
     };
-    jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(blastRadius);
+    vi.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(blastRadius);
 
     const result = await assessChange(access, endpointAppContextService, rawParams());
 
@@ -210,10 +212,10 @@ describe('assessChange', () => {
   it('reads serverless from the endpoint app context for eligibility', async () => {
     const { access, endpointAppContextService, getById, getAgentStatusForAgentPolicy } =
       await createCountAccess();
-    const isServerlessSpy = jest
+    const isServerlessSpy = vi
       .spyOn(endpointAppContextService, 'isServerless')
       .mockReturnValue(true);
-    endpointAppContextService.getLicenseService().getLicenseInformation = jest.fn(() => Gold);
+    endpointAppContextService.getLicenseService().getLicenseInformation = vi.fn(() => Gold);
     const policy = createEndpointPolicy({
       id: 'policy-id-1',
       policy_ids: ['agent-policy-a'],

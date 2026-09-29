@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useWorkflowEditorLink } from '.';
 import { clearResolvedWorkflowIdCache } from './helpers/resolve_workflow_id_from_alias';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 describe('useWorkflowEditorLink', () => {
-  const mockGetUrlForApp = jest.fn();
-  const mockHttpFetch = jest.fn();
-  const mockNavigateToApp = jest.fn();
-  const mockNavigateToUrl = jest.fn();
+  const mockGetUrlForApp = vi.fn();
+  const mockHttpFetch = vi.fn();
+  const mockNavigateToApp = vi.fn();
+  const mockNavigateToUrl = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clearResolvedWorkflowIdCache();
     mockUseKibana.mockReturnValue({
       services: {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -15,19 +18,22 @@ import type { DashboardMigrationStats } from '../../types';
 import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_missing_resources';
 import { MigrationDataInputContextProvider } from '../../../common/components';
 
-jest.mock('../../../../common/lib/kibana/use_kibana');
+vi.mock('../../../../common/lib/kibana/use_kibana');
 
-jest.mock('../../logic/use_get_migration_translation_stats', () => ({
-  useGetMigrationTranslationStats: jest.fn().mockReturnValue({
-    data: {
-      dashboards: {
-        success: { result: { full: 1, partial: 2, untranslatable: 3 } },
-        failed: 4,
-      },
-    },
-    isLoading: false,
-  }),
-}));
+vi.mock('../../logic/use_get_migration_translation_stats', () => {
+      const mocked = {
+      useGetMigrationTranslationStats: vi.fn().mockReturnValue({
+        data: {
+          dashboards: {
+            success: { result: { full: 1, partial: 2, untranslatable: 3 } },
+            failed: 4,
+          },
+        },
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseProps = {
   migrationStats: {
@@ -37,19 +43,19 @@ const baseProps = {
     last_execution: {},
   } as DashboardMigrationStats,
   isCollapsed: false,
-  onToggleCollapsed: jest.fn(),
+  onToggleCollapsed: vi.fn(),
 };
 
-const mockGetMissingResources = jest.fn();
+const mockGetMissingResources = vi.fn();
 
-const mockUseGetMissingResources = jest.spyOn(
+const mockUseGetMissingResources = vi.spyOn(
   useGetMissingResourcesModule,
   'useGetMissingResources'
 );
 
 mockUseGetMissingResources.mockImplementation((_, setterFn) => {
   return {
-    getMissingResources: jest.fn().mockImplementation(() => {
+    getMissingResources: vi.fn().mockImplementation(() => {
       const missingResources = mockGetMissingResources();
       setterFn(missingResources);
     }),
@@ -65,8 +71,8 @@ const renderTestComponent = (
     wrapper: ({ children }) => (
       <TestProviders>
         <MigrationDataInputContextProvider
-          openFlyout={jest.fn()}
-          closeFlyout={jest.fn()}
+          openFlyout={vi.fn()}
+          closeFlyout={vi.fn()}
           isFlyoutOpen={false}
         >
           {children}
@@ -79,14 +85,14 @@ const renderTestComponent = (
 // Failing: See https://github.com/elastic/kibana/issues/275681
 describe.skip('DashboardMigrationResultPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetMissingResources.mockReturnValue([]);
     // Pin time so moment().fromNow() on last_updated_at (2024-01-01T01:00:00Z) is stable
-    jest.useFakeTimers({ now: new Date('2026-01-02T01:00:00Z') });
+    vi.useFakeTimers({ now: new Date('2026-01-02T01:00:00Z') });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders panel with title, badge, and button', async () => {
@@ -121,7 +127,7 @@ describe.skip('DashboardMigrationResultPanel', () => {
   });
 
   it('renders loading spinner if translation stats are loading', () => {
-    (useGetMigrationTranslationStats as jest.Mock).mockImplementationOnce(() => ({
+    (useGetMigrationTranslationStats as Mock).mockImplementationOnce(() => ({
       data: undefined,
       isLoading: true,
     }));

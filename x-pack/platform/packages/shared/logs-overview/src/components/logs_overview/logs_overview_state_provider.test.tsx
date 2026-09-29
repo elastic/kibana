@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import { createActor, fromPromise, waitFor } from 'xstate';
 import type { LogsOverviewFeatureFlags } from '../../types';
@@ -32,7 +34,7 @@ describe('logsOverviewStateMachine', () => {
   const availableMlCapabilities: MlCapabilities = { status: 'available' } as MlCapabilities;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should show log events after resolving logsSource and mlCapabilities', async () => {

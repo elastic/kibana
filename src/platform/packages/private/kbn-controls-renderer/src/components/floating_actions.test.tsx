@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -16,29 +18,32 @@ import { FloatingActions } from './floating_actions';
 
 const clearAction = {
   id: 'clearControl',
-  isCompatible: jest.fn().mockResolvedValue(true),
+  isCompatible: vi.fn().mockResolvedValue(true),
   getDisplayName: () => 'Clear control',
   getIconType: () => 'eraser',
-  execute: jest.fn(),
+  execute: vi.fn(),
 } as unknown as Action;
 
 const mockServices = {
   services: {
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([clearAction]),
-      getFrequentlyChangingActionsForTrigger: jest.fn().mockResolvedValue([]),
-      getTrigger: jest.fn().mockReturnValue({}),
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([clearAction]),
+      getFrequentlyChangingActionsForTrigger: vi.fn().mockResolvedValue([]),
+      getTrigger: vi.fn().mockReturnValue({}),
     },
   },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockImplementation(() => mockServices),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockImplementation(() => mockServices),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FloatingActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders a floating action button with a stable aria-label and no duplicate screen reader output', async () => {

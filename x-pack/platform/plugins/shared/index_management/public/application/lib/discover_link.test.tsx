@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -11,11 +13,14 @@ import { DiscoverLink } from './discover_link';
 import { useAppContext } from '../app_context';
 import type { AppDependencies } from '../app_context';
 
-jest.mock('../app_context', () => ({
-  useAppContext: jest.fn(),
-}));
+vi.mock('../app_context', () => {
+      const mocked = {
+      useAppContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseAppContext = jest.mocked(useAppContext);
+const mockedUseAppContext = vi.mocked(useAppContext);
 
 describe('DiscoverLink', () => {
   const indexName = 'my-fancy-index';
@@ -29,7 +34,7 @@ describe('DiscoverLink', () => {
   });
 
   it('renders the link as an icon by default', () => {
-    const navigateMock = jest.fn();
+    const navigateMock = vi.fn();
     mockedUseAppContext.mockReturnValue({
       url: {
         locators: {
@@ -45,7 +50,7 @@ describe('DiscoverLink', () => {
   });
 
   it('renders the link as a button if the prop is set', () => {
-    const navigateMock = jest.fn();
+    const navigateMock = vi.fn();
     mockedUseAppContext.mockReturnValue({
       url: {
         locators: {
@@ -61,7 +66,7 @@ describe('DiscoverLink', () => {
   });
 
   it('calls navigate method when button is clicked', async () => {
-    const navigateMock = jest.fn();
+    const navigateMock = vi.fn();
     mockedUseAppContext.mockReturnValue({
       url: {
         locators: {

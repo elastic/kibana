@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,8 +25,8 @@ const createCloudMock = (
   }> = {}
 ): CloudStart =>
   ({
-    trialDaysLeft: jest.fn().mockReturnValue(overrides.trialDaysLeft ?? 0),
-    getPrivilegedUrls: jest.fn().mockResolvedValue({
+    trialDaysLeft: vi.fn().mockReturnValue(overrides.trialDaysLeft ?? 0),
+    getPrivilegedUrls: vi.fn().mockResolvedValue({
       billingUrl: overrides.billingUrl,
     }),
     isServerlessEnabled: overrides.isServerlessEnabled ?? false,
@@ -44,7 +46,7 @@ const renderBadge = async (cloud: CloudStart) => {
 
 describe('TrialUsageBadge', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders TRIAL badge', async () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
@@ -14,7 +16,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { TabbedModal, type IModalTabDeclaration } from './tabbed_modal';
 
 describe('TabbedModal', () => {
-  const modalOnCloseHandler = jest.fn();
+  const modalOnCloseHandler = vi.fn();
 
   interface TabState {
     inputText: string;
@@ -60,7 +62,7 @@ describe('TabbedModal', () => {
   });
 
   it('renders correctly', () => {
-    const tabDefinition = getTabDefinition(jest.fn());
+    const tabDefinition = getTabDefinition(vi.fn());
 
     render(
       <TabbedModal
@@ -78,7 +80,7 @@ describe('TabbedModal', () => {
   });
 
   describe('modal configuration', () => {
-    const mockedHandlerFn = jest.fn();
+    const mockedHandlerFn = vi.fn();
 
     it("when a single tab definition is passed it simply renders it's content into the modal component without tabs", async () => {
       const tabDefinition = getTabDefinition(mockedHandlerFn);

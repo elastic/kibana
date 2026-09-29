@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 
 import type { CoreStatus } from '@kbn/core/server';
@@ -34,7 +37,7 @@ describe('ElasticsearchService', () => {
   });
 
   describe('start()', () => {
-    let mockLicense: jest.Mocked<SecurityLicense>;
+    let mockLicense: Mocked<SecurityLicense>;
     let mockStatusSubject: BehaviorSubject<CoreStatus>;
     let mockLicenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
     beforeEach(() => {
@@ -65,7 +68,7 @@ describe('ElasticsearchService', () => {
     });
 
     it('`watchOnlineStatus$` allows tracking of Elasticsearch status', () => {
-      const mockHandler = jest.fn();
+      const mockHandler = vi.fn();
       service.start().watchOnlineStatus$().subscribe(mockHandler);
 
       // Neither ES nor license is available yet.
@@ -88,7 +91,7 @@ describe('ElasticsearchService', () => {
     });
 
     it('`watchOnlineStatus$` allows to schedule retry', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
 
       // Both ES and license are available.
       mockLicense.isEnabled.mockReturnValue(true);
@@ -97,7 +100,7 @@ describe('ElasticsearchService', () => {
         savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
       });
 
-      const mockHandler = jest.fn();
+      const mockHandler = vi.fn();
       service.start().watchOnlineStatus$().subscribe(mockHandler);
       expect(mockHandler).toHaveBeenCalledTimes(1);
 
@@ -107,30 +110,30 @@ describe('ElasticsearchService', () => {
       scheduleRetry();
       await nextTick();
       expect(mockHandler).toHaveBeenCalledTimes(1);
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockHandler).toHaveBeenCalledTimes(2);
 
       // Delay between consequent retries is increasing.
       scheduleRetry();
       await nextTick();
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockHandler).toHaveBeenCalledTimes(2);
       await nextTick();
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockHandler).toHaveBeenCalledTimes(3);
 
       // Delay between consequent retries is increasing.
       scheduleRetry();
       await nextTick();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
       expect(mockHandler).toHaveBeenCalledTimes(3);
       await nextTick();
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockHandler).toHaveBeenCalledTimes(4);
 
       // If `scheduleRetry` isn't called retries aren't scheduled anymore.
       await nextTick();
-      jest.runAllTimers();
+      vi.runAllTimers();
       expect(mockHandler).toHaveBeenCalledTimes(4);
 
       // New changes still trigger handler once again and reset retry timer.
@@ -141,12 +144,12 @@ describe('ElasticsearchService', () => {
       scheduleRetry();
       await nextTick();
       expect(mockHandler).toHaveBeenCalledTimes(5);
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockHandler).toHaveBeenCalledTimes(6);
     });
 
     it('`watchOnlineStatus$` cancels scheduled retry if status changes before retry timeout fires', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
 
       // Both ES and license are available.
       mockLicense.isEnabled.mockReturnValue(true);
@@ -155,7 +158,7 @@ describe('ElasticsearchService', () => {
         savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
       });
 
-      const mockHandler = jest.fn();
+      const mockHandler = vi.fn();
       service.start().watchOnlineStatus$().subscribe(mockHandler);
       expect(mockHandler).toHaveBeenCalledTimes(1);
 
@@ -172,7 +175,7 @@ describe('ElasticsearchService', () => {
 
       // Retry timeout should have been cancelled.
       await nextTick();
-      jest.runAllTimers();
+      vi.runAllTimers();
       expect(mockHandler).toHaveBeenCalledTimes(2);
     });
   });

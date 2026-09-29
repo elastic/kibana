@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverAppLocator } from '@kbn/discover-plugin/common';
@@ -15,13 +18,16 @@ import { BehaviorSubject } from 'rxjs';
 import type { Params, PluginDeps } from './abstract_explore_data_action';
 import { ExploreDataContextMenuAction } from './explore_data_context_menu_action';
 
-const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;
+const i18nTranslateSpy = i18n.translate as unknown as MockInstance;
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: jest.fn((key, options) => options.defaultMessage),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: vi.fn((key, options) => options.defaultMessage),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 afterEach(() => {
   i18nTranslateSpy.mockClear();
@@ -31,7 +37,7 @@ const setup = () => {
   const core = coreMock.createStart();
   const locator: DiscoverAppLocator = {
     ...sharePluginMock.createLocator(),
-    getLocation: jest.fn(() =>
+    getLocation: vi.fn(() =>
       Promise.resolve({
         app: 'discover',
         path: '/foo#bar',

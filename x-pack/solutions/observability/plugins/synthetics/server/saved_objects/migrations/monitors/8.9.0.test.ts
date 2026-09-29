@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { ConfigKey } from '../../../../common/runtime_types';
@@ -16,7 +18,7 @@ const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
 describe('Monitor migrations v8.8.0 -> v8.9.0', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
@@ -38,7 +40,7 @@ describe('initUiSettings', () => {
   it('does NOT register ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING when feature flag is disabled', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings).not.toHaveProperty(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
   });
 
@@ -50,7 +52,7 @@ describe('initUiSettings', () => {
 
     initUiSettings(mockUiSettings, enabledFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings).toHaveProperty(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
     expect(registeredSettings[ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]).toEqual(
       expect.objectContaining({
@@ -64,21 +66,21 @@ describe('initUiSettings', () => {
   it('registers ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING synchronously', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings).toHaveProperty(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
   });
 
   it('registers ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING with value false (off by default)', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings[ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING].value).toBe(false);
   });
 
   it('registers ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING as editable (not readonly)', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings[ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING].readonly).toBeUndefined();
   });
 
@@ -87,7 +89,7 @@ describe('initUiSettings', () => {
 
     initUiSettings(mockUiSettings, enabledFeatures, false);
 
-    const keys = Object.keys((mockUiSettings.register as jest.Mock).mock.calls[0][0]);
+    const keys = Object.keys((mockUiSettings.register as Mock).mock.calls[0][0]);
     expect(keys.indexOf(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING)).toBe(
       keys.indexOf(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) + 1
     );
@@ -96,7 +98,7 @@ describe('initUiSettings', () => {
   it('positions ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING immediately before ENABLE_ASSET_INVENTORY_SETTING when alignment is disabled', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
-    const keys = Object.keys((mockUiSettings.register as jest.Mock).mock.calls[0][0]);
+    const keys = Object.keys((mockUiSettings.register as Mock).mock.calls[0][0]);
     expect(keys.indexOf(ENABLE_ASSET_INVENTORY_SETTING)).toBe(
       keys.indexOf(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING) + 1
     );
@@ -105,7 +107,7 @@ describe('initUiSettings', () => {
   it('registers alert analysis workflow settings', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings).toEqual(
       expect.objectContaining({
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED]: expect.objectContaining({
@@ -132,7 +134,7 @@ describe('initUiSettings', () => {
   it('registers the alert analysis workflow agent setting defaulting to the default agent', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings[SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]).toEqual(
       expect.objectContaining({
         value: agentBuilderDefaultAgentId,
@@ -146,7 +148,7 @@ describe('initUiSettings', () => {
   it('registers ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is disabled', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings).toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
     expect(registeredSettings[ENABLE_NEW_FLYOUT_SETTING]).toEqual(
       expect.objectContaining({
@@ -166,7 +168,7 @@ describe('initUiSettings', () => {
 
     initUiSettings(mockUiSettings, disabledFeatures, false);
 
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (mockUiSettings.register as Mock).mock.calls[0][0];
     expect(registeredSettings).not.toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
   });
 });

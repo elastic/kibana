@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AggConfigs } from '../agg_configs';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { NumberFormat } from '@kbn/field-formats-plugin/common';
@@ -48,7 +50,7 @@ describe('Shard Delay Agg', () => {
           get: getShardDelayBucketAgg,
         } as any,
       },
-      jest.fn()
+      vi.fn()
     );
   };
 

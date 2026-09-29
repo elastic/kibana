@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
@@ -15,9 +17,9 @@ describe('hasContextEngineReadPrivilege', () => {
 
   const createSecurityStart = (hasAllRequested: boolean) => {
     const security = securityMock.createStart();
-    const checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested });
+    const checkPrivileges = vi.fn().mockResolvedValue({ hasAllRequested });
     security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-    security.authz.actions.api.get = jest.fn((privilege: string) => `api:${privilege}`);
+    security.authz.actions.api.get = vi.fn((privilege: string) => `api:${privilege}`);
     return { security, checkPrivileges };
   };
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { Replacements } from '@kbn/elastic-assistant-common';
@@ -38,33 +40,36 @@ const initialGraphState: AttackDiscoveryGraphState = {
   unrefinedResults: null,
 };
 
-jest.mock('./anonymized_alerts_retriever', () => ({
-  AnonymizedAlertsRetriever: jest
-    .fn()
-    .mockImplementation(
-      ({
-        onNewReplacements,
-        replacements,
-      }: {
-        onNewReplacements?: (replacements: Replacements) => void;
-        replacements?: Replacements;
-      }) => ({
-        withConfig: jest.fn().mockReturnValue({
-          invoke: jest.fn(async () => {
-            if (onNewReplacements != null && replacements != null) {
-              onNewReplacements(replacements);
-            }
+vi.mock('./anonymized_alerts_retriever', () => {
+      const mocked = {
+      AnonymizedAlertsRetriever: vi
+        .fn()
+        .mockImplementation(
+          ({
+            onNewReplacements,
+            replacements,
+          }: {
+            onNewReplacements?: (replacements: Replacements) => void;
+            replacements?: Replacements;
+          }) => ({
+            withConfig: vi.fn().mockReturnValue({
+              invoke: vi.fn(async () => {
+                if (onNewReplacements != null && replacements != null) {
+                  onNewReplacements(replacements);
+                }
 
-            return mockAnonymizedAlerts;
-          }),
-        }),
-      })
-    ),
-}));
+                return mockAnonymizedAlerts;
+              }),
+            }),
+          })
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getRetrieveAnonymizedAlertsNode', () => {
   const logger = {
-    debug: jest.fn(),
+    debug: vi.fn(),
   } as unknown as Logger;
 
   let esClient: ElasticsearchClient;
@@ -96,7 +101,7 @@ describe('getRetrieveAnonymizedAlertsNode', () => {
 
   it('calls onNewReplacements with updated replacements', async () => {
     const state: AttackDiscoveryGraphState = { ...initialGraphState };
-    const onNewReplacements = jest.fn();
+    const onNewReplacements = vi.fn();
     const replacements = { key: 'value' };
 
     const retrieveAnonymizedAlerts = getRetrieveAnonymizedAlertsNode({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
@@ -54,7 +56,7 @@ const commWithUserConfig: RelationshipIntegrationConfig = {
 
 describe('buildTargetsPerActorQuery (targets per actor)', () => {
   it('delegates body to esqlQueryOverride and prepends the engine preamble for kind: "override" configs', () => {
-    const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
+    const override = vi.fn().mockReturnValue('FROM test | LIMIT 1');
     const overrideConfig: RelationshipIntegrationConfig = {
       kind: 'override',
       id: 'test_override',
@@ -74,7 +76,7 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
   });
 
   it('forwards the page actor values to esqlQueryOverride', () => {
-    const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
+    const override = vi.fn().mockReturnValue('FROM test | LIMIT 1');
     const overrideConfig: RelationshipIntegrationConfig = {
       kind: 'override',
       id: 'test_override',

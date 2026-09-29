@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Relationships should render dashboards normally 1`] = `
+exports[`Relationships > should render dashboards normally 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
@@ -160,7 +160,7 @@ exports[`Relationships should render dashboards normally 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Relationships should render errors 1`] = `
+exports[`Relationships > should render errors 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
@@ -202,7 +202,7 @@ exports[`Relationships should render errors 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Relationships should render index patterns normally 1`] = `
+exports[`Relationships > should render index patterns normally 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
@@ -367,7 +367,7 @@ exports[`Relationships should render index patterns normally 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Relationships should render invalid relations 1`] = `
+exports[`Relationships > should render invalid relations 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
@@ -552,7 +552,7 @@ exports[`Relationships should render invalid relations 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Relationships should render searches normally 1`] = `
+exports[`Relationships > should render searches normally 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
@@ -718,7 +718,7 @@ exports[`Relationships should render searches normally 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Relationships should render visualizations normally 1`] = `
+exports[`Relationships > should render visualizations normally 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}

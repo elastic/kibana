@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useDatePickerContext } from './use_date_picker_context';
 import { useTimefilter } from './use_timefilter';
 
-jest.mock('./use_date_picker_context');
+vi.mock('./use_date_picker_context');
 
 const mockContextFactory = (
   isAutoRefreshSelectorEnabled: boolean = true,
@@ -19,12 +22,12 @@ const mockContextFactory = (
     query: {
       timefilter: {
         timefilter: {
-          disableTimeRangeSelector: jest.fn(),
-          disableAutoRefreshSelector: jest.fn(),
-          enableTimeRangeSelector: jest.fn(),
-          enableAutoRefreshSelector: jest.fn(),
-          isAutoRefreshSelectorEnabled: jest.fn(() => isAutoRefreshSelectorEnabled),
-          isTimeRangeSelectorEnabled: jest.fn(() => isTimeRangeSelectorEnabled),
+          disableTimeRangeSelector: vi.fn(),
+          disableAutoRefreshSelector: vi.fn(),
+          enableTimeRangeSelector: vi.fn(),
+          enableAutoRefreshSelector: vi.fn(),
+          isAutoRefreshSelectorEnabled: vi.fn(() => isAutoRefreshSelectorEnabled),
+          isTimeRangeSelectorEnabled: vi.fn(() => isTimeRangeSelectorEnabled),
         },
       },
     },
@@ -33,7 +36,7 @@ const mockContextFactory = (
 
 describe('useTimefilter', () => {
   test('will not trigger any date picker settings by default', () => {
-    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory());
+    (useDatePickerContext as Mock).mockReturnValueOnce(mockContextFactory());
 
     const { result } = renderHook(() => useTimefilter());
     const timefilter = result.current;
@@ -45,7 +48,7 @@ describe('useTimefilter', () => {
   });
 
   test('custom disabled overrides', () => {
-    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory());
+    (useDatePickerContext as Mock).mockReturnValueOnce(mockContextFactory());
 
     const { result } = renderHook(() =>
       useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false })
@@ -59,7 +62,7 @@ describe('useTimefilter', () => {
   });
 
   test('custom enabled overrides', () => {
-    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(false, false));
+    (useDatePickerContext as Mock).mockReturnValueOnce(mockContextFactory(false, false));
 
     const { result } = renderHook(() =>
       useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true })

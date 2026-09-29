@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import type { ReactNode } from 'react';
@@ -37,7 +39,7 @@ function Wrapper({
   children?: ReactNode;
   dataSearchResponse: IKibanaSearchResponse<LatencyCorrelationsResponse>;
 }) {
-  const mockDataSearch = jest.fn(() => of(dataSearchResponse));
+  const mockDataSearch = vi.fn(() => of(dataSearchResponse));
 
   const dataPluginMockStart = dataPluginMock.createStartContract();
   const KibanaReactContext = createKibanaReactContext({
@@ -51,11 +53,11 @@ function Wrapper({
     usageCollection: { reportUiCounter: () => {} },
   } as Partial<CoreStart>);
 
-  const httpGet = jest.fn();
+  const httpGet = vi.fn();
 
   const history = createMemoryHistory();
-  jest.spyOn(history, 'push');
-  jest.spyOn(history, 'replace');
+  vi.spyOn(history, 'push');
+  vi.spyOn(history, 'replace');
 
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
@@ -96,7 +98,7 @@ describe('correlations', () => {
             },
           }}
         >
-          <LatencyCorrelations onFilter={jest.fn()} />
+          <LatencyCorrelations onFilter={vi.fn()} />
         </Wrapper>
       );
 
@@ -117,7 +119,7 @@ describe('correlations', () => {
             },
           }}
         >
-          <LatencyCorrelations onFilter={jest.fn()} />
+          <LatencyCorrelations onFilter={vi.fn()} />
         </Wrapper>
       );
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { resetContext } from 'kea';
@@ -13,7 +15,7 @@ import { KibanaLogic, mountKibanaLogic } from './kibana_logic';
 
 describe('KibanaLogic', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetContext({});
   });
 

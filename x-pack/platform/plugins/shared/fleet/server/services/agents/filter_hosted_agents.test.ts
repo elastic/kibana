@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -13,13 +16,16 @@ import type { Agent } from '../../types';
 
 import { filterHostedPolicies } from './filter_hosted_agents';
 
-jest.mock('./hosted_agent', () => ({
-  ...jest.requireActual('./hosted_agent'),
-  getHostedPolicies: jest.fn().mockResolvedValue({ hosted: true }),
-}));
+vi.mock('./hosted_agent', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hosted_agent')),
+      getHostedPolicies: vi.fn().mockResolvedValue({ hosted: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('filterHostedPolicies', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();

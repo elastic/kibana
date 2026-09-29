@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { createSLO } from './fixtures/slo';
 import { ManageSLO } from './manage_slo';
 import {
@@ -16,9 +18,9 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 
 describe('ManageSLO', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
-  let mockTransformManager: jest.Mocked<TransformManager>;
-  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
+  let mockTransformManager: Mocked<TransformManager>;
+  let mockSummaryTransformManager: Mocked<TransformManager>;
   let manageSLO: ManageSLO;
 
   beforeEach(() => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,7 +23,7 @@ describe('StackArnField', () => {
       <I18nProvider>
         <StackArnField
           value={props.value ?? ''}
-          onChange={props.onChange ?? jest.fn()}
+          onChange={props.onChange ?? vi.fn()}
           data-test-subj={TEST_SUBJ}
         />
       </I18nProvider>
@@ -34,7 +36,7 @@ describe('StackArnField', () => {
 
     rerender(
       <I18nProvider>
-        <StackArnField value={VALID_STACK_ARN} onChange={jest.fn()} data-test-subj={TEST_SUBJ} />
+        <StackArnField value={VALID_STACK_ARN} onChange={vi.fn()} data-test-subj={TEST_SUBJ} />
       </I18nProvider>
     );
     expect(screen.queryByText(ERROR_TEXT)).not.toBeInTheDocument();
@@ -49,7 +51,7 @@ describe('StackArnField', () => {
   });
 
   it('forwards the raw input value to onChange without trimming', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderField({ onChange });
 
     fireEvent.change(screen.getByTestId(TEST_SUBJ), { target: { value: `  ${VALID_STACK_ARN} ` } });

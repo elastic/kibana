@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { deleteRuntimeField } from './delete_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
@@ -19,8 +21,8 @@ describe('delete runtime field', () => {
     dataViewsService.getDataViewLazy.mockImplementation(
       async (id: string) =>
         ({
-          removeRuntimeField: jest.fn(),
-          getRuntimeField: jest.fn().mockReturnValueOnce({}),
+          removeRuntimeField: vi.fn(),
+          getRuntimeField: vi.fn().mockReturnValueOnce({}),
         } as unknown as DataViewLazy)
     );
 

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const convertModelVersionBackwardConversionSchemaMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-base-server-internal');
+export const convertModelVersionBackwardConversionSchemaMock = vi.fn();
+
+vi.doMock('@kbn/core-saved-objects-base-server-internal', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-base-server-internal'));
   return {
     ...actual,
     convertModelVersionBackwardConversionSchema: convertModelVersionBackwardConversionSchemaMock,

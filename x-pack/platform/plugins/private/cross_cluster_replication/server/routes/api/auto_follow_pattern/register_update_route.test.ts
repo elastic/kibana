@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -36,7 +38,7 @@ describe('[CCR API] Update auto-follow pattern', () => {
     const routeContextMock = mockRouteContext({
       ccr: {
         // Just echo back what we send so we can inspect it.
-        putAutoFollowPattern: jest.fn().mockImplementation((payload) => payload),
+        putAutoFollowPattern: vi.fn().mockImplementation((payload) => payload),
       },
     });
 

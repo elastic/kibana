@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
@@ -16,13 +19,16 @@ import {
   useConsoleEsqlCallbacks,
 } from './use_console_esql_callbacks';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLSources: jest.fn(),
-  getEsqlColumns: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLSources: vi.fn(),
+      getEsqlColumns: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetESQLSources = getESQLSources as jest.MockedFunction<typeof getESQLSources>;
-const mockGetEsqlColumns = getEsqlColumns as jest.MockedFunction<typeof getEsqlColumns>;
+const mockGetESQLSources = getESQLSources as MockedFunction<typeof getESQLSources>;
+const mockGetEsqlColumns = getEsqlColumns as MockedFunction<typeof getEsqlColumns>;
 
 const createParams = (getEntitiesRefreshGeneration: () => number = () => 0) => {
   const {
@@ -36,14 +42,14 @@ describe('useConsoleEsqlCallbacks', () => {
   const sources = [{ name: 'logs', hidden: false, type: 'index' } as ESQLSourceResult];
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(Date, 'now').mockReturnValue(1000);
+    vi.resetAllMocks();
+    vi.spyOn(Date, 'now').mockReturnValue(1000);
     mockGetESQLSources.mockResolvedValue(sources);
     mockGetEsqlColumns.mockResolvedValue([]);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('reuses the same sources request while the cache is fresh', async () => {
@@ -67,7 +73,7 @@ describe('useConsoleEsqlCallbacks', () => {
   });
 
   it('fetches sources again after the cache expires', async () => {
-    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1000);
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1000);
     const { result } = renderHook(() => useConsoleEsqlCallbacks(createParams()));
 
     await result.current.getSources!();
@@ -151,7 +157,7 @@ describe('useConsoleEsqlCallbacks', () => {
 
   it('keeps a fresh cache when a stale request rejects after the cache was refreshed', async () => {
     const staleError = new Error('stale sources request');
-    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1000);
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1000);
     let rejectStale: (reason: Error) => void;
     mockGetESQLSources
       .mockImplementationOnce(

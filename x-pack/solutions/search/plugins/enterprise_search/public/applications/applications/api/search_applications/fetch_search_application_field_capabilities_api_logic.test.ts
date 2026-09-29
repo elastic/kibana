@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -14,7 +16,7 @@ import { fetchSearchApplicationFieldCapabilities } from './fetch_search_applicat
 describe('FetchSearchApplicationFieldCapabilitiesApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('fetchSearchApplicationFieldCapabilities', () => {
     it('requests the field_capabilities api', async () => {

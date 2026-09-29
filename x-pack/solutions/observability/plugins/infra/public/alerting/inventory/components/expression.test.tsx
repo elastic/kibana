@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -37,33 +40,39 @@ const mockDataView = {
   isPersisted: () => false,
   getName: () => 'mock-data-view',
   toSpec: () => ({}),
-} as jest.Mocked<DataView>;
+} as Mocked<DataView>;
 
-jest.mock('../../../containers/metrics_source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-  }),
-  useMetricsDataViewContext: () => ({
-    metricsView: {
-      indices: 'metricbeat-*',
-      timeFieldName: mockDataView.timeFieldName,
-      fields: mockDataView.fields,
-      dataViewReference: mockDataView,
-    } as ResolvedDataView,
-    loading: false,
-    error: undefined,
-  }),
-}));
+vi.mock('../../../containers/metrics_source', () => {
+      const mocked = {
+      withSourceProvider: () => vi.fn,
+      useSourceContext: () => ({
+        source: { id: 'default' },
+      }),
+      useMetricsDataViewContext: () => ({
+        metricsView: {
+          indices: 'metricbeat-*',
+          timeFieldName: mockDataView.timeFieldName,
+          fields: mockDataView.fields,
+          dataViewReference: mockDataView,
+        } as ResolvedDataView,
+        loading: false,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      ...mockCoreMock.createStart(),
-      unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          ...mockCoreMock.createStart(),
+          unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 const exampleCustomMetric = {
   id: 'this-is-an-id',
   field: 'some.system.field',

@@ -5,34 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useOverviewAlertsCount } from './use_overview_alerts_count';
 import * as paramHook from '../../../hooks/use_url_params';
 import * as filtersHook from './use_monitor_filters';
 import * as spaceHook from '../../../../../hooks/use_kibana_space';
 
-const mockHttpPost = jest.fn();
+const mockHttpPost = vi.fn();
 // Stable across renders — a fresh object per call would change `http`'s
 // identity every render, defeating `useAsyncFn`'s deps array and causing an
 // infinite refetch loop (the effect that calls `refetch` never settles).
 const mockServices = { services: { http: { post: mockHttpPost } } };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => mockServices,
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => mockServices,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const bucketsResponse = (buckets: Array<{ key: string; doc_count: number }>) => ({
   aggregations: { count: { buckets } },
 });
 
 describe('useOverviewAlertsCount', () => {
-  const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
-  const filtersSpy = jest.spyOn(filtersHook, 'useMonitorFilters');
-  const monitorIdFilterSpy = jest.spyOn(filtersHook, 'useMonitorIdFilter');
-  const spaceSpy = jest.spyOn(spaceHook, 'useKibanaSpace');
+  const paramSpy = vi.spyOn(paramHook, 'useGetUrlParams');
+  const filtersSpy = vi.spyOn(filtersHook, 'useMonitorFilters');
+  const monitorIdFilterSpy = vi.spyOn(filtersHook, 'useMonitorIdFilter');
+  const spaceSpy = vi.spyOn(spaceHook, 'useKibanaSpace');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     filtersSpy.mockReturnValue([]);
     monitorIdFilterSpy.mockReturnValue(undefined);
     paramSpy.mockReturnValue({} as any);

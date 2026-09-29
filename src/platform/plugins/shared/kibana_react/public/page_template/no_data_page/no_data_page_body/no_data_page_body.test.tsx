@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { NoDataPageBody } from './no_data_page_body';
 import type { ReactElement } from 'react';
 import React from 'react';
@@ -17,7 +19,7 @@ describe('NoDataPageBody', () => {
   const action = {
     recommended: false,
     button: 'Button text',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   };
   const el = <NoDataCard key={'key'} {...action} />;
   const actionCards: ReactElement[] = [];

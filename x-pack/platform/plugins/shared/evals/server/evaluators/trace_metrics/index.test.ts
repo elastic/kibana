@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -24,7 +26,7 @@ describe('trace metrics evaluators', () => {
   };
 
   const createEsClient = () => {
-    const searchMock = jest.fn();
+    const searchMock = vi.fn();
     const esClient = {
       search: searchMock,
     } as unknown as ElasticsearchClient;

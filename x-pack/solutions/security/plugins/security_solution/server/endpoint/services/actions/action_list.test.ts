@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
@@ -43,7 +45,7 @@ describe('action list services', () => {
 
     const fleetAgentGenerator = new FleetAgentGenerator('seed');
     (
-      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as Mock
     ).mockResolvedValue([
       fleetAgentGenerator.generate({
         id: 'agent-a',

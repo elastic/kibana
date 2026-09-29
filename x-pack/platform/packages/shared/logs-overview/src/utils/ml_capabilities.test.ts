@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 import { createActor, toPromise } from 'xstate';
 import {
@@ -15,7 +17,7 @@ import {
 
 describe('loadMlCapabilitiesActor', () => {
   const createMlApi = (overrides: Partial<MlCapabilitiesResponse> = {}): MlApiDependency => ({
-    checkMlCapabilities: jest.fn().mockResolvedValue({
+    checkMlCapabilities: vi.fn().mockResolvedValue({
       isPlatinumOrTrialLicense: true,
       mlFeatureEnabledInSpace: true,
       ...overrides,

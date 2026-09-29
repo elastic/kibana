@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -22,16 +24,16 @@ describe('updateAlertsStatus', () => {
   let alertService: AlertService;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-02-21T17:35:00Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-02-21T17:35:00Z'));
 
     alertService = new AlertService(esClient, logger, alertsClient);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   describe('happy path', () => {
@@ -843,19 +845,19 @@ describe('updateAlertsStatus — event bus', () => {
   const request = httpServerMock.createKibanaRequest();
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-02-21T17:35:00Z'));
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-02-21T17:35:00Z'));
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('emits alertStatusChanged after updating statuses', async () => {
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     esClient.mget.mockResolvedValueOnce({
@@ -887,7 +889,7 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('emits one event per distinct target status', async () => {
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     // a1 has previous status 'acknowledged' → target 'closed': actual change
@@ -923,7 +925,7 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('does not emit when all alerts already have the target status', async () => {
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     // Both alerts already at 'closed' (the target)
@@ -956,7 +958,7 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('does not emit for alerts not found by the prefetch', async () => {
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     // Neither alert found by mget
@@ -974,7 +976,7 @@ describe('updateAlertsStatus — event bus', () => {
   it('logs warn and still completes update when mget prefetch fails', async () => {
     const bus = new CasesEventBus();
     // Listener must be registered so prefetch is attempted (hasAlertStatusChangedListeners() === true).
-    bus.onAlertStatusChanged(jest.fn());
+    bus.onAlertStatusChanged(vi.fn());
     esClient.mget.mockRejectedValue(new Error('mget failure'));
 
     const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
@@ -982,7 +984,7 @@ describe('updateAlertsStatus — event bus', () => {
       { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
     ]);
     // pRetry schedules timer-based delays between retries; advance them all.
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
     await expect(updatePromise).resolves.not.toThrow();
 
     expect(logger.warn).toHaveBeenCalledWith(
@@ -992,7 +994,7 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('omits previousStatus entry for docs not found in prefetch (no fabricated open)', async () => {
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     // a1 is found with status 'acknowledged', a2 is not found
@@ -1024,7 +1026,7 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('emits with the affected ID but no previousStatuses row when the alert has an unrecognised previous status value', async () => {
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     esClient.mget.mockResolvedValueOnce({
@@ -1057,7 +1059,7 @@ describe('updateAlertsStatus — event bus', () => {
     // and signal.status are null/missing, so Elasticsearch performs no mutation. Emitting here
     // would start an external workflow for a status change that never happened.
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     esClient.mget.mockResolvedValueOnce({
@@ -1092,7 +1094,7 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('does not emit at all when every alert is status-less', async () => {
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     esClient.mget.mockResolvedValueOnce({
@@ -1112,7 +1114,7 @@ describe('updateAlertsStatus — event bus', () => {
   it('emits for an alert whose only status field is a non-null signal.status', async () => {
     // The legacy branch of the script mutates signal.status, so this doc does transition.
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     esClient.mget.mockResolvedValueOnce({
@@ -1144,7 +1146,7 @@ describe('updateAlertsStatus — event bus', () => {
     // Without the guard, signal.status 'closed' would equal the target and suppress the event,
     // even though the update script will mutate the non-null modern field from 'triaged' to 'closed'.
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     esClient.mget.mockResolvedValueOnce({
@@ -1173,7 +1175,7 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('treats same id with different indices as independent entries (composite key)', async () => {
     const bus = new CasesEventBus();
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     // 'a1' appears in two indices: security has it 'open' (change), observability has it 'closed' (no-op).

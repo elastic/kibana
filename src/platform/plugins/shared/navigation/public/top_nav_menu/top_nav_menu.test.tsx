@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -27,17 +30,17 @@ describe('TopNavMenu', () => {
     {
       id: 'test',
       label: 'test',
-      run: jest.fn(),
+      run: vi.fn(),
     },
     {
       id: 'test2',
       label: 'test2',
-      run: jest.fn(),
+      run: vi.fn(),
     },
     {
       id: 'test3',
       label: 'test3',
-      run: jest.fn(),
+      run: vi.fn(),
     },
   ];
   const badges: TopNavMenuBadgeProps[] = [
@@ -128,7 +131,7 @@ describe('TopNavMenu', () => {
   describe('when setMenuMountPoint is provided', () => {
     let portalTarget: HTMLElement;
     let mountPoint: MountPoint;
-    let setMountPoint: jest.Mock<(mountPoint: MountPoint<HTMLElement>) => void>;
+    let setMountPoint: Mock<(mountPoint: MountPoint<HTMLElement>) => void>;
     let dom: ReactWrapper;
 
     const refresh = () => {
@@ -152,7 +155,7 @@ describe('TopNavMenu', () => {
     beforeEach(() => {
       portalTarget = document.createElement('div');
       document.body.append(portalTarget);
-      setMountPoint = jest.fn().mockImplementation((mp) => (mountPoint = mp));
+      setMountPoint = vi.fn().mockImplementation((mp) => (mountPoint = mp));
     });
 
     afterEach(() => {

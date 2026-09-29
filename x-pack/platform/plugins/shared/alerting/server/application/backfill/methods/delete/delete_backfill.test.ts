@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
 import { RulesClient } from '../../../../rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
@@ -16,9 +19,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { updateGaps } from '../../../../lib/rule_gaps/update/update_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 
-jest.mock('../../../../lib/rule_gaps/update/update_gaps', () => ({
-  updateGaps: jest.fn(),
-}));
+vi.mock('../../../../lib/rule_gaps/update/update_gaps', () => {
+      const mocked = {
+      updateGaps: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const {
   rulesClientParams,
@@ -85,7 +91,7 @@ describe('deleteBackfill()', () => {
   let rulesClient: RulesClient;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAdHocRunSO);
     unsecuredSavedObjectsClient.delete.mockResolvedValue({});
@@ -138,7 +144,7 @@ describe('deleteBackfill()', () => {
 
     await rulesClient.deleteBackfill('1');
 
-    const updateGapsCall = (updateGaps as jest.Mock).mock.calls[0][0];
+    const updateGapsCall = (updateGaps as Mock).mock.calls[0][0];
     expect(updateGapsCall.ruleId).toBe('abc');
     expect(updateGapsCall.start).toEqual(new Date('2023-10-19T15:07:40.011Z'));
     expect(updateGapsCall.end).toBeInstanceOf(Date);

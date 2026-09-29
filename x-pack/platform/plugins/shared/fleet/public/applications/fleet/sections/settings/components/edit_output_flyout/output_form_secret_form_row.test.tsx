@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -14,13 +16,13 @@ import { SecretFormRow } from './output_form_secret_form_row';
 describe('SecretFormRow', () => {
   const title = 'Test Secret';
   const initialValue = 'initial value';
-  const clear = jest.fn();
-  const onToggleSecretStorage = jest.fn();
-  const cancelEdit = jest.fn();
+  const clear = vi.fn();
+  const onToggleSecretStorage = vi.fn();
+  const cancelEdit = vi.fn();
   const useSecretsStorage = true;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should switch to edit mode when the replace button is clicked', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -45,11 +47,11 @@ const attachment = (
   } as Attachment<typeof PROPOSAL_ATTACHMENT_TYPE, ProposalAttachmentData>);
 
 const createType = () => {
-  const get = jest.fn().mockResolvedValue(proposal());
+  const get = vi.fn().mockResolvedValue(proposal());
   const privileges = {
-    assertCanManage: jest.fn().mockResolvedValue(undefined),
-    assertCanRead: jest.fn().mockResolvedValue(undefined),
-    canManage: jest.fn().mockResolvedValue(true),
+    assertCanManage: vi.fn().mockResolvedValue(undefined),
+    assertCanRead: vi.fn().mockResolvedValue(undefined),
+    canManage: vi.fn().mockResolvedValue(true),
   };
   const logger = loggerMock.create();
 
@@ -76,7 +78,7 @@ const represent = async (type: ReturnType<typeof createType>['type'], input = at
 
 describe('proposalAttachmentType', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('validate', () => {

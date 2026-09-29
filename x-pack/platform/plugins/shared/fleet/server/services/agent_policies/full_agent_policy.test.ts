@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import omit from 'lodash/omit';
 
 import type { AgentPolicy, Output, DownloadSource, PackageInfo } from '../../types';
@@ -36,25 +39,25 @@ import { getMonitoringPermissions } from './monitoring_permissions';
 import { generateOtelcolConfig } from './otel_collector';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 
-jest.mock('../epm/packages');
-jest.mock('../fleet_server_host');
-jest.mock('./otel_collector');
-jest.mock('./related_saved_objects');
+vi.mock('../epm/packages');
+vi.mock('../fleet_server_host');
+vi.mock('./otel_collector');
+vi.mock('./related_saved_objects');
 
-const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as jest.Mock<
+const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as Mock<
   ReturnType<typeof getMonitoringPermissions>
 >;
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedGenerateOtelcolConfig = generateOtelcolConfig as jest.Mock<
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedGenerateOtelcolConfig = generateOtelcolConfig as Mock<
   ReturnType<typeof generateOtelcolConfig>
 >;
-const mockedFetchRelatedSavedObjects = fetchRelatedSavedObjects as jest.Mock<
+const mockedFetchRelatedSavedObjects = fetchRelatedSavedObjects as Mock<
   ReturnType<typeof fetchRelatedSavedObjects>
 >;
 
 const soClientMock = createSavedObjectClientMock();
-const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
-const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as jest.Mock<
+const mockedGetPackageInfo = getPackageInfo as Mock<ReturnType<typeof getPackageInfo>>;
+const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as Mock<
   ReturnType<typeof getFleetServerHostsForAgentPolicy>
 >;
 
@@ -74,9 +77,9 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
   });
 }
 
-jest.mock('../agent_policy');
+vi.mock('../agent_policy');
 
-jest.mock('../output', () => {
+vi.mock('../output', () => {
   const OUTPUTS: { [k: string]: Output } = {
     'data-output-id': {
       id: 'data-output-id',
@@ -159,15 +162,15 @@ jest.mock('../output', () => {
   };
 });
 
-jest.mock('../agent_policy_update');
-jest.mock('../agents');
-jest.mock('../package_policy');
+vi.mock('../agent_policy_update');
+vi.mock('../agents');
+vi.mock('../package_policy');
 
-jest.mock('./monitoring_permissions');
-jest.mock('./otel_collector');
-jest.mock('./related_saved_objects');
+vi.mock('./monitoring_permissions');
+vi.mock('./otel_collector');
+vi.mock('./related_saved_objects');
 
-jest.mock('../download_source', () => {
+vi.mock('../download_source', () => {
   return {
     downloadSourceService: {
       getDefaultDownloadSourceId: async () => 'default-download-source-id',
@@ -209,7 +212,7 @@ jest.mock('../download_source', () => {
 });
 
 function getAgentPolicyUpdateMock() {
-  return agentPolicyUpdateEventHandler as unknown as jest.Mock<
+  return agentPolicyUpdateEventHandler as unknown as Mock<
     typeof agentPolicyUpdateEventHandler
   >;
 }
@@ -217,8 +220,8 @@ function getAgentPolicyUpdateMock() {
 describe('getFullAgentPolicy', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.spyOn(appContextService, 'getMessageSigningService').mockReturnValue(undefined);
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+    vi.spyOn(appContextService, 'getMessageSigningService').mockReturnValue(undefined);
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableOtelIntegrations: true,
     } as any);
 
@@ -1346,7 +1349,7 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should populate agent.protection and signed properties if encryption is available', async () => {
-    (appContextService.getMessageSigningService as jest.Mock).mockReturnValue(
+    (appContextService.getMessageSigningService as Mock).mockReturnValue(
       createMessageSigningServiceMock()
     );
     mockAgentPolicy({});
@@ -1718,10 +1721,10 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should emit only the apm applications block for the ECH managed bulk output', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
       managedOtlp: { url: 'https://managed-otlp.example.invalid' },
     } as any);
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentless: { managedBulk: { enabled: true } },
@@ -1777,7 +1780,7 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should emit only the apm applications block for the serverless managed bulk output, matched via the config-injected endpoint', async () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       outputs: [
@@ -1847,10 +1850,10 @@ describe('getFullAgentPolicy', () => {
     const MANAGED_OTLP_HOST = 'my-otlp-host.elastic.cloud';
     const OTLP_OUTPUT_ID = 'my-otlp-output';
 
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
       managedOtlp: { url: MANAGED_OTLP_HOST },
     } as any);
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
     } as any);
@@ -1902,10 +1905,10 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should not emit _managed_otlp_apm for an OTLP output that does not match the managed endpoint', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
       managedOtlp: { url: 'my-otlp-host.elastic.cloud' },
     } as any);
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
     } as any);
@@ -1951,10 +1954,10 @@ describe('getFullAgentPolicy', () => {
     const MANAGED_OTLP_HOST = 'my-otlp-host.elastic.cloud';
     const OTLP_OUTPUT_ID = 'my-otlp-output';
 
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
       managedOtlp: { url: MANAGED_OTLP_HOST },
     } as any);
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
     } as any);
@@ -2276,7 +2279,7 @@ describe('getFullAgentPolicy', () => {
     });
 
     it('should not call generateOtelcolConfig when enableOtelIntegrations is false', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
         enableOtelIntegrations: false,
       } as any);
 
@@ -2706,7 +2709,7 @@ describe('getFullAgentPolicy', () => {
     });
 
     it('keeps a reference whose placeholder appears only in otelcolConfig', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
         enableOtelIntegrations: true,
       } as any);
 

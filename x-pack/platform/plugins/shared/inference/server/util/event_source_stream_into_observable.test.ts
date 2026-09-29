@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Readable } from 'node:stream';
 import { toArray, firstValueFrom } from 'rxjs';
 import { isInferenceRequestError } from '@kbn/inference-common';
@@ -64,7 +66,7 @@ describe('eventSourceStreamIntoObservable', () => {
   });
 
   it('destroys the stream and errors the subscriber when maxDurationMs is exceeded', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const stream = new Readable({ read: () => {} });
 
@@ -74,7 +76,7 @@ describe('eventSourceStreamIntoObservable', () => {
         });
       });
 
-      jest.advanceTimersByTime(1_001);
+      vi.advanceTimersByTime(1_001);
 
       const error = await error$;
       expect(stream.destroyed).toBe(true);
@@ -88,13 +90,13 @@ describe('eventSourceStreamIntoObservable', () => {
         })
       );
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
   it('enforces the deadline in-band when the timers phase is starved', async () => {
     const start = Date.now();
-    const nowSpy = jest.spyOn(Date, 'now');
+    const nowSpy = vi.spyOn(Date, 'now');
     try {
       const stream = new Readable({ read: () => {} });
 
@@ -174,19 +176,19 @@ describe('eventSourceStreamIntoObservable', () => {
   });
 
   it('clears the cap timer once the stream completes', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const stream = Readable.from([`data: 42\n\n`]);
 
       const results$ = firstValueFrom(
         eventSourceStreamIntoObservable(stream, { maxDurationMs: 5_000 }).pipe(toArray())
       );
-      await jest.advanceTimersByTimeAsync(1);
+      await vi.advanceTimersByTimeAsync(1);
 
       expect(await results$).toEqual(['42']);
-      expect(jest.getTimerCount()).toBe(0);
+      expect(vi.getTimerCount()).toBe(0);
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 });

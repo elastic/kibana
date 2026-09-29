@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { detectionsDataStream } from './detections';
 import { eventsDataStream } from './events';
 import {
@@ -19,10 +21,10 @@ describe('createSignificantEventsClients', () => {
     const detectionDataStreamClient = {};
     const eventDataStreamClient = {};
     const services: SignificantEventsServices = {
-      detection: { getClient: jest.fn().mockReturnValue(detectionClient) } as never,
-      event: { getClient: jest.fn().mockReturnValue(eventClient) } as never,
+      detection: { getClient: vi.fn().mockReturnValue(detectionClient) } as never,
+      event: { getClient: vi.fn().mockReturnValue(eventClient) } as never,
     };
-    const initializeClient = jest.fn(async (name: string) =>
+    const initializeClient = vi.fn(async (name: string) =>
       name === detectionsDataStream.name ? detectionDataStreamClient : eventDataStreamClient
     );
 
@@ -43,12 +45,12 @@ describe('createSignificantEventsClients', () => {
   it('getEventClient() always returns EventClient, regardless of useRuleEventsRead', async () => {
     const eventClient = {};
     const services: SignificantEventsServices = {
-      detection: { getClient: jest.fn() } as never,
-      event: { getClient: jest.fn().mockReturnValue(eventClient) } as never,
+      detection: { getClient: vi.fn() } as never,
+      event: { getClient: vi.fn().mockReturnValue(eventClient) } as never,
     };
     const clients = createSignificantEventsClients({
       services,
-      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
+      dataStreams: { initializeClient: vi.fn().mockResolvedValue({}) } as never,
       esClient: {} as never,
       space: 'default',
       useRuleEventsRead: true,
@@ -63,17 +65,17 @@ describe('createSignificantEventsClients', () => {
   it('getEventSearchClient() returns RuleEventsClient when useRuleEventsRead is true and EventClient when false/omitted', async () => {
     const ruleEventsClient = {};
     const eventClient = {};
-    const getClient = jest.fn(({ useRuleEventsRead }: { useRuleEventsRead?: boolean }) =>
+    const getClient = vi.fn(({ useRuleEventsRead }: { useRuleEventsRead?: boolean }) =>
       useRuleEventsRead ? ruleEventsClient : eventClient
     );
     const services: SignificantEventsServices = {
-      detection: { getClient: jest.fn() } as never,
+      detection: { getClient: vi.fn() } as never,
       event: { getClient } as never,
     };
 
     const clientsWithFlagOn = createSignificantEventsClients({
       services,
-      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
+      dataStreams: { initializeClient: vi.fn().mockResolvedValue({}) } as never,
       esClient: {} as never,
       space: 'default',
       useRuleEventsRead: true,
@@ -82,7 +84,7 @@ describe('createSignificantEventsClients', () => {
 
     const clientsWithFlagOff = createSignificantEventsClients({
       services,
-      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
+      dataStreams: { initializeClient: vi.fn().mockResolvedValue({}) } as never,
       esClient: {} as never,
       space: 'default',
     });

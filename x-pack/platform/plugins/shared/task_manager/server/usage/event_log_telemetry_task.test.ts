@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { TaskCost, type RunContext } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
@@ -18,9 +21,9 @@ import { getEventLogStats } from './lib/get_event_log_stats';
 import { emptyState } from './task_state';
 import { SCHEDULE, TASK_ID, TASK_TYPE } from './constants';
 
-jest.mock('./lib/get_event_log_stats');
+vi.mock('./lib/get_event_log_stats');
 
-const getEventLogStatsMock = getEventLogStats as jest.MockedFunction<typeof getEventLogStats>;
+const getEventLogStatsMock = getEventLogStats as MockedFunction<typeof getEventLogStats>;
 
 const logger = loggingSystemMock.createLogger();
 
@@ -33,7 +36,7 @@ const stats = {
 
 const createCoreStartServices = () => {
   const coreStart = coreMock.createStart();
-  return jest.fn().mockResolvedValue([coreStart, {}, {}]);
+  return vi.fn().mockResolvedValue([coreStart, {}, {}]);
 };
 
 const signal = new AbortController().signal;
@@ -41,13 +44,13 @@ const signal = new AbortController().signal;
 const runContext = (state = {}) => ({ taskInstance: { state }, signal } as unknown as RunContext);
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('registerEventLogTelemetryTask', () => {
   it('registers the task definition with a versioned state schema', () => {
     const taskTypeDictionary = {
-      registerTaskDefinitions: jest.fn(),
+      registerTaskDefinitions: vi.fn(),
     } as unknown as TaskTypeDictionary;
 
     registerEventLogTelemetryTask(logger, createCoreStartServices(), taskTypeDictionary);
@@ -67,7 +70,7 @@ describe('registerEventLogTelemetryTask', () => {
 
 describe('scheduleEventLogTelemetryTask', () => {
   it('schedules a single task keyed by a well-known id', async () => {
-    const taskScheduling = { ensureScheduled: jest.fn() } as unknown as TaskScheduling;
+    const taskScheduling = { ensureScheduled: vi.fn() } as unknown as TaskScheduling;
 
     await scheduleEventLogTelemetryTask(logger, taskScheduling);
 
@@ -82,7 +85,7 @@ describe('scheduleEventLogTelemetryTask', () => {
 
   it('logs instead of throwing when scheduling fails', async () => {
     const taskScheduling = {
-      ensureScheduled: jest.fn().mockRejectedValue(new Error('no connection')),
+      ensureScheduled: vi.fn().mockRejectedValue(new Error('no connection')),
     } as unknown as TaskScheduling;
 
     await expect(scheduleEventLogTelemetryTask(logger, taskScheduling)).resolves.toBeUndefined();

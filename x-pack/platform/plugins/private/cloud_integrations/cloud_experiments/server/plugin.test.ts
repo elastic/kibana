@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -12,11 +14,11 @@ import { config } from './config';
 import { CloudExperimentsPlugin } from './plugin';
 
 describe('Cloud Experiments server plugin', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.clearAllMocks();
+    vi.clearAllTimers();
+    vi.clearAllMocks();
   });
 
   describe('constructor', () => {
@@ -78,7 +80,7 @@ describe('Cloud Experiments server plugin', () => {
 
       const initializerContext = coreMock.createPluginInitializerContext();
 
-      await jest.advanceTimersByTimeAsync(100); // Remove the debounceTime effect
+      await vi.advanceTimersByTimeAsync(100); // Remove the debounceTime effect
       expect(coreSetupMock.featureFlags.appendContext).toHaveBeenCalledWith({
         kind: 'multi',
         kibana: {
@@ -153,7 +155,7 @@ describe('Cloud Experiments server plugin', () => {
       plugin.start(coreStart);
 
       // After scheduler kicks in...
-      await jest.advanceTimersByTimeAsync(100);
+      await vi.advanceTimersByTimeAsync(100);
       expect(coreSetup.featureFlags.appendContext).toHaveBeenCalledWith(
         expect.objectContaining({
           kind: 'multi',
@@ -187,16 +189,16 @@ describe('Cloud Experiments server plugin', () => {
 
     test('stops the Metadata Service', () => {
       // eslint-disable-next-line dot-notation
-      const metadataServiceStopSpy = jest.spyOn(plugin['metadataService'], 'stop');
+      const metadataServiceStopSpy = vi.spyOn(plugin['metadataService'], 'stop');
       plugin.stop();
       expect(metadataServiceStopSpy).toHaveBeenCalledTimes(1);
     });
 
     test('stops rollout evaluation probe subscriptions', () => {
-      const unsubscribe = jest.fn();
+      const unsubscribe = vi.fn();
       const coreStart = coreMock.createStart();
-      coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue({
-        subscribe: jest.fn().mockReturnValue({ unsubscribe }),
+      coreStart.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue({
+        subscribe: vi.fn().mockReturnValue({ unsubscribe }),
       });
 
       plugin.start(coreStart);

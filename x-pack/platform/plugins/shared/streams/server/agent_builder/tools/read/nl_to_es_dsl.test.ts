@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { extractJson, translateNlToEsDsl } from './nl_to_es_dsl';
 
 describe('translateNlToEsDsl', () => {
   const createMockInferenceClient = (content: string) => ({
-    chatComplete: jest.fn().mockResolvedValue({ content }),
-    output: jest.fn(),
+    chatComplete: vi.fn().mockResolvedValue({ content }),
+    output: vi.fn(),
   });
 
   it('parses valid JSON response', async () => {
@@ -68,8 +70,8 @@ describe('translateNlToEsDsl', () => {
 
   it('throws on null content', async () => {
     const client = {
-      chatComplete: jest.fn().mockResolvedValue({ content: null }),
-      output: jest.fn(),
+      chatComplete: vi.fn().mockResolvedValue({ content: null }),
+      output: vi.fn(),
     };
     await expect(
       translateNlToEsDsl({

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { ContentListProvider } from '../../context';
@@ -14,7 +16,7 @@ import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import { useContentListSort } from './use_content_list_sort';
 
 describe('useContentListSort', () => {
-  const mockFindItems = jest.fn(
+  const mockFindItems = vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: [],
       total: 0,
@@ -45,7 +47,7 @@ describe('useContentListSort', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -180,7 +182,7 @@ describe('useContentListSort', () => {
   describe('error handling', () => {
     it('throws when used outside provider', () => {
       // Suppress console.error for expected error.
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       expect(() => {
         renderHook(() => useContentListSort());

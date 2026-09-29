@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   serverMock,
   requestContextMock,
@@ -22,23 +25,26 @@ const postRequest = (body: Record<string, unknown>) =>
     body,
   });
 
-jest.mock('../../../saved_object/timelines', () => ({
-  getAllTimelineByIds: jest.fn(),
-}));
+vi.mock('../../../saved_object/timelines', () => {
+      const mocked = {
+      getAllTimelineByIds: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('POST /internal/timelines/_by_ids', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     context = requestContextMock.createTools().context;
     getTimelinesByIdsRoute(server.router);
   });
 
   test('forwards ids and the optional filter/sort/page params to the saved-object helper', async () => {
-    (getAllTimelineByIds as jest.Mock).mockResolvedValue({ totalCount: 0, timeline: [] });
+    (getAllTimelineByIds as Mock).mockResolvedValue({ totalCount: 0, timeline: [] });
 
     const result = await server.inject(
       postRequest({
@@ -56,8 +62,8 @@ describe('POST /internal/timelines/_by_ids', () => {
     );
 
     expect(result.status).toBe(200);
-    expect(getAllTimelineByIds as jest.Mock).toHaveBeenCalledTimes(1);
-    const [, ids, options] = (getAllTimelineByIds as jest.Mock).mock.calls[0];
+    expect(getAllTimelineByIds as Mock).toHaveBeenCalledTimes(1);
+    const [, ids, options] = (getAllTimelineByIds as Mock).mock.calls[0];
     expect(ids).toEqual(['id-1', 'id-2']);
     expect(options).toEqual({
       onlyUserFavorite: true,
@@ -70,14 +76,14 @@ describe('POST /internal/timelines/_by_ids', () => {
   });
 
   test('defaults paging to the requested ids length and pageIndex 1 when omitted', async () => {
-    (getAllTimelineByIds as jest.Mock).mockResolvedValue({ totalCount: 0, timeline: [] });
+    (getAllTimelineByIds as Mock).mockResolvedValue({ totalCount: 0, timeline: [] });
 
     await server.inject(
       postRequest({ ids: ['id-1', 'id-2', 'id-3'] }),
       requestContextMock.convertContext(context)
     );
 
-    const [, , options] = (getAllTimelineByIds as jest.Mock).mock.calls[0];
+    const [, , options] = (getAllTimelineByIds as Mock).mock.calls[0];
     expect(options.pageInfo).toEqual({ pageSize: 3, pageIndex: 1 });
     expect(options.onlyUserFavorite).toBeNull();
     expect(options.status).toBeNull();

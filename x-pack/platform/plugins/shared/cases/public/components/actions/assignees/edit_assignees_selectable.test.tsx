@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, screen } from '@testing-library/react';
 
@@ -15,7 +17,7 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import * as api from '../../../containers/user_profiles/api';
 
-jest.mock('../../../containers/user_profiles/api');
+vi.mock('../../../containers/user_profiles/api');
 
 describe('EditAssigneesSelectable', () => {
   let user: UserEvent;
@@ -27,7 +29,7 @@ describe('EditAssigneesSelectable', () => {
   const props = {
     selectedCases: [basicCase],
     isLoading: false,
-    onChangeAssignees: jest.fn(),
+    onChangeAssignees: vi.fn(),
   };
 
   /**
@@ -41,28 +43,28 @@ describe('EditAssigneesSelectable', () => {
       { ...basicCase, assignees: [...basicCase.assignees, { uid: userProfiles[1].uid }] },
     ],
     isLoading: false,
-    onChangeAssignees: jest.fn(),
+    onChangeAssignees: vi.fn(),
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {
@@ -189,7 +191,7 @@ describe('EditAssigneesSelectable', () => {
   });
 
   it('sort users alphabetically correctly', async () => {
-    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+    const spyOnBulkGetUserProfiles = vi.spyOn(api, 'bulkGetUserProfiles');
     const reversedUserProfiles = [...userProfiles].reverse();
     spyOnBulkGetUserProfiles.mockResolvedValueOnce(reversedUserProfiles);
 
@@ -221,7 +223,7 @@ describe('EditAssigneesSelectable', () => {
     await user.type(screen.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -249,7 +251,7 @@ describe('EditAssigneesSelectable', () => {
     await user.type(screen.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -280,7 +282,7 @@ describe('EditAssigneesSelectable', () => {
     await user.type(screen.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     const searchResults = screen.getAllByTestId(
@@ -305,7 +307,7 @@ describe('EditAssigneesSelectable', () => {
     await user.type(screen.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -359,7 +361,7 @@ describe('EditAssigneesSelectable', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -379,7 +381,7 @@ describe('EditAssigneesSelectable', () => {
     await user.type(screen.getByPlaceholderText('Find a user'), 'not-exists');
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {

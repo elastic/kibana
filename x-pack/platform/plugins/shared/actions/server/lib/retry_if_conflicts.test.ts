@@ -4,32 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { retryIfConflicts, RetryForConflictsAttempts } from './retry_if_conflicts';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-jest.mock('@kbn/core/server');
+vi.mock('@kbn/core/server');
 
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 describe('retryIfConflicts', () => {
   let logger: Logger;
 
   beforeEach(() => {
     logger = mockLogger;
-    (SavedObjectsErrorHelpers.isConflictError as jest.Mock).mockReturnValue(true);
+    (SavedObjectsErrorHelpers.isConflictError as Mock).mockReturnValue(true);
   });
 
   it('should execute operation successfully without conflicts', async () => {
-    const operation = jest.fn().mockResolvedValue('success');
+    const operation = vi.fn().mockResolvedValue('success');
     const result = await retryIfConflicts(logger, 'testOperation', operation);
     expect(result).toBe('success');
     expect(operation).toHaveBeenCalledTimes(1);
   });
 
   it('should retry the operation on conflict error', async () => {
-    const operation = jest.fn().mockRejectedValueOnce('conflict').mockResolvedValueOnce('success');
+    const operation = vi.fn().mockRejectedValueOnce('conflict').mockResolvedValueOnce('success');
 
     const result = await retryIfConflicts(logger, 'testOperation', operation);
     expect(result).toBe('success');
@@ -38,7 +41,7 @@ describe('retryIfConflicts', () => {
   });
 
   it('should throw error if maximum retries exceeded', async () => {
-    const operation = jest.fn().mockRejectedValue('conflict');
+    const operation = vi.fn().mockRejectedValue('conflict');
 
     await expect(retryIfConflicts(logger, 'testOperation', operation)).rejects.toBe('conflict');
     expect(operation).toHaveBeenCalledTimes(RetryForConflictsAttempts + 1);
@@ -46,9 +49,9 @@ describe('retryIfConflicts', () => {
   });
 
   it('should throw non-conflict error immediately', async () => {
-    (SavedObjectsErrorHelpers.isConflictError as jest.Mock).mockReturnValue(false);
+    (SavedObjectsErrorHelpers.isConflictError as Mock).mockReturnValue(false);
     const nonConflictError = new Error('non-conflict error');
-    const operation = jest.fn().mockRejectedValue(nonConflictError);
+    const operation = vi.fn().mockRejectedValue(nonConflictError);
 
     await expect(retryIfConflicts(logger, 'testOperation', operation)).rejects.toThrow(
       nonConflictError

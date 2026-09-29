@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { bulkUntrackAlertsRoute } from './bulk_untrack_alerts_route';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -13,11 +15,14 @@ import { rulesClientMock } from '../../../../rules_client.mock';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('bulkUntrackAlertsRoute', () => {

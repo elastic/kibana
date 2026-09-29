@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import type { SavedObject, SavedObjectsExportTransformContext } from '@kbn/core/server';
 import { handleExport } from './export';
@@ -20,10 +23,10 @@ import {
   getTemplatesAndFieldDefinitionsForCases,
 } from './utils';
 
-jest.mock('./utils', () => {
+vi.mock('./utils', () => {
   return {
-    getAttachmentsAndUserActionsForCases: jest.fn().mockResolvedValue([]),
-    getTemplatesAndFieldDefinitionsForCases: jest.fn().mockResolvedValue([]),
+    getAttachmentsAndUserActionsForCases: vi.fn().mockResolvedValue([]),
+    getTemplatesAndFieldDefinitionsForCases: vi.fn().mockResolvedValue([]),
   };
 });
 
@@ -138,7 +141,7 @@ describe('case export', () => {
       references: [],
     };
 
-    (getTemplatesAndFieldDefinitionsForCases as jest.Mock).mockResolvedValueOnce([
+    (getTemplatesAndFieldDefinitionsForCases as Mock).mockResolvedValueOnce([
       mockTemplateSO,
       mockFieldDefSO,
     ]);

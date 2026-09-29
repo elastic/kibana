@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,23 +17,29 @@ import {
   EntityAttachmentInlineContent,
 } from './entity_attachment_inline_content';
 
-jest.mock('./entity_card/entity_card', () => ({
-  EntityCard: (props: Record<string, unknown>) => (
-    <div
-      data-test-subj="entityCardMock"
-      data-watchlists-enabled={String(props.watchlistsEnabled)}
-      data-privmon-modifier-enabled={String(props.privmonModifierEnabled)}
-    >
-      {JSON.stringify(props.identifier)}
-    </div>
-  ),
-}));
+vi.mock('./entity_card/entity_card', () => {
+      const mocked = {
+      EntityCard: (props: Record<string, unknown>) => (
+        <div
+          data-test-subj="entityCardMock"
+          data-watchlists-enabled={String(props.watchlistsEnabled)}
+          data-privmon-modifier-enabled={String(props.privmonModifierEnabled)}
+        >
+          {JSON.stringify(props.identifier)}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./entity_table/entity_table', () => ({
-  EntityTable: (props: Record<string, unknown>) => (
-    <div data-test-subj="entityTableMock">{`count:${(props.entities as unknown[]).length}`}</div>
-  ),
-}));
+vi.mock('./entity_table/entity_table', () => {
+      const mocked = {
+      EntityTable: (props: Record<string, unknown>) => (
+        <div data-test-subj="entityTableMock">{`count:${(props.entities as unknown[]).length}`}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const experimentalFeatures = {
   entityAnalyticsWatchlistEnabled: true,

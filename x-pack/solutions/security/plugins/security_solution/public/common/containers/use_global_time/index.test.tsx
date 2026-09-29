@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { useGlobalTime } from '.';
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('react-redux-v7', () => {
-  const originalModule = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const originalModule = require('react-redux-v7');
 
   return {
     ...originalModule,
     useDispatch: () => mockDispatch,
-    useSelector: jest.fn().mockReturnValue({ from: 0, to: 0 }),
+    useSelector: vi.fn().mockReturnValue({ from: 0, to: 0 }),
   };
 });
 

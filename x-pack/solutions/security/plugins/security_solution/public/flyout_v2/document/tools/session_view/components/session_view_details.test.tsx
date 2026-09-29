@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -19,8 +21,8 @@ import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
 
 let lastOnJumpToEvent: ((event: ProcessEvent) => void) | undefined;
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiTabbedContent: ({ tabs }: { tabs: Array<{ content: React.ReactNode }> }) => (
@@ -33,22 +35,31 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../use_flyout_api');
-jest.mock('./process_tab', () => ({
-  ProcessTab: () => <div data-test-subj="processTabMock" />,
-}));
-jest.mock('./metadata_tab', () => ({
-  MetadataTab: () => <div data-test-subj="metadataTabMock" />,
-}));
-jest.mock('./alerts_tab', () => ({
-  AlertsTab: (props: { onJumpToEvent: (event: ProcessEvent) => void }) => {
-    lastOnJumpToEvent = props.onJumpToEvent;
-    return <div data-test-subj="alertsTabMock" />;
-  },
-}));
+vi.mock('../../../../use_flyout_api');
+vi.mock('./process_tab', () => {
+      const mocked = {
+      ProcessTab: () => <div data-test-subj="processTabMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./metadata_tab', () => {
+      const mocked = {
+      MetadataTab: () => <div data-test-subj="metadataTabMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./alerts_tab', () => {
+      const mocked = {
+      AlertsTab: (props: { onJumpToEvent: (event: ProcessEvent) => void }) => {
+        lastOnJumpToEvent = props.onJumpToEvent;
+        return <div data-test-subj="alertsTabMock" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SessionViewDetails', () => {
-  const mockUseFlyoutApi = jest.mocked(useFlyoutApi);
+  const mockUseFlyoutApi = vi.mocked(useFlyoutApi);
   const flyoutApi = createFlyoutApiMock();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
@@ -64,9 +75,9 @@ describe('SessionViewDetails', () => {
               sessionEntityId="session-entity-id"
               sessionStartTime="2023-01-01T00:00:00.000Z"
               investigatedAlertId="alert-id"
-              renderCellActions={jest.fn()}
+              renderCellActions={vi.fn()}
               onJumpToEvent={onJumpToEvent}
-              onAlertUpdated={jest.fn()}
+              onAlertUpdated={vi.fn()}
             />
           </Router>
         </Provider>
@@ -74,13 +85,13 @@ describe('SessionViewDetails', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     lastOnJumpToEvent = undefined;
     mockUseFlyoutApi.mockReturnValue(flyoutApi);
   });
 
   it('delegates jump to event handling to the parent', () => {
-    const onJumpToEvent = jest.fn();
+    const onJumpToEvent = vi.fn();
 
     renderComponent(onJumpToEvent);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, waitFor, screen } from '@testing-library/react';
@@ -19,7 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,31 +33,43 @@ const queryClient = new QueryClient({
   },
 });
 
-jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
-  fetchUiConfig: jest
-    .fn()
-    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
-}));
+vi.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => {
+      const mocked = {
+      fetchUiConfig: vi
+        .fn()
+        .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    push: jest.fn(),
-    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => ({
+        push: vi.fn(),
+        createHref: vi.fn(({ pathname }: { pathname: string }) => pathname),
+      }),
+      useLocation: () => ({
+        pathname: '/triggersActions/rules/',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cps-utils', () => ({
-  ...jest.requireActual('@kbn/cps-utils'),
-  useRouteBasedCpsPickerAccess: jest.fn(),
-}));
-const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
+vi.mock('@kbn/cps-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/cps-utils')),
+      useRouteBasedCpsPickerAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseRouteBasedCpsPickerAccess = vi.mocked(useRouteBasedCpsPickerAccess);
 
 function renderWithIntl(ui: React.ReactElement) {
   return render(
@@ -68,13 +83,13 @@ function renderWithIntl(ui: React.ReactElement) {
 
 describe('rule_details_route', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 
   const spacesMock = spacesPluginMock.createStartContract();
   async function setup() {
-    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+    const useKibanaMock = useKibana as Mocked<typeof useKibana>;
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const services = useKibanaMock().services;
     services.spaces = spacesMock;
@@ -119,7 +134,7 @@ describe('rule_details_route', () => {
 
   it('uses the mount host path prefix for aliasMatch redirects', async () => {
     await setup();
-    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+    const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
     useKibanaMock().services.host = {
       app: 'observabilityAlerting',
@@ -225,7 +240,7 @@ describe('rule_details_route', () => {
 
 describe('getRuleData useEffect handler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches rule', async () => {
@@ -236,7 +251,7 @@ describe('getRuleData useEffect handler', () => {
     resolveRule.mockImplementationOnce(async () => rule);
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
 
     await getRuleData(
@@ -282,7 +297,7 @@ describe('getRuleData useEffect handler', () => {
     loadActionTypes.mockImplementation(async () => [connectorType]);
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
 
     await getRuleData(
@@ -330,7 +345,7 @@ describe('getRuleData useEffect handler', () => {
     });
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
@@ -376,7 +391,7 @@ describe('getRuleData useEffect handler', () => {
     loadActionTypes.mockImplementation(async () => [connectorType]);
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
@@ -426,7 +441,7 @@ describe('getRuleData useEffect handler', () => {
     });
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
@@ -474,7 +489,7 @@ describe('getRuleData useEffect handler', () => {
     loadActionTypes.mockImplementation(async () => [connectorType]);
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
@@ -533,7 +548,7 @@ describe('getRuleData useEffect handler', () => {
     loadActionTypes.mockImplementation(async () => [availableConnectorType]);
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
@@ -554,18 +569,18 @@ describe('getRuleData useEffect handler', () => {
 
 function mockApis() {
   return {
-    loadRule: jest.fn(),
-    loadRuleTypes: jest.fn(),
-    loadActionTypes: jest.fn(),
-    resolveRule: jest.fn(),
+    loadRule: vi.fn(),
+    loadRuleTypes: vi.fn(),
+    loadActionTypes: vi.fn(),
+    resolveRule: vi.fn(),
   };
 }
 
 function mockStateSetter() {
   return {
-    setRule: jest.fn(),
-    setRuleType: jest.fn(),
-    setActionTypes: jest.fn(),
+    setRule: vi.fn(),
+    setRuleType: vi.fn(),
+    setActionTypes: vi.fn(),
   };
 }
 

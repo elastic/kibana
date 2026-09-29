@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { render } from '@testing-library/react';
 import type { LazyTimelineTabRendererProps } from './lazy_timeline_tab_renderer';
@@ -12,10 +15,10 @@ import { LazyTimelineTabRenderer } from './lazy_timeline_tab_renderer';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../../common/types';
 
-jest.mock('../../../../common/hooks/use_selector');
+vi.mock('../../../../common/hooks/use_selector');
 
 describe('LazyTimelineTabRenderer', () => {
-  const mockUseDeepEqualSelector = useDeepEqualSelector as jest.Mock;
+  const mockUseDeepEqualSelector = useDeepEqualSelector as Mock;
   const defaultProps = {
     dataTestSubj: 'test',
     shouldShowTab: true,
@@ -62,7 +65,7 @@ describe('LazyTimelineTabRenderer', () => {
 
   describe('re-rendering', () => {
     const testChildString = 'new content';
-    const mockFnShouldThatShouldOnlyRunOnce = jest.fn();
+    const mockFnShouldThatShouldOnlyRunOnce = vi.fn();
 
     const TestChild = () => {
       useEffect(() => {
@@ -78,7 +81,7 @@ describe('LazyTimelineTabRenderer', () => {
     );
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       mockUseDeepEqualSelector.mockReturnValue({ show: true });
     });
 

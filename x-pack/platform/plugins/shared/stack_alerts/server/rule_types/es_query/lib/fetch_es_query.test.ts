@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { OnlyEsQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
 import { fetchEsQuery, generateLink } from './fetch_es_query';
@@ -16,15 +18,15 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/common', () => {
-  const actual = jest.requireActual('@kbn/triggers-actions-ui-plugin/common');
+vi.mock('@kbn/triggers-actions-ui-plugin/common', async () => {
+  const actual = (await vi.importActual('@kbn/triggers-actions-ui-plugin/common'));
   return {
     ...actual,
-    parseAggregationResults: jest.fn(),
+    parseAggregationResults: vi.fn(),
   };
 });
 
-const mockNow = jest.getRealSystemTime();
+const mockNow = vi.getRealSystemTime();
 const defaultParams: OnlyEsQueryRuleParams = {
   index: ['test-index'],
   size: 100,
@@ -46,22 +48,22 @@ const mockRuleResultService = publicRuleResultServiceMock.create();
 
 describe('fetchEsQuery', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockNow);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockNow);
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   const services = {
     // @ts-expect-error
     share: {
       url: {
         locators: {
-          get: jest.fn().mockReturnValue({
-            getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+          get: vi.fn().mockReturnValue({
+            getRedirectUrl: vi.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
           } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
         },
       },
@@ -632,7 +634,7 @@ describe('fetchEsQuery', () => {
   it('should generate a link', () => {
     const date = '2020-02-09T23:15:41.941Z';
     const locatorMock = {
-      getRedirectUrl: jest.fn(() => 'space1/app/r?l=DISCOVER_APP_LOCATOR'),
+      getRedirectUrl: vi.fn(() => 'space1/app/r?l=DISCOVER_APP_LOCATOR'),
     } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
     const filter = {
       bool: {

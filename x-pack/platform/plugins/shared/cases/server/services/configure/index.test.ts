@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   CaseConnector,
   CaseCustomFields,
@@ -202,7 +204,7 @@ describe('CaseConfigureService', () => {
   let service: CaseConfigureService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     service = new CaseConfigureService(mockLogger);
   });
 

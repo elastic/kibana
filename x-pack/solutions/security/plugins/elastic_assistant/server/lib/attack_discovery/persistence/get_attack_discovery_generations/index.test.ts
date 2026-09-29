@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getAttackDiscoveryGenerations } from '.';
 
 import { authenticatedUser } from '../../../../__mocks__/user';
 
 describe('getAttackDiscoveryGenerations', () => {
-  const esClient = { msearch: jest.fn() } as { msearch: jest.Mock };
+  const esClient = { msearch: vi.fn() } as { msearch: Mock };
   interface Logger {
-    debug: jest.Mock;
-    info: jest.Mock;
-    warn: jest.Mock;
-    error: jest.Mock;
+    debug: Mock;
+    info: Mock;
+    warn: Mock;
+    error: Mock;
   }
-  const logger: Logger = { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+  const logger: Logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
   const eventLogIndex = 'test-index';
   const spaceId = 'default';
   // use imported authenticatedUser
@@ -32,7 +35,7 @@ describe('getAttackDiscoveryGenerations', () => {
   const getAttackDiscoveryGenerationsParams = { size: 10 };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('returns the expected response', () => {

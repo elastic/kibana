@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getServiceMapBadgesEnd } from './get_service_map_badges_end';
 
 const NOW_ISO = '2026-05-12T13:00:00.000Z';
@@ -35,7 +37,7 @@ describe('getServiceMapBadgesEnd', () => {
 
   it('uses Date.now() when no explicit clock is provided', () => {
     const realDateNow = Date.now;
-    Date.now = jest.fn(() => NOW_MS);
+    Date.now = vi.fn(() => NOW_MS);
     try {
       const past = '2026-05-12T10:00:00.000Z';
       expect(getServiceMapBadgesEnd(past)).toBe(NOW_ISO);

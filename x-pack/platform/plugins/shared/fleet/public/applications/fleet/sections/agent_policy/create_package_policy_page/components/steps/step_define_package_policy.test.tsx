@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, act, fireEvent } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -22,31 +25,40 @@ import { useOutputs } from './components/hooks';
 
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
-jest.mock('./components/hooks', () => ({
-  ...jest.requireActual('./components/hooks'),
-  useOutputs: jest.fn().mockReturnValue({
-    isLoading: false,
-    canUseOutputPerIntegration: true,
-    allowedOutputs: [{ id: 'output-1', name: 'Default output', type: 'elasticsearch' }],
-  }),
-}));
+vi.mock('./components/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('./components/hooks')),
+      useOutputs: vi.fn().mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: true,
+        allowedOutputs: [{ id: 'output-1', name: 'Default output', type: 'elasticsearch' }],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
-  useGetIlmPoliciesQuery: jest.fn().mockReturnValue({
-    data: { has_manage_ilm: true, items: ['policy-a', 'policy-b'] },
-    isLoading: false,
-  }),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      useGetPackagePoliciesQuery: vi.fn().mockReturnValue({ data: { items: [] } }),
+      useGetIlmPoliciesQuery: vi.fn().mockReturnValue({
+        data: { has_manage_ilm: true, items: ['policy-a', 'policy-b'] },
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks/use_space_settings_context', () => ({
-  ...jest.requireActual('../../../../../../../hooks/use_space_settings_context'),
-  useSpaceSettingsContext: jest.fn().mockReturnValue({
-    allowedNamespacePrefixes: [],
-    defaultNamespace: 'default',
-  }),
-}));
+vi.mock('../../../../../../../hooks/use_space_settings_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../../hooks/use_space_settings_context')),
+      useSpaceSettingsContext: vi.fn().mockReturnValue({
+        allowedNamespacePrefixes: [],
+        defaultNamespace: 'default',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('StepDefinePackagePolicy', () => {
   const packageInfo: PackageInfo = {
@@ -94,7 +106,7 @@ describe('StepDefinePackagePolicy', () => {
     },
   ];
   let packagePolicy: NewPackagePolicy;
-  const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {
+  const mockUpdatePackagePolicy = vi.fn().mockImplementation((val: any) => {
     packagePolicy = {
       ...val,
       ...packagePolicy,
@@ -325,7 +337,7 @@ describe('StepDefinePackagePolicy', () => {
     });
 
     describe('inherit option label', () => {
-      const mockUseOutputs = jest.mocked(useOutputs);
+      const mockUseOutputs = vi.mocked(useOutputs);
       const renderWithOutput = () =>
         testRenderer.render(
           <StepDefinePackagePolicy
@@ -586,7 +598,7 @@ describe('StepDefinePackagePolicy', () => {
   });
 
   describe('namespace customization toggle', () => {
-    const mockUseSpaceSettingsContext = useSpaceSettingsContext as jest.Mock;
+    const mockUseSpaceSettingsContext = useSpaceSettingsContext as Mock;
 
     const renderWithToggle = (overrides: {
       packagePolicyOverride?: Partial<NewPackagePolicy>;
@@ -605,7 +617,7 @@ describe('StepDefinePackagePolicy', () => {
           validationResults={validationResults}
           submitAttempted={true}
           onNamespaceCustomizationEnabledChange={
-            overrides.onNamespaceCustomizationEnabledChange ?? jest.fn()
+            overrides.onNamespaceCustomizationEnabledChange ?? vi.fn()
           }
           packagePolicyId={overrides.packagePolicyId}
         />
@@ -679,7 +691,7 @@ describe('StepDefinePackagePolicy', () => {
     });
 
     it('calls onNamespaceCustomizationEnabledChange when toggled', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderResult = renderWithToggle({
         packagePolicyOverride: { namespace: 'staging' },
         onNamespaceCustomizationEnabledChange: onChange,
@@ -692,7 +704,7 @@ describe('StepDefinePackagePolicy', () => {
     });
 
     it('calls onNamespaceCustomizationEnabledChange with isInit=true when namespace is already opted in', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderResult = renderWithToggle({
         packagePolicyOverride: { namespace: 'staging' },
         packageInfoOverride: {
@@ -708,7 +720,7 @@ describe('StepDefinePackagePolicy', () => {
     });
 
     describe('impact warnings', () => {
-      const mockUseGetPackagePoliciesQuery = useGetPackagePoliciesQuery as jest.Mock;
+      const mockUseGetPackagePoliciesQuery = useGetPackagePoliciesQuery as Mock;
 
       afterEach(() => {
         mockUseGetPackagePoliciesQuery.mockReturnValue({ data: { items: [] } });
@@ -844,7 +856,7 @@ describe('StepDefinePackagePolicy', () => {
     });
 
     describe('ILM policy picker', () => {
-      const mockUseGetIlmPoliciesQuery = useGetIlmPoliciesQuery as jest.Mock;
+      const mockUseGetIlmPoliciesQuery = useGetIlmPoliciesQuery as Mock;
 
       afterEach(() => {
         mockUseGetIlmPoliciesQuery.mockReturnValue({
@@ -898,7 +910,7 @@ describe('StepDefinePackagePolicy', () => {
       });
 
       it('calls onIlmPolicyChange when a policy is selected', async () => {
-        const onIlmPolicyChange = jest.fn();
+        const onIlmPolicyChange = vi.fn();
         renderResult = testRenderer.render(
           <StepDefinePackagePolicy
             namespacePlaceholder={getInheritedNamespace(agentPolicies)}
@@ -907,7 +919,7 @@ describe('StepDefinePackagePolicy', () => {
             updatePackagePolicy={mockUpdatePackagePolicy}
             validationResults={validationResults}
             submitAttempted={true}
-            onNamespaceCustomizationEnabledChange={jest.fn()}
+            onNamespaceCustomizationEnabledChange={vi.fn()}
             onIlmPolicyChange={onIlmPolicyChange}
           />
         );
@@ -921,7 +933,7 @@ describe('StepDefinePackagePolicy', () => {
       });
 
       it('resets the selected ILM policy and calls onIlmPolicyChange(undefined) when toggle is turned off', async () => {
-        const onIlmPolicyChange = jest.fn();
+        const onIlmPolicyChange = vi.fn();
         renderResult = testRenderer.render(
           <StepDefinePackagePolicy
             namespacePlaceholder={getInheritedNamespace(agentPolicies)}
@@ -930,7 +942,7 @@ describe('StepDefinePackagePolicy', () => {
             updatePackagePolicy={mockUpdatePackagePolicy}
             validationResults={validationResults}
             submitAttempted={true}
-            onNamespaceCustomizationEnabledChange={jest.fn()}
+            onNamespaceCustomizationEnabledChange={vi.fn()}
             onIlmPolicyChange={onIlmPolicyChange}
           />
         );

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useMonitorDetail } from './use_monitor_detail';
@@ -12,14 +15,17 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../../../common/runtime_types';
 import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_defaults';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useEsSearchMock = observabilitySharedPublic.useEsSearch as jest.Mock;
+const useEsSearchMock = observabilitySharedPublic.useEsSearch as Mock;
 
 describe('useMonitorDetail', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('uses default index pattern when no remoteName is provided', () => {
     renderHook(() => useMonitorDetail('config-123', 'US East'));

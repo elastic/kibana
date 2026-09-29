@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { canonicalizeSlug, createCortexPageStore, toCortexKiId } from './page_store';
 
@@ -48,7 +50,7 @@ describe('createCortexPageStore', () => {
 
   it('lists cortex pages and computes stats from the unfiltered set', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: [
             { _id: 'cortex_service_checkout', _source: source },
@@ -86,7 +88,7 @@ describe('createCortexPageStore', () => {
 
   it('collapses slug-prefix duplicates onto the canonical page', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -129,8 +131,8 @@ describe('createCortexPageStore', () => {
 
   it('upserts a page with a stable id and returns the normalized document', async () => {
     const esClient = {
-      get: jest.fn().mockRejectedValue({ statusCode: 404 }),
-      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+      get: vi.fn().mockRejectedValue({ statusCode: 404 }),
+      index: vi.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
     };
 
     const store = createCortexPageStore({
@@ -167,8 +169,8 @@ describe('createCortexPageStore', () => {
 
   it('writes and returns the same id for slugs with repeated copied prefixes', async () => {
     const esClient = {
-      get: jest.fn().mockRejectedValue({ statusCode: 404 }),
-      index: jest.fn().mockResolvedValue({}),
+      get: vi.fn().mockRejectedValue({ statusCode: 404 }),
+      index: vi.fn().mockResolvedValue({}),
     };
     const store = createCortexPageStore({
       esClient: esClient as never,
@@ -193,7 +195,7 @@ describe('createCortexPageStore', () => {
 
   it('reads a page with its version and writes against it', async () => {
     const esClient = {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         found: true,
         _id: 'default:cortex_service_checkout',
         _seq_no: 7,
@@ -205,7 +207,7 @@ describe('createCortexPageStore', () => {
           attributes: { status: 'tentative', corroborations: 2, slug: 'checkout' },
         },
       }),
-      index: jest.fn().mockResolvedValue({ _seq_no: 8, _primary_term: 1 }),
+      index: vi.fn().mockResolvedValue({ _seq_no: 8, _primary_term: 1 }),
     };
     const store = createCortexPageStore({
       esClient: esClient as never,
@@ -234,8 +236,8 @@ describe('createCortexPageStore', () => {
 
   it('writes unconditionally without a version', async () => {
     const esClient = {
-      get: jest.fn().mockRejectedValue({ statusCode: 404 }),
-      index: jest.fn().mockResolvedValue({}),
+      get: vi.fn().mockRejectedValue({ statusCode: 404 }),
+      index: vi.fn().mockResolvedValue({}),
     };
     const store = createCortexPageStore({
       esClient: esClient as never,
@@ -255,7 +257,7 @@ describe('createCortexPageStore', () => {
   });
 
   it('creates a page with a create-only write', async () => {
-    const esClient = { create: jest.fn().mockResolvedValue({}) };
+    const esClient = { create: vi.fn().mockResolvedValue({}) };
     const store = createCortexPageStore({
       esClient: esClient as never,
       logger,
@@ -280,7 +282,7 @@ describe('createCortexPageStore', () => {
   });
 
   it('refuses to create a page that already exists', async () => {
-    const esClient = { create: jest.fn().mockRejectedValue({ statusCode: 409 }) };
+    const esClient = { create: vi.fn().mockRejectedValue({ statusCode: 409 }) };
     const store = createCortexPageStore({
       esClient: esClient as never,
       logger,
@@ -300,12 +302,12 @@ describe('createCortexPageStore', () => {
 
   it('increments corroborations on an existing page', async () => {
     const esClient = {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         found: true,
         _id: 'cortex_service_checkout',
         _source: source,
       }),
-      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+      index: vi.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
     };
 
     const store = createCortexPageStore({
@@ -331,7 +333,7 @@ describe('createCortexPageStore', () => {
   // straight to the status the optimizer retired it from.
   it('revives an archived page as tentative, not established', async () => {
     const esClient = {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         found: true,
         _id: 'cortex_service_checkout',
         _source: {
@@ -339,7 +341,7 @@ describe('createCortexPageStore', () => {
           attributes: { ...source.attributes, status: 'archived' },
         },
       }),
-      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+      index: vi.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
     };
 
     const store = createCortexPageStore({
@@ -370,7 +372,7 @@ describe('createCortexPageStore', () => {
       attributes: { status: 'established', corroborations: 1, slug: 'email-service' },
     };
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: [
             { _id: 'cortex_service_cortex-service-email-service', _source: prefixed },
@@ -378,7 +380,7 @@ describe('createCortexPageStore', () => {
           ],
         },
       }),
-      get: jest.fn().mockImplementation(async ({ id }: { id: string }) => {
+      get: vi.fn().mockImplementation(async ({ id }: { id: string }) => {
         if (id === 'default:cortex_service_cortex-service-email-service') {
           return { found: true, _id: id, _source: prefixed };
         }
@@ -387,8 +389,8 @@ describe('createCortexPageStore', () => {
         }
         return { found: false };
       }),
-      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_email-service' }),
-      delete: jest.fn().mockResolvedValue({}),
+      index: vi.fn().mockResolvedValue({ _id: 'cortex_service_email-service' }),
+      delete: vi.fn().mockResolvedValue({}),
     };
 
     const store = createCortexPageStore({
@@ -415,7 +417,7 @@ describe('createCortexPageStore', () => {
 
   it('only reads pages belonging to its own space', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
     };
 
     const store = createCortexPageStore({
@@ -444,8 +446,8 @@ describe('createCortexPageStore', () => {
   it('keeps two spaces on separate documents for the same entity', async () => {
     const indexFor = async (spaceId: string) => {
       const esClient = {
-        get: jest.fn().mockResolvedValue({ found: false }),
-        index: jest.fn().mockResolvedValue({}),
+        get: vi.fn().mockResolvedValue({ found: false }),
+        index: vi.fn().mockResolvedValue({}),
       };
       const store = createCortexPageStore({
         esClient: esClient as never,
@@ -468,7 +470,7 @@ describe('createCortexPageStore', () => {
 
   it('hands callers logical ids even though storage is namespaced', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: { hits: [{ _id: 'marketing:cortex_service_checkout', _source: source }] },
       }),
     };

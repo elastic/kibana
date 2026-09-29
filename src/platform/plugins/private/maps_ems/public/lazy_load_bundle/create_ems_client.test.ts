@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { EMSSettings } from '../../common/ems_settings';
 import {
@@ -62,13 +65,13 @@ describe('createEMSClient', () => {
     });
 
     test('fetch function should not include the serverless header', async () => {
-      global.fetch = jest.fn((_, { headers }: { headers: Headers }) => {
+      global.fetch = vi.fn((_, { headers }: { headers: Headers }) => {
         expect(headers.has(ELASTIC_HTTP_VERSION_HEADER)).toBeFalsy();
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ layers: [{ layer_id: 'mock_1' }] }),
         });
-      }) as jest.Mock;
+      }) as Mock;
 
       const mocked = await emsClient.getFileLayers();
       // Ensure we ran the mocked function
@@ -101,13 +104,13 @@ describe('createEMSClient', () => {
     });
 
     test('fetch function should include the serverless header', async () => {
-      global.fetch = jest.fn((_, { headers }: { headers: Headers }) => {
+      global.fetch = vi.fn((_, { headers }: { headers: Headers }) => {
         expect(headers.get(ELASTIC_HTTP_VERSION_HEADER)).toBe(DEFAULT_EMS_REST_VERSION);
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ layers: [{ layer_id: 'mock_2' }] }),
         });
-      }) as jest.Mock;
+      }) as Mock;
 
       const mocked = await emsClient.getFileLayers();
       // Ensure we ran the mocked function

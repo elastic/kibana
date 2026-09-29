@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
@@ -12,9 +14,9 @@ import { getRulesClientMockParams } from '../../../../test_utils';
 
 describe('resolve', () => {
   const kibanaVersion = 'v8.2.0';
-  const createAPIKeyMock = jest.fn();
-  const isAuthenticationTypeApiKeyMock = jest.fn();
-  const getAuthenticationApiKeyMock = jest.fn();
+  const createAPIKeyMock = vi.fn();
+  const isAuthenticationTypeApiKeyMock = vi.fn();
+  const getAuthenticationApiKeyMock = vi.fn();
 
   const { rulesClientParams, taskManager, ruleTypeRegistry, unsecuredSavedObjectsClient } =
     getRulesClientMockParams({
@@ -27,7 +29,7 @@ describe('resolve', () => {
   let rulesClient: RulesClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
     rulesClient = new RulesClient(rulesClientParams);
   });

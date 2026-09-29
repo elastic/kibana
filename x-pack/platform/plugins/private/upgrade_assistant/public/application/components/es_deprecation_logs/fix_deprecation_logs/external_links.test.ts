@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDeprecationDataView } from './external_links';
 
 import { DEPRECATION_LOGS_INDEX_PATTERN } from '../../../../../common/constants';
@@ -20,8 +22,8 @@ describe('External Links', () => {
 
   describe('getDeprecationDataView', () => {
     it('creates new data view if doesnt exist', async () => {
-      dataService.dataViews.find = jest.fn().mockResolvedValue([]);
-      dataService.dataViews.createAndSave = jest.fn().mockResolvedValue({ id: '123-456' });
+      dataService.dataViews.find = vi.fn().mockResolvedValue([]);
+      dataService.dataViews.createAndSave = vi.fn().mockResolvedValue({ id: '123-456' });
 
       const dataViewId = (await getDeprecationDataView(dataService)).id;
 
@@ -34,7 +36,7 @@ describe('External Links', () => {
     });
 
     it('uses existing data view if it already exists', async () => {
-      dataService.dataViews.find = jest.fn().mockResolvedValue([
+      dataService.dataViews.find = vi.fn().mockResolvedValue([
         {
           id: '123-456',
           title: DEPRECATION_LOGS_INDEX_PATTERN,

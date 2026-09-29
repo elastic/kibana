@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   rowToDocument,
   toEsqlQueryHits,
@@ -26,7 +28,7 @@ describe('ESQL query utils', () => {
   const value4 = ['2025-07-12T13:32:04.174Z', '1.2.0', null];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rowToDocument', () => {
@@ -107,7 +109,7 @@ describe('ESQL query utils', () => {
     });
 
     it('correctly calls setImmediate', async () => {
-      const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      const setImmediateSpy = vi.spyOn(global, 'setImmediate');
       const values = [];
       for (let i = 0; i < 1000; i++) {
         values.push(value1);
@@ -654,7 +656,7 @@ describe('ESQL query utils', () => {
       expect(duplicateAlertIds?.size).toBe(0);
     });
     it('correctly calls setImmediate', async () => {
-      const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      const setImmediateSpy = vi.spyOn(global, 'setImmediate');
       const values = [];
       for (let i = 0; i < 1000; i++) {
         values.push(value1);

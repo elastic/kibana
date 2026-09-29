@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import path from 'path';
 import Fs from 'fs';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -15,15 +18,21 @@ import type { ServerlessProjectType } from '@kbn/es';
 
 const MOCKED_SCOUT_SERVERS_ROOT = '/mock/repo/root/scout/servers';
 
-jest.mock('fs');
+vi.mock('fs');
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo/root',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/scout-info', () => ({
-  SCOUT_SERVERS_ROOT: '/mock/repo/root/scout/servers',
-}));
+vi.mock('@kbn/scout-info', () => {
+      const mocked = {
+      SCOUT_SERVERS_ROOT: '/mock/repo/root/scout/servers',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const testServersConfig = {
   hosts: {
@@ -49,20 +58,23 @@ const testServersConfig = {
 // for local runs (the round-trip stays valid).
 const expectedSerializedConfig = JSON.stringify(testServersConfig, null, 2);
 
-jest.mock('path', () => ({
-  ...jest.requireActual('path'),
-  join: jest.fn((...args) => args.join('/')),
-}));
+vi.mock('path', () => {
+      const mocked = {
+      ...require('path'),
+      join: vi.fn((...args) => args.join('/')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('saveScoutTestConfigOnDisk', () => {
   let mockLog: ToolingLog;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLog = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as ToolingLog;
   });
 
@@ -70,13 +82,13 @@ describe('saveScoutTestConfigOnDisk', () => {
     const mockConfigFilePath = `${MOCKED_SCOUT_SERVERS_ROOT}/local.json`;
 
     // Mock path.join to return a fixed file path
-    (path.join as jest.Mock).mockReturnValueOnce(mockConfigFilePath);
+    (path.join as Mock).mockReturnValueOnce(mockConfigFilePath);
 
     // Mock Fs.existsSync to return true
-    (Fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+    (Fs.existsSync as Mock).mockReturnValueOnce(true);
 
     // Mock Fs.writeFileSync to do nothing
-    const writeFileSyncMock = jest.spyOn(Fs, 'writeFileSync');
+    const writeFileSyncMock = vi.spyOn(Fs, 'writeFileSync');
 
     saveScoutTestConfigOnDisk(testServersConfig, mockLog);
 
@@ -95,11 +107,11 @@ describe('saveScoutTestConfigOnDisk', () => {
   it('should throw an error if writing to file fails', () => {
     const mockConfigFilePath = `${MOCKED_SCOUT_SERVERS_ROOT}/local.json`;
 
-    (path.join as jest.Mock).mockReturnValueOnce(mockConfigFilePath);
-    (Fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+    (path.join as Mock).mockReturnValueOnce(mockConfigFilePath);
+    (Fs.existsSync as Mock).mockReturnValueOnce(true);
 
     // Mock writeFileSync to throw an error
-    (Fs.writeFileSync as jest.Mock).mockImplementationOnce(() => {
+    (Fs.writeFileSync as Mock).mockImplementationOnce(() => {
       throw new Error('Disk is full');
     });
 
@@ -114,13 +126,13 @@ describe('saveScoutTestConfigOnDisk', () => {
   it('should create configuration directory if it does not exist', () => {
     const mockConfigFilePath = `${MOCKED_SCOUT_SERVERS_ROOT}/local.json`;
 
-    (path.join as jest.Mock).mockReturnValueOnce(mockConfigFilePath);
+    (path.join as Mock).mockReturnValueOnce(mockConfigFilePath);
 
     // Mock existsSync to simulate non-existent directory
-    (Fs.existsSync as jest.Mock).mockReturnValueOnce(false);
+    (Fs.existsSync as Mock).mockReturnValueOnce(false);
 
-    const mkdirSyncMock = jest.spyOn(Fs, 'mkdirSync');
-    const writeFileSyncMock = jest.spyOn(Fs, 'writeFileSync');
+    const mkdirSyncMock = vi.spyOn(Fs, 'mkdirSync');
+    const writeFileSyncMock = vi.spyOn(Fs, 'writeFileSync');
 
     saveScoutTestConfigOnDisk(testServersConfig, mockLog);
 

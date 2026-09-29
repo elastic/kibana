@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import {
@@ -16,7 +18,7 @@ import { installDecisionTreeReinforcementAgent } from './install_decision_tree_r
 describe('installDecisionTreeReinforcementAgent', () => {
   it('ensures a private persisted agent so users cannot converse with it directly', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
-    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+    const availability = { cacheMode: 'space' as const, handler: vi.fn() };
 
     await installDecisionTreeReinforcementAgent({
       agentBuilder,

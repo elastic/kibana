@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getKibanaRoleSchema } from './role_schema';
 
 const basePrivilegeNamesMap = {
@@ -15,7 +17,7 @@ const basePrivilegeNamesMap = {
 describe('getKibanaRoleSchema', () => {
   describe('input hardening', () => {
     test('resolves base privilege names at most once regardless of entry/privilege count', () => {
-      const getBasePrivilegeNames = jest.fn(() => basePrivilegeNamesMap);
+      const getBasePrivilegeNames = vi.fn(() => basePrivilegeNamesMap);
       const kibana = Array.from({ length: 25 }, (_unused, i) => ({
         spaces: [`space-${i}`],
         base: ['all', 'read'],

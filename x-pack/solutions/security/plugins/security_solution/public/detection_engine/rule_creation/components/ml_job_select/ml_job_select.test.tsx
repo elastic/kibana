@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MlJobSelect } from '.';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useFormFieldMock } from '../../../../common/mock';
-jest.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
+vi.mock('../../../../common/lib/kibana');
 
 describe('MlJobSelect', () => {
   beforeAll(() => {
-    (useSecurityJobs as jest.Mock).mockReturnValue({ loading: false, jobs: [] });
+    (useSecurityJobs as Mock).mockReturnValue({ loading: false, jobs: [] });
   });
 
   it('renders correctly', () => {

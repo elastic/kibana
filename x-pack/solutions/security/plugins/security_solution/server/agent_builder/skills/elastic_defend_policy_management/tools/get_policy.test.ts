@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -22,19 +24,22 @@ import { createPolicyTool } from './create_policy_tool';
 import { GET_POLICY_TOOL_ID, createGetPolicyTool, getPolicySchema } from './get_policy';
 import { estimateGuardedEnvelopeTokens, toPresentationHash } from './trim_policy_result';
 
-jest.mock('./create_policy_tool', () => ({
-  createPolicyTool: jest.fn(),
-}));
+vi.mock('./create_policy_tool', () => {
+      const mocked = {
+      createPolicyTool: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SPACE_ID = 'space-marketing';
-const getStartServices = jest.fn() as unknown as StartServicesAccessor;
-const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
+const getStartServices = vi.fn() as unknown as StartServicesAccessor;
+const mockedCreatePolicyTool = vi.mocked(createPolicyTool);
 const mockService = {
-  getPolicy: jest.fn(),
-  getPolicyBaseline: jest.fn(),
+  getPolicy: vi.fn(),
+  getPolicyBaseline: vi.fn(),
 } as unknown as EndpointPolicyManagementService;
-const mockedGetPolicy = jest.mocked(mockService.getPolicy);
-const mockedGetPolicyBaseline = jest.mocked(mockService.getPolicyBaseline);
+const mockedGetPolicy = vi.mocked(mockService.getPolicy);
+const mockedGetPolicyBaseline = vi.mocked(mockService.getPolicyBaseline);
 
 const createPolicyRead = (overrides: Partial<EndpointPolicyRead> = {}): EndpointPolicyRead => {
   const storedConfig = policyFactory();

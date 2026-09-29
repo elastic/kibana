@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getChoices, getAppInfo, getOAuthToken } from './api';
 import type { ServiceNowActionConnector } from './types';
@@ -78,14 +81,14 @@ const oAuthConnector: ServiceNowActionConnector = {
 
 describe('ServiceNow API', () => {
   const http = httpServiceMock.createStartContract();
-  let fetchMock: jest.SpyInstance<Promise<unknown>>;
+  let fetchMock: MockInstance<Promise<unknown>>;
 
   beforeAll(() => {
-    fetchMock = jest.spyOn(window, 'fetch');
+    fetchMock = vi.spyOn(window, 'fetch');
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('getChoices', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DynamicRiskLevelPanel } from './dynamic_risk_level_panel';
@@ -15,24 +18,30 @@ import { RiskSeverity } from '../../../../common/search_strategy';
 import { ENTITY_RISK_LEVEL_FIELD } from './risk_level_breakdown_table';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 
-jest.mock('../watchlists/components/hooks/use_risk_levels_esql_query');
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(() => 'default'),
-}));
+vi.mock('../watchlists/components/hooks/use_risk_levels_esql_query');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn(() => 'default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../risk_score_donut_chart', () => ({
-  RiskScoreDonutChart: jest.fn(() => <div data-test-subj="mock-risk-score-donut-chart" />),
-}));
+vi.mock('../risk_score_donut_chart', () => {
+      const mocked = {
+      RiskScoreDonutChart: vi.fn(() => <div data-test-subj="mock-risk-score-donut-chart" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRiskLevelsEsqlQuery = useRiskLevelsEsqlQuery as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
-const mockRiskScoreDonutChart = RiskScoreDonutChart as unknown as jest.Mock;
+const mockUseRiskLevelsEsqlQuery = useRiskLevelsEsqlQuery as Mock;
+const mockUseKibana = useKibana as Mock;
+const mockRiskScoreDonutChart = RiskScoreDonutChart as unknown as Mock;
 
-const buildKibanaServices = (addFilters: jest.Mock, isV2Enabled: boolean) => ({
+const buildKibanaServices = (addFilters: Mock, isV2Enabled: boolean) => ({
   services: {
     uiSettings: {
-      get: jest.fn((key: string) => {
+      get: vi.fn((key: string) => {
         if (key === 'securitySolution:entityStoreEnableV2') {
           return isV2Enabled;
         }
@@ -51,18 +60,18 @@ const buildKibanaServices = (addFilters: jest.Mock, isV2Enabled: boolean) => ({
 
 describe('DynamicRiskLevelPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseRiskLevelsEsqlQuery.mockReturnValue({
       records: [],
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: { dsl: ['mock-dsl'], response: ['mock-response'] },
     });
   });
 
   it('renders the entity risk levels title', () => {
-    mockUseKibana.mockReturnValue(buildKibanaServices(jest.fn(), false));
+    mockUseKibana.mockReturnValue(buildKibanaServices(vi.fn(), false));
 
     render(
       <TestProviders>
@@ -74,7 +83,7 @@ describe('DynamicRiskLevelPanel', () => {
   });
 
   it('renders the entity risk levels title when a watchlist is selected', () => {
-    mockUseKibana.mockReturnValue(buildKibanaServices(jest.fn(), true));
+    mockUseKibana.mockReturnValue(buildKibanaServices(vi.fn(), true));
 
     render(
       <TestProviders>
@@ -86,7 +95,7 @@ describe('DynamicRiskLevelPanel', () => {
   });
 
   it('renders the inspect button', () => {
-    mockUseKibana.mockReturnValue(buildKibanaServices(jest.fn(), true));
+    mockUseKibana.mockReturnValue(buildKibanaServices(vi.fn(), true));
 
     render(
       <TestProviders>
@@ -98,7 +107,7 @@ describe('DynamicRiskLevelPanel', () => {
   });
 
   it('threads an onPartitionClick handler to the donut that adds a global filter for entity.risk.calculated_level', () => {
-    const addFilters = jest.fn();
+    const addFilters = vi.fn();
     mockUseKibana.mockReturnValue(buildKibanaServices(addFilters, false));
 
     render(
@@ -127,7 +136,7 @@ describe('DynamicRiskLevelPanel', () => {
   });
 
   it('applies custom filter for Unknown entity.risk.calculated_level', () => {
-    const addFilters = jest.fn();
+    const addFilters = vi.fn();
     mockUseKibana.mockReturnValue(buildKibanaServices(addFilters, false));
 
     render(

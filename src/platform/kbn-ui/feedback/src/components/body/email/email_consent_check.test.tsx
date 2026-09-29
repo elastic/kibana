@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -15,12 +17,12 @@ import { EmailConsentCheck } from './email_consent_check';
 
 const mockProps = {
   allowEmailContact: false,
-  handleChangeAllowEmailContact: jest.fn(),
+  handleChangeAllowEmailContact: vi.fn(),
 };
 
 describe('EmailConsentCheck', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render email consent checkbox', () => {

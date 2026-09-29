@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 
@@ -15,16 +17,16 @@ import { installPackage } from '../../services/epm/packages';
 
 import { _runBulkUpgradeTask } from './run_bulk_upgrade';
 
-jest.mock('../../services/epm/packages');
-jest.mock('../../services/package_policy');
+vi.mock('../../services/epm/packages');
+vi.mock('../../services/package_policy');
 
 describe('Bulk upgrade task', () => {
   beforeEach(() => {
     const mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
 
-    jest.mocked(installPackage).mockReset();
-    jest.mocked(installPackage).mockImplementation(async (params) => {
+    vi.mocked(installPackage).mockReset();
+    vi.mocked(installPackage).mockImplementation(async (params) => {
       if (!('pkgkey' in params)) {
         throw new Error('Invalid call to installPackage');
       }
@@ -44,9 +46,9 @@ describe('Bulk upgrade task', () => {
       throw new Error('not implemented');
     });
 
-    jest.mocked(packagePolicyService.listIds).mockResolvedValue({ items: ['id1', 'id2'] } as any);
+    vi.mocked(packagePolicyService.listIds).mockResolvedValue({ items: ['id1', 'id2'] } as any);
 
-    jest
+    vi
       .mocked(packagePolicyService.bulkUpgrade)
       .mockResolvedValue([{ success: true }, { success: true }] as any);
   });

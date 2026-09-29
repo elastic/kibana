@@ -5,40 +5,51 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useRuleChangeHistoryModal } from './use_rule_change_history_modal';
 
-const mockOpenModal = jest.fn();
+const mockOpenModal = vi.fn();
 
-jest.mock('@kbn/change-history-ui', () => ({
-  useChangeHistoryModal: () => ({ openModal: mockOpenModal, closeModal: jest.fn(), isOpen: false }),
-}));
+vi.mock('@kbn/change-history-ui', () => {
+      const mocked = {
+      useChangeHistoryModal: () => ({ openModal: mockOpenModal, closeModal: vi.fn(), isOpen: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockProviderRenders: Array<{ ruleId: string; ruleName: string; analytics: unknown }> = [];
 
-jest.mock('./rule_change_history_provider', () => ({
-  RuleChangeHistoryProvider: (props: {
-    ruleId: string;
-    ruleName: string;
-    analytics: unknown;
-    children: React.ReactNode;
-  }) => {
-    mockProviderRenders.push({
-      ruleId: props.ruleId,
-      ruleName: props.ruleName,
-      analytics: props.analytics,
+vi.mock('./rule_change_history_provider', () => {
+      const mocked = {
+      RuleChangeHistoryProvider: (props: {
+        ruleId: string;
+        ruleName: string;
+        analytics: unknown;
+        children: React.ReactNode;
+      }) => {
+        mockProviderRenders.push({
+          ruleId: props.ruleId,
+          ruleName: props.ruleName,
+          analytics: props.analytics,
+        });
+        return <div data-test-subj="provider">{props.children}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
     });
-    return <div data-test-subj="provider">{props.children}</div>;
-  },
-}));
 
-const mockAnalyticsStub = { reportEvent: jest.fn() };
+const mockAnalyticsStub = { reportEvent: vi.fn() };
 
-jest.mock('@kbn/core-di-browser', () => ({
-  CoreStart: (key: string) => `CoreStart:${key}`,
-  useService: (token: unknown) => (token === 'CoreStart:analytics' ? mockAnalyticsStub : {}),
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      CoreStart: (key: string) => `CoreStart:${key}`,
+      useService: (token: unknown) => (token === 'CoreStart:analytics' ? mockAnalyticsStub : {}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const Harness = () => {
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();

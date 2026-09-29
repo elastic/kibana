@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import type { AlertRetrievalResult } from '../../../invoke_alert_retrieval_workflow';
 import { handleNoAlerts } from '.';
 
-const mockWriteAttackDiscoveryEvent = jest.fn();
+const mockWriteAttackDiscoveryEvent = vi.fn();
 
-jest.mock('../../../../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../../../../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const alertRetrievalResult: AlertRetrievalResult = {
   alerts: [],
@@ -42,18 +47,18 @@ const defaultProps = {
     model: 'gpt-4',
   },
   authenticatedUser: { username: 'test-user' } as AuthenticatedUser,
-  eventLogger: { logEvent: jest.fn() } as unknown as IEventLogger,
+  eventLogger: { logEvent: vi.fn() } as unknown as IEventLogger,
   eventLogIndex: '.kibana-event-log-test',
   executionUuid: 'exec-1',
   generationWorkflowId: 'generation',
-  logger: { error: jest.fn(), info: jest.fn() } as unknown as Logger,
+  logger: { error: vi.fn(), info: vi.fn() } as unknown as Logger,
   spaceId: 'default',
   startTime: new Date('2024-01-01T00:00:00.000Z'),
 };
 
 describe('handleNoAlerts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a no_alerts outcome', async () => {

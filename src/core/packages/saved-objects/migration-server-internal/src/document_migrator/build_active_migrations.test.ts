@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   getCoreTransformsMock,
   getConversionTransformsMock,
@@ -47,7 +49,7 @@ describe('buildActiveMigrations', () => {
     ...(deferred != null ? { deferred } : {}),
     version,
     transformType: type,
-    transform: jest.fn(),
+    transform: vi.fn(),
   });
 
   const expectTransform = (type: TransformType, version: string, deferred?: boolean): Transform =>
@@ -74,16 +76,16 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
+          '7.12.0': vi.fn(),
+          '7.16.0': vi.fn(),
         },
       });
 
       addType({
         name: 'bar',
         migrations: () => ({
-          '7.114.0': jest.fn(),
-          '8.3.0': jest.fn(),
+          '7.114.0': vi.fn(),
+          '8.3.0': vi.fn(),
         }),
       });
 
@@ -114,8 +116,8 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
+          '7.12.0': vi.fn(),
+          '7.16.0': vi.fn(),
         },
       });
 
@@ -128,15 +130,15 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
+          '7.12.0': vi.fn(),
+          '7.16.0': vi.fn(),
           '8.3.0': {
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
           '8.4.0': {
             // @ts-expect-error
             deferred: true,
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
         },
       });
@@ -229,12 +231,12 @@ describe('buildActiveMigrations', () => {
         ({ typeDefinition }: { typeDefinition: SavedObjectsType }) => {
           if (typeDefinition.name === 'foo') {
             return {
-              '7.10.0': jest.fn(),
+              '7.10.0': vi.fn(),
             };
           } else {
             return {
-              '8.3.0': jest.fn(),
-              '8.4.0': jest.fn(),
+              '8.3.0': vi.fn(),
+              '8.4.0': vi.fn(),
             };
           }
         }
@@ -347,16 +349,16 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
+          '7.12.0': vi.fn(),
+          '7.16.0': vi.fn(),
         },
       });
 
       addType({
         name: 'bar',
         migrations: {
-          '7.17.0': jest.fn(),
-          '8.2.1': jest.fn(),
+          '7.17.0': vi.fn(),
+          '8.2.1': vi.fn(),
         },
       });
 
@@ -414,9 +416,9 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
-          '8.3.0': jest.fn(),
+          '7.12.0': vi.fn(),
+          '7.16.0': vi.fn(),
+          '8.3.0': vi.fn(),
         },
       });
       getCoreTransformsMock.mockReturnValue([
@@ -450,13 +452,13 @@ describe('buildActiveMigrations', () => {
           '7.12.0': {
             // @ts-expect-error
             deferred: true,
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
-          '7.16.0': jest.fn(),
+          '7.16.0': vi.fn(),
           '8.3.0': {
             // @ts-expect-error
             deferred: true,
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
         },
       });

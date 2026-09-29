@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -19,30 +21,42 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(),
-}));
-jest.mock('../../../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('./response_section_content', () => ({
-  ResponseSectionContent: jest.fn(
-    ({ onShowResponseDetails }: { onShowResponseDetails: () => void }) => (
-      <button
-        type="button"
-        data-test-subj="responseSectionContentMock"
-        onClick={onShowResponseDetails}
-      >
-        {'show'}
-      </button>
-    )
-  ),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./response_section_content', () => {
+      const mocked = {
+      ResponseSectionContent: vi.fn(
+        ({ onShowResponseDetails }: { onShowResponseDetails: () => void }) => (
+          <button
+            type="button"
+            data-test-subj="responseSectionContentMock"
+            onClick={onShowResponseDetails}
+          >
+            {'show'}
+          </button>
+        )
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenSystemFlyout = jest.fn();
+const mockOpenSystemFlyout = vi.fn();
 const store = createStore(() => ({}));
 const history = createMemoryHistory();
 
@@ -66,21 +80,21 @@ const renderResponseSection = () =>
   );
 
 describe('<ResponseSection />', () => {
-  const mockUseKibana = jest.mocked(useKibana);
-  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
-  const mockResponseSectionContent = jest.mocked(ResponseSectionContent);
+  const mockUseKibana = vi.mocked(useKibana);
+  const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);
+  const mockResponseSectionContent = vi.mocked(ResponseSectionContent);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+    vi.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
           openSystemFlyout: mockOpenSystemFlyout,
         },
-        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
-        telemetry: { reportEvent: jest.fn() },
+        storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });

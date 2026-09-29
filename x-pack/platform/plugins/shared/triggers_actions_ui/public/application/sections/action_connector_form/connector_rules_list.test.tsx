@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,26 +21,35 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { ActionConnector } from '../../../types';
 import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helper';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../lib/rule_api/rules_kuery_filter', () => ({
-  loadRulesWithKueryFilter: jest.fn(),
-}));
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
-  getRuleTypes: jest.fn(),
-}));
-jest.mock('../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../lib/rule_api/rules_kuery_filter', () => {
+      const mocked = {
+      loadRulesWithKueryFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
+      const mocked = {
+      getRuleTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { loadRulesWithKueryFilter } = jest.requireMock('../../lib/rule_api/rules_kuery_filter');
+const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
+const { loadRulesWithKueryFilter } = (await vi.importMock('../../lib/rule_api/rules_kuery_filter'));
 
-const getUrlForAppMock = jest.fn();
-const addSuccessMock = jest.fn();
-const addErrorMock = jest.fn();
-const addDangerMock = jest.fn();
+const getUrlForAppMock = vi.fn();
+const addSuccessMock = vi.fn();
+const addErrorMock = vi.fn();
+const addDangerMock = vi.fn();
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,7 +62,7 @@ const queryClient = new QueryClient({
 
 describe('Connector rules list', () => {
   beforeAll(() => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
     useKibanaMock().services.application.getUrlForApp = getUrlForAppMock;
     useKibanaMock().services.notifications.toasts = {
       addSuccessMock,
@@ -67,7 +79,7 @@ describe('Connector rules list', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

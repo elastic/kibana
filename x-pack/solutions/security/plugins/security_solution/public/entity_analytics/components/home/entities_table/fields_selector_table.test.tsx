@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -111,12 +113,12 @@ describe('FieldsSelectorTable', () => {
     title: 'Fields',
     dataView: createMockDataView(mockFields),
     columns: ['entity.name'],
-    onAddColumn: jest.fn(),
-    onRemoveColumn: jest.fn(),
+    onAddColumn: vi.fn(),
+    onRemoveColumn: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a table with field checkboxes', () => {

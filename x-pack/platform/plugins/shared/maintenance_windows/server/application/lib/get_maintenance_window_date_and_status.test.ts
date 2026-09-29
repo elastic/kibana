@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import {
   getMaintenanceWindowDateAndStatus,
@@ -46,7 +48,7 @@ const events: DateRange[] = [
 
 describe('getMaintenanceWindowDateAndStatus', () => {
   it('should return finished if there is are no events', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
     const result = getMaintenanceWindowDateAndStatus({
       events: [],
       dateToCompare: new Date(),
@@ -60,7 +62,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
   });
 
   it('should return archived if expiration date is before or equal to now', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-23T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-23T00:30:00.000Z'));
     let result = getMaintenanceWindowDateAndStatus({
       events,
       dateToCompare: new Date(),
@@ -83,7 +85,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
     expect(result.eventEndTime).toEqual(null);
     expect(result.status).toEqual('archived');
 
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-28T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-28T00:30:00.000Z'));
     result = getMaintenanceWindowDateAndStatus({
       events,
       dateToCompare: new Date(),
@@ -95,7 +97,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
     expect(result.eventEndTime).toEqual('2023-03-28T01:00:00.000Z');
     expect(result.status).toEqual('archived');
 
-    jest.useFakeTimers().setSystemTime(new Date('2023-04-28T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-04-28T00:30:00.000Z'));
     result = getMaintenanceWindowDateAndStatus({
       events,
       dateToCompare: new Date(),
@@ -109,7 +111,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
   });
 
   it('should return disabled if the mw is disable and no events', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
     const result = getMaintenanceWindowDateAndStatus({
       events: [],
       dateToCompare: new Date(),
@@ -123,7 +125,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
   });
 
   it('should return disabled if mw is disabled and the existing events', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
     const result = getMaintenanceWindowDateAndStatus({
       events,
       dateToCompare: new Date(),
@@ -138,7 +140,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
 
 describe('findRecentEventWithStatus', () => {
   it('should find the status if event is running', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-25T00:00:00.000Z',
@@ -148,7 +150,7 @@ describe('findRecentEventWithStatus', () => {
       status: MaintenanceWindowStatus.Running,
     });
 
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-27T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-27T00:30:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-27T00:00:00.000Z',
@@ -158,7 +160,7 @@ describe('findRecentEventWithStatus', () => {
       status: MaintenanceWindowStatus.Running,
     });
 
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-29T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-29T00:30:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-29T00:00:00.000Z',
@@ -168,7 +170,7 @@ describe('findRecentEventWithStatus', () => {
       status: MaintenanceWindowStatus.Running,
     });
 
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-30T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-30T00:30:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-30T00:00:00.000Z',
@@ -180,7 +182,7 @@ describe('findRecentEventWithStatus', () => {
   });
 
   it('should find the status if event is upcoming', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-24T05:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-24T05:00:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-25T00:00:00.000Z',
@@ -190,7 +192,7 @@ describe('findRecentEventWithStatus', () => {
       status: MaintenanceWindowStatus.Upcoming,
     });
 
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-26T05:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-26T05:00:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-27T00:00:00.000Z',
@@ -199,7 +201,7 @@ describe('findRecentEventWithStatus', () => {
       index: 2,
       status: MaintenanceWindowStatus.Upcoming,
     });
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-27T05:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-27T05:00:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-28T00:00:00.000Z',
@@ -208,7 +210,7 @@ describe('findRecentEventWithStatus', () => {
       index: 3,
       status: MaintenanceWindowStatus.Upcoming,
     });
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-29T05:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-29T05:00:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-30T00:00:00.000Z',
@@ -220,7 +222,7 @@ describe('findRecentEventWithStatus', () => {
   });
 
   it('should find the status if event is finished', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-04-01T05:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-04-01T05:00:00.000Z'));
     expect(findRecentEventWithStatus(events, new Date())).toEqual({
       event: {
         gte: '2023-03-31T00:00:00.000Z',
@@ -232,7 +234,7 @@ describe('findRecentEventWithStatus', () => {
   });
 
   it('should find the status if there is only 1 event', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-01-01T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-01-01T00:00:00.000Z'));
     expect(
       findRecentEventWithStatus(
         [
@@ -252,7 +254,7 @@ describe('findRecentEventWithStatus', () => {
       status: MaintenanceWindowStatus.Upcoming,
     });
 
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-31T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-31T00:30:00.000Z'));
     expect(
       findRecentEventWithStatus(
         [
@@ -272,7 +274,7 @@ describe('findRecentEventWithStatus', () => {
       status: MaintenanceWindowStatus.Running,
     });
 
-    jest.useFakeTimers().setSystemTime(new Date('2023-04-20T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-04-20T00:00:00.000Z'));
     expect(
       findRecentEventWithStatus(
         [

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { serializeCounterKey, storeCounter } from './saved_objects';
@@ -48,11 +50,11 @@ describe('storeCounter', () => {
   const mockNow = 1617954426939;
 
   beforeEach(() => {
-    jest.spyOn(moment, 'now').mockReturnValue(mockNow);
+    vi.spyOn(moment, 'now').mockReturnValue(mockNow);
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('stores counter in a saved object', async () => {

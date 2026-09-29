@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { AxisLabelOrientationSelectorProps } from './axis_label_orientation_selector';
@@ -15,7 +17,7 @@ const renderComponent = (propsOverrides?: Partial<AxisLabelOrientationSelectorPr
     <AxisLabelOrientationSelector
       axis="x"
       selectedLabelOrientation={0}
-      setLabelOrientation={jest.fn()}
+      setLabelOrientation={vi.fn()}
       {...propsOverrides}
     />
   );
@@ -31,7 +33,7 @@ describe('AxisLabelOrientationSelector', () => {
   });
 
   it('should call setOrientation when changing the orientation', () => {
-    const setLabelOrientation = jest.fn();
+    const setLabelOrientation = vi.fn();
     renderComponent({ setLabelOrientation });
 
     fireEvent.click(screen.getByRole('button', { name: /vertical/i }));

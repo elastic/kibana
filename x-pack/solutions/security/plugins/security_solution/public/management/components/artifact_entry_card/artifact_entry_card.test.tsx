@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { memo } from 'react';
 import type { AppContextTestRender, UserPrivilegesMockSetter } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -28,8 +31,8 @@ import {
 } from '../../../../common/endpoint/service/artifacts/utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-jest.mock('../../../common/components/user_privileges');
-const mockUserPrivileges = useUserPrivileges as jest.Mock;
+vi.mock('../../../common/components/user_privileges');
+const mockUserPrivileges = useUserPrivileges as Mock;
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],

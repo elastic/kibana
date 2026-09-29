@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -22,11 +25,11 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { TestProviders } from '../../../../../common/mock';
 import { APP_UI_ID } from '../../../../../../common';
 
-jest.mock('../../../main/hooks/use_fetch_related_cases');
+vi.mock('../../../main/hooks/use_fetch_related_cases');
 
-const mockNavigateToApp = jest.fn();
-jest.mock('../../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../../common/lib/kibana');
+const mockNavigateToApp = vi.fn();
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../../common/lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -60,7 +63,7 @@ const renderRelatedCases = () =>
 
 describe('<RelatedCases />', () => {
   it('should render many related cases correctly', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -100,7 +103,7 @@ describe('<RelatedCases />', () => {
   });
 
   it('should open new tab when clicking on the case link', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -124,7 +127,7 @@ describe('<RelatedCases />', () => {
   });
 
   it('should render null if error', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: true,
     });
@@ -134,7 +137,7 @@ describe('<RelatedCases />', () => {
   });
 
   it('should render no data message', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],

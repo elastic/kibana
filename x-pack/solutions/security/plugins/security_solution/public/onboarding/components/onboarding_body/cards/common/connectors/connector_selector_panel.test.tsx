@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -26,28 +28,31 @@ const mockConnectors: AIConnector[] = [
 ];
 
 const mockActionTypeRegistry = {
-  get: jest.fn(() => ({ iconClass: 'testIcon', name: 'Test Action' })),
+  get: vi.fn(() => ({ iconClass: 'testIcon', name: 'Test Action' })),
 };
 
-jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry },
-      settings: {
-        client: { get: jest.fn() },
-      },
-    },
-  }),
-}));
+vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry },
+          settings: {
+            client: { get: vi.fn() },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ConnectorSelectorPanel', () => {
   it('renders correctly', () => {
-    render(<ConnectorSelectorPanel connectors={mockConnectors} onConnectorSelected={jest.fn()} />);
+    render(<ConnectorSelectorPanel connectors={mockConnectors} onConnectorSelected={vi.fn()} />);
     expect(screen.getByText('Selected provider')).toBeInTheDocument();
   });
 
   it('preselects the only connector if there is one', () => {
-    const onConnectorSelected = jest.fn();
+    const onConnectorSelected = vi.fn();
     render(
       <ConnectorSelectorPanel
         connectors={[mockConnectors[0]]}
@@ -58,7 +63,7 @@ describe('ConnectorSelectorPanel', () => {
   });
 
   it('calls onConnectorSelected when a connector is selected', async () => {
-    const onConnectorSelected = jest.fn();
+    const onConnectorSelected = vi.fn();
     render(
       <ConnectorSelectorPanel
         connectors={mockConnectors}
@@ -84,7 +89,7 @@ describe('ConnectorSelectorPanel', () => {
           secrets: {},
         },
       ] as AIConnector[],
-      onConnectorSelected: jest.fn(),
+      onConnectorSelected: vi.fn(),
       selectedConnectorId: '.inference',
     };
     const { getByTestId } = render(<ConnectorSelectorPanel {...props} />);

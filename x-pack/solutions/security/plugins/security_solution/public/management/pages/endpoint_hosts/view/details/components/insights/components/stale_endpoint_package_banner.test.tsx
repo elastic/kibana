@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { StaleEndpointPackageBanner } from './stale_endpoint_package_banner';
 
-jest.mock('../../../../hooks/insights/use_fetch_endpoint_package_freshness', () => ({
-  useFetchEndpointPackageFreshness: jest.fn(),
-}));
+vi.mock('../../../../hooks/insights/use_fetch_endpoint_package_freshness', () => {
+      const mocked = {
+      useFetchEndpointPackageFreshness: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchEndpointPackageFreshness = jest.requireMock(
-  '../../../../hooks/insights/use_fetch_endpoint_package_freshness'
-).useFetchEndpointPackageFreshness;
+const mockUseFetchEndpointPackageFreshness = (await vi.importMock('../../../../hooks/insights/use_fetch_endpoint_package_freshness')).useFetchEndpointPackageFreshness;
 
 const STORAGE_KEY_PREFIX =
   'securitySolution.endpointHosts.workflowInsightsAB.stalePackageBannerDismissed';
 
 describe('StaleEndpointPackageBanner', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -23,35 +26,50 @@ import {
 } from '../../common/lib/telemetry';
 import { FLYOUT_DESCRIPTOR_KIND } from '../shared/url_state/flyout_v2_url_param';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useStore: jest.fn(() => ({})),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(() => ({})),
-}));
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/hooks/is_in_security_app');
-jest.mock('../shared/components/flyout_provider', () => ({
-  flyoutProviders: jest.fn(() => 'FLYOUT_CONTENT'),
-}));
-jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: jest.fn(() => ({ size: 's' })),
-  useDefaultToolsFlyoutProperties: jest.fn(() => ({ minWidth: 384, size: 'm' })),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useStore: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/hooks/is_in_security_app');
+vi.mock('../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: vi.fn(() => 'FLYOUT_CONTENT'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../shared/hooks/use_default_flyout_properties', () => {
+      const mocked = {
+      useDefaultDocumentFlyoutProperties: vi.fn(() => ({ size: 's' })),
+      useDefaultToolsFlyoutProperties: vi.fn(() => ({ minWidth: 384, size: 'm' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockWriteOnOpen = jest.fn();
-const mockBuildOnClose = jest.fn(() => jest.fn());
-jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
-  useFlyoutV2UrlWriter: jest.fn(() => ({
-    writeOnOpen: mockWriteOnOpen,
-    buildOnClose: mockBuildOnClose,
-  })),
-}));
+const mockWriteOnOpen = vi.fn();
+const mockBuildOnClose = vi.fn(() => vi.fn());
+vi.mock('../shared/url_state/flyout_v2_url_writer', () => {
+      const mocked = {
+      useFlyoutV2UrlWriter: vi.fn(() => ({
+        writeOnOpen: mockWriteOnOpen,
+        buildOnClose: mockBuildOnClose,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenSystemFlyout = jest.fn();
-const mockReportEvent = jest.fn();
+const mockOpenSystemFlyout = vi.fn();
+const mockReportEvent = vi.fn();
 const hit = {
   id: '1',
   raw: { _id: 'attack-id', _index: 'attack-index' },
@@ -60,17 +78,17 @@ const hit = {
 
 describe('useAttackFlyoutApi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
-    mockBuildOnClose.mockReturnValue(jest.fn());
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
+    mockBuildOnClose.mockReturnValue(vi.fn());
+    (useKibana as Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
-        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
+        storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
         telemetry: { reportEvent: mockReportEvent },
       },
     });
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    (useIsInSecurityApp as Mock).mockReturnValue(true);
   });
 
   it('openAttackFlyout opens a system flyout as a new session with the document properties', () => {
@@ -169,7 +187,7 @@ describe('useAttackFlyoutApi', () => {
       session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
-    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    const { children } = (flyoutProviders as Mock).mock.calls[0][0];
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
@@ -206,7 +224,7 @@ describe('useAttackFlyoutApi', () => {
       session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
-    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    const { children } = (flyoutProviders as Mock).mock.calls[0][0];
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
@@ -229,7 +247,7 @@ describe('useAttackFlyoutApi', () => {
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+    (useIsInSecurityApp as Mock).mockReturnValue(false);
     const { result } = renderHook(() => useAttackFlyoutApi());
     result.current.openAttackFlyout({ attackId: 'attack-1', indexName: '.alerts-security' });
 

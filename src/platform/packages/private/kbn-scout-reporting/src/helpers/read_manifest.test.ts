@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import path from 'path';
 import fs from 'fs';
 import {
@@ -69,12 +72,12 @@ describe('read_manifest', () => {
     const pluginFilePath = path.join(path.sep, 'plugins', 'my_plugin', 'kibana.jsonc');
     const packageFilePath = path.join(path.sep, 'packages', 'my_package', 'kibana.jsonc');
 
-    let existsSyncSpy: jest.SpyInstance;
-    let readFileSyncSpy: jest.SpyInstance;
+    let existsSyncSpy: MockInstance;
+    let readFileSyncSpy: MockInstance;
 
     beforeEach(() => {
-      existsSyncSpy = jest.spyOn(fs, 'existsSync');
-      readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
+      existsSyncSpy = vi.spyOn(fs, 'existsSync');
+      readFileSyncSpy = vi.spyOn(fs, 'readFileSync');
     });
 
     afterEach(() => {
@@ -237,12 +240,12 @@ describe('read_manifest', () => {
       }
     `;
 
-    let existsSyncSpy: jest.SpyInstance;
-    let readFileSyncSpy: jest.SpyInstance;
+    let existsSyncSpy: MockInstance;
+    let readFileSyncSpy: MockInstance;
 
     beforeEach(() => {
-      existsSyncSpy = jest.spyOn(fs, 'existsSync');
-      readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
+      existsSyncSpy = vi.spyOn(fs, 'existsSync');
+      readFileSyncSpy = vi.spyOn(fs, 'readFileSync');
     });
 
     afterEach(() => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -17,16 +20,19 @@ import { mockAnonymizationFields } from '../../../../mock/mock_anonymization_fie
 import { mockAnonymizedEventsReplacements } from '../../../../mock/mock_anonymized_events';
 import { getAnonymizedEvents } from '.';
 
-jest.mock('@kbn/elastic-assistant-common', () => ({
-  ...jest.requireActual('@kbn/elastic-assistant-common'),
-  getRawDataOrDefault: jest.fn(),
-  transformRawData: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant-common', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/elastic-assistant-common')),
+      getRawDataOrDefault: vi.fn(),
+      transformRawData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockEsClient = () => {
   return {
-    search: jest.fn(),
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+    search: vi.fn(),
+  } as unknown as Mocked<ElasticsearchClient>;
 };
 
 const mockRawData: Record<string, unknown[]> = {
@@ -36,13 +42,13 @@ const mockRawData: Record<string, unknown[]> = {
 
 describe('getAnonymizedEvents', () => {
   const mockEsClient = createMockEsClient();
-  const mockedGetRawDataOrDefault = getRawDataOrDefault as jest.MockedFunction<
+  const mockedGetRawDataOrDefault = getRawDataOrDefault as MockedFunction<
     typeof getRawDataOrDefault
   >;
-  const mockedTransformRawData = transformRawData as jest.MockedFunction<typeof transformRawData>;
+  const mockedTransformRawData = transformRawData as MockedFunction<typeof transformRawData>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient.search.mockResolvedValue({
       aggregations: {
         unique_process_executable: {
@@ -147,7 +153,7 @@ describe('getAnonymizedEvents', () => {
   });
 
   it('should handle anonymizationFields when provided', async () => {
-    const onNewReplacements = jest.fn();
+    const onNewReplacements = vi.fn();
 
     await getAnonymizedEvents({
       insightType: DefendInsightType.enum.incompatible_antivirus,
@@ -167,7 +173,7 @@ describe('getAnonymizedEvents', () => {
   });
 
   it('should use existing replacements when provided', async () => {
-    const onNewReplacements = jest.fn();
+    const onNewReplacements = vi.fn();
 
     await getAnonymizedEvents({
       insightType: DefendInsightType.enum.incompatible_antivirus,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -14,15 +17,15 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../../common/hooks/use_selector');
+vi.mock('../../../../common/hooks/use_selector');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const mockOptions = [
@@ -39,7 +42,7 @@ const groups = {
 
 describe('AdditionalToolbarControls', () => {
   beforeEach(() => {
-    (useDeepEqualSelector as jest.Mock).mockImplementation(() => groups[tableId]);
+    (useDeepEqualSelector as Mock).mockImplementation(() => groups[tableId]);
   });
 
   test('should render the group selector component and allow the user to select a grouping field', () => {

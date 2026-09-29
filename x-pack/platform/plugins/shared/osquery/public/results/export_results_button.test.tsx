@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,16 +16,16 @@ import { useIsExperimentalFeatureEnabled } from '../common/experimental_features
 import { useExportResults } from './use_export_results';
 import { ExportResultsButton } from './export_results_button';
 
-jest.mock('../common/experimental_features_context');
-jest.mock('./use_export_results');
+vi.mock('../common/experimental_features_context');
+vi.mock('./use_export_results');
 
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.MockedFunction<
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as MockedFunction<
   typeof useIsExperimentalFeatureEnabled
 >;
-const useExportResultsMock = useExportResults as jest.MockedFunction<typeof useExportResults>;
+const useExportResultsMock = useExportResults as MockedFunction<typeof useExportResults>;
 
 const defaultExportMock = {
-  exportResults: jest.fn().mockResolvedValue(undefined),
+  exportResults: vi.fn().mockResolvedValue(undefined),
   isExporting: false,
 };
 
@@ -39,7 +42,7 @@ const renderButton = (props: Partial<React.ComponentProps<typeof ExportResultsBu
 
 describe('ExportResultsButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     useExportResultsMock.mockReturnValue(defaultExportMock);
   });

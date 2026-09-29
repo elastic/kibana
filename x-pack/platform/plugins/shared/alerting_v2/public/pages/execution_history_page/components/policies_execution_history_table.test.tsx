@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,32 +19,35 @@ import { POLICY_EXECUTION_FIELDS } from '../data_view';
 let mockCanReadRules = true;
 let mockCanReadActionPolicies = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
-    }
-    if (token === 'settings') {
-      return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
-    }
-    if (typeof token === 'function') {
-      const canRead = (feature: string) =>
-        feature === 'actionPolicies' ? mockCanReadActionPolicies : mockCanReadRules;
-      return { canRead, canWrite: canRead, can: () => true };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'application') {
+          return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
+        }
+        if (token === 'settings') {
+          return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+        }
+        if (typeof token === 'function') {
+          const canRead = (feature: string) =>
+            feature === 'actionPolicies' ? mockCanReadActionPolicies : mockCanReadRules;
+          return { canRead, canWrite: canRead, can: () => true };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Render each row's cells through the custom renderers the component supplies, so the cell
 // renderers stay covered without mounting the real virtualized data grid.
-jest.mock('@kbn/unified-data-table', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('@kbn/unified-data-table', () => {
+  const ReactActual = require('react');
   return {
     DataLoadingState: { loading: 'loading', loaded: 'loaded' },
     ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-    UnifiedDataTable: jest.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
+    UnifiedDataTable: vi.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
       ReactActual.createElement(
         'div',
         { 'data-test-subj': 'unifiedDataTable' },
@@ -67,18 +72,27 @@ jest.mock('@kbn/unified-data-table', () => {
   };
 });
 
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('@kbn/cell-actions', () => {
+      const mocked = {
+      CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../data_view', () => ({
-  ...jest.requireActual('../data_view'),
-  usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
-}));
+vi.mock('../data_view', async () => {
+      const mocked = {
+      ...(await vi.importActual('../data_view')),
+      usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_unified_data_table_services', () => ({
-  useUnifiedDataTableServices: () => ({}),
-}));
+vi.mock('../hooks/use_unified_data_table_services', () => {
+      const mocked = {
+      useUnifiedDataTableServices: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildItem = (
   overrides: Partial<PolicyExecutionHistoryItem> = {}
@@ -96,10 +110,10 @@ const buildItem = (
   ...overrides,
 });
 
-const onPolicyClick = jest.fn();
-const onRuleClick = jest.fn();
-const onChangePage = jest.fn();
-const onChangeItemsPerPage = jest.fn();
+const onPolicyClick = vi.fn();
+const onRuleClick = vi.fn();
+const onChangePage = vi.fn();
+const onChangeItemsPerPage = vi.fn();
 
 const renderTable = (props: Partial<React.ComponentProps<typeof PoliciesExecutionHistoryTable>>) =>
   render(
@@ -123,13 +137,13 @@ const renderTable = (props: Partial<React.ComponentProps<typeof PoliciesExecutio
   );
 
 const lastGridColumns = (): string[] => {
-  const calls = jest.mocked(UnifiedDataTable).mock.calls;
+  const calls = vi.mocked(UnifiedDataTable).mock.calls;
   return (calls[calls.length - 1][0] as Record<string, any>).columns;
 };
 
 describe('PoliciesExecutionHistoryTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCanReadRules = true;
     mockCanReadActionPolicies = true;
   });

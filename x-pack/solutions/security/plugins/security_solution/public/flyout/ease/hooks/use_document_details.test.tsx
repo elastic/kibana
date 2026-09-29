@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { useDocumentDetails } from './use_document_details';
@@ -15,26 +18,26 @@ import { mockSearchHit } from '../../document_details/shared/mocks/mock_search_h
 import { mockDataAsNestedObject } from '../../document_details/shared/mocks/mock_data_as_nested_object';
 import { useGetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';
 
-jest.mock('../../../timelines/containers/details');
-jest.mock('../../document_details/shared/hooks/use_get_fields_data');
+vi.mock('../../../timelines/containers/details');
+vi.mock('../../document_details/shared/hooks/use_get_fields_data');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const documentId = 'documentId';
 
 describe('useDocumentDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return all properties', () => {
-    (useTimelineEventsDetails as jest.Mock).mockReturnValue([
+    (useTimelineEventsDetails as Mock).mockReturnValue([
       true,
       mockDataFormattedForFieldBrowser,
       mockSearchHit,
       mockDataAsNestedObject,
     ]);
-    const getFieldsData = jest.fn();
-    (useGetFieldsData as jest.Mock).mockReturnValue({ getFieldsData });
+    const getFieldsData = vi.fn();
+    (useGetFieldsData as Mock).mockReturnValue({ getFieldsData });
 
     const { result } = renderHook(() =>
       useDocumentDetails({

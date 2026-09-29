@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SecuritySolutionPageWrapper } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { TestProviders } from '../../mock';
 
-jest.mock('../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SecuritySolutionPageWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
   });
 
   it('should render children and apply classNames correctly', () => {

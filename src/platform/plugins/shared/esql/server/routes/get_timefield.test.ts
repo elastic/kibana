@@ -7,48 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { registerGetTimeFieldRoute } from './get_timefield';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('logs-*'),
-  getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
-  parseTimeFieldFromESQLQuery: jest.fn().mockReturnValue(undefined),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getIndexPatternFromESQLQuery: vi.fn().mockReturnValue('logs-*'),
+      getProjectRoutingFromEsqlQuery: vi.fn().mockReturnValue(undefined),
+      parseTimeFieldFromESQLQuery: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/esql', () => ({
-  Parser: { parse: jest.fn().mockReturnValue({ root: { commands: [] } }) },
-  isSubQuery: jest.fn().mockReturnValue(false),
-}));
+vi.mock('@elastic/esql', () => {
+      const mocked = {
+      Parser: { parse: vi.fn().mockReturnValue({ root: { commands: [] } }) },
+      isSubQuery: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-server-utils', () => ({
-  EsqlService: jest.fn().mockImplementation(() => ({
-    getViews: jest.fn().mockResolvedValue({ views: [] }),
-    getDatasets: jest.fn().mockResolvedValue({ datasets: [] }),
-  })),
-}));
+vi.mock('@kbn/esql-server-utils', () => {
+      const mocked = {
+      EsqlService: vi.fn().mockImplementation(() => ({
+        getViews: vi.fn().mockResolvedValue({ views: [] }),
+        getDatasets: vi.fn().mockResolvedValue({ datasets: [] }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const {
   parseTimeFieldFromESQLQuery,
   getIndexPatternFromESQLQuery,
   getProjectRoutingFromEsqlQuery,
-} = jest.requireMock('@kbn/esql-utils');
-const { Parser } = jest.requireMock('@elastic/esql');
-const { EsqlService } = jest.requireMock('@kbn/esql-server-utils');
+} = (await vi.importMock('@kbn/esql-utils'));
+const { Parser } = (await vi.importMock('@elastic/esql'));
+const { EsqlService } = (await vi.importMock('@kbn/esql-server-utils'));
 
 function buildMocks() {
-  const handler = jest.fn();
+  const handler = vi.fn();
   const router = {
-    post: jest.fn((_, h) => {
+    post: vi.fn((_, h) => {
       handler.mockImplementation(h);
     }),
   };
 
   const esClient = {
     asCurrentUser: {
-      fieldCaps: jest.fn().mockResolvedValue({ fields: { '@timestamp': {} } }),
-      esql: { query: jest.fn().mockResolvedValue({ columns: [] }) },
+      fieldCaps: vi.fn().mockResolvedValue({ fields: { '@timestamp': {} } }),
+      esql: { query: vi.fn().mockResolvedValue({ columns: [] }) },
     },
   };
   const core = {
@@ -56,11 +67,11 @@ function buildMocks() {
   };
   const requestHandlerContext = { core: Promise.resolve(core) };
   const response = {
-    ok: jest.fn((r) => ({ status: 200, ...r })),
-    badRequest: jest.fn((r) => ({ status: 400, ...r })),
-    customError: jest.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
+    ok: vi.fn((r) => ({ status: 200, ...r })),
+    badRequest: vi.fn((r) => ({ status: 400, ...r })),
+    customError: vi.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
   };
-  const context = { logger: { get: () => ({ error: jest.fn() }) } };
+  const context = { logger: { get: () => ({ error: vi.fn() }) } };
 
   return {
     router: router as unknown as IRouter,
@@ -72,7 +83,7 @@ function buildMocks() {
 }
 
 describe('registerGetTimeFieldRoute', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('registers a POST handler at the correct path', () => {
     const { router, context } = buildMocks();
@@ -131,8 +142,8 @@ describe('registerGetTimeFieldRoute', () => {
     getIndexPatternFromESQLQuery.mockReturnValueOnce('my-dataset');
     Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
     EsqlService.mockImplementationOnce(() => ({
-      getViews: jest.fn().mockResolvedValue({ views: [] }),
-      getDatasets: jest.fn().mockResolvedValue({ datasets: [{ name: 'my-dataset' }] }),
+      getViews: vi.fn().mockResolvedValue({ views: [] }),
+      getDatasets: vi.fn().mockResolvedValue({ datasets: [{ name: 'my-dataset' }] }),
     }));
 
     const core = await requestHandlerContext.core;

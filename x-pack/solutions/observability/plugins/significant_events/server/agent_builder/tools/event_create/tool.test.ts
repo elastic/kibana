@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
@@ -14,24 +17,33 @@ import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_c
 import { eventsWriteHandler } from '../event_write/handler';
 import { createEventTool, SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID } from './tool';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
-  assertCanManageSignificantEvents: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_can_manage_significant_events', () => {
+      const mocked = {
+      assertCanManageSignificantEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../event_write/handler', () => ({
-  eventsWriteHandler: jest.fn(),
-}));
+vi.mock('../event_write/handler', () => {
+      const mocked = {
+      eventsWriteHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('event_create tool', () => {
-  const telemetry = { trackAgentToolEventCreate: jest.fn() };
+  const telemetry = { trackAgentToolEventCreate: vi.fn() };
 
   it('uses expected tool id', () => {
     const tool = createEventTool({
-      getScopedClients: jest.fn() as unknown as GetScopedClients,
+      getScopedClients: vi.fn() as unknown as GetScopedClients,
       server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
@@ -41,18 +53,18 @@ describe('event_create tool', () => {
   });
 
   it('returns success result', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
-    (eventsWriteHandler as jest.Mock).mockResolvedValue({
+    (assertSignificantEventsAccess as Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as Mock).mockResolvedValue(undefined);
+    (eventsWriteHandler as Mock).mockResolvedValue({
       event_uuid: 'e1',
       event_id: 'agent-event-abcd1234',
       status: 'open',
       written: true,
     });
 
-    const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
-      getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
+    const getScopedClients = vi.fn().mockResolvedValue({
+      getEventClient: vi.fn().mockReturnValue({}),
+      getAlertEventsClient: vi.fn().mockResolvedValue(undefined),
       licensing: {},
       uiSettingsClient: {},
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getDerivativeMetricAgg } from './derivative';
 import { getCumulativeSumMetricAgg } from './cumulative_sum';
 import { getMovingAvgMetricAgg } from './moving_avg';
@@ -91,7 +93,7 @@ describe('parent pipeline aggs', function () {
             },
           ],
           { typesRegistry },
-          jest.fn()
+          vi.fn()
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -217,7 +219,7 @@ describe('parent pipeline aggs', function () {
         });
 
         const searchSource: any = {};
-        const customMetricSpy = jest.fn();
+        const customMetricSpy = vi.fn();
         const customMetric = aggConfig.params.customMetric;
 
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter

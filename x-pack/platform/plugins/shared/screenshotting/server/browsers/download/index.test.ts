@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { PackageInfo } from '@kbn/screenshotting-server';
 import { ChromiumArchivePaths } from '@kbn/screenshotting-server';
 import { access, readdir } from 'fs/promises';
@@ -14,8 +17,8 @@ import { download } from '.';
 import { sha256 } from './checksum';
 import { fetch } from './fetch';
 
-jest.mock('./checksum');
-jest.mock('./fetch');
+vi.mock('./checksum');
+vi.mock('./fetch');
 
 describe('ensureDownloaded', () => {
   let paths: ChromiumArchivePaths;
@@ -25,13 +28,13 @@ describe('ensureDownloaded', () => {
     paths = new ChromiumArchivePaths();
     pkg = paths.find('linux', 'x64') as PackageInfo;
 
-    (sha256 as jest.MockedFunction<typeof sha256>).mockImplementation(
+    (sha256 as MockedFunction<typeof sha256>).mockImplementation(
       async (packagePath) =>
         paths.packages.find((packageInfo) => paths.resolvePath(packageInfo) === packagePath)
           ?.archiveChecksum ?? 'some-sha256'
     );
 
-    (fetch as jest.MockedFunction<typeof fetch>).mockImplementation(
+    (fetch as MockedFunction<typeof fetch>).mockImplementation(
       async (_url, packagePath) =>
         paths.packages.find((packageInfo) => paths.resolvePath(packageInfo) === packagePath)
           ?.archiveChecksum ?? 'some-sha256'
@@ -42,7 +45,7 @@ describe('ensureDownloaded', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should remove unexpected files', async () => {
@@ -61,13 +64,13 @@ describe('ensureDownloaded', () => {
   });
 
   it('should reject when download fails', async () => {
-    (fetch as jest.MockedFunction<typeof fetch>).mockRejectedValueOnce(new Error('some error'));
+    (fetch as MockedFunction<typeof fetch>).mockRejectedValueOnce(new Error('some error'));
 
     await expect(download(paths, pkg)).rejects.toBeInstanceOf(Error);
   });
 
   it('should reject when downloaded sha256 hash is different', async () => {
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue('random-sha256');
+    (fetch as MockedFunction<typeof fetch>).mockResolvedValue('random-sha256');
 
     await expect(download(paths, pkg)).rejects.toBeInstanceOf(Error);
   });
@@ -101,7 +104,7 @@ describe('ensureDownloaded', () => {
     });
 
     it('should download again if sha256 hash different', async () => {
-      (sha256 as jest.MockedFunction<typeof sha256>).mockResolvedValueOnce('random-sha256');
+      (sha256 as MockedFunction<typeof sha256>).mockResolvedValueOnce('random-sha256');
       await download(paths, pkg);
 
       expect(fetch).toHaveBeenCalledTimes(1);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
@@ -12,10 +15,10 @@ import type { HttpSetup } from '@kbn/core/public';
 
 import { useConnectors } from './use_connectors';
 
-jest.mock('@kbn/response-ops-rule-form/src/common/hooks');
+vi.mock('@kbn/response-ops-rule-form/src/common/hooks');
 
 const mockHttp = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 } as unknown as HttpSetup;
 
 describe('useConnectors', () => {
@@ -35,11 +38,11 @@ describe('useConnectors', () => {
   } as ActionConnector;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns all connectors when loaded successfully', () => {
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       data: [mockConnector1, mockConnector2],
       isLoading: false,
     });
@@ -50,7 +53,7 @@ describe('useConnectors', () => {
   });
 
   it('returns only current connector when connectors are empty', () => {
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       data: [],
       isLoading: false,
     });
@@ -65,7 +68,7 @@ describe('useConnectors', () => {
   });
 
   it('merges current connector with all connectors when current connector is not in the list', () => {
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       data: [mockConnector1],
       isLoading: false,
     });
@@ -80,7 +83,7 @@ describe('useConnectors', () => {
   });
 
   it('does not duplicate connector when current connector already exists in all connectors', () => {
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       data: [mockConnector1, mockConnector2],
       isLoading: false,
     });

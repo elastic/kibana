@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WaitForInputStep } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
@@ -19,46 +22,49 @@ import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
-jest.mock('./hitl_external_resume_helpers', () => ({
-  invalidateHitlExternalResumeTokenIfPresent: jest.fn(),
-  mintHitlExternalResumeToken: jest.fn().mockReturnValue({
-    token: 'resume-token',
-    tokenHash: 'resume-token-hash',
-    expiresAt: '2999-01-01T00:00:00.000Z',
-  }),
-}));
+vi.mock('./hitl_external_resume_helpers', () => {
+      const mocked = {
+      invalidateHitlExternalResumeTokenIfPresent: vi.fn(),
+      mintHitlExternalResumeToken: vi.fn().mockReturnValue({
+        token: 'resume-token',
+        tokenHash: 'resume-token-hash',
+        expiresAt: '2999-01-01T00:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hitl_notifications/has_external_hitl_channels', () => ({
-  hasExternalHitlChannels: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../hitl_notifications/has_external_hitl_channels', () => {
+      const mocked = {
+      hasExternalHitlChannels: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hitl_notifications/send_wait_for_input_notifications', () => ({
-  sendWaitForInputNotifications: jest.fn(),
-}));
+vi.mock('../hitl_notifications/send_wait_for_input_notifications', () => {
+      const mocked = {
+      sendWaitForInputNotifications: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMintHitlExternalResumeToken = jest.requireMock('./hitl_external_resume_helpers')
-  .mintHitlExternalResumeToken as jest.Mock;
-const mockInvalidateHitlExternalResumeTokenIfPresent = jest.requireMock(
-  './hitl_external_resume_helpers'
-).invalidateHitlExternalResumeTokenIfPresent as jest.Mock;
+const mockMintHitlExternalResumeToken = (await vi.importMock('./hitl_external_resume_helpers'))
+  .mintHitlExternalResumeToken as Mock;
+const mockInvalidateHitlExternalResumeTokenIfPresent = (await vi.importMock('./hitl_external_resume_helpers')).invalidateHitlExternalResumeTokenIfPresent as Mock;
 
-const { hasExternalHitlChannels } = jest.requireMock(
-  '../hitl_notifications/has_external_hitl_channels'
-);
-const { sendWaitForInputNotifications } = jest.requireMock(
-  '../hitl_notifications/send_wait_for_input_notifications'
-);
-const mockHasExternalHitlChannels = hasExternalHitlChannels as jest.Mock;
-const mockSendWaitForInputNotifications = sendWaitForInputNotifications as jest.Mock;
+const { hasExternalHitlChannels } = (await vi.importMock('../hitl_notifications/has_external_hitl_channels'));
+const { sendWaitForInputNotifications } = (await vi.importMock('../hitl_notifications/send_wait_for_input_notifications'));
+const mockHasExternalHitlChannels = hasExternalHitlChannels as Mock;
+const mockSendWaitForInputNotifications = sendWaitForInputNotifications as Mock;
 
 describe('WaitForInputStepImpl', () => {
   let underTest: WaitForInputStepImpl;
 
   let node: WaitForInputGraphNode;
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
   let workflowLogger: IWorkflowEventLogger;
-  let mockConnectorExecutor: jest.Mocked<ConnectorExecutor>;
+  let mockConnectorExecutor: Mocked<ConnectorExecutor>;
   let mockDependencies: ContextDependencies;
 
   beforeEach(() => {
@@ -81,36 +87,36 @@ describe('WaitForInputStepImpl', () => {
     };
 
     mockStepExecutionRuntime = {
-      tryEnterWaitUntil: jest.fn().mockReturnValue(true),
-      finishStep: jest.fn(),
-      setInput: jest.fn(),
-      setCurrentStepState: jest.fn(),
-      updateWorkflowExecution: jest.fn(),
+      tryEnterWaitUntil: vi.fn().mockReturnValue(true),
+      finishStep: vi.fn(),
+      setInput: vi.fn(),
+      setCurrentStepState: vi.fn(),
+      updateWorkflowExecution: vi.fn(),
       stepExecutionId: 'test-step-exec-id',
       abortController: new AbortController(),
       contextManager: {
-        renderValueAccordingToContext: jest.fn(<T>(v: T): T => v),
-        getEsClientAsUser: jest.fn().mockReturnValue({ security: { createApiKey: jest.fn() } }),
+        renderValueAccordingToContext: vi.fn(<T>(v: T): T => v),
+        getEsClientAsUser: vi.fn().mockReturnValue({ security: { createApiKey: vi.fn() } }),
       },
-    } as unknown as jest.Mocked<StepExecutionRuntime>;
+    } as unknown as Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
-      getWorkflowExecution: jest.fn().mockReturnValue({
+      navigateToNextNode: vi.fn(),
+      getWorkflowExecution: vi.fn().mockReturnValue({
         id: 'exec-abc',
         workflowId: 'wf-1',
         spaceId: 'default',
         context: {},
       }),
-    } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
+    } as unknown as Mocked<WorkflowExecutionRuntimeManager>;
 
     workflowLogger = {
-      logDebug: jest.fn(),
+      logDebug: vi.fn(),
     } as unknown as IWorkflowEventLogger;
 
     mockConnectorExecutor = {
-      execute: jest.fn(),
-    } as unknown as jest.Mocked<ConnectorExecutor>;
+      execute: vi.fn(),
+    } as unknown as Mocked<ConnectorExecutor>;
 
     mockDependencies = {
       spaceId: 'default',
@@ -118,7 +124,7 @@ describe('WaitForInputStepImpl', () => {
         security: {
           authc: {
             apiKeys: {
-              invalidateAsInternalUser: jest.fn().mockResolvedValue({}),
+              invalidateAsInternalUser: vi.fn().mockResolvedValue({}),
             },
           },
         },
@@ -184,7 +190,7 @@ describe('WaitForInputStepImpl', () => {
       };
       const templatingEngine = new WorkflowTemplatingEngine();
       (
-        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockImplementation((v: unknown) => templatingEngine.render(v, renderContext));
 
       node.configuration.with = {
@@ -205,7 +211,7 @@ describe('WaitForInputStepImpl', () => {
       expect(
         mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
       ).toHaveBeenCalledWith(schema);
-      const persisted = (mockStepExecutionRuntime.setInput as jest.Mock).mock.calls[0][0];
+      const persisted = (mockStepExecutionRuntime.setInput as Mock).mock.calls[0][0];
       expect(persisted.message).toBe('hello world');
       expect(persisted.schema.properties.approved.default).toBe(true);
       expect(typeof persisted.schema.properties.approved.default).toBe('boolean');
@@ -218,7 +224,7 @@ describe('WaitForInputStepImpl', () => {
         timeout: "{{ inputs.expiresIn | default: '72h' }}",
       } as WaitForInputStep;
       (
-        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockImplementation((value: unknown) =>
         value === node.configuration.timeout ? '1h' : value
       );
@@ -241,7 +247,7 @@ describe('WaitForInputStepImpl', () => {
         },
       } as WaitForInputStep;
       (
-        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockImplementation((value: unknown) =>
         value === node.configuration.timeout ? 'soon' : value
       );

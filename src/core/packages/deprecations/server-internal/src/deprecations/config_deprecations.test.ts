@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { registerConfigDeprecationsInfo } from './config_deprecations';
 import { mockDeprecationsRegistry, mockDeprecationsFactory } from '../mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -23,7 +25,7 @@ describe('#registerConfigDeprecationsInfo', () => {
     const configService = configServiceMock.create({
       atPath: { skip_deprecated_settings: ['hello', 'world'] },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     coreContext = mockCoreContext.create({ configService });
   });
 

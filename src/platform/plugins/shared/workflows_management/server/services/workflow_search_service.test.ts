@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -40,14 +43,14 @@ const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties
 
 const makeDeps = (): {
   deps: WorkflowSearchDeps;
-  storageClient: { search: jest.Mock };
+  storageClient: { search: Mock };
   esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  workflowExecutionsDataClient: { search: jest.Mock };
+  workflowExecutionsDataClient: { search: Mock };
   logger: ReturnType<typeof loggerMock.create>;
 } => {
-  const storageClient = { search: jest.fn() };
+  const storageClient = { search: vi.fn() };
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const workflowExecutionsDataClient = { search: jest.fn() };
+  const workflowExecutionsDataClient = { search: vi.fn() };
   const logger = loggerMock.create();
   return {
     deps: {

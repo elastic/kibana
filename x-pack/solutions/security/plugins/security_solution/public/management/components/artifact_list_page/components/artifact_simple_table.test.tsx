@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -29,10 +32,10 @@ import { NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE } from '../../..
 import type { MenuItemPropsByPolicyId } from '../../artifact_entry_card';
 import { useArtifactAssignedPolicies as _useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../hooks/use_artifact_assigned_policies');
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
-const useArtifactAssignedPoliciesMock = _useArtifactAssignedPolicies as jest.Mock;
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../hooks/use_artifact_assigned_policies');
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
+const useArtifactAssignedPoliciesMock = _useArtifactAssignedPolicies as Mock;
 
 describe('ArtifactSimpleTable', () => {
   const generator = new ExceptionsListItemGenerator('seed');
@@ -41,8 +44,8 @@ describe('ArtifactSimpleTable', () => {
     props?: Partial<ArtifactSimpleTableProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let onChange: jest.MockedFunction<ArtifactSimpleTableProps['onChange']>;
-  let onAction: jest.MockedFunction<ArtifactSimpleTableProps['onAction']>;
+  let onChange: MockedFunction<ArtifactSimpleTableProps['onChange']>;
+  let onAction: MockedFunction<ArtifactSimpleTableProps['onAction']>;
   let item: ExceptionListItemSchema;
   let defaultProps: ArtifactSimpleTableProps;
 
@@ -63,8 +66,8 @@ describe('ArtifactSimpleTable', () => {
     });
 
     const mockedContext = createAppRootMockRenderer();
-    onChange = jest.fn();
-    onAction = jest.fn();
+    onChange = vi.fn();
+    onAction = vi.fn();
     item = generator.generate({
       name: 'YARA rule one',
       os_types: ['windows', 'linux', 'macos'],

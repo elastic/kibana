@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -48,15 +50,15 @@ describe('InterceptTriggerService', () => {
       });
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('would cause a creation invocation when a trigger with the same ID has not been registered', async () => {
-        const createSavedObjectFnMock = jest.fn(() => Promise.resolve());
+        const createSavedObjectFnMock = vi.fn(() => Promise.resolve());
 
         coreStartMock.savedObjects.createInternalRepository.mockReturnValue({
           create: createSavedObjectFnMock,
-          get: jest.fn(() => Promise.resolve({ attributes: null })),
+          get: vi.fn(() => Promise.resolve({ attributes: null })),
         } as unknown as ISavedObjectsRepository);
 
         const { registerTriggerDefinition } = interceptTrigger.start(coreStartMock);
@@ -85,11 +87,11 @@ describe('InterceptTriggerService', () => {
       });
 
       it('would cause an update invocation when an existing trigger has its interval configuration updated', async () => {
-        const updateSavedObjectFnMock = jest.fn(() => Promise.resolve());
+        const updateSavedObjectFnMock = vi.fn(() => Promise.resolve());
 
         coreStartMock.savedObjects.createInternalRepository.mockReturnValue({
           update: updateSavedObjectFnMock,
-          get: jest.fn((...args) =>
+          get: vi.fn((...args) =>
             Promise.resolve({
               attributes: {
                 id: args[1],

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RulesClientContext } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
@@ -15,11 +18,11 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { RecoveredActionGroup } from '../../../../../common';
 import type { IScopedChangeTrackingService } from '../../../../rules_client/lib/change_tracking';
 
-const loggerErrorMock = jest.fn();
-const getBulkMock = jest.fn();
+const loggerErrorMock = vi.fn();
+const getBulkMock = vi.fn();
 
 const savedObjectsMock = savedObjectsRepositoryMock.create();
-savedObjectsMock.get = jest.fn().mockReturnValue({
+savedObjectsMock.get = vi.fn().mockReturnValue({
   attributes: {
     actions: [],
     snoozeSchedule: [
@@ -39,7 +42,7 @@ savedObjectsMock.get = jest.fn().mockReturnValue({
 });
 
 const context = {
-  logger: { error: loggerErrorMock, debug: jest.fn() },
+  logger: { error: loggerErrorMock, debug: vi.fn() },
   getActionsClient: () => {
     return {
       getBulk: getBulkMock,
@@ -57,7 +60,7 @@ const context = {
 
 describe('validate unsnooze params', () => {
   beforeEach(() => {
-    savedObjectsMock.update = jest.fn().mockResolvedValue({
+    savedObjectsMock.update = vi.fn().mockResolvedValue({
       id: '123',
       type: 'alert',
       attributes: { snoozeSchedule: [] },
@@ -66,7 +69,7 @@ describe('validate unsnooze params', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should validate params correctly', async () => {
@@ -162,10 +165,10 @@ describe('unsnoozeRule change tracking', () => {
     });
   };
 
-  const createChangeTrackingService = (): jest.Mocked<IScopedChangeTrackingService> => ({
-    log: jest.fn().mockResolvedValue(undefined),
-    logBulk: jest.fn().mockResolvedValue(undefined),
-    getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+  const createChangeTrackingService = (): Mocked<IScopedChangeTrackingService> => ({
+    log: vi.fn().mockResolvedValue(undefined),
+    logBulk: vi.fn().mockResolvedValue(undefined),
+    getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
   });
 
   beforeEach(() => {
@@ -251,7 +254,7 @@ describe('unsnoozeRule change tracking', () => {
   });
 
   test('logs the change only after the OCC retry succeeds', async () => {
-    const { SavedObjectsErrorHelpers } = jest.requireActual('@kbn/core/server');
+    const { SavedObjectsErrorHelpers } = (await vi.importActual('@kbn/core/server'));
     const changeTrackingService = createChangeTrackingService();
     const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
 

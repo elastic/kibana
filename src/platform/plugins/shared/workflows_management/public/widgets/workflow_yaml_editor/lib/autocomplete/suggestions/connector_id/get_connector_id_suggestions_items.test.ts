@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import {
@@ -14,26 +16,32 @@ import {
   getConnectorInstancesForType,
 } from './get_connector_id_suggestions_items';
 
-jest.mock('../../../../../../shared/lib/action_type_utils', () => ({
-  getActionTypeIdFromStepType: jest.fn((stepType: string) => `.${stepType.split('.')[0]}`),
-  getActionTypeDisplayNameFromStepType: jest.fn((stepType: string) => {
-    const name = stepType.split('.')[0];
-    return name.charAt(0).toUpperCase() + name.slice(1);
-  }),
-}));
+vi.mock('../../../../../../shared/lib/action_type_utils', () => {
+      const mocked = {
+      getActionTypeIdFromStepType: vi.fn((stepType: string) => `.${stepType.split('.')[0]}`),
+      getActionTypeDisplayNameFromStepType: vi.fn((stepType: string) => {
+        const name = stepType.split('.')[0];
+        return name.charAt(0).toUpperCase() + name.slice(1);
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../shared/lib/connectors_utils', () => ({
-  getConnectorTypesFromStepType: jest.fn((stepType: string) => [stepType]),
-  getCustomStepConnectorIdSelectionHandler: jest.fn().mockReturnValue(undefined),
-  getInferenceConnectorTaskTypeFromSubAction: jest.fn().mockReturnValue(undefined),
-  isCreateConnectorEnabledForStepType: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../../../shared/lib/connectors_utils', () => {
+      const mocked = {
+      getConnectorTypesFromStepType: vi.fn((stepType: string) => [stepType]),
+      getCustomStepConnectorIdSelectionHandler: vi.fn().mockReturnValue(undefined),
+      getInferenceConnectorTaskTypeFromSubAction: vi.fn().mockReturnValue(undefined),
+      isCreateConnectorEnabledForStepType: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const {
   isCreateConnectorEnabledForStepType,
   getCustomStepConnectorIdSelectionHandler,
   getInferenceConnectorTaskTypeFromSubAction,
-} = jest.requireMock('../../../../../../shared/lib/connectors_utils');
+} = (await vi.importMock('../../../../../../shared/lib/connectors_utils'));
 
 const createMockRange = (): monaco.IRange => ({
   startLineNumber: 3,
@@ -118,7 +126,7 @@ const createMockDynamicConnectorTypes = (): Record<string, ConnectorTypeInfo> =>
 
 describe('getConnectorIdSuggestionsItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     isCreateConnectorEnabledForStepType.mockReturnValue(false);
     getCustomStepConnectorIdSelectionHandler.mockReturnValue(undefined);
     getInferenceConnectorTaskTypeFromSubAction.mockReturnValue(undefined);
@@ -250,7 +258,7 @@ describe('getConnectorIdSuggestionsItems', () => {
 
 describe('getConnectorInstancesForType', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getCustomStepConnectorIdSelectionHandler.mockReturnValue(undefined);
     getInferenceConnectorTaskTypeFromSubAction.mockReturnValue(undefined);
   });

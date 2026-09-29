@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchDurationPercentiles } from './fetch_duration_percentiles';
@@ -25,20 +28,20 @@ function createApmEventClient({
   fieldTypes?: Record<string, { type: string }>;
 } = {}) {
   return {
-    fieldCaps: jest.fn().mockResolvedValue({
+    fieldCaps: vi.fn().mockResolvedValue({
       fields: {
         'transaction.duration.histogram': fieldTypes,
       },
     }),
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       hits: { total: { value: 1, relation: 'eq' } },
       aggregations: {
         duration_percentiles: { values: percentileValues },
       },
     }),
   } as unknown as APMEventClient & {
-    fieldCaps: jest.Mock;
-    search: jest.Mock;
+    fieldCaps: Mock;
+    search: Mock;
   };
 }
 

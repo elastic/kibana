@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
@@ -26,47 +29,57 @@ import {
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
 } from './remove_entities_from_watchlist_tool';
 
-jest.mock('./watchlist_availability', () => ({
-  getWatchlistToolAvailability: jest.fn(),
-}));
+vi.mock('./watchlist_availability', () => {
+      const mocked = {
+      getWatchlistToolAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetWatchlistToolAvailability = getWatchlistToolAvailability as jest.Mock;
+const mockGetWatchlistToolAvailability = getWatchlistToolAvailability as Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsWatchlistEnabled: true,
   entityAnalyticsEntityStoreV2: true,
 } as ExperimentalFeatures;
 
-const mockGetWatchlistFn = jest.fn();
-jest.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_config', () => {
-  const actual = jest.requireActual(
-    '../../../../lib/entity_analytics/watchlists/management/watchlist_config'
-  );
+const mockGetWatchlistFn = vi.fn();
+vi.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_config', async () => {
+  const actual = (await vi.importActual('../../../../lib/entity_analytics/watchlists/management/watchlist_config'));
   return {
     ...actual,
-    WatchlistConfigClient: jest.fn().mockImplementation(() => ({
+    WatchlistConfigClient: vi.fn().mockImplementation(() => ({
       get: mockGetWatchlistFn,
     })),
   };
 });
 
-const mockUnassignFn = jest.fn();
-jest.mock('../../../../lib/entity_analytics/watchlists/entity_sources/manual/service', () => ({
-  createManualEntityService: jest.fn().mockImplementation(() => ({
-    unassign: mockUnassignFn,
-  })),
-}));
+const mockUnassignFn = vi.fn();
+vi.mock('../../../../lib/entity_analytics/watchlists/entity_sources/manual/service', () => {
+      const mocked = {
+      createManualEntityService: vi.fn().mockImplementation(() => ({
+        unassign: mockUnassignFn,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/entity-store/server/domain/crud', () => ({
-  CRUDClient: jest.fn().mockImplementation(() => ({})),
-}));
+vi.mock('@kbn/entity-store/server/domain/crud', () => {
+      const mocked = {
+      CRUDClient: vi.fn().mockImplementation(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetUserWatchlistPrivileges = jest.fn();
-jest.mock(
+const mockGetUserWatchlistPrivileges = vi.fn();
+vi.mock(
   '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
-  () => ({
-    getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
-  })
+  () => {
+      const mocked = {
+        getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const buildWatchlist = (overrides: Partial<Record<string, unknown>> = {}) => ({
@@ -110,10 +123,10 @@ const buildHandlerContextWithPrompts = (
   };
   ctx.prompts = {
     ...ctx.prompts,
-    checkConfirmationStatus: jest.fn().mockReturnValue({
+    checkConfirmationStatus: vi.fn().mockReturnValue({
       status: promptOverrides.checkStatus ?? ConfirmationStatus.unprompted,
     }),
-    askForConfirmation: jest.fn().mockReturnValue(
+    askForConfirmation: vi.fn().mockReturnValue(
       promptOverrides.askResult ?? {
         prompt: {
           id: 'placeholder',
@@ -136,7 +149,7 @@ describe('removeEntitiesFromWatchlistTool', () => {
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
     mockGetWatchlistToolAvailability.mockResolvedValue({ status: 'available' });
     mockGetUserWatchlistPrivileges.mockResolvedValue({
@@ -218,7 +231,7 @@ describe('removeEntitiesFromWatchlistTool', () => {
 
         await tool.handler({ watchlistId: 'wl-1', entityIds: ['user:alice'] }, ctx);
 
-        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        const askArgs = (ctx.prompts.askForConfirmation as Mock).mock.calls[0][0];
         expect(askArgs).toMatchObject({
           id: 'watchlists.remove_entities_from_watchlist.tool-call-remove',
           title: 'Remove entities from watchlist',

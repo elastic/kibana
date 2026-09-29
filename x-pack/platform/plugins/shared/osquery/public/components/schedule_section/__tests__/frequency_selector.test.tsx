@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { FrequencySelector } from '../frequency_selector';
@@ -26,7 +28,7 @@ const baseRecurrence = (): RecurrenceFormState => createDefaultRecurrence();
 describe('FrequencySelector', () => {
   describe('rendering — supported frequency set', () => {
     it('renders the Daily and Custom options', () => {
-      renderWithProviders(<FrequencySelector value={baseRecurrence()} onChange={jest.fn()} />);
+      renderWithProviders(<FrequencySelector value={baseRecurrence()} onChange={vi.fn()} />);
 
       expect(screen.getByLabelText(FREQUENCY_DAILY)).toBeInTheDocument();
       expect(screen.getByLabelText(FREQUENCY_CUSTOM)).toBeInTheDocument();
@@ -35,7 +37,7 @@ describe('FrequencySelector', () => {
     it('does not render Minutely, Hourly, Monthly, or Yearly as separate frequency options', () => {
       // Monthly/Yearly are units of Custom's "Repeat every" selector, not
       // separate top-level frequency options (D39, supersedes D38).
-      renderWithProviders(<FrequencySelector value={baseRecurrence()} onChange={jest.fn()} />);
+      renderWithProviders(<FrequencySelector value={baseRecurrence()} onChange={vi.fn()} />);
 
       expect(screen.queryByLabelText(FREQUENCY_MINUTELY)).not.toBeInTheDocument();
       expect(screen.queryByLabelText(FREQUENCY_HOURLY)).not.toBeInTheDocument();
@@ -49,7 +51,7 @@ describe('FrequencySelector', () => {
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'daily' }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -61,7 +63,7 @@ describe('FrequencySelector', () => {
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'daily' }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -75,7 +77,7 @@ describe('FrequencySelector', () => {
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom' }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -94,7 +96,7 @@ describe('FrequencySelector', () => {
             frequency: 'custom',
             byweekday: ['MO', 'WE'],
           }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -111,7 +113,7 @@ describe('FrequencySelector', () => {
             frequency: 'custom',
             byweekday: [],
           }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           weekdaysError
         />
       );
@@ -122,7 +124,7 @@ describe('FrequencySelector', () => {
     it('treats an undefined repeatUnit as "weeks" (backward compatibility)', () => {
       const { repeatUnit, ...rest } = baseRecurrence();
       renderWithProviders(
-        <FrequencySelector value={{ ...rest, frequency: 'custom' }} onChange={jest.fn()} />
+        <FrequencySelector value={{ ...rest, frequency: 'custom' }} onChange={vi.fn()} />
       );
 
       expect(screen.getByTestId('osquery-frequency-selector-weekdays')).toBeInTheDocument();
@@ -137,7 +139,7 @@ describe('FrequencySelector', () => {
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'months' }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -152,7 +154,7 @@ describe('FrequencySelector', () => {
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'years' }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -163,7 +165,7 @@ describe('FrequencySelector', () => {
     });
 
     it('switches the unit to Month(s) and clears `_unknown`', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{
@@ -185,7 +187,7 @@ describe('FrequencySelector', () => {
     });
 
     it('switches the unit to Year(s)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom' }}
@@ -202,7 +204,7 @@ describe('FrequencySelector', () => {
     });
 
     it('does not fire onChange when re-selecting the current unit', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'weeks' }}
@@ -218,7 +220,7 @@ describe('FrequencySelector', () => {
     });
 
     it('preserves byweekday selection when switching from weeks to months and back', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', byweekday: ['MO', 'WE'] }}
@@ -238,7 +240,7 @@ describe('FrequencySelector', () => {
       // Month(s) caps at 1200 (100 years) — well under the ~292.5-year
       // rrule-go horizon. A unit-blind 9999 cap would let an interval
       // through whose second MONTHLY occurrence never fires.
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'months' }}
@@ -255,7 +257,7 @@ describe('FrequencySelector', () => {
     });
 
     it('clamps a Year(s) interval above 100 to 100', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'years' }}
@@ -272,7 +274,7 @@ describe('FrequencySelector', () => {
     });
 
     it('clamps a Month(s) interval above 1200 to 1200', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'months' }}
@@ -289,7 +291,7 @@ describe('FrequencySelector', () => {
     });
 
     it('still allows a Week(s) interval up to 9999', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'weeks' }}
@@ -306,7 +308,7 @@ describe('FrequencySelector', () => {
     });
 
     it('re-bounds an over-cap Month(s) interval when switching to Year(s)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{
@@ -329,7 +331,7 @@ describe('FrequencySelector', () => {
     });
 
     it('keeps `repeatUnit` sticky across a Daily round trip (frequency change does not reset it)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const { rerender } = renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'months' }}
@@ -352,7 +354,7 @@ describe('FrequencySelector', () => {
 
   describe('change handling', () => {
     it('switches frequency and clears `_unknown` on the change', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{
@@ -375,7 +377,7 @@ describe('FrequencySelector', () => {
     });
 
     it('does not fire onChange when the user re-selects the current frequency', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'daily' }}
@@ -388,7 +390,7 @@ describe('FrequencySelector', () => {
     });
 
     it('appends a newly selected weekday in canonical order (MO..SU)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{
@@ -408,7 +410,7 @@ describe('FrequencySelector', () => {
     });
 
     it('removes a previously selected weekday on toggle off', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{
@@ -426,7 +428,7 @@ describe('FrequencySelector', () => {
     });
 
     it('clamps the INTERVAL input below the minimum (1)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom' }}
@@ -443,7 +445,7 @@ describe('FrequencySelector', () => {
     });
 
     it('clamps the INTERVAL input above the maximum (9999)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <FrequencySelector
           value={{ ...baseRecurrence(), frequency: 'custom' }}
@@ -469,8 +471,8 @@ describe('FrequencySelector', () => {
     // pin distinct prefixes to mirror that because EUI's test-env stub
     // returns a static id.
     it('routes frequency-label clicks only to the instance whose label was clicked', () => {
-      const firstOnChange = jest.fn();
-      const secondOnChange = jest.fn();
+      const firstOnChange = vi.fn();
+      const secondOnChange = vi.fn();
       renderWithProviders(
         <>
           <FrequencySelector
@@ -495,8 +497,8 @@ describe('FrequencySelector', () => {
     });
 
     it('routes weekday-label clicks only to the instance whose label was clicked', () => {
-      const firstOnChange = jest.fn();
-      const secondOnChange = jest.fn();
+      const firstOnChange = vi.fn();
+      const secondOnChange = vi.fn();
       renderWithProviders(
         <>
           <FrequencySelector

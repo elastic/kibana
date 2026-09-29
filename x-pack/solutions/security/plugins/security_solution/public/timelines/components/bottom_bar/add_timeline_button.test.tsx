@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AddTimelineButton } from './add_timeline_button';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../hooks/use_create_timeline');
+vi.mock('../../hooks/use_create_timeline');
 
 const timelineId = 'timelineId';
 const renderAddTimelineButton = () => render(<AddTimelineButton timelineId={timelineId} />);
 
 describe('AddTimelineButton', () => {
   it('should present 3 options in the popover when clicking on the plus button', async () => {
-    (useCreateTimeline as jest.Mock).mockReturnValue(jest.fn());
+    (useCreateTimeline as Mock).mockReturnValue(vi.fn());
 
     const { getByTestId } = renderAddTimelineButton();
 

@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useSerialPolling } from './use_serial_polling';
 
 describe('useSerialPolling', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('calls poll immediately on mount', async () => {
-    const poll = jest.fn().mockResolvedValue(undefined);
+    const poll = vi.fn().mockResolvedValue(undefined);
 
     renderHook(() =>
       useSerialPolling({
@@ -40,7 +42,7 @@ describe('useSerialPolling', () => {
 
   it('calls poll again only after previous finishes and interval elapses', async () => {
     let resolvePoll: (() => void) | undefined;
-    const poll = jest.fn(
+    const poll = vi.fn(
       () =>
         new Promise<void>((resolve) => {
           resolvePoll = resolve;
@@ -66,13 +68,13 @@ describe('useSerialPolling', () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(999);
+      vi.advanceTimersByTime(999);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(2);
@@ -80,7 +82,7 @@ describe('useSerialPolling', () => {
 
   it('does not start a second poll while the first is still in flight', async () => {
     let resolvePoll: (() => void) | undefined;
-    const poll = jest.fn(
+    const poll = vi.fn(
       () =>
         new Promise<void>((resolve) => {
           resolvePoll = resolve;
@@ -100,7 +102,7 @@ describe('useSerialPolling', () => {
     expect(poll).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(1);
@@ -111,14 +113,14 @@ describe('useSerialPolling', () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(2);
   });
 
   it('stops polling when shouldStop returns true after a poll', async () => {
-    const poll = jest.fn().mockResolvedValue(undefined);
+    const poll = vi.fn().mockResolvedValue(undefined);
     let stop = false;
 
     renderHook(() =>
@@ -137,14 +139,14 @@ describe('useSerialPolling', () => {
     stop = true;
 
     await act(async () => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(1);
   });
 
   it('does not poll when enabled is false', async () => {
-    const poll = jest.fn().mockResolvedValue(undefined);
+    const poll = vi.fn().mockResolvedValue(undefined);
 
     renderHook(() =>
       useSerialPolling({
@@ -156,7 +158,7 @@ describe('useSerialPolling', () => {
 
     await act(async () => {
       await Promise.resolve();
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       await Promise.resolve();
     });
 
@@ -164,7 +166,7 @@ describe('useSerialPolling', () => {
   });
 
   it('stops polling on unmount', async () => {
-    const poll = jest.fn().mockResolvedValue(undefined);
+    const poll = vi.fn().mockResolvedValue(undefined);
 
     const { unmount } = renderHook(() =>
       useSerialPolling({
@@ -181,15 +183,15 @@ describe('useSerialPolling', () => {
     unmount();
 
     await act(async () => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(1);
   });
 
   it('uses dynamic intervalMs from a function', async () => {
-    const poll = jest.fn().mockResolvedValue(undefined);
-    const getIntervalMs = jest.fn().mockReturnValue(2000);
+    const poll = vi.fn().mockResolvedValue(undefined);
+    const getIntervalMs = vi.fn().mockReturnValue(2000);
 
     renderHook(() =>
       useSerialPolling({
@@ -205,21 +207,21 @@ describe('useSerialPolling', () => {
     expect(poll).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      jest.advanceTimersByTime(1999);
+      vi.advanceTimersByTime(1999);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(1);
     expect(getIntervalMs).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(2);
   });
 
   it('does not schedule sleep when immediate is false and shouldStop is already true', async () => {
-    const poll = jest.fn().mockResolvedValue(undefined);
+    const poll = vi.fn().mockResolvedValue(undefined);
 
     renderHook(() =>
       useSerialPolling({
@@ -232,7 +234,7 @@ describe('useSerialPolling', () => {
 
     await act(async () => {
       await Promise.resolve();
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       await Promise.resolve();
     });
 
@@ -240,7 +242,7 @@ describe('useSerialPolling', () => {
   });
 
   it('waits one interval before the first poll when immediate is false', async () => {
-    const poll = jest.fn().mockResolvedValue(undefined);
+    const poll = vi.fn().mockResolvedValue(undefined);
 
     renderHook(() =>
       useSerialPolling({
@@ -257,14 +259,14 @@ describe('useSerialPolling', () => {
     expect(poll).not.toHaveBeenCalled();
 
     await act(async () => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(1);
   });
 
   it('restarts polling when pollKey changes after the loop had stopped', async () => {
-    const poll = jest.fn().mockResolvedValue(undefined);
+    const poll = vi.fn().mockResolvedValue(undefined);
     let stop = true;
 
     const { rerender } = renderHook(
@@ -284,7 +286,7 @@ describe('useSerialPolling', () => {
     expect(poll).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(1);
@@ -298,7 +300,7 @@ describe('useSerialPolling', () => {
   });
 
   it('continues polling after poll rejects', async () => {
-    const poll = jest.fn().mockRejectedValueOnce(new Error('network')).mockResolvedValue(undefined);
+    const poll = vi.fn().mockRejectedValueOnce(new Error('network')).mockResolvedValue(undefined);
 
     renderHook(() =>
       useSerialPolling({
@@ -314,7 +316,7 @@ describe('useSerialPolling', () => {
     expect(poll).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       await Promise.resolve();
     });
     expect(poll).toHaveBeenCalledTimes(2);

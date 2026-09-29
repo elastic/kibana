@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { RulesFactory } from './rules_factory';
 import { RULE_CPU_USAGE } from '../../common/constants';
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-    },
-  },
-}));
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RulesFactory', () => {
   const rulesClient = {
-    find: jest.fn(),
+    find: vi.fn(),
   };
 
   afterEach(() => {
@@ -26,7 +31,7 @@ describe('RulesFactory', () => {
   });
 
   it('should get by type', async () => {
-    rulesClient.find = jest.fn().mockImplementation(() => {
+    rulesClient.find = vi.fn().mockImplementation(() => {
       return {
         total: 1,
         data: [
@@ -48,7 +53,7 @@ describe('RulesFactory', () => {
 
   it('should pass in the correct filters', async () => {
     let filter = null;
-    rulesClient.find = jest.fn().mockImplementation(({ options }) => {
+    rulesClient.find = vi.fn().mockImplementation(({ options }) => {
       filter = options.filter;
       return {
         total: 0,

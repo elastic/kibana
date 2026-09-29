@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { screen } from '@testing-library/react';
@@ -16,14 +18,14 @@ import { getMockBuilderArgs } from './mock';
 import { createObservablesUserActionBuilder } from './observables';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
 
 describe('createObservablesUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const tests: [number, ObservablesActionType, string][] = [

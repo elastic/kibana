@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { render, screen } from '@testing-library/react';
@@ -13,22 +15,25 @@ import { CUSTOM_EVENT_TYPE, createCustomEvent } from './custom_event.factory';
 import { createCustomEventItem } from './timeline_item.factory';
 import { CustomEvent } from './custom_event';
 
-jest.mock('../../../../context/conversation/use_conversation_id', () => ({
-  useConversationId: jest.fn(),
-}));
+vi.mock('../../../../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CustomEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useConversationId).mockReturnValue('conv-1');
+    vi.clearAllMocks();
+    vi.mocked(useConversationId).mockReturnValue('conv-1');
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('draws what the definition renders, passing it the event and render context', () => {
-    const renderEvent = jest.fn(() => <p>Note body</p>);
+    const renderEvent = vi.fn(() => <p>Note body</p>);
     const item = createCustomEventItem({
       definition: { type: CUSTOM_EVENT_TYPE, render: renderEvent },
     });
@@ -43,7 +48,7 @@ describe('CustomEvent', () => {
   });
 
   it('shows a callout instead of crashing when the renderer throws', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     const item = createCustomEventItem({
       definition: {
         type: CUSTOM_EVENT_TYPE,
@@ -73,7 +78,7 @@ describe('CustomEvent', () => {
 
   it('draws the icon, actor name, label and time when getHeader returns data', () => {
     const event = createCustomEvent();
-    const getHeader = jest.fn(() => ({
+    const getHeader = vi.fn(() => ({
       icon: 'document',
       iconTitle: 'Note icon',
       label: 'Text Note',
@@ -96,7 +101,7 @@ describe('CustomEvent', () => {
   });
 
   it('shows a callout instead of crashing when getHeader throws', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     const item = createCustomEventItem({
       definition: {
         type: CUSTOM_EVENT_TYPE,
@@ -114,7 +119,7 @@ describe('CustomEvent', () => {
   });
 
   it('renders nothing without a conversation id', () => {
-    jest.mocked(useConversationId).mockReturnValue(undefined);
+    vi.mocked(useConversationId).mockReturnValue(undefined);
 
     const { container } = render(<CustomEvent item={createCustomEventItem()} />);
 

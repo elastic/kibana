@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,11 +15,11 @@ import { DisconnectClusterModal } from '.';
 import { CloudConnectedAppContextProvider } from '../../../app_context';
 
 const mockTelemetryClient = {
-  trackClusterConnected: jest.fn(),
-  trackClusterDisconnected: jest.fn(),
-  trackServiceEnabled: jest.fn(),
-  trackServiceDisabled: jest.fn(),
-  trackLinkClicked: jest.fn(),
+  trackClusterConnected: vi.fn(),
+  trackClusterDisconnected: vi.fn(),
+  trackServiceEnabled: vi.fn(),
+  trackServiceDisabled: vi.fn(),
+  trackLinkClicked: vi.fn(),
 };
 
 const renderWithIntl = (component: React.ReactElement) => {
@@ -39,13 +41,13 @@ const renderWithIntl = (component: React.ReactElement) => {
 describe('DisconnectClusterModal', () => {
   const defaultProps = {
     clusterName: 'test-cluster-123',
-    onClose: jest.fn(),
-    onConfirm: jest.fn(),
+    onClose: vi.fn(),
+    onConfirm: vi.fn(),
     isLoading: false,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render modal with cluster name', () => {
@@ -92,7 +94,7 @@ describe('DisconnectClusterModal', () => {
 
   describe('User interactions', () => {
     it('should call onClose when Cancel button is clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(<DisconnectClusterModal {...defaultProps} onClose={onClose} />);
 
       const cancelButton = screen.getByTestId('disconnectClusterCancelButton');
@@ -102,7 +104,7 @@ describe('DisconnectClusterModal', () => {
     });
 
     it('should call onConfirm when Disconnect button is clicked with valid confirmation', async () => {
-      const onConfirm = jest.fn().mockResolvedValue(undefined);
+      const onConfirm = vi.fn().mockResolvedValue(undefined);
       renderWithIntl(<DisconnectClusterModal {...defaultProps} onConfirm={onConfirm} />);
 
       const input = screen.getByTestId('disconnectClusterConfirmationInput');
@@ -150,7 +152,7 @@ describe('DisconnectClusterModal', () => {
     });
 
     it('should show loading spinner on Disconnect button when isLoading is true', async () => {
-      const onConfirm = jest
+      const onConfirm = vi
         .fn()
         .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
 

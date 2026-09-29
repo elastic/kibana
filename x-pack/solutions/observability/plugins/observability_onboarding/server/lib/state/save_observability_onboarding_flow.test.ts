@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { saveObservabilityOnboardingFlow } from './save_observability_onboarding_flow';
 import { OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE } from '../../saved_objects/observability_onboarding_status';
@@ -19,7 +21,7 @@ const flow = {
 describe('saveObservabilityOnboardingFlow', () => {
   it('creates a flow with createdBy', async () => {
     const savedObjectsClient = {
-      create: jest.fn().mockResolvedValue({
+      create: vi.fn().mockResolvedValue({
         id: 'flow-id',
         updated_at: '2026-07-07T00:00:00.000Z',
       }),
@@ -39,7 +41,7 @@ describe('saveObservabilityOnboardingFlow', () => {
 
   it('updates a flow without dropping createdBy', async () => {
     const savedObjectsClient = {
-      update: jest.fn().mockResolvedValue({
+      update: vi.fn().mockResolvedValue({
         id: 'flow-id',
         updated_at: '2026-07-07T00:00:00.000Z',
       }),

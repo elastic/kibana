@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -16,7 +18,7 @@ import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discov
 
 describe('Status Column', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const column = createStatusColumn() as EuiTableFieldDataColumnType<AttackDiscoverySchedule>;
 

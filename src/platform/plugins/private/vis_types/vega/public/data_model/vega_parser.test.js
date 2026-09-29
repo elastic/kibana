@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
@@ -16,7 +18,7 @@ import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 import { VegaThemeColors, getDefaultAreaGradientFill } from './utils';
 import { DEFAULT_EMS_DARKMAP_ID } from '@kbn/maps-ems-plugin/common';
 
-jest.mock('../services');
+vi.mock('../services');
 
 const theme = { name: 'borealis', darkMode: false };
 
@@ -24,8 +26,8 @@ describe(`VegaParser.parseAsync`, () => {
   function check(spec, useResize, expectedSpec, warnCount) {
     return async () => {
       const searchApiStub = {
-        search: jest.fn(() => of({})),
-        resetSearchStats: jest.fn(),
+        search: vi.fn(() => of({})),
+        resetSearchStats: vi.fn(),
       };
       expectedSpec = expectedSpec || cloneDeep(spec);
       const mockGetServiceSettings = async () => {
@@ -230,10 +232,10 @@ describe('VegaParser._resolveEsQueries', () => {
 
   beforeEach(() => {
     searchApiStub = {
-      search: jest.fn(() => ({
-        toPromise: jest.fn(() => Promise.resolve(data)),
+      search: vi.fn(() => ({
+        toPromise: vi.fn(() => Promise.resolve(data)),
       })),
-      resetSearchStats: jest.fn(),
+      resetSearchStats: vi.fn(),
     };
   });
 

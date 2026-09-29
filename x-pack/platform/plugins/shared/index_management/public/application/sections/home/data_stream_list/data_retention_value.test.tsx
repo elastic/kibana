@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -13,16 +15,22 @@ import { useAppContext } from '../../../app_context';
 import { useIlmLocator } from '../../../services/use_ilm_locator';
 import { DataRetentionValue } from './data_retention_value';
 
-jest.mock('../../../app_context', () => ({
-  useAppContext: jest.fn(),
-}));
+vi.mock('../../../app_context', () => {
+      const mocked = {
+      useAppContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../services/use_ilm_locator', () => ({
-  useIlmLocator: jest.fn(),
-}));
+vi.mock('../../../services/use_ilm_locator', () => {
+      const mocked = {
+      useIlmLocator: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAppContext = jest.mocked(useAppContext);
-const mockUseIlmLocator = jest.mocked(useIlmLocator);
+const mockUseAppContext = vi.mocked(useAppContext);
+const mockUseIlmLocator = vi.mocked(useIlmLocator);
 
 const createDataStream = (overrides: Partial<DataStream> = {}): DataStream => ({
   name: 'my-data-stream',
@@ -52,10 +60,10 @@ const createDataStream = (overrides: Partial<DataStream> = {}): DataStream => ({
 });
 
 describe('DataRetentionValue', () => {
-  const navigateToUrl = jest.fn();
+  const navigateToUrl = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAppContext.mockReturnValue({
       core: { application: { navigateToUrl } },
     } as unknown as AppDependencies);

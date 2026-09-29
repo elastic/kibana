@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import {
   CLEANUP_TASK_ID,
@@ -35,24 +37,24 @@ describe('cleanup_task', () => {
   });
 
   describe('registerNotificationCleanupTask()', () => {
-    const search = jest.fn();
-    const deleteByQuery = jest.fn().mockResolvedValue({});
-    const getStartServices = jest
+    const search = vi.fn();
+    const deleteByQuery = vi.fn().mockResolvedValue({});
+    const getStartServices = vi
       .fn()
       .mockResolvedValue([
         { elasticsearch: { client: { asInternalUser: { search, deleteByQuery } } } },
       ]);
     const core = { getStartServices } as any;
 
-    const registerTaskDefinitions = jest.fn();
+    const registerTaskDefinitions = vi.fn();
     const taskManager = { registerTaskDefinitions } as any;
 
-    const logger = { error: jest.fn() } as any;
+    const logger = { error: vi.fn() } as any;
 
     const abortController = new AbortController();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       search.mockResolvedValue({ aggregations: { expired_groups: { buckets: [] } } });
     });
 
@@ -108,7 +110,7 @@ describe('cleanup_task', () => {
 
   describe('scheduleNotificationCleanupTask()', () => {
     it('calls ensureScheduled with correct id, taskType, and daily interval', async () => {
-      const ensureScheduled = jest.fn().mockResolvedValue({});
+      const ensureScheduled = vi.fn().mockResolvedValue({});
       const taskManager = { ensureScheduled } as any;
 
       await scheduleNotificationCleanupTask(taskManager);

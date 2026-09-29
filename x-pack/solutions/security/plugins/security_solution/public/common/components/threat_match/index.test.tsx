@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
@@ -25,10 +28,13 @@ const mockTheme = getMockTheme({
   },
 });
 
-jest.mock('../../lib/kibana');
-jest.mock('../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../lib/kibana');
+vi.mock('../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getDoublePayLoad = (): ThreatMapping => [
   { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },
@@ -36,10 +42,10 @@ const getDoublePayLoad = (): ThreatMapping => [
 ];
 
 describe('ThreatMatchComponent', () => {
-  const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
+  const getValueSuggestionsMock = vi.fn().mockResolvedValue(['value 1', 'value 2']);
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         unifiedSearch: {
           autocomplete: {
@@ -73,7 +79,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onMappingEntriesChange={jest.fn()}
+          onMappingEntriesChange={vi.fn()}
         />
       </ThemeProvider>
     );
@@ -109,7 +115,7 @@ describe('ThreatMatchComponent', () => {
             fields,
           } as DataViewBase
         }
-        onMappingEntriesChange={jest.fn()}
+        onMappingEntriesChange={vi.fn()}
       />
     );
 
@@ -141,7 +147,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onMappingEntriesChange={jest.fn()}
+          onMappingEntriesChange={vi.fn()}
         />
       </ThemeProvider>
     );
@@ -151,7 +157,7 @@ describe('ThreatMatchComponent', () => {
   });
 
   test('it adds an entry when "and" clicked', async () => {
-    const handleMappingEntriesChangeMock = jest.fn();
+    const handleMappingEntriesChangeMock = vi.fn();
 
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
@@ -234,7 +240,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onMappingEntriesChange={jest.fn()}
+          onMappingEntriesChange={vi.fn()}
         />
       </ThemeProvider>
     );
@@ -255,7 +261,7 @@ describe('ThreatMatchComponent', () => {
   });
 
   test('it adds an item when "or" clicked', async () => {
-    const handleMappingEntriesChangeMock = jest.fn();
+    const handleMappingEntriesChangeMock = vi.fn();
 
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
@@ -346,7 +352,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onMappingEntriesChange={jest.fn()}
+          onMappingEntriesChange={vi.fn()}
         />
       </ThemeProvider>
     );
@@ -368,7 +374,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it removes one row if user deletes a row', () => {
     const mappingEntries = getDoublePayLoad();
-    const handleMappingEntriesChangeMock = jest.fn();
+    const handleMappingEntriesChangeMock = vi.fn();
 
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
@@ -435,7 +441,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onMappingEntriesChange={jest.fn()}
+          onMappingEntriesChange={vi.fn()}
         />
       </ThemeProvider>
     );
@@ -462,7 +468,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onMappingEntriesChange={jest.fn()}
+          onMappingEntriesChange={vi.fn()}
         />
       </ThemeProvider>
     );

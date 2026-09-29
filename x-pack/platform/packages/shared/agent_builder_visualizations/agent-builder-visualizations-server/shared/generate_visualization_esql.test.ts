@@ -5,26 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ModelProvider, ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { buildEsqlEditContext, generateVisualizationEsql } from './generate_visualization_esql';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  generateEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      generateEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./esql_instructions', () => ({
-  buildEsqlAdditionalInstructions: () => 'esql-instructions',
-}));
+vi.mock('./esql_instructions', () => {
+      const mocked = {
+      buildEsqlAdditionalInstructions: () => 'esql-instructions',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGenerateEsql = jest.mocked(generateEsql);
+const mockedGenerateEsql = vi.mocked(generateEsql);
 
-const logger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn(), warn: vi.fn(), error: vi.fn() } as unknown as Logger;
 const events = {} as ToolEventEmitter;
 const defaultModel = { connector: { connectorId: 'default-connector' } } as ScopedModel;
-const getDefaultModel = jest.fn();
+const getDefaultModel = vi.fn();
 const modelProvider = { getDefaultModel } as unknown as ModelProvider;
 const asCurrentUser = { name: 'current-user-client' };
 const esClient = { asCurrentUser } as unknown as IScopedClusterClient;

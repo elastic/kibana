@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { RuleExecutionPipeline } from './execution_pipeline';
@@ -299,7 +301,7 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('middleware can intercept errors', async () => {
-      const errorHandlerCalled = jest.fn();
+      const errorHandlerCalled = vi.fn();
 
       const errorMiddleware: RuleExecutionMiddleware = {
         name: 'error_handler',

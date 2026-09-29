@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { filtersNotAlreadyPresent, getEsQueryFromSavedSearch } from './saved_search_utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
@@ -24,7 +26,7 @@ function createMockFilterManager() {
     addFilters: (value: Filter[]) => {
       filters.push(...value);
     },
-  } as unknown as jest.Mocked<FilterManager>;
+  } as unknown as Mocked<FilterManager>;
 }
 // helper function to create data views
 function createMockDataView(id: string) {

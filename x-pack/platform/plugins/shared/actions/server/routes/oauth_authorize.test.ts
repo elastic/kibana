@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-jest.mock('./verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
-jest.mock('../lib/oauth_state_client');
-jest.mock('../lib/oauth_authorization_service');
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
+vi.mock('./verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/oauth_state_client');
+vi.mock('../lib/oauth_authorization_service');
 
 import Boom from '@hapi/boom';
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -22,8 +28,8 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { OAUTH_API_TAG } from '../feature';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
-const MockOAuthStateClient = OAuthStateClient as jest.MockedClass<typeof OAuthStateClient>;
-const MockOAuthAuthorizationService = OAuthAuthorizationService as jest.MockedClass<
+const MockOAuthStateClient = OAuthStateClient as MockedClass<typeof OAuthStateClient>;
+const MockOAuthAuthorizationService = OAuthAuthorizationService as MockedClass<
   typeof OAuthAuthorizationService
 >;
 
@@ -31,37 +37,37 @@ const mockLogger = loggingSystemMock.create().get();
 const mockConfigurationUtilities = actionsConfigMock.create();
 
 const mockOAuthStateClientInstance = {
-  create: jest.fn(),
-  get: jest.fn(),
-  delete: jest.fn(),
-  cleanupExpiredStates: jest.fn(),
+  create: vi.fn(),
+  get: vi.fn(),
+  delete: vi.fn(),
+  cleanupExpiredStates: vi.fn(),
 };
 
 const mockOAuthServiceInstance = {
-  getOAuthConfig: jest.fn(),
-  buildAuthorizationUrl: jest.fn(),
-  buildEarsAuthorizationUrl: jest.fn(),
+  getOAuthConfig: vi.fn(),
+  buildAuthorizationUrl: vi.fn(),
+  buildEarsAuthorizationUrl: vi.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
-  getClient: jest.fn().mockReturnValue({}),
+  getClient: vi.fn().mockReturnValue({}),
 };
 
 const mockSpacesService = {
-  getSpaceId: jest.fn().mockReturnValue('default'),
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getSpaceId: vi.fn().mockReturnValue('default'),
+  spaceIdToNamespace: vi.fn().mockReturnValue(undefined),
 };
 
 const mockRateLimiter = {
-  log: jest.fn(),
-  isRateLimited: jest.fn().mockReturnValue(false),
-  getLogs: jest.fn(),
+  log: vi.fn(),
+  isRateLimited: vi.fn().mockReturnValue(false),
+  getLogs: vi.fn(),
 };
 
 const KIBANA_URL = 'https://kibana.example.com';
 
 const createMockCoreSetup = (publicBaseUrl: string | undefined = KIBANA_URL) => ({
-  getStartServices: jest.fn().mockResolvedValue([
+  getStartServices: vi.fn().mockResolvedValue([
     {
       http: {
         basePath: {
@@ -77,7 +83,7 @@ const createMockCoreSetup = (publicBaseUrl: string | undefined = KIBANA_URL) => 
 });
 
 const mockActionsClient = {
-  get: jest.fn().mockResolvedValue({}),
+  get: vi.fn().mockResolvedValue({}),
 };
 
 const createMockContext = (
@@ -89,15 +95,15 @@ const createMockContext = (
   core: Promise.resolve({
     security: {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(currentUser),
+        getCurrentUser: vi.fn().mockReturnValue(currentUser),
       },
     },
     savedObjects: {
-      getClient: jest.fn().mockReturnValue({}),
+      getClient: vi.fn().mockReturnValue({}),
     },
   }),
   actions: Promise.resolve({
-    getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
+    getActionsClient: vi.fn().mockReturnValue(mockActionsClient),
   }),
 });
 
@@ -105,12 +111,12 @@ describe('oauthAuthorizeRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     router = httpServiceMock.createRouter();
-    (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
+    (verifyAccessAndContext as Mock).mockImplementation((_license, handler) => handler);
 
     // Restore mock implementations cleared by resetAllMocks
-    (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
+    (mockLogger.get as Mock).mockReturnValue(mockLogger);
     mockActionsClient.get.mockResolvedValue({});
     mockRateLimiter.isRateLimited.mockReturnValue(false);
     mockSpacesService.getSpaceId.mockReturnValue('default');
@@ -119,7 +125,7 @@ describe('oauthAuthorizeRoute', () => {
 
     MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
     MockOAuthAuthorizationService.mockImplementation(() => mockOAuthServiceInstance as never);
-    (OAuthAuthorizationService.getRedirectUri as jest.Mock).mockReturnValue(
+    (OAuthAuthorizationService.getRedirectUri as Mock).mockReturnValue(
       'https://kibana.example.com/api/actions/connector/_oauth_callback'
     );
   });

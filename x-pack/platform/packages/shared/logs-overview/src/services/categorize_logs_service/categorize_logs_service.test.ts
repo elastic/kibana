@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createActor, fromPromise, waitFor } from 'xstate';
 import type { LogCategory } from '../../types';
 import { categorizeLogsService } from './categorize_logs_service';
@@ -47,7 +49,7 @@ const createDeferred = <T>() => {
 
 describe('categorizeLogsService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('cancel from loading states', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TimelineTypeEnum, type TimelineType } from '../../../../../../../common/api/timeline';
 import type { State } from '../../../../../../common/store';
@@ -16,32 +18,38 @@ const MOCK_TIMELINE_ID = 'timeline-test';
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-const mockPortalNode = { mount: jest.fn() } as unknown as ReturnType<
+const mockPortalNode = { mount: vi.fn() } as unknown as ReturnType<
   typeof import('react-reverse-portal').createHtmlPortalNode
 >;
 
-jest.mock('../../../../../../common/hooks/use_timeline_events_count', () => ({
-  useTimelineEventsCountPortal: () => ({ portalNode: mockPortalNode }),
-}));
+vi.mock('../../../../../../common/hooks/use_timeline_events_count', () => {
+      const mocked = {
+      useTimelineEventsCountPortal: () => ({ portalNode: mockPortalNode }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTimeline: { timelineType: TimelineType; isDataProviderVisible: boolean } = {
   timelineType: TimelineTypeEnum.default,
   isDataProviderVisible: false,
 };
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useSelector: (selector: (s: unknown) => unknown) =>
-    selector({
-      timeline: {
-        showCallOutUnauthorizedMsg: false,
-        insertTimeline: null,
-        timelineById: {
-          'timeline-test': mockTimeline,
-        },
-      },
-    } as unknown as State),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useSelector: (selector: (s: unknown) => unknown) =>
+        selector({
+          timeline: {
+            showCallOutUnauthorizedMsg: false,
+            insertTimeline: null,
+            timelineById: {
+              'timeline-test': mockTimeline,
+            },
+          },
+        } as unknown as State),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 

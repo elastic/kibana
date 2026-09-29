@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,9 +23,9 @@ import {
   toMeterColorStops,
 } from './progress_bar_cell';
 
-jest.mock('@elastic/charts', () => {
-  const actual = jest.requireActual('@elastic/charts');
-  const mockMeter = jest.fn((_props: MeterProps) => null);
+vi.mock('@elastic/charts', () => {
+  const actual = require('@elastic/charts');
+  const mockMeter = vi.fn((_props: MeterProps) => null);
   return {
     ...actual,
     Meter: (props: MeterProps) => {
@@ -34,8 +37,8 @@ jest.mock('@elastic/charts', () => {
 });
 
 const chartsMock: {
-  __mockMeter: jest.Mock<null, [MeterProps]>;
-} = jest.requireMock('@elastic/charts');
+  __mockMeter: Mock<null, [MeterProps]>;
+} = (await vi.importMock('@elastic/charts'));
 const meterMock = chartsMock.__mockMeter;
 
 describe('progress bar cell helpers', () => {
@@ -129,7 +132,7 @@ describe('progress bar cell helpers', () => {
     });
 
     it('renders a clickable filter label when onLabelClick is provided', async () => {
-      const onLabelClick = jest.fn();
+      const onLabelClick = vi.fn();
       render(<ProgressBarCell {...baseProps} onLabelClick={onLabelClick} />);
       const label = screen.getByTestId('lnsTableProgressBarLabel');
       await userEvent.click(label);

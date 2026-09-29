@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
@@ -14,11 +17,11 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getAgentsSocketsStatsMock } from './get_agents_sockets_stats.test.mocks';
 import { AgentManager } from './agent_manager';
 
-jest.mock('http');
-jest.mock('https');
+vi.mock('http');
+vi.mock('https');
 
-const HttpAgentMock = HttpAgent as unknown as jest.Mock<HttpAgent>;
-const HttpsAgentMock = HttpsAgent as unknown as jest.Mock<HttpsAgent>;
+const HttpAgentMock = HttpAgent as unknown as Mock<HttpAgent>;
+const HttpsAgentMock = HttpsAgent as unknown as Mock<HttpsAgent>;
 
 describe('AgentManager', () => {
   let logger: MockedLogger;

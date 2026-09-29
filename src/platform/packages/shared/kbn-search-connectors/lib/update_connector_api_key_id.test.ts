@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { updateConnectorApiKeyId } from './update_connector_api_key_id';
@@ -14,13 +16,13 @@ import { updateConnectorApiKeyId } from './update_connector_api_key_id';
 describe('updateConnectorApiKeyId lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   it('should update a connector API key id and API key secret id', async () => {
@@ -44,6 +46,6 @@ describe('updateConnectorApiKeyId lib function', () => {
         api_key_secret_id: 'api-key-secret-id',
       },
     });
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

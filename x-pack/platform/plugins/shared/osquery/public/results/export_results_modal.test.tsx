@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,8 +14,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ExportResultsModal } from './export_results_modal';
 
 const renderModal = (props: Partial<React.ComponentProps<typeof ExportResultsModal>> = {}) => {
-  const onClose = jest.fn();
-  const onExport = jest.fn();
+  const onClose = vi.fn();
+  const onExport = vi.fn();
 
   render(
     <I18nProvider>

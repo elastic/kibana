@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,38 +15,41 @@ import { UnifiedDataTable } from '@kbn/unified-data-table';
 import type { RuleExecutionView } from '@kbn/alerting-v2-schemas';
 import { RulesTabContent } from './rules_tab_content';
 
-const mockUseFetchRuleExecutions = jest.fn();
-const mockRefetch = jest.fn();
-const mockUseAlertingRulesCache = jest.fn();
+const mockUseFetchRuleExecutions = vi.fn();
+const mockRefetch = vi.fn();
+const mockUseAlertingRulesCache = vi.fn();
 
 let mockCanReadRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'settings') {
-      return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
-    }
-    if (token === 'http') {
-      return {};
-    }
-    if (typeof token === 'function') {
-      return {
-        canRead: () => mockCanReadRules,
-        canWrite: () => mockCanReadRules,
-        can: () => mockCanReadRules,
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'settings') {
+          return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+        }
+        if (token === 'http') {
+          return {};
+        }
+        if (typeof token === 'function') {
+          return {
+            canRead: () => mockCanReadRules,
+            canWrite: () => mockCanReadRules,
+            can: () => mockCanReadRules,
+          };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/unified-data-table', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('@kbn/unified-data-table', () => {
+  const ReactActual = require('react');
   return {
     DataLoadingState: { loading: 'loading', loaded: 'loaded' },
     ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-    UnifiedDataTable: jest.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
+    UnifiedDataTable: vi.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
       ReactActual.createElement(
         'div',
         { 'data-test-subj': 'unifiedDataTable' },
@@ -69,26 +74,41 @@ jest.mock('@kbn/unified-data-table', () => {
   };
 });
 
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('@kbn/cell-actions', () => {
+      const mocked = {
+      CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../data_view', () => ({
-  ...jest.requireActual('../data_view'),
-  useRuleExecutionsDataView: () => ({ dataView: {}, error: undefined }),
-}));
+vi.mock('../data_view', async () => {
+      const mocked = {
+      ...(await vi.importActual('../data_view')),
+      useRuleExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_unified_data_table_services', () => ({
-  useUnifiedDataTableServices: () => ({}),
-}));
+vi.mock('../hooks/use_unified_data_table_services', () => {
+      const mocked = {
+      useUnifiedDataTableServices: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_rule_executions', () => ({
-  useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
-}));
+vi.mock('../../../hooks/use_fetch_rule_executions', () => {
+      const mocked = {
+      useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => ({
-  useAlertingRulesCache: (...args: unknown[]) => mockUseAlertingRulesCache(...args),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => {
+      const mocked = {
+      useAlertingRulesCache: (...args: unknown[]) => mockUseAlertingRulesCache(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
   id: 'exec-1',
@@ -119,7 +139,7 @@ const mockResult = (
   });
 };
 
-const mockOnRuleClick = jest.fn();
+const mockOnRuleClick = vi.fn();
 
 const renderComponent = () =>
   render(
@@ -130,7 +150,7 @@ const renderComponent = () =>
 
 // Latest props the component handed to the (stubbed) grid.
 const lastGridProps = () => {
-  const calls = jest.mocked(UnifiedDataTable).mock.calls;
+  const calls = vi.mocked(UnifiedDataTable).mock.calls;
   return calls[calls.length - 1][0] as Record<string, any>;
 };
 
@@ -140,7 +160,7 @@ const withRows = (items: RuleExecutionView[], total = items.length) => ({
 
 describe('RulesTabContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCanReadRules = true;
     mockUseAlertingRulesCache.mockReturnValue({
       rulesCache: {

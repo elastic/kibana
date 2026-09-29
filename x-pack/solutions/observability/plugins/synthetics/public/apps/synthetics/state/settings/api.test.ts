@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 import { setDynamicSettings } from './api';
 
-jest.mock('../../../../utils/api_service', () => ({
-  apiService: { get: jest.fn(), put: jest.fn() },
-}));
+vi.mock('../../../../utils/api_service', () => {
+      const mocked = {
+      apiService: { get: vi.fn(), put: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('setDynamicSettings', () => {
-  const mockPut = apiService.put as jest.Mock;
+  const mockPut = apiService.put as Mock;
 
   beforeEach(() => {
     mockPut.mockReset();

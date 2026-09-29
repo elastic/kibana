@@ -7,26 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { identifyDependencyUsageWithCruiser } from './dependency_graph/providers/cruiser.ts';
 import { configureYargs } from './cli';
 
-jest.mock('chalk', () => ({
-  green: jest.fn((str) => str),
-  yellow: jest.fn((str) => str),
-  cyan: jest.fn((str) => str),
-  magenta: jest.fn((str) => str),
-  blue: jest.fn((str) => str),
-  bold: { magenta: jest.fn((str) => str), blue: jest.fn((str) => str) },
-}));
+vi.mock('chalk', () => {
+      const mocked = {
+      green: vi.fn((str) => str),
+      yellow: vi.fn((str) => str),
+      cyan: vi.fn((str) => str),
+      magenta: vi.fn((str) => str),
+      blue: vi.fn((str) => str),
+      bold: { magenta: vi.fn((str) => str), blue: vi.fn((str) => str) },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./dependency_graph/providers/cruiser', () => ({
-  identifyDependencyUsageWithCruiser: jest.fn(),
-}));
+vi.mock('./dependency_graph/providers/cruiser', () => {
+      const mocked = {
+      identifyDependencyUsageWithCruiser: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./cli', () => ({
-  ...jest.requireActual('./cli'),
-  runCLI: jest.fn(),
-}));
+vi.mock('./cli', async () => {
+      const mocked = {
+      ...(await vi.importActual('./cli')),
+      runCLI: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('dependency-usage CLI', () => {
   const parser = configureYargs()
@@ -36,11 +47,11 @@ describe('dependency-usage CLI', () => {
     .exitProcess(false);
 
   beforeEach(() => {
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should handle verbose option', () => {

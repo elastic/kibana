@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -15,7 +17,7 @@ import { DatasetComponent } from './dataset_component';
 describe('DatasetComponent', () => {
   function render(value = 'generic', datastreams: any = [], props?: any) {
     const renderer = createFleetTestRendererMock();
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const fieldLabel = 'Dataset name';
 
     const utils = renderer.render(

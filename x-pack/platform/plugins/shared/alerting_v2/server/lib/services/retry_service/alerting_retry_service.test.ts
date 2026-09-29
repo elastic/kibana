@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -16,19 +18,19 @@ describe('AlertingRetryService', () => {
   async function flushTimers(ms: number = 2_000) {
     // baseDelay is 250ms and maxBackoffTime is 1000ms in AlertingRetryService, so 2000ms
     // is enough to cover a retry delay even with jitter.
-    await jest.advanceTimersByTimeAsync(ms);
+    await vi.advanceTimersByTimeAsync(ms);
   }
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('delegates to EsTransientRetryService and returns the callback result', async () => {
@@ -40,7 +42,7 @@ describe('AlertingRetryService', () => {
   it('retries transient ES errors (e.g. 503) and eventually succeeds', async () => {
     const service = new AlertingRetryService(logger);
 
-    const callback = jest
+    const callback = vi
       .fn<Promise<string>, []>()
       .mockRejectedValueOnce(new errors.ResponseError({ statusCode: 503 } as DiagnosticResult))
       .mockResolvedValueOnce('ok');
@@ -57,7 +59,7 @@ describe('AlertingRetryService', () => {
     const service = new AlertingRetryService(logger);
 
     const err = new errors.ResponseError({ statusCode: 500 } as DiagnosticResult);
-    const callback = jest.fn<Promise<never>, []>().mockRejectedValueOnce(err);
+    const callback = vi.fn<Promise<never>, []>().mockRejectedValueOnce(err);
 
     const promise = service.retry(callback);
     const assertion = expect(promise).rejects.toBe(err);

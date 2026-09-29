@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,23 +19,29 @@ import { CaseSeverity } from '../../../../../common/types/domain';
 import { CaseStatuses } from '@kbn/cases-components';
 import * as i18n from '../../translations';
 
-const mockNavigateToCaseView = jest.fn();
-jest.mock('../../../../common/navigation/hooks', () => ({
-  ...jest.requireActual('../../../../common/navigation/hooks'),
-  useCaseViewNavigation: () => ({
-    navigateToCaseView: mockNavigateToCaseView,
-    getCaseViewUrl: jest.fn().mockReturnValue('/cases/test-id'),
-  }),
-}));
+const mockNavigateToCaseView = vi.fn();
+vi.mock('../../../../common/navigation/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/navigation/hooks')),
+      useCaseViewNavigation: () => ({
+        navigateToCaseView: mockNavigateToCaseView,
+        getCaseViewUrl: vi.fn().mockReturnValue('/cases/test-id'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_actions', () => ({
-  ...jest.requireActual('../../hooks/use_actions'),
-  ActionColumnComponent: () => (
-    <button type="button" data-test-subj="mock-action-column">
-      {'...'}
-    </button>
-  ),
-}));
+vi.mock('../../hooks/use_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks/use_actions')),
+      ActionColumnComponent: () => (
+        <button type="button" data-test-subj="mock-action-column">
+          {'...'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCase = {
   ...basicCase,
@@ -55,12 +63,12 @@ const defaultProps = {
   isSelected: false,
   hasSelection: false,
   isSelectable: true,
-  onSelectionChange: jest.fn(),
+  onSelectionChange: vi.fn(),
 };
 
 describe('CaseListItem', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders case title, id, severity badge, status, and alerts badge', () => {
@@ -277,7 +285,7 @@ describe('CaseListItem', () => {
   });
 
   it('calls onSelectionChange when checkbox is clicked', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
 
     renderWithTestingProviders(
       <CaseListItem {...defaultProps} onSelectionChange={onSelectionChange} />
@@ -289,7 +297,7 @@ describe('CaseListItem', () => {
   });
 
   it('calls onSelectionChange with false when unchecking a selected case', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
 
     renderWithTestingProviders(
       <CaseListItem
@@ -306,7 +314,7 @@ describe('CaseListItem', () => {
   });
 
   it('does not call onSelectionChange when the card link is clicked', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
 
     renderWithTestingProviders(
       <CaseListItem {...defaultProps} onSelectionChange={onSelectionChange} />

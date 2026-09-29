@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
@@ -15,13 +18,16 @@ import type { ActionsConfigurationUtilities } from '../../../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 import { actionsClientMock } from '../../../mocks';
 
-jest.mock('../../verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
+vi.mock('../../verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
+  vi.clearAllMocks();
+  (verifyAccessAndContext as Mock).mockImplementation((license, handler) => handler);
 });
 
 const createActionsConfigUtilsMock = (
@@ -31,10 +37,10 @@ const createActionsConfigUtilsMock = (
   }> = {}
 ): ActionsConfigurationUtilities =>
   ({
-    getWebhookSettings: jest.fn(() => ({
+    getWebhookSettings: vi.fn(() => ({
       ssl: { pfx: { enabled: overrides.pfxEnabled ?? true } },
     })),
-    isEarsEnabled: jest.fn(() => overrides.earsEnabled ?? false),
+    isEarsEnabled: vi.fn(() => overrides.earsEnabled ?? false),
   } as unknown as ActionsConfigurationUtilities);
 
 describe('getConnectorSpecRoute', () => {
@@ -259,7 +265,7 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
+    (verifyAccessAndContext as Mock).mockImplementation(() => async () => {
       throw new Error('License check failed');
     });
 

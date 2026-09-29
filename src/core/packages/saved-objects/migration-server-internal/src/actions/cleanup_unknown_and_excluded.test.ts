@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import * as Either from 'fp-ts/Either';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { checkForUnknownDocs, type DocumentIdAndType } from './check_for_unknown_docs';
@@ -18,19 +21,19 @@ import {
   initialExcludeOnUpgradeQueryMock,
 } from './cleanup_unknown_and_excluded.mocks';
 
-jest.mock('./check_for_unknown_docs');
-jest.mock('./calculate_exclude_filters');
-jest.mock('./delete_by_query');
+vi.mock('./check_for_unknown_docs');
+vi.mock('./calculate_exclude_filters');
+vi.mock('./delete_by_query');
 
-const mockCheckForUnknownDocs = checkForUnknownDocs as jest.MockedFunction<
+const mockCheckForUnknownDocs = checkForUnknownDocs as MockedFunction<
   typeof checkForUnknownDocs
 >;
 
-const mockCalculateExcludeFilters = calculateExcludeFilters as jest.MockedFunction<
+const mockCalculateExcludeFilters = calculateExcludeFilters as MockedFunction<
   typeof calculateExcludeFilters
 >;
 
-const mockDeleteByQuery = deleteByQuery as jest.MockedFunction<typeof deleteByQuery>;
+const mockDeleteByQuery = deleteByQuery as MockedFunction<typeof deleteByQuery>;
 
 describe('cleanupUnknownAndExcluded', () => {
   const unknownDocs: DocumentIdAndType[] = [
@@ -52,7 +55,7 @@ describe('cleanupUnknownAndExcluded', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls `Actions.checkForUnknownDocs()` with the correct params', async () => {

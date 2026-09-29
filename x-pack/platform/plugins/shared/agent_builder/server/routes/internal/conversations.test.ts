@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -19,12 +22,12 @@ const SEARCH_PATH = `${internalApiPath}/conversations/_search`;
 
 describe('registerInternalConversationRoutes - _mark_read', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let markRead: jest.Mock;
+  let markRead: Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   });
 
@@ -38,28 +41,28 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    markRead = jest.fn().mockResolvedValue({ id: 'conv-1', read: true });
+    markRead = vi.fn().mockResolvedValue({ id: 'conv-1', read: true });
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ markRead }),
+        getScopedClient: vi.fn().mockResolvedValue({ markRead }),
       },
     });
 
     const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
 
     const router = {
-      post: jest
+      post: vi
         .fn()
         .mockImplementation(
           (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
             routeHandlers[config.path] = handler;
           }
         ),
-      patch: jest.fn(),
-      get: jest.fn(),
+      patch: vi.fn(),
+      get: vi.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -88,14 +91,14 @@ const APPLY_TEMPLATE_PATH = `${internalApiPath}/conversations/{conversation_id}/
 
 describe('registerInternalConversationRoutes - _apply_template', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let applyTemplate: jest.Mock;
+  let applyTemplate: Mock;
 
   const createMockContext = ({ featureFlagEnabled = true } = {}) => ({
     core: Promise.resolve({
-      uiSettings: { client: { get: jest.fn().mockResolvedValue(featureFlagEnabled) } },
+      uiSettings: { client: { get: vi.fn().mockResolvedValue(featureFlagEnabled) } },
     }),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   });
 
@@ -109,30 +112,30 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    applyTemplate = jest
+    applyTemplate = vi
       .fn()
       .mockResolvedValue({ id: 'conv-1', template_id: 'phishing', template_version: 1 });
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ applyTemplate }),
+        getScopedClient: vi.fn().mockResolvedValue({ applyTemplate }),
       },
     });
 
     const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
 
     const router = {
-      post: jest
+      post: vi
         .fn()
         .mockImplementation(
           (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
             routeHandlers[config.path] = handler;
           }
         ),
-      patch: jest.fn(),
-      get: jest.fn(),
+      patch: vi.fn(),
+      get: vi.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -184,14 +187,14 @@ const PATCH_METADATA_PATH = `${internalApiPath}/conversations/{conversation_id}/
 
 describe('registerInternalConversationRoutes - PATCH /metadata', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let patchMetadata: jest.Mock;
+  let patchMetadata: Mock;
 
   const createMockContext = ({ featureFlagEnabled = true } = {}) => ({
     core: Promise.resolve({
-      uiSettings: { client: { get: jest.fn().mockResolvedValue(featureFlagEnabled) } },
+      uiSettings: { client: { get: vi.fn().mockResolvedValue(featureFlagEnabled) } },
     }),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   });
 
@@ -205,31 +208,31 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    patchMetadata = jest.fn().mockResolvedValue({
+    patchMetadata = vi.fn().mockResolvedValue({
       conversation: { id: 'conv-1', metadata: { severity: 'high' } },
       changedFields: [],
     });
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ patchMetadata }),
+        getScopedClient: vi.fn().mockResolvedValue({ patchMetadata }),
       },
     });
 
     const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
 
     const router = {
-      post: jest.fn(),
-      patch: jest
+      post: vi.fn(),
+      patch: vi
         .fn()
         .mockImplementation(
           (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
             routeHandlers[config.path] = handler;
           }
         ),
-      get: jest.fn(),
+      get: vi.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -291,12 +294,12 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
 
 describe('registerInternalConversationRoutes - _set_pinned', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let setPinned: jest.Mock;
+  let setPinned: Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   });
 
@@ -310,28 +313,28 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    setPinned = jest.fn().mockResolvedValue({ id: 'conv-1', pinned: true });
+    setPinned = vi.fn().mockResolvedValue({ id: 'conv-1', pinned: true });
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ setPinned }),
+        getScopedClient: vi.fn().mockResolvedValue({ setPinned }),
       },
     });
 
     const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
 
     const router = {
-      post: jest
+      post: vi
         .fn()
         .mockImplementation(
           (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
             routeHandlers[config.path] = handler;
           }
         ),
-      patch: jest.fn(),
-      get: jest.fn(),
+      patch: vi.fn(),
+      get: vi.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -358,12 +361,12 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
 
 describe('registerInternalConversationRoutes - _search', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let search: jest.Mock;
+  let search: Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   });
 
@@ -378,25 +381,25 @@ describe('registerInternalConversationRoutes - _search', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    search = jest.fn().mockResolvedValue({
+    search = vi.fn().mockResolvedValue({
       results: [{ id: 'conv-1', title: 'Sales report' }],
       total: 1,
     });
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ search }),
+        getScopedClient: vi.fn().mockResolvedValue({ search }),
       },
     });
 
     const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
 
     const router = {
-      post: jest.fn(),
-      patch: jest.fn(),
-      get: jest
+      post: vi.fn(),
+      patch: vi.fn(),
+      get: vi
         .fn()
         .mockImplementation(
           (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {

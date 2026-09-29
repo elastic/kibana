@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
@@ -16,9 +18,9 @@ import type { ReindexState } from '../../../use_reindex';
 import { ReindexFlyoutStep } from './reindex_step';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-jest.mock('../../../../../../../app_context', () => {
-  const actual = jest.requireActual('../../../../../../../app_context');
-  const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
+vi.mock('../../../../../../../app_context', async () => {
+  const actual = (await vi.importActual('../../../../../../../app_context'));
+  const { docLinksServiceMock } = (await vi.importActual('@kbn/core-doc-links-browser-mocks'));
 
   return {
     ...actual,
@@ -39,9 +41,9 @@ jest.mock('../../../../../../../app_context', () => {
 
 describe('ReindexStep', () => {
   const defaultProps = {
-    closeFlyout: jest.fn(),
-    startReindex: jest.fn(),
-    cancelReindex: jest.fn(),
+    closeFlyout: vi.fn(),
+    startReindex: vi.fn(),
+    cancelReindex: vi.fn(),
     reindexState: {
       loadingState: LoadingState.Success,
       lastCompletedStep: undefined,

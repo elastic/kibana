@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-jest.mock('../security', () => {
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
+vi.mock('../security', async () => {
   return {
-    ...jest.requireActual('../security'),
-    getAuthzFromRequest: jest.fn(),
+    ...(await vi.importActual('../security')),
+    getAuthzFromRequest: vi.fn(),
   };
 });
 
@@ -36,9 +39,9 @@ import * as epmTransformsInstall from './elasticsearch/transform/install';
 import * as epmArchiveParse from './archive/parse';
 import { getEsPackage } from './archive/storage';
 
-jest.mock('./archive/storage');
+vi.mock('./archive/storage');
 
-const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock;
+const mockGetAuthzFromRequest = getAuthzFromRequest as Mock;
 const testKeys = [
   'getInstallation',
   'ensureInstalledPackage',
@@ -62,7 +65,7 @@ function getTest(
   let test: {
     method: Function;
     args: any[];
-    spy: jest.SpyInstance;
+    spy: MockInstance;
     spyArgs: any[];
     spyResponse: any;
     expectedReturnValue: any;
@@ -73,7 +76,7 @@ function getTest(
       test = {
         method: mocks.packageClient.getInstallation.bind(mocks.packageClient),
         args: ['package name'],
-        spy: jest.spyOn(epmPackagesGet, 'getInstallation'),
+        spy: vi.spyOn(epmPackagesGet, 'getInstallation'),
         spyArgs: [
           {
             pkgName: 'package name',
@@ -88,7 +91,7 @@ function getTest(
       test = {
         method: mocks.packageClient.ensureInstalledPackage.bind(mocks.packageClient),
         args: [{ pkgName: 'package name', pkgVersion: '8.0.0', spaceId: 'spaceId' }],
-        spy: jest.spyOn(epmPackagesInstall, 'ensureInstalledPackage'),
+        spy: vi.spyOn(epmPackagesInstall, 'ensureInstalledPackage'),
         spyArgs: [
           {
             pkgName: 'package name',
@@ -106,7 +109,7 @@ function getTest(
       test = {
         method: mocks.packageClient.fetchFindLatestPackage.bind(mocks.packageClient),
         args: ['package name'],
-        spy: jest.spyOn(epmRegistry, 'fetchFindLatestPackageOrThrow'),
+        spy: vi.spyOn(epmRegistry, 'fetchFindLatestPackageOrThrow'),
         spyArgs: ['package name', undefined],
         spyResponse: { name: 'fetchFindLatestPackage test' },
         expectedReturnValue: { name: 'fetchFindLatestPackage test' },
@@ -116,7 +119,7 @@ function getTest(
       test = {
         method: mocks.packageClient.getLatestPackageInfo.bind(mocks.packageClient),
         args: ['package name'],
-        spy: jest.spyOn(epmPackagesGet, 'getPackageInfo'),
+        spy: vi.spyOn(epmPackagesGet, 'getPackageInfo'),
         spyArgs: [
           {
             pkgName: 'package name',
@@ -133,7 +136,7 @@ function getTest(
       test = {
         method: mocks.packageClient.getPackage.bind(mocks.packageClient),
         args: ['package name', '8.0.0'],
-        spy: jest.spyOn(epmPackagesGet, 'getPackageFromSource'),
+        spy: vi.spyOn(epmPackagesGet, 'getPackageFromSource'),
         spyArgs: [
           {
             pkgName: 'package name',
@@ -155,7 +158,7 @@ function getTest(
       test = {
         method: mocks.packageClient.getPackageFieldsMetadata.bind(mocks.packageClient),
         args: [{ packageName: 'package_name', datasetName: 'dataset_name' }],
-        spy: jest.spyOn(epmRegistry, 'getPackageFieldsMetadata'),
+        spy: vi.spyOn(epmRegistry, 'getPackageFieldsMetadata'),
         spyArgs: [{ packageName: 'package_name', datasetName: 'dataset_name' }, undefined],
         spyResponse: {
           dataset_name: { field_1: { flat_name: 'field_1', type: 'keyword' } },
@@ -180,7 +183,7 @@ function getTest(
       test = {
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
-        spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
+        spy: vi.spyOn(epmTransformsInstall, 'installTransforms'),
         spyArgs: [
           {
             packageInstallContext: expect.objectContaining({
@@ -220,7 +223,7 @@ function getTest(
       test = {
         method: mocks.packageClient.readBundledPackage.bind(mocks.packageClient),
         args: [bundledPackage],
-        spy: jest.spyOn(epmArchiveParse, 'generatePackageInfoFromArchiveBuffer'),
+        spy: vi.spyOn(epmArchiveParse, 'generatePackageInfoFromArchiveBuffer'),
         spyArgs: [bundledPackage.getBuffer(), 'application/zip'],
         spyResponse: {
           packageInfo: { name: 'readBundledPackage test' },
@@ -253,7 +256,7 @@ describe('PackageService', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('asScoped', () => {
@@ -301,10 +304,10 @@ describe('PackageService', () => {
         );
         spy.mockResolvedValue(spyResponse);
         if (testKey === 'reinstallEsAssets') {
-          jest
+          vi
             .mocked(epmPackagesGet.getInstallation)
             .mockResolvedValue({ name: 'package name' } as any);
-          jest.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
+          vi.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
         }
         await expect(method(...args)).resolves.toEqual(expectedReturnValue);
         expect(spy).toHaveBeenCalledWith(...spyArgs);
@@ -326,13 +329,13 @@ describe('PackageService', () => {
       );
       spy.mockResolvedValue(spyResponse);
       if (testKey === 'reinstallEsAssets') {
-        jest
+        vi
           .mocked(epmPackagesGet.getInstallation)
           .mockResolvedValue({ name: 'package name' } as any);
-        jest.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
+        vi.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
       }
       if (testKey === 'getPackage') {
-        jest.mocked(epmPackagesGet.getInstallation).mockResolvedValue(undefined);
+        vi.mocked(epmPackagesGet.getInstallation).mockResolvedValue(undefined);
       }
 
       await expect(method(...args)).resolves.toEqual(expectedReturnValue);
@@ -347,7 +350,7 @@ describe('PackageService', () => {
     const paths = ['/some/bundled/path'];
 
     it('calls getPackageFromSource without installedPkg', async () => {
-      jest
+      vi
         .spyOn(epmPackagesGet, 'getPackageFromSource')
         .mockResolvedValue({ packageInfo: packageInfo as any, paths });
 
@@ -362,8 +365,8 @@ describe('PackageService', () => {
     });
 
     it('propagates PackageNotFoundError when package cannot be found anywhere', async () => {
-      const { PackageNotFoundError } = jest.requireActual('../../errors');
-      jest
+      const { PackageNotFoundError } = (await vi.importActual('../../errors'));
+      vi
         .spyOn(epmPackagesGet, 'getPackageFromSource')
         .mockRejectedValue(
           new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`)

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,10 +14,10 @@ import { QueryParamFields } from './query_param_fields';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 
 describe('QueryParamFields', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders key and value fields', async () => {

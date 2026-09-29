@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SetupModeBadge } from './badge';
@@ -94,7 +96,7 @@ describe('setupMode SetupModeBadge', () => {
   }
 
   it('should call openFlyout when clicked', () => {
-    const openFlyout = jest.fn();
+    const openFlyout = vi.fn();
     const instance = {
       id: 1,
     };
@@ -118,7 +120,7 @@ describe('setupMode SetupModeBadge', () => {
   });
 
   it('should use a custom action for the live elasticsearch cluster', () => {
-    const shortcutToFinishMigration = jest.fn();
+    const shortcutToFinishMigration = vi.fn();
     const component = shallow(
       <SetupModeBadge
         setupMode={{

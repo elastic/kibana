@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react';
@@ -23,13 +25,19 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { isInfraTabHidden, isMetricsTabHidden, useTabs } from './use_tabs';
 
-jest.mock('../../../../hooks/use_profiling_integration_setting', () => ({
-  useProfilingPluginSetting: () => true,
-}));
+vi.mock('../../../../hooks/use_profiling_integration_setting', () => {
+      const mocked = {
+      useProfilingPluginSetting: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../alerting/utils/get_alerting_capabilities', () => ({
-  getAlertingCapabilities: () => ({ isAlertingAvailable: true, canReadAlerts: true }),
-}));
+vi.mock('../../../alerting/utils/get_alerting_capabilities', () => {
+      const mocked = {
+      getAlertingCapabilities: () => ({ isAlertingAvailable: true, canReadAlerts: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const KibanaReactContext = createKibanaReactContext({
   settings: { client: { get: () => {} } },
@@ -153,7 +161,7 @@ describe('APM service template', () => {
           alertsCount: 1,
         },
         status: fetcherHook.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       },
     };
 
@@ -161,18 +169,18 @@ describe('APM service template', () => {
       const callApmApi = () => (endpoint: APIEndpoint) => {
         return apisMockData[endpoint];
       };
-      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+      vi.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
         return func(callApmApi()) || {};
       });
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('APM signal only', () => {
       beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+        vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
           agentName: 'java',
           serviceName: 'foo',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,

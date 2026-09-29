@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { usePatchObservable } from './use_patch_observables';
 import { patchObservable } from './api';
@@ -13,28 +16,28 @@ import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_c
 import * as i18n from './translations';
 import { TestProviders } from '../common/mock';
 
-jest.mock('../common/use_cases_toast');
-jest.mock('../components/case_view/use_on_refresh_case_view_page');
+vi.mock('../common/use_cases_toast');
+vi.mock('../components/case_view/use_on_refresh_case_view_page');
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('usePatchObservable', () => {
   const caseId = 'test-case-id';
   const observableId = 'test-observable-id';
-  const showErrorToast = jest.fn();
-  const showSuccessToast = jest.fn();
+  const showErrorToast = vi.fn();
+  const showSuccessToast = vi.fn();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const mockRequest = { observable: { value: 'value', typeKey: 'test', description: null } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
+    vi.clearAllMocks();
+    (useCasesToast as Mock).mockReturnValue({ showErrorToast, showSuccessToast });
   });
 
   it('should call patchObservable and show success toast on success', async () => {
-    (patchObservable as jest.Mock).mockResolvedValue({});
+    (patchObservable as Mock).mockResolvedValue({});
 
     const { result } = renderHook(() => usePatchObservable(caseId, observableId), {
       wrapper: TestProviders,
@@ -53,7 +56,7 @@ describe('usePatchObservable', () => {
 
   it('should show error toast on failure', async () => {
     const error = new Error('Failed to patch observable');
-    (patchObservable as jest.Mock).mockRejectedValue(error);
+    (patchObservable as Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => usePatchObservable(caseId, observableId), {
       wrapper: TestProviders,

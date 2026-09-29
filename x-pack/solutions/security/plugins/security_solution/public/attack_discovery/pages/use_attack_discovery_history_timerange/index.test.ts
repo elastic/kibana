@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import * as ReactUse from 'react-use/lib/useLocalStorage';
 import { useAttackDiscoveryHistoryTimerange } from '.';
@@ -17,11 +19,11 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
 
   describe('when localStorage is empty', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      jest
+      vi.clearAllMocks();
+      vi
         .spyOn(ReactUse, 'default')
-        .mockReturnValueOnce([undefined, jest.fn(), jest.fn()])
-        .mockReturnValueOnce([undefined, jest.fn(), jest.fn()]);
+        .mockReturnValueOnce([undefined, vi.fn(), vi.fn()])
+        .mockReturnValueOnce([undefined, vi.fn(), vi.fn()]);
     });
 
     it('returns the default historyStart value', () => {
@@ -38,10 +40,10 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
   });
 
   it('returns a custom start value from localStorage', () => {
-    jest
+    vi
       .spyOn(ReactUse, 'default')
-      .mockReturnValueOnce([customStart, jest.fn(), jest.fn()])
-      .mockReturnValueOnce([undefined, jest.fn(), jest.fn()]);
+      .mockReturnValueOnce([customStart, vi.fn(), vi.fn()])
+      .mockReturnValueOnce([undefined, vi.fn(), vi.fn()]);
 
     const { result } = renderHook(() => useAttackDiscoveryHistoryTimerange());
 
@@ -49,10 +51,10 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
   });
 
   it('returns custom end value from localStorage', () => {
-    jest
+    vi
       .spyOn(ReactUse, 'default')
-      .mockReturnValueOnce([undefined, jest.fn(), jest.fn()])
-      .mockReturnValueOnce([customEnd, jest.fn(), jest.fn()]);
+      .mockReturnValueOnce([undefined, vi.fn(), vi.fn()])
+      .mockReturnValueOnce([customEnd, vi.fn(), vi.fn()]);
 
     const { result } = renderHook(() => useAttackDiscoveryHistoryTimerange());
 
@@ -60,11 +62,11 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
   });
 
   it('setHistoryStart updates the value', () => {
-    const setHistoryStart = jest.fn();
-    jest
+    const setHistoryStart = vi.fn();
+    vi
       .spyOn(ReactUse, 'default')
-      .mockReturnValueOnce([customStart, setHistoryStart, jest.fn()])
-      .mockReturnValueOnce([customEnd, jest.fn(), jest.fn()]);
+      .mockReturnValueOnce([customStart, setHistoryStart, vi.fn()])
+      .mockReturnValueOnce([customEnd, vi.fn(), vi.fn()]);
 
     const { result } = renderHook(() => useAttackDiscoveryHistoryTimerange());
 
@@ -76,11 +78,11 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
   });
 
   it('setHistoryEnd updates the value', () => {
-    const setHistoryEnd = jest.fn();
-    jest
+    const setHistoryEnd = vi.fn();
+    vi
       .spyOn(ReactUse, 'default')
-      .mockReturnValueOnce([customStart, jest.fn(), jest.fn()])
-      .mockReturnValueOnce([customEnd, setHistoryEnd, jest.fn()]);
+      .mockReturnValueOnce([customStart, vi.fn(), vi.fn()])
+      .mockReturnValueOnce([customEnd, setHistoryEnd, vi.fn()]);
 
     const { result } = renderHook(() => useAttackDiscoveryHistoryTimerange());
 

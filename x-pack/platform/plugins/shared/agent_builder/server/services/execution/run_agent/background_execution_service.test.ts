@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BackgroundExecutionService } from './background_execution_service';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 
 const createMockExecutor = (overrides: Partial<SubAgentExecutor> = {}): SubAgentExecutor => ({
-  executeSubAgent: jest.fn(),
-  createSubAgent: jest.fn(),
-  sendToSubAgent: jest.fn(),
-  getExecution: jest.fn(),
+  executeSubAgent: vi.fn(),
+  createSubAgent: vi.fn(),
+  sendToSubAgent: vi.fn(),
+  getExecution: vi.fn(),
   ...overrides,
 });
 
@@ -34,7 +36,7 @@ describe('BackgroundExecutionService', () => {
   describe('checkForCompletions', () => {
     it('updates state when execution completes', async () => {
       const executor = createMockExecutor({
-        getExecution: jest.fn().mockResolvedValue({
+        getExecution: vi.fn().mockResolvedValue({
           executionId: 'exec-1',
           status: ExecutionStatus.completed,
           events: [
@@ -63,7 +65,7 @@ describe('BackgroundExecutionService', () => {
     });
 
     it('does not re-check already completed executions', async () => {
-      const executor = createMockExecutor({ getExecution: jest.fn() });
+      const executor = createMockExecutor({ getExecution: vi.fn() });
 
       const service = new BackgroundExecutionService({
         subAgentExecutor: executor,
@@ -85,7 +87,7 @@ describe('BackgroundExecutionService', () => {
 
     it('updates state when execution fails', async () => {
       const executor = createMockExecutor({
-        getExecution: jest.fn().mockResolvedValue({
+        getExecution: vi.fn().mockResolvedValue({
           executionId: 'exec-1',
           status: ExecutionStatus.failed,
           error: { code: 'internal_error', message: 'LLM timeout' },
@@ -116,7 +118,7 @@ describe('BackgroundExecutionService', () => {
 
     it('sets toolCallGroupId on completed_at when provided', async () => {
       const executor = createMockExecutor({
-        getExecution: jest.fn().mockResolvedValue({
+        getExecution: vi.fn().mockResolvedValue({
           executionId: 'exec-1',
           status: ExecutionStatus.completed,
           events: [

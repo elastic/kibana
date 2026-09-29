@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   ALERT_EVALUATION_TIME_RANGE,
   ALERT_RULE_PARAMETERS,
@@ -21,9 +24,12 @@ import type { RuleTypeRegistry } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRule = {
   id: 'rule-123',
@@ -51,19 +57,19 @@ const mockInspectorResponse = {
 
 const createMockRuleTypeRegistry = (
   queryInspector?: RuleQueryInspectorFn
-): jest.Mocked<RuleTypeRegistry> =>
+): Mocked<RuleTypeRegistry> =>
   ({
-    get: jest.fn().mockReturnValue({ queryInspector }),
-    has: jest.fn().mockReturnValue(true),
-  } as unknown as jest.Mocked<RuleTypeRegistry>);
+    get: vi.fn().mockReturnValue({ queryInspector }),
+    has: vi.fn().mockReturnValue(true),
+  } as unknown as Mocked<RuleTypeRegistry>);
 
-const mockGetAlertIndicesAlias = jest
+const mockGetAlertIndicesAlias = vi
   .fn()
   .mockReturnValue(['.alerts-observability.custom_threshold-default']);
 
 const createMockCoreSetup = (alertDoc?: Record<string, unknown>) => {
   const coreSetup = coreMock.createSetup();
-  const mockSearch = jest.fn().mockResolvedValue({
+  const mockSearch = vi.fn().mockResolvedValue({
     hits: { hits: alertDoc ? [{ _source: alertDoc }] : [] },
   });
   coreSetup.getStartServices.mockResolvedValue([
@@ -84,9 +90,9 @@ const createMockCoreSetup = (alertDoc?: Record<string, unknown>) => {
 
 describe('ruleQueryInspectorRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    rulesClient.get = jest.fn().mockResolvedValue(mockRule);
-    rulesClient.getSpaceId = jest.fn().mockReturnValue('default');
+    vi.resetAllMocks();
+    rulesClient.get = vi.fn().mockResolvedValue(mockRule);
+    rulesClient.getSpaceId = vi.fn().mockReturnValue('default');
     mockGetAlertIndicesAlias.mockReturnValue(['.alerts-observability.custom_threshold-default']);
   });
 
@@ -112,7 +118,7 @@ describe('ruleQueryInspectorRoute', () => {
   it('calls the queryInspector with current rule params when no alert_id', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const mockQueryInspector = jest.fn().mockResolvedValue(mockInspectorResponse);
+    const mockQueryInspector = vi.fn().mockResolvedValue(mockInspectorResponse);
     const ruleTypeRegistry = createMockRuleTypeRegistry(mockQueryInspector);
     const { coreSetup } = createMockCoreSetup();
 
@@ -174,7 +180,7 @@ describe('ruleQueryInspectorRoute', () => {
   it('uses alert params and time range when alert_id is provided', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const mockQueryInspector = jest.fn().mockResolvedValue(mockInspectorResponse);
+    const mockQueryInspector = vi.fn().mockResolvedValue(mockInspectorResponse);
     const ruleTypeRegistry = createMockRuleTypeRegistry(mockQueryInspector);
     const { coreSetup } = createMockCoreSetup(mockAlertDoc);
 
@@ -213,7 +219,7 @@ describe('ruleQueryInspectorRoute', () => {
   it('returns badRequest when alert does not belong to rule', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const mockQueryInspector = jest.fn().mockResolvedValue(mockInspectorResponse);
+    const mockQueryInspector = vi.fn().mockResolvedValue(mockInspectorResponse);
     const ruleTypeRegistry = createMockRuleTypeRegistry(mockQueryInspector);
     const { coreSetup } = createMockCoreSetup({
       ...mockAlertDoc,
@@ -252,7 +258,7 @@ describe('ruleQueryInspectorRoute', () => {
   it('returns notFound when alert does not exist', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const mockQueryInspector = jest.fn().mockResolvedValue(mockInspectorResponse);
+    const mockQueryInspector = vi.fn().mockResolvedValue(mockInspectorResponse);
     const ruleTypeRegistry = createMockRuleTypeRegistry(mockQueryInspector);
     const { coreSetup } = createMockCoreSetup(undefined);
 
@@ -288,7 +294,7 @@ describe('ruleQueryInspectorRoute', () => {
   it('falls back to current rule params when alert has no ALERT_RULE_PARAMETERS', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const mockQueryInspector = jest.fn().mockResolvedValue(mockInspectorResponse);
+    const mockQueryInspector = vi.fn().mockResolvedValue(mockInspectorResponse);
     const ruleTypeRegistry = createMockRuleTypeRegistry(mockQueryInspector);
     const alertDocWithoutParams = {
       [ALERT_RULE_UUID]: 'rule-123',

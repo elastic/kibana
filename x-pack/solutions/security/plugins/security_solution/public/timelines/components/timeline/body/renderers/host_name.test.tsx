@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
@@ -19,37 +21,43 @@ import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_fl
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createEntityFlyoutApiMock } from '../../../../../flyout_v2/entity/use_entity_flyout_api.mock';
 
-const mockOpenFlyout = jest.fn();
+const mockOpenFlyout = vi.fn();
 
-jest.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/expandable-flyout');
 
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/components/draggables', () => ({
-  DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
-}));
+vi.mock('../../../../../common/components/draggables', () => {
+      const mocked = {
+      DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../../flyout_v2/use_flyout_api');
 
 describe('HostName', () => {
   let flyoutApi: ReturnType<typeof createEntityFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
     flyoutApi = createEntityFlyoutApiMock();
-    jest
+    vi
       .mocked(useFlyoutApi)
       .mockReturnValue(flyoutApi as unknown as ReturnType<typeof useFlyoutApi>);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const props = {
@@ -193,7 +201,7 @@ describe('HostName', () => {
   });
 
   test('should open the v2 system flyout when the new flyout advanced setting is enabled', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,

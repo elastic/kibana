@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
   ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
@@ -20,15 +22,15 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { AD_WORKFLOW_IDS, installStatic } from './install_static';
 
 const createMockLifecycleClient = () => ({
-  execute: jest.fn().mockResolvedValue('mock-execution-id'),
-  install: jest.fn().mockResolvedValue(undefined),
-  ready: jest.fn().mockResolvedValue(undefined),
-  uninstall: jest.fn().mockResolvedValue(undefined),
+  execute: vi.fn().mockResolvedValue('mock-execution-id'),
+  install: vi.fn().mockResolvedValue(undefined),
+  ready: vi.fn().mockResolvedValue(undefined),
+  uninstall: vi.fn().mockResolvedValue(undefined),
 });
 
 const createMockWorkflowsExtensionsStart = (lifecycleClient = createMockLifecycleClient()) =>
   ({
-    initManagedWorkflowsClient: jest.fn().mockResolvedValue(lifecycleClient),
+    initManagedWorkflowsClient: vi.fn().mockResolvedValue(lifecycleClient),
   } as unknown as WorkflowsExtensionsServerPluginStart);
 
 describe('installStatic', () => {
@@ -94,15 +96,15 @@ describe('installStatic', () => {
     it('calls ready() exactly once after all 7 installs', async () => {
       const callOrder: string[] = [];
       const lifecycleClient = {
-        install: jest.fn().mockImplementation(async () => {
+        install: vi.fn().mockImplementation(async () => {
           callOrder.push('install');
         }),
-        ready: jest.fn().mockImplementation(async () => {
+        ready: vi.fn().mockImplementation(async () => {
           callOrder.push('ready');
         }),
       };
       const workflowsExtensions = {
-        initManagedWorkflowsClient: jest.fn().mockResolvedValue(lifecycleClient),
+        initManagedWorkflowsClient: vi.fn().mockResolvedValue(lifecycleClient),
       } as unknown as WorkflowsExtensionsServerPluginStart;
 
       await installStatic({ enabled: true, workflowsExtensions });

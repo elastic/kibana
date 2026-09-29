@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-jest.mock('../../../../hooks/use_kibana_ui_setting', () => ({
-  _esModule: true,
-  useKibanaUiSetting: jest.fn(() => [
-    [
-      {
-        from: 'now/d',
-        to: 'now/d',
-        display: 'Today',
-      },
-    ],
-  ]),
-}));
+import { vi } from 'vitest';
+
+vi.mock('../../../../hooks/use_kibana_ui_setting', () => {
+      const mocked = {
+      _esModule: true,
+      useKibanaUiSetting: vi.fn(() => [
+        [
+          {
+            from: 'now/d',
+            to: 'now/d',
+            display: 'Today',
+          },
+        ],
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -31,10 +36,10 @@ describe('MetricsTimeControls', () => {
       to: 'now',
       interval: '>=1m',
     };
-    const handleTimeChange = jest.fn();
-    const handleRefreshChange = jest.fn();
-    const handleAutoReload = jest.fn();
-    const handleOnRefresh = jest.fn();
+    const handleTimeChange = vi.fn();
+    const handleRefreshChange = vi.fn();
+    const handleAutoReload = vi.fn();
+    const handleOnRefresh = vi.fn();
 
     render(
       <MetricsTimeControls

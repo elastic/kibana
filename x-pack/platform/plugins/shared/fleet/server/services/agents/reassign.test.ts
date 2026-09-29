@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
@@ -176,9 +179,9 @@ describe('reassignAgent', () => {
 });
 
 describe('reassignAgents kuery construction', () => {
-  let mockGetAgentsByKuery: jest.SpyInstance;
-  let mockAgentsKueryNamespaceFilter: jest.SpyInstance;
-  let mockReassignBatch: jest.SpyInstance;
+  let mockGetAgentsByKuery: MockInstance;
+  let mockAgentsKueryNamespaceFilter: MockInstance;
+  let mockReassignBatch: MockInstance;
 
   beforeEach(async () => {
     const { soClient } = createClientMock();
@@ -188,16 +191,16 @@ describe('reassignAgents kuery construction', () => {
         withoutSpaceExtensions: soClient,
       })
     );
-    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
+    mockGetAgentsByKuery = vi.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
       agents: [],
       total: 0,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
     });
-    mockAgentsKueryNamespaceFilter = jest
+    mockAgentsKueryNamespaceFilter = vi
       .spyOn(agentNamespaces, 'agentsKueryNamespaceFilter')
       .mockResolvedValue('namespaces:custom_space');
-    mockReassignBatch = jest
+    mockReassignBatch = vi
       .spyOn(reassignActionRunner, 'reassignBatch')
       .mockResolvedValue({ actionId: 'test-action-id' });
   });
@@ -227,7 +230,7 @@ describe('reassignAgents kuery construction', () => {
   it('skips namespace filter for cross-space kuery (spaceId "*") so non-default-space agents are matched', async () => {
     const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
     // simulate an unscoped internal client by overriding getCurrentNamespace to return undefined
-    soClient.getCurrentNamespace = jest.fn().mockReturnValue(undefined);
+    soClient.getCurrentNamespace = vi.fn().mockReturnValue(undefined);
     const unscopedClient = soClient;
 
     // make the filter return an empty string for undefined so buildFilterWithNamespace is a no-op
@@ -254,10 +257,10 @@ describe('reassignAgents kuery construction', () => {
 });
 
 describe('reassignAgents kuery path — cheap count and sync/async branching', () => {
-  let mockGetAgentsByKuery: jest.SpyInstance;
-  let mockOpenPointInTime: jest.SpyInstance;
-  let mockReassignBatch: jest.SpyInstance;
-  let mockReassignActionRunner: jest.SpyInstance;
+  let mockGetAgentsByKuery: MockInstance;
+  let mockOpenPointInTime: MockInstance;
+  let mockReassignBatch: MockInstance;
+  let mockReassignActionRunner: MockInstance;
 
   beforeEach(async () => {
     const { soClient } = createClientMock();
@@ -267,17 +270,17 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
         withoutSpaceExtensions: soClient,
       })
     );
-    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery');
-    mockOpenPointInTime = jest.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
-    mockReassignBatch = jest
+    mockGetAgentsByKuery = vi.spyOn(crud, 'getAgentsByKuery');
+    mockOpenPointInTime = vi.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
+    mockReassignBatch = vi
       .spyOn(reassignActionRunner, 'reassignBatch')
       .mockResolvedValue({ actionId: 'test-action-id' });
-    mockReassignActionRunner = jest
+    mockReassignActionRunner = vi
       .spyOn(reassignActionRunner, 'ReassignActionRunner')
       .mockImplementation(
         () =>
           ({
-            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+            runActionAsyncTask: vi.fn().mockResolvedValue({ actionId: 'async-action-id' }),
           } as any)
       );
   });
@@ -416,7 +419,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
 
   it('dry run (agentIds) returns count of found agents only', async () => {
     const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
-    const mockGetAgentsById = jest
+    const mockGetAgentsById = vi
       .spyOn(crud, 'getAgentsById')
       .mockResolvedValue([
         { id: 'agent-1' } as any,
@@ -438,7 +441,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
 
   it('throws when spaceId "*" is used without _internalCrossSpace flag', async () => {
     const { esClient, regularAgentPolicySO2 } = createClientMock();
-    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue(undefined) } as any;
+    const scopedClient = { getCurrentNamespace: vi.fn().mockReturnValue(undefined) } as any;
 
     await expect(
       reassignAgents(
@@ -452,7 +455,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
 
   it('throws when spaceId "*" with _internalCrossSpace is used with a custom-space scoped soClient', async () => {
     const { esClient, regularAgentPolicySO2 } = createClientMock();
-    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue('space-a') } as any;
+    const scopedClient = { getCurrentNamespace: vi.fn().mockReturnValue('space-a') } as any;
 
     await expect(
       reassignAgents(
@@ -466,7 +469,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
 
   it('with spaceId "*", passes skipNamespaceFilter to getAgentsById and spaceId to reassignBatch', async () => {
     const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
-    const mockGetAgentsById = jest
+    const mockGetAgentsById = vi
       .spyOn(crud, 'getAgentsById')
       .mockResolvedValue([{ id: 'agent-1', policy_id: 'other-policy' } as any]);
 

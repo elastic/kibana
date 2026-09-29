@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { of } from '@kbn/kibana-utils-plugin/common';
 import type { KibanaLocation, LocatorGetUrlParams } from '../../../common/url_service';
 import { Locator, UrlService } from '../../../common/url_service';
@@ -22,8 +25,8 @@ import { BrowserShortUrlClientFactory } from './short_url_client_factory';
 import type { TimeRange } from '@kbn/es-query';
 
 const setup = () => {
-  const navigate = jest.fn(async () => {});
-  const getUrl = jest.fn(
+  const navigate = vi.fn(async () => {});
+  const getUrl = vi.fn(
     async (location: KibanaLocation, params: LocatorGetUrlParams): Promise<string> => {
       return `${params.absolute ? 'https://example.com' : ''}/xyz/${location.app}/${location.path}`;
     }
@@ -32,7 +35,7 @@ const setup = () => {
     basePath: {
       get: () => '/xyz',
     },
-    fetch: jest.fn(async () => {
+    fetch: vi.fn(async () => {
       return {} as any;
     }),
   };
@@ -67,7 +70,7 @@ const setup = () => {
 describe('create()', () => {
   test('calls HTTP short URL creation endpoint', async () => {
     const { service, http, legacyShortUrlLocator } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
 
     expect(fetchSpy).toHaveBeenCalledTimes(0);
 
@@ -96,7 +99,7 @@ describe('create()', () => {
     const legacyShortUrlLocator = service.locators.get<LegacyShortUrlLocatorParams>(
       LEGACY_SHORT_URL_LOCATOR_ID
     );
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
     const shortUrlData = {
       id: '123',
       slug: 'yellow-orange-tomato',
@@ -130,7 +133,7 @@ describe('create()', () => {
 
   test('passes through error thrown by HTTP client', async () => {
     const { service, http, legacyShortUrlLocator } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
     const error = { message: 'Something went wrong...' };
 
     fetchSpy.mockImplementation(async () => {
@@ -156,7 +159,7 @@ describe('create()', () => {
 describe('createFromLongUrl()', () => {
   test('calls HTTP short URL creation endpoint', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
 
     expect(fetchSpy).toHaveBeenCalledTimes(0);
 
@@ -177,7 +180,7 @@ describe('createFromLongUrl()', () => {
 
   test('returns the short URL object and additional data', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
     const shortUrlData = {
       id: '123',
       slug: 'yellow-orange-tomato',
@@ -215,7 +218,7 @@ describe('createFromLongUrl()', () => {
 describe('get()', () => {
   test('calls HTTP "get" endpoint', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
 
     expect(fetchSpy).toHaveBeenCalledTimes(0);
 
@@ -229,7 +232,7 @@ describe('get()', () => {
 
   test('returns data returned by the "get" endpoint', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
     const shortUrlData = {
       id: '123',
       slug: 'yellow-orange-tomato',
@@ -258,7 +261,7 @@ describe('get()', () => {
 
   test('passes through error thrown by HTTP client', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
     const error = { message: 'Something went wrong...' };
 
     fetchSpy.mockImplementation(async () => {
@@ -277,7 +280,7 @@ describe('get()', () => {
 describe('resolve()', () => {
   test('calls HTTP "resolve" endpoint', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
 
     expect(fetchSpy).toHaveBeenCalledTimes(0);
 
@@ -291,7 +294,7 @@ describe('resolve()', () => {
 
   test('returns data returned by the "resolve" endpoint', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
     const shortUrlData = {
       id: '123',
       slug: 'yellow-orange-tomato',
@@ -320,7 +323,7 @@ describe('resolve()', () => {
 
   test('passes through error thrown by HTTP client', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
     const error = { message: 'Something went wrong...' };
 
     fetchSpy.mockImplementation(async () => {
@@ -339,7 +342,7 @@ describe('resolve()', () => {
 describe('delete()', () => {
   test('calls the HTTP endpoint', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
 
     expect(fetchSpy).toHaveBeenCalledTimes(0);
 
@@ -353,7 +356,7 @@ describe('delete()', () => {
 
   test('passes through error thrown by HTTP client', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
     const error = { message: 'Something went wrong...' };
 
     fetchSpy.mockImplementation(async () => {
@@ -372,16 +375,16 @@ describe('delete()', () => {
 describe('createWithLocator()', () => {
   const mockLocator = {
     id: 'MOCK_LOCATOR',
-    getLocation: jest.fn(),
-    navigate: jest.fn(),
-    getUrl: jest.fn(),
-    navigateSync: jest.fn(),
-    getRedirectUrl: jest.fn(),
-    extract: jest.fn(),
-    inject: jest.fn(),
-    telemetry: jest.fn(),
+    getLocation: vi.fn(),
+    navigate: vi.fn(),
+    getUrl: vi.fn(),
+    navigateSync: vi.fn(),
+    getRedirectUrl: vi.fn(),
+    extract: vi.fn(),
+    inject: vi.fn(),
+    telemetry: vi.fn(),
     migrations: {},
-    useUrl: jest.fn(),
+    useUrl: vi.fn(),
     getTimeRange: (params: { timeRange?: TimeRange }) => params.timeRange,
     setTimeRange: (params: { timeRange?: TimeRange }, timeRange?: TimeRange) => ({
       ...params,
@@ -391,15 +394,15 @@ describe('createWithLocator()', () => {
 
   // Mock Date.now() for consistent results
   const fixedNow = new Date('2026-01-12T12:00:00.000Z');
-  jest.spyOn(Date, 'now').mockImplementation(() => fixedNow.getTime());
+  vi.spyOn(Date, 'now').mockImplementation(() => fixedNow.getTime());
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('converts relative timeRange to absolute when isAbsoluteTime is true', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
 
     await service.shortUrls.get(null).createWithLocator(
       {
@@ -418,7 +421,7 @@ describe('createWithLocator()', () => {
 
   test('preserves relative time when isAbsoluteTime is false', async () => {
     const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const fetchSpy = http.fetch as unknown as MockInstance;
 
     await service.shortUrls.get(null).createWithLocator(
       {

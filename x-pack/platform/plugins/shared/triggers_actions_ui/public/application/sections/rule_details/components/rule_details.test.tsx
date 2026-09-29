@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -39,92 +42,125 @@ const queryClient = new QueryClient({
   },
 });
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.requireMock('../../../../common/get_experimental_features');
+(await vi.importMock('../../../../common/get_experimental_features'));
 
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/rule_api/rule_summary', () => ({
-  loadRuleSummary: jest.fn().mockReturnValue({
-    alerts: {},
-  }),
-}));
+vi.mock('../../../lib/rule_api/rule_summary', () => {
+      const mocked = {
+      loadRuleSummary: vi.fn().mockReturnValue({
+        alerts: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
-  loadExecutionLogAggregations: jest.fn().mockReturnValue([]),
-}));
+vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
+      const mocked = {
+      loadExecutionLogAggregations: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
-  getRuleTypes: jest.fn(),
-}));
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
+      const mocked = {
+      getRuleTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
-  getRuleTypes: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
+      const mocked = {
+      getRuleTypes: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
-  fetchUiConfig: jest
-    .fn()
-    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
-}));
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    createHref: jest.fn(({ pathname, search = '', hash = '' }) => `${pathname}${search}${hash}`),
-    listen: jest.fn(() => jest.fn()),
-    location: {
-      pathname: '/triggersActions/rules/',
-      search: '',
-      hash: '',
-      state: undefined,
-    },
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-    search: '',
-    hash: '',
-  }),
-}));
+vi.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => {
+      const mocked = {
+      fetchUiConfig: vi
+        .fn()
+        .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => ({
+        push: vi.fn(),
+        replace: vi.fn(),
+        createHref: vi.fn(({ pathname, search = '', hash = '' }) => `${pathname}${search}${hash}`),
+        listen: vi.fn(() => vi.fn()),
+        location: {
+          pathname: '/triggersActions/rules/',
+          search: '',
+          hash: '',
+          state: undefined,
+        },
+      }),
+      useLocation: () => ({
+        pathname: '/triggersActions/rules/',
+        search: '',
+        hash: '',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/action_connector_api', () => ({
-  loadAllActions: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../../../lib/action_connector_api', () => {
+      const mocked = {
+      loadAllActions: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/rule_api/update_api_key', () => ({
-  bulkUpdateAPIKey: jest.fn(),
-}));
+vi.mock('../../../lib/rule_api/update_api_key', () => {
+      const mocked = {
+      bulkUpdateAPIKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_route', () => ({
-  RuleRouteWithApi: () => <div data-test-subj="ruleRouteWithApi" />,
-}));
+vi.mock('./rule_route', () => {
+      const mocked = {
+      RuleRouteWithApi: () => <div data-test-subj="ruleRouteWithApi" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
+const { bulkUpdateAPIKey } = (await vi.importMock('../../../lib/rule_api/update_api_key'));
 
-jest.mock('../../../lib/capabilities', () => ({
-  hasAllPrivilege: jest.fn(() => true),
-  hasSaveRulesCapability: jest.fn(() => true),
-  hasExecuteActionsCapability: jest.fn(() => true),
-  hasManageApiKeysCapability: jest.fn(() => true),
-  hasShowActionsCapability: jest.fn(() => false),
-}));
+vi.mock('../../../lib/capabilities', () => {
+      const mocked = {
+      hasAllPrivilege: vi.fn(() => true),
+      hasSaveRulesCapability: vi.fn(() => true),
+      hasExecuteActionsCapability: vi.fn(() => true),
+      hasManageApiKeysCapability: vi.fn(() => true),
+      hasShowActionsCapability: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const mockRuleApis = {
-  muteRule: jest.fn(),
-  unmuteRule: jest.fn(),
-  requestRefresh: jest.fn(),
-  refreshToken: { resolve: jest.fn(), reject: jest.fn() },
-  snoozeRule: jest.fn(),
-  unsnoozeRule: jest.fn(),
-  bulkEnableRules: jest.fn(),
-  bulkDisableRules: jest.fn(),
-  bulkDeleteRules: jest.fn(),
+  muteRule: vi.fn(),
+  unmuteRule: vi.fn(),
+  requestRefresh: vi.fn(),
+  refreshToken: { resolve: vi.fn(), reject: vi.fn() },
+  snoozeRule: vi.fn(),
+  unsnoozeRule: vi.fn(),
+  bulkEnableRules: vi.fn(),
+  bulkDisableRules: vi.fn(),
+  bulkDeleteRules: vi.fn(),
 };
 
 const authorizedConsumers = {
@@ -183,13 +219,13 @@ const toggleEnabledSwitch = async () => {
 
 describe('rule_details', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Lifecycle alerts', () => {
     const renderComponent = ({ autoRecoverAlerts }: { autoRecoverAlerts?: boolean }) => {
       const rule = mockRule();
-      const requestRefresh = jest.fn();
+      const requestRefresh = vi.fn();
       return renderRuleDetails(
         <RuleDetails
           rule={rule}
@@ -325,7 +361,7 @@ describe('rule_details', () => {
     });
 
     it('renders the API key owner metadata using the resolved user profile when apiKeyOwnerProfileUid is set', async () => {
-      useKibanaMock().services.userProfile.bulkGet = jest.fn().mockResolvedValue([
+      useKibanaMock().services.userProfile.bulkGet = vi.fn().mockResolvedValue([
         {
           uid: 'api-key-owner-uid',
           user: { username: '2889684073', email: 'jdoe@elastic.co' },
@@ -342,7 +378,7 @@ describe('rule_details', () => {
     });
 
     it('falls back to apiKeyOwner when its profile uid cannot be resolved', async () => {
-      const bulkGet = jest.fn().mockResolvedValue([]);
+      const bulkGet = vi.fn().mockResolvedValue([]);
       useKibanaMock().services.userProfile.bulkGet = bulkGet;
       const rule = mockRule({
         apiKeyOwner: '2889684073',
@@ -357,8 +393,8 @@ describe('rule_details', () => {
       expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('2889684073');
     });
 
-    it(`doesn't render the API key owner metadata when user can't manage API keys`, () => {
-      const { hasManageApiKeysCapability } = jest.requireMock('../../../lib/capabilities');
+    it(`doesn't render the API key owner metadata when user can't manage API keys`, async () => {
+      const { hasManageApiKeysCapability } = (await vi.importMock('../../../lib/capabilities'));
       hasManageApiKeysCapability.mockReturnValueOnce(false);
       const rule = mockRule();
       renderPage(rule);
@@ -375,7 +411,7 @@ describe('rule_details', () => {
     });
 
     it('renders the created/updated metadata using the resolved user profile when createdByProfileUid/updatedByProfileUid are set', async () => {
-      useKibanaMock().services.userProfile.bulkGet = jest.fn().mockResolvedValue([
+      useKibanaMock().services.userProfile.bulkGet = vi.fn().mockResolvedValue([
         {
           uid: 'created-uid',
           user: { username: 'jdoe', full_name: 'Jane Doe' },
@@ -404,7 +440,7 @@ describe('rule_details', () => {
     });
 
     it('falls back to createdBy/updatedBy when a profile uid is set but cannot be resolved', async () => {
-      const bulkGet = jest.fn().mockResolvedValue([]);
+      const bulkGet = vi.fn().mockResolvedValue([]);
       useKibanaMock().services.userProfile.bulkGet = bulkGet;
       // Use uids distinct from other tests in this suite so this test's query isn't served from
       // a cached result of a previous test sharing the same module-level `queryClient`.
@@ -427,7 +463,7 @@ describe('rule_details', () => {
     });
 
     it('does not render the actions menu if the user has only read permissions', async () => {
-      const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
+      const { hasAllPrivilege } = (await vi.importMock('../../../lib/capabilities'));
       hasAllPrivilege.mockReturnValue(false);
       const rule = mockRule();
       const mockedRuleType: RuleType = {
@@ -562,7 +598,7 @@ describe('rule_details', () => {
 
       it('renders view in Discover menu item when navigation is available', async () => {
         const alertingMock = useKibanaMock().services.alerting;
-        (alertingMock!.getNavigation as jest.Mock).mockResolvedValueOnce('/app/discover#/alert');
+        (alertingMock!.getNavigation as Mock).mockResolvedValueOnce('/app/discover#/alert');
 
         const rule = mockRule();
         renderRuleDetails(
@@ -577,12 +613,12 @@ describe('rule_details', () => {
 
       it('renders view linked object menu item for supported rule types', async () => {
         const mockLocator = {
-          getRedirectUrl: jest.fn().mockReturnValue('/app/slos/slo-id-1'),
+          getRedirectUrl: vi.fn().mockReturnValue('/app/slos/slo-id-1'),
         };
         useKibanaMock().services.share = {
           url: {
             locators: {
-              get: jest.fn().mockReturnValue(mockLocator),
+              get: vi.fn().mockReturnValue(mockLocator),
             },
           },
         } as any;
@@ -623,7 +659,7 @@ describe('rule_details', () => {
       validate: () => {
         return { errors: {} };
       },
-      ruleParamsExpression: jest.fn(),
+      ruleParamsExpression: vi.fn(),
       requiresAppContext: false,
     };
     ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
@@ -659,7 +695,7 @@ describe('rule_details', () => {
     });
 
     it('should not render an edit button when rule editable but actions arent', async () => {
-      const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+      const { hasExecuteActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
       hasExecuteActionsCapability.mockReturnValue(false);
       const rule = mockRule({
         enabled: true,
@@ -680,7 +716,7 @@ describe('rule_details', () => {
     });
 
     it('should render an edit button when rule editable but actions arent when there are no actions on the rule', async () => {
-      const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+      const { hasExecuteActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
       hasExecuteActionsCapability.mockReturnValueOnce(false);
       const rule = mockRule({
         enabled: true,
@@ -694,7 +730,7 @@ describe('rule_details', () => {
     });
   });
 
-  describe('broken connector indicator', () => {
+  describe('broken connector indicator', async () => {
     const actionTypes: ActionType[] = [
       {
         id: '.server-log',
@@ -718,12 +754,12 @@ describe('rule_details', () => {
       validate: () => {
         return { errors: {} };
       },
-      ruleParamsExpression: jest.fn(),
+      ruleParamsExpression: vi.fn(),
       requiresAppContext: false,
     };
     ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-    const { loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
+    const { loadAllActions } = (await vi.importMock('../../../lib/action_connector_api'));
     loadAllActions.mockResolvedValue([
       {
         secrets: {},
@@ -834,7 +870,7 @@ describe('rule_details', () => {
           },
         ],
       });
-      const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+      const { hasExecuteActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
       hasExecuteActionsCapability.mockReturnValue(false);
       renderRuleDetails(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
@@ -849,7 +885,7 @@ describe('rule_details', () => {
   describe('update API key button', () => {
     it('should call update api key when clicked', async () => {
       const rule = mockRule();
-      const requestRefresh = jest.fn();
+      const requestRefresh = vi.fn();
       renderRuleDetails(
         <RuleDetails
           rule={rule}
@@ -881,7 +917,7 @@ describe('rule_details', () => {
         total: 1,
       });
       const rule = mockRule();
-      const requestRefresh = jest.fn();
+      const requestRefresh = vi.fn();
       renderRuleDetails(
         <RuleDetails
           rule={rule}
@@ -908,7 +944,7 @@ describe('rule_details', () => {
   describe('enable/disable rule toggle', () => {
     it('should disable the rule when toggled off', async () => {
       const rule = mockRule();
-      const requestRefresh = jest.fn();
+      const requestRefresh = vi.fn();
       renderRuleDetails(
         <RuleDetails
           rule={rule}
@@ -936,7 +972,7 @@ describe('rule_details', () => {
 
     it('should enable the rule when toggled on', async () => {
       const rule = { ...mockRule(), enabled: false };
-      const requestRefresh = jest.fn();
+      const requestRefresh = vi.fn();
       renderRuleDetails(
         <RuleDetails
           rule={rule}
@@ -957,7 +993,7 @@ describe('rule_details', () => {
 
     it('should not show untrack alerts modal if rule type does not track alerts life cycle', async () => {
       const rule = mockRule();
-      const requestRefresh = jest.fn();
+      const requestRefresh = vi.fn();
       renderRuleDetails(
         <RuleDetails
           rule={rule}

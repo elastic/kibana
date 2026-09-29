@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import {
@@ -520,7 +522,7 @@ describe('Utils', () => {
 
   describe('convertCustomFieldValue ', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns the string when the value is a non-empty string', async () => {
@@ -569,7 +571,7 @@ describe('Utils', () => {
 
   describe('addOrReplaceField ', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('adds new custom field correctly', async () => {

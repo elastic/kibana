@@ -5,34 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Footer } from './footer';
 
-const mockCreateRuleFn = jest.fn();
-const mockCspTakeAction = jest.fn(() => <div data-test-subj="mockCspTakeAction" />);
+const mockCreateRuleFn = vi.fn();
+const mockCspTakeAction = vi.fn(() => <div data-test-subj="mockCspTakeAction" />);
 const MockCspComponent = ({
   children,
 }: {
   children: (props: { createRuleFn: unknown }) => React.ReactNode;
 }) => <>{children({ createRuleFn: mockCreateRuleFn })}</>;
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      cloudSecurityPosture: {
-        getCloudSecurityPostureMisconfigurationFlyout: () => ({
-          Component: MockCspComponent,
-          TakeAction: mockCspTakeAction,
-        }),
-      },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          cloudSecurityPosture: {
+            getCloudSecurityPostureMisconfigurationFlyout: () => ({
+              Component: MockCspComponent,
+              TakeAction: mockCspTakeAction,
+            }),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<Footer /> (misconfiguration)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the take action control with a create-rule function', () => {

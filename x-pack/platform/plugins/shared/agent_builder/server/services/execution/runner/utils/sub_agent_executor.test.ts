@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EMPTY } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
@@ -14,7 +17,7 @@ import { createSubAgentExecutor } from './sub_agent_executor';
 describe('createSubAgentExecutor', () => {
   const autoApprovedApis: AutoApprovedApi[] = [{ target: 'elasticsearch', api: 'indices.create' }];
 
-  let executeAgent: jest.Mock;
+  let executeAgent: Mock;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
   const createExecutor = (interactivity: InteractivityConfig) => {
@@ -27,7 +30,7 @@ describe('createSubAgentExecutor', () => {
   };
 
   beforeEach(() => {
-    executeAgent = jest.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
+    executeAgent = vi.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
     request = httpServerMock.createKibanaRequest();
   });
 

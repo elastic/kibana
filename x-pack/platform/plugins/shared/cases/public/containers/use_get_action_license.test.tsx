@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 import { useGetActionLicense } from './use_get_action_license';
 import { useToasts } from '../common/lib/kibana';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('useGetActionLicense', () => {
   const abortCtrl = new AbortController();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getActionLicense with correct arguments', async () => {
-    const spyOnGetActionLicense = jest.spyOn(api, 'getActionLicense');
+    const spyOnGetActionLicense = vi.spyOn(api, 'getActionLicense');
     renderHook(() => useGetActionLicense(), {
       wrapper: TestProviders,
     });
@@ -31,10 +34,10 @@ describe('useGetActionLicense', () => {
   });
 
   it('unhappy path', async () => {
-    const addError = jest.fn();
+    const addError = vi.fn();
 
-    (useToasts as jest.Mock).mockReturnValue({ addError });
-    const spyOnGetActionLicense = jest.spyOn(api, 'getActionLicense');
+    (useToasts as Mock).mockReturnValue({ addError });
+    const spyOnGetActionLicense = vi.spyOn(api, 'getActionLicense');
     spyOnGetActionLicense.mockImplementation(() => {
       throw new Error('Something went wrong');
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
@@ -326,7 +329,7 @@ describe('metric visualization', () => {
             createMockFramePublicAPI({
               datasourceLayers: {
                 [fullState.layerId]: createMockDatasource('formBased', {
-                  getOperationForColumnId: jest.fn(() => ({
+                  getOperationForColumnId: vi.fn(() => ({
                     hasReducedTimeRange: false,
                     dataType: 'number',
                     hasTimeShift: false,
@@ -438,7 +441,7 @@ describe('metric visualization', () => {
           const frame = createMockFramePublicAPI({
             datasourceLayers: {
               [fullState.layerId]: createMockDatasource('formBased', {
-                getOperationForColumnId: jest.fn(() => ({
+                getOperationForColumnId: vi.fn(() => ({
                   hasReducedTimeRange: false,
                   dataType: 'number',
                   hasTimeShift: false,
@@ -474,7 +477,7 @@ describe('metric visualization', () => {
         const frame = createMockFramePublicAPI({
           datasourceLayers: {
             [fullState.layerId]: createMockDatasource('formBased', {
-              getOperationForColumnId: jest.fn(() => ({
+              getOperationForColumnId: vi.fn(() => ({
                 hasReducedTimeRange: false,
                 dataType: 'number',
                 hasTimeShift: false,
@@ -571,8 +574,8 @@ describe('metric visualization', () => {
     let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
       const mockDatasource = createMockDatasource('formBased', {
-        getMaxPossibleNumValues: jest.fn().mockReturnValue(maxPossibleNumValues),
-        getOperationForColumnId: jest.fn().mockReturnValue({
+        getMaxPossibleNumValues: vi.fn().mockReturnValue(maxPossibleNumValues),
+        getOperationForColumnId: vi.fn().mockReturnValue({
           isStaticValue: false,
           dataType: 'number',
         }),
@@ -980,7 +983,7 @@ describe('metric visualization', () => {
 
       it('always applies max function to static max dimensions', () => {
         (
-          datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
+          datasourceLayers.first as Mocked<DatasourcePublicAPI>
         ).getOperationForColumnId.mockReturnValue({
           isStaticValue: true,
           dataType: 'number',
@@ -1015,7 +1018,7 @@ describe('metric visualization', () => {
           }
         `);
         (
-          datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
+          datasourceLayers.first as Mocked<DatasourcePublicAPI>
         ).getOperationForColumnId.mockClear();
       });
 
@@ -1217,7 +1220,7 @@ describe('metric visualization', () => {
 
     describe('forward secondary trend parameters correctly', () => {
       test('should use the static coloring if data type is not numeric', async () => {
-        datasourceLayers.first!.getOperationForColumnId = jest
+        datasourceLayers.first!.getOperationForColumnId = vi
           .fn()
           .mockReturnValue({ dataType: 'string' });
         const AST = visualization.toExpression(
@@ -1241,7 +1244,7 @@ describe('metric visualization', () => {
       });
 
       test('should use 0 baseline if primary metric is not numeric', async () => {
-        datasourceLayers.first!.getOperationForColumnId = jest.fn((id: string) =>
+        datasourceLayers.first!.getOperationForColumnId = vi.fn((id: string) =>
           id === fullState.metricAccessor
             ? {
                 hasTimeShift: false,
@@ -1445,7 +1448,7 @@ describe('metric visualization', () => {
             },
           },
           createMockDatasource('formBased', {
-            getOperationForColumnId: jest.fn((id: string) =>
+            getOperationForColumnId: vi.fn((id: string) =>
               // make primary result in a string type
               createOperationByType(id !== fullState.secondaryMetricAccessor ? 'string' : 'number')
             ),
@@ -1842,7 +1845,7 @@ describe('metric visualization', () => {
       return createMockFramePublicAPI({
         datasourceLayers: {
           [fullState.layerId]: createMockDatasource('formBased', {
-            getOperationForColumnId: jest.fn(operationFn),
+            getOperationForColumnId: vi.fn(operationFn),
           }).publicAPIMock,
         },
       });

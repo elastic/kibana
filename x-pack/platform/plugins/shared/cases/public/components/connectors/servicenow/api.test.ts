@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getChoices } from './api';
 import { choices } from '../mock';
@@ -17,7 +19,7 @@ const choicesResponse = {
 describe('ServiceNow API', () => {
   const http = httpServiceMock.createStartContract();
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   describe('getChoices', () => {
     test('should call get choices API', async () => {

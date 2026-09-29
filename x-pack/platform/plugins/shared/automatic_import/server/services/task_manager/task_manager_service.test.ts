@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -18,13 +21,13 @@ import {
 import { TASK_STATUSES } from '../saved_objects/constants';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
 
-jest.mock('../agents/agent_service');
-jest.mock('../build_integration/fields');
-jest.mock('../build_integration/validate_fields');
+vi.mock('../agents/agent_service');
+vi.mock('../build_integration/fields');
+vi.mock('../build_integration/validate_fields');
 
-const { AgentService } = jest.requireMock('../agents/agent_service');
-const { generateFieldMappings } = jest.requireMock('../build_integration/fields');
-const { validateFieldMappings } = jest.requireMock('../build_integration/validate_fields');
+const { AgentService } = (await vi.importMock('../agents/agent_service'));
+const { generateFieldMappings } = (await vi.importMock('../build_integration/fields'));
+const { validateFieldMappings } = (await vi.importMock('../build_integration/validate_fields'));
 
 describe('TaskManagerService', () => {
   it('exports DATA_STREAM_CREATION_TASK_TYPE', () => {
@@ -69,8 +72,8 @@ describe('isUnrecoverableByStatus', () => {
 
 describe('runTask abort handling', () => {
   let taskDefinition: Record<string, { createTaskRunner: Function }>;
-  let mockSavedObjectService: jest.Mocked<AutomaticImportSavedObjectService>;
-  let mockAnalytics: { reportEvent: jest.Mock; registerEventType: jest.Mock };
+  let mockSavedObjectService: Mocked<AutomaticImportSavedObjectService>;
+  let mockAnalytics: { reportEvent: Mock; registerEventType: Mock };
   let loggerFactory: ReturnType<typeof loggingSystemMock.create>;
 
   const taskParams = {
@@ -103,42 +106,42 @@ describe('runTask abort handling', () => {
 
   const mockPluginsStart = {
     inference: {
-      getChatModel: jest.fn().mockResolvedValue({}),
+      getChatModel: vi.fn().mockResolvedValue({}),
     },
     fieldsMetadata: {
-      getClient: jest.fn().mockResolvedValue({}),
+      getClient: vi.fn().mockResolvedValue({}),
     },
   };
 
   const mockCore = {
-    getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
+    getStartServices: vi.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
   };
 
   const mockSamplesIndexService = {};
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     taskDefinition = {};
     loggerFactory = loggingSystemMock.create();
 
     mockAnalytics = {
-      reportEvent: jest.fn(),
-      registerEventType: jest.fn(),
+      reportEvent: vi.fn(),
+      registerEventType: vi.fn(),
     };
 
     mockSavedObjectService = {
-      updateDataStreamSavedObjectAttributes: jest.fn().mockResolvedValue(undefined),
-      updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<AutomaticImportSavedObjectService>;
+      updateDataStreamSavedObjectAttributes: vi.fn().mockResolvedValue(undefined),
+      updateDataStreamPhase: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Mocked<AutomaticImportSavedObjectService>;
 
     const mockTaskManagerSetup = {
-      registerTaskDefinitions: jest.fn((defs: Record<string, unknown>) => {
+      registerTaskDefinitions: vi.fn((defs: Record<string, unknown>) => {
         Object.assign(taskDefinition, defs);
       }),
     };
 
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockResolvedValue({
+      invokeAutomaticImportAgent: vi.fn().mockResolvedValue({
         current_pipeline: { name: 'test', processors: [] },
         pipeline_generation_results: [{ _source: { answer: 42 } }],
         field_mappings: [
@@ -209,7 +212,7 @@ describe('runTask abort handling', () => {
     const abortController = new AbortController();
 
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockImplementation(async () => {
+      invokeAutomaticImportAgent: vi.fn().mockImplementation(async () => {
         abortController.abort();
         return {
           current_pipeline: { name: 'test', processors: [] },
@@ -221,7 +224,7 @@ describe('runTask abort handling', () => {
     const service = new TaskManagerService(
       loggerFactory,
       {
-        registerTaskDefinitions: jest.fn((defs: Record<string, unknown>) => {
+        registerTaskDefinitions: vi.fn((defs: Record<string, unknown>) => {
           Object.assign(taskDefinition, defs);
         }),
       } as never,
@@ -316,13 +319,13 @@ describe('runTask abort handling', () => {
     abortController.abort();
 
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockRejectedValue(new Error('aborted')),
+      invokeAutomaticImportAgent: vi.fn().mockRejectedValue(new Error('aborted')),
     }));
 
     const service = new TaskManagerService(
       loggerFactory,
       {
-        registerTaskDefinitions: jest.fn((defs: Record<string, unknown>) => {
+        registerTaskDefinitions: vi.fn((defs: Record<string, unknown>) => {
           Object.assign(taskDefinition, defs);
         }),
       } as never,
@@ -346,7 +349,7 @@ describe('runTask abort handling', () => {
     const abortController = new AbortController();
 
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockImplementation(async () => {
+      invokeAutomaticImportAgent: vi.fn().mockImplementation(async () => {
         abortController.abort();
         throw new Error('aborted');
       }),
@@ -363,7 +366,7 @@ describe('runTask abort handling', () => {
     const service = new TaskManagerService(
       loggerFactory,
       {
-        registerTaskDefinitions: jest.fn((defs: Record<string, unknown>) => {
+        registerTaskDefinitions: vi.fn((defs: Record<string, unknown>) => {
           Object.assign(taskDefinition, defs);
         }),
       } as never,
@@ -383,13 +386,13 @@ describe('runTask abort handling', () => {
     const abortController = new AbortController();
 
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockRejectedValue(new Error('Model inference failed')),
+      invokeAutomaticImportAgent: vi.fn().mockRejectedValue(new Error('Model inference failed')),
     }));
 
     const service = new TaskManagerService(
       loggerFactory,
       {
-        registerTaskDefinitions: jest.fn((defs: Record<string, unknown>) => {
+        registerTaskDefinitions: vi.fn((defs: Record<string, unknown>) => {
           Object.assign(taskDefinition, defs);
         }),
       } as never,
@@ -423,24 +426,24 @@ describe('runTask abort handling', () => {
 
 describe('removeDataStreamCreationTask', () => {
   const mockCore = {
-    getStartServices: jest
+    getStartServices: vi
       .fn()
       .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: {} } } }, {}]),
   };
 
   it('aborts the Task Manager AbortController when a run is in flight on this node, then removes the task', async () => {
     const loggerFactory = loggingSystemMock.create();
-    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+    const mockAnalytics = { reportEvent: vi.fn(), registerEventType: vi.fn() };
 
     const service = new TaskManagerService(
       loggerFactory,
-      { registerTaskDefinitions: jest.fn() } as never,
+      { registerTaskDefinitions: vi.fn() } as never,
       mockCore as never,
       mockAnalytics as never,
       {} as never
     );
 
-    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+    const removeIfExists = vi.fn().mockResolvedValue(undefined);
     service.initialize({ removeIfExists } as never, {} as never);
 
     const taskId = 'data-stream-task-myint-mydstream';
@@ -460,17 +463,17 @@ describe('removeDataStreamCreationTask', () => {
 
   it('calls removeIfExists when there is no in-flight run on this node', async () => {
     const loggerFactory = loggingSystemMock.create();
-    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+    const mockAnalytics = { reportEvent: vi.fn(), registerEventType: vi.fn() };
 
     const service = new TaskManagerService(
       loggerFactory,
-      { registerTaskDefinitions: jest.fn() } as never,
+      { registerTaskDefinitions: vi.fn() } as never,
       mockCore as never,
       mockAnalytics as never,
       {} as never
     );
 
-    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+    const removeIfExists = vi.fn().mockResolvedValue(undefined);
     service.initialize({ removeIfExists } as never, {} as never);
 
     await service.removeDataStreamCreationTask({
@@ -483,23 +486,23 @@ describe('removeDataStreamCreationTask', () => {
 
   it('does not call abort when in-flight controller is already aborted', async () => {
     const loggerFactory = loggingSystemMock.create();
-    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+    const mockAnalytics = { reportEvent: vi.fn(), registerEventType: vi.fn() };
 
     const service = new TaskManagerService(
       loggerFactory,
-      { registerTaskDefinitions: jest.fn() } as never,
+      { registerTaskDefinitions: vi.fn() } as never,
       mockCore as never,
       mockAnalytics as never,
       {} as never
     );
 
-    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+    const removeIfExists = vi.fn().mockResolvedValue(undefined);
     service.initialize({ removeIfExists } as never, {} as never);
 
     const taskId = 'data-stream-task-x-y';
     const controller = new AbortController();
     controller.abort();
-    const abortSpy = jest.spyOn(controller, 'abort');
+    const abortSpy = vi.spyOn(controller, 'abort');
 
     (
       service as unknown as { inFlightRunAbortSignals: Map<string, AbortController> }
@@ -516,17 +519,17 @@ describe('removeDataStreamCreationTask', () => {
 
   it('throws when removeIfExists rejects', async () => {
     const loggerFactory = loggingSystemMock.create();
-    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+    const mockAnalytics = { reportEvent: vi.fn(), registerEventType: vi.fn() };
 
     const service = new TaskManagerService(
       loggerFactory,
-      { registerTaskDefinitions: jest.fn() } as never,
+      { registerTaskDefinitions: vi.fn() } as never,
       mockCore as never,
       mockAnalytics as never,
       {} as never
     );
 
-    const removeIfExists = jest.fn().mockRejectedValue(new Error('ES unavailable'));
+    const removeIfExists = vi.fn().mockRejectedValue(new Error('ES unavailable'));
     service.initialize({ removeIfExists } as never, {} as never);
 
     await expect(
@@ -536,11 +539,11 @@ describe('removeDataStreamCreationTask', () => {
 
   it('throws assertion error when TaskManager is not initialized', async () => {
     const loggerFactory = loggingSystemMock.create();
-    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+    const mockAnalytics = { reportEvent: vi.fn(), registerEventType: vi.fn() };
 
     const service = new TaskManagerService(
       loggerFactory,
-      { registerTaskDefinitions: jest.fn() } as never,
+      { registerTaskDefinitions: vi.fn() } as never,
       mockCore as never,
       mockAnalytics as never,
       {} as never
@@ -555,10 +558,10 @@ describe('removeDataStreamCreationTask', () => {
 describe('scheduleDataStreamCreationTask', () => {
   const createService = () => {
     const loggerFactory = loggingSystemMock.create();
-    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+    const mockAnalytics = { reportEvent: vi.fn(), registerEventType: vi.fn() };
     const service = new TaskManagerService(
       loggerFactory,
-      { registerTaskDefinitions: jest.fn() } as never,
+      { registerTaskDefinitions: vi.fn() } as never,
       {} as never,
       mockAnalytics as never,
       {} as never
@@ -578,7 +581,7 @@ describe('scheduleDataStreamCreationTask', () => {
 
   it('returns the scheduled task ID on success', async () => {
     const service = createService();
-    const ensureScheduled = jest.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
+    const ensureScheduled = vi.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
     service.initialize({ ensureScheduled } as never, {} as never);
 
     const result = await service.scheduleDataStreamCreationTask(baseParams, fakeRequest);
@@ -598,7 +601,7 @@ describe('scheduleDataStreamCreationTask', () => {
 
   it('returns the existing task ID when task already exists (ensureScheduled handles conflict)', async () => {
     const service = createService();
-    const ensureScheduled = jest.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
+    const ensureScheduled = vi.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
     service.initialize({ ensureScheduled } as never, {} as never);
 
     const result = await service.scheduleDataStreamCreationTask(baseParams, fakeRequest);
@@ -608,7 +611,7 @@ describe('scheduleDataStreamCreationTask', () => {
 
   it('propagates errors from ensureScheduled', async () => {
     const service = createService();
-    const ensureScheduled = jest.fn().mockRejectedValue(new Error('unauthorized'));
+    const ensureScheduled = vi.fn().mockRejectedValue(new Error('unauthorized'));
     service.initialize({ ensureScheduled } as never, {} as never);
 
     await expect(service.scheduleDataStreamCreationTask(baseParams, fakeRequest)).rejects.toThrow(
@@ -626,10 +629,10 @@ describe('scheduleDataStreamCreationTask', () => {
 describe('getTaskStatus', () => {
   const createService = () => {
     const loggerFactory = loggingSystemMock.create();
-    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+    const mockAnalytics = { reportEvent: vi.fn(), registerEventType: vi.fn() };
     return new TaskManagerService(
       loggerFactory,
-      { registerTaskDefinitions: jest.fn() } as never,
+      { registerTaskDefinitions: vi.fn() } as never,
       {} as never,
       mockAnalytics as never,
       {} as never
@@ -638,7 +641,7 @@ describe('getTaskStatus', () => {
 
   it('returns the task status from state', async () => {
     const service = createService();
-    const get = jest.fn().mockResolvedValue({ state: { task_status: TASK_STATUSES.completed } });
+    const get = vi.fn().mockResolvedValue({ state: { task_status: TASK_STATUSES.completed } });
     service.initialize({ get } as never, {} as never);
 
     const result = await service.getTaskStatus('task-1');
@@ -647,7 +650,7 @@ describe('getTaskStatus', () => {
 
   it('throws when task is not found', async () => {
     const service = createService();
-    const get = jest.fn().mockRejectedValue(new Error('not found'));
+    const get = vi.fn().mockRejectedValue(new Error('not found'));
     service.initialize({ get } as never, {} as never);
 
     await expect(service.getTaskStatus('missing-task')).rejects.toThrow(
@@ -664,8 +667,8 @@ describe('getTaskStatus', () => {
 
 describe('runTask error edge cases', () => {
   let taskDefinition: Record<string, { createTaskRunner: Function }>;
-  let mockSavedObjectService: jest.Mocked<AutomaticImportSavedObjectService>;
-  let mockAnalytics: { reportEvent: jest.Mock; registerEventType: jest.Mock };
+  let mockSavedObjectService: Mocked<AutomaticImportSavedObjectService>;
+  let mockAnalytics: { reportEvent: Mock; registerEventType: Mock };
   let loggerFactory: ReturnType<typeof loggingSystemMock.create>;
 
   const taskParams = {
@@ -698,22 +701,22 @@ describe('runTask error edge cases', () => {
 
   const mockPluginsStart = {
     inference: {
-      getChatModel: jest.fn().mockResolvedValue({}),
+      getChatModel: vi.fn().mockResolvedValue({}),
     },
     fieldsMetadata: {
-      getClient: jest.fn().mockResolvedValue({}),
+      getClient: vi.fn().mockResolvedValue({}),
     },
   };
 
   const mockCore = {
-    getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
+    getStartServices: vi.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
   };
 
   const mockSamplesIndexService = {};
 
   const buildService = () => {
     const mockTaskManagerSetup = {
-      registerTaskDefinitions: jest.fn((defs: Record<string, unknown>) => {
+      registerTaskDefinitions: vi.fn((defs: Record<string, unknown>) => {
         Object.assign(taskDefinition, defs);
       }),
     };
@@ -730,22 +733,22 @@ describe('runTask error edge cases', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     taskDefinition = {};
     loggerFactory = loggingSystemMock.create();
 
     mockAnalytics = {
-      reportEvent: jest.fn(),
-      registerEventType: jest.fn(),
+      reportEvent: vi.fn(),
+      registerEventType: vi.fn(),
     };
 
     mockSavedObjectService = {
-      updateDataStreamSavedObjectAttributes: jest.fn().mockResolvedValue(undefined),
-      updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<AutomaticImportSavedObjectService>;
+      updateDataStreamSavedObjectAttributes: vi.fn().mockResolvedValue(undefined),
+      updateDataStreamPhase: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Mocked<AutomaticImportSavedObjectService>;
 
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockResolvedValue({
+      invokeAutomaticImportAgent: vi.fn().mockResolvedValue({
         current_pipeline: { name: 'test', processors: [] },
         pipeline_generation_results: [{ _source: { answer: 42 } }],
       }),
@@ -773,7 +776,7 @@ describe('runTask error edge cases', () => {
     };
 
     const mockTaskManagerSetup = {
-      registerTaskDefinitions: jest.fn((defs: Record<string, unknown>) => {
+      registerTaskDefinitions: vi.fn((defs: Record<string, unknown>) => {
         Object.assign(taskDefinition, defs);
       }),
     };
@@ -807,7 +810,7 @@ describe('runTask error edge cases', () => {
 
   it('fails when agent does not produce a valid ingest pipeline', async () => {
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockResolvedValue({
+      invokeAutomaticImportAgent: vi.fn().mockResolvedValue({
         current_pipeline: null,
         pipeline_generation_results: [],
       }),
@@ -827,7 +830,7 @@ describe('runTask error edge cases', () => {
   it('throws unrecoverable error for HTTP error status codes', async () => {
     const httpError = Object.assign(new Error('Forbidden'), { statusCode: 403 });
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockRejectedValue(httpError),
+      invokeAutomaticImportAgent: vi.fn().mockRejectedValue(httpError),
     }));
 
     buildService();
@@ -842,7 +845,7 @@ describe('runTask error edge cases', () => {
 
   it('returns failed state (retryable) for errors without HTTP status', async () => {
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockRejectedValue(new Error('transient network error')),
+      invokeAutomaticImportAgent: vi.fn().mockRejectedValue(new Error('transient network error')),
     }));
 
     buildService();
@@ -856,7 +859,7 @@ describe('runTask error edge cases', () => {
 
   it('reports telemetry with error message on failure', async () => {
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockRejectedValue(new Error('LLM timeout')),
+      invokeAutomaticImportAgent: vi.fn().mockRejectedValue(new Error('LLM timeout')),
     }));
 
     buildService();
@@ -876,7 +879,7 @@ describe('runTask error edge cases', () => {
   it('does not report telemetry on cancellation', async () => {
     const abortController = new AbortController();
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockImplementation(async () => {
+      invokeAutomaticImportAgent: vi.fn().mockImplementation(async () => {
         abortController.abort();
         throw new Error('aborted');
       }),
@@ -891,7 +894,7 @@ describe('runTask error edge cases', () => {
 
   it('still marks as failed even when SO update for failure throws', async () => {
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockRejectedValue(new Error('agent crashed')),
+      invokeAutomaticImportAgent: vi.fn().mockRejectedValue(new Error('agent crashed')),
     }));
 
     mockSavedObjectService.updateDataStreamSavedObjectAttributes.mockRejectedValue(
@@ -922,7 +925,7 @@ describe('runTask error edge cases', () => {
 
   it('passes undefined agent field_mappings when agent does not provide them', async () => {
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockResolvedValue({
+      invokeAutomaticImportAgent: vi.fn().mockResolvedValue({
         current_pipeline: { name: 'test', processors: [] },
         pipeline_generation_results: [{ _source: { value: 'test' } }],
       }),
@@ -956,7 +959,7 @@ describe('runTask error edge cases', () => {
 
   it('handles non-Error thrown values in the error path', async () => {
     AgentService.mockImplementation(() => ({
-      invokeAutomaticImportAgent: jest.fn().mockRejectedValue('string error'),
+      invokeAutomaticImportAgent: vi.fn().mockRejectedValue('string error'),
     }));
 
     buildService();

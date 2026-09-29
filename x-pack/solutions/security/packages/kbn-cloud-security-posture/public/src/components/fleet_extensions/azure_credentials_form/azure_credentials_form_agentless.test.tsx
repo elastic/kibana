@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,119 +20,137 @@ import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form_agentless';
 
 // Mock functions
-const mockCloudConnectorSetup = jest.fn(() => (
+const mockCloudConnectorSetup = vi.fn(() => (
   <div data-test-subj="azureLaunchCloudConnectorArmTemplate" />
 ));
 
 // Mock the hooks and utilities
-jest.mock('../hooks/use_cloud_setup_context');
-jest.mock('../utils');
-jest.mock('./get_azure_credentials_form_options');
+vi.mock('../hooks/use_cloud_setup_context');
+vi.mock('../utils');
+vi.mock('./get_azure_credentials_form_options');
 
 // Mock CloudConnectorSetup component (lazy loaded from Fleet)
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  ...jest.requireActual('@kbn/fleet-plugin/public'),
-  LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
-}));
+vi.mock('@kbn/fleet-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/fleet-plugin/public')),
+      LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the utilities
-jest.mock('../utils', () => ({
-  getTemplateUrlFromPackageInfo: jest.fn(),
-  updatePolicyWithInputs: jest.fn(),
-  getAzureCredentialsType: jest.fn(),
-  getCloudCredentialVarsConfig: jest.fn(),
-  azureField: {
-    fields: {
-      'azure.credentials.tenant_id': { label: 'Tenant ID', type: 'text' },
-      'azure.credentials.client_id': { label: 'Client ID', type: 'text' },
-      'azure.credentials.client_secret': { label: 'Client Secret', type: 'password' },
-      'azure.credentials.type': { label: 'Credentials Type', type: 'text' },
-    },
-  },
-  getAzureInputVarsFields: jest.fn(),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      getTemplateUrlFromPackageInfo: vi.fn(),
+      updatePolicyWithInputs: vi.fn(),
+      getAzureCredentialsType: vi.fn(),
+      getCloudCredentialVarsConfig: vi.fn(),
+      azureField: {
+        fields: {
+          'azure.credentials.tenant_id': { label: 'Tenant ID', type: 'text' },
+          'azure.credentials.client_id': { label: 'Client ID', type: 'text' },
+          'azure.credentials.client_secret': { label: 'Client Secret', type: 'password' },
+          'azure.credentials.type': { label: 'Credentials Type', type: 'text' },
+        },
+      },
+      getAzureInputVarsFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock get_azure_credentials_form_options
-jest.mock('./get_azure_credentials_form_options', () => ({
-  getAgentlessCredentialsType: jest.fn(),
-  getAzureAgentlessCredentialFormOptions: jest.fn(),
-  getAzureCloudConnectorsCredentialsFormOptions: jest.fn(),
-  getInputVarsFields: jest.fn(),
-}));
+vi.mock('./get_azure_credentials_form_options', () => {
+      const mocked = {
+      getAgentlessCredentialsType: vi.fn(),
+      getAzureAgentlessCredentialFormOptions: vi.fn(),
+      getAzureCloudConnectorsCredentialsFormOptions: vi.fn(),
+      getInputVarsFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock components
-jest.mock('./azure_input_var_fields', () => ({
-  AzureInputVarFields: ({
-    disabled,
-    onChangeHandler,
-    fields,
-    hasInvalidRequiredVars,
-  }: {
-    disabled?: boolean;
-    onChangeHandler?: (id: string, value: string) => void;
-    fields?: Array<{ id: string; type: string; value: string }>;
-    hasInvalidRequiredVars?: boolean;
-  }) => (
-    <div data-test-subj="azure-input-var-fields">
-      <span data-test-subj="disabled-state">
-        {disabled || hasInvalidRequiredVars ? 'true' : 'false'}
-      </span>
-      <button
-        type="button"
-        data-test-subj="azure-field-change"
-        onClick={() => onChangeHandler?.('test-id', 'test-value')}
-      >
-        {'Change Field'}
-      </button>
-      {fields?.map((field: { id: string; type: string; value: string }) => (
-        <input
-          key={field.id}
-          data-test-subj={field.id}
-          type={field.type}
-          value={field.value}
-          onChange={() => {}}
-        />
-      ))}
-    </div>
-  ),
-}));
+vi.mock('./azure_input_var_fields', () => {
+      const mocked = {
+      AzureInputVarFields: ({
+        disabled,
+        onChangeHandler,
+        fields,
+        hasInvalidRequiredVars,
+      }: {
+        disabled?: boolean;
+        onChangeHandler?: (id: string, value: string) => void;
+        fields?: Array<{ id: string; type: string; value: string }>;
+        hasInvalidRequiredVars?: boolean;
+      }) => (
+        <div data-test-subj="azure-input-var-fields">
+          <span data-test-subj="disabled-state">
+            {disabled || hasInvalidRequiredVars ? 'true' : 'false'}
+          </span>
+          <button
+            type="button"
+            data-test-subj="azure-field-change"
+            onClick={() => onChangeHandler?.('test-id', 'test-value')}
+          >
+            {'Change Field'}
+          </button>
+          {fields?.map((field: { id: string; type: string; value: string }) => (
+            <input
+              key={field.id}
+              data-test-subj={field.id}
+              type={field.type}
+              value={field.value}
+              onChange={() => {}}
+            />
+          ))}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./azure_setup_info', () => ({
-  AzureSetupInfoContent: ({ documentationLink }: { documentationLink?: string }) => (
-    <div data-test-subj="azure-setup-info">
-      <span data-test-subj="doc-link">{documentationLink}</span>
-    </div>
-  ),
-}));
+vi.mock('./azure_setup_info', () => {
+      const mocked = {
+      AzureSetupInfoContent: ({ documentationLink }: { documentationLink?: string }) => (
+        <div data-test-subj="azure-setup-info">
+          <span data-test-subj="doc-link">{documentationLink}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./azure_credential_type_selector', () => ({
-  AzureCredentialTypeSelector: ({
-    options,
-    value,
-    onChange,
-  }: {
-    options?: Array<{ value: string; text: string }>;
-    value?: string;
-    onChange?: (event: React.FocusEvent<HTMLSelectElement>) => void;
-  }) => (
-    <select data-test-subj="azure-credentials-type-selector" value={value} onBlur={onChange}>
-      {options?.map((option: { value: string; text: string }) => (
-        <option key={option.value} value={option.value}>
-          {option.text}
-        </option>
-      ))}
-    </select>
-  ),
-}));
+vi.mock('./azure_credential_type_selector', () => {
+      const mocked = {
+      AzureCredentialTypeSelector: ({
+        options,
+        value,
+        onChange,
+      }: {
+        options?: Array<{ value: string; text: string }>;
+        value?: string;
+        onChange?: (event: React.FocusEvent<HTMLSelectElement>) => void;
+      }) => (
+        <select data-test-subj="azure-credentials-type-selector" value={value} onBlur={onChange}>
+          {options?.map((option: { value: string; text: string }) => (
+            <option key={option.value} value={option.value}>
+              {option.text}
+            </option>
+          ))}
+        </select>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Get mocked functions from jest modules
-const { useCloudSetup: mockUseCloudSetup } = jest.requireMock('../hooks/use_cloud_setup_context');
+const { useCloudSetup: mockUseCloudSetup } = (await vi.importMock('../hooks/use_cloud_setup_context'));
 const {
   getAgentlessCredentialsType: mockGetAgentlessCredentialsType,
   getAzureAgentlessCredentialFormOptions: mockGetAzureAgentlessCredentialFormOptions,
   getAzureCloudConnectorsCredentialsFormOptions: mockGetAzureCloudConnectorsCredentialsFormOptions,
   getInputVarsFields: mockGetInputVarsFields,
-} = jest.requireMock('./get_azure_credentials_form_options');
+} = (await vi.importMock('./get_azure_credentials_form_options'));
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
@@ -191,7 +211,7 @@ const getDefaultCloudSetup = () => ({
 });
 
 describe('AzureCredentialsFormAgentless', () => {
-  const mockUpdatePolicy = jest.fn();
+  const mockUpdatePolicy = vi.fn();
   const mockInput = createMockAzureInput();
   const mockPackageInfo = createMockAzurePackageInfo();
   const mockNewPolicy = createMockAzurePolicy(mockInput);
@@ -208,7 +228,7 @@ describe('AzureCredentialsFormAgentless', () => {
   const defaultCloudSetup = getDefaultCloudSetup();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCloudConnectorSetup.mockClear();
     mockUseCloudSetup.mockReturnValue(defaultCloudSetup);
     mockGetAgentlessCredentialsType.mockReturnValue('cloud_connectors');
@@ -291,7 +311,7 @@ describe('AzureCredentialsFormAgentless', () => {
     });
 
     it('should set supports_cloud_connector to false when credential type is service_principal_with_client_secret', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithSupport = {
         ...mockNewPolicy,
         supports_cloud_connector: true, // Start with true
@@ -316,7 +336,7 @@ describe('AzureCredentialsFormAgentless', () => {
     });
 
     it('should not call updatePolicy when credential type is cloud_connectors', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithSupport = {
         ...mockNewPolicy,
         supports_cloud_connector: true, // Already correct
@@ -337,7 +357,7 @@ describe('AzureCredentialsFormAgentless', () => {
     });
 
     it('should clear cloud_connector_id when switching away from cloud_connectors', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithConnector = {
         ...mockNewPolicy,
         supports_cloud_connector: true,
@@ -363,7 +383,7 @@ describe('AzureCredentialsFormAgentless', () => {
     });
 
     it('should not call updatePolicy when supports_cloud_connector is already false with non-cloud_connectors credential', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithoutSupport = {
         ...mockNewPolicy,
         supports_cloud_connector: false, // Already correct

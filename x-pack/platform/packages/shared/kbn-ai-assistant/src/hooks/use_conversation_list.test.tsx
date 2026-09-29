@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useConversationList } from './use_conversation_list';
 
-const mockService: { callApi: jest.Mock } = {
-  callApi: jest.fn(),
+const mockService: { callApi: Mock } = {
+  callApi: vi.fn(),
 };
 
 const useKibanaMockServices = {
   uiSettings: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
   observabilityAIAssistant: {
     service: mockService,
@@ -30,7 +33,7 @@ describe('useConversationList', () => {
   );
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches conversations on mount', async () => {

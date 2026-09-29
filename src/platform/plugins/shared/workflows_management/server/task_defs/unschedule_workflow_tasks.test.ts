@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { unscheduleWorkflowTasks } from './unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
-const makeMockScheduler = (): jest.Mocked<WorkflowTaskScheduler> =>
+const makeMockScheduler = (): Mocked<WorkflowTaskScheduler> =>
   ({
-    bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-    unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+    bulkUnscheduleWorkflowTasks: vi.fn().mockResolvedValue(undefined),
+    unscheduleWorkflowTasks: vi.fn().mockResolvedValue(undefined),
   } as any);
 
 describe('unscheduleWorkflowTasks', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('calls bulkUnscheduleWorkflowTasks with all workflow IDs', async () => {
     const scheduler = makeMockScheduler();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -18,7 +20,7 @@ import {
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     service = new AnalyticsService(logger);

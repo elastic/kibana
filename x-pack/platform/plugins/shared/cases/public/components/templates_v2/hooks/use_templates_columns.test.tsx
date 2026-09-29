@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, renderHook, screen } from '@testing-library/react';
@@ -20,15 +22,15 @@ describe('useTemplatesColumns', () => {
   );
 
   const defaultProps = {
-    onEdit: jest.fn(),
-    onClone: jest.fn(),
-    onExport: jest.fn(),
-    onDelete: jest.fn(),
-    onIsEnabledChange: jest.fn(),
+    onEdit: vi.fn(),
+    onClone: vi.fn(),
+    onExport: vi.fn(),
+    onDelete: vi.fn(),
+    onIsEnabledChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns columns array', () => {
@@ -153,7 +155,7 @@ describe('useTemplatesColumns', () => {
 
     const newProps = {
       ...defaultProps,
-      onEdit: jest.fn(),
+      onEdit: vi.fn(),
     };
 
     rerender(newProps);

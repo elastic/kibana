@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import '@kbn/code-editor-mock/jest_helper';
 import React from 'react';
@@ -18,11 +20,14 @@ import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { useEsDocSearch } from '../../../../hooks/use_es_doc_search';
 
-jest.mock('../../../../hooks/use_es_doc_search', () => ({
-  useEsDocSearch: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_es_doc_search', () => {
+      const mocked = {
+      useEsDocSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEsDocSearch = jest.mocked(useEsDocSearch);
+const mockUseEsDocSearch = vi.mocked(useEsDocSearch);
 
 const defaultHit = {
   flattened: {},

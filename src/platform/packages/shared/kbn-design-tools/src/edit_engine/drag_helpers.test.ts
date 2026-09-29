@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DEVTOOL_MANAGED_ATTR } from '../lib/constants';
 import type { DragState } from './interaction_state';
 import type { ElementRegistry } from './element_registry';
@@ -30,7 +32,7 @@ describe('dragHelpers', () => {
   describe('findManagedSession', () => {
     it('should return null for unmanaged elements', () => {
       const el = document.createElement('div');
-      const registry = { get: jest.fn() } as unknown as ElementRegistry;
+      const registry = { get: vi.fn() } as unknown as ElementRegistry;
 
       expect(findManagedSession(el, registry)).toBeNull();
       expect(registry.get).not.toHaveBeenCalled();
@@ -40,7 +42,7 @@ describe('dragHelpers', () => {
       const el = document.createElement('div');
       el.setAttribute(DEVTOOL_MANAGED_ATTR, '');
       const session = makeSession();
-      const registry = { get: jest.fn().mockReturnValue(session) } as unknown as ElementRegistry;
+      const registry = { get: vi.fn().mockReturnValue(session) } as unknown as ElementRegistry;
 
       expect(findManagedSession(el, registry)).toBe(session);
     });
@@ -48,7 +50,7 @@ describe('dragHelpers', () => {
     it('should return null when the element is not tracked in the registry', () => {
       const el = document.createElement('div');
       el.setAttribute(DEVTOOL_MANAGED_ATTR, '');
-      const registry = { get: jest.fn().mockReturnValue(undefined) } as unknown as ElementRegistry;
+      const registry = { get: vi.fn().mockReturnValue(undefined) } as unknown as ElementRegistry;
 
       expect(findManagedSession(el, registry)).toBeNull();
     });

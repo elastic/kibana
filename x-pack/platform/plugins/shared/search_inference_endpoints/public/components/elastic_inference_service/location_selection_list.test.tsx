@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -34,8 +36,8 @@ const geoListProps = {
   total: 2,
   totalSelected: 2,
   allSelected: true,
-  onSelectAll: jest.fn(),
-  onToggle: jest.fn(),
+  onSelectAll: vi.fn(),
+  onToggle: vi.fn(),
   ...GEO_LOCATION_COPY,
 };
 
@@ -104,7 +106,7 @@ describe('toRegionSelectableOptions', () => {
 
 describe('LocationSelectionList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the selectable loading message', () => {
@@ -179,7 +181,7 @@ describe('LocationSelectionList', () => {
   });
 
   it('marks selected geos and toggles the clicked geo code', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     render(
       <Wrapper>
         <LocationSelectionList
@@ -201,7 +203,7 @@ describe('LocationSelectionList', () => {
   });
 
   it('renders region group labels and selectable region options', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     render(
       <Wrapper>
         <LocationSelectionList
@@ -212,7 +214,7 @@ describe('LocationSelectionList', () => {
           total={2}
           totalSelected={1}
           allSelected={false}
-          onSelectAll={jest.fn()}
+          onSelectAll={vi.fn()}
           onToggle={onToggle}
         />
       </Wrapper>

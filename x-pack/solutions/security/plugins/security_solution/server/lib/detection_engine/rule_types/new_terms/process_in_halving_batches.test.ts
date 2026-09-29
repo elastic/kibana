@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { getBatchSizeReducedWarning, processInHalvingBatches } from './process_in_halving_batches';
 
@@ -15,8 +17,8 @@ const maxResponseSizeError = () =>
 
 describe('processInHalvingBatches', () => {
   it('processes all items in a single batch when the response fits', async () => {
-    const processBatch = jest.fn().mockResolvedValue({ stop: false });
-    const onBatchSizeReduced = jest.fn();
+    const processBatch = vi.fn().mockResolvedValue({ stop: false });
+    const onBatchSizeReduced = vi.fn();
 
     await processInHalvingBatches({
       items: ['a', 'b', 'c', 'd'],
@@ -30,13 +32,13 @@ describe('processInHalvingBatches', () => {
   });
 
   it('starts with the given initial batch size and passes the start index of every batch', async () => {
-    const processBatch = jest.fn().mockResolvedValue({ stop: false });
+    const processBatch = vi.fn().mockResolvedValue({ stop: false });
 
     await processInHalvingBatches({
       items: ['a', 'b', 'c', 'd', 'e'],
       initialBatchSize: 2,
       processBatch,
-      onBatchSizeReduced: jest.fn(),
+      onBatchSizeReduced: vi.fn(),
     });
 
     expect(processBatch.mock.calls).toEqual([
@@ -47,12 +49,12 @@ describe('processInHalvingBatches', () => {
   });
 
   it('does nothing when there are no items', async () => {
-    const processBatch = jest.fn().mockResolvedValue({ stop: false });
+    const processBatch = vi.fn().mockResolvedValue({ stop: false });
 
     await processInHalvingBatches({
       items: [],
       processBatch,
-      onBatchSizeReduced: jest.fn(),
+      onBatchSizeReduced: vi.fn(),
     });
 
     expect(processBatch).not.toHaveBeenCalled();
@@ -60,8 +62,8 @@ describe('processInHalvingBatches', () => {
 
   it('halves the batch and retries the same items when the response exceeds the limit', async () => {
     const error = maxResponseSizeError();
-    const processBatch = jest.fn().mockRejectedValueOnce(error).mockResolvedValue({ stop: false });
-    const onBatchSizeReduced = jest.fn();
+    const processBatch = vi.fn().mockRejectedValueOnce(error).mockResolvedValue({ stop: false });
+    const onBatchSizeReduced = vi.fn();
 
     await processInHalvingBatches({
       items: ['a', 'b', 'c', 'd', 'e'],
@@ -80,7 +82,7 @@ describe('processInHalvingBatches', () => {
   });
 
   it('resumes from the failed batch without processing the previous batches again', async () => {
-    const processBatch = jest
+    const processBatch = vi
       .fn()
       .mockResolvedValueOnce({ stop: false })
       .mockRejectedValueOnce(maxResponseSizeError())
@@ -90,7 +92,7 @@ describe('processInHalvingBatches', () => {
       items: ['a', 'b', 'c', 'd', 'e', 'f'],
       initialBatchSize: 3,
       processBatch,
-      onBatchSizeReduced: jest.fn(),
+      onBatchSizeReduced: vi.fn(),
     });
 
     expect(processBatch.mock.calls).toEqual([
@@ -104,9 +106,9 @@ describe('processInHalvingBatches', () => {
 
   it('retries with the batch size returned by a custom getReducedBatchSize', async () => {
     const error = new Error('too many clauses');
-    const processBatch = jest.fn().mockRejectedValueOnce(error).mockResolvedValue({ stop: false });
-    const getReducedBatchSize = jest.fn().mockReturnValue(3);
-    const onBatchSizeReduced = jest.fn();
+    const processBatch = vi.fn().mockRejectedValueOnce(error).mockResolvedValue({ stop: false });
+    const getReducedBatchSize = vi.fn().mockReturnValue(3);
+    const onBatchSizeReduced = vi.fn();
 
     await processInHalvingBatches({
       items: ['a', 'b', 'c', 'd'],
@@ -126,14 +128,14 @@ describe('processInHalvingBatches', () => {
 
   it('rethrows the error when a custom getReducedBatchSize gives up', async () => {
     const error = new Error('too many clauses');
-    const processBatch = jest.fn().mockRejectedValue(error);
+    const processBatch = vi.fn().mockRejectedValue(error);
 
     await expect(
       processInHalvingBatches({
         items: ['a', 'b', 'c', 'd'],
         processBatch,
         getReducedBatchSize: () => undefined,
-        onBatchSizeReduced: jest.fn(),
+        onBatchSizeReduced: vi.fn(),
       })
     ).rejects.toBe(error);
 
@@ -141,13 +143,13 @@ describe('processInHalvingBatches', () => {
   });
 
   it('keeps halving until the batch fits', async () => {
-    const processBatch = jest
+    const processBatch = vi
       .fn()
       .mockRejectedValueOnce(maxResponseSizeError())
       .mockRejectedValueOnce(maxResponseSizeError())
       .mockRejectedValueOnce(maxResponseSizeError())
       .mockResolvedValue({ stop: false });
-    const onBatchSizeReduced = jest.fn();
+    const onBatchSizeReduced = vi.fn();
 
     await processInHalvingBatches({
       items: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
@@ -177,8 +179,8 @@ describe('processInHalvingBatches', () => {
 
   it('rethrows the error when a single item still exceeds the limit', async () => {
     const error = maxResponseSizeError();
-    const processBatch = jest.fn().mockRejectedValue(error);
-    const onBatchSizeReduced = jest.fn();
+    const processBatch = vi.fn().mockRejectedValue(error);
+    const onBatchSizeReduced = vi.fn();
 
     await expect(
       processInHalvingBatches({
@@ -197,8 +199,8 @@ describe('processInHalvingBatches', () => {
 
   it('rethrows errors unrelated to the response size without retrying', async () => {
     const error = new Error('index_not_found_exception');
-    const processBatch = jest.fn().mockRejectedValue(error);
-    const onBatchSizeReduced = jest.fn();
+    const processBatch = vi.fn().mockRejectedValue(error);
+    const onBatchSizeReduced = vi.fn();
 
     await expect(
       processInHalvingBatches({
@@ -214,13 +216,13 @@ describe('processInHalvingBatches', () => {
 
   it('rethrows other request aborted errors without retrying', async () => {
     const error = new esErrors.RequestAbortedError('Request aborted');
-    const processBatch = jest.fn().mockRejectedValue(error);
+    const processBatch = vi.fn().mockRejectedValue(error);
 
     await expect(
       processInHalvingBatches({
         items: ['a', 'b', 'c'],
         processBatch,
-        onBatchSizeReduced: jest.fn(),
+        onBatchSizeReduced: vi.fn(),
       })
     ).rejects.toBe(error);
 
@@ -228,7 +230,7 @@ describe('processInHalvingBatches', () => {
   });
 
   it('stops processing the remaining items when a batch asks to stop', async () => {
-    const processBatch = jest
+    const processBatch = vi
       .fn()
       .mockRejectedValueOnce(maxResponseSizeError())
       .mockResolvedValueOnce({ stop: false })
@@ -237,7 +239,7 @@ describe('processInHalvingBatches', () => {
     await processInHalvingBatches({
       items: ['a', 'b', 'c', 'd', 'e', 'f'],
       processBatch,
-      onBatchSizeReduced: jest.fn(),
+      onBatchSizeReduced: vi.fn(),
     });
 
     expect(processBatch.mock.calls.map(([batch]) => batch)).toEqual([

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
@@ -28,7 +30,7 @@ describe('Manage ML Job', () => {
   describe('when users have write access to uptime', () => {
     it('enables the button to create alerts', async () => {
       const { getByText } = render(
-        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={vi.fn()} onJobDelete={vi.fn()} />,
         {
           state: makeMlCapabilities(),
           core: makeUptimePermissionsCore({ save: true }),
@@ -44,7 +46,7 @@ describe('Manage ML Job', () => {
 
     it('does not display an informative tooltip', async () => {
       const { getByText, queryByText } = render(
-        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={vi.fn()} onJobDelete={vi.fn()} />,
         {
           state: makeMlCapabilities(),
           core: makeUptimePermissionsCore({ save: true }),
@@ -66,7 +68,7 @@ describe('Manage ML Job', () => {
   describe("when users don't have write access to uptime", () => {
     it('disables the button to create alerts', async () => {
       const { getByText } = render(
-        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={vi.fn()} onJobDelete={vi.fn()} />,
         {
           state: makeMlCapabilities(),
           core: makeUptimePermissionsCore({ save: false }),
@@ -82,7 +84,7 @@ describe('Manage ML Job', () => {
 
     it('displays an informative tooltip', async () => {
       const { getByText, findByText } = render(
-        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={vi.fn()} onJobDelete={vi.fn()} />,
         {
           state: makeMlCapabilities(),
           core: makeUptimePermissionsCore({ save: false }),

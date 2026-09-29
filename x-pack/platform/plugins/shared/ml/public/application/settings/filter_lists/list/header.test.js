@@ -5,47 +5,55 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 import React from 'react';
 
 // Mock the Kibana context
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (Component) => {
-    const MockedComponent = (props) => {
-      const kibana = {
-        services: {
-          docLinks: {
-            links: {
-              ml: {
-                customRules:
-                  'https://www.elastic.co/guide/en/machine-learning/current/ml-rules.html',
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      withKibana: (Component) => {
+        const MockedComponent = (props) => {
+          const kibana = {
+            services: {
+              docLinks: {
+                links: {
+                  ml: {
+                    customRules:
+                      'https://www.elastic.co/guide/en/machine-learning/current/ml-rules.html',
+                  },
+                },
               },
             },
+          };
+          return <Component {...props} kibana={kibana} />;
+        };
+        return MockedComponent;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: vi.fn(),
+            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
           },
         },
-      };
-      return <Component {...props} kibana={kibana} />;
+      }),
+      useNavigateToPath: () => vi.fn(),
     };
-    return MockedComponent;
-  },
-}));
-
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/'),
-      },
-    },
-  }),
-  useNavigateToPath: () => jest.fn(),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 import { FilterListsHeader } from './header';
 
 describe('Filter Lists Header', () => {
-  const refreshFilterLists = jest.fn();
+  const refreshFilterLists = vi.fn();
 
   const requiredProps = {
     totalCount: 3,

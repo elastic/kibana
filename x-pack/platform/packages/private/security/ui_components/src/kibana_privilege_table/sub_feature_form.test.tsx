@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
@@ -55,7 +57,7 @@ describe('SubFeatureForm', () => {
         selectedFeaturePrivileges={[]}
         privilegeCalculator={calculator}
         privilegeIndex={0}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         disabled={true}
       />
     );
@@ -80,7 +82,7 @@ describe('SubFeatureForm', () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <SubFeatureForm
@@ -116,7 +118,7 @@ describe('SubFeatureForm', () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <SubFeatureForm
@@ -150,7 +152,7 @@ describe('SubFeatureForm', () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <SubFeatureForm
@@ -184,7 +186,7 @@ describe('SubFeatureForm', () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <SubFeatureForm
@@ -220,7 +222,7 @@ describe('SubFeatureForm', () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <SubFeatureForm
@@ -287,7 +289,7 @@ describe('SubFeatureForm', () => {
     const kibanaPrivileges = createKibanaPrivileges([feature]);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <SubFeatureForm
@@ -322,7 +324,7 @@ describe('SubFeatureForm', () => {
         selectedFeaturePrivileges={[]}
         privilegeCalculator={calculator}
         privilegeIndex={0}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         disabled={false}
       />
     );
@@ -352,7 +354,7 @@ describe('SubFeatureForm', () => {
         selectedFeaturePrivileges={['cool_all']}
         privilegeCalculator={calculator}
         privilegeIndex={0}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         disabled={false}
       />
     );
@@ -375,7 +377,7 @@ describe('SubFeatureForm', () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <SubFeatureForm
@@ -440,7 +442,7 @@ describe('SubFeatureForm', () => {
     const kibanaPrivileges = createKibanaPrivileges([feature]);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <SubFeatureForm

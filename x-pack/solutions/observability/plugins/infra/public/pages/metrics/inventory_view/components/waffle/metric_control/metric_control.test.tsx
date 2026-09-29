@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
@@ -50,8 +52,8 @@ describe('WaffleMetricControls', () => {
       <WaffleMetricControls
         options={options}
         metric={customMetrics[0]}
-        onChange={jest.fn()}
-        onChangeCustomMetrics={jest.fn()}
+        onChange={vi.fn()}
+        onChangeCustomMetrics={vi.fn()}
         customMetrics={customMetrics}
       />
     );

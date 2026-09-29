@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
 import type { ApmIndicesConfig } from '@kbn/observability-shared-plugin/public';
@@ -28,7 +30,7 @@ describe('registerDataHandler', () => {
   const originalConsole = global.console;
   beforeAll(() => {
     // mocks console to avoid polluting the test output
-    global.console = { error: jest.fn() } as unknown as typeof console;
+    global.console = { error: vi.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {

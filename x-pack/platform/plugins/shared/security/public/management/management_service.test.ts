@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -54,13 +57,13 @@ describe('ManagementService', () => {
       const license = licenseMock.create();
       const managementSetup: ManagementSetup = {
         sections: {
-          register: jest.fn(() => mockSection),
+          register: vi.fn(() => mockSection),
           section: {
             security: mockSection,
           } as DefinedSections,
         },
         locator: {} as any,
-        registerAutoOpsStatusHook: jest.fn(),
+        registerAutoOpsStatusHook: vi.fn(),
       };
 
       const service = new ManagementService({} as unknown as ConfigType);
@@ -197,13 +200,13 @@ describe('ManagementService', () => {
       const license = licenseMock.create();
       const managementSetup: ManagementSetup = {
         sections: {
-          register: jest.fn(() => mockSectionWithConfig),
+          register: vi.fn(() => mockSectionWithConfig),
           section: {
             security: mockSectionWithConfig,
           } as DefinedSections,
         },
         locator: {} as any,
-        registerAutoOpsStatusHook: jest.fn(),
+        registerAutoOpsStatusHook: vi.fn(),
       };
 
       const config = {
@@ -290,13 +293,13 @@ describe('ManagementService', () => {
 
       const managementSetup: ManagementSetup = {
         sections: {
-          register: jest.fn(() => mockSection),
+          register: vi.fn(() => mockSection),
           section: {
             security: mockSection,
           } as DefinedSections,
         },
         locator: {} as any,
-        registerAutoOpsStatusHook: jest.fn(),
+        registerAutoOpsStatusHook: vi.fn(),
       };
 
       const { authc } = securityMock.createSetup();
@@ -319,15 +322,15 @@ describe('ManagementService', () => {
           get enabled() {
             return enabled;
           },
-          enable: jest.fn().mockImplementation(() => {
+          enable: vi.fn().mockImplementation(() => {
             enabled = true;
           }),
-          disable: jest.fn().mockImplementation(() => {
+          disable: vi.fn().mockImplementation(() => {
             enabled = false;
           }),
-        } as unknown as jest.Mocked<ManagementApp>;
+        } as unknown as Mocked<ManagementApp>;
       };
-      const mockApps = new Map<string, jest.Mocked<ManagementApp>>([
+      const mockApps = new Map<string, Mocked<ManagementApp>>([
         [usersManagementApp.id, getMockedApp(usersManagementApp.id)],
         [rolesManagementApp.id, getMockedApp(rolesManagementApp.id)],
         [apiKeysManagementApp.id, getMockedApp(apiKeysManagementApp.id)],
@@ -337,8 +340,8 @@ describe('ManagementService', () => {
           getMockedApp(applicationConnectionsManagementApp.id),
         ],
         [serviceAccountsManagementApp.id, getMockedApp(serviceAccountsManagementApp.id)],
-      ] as Array<[string, jest.Mocked<ManagementApp>]>);
-      mockSection.getApp = jest.fn().mockImplementation((id) => mockApps.get(id));
+      ] as Array<[string, Mocked<ManagementApp>]>);
+      mockSection.getApp = vi.fn().mockImplementation((id) => mockApps.get(id));
 
       service.start({
         capabilities: {

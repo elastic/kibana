@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AugmentMessageCodeBlocks } from './augment_message_code_blocks';
 import { AugmentMessageCodeBlocksService, defaultValue } from './augment_message_code_blocks';
 import type { Conversation } from '@kbn/elastic-assistant';
@@ -31,10 +33,10 @@ describe('AugmentMessageCodeBlocksService', () => {
 
     const mockConversation = {} as Conversation;
     const mockAugmentMessageCodeBlocks: AugmentMessageCodeBlocks = {
-      mount: jest.fn(({ currentConversation, showAnonymizedValues }) => {
+      mount: vi.fn(({ currentConversation, showAnonymizedValues }) => {
         expect(currentConversation).toBe(mockConversation);
         expect(showAnonymizedValues).toBe(true);
-        return jest.fn();
+        return vi.fn();
       }),
     };
 

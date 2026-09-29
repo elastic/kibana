@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import React from 'react';
@@ -48,10 +50,10 @@ const getField = (fieldName: string): DataViewField => {
 };
 
 describe('Default cell actions ', () => {
-  const execCommandMock = (global.document.execCommand = jest.fn());
+  const execCommandMock = (global.document.execCommand = vi.fn());
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const CopyBtn = buildCopyValueButton(
@@ -92,7 +94,7 @@ describe('Default cell actions ', () => {
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
       'table',
-      jest.fn()
+      vi.fn()
     );
 
     expect(cellActions).toHaveLength(3);

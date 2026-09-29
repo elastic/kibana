@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -49,7 +51,7 @@ describe('RoleComboBox', () => {
           },
         ]}
         selectedRoleNames={[]}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
       />
     );
 

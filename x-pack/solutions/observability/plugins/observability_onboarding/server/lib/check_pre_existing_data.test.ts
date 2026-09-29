@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { checkPreExistingData } from './check_pre_existing_data';
 
 const createMockEsClient = (response?: unknown, error?: Error) => {
-  const search = error ? jest.fn().mockRejectedValue(error) : jest.fn().mockResolvedValue(response);
+  const search = error ? vi.fn().mockRejectedValue(error) : vi.fn().mockResolvedValue(response);
   return { search } as unknown as Parameters<typeof checkPreExistingData>[0];
 };
 

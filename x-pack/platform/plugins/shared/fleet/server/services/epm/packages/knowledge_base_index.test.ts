@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -18,23 +21,26 @@ import {
 } from './knowledge_base_index';
 
 // Mock the app context service
-jest.mock('../../app_context', () => ({
-  appContextService: {
-    getLogger: jest.fn().mockReturnValue({
-      error: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
-    }),
-  },
-}));
+vi.mock('../../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: vi.fn().mockReturnValue({
+          error: vi.fn(),
+          warn: vi.fn(),
+          info: vi.fn(),
+          debug: vi.fn(),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('knowledge_base_index', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
     mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('saveKnowledgeBaseContentToIndex', () => {
@@ -50,8 +56,8 @@ describe('knowledge_base_index', () => {
     ];
 
     beforeEach(() => {
-      (mockEsClient.indices.existsIndexTemplate as jest.Mock).mockResolvedValue(true);
-      (mockEsClient.indices.exists as jest.Mock).mockResolvedValue(true);
+      (mockEsClient.indices.existsIndexTemplate as Mock).mockResolvedValue(true);
+      (mockEsClient.indices.exists as Mock).mockResolvedValue(true);
     });
 
     it('should save knowledge base content successfully', async () => {
@@ -113,7 +119,7 @@ describe('knowledge_base_index', () => {
       expect(result).toEqual(['test-package-test1.md', 'test-package-test2.md']);
 
       // Verify the document IDs used in bulk operation follow packageName-fileName pattern
-      const bulkCall = (mockEsClient.bulk as jest.Mock).mock.calls[0][0];
+      const bulkCall = (mockEsClient.bulk as Mock).mock.calls[0][0];
       const bulkId1 = bulkCall.operations[0].index._id;
       const bulkId2 = bulkCall.operations[2].index._id;
 
@@ -200,7 +206,7 @@ describe('knowledge_base_index', () => {
     };
 
     it('should retrieve knowledge base content by package name only', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue(mockSearchResponse as any);
+      (mockEsClient.search as Mock).mockResolvedValue(mockSearchResponse as any);
 
       const result = await getPackageKnowledgeBaseFromIndex(mockEsClient, 'test-package');
 
@@ -236,7 +242,7 @@ describe('knowledge_base_index', () => {
     it('should return empty array when index not found', async () => {
       const notFoundError = new Error('Index not found');
       (notFoundError as any).statusCode = 404;
-      (mockEsClient.search as jest.Mock).mockRejectedValue(notFoundError);
+      (mockEsClient.search as Mock).mockRejectedValue(notFoundError);
 
       const result = await getPackageKnowledgeBaseFromIndex(mockEsClient, 'test-package');
 
@@ -246,7 +252,7 @@ describe('knowledge_base_index', () => {
     it('should throw error for non-404 errors', async () => {
       const serverError = new Error('Server error');
       (serverError as any).statusCode = 500;
-      (mockEsClient.search as jest.Mock).mockRejectedValue(serverError);
+      (mockEsClient.search as Mock).mockRejectedValue(serverError);
 
       await expect(getPackageKnowledgeBaseFromIndex(mockEsClient, 'test-package')).rejects.toThrow(
         'Server error'

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,12 +15,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Form, useForm, useFormData } from '../../../shared_imports';
 import { ReferenceFieldSelects } from './reference_field_selects';
 
-jest.mock('../../../mappings_state_context', () => ({
-  useMappingsState: jest.fn(),
-}));
+vi.mock('../../../mappings_state_context', () => {
+      const mocked = {
+      useMappingsState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,
@@ -62,8 +68,8 @@ const FormWrapper = ({
   );
 };
 
-const mockUseMappingsState = jest.requireMock('../../../mappings_state_context')
-  .useMappingsState as jest.Mock;
+const mockUseMappingsState = (await vi.importMock('../../../mappings_state_context'))
+  .useMappingsState as Mock;
 
 const ReferenceFieldValueSpy = () => {
   const [{ reference_field: referenceField }] = useFormData<{ reference_field?: string }>({

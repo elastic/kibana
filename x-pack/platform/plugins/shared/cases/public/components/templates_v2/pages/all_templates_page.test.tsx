@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,47 +27,56 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type { BulkDeleteTemplatesResponse } from '../types';
 import * as api from '../api/api';
 
-jest.mock('../api/api');
+vi.mock('../api/api');
 
-jest.mock('../../use_breadcrumbs', () => ({
-  useCasesTemplatesBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../use_breadcrumbs', () => {
+      const mocked = {
+      useCasesTemplatesBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNavigateToAllCases = jest.fn();
-const mockNavigateToCasesCreateTemplate = jest.fn();
-const mockNavigateToCasesEditTemplate = jest.fn();
+const mockNavigateToAllCases = vi.fn();
+const mockNavigateToCasesCreateTemplate = vi.fn();
+const mockNavigateToCasesEditTemplate = vi.fn();
 
-jest.mock('../../../common/navigation/hooks', () => ({
-  useAllCasesNavigation: () => ({
-    getAllCasesUrl: jest.fn().mockReturnValue('/'),
-    navigateToAllCases: mockNavigateToAllCases,
-  }),
-  useCasesCreateTemplateNavigation: () => ({
-    getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
-    navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
-  }),
-  useCasesFieldLibraryNavigation: () => ({
-    getCasesFieldLibraryUrl: jest.fn().mockReturnValue('/field-library'),
-    navigateToCasesFieldLibrary: jest.fn(),
-  }),
-}));
+vi.mock('../../../common/navigation/hooks', () => {
+      const mocked = {
+      useAllCasesNavigation: () => ({
+        getAllCasesUrl: vi.fn().mockReturnValue('/'),
+        navigateToAllCases: mockNavigateToAllCases,
+      }),
+      useCasesCreateTemplateNavigation: () => ({
+        getCasesCreateTemplateUrl: vi.fn().mockReturnValue('/templates/create'),
+        navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+      }),
+      useCasesFieldLibraryNavigation: () => ({
+        getCasesFieldLibraryUrl: vi.fn().mockReturnValue('/field-library'),
+        navigateToCasesFieldLibrary: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/navigation', () => ({
-  useCasesCreateTemplateNavigation: () => ({
-    getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
-    navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
-  }),
-  useCasesEditTemplateNavigation: () => ({
-    getCasesEditTemplateUrl: jest.fn().mockReturnValue('/templates/edit'),
-    navigateToCasesEditTemplate: mockNavigateToCasesEditTemplate,
-  }),
-  useCasesFieldLibraryNavigation: () => ({
-    getCasesFieldLibraryUrl: jest.fn().mockReturnValue('/field-library'),
-    navigateToCasesFieldLibrary: jest.fn(),
-  }),
-}));
+vi.mock('../../../common/navigation', () => {
+      const mocked = {
+      useCasesCreateTemplateNavigation: () => ({
+        getCasesCreateTemplateUrl: vi.fn().mockReturnValue('/templates/create'),
+        navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+      }),
+      useCasesEditTemplateNavigation: () => ({
+        getCasesEditTemplateUrl: vi.fn().mockReturnValue('/templates/edit'),
+        navigateToCasesEditTemplate: mockNavigateToCasesEditTemplate,
+      }),
+      useCasesFieldLibraryNavigation: () => ({
+        getCasesFieldLibraryUrl: vi.fn().mockReturnValue('/field-library'),
+        navigateToCasesFieldLibrary: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const apiMock = api as jest.Mocked<typeof api>;
+const apiMock = api as Mocked<typeof api>;
 
 describe('AllTemplatesPage', () => {
   const mockTemplatesResponse = {
@@ -108,12 +120,12 @@ describe('AllTemplatesPage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     apiMock.getTemplates.mockResolvedValue(mockTemplatesResponse);
     // clearAllMocks keeps implementations, so reset this one: the tests below install a promise they
     // resolve by hand, which any later test would otherwise inherit as a delete that never settles.
     apiMock.bulkDeleteTemplates.mockResolvedValue({ success: true, deleted: [], errors: [] });
-    jest
+    vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig

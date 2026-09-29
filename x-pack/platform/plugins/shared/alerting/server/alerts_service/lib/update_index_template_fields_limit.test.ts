@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
@@ -34,7 +36,7 @@ const createTemplate = (
 
 describe('updateIndexTemplateFieldsLimit', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('calls putIndexTemplate with the updated total_fields.limit', async () => {

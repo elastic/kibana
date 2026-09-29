@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -79,7 +81,7 @@ describe('UserMessageText', () => {
 
   describe('onHoverImage', () => {
     it('calls onHoverImage with the image name on mouse enter', () => {
-      const onHoverImage = jest.fn();
+      const onHoverImage = vi.fn();
       renderWithProvider(
         <UserMessageText text="[photo.png](image://photo.png)" onHoverImage={onHoverImage} />
       );
@@ -90,7 +92,7 @@ describe('UserMessageText', () => {
     });
 
     it('calls onHoverImage with null on mouse leave', () => {
-      const onHoverImage = jest.fn();
+      const onHoverImage = vi.fn();
       renderWithProvider(
         <UserMessageText text="[photo.png](image://photo.png)" onHoverImage={onHoverImage} />
       );

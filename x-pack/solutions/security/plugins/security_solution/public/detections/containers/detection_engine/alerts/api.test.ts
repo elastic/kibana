@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   alertsMock,
@@ -30,9 +33,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { searchAttacks } from '../../../../common/containers/attacks/api';
 
 const abortCtrl = new AbortController();
-const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/containers/attacks/api');
+const mockKibanaServices = KibanaServices.get as Mock;
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/containers/attacks/api');
 
 const coreStartMock = coreMock.createStart({ basePath: '/mock' });
 mockKibanaServices.mockReturnValue(coreStartMock);
@@ -108,8 +111,8 @@ describe('Detections Alerts API', () => {
 
   describe('fetchQueryAttacks', () => {
     beforeEach(() => {
-      (searchAttacks as jest.Mock).mockClear();
-      (searchAttacks as jest.Mock).mockResolvedValue(alertsMock);
+      (searchAttacks as Mock).mockClear();
+      (searchAttacks as Mock).mockResolvedValue(alertsMock);
     });
 
     test('calls searchAttacks with query and signal', async () => {

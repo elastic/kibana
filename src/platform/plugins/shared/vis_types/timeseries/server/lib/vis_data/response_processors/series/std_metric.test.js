@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stdMetric } from './std_metric';
 
 describe('stdMetric(resp, panel, series)', () => {
@@ -49,7 +51,7 @@ describe('stdMetric(resp, panel, series)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     await stdMetric(resp, panel, series, {})(next)([]);
 
     expect(next.mock.calls.length).toEqual(1);
@@ -58,7 +60,7 @@ describe('stdMetric(resp, panel, series)', () => {
   test('calls next when finished (percentile)', async () => {
     series.metrics[0].type = 'percentile';
 
-    const next = jest.fn((d) => d);
+    const next = vi.fn((d) => d);
     const results = await stdMetric(resp, panel, series, {})(next)([]);
 
     expect(next.mock.calls.length).toEqual(1);
@@ -69,7 +71,7 @@ describe('stdMetric(resp, panel, series)', () => {
     series.metrics[0].type = 'std_deviation';
     series.metrics[0].mode = 'band';
 
-    const next = jest.fn((d) => d);
+    const next = vi.fn((d) => d);
     const results = await stdMetric(resp, panel, series, {})(next)([]);
 
     expect(next.mock.calls.length).toEqual(1);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -25,14 +28,14 @@ describe.each([
   let render: (
     props?: Partial<ArtifactEntryCollapsibleCardProps>
   ) => ReturnType<AppContextTestRender['render']>;
-  let handleOnExpandCollapse: jest.MockedFunction<
+  let handleOnExpandCollapse: MockedFunction<
     ArtifactEntryCollapsibleCardProps['onExpandCollapse']
   >;
 
   beforeEach(() => {
     item = generateItem();
     appTestContext = createAppRootMockRenderer();
-    handleOnExpandCollapse = jest.fn();
+    handleOnExpandCollapse = vi.fn();
     render = (props = {}) => {
       const cardProps: ArtifactEntryCollapsibleCardProps = {
         item,

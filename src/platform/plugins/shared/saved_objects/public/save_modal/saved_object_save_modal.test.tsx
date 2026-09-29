@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
@@ -15,8 +17,8 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
-jest.mock('@elastic/eui', () => {
-  const actualEui = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actualEui = (await vi.importActual('@elastic/eui'));
   return {
     ...actualEui,
     withEuiTheme: (Component: any) => (props: any) =>
@@ -33,9 +35,9 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockSave = jest.fn();
-const mockHasLibraryItemWithTitle = jest.fn().mockResolvedValue(false);
-const mockClose = jest.fn();
+const mockSave = vi.fn();
+const mockHasLibraryItemWithTitle = vi.fn().mockResolvedValue(false);
+const mockClose = vi.fn();
 
 describe('SavedObjectSaveModal', () => {
   it('should render', async () => {
@@ -138,7 +140,7 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('enforces copy on save', async () => {
-    const onSave = jest.fn();
+    const onSave = vi.fn();
 
     render(
       <EuiProvider>
@@ -189,7 +191,7 @@ describe('SavedObjectSaveModal', () => {
 
   describe('handle title duplication logic', () => {
     it('should append "[1]" to title if no number is present', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       render(
         <I18nProvider>
@@ -215,7 +217,7 @@ describe('SavedObjectSaveModal', () => {
     });
 
     it('should increment the number by one when a number is already present', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       render(
         <I18nProvider>

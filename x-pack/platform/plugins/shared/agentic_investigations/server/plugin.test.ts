@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -23,13 +26,19 @@ import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants'
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
 
-jest.mock('./impact/routes/register_routes', () => ({
-  registerImpactRoutes: jest.fn(),
-}));
+vi.mock('./impact/routes/register_routes', () => {
+      const mocked = {
+      registerImpactRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./escalations/routes/register_routes', () => ({
-  registerEscalationRoutes: jest.fn(),
-}));
+vi.mock('./escalations/routes/register_routes', () => {
+      const mocked = {
+      registerEscalationRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createContext = () =>
   ({
@@ -39,10 +48,10 @@ const createContext = () =>
 const setupPlugin = () => {
   const plugin = new AgenticInvestigationsPlugin(createContext());
   const coreSetup = coreMock.createSetup();
-  const features = { registerKibanaFeature: jest.fn() };
+  const features = { registerKibanaFeature: vi.fn() };
 
-  const workflowsExtensions = { registerStepDefinition: jest.fn() };
-  const agentBuilder = { attachments: { registerType: jest.fn() } };
+  const workflowsExtensions = { registerStepDefinition: vi.fn() };
+  const agentBuilder = { attachments: { registerType: vi.fn() } };
 
   plugin.setup(
     coreSetup as never,
@@ -62,19 +71,19 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   const coreStart = coreMock.createStart();
   const agentBuilder = {
     conversations: {
-      getScopedClient: jest.fn().mockReturnValue({
-        get: jest.fn(),
-        bulkGet: jest.fn(),
-        list: jest.fn(),
-        search: jest.fn(),
-        create: jest.fn(),
-        patchMetadata: jest.fn(),
-        update: jest.fn(),
+      getScopedClient: vi.fn().mockReturnValue({
+        get: vi.fn(),
+        bulkGet: vi.fn(),
+        list: vi.fn(),
+        search: vi.fn(),
+        create: vi.fn(),
+        patchMetadata: vi.fn(),
+        update: vi.fn(),
       }),
     },
     conversationTemplates: {
-      get: jest.fn().mockResolvedValue(undefined),
-      list: jest.fn().mockResolvedValue([]),
+      get: vi.fn().mockResolvedValue(undefined),
+      list: vi.fn().mockResolvedValue([]),
     },
   };
 
@@ -91,12 +100,12 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
 };
 
 /** The single registered feature config, for assertions on its shape. */
-const registeredFeature = (features: { registerKibanaFeature: jest.Mock }) =>
+const registeredFeature = (features: { registerKibanaFeature: Mock }) =>
   features.registerKibanaFeature.mock.calls[0][0];
 
 describe('AgenticInvestigationsPlugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setup', () => {

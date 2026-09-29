@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,7 +22,7 @@ describe('IacTemplateDetails', () => {
   const defaultProps = {
     iacDeploymentId: '',
     isDeploymentIdInvalid: false,
-    onIacDeploymentIdChange: jest.fn(),
+    onIacDeploymentIdChange: vi.fn(),
   };
 
   const renderComponent = (props = {}) =>
@@ -31,7 +33,7 @@ describe('IacTemplateDetails', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the stack console link when deployment ID is a valid ARN', () => {
@@ -67,7 +69,7 @@ describe('IacTemplateDetails', () => {
   });
 
   it('calls onIacDeploymentIdChange with trimmed value on input change', () => {
-    const onIacDeploymentIdChange = jest.fn();
+    const onIacDeploymentIdChange = vi.fn();
     renderComponent({ onIacDeploymentIdChange });
 
     const input = screen.getByTestId(

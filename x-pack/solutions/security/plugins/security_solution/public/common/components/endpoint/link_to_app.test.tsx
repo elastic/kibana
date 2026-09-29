@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { mount, type ComponentType } from 'enzyme';
 import { LinkToApp } from './link_to_app';
@@ -12,13 +15,13 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
-type LinkToAppOnClickMock<Return = void> = jest.Mock<
+type LinkToAppOnClickMock<Return = void> = Mock<
   Return,
   [React.MouseEvent<HTMLAnchorElement, MouseEvent>]
 >;
 
 describe('LinkToApp component', () => {
-  let fakeCoreStart: jest.Mocked<CoreStart>;
+  let fakeCoreStart: Mocked<CoreStart>;
   const render = (ui: Parameters<typeof mount>[0]) =>
     mount(ui, {
       wrappingComponent: KibanaContextProvider as ComponentType<{}>,
@@ -45,7 +48,7 @@ describe('LinkToApp component', () => {
   });
   it('should support onClick prop', () => {
     // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
-    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn().mockImplementation((_event) => {});
+    const spyOnClickHandler: LinkToAppOnClickMock = vi.fn().mockImplementation((_event) => {});
     const renderResult = render(
       <LinkToApp appId="fleet" href="/app/fleet" onClick={spyOnClickHandler}>
         {'link'}
@@ -99,7 +102,7 @@ describe('LinkToApp component', () => {
   });
   it('should still preventDefault if onClick callback throws', () => {
     // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
-    const spyOnClickHandler = jest.fn().mockImplementation((_event) => {
+    const spyOnClickHandler = vi.fn().mockImplementation((_event) => {
       throw new Error('test');
     });
     // eslint-disable-next-line no-empty
@@ -116,7 +119,7 @@ describe('LinkToApp component', () => {
     }
   });
   it('should not navigate if onClick callback prevents default', () => {
-    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn().mockImplementation((ev) => {
+    const spyOnClickHandler: LinkToAppOnClickMock = vi.fn().mockImplementation((ev) => {
       ev.preventDefault();
     });
     const renderResult = render(

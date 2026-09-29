@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ColorPickerProps } from './color_picker';
 import { ColorPicker } from './color_picker';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 describe('ColorPicker', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const defaultProps: ColorPickerProps = {
     name: 'color',
     value: null,
@@ -25,7 +27,7 @@ describe('ColorPicker', () => {
     render(<ColorPicker {...defaultProps} {...props} />);
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the EuiColorPicker', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { Observable } from '../../../common/types/domain';
 import { createCasesClientMockArgs } from '../mocks';
 import { emitObservablesAddedEvent } from './trigger_utils';
@@ -43,7 +45,7 @@ describe('emitObservablesAddedEvent', () => {
       observableTypeKeys: ['observable-type-url', 'observable-type-ipv4', 'observable-type-url'],
     });
 
-    const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock.calls;
+    const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as Mock).mock.calls;
     expect(payload.observableIds.length).toBe(payload.observableTypeKeys.length);
   });
 
@@ -67,7 +69,7 @@ describe('emitObservablesAddedEvent', () => {
     const theCase = makeCase();
     emitObservablesAddedEvent(clientArgs, theCase, [makeObservable()]);
 
-    const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock.calls;
+    const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as Mock).mock.calls;
 
     expect(payload).not.toHaveProperty('value');
     expect(payload).not.toHaveProperty('description');

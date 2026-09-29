@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchSynonymSets } from './fetch_synonym_sets';
 
 describe('fetch synonym sets lib function', () => {
   const mockClient = {
     security: {
-      hasPrivileges: jest.fn(),
+      hasPrivileges: vi.fn(),
     },
     synonyms: {
-      getSynonymsSets: jest.fn(),
+      getSynonymsSets: vi.fn(),
     },
   };
 
   const client = () => mockClient as unknown as ElasticsearchClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should return synonym sets', async () => {
     mockClient.synonyms.getSynonymsSets.mockResolvedValue({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
@@ -56,23 +59,26 @@ import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_
 import { MetaArchValue, EndpointArtifactScanContext } from '../../../../../common/endpoint/types';
 import { validateYaraRule, YaraEngineUnavailableError } from '../../../lib/libyara';
 
-jest.mock('../../../lib/reference_data');
-jest.mock('../../../lib/libyara', () => ({
-  validateYaraRule: jest.fn(async () => ({
-    errors: [],
-    warnings: [],
-    errorCount: 0,
-    warningCount: 0,
-    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
-  })),
-  YaraEngineUnavailableError: jest.requireActual('../../../lib/libyara/errors')
-    .YaraEngineUnavailableError,
-}));
+vi.mock('../../../lib/reference_data');
+vi.mock('../../../lib/libyara', async () => {
+      const mocked = {
+      validateYaraRule: vi.fn(async () => ({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      })),
+      YaraEngineUnavailableError: (await vi.importActual('../../../lib/libyara/errors'))
+        .YaraEngineUnavailableError,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
+const mockValidateYaraRule = validateYaraRule as MockedFunction<typeof validateYaraRule>;
 
 const mockedGetIsEndpointExceptionsPerPolicyEnabled =
-  getIsEndpointExceptionsPerPolicyEnabled as jest.MockedFunction<
+  getIsEndpointExceptionsPerPolicyEnabled as MockedFunction<
     typeof getIsEndpointExceptionsPerPolicyEnabled
   >;
 
@@ -122,8 +128,8 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX = 'endpoint-yararules-linux-v1';
 
   const getMockPolicyFetchAllItemIds = (items: string[]) =>
-    jest.fn(async () =>
-      jest.fn(async function* () {
+    vi.fn(async () =>
+      vi.fn(async function* () {
         yield items;
       })()
     );
@@ -160,12 +166,12 @@ describe('ManifestManager', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedGetIsEndpointExceptionsPerPolicyEnabled.mockResolvedValue(false);
   });
 
   describe('getLastComputedManifest from Unified Manifest SO', () => {
-    const mockGetAllUnifiedManifestsSOFromCache = jest.fn().mockImplementation(() => [
+    const mockGetAllUnifiedManifestsSOFromCache = vi.fn().mockImplementation(() => [
       {
         policyId: '.global',
         semanticVersion: '1.0.0',
@@ -205,7 +211,7 @@ describe('ManifestManager', () => {
         })
       );
 
-      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => []);
+      manifestManager.getAllUnifiedManifestsSO = vi.fn().mockImplementation(() => []);
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -224,7 +230,7 @@ describe('ManifestManager', () => {
         })
       );
 
-      savedObjectsClient.get = jest.fn().mockImplementation(async (objectType: string) => {
+      savedObjectsClient.get = vi.fn().mockImplementation(async (objectType: string) => {
         if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
           return {
             attributes: {
@@ -240,7 +246,7 @@ describe('ManifestManager', () => {
         }
       });
 
-      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => []);
+      manifestManager.getAllUnifiedManifestsSO = vi.fn().mockImplementation(() => []);
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -258,7 +264,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(manifestManagerContext);
 
       (
-        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+        manifestManagerContext.artifactClient as Mocked<EndpointArtifactClientInterface>
       ).fetchAll.mockReturnValue(createFetchAllArtifactsIterableMock([ARTIFACTS as Artifact[]]));
 
       manifestManager.getAllUnifiedManifestsSO = mockGetAllUnifiedManifestsSOFromCache;
@@ -297,7 +303,7 @@ describe('ManifestManager', () => {
       manifestManager.getAllUnifiedManifestsSO = mockGetAllUnifiedManifestsSOFromCache;
 
       (
-        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+        manifestManagerContext.artifactClient as Mocked<EndpointArtifactClientInterface>
       ).fetchAll.mockReturnValue(
         createFetchAllArtifactsIterableMock([
           // report the MACOS Exceptions artifact as not found
@@ -335,7 +341,7 @@ describe('ManifestManager', () => {
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
-      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => [
+      manifestManager.getAllUnifiedManifestsSO = vi.fn().mockImplementation(() => [
         {
           policyId: '.global',
           semanticVersion: '1.0.0',
@@ -359,10 +365,10 @@ describe('ManifestManager', () => {
         },
       ]);
 
-      context.savedObjectsClient.bulkCreate = jest.fn();
-      context.savedObjectsClient.bulkUpdate = jest.fn();
-      context.savedObjectsClient.bulkDelete = jest.fn();
-      manifestManager.bumpGlobalUnifiedManifestVersion = jest.fn();
+      context.savedObjectsClient.bulkCreate = vi.fn();
+      context.savedObjectsClient.bulkUpdate = vi.fn();
+      context.savedObjectsClient.bulkDelete = vi.fn();
+      manifestManager.bumpGlobalUnifiedManifestVersion = vi.fn();
 
       await expect(manifestManager.commit(manifest)).resolves.toBeUndefined();
       expect(context.savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -439,7 +445,7 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
-      context.exceptionListClient.findExceptionListItem = jest.fn().mockRejectedValue(new Error());
+      context.exceptionListClient.findExceptionListItem = vi.fn().mockRejectedValue(new Error());
 
       await expect(manifestManager.buildNewManifest()).rejects.toThrow();
     });
@@ -1637,7 +1643,7 @@ describe('ManifestManager', () => {
 
       // License downgrade while the failed build's snapshot is still the last thing fetched.
       // The list client still returns the signature; a cache hit would ship it once the engine recovers.
-      context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+      context.licenseService.isEnterprise = vi.fn().mockReturnValue(false);
       mockValidateYaraRule.mockResolvedValue({
         errors: [],
         warnings: [],
@@ -1696,7 +1702,7 @@ describe('ManifestManager', () => {
       });
       const manifestManager = new ManifestManager(context);
 
-      context.exceptionListClient.findExceptionListItem = jest.fn(async (...args) => {
+      context.exceptionListClient.findExceptionListItem = vi.fn(async (...args) => {
         const options = args[0] as { listId?: string };
         if (options?.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id) {
           // gated fetch for Trusted Apps
@@ -2020,7 +2026,7 @@ describe('ManifestManager', () => {
 
     test(`Returns errors for partial failures`, async () => {
       const context = buildManifestManagerContextMock({});
-      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const artifactClient = context.artifactClient as Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const error = new Error();
 
@@ -2047,7 +2053,7 @@ describe('ManifestManager', () => {
 
     test(`Returns errors for trusted devices deletion failures`, async () => {
       const context = buildManifestManagerContextMock({});
-      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const artifactClient = context.artifactClient as Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const error = new Error();
 
@@ -2076,7 +2082,7 @@ describe('ManifestManager', () => {
   describe('pushArtifacts', () => {
     test(`Successfully invokes artifactClient `, async () => {
       const context = buildManifestManagerContextMock({});
-      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const artifactClient = context.artifactClient as Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const newManifest = ManifestManager.createDefaultManifest();
 
@@ -2099,7 +2105,7 @@ describe('ManifestManager', () => {
 
     test(`Successfully pushes trusted devices artifacts`, async () => {
       const context = buildManifestManagerContextMock({});
-      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const artifactClient = context.artifactClient as Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const newManifest = ManifestManager.createDefaultManifest();
 
@@ -2122,7 +2128,7 @@ describe('ManifestManager', () => {
 
     test(`Returns errors for partial failures`, async () => {
       const context = buildManifestManagerContextMock({});
-      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const artifactClient = context.artifactClient as Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const newManifest = ManifestManager.createDefaultManifest();
       const error = new Error();
@@ -2163,7 +2169,7 @@ describe('ManifestManager', () => {
 
     test(`Returns errors for trusted devices artifact failures`, async () => {
       const context = buildManifestManagerContextMock({});
-      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const artifactClient = context.artifactClient as Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const newManifest = ManifestManager.createDefaultManifest();
       const error = new Error();
@@ -2205,8 +2211,8 @@ describe('ManifestManager', () => {
 
   describe('tryDispatch', () => {
     const getMockPolicyFetchAllItems = (items: PackagePolicy[]) =>
-      jest.fn(async () =>
-        jest.fn(async function* () {
+      vi.fn(async () =>
+        vi.fn(async function* () {
           yield items;
         })()
       );
@@ -2328,7 +2334,7 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+      context.packagePolicyService.bulkUpdate = vi.fn().mockResolvedValue({
         updatedPolicies: [],
         failedPolicies: [],
       });
@@ -2402,7 +2408,7 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+      context.packagePolicyService.bulkUpdate = vi.fn().mockResolvedValue({
         updatedPolicies: [],
         failedPolicies: [],
       });
@@ -2470,7 +2476,7 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+      context.packagePolicyService.bulkUpdate = vi.fn().mockResolvedValue({
         updatedPolicies: [],
         failedPolicies: [],
       });
@@ -2535,7 +2541,7 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+      context.packagePolicyService.bulkUpdate = vi.fn().mockResolvedValue({
         updatedPolicies: [{}],
         failedPolicies: [{ packagePolicy: policy1, error }],
       });
@@ -2580,9 +2586,9 @@ describe('ManifestManager', () => {
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      context.packagePolicyService.get = jest.fn().mockResolvedValue(latestPolicy);
+      context.packagePolicyService.get = vi.fn().mockResolvedValue(latestPolicy);
       context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
-      context.packagePolicyService.bulkUpdate = jest
+      context.packagePolicyService.bulkUpdate = vi
         .fn()
         .mockResolvedValueOnce({
           updatedPolicies: [],
@@ -2654,9 +2660,9 @@ describe('ManifestManager', () => {
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      context.packagePolicyService.get = jest.fn().mockResolvedValue(policy);
+      context.packagePolicyService.get = vi.fn().mockResolvedValue(policy);
       context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+      context.packagePolicyService.bulkUpdate = vi.fn().mockResolvedValue({
         updatedPolicies: [],
         failedPolicies: [{ error, packagePolicy: policy }],
       });
@@ -2676,7 +2682,7 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
-      (context.artifactClient.fetchAll as jest.Mock).mockReturnValue(
+      (context.artifactClient.fetchAll as Mock).mockReturnValue(
         createFetchAllArtifactsIterableMock([[generateArtifactMock()]])
       );
 
@@ -2685,7 +2691,7 @@ describe('ManifestManager', () => {
         TEST_POLICY_ID_1,
       ]);
 
-      context.savedObjectsClient.create = jest
+      context.savedObjectsClient.create = vi
         .fn()
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
@@ -2710,13 +2716,13 @@ describe('ManifestManager', () => {
         TEST_POLICY_ID_1,
       ]);
 
-      context.savedObjectsClient.create = jest
+      context.savedObjectsClient.create = vi
         .fn()
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
 
-      context.artifactClient.listArtifacts = jest.fn().mockResolvedValue([
+      context.artifactClient.listArtifacts = vi.fn().mockResolvedValue([
         {
           id: '123',
           type: 'trustlist',
@@ -2751,7 +2757,7 @@ describe('ManifestManager', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('transforms', () => {
@@ -3031,7 +3037,7 @@ describe('ManifestManager', () => {
     });
     describe('bumpGlobalUnifiedManifestVersion', () => {
       const createSoFindMock = (savedObjects: Array<Record<string, unknown>>) =>
-        jest.fn().mockImplementation(async (objectType: { type: string }) => {
+        vi.fn().mockImplementation(async (objectType: { type: string }) => {
           if (objectType.type === ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE) {
             return {
               saved_objects: savedObjects,
@@ -3051,7 +3057,7 @@ describe('ManifestManager', () => {
             },
           },
         ]);
-        context.savedObjectsClient.bulkUpdate = jest.fn();
+        context.savedObjectsClient.bulkUpdate = vi.fn();
         await manifestManager.bumpGlobalUnifiedManifestVersion();
         expect(context.savedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
           {
@@ -3066,7 +3072,7 @@ describe('ManifestManager', () => {
       });
       test('should make a clean return when no global manifest is found', async () => {
         context.savedObjectsClient.find = createSoFindMock([]);
-        context.savedObjectsClient.bulkUpdate = jest.fn();
+        context.savedObjectsClient.bulkUpdate = vi.fn();
         await manifestManager.bumpGlobalUnifiedManifestVersion();
         expect(context.savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(0);
       });
@@ -3116,10 +3122,10 @@ describe('ManifestManager', () => {
       });
 
       test('should return false when only PLI is enabled (enterprise required)', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        context.productFeaturesService.isEnabled = vi.fn().mockImplementation((key) => {
           return key === ProductFeatureKey.endpointTrustedDevices;
         });
-        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = vi.fn().mockReturnValue(false);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (
@@ -3133,8 +3139,8 @@ describe('ManifestManager', () => {
       });
 
       test('should return false when only enterprise license is present (PLI required)', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
-        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        context.productFeaturesService.isEnabled = vi.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = vi.fn().mockReturnValue(true);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (
@@ -3145,10 +3151,10 @@ describe('ManifestManager', () => {
       });
 
       test('should return true when both PLI and enterprise license are enabled', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        context.productFeaturesService.isEnabled = vi.fn().mockImplementation((key) => {
           return key === ProductFeatureKey.endpointTrustedDevices;
         });
-        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        context.licenseService.isEnterprise = vi.fn().mockReturnValue(true);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (
@@ -3163,8 +3169,8 @@ describe('ManifestManager', () => {
       });
 
       test('should return false when neither PLI nor enterprise license are enabled', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
-        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        context.productFeaturesService.isEnabled = vi.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = vi.fn().mockReturnValue(false);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (
@@ -3203,10 +3209,10 @@ describe('ManifestManager', () => {
       });
 
       test('should return false when only PLI is enabled (enterprise required)', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        context.productFeaturesService.isEnabled = vi.fn().mockImplementation((key) => {
           return key === ProductFeatureKey.endpointCustomYaraSignatures;
         });
-        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = vi.fn().mockReturnValue(false);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (
@@ -3220,8 +3226,8 @@ describe('ManifestManager', () => {
       });
 
       test('should return false when only enterprise license is present (PLI required)', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
-        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        context.productFeaturesService.isEnabled = vi.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = vi.fn().mockReturnValue(true);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (
@@ -3232,10 +3238,10 @@ describe('ManifestManager', () => {
       });
 
       test('should return true when both PLI and enterprise license are enabled', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        context.productFeaturesService.isEnabled = vi.fn().mockImplementation((key) => {
           return key === ProductFeatureKey.endpointCustomYaraSignatures;
         });
-        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        context.licenseService.isEnterprise = vi.fn().mockReturnValue(true);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (
@@ -3250,8 +3256,8 @@ describe('ManifestManager', () => {
       });
 
       test('should return false when neither PLI nor enterprise license are enabled', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
-        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        context.productFeaturesService.isEnabled = vi.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = vi.fn().mockReturnValue(false);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (
@@ -3272,7 +3278,7 @@ describe('ManifestManager', () => {
       });
 
       test('should return true for host isolation exceptions when product feature is enabled', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        context.productFeaturesService.isEnabled = vi.fn().mockImplementation((key) => {
           return key === ProductFeatureKey.endpointHostIsolationExceptions;
         });
         manifestManager = new ManifestManager(context);
@@ -3288,7 +3294,7 @@ describe('ManifestManager', () => {
       });
 
       test('should return false for host isolation exceptions when product feature is disabled', () => {
-        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.productFeaturesService.isEnabled = vi.fn().mockReturnValue(false);
         manifestManager = new ManifestManager(context);
 
         const shouldRetrieve = (

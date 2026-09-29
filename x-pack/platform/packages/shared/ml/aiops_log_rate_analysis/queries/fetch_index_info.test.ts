@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -18,7 +20,7 @@ import { fetchIndexInfo } from './fetch_index_info';
 
 describe('fetchIndexInfo', () => {
   it('returns field candidates and total hits for "my" fields', async () => {
-    const esClientFieldCapsMock = jest.fn(() => ({
+    const esClientFieldCapsMock = vi.fn(() => ({
       fields: {
         // Should end up as a field candidate
         myIpFieldName: { ip: { aggregatable: true } },
@@ -30,7 +32,7 @@ describe('fetchIndexInfo', () => {
         myNumericFieldName: { number: {} },
       },
     }));
-    const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+    const esClientSearchMock = vi.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
       return {
         hits: {
           hits: [],
@@ -58,8 +60,8 @@ describe('fetchIndexInfo', () => {
   });
 
   it('returns field candidates and total hits for pgBench mappings', async () => {
-    const esClientFieldCapsMock = jest.fn(() => fieldCapsPgBenchMock);
-    const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+    const esClientFieldCapsMock = vi.fn(() => fieldCapsPgBenchMock);
+    const esClientSearchMock = vi.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
       return {
         hits: {
           hits: [],
@@ -139,8 +141,8 @@ describe('fetchIndexInfo', () => {
   });
 
   it('returns field candidates and total hits for ecommerce mappings', async () => {
-    const esClientFieldCapsMock = jest.fn(() => fieldCapsEcommerceMock);
-    const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+    const esClientFieldCapsMock = vi.fn(() => fieldCapsEcommerceMock);
+    const esClientSearchMock = vi.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
       return {
         hits: {
           hits: [],
@@ -199,8 +201,8 @@ describe('fetchIndexInfo', () => {
   });
 
   it('returns field candidates and total hits for large-arrays mappings', async () => {
-    const esClientFieldCapsMock = jest.fn(() => fieldCapsLargeArraysMock);
-    const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+    const esClientFieldCapsMock = vi.fn(() => fieldCapsLargeArraysMock);
+    const esClientSearchMock = vi.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
       return {
         hits: {
           hits: [],

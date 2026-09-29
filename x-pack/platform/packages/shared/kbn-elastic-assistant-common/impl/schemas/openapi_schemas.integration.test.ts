@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // eslint-disable-next-line import/no-nodejs-modules
 import { resolve } from 'path';
 
 import execa from 'execa';
 
 describe('Security AI Assistant OpenAPI route schemas', () => {
-  jest.setTimeout(120000);
+  vi.setConfig({ testTimeout: 120000 });
 
   it('pass Redocly lint via openapi:validate script', async () => {
     await execa(process.execPath, ['scripts/openapi/validate.js'], {

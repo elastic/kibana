@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 
@@ -12,9 +15,9 @@ import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import { useBulkExportTemplates } from './use_bulk_export_templates';
 import * as api from '../api/api';
 
-jest.mock('../api/api');
+vi.mock('../api/api');
 
-const apiMock = api as jest.Mocked<typeof api>;
+const apiMock = api as Mocked<typeof api>;
 
 describe('useBulkExportTemplates', () => {
   const mockBulkExportResponse = {
@@ -23,7 +26,7 @@ describe('useBulkExportTemplates', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     apiMock.bulkExportTemplates.mockResolvedValue(mockBulkExportResponse);
   });
 

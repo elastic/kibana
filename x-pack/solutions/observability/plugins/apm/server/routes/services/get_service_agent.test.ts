@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   AGENT_NAME,
@@ -15,7 +18,7 @@ import {
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceAgent } from './get_service_agent';
 
-type SearchMock = jest.Mock<Promise<unknown>>;
+type SearchMock = Mock<Promise<unknown>>;
 
 const start = 1_700_000_000_000;
 const end = 1_700_000_900_000;
@@ -52,7 +55,7 @@ function getSearchParams(search: SearchMock, callIndex = 0) {
 
 describe('getServiceAgent', () => {
   it('synthesizes the agent name from telemetry SDK fields for native OTel services', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(
       hitResponse({
         [TELEMETRY_SDK_NAME]: ['opentelemetry'],
         [TELEMETRY_SDK_LANGUAGE]: ['java'],
@@ -68,7 +71,7 @@ describe('getServiceAgent', () => {
   });
 
   it('returns the classic APM agent name verbatim when agent.name exists', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(
       hitResponse({
         [AGENT_NAME]: ['java'],
       })
@@ -81,7 +84,7 @@ describe('getServiceAgent', () => {
   });
 
   it('matches documents that have agent.name or telemetry SDK fields', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(emptyResponse());
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(emptyResponse());
     const apmEventClient = { search } as unknown as APMEventClient;
 
     await getServiceAgent({ ...baseParams, apmEventClient });
@@ -107,7 +110,7 @@ describe('getServiceAgent', () => {
   });
 
   it('returns an empty object when there is no hit', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(emptyResponse());
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(emptyResponse());
     const apmEventClient = { search } as unknown as APMEventClient;
 
     const result = await getServiceAgent({ ...baseParams, apmEventClient });
@@ -116,7 +119,7 @@ describe('getServiceAgent', () => {
   });
 
   it('scopes the query to the selected environment', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(emptyResponse());
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(emptyResponse());
     const apmEventClient = { search } as unknown as APMEventClient;
 
     await getServiceAgent({ ...baseParams, environment: 'production', apmEventClient });
@@ -128,7 +131,7 @@ describe('getServiceAgent', () => {
   });
 
   it('does not add an environment filter for ENVIRONMENT_ALL', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(emptyResponse());
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(emptyResponse());
     const apmEventClient = { search } as unknown as APMEventClient;
 
     await getServiceAgent({ ...baseParams, apmEventClient });

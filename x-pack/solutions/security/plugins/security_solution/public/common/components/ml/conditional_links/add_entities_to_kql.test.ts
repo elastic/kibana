@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { entityToKql, entitiesToKql, addEntitiesToKql } from './add_entities_to_kql';
 
 describe('add_entities_to_kql', () => {
@@ -12,7 +14,7 @@ describe('add_entities_to_kql', () => {
   /* eslint-disable no-console */
   const originalError = console.log;
   beforeAll(() => {
-    console.log = jest.fn();
+    console.log = vi.fn();
   });
 
   afterAll(() => {

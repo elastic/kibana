@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, act, fireEvent } from '@testing-library/react';
 import { FeedbackBody } from './feedback_body';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-const mockGetCurrentUserEmail = jest.fn().mockResolvedValue(undefined);
+const mockGetCurrentUserEmail = vi.fn().mockResolvedValue(undefined);
 
 const mockProps = {
-  handleChangeCsatOptionId: jest.fn(),
-  handleChangeQuestionAnswer: jest.fn(),
-  handleChangeAllowEmailContact: jest.fn(),
-  handleChangeEmail: jest.fn(),
-  onEmailValidationChange: jest.fn(),
+  handleChangeCsatOptionId: vi.fn(),
+  handleChangeQuestionAnswer: vi.fn(),
+  handleChangeAllowEmailContact: vi.fn(),
+  handleChangeEmail: vi.fn(),
+  onEmailValidationChange: vi.fn(),
   getCurrentUserEmail: mockGetCurrentUserEmail,
   email: '',
   questions: [
@@ -39,7 +41,7 @@ const mockProps = {
 
 describe('FeedbackBody', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetCurrentUserEmail.mockResolvedValue(undefined);
   });
 

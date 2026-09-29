@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useLicense } from '../licence/use_licence';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
@@ -15,19 +18,19 @@ import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants'
 import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '@kbn/agent-builder-plugin/public';
 import { useIsNavControlVisible } from '../is_nav_control_visible/use_is_nav_control_visible';
 
-jest.mock('../licence/use_licence');
-jest.mock('../../context/typed_kibana_context/typed_kibana_context');
-jest.mock('../is_nav_control_visible/use_is_nav_control_visible');
+vi.mock('../licence/use_licence');
+vi.mock('../../context/typed_kibana_context/typed_kibana_context');
+vi.mock('../is_nav_control_visible/use_is_nav_control_visible');
 
-const mockUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseIsNavControlVisible = useIsNavControlVisible as jest.MockedFunction<
+const mockUseLicense = useLicense as MockedFunction<typeof useLicense>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseIsNavControlVisible = useIsNavControlVisible as MockedFunction<
   typeof useIsNavControlVisible
 >;
 
 describe('useAssistantAvailability', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockUseIsNavControlVisible.mockReturnValue({
       isVisible: true,
     });
@@ -35,7 +38,7 @@ describe('useAssistantAvailability', () => {
 
   it('returns correct values when all privileges are available', () => {
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn().mockReturnValue(true),
+      isEnterprise: vi.fn().mockReturnValue(true),
     } as unknown as LicenseService);
 
     mockUseKibana.mockReturnValue({
@@ -64,10 +67,10 @@ describe('useAssistantAvailability', () => {
           },
         },
         aiAssistantManagementSelection: {
-          aiAssistantManagementSelection$: jest.fn(),
+          aiAssistantManagementSelection$: vi.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: vi.fn().mockReturnValue(true),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -91,7 +94,7 @@ describe('useAssistantAvailability', () => {
 
   describe('hasAgentBuilderManagePrivilege capability mapping', () => {
     const enterpriseLicense = {
-      isEnterprise: jest.fn().mockReturnValue(true),
+      isEnterprise: vi.fn().mockReturnValue(true),
     } as unknown as LicenseService;
 
     const agentBuilderPrivilegeCases = [
@@ -182,7 +185,7 @@ describe('useAssistantAvailability', () => {
               },
             },
             featureFlags: {
-              getBooleanValue: jest.fn().mockReturnValue(true),
+              getBooleanValue: vi.fn().mockReturnValue(true),
             },
           },
         } as unknown as ReturnType<typeof useKibana>);
@@ -196,7 +199,7 @@ describe('useAssistantAvailability', () => {
 
   it('returns correct values when all privileges are available but assistant his hidden', () => {
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn().mockReturnValue(true),
+      isEnterprise: vi.fn().mockReturnValue(true),
     } as unknown as LicenseService);
 
     mockUseIsNavControlVisible.mockReturnValue({
@@ -229,10 +232,10 @@ describe('useAssistantAvailability', () => {
           },
         },
         aiAssistantManagementSelection: {
-          aiAssistantManagementSelection$: jest.fn(),
+          aiAssistantManagementSelection$: vi.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: vi.fn().mockReturnValue(true),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -256,7 +259,7 @@ describe('useAssistantAvailability', () => {
 
   it('returns correct values when no privileges are available', () => {
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn().mockReturnValue(false),
+      isEnterprise: vi.fn().mockReturnValue(false),
     } as unknown as LicenseService);
 
     mockUseKibana.mockReturnValue({
@@ -285,7 +288,7 @@ describe('useAssistantAvailability', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false),
+          getBooleanValue: vi.fn().mockReturnValue(false),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -309,7 +312,7 @@ describe('useAssistantAvailability', () => {
 
   it('returns correct values when only read privileges are available', () => {
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn().mockReturnValue(true),
+      isEnterprise: vi.fn().mockReturnValue(true),
     } as unknown as LicenseService);
 
     mockUseKibana.mockReturnValue({
@@ -333,7 +336,7 @@ describe('useAssistantAvailability', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: vi.fn().mockReturnValue(true),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -357,7 +360,7 @@ describe('useAssistantAvailability', () => {
 
   it('handles missing capabilities gracefully', () => {
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn().mockReturnValue(true),
+      isEnterprise: vi.fn().mockReturnValue(true),
     } as unknown as LicenseService);
 
     mockUseKibana.mockReturnValue({
@@ -366,7 +369,7 @@ describe('useAssistantAvailability', () => {
           capabilities: {},
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false),
+          getBooleanValue: vi.fn().mockReturnValue(false),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);

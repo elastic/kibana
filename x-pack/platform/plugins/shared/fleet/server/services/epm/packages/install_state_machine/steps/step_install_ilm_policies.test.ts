@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -28,19 +31,19 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepInstallILMPolicies, cleanupILMPoliciesStep } from './step_install_ilm_policies';
 
-jest.mock('../../../archive/storage');
-jest.mock('../../../elasticsearch/ilm/install');
-jest.mock('../../../elasticsearch/datastream_ilm/install');
-jest.mock('../../../elasticsearch/index/update_settings');
-jest.mock('../../remove', () => {
+vi.mock('../../../archive/storage');
+vi.mock('../../../elasticsearch/ilm/install');
+vi.mock('../../../elasticsearch/datastream_ilm/install');
+vi.mock('../../../elasticsearch/index/update_settings');
+vi.mock('../../remove', async () => {
   return {
-    ...jest.requireActual('../../remove'),
-    deletePrerequisiteAssets: jest.fn(),
-    deleteILMPolicies: jest.fn(),
+    ...(await vi.importActual('../../remove')),
+    deletePrerequisiteAssets: vi.fn(),
+    deleteILMPolicies: vi.fn(),
   };
 });
-const mockDeleteILMPolicies = deleteILMPolicies as jest.MockedFunction<typeof deleteILMPolicies>;
-const mockDeletePrerequisiteAssets = deletePrerequisiteAssets as jest.MockedFunction<
+const mockDeleteILMPolicies = deleteILMPolicies as MockedFunction<typeof deleteILMPolicies>;
+const mockDeletePrerequisiteAssets = deletePrerequisiteAssets as MockedFunction<
   typeof deletePrerequisiteAssets
 >;
 
@@ -61,8 +64,8 @@ const packageInstallContext = {
   archiveIterator: createArchiveIteratorFromMap(new Map()),
   paths: [],
 };
-let soClient: jest.Mocked<SavedObjectsClientContract>;
-let esClient: jest.Mocked<ElasticsearchClient>;
+let soClient: Mocked<SavedObjectsClientContract>;
+let esClient: Mocked<ElasticsearchClient>;
 
 describe('stepInstallILMPolicies', () => {
   const mockInstalledPackageSo: SavedObject<Installation> = {
@@ -97,8 +100,8 @@ describe('stepInstallILMPolicies', () => {
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
-    jest.mocked(installILMPolicy).mockReset();
-    jest.mocked(installIlmForDataStream).mockReset();
+    vi.mocked(installILMPolicy).mockReset();
+    vi.mocked(installIlmForDataStream).mockReset();
   });
 
   it('Should not install ILM policies if disabled in config', async () => {
@@ -120,7 +123,7 @@ describe('stepInstallILMPolicies', () => {
     await stepInstallILMPolicies({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -152,7 +155,7 @@ describe('stepInstallILMPolicies', () => {
     const res = await stepInstallILMPolicies({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -208,8 +211,8 @@ describe('stepInstallILMPolicies', () => {
         },
       })
     );
-    jest.mocked(installILMPolicy).mockResolvedValue([]);
-    jest.mocked(installIlmForDataStream).mockResolvedValue({
+    vi.mocked(installILMPolicy).mockResolvedValue([]);
+    vi.mocked(installIlmForDataStream).mockResolvedValue({
       esReferences: [
         {
           id: 'metrics-endpoint.policy-0.1.0-dev.0',
@@ -225,7 +228,7 @@ describe('stepInstallILMPolicies', () => {
     const res = await stepInstallILMPolicies({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext: {
@@ -285,7 +288,7 @@ describe('stepInstallILMPolicies', () => {
         },
       })
     );
-    jest.mocked(installILMPolicy).mockResolvedValue([
+    vi.mocked(installILMPolicy).mockResolvedValue([
       {
         id: 'metrics-endpoint.policy-0.1.0-dev.0',
         type: ElasticsearchAssetType.ingestPipeline,
@@ -299,7 +302,7 @@ describe('stepInstallILMPolicies', () => {
         type: ElasticsearchAssetType.transform,
       },
     ] as any);
-    jest.mocked(installIlmForDataStream).mockResolvedValue({
+    vi.mocked(installIlmForDataStream).mockResolvedValue({
       esReferences: [
         {
           id: 'metrics-endpoint.policy-0.1.0-dev.0',
@@ -320,7 +323,7 @@ describe('stepInstallILMPolicies', () => {
     const res = await stepInstallILMPolicies({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -445,7 +448,7 @@ describe('cleanupILMPoliciesStep', () => {
     await cleanupILMPoliciesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -503,7 +506,7 @@ describe('cleanupILMPoliciesStep', () => {
     await cleanupILMPoliciesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -531,7 +534,7 @@ describe('cleanupILMPoliciesStep', () => {
     await cleanupILMPoliciesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -557,7 +560,7 @@ describe('cleanupILMPoliciesStep', () => {
     await cleanupILMPoliciesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -584,7 +587,7 @@ describe('cleanupILMPoliciesStep', () => {
     await cleanupILMPoliciesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,

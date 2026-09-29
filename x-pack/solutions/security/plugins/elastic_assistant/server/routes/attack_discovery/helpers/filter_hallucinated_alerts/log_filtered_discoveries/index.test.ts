@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
@@ -49,7 +51,7 @@ describe('logFilteredDiscoveries', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when no discoveries are filtered', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -22,14 +25,14 @@ import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { TestProvidersComponent } from '../../../common/mock';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
 
   return {
     ...actual,
-    useParams: jest.fn().mockReturnValue({ tabName: 'default' }),
+    useParams: vi.fn().mockReturnValue({ tabName: 'default' }),
   };
 });
 
@@ -43,8 +46,8 @@ const mockTheme = getMockTheme({
   },
 });
 
-jest.mock('../../../common/components/user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+vi.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 describe('OpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
@@ -52,19 +55,19 @@ describe('OpenTimeline', () => {
   let mockResults: OpenTimelineResult[];
 
   const getDefaultTestProps = (mockSearchResults: OpenTimelineResult[]): OpenTimelineProps => ({
-    deleteTimelines: jest.fn(),
+    deleteTimelines: vi.fn(),
     defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
     isLoading: false,
     itemIdToExpandedNotesRowMap: {},
-    onAddTimelinesToFavorites: jest.fn(),
-    onDeleteSelected: jest.fn(),
+    onAddTimelinesToFavorites: vi.fn(),
+    onDeleteSelected: vi.fn(),
     onlyFavorites: false,
-    onOpenTimeline: jest.fn(),
-    onQueryChange: jest.fn(),
-    onSelectionChange: jest.fn(),
-    onTableChange: jest.fn(),
-    onToggleOnlyFavorites: jest.fn(),
-    onToggleShowNotes: jest.fn(),
+    onOpenTimeline: vi.fn(),
+    onQueryChange: vi.fn(),
+    onSelectionChange: vi.fn(),
+    onTableChange: vi.fn(),
+    onToggleOnlyFavorites: vi.fn(),
+    onToggleShowNotes: vi.fn(),
     pageIndex: 0,
     pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
     query: '',
@@ -501,7 +504,7 @@ describe('OpenTimeline', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
         <ThemeProvider theme={mockTheme}>
-          <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
+          <OpenTimeline {...defaultProps} onCreateRule={vi.fn()} />
         </ThemeProvider>
       </TestProvidersComponent>
     );
@@ -522,7 +525,7 @@ describe('OpenTimeline', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
         <ThemeProvider theme={mockTheme}>
-          <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
+          <OpenTimeline {...defaultProps} onCreateRule={vi.fn()} />
         </ThemeProvider>
       </TestProvidersComponent>
     );

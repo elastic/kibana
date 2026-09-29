@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SelectionOption } from '@kbn/workflows';
 import { setCustomFieldStepDefinition } from './set_custom_field';
 import { getCaseConfigure } from '../containers/configure/api';
 import type { Owner } from '../../common/bundled-types.gen';
 import type { CasesConfigurationUI } from '../../common/ui';
 
-jest.mock('../containers/configure/api', () => ({
-  getCaseConfigure: jest.fn(),
-}));
+vi.mock('../containers/configure/api', () => {
+      const mocked = {
+      getCaseConfigure: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('setCustomFieldStepDefinition', () => {
-  const getCaseConfigureMock = jest.mocked(getCaseConfigure);
+  const getCaseConfigureMock = vi.mocked(getCaseConfigure);
 
   const createSelectionContext = (owner?: Owner | string) => ({
     stepType: 'cases.setCustomField' as const,

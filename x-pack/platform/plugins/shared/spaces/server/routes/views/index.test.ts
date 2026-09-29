@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { Type } from '@kbn/config-schema';
 import type {
   HttpResources,
@@ -39,7 +41,7 @@ const routeDefinitionParamsMock = {
 };
 
 describe('Space Selector view routes', () => {
-  let httpResources: jest.Mocked<HttpResources>;
+  let httpResources: Mocked<HttpResources>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     httpResources = routeParamsMock.httpResources;
@@ -74,7 +76,7 @@ describe('Space Selector view routes', () => {
 });
 
 describe('Enter Space view routes', () => {
-  let httpResources: jest.Mocked<HttpResources>;
+  let httpResources: Mocked<HttpResources>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     httpResources = routeParamsMock.httpResources;

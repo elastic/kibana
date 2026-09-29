@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-jest.mock('../../../anomalies_table/anomaly_value_display', () => ({
-  AnomalyValueDisplay: jest.fn().mockImplementation(({ value }) => {
-    const React = jest.requireActual('react');
-    const displayValue = Array.isArray(value) ? value[0] : value;
-    return React.createElement(
-      'span',
-      { 'data-test-subj': 'mockAnomalyValueDisplay' },
-      `${displayValue}`
-    );
-  }),
-}));
+import { vi } from 'vitest';
+
+vi.mock('../../../anomalies_table/anomaly_value_display', () => {
+      const mocked = {
+      AnomalyValueDisplay: vi.fn().mockImplementation(({ value }) => {
+        const React = require('react');
+        const displayValue = Array.isArray(value) ? value[0] : value;
+        return React.createElement(
+          'span',
+          { 'data-test-subj': 'mockAnomalyValueDisplay' },
+          `${displayValue}`
+        );
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';

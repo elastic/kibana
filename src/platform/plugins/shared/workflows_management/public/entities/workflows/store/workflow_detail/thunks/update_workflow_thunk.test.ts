@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { parseDocument } from 'yaml';
 
 import type { EsWorkflow, UpdatedWorkflowResponseDto, WorkflowDetailDto } from '@kbn/workflows';
@@ -20,22 +23,28 @@ import { selectYamlString } from '../selectors';
 import { setWorkflow, setYamlString } from '../slice';
 
 // Mock the loadWorkflowThunk
-jest.mock('./load_workflow_thunk');
+vi.mock('./load_workflow_thunk');
 // eslint-disable-next-line import/order
 import { loadWorkflowThunk } from './load_workflow_thunk';
-const mockLoadWorkflowThunk = loadWorkflowThunk as jest.MockedFunction<typeof loadWorkflowThunk>;
+const mockLoadWorkflowThunk = loadWorkflowThunk as MockedFunction<typeof loadWorkflowThunk>;
 
 const mockWorkflowApi = createMockWorkflowApi();
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the query client
-jest.mock('../../../../../shared/lib/query_client', () => ({
-  queryClient: {
-    invalidateQueries: jest.fn(),
-  },
-}));
+vi.mock('../../../../../shared/lib/query_client', () => {
+      const mocked = {
+      queryClient: {
+        invalidateQueries: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 // Set up initial state with workflow and yaml
 const mockWorkflow: WorkflowDetailDto = {
   id: 'test-workflow-1',
@@ -50,7 +59,7 @@ const mockWorkflow: WorkflowDetailDto = {
   valid: true,
 };
 
-const { queryClient } = jest.requireMock('../../../../../shared/lib/query_client');
+const { queryClient } = (await vi.importMock('../../../../../shared/lib/query_client'));
 const defaultUpdateWorkflowResponse: UpdatedWorkflowResponseDto = {
   id: 'test-workflow-1',
   lastUpdatedAt: '2023-01-01T00:00:00Z',
@@ -67,7 +76,7 @@ describe('updateWorkflowThunk', () => {
   const dispatchThunk = (action: any) => store.dispatch(action as any);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     store = createMockStore();
     mockServices = getMockServices(store);

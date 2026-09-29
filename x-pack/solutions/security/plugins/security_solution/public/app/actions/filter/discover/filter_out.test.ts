@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMockStore } from '../../../../common/mock';
 import { createFilterOutDiscoverCellActionFactory } from './filter_out';
 import type { SecurityCellActionExecutionContext } from '../../types';
@@ -18,11 +20,14 @@ const mockGlobalFilterManager = services.data.query.filterManager;
 const currentAppIdSubject$ = new BehaviorSubject<string>(APP_UI_ID);
 services.application.currentAppId$ = currentAppIdSubject$.asObservable();
 
-jest.mock('@kbn/ui-actions-plugin/public', () => ({
-  ...jest.requireActual('@kbn/ui-actions-plugin/public'),
-  addFilterIn: () => {},
-  addFilterOut: () => {},
-}));
+vi.mock('@kbn/ui-actions-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/ui-actions-plugin/public')),
+      addFilterIn: () => {},
+      addFilterOut: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockStore = createMockStore();
 
@@ -35,7 +40,7 @@ describe('createFilterOutDiscoverCellActionFactory', () => {
 
   beforeEach(() => {
     currentAppIdSubject$.next(APP_UI_ID);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const context = {

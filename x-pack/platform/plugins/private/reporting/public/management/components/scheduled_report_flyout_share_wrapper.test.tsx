@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ScheduledReportMenuItem } from './scheduled_report_flyout_share_wrapper';
@@ -12,11 +14,11 @@ import { ScheduledReportFlyoutShareWrapper } from './scheduled_report_flyout_sha
 import { useShareTypeContext } from '@kbn/share-plugin/public';
 import { CreateScheduledReportForm } from './create_scheduled_report_form';
 
-jest.mock('./create_scheduled_report_form');
-jest.mocked(CreateScheduledReportForm).mockReturnValue(<div data-test-subj="flyoutContent" />);
+vi.mock('./create_scheduled_report_form');
+vi.mocked(CreateScheduledReportForm).mockReturnValue(<div data-test-subj="flyoutContent" />);
 
-jest.mock('@kbn/share-plugin/public');
-const mockUseShareTypeContext = jest.mocked(useShareTypeContext).mockReturnValue({
+vi.mock('@kbn/share-plugin/public');
+const mockUseShareTypeContext = vi.mocked(useShareTypeContext).mockReturnValue({
   objectType: 'dashboard',
   shareMenuItems: [
     { config: { exportType: 'printablePdfV2', label: 'PDF' } },
@@ -27,7 +29,7 @@ const mockUseShareTypeContext = jest.mocked(useShareTypeContext).mockReturnValue
 const mockApiClient = {} as any;
 const mockReportingServices = { serviceFromReporting: {} } as any;
 const mockSharingData = { title: 'Test Report' } as any;
-const mockOnClose = jest.fn();
+const mockOnClose = vi.fn();
 
 const defaultProps: ScheduledReportMenuItem = {
   apiClient: mockApiClient,
@@ -37,14 +39,17 @@ const defaultProps: ScheduledReportMenuItem = {
 };
 
 describe('ScheduledReportFlyoutShareWrapper', () => {
-  const mockUseKibana = jest.fn();
-  jest.mock('@kbn/reporting-public', () => ({
-    ...jest.requireActual('@kbn/reporting-public'),
-    useKibana: mockUseKibana,
-  }));
+  const mockUseKibana = vi.fn();
+  vi.doMock('@kbn/reporting-public', async () => {
+        const mocked = {
+          ...(await vi.importActual('@kbn/reporting-public')),
+          useKibana: mockUseKibana,
+        };
+        return { ...mocked, default: mocked };
+      });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({ services: { otherService: {} } });
   });
 

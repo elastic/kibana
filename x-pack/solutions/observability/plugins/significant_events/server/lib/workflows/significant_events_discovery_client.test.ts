@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -12,41 +15,44 @@ import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/mana
 import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
 
-jest.mock('../../agent_builder/agents/discovery', () => ({
-  installDiscoveryAgents: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../agent_builder/agents/discovery', () => {
+      const mocked = {
+      installDiscoveryAgents: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const installDiscoveryAgentsMock = installDiscoveryAgents as jest.MockedFunction<
+const installDiscoveryAgentsMock = installDiscoveryAgents as MockedFunction<
   typeof installDiscoveryAgents
 >;
 
 const statusRequest = httpServerMock.createKibanaRequest();
 
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+const createMockManagementApi = (overrides: Record<string, Mock> = {}) => {
   const api = {
-    getWorkflow: jest.fn().mockResolvedValue({
+    getWorkflow: vi.fn().mockResolvedValue({
       id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
       name: 'sigevents-orchestrator',
       enabled: true,
       definition: {},
       yaml: '',
     }),
-    runWorkflow: jest.fn().mockResolvedValue('execution-id'),
-    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-    getWorkflowExecution: jest.fn().mockResolvedValue(null),
-    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    runWorkflow: vi.fn().mockResolvedValue('execution-id'),
+    getWorkflowExecutions: vi.fn().mockResolvedValue({ results: [], total: 0 }),
+    getWorkflowExecution: vi.fn().mockResolvedValue(null),
+    cancelWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
-  return { ...api, getClient: jest.fn(() => api) };
+  return { ...api, getClient: vi.fn(() => api) };
 };
 
-const createClient = (overrides: Record<string, jest.Mock> = {}) => {
+const createClient = (overrides: Record<string, Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
   const client = new SignificantEventsDiscoveryClient({ managementApi: managementApi as never });
   return { client, managementApi };
 };
 
-const createAgentBuilder = () => ({ agents: { ensure: jest.fn() } } as never);
+const createAgentBuilder = () => ({ agents: { ensure: vi.fn() } } as never);
 
 describe('SignificantEventsDiscoveryClient', () => {
   beforeEach(() => {
@@ -83,7 +89,7 @@ describe('SignificantEventsDiscoveryClient', () => {
 
     it('starts a new execution when the latest is terminal', async () => {
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'old', status: ExecutionStatus.COMPLETED }] }),
       });
@@ -105,7 +111,7 @@ describe('SignificantEventsDiscoveryClient', () => {
 
     it('reuses the in-flight execution instead of starting a parallel run', async () => {
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'in-flight', status: ExecutionStatus.RUNNING }] }),
       });
@@ -150,7 +156,7 @@ describe('SignificantEventsDiscoveryClient', () => {
 
     it('maps a running execution to InProgress', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
       });
@@ -165,7 +171,7 @@ describe('SignificantEventsDiscoveryClient', () => {
 
     it('surfaces the error message for a failed execution', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.FAILED, error: { message: 'boom' } }],
         }),
       });
@@ -181,7 +187,7 @@ describe('SignificantEventsDiscoveryClient', () => {
 
     it('uses the timeout message for a timed-out execution', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.TIMED_OUT }] }),
       });
@@ -199,7 +205,7 @@ describe('SignificantEventsDiscoveryClient', () => {
   describe('cancel', () => {
     it('cancels the latest non-terminal execution and returns its id', async () => {
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
       });

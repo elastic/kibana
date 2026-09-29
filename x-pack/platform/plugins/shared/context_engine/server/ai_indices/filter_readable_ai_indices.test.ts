@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -35,7 +37,7 @@ const failed = (status: number, type: string, reason?: string) => ({
   error: { type, reason },
 });
 
-const msearch = jest.fn();
+const msearch = vi.fn();
 const esClient = { msearch } as unknown as ElasticsearchClient;
 const logger = loggingSystemMock.createLogger();
 const params = { esClient, logger };

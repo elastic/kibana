@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-jest.mock('./set_message_helpers', () => ({
-  flashErrorToast: jest.fn(),
-}));
+import { vi } from 'vitest';
+
+vi.mock('./set_message_helpers', () => {
+      const mocked = {
+      flashErrorToast: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
@@ -29,13 +34,13 @@ describe('flashAPIErrors', () => {
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const history = scopedHistoryMock.create();
-    history.listen.mockReturnValue(jest.fn());
+    history.listen.mockReturnValue(vi.fn());
     FlashMessagesLogic({ notifications: {} as unknown as NotificationsStart, history });
     FlashMessagesLogic.mount();
-    jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
-    jest.spyOn(FlashMessagesLogic.actions, 'setQueuedMessages');
+    vi.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
+    vi.spyOn(FlashMessagesLogic.actions, 'setQueuedMessages');
   });
 
   it('converts API errors into flash messages', () => {
@@ -95,10 +100,10 @@ describe('toastAPIErrors', () => {
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     FlashMessagesLogic.mount();
-    jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
-    jest.spyOn(FlashMessagesLogic.actions, 'setQueuedMessages');
+    vi.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
+    vi.spyOn(FlashMessagesLogic.actions, 'setQueuedMessages');
   });
 
   it('converts API errors into flash messages', () => {

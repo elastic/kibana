@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { IconSelect, IconView, ICONS } from './icon_select';
@@ -14,13 +16,13 @@ import { IconSelect, IconView, ICONS } from './icon_select';
 describe('src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js', () => {
   describe('<IconSelect />', () => {
     test('should render and match a snapshot', () => {
-      const wrapper = shallow(<IconSelect onChange={jest.fn()} value={ICONS[1].value} />);
+      const wrapper = shallow(<IconSelect onChange={vi.fn()} value={ICONS[1].value} />);
 
       expect(wrapper).toMatchSnapshot();
     });
 
     test('should put the default value if the passed one does not match with icons collection', () => {
-      const wrapper = shallow(<IconSelect onChange={jest.fn()} value="unknown" />);
+      const wrapper = shallow(<IconSelect onChange={vi.fn()} value="unknown" />);
 
       expect(wrapper.prop('selectedOptions')).toEqual([ICONS[0]]);
     });

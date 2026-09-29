@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { ClientMessage } from '@kbn/elastic-assistant';
@@ -14,26 +17,32 @@ import { updateAndAssociateNode } from '../../timelines/components/notes/helpers
 import { useKibana } from '../../common/lib/kibana';
 import { useAssistantAvailability } from '../use_assistant_availability';
 
-jest.mock('../use_assistant_availability');
-jest.mock('../../timelines/components/notes/helpers', () => ({
-  ...jest.requireActual('../../timelines/components/notes/helpers'),
-  updateAndAssociateNode: jest.fn(),
-}));
+vi.mock('../use_assistant_availability');
+vi.mock('../../timelines/components/notes/helpers', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../timelines/components/notes/helpers')),
+      updateAndAssociateNode: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../common/lib/kibana'),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      cases: {
-        hooks: {
-          useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({
-            open: jest.fn(),
-          }),
+vi.mock('../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/lib/kibana')),
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          cases: {
+            hooks: {
+              useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({
+                open: vi.fn(),
+              }),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
   const store = createMockStore(mockGlobalState);
@@ -43,8 +52,8 @@ const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
 
 describe('CommentActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantAvailability as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantAvailability as Mock).mockReturnValue({
       hasSearchAILakeConfigurations: false,
     });
   });
@@ -68,12 +77,12 @@ describe('CommentActions', () => {
   });
 
   it('content added to case is correct', () => {
-    const mockAddToExistingCaseModal = jest.fn();
-    (useKibana as unknown as jest.Mock).mockReturnValue({
+    const mockAddToExistingCaseModal = vi.fn();
+    (useKibana as unknown as Mock).mockReturnValue({
       services: {
         cases: {
           hooks: {
-            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({
+            useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({
               open: mockAddToExistingCaseModal,
             }),
           },
@@ -110,7 +119,7 @@ describe('CommentActions', () => {
     expect(getByTestId('addToExistingCaseButton')).toBeInTheDocument();
   });
   it('renders only case action when EASE', () => {
-    (useAssistantAvailability as jest.Mock).mockReturnValue({
+    (useAssistantAvailability as Mock).mockReturnValue({
       hasSearchAILakeConfigurations: true,
     });
     const message: ClientMessage = {

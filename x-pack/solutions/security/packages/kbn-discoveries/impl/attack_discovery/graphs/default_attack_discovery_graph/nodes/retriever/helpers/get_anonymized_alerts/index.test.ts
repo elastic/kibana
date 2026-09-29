@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { getOpenAndAcknowledgedAlertsQuery } from '@kbn/elastic-assistant-common';
 
@@ -13,12 +16,12 @@ const MIN_SIZE = 10;
 import { getAnonymizedAlerts } from '.';
 import { mockOpenAndAcknowledgedAlertsQueryResults } from '../../../../mock/mock_open_and_acknowledged_alerts_query_results';
 
-jest.mock('@kbn/elastic-assistant-common', () => {
-  const original = jest.requireActual('@kbn/elastic-assistant-common');
+vi.mock('@kbn/elastic-assistant-common', async () => {
+  const original = (await vi.importActual('@kbn/elastic-assistant-common'));
 
   return {
     ...original,
-    getOpenAndAcknowledgedAlertsQuery: jest.fn(),
+    getOpenAndAcknowledgedAlertsQuery: vi.fn(),
   };
 });
 
@@ -53,9 +56,9 @@ describe('getAnonymizedAlerts', () => {
   const size = 10;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (mockEsClient.search as unknown as jest.Mock).mockResolvedValue(
+    (mockEsClient.search as unknown as Mock).mockResolvedValue(
       mockOpenAndAcknowledgedAlertsQueryResults
     );
   });
@@ -169,7 +172,7 @@ describe('getAnonymizedAlerts', () => {
     // The shared builder always injects a @timestamp range + open/acknowledged status
     // clause; for an exact-id re-fetch (skill mode) we must bypass those so the
     // gate-curated ids resolve regardless of the alert's age or workflow status.
-    (getOpenAndAcknowledgedAlertsQuery as jest.Mock).mockReturnValue({
+    (getOpenAndAcknowledgedAlertsQuery as Mock).mockReturnValue({
       index: [alertsIndexPattern],
       size,
       fields: [{ field: '*', include_unmapped: true }],
@@ -197,7 +200,7 @@ describe('getAnonymizedAlerts', () => {
       size,
     });
 
-    const searchArg = (mockEsClient.search as unknown as jest.Mock).mock.calls[0][0];
+    const searchArg = (mockEsClient.search as unknown as Mock).mock.calls[0][0];
 
     expect(searchArg.query).toEqual({ ids: { values: alertIds } });
     // the non-query scaffolding (index/size/fields) is preserved so anonymization still works
@@ -242,7 +245,7 @@ describe('getAnonymizedAlerts', () => {
   });
 
   it('calls onNewReplacements for every alert', async () => {
-    const onNewReplacements = jest.fn();
+    const onNewReplacements = vi.fn();
 
     await getAnonymizedAlerts({
       alertsIndexPattern,

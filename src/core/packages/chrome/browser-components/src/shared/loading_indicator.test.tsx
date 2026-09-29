@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
@@ -19,7 +22,7 @@ import { LOADING_DEBOUNCE_TIME } from './chrome_hooks';
 const setup = (loadingCount = 0) => {
   const loadingCount$ = new BehaviorSubject(loadingCount);
   const deps = createMockChromeComponentsDeps();
-  (deps.http.getLoadingCount$ as jest.Mock).mockReturnValue(loadingCount$);
+  (deps.http.getLoadingCount$ as Mock).mockReturnValue(loadingCount$);
   return { loadingCount$, deps };
 };
 
@@ -31,8 +34,8 @@ const renderIndicator = (deps: ReturnType<typeof createMockChromeComponentsDeps>
   );
 
 describe('LoadingIndicator', () => {
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
 
   it('is hidden when loading count is 0', () => {
     const { deps } = setup(0);
@@ -43,14 +46,14 @@ describe('LoadingIndicator', () => {
   it('shows spinner when loading count > 0 (after debounce)', () => {
     const { deps } = setup(1);
     renderIndicator(deps);
-    act(() => jest.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
+    act(() => vi.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
     expect(screen.getByTestId('globalLoadingIndicator')).toBeInTheDocument();
   });
 
   it('shows progress bar when showAsBar is true', () => {
     const { deps } = setup(1);
     renderIndicator(deps, { showAsBar: true });
-    act(() => jest.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
+    act(() => vi.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
     expect(screen.getByTestId('globalLoadingIndicator')).toBeInTheDocument();
   });
 
@@ -58,11 +61,11 @@ describe('LoadingIndicator', () => {
     const { loadingCount$, deps } = setup(1);
     renderIndicator(deps);
 
-    act(() => jest.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
+    act(() => vi.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
     expect(screen.getByTestId('globalLoadingIndicator')).toBeInTheDocument();
 
     act(() => loadingCount$.next(0));
-    act(() => jest.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
+    act(() => vi.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
     expect(screen.getByTestId('globalLoadingIndicator-hidden')).toBeInTheDocument();
   });
 });

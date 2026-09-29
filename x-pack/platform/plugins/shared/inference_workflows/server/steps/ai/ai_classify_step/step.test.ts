@@ -5,41 +5,62 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
-jest.mock('./build_prompts', () => ({
-  buildSystemPart: jest.fn(),
-  buildDataPart: jest.fn(),
-  buildInstructionsPart: jest.fn(),
-  buildClassificationRequestPart: jest.fn(),
-}));
+vi.mock('./build_prompts', () => {
+      const mocked = {
+      buildSystemPart: vi.fn(),
+      buildDataPart: vi.fn(),
+      buildInstructionsPart: vi.fn(),
+      buildClassificationRequestPart: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./validate_model_response', () => ({
-  validateModelResponse: jest.fn(),
-}));
+vi.mock('./validate_model_response', () => {
+      const mocked = {
+      validateModelResponse: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./schemas', () => ({
-  convertOutputToModelResponseSchema: jest.fn((schema) => schema),
-}));
+vi.mock('./schemas', () => {
+      const mocked = {
+      convertOutputToModelResponseSchema: vi.fn((schema) => schema),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/steps/ai', () => ({
-  AiClassifyStepCommonDefinition: {
-    id: 'ai.classify',
-    inputSchema: {},
-    outputSchema: {},
-    configSchema: {},
-  },
-  buildStructuredOutputSchema: jest.fn(),
-}));
+vi.mock('../../../../common/steps/ai', () => {
+      const mocked = {
+      AiClassifyStepCommonDefinition: {
+        id: 'ai.classify',
+        inputSchema: {},
+        outputSchema: {},
+        configSchema: {},
+      },
+      buildStructuredOutputSchema: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-extensions/server', () => ({
-  createServerStepDefinition: jest.fn((definition) => definition),
-}));
+vi.mock('@kbn/workflows-extensions/server', () => {
+      const mocked = {
+      createServerStepDefinition: vi.fn((definition) => definition),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/resolve_connector_id', () => ({
-  resolveConnectorId: jest.fn(),
-}));
+vi.mock('../utils/resolve_connector_id', () => {
+      const mocked = {
+      resolveConnectorId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   buildClassificationRequestPart,
@@ -58,33 +79,33 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
-const mockBuildSystemPart = buildSystemPart as jest.MockedFunction<typeof buildSystemPart>;
-const mockBuildDataPart = buildDataPart as jest.MockedFunction<typeof buildDataPart>;
-const mockBuildInstructionsPart = buildInstructionsPart as jest.MockedFunction<
+const mockBuildSystemPart = buildSystemPart as MockedFunction<typeof buildSystemPart>;
+const mockBuildDataPart = buildDataPart as MockedFunction<typeof buildDataPart>;
+const mockBuildInstructionsPart = buildInstructionsPart as MockedFunction<
   typeof buildInstructionsPart
 >;
-const mockBuildClassificationRequestPart = buildClassificationRequestPart as jest.MockedFunction<
+const mockBuildClassificationRequestPart = buildClassificationRequestPart as MockedFunction<
   typeof buildClassificationRequestPart
 >;
-const mockValidateModelResponse = validateModelResponse as jest.MockedFunction<
+const mockValidateModelResponse = validateModelResponse as MockedFunction<
   typeof validateModelResponse
 >;
-const mockBuildStructuredOutputSchema = buildStructuredOutputSchema as jest.MockedFunction<
+const mockBuildStructuredOutputSchema = buildStructuredOutputSchema as MockedFunction<
   typeof buildStructuredOutputSchema
 >;
 const mockConvertOutputToModelResponseSchema =
-  convertOutputToModelResponseSchema as jest.MockedFunction<
+  convertOutputToModelResponseSchema as MockedFunction<
     typeof convertOutputToModelResponseSchema
   >;
-const mockCreateServerStepDefinition = createServerStepDefinition as jest.MockedFunction<
+const mockCreateServerStepDefinition = createServerStepDefinition as MockedFunction<
   typeof createServerStepDefinition
 >;
-const mockResolveConnectorId = resolveConnectorId as jest.MockedFunction<typeof resolveConnectorId>;
+const mockResolveConnectorId = resolveConnectorId as MockedFunction<typeof resolveConnectorId>;
 
 describe('aiClassifyStepDefinition', () => {
-  let mockCoreSetup: jest.Mocked<CoreSetup<InferenceWorkflowsStartDeps>>;
-  let mockInference: jest.Mocked<InferenceServerStart>;
-  let mockContextManager: jest.Mocked<ContextManager>;
+  let mockCoreSetup: Mocked<CoreSetup<InferenceWorkflowsStartDeps>>;
+  let mockInference: Mocked<InferenceServerStart>;
+  let mockContextManager: Mocked<ContextManager>;
   let mockContext: StepHandlerContext<any>;
   let mockChatModel: any;
   let mockRunnable: any;
@@ -92,17 +113,17 @@ describe('aiClassifyStepDefinition', () => {
   let mockSchema: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockAbortController = new AbortController();
 
     mockSchema = {
-      parse: jest.fn(),
-      safeParse: jest.fn(),
+      parse: vi.fn(),
+      safeParse: vi.fn(),
     };
 
     mockRunnable = {
-      invoke: jest.fn().mockResolvedValue({
+      invoke: vi.fn().mockResolvedValue({
         parsed: {
           category: 'test-category',
           metadata: {},
@@ -117,24 +138,24 @@ describe('aiClassifyStepDefinition', () => {
     };
 
     mockChatModel = {
-      invoke: jest.fn(),
-      withStructuredOutput: jest.fn().mockReturnValue(mockRunnable),
+      invoke: vi.fn(),
+      withStructuredOutput: vi.fn().mockReturnValue(mockRunnable),
     };
 
     mockInference = {
-      getChatModel: jest.fn().mockResolvedValue(mockChatModel),
+      getChatModel: vi.fn().mockResolvedValue(mockChatModel),
     } as any;
 
     mockCoreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([{}, { inference: mockInference }, {}]),
+      getStartServices: vi.fn().mockResolvedValue([{}, { inference: mockInference }, {}]),
     } as any;
 
     mockContextManager = {
-      getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
-      getContext: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn(),
-      callKibanaApi: jest.fn(),
+      getFakeRequest: vi.fn().mockReturnValue({} as KibanaRequest),
+      getContext: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn(),
+      callKibanaApi: vi.fn(),
     };
 
     mockContext = {
@@ -161,10 +182,10 @@ describe('aiClassifyStepDefinition', () => {
       },
       contextManager: mockContextManager,
       logger: {
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       },
       abortSignal: mockAbortController.signal,
       stepId: 'test-step-id',

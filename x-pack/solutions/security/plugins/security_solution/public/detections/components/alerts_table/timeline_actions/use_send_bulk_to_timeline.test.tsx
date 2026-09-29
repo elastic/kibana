@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { useSendBulkToTimeline } from './use_send_bulk_to_timeline';
@@ -17,15 +20,18 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { State } from '../../../../common/store/types';
 import { TimelineId } from '../../../../../common/types/timeline';
 
-jest.mock('../../../../timelines/components/open_timeline/use_update_timeline');
-jest.mock('../../../../timelines/hooks/use_create_timeline');
-jest.mock('../actions', () => ({
-  sendBulkEventsToTimelineAction: jest.fn(),
-}));
+vi.mock('../../../../timelines/components/open_timeline/use_update_timeline');
+vi.mock('../../../../timelines/hooks/use_create_timeline');
+vi.mock('../actions', () => {
+      const mocked = {
+      sendBulkEventsToTimelineAction: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUpdateTimeline = useUpdateTimeline as jest.Mock;
-const mockUseCreateTimeline = useCreateTimeline as jest.Mock;
-const mockSendBulkEventsToTimelineAction = sendBulkEventsToTimelineAction as jest.Mock;
+const mockUseUpdateTimeline = useUpdateTimeline as Mock;
+const mockUseCreateTimeline = useCreateTimeline as Mock;
+const mockSendBulkEventsToTimelineAction = sendBulkEventsToTimelineAction as Mock;
 
 const defaultProps = {
   tableId: TableId.alertsOnAlertsPage,
@@ -70,13 +76,13 @@ const createTestState = (): State => ({
 
 describe('useSendBulkToTimeline', () => {
   let store: ReturnType<typeof createMockStore>;
-  let mockUpdateTimeline: jest.Mock;
-  let mockClearActiveTimeline: jest.Mock;
+  let mockUpdateTimeline: Mock;
+  let mockClearActiveTimeline: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUpdateTimeline = jest.fn();
-    mockClearActiveTimeline = jest.fn().mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    mockUpdateTimeline = vi.fn();
+    mockClearActiveTimeline = vi.fn().mockResolvedValue(undefined);
     mockUseUpdateTimeline.mockReturnValue(mockUpdateTimeline);
     mockUseCreateTimeline.mockReturnValue(mockClearActiveTimeline);
     store = createMockStore(createTestState());

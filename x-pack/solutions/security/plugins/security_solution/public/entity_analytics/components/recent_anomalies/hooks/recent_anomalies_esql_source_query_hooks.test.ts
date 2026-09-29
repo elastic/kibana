@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
@@ -12,15 +15,24 @@ import {
   useRecentAnomaliesDataEsqlSource,
 } from './recent_anomalies_esql_source_query_hooks';
 
-jest.mock('@kbn/entity-store/public', () => ({ useEntityStoreEuidApi: jest.fn() }));
-jest.mock('../../../../common/hooks/use_resolved_latest_entities_index_name', () => ({
-  useResolvedLatestEntitiesIndexName: jest.fn(() => ({
-    data: { indexName: '.entities.v2.latest.default' },
-  })),
-}));
-jest.mock('../anomaly_heatmap_interval', () => ({ useIntervalForHeatmap: jest.fn(() => 3) }));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = { useEntityStoreEuidApi: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_resolved_latest_entities_index_name', () => {
+      const mocked = {
+      useResolvedLatestEntitiesIndexName: vi.fn(() => ({
+        data: { indexName: '.entities.v2.latest.default' },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../anomaly_heatmap_interval', () => {
+      const mocked = { useIntervalForHeatmap: vi.fn(() => 3) };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
+const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as Mock;
 
 const TIME_RANGE_WHERE = '| WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend';
 

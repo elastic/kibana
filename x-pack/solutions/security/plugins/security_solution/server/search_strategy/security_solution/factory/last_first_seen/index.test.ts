@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ZodError } from '@kbn/zod/v4';
 
 import { Direction } from '../../../../../common/search_strategy';
@@ -21,7 +23,7 @@ import type { FirstLastSeenRequestOptionsInput } from '../../../../../common/api
 
 describe('firstLastSeen search strategy', () => {
   describe('first seen search strategy', () => {
-    const buildFirstLastSeenQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
+    const buildFirstLastSeenQuery = vi.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
 
     afterEach(() => {
       buildFirstLastSeenQuery.mockClear();
@@ -46,7 +48,7 @@ describe('firstLastSeen search strategy', () => {
   });
 
   describe('last seen search strategy', () => {
-    const buildFirstLastSeenQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
+    const buildFirstLastSeenQuery = vi.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
 
     afterEach(() => {
       buildFirstLastSeenQuery.mockClear();

@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import { createUserProfilesService } from './user_profiles_service';
 
 describe('createUserProfilesService', () => {
-  const buildUserProfile = (userProfile: jest.Mock) =>
+  const buildUserProfile = (userProfile: Mock) =>
     ({ bulkGet: userProfile } as unknown as UserProfileServiceStart);
 
   it('short-circuits with an empty array when no uids are supplied', async () => {
-    const bulkGet = jest.fn();
+    const bulkGet = vi.fn();
 
     const service = createUserProfilesService(buildUserProfile(bulkGet));
 
@@ -25,7 +28,7 @@ describe('createUserProfilesService', () => {
 
   it('forwards the uids and `dataPath: "avatar"` to `bulkGet` and reshapes the response', async () => {
     const avatar = { initials: 'AB', color: '#000' };
-    const bulkGet = jest.fn().mockResolvedValue([
+    const bulkGet = vi.fn().mockResolvedValue([
       {
         uid: 'u1',
         user: { username: 'alice', email: 'alice@example.com', full_name: 'Alice Smith' },

@@ -7,29 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { parseVariablePath } from '../parse_variable_path';
 import type { VariableItem } from '../types';
 import { z } from '@kbn/zod/v4';
 
 // Mock the imports
-jest.mock('../parse_variable_path');
-jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path');
-jest.mock('../context/get_foreach_state_schema');
+vi.mock('../parse_variable_path');
+vi.mock('@kbn/workflows/common/utils/zod/get_schema_at_path');
+vi.mock('../context/get_foreach_state_schema');
 
 import { validateVariable } from './validate_variable';
 import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from '../context/errors';
 import { getForeachItemSchema } from '../context/get_foreach_state_schema';
 
-const mockParseVariablePath = parseVariablePath as jest.MockedFunction<typeof parseVariablePath>;
-const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
-const mockGetForeachItemSchema = getForeachItemSchema as jest.MockedFunction<
+const mockParseVariablePath = parseVariablePath as MockedFunction<typeof parseVariablePath>;
+const mockGetSchemaAtPath = getSchemaAtPath as MockedFunction<typeof getSchemaAtPath>;
+const mockGetForeachItemSchema = getForeachItemSchema as MockedFunction<
   typeof getForeachItemSchema
 >;
 
 describe('validateVariable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createVariableItem = (overrides: Partial<VariableItem> = {}): VariableItem => ({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment-timezone';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -73,34 +75,34 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
 describe('DatePicker', () => {
   describe('rendering', () => {
     it('renders the label', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByText('Due date')).toBeInTheDocument();
     });
 
     it('renders an input element', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
 
     it('disables the input while saving', () => {
-      render(<FormWrapper isSaving onSubmitResult={jest.fn()} />);
+      render(<FormWrapper isSaving onSubmitResult={vi.fn()} />);
 
       expect(screen.getByRole('textbox')).toBeDisabled();
     });
 
     it('shows Optional label when isRequired is false', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired={false} onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByText('Optional')).toBeInTheDocument();
     });
 
     it('does not show Optional label when isRequired is true', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired onSubmitResult={onSubmitResult} />);
 
       expect(screen.queryByText('Optional')).not.toBeInTheDocument();
@@ -109,7 +111,7 @@ describe('DatePicker', () => {
 
   describe('isRequired validation', () => {
     it('blocks form submission when isRequired is true and no date is selected', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -120,7 +122,7 @@ describe('DatePicker', () => {
     });
 
     it('allows form submission when isRequired is false and no date is selected', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired={false} onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -131,7 +133,7 @@ describe('DatePicker', () => {
     });
 
     it('allows form submission when isRequired is true and a date is pre-populated', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper
           isRequired
@@ -148,7 +150,7 @@ describe('DatePicker', () => {
     });
 
     it('shows an error message when required validation fails', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -161,7 +163,7 @@ describe('DatePicker', () => {
 
   describe('show_time metadata', () => {
     it('does not show the time selector by default', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
 
       // react-datepicker renders a time input only when showTimeSelect is true
@@ -171,8 +173,8 @@ describe('DatePicker', () => {
 
   describe('inline actions', () => {
     it('shows actions after the date changes and confirms it', async () => {
-      const onConfirm = jest.fn();
-      render(<FormWrapper onConfirm={onConfirm} onSubmitResult={jest.fn()} />);
+      const onConfirm = vi.fn();
+      render(<FormWrapper onConfirm={onConfirm} onSubmitResult={vi.fn()} />);
 
       const input = screen.getByRole('textbox');
       await userEvent.type(input, '07/15/2026');
@@ -186,7 +188,7 @@ describe('DatePicker', () => {
 
   describe('serializer', () => {
     it('serializes a UTC ISO string default to a UTC ISO string on submit', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       const isoValue = '2024-06-01T09:00:00.000Z';
 
       render(<FormWrapper initialValue={isoValue} onSubmitResult={onSubmitResult} />);

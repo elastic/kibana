@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
@@ -25,28 +28,40 @@ import { triggerSchemas } from './trigger_schemas';
 import { PLUGIN_ID } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
-jest.mock('./application', () => ({ renderApp: jest.fn(() => jest.fn()) }));
+vi.mock('./application', () => {
+      const mocked = { renderApp: vi.fn(() => vi.fn()) };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./common/lib/telemetry/telemetry_service', () => {
+vi.mock('./common/lib/telemetry/telemetry_service', () => {
   return {
-    TelemetryService: jest.fn().mockImplementation(() => ({
-      setup: jest.fn(),
-      getClient: jest.fn().mockReturnValue({ reportEvent: jest.fn() }),
+    TelemetryService: vi.fn().mockImplementation(() => ({
+      setup: vi.fn(),
+      getClient: vi.fn().mockReturnValue({ reportEvent: vi.fn() }),
     })),
   };
 });
 
-jest.mock('../common/step_schemas', () => ({
-  stepSchemas: { initialize: jest.fn() },
-}));
+vi.mock('../common/step_schemas', () => {
+      const mocked = {
+      stepSchemas: { initialize: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./trigger_schemas', () => ({
-  triggerSchemas: { initialize: jest.fn() },
-}));
+vi.mock('./trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: { initialize: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./connectors/workflows', () => ({
-  getWorkflowsConnectorType: jest.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
-}));
+vi.mock('./connectors/workflows', () => {
+      const mocked = {
+      getWorkflowsConnectorType: vi.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createPlugin = () =>
   new WorkflowsPlugin(
@@ -63,7 +78,7 @@ describe('WorkflowsPlugin', () => {
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let setupDeps: {
     actions: { isInboundEventsEnabled: boolean };
-    triggersActionsUi: { actionTypeRegistry: { register: jest.Mock } };
+    triggersActionsUi: { actionTypeRegistry: { register: Mock } };
     workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createSetup>;
   };
   let startDeps: {
@@ -72,14 +87,14 @@ describe('WorkflowsPlugin', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     plugin = createPlugin();
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
     coreSetup.plugins.onStart.mockReturnValue(Promise.resolve({ found: false }));
     setupDeps = {
       actions: { isInboundEventsEnabled: false },
-      triggersActionsUi: { actionTypeRegistry: { register: jest.fn() } },
+      triggersActionsUi: { actionTypeRegistry: { register: vi.fn() } },
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     };
     startDeps = {
@@ -100,7 +115,7 @@ describe('WorkflowsPlugin', () => {
       plugin.setup(coreSetup, {
         actions: {
           ...setupDeps.actions,
-          validateEmailAddresses: jest.fn(),
+          validateEmailAddresses: vi.fn(),
           enabledEmailServices: ['*'],
           isEarsEnabled: false,
           isEarsExperimentalEnabled: false,
@@ -262,7 +277,7 @@ describe('WorkflowsPlugin', () => {
         startDeps.licensing.license$ = new BehaviorSubject({
           isActive: true,
           isAvailable: true,
-          hasAtLeast: jest.fn().mockReturnValue(isValid),
+          hasAtLeast: vi.fn().mockReturnValue(isValid),
         }) as any;
       };
 

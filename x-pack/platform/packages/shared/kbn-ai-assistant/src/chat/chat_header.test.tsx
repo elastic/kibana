@@ -5,21 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHeader } from './chat_header';
 
-jest.mock('./chat_actions_menu', () => ({
-  ChatActionsMenu: () => <div data-test-subj="chat-actions-menu" />,
-}));
+vi.mock('./chat_actions_menu', () => {
+      const mocked = {
+      ChatActionsMenu: () => <div data-test-subj="chat-actions-menu" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./chat_sharing_menu', () => ({
-  ChatSharingMenu: () => <div data-test-subj="chat-sharing-menu" />,
-}));
+vi.mock('./chat_sharing_menu', () => {
+      const mocked = {
+      ChatSharingMenu: () => <div data-test-subj="chat-sharing-menu" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./chat_context_menu', () => ({
-  ChatContextMenu: () => <div data-test-subj="chat-context-menu" />,
-}));
+vi.mock('./chat_context_menu', () => {
+      const mocked = {
+      ChatContextMenu: () => <div data-test-subj="chat-context-menu" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ChatHeader', () => {
   const baseProps = {
@@ -39,17 +50,17 @@ describe('ChatHeader', () => {
     loading: false,
     title: 'My title',
     isConversationOwnedByCurrentUser: false,
-    onDuplicateConversation: jest.fn(),
-    onSaveTitle: jest.fn(),
-    onToggleFlyoutPositionMode: jest.fn(),
-    navigateToConversation: jest.fn(),
-    updateDisplayedConversation: jest.fn(),
-    handleConversationAccessUpdate: jest.fn(),
-    deleteConversation: jest.fn(),
-    copyConversationToClipboard: jest.fn(),
-    copyUrl: jest.fn(),
-    handleArchiveConversation: jest.fn(),
-    navigateToModelManagementApp: jest.fn(),
+    onDuplicateConversation: vi.fn(),
+    onSaveTitle: vi.fn(),
+    onToggleFlyoutPositionMode: vi.fn(),
+    navigateToConversation: vi.fn(),
+    updateDisplayedConversation: vi.fn(),
+    handleConversationAccessUpdate: vi.fn(),
+    deleteConversation: vi.fn(),
+    copyConversationToClipboard: vi.fn(),
+    copyUrl: vi.fn(),
+    handleArchiveConversation: vi.fn(),
+    navigateToModelManagementApp: vi.fn(),
   };
 
   it('renders the chat actions menu', () => {

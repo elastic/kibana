@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -25,43 +28,43 @@ import { CreateCase } from '.';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../containers/api');
-jest.mock('../../containers/user_profiles/api');
-jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_get_case_configuration');
-jest.mock('../connectors/jira/use_get_issue_types');
-jest.mock('../connectors/jira/use_get_fields_by_issue_type');
-jest.mock('../connectors/jira/use_get_issues');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../containers/api');
+vi.mock('../../containers/user_profiles/api');
+vi.mock('../../containers/use_get_tags');
+vi.mock('../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../containers/configure/use_get_case_configuration');
+vi.mock('../connectors/jira/use_get_issue_types');
+vi.mock('../connectors/jira/use_get_fields_by_issue_type');
+vi.mock('../connectors/jira/use_get_issues');
 
-const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
-const useGetTagsMock = useGetTags as jest.Mock;
-const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
-const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
-const fetchTags = jest.fn();
+const useGetConnectorsMock = useGetSupportedActionConnectors as Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
+const useGetTagsMock = useGetTags as Mock;
+const useGetIssueTypesMock = useGetIssueTypes as Mock;
+const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as Mock;
+const fetchTags = vi.fn();
 
 const defaultProps = {
-  onCancel: jest.fn(),
-  onSuccess: jest.fn(),
+  onCancel: vi.fn(),
+  onSuccess: vi.fn(),
 };
 
 describe('CreateCase case', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);

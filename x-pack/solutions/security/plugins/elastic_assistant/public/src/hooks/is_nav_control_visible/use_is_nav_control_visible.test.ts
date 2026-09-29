@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useIsNavControlVisible } from './use_is_nav_control_visible';
 import { of } from 'rxjs';
@@ -13,9 +16,9 @@ import type { Space } from '@kbn/spaces-plugin/common';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../context/typed_kibana_context/typed_kibana_context', () => {
+vi.mock('../../context/typed_kibana_context/typed_kibana_context', () => {
   return {
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
   };
 });
 
@@ -26,7 +29,7 @@ describe('isNavControlVisible', () => {
     settings.client.get$.mockReturnValue(of(AIChatExperience.Classic));
   });
   it('returns true when the current app is security and the ai assistant type is default', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: of('security'),
@@ -53,7 +56,7 @@ describe('isNavControlVisible', () => {
   });
 
   it('returns false when the current app is observability and the ai assistant type is default', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: of('observability'),
@@ -77,7 +80,7 @@ describe('isNavControlVisible', () => {
   });
 
   it('returns false when the current app is search and the ai assistant type is default', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: of('search'),
@@ -101,7 +104,7 @@ describe('isNavControlVisible', () => {
   });
 
   it('returns false when the current app is discover and the ai assistant type is security', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: of('discover'),
@@ -125,7 +128,7 @@ describe('isNavControlVisible', () => {
   });
 
   it('returns false when the current app is discover and the ai assistant type is observability', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: of('discover'),
@@ -149,7 +152,7 @@ describe('isNavControlVisible', () => {
   });
 
   it('returns true when isServerless is true regardless of app and preference', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: of('observability'),
@@ -173,7 +176,7 @@ describe('isNavControlVisible', () => {
   });
 
   it("returns true when space.solution is 'security' regardless of app and preference", () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: of('observability'),
@@ -199,7 +202,7 @@ describe('isNavControlVisible', () => {
   it('returns false when chat experience is set to Agent (AgentBuilderNavControl will be used instead)', () => {
     settings.client.get$.mockReturnValue(of(AIChatExperience.Agent));
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: of('security'),

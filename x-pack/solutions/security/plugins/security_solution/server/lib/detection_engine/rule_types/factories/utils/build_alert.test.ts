@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ALERT_INSTANCE_ID,
   ALERT_NAMESPACE,
@@ -31,7 +33,7 @@ type SignalDoc = SignalSourceHit & {
 
 describe('buildAlertFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it creates the expected alert fields', () => {

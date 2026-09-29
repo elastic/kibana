@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 import { PolicyName } from './policy_name';
 
-jest.mock('../../../hooks', () => ({
-  useFleetPermissions: () => ({ canReadAgentPolicies: true, canReadAgents: true }),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useFleetPermissions: () => ({ canReadAgentPolicies: true, canReadAgents: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_policy_details_flyout', () => ({
-  AgentPolicyDetailsFlyout: () => null,
-}));
+vi.mock('./agent_policy_details_flyout', () => {
+      const mocked = {
+      AgentPolicyDetailsFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   host: 'agent-a',

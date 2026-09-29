@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -24,8 +26,8 @@ import { LIST_ITEM_DATE_FORMAT } from './parts/timestamp_row';
 import { getOrCreateFilterStore, destroyFilterStore } from '../../../filters/filter_store';
 import type { EntityOrEventItem } from './types';
 
-const mockOnShowDocument = jest.fn();
-const mockOnShowEntity = jest.fn();
+const mockOnShowDocument = vi.fn();
+const mockOnShowEntity = vi.fn();
 
 // Distributes `Omit` across the discriminated union so the `isLoading` discriminant is preserved.
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;

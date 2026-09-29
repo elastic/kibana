@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
@@ -64,10 +66,10 @@ const MOCK_TEMPLATES: IndexTemplate[] = [
 ];
 
 const defaultProps = {
-  onClose: jest.fn(),
-  onCreate: jest.fn().mockResolvedValue(undefined),
-  onCreateTemplate: jest.fn(),
-  onRetryLoadTemplates: jest.fn(),
+  onClose: vi.fn(),
+  onCreate: vi.fn().mockResolvedValue(undefined),
+  onCreateTemplate: vi.fn(),
+  onRetryLoadTemplates: vi.fn(),
   templates: MOCK_TEMPLATES,
 };
 
@@ -91,15 +93,15 @@ const selectTemplateAndGoToStep2 = (
 
 describe('CreateClassicStreamFlyout', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -173,7 +175,7 @@ describe('CreateClassicStreamFlyout', () => {
 
   describe('callback functions', () => {
     it('calls onClose when Cancel button or close flyout button is clicked', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const { getByTestId } = renderFlyout({ onClose });
 
       fireEvent.click(getByTestId('cancelButton'));
@@ -186,7 +188,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('calls onCreate with stream name when Create button is clicked and validation passes', async () => {
-      const onCreate = jest.fn().mockResolvedValue(undefined);
+      const onCreate = vi.fn().mockResolvedValue(undefined);
       const { getByTestId } = renderFlyout({ onCreate });
 
       // Select template and navigate to second step
@@ -207,7 +209,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('does not call onCreate when validation fails (empty wildcard)', async () => {
-      const onCreate = jest.fn().mockResolvedValue(undefined);
+      const onCreate = vi.fn().mockResolvedValue(undefined);
       const { getByTestId, findByText } = renderFlyout({ onCreate });
 
       // Select template and navigate to second step
@@ -225,8 +227,8 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('does not call onCreate or onClose when navigating between steps', () => {
-      const onClose = jest.fn();
-      const onCreate = jest.fn().mockResolvedValue(undefined);
+      const onClose = vi.fn();
+      const onCreate = vi.fn().mockResolvedValue(undefined);
       const { getByTestId } = renderFlyout({ onCreate, onClose });
 
       // Select template
@@ -262,7 +264,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('empty state', () => {
       it('renders empty state when there are no templates', () => {
-        const onCreateTemplate = jest.fn();
+        const onCreateTemplate = vi.fn();
         const { getByText, getByTestId } = renderFlyout({ templates: [], onCreateTemplate });
 
         expect(getByText('No index templates detected')).toBeInTheDocument();
@@ -273,7 +275,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('calls onCreateTemplate when Create index template button is clicked', () => {
-        const onCreateTemplate = jest.fn();
+        const onCreateTemplate = vi.fn();
         const { getByTestId } = renderFlyout({ templates: [], onCreateTemplate });
 
         fireEvent.click(getByTestId('createTemplateButton'));
@@ -293,7 +295,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('calls onRetryLoadTemplates when Retry button is clicked', () => {
-        const onRetryLoadTemplates = jest.fn();
+        const onRetryLoadTemplates = vi.fn();
         const { getByTestId } = renderFlyout({
           hasErrorLoadingTemplates: true,
           onRetryLoadTemplates,
@@ -339,7 +341,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('renders the name and confirm step with template details', async () => {
-      const mockGetSimulatedTemplate = jest.fn().mockResolvedValue(createMockSimulatedTemplate());
+      const mockGetSimulatedTemplate = vi.fn().mockResolvedValue(createMockSimulatedTemplate());
 
       const { getByTestId, getByText } = renderFlyout({
         getSimulatedTemplate: mockGetSimulatedTemplate,
@@ -409,7 +411,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('displays correct index mode for different templates', async () => {
-      const mockGetSimulatedTemplate = jest.fn().mockResolvedValue({
+      const mockGetSimulatedTemplate = vi.fn().mockResolvedValue({
         template: {
           settings: {
             index: {
@@ -514,7 +516,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('validation', () => {
       it('shows validation error when trying to create with empty wildcard', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
+        const onCreate = vi.fn().mockResolvedValue(undefined);
         const { getByTestId, findByText } = renderFlyout({ onCreate });
 
         // Select template and navigate to second step
@@ -531,8 +533,8 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('calls onValidate when provided and local validation passes', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
-        const onValidate = jest.fn().mockResolvedValue({ errorType: null });
+        const onCreate = vi.fn().mockResolvedValue(undefined);
+        const onValidate = vi.fn().mockResolvedValue({ errorType: null });
         const { getByTestId } = renderFlyout({ onCreate, onValidate });
 
         // Select template and navigate to second step
@@ -560,8 +562,8 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('shows duplicate error from onValidate', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
-        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const onCreate = vi.fn().mockResolvedValue(undefined);
+        const onValidate = vi.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
 
         // Select template and navigate to second step
@@ -582,8 +584,8 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('shows higher priority error from onValidate', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
-        const onValidate = jest.fn().mockResolvedValue({
+        const onCreate = vi.fn().mockResolvedValue(undefined);
+        const onValidate = vi.fn().mockResolvedValue({
           errorType: 'higherPriority',
           conflictingIndexPattern: 'logs-*',
         });
@@ -610,9 +612,9 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('debounced validation and live validation mode', () => {
       it('should trigger debounced validation in Live Validation Mode (when error exists)', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
+        const onCreate = vi.fn().mockResolvedValue(undefined);
         // Return error to enter Live Validation Mode
-        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const onValidate = vi.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -645,8 +647,8 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('should keep error visible while validating in Live Validation Mode', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
-        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const onCreate = vi.fn().mockResolvedValue(undefined);
+        const onValidate = vi.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText, getByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -669,10 +671,10 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('AbortController cancellation', () => {
       it('should abort validation when template changes', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
+        const onCreate = vi.fn().mockResolvedValue(undefined);
         let abortSignal: AbortSignal | undefined;
 
-        const onValidate = jest.fn().mockImplementation((name, template, signal) => {
+        const onValidate = vi.fn().mockImplementation((name, template, signal) => {
           abortSignal = signal;
           return new Promise((resolve) => {
             setTimeout(() => resolve({ errorType: null }), 10000);
@@ -706,8 +708,8 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('template and index pattern change effects', () => {
       it('should reset validation error state when template changes', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
-        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const onCreate = vi.fn().mockResolvedValue(undefined);
+        const onValidate = vi.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText, queryByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -731,14 +733,14 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Ensure debounced validation doesn't bring it back
         await act(async () => {
-          jest.advanceTimersByTime(500);
+          vi.advanceTimersByTime(500);
         });
         expect(queryByText(/You must specify a valid text string/i)).not.toBeInTheDocument();
       });
 
       it('should reset validation when index pattern changes', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
-        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const onCreate = vi.fn().mockResolvedValue(undefined);
+        const onValidate = vi.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText, queryByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
@@ -765,7 +767,7 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Ensure debounced validation doesn't bring it back
         await act(async () => {
-          jest.advanceTimersByTime(500);
+          vi.advanceTimersByTime(500);
         });
         expect(queryByText(/You must specify a valid text string/i)).not.toBeInTheDocument();
       });
@@ -773,8 +775,8 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('error handling', () => {
       it('should handle validation errors gracefully', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
-        const onValidate = jest.fn().mockRejectedValue(new Error('Network error'));
+        const onCreate = vi.fn().mockResolvedValue(undefined);
+        const onValidate = vi.fn().mockRejectedValue(new Error('Network error'));
 
         const { getByTestId } = renderFlyout({ onCreate, onValidate });
 
@@ -799,8 +801,8 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('validation state management', () => {
       it('should show loading state during validation', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
-        const onValidate = jest.fn().mockImplementation(() => {
+        const onCreate = vi.fn().mockResolvedValue(undefined);
+        const onValidate = vi.fn().mockImplementation(() => {
           return new Promise((resolve) => {
             setTimeout(() => resolve({ errorType: null }), 100);
           });
@@ -834,9 +836,9 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('should reset hasAttemptedSubmit when validation passes in live mode', async () => {
-        const onCreate = jest.fn().mockResolvedValue(undefined);
+        const onCreate = vi.fn().mockResolvedValue(undefined);
         // First return error to enter Live Validation Mode
-        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const onValidate = vi.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -874,7 +876,7 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Advance timers - validation should not trigger
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(300);
+          await vi.advanceTimersByTimeAsync(300);
         });
 
         // Should not validate again (hasAttemptedSubmit was reset to false)
@@ -901,13 +903,13 @@ describe('CreateClassicStreamFlyout', () => {
 
     it('should abort ILM policy fetch when going back to template selection', async () => {
       let capturedSignal: AbortSignal | undefined;
-      const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
+      const mockGetIlmPolicy = vi.fn().mockImplementation((policyName, signal) => {
         capturedSignal = signal;
         return new Promise((resolve) => {
           setTimeout(() => resolve(null), 10000);
         });
       });
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplateWithIlm('30d'));
 
@@ -937,7 +939,7 @@ describe('CreateClassicStreamFlyout', () => {
       let secondSignal: AbortSignal | undefined;
       let ilmCallCount = 0;
 
-      const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
+      const mockGetIlmPolicy = vi.fn().mockImplementation((policyName, signal) => {
         ilmCallCount++;
         if (ilmCallCount === 1) {
           firstSignal = signal;
@@ -948,7 +950,7 @@ describe('CreateClassicStreamFlyout', () => {
           setTimeout(() => resolve(null), 10000);
         });
       });
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplateWithIlm('30d'));
 
@@ -992,7 +994,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('calls getSimulatedTemplate when navigating to second step', async () => {
-      const mockGetSimulatedTemplate = jest.fn().mockResolvedValue(createMockSimulatedTemplate());
+      const mockGetSimulatedTemplate = vi.fn().mockResolvedValue(createMockSimulatedTemplate());
 
       const { getByTestId } = renderFlyout({
         getSimulatedTemplate: mockGetSimulatedTemplate,
@@ -1010,7 +1012,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('displays index mode from simulated template', async () => {
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('logsdb'));
 
@@ -1028,10 +1030,10 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('displays retention from simulated template when ILM policy is present', async () => {
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('standard', 'my-ilm-policy'));
-      const mockGetIlmPolicy = jest.fn().mockResolvedValue(null);
+      const mockGetIlmPolicy = vi.fn().mockResolvedValue(null);
 
       const { getByTestId, getByText } = renderFlyout({
         getSimulatedTemplate: mockGetSimulatedTemplate,
@@ -1054,7 +1056,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     it('should abort simulated template fetch when going back to template selection', async () => {
       let capturedSignal: AbortSignal | undefined;
-      const mockGetSimulatedTemplate = jest.fn().mockImplementation((templateName, signal) => {
+      const mockGetSimulatedTemplate = vi.fn().mockImplementation((templateName, signal) => {
         capturedSignal = signal;
         return new Promise((resolve) => {
           setTimeout(() => resolve(createMockSimulatedTemplate()), 10000);
@@ -1086,7 +1088,7 @@ describe('CreateClassicStreamFlyout', () => {
       let secondSignal: AbortSignal | undefined;
       let callCount = 0;
 
-      const mockGetSimulatedTemplate = jest.fn().mockImplementation((templateName, signal) => {
+      const mockGetSimulatedTemplate = vi.fn().mockImplementation((templateName, signal) => {
         callCount++;
         if (callCount === 1) {
           firstSignal = signal;
@@ -1122,7 +1124,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('shows error message when simulated template fetch fails', async () => {
-      const mockGetSimulatedTemplate = jest.fn().mockRejectedValue(new Error('Network error'));
+      const mockGetSimulatedTemplate = vi.fn().mockRejectedValue(new Error('Network error'));
 
       const { getByTestId, getByText, queryByText } = renderFlyout({
         getSimulatedTemplate: mockGetSimulatedTemplate,
@@ -1153,7 +1155,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     it('falls back to template lifecycle when simulated template has no ILM policy', async () => {
       // Simulated template with no ILM policy
-      const mockGetSimulatedTemplate = jest
+      const mockGetSimulatedTemplate = vi
         .fn()
         .mockResolvedValue(createMockSimulatedTemplate('standard'));
 

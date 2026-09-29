@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useUpdateMigrationRule } from './use_update_migration_rule';
 import { updateMigrationRules } from '../api';
@@ -15,39 +18,51 @@ import { useInvalidateGetMigrationRules } from './use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 
-jest.mock('../api');
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addSuccess: jest.fn(),
-    addError: jest.fn(),
-  }),
-}));
-jest.mock('./use_get_migration_rules', () => ({
-  useInvalidateGetMigrationRules: jest.fn(),
-}));
-jest.mock('./use_get_migration_translation_stats', () => ({
-  useInvalidateGetMigrationTranslationStats: jest.fn(),
-}));
-jest.mock('../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../api');
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addSuccess: vi.fn(),
+        addError: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_get_migration_rules', () => {
+      const mocked = {
+      useInvalidateGetMigrationRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_get_migration_translation_stats', () => {
+      const mocked = {
+      useInvalidateGetMigrationTranslationStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockResponse = { updated: 1 };
 const mockError = new Error('API error');
-const mockAddError = jest.fn();
-const invalidateRules = jest.fn();
-const invalidateStats = jest.fn();
-const mockReportTranslatedItemUpdate = jest.fn();
+const mockAddError = vi.fn();
+const invalidateRules = vi.fn();
+const invalidateStats = vi.fn();
+const mockReportTranslatedItemUpdate = vi.fn();
 
 describe('useUpdateMigrationRule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({
       addError: mockAddError,
     });
-    (useInvalidateGetMigrationRules as jest.Mock).mockReturnValue(invalidateRules);
-    (useInvalidateGetMigrationTranslationStats as jest.Mock).mockReturnValue(invalidateStats);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useInvalidateGetMigrationRules as Mock).mockReturnValue(invalidateRules);
+    (useInvalidateGetMigrationTranslationStats as Mock).mockReturnValue(invalidateStats);
+    (useKibana as Mock).mockReturnValue({
       services: {
         siemMigrations: {
           rules: {
@@ -62,7 +77,7 @@ describe('useUpdateMigrationRule', () => {
 
   describe('on success', () => {
     beforeEach(() => {
-      (updateMigrationRules as jest.Mock).mockResolvedValue(mockResponse);
+      (updateMigrationRules as Mock).mockResolvedValue(mockResponse);
     });
 
     it('invalidates queries on settled', async () => {
@@ -84,7 +99,7 @@ describe('useUpdateMigrationRule', () => {
 
   describe('on error', () => {
     beforeEach(() => {
-      (updateMigrationRules as jest.Mock).mockRejectedValue(mockError);
+      (updateMigrationRules as Mock).mockRejectedValue(mockError);
     });
 
     it('shows an error toast', async () => {

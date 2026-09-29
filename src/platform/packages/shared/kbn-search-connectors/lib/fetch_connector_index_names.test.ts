@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -35,11 +37,11 @@ const indexNotFoundError = new errors.ResponseError({
 describe('fetchConnectorIndexNames lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should fetch connector index names', async () => {

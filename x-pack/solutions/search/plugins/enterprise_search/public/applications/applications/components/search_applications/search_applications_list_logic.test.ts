@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -63,8 +65,8 @@ describe('SearchApplicationsListLogic', () => {
   const { mount } = new LogicMounter(SearchApplicationsListLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     apiLogicMount();
     mount();
   });
@@ -84,8 +86,8 @@ describe('SearchApplicationsListLogic', () => {
         expect(SearchApplicationsListLogic.values.data).toEqual({ ...mockData, count: 11 });
       });
       it('updates meta with newPageIndex', () => {
-        jest.spyOn(SearchApplicationsListLogic.actions, 'fetchSearchApplications');
-        jest.spyOn(SearchApplicationsListLogic.actions, 'onPaginate');
+        vi.spyOn(SearchApplicationsListLogic.actions, 'fetchSearchApplications');
+        vi.spyOn(SearchApplicationsListLogic.actions, 'onPaginate');
 
         expect(SearchApplicationsListLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -190,7 +192,7 @@ describe('SearchApplicationsListLogic', () => {
         });
       });
       it('updates meta with new state when apiSuccess', () => {
-        jest.spyOn(SearchApplicationsListLogic.actions, 'fetchSearchApplications');
+        vi.spyOn(SearchApplicationsListLogic.actions, 'fetchSearchApplications');
         const newCount = 20;
         const newPageMeta = {
           from: 10,
@@ -323,8 +325,8 @@ describe('SearchApplicationsListLogic', () => {
   });
   describe('listeners', () => {
     it('calls flashSuccessToast, closeDeleteSearchApplicationModal and fetchSearchApplications on deleteSuccess', () => {
-      SearchApplicationsListLogic.actions.fetchSearchApplications = jest.fn();
-      SearchApplicationsListLogic.actions.closeDeleteSearchApplicationModal = jest.fn();
+      SearchApplicationsListLogic.actions.fetchSearchApplications = vi.fn();
+      SearchApplicationsListLogic.actions.closeDeleteSearchApplicationModal = vi.fn();
       SearchApplicationsListLogic.actions.deleteSuccess({ searchApplicationName: results[0].name });
 
       expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
@@ -334,8 +336,8 @@ describe('SearchApplicationsListLogic', () => {
       ).toHaveBeenCalled();
     });
     it('call makeRequest on fetchSearchApplications', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
-      SearchApplicationsListLogic.actions.makeRequest = jest.fn();
+      vi.useFakeTimers({ legacyFakeTimers: true });
+      SearchApplicationsListLogic.actions.makeRequest = vi.fn();
       SearchApplicationsListLogic.actions.fetchSearchApplications();
       await nextTick();
       expect(SearchApplicationsListLogic.actions.makeRequest).toHaveBeenCalledWith({

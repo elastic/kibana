@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { setup, setupEnvironment } from './pipeline_processors_editor.helpers';
@@ -54,18 +57,18 @@ const testProcessors: Pick<Pipeline, 'processors'> = {
 };
 
 describe('Pipeline Editor', () => {
-  let onUpdate: jest.Mock;
+  let onUpdate: Mock;
   let rerenderWithProps: ReturnType<typeof setup>['rerenderWithProps'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupEnvironment();
-    onUpdate = jest.fn();
+    onUpdate = vi.fn();
     ({ rerenderWithProps } = setup({
       value: {
         ...testProcessors,
       },
-      onFlyoutOpen: jest.fn(),
+      onFlyoutOpen: vi.fn(),
       onUpdate,
     }));
   });
@@ -84,7 +87,7 @@ describe('Pipeline Editor', () => {
         value: {
           processors: [],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -192,7 +195,7 @@ describe('Pipeline Editor', () => {
       // A non-inference processor that happens to have a `target_field` unknown option should
       // keep it after saving, because `target_field` must only be treated as "known" for
       // inference processors.
-      onUpdate = jest.fn();
+      onUpdate = vi.fn();
       rerenderWithProps({
         value: {
           processors: [
@@ -205,7 +208,7 @@ describe('Pipeline Editor', () => {
             },
           ],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -238,7 +241,7 @@ describe('Pipeline Editor', () => {
       // When editing an inference processor, input_output / target_field / field_map are
       // "known" to the form, so they must NOT bleed through from unknownOptions into the
       // serialized output (which would double-write or conflict with what the form emits).
-      onUpdate = jest.fn();
+      onUpdate = vi.fn();
       rerenderWithProps({
         value: {
           processors: [
@@ -250,7 +253,7 @@ describe('Pipeline Editor', () => {
             },
           ],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -630,12 +633,12 @@ describe('Pipeline Editor', () => {
       ],
     };
     it('editor works when value is an object', async () => {
-      onUpdate = jest.fn();
+      onUpdate = vi.fn();
       rerenderWithProps({
         value: {
           ...mockData,
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
       expect(

@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CACHE_TTL_MS, createProjectFetcher } from './project_fetcher';
 
 describe('createProjectFetcher', () => {
-  let mockHttp: jest.Mocked<HttpSetup>;
+  let mockHttp: Mocked<HttpSetup>;
   const mockLogger = loggingSystemMock.createLogger();
 
   const mockOriginProject: CPSProject = {
@@ -47,16 +50,16 @@ describe('createProjectFetcher', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     mockHttp = {
-      post: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown as jest.Mocked<HttpSetup>;
+      post: vi.fn().mockResolvedValue(mockResponse),
+    } as unknown as Mocked<HttpSetup>;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   describe('basic fetch', () => {
@@ -101,7 +104,7 @@ describe('createProjectFetcher', () => {
 
       const fetcher = createProjectFetcher(mockHttp, mockLogger);
       const promise = fetcher.fetchProjects('_alias:*');
-      const timerPromise = jest.runAllTimersAsync();
+      const timerPromise = vi.runAllTimersAsync();
       const [result] = await Promise.all([promise, timerPromise]);
 
       expect(mockHttp.post).toHaveBeenCalledTimes(3);
@@ -113,7 +116,7 @@ describe('createProjectFetcher', () => {
 
       const fetcher = createProjectFetcher(mockHttp, mockLogger);
       const promise = fetcher.fetchProjects('_alias:*');
-      const timerPromise = jest.runAllTimersAsync();
+      const timerPromise = vi.runAllTimersAsync();
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow('Persistent error');
       expect(mockHttp.post).toHaveBeenCalledTimes(3);
@@ -137,12 +140,12 @@ describe('createProjectFetcher', () => {
       await fetcher.fetchProjects('_alias:*');
       expect(mockHttp.post).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(CACHE_TTL_MS - 1);
+      vi.advanceTimersByTime(CACHE_TTL_MS - 1);
 
       await fetcher.fetchProjects('_alias:*');
       expect(mockHttp.post).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(CACHE_TTL_MS + 1);
+      vi.advanceTimersByTime(CACHE_TTL_MS + 1);
 
       await fetcher.fetchProjects('_alias:*');
       expect(mockHttp.post).toHaveBeenCalledTimes(2);
@@ -172,7 +175,7 @@ describe('createProjectFetcher', () => {
       const fetcher = createProjectFetcher(mockHttp, mockLogger);
 
       const failedPromise = fetcher.fetchProjects('_alias:*');
-      const timerPromise = jest.runAllTimersAsync();
+      const timerPromise = vi.runAllTimersAsync();
       await expect(Promise.all([failedPromise, timerPromise])).rejects.toThrow('Transient error');
 
       const result = await fetcher.fetchProjects('_alias:*');
@@ -218,7 +221,7 @@ describe('createProjectFetcher', () => {
       const result1 = await fetcher.fetchProjects('_alias:*');
       expect(result1).toBeNull();
 
-      jest.advanceTimersByTime(CACHE_TTL_MS + 1);
+      vi.advanceTimersByTime(CACHE_TTL_MS + 1);
 
       const result2 = await fetcher.fetchProjects('_alias:*');
       expect(result2!.origin).toEqual(mockOriginProject);

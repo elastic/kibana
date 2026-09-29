@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React, { type ComponentProps } from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ReportDiagnostic } from './report_diagnostic';
 
-const mockedApiClient: jest.Mocked<
+const mockedApiClient: Mocked<
   Pick<ComponentProps<typeof ReportDiagnostic>['apiClient'], 'verifyBrowser'>
 > = {
-  verifyBrowser: jest.fn(),
+  verifyBrowser: vi.fn(),
 };
 
 const defaultProps: Pick<ComponentProps<typeof ReportDiagnostic>, 'apiClient'> = {
@@ -32,7 +35,7 @@ const renderComponent = (props: Pick<ComponentProps<typeof ReportDiagnostic>, 'c
 
 describe('ReportDiagnostic', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("does not render the component, if image exports aren't supported", () => {

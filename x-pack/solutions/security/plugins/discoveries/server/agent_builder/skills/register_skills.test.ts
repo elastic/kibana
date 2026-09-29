@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
@@ -21,7 +23,7 @@ describe('registerSkills', () => {
 
   const mockGetEventLogIndex = async () => 'event-log-*';
   const mockExecutionLookup: WorkflowExecutionLookup = {
-    getWorkflowExecution: jest.fn(),
+    getWorkflowExecution: vi.fn(),
   };
 
   const baseOptions = {
@@ -30,7 +32,7 @@ describe('registerSkills', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('completes without error when agentBuilder is available', async () => {
@@ -91,14 +93,14 @@ describe('registerSkills', () => {
   // allow-list would be silently rejected at runtime, so every id we register
   // must be a member of the allow-list.
   it('registers only skills whose ids are in the agent-builder allow-list', async () => {
-    const mockLookup: WorkflowExecutionLookup = { getWorkflowExecution: jest.fn() };
+    const mockLookup: WorkflowExecutionLookup = { getWorkflowExecution: vi.fn() };
     const mockFetcher: WorkflowFetcher = {
-      getWorkflow: jest.fn(),
-      getWorkflowExecution: jest.fn(),
+      getWorkflow: vi.fn(),
+      getWorkflowExecution: vi.fn(),
     };
 
     await registerSkills(mockAgentBuilder, mockLogger, {
-      getEventLogIndex: jest.fn(async () => '.kibana-event-log'),
+      getEventLogIndex: vi.fn(async () => '.kibana-event-log'),
       workflowExecutionLookup: mockLookup,
       workflowFetcher: mockFetcher,
     });
@@ -117,8 +119,8 @@ describe('registerSkills', () => {
 
   describe('workflow troubleshooting skill', () => {
     const mockFetcher: WorkflowFetcher = {
-      getWorkflow: jest.fn(),
-      getWorkflowExecution: jest.fn(),
+      getWorkflow: vi.fn(),
+      getWorkflowExecution: vi.fn(),
     };
 
     it('registers the workflow troubleshooting skill when workflowFetcher is provided', async () => {

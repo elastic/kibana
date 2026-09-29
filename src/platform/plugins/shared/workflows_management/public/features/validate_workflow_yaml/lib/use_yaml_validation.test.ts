@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
 import { monaco } from '@kbn/monaco';
 
-const mockValidateEsqlSteps = jest.fn().mockResolvedValue([]);
+const mockValidateEsqlSteps = vi.fn().mockResolvedValue([]);
 
-jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => ({
-  validateEsqlSteps: (...args: unknown[]) => mockValidateEsqlSteps(...args),
-}));
+vi.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => {
+      const mocked = {
+      validateEsqlSteps: (...args: unknown[]) => mockValidateEsqlSteps(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_workflow_yaml_validation_context', () => {
-  const actual = jest.requireActual('./use_workflow_yaml_validation_context');
+vi.mock('./use_workflow_yaml_validation_context', async () => {
+  const actual = (await vi.importActual('./use_workflow_yaml_validation_context'));
   // Required lazily: the factory body runs before this module's own consts initialize.
-  const { createMockWorkflowContextRegistry: createRegistry } = jest.requireActual(
-    '../../../../common/lib/create_workflow_context_registry.mock'
-  );
+  const { createMockWorkflowContextRegistry: createRegistry } = (await vi.importActual('../../../../common/lib/create_workflow_context_registry.mock'));
   const mockValidationContext = {
     registry: createRegistry(),
     connectorTypes: { status: 'ready', value: {} },
@@ -35,15 +38,18 @@ jest.mock('./use_workflow_yaml_validation_context', () => {
 
   return {
     ...actual,
-    useWorkflowYamlValidationContext: jest.fn(() => mockValidationContext),
+    useWorkflowYamlValidationContext: vi.fn(() => mockValidationContext),
   };
 });
 
-jest.mock(
+vi.mock(
   '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks',
-  () => ({
-    useWorkflowEsqlCallbacks: () => ({}),
-  })
+  () => {
+      const mocked = {
+        useWorkflowEsqlCallbacks: () => ({}),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 import type { WorkflowLookup } from '@kbn/workflows-yaml';
@@ -73,9 +79,12 @@ const readyValidationContext: WorkflowYamlValidationContext = {
   esqlCallbacks: {},
 };
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => mockKibanaValue),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(() => mockKibanaValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
@@ -92,14 +101,14 @@ const createMockEditor = (value: string) => {
 
   return {
     getModel: () => model,
-    createDecorationsCollection: jest.fn(() => ({
-      clear: jest.fn(),
+    createDecorationsCollection: vi.fn(() => ({
+      clear: vi.fn(),
     })),
   };
 };
 
 // Mock Monaco setModelMarkers
-const mockSetModelMarkers = jest.fn();
+const mockSetModelMarkers = vi.fn();
 (monaco.editor as any).setModelMarkers = mockSetModelMarkers;
 
 const getBatchedMarkerCalls = () =>
@@ -117,31 +126,34 @@ const getLastBatchedMarkers = (): unknown[] => {
 };
 
 // Mock schema functions
-jest.mock('../../../../common/schema', () => ({
-  ...jest.requireActual('../../../../common/schema'),
-  getCachedDynamicConnectorTypes: jest.fn(() => ({})),
-  getWorkflowZodSchemaLoose: jest.fn(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { z } = require('@kbn/zod/v4');
-    // mock actual schema, we only test the name uniqueness validation
-    return z
-      .object({
-        version: z.string().optional(),
-        name: z.string(),
-        enabled: z.boolean().optional(),
-        triggers: z.array(z.any()).optional(),
-        steps: z
-          .array(
-            z.object({
-              name: z.string(),
-              type: z.string(),
-            })
-          )
-          .optional(),
-      })
-      .passthrough();
-  }),
-}));
+vi.mock('../../../../common/schema', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/schema')),
+      getCachedDynamicConnectorTypes: vi.fn(() => ({})),
+      getWorkflowZodSchemaLoose: vi.fn(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { z } = require('@kbn/zod/v4');
+        // mock actual schema, we only test the name uniqueness validation
+        return z
+          .object({
+            version: z.string().optional(),
+            name: z.string(),
+            enabled: z.boolean().optional(),
+            triggers: z.array(z.any()).optional(),
+            steps: z
+              .array(
+                z.object({
+                  name: z.string(),
+                  type: z.string(),
+                })
+              )
+              .optional(),
+          })
+          .passthrough();
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Helper to render hook with proper Redux context
 const renderHookWithProviders = (
@@ -170,15 +182,15 @@ const renderHookWithProviders = (
 
 describe('useYamlValidation - Step Name Uniqueness', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
-    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.mocked(useKibana).mockReturnValue(mockKibanaValue);
+    vi.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('should not report errors for unique step names', async () => {
@@ -202,7 +214,7 @@ steps:
     const { result, store } = renderHookWithProviders(mockEditor as any, yamlContent);
 
     // Fast-forward through the debounced computation
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     // Wait for the Redux state to have computed data
     await waitFor(
@@ -251,7 +263,7 @@ steps:
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
 
     // Fast-forward through the debounced computation
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -285,7 +297,7 @@ steps:
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
 
     // Fast-forward through the debounced computation
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -319,7 +331,7 @@ steps:
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
 
     // Fast-forward through the debounced computation
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -352,7 +364,7 @@ steps:
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
 
     // Fast-forward through the debounced computation
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -396,7 +408,7 @@ steps:
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
 
     // Fast-forward through the debounced computation
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -426,15 +438,15 @@ steps:
 
 describe('useYamlValidation - Marker Batching', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
-    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.mocked(useKibana).mockReturnValue(mockKibanaValue);
+    vi.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('should batch all custom markers into a single setModelMarkers call', async () => {
@@ -460,7 +472,7 @@ steps:
     const mockEditor = createMockEditor(yamlContent);
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -489,7 +501,7 @@ steps:
     const mockEditor = createMockEditor(yamlContent);
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -522,7 +534,7 @@ steps:
     const mockEditor = createMockEditor(editorYaml);
     const { result } = renderHookWithProviders(mockEditor as any, computedYaml);
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -546,7 +558,7 @@ steps: []
 
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
     await act(async () => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       await Promise.resolve();
     });
 
@@ -575,7 +587,7 @@ steps:
     const { result, rerender } = renderHookWithProviders(mockEditor as any, yamlContent);
 
     await act(async () => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       await Promise.resolve();
     });
     await waitFor(() => {
@@ -584,13 +596,13 @@ steps:
     });
 
     // A connector refresh puts the store back into `loading`.
-    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue({
+    vi.mocked(useWorkflowYamlValidationContext).mockReturnValue({
       ...readyValidationContext,
       connectorTypes: { status: 'loading' },
     });
     await act(async () => {
       rerender();
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       await Promise.resolve();
     });
 
@@ -602,7 +614,7 @@ steps:
   });
 
   it('reports failed connector metadata as a prerequisite error, not a diagnostic', async () => {
-    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue({
+    vi.mocked(useWorkflowYamlValidationContext).mockReturnValue({
       ...readyValidationContext,
       connectorTypes: { status: 'failed', error: 'Connector request failed' },
     });
@@ -615,7 +627,7 @@ steps: []
 
     const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
     await act(async () => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       await Promise.resolve();
     });
 
@@ -632,8 +644,8 @@ steps: []
 
 describe('useYamlValidation - ES|QL step wiring', () => {
   beforeEach(() => {
-    jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
-    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
+    vi.mocked(useKibana).mockReturnValue(mockKibanaValue);
+    vi.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
     mockValidateEsqlSteps.mockReset();
     mockValidateEsqlSteps.mockResolvedValue([]);
   });

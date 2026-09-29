@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
@@ -22,13 +25,13 @@ describe('filterEventsAgainstList', () => {
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listClient = listMock.getListClient();
-    listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
+    listClient.searchListItemByValues = vi.fn().mockResolvedValue([]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should respond with eventSearchResult if exceptionList is empty array', async () => {
@@ -104,7 +107,7 @@ describe('filterEventsAgainstList', () => {
           },
         },
       ];
-      listClient.searchListItemByValues = jest.fn(({ value }) =>
+      listClient.searchListItemByValues = vi.fn(({ value }) =>
         Promise.resolve(
           value.slice(0, 2).map((item) => ({
             ...getSearchListItemResponseMock(),
@@ -123,8 +126,8 @@ describe('filterEventsAgainstList', () => {
           '7.7.7.7',
         ]),
       });
-      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].type).toEqual('ip');
-      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].listId).toEqual(
+      expect((listClient.searchListItemByValues as Mock).mock.calls[0][0].type).toEqual('ip');
+      expect((listClient.searchListItemByValues as Mock).mock.calls[0][0].listId).toEqual(
         'ci-badguys.txt'
       );
       expect(included.length).toEqual(2);
@@ -163,12 +166,12 @@ describe('filterEventsAgainstList', () => {
       ];
 
       // this call represents an exception list with a value list containing ['2.2.2.2', '4.4.4.4']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
         { ...getSearchListItemResponseMock(), value: ['4.4.4.4'] },
       ]);
       // this call represents an exception list with a value list containing ['6.6.6.6']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['6.6.6.6'] },
       ]);
 
@@ -188,7 +191,7 @@ describe('filterEventsAgainstList', () => {
           '9.9.9.9',
         ]),
       });
-      expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
+      expect(listClient.searchListItemByValues as Mock).toHaveBeenCalledTimes(2);
       expect(included.length).toEqual(6);
       expect(excluded.length).toEqual(3);
 
@@ -225,11 +228,11 @@ describe('filterEventsAgainstList', () => {
       ];
 
       // this call represents an exception list with a value list containing ['2.2.2.2', '4.4.4.4']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
       ]);
       // this call represents an exception list with a value list containing ['6.6.6.6']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['6.6.6.6'] },
       ]);
 
@@ -249,7 +252,7 @@ describe('filterEventsAgainstList', () => {
           '9.9.9.9',
         ]),
       });
-      expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
+      expect(listClient.searchListItemByValues as Mock).toHaveBeenCalledTimes(2);
       // @ts-expect-error
       const ipVals = included.map((item) => item._source.source.ip);
       expect(included.length).toEqual(7);
@@ -284,11 +287,11 @@ describe('filterEventsAgainstList', () => {
       ];
 
       // this call represents an exception list with a value list containing ['2.2.2.2']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
       ]);
       // this call represents an exception list with a value list containing ['4.4.4.4']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['4.4.4.4'] },
       ]);
 
@@ -323,7 +326,7 @@ describe('filterEventsAgainstList', () => {
           ]
         ),
       });
-      expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
+      expect(listClient.searchListItemByValues as Mock).toHaveBeenCalledTimes(2);
       expect(included.length).toEqual(8);
       expect(excluded.length).toEqual(1);
 
@@ -365,7 +368,7 @@ describe('filterEventsAgainstList', () => {
       ];
 
       // this call represents an exception list with a value list containing ['2.2.2.2', '4.4.4.4']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValue([
+      (listClient.searchListItemByValues as Mock).mockResolvedValue([
         { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
       ]);
 
@@ -385,7 +388,7 @@ describe('filterEventsAgainstList', () => {
           '9.9.9.9',
         ]),
       });
-      expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
+      expect(listClient.searchListItemByValues as Mock).toHaveBeenCalledTimes(2);
       expect(included.length).toEqual(9);
       expect(excluded.length).toEqual(0);
 
@@ -428,11 +431,11 @@ describe('filterEventsAgainstList', () => {
       ];
 
       // this call represents an exception list with a value list containing ['2.2.2.2']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['2.2.2.2', '3.3.3.3'] },
       ]);
       // this call represents an exception list with a value list containing ['4.4.4.4']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['3.3.3.3', '4.4.4.4'] },
       ]);
 
@@ -455,13 +458,13 @@ describe('filterEventsAgainstList', () => {
           ]
         ),
       });
-      expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
-      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].value).toEqual([
+      expect(listClient.searchListItemByValues as Mock).toHaveBeenCalledTimes(2);
+      expect((listClient.searchListItemByValues as Mock).mock.calls[0][0].value).toEqual([
         ['1.1.1.1', '1.1.1.1'],
         ['1.1.1.1', '2.2.2.2'],
         ['2.2.2.2', '3.3.3.3'],
       ]);
-      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[1][0].value).toEqual([
+      expect((listClient.searchListItemByValues as Mock).mock.calls[1][0].value).toEqual([
         ['1.1.1.1', '2.2.2.2'],
         ['2.2.2.2', '3.3.3.3'],
         ['3.3.3.3', '4.4.4.4'],
@@ -520,7 +523,7 @@ describe('filterEventsAgainstList', () => {
           },
         },
       ];
-      listClient.searchListItemByValues = jest.fn(({ value }) =>
+      listClient.searchListItemByValues = vi.fn(({ value }) =>
         Promise.resolve(
           value.slice(0, 2).map((item) => ({
             ...getSearchListItemResponseMock(),
@@ -539,8 +542,8 @@ describe('filterEventsAgainstList', () => {
           '7.7.7.7',
         ]),
       });
-      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].type).toEqual('ip');
-      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].listId).toEqual(
+      expect((listClient.searchListItemByValues as Mock).mock.calls[0][0].type).toEqual('ip');
+      expect((listClient.searchListItemByValues as Mock).mock.calls[0][0].listId).toEqual(
         'ci-badguys.txt'
       );
       expect(included.length).toEqual(2);
@@ -571,14 +574,14 @@ describe('filterEventsAgainstList', () => {
       ];
 
       // this call represents an exception list with a value list containing ['2.2.2.2', '3.3.3.3']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         {
           ...getSearchListItemResponseMock(),
           value: ['1.1.1.1', '2.2.2.2'],
         },
       ]);
       // this call represents an exception list with a value list containing ['3.3.3.3', '4.4.4.4']
-      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+      (listClient.searchListItemByValues as Mock).mockResolvedValueOnce([
         { ...getSearchListItemResponseMock(), value: ['3.3.3.3', '4.4.4.4'] },
       ]);
 
@@ -601,13 +604,13 @@ describe('filterEventsAgainstList', () => {
           ]
         ),
       });
-      expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
-      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].value).toEqual([
+      expect(listClient.searchListItemByValues as Mock).toHaveBeenCalledTimes(2);
+      expect((listClient.searchListItemByValues as Mock).mock.calls[0][0].value).toEqual([
         ['1.1.1.1', '1.1.1.1'],
         ['1.1.1.1', '2.2.2.2'],
         ['2.2.2.2', '3.3.3.3'],
       ]);
-      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[1][0].value).toEqual([
+      expect((listClient.searchListItemByValues as Mock).mock.calls[1][0].value).toEqual([
         ['1.1.1.1', '2.2.2.2'],
         ['2.2.2.2', '3.3.3.3'],
         ['3.3.3.3', '4.4.4.4'],

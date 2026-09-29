@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { GROUP_NOT_SET_VALUE } from '@kbn/esql-utils';
@@ -22,18 +24,21 @@ import { createElement, type ReactNode } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CascadedDocumentsFetcher } from '../../../../data_fetching/cascaded_documents_fetcher';
 
-jest.mock('../telemetry', () => ({
-  useCascadedDocumentsTelemetry: () => ({
-    trackCascadeExpanded: jest.fn(),
-    trackCascadeCollapsed: jest.fn(),
-    trackCascadeOptOut: jest.fn(),
-    trackCascadeOpenInNewTab: jest.fn(),
-  }),
-}));
+vi.mock('../telemetry', () => {
+      const mocked = {
+      useCascadedDocumentsTelemetry: () => ({
+        trackCascadeExpanded: vi.fn(),
+        trackCascadeCollapsed: vi.fn(),
+        trackCascadeOptOut: vi.fn(),
+        trackCascadeOpenInNewTab: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('data_fetching related hooks', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useGroupedCascadeData', () => {
@@ -266,8 +271,8 @@ describe('data_fetching related hooks', () => {
   describe('useDataCascadeRowExpansionHandlers', () => {
     const createMockFetcher = () =>
       ({
-        fetchCascadedDocuments: jest.fn().mockResolvedValue([]),
-        cancelFetch: jest.fn(),
+        fetchCascadedDocuments: vi.fn().mockResolvedValue([]),
+        cancelFetch: vi.fn(),
       } as unknown as CascadedDocumentsFetcher);
 
     const createWrapper = (overrides?: Partial<CascadedDocumentsContext>) => {
@@ -285,15 +290,15 @@ describe('data_fetching related hooks', () => {
         renderViewModeToggle: undefined,
         expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
         expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
-        getExpandedDocSetter: () => jest.fn(),
+        getExpandedDocSetter: () => vi.fn(),
         getRenderDocumentViewMetaSetter: () => undefined,
-        getDataCascadeUiState: jest.fn(),
-        getDataGridUiStateMap: jest.fn(),
-        setDataCascadeUiState: jest.fn(),
-        setDataGridUiState: jest.fn(),
-        cascadeGroupingChangeHandler: jest.fn(),
-        onUpdateESQLQuery: jest.fn(),
-        openInNewTab: jest.fn(),
+        getDataCascadeUiState: vi.fn(),
+        getDataGridUiStateMap: vi.fn(),
+        setDataCascadeUiState: vi.fn(),
+        setDataGridUiState: vi.fn(),
+        cascadeGroupingChangeHandler: vi.fn(),
+        onUpdateESQLQuery: vi.fn(),
+        openInNewTab: vi.fn(),
         ...overrides,
       };
 

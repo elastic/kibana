@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { z } from '@kbn/zod/v4';
@@ -44,10 +46,10 @@ const TestFormWrapper = ({ schema, onSubmit, formConfig }: TestFormWrapperProps)
 };
 
 describe('Form', () => {
-  const mockOnSubmit = jest.fn();
+  const mockOnSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a form with text fields', () => {
@@ -216,7 +218,7 @@ describe('Form', () => {
       }),
     });
 
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => {
       render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -304,10 +306,10 @@ describe('Form', () => {
 });
 
 describe('Authentication Form Integration Tests', () => {
-  const mockOnSubmit = jest.fn();
+  const mockOnSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const authSchema = z.object({
@@ -581,7 +583,7 @@ describe('Authentication Form Integration Tests', () => {
 
   describe('Form Config - disabled', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('disabled: true makes all fields disabled', () => {
@@ -779,10 +781,10 @@ describe('Authentication Form Integration Tests', () => {
 });
 
 describe('Nested Object Widget Integration Tests', () => {
-  const mockOnSubmit = jest.fn();
+  const mockOnSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('submits form with nested object data', async () => {

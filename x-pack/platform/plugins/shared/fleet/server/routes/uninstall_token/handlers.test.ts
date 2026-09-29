@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
@@ -51,7 +54,7 @@ const rotateUninstallTokenHandlerWithErrorHandler = withDefaultErrorHandler(
   rotateUninstallTokenHandler
 );
 
-jest.mock('../../services/agent_policy');
+vi.mock('../../services/agent_policy');
 
 describe('uninstall token handlers', () => {
   let context: FleetRequestHandlerContext;
@@ -67,7 +70,7 @@ describe('uninstall token handlers', () => {
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appContextService.stop();
   });
 
@@ -100,16 +103,16 @@ describe('uninstall token handlers', () => {
       perPage: 20,
     };
 
-    let getTokenMetadataMock: jest.Mock;
+    let getTokenMetadataMock: Mock;
     let request: KibanaRequest<
       unknown,
       TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
     >;
-    const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+    const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 
     beforeEach(async () => {
       const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
-      getTokenMetadataMock = uninstallTokenService.getTokenMetadata as jest.Mock;
+      getTokenMetadataMock = uninstallTokenService.getTokenMetadata as Mock;
       mockAgentPolicyService.list.mockResolvedValue({
         items: [createAgentPolicyMock()],
         total: 1,
@@ -183,7 +186,7 @@ describe('uninstall token handlers', () => {
   describe('getUninstallTokenHandler', () => {
     let uninstallTokenFixture: UninstallToken;
 
-    let getTokenMock: jest.Mock;
+    let getTokenMock: Mock;
     let request: KibanaRequest<TypeOf<typeof GetUninstallTokenRequestSchema.params>>;
 
     beforeEach(async () => {
@@ -195,7 +198,7 @@ describe('uninstall token handlers', () => {
         token: '123456789',
       };
       const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
-      getTokenMock = uninstallTokenService.getToken as jest.Mock;
+      getTokenMock = uninstallTokenService.getToken as Mock;
 
       const requestOptions: GetUninstallTokenRequest = {
         params: {
@@ -236,14 +239,14 @@ describe('uninstall token handlers', () => {
 
   describe('rotateUninstallTokenHandler', () => {
     const agentPolicyId = 'policy-id-1';
-    const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+    const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 
-    let generateTokenForPolicyIdMock: jest.Mock;
+    let generateTokenForPolicyIdMock: Mock;
     let request: KibanaRequest<RotateUninstallTokenRequest['params']>;
 
     beforeEach(async () => {
       const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
-      generateTokenForPolicyIdMock = uninstallTokenService.generateTokenForPolicyId as jest.Mock;
+      generateTokenForPolicyIdMock = uninstallTokenService.generateTokenForPolicyId as Mock;
 
       request = httpServerMock.createKibanaRequest({
         params: { agentPolicyId },

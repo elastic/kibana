@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import moment from 'moment-timezone';
@@ -12,7 +14,7 @@ import { TimestampTooltip } from './timestamp_tooltip';
 
 function mockNow(date: string | number | Date) {
   const fakeNow = new Date(date).getTime();
-  return jest.spyOn(Date, 'now').mockReturnValue(fakeNow);
+  return vi.spyOn(Date, 'now').mockReturnValue(fakeNow);
 }
 
 describe('TimestampTooltip', () => {

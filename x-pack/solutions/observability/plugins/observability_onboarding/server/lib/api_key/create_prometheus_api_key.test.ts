@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createPrometheusApiKey } from './create_prometheus_api_key';
 import { INDEX_PROMETHEUS_REMOTE_WRITE } from './privileges';
 
 const createMockEsClient = () => {
-  const createApiKey = jest.fn().mockResolvedValue({ encoded: 'encoded-key' });
+  const createApiKey = vi.fn().mockResolvedValue({ encoded: 'encoded-key' });
   return {
     client: { security: { createApiKey } } as unknown as ElasticsearchClient,
     createApiKey,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EsResourceType } from '@kbn/agent-builder-common';
 import type { ResourceDescriptor } from './index_explorer';
 import {
@@ -19,19 +22,25 @@ import { getDataStreamMappings } from './utils/mappings';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 
-jest.mock('./steps/list_search_sources');
-jest.mock('./utils/ccs', () => ({
-  ...jest.requireActual('./utils/ccs'),
-  getIndexFields: jest.fn(),
-}));
-jest.mock('./utils/mappings', () => ({
-  ...jest.requireActual('./utils/mappings'),
-  getDataStreamMappings: jest.fn(),
-}));
+vi.mock('./steps/list_search_sources');
+vi.mock('./utils/ccs', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils/ccs')),
+      getIndexFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./utils/mappings', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils/mappings')),
+      getDataStreamMappings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const listSearchSourcesMock = listSearchSources as jest.Mock;
-const getIndexFieldsMock = getIndexFields as jest.Mock;
-const getDataStreamMappingsMock = getDataStreamMappings as jest.Mock;
+const listSearchSourcesMock = listSearchSources as Mock;
+const getIndexFieldsMock = getIndexFields as Mock;
+const getDataStreamMappingsMock = getDataStreamMappings as Mock;
 
 describe('createIndexSelectorPrompt', () => {
   const nlQuery = 'some NL query';
@@ -139,12 +148,12 @@ describe('indexExplorer', () => {
   let model: ScopedModel;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     model = {
       chatModel: {
-        withStructuredOutput: jest.fn().mockReturnValue({
-          invoke: jest.fn().mockResolvedValue({
+        withStructuredOutput: vi.fn().mockReturnValue({
+          invoke: vi.fn().mockResolvedValue({
             targets: [],
           }),
         }),
@@ -182,7 +191,7 @@ describe('gatherResourceDescriptors', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
 
     listSearchSourcesMock.mockResolvedValue({

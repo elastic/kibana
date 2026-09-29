@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -17,12 +20,15 @@ import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
 import { rotateKeyPairHandler } from './handlers';
 
-jest.mock('../../services/security', () => ({
-  ...jest.requireActual('../../services/security'),
-  checkSuperuser: jest.fn(),
-}));
+vi.mock('../../services/security', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../services/security')),
+      checkSuperuser: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCheckSuperuser = checkSuperuser as jest.MockedFunction<typeof checkSuperuser>;
+const mockCheckSuperuser = checkSuperuser as MockedFunction<typeof checkSuperuser>;
 
 const rotateKeyPairHandlerWithErrorHandler = withDefaultErrorHandler(rotateKeyPairHandler);
 
@@ -52,7 +58,7 @@ describe('FleetMessageSigningServiceHandler', () => {
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appContextService.stop();
   });
 
@@ -112,7 +118,7 @@ describe('FleetMessageSigningServiceHandler', () => {
     'POST /message_signing_service/rotate_key_pair?acknowledge=true throws only a generic 500 error if rotate fails with error `%s`',
     async (error) => {
       // specific error
-      (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockRejectedValue(
+      (appContextService.getMessageSigningService()?.rotateKeyPair as Mock).mockRejectedValue(
         Error(error)
       );
 

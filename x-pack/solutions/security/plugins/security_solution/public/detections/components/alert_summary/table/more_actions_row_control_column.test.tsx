@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -17,22 +20,22 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 
 describe('MoreActionsRowControlColumn', () => {
   it('should render component with all options', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsUpdate: true });
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           ...mockCasesContract(),
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               read: true,
               createComment: true,
             }),
-            getRuleIdFromEvent: jest.fn(),
+            getRuleIdFromEvent: vi.fn(),
           },
         },
       },
@@ -57,17 +60,17 @@ describe('MoreActionsRowControlColumn', () => {
   });
 
   it('should not show cases actions if user is not authorized', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsUpdate: true });
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           ...mockCasesContract(),
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               read: false,
               createComment: false,
             }),
-            getRuleIdFromEvent: jest.fn(),
+            getRuleIdFromEvent: vi.fn(),
           },
         },
       },
@@ -93,17 +96,17 @@ describe('MoreActionsRowControlColumn', () => {
   });
 
   it('should not show tags actions if user is not authorized', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: false });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsUpdate: false });
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           ...mockCasesContract(),
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               read: true,
               createComment: true,
             }),
-            getRuleIdFromEvent: jest.fn(),
+            getRuleIdFromEvent: vi.fn(),
           },
         },
       },

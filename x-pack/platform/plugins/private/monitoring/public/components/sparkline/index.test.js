@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import renderer from 'react-test-renderer';
 import { EuiThemeProvider } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import { Sparkline } from '.';
 
-jest.mock('./sparkline_flot_chart', () => ({
-  SparklineFlotChart: () => 'SparklineFlotChart',
-}));
+vi.mock('./sparkline_flot_chart', () => {
+      const mocked = {
+      SparklineFlotChart: () => 'SparklineFlotChart',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getComponent = () => (
   <Sparkline

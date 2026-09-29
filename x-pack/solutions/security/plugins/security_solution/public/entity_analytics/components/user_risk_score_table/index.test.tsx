@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { noop } from 'lodash';
 import React from 'react';
@@ -45,7 +47,7 @@ describe('UserRiskScoreTable', () => {
     isInspect: false,
     loading: false,
     loadPage: noop,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     severityCount: {
       Unknown: 0,
       Low: 0,

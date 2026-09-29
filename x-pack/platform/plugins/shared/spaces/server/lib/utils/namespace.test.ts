@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockNamespaceIdToString, mockNamespaceStringToId } from './__mocks__';
 import { namespaceToSpaceId, spaceIdToNamespace } from './namespace';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('#spaceIdToNamespace', () => {

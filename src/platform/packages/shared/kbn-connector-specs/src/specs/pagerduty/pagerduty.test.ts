@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { PagerdutyConnector } from './pagerduty';
 
-const mockCallTool = jest.fn();
-const mockListTools = jest.fn();
-const mockClientPost = jest.fn();
-const mockClientPut = jest.fn();
-const mockClientGet = jest.fn();
+const mockCallTool = vi.fn();
+const mockListTools = vi.fn();
+const mockClientPost = vi.fn();
+const mockClientPut = vi.fn();
+const mockClientGet = vi.fn();
 
-jest.mock('../../lib/mcp/with_mcp_client', () => ({
-  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-    return fn({ callTool: mockCallTool, listTools: mockListTools });
-  }),
-}));
+vi.mock('../../lib/mcp/with_mcp_client', () => {
+      const mocked = {
+      withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+        return fn({ callTool: mockCallTool, listTools: mockListTools });
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const parse = <K extends keyof typeof PagerdutyConnector.actions>(
   action: K,
@@ -43,7 +48,7 @@ describe('PagerdutyConnector', () => {
   const mockIncident = { id: 'Q1A2B3C4D5E6F7', status: 'triggered', title: 'Prod DB down' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({
       tools: [{ name: 'get_user_data' }, { name: 'list_incidents' }],
@@ -524,7 +529,7 @@ describe('PagerdutyConnector', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
+      const { withMcpClient } = (await vi.importMock('../../lib/mcp/with_mcp_client'));
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
       await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');

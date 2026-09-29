@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { asLimited, asUnlimited } from '../../queries/task_claiming';
 import { selectTasksByCapacity } from './task_selector_by_capacity';
@@ -12,13 +14,16 @@ import type { ConcreteTaskInstance } from '../../task';
 import { TaskTypeDictionary } from '../../task_type_dictionary';
 import { mockLogger } from '../../test_utils';
 
-jest.mock('../../constants', () => ({
-  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
-    'limitedTaskType',
-    'sampleTaskSharedConcurrencyType1',
-    'sampleTaskSharedConcurrencyType2',
-  ],
-}));
+vi.mock('../../constants', () => {
+      const mocked = {
+      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+        'limitedTaskType',
+        'sampleTaskSharedConcurrencyType1',
+        'sampleTaskSharedConcurrencyType2',
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const taskManagerLogger = mockLogger();
 function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
@@ -50,25 +55,25 @@ taskDefinitions.registerTaskDefinitions({
   limitedTaskType: {
     title: 'Limited Concurrency Task Type',
     maxConcurrency: 1,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   taskType1: {
     title: 'dernstraight',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   taskType2: {
     title: 'yawn',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   sampleTaskSharedConcurrencyType1: {
     title: 'Shared Concurrency Task Type 1',
     maxConcurrency: 2,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   sampleTaskSharedConcurrencyType2: {
     title: 'Shared Concurrency Task Type 2',
     maxConcurrency: 2,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
 });
 

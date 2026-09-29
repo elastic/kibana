@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
@@ -17,24 +20,24 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import { allowedExperimentalValues } from '../../../../common';
 import { persistRiskScoresToEntityStore } from './persist_risk_scores_to_entity_store';
 
-jest.mock('./persist_risk_scores_to_entity_store');
+vi.mock('./persist_risk_scores_to_entity_store');
 
 describe('resetToZero', () => {
   let esClient: ElasticsearchClient;
   let logger: Logger;
   let dataClient: RiskScoreDataClient;
-  let writerBulkMock: jest.Mock;
-  let privmonUserCrudService: jest.Mocked<PrivmonUserCrudService>;
-  let crudClient: jest.Mocked<EntityStoreCRUDClient>;
+  let writerBulkMock: Mock;
+  let privmonUserCrudService: Mocked<PrivmonUserCrudService>;
+  let crudClient: Mocked<EntityStoreCRUDClient>;
   const experimentalFeatures = { ...allowedExperimentalValues };
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     logger = loggingSystemMock.createLogger();
     dataClient = riskScoreDataClientMock.create();
-    writerBulkMock = jest.fn().mockResolvedValue({ errors: [], docs_written: 1 });
-    (dataClient.getWriter as jest.Mock).mockResolvedValue({ bulk: writerBulkMock });
-    (persistRiskScoresToEntityStore as jest.Mock).mockImplementation(
+    writerBulkMock = vi.fn().mockResolvedValue({ errors: [], docs_written: 1 });
+    (dataClient.getWriter as Mock).mockResolvedValue({ bulk: writerBulkMock });
+    (persistRiskScoresToEntityStore as Mock).mockImplementation(
       async ({ scores }: { scores: Partial<Record<string, unknown[]>> }) => {
         const count = Object.values(scores).reduce(
           (sum, arr) => sum + ((arr as unknown[] | undefined)?.length ?? 0),
@@ -44,27 +47,27 @@ describe('resetToZero', () => {
       }
     );
     privmonUserCrudService = {
-      create: jest.fn(),
-      get: jest.fn(),
-      update: jest.fn(),
-      list: jest.fn().mockResolvedValue([]),
-      delete: jest.fn(),
+      create: vi.fn(),
+      get: vi.fn(),
+      update: vi.fn(),
+      list: vi.fn().mockResolvedValue([]),
+      delete: vi.fn(),
     };
     crudClient = {
-      createEntity: jest.fn(),
-      updateEntity: jest.fn(),
-      bulkUpdateEntity: jest.fn().mockResolvedValue([]),
-      deleteEntity: jest.fn(),
-      listEntities: jest.fn().mockResolvedValue({ entities: [], nextSearchAfter: undefined }),
-    } as unknown as jest.Mocked<EntityStoreCRUDClient>;
+      createEntity: vi.fn(),
+      updateEntity: vi.fn(),
+      bulkUpdateEntity: vi.fn().mockResolvedValue([]),
+      deleteEntity: vi.fn(),
+      listEntities: vi.fn().mockResolvedValue({ entities: [], nextSearchAfter: undefined }),
+    } as unknown as Mocked<EntityStoreCRUDClient>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses legacy id field and does not write to entity store when V2 is disabled', async () => {
-    (esClient.esql.query as jest.Mock).mockResolvedValue({
+    (esClient.esql.query as Mock).mockResolvedValue({
       values: [['host-a', 'host.name']],
     });
 
@@ -98,7 +101,7 @@ describe('resetToZero', () => {
   });
 
   it('uses entity.id and writes zero scores to entity store when V2 is enabled', async () => {
-    (esClient.esql.query as jest.Mock).mockResolvedValue({
+    (esClient.esql.query as Mock).mockResolvedValue({
       values: [['host:abc123', null]],
     });
 
@@ -153,7 +156,7 @@ describe('resetToZero', () => {
   });
 
   it('ignores invalid id_value rows safely', async () => {
-    (esClient.esql.query as jest.Mock).mockResolvedValue({
+    (esClient.esql.query as Mock).mockResolvedValue({
       values: [
         [null, 'host.name'],
         ['', 'host.name'],

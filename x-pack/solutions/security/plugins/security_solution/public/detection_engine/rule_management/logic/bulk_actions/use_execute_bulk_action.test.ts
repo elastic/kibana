@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -14,10 +17,10 @@ import { useRulesTableContextOptional } from '../../../rule_management_ui/compon
 import { useExecuteBulkAction } from './use_execute_bulk_action';
 import type { BulkAction } from '../../api/api';
 
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/lib/telemetry');
-jest.mock('../../api/hooks/use_bulk_action_mutation');
-jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/lib/telemetry');
+vi.mock('../../api/hooks/use_bulk_action_mutation');
+vi.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
 
 async function executeBulkAction(
   bulkAction: BulkAction,
@@ -33,13 +36,13 @@ async function executeBulkAction(
 }
 
 describe('useExecuteBulkAction', () => {
-  let mutateAsync: jest.Mock;
-  let toasts: Record<string, jest.Mock>;
+  let mutateAsync: Mock;
+  let toasts: Record<string, Mock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mutateAsync = jest.fn().mockResolvedValue({
+    mutateAsync = vi.fn().mockResolvedValue({
       attributes: {
         results: {
           updated: [{ immutable: true }, { immutable: false }],
@@ -50,13 +53,13 @@ describe('useExecuteBulkAction', () => {
         },
       },
     });
-    (useBulkActionMutation as jest.Mock).mockReturnValue({ mutateAsync });
+    (useBulkActionMutation as Mock).mockReturnValue({ mutateAsync });
 
     toasts = {
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
     };
-    (useAppToasts as jest.Mock).mockReturnValue(toasts);
+    (useAppToasts as Mock).mockReturnValue(toasts);
   });
 
   it('executes bulk action', async () => {
@@ -95,8 +98,8 @@ describe('useExecuteBulkAction', () => {
     });
 
     it('shows error toast upon failure', async () => {
-      (useBulkActionMutation as jest.Mock).mockReturnValue({
-        mutateAsync: jest.fn().mockRejectedValue(new Error()),
+      (useBulkActionMutation as Mock).mockReturnValue({
+        mutateAsync: vi.fn().mockRejectedValue(new Error()),
       });
 
       await executeBulkAction({
@@ -110,11 +113,11 @@ describe('useExecuteBulkAction', () => {
   });
 
   describe('when rules table context is available', () => {
-    let setLoadingRules: jest.Mock;
+    let setLoadingRules: Mock;
 
     beforeEach(() => {
-      setLoadingRules = jest.fn();
-      (useRulesTableContextOptional as jest.Mock).mockReturnValue({
+      setLoadingRules = vi.fn();
+      (useRulesTableContextOptional as Mock).mockReturnValue({
         actions: {
           setLoadingRules,
         },
@@ -158,8 +161,8 @@ describe('useExecuteBulkAction', () => {
     });
 
     it('clears loading state for the processing rules after execution failure', async () => {
-      (useBulkActionMutation as jest.Mock).mockReturnValue({
-        mutateAsync: jest.fn().mockRejectedValue(new Error()),
+      (useBulkActionMutation as Mock).mockReturnValue({
+        mutateAsync: vi.fn().mockRejectedValue(new Error()),
       });
 
       await executeBulkAction({

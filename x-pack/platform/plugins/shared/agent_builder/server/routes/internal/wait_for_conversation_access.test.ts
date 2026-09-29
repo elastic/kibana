@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ExecutionStatus,
   createConversationNotFoundError,
@@ -19,10 +21,10 @@ const setup = ({
   exists: boolean[];
   statuses?: ExecutionStatus[];
 }) => {
-  const existsMock = jest.fn();
+  const existsMock = vi.fn();
   exists.forEach((value) => existsMock.mockResolvedValueOnce(value));
-  const getConversation = jest.fn().mockResolvedValue({ id: 'conv-1' });
-  const getExecution = jest.fn();
+  const getConversation = vi.fn().mockResolvedValue({ id: 'conv-1' });
+  const getExecution = vi.fn();
   statuses.forEach((status) => getExecution.mockResolvedValueOnce({ status }));
   getExecution.mockResolvedValue({ status: statuses[statuses.length - 1] });
 

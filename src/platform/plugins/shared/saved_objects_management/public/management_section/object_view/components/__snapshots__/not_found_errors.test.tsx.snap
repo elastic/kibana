@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`NotFoundErrors component renders correctly for index-pattern type 1`] = `
+exports[`NotFoundErrors component > renders correctly for index-pattern type 1`] = `
 <div
   class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
   data-size="m"
@@ -62,7 +62,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
 </div>
 `;
 
-exports[`NotFoundErrors component renders correctly for index-pattern-field type 1`] = `
+exports[`NotFoundErrors component > renders correctly for index-pattern-field type 1`] = `
 <div
   class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
   data-size="m"
@@ -124,7 +124,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
 </div>
 `;
 
-exports[`NotFoundErrors component renders correctly for search type 1`] = `
+exports[`NotFoundErrors component > renders correctly for search type 1`] = `
 <div
   class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
   data-size="m"
@@ -186,7 +186,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
 </div>
 `;
 
-exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
+exports[`NotFoundErrors component > renders correctly for unknown type 1`] = `
 <div
   class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
   data-size="m"

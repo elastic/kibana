@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertFilteringMetric } from './alert_filtering_metric';
@@ -15,33 +18,45 @@ import { VisualizationContextMenuActions } from '../../../common/components/visu
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import { PageScope } from '../../../data_view_manager/constants';
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-}));
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
+      const mocked = {
+      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils', () => ({
-  getExcludeAlertsFilters: jest.fn(),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      getExcludeAlertsFilters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric',
-  () => ({
-    getAlertFilteringMetricLensAttributes: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        getAlertFilteringMetricLensAttributes: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../hooks/use_signal_index_with_default', () => ({
-  useSignalIndexWithDefault: jest.fn(),
-}));
+vi.mock('../../hooks/use_signal_index_with_default', () => {
+      const mocked = {
+      useSignalIndexWithDefault: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetExcludeAlertsFilters = getExcludeAlertsFilters as jest.MockedFunction<
+const mockGetExcludeAlertsFilters = getExcludeAlertsFilters as MockedFunction<
   typeof getExcludeAlertsFilters
 >;
 const mockGetAlertFilteringMetricLensAttributes =
-  getAlertFilteringMetricLensAttributes as jest.MockedFunction<
+  getAlertFilteringMetricLensAttributes as MockedFunction<
     typeof getAlertFilteringMetricLensAttributes
   >;
-const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
+const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as MockedFunction<
   typeof useSignalIndexWithDefault
 >;
 
@@ -71,7 +86,7 @@ describe('AlertFilteringMetric', () => {
     },
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockGetExcludeAlertsFilters.mockReturnValue([excludeAlertsFilters]);
     mockUseSignalIndexWithDefault.mockReturnValue('.alerts-security.alerts-default');
@@ -115,7 +130,7 @@ describe('AlertFilteringMetric', () => {
   it('handles getLensAttributes function and calls getAlertFilteringMetricLensAttributes correctly', () => {
     render(<AlertFilteringMetric {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     expect(callArgs.getLensAttributes).toBeDefined();
     expect(callArgs.getLensAttributes).toEqual(expect.any(Function));
     const mockArgs = {
@@ -146,7 +161,7 @@ describe('AlertFilteringMetric', () => {
     const props = { ...defaultProps, totalAlerts: 1000000 };
     render(<AlertFilteringMetric {...props} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -172,7 +187,7 @@ describe('AlertFilteringMetric', () => {
 
     render(<AlertFilteringMetric {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -188,14 +203,14 @@ describe('AlertFilteringMetric', () => {
 
   it('memoizes getExcludeAlertsFilters call when props do not change', () => {
     const { rerender } = render(<AlertFilteringMetric {...defaultProps} />);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rerender(<AlertFilteringMetric {...defaultProps} />);
     expect(mockGetExcludeAlertsFilters).not.toHaveBeenCalled();
   });
 
   it('calls getExcludeAlertsFilters when attackAlertIds change', () => {
     const { rerender } = render(<AlertFilteringMetric {...defaultProps} />);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const newProps = {
       ...defaultProps,

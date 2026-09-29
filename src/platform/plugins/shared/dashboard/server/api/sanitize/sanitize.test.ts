@@ -7,26 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
-jest.mock('../transforms', () => ({
-  transformDashboardIn: jest.fn(),
-  transformDashboardOut: jest.fn(),
-}));
+vi.mock('../transforms', () => {
+      const mocked = {
+      transformDashboardIn: vi.fn(),
+      transformDashboardOut: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../scope_tooling', () => ({
-  stripUnmappedKeys: jest.fn(),
-}));
+vi.mock('../scope_tooling', () => {
+      const mocked = {
+      stripUnmappedKeys: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { stripUnmappedKeys } from '../scope_tooling';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { sanitize } from './sanitize';
 
-const mockedTransformDashboardIn = jest.mocked(transformDashboardIn);
-const mockedTransformDashboardOut = jest.mocked(transformDashboardOut);
-const mockedStripUnmappedKeys = jest.mocked(stripUnmappedKeys);
+const mockedTransformDashboardIn = vi.mocked(transformDashboardIn);
+const mockedTransformDashboardOut = vi.mocked(transformDashboardOut);
+const mockedStripUnmappedKeys = vi.mocked(stripUnmappedKeys);
 
 describe('sanitize', () => {
   const baseDashboardState: DashboardState = {
@@ -52,7 +60,7 @@ describe('sanitize', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('preserves incoming access_control', async () => {
@@ -72,7 +80,7 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      parse: jest.fn().mockReturnValue(baseDashboardState),
+      parse: vi.fn().mockReturnValue(baseDashboardState),
     };
 
     const result = await sanitize(
@@ -109,7 +117,7 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      parse: jest.fn().mockReturnValue(baseDashboardState),
+      parse: vi.fn().mockReturnValue(baseDashboardState),
     };
 
     const result = await sanitize(
@@ -142,9 +150,9 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      parse: jest.fn().mockReturnValue(baseDashboardState),
+      parse: vi.fn().mockReturnValue(baseDashboardState),
     };
-    const getTypeDisplayName = jest.fn((type: string) => {
+    const getTypeDisplayName = vi.fn((type: string) => {
       if (type === 'index-pattern') return 'data view';
       if (type === 'lens') return 'visualization';
       return type;
@@ -177,7 +185,7 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      parse: jest.fn().mockReturnValue(baseDashboardState),
+      parse: vi.fn().mockReturnValue(baseDashboardState),
     };
 
     const result = await sanitize(
@@ -208,7 +216,7 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      parse: jest.fn().mockReturnValue(baseDashboardState),
+      parse: vi.fn().mockReturnValue(baseDashboardState),
     };
 
     const result = await sanitize(

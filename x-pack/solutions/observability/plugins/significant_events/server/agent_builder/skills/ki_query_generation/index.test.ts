@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import { SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID } from './get_features/tool';
@@ -14,7 +16,7 @@ import { createKIQueryGenerationSkill, type KIQueryGenerationSkillOptions } from
 describe('createKIQueryGenerationSkill', () => {
   const createOptions = () =>
     ({
-      getScopedClients: jest.fn(),
+      getScopedClients: vi.fn(),
       logger: loggerMock.create(),
     } as unknown as KIQueryGenerationSkillOptions);
 

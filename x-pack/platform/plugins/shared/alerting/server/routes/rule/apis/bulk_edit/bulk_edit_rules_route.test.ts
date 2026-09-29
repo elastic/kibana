@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 
 import { bulkEditInternalRulesRoute } from './bulk_edit_rules_route';
@@ -18,9 +21,12 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { omit } from 'lodash';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('bulkEditRulesRoute', () => {
   const mockedAlert: SanitizedRule<{}> = {
@@ -76,7 +82,7 @@ describe('bulkEditRulesRoute', () => {
   const bulkEditResult = { rules: mockedAlerts, errors: [], total: 1, skipped: [] };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     rulesClient.getRuleTypesByQuery.mockResolvedValue({ ruleTypes: [] });
   });
 
@@ -157,7 +163,7 @@ describe('bulkEditRulesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
 

@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 /*
  * Mock kbn/monaco to provide the console parser code directly without a web worker
  */
-const mockGetParsedRequests = jest.fn();
+const mockGetParsedRequests = vi.fn();
 
 /*
  * Mock the function "populateContext" that accesses the autocomplete definitions
  */
-const mockPopulateContext = jest.fn();
+const mockPopulateContext = vi.fn();
 
-jest.mock('@kbn/monaco', () => {
-  const original = jest.requireActual('@kbn/monaco');
+vi.mock('@kbn/monaco', async () => {
+  const original = (await vi.importActual('@kbn/monaco'));
   return {
     ...original,
     getParsedRequestsProvider: () => {
@@ -29,7 +32,7 @@ jest.mock('@kbn/monaco', () => {
   };
 });
 
-jest.mock('../../../services', () => {
+vi.mock('../../../services', () => {
   return {
     getStorage: () => ({
       get: () => [],
@@ -40,7 +43,7 @@ jest.mock('../../../services', () => {
   };
 });
 
-jest.mock('../../../lib/autocomplete/engine', () => {
+vi.mock('../../../lib/autocomplete/engine', () => {
   return {
     populateContext: (...args: any) => {
       mockPopulateContext(args);
@@ -48,9 +51,12 @@ jest.mock('../../../lib/autocomplete/engine', () => {
   };
 });
 
-jest.mock('../../hooks', () => ({
-  sendRequest: jest.fn(),
-}));
+vi.mock('../../hooks', () => {
+      const mocked = {
+      sendRequest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { monaco } from '@kbn/monaco';
@@ -62,12 +68,12 @@ import { _test as kbTest } from '../../../lib/kb';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
-  let editor: jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
+  let editor: Mocked<monaco.editor.IStandaloneCodeEditor>;
 
   // A model mock backed by real line content, implementing the offset/range
   // methods with faithful semantics so code under test can navigate the text.
   const createModel = (lines: string[]) => {
-    const getPositionAt = jest.fn((offset: number) => {
+    const getPositionAt = vi.fn((offset: number) => {
       let remainingOffset = offset;
       for (const [index, line] of lines.entries()) {
         if (remainingOffset <= line.length) {
@@ -77,13 +83,13 @@ describe('Editor actions provider', () => {
       }
       return { lineNumber: lines.length, column: (lines.at(-1)?.length ?? 0) + 1 };
     });
-    const getOffsetAt = jest.fn(({ lineNumber, column }: monaco.IPosition) => {
+    const getOffsetAt = vi.fn(({ lineNumber, column }: monaco.IPosition) => {
       const precedingLinesLength = lines
         .slice(0, lineNumber - 1)
         .reduce((length, line) => length + line.length + 1, 0);
       return precedingLinesLength + column - 1;
     });
-    const getValueInRange = jest.fn(
+    const getValueInRange = vi.fn(
       ({ startLineNumber, startColumn, endLineNumber, endColumn }: monaco.IRange) => {
         if (startLineNumber === endLineNumber) {
           return (lines[startLineNumber - 1] ?? '').slice(startColumn - 1, endColumn - 1);
@@ -98,12 +104,12 @@ describe('Editor actions provider', () => {
         return selectedLines.join('\n');
       }
     );
-    const getWordUntilPosition = jest.fn(({ column }: monaco.IPosition) => ({
+    const getWordUntilPosition = vi.fn(({ column }: monaco.IPosition) => ({
       word: '',
       startColumn: column,
       endColumn: column,
     }));
-    const getWordAtPosition = jest.fn(({ lineNumber, column }: monaco.IPosition) => {
+    const getWordAtPosition = vi.fn(({ lineNumber, column }: monaco.IPosition) => {
       const line = lines[lineNumber - 1] ?? '';
       for (const match of line.matchAll(/[A-Za-z]+/g)) {
         const startColumn = match.index + 1;
@@ -115,8 +121,8 @@ describe('Editor actions provider', () => {
       return null;
     });
     return {
-      isDisposed: jest.fn(() => false),
-      getVersionId: jest.fn(() => 1),
+      isDisposed: vi.fn(() => false),
+      getVersionId: vi.fn(() => 1),
       getLineCount: () => lines.length,
       getLineContent: (lineNumber: number) => lines[lineNumber - 1] ?? '',
       getLineMaxColumn: (lineNumber: number) => (lines[lineNumber - 1] ?? '').length + 1,
@@ -126,7 +132,7 @@ describe('Editor actions provider', () => {
       getValueInRange,
       getWordAtPosition,
       getWordUntilPosition,
-    } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+    } as unknown as Mocked<monaco.editor.ITextModel>;
   };
 
   it.each([
@@ -142,11 +148,11 @@ describe('Editor actions provider', () => {
   const createDisposableModel = (lines: string[]) => {
     let isDisposed = false;
     return Object.assign(createModel(lines), {
-      isDisposed: jest.fn(() => isDisposed),
-      dispose: jest.fn(() => {
+      isDisposed: vi.fn(() => isDisposed),
+      dispose: vi.fn(() => {
         isDisposed = true;
       }),
-      getLineContent: jest.fn((lineNumber: number) => {
+      getLineContent: vi.fn((lineNumber: number) => {
         if (isDisposed) {
           throw new Error('Model is disposed!');
         }
@@ -157,27 +163,27 @@ describe('Editor actions provider', () => {
 
   beforeEach(() => {
     editor = {
-      getModel: jest.fn(),
+      getModel: vi.fn(),
       createDecorationsCollection: () => ({
-        clear: jest.fn(),
-        set: jest.fn(),
+        clear: vi.fn(),
+        set: vi.fn(),
       }),
-      focus: jest.fn(),
-      onDidChangeCursorPosition: jest.fn(),
-      onDidScrollChange: jest.fn(),
-      onDidChangeCursorSelection: jest.fn(),
-      onDidContentSizeChange: jest.fn(),
-      onKeyDown: jest.fn(),
-      onKeyUp: jest.fn(),
-      getSelection: jest.fn(),
-      getPosition: jest.fn(),
-      getTopForLineNumber: jest.fn(),
-      getScrollTop: jest.fn(),
-      getOption: jest.fn(() => false),
-      trigger: jest.fn(),
-      executeEdits: jest.fn(),
-      setPosition: jest.fn(),
-    } as unknown as jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
+      focus: vi.fn(),
+      onDidChangeCursorPosition: vi.fn(),
+      onDidScrollChange: vi.fn(),
+      onDidChangeCursorSelection: vi.fn(),
+      onDidContentSizeChange: vi.fn(),
+      onKeyDown: vi.fn(),
+      onKeyUp: vi.fn(),
+      getSelection: vi.fn(),
+      getPosition: vi.fn(),
+      getTopForLineNumber: vi.fn(),
+      getScrollTop: vi.fn(),
+      getOption: vi.fn(() => false),
+      trigger: vi.fn(),
+      executeEdits: vi.fn(),
+      setPosition: vi.fn(),
+    } as unknown as Mocked<monaco.editor.IStandaloneCodeEditor>;
 
     editor.getModel.mockReturnValue({
       getLineMaxColumn: () => 10,
@@ -200,7 +206,7 @@ describe('Editor actions provider', () => {
       },
     ]);
 
-    const setEditorActionsCssMock = jest.fn();
+    const setEditorActionsCssMock = vi.fn();
 
     editorActionsProvider = new MonacoEditorActionsProvider(
       editor,
@@ -213,10 +219,10 @@ describe('Editor actions provider', () => {
     const lines = ['POST _query', '{', '  "script": """', '  GET _all', '  {', '', '  }'];
     const model = createModel(lines);
     const highlightedLines = {
-      clear: jest.fn(),
-      set: jest.fn(),
+      clear: vi.fn(),
+      set: vi.fn(),
     } as unknown as monaco.editor.IEditorDecorationsCollection;
-    const setEditorActionsCss = jest.fn();
+    const setEditorActionsCss = vi.fn();
     const parsedRequests = createParser()(lines.join('\n'))?.requests;
 
     expect(parsedRequests).toEqual([{ startOffset: 0 }]);
@@ -228,7 +234,7 @@ describe('Editor actions provider', () => {
     } as unknown as monaco.Selection);
     editor.getTopForLineNumber.mockReturnValue(100);
     editor.getScrollTop.mockReturnValue(0);
-    editor.createDecorationsCollection = jest.fn(
+    editor.createDecorationsCollection = vi.fn(
       () => highlightedLines
     ) as unknown as typeof editor.createDecorationsCollection;
     editorActionsProvider = new MonacoEditorActionsProvider(
@@ -248,7 +254,7 @@ describe('Editor actions provider', () => {
       visibility: 'visible',
       top: 101,
     });
-    const [{ range }] = (highlightedLines.set as jest.Mock).mock.calls[0][0];
+    const [{ range }] = (highlightedLines.set as Mock).mock.calls[0][0];
     expect(range.startLineNumber).toBe(1);
     expect(range.endLineNumber).toBe(7);
   });
@@ -341,11 +347,11 @@ describe('Editor actions provider', () => {
 
   describe('WHEN the opening brace key is released', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('SHOULD trigger autocomplete after the debounce period', async () => {
@@ -355,7 +361,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -371,11 +377,11 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.advanceTimersByTimeAsync(499);
+      await vi.advanceTimersByTimeAsync(499);
       expect(editor.trigger).not.toHaveBeenCalled();
 
-      await jest.advanceTimersByTimeAsync(1);
-      await jest.runAllTimersAsync();
+      await vi.advanceTimersByTimeAsync(1);
+      await vi.runAllTimersAsync();
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
         'editor.action.triggerSuggest',
@@ -392,7 +398,7 @@ describe('Editor actions provider', () => {
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
       onKeyDown({ keyCode: monacoRuntime.KeyCode.Escape } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -405,7 +411,7 @@ describe('Editor actions provider', () => {
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
       editor.getPosition.mockReturnValue({ lineNumber: 2, column: 1 } as monaco.Position);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -413,7 +419,7 @@ describe('Editor actions provider', () => {
     it('SHOULD ignore a pending trigger after the editor swaps models', async () => {
       mockGetParsedRequests.mockResolvedValue([]);
       const originalModel = Object.assign(createModel(['{}']), {
-        getLineContent: jest.fn(() => {
+        getLineContent: vi.fn(() => {
           throw new Error('Model is disposed!');
         }),
       });
@@ -424,7 +430,7 @@ describe('Editor actions provider', () => {
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
       editor.getModel.mockReturnValue(createModel(['']));
 
-      await expect(jest.runAllTimersAsync()).resolves.toBeUndefined();
+      await expect(vi.runAllTimersAsync()).resolves.toBeUndefined();
       expect(editor.trigger).not.toHaveBeenCalled();
     });
 
@@ -438,7 +444,7 @@ describe('Editor actions provider', () => {
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
       model.dispose();
 
-      await expect(jest.runAllTimersAsync()).resolves.toBeUndefined();
+      await expect(vi.runAllTimersAsync()).resolves.toBeUndefined();
       expect(editor.trigger).not.toHaveBeenCalled();
     });
 
@@ -455,11 +461,11 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
       model.dispose();
       resolveRequests!([]);
 
-      await expect(jest.runAllTimersAsync()).resolves.toBeUndefined();
+      await expect(vi.runAllTimersAsync()).resolves.toBeUndefined();
       expect(editor.trigger).not.toHaveBeenCalled();
     });
 
@@ -476,10 +482,10 @@ describe('Editor actions provider', () => {
       const onKeyDown = editor.onKeyDown.mock.calls[0][0];
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
       onKeyDown({ keyCode: monacoRuntime.KeyCode.Escape } as monaco.IKeyboardEvent);
       resolveRequests!([]);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -497,10 +503,10 @@ describe('Editor actions provider', () => {
       const onKeyDown = editor.onKeyDown.mock.calls[0][0];
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
       onKeyDown({ keyCode: monacoRuntime.KeyCode.Escape } as monaco.IKeyboardEvent);
       resolveRequests!([]);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -517,10 +523,10 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
       editor.getPosition.mockReturnValue({ lineNumber: 1, column: 1 } as monaco.Position);
       resolveRequests!([]);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -533,7 +539,7 @@ describe('Editor actions provider', () => {
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
 
-      await expect(jest.runAllTimersAsync()).resolves.toBeUndefined();
+      await expect(vi.runAllTimersAsync()).resolves.toBeUndefined();
       expect(editor.trigger).not.toHaveBeenCalled();
     });
 
@@ -546,7 +552,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -558,7 +564,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -570,7 +576,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -588,7 +594,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -606,7 +612,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -624,7 +630,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -648,7 +654,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -666,7 +672,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -682,7 +688,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: 'a' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -691,11 +697,11 @@ describe('Editor actions provider', () => {
   // #284530 review: pressing Enter between `{` and `}` must re-open suggestions.
   describe('WHEN Enter is released inside a just-opened object', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     const pressEnterAt = async (
@@ -717,7 +723,7 @@ describe('Editor actions provider', () => {
         keyCode: monacoRuntime.KeyCode.Enter,
         browserEvent: { key: 'Enter' },
       } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
     };
 
     it('SHOULD trigger autocomplete when the previous line ends with an opening brace', async () => {
@@ -775,7 +781,7 @@ describe('Editor actions provider', () => {
         keyCode: monacoRuntime.KeyCode.Enter,
         browserEvent: { key: 'Enter' },
       } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -822,11 +828,11 @@ describe('Editor actions provider', () => {
   // #284530 review: adding space inside `{}` must re-open suggestions.
   describe('WHEN space is released inside a just-opened object', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     const pressKeyAt = async (
@@ -846,7 +852,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
     };
 
     it('SHOULD trigger autocomplete after space following an opening brace', async () => {
@@ -891,7 +897,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ' ' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -927,7 +933,7 @@ describe('Editor actions provider', () => {
     const lines = ['GET _search', '{', '  "fields": [', '    "field",', '      ', '  ]', '}'];
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       mockGetParsedRequests.mockResolvedValue([
         { startOffset: 0, endOffset: lines.join('\n').length, method: 'GET', url: '_search' },
       ]);
@@ -935,7 +941,7 @@ describe('Editor actions provider', () => {
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('SHOULD trigger suggestions when the comma is released', async () => {
@@ -946,7 +952,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ',' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -975,7 +981,7 @@ describe('Editor actions provider', () => {
 
         const onKeyUp = editor.onKeyUp.mock.calls[0][0];
         onKeyUp({ browserEvent: { key: ',' } } as monaco.IKeyboardEvent);
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
 
         expect(editor.trigger).toHaveBeenCalledWith(
           'Trigger suggestions',
@@ -1008,7 +1014,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ',' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1042,7 +1048,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ',' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1075,7 +1081,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ',' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1104,7 +1110,7 @@ describe('Editor actions provider', () => {
 
         const onKeyUp = editor.onKeyUp.mock.calls[0][0];
         onKeyUp({ browserEvent: { key: ',' } } as monaco.IKeyboardEvent);
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
 
         expect(editor.trigger).not.toHaveBeenCalled();
       }
@@ -1128,7 +1134,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '[' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1155,7 +1161,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ':' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1185,7 +1191,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ' ' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1202,7 +1208,7 @@ describe('Editor actions provider', () => {
         keyCode: monacoRuntime.KeyCode.Enter,
         browserEvent: { key: 'Enter' },
       } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1216,7 +1222,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ' ' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1233,7 +1239,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ' ' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1254,7 +1260,7 @@ describe('Editor actions provider', () => {
 
       editor.getModel.mockReturnValue(createModel(lines));
       editor.getPosition.mockReturnValue({ lineNumber: 5, column: 7 } as monaco.Position);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1269,7 +1275,7 @@ describe('Editor actions provider', () => {
 
       const onKeyDown = editor.onKeyDown.mock.calls[0][0];
       onKeyDown({ keyCode: monacoRuntime.KeyCode.Tab } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1285,7 +1291,7 @@ describe('Editor actions provider', () => {
       onKeyDown({ keyCode: monacoRuntime.KeyCode.Escape } as monaco.IKeyboardEvent);
       editor.getModel.mockReturnValue(createModel(lines));
       editor.getPosition.mockReturnValue({ lineNumber: 5, column: 7 } as monaco.Position);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1305,7 +1311,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ keyCode: monacoRuntime.KeyCode.Enter } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1336,7 +1342,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ keyCode: monacoRuntime.KeyCode.Enter } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1360,7 +1366,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ' ' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1384,7 +1390,7 @@ describe('Editor actions provider', () => {
 
       const onKeyDown = editor.onKeyDown.mock.calls[0][0];
       onKeyDown({ keyCode: monacoRuntime.KeyCode.Tab } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1411,7 +1417,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ',' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1434,7 +1440,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ',' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1447,7 +1453,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: ' ' } } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1460,7 +1466,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ keyCode: monacoRuntime.KeyCode.Enter } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1473,7 +1479,7 @@ describe('Editor actions provider', () => {
 
       const onKeyDown = editor.onKeyDown.mock.calls[0][0];
       onKeyDown({ keyCode: monacoRuntime.KeyCode.Tab } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1516,7 +1522,7 @@ describe('Editor actions provider', () => {
           const onKeyUp = editor.onKeyUp.mock.calls[0][0];
           onKeyUp({ keyCode, browserEvent: { key } } as monaco.IKeyboardEvent);
         }
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
 
         expect(editor.trigger).not.toHaveBeenCalled();
       }
@@ -1540,7 +1546,7 @@ describe('Editor actions provider', () => {
         keyCode: monacoRuntime.KeyCode.Enter,
         browserEvent: { key: 'Enter' },
       } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1560,7 +1566,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ keyCode: monacoRuntime.KeyCode.Enter } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).not.toHaveBeenCalled();
     });
@@ -1570,7 +1576,7 @@ describe('Editor actions provider', () => {
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ keyCode: monacoRuntime.KeyCode.Backspace } as monaco.IKeyboardEvent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(editor.trigger).toHaveBeenCalledWith(
         'Trigger suggestions',
@@ -1777,9 +1783,9 @@ describe('Editor actions provider', () => {
       getLineCount: () => 1,
       getLineContent: () => 'GET ',
       getValueInRange: () => 'GET ',
-    } as unknown as jest.Mocked<monaco.editor.ITextModel>;
-    const mockPosition = { lineNumber: 1, column: 1 } as jest.Mocked<monaco.Position>;
-    const mockContext = {} as jest.Mocked<monaco.languages.CompletionContext>;
+    } as unknown as Mocked<monaco.editor.ITextModel>;
+    const mockPosition = { lineNumber: 1, column: 1 } as Mocked<monaco.Position>;
+    const mockContext = {} as Mocked<monaco.languages.CompletionContext>;
     const setupParserBackedBodyCompletion = (lines: string[]) => {
       const parserResult = createParser()(lines.join('\n'));
       if (!parserResult) {
@@ -1865,7 +1871,7 @@ describe('Editor actions provider', () => {
         ...mockModel,
         getLineContent: () => '"',
         getValueInRange: () => '"',
-      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      } as unknown as Mocked<monaco.editor.ITextModel>;
       const completionItems = await editorActionsProvider.provideCompletionItems(
         quoteLineModel,
         mockPosition,
@@ -1880,7 +1886,7 @@ describe('Editor actions provider', () => {
         ...mockModel,
         getLineContent: () => '"key": "value"',
         getValueInRange: () => '',
-      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      } as unknown as Mocked<monaco.editor.ITextModel>;
       const completionItems = await editorActionsProvider.provideCompletionItems(
         quoteLineModel,
         mockPosition,
@@ -1897,7 +1903,7 @@ describe('Editor actions provider', () => {
         ...mockModel,
         getLineContent: () => '"',
         getValueInRange: () => '"',
-      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      } as unknown as Mocked<monaco.editor.ITextModel>;
       const completionItems = await editorActionsProvider.provideCompletionItems(
         quoteLineModel,
         mockPosition,
@@ -1914,7 +1920,7 @@ describe('Editor actions provider', () => {
           ...mockModel,
           getLineContent: () => lineContent,
           getValueInRange: () => lineContent,
-        } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+        } as unknown as Mocked<monaco.editor.ITextModel>;
         const completionItems = await editorActionsProvider.provideCompletionItems(
           bodyLineModel,
           mockPosition,
@@ -1930,7 +1936,7 @@ describe('Editor actions provider', () => {
         ...mockModel,
         getLineContent: () => '',
         getValueInRange: () => '',
-      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      } as unknown as Mocked<monaco.editor.ITextModel>;
       const completionItems = await editorActionsProvider.provideCompletionItems(
         emptyLineModel,
         mockPosition,
@@ -3151,31 +3157,31 @@ describe('Editor actions provider', () => {
 
   describe('sendRequests', () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('falls back to server default and clears stale host when stored host is not in the allowlist', async () => {
-      (sendRequest as jest.Mock).mockResolvedValue([]);
+      (sendRequest as Mock).mockResolvedValue([]);
 
       const context = serviceContextMock.create();
-      jest
+      vi
         .spyOn(context.services.settings, 'getSelectedHost')
         .mockReturnValue('http://localhost:9300/');
-      const setSelectedHostSpy = jest.spyOn(context.services.settings, 'setSelectedHost');
-      jest.spyOn(context.services.esHostService, 'waitForInitialization').mockResolvedValue();
-      jest
+      const setSelectedHostSpy = vi.spyOn(context.services.settings, 'setSelectedHost');
+      vi.spyOn(context.services.esHostService, 'waitForInitialization').mockResolvedValue();
+      vi
         .spyOn(context.services.esHostService, 'getAllHosts')
         .mockReturnValue(['https://localhost:9200/']);
 
       // Use a custom provider that includes getErrors so sendRequests can proceed past validation
-      const provider = new MonacoEditorActionsProvider(editor, jest.fn(), '.className', {
-        getRequests: jest
+      const provider = new MonacoEditorActionsProvider(editor, vi.fn(), '.className', {
+        getRequests: vi
           .fn()
           .mockResolvedValue([{ startOffset: 0, endOffset: 11, method: 'GET', url: '_search' }]),
-        getErrors: jest.fn().mockResolvedValue([]),
+        getErrors: vi.fn().mockResolvedValue([]),
       } as any);
 
-      await provider.sendRequests(jest.fn(), context);
+      await provider.sendRequests(vi.fn(), context);
 
       expect(sendRequest).toHaveBeenCalledWith(expect.objectContaining({ host: undefined }));
       expect(setSelectedHostSpy).toHaveBeenCalledWith(null);

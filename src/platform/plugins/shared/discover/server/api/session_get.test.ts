@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
@@ -32,7 +34,7 @@ describe('getDiscoverSession', () => {
     });
 
     const requestContext = {
-      resolve: jest.fn().mockResolvedValue({ core }),
+      resolve: vi.fn().mockResolvedValue({ core }),
     } as unknown as RequestHandlerContext;
 
     await expect(getDiscoverSession(requestContext, id)).resolves.toMatchObject({

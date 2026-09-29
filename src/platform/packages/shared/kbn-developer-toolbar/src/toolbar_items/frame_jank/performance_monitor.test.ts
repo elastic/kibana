@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { PerformanceMonitor, type PerformanceInfo } from './performance_monitor';
 
 describe('PerformanceMonitor', () => {
@@ -28,13 +30,13 @@ describe('PerformanceMonitor', () => {
     now = 1000;
     snapshots = [];
     callback = undefined;
-    jest.spyOn(performance, 'now').mockImplementation(() => now);
-    jest.spyOn(document, 'hidden', 'get').mockReturnValue(false);
-    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((next) => {
+    vi.spyOn(performance, 'now').mockImplementation(() => now);
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((next) => {
       callback = next;
       return 1;
     });
-    jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {
       callback = undefined;
     });
     monitor = new PerformanceMonitor();
@@ -43,7 +45,7 @@ describe('PerformanceMonitor', () => {
 
   afterEach(() => {
     monitor.destroy();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('discards startup samples and floors a slow session at 60 FPS', () => {
@@ -94,7 +96,7 @@ describe('PerformanceMonitor', () => {
   });
 
   it('resets a 120 Hz high-water after visibility restoration', () => {
-    const hidden = jest.spyOn(document, 'hidden', 'get');
+    const hidden = vi.spyOn(document, 'hidden', 'get');
     hidden.mockReturnValue(false);
     monitor.startMonitoring();
     advanceFrames(961, 1000 / 120);

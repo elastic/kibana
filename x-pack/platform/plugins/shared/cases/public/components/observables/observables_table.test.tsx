@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,13 +17,16 @@ import { renderWithTestingProviders } from '../../common/mock';
 
 // Partial mock: keep createCaseWorkflowFilter / createCaseWorkflowComparator / useRunCaseWorkflow
 // real; only pin useCanRunCaseWorkflow so we don't need to wire up its four dependencies.
-jest.mock('../workflows/use_run_case_workflow', () => ({
-  ...jest.requireActual('../workflows/use_run_case_workflow'),
-  useCanRunCaseWorkflow: jest.fn(),
-}));
+vi.mock('../workflows/use_run_case_workflow', async () => {
+      const mocked = {
+      ...(await vi.importActual('../workflows/use_run_case_workflow')),
+      useCanRunCaseWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-describe('ObservablesTable', () => {
-  const { useCanRunCaseWorkflow } = jest.requireMock('../workflows/use_run_case_workflow');
+describe('ObservablesTable', async () => {
+  const { useCanRunCaseWorkflow } = (await vi.importMock('../workflows/use_run_case_workflow'));
 
   const props: ObservablesTableProps = {
     caseData: {
@@ -28,13 +34,13 @@ describe('ObservablesTable', () => {
       observables: mockObservables,
     },
     isLoading: false,
-    onExtractObservablesChanged: jest.fn(),
+    onExtractObservablesChanged: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: workflow runs disabled (mirrors a read-only user or feature-off state).
-    (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(false);
+    (useCanRunCaseWorkflow as Mock).mockReturnValue(false);
   });
 
   it('renders correctly', async () => {
@@ -55,20 +61,20 @@ describe('ObservablesTable', () => {
 
   describe('row selection gating', () => {
     it('shows selection checkboxes when the user can run workflows', () => {
-      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
+      (useCanRunCaseWorkflow as Mock).mockReturnValue(true);
       renderWithTestingProviders(<ObservablesTable {...props} />);
       // EuiInMemoryTable adds a checkbox for each row plus one "select all" header checkbox.
       expect(screen.getAllByRole('checkbox')).toHaveLength(mockObservables.length + 1);
     });
 
     it('does not show selection checkboxes for read-only users', () => {
-      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(false);
+      (useCanRunCaseWorkflow as Mock).mockReturnValue(false);
       renderWithTestingProviders(<ObservablesTable {...props} />);
       expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
     });
 
     it('surfaces the bulk-actions bar after selecting a row', async () => {
-      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
+      (useCanRunCaseWorkflow as Mock).mockReturnValue(true);
       renderWithTestingProviders(<ObservablesTable {...props} />);
 
       // Click the first row checkbox (index 0 is the "select all" header checkbox).
@@ -79,7 +85,7 @@ describe('ObservablesTable', () => {
     });
 
     it('does not restore a selection that was filtered out once the filter is cleared', async () => {
-      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
+      (useCanRunCaseWorkflow as Mock).mockReturnValue(true);
       const [firstObservable, secondObservable] = mockObservables;
       const { rerender } = renderWithTestingProviders(<ObservablesTable {...props} />);
 

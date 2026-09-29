@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -145,16 +147,16 @@ const response = {
   total: 1,
 };
 
-const mockUseSubActionPlaybooks = jest.fn().mockImplementation(() => ({
+const mockUseSubActionPlaybooks = vi.fn().mockImplementation(() => ({
   isLoading: false,
   response,
   error: null,
 }));
-const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(mockUseSubActionPlaybooks);
+const mockUseSubAction = vi.fn<Result, [UseSubActionParams<unknown>]>(mockUseSubActionPlaybooks);
 
-const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
-jest.mock(triggersActionsPath, () => {
-  const original = jest.requireActual(triggersActionsPath);
+const mockToasts = { addDanger: vi.fn(), addWarning: vi.fn() };
+vi.mock(triggersActionsPath, () => {
+  const original = require(triggersActionsPath);
   return {
     ...original,
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
@@ -187,7 +189,7 @@ describe('XSOARParamsFields renders', () => {
     name: 'Test',
   });
 
-  const editAction = jest.fn();
+  const editAction = vi.fn();
   const defaultProps = {
     actionConnector: connector,
     actionParams,
@@ -198,7 +200,7 @@ describe('XSOARParamsFields renders', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('New connector', () => {

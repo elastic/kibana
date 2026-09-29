@@ -7,37 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('12345'),
-}));
+import { vi } from 'vitest';
 
-jest.mock('@kbn/visualizations-plugin/public', () => ({
-  getConvertToLensModule: async () => ({
-    getColumnsFromVis: jest.fn(() => {
-      return [
-        {
-          metrics: ['0cdf0372-a78f-438f-9fc0-df9ad83796df'],
-          buckets: {
-            all: ['8a2556cf-dfb2-49f1-83cb-8892e1eace1c'],
-          },
-          columns: [
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('12345'),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/visualizations-plugin/public', () => {
+      const mocked = {
+      getConvertToLensModule: async () => ({
+        getColumnsFromVis: vi.fn(() => {
+          return [
             {
-              columnId: '8a2556cf-dfb2-49f1-83cb-8892e1eace1c',
-              meta: {
-                aggId: '2',
+              metrics: ['0cdf0372-a78f-438f-9fc0-df9ad83796df'],
+              buckets: {
+                all: ['8a2556cf-dfb2-49f1-83cb-8892e1eace1c'],
               },
+              columns: [
+                {
+                  columnId: '8a2556cf-dfb2-49f1-83cb-8892e1eace1c',
+                  meta: {
+                    aggId: '2',
+                  },
+                },
+              ],
             },
-          ],
-        },
-      ];
-    }),
-  }),
-  getDataViewByIndexPatternId: jest.fn(() => ({ id: 'myDataViewId' })),
-}));
+          ];
+        }),
+      }),
+      getDataViewByIndexPatternId: vi.fn(() => ({ id: 'myDataViewId' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../services', () => ({
-  getDataViewsStart: () => ({ get: () => ({}), getDefault: () => ({}) }),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getDataViewsStart: () => ({ get: () => ({}), getDefault: () => ({}) }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { TagCloudVisParams } from '../types';

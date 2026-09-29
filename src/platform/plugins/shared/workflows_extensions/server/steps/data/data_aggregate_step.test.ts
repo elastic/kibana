@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { dataAggregateStepDefinition } from './data_aggregate_step';
 import type { StepHandlerContext } from '../../step_registry/types';
 
@@ -30,17 +33,17 @@ describe('dataAggregateStepDefinition', () => {
     input: input as any,
     rawInput: input as any,
     contextManager: {
-      renderInputTemplate: jest.fn((val) => val),
-      getContext: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      getFakeRequest: jest.fn(),
-      callKibanaApi: jest.fn(),
+      renderInputTemplate: vi.fn((val) => val),
+      getContext: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      getFakeRequest: vi.fn(),
+      callKibanaApi: vi.fn(),
     },
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: abortSignal ?? new AbortController().signal,
     stepId: 'test-aggregate',
@@ -374,7 +377,7 @@ describe('dataAggregateStepDefinition', () => {
           metrics: [{ name: 'count', operation: 'count' }],
         }
       );
-      (context.contextManager.renderInputTemplate as jest.Mock).mockImplementation(() => {
+      (context.contextManager.renderInputTemplate as Mock).mockImplementation(() => {
         throw new Error('render failure');
       });
 
@@ -391,7 +394,7 @@ describe('dataAggregateStepDefinition', () => {
           metrics: [{ name: 'count', operation: 'count' }],
         }
       );
-      (context.logger.debug as jest.Mock).mockImplementation(() => {
+      (context.logger.debug as Mock).mockImplementation(() => {
         throw 'string-error'; // eslint-disable-line no-throw-literal
       });
 

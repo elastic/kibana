@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isTruncated, isTruncatedDeep, stripTruncationClasses } from './truncation_helpers';
 
 describe('isTruncated', () => {
@@ -27,14 +29,14 @@ describe('isTruncated', () => {
   it('should detect computed text-overflow truncation when connected', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
-    jest.spyOn(window, 'getComputedStyle').mockReturnValue({
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
       textOverflow: 'ellipsis',
       webkitLineClamp: '',
     } as CSSStyleDeclaration);
 
     expect(isTruncated(el)).toBe(true);
 
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     el.remove();
   });
 });
@@ -76,7 +78,7 @@ describe('stripTruncationClasses', () => {
     document.body.appendChild(source);
     const clone = document.createElement('div');
 
-    jest.spyOn(window, 'getComputedStyle').mockReturnValue({
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
       textOverflow: 'ellipsis',
       webkitLineClamp: '',
     } as CSSStyleDeclaration);
@@ -87,7 +89,7 @@ describe('stripTruncationClasses', () => {
     expect(clone.style.getPropertyValue('text-overflow')).toBe('clip');
     expect(clone.style.getPropertyValue('overflow')).toBe('visible');
 
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     source.remove();
   });
 
@@ -108,7 +110,7 @@ describe('stripTruncationClasses', () => {
     const clone = document.createElement('div');
     clone.classList.add('layout-truncateable-container');
 
-    jest.spyOn(window, 'getComputedStyle').mockReturnValue({
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
       textOverflow: 'clip',
       webkitLineClamp: '',
     } as CSSStyleDeclaration);
@@ -118,7 +120,7 @@ describe('stripTruncationClasses', () => {
     expect(result).toBe(false);
     expect(clone.style.getPropertyValue('overflow')).toBe('');
 
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     source.remove();
   });
 });

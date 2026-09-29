@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { fireEvent, render } from '@testing-library/react';
@@ -13,8 +15,8 @@ import { TestProviders } from '../../../../common/mock';
 import { AutoRefreshButton } from './auto_refresh_button';
 
 describe('AutoRefreshButton', () => {
-  const reFetchRulesMock = jest.fn();
-  const setIsRefreshOnMock = jest.fn();
+  const reFetchRulesMock = vi.fn();
+  const setIsRefreshOnMock = vi.fn();
 
   afterEach(() => {
     reFetchRulesMock.mockReset();

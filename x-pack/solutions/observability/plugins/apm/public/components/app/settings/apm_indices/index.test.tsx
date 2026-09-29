@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { merge } from 'lodash';
@@ -19,8 +21,8 @@ import * as hooks from '../../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ApmIndices } from '.';
 
-const saveApmIndices = jest.fn();
-const addDanger = jest.fn();
+const saveApmIndices = vi.fn();
+const addDanger = vi.fn();
 
 const apmIndexSettings = [
   {
@@ -57,7 +59,7 @@ function getMockApmContext() {
       notifications: {
         toasts: {
           addDanger,
-          addSuccess: jest.fn(),
+          addSuccess: vi.fn(),
         },
       },
       application: {
@@ -79,27 +81,27 @@ describe('ApmIndices', () => {
   const mockContext = getMockApmContext();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jest.spyOn(hooks, 'useFetcher').mockImplementation((_, fnDeps) => {
+    vi.spyOn(hooks, 'useFetcher').mockImplementation((_, fnDeps) => {
       if (fnDeps[0] === (mockContext.core as any).apmSourcesAccess) {
         return {
           data: { apmIndexSettings },
           status: FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         };
       }
 
       return {
         data: undefined,
         status: FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       };
     });
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   function renderComponent() {

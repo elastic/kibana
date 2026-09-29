@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -98,8 +100,8 @@ describe('[CCR API] Fetch all follower indices', () => {
 
     const routeContextMock = mockRouteContext({
       ccr: {
-        followInfo: jest.fn().mockResolvedValueOnce(ccrInfoMockResponse),
-        stats: jest.fn().mockResolvedValueOnce(ccrStatsMockResponse),
+        followInfo: vi.fn().mockResolvedValueOnce(ccrInfoMockResponse),
+        stats: vi.fn().mockResolvedValueOnce(ccrStatsMockResponse),
       },
     });
 

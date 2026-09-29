@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   casesBasePath,
   chunk,
@@ -343,14 +345,14 @@ describe('utils', () => {
 
   describe('runWithRetry', () => {
     it('returns the value on first success without retrying', async () => {
-      const op = jest.fn().mockResolvedValue('ok');
+      const op = vi.fn().mockResolvedValue('ok');
       const result = await runWithRetry(op, { label: 'happy-path' });
       expect(result).toBe('ok');
       expect(op).toHaveBeenCalledTimes(1);
     });
 
     it('retries on retryable errors and ultimately succeeds', async () => {
-      const op = jest
+      const op = vi
         .fn()
         .mockRejectedValueOnce(Object.assign(new Error('boom'), { axiosError: { status: 503 } }))
         .mockResolvedValueOnce('done');
@@ -360,7 +362,7 @@ describe('utils', () => {
     });
 
     it('rethrows non-retryable errors immediately', async () => {
-      const op = jest
+      const op = vi
         .fn()
         .mockRejectedValue(Object.assign(new Error('nope'), { axiosError: { status: 400 } }));
       await expect(runWithRetry(op, { retries: 5, label: 'fatal' })).rejects.toThrow('nope');
@@ -368,7 +370,7 @@ describe('utils', () => {
     });
 
     it('gives up after exhausting retries', async () => {
-      const op = jest
+      const op = vi
         .fn()
         .mockRejectedValue(Object.assign(new Error('boom'), { axiosError: { status: 503 } }));
       await expect(runWithRetry(op, { retries: 2, label: 'always-fail' })).rejects.toThrow('boom');
@@ -376,7 +378,7 @@ describe('utils', () => {
     });
 
     it('treats ECONNRESET (via err.code) as retryable', async () => {
-      const op = jest
+      const op = vi
         .fn()
         .mockRejectedValueOnce(Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' }))
         .mockResolvedValueOnce('ok');
@@ -386,7 +388,7 @@ describe('utils', () => {
     });
 
     it('treats ETIMEDOUT exposed via err.cause.code as retryable', async () => {
-      const op = jest
+      const op = vi
         .fn()
         .mockRejectedValueOnce(
           Object.assign(new Error('request failed'), {
@@ -402,7 +404,7 @@ describe('utils', () => {
     it('does not retry when a 4xx response body happens to contain a retryable token', async () => {
       // A 400 carrying "429" anywhere in its body (UUID prefix, port number,
       // HTTP date, SLA value, etc.) must not be misclassified as transient.
-      const op = jest.fn().mockRejectedValue(
+      const op = vi.fn().mockRejectedValue(
         Object.assign(new Error('Bad Request'), {
           axiosError: { status: 400 },
           response: {

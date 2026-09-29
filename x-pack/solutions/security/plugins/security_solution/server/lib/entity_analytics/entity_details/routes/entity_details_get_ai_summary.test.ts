@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AiSummaryMetadataDoc } from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
@@ -14,14 +17,14 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 
-const mockGetLatestByEntityId = jest.fn();
-const mockCreateEntityMetadataClient = jest.fn(() => ({
+const mockGetLatestByEntityId = vi.fn();
+const mockCreateEntityMetadataClient = vi.fn(() => ({
   getLatestByEntityId: mockGetLatestByEntityId,
 }));
 
-const mockGetStartServices = jest.fn();
+const mockGetStartServices = vi.fn();
 const mockAsCurrentUser = { mock: 'current-user-client' };
-const mockAsScoped = jest.fn(() => ({ asCurrentUser: mockAsCurrentUser }));
+const mockAsScoped = vi.fn(() => ({ asCurrentUser: mockAsCurrentUser }));
 
 // Import after mocks are set up
 import { entityDetailsGetAiSummaryRoute } from './entity_details_get_ai_summary';
@@ -57,7 +60,7 @@ describe('GET /internal/entity_details/ai_summary - entityDetailsGetAiSummaryRou
     mockCreateEntityMetadataClient.mockClear();
     mockAsScoped.mockClear();
 
-    (context.securitySolution as unknown as { getSpaceId: jest.Mock }).getSpaceId = jest
+    (context.securitySolution as unknown as { getSpaceId: Mock }).getSpaceId = vi
       .fn()
       .mockReturnValue('default');
 
@@ -84,7 +87,7 @@ describe('GET /internal/entity_details/ai_summary - entityDetailsGetAiSummaryRou
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (entityId = 'user:alice@local', entityType = 'user') =>

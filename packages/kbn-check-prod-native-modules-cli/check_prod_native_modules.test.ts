@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { promises as fs, existsSync } from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { findProductionDependencies, readPnpmLock } from '@kbn/yarn-lock-validator';
@@ -16,61 +19,79 @@ import {
   isNativeModule,
 } from './check_prod_native_modules';
 
-jest.mock('fs', () => ({
-  promises: {
-    readdir: jest.fn(),
-  },
-  existsSync: jest.fn(),
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      promises: {
+        readdir: vi.fn(),
+      },
+      existsSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mocked/repo/root',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mocked/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/tooling-log', () => ({
-  ToolingLog: jest.fn().mockImplementation(() => ({
-    info: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/tooling-log', () => {
+      const mocked = {
+      ToolingLog: vi.fn().mockImplementation(() => ({
+        info: vi.fn(),
+        error: vi.fn(),
+        success: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/yarn-lock-validator', () => ({
-  findProductionDependencies: jest.fn(),
-  readPnpmLock: jest.fn(),
-}));
+vi.mock('@kbn/yarn-lock-validator', () => {
+      const mocked = {
+      findProductionDependencies: vi.fn(),
+      readPnpmLock: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
   '/test/node_modules/@elastic/test-package/package.json',
-  () => ({
-    name: '@elastic/test-package',
-    version: '1.0.0',
-  }),
+  () => {
+      const mocked = {
+        name: '@elastic/test-package',
+        version: '1.0.0',
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
-jest.mock(
+vi.mock(
   // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
   '/test/node_modules/@elastic/package/package.json',
-  () => ({
-    name: '@elastic/package',
-    version: '1.0.0',
-  }),
+  () => {
+      const mocked = {
+        name: '@elastic/package',
+        version: '1.0.0',
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
 describe('Check Prod Native Modules', () => {
-  let mockLog: jest.Mocked<ToolingLog>;
+  let mockLog: Mocked<ToolingLog>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockLog = new ToolingLog() as jest.Mocked<ToolingLog>;
+    vi.clearAllMocks();
+    mockLog = new ToolingLog() as Mocked<ToolingLog>;
   });
 
   describe('isNativeModule', () => {
     it('should return true if binding.gyp is found', async () => {
-      (fs.readdir as jest.Mock).mockResolvedValueOnce([
+      (fs.readdir as Mock).mockResolvedValueOnce([
         { name: 'binding.gyp', isDirectory: () => false },
       ]);
 
@@ -79,7 +100,7 @@ describe('Check Prod Native Modules', () => {
     });
 
     it('should return true if .node file is found', async () => {
-      (fs.readdir as jest.Mock).mockResolvedValueOnce([
+      (fs.readdir as Mock).mockResolvedValueOnce([
         { name: 'test.node', isDirectory: () => false },
       ]);
 
@@ -88,7 +109,7 @@ describe('Check Prod Native Modules', () => {
     });
 
     it('should return false if no native module indicators are found', async () => {
-      (fs.readdir as jest.Mock).mockResolvedValueOnce([
+      (fs.readdir as Mock).mockResolvedValueOnce([
         { name: 'regular.js', isDirectory: () => false },
       ]);
 
@@ -97,7 +118,7 @@ describe('Check Prod Native Modules', () => {
     });
 
     it('should log an error if there is an issue reading the directory', async () => {
-      (fs.readdir as jest.Mock).mockRejectedValueOnce(new Error('Read error'));
+      (fs.readdir as Mock).mockRejectedValueOnce(new Error('Read error'));
 
       await isNativeModule('/test/path', mockLog);
       expect(mockLog.error).toHaveBeenCalledWith('Error when reading /test/path: Read error');
@@ -109,14 +130,14 @@ describe('Check Prod Native Modules', () => {
       const mockProductionDependencies = new Map([['@elastic/test-package@1.0.0', true]]);
       const mockProdNativeModulesFound: Array<{ name: string; version: string; path: string }> = [];
 
-      (fs.readdir as jest.Mock)
+      (fs.readdir as Mock)
         .mockResolvedValueOnce([{ name: '@elastic', isDirectory: () => true }])
         .mockResolvedValueOnce([{ name: 'test-package', isDirectory: () => true }]);
-      (fs.readdir as jest.Mock)
+      (fs.readdir as Mock)
         .mockResolvedValueOnce([{ name: 'binding.gyp', isDirectory: () => false }])
         .mockResolvedValueOnce([]);
-      (existsSync as jest.Mock).mockReturnValue(true);
-      jest
+      (existsSync as Mock).mockReturnValue(true);
+      vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         .spyOn(require('./check_prod_native_modules'), 'isNativeModule')
         .mockResolvedValueOnce(true);
@@ -141,15 +162,15 @@ describe('Check Prod Native Modules', () => {
       const mockProductionDependencies = new Map([['@elastic/package@1.0.0', true]]);
       const mockProdNativeModulesFound: Array<{ name: string; version: string; path: string }> = [];
 
-      (fs.readdir as jest.Mock)
+      (fs.readdir as Mock)
         .mockResolvedValueOnce([{ name: '@elastic', isDirectory: () => true }])
         .mockResolvedValueOnce([{ name: 'package', isDirectory: () => true }]);
-      (fs.readdir as jest.Mock)
+      (fs.readdir as Mock)
         .mockResolvedValueOnce([{ name: 'binding.gyp', isDirectory: () => false }])
         .mockResolvedValueOnce([]);
-      (existsSync as jest.Mock).mockReturnValue(true);
-      (existsSync as jest.Mock).mockReturnValue(true);
-      jest
+      (existsSync as Mock).mockReturnValue(true);
+      (existsSync as Mock).mockReturnValue(true);
+      vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         .spyOn(require('./check_prod_native_modules'), 'isNativeModule')
         .mockResolvedValueOnce(true);
@@ -169,11 +190,11 @@ describe('Check Prod Native Modules', () => {
 
   describe('checkProdNativeModules', () => {
     it('should return false when no native modules are found', async () => {
-      (existsSync as jest.Mock).mockReturnValue(true);
-      (findProductionDependencies as jest.Mock).mockReturnValue(new Map());
-      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
-      (fs.readdir as jest.Mock).mockResolvedValue([]);
-      jest
+      (existsSync as Mock).mockReturnValue(true);
+      (findProductionDependencies as Mock).mockReturnValue(new Map());
+      (readPnpmLock as Mock).mockResolvedValueOnce({});
+      (fs.readdir as Mock).mockResolvedValue([]);
+      vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         .spyOn(require('./check_prod_native_modules'), 'checkDependencies')
         .mockResolvedValue(undefined);
@@ -187,16 +208,16 @@ describe('Check Prod Native Modules', () => {
     });
 
     it('should return true and log errors when native modules are found', async () => {
-      (existsSync as jest.Mock).mockReturnValueOnce(true).mockReturnValueOnce(true);
-      (findProductionDependencies as jest.Mock).mockReturnValue(
+      (existsSync as Mock).mockReturnValueOnce(true).mockReturnValueOnce(true);
+      (findProductionDependencies as Mock).mockReturnValue(
         new Map([
           ['@elastic/native-module@1.0.0', { name: '@elastic/native-module', version: '1.0.0' }],
         ])
       );
-      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
+      (readPnpmLock as Mock).mockResolvedValueOnce({});
 
       // Mock loadPackageJson to return a mock package JSON object
-      jest
+      vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         .spyOn(require('./helpers'), 'loadPackageJson')
         .mockImplementation((packageJsonPath: any) => {
@@ -206,12 +227,12 @@ describe('Check Prod Native Modules', () => {
           };
         });
 
-      (fs.readdir as jest.Mock)
+      (fs.readdir as Mock)
         .mockResolvedValueOnce([{ name: '@elastic', isDirectory: () => true }])
         .mockResolvedValueOnce([{ name: 'native-module', isDirectory: () => true }])
         // .mockResolvedValueOnce([{ name: 'package.json', isDirectory: () => false }])
         .mockResolvedValueOnce([{ name: 'binding.gyp', isDirectory: () => false }]);
-      jest
+      vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         .spyOn(require('./check_prod_native_modules'), 'checkDependencies')
         .mockImplementationOnce((_, __, prodNativeModulesFound: any) => {
@@ -236,9 +257,9 @@ describe('Check Prod Native Modules', () => {
     });
 
     it('should throw an error if root node_modules folder is not found', async () => {
-      (existsSync as jest.Mock).mockReturnValue(false);
-      (findProductionDependencies as jest.Mock).mockReturnValue(new Map());
-      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
+      (existsSync as Mock).mockReturnValue(false);
+      (findProductionDependencies as Mock).mockReturnValue(new Map());
+      (readPnpmLock as Mock).mockResolvedValueOnce({});
 
       const result = await checkProdNativeModules(mockLog);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import type { DataViewBase } from '@kbn/es-query';
@@ -24,41 +27,48 @@ import { INSPECT_ACTION } from '../../../../common/components/visualization_acti
 import type { UseVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
 import { useVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
 
-jest.mock('../../../../common/components/control_columns', () => ({
-  transformControlColumns: (props: TransformColumnsProps) => [],
-  checkBoxControlColumn: {
-    id: 'checkbox-control-column',
-    width: 32,
-    headerCellRender: jest.fn(),
-    rowCellRender: jest.fn(),
-  },
-}));
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/containers/use_global_time');
-jest.mock('../../../../common/utils/normalize_time_range');
-jest.mock('../../../../common/components/events_viewer/use_timelines_events');
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
-jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => ({
-  ...jest.requireActual(
-    '../../../../common/components/visualization_actions/use_visualization_response'
-  ),
-  useVisualizationResponse: jest
-    .requireActual(
-      '../../../../common/components/visualization_actions/use_visualization_response.mock'
-    )
-    .useVisualizationResponseMock.create(),
-}));
+vi.mock('../../../../common/components/control_columns', () => {
+      const mocked = {
+      transformControlColumns: (props: TransformColumnsProps) => [],
+      checkBoxControlColumn: {
+        id: 'checkbox-control-column',
+        width: 32,
+        headerCellRender: vi.fn(),
+        rowCellRender: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/containers/use_global_time');
+vi.mock('../../../../common/utils/normalize_time_range');
+vi.mock('../../../../common/components/events_viewer/use_timelines_events');
+vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../../common/components/visualization_actions/use_visualization_response', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response')),
+      useVisualizationResponse: (await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response.mock'))
+        .useVisualizationResponseMock.create(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-const mockVisualizationEmbeddable = VisualizationEmbeddable as unknown as jest.Mock;
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockVisualizationEmbeddable = VisualizationEmbeddable as unknown as Mock;
 const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
-const mockUseFieldBrowserOptions = jest.fn();
-jest.mock('../../../../timelines/components/fields_browser', () => ({
-  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
-}));
+const mockUseFieldBrowserOptions = vi.fn();
+vi.mock('../../../../timelines/components/fields_browser', () => {
+      const mocked = {
+      useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,
@@ -73,13 +83,13 @@ const getLastMonthTimeframe = () => ({
   lookback: '1m',
 });
 
-(useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
+(useTimelineEvents as Mock).mockReturnValue([false, mockEventViewerResponse]);
 
 describe('PreviewHistogram', () => {
-  const mockSetQuery = jest.fn();
+  const mockSetQuery = vi.fn();
 
   beforeEach(() => {
-    (useGlobalTime as jest.Mock).mockReturnValue({
+    (useGlobalTime as Mock).mockReturnValue({
       from: '2020-07-07T08:20:18.966Z',
       isInitializing: false,
       to: '2020-07-08T08:20:18.966Z',
@@ -100,7 +110,7 @@ describe('PreviewHistogram', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('PreviewHistogram', () => {
@@ -108,7 +118,7 @@ describe('PreviewHistogram', () => {
       const { getByTestId } = render(
         <TestProviders store={store}>
           <PreviewHistogram
-            addNoiseWarning={jest.fn()}
+            addNoiseWarning={vi.fn()}
             timeframeOptions={getLastMonthTimeframe()}
             previewId={'test-preview-id'}
             spaceId={'default'}
@@ -127,7 +137,7 @@ describe('PreviewHistogram', () => {
       render(
         <TestProviders store={store}>
           <PreviewHistogram
-            addNoiseWarning={jest.fn()}
+            addNoiseWarning={vi.fn()}
             timeframeOptions={getLastMonthTimeframe()}
             previewId={'test-preview-id'}
             spaceId={'default'}
@@ -146,7 +156,7 @@ describe('PreviewHistogram', () => {
       render(
         <TestProviders store={store}>
           <PreviewHistogram
-            addNoiseWarning={jest.fn()}
+            addNoiseWarning={vi.fn()}
             timeframeOptions={getLastMonthTimeframe()}
             previewId={'test-preview-id'}
             spaceId={'default'}
@@ -165,7 +175,7 @@ describe('PreviewHistogram', () => {
       render(
         <TestProviders store={store}>
           <PreviewHistogram
-            addNoiseWarning={jest.fn()}
+            addNoiseWarning={vi.fn()}
             timeframeOptions={getLastMonthTimeframe()}
             previewId={'test-preview-id'}
             spaceId={'default'}
@@ -186,7 +196,7 @@ describe('PreviewHistogram', () => {
       const format = 'YYYY-MM-DD HH:mm:ss';
       const start = '2015-03-12 05:17:10';
       const end = '2020-03-12 05:17:10';
-      (useTimelineEvents as jest.Mock).mockReturnValue([
+      (useTimelineEvents as Mock).mockReturnValue([
         false,
         {
           ...mockEventViewerResponse,
@@ -201,7 +211,7 @@ describe('PreviewHistogram', () => {
       render(
         <TestProviders store={store}>
           <PreviewHistogram
-            addNoiseWarning={jest.fn()}
+            addNoiseWarning={vi.fn()}
             previewId={'test-preview-id'}
             spaceId={'default'}
             ruleType={'query'}

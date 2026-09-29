@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -14,10 +17,10 @@ import { IndexItem } from './index_item';
 import type { InferenceUsageInfo } from '../../../../types';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../../hooks/use_kibana');
-const mockUseKibana = useKibana as jest.Mock;
+vi.mock('../../../../../../hooks/use_kibana');
+const mockUseKibana = useKibana as Mock;
 const locatorMock = sharePluginMock.createLocator();
-let mockLocatorGet: jest.Mock;
+let mockLocatorGet: Mock;
 
 describe('Index Item', () => {
   const item: InferenceUsageInfo = {
@@ -25,9 +28,9 @@ describe('Index Item', () => {
     type: 'Index',
   };
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     locatorMock.getUrl.mockResolvedValue('https://locator.url');
-    mockLocatorGet = jest.fn().mockReturnValue(locatorMock);
+    mockLocatorGet = vi.fn().mockReturnValue(locatorMock);
     mockUseKibana.mockReturnValue({
       services: {
         share: {
@@ -39,7 +42,7 @@ describe('Index Item', () => {
         },
       },
     });
-    jest.spyOn(window, 'open').mockImplementation(() => null);
+    vi.spyOn(window, 'open').mockImplementation(() => null);
 
     render(<IndexItem usageItem={item} />);
   });

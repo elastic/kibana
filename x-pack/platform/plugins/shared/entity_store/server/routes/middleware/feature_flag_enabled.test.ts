@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { featureFlagEnabledMiddleware } from './feature_flag_enabled';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -17,7 +19,7 @@ describe('featureFlagEnabledMiddleware', () => {
 
   beforeEach(() => {
     mockFeatureFlags = {
-      isEntityStoreV2Enabled: jest.fn(),
+      isEntityStoreV2Enabled: vi.fn(),
     };
     mockEntityStoreCtx = {
       logger: loggerMock.create(),
@@ -28,7 +30,7 @@ describe('featureFlagEnabledMiddleware', () => {
     };
     mockReq = {};
     mockRes = {
-      customError: jest.fn(({ statusCode, body }) => ({
+      customError: vi.fn(({ statusCode, body }) => ({
         status: statusCode,
         payload: body,
       })),

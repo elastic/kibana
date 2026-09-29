@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
@@ -29,14 +32,14 @@ import { parseIngestToken } from '../../../../inbound/ingress_credential';
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+    connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
       actual.connectorTypeIsDual(actionTypeId)
     ),
   };
@@ -47,24 +50,24 @@ const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient()
 const authorization = actionsAuthorizationMock.create();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const actionExecutor = actionExecutorMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const bulkExecutionEnqueuer = jest.fn();
-const getEventLogClient = jest.fn();
-const getAxiosInstanceWithAuth = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
+const getEventLogClient = vi.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 
 const actionTypeRegistry: ActionTypeRegistry = {
-  get: jest.fn(),
-  isSystemActionType: jest.fn().mockReturnValue(false),
-  ensureActionTypeEnabled: jest.fn(),
-  isDeprecated: jest.fn().mockReturnValue(false),
-  getUtils: jest.fn().mockReturnValue({
-    isHostnameAllowed: jest.fn().mockReturnValue(true),
-    isUriAllowed: jest.fn().mockReturnValue(true),
-    getMicrosoftGraphApiUrl: jest.fn(),
-    getProxySettings: jest.fn(),
+  get: vi.fn(),
+  isSystemActionType: vi.fn().mockReturnValue(false),
+  ensureActionTypeEnabled: vi.fn(),
+  isDeprecated: vi.fn().mockReturnValue(false),
+  getUtils: vi.fn().mockReturnValue({
+    isHostnameAllowed: vi.fn().mockReturnValue(true),
+    isUriAllowed: vi.fn().mockReturnValue(true),
+    getMicrosoftGraphApiUrl: vi.fn(),
+    getProxySettings: vi.fn(),
   }),
 } as unknown as ActionTypeRegistry;
 
@@ -109,19 +112,19 @@ const decryptedInbound = {
 
 describe('rotateInboundIngress', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation((actionTypeId: string) =>
-      jest.requireActual('@kbn/connector-specs').connectorTypeHasInboundEvents(actionTypeId)
+    vi.clearAllMocks();
+    (connectorTypeHasInboundEvents as Mock).mockImplementation(async (actionTypeId: string) =>
+      (await vi.importActual('@kbn/connector-specs')).connectorTypeHasInboundEvents(actionTypeId)
     );
-    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
-      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    (connectorTypeIsDual as Mock).mockImplementation(async (actionTypeId: string) =>
+      (await vi.importActual('@kbn/connector-specs')).connectorTypeIsDual(actionTypeId)
     );
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     connectorTokenClient.deleteConnectorTokens.mockResolvedValue(undefined);
     authTypeRegistry.get.mockImplementation((authTypeId: string) => ({
       id: authTypeId,
       schema: z.object({}),
-      configure: jest.fn(async (_ctx, axiosInstance) => axiosInstance),
+      configure: vi.fn(async (_ctx, axiosInstance) => axiosInstance),
     }));
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
       decryptedInbound as never
@@ -138,7 +141,7 @@ describe('rotateInboundIngress', () => {
       attributes,
       references: options?.references ?? [],
     }));
-    (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+    (actionTypeRegistry.get as Mock).mockReturnValue(
       getConnectorType({
         id: '.inboundWebhook',
         source: ACTION_TYPE_SOURCES.spec,
@@ -205,10 +208,10 @@ describe('rotateInboundIngress', () => {
   });
 
   it('mints the first ingest credential for a dual connector that has identity', async () => {
-    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+    (connectorTypeHasInboundEvents as Mock).mockImplementation(
       (actionTypeId: string) => actionTypeId === '.inboundWebhook' || actionTypeId === '.dual'
     );
-    (connectorTypeIsDual as jest.Mock).mockImplementation(
+    (connectorTypeIsDual as Mock).mockImplementation(
       (actionTypeId: string) => actionTypeId === '.dual'
     );
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
@@ -227,7 +230,7 @@ describe('rotateInboundIngress', () => {
         hasInboundEventIdentity: true,
       },
     } as never);
-    (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+    (actionTypeRegistry.get as Mock).mockReturnValue(
       getConnectorType({
         id: '.dual',
         source: ACTION_TYPE_SOURCES.spec,
@@ -253,10 +256,10 @@ describe('rotateInboundIngress', () => {
   });
 
   it('rotates ingest credentials for dual connectors that already have a credential', async () => {
-    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+    (connectorTypeHasInboundEvents as Mock).mockImplementation(
       (actionTypeId: string) => actionTypeId === '.inboundWebhook' || actionTypeId === '.dual'
     );
-    (connectorTypeIsDual as jest.Mock).mockImplementation(
+    (connectorTypeIsDual as Mock).mockImplementation(
       (actionTypeId: string) => actionTypeId === '.dual'
     );
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
@@ -291,7 +294,7 @@ describe('rotateInboundIngress', () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [{ id: 'cred-1', success: true }],
     } as never);
-    (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+    (actionTypeRegistry.get as Mock).mockReturnValue(
       getConnectorType({
         id: '.dual',
         source: ACTION_TYPE_SOURCES.spec,
@@ -317,10 +320,10 @@ describe('rotateInboundIngress', () => {
   });
 
   it('rejects dual connectors that are not enabled', async () => {
-    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+    (connectorTypeHasInboundEvents as Mock).mockImplementation(
       (actionTypeId: string) => actionTypeId === '.dual'
     );
-    (connectorTypeIsDual as jest.Mock).mockImplementation(
+    (connectorTypeIsDual as Mock).mockImplementation(
       (actionTypeId: string) => actionTypeId === '.dual'
     );
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
@@ -21,16 +24,16 @@ import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createToolHandlerContextMock, type ToolHandlerContextMock } from '../../test_utils/runner';
 import { createLoadSkillToolsAfterRead } from './load_skill_tools_after_read';
 
-const createAnalyticsServiceMock = (): jest.Mocked<
+const createAnalyticsServiceMock = (): Mocked<
   Pick<AnalyticsService, 'reportSkillInvoked'>
 > => ({
-  reportSkillInvoked: jest.fn(),
+  reportSkillInvoked: vi.fn(),
 });
 
-const createTrackingServiceMock = (): jest.Mocked<
+const createTrackingServiceMock = (): Mocked<
   Pick<TrackingService, 'trackSkillInvocation'>
 > => ({
-  trackSkillInvocation: jest.fn(),
+  trackSkillInvocation: vi.fn(),
 });
 
 const createSkillFileEntry = (
@@ -77,8 +80,8 @@ const createMockSkill = (
   content: 'skill content',
   readonly: true,
   basePath: 'skills/platform',
-  getRegistryTools: jest.fn().mockReturnValue([]),
-  getInlineTools: jest.fn().mockReturnValue([]),
+  getRegistryTools: vi.fn().mockReturnValue([]),
+  getInlineTools: vi.fn().mockReturnValue([]),
   referencedContentCount: 0,
   experimental: false,
   ...overrides,
@@ -180,8 +183,8 @@ describe('createLoadSkillToolsAfterRead', () => {
       const convertedTool = { id: 'inline-1-converted' } as any;
 
       const skill = createMockSkill({
-        getInlineTools: jest.fn().mockReturnValue([inlineTool]),
-        getRegistryTools: jest.fn().mockReturnValue([]),
+        getInlineTools: vi.fn().mockReturnValue([inlineTool]),
+        getRegistryTools: vi.fn().mockReturnValue([]),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
@@ -207,8 +210,8 @@ describe('createLoadSkillToolsAfterRead', () => {
     it('loads registry tools as dynamic tools into the tool manager', async () => {
       const registryTool = { id: 'registry-tool-1' } as any;
       const skill = createMockSkill({
-        getInlineTools: jest.fn().mockReturnValue([]),
-        getRegistryTools: jest.fn().mockReturnValue(['registry-tool-1']),
+        getInlineTools: vi.fn().mockReturnValue([]),
+        getRegistryTools: vi.fn().mockReturnValue(['registry-tool-1']),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
@@ -235,8 +238,8 @@ describe('createLoadSkillToolsAfterRead', () => {
       const registryTool = { id: 'registry-1' } as any;
 
       const skill = createMockSkill({
-        getInlineTools: jest.fn().mockReturnValue([inlineTool]),
-        getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
+        getInlineTools: vi.fn().mockReturnValue([inlineTool]),
+        getRegistryTools: vi.fn().mockReturnValue(['registry-1']),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
@@ -264,7 +267,7 @@ describe('createLoadSkillToolsAfterRead', () => {
     it('handles skills with no getInlineTools method', async () => {
       const skill = createMockSkill({
         getInlineTools: undefined,
-        getRegistryTools: jest.fn().mockReturnValue([]),
+        getRegistryTools: vi.fn().mockReturnValue([]),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
@@ -319,7 +322,7 @@ describe('createLoadSkillToolsAfterRead', () => {
     it('throws when a skill returns more than 25 registry tools', async () => {
       const tooManyToolIds = Array.from({ length: 26 }, (_, i) => `tool-${i}`);
       const skill = createMockSkill({
-        getRegistryTools: jest.fn().mockReturnValue(tooManyToolIds),
+        getRegistryTools: vi.fn().mockReturnValue(tooManyToolIds),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
@@ -336,7 +339,7 @@ describe('createLoadSkillToolsAfterRead', () => {
     it('does not throw when a skill returns exactly 25 registry tools', async () => {
       const toolIds = Array.from({ length: 25 }, (_, i) => `tool-${i}`);
       const skill = createMockSkill({
-        getRegistryTools: jest.fn().mockReturnValue(toolIds),
+        getRegistryTools: vi.fn().mockReturnValue(toolIds),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
@@ -351,8 +354,8 @@ describe('createLoadSkillToolsAfterRead', () => {
   });
 
   describe('telemetry', () => {
-    let analyticsService: jest.Mocked<Pick<AnalyticsService, 'reportSkillInvoked'>>;
-    let trackingService: jest.Mocked<Pick<TrackingService, 'trackSkillInvocation'>>;
+    let analyticsService: Mocked<Pick<AnalyticsService, 'reportSkillInvoked'>>;
+    let trackingService: Mocked<Pick<TrackingService, 'trackSkillInvocation'>>;
     let loadSkillToolsAfterReadWithTelemetry: ReturnType<typeof createLoadSkillToolsAfterRead>;
 
     beforeEach(() => {
@@ -369,8 +372,8 @@ describe('createLoadSkillToolsAfterRead', () => {
         id: 'security-skill',
         readonly: true,
         basePath: 'skills/security/foo',
-        getInlineTools: jest.fn().mockReturnValue([]),
-        getRegistryTools: jest.fn().mockReturnValue([]),
+        getInlineTools: vi.fn().mockReturnValue([]),
+        getRegistryTools: vi.fn().mockReturnValue([]),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(
@@ -407,8 +410,8 @@ describe('createLoadSkillToolsAfterRead', () => {
       const registryTool = { id: 'registry-1' } as any;
 
       const skill = createMockSkill({
-        getInlineTools: jest.fn().mockReturnValue([inlineTool]),
-        getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
+        getInlineTools: vi.fn().mockReturnValue([inlineTool]),
+        getRegistryTools: vi.fn().mockReturnValue(['registry-1']),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
@@ -458,8 +461,8 @@ describe('createLoadSkillToolsAfterRead', () => {
         id: 'security-skill',
         readonly: true,
         basePath: 'skills/security/foo',
-        getInlineTools: jest.fn().mockReturnValue([]),
-        getRegistryTools: jest.fn().mockReturnValue([]),
+        getInlineTools: vi.fn().mockReturnValue([]),
+        getRegistryTools: vi.fn().mockReturnValue([]),
       });
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(

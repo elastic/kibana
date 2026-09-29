@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { EmptyPromptComponent } from './empty_prompt';
@@ -12,16 +15,19 @@ import { SecurityPageName } from '../../../../common';
 import { useNavigateTo } from '../../lib/kibana';
 import { OnboardingCardId } from '../../../onboarding/constants';
 
-const mockNavigateTo = jest.fn();
-const mockUseNavigateTo = useNavigateTo as jest.Mock;
+const mockNavigateTo = vi.fn();
+const mockUseNavigateTo = useNavigateTo as Mock;
 
-jest.mock('../../lib/kibana', () => ({
-  useNavigateTo: jest.fn(),
-}));
+vi.mock('../../lib/kibana', () => {
+      const mocked = {
+      useNavigateTo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EmptyPromptComponent component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseNavigateTo.mockImplementation(() => ({ navigateTo: mockNavigateTo }));
   });
 

@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterNormalPathNodeImpl } from '../enter_normal_path_node_impl';
 
 describe('EnterNormalPathNodeImpl', () => {
   let underTest: EnterNormalPathNodeImpl;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
 
   beforeEach(() => {
     mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as any;
 
     underTest = new EnterNormalPathNodeImpl(mockWorkflowRuntime);

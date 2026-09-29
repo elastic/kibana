@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
@@ -19,13 +22,19 @@ import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { AlertsTable } from '../../../alerts_table';
 import { useFilteredRelatedAlertIds } from './use_filtered_related_alert_ids';
 
-jest.mock('../../../alerts_table', () => ({
-  AlertsTable: jest.fn(() => <div data-test-subj="mock-alerts-table">{'AlertsTable'}</div>),
-}));
+vi.mock('../../../alerts_table', () => {
+      const mocked = {
+      AlertsTable: vi.fn(() => <div data-test-subj="mock-alerts-table">{'AlertsTable'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_filtered_related_alert_ids', () => ({
-  useFilteredRelatedAlertIds: jest.fn(),
-}));
+vi.mock('./use_filtered_related_alert_ids', () => {
+      const mocked = {
+      useFilteredRelatedAlertIds: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertsTab', () => {
   const defaultProps = {
@@ -48,11 +57,11 @@ describe('AlertsTab', () => {
       </TestProviders>
     );
 
-  const reportEventMock = jest.fn();
+  const reportEventMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useFilteredRelatedAlertIds as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useFilteredRelatedAlertIds as Mock).mockReturnValue({
       filteredAlertIds: new Set(['alert-1', 'alert-2']),
       isLoading: false,
       isReady: true,
@@ -91,7 +100,7 @@ describe('AlertsTab', () => {
   describe('Filtering Mode and CallOut', () => {
     it('does not render callout when all alerts match the filters', () => {
       const defaultFilters = [{ meta: { alias: 'default', disabled: false, negate: false } }];
-      (useFilteredRelatedAlertIds as jest.Mock).mockReturnValue({
+      (useFilteredRelatedAlertIds as Mock).mockReturnValue({
         filteredAlertIds: new Set(['alert-1', 'alert-2']), // Matches defaultProps.attackAlertIds length
         isLoading: false,
         isReady: true,
@@ -103,7 +112,7 @@ describe('AlertsTab', () => {
 
     it('renders callout and applies query override when there are filtered-out alerts', () => {
       const defaultFilters = [{ meta: { alias: 'default', disabled: false, negate: false } }];
-      (useFilteredRelatedAlertIds as jest.Mock).mockReturnValue({
+      (useFilteredRelatedAlertIds as Mock).mockReturnValue({
         filteredAlertIds: new Set(['alert-1']), // Missing 'alert-2'
         isLoading: false,
         isReady: true,
@@ -124,7 +133,7 @@ describe('AlertsTab', () => {
       );
 
       // Verify shouldHighlightRow logic
-      const lastCallProps = (AlertsTable as unknown as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCallProps = (AlertsTable as unknown as Mock).mock.calls.at(-1)?.[0];
       expect(lastCallProps.shouldHighlightRow({ _id: 'alert-1' })).toBe(false); // Filtered in, not highlighted
       expect(lastCallProps.shouldHighlightRow({ _id: 'alert-2' })).toBe(true); // Filtered out, highlighted
       expect(
@@ -137,7 +146,7 @@ describe('AlertsTab', () => {
 
     it('toggles to "Show matching alerts only" mode', () => {
       const defaultFilters = [{ meta: { alias: 'default', disabled: false, negate: false } }];
-      (useFilteredRelatedAlertIds as jest.Mock).mockReturnValue({
+      (useFilteredRelatedAlertIds as Mock).mockReturnValue({
         filteredAlertIds: new Set(['alert-1']),
         isLoading: false,
         isReady: true,
@@ -162,7 +171,7 @@ describe('AlertsTab', () => {
         {}
       );
 
-      const lastCallProps = (AlertsTable as unknown as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCallProps = (AlertsTable as unknown as Mock).mock.calls.at(-1)?.[0];
       expect(lastCallProps.query).toBeUndefined();
       expect(lastCallProps.shouldHighlightRow).toBeUndefined();
 

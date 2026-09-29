@@ -5,28 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { useFindSavedObjects } from './use_find_saved_objects';
 import { SUPPORTED_SO_TYPES } from './helpers';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useToastsMock = useToasts as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useToastsMock = useToasts as Mock;
 
-const buildHttpMock = (getImpl: jest.Mock) => ({
+const buildHttpMock = (getImpl: Mock) => ({
   services: { http: { get: getImpl } },
 });
 
 describe('useFindSavedObjects', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the `_find` endpoint with sort + wildcard search query', async () => {
-    const getMock = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+    const getMock = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
     useKibanaMock.mockReturnValue(buildHttpMock(getMock));
 
     renderHook(
@@ -49,7 +52,7 @@ describe('useFindSavedObjects', () => {
   });
 
   it('omits the search clause when the query is empty', async () => {
-    const getMock = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+    const getMock = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
     useKibanaMock.mockReturnValue(buildHttpMock(getMock));
 
     renderHook(
@@ -67,7 +70,7 @@ describe('useFindSavedObjects', () => {
 
   it('returns the items and total from the response', async () => {
     const items = [{ id: 'a', type: 'dashboard', meta: { title: 'A' } }];
-    const getMock = jest.fn().mockResolvedValue({ saved_objects: items, total: 42 });
+    const getMock = vi.fn().mockResolvedValue({ saved_objects: items, total: 42 });
     useKibanaMock.mockReturnValue(buildHttpMock(getMock));
 
     const { result } = renderHook(
@@ -80,10 +83,10 @@ describe('useFindSavedObjects', () => {
   });
 
   it('surfaces fetch failures via toasts.addError', async () => {
-    const addError = jest.fn();
+    const addError = vi.fn();
     useToastsMock.mockReturnValue({ addError });
     const error = new Error('boom');
-    const getMock = jest.fn().mockRejectedValue(error);
+    const getMock = vi.fn().mockRejectedValue(error);
     useKibanaMock.mockReturnValue(buildHttpMock(getMock));
 
     renderHook(

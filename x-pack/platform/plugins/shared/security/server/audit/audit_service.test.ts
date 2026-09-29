@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mkdtempSync, rmSync } from 'fs';
 import type { Socket } from 'net';
 import { tmpdir } from 'os';
@@ -43,7 +45,7 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 const logger = loggingSystemMock.createLogger();
 const license = licenseMock.create();
@@ -57,12 +59,12 @@ const config = createAuditConfig({ enabled: true });
 const { logging } = coreMock.createSetup();
 const status = statusServiceMock.createSetupContract();
 const http = httpServiceMock.createSetupContract();
-const getCurrentUser = jest
+const getCurrentUser = vi
   .fn()
   .mockReturnValue({ username: 'jdoe', roles: ['admin'], profile_uid: 'uid' });
-const getSpaceId = jest.fn().mockReturnValue('default');
-const getSID = jest.fn().mockResolvedValue('SESSION_ID');
-const recordAuditLoggingUsage = jest.fn();
+const getSpaceId = vi.fn().mockReturnValue('default');
+const getSID = vi.fn().mockResolvedValue('SESSION_ID');
+const recordAuditLoggingUsage = vi.fn();
 
 beforeEach(() => {
   logger.info.mockClear();
@@ -151,9 +153,9 @@ describe('#setup', () => {
       recordAuditLoggingUsage,
     });
     expect(recordAuditLoggingUsage).toHaveBeenCalledTimes(1);
-    jest.advanceTimersByTime(RECORD_USAGE_INTERVAL);
+    vi.advanceTimersByTime(RECORD_USAGE_INTERVAL);
     expect(recordAuditLoggingUsage).toHaveBeenCalledTimes(2);
-    jest.advanceTimersByTime(RECORD_USAGE_INTERVAL);
+    vi.advanceTimersByTime(RECORD_USAGE_INTERVAL);
     expect(recordAuditLoggingUsage).toHaveBeenCalledTimes(3);
     audit.stop();
   });
@@ -176,9 +178,9 @@ describe('#setup', () => {
       recordAuditLoggingUsage,
     });
     expect(recordAuditLoggingUsage).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(RECORD_USAGE_INTERVAL);
+    vi.advanceTimersByTime(RECORD_USAGE_INTERVAL);
     expect(recordAuditLoggingUsage).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(RECORD_USAGE_INTERVAL);
+    vi.advanceTimersByTime(RECORD_USAGE_INTERVAL);
     expect(recordAuditLoggingUsage).not.toHaveBeenCalled();
     audit.stop();
   });
@@ -246,7 +248,7 @@ describe('#asScoped', () => {
   });
 
   it('includes user.email when the current user has an email', async () => {
-    const getCurrentUserWithEmail = jest.fn().mockReturnValue({
+    const getCurrentUserWithEmail = vi.fn().mockReturnValue({
       username: 'jdoe',
       roles: ['admin'],
       profile_uid: 'uid',
@@ -280,7 +282,7 @@ describe('#asScoped', () => {
   });
 
   it('includes user.full_name when the current user has one', async () => {
-    const getCurrentUserWithFullName = jest.fn().mockReturnValue({
+    const getCurrentUserWithFullName = vi.fn().mockReturnValue({
       username: 'jdoe',
       roles: ['admin'],
       profile_uid: 'uid',
@@ -314,7 +316,7 @@ describe('#asScoped', () => {
   });
 
   describe('user.domain (Serverless OTel only)', () => {
-    const getCurrentUserWithRealm = jest.fn().mockReturnValue({
+    const getCurrentUserWithRealm = vi.fn().mockReturnValue({
       username: 'jdoe',
       roles: ['admin'],
       profile_uid: 'uid',
@@ -1297,8 +1299,8 @@ describe('runtime audit log write failures', () => {
   });
 
   it('always installs its own handler, ignoring anything an operator put in the appender config', () => {
-    const operatorHandler = jest.fn();
-    const auditHandler = jest.fn();
+    const operatorHandler = vi.fn();
+    const auditHandler = vi.fn();
     const auditConfig = createAuditConfig({
       enabled: true,
       appender: {

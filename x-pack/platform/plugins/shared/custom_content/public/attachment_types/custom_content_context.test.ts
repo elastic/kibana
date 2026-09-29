@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { GetActionButtonsParams } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -14,15 +16,21 @@ import type {
 } from '../../common/panel_context_attachment';
 import { customContentContextAttachmentUiDefinition } from './custom_content_context';
 
-const mockPreviewPanelVersion = jest.fn();
-jest.mock('../utils/panel_preview_registry', () => ({
-  previewPanelVersion: (...args: unknown[]) => mockPreviewPanelVersion(...args),
-}));
+const mockPreviewPanelVersion = vi.fn();
+vi.mock('../utils/panel_preview_registry', () => {
+      const mocked = {
+      previewPanelVersion: (...args: unknown[]) => mockPreviewPanelVersion(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddWarning = jest.fn();
-jest.mock('../services', () => ({
-  getServices: () => ({ core: { notifications: { toasts: { addWarning: mockAddWarning } } } }),
-}));
+const mockAddWarning = vi.fn();
+vi.mock('../services', () => {
+      const mocked = {
+      getServices: () => ({ core: { notifications: { toasts: { addWarning: mockAddWarning } } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type CustomContentAttachment = Attachment<
   typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -49,12 +57,12 @@ const getButtons = (attachment: CustomContentAttachment, isCanvas = false) =>
     attachment,
     isCanvas,
     isSidebar: true,
-    updateOrigin: jest.fn(),
+    updateOrigin: vi.fn(),
   } as unknown as GetActionButtonsParams<CustomContentAttachment>);
 
 describe('customContentContextAttachmentUiDefinition', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPreviewPanelVersion.mockReturnValue(true);
   });
 

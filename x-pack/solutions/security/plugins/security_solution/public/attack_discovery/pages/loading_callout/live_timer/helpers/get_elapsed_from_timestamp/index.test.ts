@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getElapsedFromTimestamp } from '.';
 
 describe('getElapsedFromTimestamp', () => {
@@ -13,11 +15,11 @@ describe('getElapsedFromTimestamp', () => {
   beforeEach(() => {
     nowMs = 0;
 
-    jest.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns 0 when startedAt is undefined', () => {

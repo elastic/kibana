@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type {
   StepExecutionsDataClient,
@@ -21,8 +24,8 @@ import { getChildWorkflowExecutions } from './get_child_workflow_executions';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 
 describe('getChildWorkflowExecutions', () => {
-  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
-  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
+  let mockWorkflowDataClient: Mocked<WorkflowExecutionsDataClient>;
+  let mockStepDataClient: Mocked<StepExecutionsDataClient>;
 
   const mockWorkflowGetByIds = (documents: unknown[]) =>
     createMockGetExecutionsByIdsResponse(documents as unknown as EsWorkflowExecution[]);
@@ -78,7 +81,7 @@ describe('getChildWorkflowExecutions', () => {
   beforeEach(() => {
     mockWorkflowDataClient = createMockWorkflowDataClient();
     mockStepDataClient = createMockStepDataClient();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should throw when parent execution is not found', async () => {

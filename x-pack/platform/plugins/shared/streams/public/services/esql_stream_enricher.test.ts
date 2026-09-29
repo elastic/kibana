@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ApplicationStart } from '@kbn/core/public';
 import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
@@ -24,13 +27,13 @@ const makeView = (name: string, extra: Partial<EsqlView> = {}): EsqlView => ({
   ...extra,
 });
 
-const makeRepositoryClient = (summaries: StreamSummary[]): jest.Mocked<StreamsRepositoryClient> =>
+const makeRepositoryClient = (summaries: StreamSummary[]): Mocked<StreamsRepositoryClient> =>
   ({
-    fetch: jest.fn().mockResolvedValue({ summaries }),
-  } as unknown as jest.Mocked<StreamsRepositoryClient>);
+    fetch: vi.fn().mockResolvedValue({ summaries }),
+  } as unknown as Mocked<StreamsRepositoryClient>);
 
 const makeApplication = (
-  getUrlForApp = jest
+  getUrlForApp = vi
     .fn()
     .mockImplementation((_appId: string, { path }: { path: string }) => `http://localhost${path}`)
 ): Promise<Pick<ApplicationStart, 'getUrlForApp'>> => Promise.resolve({ getUrlForApp });
@@ -127,8 +130,8 @@ describe('createStreamsEnrichment', () => {
 
     it('returns sources unchanged when the streams API call fails (graceful degradation)', async () => {
       const failingClient = {
-        fetch: jest.fn().mockRejectedValue(new Error('Network error')),
-      } as unknown as jest.Mocked<StreamsRepositoryClient>;
+        fetch: vi.fn().mockRejectedValue(new Error('Network error')),
+      } as unknown as Mocked<StreamsRepositoryClient>;
       const { enrichSources } = createStreamsEnrichment(failingClient, makeApplication());
       const sources = [makeSource('logs'), makeSource('other-index')];
 
@@ -294,8 +297,8 @@ describe('createStreamsEnrichment', () => {
 
     it('returns views unchanged when the streams API call fails (graceful degradation)', async () => {
       const failingClient = {
-        fetch: jest.fn().mockRejectedValue(new Error('Network error')),
-      } as unknown as jest.Mocked<StreamsRepositoryClient>;
+        fetch: vi.fn().mockRejectedValue(new Error('Network error')),
+      } as unknown as Mocked<StreamsRepositoryClient>;
       const { enrichViews } = createStreamsEnrichment(failingClient, makeApplication());
       const views = [makeView('my-query')];
 
@@ -572,7 +575,7 @@ describe('createStreamsEnrichment', () => {
 
     it('handles overlapping source sets across separate async calls correctly', async () => {
       const client = {
-        fetch: jest
+        fetch: vi
           .fn()
           .mockResolvedValueOnce({
             summaries: [
@@ -583,7 +586,7 @@ describe('createStreamsEnrichment', () => {
           .mockResolvedValueOnce({
             summaries: [{ name: 'traces', type: 'wired', description: '' }],
           }),
-      } as unknown as jest.Mocked<StreamsRepositoryClient>;
+      } as unknown as Mocked<StreamsRepositoryClient>;
       const { enrichSources } = createStreamsEnrichment(client, makeApplication());
 
       const promise1 = enrichSources([makeSource('logs'), makeSource('metrics')]);
@@ -658,7 +661,7 @@ describe('createStreamsEnrichment', () => {
 
     it('handles overlapping view sets across separate async calls correctly', async () => {
       const client = {
-        fetch: jest
+        fetch: vi
           .fn()
           .mockResolvedValueOnce({
             summaries: [
@@ -669,7 +672,7 @@ describe('createStreamsEnrichment', () => {
           .mockResolvedValueOnce({
             summaries: [{ name: 'view-c', type: 'query', description: '' }],
           }),
-      } as unknown as jest.Mocked<StreamsRepositoryClient>;
+      } as unknown as Mocked<StreamsRepositoryClient>;
       const { enrichViews } = createStreamsEnrichment(client, makeApplication());
 
       const promise1 = enrichViews([makeView('view-a'), makeView('view-b')]);

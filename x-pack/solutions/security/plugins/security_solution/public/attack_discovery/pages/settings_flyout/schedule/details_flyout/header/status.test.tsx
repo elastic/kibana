@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 
@@ -20,7 +22,7 @@ const renderComponent = async (schedule = mockAttackDiscoverySchedule) => {
 
 describe('Status', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not render component if schedule does not has last execution set', async () => {

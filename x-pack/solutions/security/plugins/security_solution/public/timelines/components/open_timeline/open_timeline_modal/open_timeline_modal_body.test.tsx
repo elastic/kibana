@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -18,26 +20,26 @@ import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
 import { TestProvidersComponent } from '../../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('OpenTimelineModal', () => {
   const title = 'All Timelines / Open Timelines';
   let mockResults: OpenTimelineResult[];
 
   const getDefaultTestProps = (mockSearchResults: OpenTimelineResult[]): OpenTimelineProps => ({
-    deleteTimelines: jest.fn(),
+    deleteTimelines: vi.fn(),
     defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
     isLoading: false,
     itemIdToExpandedNotesRowMap: {},
-    onAddTimelinesToFavorites: jest.fn(),
-    onDeleteSelected: jest.fn(),
+    onAddTimelinesToFavorites: vi.fn(),
+    onDeleteSelected: vi.fn(),
     onlyFavorites: false,
-    onOpenTimeline: jest.fn(),
-    onQueryChange: jest.fn(),
-    onSelectionChange: jest.fn(),
-    onTableChange: jest.fn(),
-    onToggleOnlyFavorites: jest.fn(),
-    onToggleShowNotes: jest.fn(),
+    onOpenTimeline: vi.fn(),
+    onQueryChange: vi.fn(),
+    onSelectionChange: vi.fn(),
+    onTableChange: vi.fn(),
+    onToggleOnlyFavorites: vi.fn(),
+    onToggleShowNotes: vi.fn(),
     pageIndex: 0,
     pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
     query: '',
@@ -94,8 +96,8 @@ describe('OpenTimelineModal', () => {
   test('it shows the delete action when onDeleteSelected and deleteTimelines are specified', () => {
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      onDeleteSelected: jest.fn(),
-      deleteTimelines: jest.fn(),
+      onDeleteSelected: vi.fn(),
+      deleteTimelines: vi.fn(),
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>

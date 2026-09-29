@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import { fieldsMetadataPluginServerMock } from '@kbn/fields-metadata-plugin/server/mocks';
 import { generateFieldMappings, mergeSamples } from './fields';
@@ -24,10 +27,10 @@ const KNOWN_ECS_FIELDS: Record<string, { name: string; type: string; source: str
   'url.path': { name: 'url.path', type: 'wildcard', source: 'ecs' },
 };
 
-const createMockFieldsMetadataClient = (): jest.Mocked<IFieldsMetadataClient> => {
-  const mock: jest.Mocked<IFieldsMetadataClient> = {
+const createMockFieldsMetadataClient = (): Mocked<IFieldsMetadataClient> => {
+  const mock: Mocked<IFieldsMetadataClient> = {
     ...fieldsMetadataPluginServerMock.createFieldsMetadataClientMock(),
-    find: jest.fn().mockImplementation(({ fieldNames, source }) => {
+    find: vi.fn().mockImplementation(({ fieldNames, source }) => {
       const matchedFields: Record<string, { name: string; type: string; source: string }> = {};
       if (source?.includes('ecs') && fieldNames) {
         for (const name of fieldNames) {
@@ -43,7 +46,7 @@ const createMockFieldsMetadataClient = (): jest.Mocked<IFieldsMetadataClient> =>
 };
 
 describe('fields', () => {
-  let fieldsMetadataClient: jest.Mocked<IFieldsMetadataClient>;
+  let fieldsMetadataClient: Mocked<IFieldsMetadataClient>;
 
   beforeEach(() => {
     fieldsMetadataClient = createMockFieldsMetadataClient();

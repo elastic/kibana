@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { XmattersSeverityOptions } from '../types';
@@ -12,12 +14,12 @@ import XmattersParamsFields from './xmatters_params';
 
 describe('XmattersParamsFields renders', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-01-01T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-01-01T12:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('all params fields is rendered', () => {
@@ -60,7 +62,7 @@ describe('XmattersParamsFields renders', () => {
 
   test('default params for testing', () => {
     const actionParams = {};
-    const editAction = jest.fn();
+    const editAction = vi.fn();
 
     render(
       <XmattersParamsFields

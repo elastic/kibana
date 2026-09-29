@@ -5,34 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { renderHook } from '@testing-library/react';
 
 import { useCancelAddPackagePolicy } from './navigation';
 
-const mockNavigateToApp = jest.fn();
-const mockGetUrlForApp = jest.fn(
+const mockNavigateToApp = vi.fn();
+const mockGetUrlForApp = vi.fn(
   (appId: string, opts?: { path?: string }) =>
     `http://localhost:5620/app/${appId}${opts?.path ?? ''}`
 );
-const mockGetHref = jest.fn((page: string, params?: Record<string, string>) => {
+const mockGetHref = vi.fn((page: string, params?: Record<string, string>) => {
   if (page === 'integration_details_overview') return `/detail/${params?.pkgkey}/overview`;
   if (page === 'policy_details') return `/fleet/policies/${params?.policyId}`;
   if (page === 'integrations_installed') return '/installed';
   return page;
 });
 
-jest.mock('../../../../hooks', () => ({
-  useStartServices: jest.fn(() => ({
-    application: {
-      navigateToApp: mockNavigateToApp,
-      getUrlForApp: mockGetUrlForApp,
-    },
-  })),
-  useLink: jest.fn(() => ({ getHref: mockGetHref })),
-  useIntraAppState: jest.fn(() => undefined),
-}));
+vi.mock('../../../../hooks', () => {
+      const mocked = {
+      useStartServices: vi.fn(() => ({
+        application: {
+          navigateToApp: mockNavigateToApp,
+          getUrlForApp: mockGetUrlForApp,
+        },
+      })),
+      useLink: vi.fn(() => ({ getHref: mockGetHref })),
+      useIntraAppState: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithSearch = (search: string) =>
   renderHook(
@@ -53,7 +58,7 @@ const renderWithSearch = (search: string) =>
 
 describe('useCancelAddPackagePolicy', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('cancelUrl', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   mockReadFileSync,
   mockReadPkcs12Keystore,
@@ -32,10 +34,10 @@ describe('#SslConfig', () => {
   });
 
   describe('throws when config is invalid', () => {
-    beforeEach(() => {
-      const realFs = jest.requireActual('fs');
+    beforeEach(async () => {
+      const realFs = require('fs');
       mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
-      const utils = jest.requireActual('@kbn/crypto');
+      const utils = (await vi.importActual('@kbn/crypto'));
       mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
         utils.readPkcs12Keystore(path, password)
       );

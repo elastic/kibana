@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -26,8 +28,8 @@ const renderItem = (props: Partial<React.ComponentProps<typeof ComponentTemplate
     <I18nProvider>
       <ComponentTemplatesListItem
         component={baseComponent}
-        onViewDetail={jest.fn()}
-        actions={[{ label: 'Select', icon: 'plusCircle', handler: jest.fn() }]}
+        onViewDetail={vi.fn()}
+        actions={[{ label: 'Select', icon: 'plusCircle', handler: vi.fn() }]}
         {...props}
       />
     </I18nProvider>
@@ -40,7 +42,7 @@ describe('ComponentTemplatesListItem', () => {
   });
 
   it('gives a disabled look (no + button, non-clickable name, tooltip) when the template has a frozen/delete phase and the index template does not create a data stream', () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     renderItem({
       component: {
         ...baseComponent,

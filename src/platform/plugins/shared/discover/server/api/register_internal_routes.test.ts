@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
@@ -90,17 +93,17 @@ describe('registerInternalRoutes', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let core: ReturnType<typeof coreMock.createRequestHandlerContext>;
   let context: RequestHandlerContext;
-  let trackUserAction: jest.Mock;
+  let trackUserAction: Mock;
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
-    trackUserAction = jest.fn();
+    trackUserAction = vi.fn();
     const userActivity: CoreSetup['userActivity'] = { trackUserAction };
     registerInternalRoutes(router.versioned, userActivity, loggingSystemMock.createLogger());
 
     core = coreMock.createRequestHandlerContext();
     context = {
-      resolve: jest.fn().mockResolvedValue({ core }),
+      resolve: vi.fn().mockResolvedValue({ core }),
     } as unknown as RequestHandlerContext;
   });
 

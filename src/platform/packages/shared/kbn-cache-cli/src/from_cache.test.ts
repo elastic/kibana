@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fromCache } from './from_cache';
 import type { Cache } from 'cache-manager';
 
 function createMockCache(): { store: Map<string, unknown>; cache: Cache } {
   const backing = new Map<string, unknown>();
   const cache = {
-    get: jest.fn(async (key: string) => backing.get(key)),
-    set: jest.fn(async (key: string, value: unknown) => {
+    get: vi.fn(async (key: string) => backing.get(key)),
+    set: vi.fn(async (key: string, value: unknown) => {
       backing.set(key, value);
     }),
   } as Partial<Cache>;
@@ -26,7 +28,7 @@ describe('fromCache', () => {
   const NEW_VAL = 'fresh-value';
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delete process.env.DISABLE_KBN_CLI_CACHE;
   });
 
@@ -34,7 +36,7 @@ describe('fromCache', () => {
     const { cache, store } = createMockCache();
     store.set(KEY, 'cached-value');
 
-    const cb = jest.fn().mockResolvedValue(NEW_VAL);
+    const cb = vi.fn().mockResolvedValue(NEW_VAL);
     const result = await fromCache(KEY, cache, cb);
 
     expect(result).toBe('cached-value');
@@ -47,7 +49,7 @@ describe('fromCache', () => {
   it('bypasses cache when DISABLE_KBN_CACHE env var is set', async () => {
     process.env.DISABLE_KBN_CLI_CACHE = 'true';
     const { cache } = createMockCache();
-    const cb = jest.fn().mockResolvedValue(NEW_VAL);
+    const cb = vi.fn().mockResolvedValue(NEW_VAL);
 
     const result = await fromCache(KEY, cache, cb);
 
@@ -62,9 +64,9 @@ describe('fromCache', () => {
     const { cache, store } = createMockCache();
     store.set(KEY, 'stale');
 
-    const cb = jest.fn().mockResolvedValue(NEW_VAL);
+    const cb = vi.fn().mockResolvedValue(NEW_VAL);
 
-    const validator = jest.fn((val: string) => val === 'fresh-value');
+    const validator = vi.fn((val: string) => val === 'fresh-value');
 
     const result = await fromCache(KEY, cache, cb, validator);
 
@@ -76,7 +78,7 @@ describe('fromCache', () => {
 
   it('stores newly computed value in cache when no cached value exists', async () => {
     const { cache } = createMockCache();
-    const cb = jest.fn().mockResolvedValue(NEW_VAL);
+    const cb = vi.fn().mockResolvedValue(NEW_VAL);
 
     const result = await fromCache(KEY, cache, cb);
 

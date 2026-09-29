@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   copyColumn,
   insertNewColumn,
@@ -46,15 +49,18 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
 
 const dataMock = dataPluginMock.createStartContract();
-dataMock.query.timefilter.timefilter.getAbsoluteTime = jest
+dataMock.query.timefilter.timefilter.getAbsoluteTime = vi
   .fn()
   .mockReturnValue({ from: '2022-11-01T00:00:00.000Z', to: '2022-11-03T00:00:00.000Z' });
 
-jest.mock('.');
-jest.mock('../../../id_generator');
-jest.mock('../dimension_panel/reference_editor', () => ({
-  ReferenceEditor: () => null,
-}));
+vi.mock('.');
+vi.mock('../../../id_generator');
+vi.mock('../dimension_panel/reference_editor', () => {
+      const mocked = {
+      ReferenceEditor: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 const TARGET_BAR_COUNT = 100;
 
 const CoreStartMock = createCoreStartMock();
@@ -121,7 +127,7 @@ const indexPattern = {
 describe('state_helpers', () => {
   beforeEach(() => {
     let count = 0;
-    (generateId as jest.Mock).mockImplementation(() => `id${++count}`);
+    (generateId as Mock).mockImplementation(() => `id${++count}`);
 
     // @ts-expect-error we are inserting an invalid type
     operationDefinitionMap.testReference = createMockedFullReference();
@@ -1856,7 +1862,7 @@ describe('state_helpers', () => {
                 meta.dataType === 'number' && !meta.isBucketed,
             },
           ],
-          buildColumn: jest.fn((args) => {
+          buildColumn: vi.fn((args) => {
             return {
               label: 'Test reference',
               isBucketed: false,
@@ -1866,12 +1872,12 @@ describe('state_helpers', () => {
               references: args.referenceIds,
             };
           }),
-          isTransferable: jest.fn(),
-          toExpression: jest.fn().mockReturnValue([]),
-          getPossibleOperation: jest
+          isTransferable: vi.fn(),
+          toExpression: vi.fn().mockReturnValue([]),
+          getPossibleOperation: vi
             .fn()
             .mockReturnValue({ dataType: 'number', isBucketed: false }),
-          getDefaultLabel: jest.fn().mockReturnValue('Test reference'),
+          getDefaultLabel: vi.fn().mockReturnValue('Test reference'),
         };
       });
 
@@ -3108,7 +3114,7 @@ describe('state_helpers', () => {
 
   describe('getErrorMessages', () => {
     it('should collect errors from metric-type operation definitions', () => {
-      const mock = jest.fn().mockReturnValue(['error 1']);
+      const mock = vi.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.average.getErrorMessage = mock;
       const errors = getErrorMessages(
         {
@@ -3130,7 +3136,7 @@ describe('state_helpers', () => {
     });
 
     it('should collect errors from reference-type operation definitions', () => {
-      const mock = jest.fn().mockReturnValue(['error 1']);
+      const mock = vi.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.testReference.getErrorMessage = mock;
       const errors = getErrorMessages(
         {
@@ -3157,8 +3163,8 @@ describe('state_helpers', () => {
     });
 
     it('should only collect the top level errors from managed references', () => {
-      const notCalledMock = jest.fn();
-      const mock = jest.fn().mockReturnValue(['error 1']);
+      const notCalledMock = vi.fn();
+      const mock = vi.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.testReference.getErrorMessage = notCalledMock;
       operationDefinitionMap.managedReference.getErrorMessage = mock;
       const errors = getErrorMessages(
@@ -3194,8 +3200,8 @@ describe('state_helpers', () => {
     });
 
     it('should ignore incompleteColumns when checking for errors', () => {
-      const savedRef = jest.fn().mockReturnValue(['error 1']);
-      const incompleteRef = jest.fn();
+      const savedRef = vi.fn().mockReturnValue(['error 1']);
+      const incompleteRef = vi.fn();
       operationDefinitionMap.testReference.getErrorMessage = savedRef;
       // @ts-expect-error invalid type, just need a single function on it
       operationDefinitionMap.testIncompleteReference = {
@@ -3233,7 +3239,7 @@ describe('state_helpers', () => {
     });
 
     it('should forward the indexpattern when available', () => {
-      const mock = jest.fn();
+      const mock = vi.fn();
       operationDefinitionMap.testReference.getErrorMessage = mock;
       getErrorMessages(
         {

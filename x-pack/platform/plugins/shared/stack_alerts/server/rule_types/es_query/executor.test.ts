@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import type { CoreSetup } from '@kbn/core/server';
 import { executor, getValidTimefieldSort, tryToParseAsDate } from './executor';
@@ -24,38 +26,47 @@ const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
 const createSearchSourceClientMock = () => {
   const searchSourceMock = createSearchSourceMock();
-  searchSourceMock.fetch$ = jest.fn().mockImplementation(() => of({ rawResponse: { took: 5 } }));
+  searchSourceMock.fetch$ = vi.fn().mockImplementation(() => of({ rawResponse: { took: 5 } }));
 
   return {
     searchSourceMock,
     searchSourceClientMock: {
-      create: jest.fn().mockReturnValue(searchSourceMock),
-      createEmpty: jest.fn().mockReturnValue(searchSourceMock),
+      create: vi.fn().mockReturnValue(searchSourceMock),
+      createEmpty: vi.fn().mockReturnValue(searchSourceMock),
     } as unknown as ISearchStartSearchSource,
   };
 };
 
 const { searchSourceClientMock } = createSearchSourceClientMock();
 
-const mockFetchEsQuery = jest.fn();
-jest.mock('./lib/fetch_es_query', () => ({
-  fetchEsQuery: (...args: [FetchEsQueryOpts]) => mockFetchEsQuery(...args),
-}));
-const mockFetchSearchSourceQuery = jest.fn();
-jest.mock('./lib/fetch_search_source_query', () => ({
-  fetchSearchSourceQuery: (...args: [FetchSearchSourceQueryOpts]) =>
-    mockFetchSearchSourceQuery(...args),
-}));
-const mockFetchEsqlQuery = jest.fn();
-jest.mock('./lib/fetch_esql_query', () => ({
-  fetchEsqlQuery: (...args: [FetchEsqlQueryOpts]) => mockFetchEsqlQuery(...args),
-}));
+const mockFetchEsQuery = vi.fn();
+vi.mock('./lib/fetch_es_query', () => {
+      const mocked = {
+      fetchEsQuery: (...args: [FetchEsQueryOpts]) => mockFetchEsQuery(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockFetchSearchSourceQuery = vi.fn();
+vi.mock('./lib/fetch_search_source_query', () => {
+      const mocked = {
+      fetchSearchSourceQuery: (...args: [FetchSearchSourceQueryOpts]) =>
+        mockFetchSearchSourceQuery(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockFetchEsqlQuery = vi.fn();
+vi.mock('./lib/fetch_esql_query', () => {
+      const mocked = {
+      fetchEsqlQuery: (...args: [FetchEsqlQueryOpts]) => mockFetchEsqlQuery(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRecoveredAlerts = jest.fn().mockReturnValue([]);
-const mockSetLimitReached = jest.fn();
-const mockReport = jest.fn();
-const mockSetAlertData = jest.fn();
-const mockGetAlertLimitValue = jest.fn().mockReturnValue(1000);
+const mockGetRecoveredAlerts = vi.fn().mockReturnValue([]);
+const mockSetLimitReached = vi.fn();
+const mockReport = vi.fn();
+const mockSetAlertData = vi.fn();
+const mockGetAlertLimitValue = vi.fn().mockReturnValue(1000);
 
 const mockAlertClient = {
   report: mockReport,
@@ -65,18 +76,18 @@ const mockAlertClient = {
   setAlertData: mockSetAlertData,
 };
 
-const mockNow = jest.getRealSystemTime();
+const mockNow = vi.getRealSystemTime();
 
 describe('es_query executor', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockNow);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockNow);
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const defaultProps = {
@@ -102,12 +113,12 @@ describe('es_query executor', () => {
       savedObjectsClient: {
         get: () => ({ attributes: { consumer: 'alerts' } }),
       },
-      getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
+      getSearchSourceClient: vi.fn().mockResolvedValue(searchSourceClientMock),
       alertsClient: mockAlertClient,
-      alertWithLifecycle: jest.fn(),
+      alertWithLifecycle: vi.fn(),
       logger,
       shouldWriteAlerts: () => true,
-      getDataViews: jest.fn(),
+      getDataViews: vi.fn(),
     };
     const coreMock = {
       http: { basePath: { publicBaseUrl: 'https://localhost:5601' } },

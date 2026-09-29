@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { PersistedLog } from './persisted_log';
 
 const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
+  clear: vi.fn(),
+  getItem: vi.fn(),
+  key: vi.fn(),
+  removeItem: vi.fn(),
+  setItem: vi.fn(),
   length: 0,
 });
 
 const createMockStorage = () => ({
   store: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 });
 
 const historyName = 'testHistory';
@@ -131,12 +134,12 @@ describe('PersistedLog', () => {
   });
 
   describe('browser tab synchronization', () => {
-    let addEventListenerSpy: jest.SpyInstance;
-    let removeEventListenerSpy: jest.SpyInstance;
+    let addEventListenerSpy: MockInstance;
+    let removeEventListenerSpy: MockInstance;
 
     beforeEach(() => {
-      addEventListenerSpy = jest.spyOn(window, 'addEventListener');
-      removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+      addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+      removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
     });
 
     afterEach(() => {
@@ -183,32 +186,36 @@ describe('PersistedLog', () => {
       subscription.unsubscribe();
     });
 
-    test('should update items when storage event is received', (done) => {
-      storage.get.mockReturnValue(payload.slice(0));
-      const log = new PersistedLog(historyName, { enableBrowserTabsSync: true }, storage);
+    test('should update items when storage event is received', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      const newItem = { animal: 'capybara' };
-      const updatedPayload = [newItem, ...payload];
+              storage.get.mockReturnValue(payload.slice(0));
+              const log = new PersistedLog(historyName, { enableBrowserTabsSync: true }, storage);
 
-      // Subscribe to changes
-      const subscription = log.get$().subscribe((items: any) => {
-        if (items.length === updatedPayload.length) {
-          expect(items).toEqual(updatedPayload);
-          subscription.unsubscribe();
-          done();
-        }
-      });
+              const newItem = { animal: 'capybara' };
+              const updatedPayload = [newItem, ...payload];
 
-      // Simulate storage event from another tab
-      const storageEvent = new StorageEvent('storage', {
-        key: historyName,
-        newValue: JSON.stringify(updatedPayload),
-        oldValue: JSON.stringify(payload),
-        storageArea: window.localStorage,
-        url: window.location.href,
-      });
+              // Subscribe to changes
+              const subscription = log.get$().subscribe((items: any) => {
+                if (items.length === updatedPayload.length) {
+                  expect(items).toEqual(updatedPayload);
+                  subscription.unsubscribe();
+                  done();
+                }
+              });
 
-      window.dispatchEvent(storageEvent);
-    });
+              // Simulate storage event from another tab
+              const storageEvent = new StorageEvent('storage', {
+                key: historyName,
+                newValue: JSON.stringify(updatedPayload),
+                oldValue: JSON.stringify(payload),
+                storageArea: window.localStorage,
+                url: window.location.href,
+              });
+
+              window.dispatchEvent(storageEvent);
+            
+        }));
   });
 });

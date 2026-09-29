@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import * as redux from 'react-redux-v7';
@@ -20,27 +22,27 @@ import { useOverviewStatus } from './use_overview_status';
 
 const refreshState = { lastRefresh: 1 };
 
-jest.mock('../../../contexts/synthetics_refresh_context', () => {
-  const actual = jest.requireActual('../../../contexts/synthetics_refresh_context');
+vi.mock('../../../contexts/synthetics_refresh_context', async () => {
+  const actual = (await vi.importActual('../../../contexts/synthetics_refresh_context'));
   return {
     ...actual,
     useSyntheticsRefreshContext: () => ({
       lastRefresh: refreshState.lastRefresh,
-      refreshApp: jest.fn(),
+      refreshApp: vi.fn(),
       refreshInterval: 60,
       refreshPaused: false,
-      setRefreshInterval: jest.fn(),
-      setRefreshPaused: jest.fn(),
+      setRefreshInterval: vi.fn(),
+      setRefreshPaused: vi.fn(),
     }),
   };
 });
 
 describe('useOverviewStatus', () => {
-  const dispatchMockFn = jest.fn();
+  const dispatchMockFn = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(dispatchMockFn);
+    vi.resetAllMocks();
+    vi.spyOn(redux, 'useDispatch').mockReturnValue(dispatchMockFn);
   });
 
   describe('initial mount fetch', () => {

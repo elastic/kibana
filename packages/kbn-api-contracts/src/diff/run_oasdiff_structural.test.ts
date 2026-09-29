@@ -7,20 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { existsSync } from 'node:fs';
 import { execFileSync } from 'child_process';
 import { runOasdiffStructural } from './run_oasdiff_structural';
 
-jest.mock('node:fs', () => ({
-  existsSync: jest.fn(),
-}));
+vi.mock('node:fs', () => {
+      const mocked = {
+      existsSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('child_process', () => ({
-  execFileSync: jest.fn(),
-}));
+vi.mock('child_process', () => {
+      const mocked = {
+      execFileSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
-const mockExecFileSync = execFileSync as jest.MockedFunction<typeof execFileSync>;
+const mockExistsSync = existsSync as MockedFunction<typeof existsSync>;
+const mockExecFileSync = execFileSync as MockedFunction<typeof execFileSync>;
 
 const sampleDiff = {
   paths: {
@@ -53,7 +62,7 @@ describe('runOasdiffStructural', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('throws when basePath is not absolute', () => {

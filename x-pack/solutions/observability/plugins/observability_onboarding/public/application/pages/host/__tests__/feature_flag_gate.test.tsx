@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -18,66 +21,105 @@ const LocationProbe: React.FC = () => {
   return <div data-test-subj="locationProbe">{pathname}</div>;
 };
 
-jest.mock('../../landing', () => ({
-  LandingPage: () => <div data-test-subj="landingPageStub" />,
-}));
+vi.mock('../../landing', () => {
+      const mocked = {
+      LandingPage: () => <div data-test-subj="landingPageStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../linux_otel_page', () => ({
-  HostLinuxOtelPage: () => <div data-test-subj="hostLinuxOtelPageStub" />,
-}));
+vi.mock('../linux_otel_page', () => {
+      const mocked = {
+      HostLinuxOtelPage: () => <div data-test-subj="hostLinuxOtelPageStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../linux_auto_detect_page', () => ({
-  HostLinuxAutoDetectPage: () => <div data-test-subj="hostLinuxAutoDetectPageStub" />,
-}));
+vi.mock('../linux_auto_detect_page', () => {
+      const mocked = {
+      HostLinuxAutoDetectPage: () => <div data-test-subj="hostLinuxAutoDetectPageStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../macos_otel_page', () => ({
-  HostMacosOtelPage: () => <div data-test-subj="hostMacosOtelPageStub" />,
-}));
+vi.mock('../macos_otel_page', () => {
+      const mocked = {
+      HostMacosOtelPage: () => <div data-test-subj="hostMacosOtelPageStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../macos_auto_detect_page', () => ({
-  HostMacosAutoDetectPage: () => <div data-test-subj="hostMacosAutoDetectPageStub" />,
-}));
+vi.mock('../macos_auto_detect_page', () => {
+      const mocked = {
+      HostMacosAutoDetectPage: () => <div data-test-subj="hostMacosAutoDetectPageStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../windows_otel_page', () => ({
-  HostWindowsOtelPage: () => <div data-test-subj="hostWindowsOtelPageStub" />,
-}));
+vi.mock('../windows_otel_page', () => {
+      const mocked = {
+      HostWindowsOtelPage: () => <div data-test-subj="hostWindowsOtelPageStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../auto_detect', () => ({
-  AutoDetectPage: () => null,
-}));
+vi.mock('../../auto_detect', () => {
+      const mocked = {
+      AutoDetectPage: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../otel_logs', () => ({
-  OtelLogsPage: () => null,
-}));
+vi.mock('../../otel_logs', () => {
+      const mocked = {
+      OtelLogsPage: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../firehose', () => ({
-  FirehosePage: () => null,
-}));
+vi.mock('../../firehose', () => {
+      const mocked = {
+      FirehosePage: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../otel_apm', () => ({
-  OtelApmPage: () => null,
-}));
+vi.mock('../../otel_apm', () => {
+      const mocked = {
+      OtelApmPage: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cloudforwarder', () => ({
-  CloudForwarderPage: () => null,
-}));
+vi.mock('../../cloudforwarder', () => {
+      const mocked = {
+      CloudForwarderPage: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
-  useFlowBreadcrumb: jest.fn(),
-}));
+vi.mock('../../../shared/use_flow_breadcrumbs', () => {
+      const mocked = {
+      useFlowBreadcrumb: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/use_managed_otlp_service_availability', () => ({
-  useManagedOtlpServiceAvailability: () => false,
-}));
+vi.mock('../../../shared/use_managed_otlp_service_availability', () => {
+      const mocked = {
+      useManagedOtlpServiceAvailability: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeAll(() => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = vi.fn();
 });
 
 const renderFlow = (flagEnabled: boolean, path: string) => {
   const services = buildHostPageServices();
   const featureFlags = services.featureFlags as CoreStart['featureFlags'] & {
-    useBooleanValue: jest.Mock;
+    useBooleanValue: Mock;
   };
   featureFlags.useBooleanValue.mockImplementation((id: string, fallback: boolean) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? flagEnabled : fallback

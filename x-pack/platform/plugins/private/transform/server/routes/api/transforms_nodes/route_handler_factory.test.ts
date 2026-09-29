@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import type { License } from '../../../services';
@@ -123,9 +125,9 @@ describe('Transform: Nodes API endpoint', () => {
     const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
     const response = httpServerMock.createResponseFactory();
     const nodesInfo = coreContext.elasticsearch.client.asInternalUser.nodes
-      .info as unknown as jest.Mock;
+      .info as unknown as Mock;
     const clusterInfo = coreContext.elasticsearch.client.asInternalUser
-      .info as unknown as jest.Mock;
+      .info as unknown as Mock;
 
     nodesInfo.mockResolvedValue({
       nodes: {

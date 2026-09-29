@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import axios from 'axios';
 
 import { createExternalService } from './service';
@@ -15,7 +18,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 interface ResponseError extends Error {
   response?: {
@@ -24,17 +27,17 @@ interface ResponseError extends Error {
   };
 }
 
-jest.mock('axios', () => jest.requireActual<typeof import('axios')>('axios'));
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios', () => (require('axios') as typeof import('axios')));
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
+    request: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
-const requestMock = request as jest.Mock;
+axios.create = vi.fn(() => axios);
+const requestMock = request as Mock;
 const configurationUtilities = actionsConfigMock.create();
 
 const issueTypesResponse = createAxiosResponse({
@@ -83,7 +86,7 @@ describe('Jira service', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createExternalService', () => {
@@ -1182,7 +1185,7 @@ describe('Jira service', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     test('it should call request with correct arguments', async () => {

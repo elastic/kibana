@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getImportRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleImportResponseActions } from '../../../../../../endpoint/services';
@@ -27,35 +30,41 @@ import {
 } from '../../../utils/utils';
 import { importRulesRoute } from './route';
 
-jest.mock('../../../../../../endpoint/services', () => ({
-  validateRuleImportResponseActions: jest.fn(),
-}));
-jest.mock('../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client', () => ({
-  createPrebuiltRuleAssetsClient: jest.fn(() => 'assets-client'),
-}));
-jest.mock('../../../../prebuilt_rules/logic/integrations/ensure_latest_rules_package_installed');
-jest.mock('../../../logic/import/action_connectors/import_rule_action_connectors');
-jest.mock('../../../logic/import/action_connectors/validate_rule_actions');
-jest.mock('../../../logic/import/create_promise_from_rule_import_stream');
-jest.mock('../../../logic/import/import_rule_exceptions');
-jest.mock('../../../utils/utils');
+vi.mock('../../../../../../endpoint/services', () => {
+      const mocked = {
+      validateRuleImportResponseActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client', () => {
+      const mocked = {
+      createPrebuiltRuleAssetsClient: vi.fn(() => 'assets-client'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../prebuilt_rules/logic/integrations/ensure_latest_rules_package_installed');
+vi.mock('../../../logic/import/action_connectors/import_rule_action_connectors');
+vi.mock('../../../logic/import/action_connectors/validate_rule_actions');
+vi.mock('../../../logic/import/create_promise_from_rule_import_stream');
+vi.mock('../../../logic/import/import_rule_exceptions');
+vi.mock('../../../utils/utils');
 
-const stream = createPromiseFromRuleImportStream as jest.MockedFunction<
+const stream = createPromiseFromRuleImportStream as MockedFunction<
   typeof createPromiseFromRuleImportStream
 >;
-const exceptions = importRuleExceptions as jest.MockedFunction<typeof importRuleExceptions>;
-const connectors = importRuleActionConnectors as jest.MockedFunction<
+const exceptions = importRuleExceptions as MockedFunction<typeof importRuleExceptions>;
+const connectors = importRuleActionConnectors as MockedFunction<
   typeof importRuleActionConnectors
 >;
-const dedupe = getTupleDuplicateErrorsAndUniqueRules as jest.MockedFunction<
+const dedupe = getTupleDuplicateErrorsAndUniqueRules as MockedFunction<
   typeof getTupleDuplicateErrorsAndUniqueRules
 >;
-const migrate = migrateLegacyActionsIds as jest.MockedFunction<typeof migrateLegacyActionsIds>;
-const packageInstall = ensureLatestRulesPackageInstalled as jest.MockedFunction<
+const migrate = migrateLegacyActionsIds as MockedFunction<typeof migrateLegacyActionsIds>;
+const packageInstall = ensureLatestRulesPackageInstalled as MockedFunction<
   typeof ensureLatestRulesPackageInstalled
 >;
-const actions = validateRuleActions as jest.MockedFunction<typeof validateRuleActions>;
-const responseActions = validateRuleImportResponseActions as jest.MockedFunction<
+const actions = validateRuleActions as MockedFunction<typeof validateRuleActions>;
+const responseActions = validateRuleImportResponseActions as MockedFunction<
   typeof validateRuleImportResponseActions
 >;
 const emptyConnectors = {
@@ -81,7 +90,7 @@ describe('Import rules route', () => {
     server.inject(request, requestContextMock.convertContext(context));
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     config = configMock.createDefault();

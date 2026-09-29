@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 
 import { getKnowledgeBaseStatus, postKnowledgeBase } from './api';
 import { API_VERSIONS } from '@kbn/spaces-plugin/common';
 
-jest.mock('@kbn/core-http-browser');
+vi.mock('@kbn/core-http-browser');
 
 const mockHttp = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 } as unknown as HttpSetup;
 
 describe('API tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (mockHttp.fetch as jest.Mock).mockImplementation(() => Promise.resolve({}));
+    vi.clearAllMocks();
+    (mockHttp.fetch as Mock).mockImplementation(() => Promise.resolve({}));
   });
 
   const knowledgeBaseArgs = {
@@ -41,7 +44,7 @@ describe('API tests', () => {
     });
     it('returns error when error is an error', async () => {
       const error = 'simulated error';
-      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
+      (mockHttp.fetch as Mock).mockImplementation(() => {
         throw new Error(error);
       });
 
@@ -64,7 +67,7 @@ describe('API tests', () => {
     });
     it('returns error when error is an error', async () => {
       const error = 'simulated error';
-      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
+      (mockHttp.fetch as Mock).mockImplementation(() => {
         throw new Error(error);
       });
 

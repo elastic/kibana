@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -20,19 +23,25 @@ import {
 } from '../../../shared/components/test_ids';
 import { useEntitiesOverview } from '../hooks/use_entities_overview';
 
-jest.mock('../hooks/use_entities_overview');
-jest.mock('./user_entity_overview', () => ({
-  UserEntityOverview: ({ userName }: { userName: string }) => (
-    <div data-test-subj="userEntityOverviewMock">{userName}</div>
-  ),
-}));
-jest.mock('./host_entity_overview', () => ({
-  HostEntityOverview: ({ hostName }: { hostName: string }) => (
-    <div data-test-subj="hostEntityOverviewMock">{hostName}</div>
-  ),
-}));
+vi.mock('../hooks/use_entities_overview');
+vi.mock('./user_entity_overview', () => {
+      const mocked = {
+      UserEntityOverview: ({ userName }: { userName: string }) => (
+        <div data-test-subj="userEntityOverviewMock">{userName}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./host_entity_overview', () => {
+      const mocked = {
+      HostEntityOverview: ({ hostName }: { hostName: string }) => (
+        <div data-test-subj="hostEntityOverviewMock">{hostName}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEntitiesOverview = useEntitiesOverview as jest.Mock;
+const mockUseEntitiesOverview = useEntitiesOverview as Mock;
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
@@ -69,14 +78,14 @@ describe('<EntitiesOverview />', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render wrapper component with link when onShowEntitiesDetails is provided', () => {
     const hit = buildHit({ host: { name: 'host-name' }, user: { name: 'user1' } });
     const { getByTestId, queryByTestId } = renderEntitiesOverview({
       hit,
-      onShowEntitiesDetails: jest.fn(),
+      onShowEntitiesDetails: vi.fn(),
     });
 
     expect(queryByTestId(TOGGLE_ICON_TEST_ID)).toBeNull();
@@ -100,7 +109,7 @@ describe('<EntitiesOverview />', () => {
     const { queryByTestId } = renderEntitiesOverview({
       hit,
       showIcon: false,
-      onShowEntitiesDetails: jest.fn(),
+      onShowEntitiesDetails: vi.fn(),
     });
     expect(queryByTestId(TITLE_ICON_TEST_ID)).toBeNull();
   });

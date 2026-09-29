@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -26,53 +29,59 @@ import { connectorTokenClientMock } from '../../../../lib/connector_token_client
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+    connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
       actual.connectorTypeIsDual(actionTypeId)
     ),
   };
 });
 
-jest.mock('../../../../data/connector', () => ({
-  getConnectorSo: jest.fn(),
-}));
+vi.mock('../../../../data/connector', () => {
+      const mocked = {
+      getConnectorSo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/connector_from_in_memory_connector', () => ({
-  connectorFromInMemoryConnector: jest.fn(),
-}));
+vi.mock('../../lib/connector_from_in_memory_connector', () => {
+      const mocked = {
+      connectorFromInMemoryConnector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getConnectorSoMock = getConnectorSo as jest.Mock;
-const connectorFromInMemoryConnectorMock = connectorFromInMemoryConnector as jest.Mock;
+const getConnectorSoMock = getConnectorSo as Mock;
+const connectorFromInMemoryConnectorMock = connectorFromInMemoryConnector as Mock;
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const authorization = actionsAuthorizationMock.create();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const actionExecutor = actionExecutorMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const bulkExecutionEnqueuer = jest.fn();
-const getEventLogClient = jest.fn();
-const getAxiosInstanceWithAuth = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
+const getEventLogClient = vi.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 
 const actionTypeRegistry: ActionTypeRegistry = {
-  get: jest.fn(),
-  isSystemActionType: jest.fn().mockReturnValue(false),
-  ensureActionTypeEnabled: jest.fn(),
-  isDeprecated: jest.fn().mockReturnValue(false),
-  getUtils: jest.fn().mockReturnValue({
-    isHostnameAllowed: jest.fn().mockReturnValue(true),
-    isUriAllowed: jest.fn().mockReturnValue(true),
-    getMicrosoftGraphApiUrl: jest.fn(),
-    getProxySettings: jest.fn(),
+  get: vi.fn(),
+  isSystemActionType: vi.fn().mockReturnValue(false),
+  ensureActionTypeEnabled: vi.fn(),
+  isDeprecated: vi.fn().mockReturnValue(false),
+  getUtils: vi.fn().mockReturnValue({
+    isHostnameAllowed: vi.fn().mockReturnValue(true),
+    isUriAllowed: vi.fn().mockReturnValue(true),
+    getMicrosoftGraphApiUrl: vi.fn(),
+    getProxySettings: vi.fn(),
   }),
 } as unknown as ActionTypeRegistry;
 
@@ -100,14 +109,14 @@ const mockContext: ActionsClientContext = {
 
 describe('get()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
-    (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(false);
-    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation((actionTypeId: string) =>
-      jest.requireActual('@kbn/connector-specs').connectorTypeHasInboundEvents(actionTypeId)
+    (actionTypeRegistry.isDeprecated as Mock).mockReturnValue(false);
+    (connectorTypeHasInboundEvents as Mock).mockImplementation(async (actionTypeId: string) =>
+      (await vi.importActual('@kbn/connector-specs')).connectorTypeHasInboundEvents(actionTypeId)
     );
-    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
-      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    (connectorTypeIsDual as Mock).mockImplementation(async (actionTypeId: string) =>
+      (await vi.importActual('@kbn/connector-specs')).connectorTypeIsDual(actionTypeId)
     );
   });
 
@@ -467,10 +476,10 @@ describe('get()', () => {
     });
 
     test('reports inbound events off for a dual connector without identity', async () => {
-      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (connectorTypeHasInboundEvents as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
-      (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (connectorTypeIsDual as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
       getConnectorSoMock.mockResolvedValueOnce({
@@ -496,10 +505,10 @@ describe('get()', () => {
     });
 
     test('reports inbound events on for a dual connector with identity', async () => {
-      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (connectorTypeHasInboundEvents as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
-      (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (connectorTypeIsDual as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
       getConnectorSoMock.mockResolvedValueOnce({
@@ -529,10 +538,10 @@ describe('get()', () => {
     });
 
     test('does not treat a visible apiKey as inbound enabled for dual connectors', async () => {
-      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (connectorTypeHasInboundEvents as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
-      (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (connectorTypeIsDual as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
       getConnectorSoMock.mockResolvedValueOnce({
@@ -657,7 +666,7 @@ describe('get()', () => {
         references: [],
       });
 
-      (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValueOnce(true);
+      (actionTypeRegistry.isDeprecated as Mock).mockReturnValueOnce(true);
 
       const result = await get({
         context: mockContext,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -15,7 +17,7 @@ import { appContextService } from '../../../app_context';
 import { makeManagedIndexPatternsGlobal } from './install';
 
 describe('Fleet index patterns', () => {
-  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSoClient: Mocked<SavedObjectsClientContract>;
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
 
   beforeEach(() => {

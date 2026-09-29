@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 
-jest.mock('../common/lib/kibana');
-jest.mock('../common/hooks/use_error_toast', () => ({
-  useErrorToast: () => jest.fn(),
-}));
+vi.mock('../common/lib/kibana');
+vi.mock('../common/hooks/use_error_toast', () => {
+      const mocked = {
+      useErrorToast: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -58,14 +64,14 @@ const MOCK_RESPONSE = {
 };
 
 describe('usePacks', () => {
-  let mockHttp: { get: jest.Mock };
-  let mockToasts: { addSuccess: jest.Mock; addError: jest.Mock; remove: jest.Mock };
+  let mockHttp: { get: Mock };
+  let mockToasts: { addSuccess: Mock; addError: Mock; remove: Mock };
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHttp = { get: jest.fn().mockResolvedValue(MOCK_RESPONSE) };
-    mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), remove: jest.fn() };
+    vi.clearAllMocks();
+    mockHttp = { get: vi.fn().mockResolvedValue(MOCK_RESPONSE) };
+    mockToasts = { addSuccess: vi.fn(), addError: vi.fn(), remove: vi.fn() };
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => null, warn: () => null, error: () => null },

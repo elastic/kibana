@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from './lib/kibana';
 import { usePackUsers, useSavedQueryUsers } from './use_saved_object_users';
 
-jest.mock('./lib/kibana');
+vi.mock('./lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -35,14 +38,14 @@ const MOCK_USERS_RESPONSE = {
 };
 
 describe('usePackUsers', () => {
-  let mockHttpGet: jest.Mock;
-  let mockBulkGet: jest.Mock;
+  let mockHttpGet: Mock;
+  let mockBulkGet: Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHttpGet = jest.fn().mockResolvedValue(MOCK_USERS_RESPONSE);
-    mockBulkGet = jest.fn().mockResolvedValue(MOCK_PROFILES);
+    vi.clearAllMocks();
+    mockHttpGet = vi.fn().mockResolvedValue(MOCK_USERS_RESPONSE);
+    mockBulkGet = vi.fn().mockResolvedValue(MOCK_PROFILES);
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => null, warn: () => null, error: () => null },
@@ -132,12 +135,12 @@ describe('usePackUsers', () => {
 });
 
 describe('useSavedQueryUsers', () => {
-  let mockHttpGet: jest.Mock;
+  let mockHttpGet: Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHttpGet = jest.fn().mockResolvedValue(MOCK_USERS_RESPONSE);
+    vi.clearAllMocks();
+    mockHttpGet = vi.fn().mockResolvedValue(MOCK_USERS_RESPONSE);
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => null, warn: () => null, error: () => null },
@@ -146,7 +149,7 @@ describe('useSavedQueryUsers', () => {
     useKibanaMock.mockReturnValue({
       services: {
         http: { get: mockHttpGet },
-        userProfile: { bulkGet: jest.fn().mockResolvedValue(MOCK_PROFILES) },
+        userProfile: { bulkGet: vi.fn().mockResolvedValue(MOCK_PROFILES) },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });

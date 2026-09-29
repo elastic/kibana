@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import {
@@ -23,7 +25,7 @@ import {
   ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS,
 } from '../../../rule_creation_ui/components/description_step/translations';
 
-jest.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({
+vi.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({
   isSavedQueryLoading: false,
   savedQueryBar: {
     saved_id: 'id',
@@ -36,7 +38,7 @@ jest.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({
   },
   savedQuery: undefined,
 });
-jest
+vi
   .spyOn(useUpsellingMessageMock, 'useUpsellingMessage')
   .mockReturnValue(
     'Alert suppression is configured but will not be applied due to insufficient licensing'
@@ -45,11 +47,11 @@ jest
 describe('RuleDefinitionSection', () => {
   describe('Alert Suppression', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('should display all suppression fields when the rule contains alert_suppression with all properties similar to a query rule', () => {
-      jest
+      vi
         .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
         .mockReturnValueOnce({ isSuppressionEnabled: true });
       const rule: Partial<RuleResponse> = {
@@ -74,7 +76,7 @@ describe('RuleDefinitionSection', () => {
       );
     });
     test('should display the suppression duration correctly when it runs per rule execution', () => {
-      jest
+      vi
         .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
         .mockReturnValueOnce({ isSuppressionEnabled: true });
       const rule: Partial<RuleResponse> = {
@@ -101,7 +103,7 @@ describe('RuleDefinitionSection', () => {
     });
 
     test('should render only AlertSuppressionTitle and SuppressAlertsDuration when rule type does not have group_by field like threshold', () => {
-      jest
+      vi
         .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
         .mockReturnValueOnce({ isSuppressionEnabled: true });
       const rule: Partial<RuleResponse> = {
@@ -130,7 +132,7 @@ describe('RuleDefinitionSection', () => {
         },
       };
 
-      jest
+      vi
         .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
         .mockReturnValueOnce({ isSuppressionEnabled: false });
 
@@ -146,7 +148,7 @@ describe('RuleDefinitionSection', () => {
     test('does not render suppression fields when alert_suppression property is not present in the rule', () => {
       const rule: Partial<RuleResponse> = {};
 
-      jest
+      vi
         .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
         .mockReturnValueOnce({ isSuppressionEnabled: true });
 

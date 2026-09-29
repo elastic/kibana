@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRules } from './rules';
 
 const http = httpServiceMock.createStartContract();
 
 describe('loadRules', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('should call find API with base parameters', async () => {
     const resolvedValue = {

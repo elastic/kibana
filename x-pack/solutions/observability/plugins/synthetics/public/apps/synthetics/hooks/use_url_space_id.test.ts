@@ -5,27 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
 import { useGetUrlParams } from './use_url_params';
 import { useUrlSpaceId } from './use_url_space_id';
 
-jest.mock('../../../hooks/use_kibana_space', () => ({
-  useKibanaSpace: jest.fn(),
-}));
+vi.mock('../../../hooks/use_kibana_space', () => {
+      const mocked = {
+      useKibanaSpace: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_url_params', () => ({
-  useGetUrlParams: jest.fn(),
-}));
+vi.mock('./use_url_params', () => {
+      const mocked = {
+      useGetUrlParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUrlSpaceId', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the spaceId when it differs from the active space', () => {
-    (useKibanaSpace as jest.Mock).mockReturnValue({ space: { id: 'default' } });
-    (useGetUrlParams as jest.Mock).mockReturnValue({ spaceId: 'team-a' });
+    (useKibanaSpace as Mock).mockReturnValue({ space: { id: 'default' } });
+    (useGetUrlParams as Mock).mockReturnValue({ spaceId: 'team-a' });
 
     const { result } = renderHook(() => useUrlSpaceId());
 
@@ -33,8 +42,8 @@ describe('useUrlSpaceId', () => {
   });
 
   it('returns undefined when spaceId matches the active space', () => {
-    (useKibanaSpace as jest.Mock).mockReturnValue({ space: { id: 'team-a' } });
-    (useGetUrlParams as jest.Mock).mockReturnValue({ spaceId: 'team-a' });
+    (useKibanaSpace as Mock).mockReturnValue({ space: { id: 'team-a' } });
+    (useGetUrlParams as Mock).mockReturnValue({ spaceId: 'team-a' });
 
     const { result } = renderHook(() => useUrlSpaceId());
 
@@ -42,8 +51,8 @@ describe('useUrlSpaceId', () => {
   });
 
   it('returns undefined when spaceId is missing from the URL', () => {
-    (useKibanaSpace as jest.Mock).mockReturnValue({ space: { id: 'default' } });
-    (useGetUrlParams as jest.Mock).mockReturnValue({});
+    (useKibanaSpace as Mock).mockReturnValue({ space: { id: 'default' } });
+    (useGetUrlParams as Mock).mockReturnValue({});
 
     const { result } = renderHook(() => useUrlSpaceId());
 
@@ -51,8 +60,8 @@ describe('useUrlSpaceId', () => {
   });
 
   it('returns the spaceId when the active space is not yet resolved', () => {
-    (useKibanaSpace as jest.Mock).mockReturnValue({ space: undefined });
-    (useGetUrlParams as jest.Mock).mockReturnValue({ spaceId: 'team-a' });
+    (useKibanaSpace as Mock).mockReturnValue({ space: undefined });
+    (useGetUrlParams as Mock).mockReturnValue({ spaceId: 'team-a' });
 
     const { result } = renderHook(() => useUrlSpaceId());
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { searchResponse } from './fixtures/search_response';
@@ -17,7 +19,7 @@ describe('ProfileTree', () => {
       onHighlight: () => {},
       target: 'searches',
       data: searchResponse,
-      onDataInitError: jest.fn(),
+      onDataInitError: vi.fn(),
     };
 
     render(<ProfileTree {...props} />);
@@ -37,7 +39,7 @@ describe('ProfileTree', () => {
     const props: Props = {
       onHighlight: () => {},
       target: 'searches',
-      onDataInitError: jest.fn(),
+      onDataInitError: vi.fn(),
       // Intentionally invalid runtime data to validate error handling.
       data: [{}] as unknown as Props['data'],
     };

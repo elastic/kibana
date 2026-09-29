@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -58,7 +60,7 @@ describe('ThreatAttachmentInlineContent', () => {
   });
 
   it('renders the empty state when the payload has no report_id', () => {
-    const http = { fetch: jest.fn() } as unknown as HttpStart;
+    const http = { fetch: vi.fn() } as unknown as HttpStart;
     const attachment = buildAttachment({} as ThreatAttachment['data']);
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
     expect(screen.getByTestId(THREAT_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
@@ -69,7 +71,7 @@ describe('ThreatAttachmentInlineContent', () => {
     // not invalidate the reference: `report_id` is usable, so the live fetch has to run rather
     // than the card reporting no reference at all.
     const http = {
-      fetch: jest.fn().mockResolvedValue({ reportId: 'r-1', content: { title: 'Live Title' } }),
+      fetch: vi.fn().mockResolvedValue({ reportId: 'r-1', content: { title: 'Live Title' } }),
     } as unknown as HttpStart;
     const attachment = buildAttachment({
       report_id: 'r-1',
@@ -88,7 +90,7 @@ describe('ThreatAttachmentInlineContent', () => {
     // The reference is valid, the fetch fails, and the captured fields are unusable: the card
     // reports the report as unavailable rather than handing React a non-child.
     const http = {
-      fetch: jest.fn().mockRejectedValue(new Error('404')),
+      fetch: vi.fn().mockRejectedValue(new Error('404')),
     } as unknown as HttpStart;
     const attachment = buildAttachment({
       report_id: 'r-1',
@@ -106,7 +108,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('renders a Rank stat from the live severity score once the fetch resolves', async () => {
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-1',
         content: { title: 'Live Title' },
         severity: { level: 'high' },
@@ -126,7 +128,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('renders enriched fields (iocs, ttps, diamond, evidence) when the live report has them', async () => {
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-2',
         content: { title: 'Enriched Title' },
         severity: { level: 'high' },
@@ -187,7 +189,7 @@ describe('ThreatAttachmentInlineContent', () => {
     // through, so array fields can arrive as non-arrays. A 200 with a malformed shape must
     // degrade to "nothing to show" for those sections, not throw in a `.filter`/`.map`.
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-malformed',
         content: { title: 'Malformed Title', external_references: { not: 'an array' } },
         severity: { level: 'high' },
@@ -220,7 +222,7 @@ describe('ThreatAttachmentInlineContent', () => {
     // so `[null]` throws at `ref.url` / `ioc.type`, and an object where a string is expected
     // reaches React as a non-child. Valid siblings must survive the bad members.
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-members',
         content: {
           title: 'Mixed Title',
@@ -267,7 +269,7 @@ describe('ThreatAttachmentInlineContent', () => {
     // is expected reaches React as a non-child, and `signal.toLowerCase()` throws outright, so
     // one bad scalar could take down a report whose other sections are perfectly usable.
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-scalars',
         content: { title: { bad: 'object' } },
         severity: { level: ['high'] },
@@ -317,7 +319,7 @@ describe('ThreatAttachmentInlineContent', () => {
     // enriched looks exactly like this. Every live section renders as null, so treating the
     // fetch as a success would leave an empty panel where the captured fields should be.
     const http = {
-      fetch: jest.fn().mockResolvedValue({ reportId: 'r-sparse' }),
+      fetch: vi.fn().mockResolvedValue({ reportId: 'r-sparse' }),
     } as unknown as HttpStart;
     const attachment = buildAttachment({
       report_id: 'r-sparse',
@@ -340,7 +342,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('falls back to captured fields when the report cannot be reached', async () => {
     const http = {
-      fetch: jest.fn().mockRejectedValue({ response: { status: 503 } }),
+      fetch: vi.fn().mockRejectedValue({ response: { status: 503 } }),
     } as unknown as HttpStart;
     const attachment = buildAttachment({
       report_id: 'r-1',
@@ -365,7 +367,7 @@ describe('ThreatAttachmentInlineContent', () => {
     ['response.status', { response: { status: 403 } }],
     ['body.statusCode', { body: { statusCode: 403, message: 'Forbidden' } }],
   ])('withholds the captured fields when the read is denied via %s', async (_label, rejection) => {
-    const http = { fetch: jest.fn().mockRejectedValue(rejection) } as unknown as HttpStart;
+    const http = { fetch: vi.fn().mockRejectedValue(rejection) } as unknown as HttpStart;
     const attachment = buildAttachment({
       report_id: 'r-1',
       title: 'Captured Title',
@@ -388,7 +390,7 @@ describe('ThreatAttachmentInlineContent', () => {
   it('still falls back when a failure merely mentions 403', async () => {
     // Guards against matching on the message text: the status has to come from the response.
     const http = {
-      fetch: jest.fn().mockRejectedValue(new Error('request failed with 403 upstream')),
+      fetch: vi.fn().mockRejectedValue(new Error('request failed with 403 upstream')),
     } as unknown as HttpStart;
     const attachment = buildAttachment({ report_id: 'r-1', title: 'Captured Title' });
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
@@ -402,7 +404,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('shows "Report unavailable" when neither live nor captured fields exist', async () => {
     const http = {
-      fetch: jest.fn().mockRejectedValue(new Error('404')),
+      fetch: vi.fn().mockRejectedValue(new Error('404')),
     } as unknown as HttpStart;
     const attachment = buildAttachment({ report_id: 'r-1' });
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
@@ -421,7 +423,7 @@ describe('ThreatAttachmentInlineContent', () => {
       spaceId: 'default',
     });
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-ioc',
         content: { title: 'IOC Title' },
         severity: { level: 'high' },
@@ -452,7 +454,7 @@ describe('ThreatAttachmentInlineContent', () => {
     fireEvent.mouseEnter(badge as Element);
     const openInDiscover = screen.getByLabelText('Open in Discover');
     expect(openInDiscover).toBeInTheDocument();
-    const openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    const openWindowSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
     fireEvent.click(openInDiscover);
     expect(openWindowSpy).toHaveBeenCalledWith(expectedHref, '_blank', 'noopener,noreferrer');
     openWindowSpy.mockRestore();
@@ -464,7 +466,7 @@ describe('ThreatAttachmentInlineContent', () => {
       value: `203.0.113.${index}`,
     }));
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-overflow',
         content: { title: 'Overflow Title' },
         severity: { level: 'high' },
@@ -491,7 +493,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('renders an external reference URL as an anchor', async () => {
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-ext',
         content: {
           title: 'External Title',
@@ -524,7 +526,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('omits non-http(s) external reference URLs', async () => {
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-ext-bad',
         content: {
           title: 'Unsafe External Title',
@@ -562,7 +564,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('shows Alert hits label rather than alert_hits_total= for evidence', async () => {
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-evidence',
         content: { title: 'Evidence Title' },
         severity: { level: 'high' },
@@ -589,7 +591,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('shows a relative "Last hunted" stat when lastHuntedAt is present', async () => {
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-last-hunted',
         content: { title: 'Last Hunted Title' },
         severity: { level: 'high' },
@@ -617,7 +619,7 @@ describe('ThreatAttachmentInlineContent', () => {
 
   it('renders regions and categories as description-list badge groups', async () => {
     const http = {
-      fetch: jest.fn().mockResolvedValue({
+      fetch: vi.fn().mockResolvedValue({
         reportId: 'r-geo',
         content: { title: 'Geo Title' },
         severity: { level: 'high' },

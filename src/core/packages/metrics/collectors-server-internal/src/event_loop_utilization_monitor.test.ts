@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { eventLoopUtilizationMock } from './event_loop_utilization_monitor.test.mocks';
 import { EventLoopUtilizationMonitor } from './event_loop_utilization_monitor';
 
 describe('EventLoopUtilizationMonitor', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('#constructor', () => {
     test('#constructor collects utilization', () => {

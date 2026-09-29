@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   DatasourceMap,
@@ -39,7 +41,7 @@ describe('lens shared logic', () => {
         {
           datasourceMap,
           visualizationMap,
-          extractFilterReferences: jest.fn(() => ({ state: [], references: [] })),
+          extractFilterReferences: vi.fn(() => ({ state: [], references: [] })),
         }
       );
     };

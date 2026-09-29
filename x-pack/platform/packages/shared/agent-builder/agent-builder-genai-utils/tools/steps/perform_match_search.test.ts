@@ -5,30 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { MappingField } from '../utils/mappings';
 import { performMatchSearch } from './perform_match_search';
 
-jest.mock('./extract_snippets', () => ({
-  extractSnippetsBatch: jest.fn(),
-}));
+vi.mock('./extract_snippets', () => {
+      const mocked = {
+      extractSnippetsBatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { extractSnippetsBatch } from './extract_snippets';
 
-const extractSnippetsBatchMock = extractSnippetsBatch as jest.MockedFunction<
+const extractSnippetsBatchMock = extractSnippetsBatch as MockedFunction<
   typeof extractSnippetsBatch
 >;
 
 const createMockEsClient = (response: unknown = { hits: { hits: [] } }) =>
   ({
-    search: jest.fn().mockResolvedValue(response),
+    search: vi.fn().mockResolvedValue(response),
   } as unknown as ElasticsearchClient);
 
 const createMockLogger = () =>
   ({
-    debug: jest.fn(),
+    debug: vi.fn(),
   } as unknown as Logger);
 
 const textField = (path: string): MappingField => ({ path, type: 'text', meta: {} });
@@ -36,7 +42,7 @@ const keywordField = (path: string): MappingField => ({ path, type: 'keyword', m
 
 describe('performMatchSearch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('CCS targets (bool/should per-field match)', () => {
@@ -53,7 +59,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.query.bool.should).toEqual([
         { match: { title: 'test query' } },
         { match: { body: 'test query' } },
@@ -74,7 +80,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.query.bool.must_not).toEqual([{ term: { _tier: 'data_frozen' } }]);
     });
 
@@ -92,7 +98,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.query.bool).not.toHaveProperty('must_not');
     });
 
@@ -109,7 +115,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.query.multi_match).toBeUndefined();
       expect(searchCall.query.bool).toBeDefined();
     });
@@ -127,7 +133,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(Object.keys(searchCall.highlight.fields)).toEqual(
         expect.arrayContaining(['title', 'body'])
       );
@@ -148,7 +154,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.retriever.rrf.fields).toEqual(['title', 'body']);
       expect(Object.keys(searchCall.highlight.fields)).toEqual(
         expect.arrayContaining(['title', 'body'])
@@ -168,7 +174,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.retriever.rrf.filter).toEqual({
         bool: { must_not: [{ term: { _tier: 'data_frozen' } }] },
       });
@@ -188,7 +194,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.retriever.rrf).not.toHaveProperty('filter');
     });
   });
@@ -207,7 +213,7 @@ describe('performMatchSearch', () => {
         logger,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.highlight).toBeDefined();
       expect(searchCall.highlight.fields).toHaveProperty('title');
     });
@@ -297,7 +303,7 @@ describe('performMatchSearch', () => {
         topSnippetsConfig,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.highlight).toBeUndefined();
     });
 
@@ -316,7 +322,7 @@ describe('performMatchSearch', () => {
         topSnippetsConfig,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.highlight).toBeUndefined();
     });
 
@@ -422,7 +428,7 @@ describe('performMatchSearch', () => {
   describe('response size guardrail', () => {
     it('throws a human-readable error when the response exceeds the max size', async () => {
       const esClient = {
-        search: jest
+        search: vi
           .fn()
           .mockRejectedValue(new errors.RequestAbortedError('Response content length exceeded')),
       } as unknown as ElasticsearchClient;
@@ -443,7 +449,7 @@ describe('performMatchSearch', () => {
     it('rethrows non-size errors unchanged', async () => {
       const originalError = new Error('some other ES error');
       const esClient = {
-        search: jest.fn().mockRejectedValue(originalError),
+        search: vi.fn().mockRejectedValue(originalError),
       } as unknown as ElasticsearchClient;
       const logger = createMockLogger();
 

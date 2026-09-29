@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
@@ -42,8 +44,8 @@ const renderMarkdownEditor = (overrideProps?: Partial<MarkdownEditorProps>) => {
       <MarkdownEditor
         processingPluginList={[]}
         content={testedContent}
-        onCancel={jest.fn()}
-        onSave={jest.fn()}
+        onCancel={vi.fn()}
+        onSave={vi.fn()}
         isPreview$={isPreview$}
         settings$={settings$}
         {...overrideProps}
@@ -53,7 +55,7 @@ const renderMarkdownEditor = (overrideProps?: Partial<MarkdownEditorProps>) => {
 };
 
 it('calls onCancel when Discard button clicked', async () => {
-  const onCancel = jest.fn();
+  const onCancel = vi.fn();
   renderMarkdownEditor({ onCancel });
 
   const discardButton = screen.getByRole('button', { name: /Discard/i });
@@ -63,7 +65,7 @@ it('calls onCancel when Discard button clicked', async () => {
 });
 
 it('calls onSave with current value when Apply clicked', async () => {
-  const onSave = jest.fn();
+  const onSave = vi.fn();
   renderMarkdownEditor({ onSave });
 
   expect(screen.getByRole('button', { name: /Apply/i })).toBeDisabled();

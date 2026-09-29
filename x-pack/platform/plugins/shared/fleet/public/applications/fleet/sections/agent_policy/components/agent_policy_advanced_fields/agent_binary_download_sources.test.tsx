@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -25,7 +27,7 @@ const downloadSourceOptions = [
 
 function render(agentPolicy: Partial<NewAgentPolicy | AgentPolicy> = {}, disabled = false) {
   const renderer = createFleetTestRendererMock();
-  const updateAgentPolicy = jest.fn();
+  const updateAgentPolicy = vi.fn();
   const result = renderer.render(
     <AgentBinaryDownloadSources
       agentPolicy={agentPolicy}
@@ -176,7 +178,7 @@ describe('AgentBinaryDownloadSources', () => {
       const result = renderer.render(
         <AgentBinaryDownloadSources
           agentPolicy={{ download_source_ids: ['ds-1'] }}
-          updateAgentPolicy={jest.fn()}
+          updateAgentPolicy={vi.fn()}
           downloadSourceOptions={[{ value: 'ds-1', inputDisplay: 'Source One' }]}
           isLoading={false}
           disabled={false}

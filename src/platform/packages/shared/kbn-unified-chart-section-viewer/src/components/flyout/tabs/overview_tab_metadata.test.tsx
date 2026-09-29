@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,17 +18,20 @@ import { METRIC_TYPE_DESCRIPTIONS } from '../components';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 import { METRIC_SOURCE_KIND } from '../hooks/use_metric_source_kind';
 
-jest.mock('../../../common/utils', () => ({
-  getUnitLabel: jest.fn(({ unit }) => {
-    const unitLabels: Record<string, string | undefined> = {
-      ms: 'Milliseconds',
-      bytes: 'Bytes',
-      percent: 'Percent',
-      count: undefined,
+vi.mock('../../../common/utils', () => {
+      const mocked = {
+      getUnitLabel: vi.fn(({ unit }) => {
+        const unitLabels: Record<string, string | undefined> = {
+          ms: 'Milliseconds',
+          bytes: 'Bytes',
+          percent: 'Percent',
+          count: undefined,
+        };
+        return unit ? unitLabels[unit] || unit : undefined;
+      }),
     };
-    return unit ? unitLabels[unit] || unit : undefined;
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 describe('OverviewTabMetadata', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
@@ -40,7 +45,7 @@ describe('OverviewTabMetadata', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('basic rendering', () => {

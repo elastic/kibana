@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { LongLegendOptionsProps } from './long_legend_options';
@@ -19,7 +21,7 @@ describe('LongLegendOptions', () => {
   beforeAll(() => {
     props = {
       truncateLegend: true,
-      setValue: jest.fn(),
+      setValue: vi.fn(),
     };
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
@@ -29,32 +32,31 @@ import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
  */
 
 const mockToasts = {
-  addDanger: jest.fn(),
-  addError: jest.fn(),
-  addSuccess: jest.fn(),
-  addWarning: jest.fn(),
-  addInfo: jest.fn(),
-  remove: jest.fn(),
+  addDanger: vi.fn(),
+  addError: vi.fn(),
+  addSuccess: vi.fn(),
+  addWarning: vi.fn(),
+  addInfo: vi.fn(),
+  remove: vi.fn(),
 };
 
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityPostureGraphGraphInvestigation';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cloud-security-posture-graph', () => {
+vi.mock('@kbn/cloud-security-posture-graph', async () => {
   const { isEntityNode, getNodeDocumentMode, hasNodeDocumentsData, getSingleDocumentData } =
-    jest.requireActual('@kbn/cloud-security-posture-graph/src/components/utils');
-  const { GraphGroupedNodePreviewPanelKey, GROUP_PREVIEW_BANNER } = jest.requireActual(
-    '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/constants'
-  );
-  const { isEntityItem } = jest.requireActual(
-    '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/components/grouped_item/types'
-  );
+    (await vi.importActual('@kbn/cloud-security-posture-graph/src/components/utils'));
+  const { GraphGroupedNodePreviewPanelKey, GROUP_PREVIEW_BANNER } = (await vi.importActual('@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/constants'));
+  const { isEntityItem } = (await vi.importActual('@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/components/grouped_item/types'));
 
   return {
-    GraphInvestigation: jest.fn(),
+    GraphInvestigation: vi.fn(),
     isEntityNode,
     isEntityItem,
     getNodeDocumentMode,
@@ -65,79 +67,109 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
   };
 });
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useToasts: () => mockToasts,
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          securitySolutionTimeline: { read: true, crud: true },
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useToasts: () => mockToasts,
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              securitySolutionTimeline: { read: true, crud: true },
+            },
+          },
+          overlays: {
+            openSystemFlyout: vi.fn(),
+          },
         },
+      }),
+      KibanaServices: {
+        get: () => ({
+          uiSettings: {
+            get: vi.fn().mockReturnValue(true),
+          },
+        }),
       },
-      overlays: {
-        openSystemFlyout: jest.fn(),
-      },
-    },
-  }),
-  KibanaServices: {
-    get: () => ({
-      uiSettings: {
-        get: jest.fn().mockReturnValue(true),
-      },
-    }),
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => true,
-}));
+vi.mock('../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../../flyout_v2/shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
-  DocumentFlyoutWrapper: () => <div />,
-}));
+vi.mock('../../../../flyout_v2/document/main/document_flyout_wrapper', () => {
+      const mocked = {
+      DocumentFlyoutWrapper: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/network/main', () => ({
-  Network: () => <div />,
-}));
+vi.mock('../../../../flyout_v2/network/main', () => {
+      const mocked = {
+      Network: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: () => ({ investigateInTimeline: jest.fn() }),
-}));
+vi.mock('../../../../common/hooks/timeline/use_investigate_in_timeline', () => {
+      const mocked = {
+      useInvestigateInTimeline: () => ({ investigateInTimeline: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: () => ({
-    dataView: {
-      id: 'experimental-data-view',
-      getIndexPattern: jest.fn().mockReturnValue('experimental-data-view-pattern'),
-    },
-    status: 'ready',
-  }),
-}));
+vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: () => ({
+        dataView: {
+          id: 'experimental-data-view',
+          getIndexPattern: vi.fn().mockReturnValue('experimental-data-view-pattern'),
+        },
+        status: 'ready',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => true,
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/context', () => ({
-  useDocumentDetailsContext: () => ({
-    searchHit: { _id: 'doc-1', _index: 'idx', _source: {} },
-    scopeId: 'test-scope',
-  }),
-}));
+vi.mock('../../shared/context', () => {
+      const mocked = {
+      useDocumentDetailsContext: () => ({
+        searchHit: { _id: 'doc-1', _index: 'idx', _source: {} },
+        scopeId: 'test-scope',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MOCK_EVENT_IDS = ['event-1', 'event-2'];
 const MOCK_TIMESTAMP = new Date().toISOString();
 
-jest.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview', () => ({
-  useGraphPreview: () => ({
-    eventIds: MOCK_EVENT_IDS,
-    timestamp: MOCK_TIMESTAMP,
-  }),
-}));
+vi.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview', () => {
+      const mocked = {
+      useGraphPreview: () => ({
+        eventIds: MOCK_EVENT_IDS,
+        timestamp: MOCK_TIMESTAMP,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const store = createStore(() => ({}));
 const history = createMemoryHistory();
@@ -153,15 +185,15 @@ const renderGraphVisualization = () =>
 
 describe('GraphVisualization (document_details wrapper)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (GraphInvestigation as unknown as jest.Mock).mockReturnValue(
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    (GraphInvestigation as unknown as Mock).mockReturnValue(
       <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
     );
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('renders the graph visualization wrapper', async () => {
@@ -180,7 +212,7 @@ describe('GraphVisualization (document_details wrapper)', () => {
       expect(GraphInvestigation).toHaveBeenCalledTimes(1);
     });
 
-    const { initialState, scopeId } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+    const { initialState, scopeId } = vi.mocked(GraphInvestigation).mock.calls[0][0];
     expect(scopeId).toBe('test-scope');
     expect(initialState.originEventIds).toEqual([
       { id: 'event-1', isAlert: false },

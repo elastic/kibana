@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,8 +18,8 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
-jest.mock('./hooks/use_kibana', () => {
-  const originalModule = jest.requireActual('./hooks/use_kibana');
+vi.mock('./hooks/use_kibana', async () => {
+  const originalModule = (await vi.importActual('./hooks/use_kibana'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -54,8 +56,8 @@ describe('ExploratoryView', () => {
       },
     });
 
-    jest.spyOn(obsvDataViews, 'ObservabilityDataViews').mockReturnValue({
-      getDataView: jest.fn().mockReturnValue(indexPattern),
+    vi.spyOn(obsvDataViews, 'ObservabilityDataViews').mockReturnValue({
+      getDataView: vi.fn().mockReturnValue(indexPattern),
     } as any);
   });
 

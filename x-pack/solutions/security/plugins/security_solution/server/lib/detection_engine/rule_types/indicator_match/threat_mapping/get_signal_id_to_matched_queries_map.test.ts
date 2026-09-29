@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ThreatMatchQueryType } from './types';
 
 import { getSignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
@@ -17,9 +20,12 @@ import { getSharedParamsMock } from '../../__mocks__/shared_params';
 import { getThreatRuleParams } from '../../../rule_schema/mocks';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 
-jest.mock('./get_threat_list', () => ({ getThreatList: jest.fn() }));
+vi.mock('./get_threat_list', () => {
+      const mocked = { getThreatList: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const getThreatListMock = getThreatList as jest.Mock;
+const getThreatListMock = getThreatList as Mock;
 
 export const namedQuery = encodeThreatMatchNamedQuery({
   id: 'source-1',
@@ -53,7 +59,7 @@ getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
 describe('getSignalIdToMatchedQueriesMap', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should call getThreatList to fetch threats from ES', async () => {

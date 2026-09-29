@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
@@ -35,35 +37,41 @@ const INLINE_DEFS = [
   },
 ];
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'uiSettings') {
-      return { get: () => mockWorkflowsEnabled };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'uiSettings') {
+          return { get: () => mockWorkflowsEnabled };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
-  getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-  InlineWorkflowEditor: ({
-    value,
-    connectorCreationConfig,
-  }: {
-    value: { id: string };
-    connectorCreationConfig?: ConnectorCreationConfig;
-  }) => (
-    <div
-      data-test-subj={`inlineWorkflowEditor-${value.id}`}
-      data-connector-creation-mode={connectorCreationConfig?.mode}
-      data-connector-creation-href={
-        connectorCreationConfig?.mode === 'new-tab' ? connectorCreationConfig.href : undefined
-      }
-    />
-  ),
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+      getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+      InlineWorkflowEditor: ({
+        value,
+        connectorCreationConfig,
+      }: {
+        value: { id: string };
+        connectorCreationConfig?: ConnectorCreationConfig;
+      }) => (
+        <div
+          data-test-subj={`inlineWorkflowEditor-${value.id}`}
+          data-connector-creation-mode={connectorCreationConfig?.mode}
+          data-connector-creation-href={
+            connectorCreationConfig?.mode === 'new-tab' ? connectorCreationConfig.href : undefined
+          }
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderBuilder = (
   defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,

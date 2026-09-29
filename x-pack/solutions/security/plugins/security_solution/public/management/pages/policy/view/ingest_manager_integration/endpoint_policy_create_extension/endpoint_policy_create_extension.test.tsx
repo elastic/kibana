@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -19,11 +22,11 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { licenseService } from '../../../../../../common/hooks/use_license';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 
-jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../../../../../../common/hooks/use_license', () => {
+vi.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isEnterprise: jest.fn(() => true),
+    isPlatinumPlus: vi.fn(),
+    isEnterprise: vi.fn(() => true),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -71,7 +74,7 @@ describe('Onboarding Component new section', () => {
   describe('When EndpointPolicyCreateExtension is mounted', () => {
     it('renders EndpointPolicyCreateExtension options correctly (Default to Endpoint)', async () => {
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={vi.fn()} />
       );
       expect(renderResult.getByTestId('selectIntegrationTypeId')).toBeVisible();
       expect(renderResult.queryByText('Next-Generation Antivirus (NGAV)')).toBeVisible();
@@ -85,7 +88,7 @@ describe('Onboarding Component new section', () => {
 
     it('renders EndpointPolicyCreateExtension options correctly (set to Cloud)', async () => {
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={vi.fn()} />
       );
       await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByText('Interactive only')).toBeVisible();
@@ -93,7 +96,7 @@ describe('Onboarding Component new section', () => {
     });
 
     it('make sure onChange is called when user change environment', async () => {
-      const mockedOnChange = jest.fn();
+      const mockedOnChange = vi.fn();
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={mockedOnChange} />
       );
@@ -104,7 +107,7 @@ describe('Onboarding Component new section', () => {
 
     it('make sure EDR Complete is the default value for endpoint environment', async () => {
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={vi.fn()} />
       );
       expect(renderResult.getByDisplayValue('DataCollection')).not.toBeChecked();
       expect(renderResult.getByDisplayValue('NGAV')).not.toBeChecked();
@@ -114,7 +117,7 @@ describe('Onboarding Component new section', () => {
 
     it('make sure interactive only is the default value for cloud environment', async () => {
       renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={vi.fn()} />
       );
       await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByDisplayValue('ALL_EVENTS')).not.toBeChecked();
@@ -140,12 +143,12 @@ describe('Onboarding Component new section', () => {
         const isEnterprise = license === 'enterprise';
         const isPlatinumPlus = ['platinum', 'enterprise'].includes(license);
 
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
         licenseServiceMock.isEnterprise.mockReturnValue(isEnterprise);
         licenseServiceMock.isPlatinumPlus.mockReturnValue(isPlatinumPlus);
 
         renderResult = mockedContext.render(
-          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={vi.fn()} />
         );
         await userEvent.click(screen.getByDisplayValue(preset));
         expect(renderResult.getByDisplayValue(preset)).toBeChecked();
@@ -171,7 +174,7 @@ describe('Onboarding Component new section', () => {
         endpointPolicyProtections: () => <div data-test-subj="paywall">{'pay up!'}</div>,
       });
       newPolicy = getMockNewPackage();
-      onChange = jest.fn();
+      onChange = vi.fn();
       render = () => {
         renderResult = mockedContext.render(
           <EndpointPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />

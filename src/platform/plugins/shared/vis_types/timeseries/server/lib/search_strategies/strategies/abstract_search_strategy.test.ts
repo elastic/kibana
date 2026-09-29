@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { from } from 'rxjs';
 
@@ -32,15 +34,15 @@ describe('AbstractSearchStrategy', () => {
       core: {
         elasticsearch: {
           client: {
-            asCurrentUser: jest.fn(),
+            asCurrentUser: vi.fn(),
           },
         },
         uiSettings: {
-          client: jest.fn(),
+          client: vi.fn(),
         },
       },
       search: {
-        search: jest.fn().mockReturnValue(from(Promise.resolve({}))),
+        search: vi.fn().mockReturnValue(from(Promise.resolve({}))),
       },
     } as unknown as VisTypeTimeseriesRequestHandlerContext;
     abstractSearchStrategy = new FooSearchStrategy();
@@ -56,8 +58,8 @@ describe('AbstractSearchStrategy', () => {
     const fields = await abstractSearchStrategy.getFieldsForWildcard(
       { indexPatternString: '', indexPattern: undefined },
       {
-        getDefault: jest.fn(),
-        getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
+        getDefault: vi.fn(),
+        getFieldsForWildcard: vi.fn(() => Promise.resolve(mockedFields)),
       } as unknown as DataViewsService,
       (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher
     );

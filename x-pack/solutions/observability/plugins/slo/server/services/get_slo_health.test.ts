@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -13,10 +16,10 @@ import { createSLORepositoryMock } from './mocks';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import * as compute_health from '../domain/services/compute_health';
 
-jest.spyOn(compute_health, 'computeHealth');
+vi.spyOn(compute_health, 'computeHealth');
 
 describe('GetSLOHealth', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
 

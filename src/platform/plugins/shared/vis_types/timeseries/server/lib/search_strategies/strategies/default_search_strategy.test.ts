@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FetchedIndexPattern } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -19,7 +21,7 @@ describe('DefaultSearchStrategy', () => {
     core: {
       uiSettings: {
         client: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
       },
     },

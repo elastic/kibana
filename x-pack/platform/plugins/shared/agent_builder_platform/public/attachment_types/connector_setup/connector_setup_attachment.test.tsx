@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
@@ -33,7 +35,7 @@ const buildAttachment = (origin?: string): ConnectorSetupAttachment =>
 
 const setup = () => {
   let formProps: Record<string, any> | null = null;
-  const getAddConnectorForm = jest.fn((props: Record<string, any>) => {
+  const getAddConnectorForm = vi.fn((props: Record<string, any>) => {
     formProps = props;
     return <div data-test-subj="connector-form" />;
   });
@@ -41,7 +43,7 @@ const setup = () => {
     getAddConnectorForm,
   } as unknown as TriggersAndActionsUIPublicPluginStart;
 
-  const getUrlForApp = jest.fn().mockReturnValue('/app/agent_builder/manage/connectors');
+  const getUrlForApp = vi.fn().mockReturnValue('/app/agent_builder/manage/connectors');
   const application = { getUrlForApp } as unknown as CoreStart['application'];
 
   const definition = createConnectorSetupAttachmentDefinition({
@@ -68,13 +70,13 @@ describe('createConnectorSetupAttachmentDefinition', () => {
 
   it('inline "Configure connector" button opens the canvas', () => {
     const { definition } = setup();
-    const openCanvas = jest.fn();
+    const openCanvas = vi.fn();
     const buttons = definition.getActionButtons!({
       attachment: buildAttachment(),
       isCanvas: false,
       isSidebar: false,
       openCanvas,
-      updateOrigin: jest.fn(),
+      updateOrigin: vi.fn(),
     });
     expect(buttons).toHaveLength(1);
     expect(buttons[0].label).toBe('Configure connector');
@@ -89,7 +91,7 @@ describe('createConnectorSetupAttachmentDefinition', () => {
         attachment: buildAttachment(),
         isCanvas: true,
         isSidebar: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       })
     ).toEqual([]);
   });
@@ -100,8 +102,8 @@ describe('createConnectorSetupAttachmentDefinition', () => {
       attachment: buildAttachment('c1'),
       isCanvas: false,
       isSidebar: false,
-      openCanvas: jest.fn(),
-      updateOrigin: jest.fn(),
+      openCanvas: vi.fn(),
+      updateOrigin: vi.fn(),
     });
     expect(buttons[0].label).toBe('Manage connector');
     expect(getUrlForApp).toHaveBeenCalledWith('agent_builder', { path: '/manage/connectors' });
@@ -111,9 +113,9 @@ describe('createConnectorSetupAttachmentDefinition', () => {
   it('renders the embedded form and wires Save -> create -> updateOrigin -> closeCanvas', async () => {
     const { definition, getAddConnectorForm, getFormProps } = setup();
     const registered: ActionButton[][] = [];
-    const registerActionButtons = jest.fn((btns: ActionButton[]) => registered.push(btns));
-    const updateOrigin = jest.fn().mockResolvedValue(undefined);
-    const closeCanvas = jest.fn();
+    const registerActionButtons = vi.fn((btns: ActionButton[]) => registered.push(btns));
+    const updateOrigin = vi.fn().mockResolvedValue(undefined);
+    const closeCanvas = vi.fn();
     const callbacks = {
       registerActionButtons,
       updateOrigin,
@@ -137,7 +139,7 @@ describe('createConnectorSetupAttachmentDefinition', () => {
     );
     expect(screen.getByTestId('connector-form')).toBeInTheDocument();
 
-    const handle = { submit: jest.fn().mockResolvedValue({ id: 'c1', name: 'Acme GitHub' }) };
+    const handle = { submit: vi.fn().mockResolvedValue({ id: 'c1', name: 'Acme GitHub' }) };
     act(() => {
       getFormProps()!.onReady(handle);
     });

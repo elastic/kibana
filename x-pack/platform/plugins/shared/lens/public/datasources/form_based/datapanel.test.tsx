@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -29,12 +31,12 @@ import { createMockFramePublicAPI } from '../../mocks';
 import type { DataViewsState, FormBasedPrivateState } from '@kbn/lens-common';
 import { renderWithProviders } from '../../test_utils/test_utils';
 
-const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
-jest.spyOn(UseExistingFieldsApi, 'useExistingFieldsFetcher');
-jest.spyOn(UseExistingFieldsApi, 'useExistingFieldsReader');
+vi.spyOn(UseExistingFieldsApi, 'useExistingFieldsFetcher');
+vi.spyOn(UseExistingFieldsApi, 'useExistingFieldsReader');
 
-const loadFieldExistingMock = jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
+const loadFieldExistingMock = vi.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 loadFieldExistingMock.mockResolvedValue({
   indexPatternTitle: 'idx1',
   existingFieldNames: [],
@@ -203,23 +205,23 @@ const defaultProps = {
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
   indexPatternService: createIndexPatternServiceMock({
-    updateIndexPatterns: jest.fn(),
+    updateIndexPatterns: vi.fn(),
     core,
     dataViews,
   }),
-  onIndexPatternRefresh: jest.fn(),
+  onIndexPatternRefresh: vi.fn(),
   core,
   dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
   charts: chartPluginMock.createSetupContract(),
   query: { query: '', language: 'lucene' },
   filters: [],
-  showNoDataPopover: jest.fn(),
-  dropOntoWorkspace: jest.fn(),
-  hasSuggestionForField: jest.fn(() => false),
+  showNoDataPopover: vi.fn(),
+  dropOntoWorkspace: vi.fn(),
+  hasSuggestionForField: vi.fn(() => false),
   uiActions: uiActionsPluginMock.createStartContract(),
   frame,
   activeIndexPatterns: [frame.dataViews.indexPatterns['1']],
-  setState: jest.fn(),
+  setState: vi.fn(),
   state: constructState('1'),
 };
 
@@ -273,15 +275,15 @@ const getEmptyFieldsNames = () => getFieldNames('lnsIndexPatternEmptyFields');
 const getMetaFieldsNames = () => getFieldNames('lnsIndexPatternMetaFields');
 
 const searchForPhrase = async (phrase: string) => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   await user.type(screen.getByRole('searchbox', { name: 'Search field names' }), phrase);
-  act(() => jest.advanceTimersByTime(256));
-  jest.useRealTimers();
+  act(() => vi.advanceTimersByTime(256));
+  vi.useRealTimers();
 };
 
 describe('FormBased Data Panel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     UseExistingFieldsApi.resetExistingFieldsCache();
     window.localStorage.removeItem('lens.unifiedFieldList.initiallyOpenSections');
   });
@@ -404,7 +406,7 @@ describe('FormBased Data Panel', () => {
     });
 
     it('loads existence data if layer index pattern changes', async () => {
-      jest
+      vi
         .spyOn(ExistingFieldsServiceApi, 'loadFieldExisting')
         .mockImplementation(async ({ dataView }) => ({
           indexPatternTitle: 'idx1',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createAttachmentStateManagerMock,
@@ -32,7 +34,7 @@ describe('createImageResolver', () => {
   it('memoizes image resolution so the files plugin is only fetched once per attachment', async () => {
     const { attachmentStateManager, attachments, imageResolver } = setup();
 
-    const getBase64 = jest.fn().mockResolvedValue('AAA');
+    const getBase64 = vi.fn().mockResolvedValue('AAA');
     attachmentStateManager.get.mockReturnValue({
       id: 'img-1',
       version: 1,
@@ -42,15 +44,15 @@ describe('createImageResolver', () => {
     attachments.getTypeDefinition.mockReturnValue({
       id: 'image',
       isReadonly: true,
-      validate: jest.fn(),
-      format: jest.fn().mockResolvedValue({
+      validate: vi.fn(),
+      format: vi.fn().mockResolvedValue({
         getRepresentation: () => ({
           type: 'image',
           mimeType: 'image/png',
           getBase64,
         }),
       }),
-      getTools: jest.fn(),
+      getTools: vi.fn(),
     } as any);
 
     const first = await imageResolver({ attachmentId: 'img-1' });
@@ -80,7 +82,7 @@ describe('createImageResolver', () => {
   it('treats different versions of the same attachment as separate cache entries', async () => {
     const { attachmentStateManager, attachments, imageResolver } = setup();
 
-    const getBase64 = jest.fn().mockResolvedValue('AAA');
+    const getBase64 = vi.fn().mockResolvedValue('AAA');
     attachmentStateManager.get.mockReturnValue({
       id: 'img-1',
       version: 1,
@@ -90,11 +92,11 @@ describe('createImageResolver', () => {
     attachments.getTypeDefinition.mockReturnValue({
       id: 'image',
       isReadonly: true,
-      validate: jest.fn(),
-      format: jest.fn().mockResolvedValue({
+      validate: vi.fn(),
+      format: vi.fn().mockResolvedValue({
         getRepresentation: () => ({ type: 'image', mimeType: 'image/png', getBase64 }),
       }),
-      getTools: jest.fn(),
+      getTools: vi.fn(),
     } as any);
 
     await imageResolver({ attachmentId: 'img-1', version: 1 });
@@ -116,11 +118,11 @@ describe('createImageResolver', () => {
     attachments.getTypeDefinition.mockReturnValue({
       id: 'text',
       isReadonly: true,
-      validate: jest.fn(),
-      format: jest.fn().mockResolvedValue({
+      validate: vi.fn(),
+      format: vi.fn().mockResolvedValue({
         getRepresentation: () => ({ type: 'text', value: 'hello' }),
       }),
-      getTools: jest.fn(),
+      getTools: vi.fn(),
     } as any);
 
     const result = await imageResolver({ attachmentId: 'text-1' });
@@ -140,9 +142,9 @@ describe('createImageResolver', () => {
     attachments.getTypeDefinition.mockReturnValue({
       id: 'image',
       isReadonly: true,
-      validate: jest.fn(),
-      format: jest.fn().mockRejectedValue(new Error('boom')),
-      getTools: jest.fn(),
+      validate: vi.fn(),
+      format: vi.fn().mockRejectedValue(new Error('boom')),
+      getTools: vi.fn(),
     } as any);
 
     const result = await imageResolver({ attachmentId: 'img-1' });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { ProductFeatureRulesKey } from '@kbn/security-solution-features/keys';
 import {
@@ -15,16 +18,16 @@ import type { InitializationFlowContext } from '../../types';
 import { initEndpointProtectionFlow } from '.';
 import { installEndpointPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_endpoint_package';
 
-jest.mock('../../../detection_engine/prebuilt_rules/logic/integrations/install_endpoint_package');
+vi.mock('../../../detection_engine/prebuilt_rules/logic/integrations/install_endpoint_package');
 
-const installEndpointPackageMock = installEndpointPackage as jest.MockedFunction<
+const installEndpointPackageMock = installEndpointPackage as MockedFunction<
   typeof installEndpointPackage
 >;
 
 const createMockSecurityContext = ({ isExternalDetectionsEnabled = false } = {}) =>
   ({
-    getInternalFleetServices: jest.fn(),
-    getAppClient: jest.fn(),
+    getInternalFleetServices: vi.fn(),
+    getAppClient: vi.fn(),
     getProductFeatureService: () => ({
       isEnabled: (key: string) =>
         key === ProductFeatureRulesKey.externalDetections && isExternalDetectionsEnabled,
@@ -43,7 +46,7 @@ const createMockInitializationFlowContext = ({
 
 describe('initEndpointProtectionFlow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has the correct id', () => {

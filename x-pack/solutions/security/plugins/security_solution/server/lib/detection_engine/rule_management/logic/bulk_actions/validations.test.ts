@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
@@ -21,7 +23,7 @@ import {
 } from './validations';
 
 const createMockMlAuthz = (valid: boolean = true) => ({
-  validateRuleType: jest.fn().mockResolvedValue({ valid, message: 'mocked validation message' }),
+  validateRuleType: vi.fn().mockResolvedValue({ valid, message: 'mocked validation message' }),
 });
 
 describe('bulk actions validations', () => {

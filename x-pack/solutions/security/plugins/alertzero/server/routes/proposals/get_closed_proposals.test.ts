@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
@@ -12,10 +14,10 @@ import { createRouteContextMock } from '../route_context.mock';
 import { registerGetClosedProposalsRoute } from './get_closed_proposals';
 
 const makeDeps = (conversationProposalsService: unknown) => {
-  const addVersion = jest.fn();
+  const addVersion = vi.fn();
   const router = {
     versioned: {
-      get: jest.fn().mockReturnValue({ addVersion }),
+      get: vi.fn().mockReturnValue({ addVersion }),
     },
   };
   registerGetClosedProposalsRoute({
@@ -42,7 +44,7 @@ const makeDeps = (conversationProposalsService: unknown) => {
 
 describe('registerGetClosedProposalsRoute', () => {
   it('returns 404 when the per-space setting is off', async () => {
-    const listClosed = jest.fn();
+    const listClosed = vi.fn();
     const { handler } = makeDeps({ listClosed });
     const response = httpServerMock.createResponseFactory();
 
@@ -59,7 +61,7 @@ describe('registerGetClosedProposalsRoute', () => {
   });
 
   it('delegates to listClosed with the correct size, from, and spaceId', async () => {
-    const listClosed = jest.fn().mockResolvedValue({ proposals: [], total: 0 });
+    const listClosed = vi.fn().mockResolvedValue({ proposals: [], total: 0 });
     const { handler } = makeDeps({ listClosed });
     const response = httpServerMock.createResponseFactory();
 
@@ -80,13 +82,13 @@ describe('registerGetClosedProposalsRoute', () => {
   });
 
   it('accepts size=0, so a collapsed accordion can read the total without the rows', () => {
-    const { validateQuery } = makeDeps({ listClosed: jest.fn() });
+    const { validateQuery } = makeDeps({ listClosed: vi.fn() });
 
     expect(validateQuery({ size: '0', from: '0' })).toEqual({ value: { size: 0, from: 0 } });
   });
 
   it('returns the group total on a size=0 page', async () => {
-    const listClosed = jest.fn().mockResolvedValue({ proposals: [], total: 42 });
+    const listClosed = vi.fn().mockResolvedValue({ proposals: [], total: 42 });
     const { handler } = makeDeps({ listClosed });
     const response = httpServerMock.createResponseFactory();
 
@@ -100,14 +102,14 @@ describe('registerGetClosedProposalsRoute', () => {
   });
 
   it('rejects a negative size', () => {
-    const { validateQuery } = makeDeps({ listClosed: jest.fn() });
+    const { validateQuery } = makeDeps({ listClosed: vi.fn() });
 
     expect(validateQuery({ size: '-1', from: '0' })).toEqual({ error: expect.any(String) });
   });
 
   it('returns 500 when listClosed throws', async () => {
     const { handler } = makeDeps({
-      listClosed: jest.fn().mockRejectedValue(new Error('ES down')),
+      listClosed: vi.fn().mockRejectedValue(new Error('ES down')),
     });
     const response = httpServerMock.createResponseFactory();
 

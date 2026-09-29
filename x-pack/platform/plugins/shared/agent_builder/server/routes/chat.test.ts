@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -21,12 +23,15 @@ import {
   registerChatRoutes,
 } from './chat';
 
-const mockObservableIntoEventSourceStream = jest.fn();
-jest.mock('@kbn/sse-utils-server', () => ({
-  observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
-    mockObservableIntoEventSourceStream(observable, options),
-  cloudProxyBufferSize: 4096,
-}));
+const mockObservableIntoEventSourceStream = vi.fn();
+vi.mock('@kbn/sse-utils-server', () => {
+      const mocked = {
+      observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
+        mockObservableIntoEventSourceStream(observable, options),
+      cloudProxyBufferSize: 4096,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('promptResponseEntrySchema', () => {
   it('accepts the confirmation variant', () => {
@@ -292,11 +297,11 @@ describe('registerChatRoutes', () => {
   it('registers an internal callback converse route', () => {
     const postConfigs: Array<{ path: string; access?: string }> = [];
     const createVersionedRoute = () => ({
-      addVersion: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
+      addVersion: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
     });
     const router = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string; access?: string }) => {
+        post: vi.fn().mockImplementation((config: { path: string; access?: string }) => {
           postConfigs.push(config);
           return createVersionedRoute();
         }),
@@ -305,7 +310,7 @@ describe('registerChatRoutes', () => {
 
     registerChatRoutes({
       router,
-      getInternalServices: jest.fn(),
+      getInternalServices: vi.fn(),
       coreSetup: {} as never,
       pluginsSetup: {},
       logger: loggingSystemMock.createLogger(),
@@ -322,8 +327,8 @@ describe('registerChatRoutes', () => {
   it('schedules callback converse with origin for conversation resolution', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
-    const validateCallbackUrl = jest.fn();
-    const executeAgent = jest.fn().mockResolvedValue({
+    const validateCallbackUrl = vi.fn();
+    const executeAgent = vi.fn().mockResolvedValue({
       executionId: 'execution-1',
       conversationId: 'conversation-1',
       events$: of(),
@@ -340,8 +345,8 @@ describe('registerChatRoutes', () => {
 
     const router = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        post: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation(
               (
@@ -359,7 +364,7 @@ describe('registerChatRoutes', () => {
 
     registerChatRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { executeAgent },
         callbackDeliveryService: { validateCallbackUrl },
       }),
@@ -369,19 +374,19 @@ describe('registerChatRoutes', () => {
     } as never);
 
     const response = {
-      accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
-      forbidden: jest.fn(),
-      customError: jest.fn(),
-      notFound: jest.fn(),
+      accepted: vi.fn(({ body }) => ({ status: 202, payload: body })),
+      forbidden: vi.fn(),
+      customError: vi.fn(),
+      notFound: vi.fn(),
     };
     const result = await callbackHandler!(
       {
         core: Promise.resolve({}),
         licensing: Promise.resolve({
-          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
         }),
         agentBuilder: Promise.resolve({
-          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+          spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
         }),
       },
       {
@@ -422,8 +427,8 @@ describe('registerChatRoutes', () => {
   it('passes the idempotency key through to the execution service', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
-    const validateCallbackUrl = jest.fn();
-    const executeAgent = jest.fn().mockResolvedValue({
+    const validateCallbackUrl = vi.fn();
+    const executeAgent = vi.fn().mockResolvedValue({
       executionId: 'execution-1',
       conversationId: 'conversation-1',
       events$: of(),
@@ -431,8 +436,8 @@ describe('registerChatRoutes', () => {
 
     const router = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        post: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation(
               (
@@ -450,7 +455,7 @@ describe('registerChatRoutes', () => {
 
     registerChatRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { executeAgent },
         callbackDeliveryService: { validateCallbackUrl },
       }),
@@ -460,19 +465,19 @@ describe('registerChatRoutes', () => {
     } as never);
 
     const response = {
-      accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
-      forbidden: jest.fn(),
-      customError: jest.fn(),
-      notFound: jest.fn(),
+      accepted: vi.fn(({ body }) => ({ status: 202, payload: body })),
+      forbidden: vi.fn(),
+      customError: vi.fn(),
+      notFound: vi.fn(),
     };
     const result = await callbackHandler!(
       {
         core: Promise.resolve({}),
         licensing: Promise.resolve({
-          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
         }),
         agentBuilder: Promise.resolve({
-          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+          spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
         }),
       },
       {
@@ -523,8 +528,8 @@ describe('registerChatRoutes', () => {
   it('prefers a caller-provided execution id over the idempotency key', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
-    const validateCallbackUrl = jest.fn();
-    const executeAgent = jest.fn().mockResolvedValue({
+    const validateCallbackUrl = vi.fn();
+    const executeAgent = vi.fn().mockResolvedValue({
       executionId: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
       conversationId: 'conversation-1',
       events$: of(),
@@ -532,8 +537,8 @@ describe('registerChatRoutes', () => {
 
     const router = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        post: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation(
               (
@@ -551,7 +556,7 @@ describe('registerChatRoutes', () => {
 
     registerChatRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { executeAgent },
         callbackDeliveryService: { validateCallbackUrl },
       }),
@@ -561,20 +566,20 @@ describe('registerChatRoutes', () => {
     } as never);
 
     const response = {
-      accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
-      forbidden: jest.fn(),
-      customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
-      notFound: jest.fn(),
+      accepted: vi.fn(({ body }) => ({ status: 202, payload: body })),
+      forbidden: vi.fn(),
+      customError: vi.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+      notFound: vi.fn(),
     };
 
     const result = await callbackHandler!(
       {
         core: Promise.resolve({}),
         licensing: Promise.resolve({
-          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
         }),
         agentBuilder: Promise.resolve({
-          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+          spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
         }),
       },
       {
@@ -613,17 +618,17 @@ describe('registerChatRoutes', () => {
   it('rejects callback converse when the callback URL is not allowlisted', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
-    const validateCallbackUrl = jest.fn().mockImplementation(() => {
+    const validateCallbackUrl = vi.fn().mockImplementation(() => {
       throw new Error(
         'target url "https://disallowed.example.com/events" is not added to the Kibana config xpack.actions.allowedHosts'
       );
     });
-    const executeAgent = jest.fn();
+    const executeAgent = vi.fn();
 
     const router = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        post: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation(
               (
@@ -641,7 +646,7 @@ describe('registerChatRoutes', () => {
 
     registerChatRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { executeAgent },
         callbackDeliveryService: { validateCallbackUrl },
       }),
@@ -651,20 +656,20 @@ describe('registerChatRoutes', () => {
     } as never);
 
     const response = {
-      accepted: jest.fn(),
-      forbidden: jest.fn(),
-      customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
-      notFound: jest.fn(),
+      accepted: vi.fn(),
+      forbidden: vi.fn(),
+      customError: vi.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+      notFound: vi.fn(),
     };
 
     const result = await callbackHandler!(
       {
         core: Promise.resolve({}),
         licensing: Promise.resolve({
-          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
         }),
         agentBuilder: Promise.resolve({
-          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+          spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
         }),
       },
       {
@@ -695,8 +700,8 @@ describe('registerChatRoutes', () => {
 
     const buildRouter = (onConverse: (handler: Function) => void) => ({
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest.fn().mockImplementation((_versionConfig: unknown, handler: Function) => {
+        post: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi.fn().mockImplementation((_versionConfig: unknown, handler: Function) => {
             if (config.path === conversePath) {
               onConverse(handler);
             }
@@ -708,17 +713,17 @@ describe('registerChatRoutes', () => {
     const baseContext = {
       core: Promise.resolve({}),
       licensing: Promise.resolve({
-        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
       }),
       agentBuilder: Promise.resolve({
-        spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+        spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
       }),
     };
 
     it('rejects unknown skill ids with a 400', async () => {
       let converseHandler: Function | undefined;
-      const executeAgent = jest.fn();
-      const skillRegistry = { bulkGet: jest.fn().mockResolvedValue(new Map()) };
+      const executeAgent = vi.fn();
+      const skillRegistry = { bulkGet: vi.fn().mockResolvedValue(new Map()) };
 
       const router = buildRouter((h) => {
         converseHandler = h;
@@ -726,9 +731,9 @@ describe('registerChatRoutes', () => {
 
       registerChatRoutes({
         router,
-        getInternalServices: jest.fn().mockReturnValue({
+        getInternalServices: vi.fn().mockReturnValue({
           execution: { executeAgent },
-          skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
+          skills: { getRegistry: vi.fn().mockResolvedValue(skillRegistry) },
         }),
         coreSetup: {} as never,
         pluginsSetup: {},
@@ -736,10 +741,10 @@ describe('registerChatRoutes', () => {
       } as never);
 
       const response = {
-        ok: jest.fn(),
-        customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
-        forbidden: jest.fn(),
-        notFound: jest.fn(),
+        ok: vi.fn(),
+        customError: vi.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+        forbidden: vi.fn(),
+        notFound: vi.fn(),
       };
 
       const result = await converseHandler!(
@@ -761,9 +766,9 @@ describe('registerChatRoutes', () => {
 
     it('proceeds when all skill ids are known', async () => {
       let converseHandler: Function | undefined;
-      const executeAgent = jest.fn().mockResolvedValue({ events$: of() });
+      const executeAgent = vi.fn().mockResolvedValue({ events$: of() });
       const skillRegistry = {
-        bulkGet: jest.fn().mockResolvedValue(new Map([['known-skill', { id: 'known-skill' }]])),
+        bulkGet: vi.fn().mockResolvedValue(new Map([['known-skill', { id: 'known-skill' }]])),
       };
 
       const router = buildRouter((h) => {
@@ -772,9 +777,9 @@ describe('registerChatRoutes', () => {
 
       registerChatRoutes({
         router,
-        getInternalServices: jest.fn().mockReturnValue({
+        getInternalServices: vi.fn().mockReturnValue({
           execution: { executeAgent },
-          skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
+          skills: { getRegistry: vi.fn().mockResolvedValue(skillRegistry) },
         }),
         coreSetup: {} as never,
         pluginsSetup: {},
@@ -782,10 +787,10 @@ describe('registerChatRoutes', () => {
       } as never);
 
       const response = {
-        ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-        customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
-        forbidden: jest.fn(),
-        notFound: jest.fn(),
+        ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+        customError: vi.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+        forbidden: vi.fn(),
+        notFound: vi.fn(),
       };
 
       await converseHandler!(
@@ -837,7 +842,7 @@ describe('registerChatRoutes', () => {
           access_control: { access_mode: 'private', entries: [] },
         },
       };
-      const executeAgent = jest.fn().mockResolvedValue({
+      const executeAgent = vi.fn().mockResolvedValue({
         events$: of(
           roundCompleteEvent,
           executionStartedEvent,
@@ -851,8 +856,8 @@ describe('registerChatRoutes', () => {
 
       const router = {
         versioned: {
-          post: jest.fn().mockImplementation((config: { path: string }) => ({
-            addVersion: jest.fn().mockImplementation((_v: unknown, handler: Function) => {
+          post: vi.fn().mockImplementation((config: { path: string }) => ({
+            addVersion: vi.fn().mockImplementation((_v: unknown, handler: Function) => {
               if (config.path === asyncPath) {
                 asyncHandler = handler;
               }
@@ -863,21 +868,21 @@ describe('registerChatRoutes', () => {
 
       registerChatRoutes({
         router,
-        getInternalServices: jest.fn().mockReturnValue({
+        getInternalServices: vi.fn().mockReturnValue({
           execution: { executeAgent },
         }),
         coreSetup: {
-          getStartServices: jest.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
+          getStartServices: vi.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
         },
         pluginsSetup: {},
         logger: loggingSystemMock.createLogger(),
       } as never);
 
       const response = {
-        ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-        forbidden: jest.fn(),
-        customError: jest.fn(),
-        notFound: jest.fn(),
+        ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+        forbidden: vi.fn(),
+        customError: vi.fn(),
+        notFound: vi.fn(),
       };
       const aborted$ = new Subject<void>();
 
@@ -885,10 +890,10 @@ describe('registerChatRoutes', () => {
         {
           core: Promise.resolve({}),
           licensing: Promise.resolve({
-            license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+            license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
           }),
           agentBuilder: Promise.resolve({
-            spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+            spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
           }),
         },
         {

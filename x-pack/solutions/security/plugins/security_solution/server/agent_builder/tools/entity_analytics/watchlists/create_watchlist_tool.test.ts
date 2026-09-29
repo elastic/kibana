@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
@@ -23,35 +26,39 @@ import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/
 import { getWatchlistToolAvailability } from './watchlist_availability';
 import { createWatchlistTool, SECURITY_CREATE_WATCHLIST_TOOL_ID } from './create_watchlist_tool';
 
-jest.mock('./watchlist_availability', () => ({
-  getWatchlistToolAvailability: jest.fn(),
-}));
+vi.mock('./watchlist_availability', () => {
+      const mocked = {
+      getWatchlistToolAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetWatchlistToolAvailability = getWatchlistToolAvailability as jest.Mock;
+const mockGetWatchlistToolAvailability = getWatchlistToolAvailability as Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsWatchlistEnabled: true,
 } as ExperimentalFeatures;
 
-const mockCreateFn = jest.fn();
-jest.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_config', () => {
-  const actual = jest.requireActual(
-    '../../../../lib/entity_analytics/watchlists/management/watchlist_config'
-  );
+const mockCreateFn = vi.fn();
+vi.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_config', async () => {
+  const actual = (await vi.importActual('../../../../lib/entity_analytics/watchlists/management/watchlist_config'));
   return {
     ...actual,
-    WatchlistConfigClient: jest.fn().mockImplementation(() => ({
+    WatchlistConfigClient: vi.fn().mockImplementation(() => ({
       create: mockCreateFn,
     })),
   };
 });
 
-const mockGetUserWatchlistPrivileges = jest.fn();
-jest.mock(
+const mockGetUserWatchlistPrivileges = vi.fn();
+vi.mock(
   '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
-  () => ({
-    getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
-  })
+  () => {
+      const mocked = {
+        getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const buildCreatedWatchlist = (overrides: Partial<Record<string, unknown>> = {}) => ({
@@ -80,10 +87,10 @@ const buildHandlerContextWithPrompts = (
   };
   ctx.prompts = {
     ...ctx.prompts,
-    checkConfirmationStatus: jest.fn().mockReturnValue({
+    checkConfirmationStatus: vi.fn().mockReturnValue({
       status: promptOverrides.checkStatus ?? ConfirmationStatus.unprompted,
     }),
-    askForConfirmation: jest.fn().mockReturnValue(
+    askForConfirmation: vi.fn().mockReturnValue(
       promptOverrides.askResult ?? {
         prompt: {
           id: 'placeholder',
@@ -102,7 +109,7 @@ describe('createWatchlistTool', () => {
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
     mockGetWatchlistToolAvailability.mockResolvedValue({ status: 'available' });
     mockGetUserWatchlistPrivileges.mockResolvedValue({

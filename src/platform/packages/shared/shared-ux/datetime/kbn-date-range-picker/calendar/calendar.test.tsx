@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
@@ -14,18 +17,21 @@ import type { DateRange } from 'react-day-picker';
 
 import { Calendar } from './calendar';
 
-jest.mock('./calendar_view', () => ({
-  CalendarView: ({ year, monthIndex }: { year: number; monthIndex: number }) => {
-    const monthNum = String(monthIndex + 1).padStart(2, '0');
-    const month = new Date(year, monthIndex, 1);
+vi.mock('./calendar_view', () => {
+      const mocked = {
+      CalendarView: ({ year, monthIndex }: { year: number; monthIndex: number }) => {
+        const monthNum = String(monthIndex + 1).padStart(2, '0');
+        const month = new Date(year, monthIndex, 1);
 
-    return (
-      <div data-test-subj="calendar-view" data-month={`${year}-${monthNum}`}>
-        {month.toLocaleString('default', { month: 'long', year: 'numeric' })}
-      </div>
-    );
-  },
-}));
+        return (
+          <div data-test-subj="calendar-view" data-month={`${year}-${monthNum}`}>
+            {month.toLocaleString('default', { month: 'long', year: 'numeric' })}
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_MONTH_HEIGHT = 280;
 const TEST_VIEWPORT_MONTHS = 3;
@@ -65,7 +71,7 @@ function mockScrollerLayout() {
     });
   });
 
-  const scrollToSpy = jest.fn(({ top }: { top?: number }) => {
+  const scrollToSpy = vi.fn(({ top }: { top?: number }) => {
     if (typeof top === 'number') {
       scrollTop = top;
     }
@@ -89,13 +95,13 @@ function mockScrollerLayout() {
 }
 
 describe('Calendar', () => {
-  const defaultProps: { range: DateRange | undefined; onRangeChange: jest.Mock } = {
+  const defaultProps: { range: DateRange | undefined; onRangeChange: Mock } = {
     range: undefined,
-    onRangeChange: jest.fn(),
+    onRangeChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the current month inside the mounted window', () => {

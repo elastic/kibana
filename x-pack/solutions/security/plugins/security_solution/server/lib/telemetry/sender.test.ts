@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable dot-notation */
 import type { ExperimentalFeatures } from '../../../common';
 import { TelemetryEventsSender } from './sender';
@@ -484,15 +486,15 @@ describe('TelemetryEventsSender', () => {
     it('empties the queue when sending', async () => {
       const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       sender['telemetryStart'] = {
-        getIsOptedIn: jest.fn(async () => true),
+        getIsOptedIn: vi.fn(async () => true),
         isOptedIn$: of(true),
       };
       sender['telemetrySetup'] = {
-        getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
+        getTelemetryUrl: vi.fn(async () => new URL('https://telemetry.elastic.co')),
       };
-      sender['isTelemetryServicesReachable'] = jest.fn(async () => true);
+      sender['isTelemetryServicesReachable'] = vi.fn(async () => true);
       sender['telemetryUsageCounter'] = telemetryUsageCounter;
-      sender['sendEvents'] = jest.fn(async () => {
+      sender['sendEvents'] = vi.fn(async () => {
         sender['telemetryUsageCounter']?.incrementCounter({
           counterName: 'test_counter',
           counterType: 'invoked',
@@ -516,9 +518,9 @@ describe('TelemetryEventsSender', () => {
 
     it("shouldn't send when telemetry is disabled", async () => {
       const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
-      sender['sendEvents'] = jest.fn();
+      sender['sendEvents'] = vi.fn();
       const telemetryStart = {
-        getIsOptedIn: jest.fn(async () => false),
+        getIsOptedIn: vi.fn(async () => false),
         isOptedIn$: of(false),
       };
       sender['telemetryStart'] = telemetryStart;
@@ -533,13 +535,13 @@ describe('TelemetryEventsSender', () => {
 
     it("shouldn't send when telemetry when opted in but cannot connect to elastic telemetry services", async () => {
       const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
-      sender['sendEvents'] = jest.fn();
+      sender['sendEvents'] = vi.fn();
       const telemetryStart = {
-        getIsOptedIn: jest.fn(async () => true),
+        getIsOptedIn: vi.fn(async () => true),
         isOptedIn$: of(true),
       };
       sender['telemetryStart'] = telemetryStart;
-      sender['isTelemetryServicesReachable'] = jest.fn(async () => false);
+      sender['isTelemetryServicesReachable'] = vi.fn(async () => false);
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       expect(sender['queue'].length).toBe(2);

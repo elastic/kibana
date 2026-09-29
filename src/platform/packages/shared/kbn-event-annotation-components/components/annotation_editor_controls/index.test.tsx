@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import AnnotationEditorControls from './annotation_editor_controls';
@@ -24,11 +26,14 @@ import { act } from 'react-dom/test-utils';
 import { EuiButtonGroup, EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-jest.mock('@kbn/kql/public', () => ({
-  QueryStringInput: () => {
-    return 'QueryStringInput';
-  },
-}));
+vi.mock('@kbn/kql/public', () => {
+      const mocked = {
+      QueryStringInput: () => {
+        return 'QueryStringInput';
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const customLineStaticAnnotation: EventAnnotationConfig = {
   id: 'ann1',
@@ -159,7 +164,7 @@ describe('AnnotationsPanel', () => {
     });
 
     test('calculates correct endTimestamp and transparent color when switching for range annotation and back', async () => {
-      const onAnnotationChange = jest.fn();
+      const onAnnotationChange = vi.fn();
       const rangeEndTimestamp = new Date().toISOString();
 
       const { rerender } = render(
@@ -229,7 +234,7 @@ describe('AnnotationsPanel', () => {
     });
 
     test('keeps auto color when switching annotation types without a custom color', () => {
-      const onAnnotationChange = jest.fn();
+      const onAnnotationChange = vi.fn();
       const rangeEndTimestamp = new Date().toISOString();
       const autoColorAnnotation: EventAnnotationConfig = {
         id: 'ann1',
@@ -353,7 +358,7 @@ describe('AnnotationsPanel', () => {
     });
 
     test('should prefill timeField with the default time field when switching to query based annotations', () => {
-      const onAnnotationChange = jest.fn();
+      const onAnnotationChange = vi.fn();
 
       const component = mountWithThemeProvider({
         annotation: customLineStaticAnnotation,
@@ -374,7 +379,7 @@ describe('AnnotationsPanel', () => {
     });
 
     test('should avoid to retain specific manual configurations when switching to query based annotations', () => {
-      const onAnnotationChange = jest.fn();
+      const onAnnotationChange = vi.fn();
 
       const component = mountWithThemeProvider({
         annotation: customLineStaticAnnotation,
@@ -413,7 +418,7 @@ describe('AnnotationsPanel', () => {
         lineWidth: 3,
       };
 
-      const onAnnotationChange = jest.fn();
+      const onAnnotationChange = vi.fn();
 
       const component = mountWithThemeProvider({ annotation, onAnnotationChange });
 
@@ -447,7 +452,7 @@ describe('AnnotationsPanel', () => {
         filter: { type: 'kibana_query', query: '', language: 'kuery' },
       };
 
-      const onAnnotationChange = jest.fn();
+      const onAnnotationChange = vi.fn();
 
       const component = mountWithThemeProvider({ annotation, onAnnotationChange });
 
@@ -472,7 +477,7 @@ describe('AnnotationsPanel', () => {
     });
 
     test('should fallback to the first date field available in the dataView if not time-based', () => {
-      const onAnnotationChange = jest.fn();
+      const onAnnotationChange = vi.fn();
       const component = mountWithThemeProvider({
         annotation: customLineStaticAnnotation,
         onAnnotationChange,

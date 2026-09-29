@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -19,16 +21,19 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { KibanaServices } from '../../common/lib/kibana';
 
-jest.mock('../../containers/user_profiles/api');
-jest.mock('../create/template_fields', () => ({
-  CreateCaseTemplateFields: () => <div data-test-subj="create-case-template-fields" />,
-}));
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../containers/user_profiles/api');
+vi.mock('../create/template_fields', () => {
+      const mocked = {
+      CreateCaseTemplateFields: () => <div data-test-subj="create-case-template-fields" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/navigation/hooks');
 
 describe('CaseFormFields', () => {
   let user: UserEvent;
 
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const formDefaultValue = { tags: [] };
   const defaultProps = {
     isLoading: false,
@@ -36,22 +41,22 @@ describe('CaseFormFields', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     localStorage.clear();
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {
@@ -357,7 +362,7 @@ describe('CaseFormFields', () => {
 
   describe('templates v2', () => {
     it('does not render CreateCaseTemplateFields when templates v2 is disabled', () => {
-      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
 
       renderWithTestingProviders(
         <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
@@ -369,7 +374,7 @@ describe('CaseFormFields', () => {
     });
 
     it('renders CreateCaseTemplateFields when templates v2 is enabled', async () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -385,7 +390,7 @@ describe('CaseFormFields', () => {
     });
 
     it('does not render legacy custom fields when templates v2 is enabled and the switch is off', () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -409,7 +414,7 @@ describe('CaseFormFields', () => {
     });
 
     it('renders legacy custom fields, badge, callout, and divider when the switch is on', async () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -442,7 +447,7 @@ describe('CaseFormFields', () => {
     });
 
     it('shows the administrator message in the deprecation callout when the user lacks settings permission', async () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -477,7 +482,7 @@ describe('CaseFormFields', () => {
     });
 
     it('forces legacy custom fields visible when required fields lack defaults', async () => {
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig

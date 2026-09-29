@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID } from '@kbn/anonymization-common';
@@ -12,12 +14,15 @@ import { ProfileFormContent } from './profile_form_content';
 import { useProfileFormContext } from './profile_form_context';
 import { buildProfileFormContextValue } from './test_fixtures/profile_form_context_value';
 
-jest.mock('./profile_form_context', () => ({
-  useProfileFormContext: jest.fn(),
-}));
+vi.mock('./profile_form_context', () => {
+      const mocked = {
+      useProfileFormContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setContext = (overrides = {}) => {
-  jest.mocked(useProfileFormContext).mockReturnValue({
+  vi.mocked(useProfileFormContext).mockReturnValue({
     ...buildProfileFormContextValue(),
     ...overrides,
     fieldRulesError: undefined,

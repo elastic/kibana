@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
@@ -182,7 +184,7 @@ describe('parseTargetsPerActorRows — kind: "override" safety net', () => {
       logger
     );
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    const message = (logger.warn as jest.Mock).mock.calls[0][0] as string;
+    const message = (logger.warn as Mock).mock.calls[0][0] as string;
     expect(message).toContain('[okta]');
     expect(message).toContain('communicates_with');
     expect(message).toContain('results will be empty');
@@ -197,7 +199,7 @@ describe('parseTargetsPerActorRows — kind: "override" safety net', () => {
       logger
     );
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    const message = (logger.warn as jest.Mock).mock.calls[0][0] as string;
+    const message = (logger.warn as Mock).mock.calls[0][0] as string;
     expect(message).toContain('actorUserId');
   });
 
@@ -215,7 +217,7 @@ describe('parseTargetsPerActorRows — kind: "override" safety net', () => {
       logger
     );
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    const message = (logger.warn as jest.Mock).mock.calls[0][0] as string;
+    const message = (logger.warn as Mock).mock.calls[0][0] as string;
     expect(message).toContain('[hypothetical_owns_override]');
     expect(message).toContain('owns');
     expect(message).not.toContain('owns_inferred');

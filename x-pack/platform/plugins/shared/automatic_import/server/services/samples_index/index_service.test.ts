@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import expect from 'expect';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -13,14 +15,14 @@ import { AutomaticImportSamplesIndexService } from './index_service';
 import type { AddSamplesToDataStreamParams } from './index_service';
 
 // Mock the storage adapter
-jest.mock('./storage', () => {
-  const mockBulk = jest.fn().mockResolvedValue({
+vi.mock('./storage', () => {
+  const mockBulk = vi.fn().mockResolvedValue({
     took: 1,
     errors: false,
     items: [],
   });
 
-  const mockSearch = jest.fn().mockResolvedValue({
+  const mockSearch = vi.fn().mockResolvedValue({
     hits: {
       hits: [
         {
@@ -37,9 +39,9 @@ jest.mock('./storage', () => {
     },
   });
 
-  const mockDelete = jest.fn().mockResolvedValue({});
+  const mockDelete = vi.fn().mockResolvedValue({});
 
-  const mockGetClient = jest.fn().mockReturnValue({
+  const mockGetClient = vi.fn().mockReturnValue({
     bulk: mockBulk,
     search: mockSearch,
     delete: mockDelete,
@@ -47,11 +49,11 @@ jest.mock('./storage', () => {
 
   return {
     automaticImportSamplesIndexName: '.kibana-automatic-import-samples',
-    createIndexAdapter: jest.fn().mockReturnValue({
+    createIndexAdapter: vi.fn().mockReturnValue({
       getClient: mockGetClient,
     }),
-    AutomaticImportSamplesIndexAdapter: jest.fn(),
-    AutomaticImportSamplesProperties: jest.fn(),
+    AutomaticImportSamplesIndexAdapter: vi.fn(),
+    AutomaticImportSamplesProperties: vi.fn(),
   };
 });
 
@@ -61,7 +63,7 @@ describe('AutomaticImportSamplesIndexService', () => {
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockLoggerFactory = loggerMock.create();
 
@@ -81,7 +83,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
       await service.addSamplesToDataStream(params);
 
-      const { createIndexAdapter } = jest.requireMock('./storage');
+      const { createIndexAdapter } = (await vi.importMock('./storage'));
       const adapterInstance = createIndexAdapter.mock.results[0].value;
       const bulkClient = adapterInstance.getClient();
 
@@ -115,7 +117,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
       await service.addSamplesToDataStream(params);
 
-      const { createIndexAdapter } = jest.requireMock('./storage');
+      const { createIndexAdapter } = (await vi.importMock('./storage'));
       const adapterInstance = createIndexAdapter.mock.results[0].value;
       const bulkClient = adapterInstance.getClient();
 
@@ -146,7 +148,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
       await service.addSamplesToDataStream(params);
 
-      const { createIndexAdapter } = jest.requireMock('./storage');
+      const { createIndexAdapter } = (await vi.importMock('./storage'));
       const adapterInstance = createIndexAdapter.mock.results[0].value;
       const bulkClient = adapterInstance.getClient();
 
@@ -167,7 +169,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
       await service.addSamplesToDataStream(params);
 
-      const { createIndexAdapter } = jest.requireMock('./storage');
+      const { createIndexAdapter } = (await vi.importMock('./storage'));
       const adapterInstance = createIndexAdapter.mock.results[0].value;
       const bulkClient = adapterInstance.getClient();
 
@@ -192,7 +194,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
       await service.addSamplesToDataStream(params);
 
-      const { createIndexAdapter } = jest.requireMock('./storage');
+      const { createIndexAdapter } = (await vi.importMock('./storage'));
       const adapterInstance = createIndexAdapter.mock.results[0].value;
       const bulkClient = adapterInstance.getClient();
 
@@ -212,7 +214,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
       await service.addSamplesToDataStream(params);
 
-      const { createIndexAdapter } = jest.requireMock('./storage');
+      const { createIndexAdapter } = (await vi.importMock('./storage'));
       const adapterInstance = createIndexAdapter.mock.results[0].value;
       const bulkClient = adapterInstance.getClient();
 
@@ -231,7 +233,7 @@ describe('AutomaticImportSamplesIndexService', () => {
     it('should retrieve samples for a data stream', async () => {
       const samples = await service.getSamplesForDataStream('integration-123', 'data-stream-456');
 
-      const { createIndexAdapter } = jest.requireMock('./storage');
+      const { createIndexAdapter } = (await vi.importMock('./storage'));
       const adapterInstance = createIndexAdapter.mock.results[0].value;
       const searchClient = adapterInstance.getClient();
 
@@ -305,7 +307,7 @@ describe('AutomaticImportSamplesIndexService', () => {
     });
 
     it('should use correct index name and query parameters for filtering', async () => {
-      const { automaticImportSamplesIndexName } = jest.requireActual('./storage');
+      const { automaticImportSamplesIndexName } = (await vi.importActual('./storage'));
       mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 0 } as DeleteByQueryResponse);
 
       await service.deleteSamplesForDataStream('test-integration', 'test-datastream');

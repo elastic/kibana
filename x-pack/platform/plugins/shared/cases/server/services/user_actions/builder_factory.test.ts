@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   AttachmentType,
   CaseSeverity,
@@ -33,17 +35,17 @@ describe('UserActionBuilder', () => {
   let builderFactory: BuilderFactory;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     builderFactory = new BuilderFactory();
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('parameters', () => {

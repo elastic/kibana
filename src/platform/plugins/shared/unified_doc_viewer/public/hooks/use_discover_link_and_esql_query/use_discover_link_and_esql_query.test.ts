@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { esql } from '@elastic/esql';
 import { esqlEquals } from '../../utils/esql_expressions';
 import { useDiscoverLinkAndEsqlQuery } from '.';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 
-jest.mock('../use_generate_discover_link', () => ({
-  useGetGenerateDiscoverLink: jest.fn(),
-}));
+vi.mock('../use_generate_discover_link', () => {
+      const mocked = {
+      useGetGenerateDiscoverLink: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDiscoverLinkAndEsqlQuery', () => {
-  const mockUseGetGenerateDiscoverLink = jest.mocked(useGetGenerateDiscoverLink);
+  const mockUseGetGenerateDiscoverLink = vi.mocked(useGetGenerateDiscoverLink);
 
   beforeEach(() => {
     mockUseGetGenerateDiscoverLink.mockReset();
   });
 
   it('returns undefined values when indexPattern or whereClause are missing', () => {
-    const generateDiscoverLink = jest.fn(() => 'http://discover/url');
+    const generateDiscoverLink = vi.fn(() => 'http://discover/url');
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const { result } = renderHook(() =>
@@ -38,7 +43,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
 
   it('returns the raw esqlQueryString without SET prefix when no unmappedFieldsPolicy is provided', () => {
     const DISCOVER_URL = 'http://discover/url';
-    const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
+    const generateDiscoverLink = vi.fn(() => DISCOVER_URL);
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'traces-*';
@@ -54,7 +59,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
 
   it('prepends the SET directive when unmappedFieldsPolicy is provided', () => {
     const DISCOVER_URL = 'http://discover/url';
-    const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
+    const generateDiscoverLink = vi.fn(() => DISCOVER_URL);
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'logs-*';
@@ -71,7 +76,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
   });
 
   it('nullifies unmapped error.* columns in the in-tab query (#281060)', () => {
-    const generateDiscoverLink = jest.fn(() => 'http://discover/url');
+    const generateDiscoverLink = vi.fn(() => 'http://discover/url');
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'logs-*';
@@ -89,7 +94,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
   });
 
   it('preserves backslashes in the where clause without double-escaping', () => {
-    const generateDiscoverLink = jest.fn(() => 'http://discover/url');
+    const generateDiscoverLink = vi.fn(() => 'http://discover/url');
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'logs-*';

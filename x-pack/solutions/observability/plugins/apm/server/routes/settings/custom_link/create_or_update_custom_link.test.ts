@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockNow } from '../../../utils/test_helpers';
 import type { CustomLink } from '../../../../common/custom_link/custom_link_types';
 import { createOrUpdateCustomLink } from './create_or_update_custom_link';
 import type { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 describe('Create or Update Custom link', () => {
-  const internalClientIndexMock = jest.fn();
+  const internalClientIndexMock = vi.fn();
 
   const mockInternalESClient = {
     index: internalClientIndexMock,

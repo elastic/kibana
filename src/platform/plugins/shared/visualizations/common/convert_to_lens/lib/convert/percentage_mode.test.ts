@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { SchemaConfig } from '../../..';
 import { convertToColumnInPercentageMode } from './percentage_mode';
 
-const mockGetFormulaForAgg = jest.fn();
+const mockGetFormulaForAgg = vi.fn();
 
-jest.mock('../metrics/formula', () => ({
-  getFormulaForAgg: jest.fn(() => mockGetFormulaForAgg()),
-}));
+vi.mock('../metrics/formula', () => {
+      const mocked = {
+      getFormulaForAgg: vi.fn(() => mockGetFormulaForAgg()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertToColumnInPercentageMode', () => {
   const visType = 'heatmap';
@@ -38,7 +43,7 @@ describe('convertToColumnInPercentageMode', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetFormulaForAgg.mockReturnValue(formula);
   });
 

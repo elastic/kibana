@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { Type } from '@kbn/config-schema';
@@ -23,7 +25,7 @@ describe('Update API Key route', () => {
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     return coreMock.createCustomRequestHandlerContext({
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
 

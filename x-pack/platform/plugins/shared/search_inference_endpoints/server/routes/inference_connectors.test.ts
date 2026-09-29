@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { InferenceConnectorType } from '@kbn/inference-common';
@@ -36,12 +39,12 @@ interface SettingsValues {
 const createContext = ({
   defaultConnectorId,
   defaultConnectorOnly,
-}: SettingsValues = {}): jest.Mocked<RequestHandlerContext> =>
+}: SettingsValues = {}): Mocked<RequestHandlerContext> =>
   ({
     core: Promise.resolve({
       uiSettings: {
         client: {
-          get: jest.fn(async (key: string) => {
+          get: vi.fn(async (key: string) => {
             if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return defaultConnectorId;
             if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY)
               return defaultConnectorOnly ?? false;
@@ -50,11 +53,11 @@ const createContext = ({
         },
       },
     }),
-  } as unknown as jest.Mocked<RequestHandlerContext>);
+  } as unknown as Mocked<RequestHandlerContext>);
 
 const makeFeatureRegistry = (ignoreGlobalDefault = false): InferenceFeatureRegistry =>
   ({
-    get: jest.fn(() =>
+    get: vi.fn(() =>
       ignoreGlobalDefault ? { featureId: 'my_feature', ignoreGlobalDefault: true } : undefined
     ),
   } as unknown as InferenceFeatureRegistry);
@@ -62,9 +65,9 @@ const makeFeatureRegistry = (ignoreGlobalDefault = false): InferenceFeatureRegis
 describe('GET /internal/search_inference_endpoints/connectors', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
-  let getForFeature: jest.Mock;
-  let getConnectorList: jest.Mock;
-  let getConnectorById: jest.Mock;
+  let getForFeature: Mock;
+  let getConnectorList: Mock;
+  let getConnectorById: Mock;
 
   const registerRoute = (
     settings: SettingsValues = {},
@@ -87,10 +90,10 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    getForFeature = jest.fn();
-    getConnectorList = jest.fn();
-    getConnectorById = jest.fn();
+    vi.clearAllMocks();
+    getForFeature = vi.fn();
+    getConnectorList = vi.fn();
+    getConnectorById = vi.fn();
   });
 
   it('returns SO-configured endpoints as-is when soEntryFound is true', async () => {

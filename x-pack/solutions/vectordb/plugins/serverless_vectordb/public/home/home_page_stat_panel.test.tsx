@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import { EuiThemeProvider, useIsWithinMinBreakpoint } from '@elastic/eui';
@@ -20,18 +23,24 @@ import {
   type HomePageStatPanelMetric,
 } from './home_page_stat_panel';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useIsWithinMinBreakpoint: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useIsWithinMinBreakpoint: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockIsWithinMinBreakpoint = useIsWithinMinBreakpoint as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockIsWithinMinBreakpoint = useIsWithinMinBreakpoint as Mock;
 
-const navigateToIndexDetails = jest.fn();
-const navigateToDiscover = jest.fn();
+const navigateToIndexDetails = vi.fn();
+const navigateToDiscover = vi.fn();
 
 const newIndex: NewIndexDetails = {
   indexName: 'my_vectors',
@@ -52,7 +61,7 @@ const action = (overrides: Partial<HomePageStatPanelAction> = {}): HomePageStatP
   key: 'create',
   iconType: 'plusCircle',
   label: 'Create a dashboard',
-  onClick: jest.fn(),
+  onClick: vi.fn(),
   testSubj: 'createDashboardAction',
   telemetryId: 'createDashboardTelemetryId',
   ...overrides,
@@ -89,7 +98,7 @@ const openNewIndexMenu = async () => {
 
 describe('HomePageStatPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     window.localStorage.clear();
     mockIsWithinMinBreakpoint.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
@@ -129,7 +138,7 @@ describe('HomePageStatPanel', () => {
 
   describe('actions', () => {
     it('puts every action behind the overflow menu by default', async () => {
-      const onCreate = jest.fn();
+      const onCreate = vi.fn();
       renderPanel({ actions: [action({ onClick: onCreate })] });
 
       expect(screen.queryByTestId('createDashboardAction')).not.toBeInTheDocument();
@@ -141,8 +150,8 @@ describe('HomePageStatPanel', () => {
     });
 
     it('promotes the first action to a button when showPrimary is set', async () => {
-      const onCreate = jest.fn();
-      const onManage = jest.fn();
+      const onCreate = vi.fn();
+      const onManage = vi.fn();
       renderPanel({
         showPrimary: true,
         actions: [

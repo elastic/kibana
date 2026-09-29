@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { DefaultItemAction, EuiTableActionsColumnType } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
@@ -22,8 +24,8 @@ type ActionsColumn = EuiTableActionsColumnType<ContentListItem> & {
 const defaultContext: ColumnBuilderContext = {
   itemConfig: {
     actions: {
-      edit: { onItemAction: jest.fn() },
-      delete: { onBulkAction: jest.fn(async () => {}) },
+      edit: { onItemAction: vi.fn() },
+      delete: { onBulkAction: vi.fn(async () => {}) },
     },
   },
   isReadOnly: false,
@@ -41,7 +43,7 @@ const defaultContext: ColumnBuilderContext = {
 
 describe('actions column builder', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('buildActionsColumn', () => {
@@ -58,7 +60,7 @@ describe('actions column builder', () => {
       it('includes edit action when `actions.edit.onItemAction` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
-          itemConfig: { actions: { edit: { onItemAction: jest.fn() } } },
+          itemConfig: { actions: { edit: { onItemAction: vi.fn() } } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -85,7 +87,7 @@ describe('actions column builder', () => {
       it('includes delete action when `actions.delete.onBulkAction` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
-          itemConfig: { actions: { delete: { onBulkAction: jest.fn(async () => {}) } } },
+          itemConfig: { actions: { delete: { onBulkAction: vi.fn(async () => {}) } } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -122,7 +124,7 @@ describe('actions column builder', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
           isReadOnly: true,
-          features: { contentEditor: { open: jest.fn() } },
+          features: { contentEditor: { open: vi.fn() } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -137,7 +139,7 @@ describe('actions column builder', () => {
       it('includes the content editor action alongside edit and delete when `features.contentEditor.open` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
-          features: { contentEditor: { open: jest.fn() } },
+          features: { contentEditor: { open: vi.fn() } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -190,7 +192,7 @@ describe('actions column builder', () => {
       });
 
       it('renders a custom `<Action>` when its config is wired in `itemConfig.actions[id]`', () => {
-        const onArchive = jest.fn();
+        const onArchive = vi.fn();
         const context: ColumnBuilderContext = {
           ...defaultContext,
           itemConfig: {
@@ -220,7 +222,7 @@ describe('actions column builder', () => {
           itemConfig: {
             actions: {
               archive: {
-                onItemAction: jest.fn(),
+                onItemAction: vi.fn(),
                 restriction: (item) =>
                   item.managed ? 'Managed items cannot be archived.' : undefined,
               },

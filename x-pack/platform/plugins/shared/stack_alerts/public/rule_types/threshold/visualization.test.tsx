@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { screen, waitFor } from '@testing-library/react';
@@ -20,34 +23,37 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('./index_threshold_api', () => ({
-  getThresholdRuleVisualizationData: jest.fn(() =>
-    Promise.resolve({
-      results: [
-        { group: 'a', metrics: [['b', 2]] },
-        { group: 'a', metrics: [['b', 10]] },
-      ],
-    })
-  ),
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('./index_threshold_api', () => {
+      const mocked = {
+      getThresholdRuleVisualizationData: vi.fn(() =>
+        Promise.resolve({
+          results: [
+            { group: 'a', metrics: [['b', 2]] },
+            { group: 'a', metrics: [['b', 10]] },
+          ],
+        })
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getThresholdRuleVisualizationData } = jest.requireMock('./index_threshold_api');
+const { getThresholdRuleVisualizationData } = (await vi.importMock('./index_threshold_api'));
 
 const dataMock = dataPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 dataMock.fieldFormats = {
-  getDefaultInstance: jest.fn(() => ({
-    convert: jest.fn((s: unknown) => JSON.stringify(s)),
+  getDefaultInstance: vi.fn(() => ({
+    convert: vi.fn((s: unknown) => JSON.stringify(s)),
   })),
 } as unknown as DataPublicPluginStart['fieldFormats'];
 
 describe('ThresholdVisualization', () => {
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         uiSettings: uiSettingsServiceMock.createSetupContract(),
-        http: { post: jest.fn() },
+        http: { post: vi.fn() },
       },
     });
     getThresholdRuleVisualizationData.mockImplementation(() =>
@@ -84,7 +90,7 @@ describe('ThresholdVisualization', () => {
 
   test('periodically requests visualization data', async () => {
     const refreshRate = 10;
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
 
     renderWithI18n(
       <ThresholdVisualization
@@ -105,13 +111,13 @@ describe('ThresholdVisualization', () => {
 
     for (let i = 1; i <= 5; i++) {
       await act(async () => {
-        jest.advanceTimersByTime(refreshRate);
+        vi.advanceTimersByTime(refreshRate);
         await Promise.resolve();
       });
       expect(getThresholdRuleVisualizationData).toHaveBeenCalledTimes(i + 1);
     }
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('renders loading message on initial load', async () => {
@@ -177,13 +183,13 @@ describe('ThresholdVisualization', () => {
   });
 
   test('passes projectRouting from CPS manager to getThresholdRuleVisualizationData', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         uiSettings: uiSettingsServiceMock.createSetupContract(),
-        http: { post: jest.fn() },
+        http: { post: vi.fn() },
         cps: {
           cpsManager: {
-            getProjectRouting: jest.fn(() => '_alias:*'),
+            getProjectRouting: vi.fn(() => '_alias:*'),
           },
         },
       },
@@ -199,10 +205,10 @@ describe('ThresholdVisualization', () => {
   });
 
   test('passes undefined projectRouting when CPS manager is absent', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         uiSettings: uiSettingsServiceMock.createSetupContract(),
-        http: { post: jest.fn() },
+        http: { post: vi.fn() },
       },
     });
 

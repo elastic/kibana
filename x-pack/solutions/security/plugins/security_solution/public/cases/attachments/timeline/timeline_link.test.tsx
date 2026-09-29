@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,15 +19,15 @@ import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_cl
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { FAILED_TO_RETRIEVE_TIMELINE, TIMELINE_ERROR_TITLE } from './translations';
 
-jest.mock('../../../common/hooks/use_upselling');
-jest.mock('../../../common/components/user_privileges');
-jest.mock('../../../common/utils/timeline/use_timeline_click');
-jest.mock('../../../common/hooks/use_app_toasts');
+vi.mock('../../../common/hooks/use_upselling');
+vi.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/utils/timeline/use_timeline_click');
+vi.mock('../../../common/hooks/use_app_toasts');
 
-const useUpsellingMessageMock = useUpsellingMessage as jest.Mock;
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useTimelineClickMock = useTimelineClick as jest.Mock;
-const useAppToastsMock = useAppToasts as jest.Mock;
+const useUpsellingMessageMock = useUpsellingMessage as Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
+const useTimelineClickMock = useTimelineClick as Mock;
+const useAppToastsMock = useAppToasts as Mock;
 
 const baseProps = {
   savedObjectId: 'attachment-so-1',
@@ -33,11 +36,11 @@ const baseProps = {
 };
 
 describe('TimelineLink', () => {
-  const handleTimelineClick = jest.fn();
-  const addError = jest.fn();
+  const handleTimelineClick = vi.fn();
+  const addError = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUpsellingMessageMock.mockReturnValue(undefined);
     useUserPrivilegesMock.mockReturnValue({ timelinePrivileges: { read: true } });
     useTimelineClickMock.mockReturnValue(handleTimelineClick);

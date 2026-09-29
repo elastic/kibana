@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -15,15 +17,15 @@ import type { EmailService, HTMLEmail, PlainTextEmail, AttachmentEmail } from '.
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const emailServiceMock: EmailService = {
-  sendPlainTextEmail: jest.fn(),
-  sendHTMLEmail: jest.fn(),
-  sendAttachmentEmail: jest.fn(),
+  sendPlainTextEmail: vi.fn(),
+  sendHTMLEmail: vi.fn(),
+  sendAttachmentEmail: vi.fn(),
 };
 
 const validLicense = licensingMock.createLicenseMock();
 const invalidLicense = licensingMock.createLicenseMock();
 invalidLicense.type = 'basic';
-invalidLicense.check = jest.fn(() => ({
+invalidLicense.check = vi.fn(() => ({
   state: 'invalid',
   message: 'This is an invalid testing license',
 })) as unknown as any;

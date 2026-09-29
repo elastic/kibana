@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { deleteCasesStepDefinition } from './delete_cases';
 import { createStepHandlerContext } from './test_utils';
 import type { CasesClient } from '../../client';
@@ -18,7 +20,7 @@ describe('deleteCasesStepDefinition', () => {
   };
 
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = deleteCasesStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.deleteCases');
@@ -27,8 +29,8 @@ describe('deleteCasesStepDefinition', () => {
   });
 
   it('deletes all cases and returns deleted ids', async () => {
-    const deleteCases = jest.fn().mockResolvedValue(undefined);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const deleteCases = vi.fn().mockResolvedValue(undefined);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { delete: deleteCases },
     } as unknown as CasesClient);
     const definition = deleteCasesStepDefinition(getCasesClient);
@@ -44,8 +46,8 @@ describe('deleteCasesStepDefinition', () => {
   });
 
   it('returns translated error when delete fails', async () => {
-    const deleteCases = jest.fn().mockRejectedValue(new Error('delete failed'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const deleteCases = vi.fn().mockRejectedValue(new Error('delete failed'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { delete: deleteCases },
     } as unknown as CasesClient);
     const definition = deleteCasesStepDefinition(getCasesClient);

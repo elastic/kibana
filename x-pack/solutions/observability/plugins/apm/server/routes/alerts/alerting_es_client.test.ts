@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { type APMEventESSearchRequestParams, alertingEsClient } from './alerting_es_client';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { ESSearchResponse } from '@kbn/es-types';
 
 describe('alertingEsClient', () => {
-  let scopedClusterClientMock: jest.Mocked<{
-    asCurrentUser: jest.Mocked<ElasticsearchClient>;
+  let scopedClusterClientMock: Mocked<{
+    asCurrentUser: Mocked<ElasticsearchClient>;
   }>;
 
-  let uiSettingsClientMock: jest.Mocked<IUiSettingsClient>;
+  let uiSettingsClientMock: Mocked<IUiSettingsClient>;
 
   const params = {
     size: 10,
@@ -39,17 +42,17 @@ describe('alertingEsClient', () => {
   beforeEach(() => {
     scopedClusterClientMock = {
       asCurrentUser: {
-        search: jest.fn().mockResolvedValue(mockSearchResponse),
-      } as unknown as jest.Mocked<ElasticsearchClient>,
+        search: vi.fn().mockResolvedValue(mockSearchResponse),
+      } as unknown as Mocked<ElasticsearchClient>,
     };
 
     uiSettingsClientMock = {
-      get: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IUiSettingsClient>;
+      get: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Mocked<IUiSettingsClient>;
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   // Helper function to perform the search

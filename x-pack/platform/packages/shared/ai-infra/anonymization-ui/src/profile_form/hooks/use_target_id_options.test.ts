@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   TARGET_TYPE_DATA_VIEW,
@@ -15,35 +17,41 @@ import { useDataViewsList } from '../../common/services/target_lookup/hooks/use_
 import { useResolveIndex } from '../../common/services/target_lookup/hooks/use_resolve_index';
 import { useTargetIdOptions } from './use_target_id_options';
 
-jest.mock('../../common/services/target_lookup/hooks/use_data_views_list', () => ({
-  useDataViewsList: jest.fn(),
-}));
-jest.mock('../../common/services/target_lookup/hooks/use_resolve_index', () => ({
-  useResolveIndex: jest.fn(),
-}));
+vi.mock('../../common/services/target_lookup/hooks/use_data_views_list', () => {
+      const mocked = {
+      useDataViewsList: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/services/target_lookup/hooks/use_resolve_index', () => {
+      const mocked = {
+      useResolveIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const targetLookupClient = {
-  getDataViews: jest.fn(),
-  getDataViewById: jest.fn(),
-  resolveIndex: jest.fn(),
-  getFieldsForWildcard: jest.fn(),
+  getDataViews: vi.fn(),
+  getDataViewById: vi.fn(),
+  resolveIndex: vi.fn(),
+  getFieldsForWildcard: vi.fn(),
 };
 
 describe('useTargetIdOptions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useDataViewsList).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useDataViewsList).mockReturnValue({
       data: undefined,
       isFetching: false,
     } as unknown as ReturnType<typeof useDataViewsList>);
-    jest.mocked(useResolveIndex).mockReturnValue({
+    vi.mocked(useResolveIndex).mockReturnValue({
       data: undefined,
       isFetching: false,
     } as unknown as ReturnType<typeof useResolveIndex>);
   });
 
   it('maps data view options from query results', () => {
-    jest.mocked(useDataViewsList).mockReturnValue({
+    vi.mocked(useDataViewsList).mockReturnValue({
       data: { data_view: [{ id: 'dv-1', title: 'logs-*', name: 'Logs' }] },
       isFetching: false,
     } as unknown as ReturnType<typeof useDataViewsList>);
@@ -64,7 +72,7 @@ describe('useTargetIdOptions', () => {
   });
 
   it('uses data view title when name is missing', () => {
-    jest.mocked(useDataViewsList).mockReturnValue({
+    vi.mocked(useDataViewsList).mockReturnValue({
       data: { data_view: [{ id: 'dv-1', title: 'logs-*' }] },
       isFetching: false,
     } as unknown as ReturnType<typeof useDataViewsList>);
@@ -84,7 +92,7 @@ describe('useTargetIdOptions', () => {
   });
 
   it('uses data views loading state and disables resolve suggestions for data view targets', () => {
-    jest.mocked(useDataViewsList).mockReturnValue({
+    vi.mocked(useDataViewsList).mockReturnValue({
       data: undefined,
       isFetching: true,
     } as unknown as ReturnType<typeof useDataViewsList>);
@@ -101,7 +109,7 @@ describe('useTargetIdOptions', () => {
     );
 
     expect(result.current.isTargetIdLoading).toBe(true);
-    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+    expect(vi.mocked(useResolveIndex)).toHaveBeenCalledWith(
       expect.objectContaining({
         query: '',
         enabled: false,
@@ -110,7 +118,7 @@ describe('useTargetIdOptions', () => {
   });
 
   it('maps resolve-index options and keeps custom fallback', () => {
-    jest.mocked(useResolveIndex).mockReturnValue({
+    vi.mocked(useResolveIndex).mockReturnValue({
       data: {
         data_streams: [{ name: 'logs-stream' }],
         aliases: [{ name: 'logs-alias' }],
@@ -140,7 +148,7 @@ describe('useTargetIdOptions', () => {
   });
 
   it('returns empty options when resolve-index has no data', () => {
-    jest.mocked(useResolveIndex).mockReturnValue({
+    vi.mocked(useResolveIndex).mockReturnValue({
       data: undefined,
       isFetching: false,
     } as unknown as ReturnType<typeof useResolveIndex>);
@@ -160,7 +168,7 @@ describe('useTargetIdOptions', () => {
   });
 
   it('limits index options to 100 items', () => {
-    jest.mocked(useResolveIndex).mockReturnValue({
+    vi.mocked(useResolveIndex).mockReturnValue({
       data: {
         data_streams: [],
         aliases: [],
@@ -197,7 +205,7 @@ describe('useTargetIdOptions', () => {
       })
     );
 
-    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+    expect(vi.mocked(useResolveIndex)).toHaveBeenCalledWith(
       expect.objectContaining({
         query: 'kibana*',
         targetType: TARGET_TYPE_INDEX,
@@ -217,7 +225,7 @@ describe('useTargetIdOptions', () => {
       })
     );
 
-    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+    expect(vi.mocked(useResolveIndex)).toHaveBeenCalledWith(
       expect.objectContaining({
         query: 'kibana',
         targetType: TARGET_TYPE_INDEX_PATTERN,
@@ -237,7 +245,7 @@ describe('useTargetIdOptions', () => {
       })
     );
 
-    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+    expect(vi.mocked(useResolveIndex)).toHaveBeenCalledWith(
       expect.objectContaining({
         query: '',
         enabled: false,
@@ -257,7 +265,7 @@ describe('useTargetIdOptions', () => {
       })
     );
 
-    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+    expect(vi.mocked(useResolveIndex)).toHaveBeenCalledWith(
       expect.objectContaining({
         query: '*',
         enabled: true,
@@ -277,7 +285,7 @@ describe('useTargetIdOptions', () => {
       })
     );
 
-    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+    expect(vi.mocked(useResolveIndex)).toHaveBeenCalledWith(
       expect.objectContaining({
         expandWildcards: 'open',
       })
@@ -296,7 +304,7 @@ describe('useTargetIdOptions', () => {
       })
     );
 
-    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+    expect(vi.mocked(useResolveIndex)).toHaveBeenCalledWith(
       expect.objectContaining({
         expandWildcards: 'all',
       })
@@ -304,7 +312,7 @@ describe('useTargetIdOptions', () => {
   });
 
   it('filters out unavailable index options and custom fallback', () => {
-    jest.mocked(useResolveIndex).mockReturnValue({
+    vi.mocked(useResolveIndex).mockReturnValue({
       data: {
         data_streams: [],
         aliases: [],
@@ -331,7 +339,7 @@ describe('useTargetIdOptions', () => {
   });
 
   it('filters out unavailable data view options', () => {
-    jest.mocked(useDataViewsList).mockReturnValue({
+    vi.mocked(useDataViewsList).mockReturnValue({
       data: {
         data_view: [
           { id: 'dv-1', title: 'logs-*', name: 'Logs' },

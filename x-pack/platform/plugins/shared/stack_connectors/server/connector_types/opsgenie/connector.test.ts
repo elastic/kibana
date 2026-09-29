@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import crypto from 'crypto';
@@ -20,24 +23,24 @@ import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/opsgenie';
 import type { CreateAlertParams } from '@kbn/connector-schemas/opsgenie';
 import { renderParameterTemplates } from './render_template_variables';
 
-jest.mock('axios');
+vi.mock('axios');
 
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
+    request: vi.fn(),
   };
 });
 
-const axiosMock = axios as jest.Mocked<typeof axios>;
-const requestMock = utils.request as jest.Mock;
+const axiosMock = axios as Mocked<typeof axios>;
+const requestMock = utils.request as Mock;
 
 describe('OpsgenieConnector', () => {
-  const axiosInstanceMock = jest.fn();
+  const axiosInstanceMock = vi.fn();
 
   let connector: OpsgenieConnector;
-  let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
+  let mockedActionsConfig: Mocked<ActionsConfigurationUtilities>;
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
   let connectorUsageCollector: ConnectorUsageCollector;
@@ -61,8 +64,8 @@ describe('OpsgenieConnector', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
     requestMock.mockReturnValue({ data: { took: 5, requestId: '123', result: 'ok' } });
     axiosMock.create.mockImplementation(() => {
       return axiosInstanceMock as unknown as AxiosInstance;

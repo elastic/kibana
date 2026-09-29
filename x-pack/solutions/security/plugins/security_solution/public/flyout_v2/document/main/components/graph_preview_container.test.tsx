@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
@@ -25,25 +28,37 @@ import {
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
-jest.mock('../../../../common/hooks/use_upselling');
-jest.mock('../hooks/use_graph_preview');
-jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
-  useFetchGraphData: jest.fn(),
-}));
-jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
-  uiMetricService: { trackUiMetric: jest.fn() },
-}));
-jest.mock('@kbn/cloud-security-posture-graph', () => ({
-  Graph: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
-}));
-jest.mock('../../../shared/components/graph_preview', () => ({
-  GraphPreview: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
-}));
+vi.mock('../../../../common/hooks/use_upselling');
+vi.mock('../hooks/use_graph_preview');
+vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
+      const mocked = {
+      useFetchGraphData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
+      const mocked = {
+      uiMetricService: { trackUiMetric: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/cloud-security-posture-graph', () => {
+      const mocked = {
+      Graph: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/components/graph_preview', () => {
+      const mocked = {
+      GraphPreview: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUpsellingComponent = useUpsellingComponent as jest.Mock;
-const mockUseGraphPreview = useGraphPreview as jest.Mock;
-const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
-const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
+const mockUseUpsellingComponent = useUpsellingComponent as Mock;
+const mockUseGraphPreview = useGraphPreview as Mock;
+const mockUseFetchGraphData = useFetchGraphData as Mock;
+const uiMetricServiceMock = uiMetricService as Mocked<typeof uiMetricService>;
 
 const mockHit = {
   id: '1',
@@ -52,7 +67,7 @@ const mockHit = {
   isAnchor: false,
 } as DataTableRecord;
 
-const mockOnShowGraph = jest.fn();
+const mockOnShowGraph = vi.fn();
 
 const renderContainer = (
   overrides: Partial<React.ComponentProps<typeof GraphPreviewContainer>> = {}
@@ -73,7 +88,7 @@ const previewAvailable = {
 
 describe('<GraphPreviewContainer />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUpsellingComponent.mockReturnValue(null);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,

@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { getReportingShareIntegrationConfig } from './scheduled_report_share_integration';
 import type { ExportShareConfig, ShareContext } from '@kbn/share-plugin/public/types';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 
-jest.mock('../components/scheduled_report_flyout_share_wrapper', () => ({
-  ScheduledReportFlyoutShareWrapper: () => (
-    <div data-test-subj="mockScheduledReportFlyoutShareWrapper" />
-  ),
-}));
+vi.mock('../components/scheduled_report_flyout_share_wrapper', () => {
+      const mocked = {
+      ScheduledReportFlyoutShareWrapper: () => (
+        <div data-test-subj="mockScheduledReportFlyoutShareWrapper" />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getReportingShareIntegrationConfig', () => {
-  const mockApiClient = {} as jest.Mocked<ReportingAPIClient>;
+  const mockApiClient = {} as Mocked<ReportingAPIClient>;
   const mockServices = {} as any;
   const mockShareContext = {
     sharingData: { exportType: 'pngV2' },

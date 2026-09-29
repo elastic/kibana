@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -33,30 +35,30 @@ const mockSystemPrompts: PromptResponse[] = [mockSystemPrompt];
 
 const mockUseAssistantContext = {
   conversations: mockConversations,
-  setConversations: jest.fn(),
-  setAllSystemPrompts: jest.fn(),
+  setConversations: vi.fn(),
+  setAllSystemPrompts: vi.fn(),
   allSystemPrompts: mockSystemPrompts,
   chrome: {
-    getChromeStyle$: jest.fn(() => of('classic')),
+    getChromeStyle$: vi.fn(() => of('classic')),
   },
   assistantAvailability: {
     hasAssistantPrivilege: true,
   },
 };
 
-jest.mock('../../../assistant_context', () => {
-  const original = jest.requireActual('../../../assistant_context');
+vi.mock('../../../assistant_context', async () => {
+  const original = (await vi.importActual('../../../assistant_context'));
   return {
     ...original,
-    useAssistantContext: jest.fn().mockImplementation(() => mockUseAssistantContext),
+    useAssistantContext: vi.fn().mockImplementation(() => mockUseAssistantContext),
   };
 });
 
 const mockUseConversation = {
-  setApiConfig: jest.fn(),
+  setApiConfig: vi.fn(),
 };
-jest.mock('../../use_conversation', () => {
-  const original = jest.requireActual('../../use_conversation');
+vi.mock('../../use_conversation', async () => {
+  const original = (await vi.importActual('../../use_conversation'));
 
   return {
     ...original,
@@ -66,17 +68,17 @@ jest.mock('../../use_conversation', () => {
 
 describe('SystemPrompt', () => {
   const isSettingsModalVisible = false;
-  const onSystemPromptSelectionChange = jest.fn();
-  const setIsSettingsModalVisible = jest.fn();
+  const onSystemPromptSelectionChange = vi.fn();
+  const setIsSettingsModalVisible = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jest.mock('../../../assistant_context', () => {
-      const original = jest.requireActual('../../../assistant_context');
+    vi.doMock('../../../assistant_context', async () => {
+      const original = (await vi.importActual('../../../assistant_context'));
       return {
         ...original,
-        useAssistantContext: jest.fn().mockImplementation(() => mockUseAssistantContext),
+        useAssistantContext: vi.fn().mockImplementation(() => mockUseAssistantContext),
       };
     });
   });

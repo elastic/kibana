@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -31,7 +33,7 @@ import type { CreateControlTypeAction } from '../../../actions/control_panel_act
 
 // Stub out the ES|QL editor so we don't mount Monaco in tests; we only care about the
 // surrounding editor's reaction to the values_source toggle.
-jest.mock('@kbn/esql/public', () => ({
+vi.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: () => <div data-test-subj="mock-esql-editor" />,
 }));
 
@@ -57,7 +59,7 @@ const mockDataView = createStubDataView({
 const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   esqlVariables$: new BehaviorSubject([]),
-  getEditorConfig: jest.fn(),
+  getEditorConfig: vi.fn(),
 };
 
 const mockRegisteredTriggerActions: CreateControlTypeAction[] = [
@@ -70,7 +72,7 @@ const mockRegisteredTriggerActions: CreateControlTypeAction[] = [
     getIconType: () => 'text',
     getDisplayName: () => 'Alphabetically first',
     isCompatible: () => Promise.resolve(true),
-    execute: jest.fn().mockReturnValue({
+    execute: vi.fn().mockReturnValue({
       api: dashboardApi,
       Component: <>Should be first alphabetically</>,
     }),
@@ -82,7 +84,7 @@ const mockRegisteredTriggerActions: CreateControlTypeAction[] = [
     getIconType: () => 'starFill',
     getDisplayName: () => 'Supreme leader',
     isCompatible: () => Promise.resolve(true),
-    execute: jest.fn().mockReturnValue({
+    execute: vi.fn().mockReturnValue({
       api: dashboardApi,
       Component: <>This control is forced first via the factory order</>,
     }),
@@ -101,8 +103,8 @@ describe('Data control editor', () => {
     controlType?: string;
     initialDefaultPanelTitle?: string;
   }) => {
-    dataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
-    (uiActionsService as Writable<typeof uiActionsService>).getTriggerActions = jest
+    dataViewsService.get = vi.fn().mockResolvedValue(mockDataView);
+    (uiActionsService as Writable<typeof uiActionsService>).getTriggerActions = vi
       .fn()
       .mockResolvedValue(mockRegisteredTriggerActions);
 
@@ -136,7 +138,9 @@ describe('Data control editor', () => {
   };
 
   const selectField = async (controlEditor: RenderResult, fieldName: string) => {
-    expect(controlEditor.queryByTestId(`field-picker-select-${fieldName}`)).toBeInTheDocument();
+    expect(
+      await controlEditor.findByTestId(`field-picker-select-${fieldName}`)
+    ).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(controlEditor.getByTestId(`field-picker-select-${fieldName}`));
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { unsnoozeRuleRoute } from './unsnooze_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
@@ -14,9 +16,12 @@ import { RuleTypeDisabledError } from '../../../../../lib/errors/rule_type_disab
 import type { SanitizedRule } from '../../../../../types';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('unsnoozeAlertRoute', () => {
   const mockedRule: SanitizedRule<{
@@ -62,8 +67,8 @@ describe('unsnoozeAlertRoute', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
+    vi.resetAllMocks();
+    rulesClient.get = vi.fn().mockResolvedValue(mockedRule);
   });
 
   it('unsnoozes a rule', async () => {
@@ -175,7 +180,7 @@ describe('unsnoozeAlertRoute', () => {
     it('returns 400 if the rule type is internally managed', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
-      rulesClient.get = jest
+      rulesClient.get = vi
         .fn()
         .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
 

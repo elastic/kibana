@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
@@ -32,11 +35,11 @@ describe('EnterForeachIterationNodeImpl', () => {
     } as GraphNodeUnion;
 
     workflowExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowExecutionRuntimeManager.navigateToNextNode = jest.fn();
+    workflowExecutionRuntimeManager.navigateToNextNode = vi.fn();
 
     stepExecutionRuntime = {
-      startStep: jest.fn(),
-      setInput: jest.fn(),
+      startStep: vi.fn(),
+      setInput: vi.fn(),
       scopeStack: WorkflowScopeStack.fromStackFrames([
         {
           stepId: 'loop',
@@ -47,20 +50,20 @@ describe('EnterForeachIterationNodeImpl', () => {
 
     foreachStepRuntime = {
       node: { stepId: 'loop' },
-      getCurrentStepResult: jest.fn().mockReturnValue({
+      getCurrentStepResult: vi.fn().mockReturnValue({
         input: {
           foreach: '{{ consts.items }}',
           items: ['item0', 'item1', 'item2'],
         },
       }),
       contextManager: {
-        evaluateExpressionInContext: jest.fn(),
-        renderValueAccordingToContext: jest.fn(),
+        evaluateExpressionInContext: vi.fn(),
+        renderValueAccordingToContext: vi.fn(),
       },
     } as unknown as StepExecutionRuntime;
 
     stepExecutionRuntimeFactory = {
-      createStepExecutionRuntime: jest.fn().mockReturnValue(foreachStepRuntime),
+      createStepExecutionRuntime: vi.fn().mockReturnValue(foreachStepRuntime),
     } as unknown as StepExecutionRuntimeFactory;
 
     underTest = new EnterForeachIterationNodeImpl(
@@ -102,10 +105,10 @@ describe('EnterForeachIterationNodeImpl', () => {
   });
 
   it('should re-evaluate the foreach expression when input has no items', () => {
-    (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
+    (foreachStepRuntime.getCurrentStepResult as Mock).mockReturnValue({
       input: { foreach: '{{ consts.items }}' },
     });
-    (foreachStepRuntime.contextManager.evaluateExpressionInContext as jest.Mock).mockReturnValue([
+    (foreachStepRuntime.contextManager.evaluateExpressionInContext as Mock).mockReturnValue([
       'legacy0',
       'legacy1',
       'legacy2',
@@ -121,10 +124,10 @@ describe('EnterForeachIterationNodeImpl', () => {
   });
 
   it('should parse a rendered JSON list when input has no items', () => {
-    (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
+    (foreachStepRuntime.getCurrentStepResult as Mock).mockReturnValue({
       input: { foreach: '["a", "b", "c"]' },
     });
-    (foreachStepRuntime.contextManager.renderValueAccordingToContext as jest.Mock).mockReturnValue(
+    (foreachStepRuntime.contextManager.renderValueAccordingToContext as Mock).mockReturnValue(
       '["a", "b", "c"]'
     );
 
@@ -137,7 +140,7 @@ describe('EnterForeachIterationNodeImpl', () => {
   });
 
   it('should throw if the foreach step has no items and no expression to re-evaluate', () => {
-    (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
+    (foreachStepRuntime.getCurrentStepResult as Mock).mockReturnValue({
       input: {},
     });
 

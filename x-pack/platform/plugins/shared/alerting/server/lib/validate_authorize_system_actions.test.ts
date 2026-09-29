@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
@@ -19,12 +22,12 @@ describe('validateAndAuthorizeSystemActions', () => {
   const connectorAdapter: ConnectorAdapter = {
     connectorTypeId: '.test',
     ruleActionParamsSchema: schema.object({ foo: schema.string() }),
-    buildActionParams: jest.fn(),
+    buildActionParams: vi.fn(),
   };
 
   let registry: ConnectorAdapterRegistry;
-  let actionsClient: jest.Mocked<ActionsClient>;
-  let actionsAuthorization: jest.Mocked<ActionsAuthorization>;
+  let actionsClient: Mocked<ActionsClient>;
+  let actionsAuthorization: Mocked<ActionsAuthorization>;
 
   beforeEach(() => {
     registry = new ConnectorAdapterRegistry();

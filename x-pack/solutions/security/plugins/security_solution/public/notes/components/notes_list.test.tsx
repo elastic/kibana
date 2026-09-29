@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, within } from '@testing-library/react';
 import React from 'react';
 import {
@@ -21,10 +24,10 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import type { Note } from '../../../common/api/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
-jest.mock('../../common/hooks/use_experimental_features');
+vi.mock('../../common/hooks/use_experimental_features');
 
-jest.mock('../../common/components/user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+vi.mock('../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 const mockNote: Note = {
   eventId: '1',
@@ -41,7 +44,7 @@ const mockOptions = { hideTimelineIcon: true };
 
 describe('NotesList', () => {
   beforeEach(() => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(false);
 
     useUserPrivilegesMock.mockReturnValue({
       timelinePrivileges: { read: true },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { schema } from '@kbn/config-schema';
@@ -27,13 +30,16 @@ import {
   postEnrollmentApiKeyHandler,
 } from './handler';
 
-jest.mock('./handler', () => ({
-  ...jest.requireActual('./handler'),
-  getEnrollmentApiKeysHandler: jest.fn(),
-  getOneEnrollmentApiKeyHandler: jest.fn(),
-  deleteEnrollmentApiKeyHandler: jest.fn(),
-  postEnrollmentApiKeyHandler: jest.fn(),
-}));
+vi.mock('./handler', async () => {
+      const mocked = {
+      ...(await vi.importActual('./handler')),
+      getEnrollmentApiKeysHandler: vi.fn(),
+      getOneEnrollmentApiKeyHandler: vi.fn(),
+      deleteEnrollmentApiKeyHandler: vi.fn(),
+      postEnrollmentApiKeyHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -60,7 +66,7 @@ describe('schema validation', () => {
       page: 1,
       perPage: 20,
     };
-    (getEnrollmentApiKeysHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getEnrollmentApiKeysHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getEnrollmentApiKeysHandler(context, {} as any, response);
@@ -82,7 +88,7 @@ describe('schema validation', () => {
         created_at: '2020-01-01',
       },
     };
-    (getOneEnrollmentApiKeyHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getOneEnrollmentApiKeyHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getOneEnrollmentApiKeyHandler(context, {} as any, response);
@@ -98,7 +104,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       action: 'deleted',
     };
-    (deleteEnrollmentApiKeyHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (deleteEnrollmentApiKeyHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await deleteEnrollmentApiKeyHandler(context, {} as any, response);
@@ -121,7 +127,7 @@ describe('schema validation', () => {
       },
       action: 'created',
     };
-    (postEnrollmentApiKeyHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (postEnrollmentApiKeyHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await postEnrollmentApiKeyHandler(context, {} as any, response);

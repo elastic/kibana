@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { addExistsFilter, addFilterIn, addFilterOut } from '@kbn/cell-actions/actions';
 import { of } from 'rxjs';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
@@ -12,17 +14,23 @@ import type { CreateFilterLensActionParams } from './create_action';
 import { createFilterLensAction } from './create_action';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
-jest.mock('@kbn/cell-actions/actions', () => ({
-  addFilterIn: jest.fn(),
-  addFilterOut: jest.fn(),
-  addExistsFilter: jest.fn(),
-}));
+vi.mock('@kbn/cell-actions/actions', () => {
+      const mocked = {
+      addFilterIn: vi.fn(),
+      addFilterOut: vi.fn(),
+      addExistsFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../timelines/store', () => ({
-  timelineSelectors: {
-    getTimelineByIdSelector: jest.fn().mockReturnValue(() => ({})),
-  },
-}));
+vi.mock('../../../../timelines/store', () => {
+      const mocked = {
+      timelineSelectors: {
+        getTimelineByIdSelector: vi.fn().mockReturnValue(() => ({})),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createFilterLensAction', () => {
   const mockServices = {
@@ -30,16 +38,16 @@ describe('createFilterLensAction', () => {
     data: { query: { filterManager: 'mockFilterManager' } },
     application: { currentAppId$: of('appId') },
     topValuesPopover: {
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
     },
     notifications: {
       toasts: {
-        addWarning: jest.fn(),
+        addWarning: vi.fn(),
       },
     },
   };
   const mockStore = {
-    getState: jest.fn(),
+    getState: vi.fn(),
   };
 
   const mockUserCountData = [
@@ -82,7 +90,7 @@ describe('createFilterLensAction', () => {
   } as unknown as CreateFilterLensActionParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create a "filter In" action with the field value', async () => {

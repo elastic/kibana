@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -20,54 +23,66 @@ import { useConnectors } from '../../../../../common/hooks/use_connectors';
 import { useListWorkflows } from '../../workflow_configuration/hooks/use_list_workflows';
 import { useGenerateWorkflow } from '../../workflow_configuration/hooks/use_generate_workflow';
 
-jest.mock('@kbn/inference-connectors');
-jest.mock('../logic/use_schedule_api');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_connectors');
-jest.mock('../../workflow_configuration/hooks/use_list_workflows');
-jest.mock('../../workflow_configuration/hooks/use_generate_workflow');
-jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn().mockReturnValue({
-    dataView: undefined,
-    status: 'ready',
-  }),
-}));
+vi.mock('@kbn/inference-connectors');
+vi.mock('../logic/use_schedule_api');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/hooks/use_connectors');
+vi.mock('../../workflow_configuration/hooks/use_list_workflows');
+vi.mock('../../workflow_configuration/hooks/use_generate_workflow');
+vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn().mockReturnValue({
+        dataView: undefined,
+        status: 'ready',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 // Stub the heavy RuleActionsField subtree. It renders the triggers_actions_ui
 // `ActionForm` via `React.lazy`/`Suspense` (`getActionFormLazy`), whose first
 // mount pays a large one-time lazy-import cost and whose connector/action-type
 // loads never settle under jsdom. That subtree — not `AlertSelection` — is the
 // dominant cost and the source of the "not wrapped in act(...)" churn that
 // tripped Jest's 5s per-test timeout in CI.
-jest.mock('../../../../../common/components/rule_actions_field', () => ({
-  RuleActionsField: () => <div data-test-subj="mockRuleActionsField" />,
-}));
+vi.mock('../../../../../common/components/rule_actions_field', () => {
+      const mocked = {
+      RuleActionsField: () => <div data-test-subj="mockRuleActionsField" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 // Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
 // alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
 // stub keeps the `alertSelection` marker and an `alertsRange` control wired to
 // `onSettingsChanged` so the unsaved-changes assertions still exercise it.
-jest.mock('../../alert_selection', () => ({
-  AlertSelection: ({
-    settings,
-    onSettingsChanged,
-  }: {
-    settings: Record<string, unknown>;
-    onSettingsChanged?: (settings: Record<string, unknown>) => void;
-  }) => (
-    <div data-test-subj="alertSelection">
-      <input
-        data-test-subj="alertsRange"
-        onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
-      />
-    </div>
-  ),
-}));
-jest.mock('react-router-dom', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
+vi.mock('../../alert_selection', () => {
+      const mocked = {
+      AlertSelection: ({
+        settings,
+        onSettingsChanged,
+      }: {
+        settings: Record<string, unknown>;
+        onSettingsChanged?: (settings: Record<string, unknown>) => void;
+      }) => (
+        <div data-test-subj="alertSelection">
+          <input
+            data-test-subj="alertsRange"
+            onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
+          />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockConnectors: unknown[] = [
   {
@@ -80,10 +95,10 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseScheduleApi = useScheduleApi as jest.MockedFunction<typeof useScheduleApi>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseScheduleApi = useScheduleApi as MockedFunction<typeof useScheduleApi>;
 
-const setMockCreateSchedule = ({ mutateAsync }: { mutateAsync: jest.Mock }) => {
+const setMockCreateSchedule = ({ mutateAsync }: { mutateAsync: Mock }) => {
   mockUseScheduleApi.mockReturnValue({
     isWorkflowsEnabled: false,
     useCreateSchedule: () =>
@@ -94,7 +109,7 @@ const setMockCreateSchedule = ({ mutateAsync }: { mutateAsync: jest.Mock }) => {
 };
 
 const defaultProps = {
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 const renderComponent = async () => {
@@ -109,12 +124,12 @@ const renderComponent = async () => {
 
 describe('CreateFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(false),
+          useBooleanValue: vi.fn().mockReturnValue(false),
         },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
@@ -123,7 +138,7 @@ describe('CreateFlyout', () => {
           ...triggersActionsUiMock.createStart(),
         },
         uiSettings: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
         unifiedSearch: {
           ui: {
@@ -131,33 +146,33 @@ describe('CreateFlyout', () => {
           },
         },
       },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    } as unknown as Mocked<ReturnType<typeof useKibana>>);
 
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       isLoading: false,
       data: mockConnectors,
     });
 
-    (useConnectors as jest.Mock).mockReturnValue({
+    (useConnectors as Mock).mockReturnValue({
       connectors: mockConnectors,
-      setCurrentConnector: jest.fn(),
+      setCurrentConnector: vi.fn(),
     });
 
-    (useListWorkflows as jest.Mock).mockReturnValue({
+    (useListWorkflows as Mock).mockReturnValue({
       data: [],
       isLoading: false,
       isSuccess: true,
       status: 'success' as const,
     });
 
-    (useGenerateWorkflow as jest.Mock).mockReturnValue({
-      cancelGeneration: jest.fn(),
+    (useGenerateWorkflow as Mock).mockReturnValue({
+      cancelGeneration: vi.fn(),
       generatedWorkflow: null,
       isGenerating: false,
-      startGeneration: jest.fn(),
+      startGeneration: vi.fn(),
     });
 
-    setMockCreateSchedule({ mutateAsync: jest.fn() });
+    setMockCreateSchedule({ mutateAsync: vi.fn() });
   });
 
   it('should render the flyout title', async () => {
@@ -229,11 +244,11 @@ describe('CreateFlyout', () => {
   });
 
   it('does not call createAttackDiscoverySchedule if a connector is not found', async () => {
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       isLoading: false,
       data: [],
     });
-    const mutateAsync = jest.fn();
+    const mutateAsync = vi.fn();
     setMockCreateSchedule({ mutateAsync });
     await act(async () => {
       render(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
@@ -16,7 +18,7 @@ describe('transform connector for export', () => {
     id: 'test',
     name: 'Test',
   });
-  const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> =
+  const actionTypeRegistry: Mocked<ActionTypeRegistryContract> =
     actionTypeRegistryMock.create();
 
   const connectorsWithNoSecrets = [

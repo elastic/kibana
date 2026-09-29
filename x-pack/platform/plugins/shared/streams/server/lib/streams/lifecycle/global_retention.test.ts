@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getDataStreamGlobalRetention } from './global_retention';
@@ -25,14 +28,14 @@ const createResponseError = (statusCode: number): errors.ResponseError =>
     },
   });
 
-const createEsClientMock = ({ request }: { request: jest.Mock }): ElasticsearchClient =>
+const createEsClientMock = ({ request }: { request: Mock }): ElasticsearchClient =>
   ({
     transport: { request },
   } as unknown as ElasticsearchClient);
 
 describe('getDataStreamGlobalRetention', () => {
   it('reads both default and max from the data stream lifecycle', async () => {
-    const request = jest.fn().mockResolvedValue({
+    const request = vi.fn().mockResolvedValue({
       global_retention: { default_retention: '90d', max_retention: '365d' },
     });
 
@@ -45,7 +48,7 @@ describe('getDataStreamGlobalRetention', () => {
   });
 
   it('returns only the max when the default is not configured', async () => {
-    const request = jest.fn().mockResolvedValue({
+    const request = vi.fn().mockResolvedValue({
       global_retention: { max_retention: '365d' },
     });
 
@@ -58,7 +61,7 @@ describe('getDataStreamGlobalRetention', () => {
   });
 
   it('returns an empty result when no global retention is configured', async () => {
-    const request = jest.fn().mockResolvedValue({ global_retention: {} });
+    const request = vi.fn().mockResolvedValue({ global_retention: {} });
 
     const result = await getDataStreamGlobalRetention({
       esClient: createEsClientMock({ request }),
@@ -69,7 +72,7 @@ describe('getDataStreamGlobalRetention', () => {
   });
 
   it('degrades to an empty result when the user lacks privileges (403)', async () => {
-    const request = jest.fn().mockRejectedValue(createResponseError(403));
+    const request = vi.fn().mockRejectedValue(createResponseError(403));
 
     const result = await getDataStreamGlobalRetention({
       esClient: createEsClientMock({ request }),
@@ -80,7 +83,7 @@ describe('getDataStreamGlobalRetention', () => {
   });
 
   it('degrades to an empty result when the stream is missing (404)', async () => {
-    const request = jest.fn().mockRejectedValue(createResponseError(404));
+    const request = vi.fn().mockRejectedValue(createResponseError(404));
 
     const result = await getDataStreamGlobalRetention({
       esClient: createEsClientMock({ request }),
@@ -91,7 +94,7 @@ describe('getDataStreamGlobalRetention', () => {
   });
 
   it('rethrows unexpected errors', async () => {
-    const request = jest.fn().mockRejectedValue(createResponseError(500));
+    const request = vi.fn().mockRejectedValue(createResponseError(500));
 
     await expect(
       getDataStreamGlobalRetention({

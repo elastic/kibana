@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ChangeKbModel } from './change_kb_model';
@@ -27,47 +30,50 @@ import {
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-jest.mock('@kbn/ai-assistant/src/hooks', () => ({
-  useInferenceEndpoints: () => ({
-    inferenceEndpoints: [],
-    isLoading: false,
-    error: null,
-  }),
-}));
+vi.mock('@kbn/ai-assistant/src/hooks', () => {
+      const mocked = {
+      useInferenceEndpoints: () => ({
+        inferenceEndpoints: [],
+        isLoading: false,
+        error: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
 
   return {
     useKibana: () => ({
       services: {
         notifications: notificationServiceMock.createStartContract(),
         overlays: {
-          openConfirm: jest.fn(() => Promise.resolve(true)),
+          openConfirm: vi.fn(() => Promise.resolve(true)),
         },
       },
     }),
   };
 });
 
-const mockSetEisKnowledgeBaseCalloutDismissed = jest.fn();
+const mockSetEisKnowledgeBaseCalloutDismissed = vi.fn();
 
-jest.mock('@kbn/observability-ai-assistant-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/observability-ai-assistant-plugin/public');
+vi.mock('@kbn/observability-ai-assistant-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/observability-ai-assistant-plugin/public'));
   return {
     ...actual,
-    useEisKnowledgeBaseCalloutDismissed: jest.fn(() => [
+    useEisKnowledgeBaseCalloutDismissed: vi.fn(() => [
       false,
       mockSetEisKnowledgeBaseCalloutDismissed,
     ]),
   };
 });
 
-const mockUseEisKnowledgeBaseCalloutDismissed = useEisKnowledgeBaseCalloutDismissed as jest.Mock;
+const mockUseEisKnowledgeBaseCalloutDismissed = useEisKnowledgeBaseCalloutDismissed as Mock;
 
-jest.mock('@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints');
+vi.mock('@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints');
 
-const mockGetModelOptions = jest.mocked(modelOptionsModule.getModelOptionsForInferenceEndpoints);
+const mockGetModelOptions = vi.mocked(modelOptionsModule.getModelOptionsForInferenceEndpoints);
 
 const createMockStatus = (
   overrides?: Partial<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>
@@ -98,12 +104,12 @@ const createMockKnowledgeBase = (
   isInstalling: false,
   isWarmingUpModel: false,
   isPolling: false,
-  install: jest.fn().mockResolvedValue(undefined),
-  warmupModel: jest.fn().mockResolvedValue(undefined),
+  install: vi.fn().mockResolvedValue(undefined),
+  warmupModel: vi.fn().mockResolvedValue(undefined),
   isProductDocInstalling: false,
   isProductDocUninstalling: false,
-  installProductDoc: jest.fn().mockResolvedValue(undefined),
-  uninstallProductDoc: jest.fn().mockResolvedValue(undefined),
+  installProductDoc: vi.fn().mockResolvedValue(undefined),
+  uninstallProductDoc: vi.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
@@ -155,7 +161,7 @@ describe('ChangeKbModel', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('disables the `Update` button when selected model is the same as current and no redeployment needed', () => {

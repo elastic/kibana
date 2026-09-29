@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -16,19 +18,25 @@ import { basicCase, basicFileMock } from '../../../containers/mock';
 import { allCasesPermissions } from '../../../common/mock';
 import type { FileViewProps } from '.';
 
-jest.mock('@kbn/shared-ux-file-context', () => ({
-  useFilesContext: () => ({
-    client: {
-      getDownloadHref: jest.fn(() => 'http://example.com/file'),
-    },
-  }),
-}));
+vi.mock('@kbn/shared-ux-file-context', () => {
+      const mocked = {
+      useFilesContext: () => ({
+        client: {
+          getDownloadHref: vi.fn(() => 'http://example.com/file'),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cases_context/use_cases_context', () => ({
-  useCasesContext: () => ({
-    owner: ['securitySolution'],
-  }),
-}));
+vi.mock('../../cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: () => ({
+        owner: ['securitySolution'],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const validFileEntry = {
   name: basicFileMock.name,

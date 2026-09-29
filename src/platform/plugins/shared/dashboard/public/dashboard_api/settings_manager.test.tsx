@@ -33,38 +33,49 @@ describe('initializeSettingsManager', () => {
   });
 
   describe('startComparing', () => {
-    test('Should return no changes when there are no changes', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-        expect(changes).toMatchInlineSnapshot(`Object {}`);
-        done();
-      });
-    });
+    test('Should return no changes when there are no changes', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    test('Should return time_restore change when time_restoreChanges', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-        expect(changes).toMatchInlineSnapshot(`
+              const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+              const settingsManager = initializeSettingsManager(lastSavedState$.value);
+              settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
+                expect(changes).toMatchInlineSnapshot(`Object {}`);
+                done();
+              });
+            
+        }));
+
+    test('Should return time_restore change when time_restoreChanges', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+              const settingsManager = initializeSettingsManager(lastSavedState$.value);
+              settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
+                expect(changes).toMatchInlineSnapshot(`
           Object {
             "time_restore": false,
           }
         `);
-        done();
-      });
-      const currentSettings = settingsManager.api.getSettings();
-      settingsManager.api.setSettings({
-        ...currentSettings,
-        time_restore: !currentSettings.time_restore,
-      });
-    });
+                done();
+              });
+              const currentSettings = settingsManager.api.getSettings();
+              settingsManager.api.setSettings({
+                ...currentSettings,
+                time_restore: !currentSettings.time_restore,
+              });
+            
+        }));
 
-    test('Should return only changed keys when there are changes', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-        expect(changes).toMatchInlineSnapshot(`
+    test('Should return only changed keys when there are changes', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+              const settingsManager = initializeSettingsManager(lastSavedState$.value);
+              settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
+                expect(changes).toMatchInlineSnapshot(`
           Object {
             "options": Object {
               "auto_apply_filters": true,
@@ -78,15 +89,16 @@ describe('initializeSettingsManager', () => {
             "title": "updated title",
           }
         `);
-        done();
-      });
-      const currentSettings = settingsManager.api.getSettings();
-      settingsManager.api.setSettings({
-        ...currentSettings,
-        title: 'updated title',
-        hide_panel_titles: !currentSettings.hide_panel_titles,
-      });
-    });
+                done();
+              });
+              const currentSettings = settingsManager.api.getSettings();
+              settingsManager.api.setSettings({
+                ...currentSettings,
+                title: 'updated title',
+                hide_panel_titles: !currentSettings.hide_panel_titles,
+              });
+            
+        }));
   });
 
   describe('projectRoutingRestore deserialization', () => {

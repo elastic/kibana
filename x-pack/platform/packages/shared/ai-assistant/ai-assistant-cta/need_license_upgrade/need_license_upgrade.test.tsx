@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import type { NeedLicenseUpgradeProps } from './need_license_upgrade';
@@ -14,7 +16,7 @@ import { translations as defaultTranslations } from '../call_to_action.translati
 import { EuiThemeProvider } from '@elastic/eui';
 
 describe('NeedLicenseUpgrade', () => {
-  const onManageLicense = jest.fn();
+  const onManageLicense = vi.fn();
 
   const renderComponent = (props: NeedLicenseUpgradeProps) =>
     render(<NeedLicenseUpgrade {...props} />, { wrapper: EuiThemeProvider });

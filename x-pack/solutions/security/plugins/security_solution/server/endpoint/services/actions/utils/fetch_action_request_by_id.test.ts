@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { createMockEndpointAppContextService } from '../../../mocks';
 import { applyActionsEsSearchMock, createActionRequestsEsSearchResultsMock } from '../mocks';
 import { fetchActionRequestById } from './fetch_action_request_by_id';
@@ -29,7 +31,7 @@ describe('fetchActionRequestById() utility', () => {
 
   it('should search the actions index with expected query', async () => {
     (
-      endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
     ).mockResolvedValue(undefined);
 
     await fetchActionRequestById(endpointServiceMock, 'default', '123');
@@ -50,12 +52,12 @@ describe('fetchActionRequestById() utility', () => {
   describe('and space awareness feature is enabled', () => {
     it('should validate that action is accessible in active space', async () => {
       (
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).mockResolvedValue(undefined);
       await fetchActionRequestById(endpointServiceMock, 'default', '123');
 
       expect(
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).toHaveBeenCalledWith({
         integrationPolicyIds: ['integration-policy-1'],
         options: { matchAll: false },
@@ -76,7 +78,7 @@ describe('fetchActionRequestById() utility', () => {
           ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted,
         ]),
       });
-      (endpointServiceMock.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+      (endpointServiceMock.getReferenceDataClient().get as Mock).mockResolvedValue(
         set(
           await REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](
             {} as SavedObjectsClientContract,
@@ -102,7 +104,7 @@ describe('fetchActionRequestById() utility', () => {
           ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted,
         ]),
       });
-      (endpointServiceMock.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+      (endpointServiceMock.getReferenceDataClient().get as Mock).mockResolvedValue(
         set(
           await REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](
             {} as SavedObjectsClientContract,
@@ -120,14 +122,14 @@ describe('fetchActionRequestById() utility', () => {
 
     it('should not validate action against spaces if `bypassSpaceValidation` is true', async () => {
       (
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).mockResolvedValue(undefined);
       await fetchActionRequestById(endpointServiceMock, 'default', '123', {
         bypassSpaceValidation: true,
       });
 
       expect(
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).not.toHaveBeenCalled();
     });
   });
@@ -161,7 +163,7 @@ describe('fetchActionRequestById() utility', () => {
       });
 
       expect(
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).not.toHaveBeenCalled();
     });
 
@@ -201,7 +203,7 @@ describe('fetchActionRequestById() utility', () => {
           ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted,
         ]),
       });
-      (endpointServiceMock.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+      (endpointServiceMock.getReferenceDataClient().get as Mock).mockResolvedValue(
         set(
           await REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](
             {} as SavedObjectsClientContract,
@@ -236,7 +238,7 @@ describe('fetchActionRequestById() utility', () => {
 
     it('should accept an action whose integration policy is visible in the active space even if its originSpaceId differs', async () => {
       (
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).mockResolvedValueOnce(undefined);
 
       const scoped = await endpointServiceMock.asScoped(request);
@@ -247,7 +249,7 @@ describe('fetchActionRequestById() utility', () => {
       ).resolves.toEqual(expect.objectContaining({ originSpaceId: 'default' }));
 
       expect(
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).toHaveBeenCalledWith({
         integrationPolicyIds: ['integration-policy-1'],
         options: { matchAll: false },
@@ -263,13 +265,13 @@ describe('fetchActionRequestById() utility', () => {
       ).resolves.toBeDefined();
 
       expect(
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).not.toHaveBeenCalled();
     });
 
     it('should reject an action when neither originSpaceId matches nor the integration policy is visible in the active space', async () => {
       (
-        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
       ).mockRejectedValueOnce(new Error('policy not in space'));
 
       const scoped = await endpointServiceMock.asScoped(request);

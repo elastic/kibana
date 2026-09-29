@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
@@ -17,32 +19,38 @@ import {
 import { useCanRunCaseWorkflow } from './use_run_case_workflow';
 import * as api from './api';
 
-jest.mock('../../common/lib/kibana');
-const mockRefreshCaseViewPage = jest.fn();
-jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
-  useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
-}));
-jest.mock('./use_run_case_workflow', () => ({
-  ...jest.requireActual('./use_run_case_workflow'),
-  useCanRunCaseWorkflow: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana');
+const mockRefreshCaseViewPage = vi.fn();
+vi.mock('../case_view/use_on_refresh_case_view_page', () => {
+      const mocked = {
+      useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_run_case_workflow', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_run_case_workflow')),
+      useCanRunCaseWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
-const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
+const mockUseCanRunCaseWorkflow = vi.mocked(useCanRunCaseWorkflow);
+const mockRunCaseWorkflow = vi.spyOn(api, 'runCaseWorkflow');
 
-describe('useCaseAttachmentWorkflowRun', () => {
+describe('useCaseAttachmentWorkflowRun', async () => {
   const mockHttp = {} as HttpStart;
   const mockToasts = notificationServiceMock.createStartContract().toasts;
-  const mockGetAppUrl = jest
+  const mockGetAppUrl = vi
     .fn()
     .mockReturnValue('/app/workflows/workflow-1?tab=executions&executionId=exec-1');
-  const { useAppUrl, useHttp, useKibana, useToasts } = jest.requireMock('../../common/lib/kibana');
+  const { useAppUrl, useHttp, useKibana, useToasts } = (await vi.importMock('../../common/lib/kibana'));
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <CaseAttachmentWorkflowProvider caseId="case-1">{children}</CaseAttachmentWorkflowProvider>
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCanRunCaseWorkflow.mockReturnValue(true);
     useHttp.mockReturnValue(mockHttp);
     useToasts.mockReturnValue(mockToasts);
@@ -202,7 +210,7 @@ describe('useCaseAttachmentWorkflowRouting', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCanRunCaseWorkflow.mockReturnValue(true);
   });
 

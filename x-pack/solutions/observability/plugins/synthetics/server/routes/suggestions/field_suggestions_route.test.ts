@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getSyntheticsFieldSuggestionsRoute } from './field_suggestions_route';
 
 describe('getSyntheticsFieldSuggestionsRoute', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   const runHandler = (body: unknown, spaceId = 'default') => {
-    const search = jest.fn().mockResolvedValue({ body });
+    const search = vi.fn().mockResolvedValue({ body });
     const route = getSyntheticsFieldSuggestionsRoute();
     return {
       search,

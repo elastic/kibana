@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { agentPolicyService } from '../agent_policy';
@@ -14,21 +16,21 @@ import { getPackagePolicySavedObjectType } from '../package_policy';
 
 import { _updatePackagePoliciesThatNeedBump } from './bump_migrated_agent_policies_task';
 
-jest.mock('../app_context');
-jest.mock('../agent_policy');
-jest.mock('../package_policy');
+vi.mock('../app_context');
+vi.mock('../agent_policy');
+vi.mock('../package_policy');
 
-const mockedAgentPolicyService = jest.mocked(agentPolicyService);
-const mockedAppContextService = jest.mocked(appContextService);
+const mockedAgentPolicyService = vi.mocked(agentPolicyService);
+const mockedAppContextService = vi.mocked(appContextService);
 const mockSoClient = {
-  find: jest.fn(),
-  bulkUpdate: jest.fn(),
+  find: vi.fn(),
+  bulkUpdate: vi.fn(),
 } as any;
-const mockGetPackagePolicySavedObjectType = jest.mocked(getPackagePolicySavedObjectType);
+const mockGetPackagePolicySavedObjectType = vi.mocked(getPackagePolicySavedObjectType);
 
 describe('_updatePackagePoliciesThatNeedBump', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSoClient.find.mockResolvedValue({
       total: 3,
       saved_objects: [

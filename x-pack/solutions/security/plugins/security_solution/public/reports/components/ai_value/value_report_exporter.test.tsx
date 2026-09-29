@@ -5,56 +5,68 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ValueReportExporter } from './value_report_exporter';
 import { useToasts } from '../../../common/lib/kibana';
 
 // Mock dependencies
-jest.mock('../../../common/lib/kibana', () => ({
-  useToasts: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useToasts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock PDFDocument
-jest.mock('pdf-lib', () => ({
-  PDFDocument: {
-    create: jest.fn(() => ({
-      addPage: jest.fn(() => ({
-        drawImage: jest.fn(),
-      })),
-      embedPng: jest.fn(() => ({
-        width: 800,
-        height: 600,
-      })),
-      save: jest.fn(() => new Uint8Array([1, 2, 3])),
-    })),
-  },
-}));
+vi.mock('pdf-lib', () => {
+      const mocked = {
+      PDFDocument: {
+        create: vi.fn(() => ({
+          addPage: vi.fn(() => ({
+            drawImage: vi.fn(),
+          })),
+          embedPng: vi.fn(() => ({
+            width: 800,
+            height: 600,
+          })),
+          save: vi.fn(() => new Uint8Array([1, 2, 3])),
+        })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock domtoimage
-jest.mock('dom-to-image-more', () => ({
-  toBlob: jest.fn(),
-}));
+vi.mock('dom-to-image-more', () => {
+      const mocked = {
+      toBlob: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseToasts = useToasts as jest.MockedFunction<typeof useToasts>;
+const mockUseToasts = useToasts as MockedFunction<typeof useToasts>;
 
 describe('ValueReportExporter', () => {
-  const mockAddError = jest.fn();
+  const mockAddError = vi.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     mockUseToasts.mockReturnValue({
       addError: mockAddError,
     } as unknown as ReturnType<typeof useToasts>);
 
-    const { toBlob } = jest.requireMock('dom-to-image-more');
+    const { toBlob } = (await vi.importMock('dom-to-image-more'));
     toBlob.mockResolvedValue({
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+      arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
     });
   });
 
   it('renders children with export function', () => {
-    const mockChildren = jest.fn(() => <div>{'Test Content'}</div>);
+    const mockChildren = vi.fn(() => <div>{'Test Content'}</div>);
 
     render(<ValueReportExporter>{mockChildren}</ValueReportExporter>);
 
@@ -76,7 +88,7 @@ describe('ValueReportExporter', () => {
   });
 
   it('handles export error gracefully', async () => {
-    const { toBlob } = jest.requireMock('dom-to-image-more');
+    const { toBlob } = (await vi.importMock('dom-to-image-more'));
     toBlob.mockRejectedValue(new Error('Export failed'));
 
     let exportFunction: (() => void) | null = null;
@@ -98,7 +110,7 @@ describe('ValueReportExporter', () => {
   });
 
   it('memoizes the component correctly', () => {
-    const mockChildren = jest.fn(() => <div>{'Test Content'}</div>);
+    const mockChildren = vi.fn(() => <div>{'Test Content'}</div>);
 
     const { rerender } = render(<ValueReportExporter>{mockChildren}</ValueReportExporter>);
     const initialCallCount = mockChildren.mock.calls.length;
@@ -107,7 +119,7 @@ describe('ValueReportExporter', () => {
   });
 
   it('handles different children functions', () => {
-    const differentChildren = jest.fn(() => <div>{'Different Content'}</div>);
+    const differentChildren = vi.fn(() => <div>{'Different Content'}</div>);
 
     render(<ValueReportExporter>{differentChildren}</ValueReportExporter>);
 

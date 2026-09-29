@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
@@ -25,7 +27,7 @@ const resolve = ({
   accessibleSpaceIds?: string[];
   authorized?: boolean;
 }) => {
-  const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(authorized);
+  const checkManageEvalsPrivileges = vi.fn().mockResolvedValue(authorized);
 
   return {
     checkManageEvalsPrivileges,
@@ -34,7 +36,7 @@ const resolve = ({
       activeSpaceId,
       requestedSpaceIds,
       currentSpaceIds,
-      getAccessibleSpaceIds: jest.fn().mockResolvedValue(accessibleSpaceIds),
+      getAccessibleSpaceIds: vi.fn().mockResolvedValue(accessibleSpaceIds),
       checkManageEvalsPrivileges,
     }),
   };
@@ -171,7 +173,7 @@ describe('resolveTargetSpaces', () => {
         activeSpaceId: DEFAULT_SPACE_ID,
         requestedSpaceIds: ['sales'],
         getAccessibleSpaceIds: undefined,
-        checkManageEvalsPrivileges: jest.fn().mockResolvedValue(true),
+        checkManageEvalsPrivileges: vi.fn().mockResolvedValue(true),
       })
     ).resolves.toMatchObject({ authorized: false, statusCode: 400 });
   });

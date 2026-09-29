@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -16,19 +19,19 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { getEndpointArtifactsTool, classifyArtifactError, buildArtifactFilter } from '.';
 
 const mockLogger = {
-  error: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn(),
-  debug: jest.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
+  debug: vi.fn(),
 };
 
 const createMockContext = (): ToolHandlerContext => {
   const mockScopedClient = {
-    findEndpointArtifactListItems: jest.fn(),
+    findEndpointArtifactListItems: vi.fn(),
   };
 
   const mockEndpointService = createMockEndpointAppContext().service;
-  mockEndpointService.getScopedEndpointArtifactClient = jest.fn().mockReturnValue(mockScopedClient);
+  mockEndpointService.getScopedEndpointArtifactClient = vi.fn().mockReturnValue(mockScopedClient);
 
   return {
     logger: mockLogger,
@@ -37,7 +40,7 @@ const createMockContext = (): ToolHandlerContext => {
     esClient: {
       asCurrentUser: {
         security: {
-          authenticate: jest.fn().mockResolvedValue({ username: 'test_user' }),
+          authenticate: vi.fn().mockResolvedValue({ username: 'test_user' }),
         },
       },
     } as unknown as ToolHandlerContext['esClient'],
@@ -79,10 +82,10 @@ const createMockExceptionItem = (
 describe('getEndpointArtifactsTool', () => {
   let mockEndpointAppContextService: EndpointAppContextService;
   let mockContext: ToolHandlerContext;
-  let mockScopedClient: { findEndpointArtifactListItems: jest.Mock };
+  let mockScopedClient: { findEndpointArtifactListItems: Mock };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockContext = createMockContext();
     mockEndpointAppContextService = (
       mockContext as unknown as { endpointAppContextService: EndpointAppContextService }
@@ -91,7 +94,7 @@ describe('getEndpointArtifactsTool', () => {
       {} as never,
       {} as never,
       ''
-    ) as unknown as { findEndpointArtifactListItems: jest.Mock };
+    ) as unknown as { findEndpointArtifactListItems: Mock };
   });
 
   describe('tool definition', () => {

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fetchAllPagesWithConcurrency } from './fetch_all_pages_with_concurrency';
 
 describe('fetchAllPagesWithConcurrency', () => {
   it('returns the first page when one page is enough', async () => {
-    const fetchPage = jest.fn().mockResolvedValue({
+    const fetchPage = vi.fn().mockResolvedValue({
       total: 2,
       data: ['a', 'b'],
     });
@@ -28,7 +30,7 @@ describe('fetchAllPagesWithConcurrency', () => {
     let active = 0;
     let maxActive = 0;
 
-    const fetchPage = jest.fn(async (page, perPage) => {
+    const fetchPage = vi.fn(async (page, perPage) => {
       active += 1;
       maxActive = Math.max(maxActive, active);
 
@@ -53,7 +55,7 @@ describe('fetchAllPagesWithConcurrency', () => {
   });
 
   it('defaults invalid concurrency values to a single worker', async () => {
-    const fetchPage = jest.fn(async (page) => ({
+    const fetchPage = vi.fn(async (page) => ({
       total: 3,
       data: [page],
     }));
@@ -68,7 +70,7 @@ describe('fetchAllPagesWithConcurrency', () => {
   });
 
   it('rejects when any page fetch fails', async () => {
-    const fetchPage = jest.fn(async (page) => {
+    const fetchPage = vi.fn(async (page) => {
       if (page === 3) {
         throw new Error('fetch failed');
       }
@@ -88,7 +90,7 @@ describe('fetchAllPagesWithConcurrency', () => {
   });
 
   it('does not over-fetch when concurrency is larger than remaining pages', async () => {
-    const fetchPage = jest.fn(async (page, perPage) => ({
+    const fetchPage = vi.fn(async (page, perPage) => ({
       total: 2,
       data: [`${page}-${perPage}`],
     }));
@@ -106,7 +108,7 @@ describe('fetchAllPagesWithConcurrency', () => {
   it('floors non-integer concurrency values', async () => {
     let active = 0;
     let maxActive = 0;
-    const fetchPage = jest.fn(async (page) => {
+    const fetchPage = vi.fn(async (page) => {
       active += 1;
       maxActive = Math.max(maxActive, active);
       await new Promise((resolve) => setTimeout(resolve, 5));
@@ -128,7 +130,7 @@ describe('fetchAllPagesWithConcurrency', () => {
   });
 
   it('defaults non-finite concurrency values to one worker', async () => {
-    const fetchPage = jest.fn(async (page) => ({
+    const fetchPage = vi.fn(async (page) => ({
       total: 3,
       data: [page],
     }));
@@ -144,7 +146,7 @@ describe('fetchAllPagesWithConcurrency', () => {
   });
 
   it('throws when perPage is invalid', async () => {
-    const fetchPage = jest.fn();
+    const fetchPage = vi.fn();
 
     await expect(
       fetchAllPagesWithConcurrency({

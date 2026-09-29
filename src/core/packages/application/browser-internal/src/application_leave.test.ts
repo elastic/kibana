@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AppLeaveActionType } from '@kbn/core-application-browser';
 import { isConfirmAction, getLeaveAction } from './application_leave';
 
@@ -46,7 +48,7 @@ describe('getLeaveAction', () => {
       text: 'another message',
       title: 'a title',
     });
-    const callback = jest.fn();
+    const callback = vi.fn();
     expect(
       getLeaveAction((actions) => actions.confirm('another message', 'a title', callback))
     ).toEqual({

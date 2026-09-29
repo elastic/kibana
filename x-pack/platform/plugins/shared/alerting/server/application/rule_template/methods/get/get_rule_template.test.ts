@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRulesClientMockParams } from '../../../../test_utils';
 
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
+vi.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
-    formatLegacyActions: jest.fn(),
+    formatLegacyActions: vi.fn(),
   };
 });
 
@@ -28,7 +31,7 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();

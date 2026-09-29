@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { pick } from 'lodash';
 import { act } from '@testing-library/react';
@@ -25,7 +27,7 @@ describe('RateLimiterError', () => {
     Object.defineProperties(window, {
       location: {
         value: {
-          reload: jest.fn(),
+          reload: vi.fn(),
         },
       },
     });
@@ -36,7 +38,7 @@ describe('RateLimiterError', () => {
   });
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     result = renderWithI18n(
       <RateLimiterError
         error={createHttpFetchError(
@@ -50,8 +52,8 @@ describe('RateLimiterError', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.resetAllMocks();
+    vi.useRealTimers();
+    vi.resetAllMocks();
   });
 
   it('should render a generic error screen', async () => {
@@ -63,9 +65,9 @@ describe('RateLimiterError', () => {
     const button = result.getByTestId('reload') as HTMLButtonElement;
     expect(button.disabled).toBeTruthy();
     expect(button.textContent).toContain('(2)');
-    act(() => jest.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1000));
     expect(button.textContent).toContain('(1)');
-    act(() => jest.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1000));
     expect(button.textContent).not.toContain('(0)');
     expect(button.disabled).toBeFalsy();
   });
@@ -76,8 +78,8 @@ describe('RateLimiterError', () => {
     button.click();
     expect(window.location.reload).not.toHaveBeenCalled();
 
-    act(() => jest.advanceTimersByTime(1000));
-    act(() => jest.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1000));
     button.click();
     expect(window.location.reload).toHaveBeenCalled();
   });

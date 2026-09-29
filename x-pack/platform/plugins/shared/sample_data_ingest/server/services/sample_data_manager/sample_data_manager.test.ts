@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-jest.mock('../artifact_manager', () => {
+import { vi } from 'vitest';
+import type { Mocked, MockedClass } from 'vitest';
+
+vi.mock('../artifact_manager', () => {
   return {
-    ArtifactManager: jest.fn(),
+    ArtifactManager: vi.fn(),
   };
 });
 
-jest.mock('../index_manager', () => {
+vi.mock('../index_manager', () => {
   return {
-    IndexManager: jest.fn(),
+    IndexManager: vi.fn(),
   };
 });
 
-jest.mock('../saved_objects_manager', () => {
+vi.mock('../saved_objects_manager', () => {
   return {
-    SavedObjectsManager: jest.fn(),
+    SavedObjectsManager: vi.fn(),
   };
 });
 
@@ -37,9 +40,9 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getInstallTaskId, type InstallSampleDataTaskState } from '../../tasks/install_sample_data';
 
-const MockedArtifactManager = ArtifactManager as jest.MockedClass<typeof ArtifactManager>;
-const MockedIndexManager = IndexManager as jest.MockedClass<typeof IndexManager>;
-const MockedSavedObjectsManager = SavedObjectsManager as jest.MockedClass<
+const MockedArtifactManager = ArtifactManager as MockedClass<typeof ArtifactManager>;
+const MockedIndexManager = IndexManager as MockedClass<typeof IndexManager>;
+const MockedSavedObjectsManager = SavedObjectsManager as MockedClass<
   typeof SavedObjectsManager
 >;
 
@@ -47,15 +50,15 @@ describe('SampleDataManager', () => {
   let logger: MockedLogger;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let soImporter: jest.Mocked<ISavedObjectsImporter>;
+  let soImporter: Mocked<ISavedObjectsImporter>;
   let sampleDataManager: SampleDataManager;
-  let mockArtifactManager: jest.Mocked<ArtifactManager>;
-  let mockIndexManager: jest.Mocked<IndexManager>;
-  let mockSavedObjectsManager: jest.Mocked<SavedObjectsManager>;
+  let mockArtifactManager: Mocked<ArtifactManager>;
+  let mockIndexManager: Mocked<IndexManager>;
+  let mockSavedObjectsManager: Mocked<SavedObjectsManager>;
   let taskManager: ReturnType<typeof taskManagerMock.createStart>;
 
   const mockArchive = {
-    close: jest.fn(),
+    close: vi.fn(),
     entries: new Map(),
   } as unknown as ZipArchive;
 
@@ -84,25 +87,25 @@ describe('SampleDataManager', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     soClient = savedObjectsClientMock.create();
     soImporter = {
-      import: jest.fn(),
+      import: vi.fn(),
     } as any;
 
     mockArtifactManager = {
-      prepareArtifact: jest.fn(),
-      cleanup: jest.fn(),
+      prepareArtifact: vi.fn(),
+      cleanup: vi.fn(),
     } as any;
 
     mockIndexManager = {
-      createAndPopulateIndex: jest.fn(),
-      deleteIndex: jest.fn(),
-      hasIndex: jest.fn(),
-      setESClient: jest.fn(),
+      createAndPopulateIndex: vi.fn(),
+      deleteIndex: vi.fn(),
+      hasIndex: vi.fn(),
+      setESClient: vi.fn(),
     } as any;
 
     mockSavedObjectsManager = {
-      importSavedObjects: jest.fn(),
-      deleteSavedObjects: jest.fn(),
-      getDashboardId: jest.fn(),
+      importSavedObjects: vi.fn(),
+      deleteSavedObjects: vi.fn(),
+      getDashboardId: vi.fn(),
     } as any;
 
     MockedArtifactManager.mockImplementation(() => mockArtifactManager);
@@ -137,7 +140,7 @@ describe('SampleDataManager', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('constructor', () => {

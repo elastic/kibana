@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -30,8 +32,8 @@ const createAccessDeps = (grants: PrivilegeGrants) => {
   const endpointAppContextService = createMockEndpointAppContextService();
   const request = httpServerMock.createKibanaRequest();
   const scopedFleet = endpointAppContextService.getInternalFleetServices();
-  const getScopedClient = jest.fn().mockReturnValue({ sentinel: 'request-scoped-so-client' });
-  const getStartServices = jest.fn(async () => [
+  const getScopedClient = vi.fn().mockReturnValue({ sentinel: 'request-scoped-so-client' });
+  const getStartServices = vi.fn(async () => [
     { savedObjects: { getScopedClient } },
   ]) as unknown as StartServicesAccessor;
 

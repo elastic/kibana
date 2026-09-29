@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -16,10 +19,10 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import { tableMatchesExpectedContent } from '../../../common/test_utils';
 import { useGetFieldsResponse } from './mocks';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_fields');
+vi.mock('../../../common/lib/kibana');
+vi.mock('./use_get_fields');
 
-const useGetFieldsMock = useGetFields as jest.Mock;
+const useGetFieldsMock = useGetFields as Mock;
 
 describe('Resilient Fields: Preview', () => {
   const fields = {
@@ -45,7 +48,7 @@ describe('Resilient Fields: Preview', () => {
 
   beforeEach(() => {
     useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {

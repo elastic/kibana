@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,44 +15,65 @@ import { CaseSeverity } from '../../../../common/types/domain';
 import type { ParsedTemplateDefinition } from '../../../../common/types/domain/template/v1';
 import { TemplateCaseDefaultsForm } from './template_case_defaults_form';
 
-jest.mock('../../cases_context/use_cases_context', () => ({
-  useCasesContext: () => ({ owner: ['securitySolution'] }),
-}));
+vi.mock('../../cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: () => ({ owner: ['securitySolution'] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../app/use_available_owners', () => ({
-  useAvailableCasesOwners: () => ['securitySolution'],
-}));
+vi.mock('../../app/use_available_owners', () => {
+      const mocked = {
+      useAvailableCasesOwners: () => ['securitySolution'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/use_is_user_typing', () => ({
-  useIsUserTyping: () => ({
-    isUserTyping: false,
-    onContentChange: jest.fn(),
-    onDebounce: jest.fn(),
-  }),
-}));
+vi.mock('../../../common/use_is_user_typing', () => {
+      const mocked = {
+      useIsUserTyping: () => ({
+        isUserTyping: false,
+        onContentChange: vi.fn(),
+        onDebounce: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/user_profiles/use_suggest_user_profiles', () => ({
-  useSuggestUserProfiles: () => ({
-    data: [],
-    isLoading: false,
-    isFetching: false,
-  }),
-}));
+vi.mock('../../../containers/user_profiles/use_suggest_user_profiles', () => {
+      const mocked = {
+      useSuggestUserProfiles: () => ({
+        data: [],
+        isLoading: false,
+        isFetching: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles', () => ({
-  useBulkGetUserProfiles: () => ({
-    data: new Map(),
-    isFetching: false,
-  }),
-}));
+vi.mock('../../../containers/user_profiles/use_bulk_get_user_profiles', () => {
+      const mocked = {
+      useBulkGetUserProfiles: () => ({
+        data: new Map(),
+        isFetching: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_get_template_tags', () => ({
-  useGetTemplateTags: () => ({ data: [] }),
-}));
+vi.mock('../hooks/use_get_template_tags', () => {
+      const mocked = {
+      useGetTemplateTags: () => ({ data: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/use_get_categories', () => ({
-  useGetCategories: () => ({ data: [], isLoading: false }),
-}));
+vi.mock('../../../containers/use_get_categories', () => {
+      const mocked = {
+      useGetCategories: () => ({ data: [], isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TemplateCaseDefaultsForm', () => {
   const baseTemplate: ParsedTemplateDefinition = {
@@ -101,7 +124,7 @@ describe('TemplateCaseDefaultsForm', () => {
 
   it('propagates severity changes from the select input', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     renderWithTestingProviders(
       <TemplateCaseDefaultsForm parsedTemplate={baseTemplate} onChange={onChange} />

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { fetchClassicAlertsAsEpisodes } from './fetch_classic_episodes';
@@ -41,7 +43,7 @@ const mockPost = (handler: (url: string) => Promise<unknown>) => {
 
 describe('fetchClassicAlertsAsEpisodes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const callFetch = (overrides?: Partial<Parameters<typeof fetchClassicAlertsAsEpisodes>[0]>) =>

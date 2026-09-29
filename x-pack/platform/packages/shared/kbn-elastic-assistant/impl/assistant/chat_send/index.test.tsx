@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { Props } from '.';
 import { ChatSend } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
-jest.mock('./use_chat_send');
+vi.mock('./use_chat_send');
 
-const setUserPrompt = jest.fn();
-const handleChatSend = jest.fn();
-const handleRegenerateResponse = jest.fn();
+const setUserPrompt = vi.fn();
+const handleChatSend = vi.fn();
+const handleRegenerateResponse = vi.fn();
 const testProps: Props = {
   setUserPrompt,
   handleChatSend,
@@ -27,7 +29,7 @@ const testProps: Props = {
 };
 describe('ChatSend', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('the prompt updates when the text area changes', async () => {
     const { getByTestId } = render(<ChatSend {...testProps} />, {

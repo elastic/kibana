@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { Logger } from '@kbn/logging';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
@@ -14,16 +17,16 @@ import { createContentInsightsService } from './content_insights_service';
 
 describe('createContentInsightsService', () => {
   const http = {
-    get: jest.fn(),
-    post: jest.fn(),
-  } as unknown as jest.Mocked<HttpStart>;
-  const childLogger = { warn: jest.fn() };
+    get: vi.fn(),
+    post: vi.fn(),
+  } as unknown as Mocked<HttpStart>;
+  const childLogger = { warn: vi.fn() };
   const logger = {
-    get: jest.fn().mockReturnValue(childLogger),
-  } as unknown as jest.Mocked<Logger>;
+    get: vi.fn().mockReturnValue(childLogger),
+  } as unknown as Mocked<Logger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a real `ContentInsightsClient` configured for the supplied domain id', async () => {

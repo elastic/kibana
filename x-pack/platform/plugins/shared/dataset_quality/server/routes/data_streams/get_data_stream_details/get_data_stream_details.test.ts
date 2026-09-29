@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { badRequest } from '@hapi/boom';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { datasetQualityPrivileges } from '../../../services';
@@ -14,29 +17,29 @@ import { getDataStreams } from '../get_data_streams';
 import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
 import { getDataStreamDetails } from '.';
 
-jest.mock('../../../services');
-jest.mock('../../../utils', () => {
-  const actual = jest.requireActual('../../../utils');
+vi.mock('../../../services');
+vi.mock('../../../utils', async () => {
+  const actual = (await vi.importActual('../../../utils'));
   return {
     ...actual,
-    createDatasetQualityESClient: jest.fn(),
+    createDatasetQualityESClient: vi.fn(),
   };
 });
-jest.mock('../failed_docs/get_failed_docs');
-jest.mock('../get_data_streams');
-jest.mock('../get_data_streams_metering_stats');
+vi.mock('../failed_docs/get_failed_docs');
+vi.mock('../get_data_streams');
+vi.mock('../get_data_streams_metering_stats');
 
-const mockDatasetQualityPrivileges = datasetQualityPrivileges as jest.Mocked<
+const mockDatasetQualityPrivileges = datasetQualityPrivileges as Mocked<
   typeof datasetQualityPrivileges
 >;
-const mockCreateDatasetQualityESClient = createDatasetQualityESClient as jest.MockedFunction<
+const mockCreateDatasetQualityESClient = createDatasetQualityESClient as MockedFunction<
   typeof createDatasetQualityESClient
 >;
-const mockGetFailedDocsPaginated = getFailedDocsPaginated as jest.MockedFunction<
+const mockGetFailedDocsPaginated = getFailedDocsPaginated as MockedFunction<
   typeof getFailedDocsPaginated
 >;
-const mockGetDataStreams = getDataStreams as jest.MockedFunction<typeof getDataStreams>;
-const mockGetDataStreamsMeteringStats = getDataStreamsMeteringStats as jest.MockedFunction<
+const mockGetDataStreams = getDataStreams as MockedFunction<typeof getDataStreams>;
+const mockGetDataStreamsMeteringStats = getDataStreamsMeteringStats as MockedFunction<
   typeof getDataStreamsMeteringStats
 >;
 
@@ -62,16 +65,16 @@ describe('getDataStreamDetails', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   let mockESClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
-    search: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
-    fieldCaps: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
+    search: MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
+    fieldCaps: MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
   };
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient();
     mockESClient = elasticsearchServiceMock.createElasticsearchClient();
     mockDatasetQualityESClient = {
-      search: jest.fn(),
-      fieldCaps: jest.fn(),
+      search: vi.fn(),
+      fieldCaps: vi.fn(),
     };
     esClient.asCurrentUser = mockESClient;
 
@@ -142,7 +145,7 @@ describe('getDataStreamDetails', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('parameter validation', () => {

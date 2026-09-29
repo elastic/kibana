@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -15,7 +17,7 @@ import {
 } from './test_ids';
 import { RelatedAttacks } from './related_attacks';
 
-const mockOnShowCorrelationsDetails = jest.fn();
+const mockOnShowCorrelationsDetails = vi.fn();
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_RELATED_ATTACKS_TEST_ID);
 const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_RELATED_ATTACKS_TEST_ID);
@@ -32,7 +34,7 @@ const renderRelatedAttacks = (attackIds: string[]) =>
 
 describe('<RelatedAttacks />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render singular label for one attack', () => {

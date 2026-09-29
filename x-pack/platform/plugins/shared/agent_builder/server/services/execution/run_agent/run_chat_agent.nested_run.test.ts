@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type { StreamEvent } from '@langchain/core/tracers/log_stream';
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
@@ -17,45 +20,63 @@ import { steps as nodeNames } from './constants';
 
 // The graph, the event conversion and the round assembly run for real: what a sub-agent run goes
 // through when it is started from inside the parent's `executeTool` node.
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  prepareConversation: jest.fn(),
-  selectTools: jest.fn(),
-  selectSkills: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('./utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils')),
+      prepareConversation: vi.fn(),
+      selectTools: vi.fn(),
+      selectSkills: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tools/register_internal_tools', () => ({
-  registerInternalTools: jest.fn(),
-}));
+vi.mock('./tools/register_internal_tools', () => {
+      const mocked = {
+      registerInternalTools: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/create_result_transformer', () => ({
-  createResultTransformer: jest.fn(() => ({})),
-}));
+vi.mock('./utils/create_result_transformer', () => {
+      const mocked = {
+      createResultTransformer: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/image_resolver', () => ({
-  createImageResolver: jest.fn(() => jest.fn()),
-}));
+vi.mock('./utils/image_resolver', () => {
+      const mocked = {
+      createImageResolver: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./prompts', () => ({
-  createPromptFactory: jest.fn(() => ({
-    getMainPrompt: jest.fn().mockResolvedValue([]),
-    getStructuredAnswerPrompt: jest.fn().mockResolvedValue([]),
-  })),
-}));
+vi.mock('./prompts', () => {
+      const mocked = {
+      createPromptFactory: vi.fn(() => ({
+        getMainPrompt: vi.fn().mockResolvedValue([]),
+        getStructuredAnswerPrompt: vi.fn().mockResolvedValue([]),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@langchain/langgraph/prebuilt', () => ({
-  ToolNode: jest.fn().mockImplementation(() => ({
-    invoke: jest.fn().mockResolvedValue([]),
-  })),
-}));
+vi.mock('@langchain/langgraph/prebuilt', () => {
+      const mocked = {
+      ToolNode: vi.fn().mockImplementation(() => ({
+        invoke: vi.fn().mockResolvedValue([]),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
-const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
+const prepareConversationMock = prepareConversation as MockedFunction<typeof prepareConversation>;
+const selectToolsMock = selectTools as MockedFunction<typeof selectTools>;
 
 describe('runDefaultAgentMode started from inside another graph node (sub-agent run)', () => {
   it('completes the round with its tool call, result and answer, and leaks nothing to the parent stream', async () => {
     const context = createAgentHandlerContextMock();
-    const researchInvoke = jest
+    const researchInvoke = vi
       .fn()
       .mockResolvedValueOnce(
         new AIMessage({
@@ -65,16 +86,16 @@ describe('runDefaultAgentMode started from inside another graph node (sub-agent 
       )
       .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
     const chatModel = {
-      bindTools: jest.fn(() => ({ withConfig: jest.fn(() => ({ invoke: researchInvoke })) })),
+      bindTools: vi.fn(() => ({ withConfig: vi.fn(() => ({ invoke: researchInvoke })) })),
     };
-    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+    vi.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
       connector: { name: 'test-connector', connectorId: 'connector-1' },
       chatModel,
     } as any);
     context.toolManager.list.mockReturnValue([]);
     context.toolManager.getToolIdMapping.mockReturnValue(new Map([['my_tool', 'my.tool']]));
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
-    jest.mocked(context.attachmentStateManager.getAccessedRefs).mockReturnValue([]);
+    vi.mocked(context.attachmentStateManager.getAccessedRefs).mockReturnValue([]);
     prepareConversationMock.mockResolvedValue({
       timeline: [],
       nextInput: { message: 'hello', attachments: [] },
@@ -83,9 +104,9 @@ describe('runDefaultAgentMode started from inside another graph node (sub-agent 
       attachmentStateManager: context.attachmentStateManager,
     } as any);
     selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
-    const { ToolNode } = jest.requireMock('@langchain/langgraph/prebuilt');
+    const { ToolNode } = (await vi.importMock('@langchain/langgraph/prebuilt'));
     ToolNode.mockImplementationOnce(() => ({
-      invoke: jest.fn().mockResolvedValue([
+      invoke: vi.fn().mockResolvedValue([
         new ToolMessage({
           tool_call_id: 'c1',
           content: 'r1',
@@ -134,7 +155,7 @@ describe('runDefaultAgentMode started from inside another graph node (sub-agent 
       ]
     );
 
-    const emittedTypes = jest.mocked(context.events.emit).mock.calls.map(([event]) => event.type);
+    const emittedTypes = vi.mocked(context.events.emit).mock.calls.map(([event]) => event.type);
     const countOf = (type: ChatEventType) => emittedTypes.filter((t) => t === type).length;
     expect(countOf(ChatEventType.toolCall)).toBe(1);
     expect(countOf(ChatEventType.toolResult)).toBe(1);

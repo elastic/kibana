@@ -5,59 +5,83 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 
-const mockLoadAsync = jest.fn();
-jest.mock('jszip', () => ({
+const mockLoadAsync = vi.fn();
+vi.mock('jszip', () => ({
   __esModule: true,
   default: { loadAsync: (...args: unknown[]) => mockLoadAsync(...args) },
 }));
 
-const mockParseYaml = jest.fn();
-jest.mock('yaml', () => ({ parse: (...args: unknown[]) => mockParseYaml(...args) }));
+const mockParseYaml = vi.fn();
+vi.mock('yaml', () => {
+      const mocked = { parse: (...args: unknown[]) => mockParseYaml(...args) };
+      return { ...mocked, default: mocked };
+    });
 
-const mockEvaluateUploadedZipPackage = jest.fn();
-const mockRunInstallPackage = jest.fn();
-const mockGetIntegrationNameFromResponse = jest.fn();
-jest.mock('../../../common', () => ({
-  runInstallPackage: (...args: unknown[]) => mockRunInstallPackage(...args),
-  getIntegrationNameFromResponse: (...args: unknown[]) =>
-    mockGetIntegrationNameFromResponse(...args),
-}));
+const mockEvaluateUploadedZipPackage = vi.fn();
+const mockRunInstallPackage = vi.fn();
+const mockGetIntegrationNameFromResponse = vi.fn();
+vi.mock('../../../common', () => {
+      const mocked = {
+      runInstallPackage: (...args: unknown[]) => mockRunInstallPackage(...args),
+      getIntegrationNameFromResponse: (...args: unknown[]) =>
+        mockGetIntegrationNameFromResponse(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/evaluate_upload_package', () => ({
-  evaluateUploadedZipPackage: (...args: unknown[]) => mockEvaluateUploadedZipPackage(...args),
-}));
+vi.mock('../../../common/lib/evaluate_upload_package', () => {
+      const mocked = {
+      evaluateUploadedZipPackage: (...args: unknown[]) => mockEvaluateUploadedZipPackage(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {},
-      application: {
-        getUrlForApp: jest.fn(() => '/app/integrations'),
-        navigateToUrl: jest.fn(),
-      },
-      licensing: { license$: { subscribe: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('../../../common/hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {},
+          application: {
+            getUrlForApp: vi.fn(() => '/app/integrations'),
+            navigateToUrl: vi.fn(),
+          },
+          licensing: { license$: { subscribe: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-use/lib/useObservable', () =>
-  jest.fn(() => ({ isAvailable: true, isActive: true, hasAtLeast: () => true }))
+vi.mock('react-use/lib/useObservable', () =>
+  vi.fn(() => ({ isAvailable: true, isActive: true, hasAtLeast: () => true }))
 );
 
-jest.mock('../../telemetry_context', () => ({
-  useTelemetry: () => ({ reportCancelButtonClicked: jest.fn() }),
-}));
+vi.mock('../../telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({ reportCancelButtonClicked: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./docs_link_subtitle', () => ({
-  DocsLinkSubtitle: () => null,
-}));
+vi.mock('./docs_link_subtitle', () => {
+      const mocked = {
+      DocsLinkSubtitle: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../license_paywall/license_paywall_card', () => ({
-  LicensePaywallCard: () => null,
-}));
+vi.mock('../../license_paywall/license_paywall_card', () => {
+      const mocked = {
+      LicensePaywallCard: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { CreateIntegrationUpload } from './create_integration_upload';
 
@@ -66,12 +90,12 @@ const makeZipWithPackageName = (packageName: string, version = '1.0.0') => ({
     [`${packageName}-${version}/manifest.yml`]: {
       dir: false,
       name: `${packageName}-${version}/manifest.yml`,
-      async: jest.fn().mockResolvedValue(`name: ${packageName}\nversion: ${version}\n`),
+      async: vi.fn().mockResolvedValue(`name: ${packageName}\nversion: ${version}\n`),
     },
   },
 });
 
-const settledMockResults = (mockFn: jest.Mock) =>
+const settledMockResults = (mockFn: Mock) =>
   Promise.all(
     mockFn.mock.results.map((result) =>
       result.type === 'throw'
@@ -104,7 +128,7 @@ const renderUpload = () => render(<CreateIntegrationUpload />);
 
 describe('CreateIntegrationUpload', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEvaluateUploadedZipPackage.mockResolvedValue({ kind: 'ok' });
     mockParseYaml.mockReturnValue({ name: 'test_package', version: '1.0.0' });
     mockLoadAsync.mockResolvedValue(makeZipWithPackageName('test_package'));

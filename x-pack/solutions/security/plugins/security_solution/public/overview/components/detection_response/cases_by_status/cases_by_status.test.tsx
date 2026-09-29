@@ -5,47 +5,56 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { BarChartComponentProps } from '../../../../common/components/charts/barchart';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { CasesByStatus } from './cases_by_status';
-jest.mock('../../../../common/components/link_to');
-jest.mock('../../../../common/containers/query_toggle');
-jest.mock('./use_cases_by_status', () => ({
-  useCasesByStatus: jest.fn().mockReturnValue({
-    closed: 1,
-    inProgress: 2,
-    isLoading: false,
-    open: 3,
-    totalCounts: 6,
-    updatedAt: new Date('2022-04-08T12:00:00.000Z').valueOf(),
-  }),
-}));
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/components/link_to');
+vi.mock('../../../../common/containers/query_toggle');
+vi.mock('./use_cases_by_status', () => {
+      const mocked = {
+      useCasesByStatus: vi.fn().mockReturnValue({
+        closed: 1,
+        inProgress: 2,
+        isLoading: false,
+        open: 3,
+        totalCounts: 6,
+        updatedAt: new Date('2022-04-08T12:00:00.000Z').valueOf(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
-    useNavigation: jest.fn().mockReturnValue({
-      getAppUrl: jest.fn(),
-      navigateTo: jest.fn(),
+    useNavigation: vi.fn().mockReturnValue({
+      getAppUrl: vi.fn(),
+      navigateTo: vi.fn(),
     }),
   };
 });
-jest.mock('../../../../common/components/charts/barchart', () => ({
-  BarChart: jest.fn((props: BarChartComponentProps) => <div data-test-subj="barChart" />),
-}));
+vi.mock('../../../../common/components/charts/barchart', () => {
+      const mocked = {
+      BarChart: vi.fn((props: BarChartComponentProps) => <div data-test-subj="barChart" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetToggle = jest.fn();
-(useQueryToggle as jest.Mock).mockReturnValue({
+const mockSetToggle = vi.fn();
+(useQueryToggle as Mock).mockReturnValue({
   toggleStatus: true,
   setToggleStatus: mockSetToggle,
 });
 
 describe('CasesByStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders title', () => {
@@ -77,7 +86,7 @@ describe('CasesByStatus', () => {
   });
 
   test('collapses content', () => {
-    (useQueryToggle as jest.Mock).mockReturnValueOnce({
+    (useQueryToggle as Mock).mockReturnValueOnce({
       toggleStatus: false,
       setToggleStatus: mockSetToggle,
     });

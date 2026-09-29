@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
@@ -27,16 +30,16 @@ import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_s
 import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
-jest.mock('./run_stack_monitor/run_stack_monitor');
-jest.mock('./catch_error');
-jest.mock('./handle_execution_delay');
+vi.mock('./run_stack_monitor/run_stack_monitor');
+vi.mock('./catch_error');
+vi.mock('./handle_execution_delay');
 
-const mockCatchError = catchErrorModule.catchError as jest.Mock;
-const mockHandleExecutionDelay = handleExecutionDelayModule.handleExecutionDelay as jest.Mock;
-const mockRunStackMonitor = runStackMonitorModule.runStackMonitor as jest.Mock;
+const mockCatchError = catchErrorModule.catchError as Mock;
+const mockHandleExecutionDelay = handleExecutionDelayModule.handleExecutionDelay as Mock;
+const mockRunStackMonitor = runStackMonitorModule.runStackMonitor as Mock;
 
 type RunNodeTestParams = Omit<
-  jest.Mocked<WorkflowExecutionLoopParams>,
+  Mocked<WorkflowExecutionLoopParams>,
   'workflowExecutionCursor'
 > & {
   workflowExecutionCursor: MockWorkflowExecutionCursor;
@@ -47,11 +50,11 @@ describe('runNode', () => {
   let taskAbortController: AbortController;
   let workflowExecution: EsWorkflowExecution;
   let mockNode: GraphNodeUnion;
-  let mockNodeImplementation: jest.Mocked<NodeImplementation>;
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
+  let mockNodeImplementation: Mocked<NodeImplementation>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Set up default implementations for mocks
     mockRunStackMonitor.mockImplementation(
@@ -93,16 +96,16 @@ describe('runNode', () => {
       node: mockNode,
       scopeStack,
       abortController: new AbortController(),
-      flushEventLogs: jest.fn().mockResolvedValue(undefined),
+      flushEventLogs: vi.fn().mockResolvedValue(undefined),
       contextManager: {
-        ensureContextReady: jest.fn().mockResolvedValue(undefined),
-        releaseReadPins: jest.fn(),
+        ensureContextReady: vi.fn().mockResolvedValue(undefined),
+        releaseReadPins: vi.fn(),
       },
-    } as unknown as jest.Mocked<StepExecutionRuntime>;
+    } as unknown as Mocked<StepExecutionRuntime>;
 
     mockNodeImplementation = {
-      run: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<NodeImplementation>;
+      run: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Mocked<NodeImplementation>;
 
     const workflowExecutionCursor = createMockWorkflowExecutionCursor({
       currentNode: mockNode,
@@ -113,28 +116,28 @@ describe('runNode', () => {
     mockParams = {
       workflowRuntime: {
         executionCursor: workflowExecutionCursor,
-        enterScope: jest.fn(),
-        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-        getCurrentNodeScope: jest.fn().mockReturnValue(emptyStackFrames),
-        setWorkflowError: jest.fn(),
-        saveState: jest.fn().mockResolvedValue(undefined),
+        enterScope: vi.fn(),
+        getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+        getCurrentNodeScope: vi.fn().mockReturnValue(emptyStackFrames),
+        setWorkflowError: vi.fn(),
+        saveState: vi.fn().mockResolvedValue(undefined),
       },
       workflowExecutionCursor,
       stepExecutionRuntimeFactory: {
-        createStepExecutionRuntime: jest.fn().mockReturnValue(mockStepExecutionRuntime),
+        createStepExecutionRuntime: vi.fn().mockReturnValue(mockStepExecutionRuntime),
       },
       nodesFactory: {
-        create: jest.fn().mockReturnValue(mockNodeImplementation),
+        create: vi.fn().mockReturnValue(mockNodeImplementation),
       },
       workflowExecutionState: {
-        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-      } as unknown as jest.Mocked<WorkflowExecutionState>,
+        getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+      } as unknown as Mocked<WorkflowExecutionState>,
       workflowLogger: createMockWorkflowEventLogger(),
       workflowExecutionRepository: {
-        getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+        getWorkflowExecutionById: vi.fn().mockResolvedValue(null),
       },
       stepIoService: {
-        releaseTransientlyRehydratedOutputs: jest.fn(),
+        releaseTransientlyRehydratedOutputs: vi.fn(),
       },
       signal: taskAbortController.signal,
     } as unknown as RunNodeTestParams;
@@ -203,24 +206,24 @@ describe('runNode', () => {
 
       const workflowLogger = createMockWorkflowEventLogger();
       const workflowExecutionRepository = {
-        getWorkflowExecutionById: jest.fn(),
+        getWorkflowExecutionById: vi.fn(),
       };
 
       (mockParams as unknown as WorkflowExecutionLoopParams).workflowLogger = workflowLogger;
       (mockParams as unknown as WorkflowExecutionLoopParams).workflowExecutionRepository =
         workflowExecutionRepository as unknown as WorkflowExecutionLoopParams['workflowExecutionRepository'];
 
-      const upsertStep = jest.fn();
-      const updateWorkflowExecution = jest.fn((patch: Partial<EsWorkflowExecution>) => {
+      const upsertStep = vi.fn();
+      const updateWorkflowExecution = vi.fn((patch: Partial<EsWorkflowExecution>) => {
         Object.assign(workflowExecution, patch);
       });
       mockParams.workflowExecutionState = {
         ...mockParams.workflowExecutionState,
-        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-        getStepExecution: jest.fn().mockReturnValue(undefined),
+        getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+        getStepExecution: vi.fn().mockReturnValue(undefined),
         upsertStep,
         updateWorkflowExecution,
-      } as unknown as jest.Mocked<WorkflowExecutionState>;
+      } as unknown as Mocked<WorkflowExecutionState>;
 
       await runNode(mockParams);
 
@@ -235,19 +238,19 @@ describe('runNode', () => {
 
       mockParams.workflowExecutionState = {
         ...mockParams.workflowExecutionState,
-        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-        getStepExecution: jest.fn().mockReturnValue(undefined),
-        upsertStep: jest.fn(),
-        updateWorkflowExecution: jest.fn((patch: Partial<EsWorkflowExecution>) => {
+        getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+        getStepExecution: vi.fn().mockReturnValue(undefined),
+        upsertStep: vi.fn(),
+        updateWorkflowExecution: vi.fn((patch: Partial<EsWorkflowExecution>) => {
           Object.assign(workflowExecution, patch);
         }),
-      } as unknown as jest.Mocked<WorkflowExecutionState>;
+      } as unknown as Mocked<WorkflowExecutionState>;
 
       const cancellableNodeImpl: NodeImplementation & CancellableNode = {
-        run: jest.fn().mockResolvedValue(undefined),
-        onCancel: jest.fn().mockResolvedValue(undefined),
+        run: vi.fn().mockResolvedValue(undefined),
+        onCancel: vi.fn().mockResolvedValue(undefined),
       };
-      (mockParams.nodesFactory.create as jest.Mock).mockReturnValue(cancellableNodeImpl);
+      (mockParams.nodesFactory.create as Mock).mockReturnValue(cancellableNodeImpl);
 
       await runNode(mockParams);
 
@@ -262,13 +265,13 @@ describe('runNode', () => {
 
       mockParams.workflowExecutionState = {
         ...mockParams.workflowExecutionState,
-        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-        getStepExecution: jest.fn().mockReturnValue(undefined),
-        upsertStep: jest.fn(),
-        updateWorkflowExecution: jest.fn((patch: Partial<EsWorkflowExecution>) => {
+        getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+        getStepExecution: vi.fn().mockReturnValue(undefined),
+        upsertStep: vi.fn(),
+        updateWorkflowExecution: vi.fn((patch: Partial<EsWorkflowExecution>) => {
           Object.assign(workflowExecution, patch);
         }),
-      } as unknown as jest.Mocked<WorkflowExecutionState>;
+      } as unknown as Mocked<WorkflowExecutionState>;
 
       await runNode(mockParams);
 
@@ -282,20 +285,20 @@ describe('runNode', () => {
 
       mockParams.workflowExecutionState = {
         ...mockParams.workflowExecutionState,
-        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-        getStepExecution: jest.fn().mockReturnValue(undefined),
-        upsertStep: jest.fn(),
-        updateWorkflowExecution: jest.fn((patch: Partial<EsWorkflowExecution>) => {
+        getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+        getStepExecution: vi.fn().mockReturnValue(undefined),
+        upsertStep: vi.fn(),
+        updateWorkflowExecution: vi.fn((patch: Partial<EsWorkflowExecution>) => {
           Object.assign(workflowExecution, patch);
         }),
-      } as unknown as jest.Mocked<WorkflowExecutionState>;
+      } as unknown as Mocked<WorkflowExecutionState>;
 
       const onCancelError = new Error('onCancel failed');
       const cancellableNodeImpl: NodeImplementation & CancellableNode = {
-        run: jest.fn().mockResolvedValue(undefined),
-        onCancel: jest.fn().mockRejectedValue(onCancelError),
+        run: vi.fn().mockResolvedValue(undefined),
+        onCancel: vi.fn().mockRejectedValue(onCancelError),
       };
-      (mockParams.nodesFactory.create as jest.Mock).mockReturnValue(cancellableNodeImpl);
+      (mockParams.nodesFactory.create as Mock).mockReturnValue(cancellableNodeImpl);
 
       await runNode(mockParams);
 
@@ -378,7 +381,7 @@ describe('runNode', () => {
 
     it('should call catchError when error occurs', async () => {
       const error = new Error('Step execution failed');
-      (mockNodeImplementation.run as jest.Mock).mockRejectedValue(error);
+      (mockNodeImplementation.run as Mock).mockRejectedValue(error);
 
       await runNode(mockParams);
 
@@ -413,12 +416,12 @@ describe('runNode', () => {
   });
 
   describe('onCancel lifecycle hook', () => {
-    const setupCancellableNode = (onCancel: jest.Mock) => {
+    const setupCancellableNode = (onCancel: Mock) => {
       const cancellableNodeImpl: NodeImplementation & CancellableNode = {
-        run: jest.fn().mockResolvedValue(undefined),
+        run: vi.fn().mockResolvedValue(undefined),
         onCancel,
       };
-      (mockParams.nodesFactory.create as jest.Mock).mockReturnValue(cancellableNodeImpl);
+      (mockParams.nodesFactory.create as Mock).mockReturnValue(cancellableNodeImpl);
       return cancellableNodeImpl;
     };
 
@@ -430,9 +433,9 @@ describe('runNode', () => {
     };
 
     it('should call onCancel after run() when abort signal was triggered', async () => {
-      const mockOnCancel = jest.fn().mockResolvedValue(undefined);
+      const mockOnCancel = vi.fn().mockResolvedValue(undefined);
       const cancellableNode = setupCancellableNode(mockOnCancel);
-      cancellableNode.run = jest.fn(async () => {
+      cancellableNode.run = vi.fn(async () => {
         await new Promise<void>((resolve) => process.nextTick(resolve));
       });
       simulateAbortDuringRun();
@@ -444,7 +447,7 @@ describe('runNode', () => {
     });
 
     it('should not call onCancel when abort signal was not triggered', async () => {
-      const mockOnCancel = jest.fn();
+      const mockOnCancel = vi.fn();
       setupCancellableNode(mockOnCancel);
 
       await runNode(mockParams);
@@ -453,7 +456,7 @@ describe('runNode', () => {
     });
 
     it('should not call onCancel on a non-CancellableNode even if aborted', async () => {
-      mockNodeImplementation.run = jest.fn(async () => {
+      mockNodeImplementation.run = vi.fn(async () => {
         await new Promise<void>((resolve) => process.nextTick(resolve));
       });
       simulateAbortDuringRun();
@@ -465,9 +468,9 @@ describe('runNode', () => {
 
     it('should handle onCancel errors gracefully without throwing', async () => {
       const onCancelError = new Error('onCancel failed');
-      const mockOnCancel = jest.fn().mockRejectedValue(onCancelError);
+      const mockOnCancel = vi.fn().mockRejectedValue(onCancelError);
       const cancellableNode = setupCancellableNode(mockOnCancel);
-      cancellableNode.run = jest.fn(async () => {
+      cancellableNode.run = vi.fn(async () => {
         await new Promise<void>((resolve) => process.nextTick(resolve));
       });
       simulateAbortDuringRun();
@@ -490,9 +493,9 @@ describe('runNode', () => {
       // run/monitor race into runNode's catch, which previously skipped the
       // onCancel call. Cleanup now lives in `finally`, so a cancellable node
       // (e.g. parallel) still gets to release/timeout its parked children.
-      const mockOnCancel = jest.fn().mockResolvedValue(undefined);
+      const mockOnCancel = vi.fn().mockResolvedValue(undefined);
       const cancellableNode = setupCancellableNode(mockOnCancel);
-      cancellableNode.run = jest.fn(async () => {
+      cancellableNode.run = vi.fn(async () => {
         await new Promise<void>((resolve) => process.nextTick(resolve));
       });
       mockRunStackMonitor.mockImplementation(async () => {
@@ -509,11 +512,11 @@ describe('runNode', () => {
 
     it('should handle synchronous onCancel that throws', async () => {
       const syncError = new Error('sync onCancel error');
-      const mockOnCancel = jest.fn().mockImplementation(() => {
+      const mockOnCancel = vi.fn().mockImplementation(() => {
         throw syncError;
       });
       const cancellableNode = setupCancellableNode(mockOnCancel);
-      cancellableNode.run = jest.fn(async () => {
+      cancellableNode.run = vi.fn(async () => {
         await new Promise<void>((resolve) => process.nextTick(resolve));
       });
       simulateAbortDuringRun();

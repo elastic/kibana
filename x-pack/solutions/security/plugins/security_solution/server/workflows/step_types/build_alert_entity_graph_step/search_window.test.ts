@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { searchWindow } from './search_window';
 import type { EsHit, EsSearchClient } from './types';
 
@@ -23,7 +25,7 @@ const makeClient = (pages: EsHit[][]): EsSearchClient => {
     return { hits: { hits } };
   };
   return {
-    search: jest.fn(searchImpl) as unknown as EsSearchClient['search'],
+    search: vi.fn(searchImpl) as unknown as EsSearchClient['search'],
   };
 };
 

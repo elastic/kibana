@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
@@ -15,11 +17,11 @@ import { getList } from './get_list';
 
 describe('get_list', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns a list as expected if the list is found', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { duplicateExceptions } from './duplicate_exceptions';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
@@ -12,20 +14,23 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('duplicateExceptions', () => {
   let exceptionsClient: ExceptionListClient;
 
   beforeAll(() => {
     exceptionsClient = getExceptionListClientMock();
-    exceptionsClient.duplicateExceptionListAndItems = jest.fn();
+    exceptionsClient.duplicateExceptionListAndItems = vi.fn();
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty array if no exceptions to duplicate', async () => {
@@ -67,14 +72,14 @@ describe('duplicateExceptions', () => {
       id: '123-abc',
     };
 
-    exceptionsClient.getExceptionList = jest.fn().mockResolvedValue({
+    exceptionsClient.getExceptionList = vi.fn().mockResolvedValue({
       ...getDetectionsExceptionListSchemaMock(),
       type: ExceptionListTypeEnum.RULE_DEFAULT,
       list_id: 'rule_default_list',
       namespace_type: 'single',
       id: '5678',
     });
-    exceptionsClient.duplicateExceptionListAndItems = jest
+    exceptionsClient.duplicateExceptionListAndItems = vi
       .fn()
       .mockResolvedValue(newDefaultRuleList);
 
@@ -111,7 +116,7 @@ describe('duplicateExceptions', () => {
   });
 
   it('throws error if rule default list to duplicate not found', async () => {
-    exceptionsClient.getExceptionList = jest.fn().mockResolvedValue(null);
+    exceptionsClient.getExceptionList = vi.fn().mockResolvedValue(null);
 
     const ruleDefaultListReference: List = {
       type: ExceptionListTypeEnum.RULE_DEFAULT,
@@ -133,14 +138,14 @@ describe('duplicateExceptions', () => {
   });
 
   it('throws error if list duplication returns null', async () => {
-    exceptionsClient.getExceptionList = jest.fn().mockResolvedValue({
+    exceptionsClient.getExceptionList = vi.fn().mockResolvedValue({
       ...getDetectionsExceptionListSchemaMock(),
       type: ExceptionListTypeEnum.RULE_DEFAULT,
       list_id: 'my_list',
       namespace_type: 'single',
       id: '1234',
     });
-    exceptionsClient.duplicateExceptionListAndItems = jest.fn().mockResolvedValue(null);
+    exceptionsClient.duplicateExceptionListAndItems = vi.fn().mockResolvedValue(null);
 
     const ruleDefaultListReference: List = {
       type: ExceptionListTypeEnum.RULE_DEFAULT,

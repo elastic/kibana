@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent } from '@testing-library/react';
@@ -15,8 +17,8 @@ const defaultProps = {
   indexPatterns: ['logs-*'],
   selectedIndexPattern: 'logs-*',
   streamNameParts: [''],
-  onIndexPatternChange: jest.fn(),
-  onStreamNamePartsChange: jest.fn(),
+  onIndexPatternChange: vi.fn(),
+  onStreamNamePartsChange: vi.fn(),
   validationError: null,
   conflictingIndexPattern: undefined,
 };
@@ -31,7 +33,7 @@ const renderComponent = (props = {}) => {
 
 describe('NameStreamSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -104,7 +106,7 @@ describe('NameStreamSection', () => {
     });
 
     it('calls onIndexPatternChange when a different pattern is selected', () => {
-      const onIndexPatternChange = jest.fn();
+      const onIndexPatternChange = vi.fn();
       const { getByTestId } = renderComponent({
         indexPatterns: ['logs-*', 'metrics-*'],
         selectedIndexPattern: 'logs-*',
@@ -226,7 +228,7 @@ describe('NameStreamSection', () => {
     });
 
     it('calls onStreamNamePartsChange when input changes', () => {
-      const onStreamNamePartsChange = jest.fn();
+      const onStreamNamePartsChange = vi.fn();
       const { getByTestId } = renderComponent({
         indexPatterns: ['logs-*'],
         streamNameParts: [''],

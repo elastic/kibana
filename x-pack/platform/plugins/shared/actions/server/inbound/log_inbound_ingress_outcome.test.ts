@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { INBOUND_INGRESS_OUTCOMES, logInboundIngressOutcome } from './log_inbound_ingress_outcome';
@@ -13,7 +15,7 @@ describe('logInboundIngressOutcome', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('covers the full outcome taxonomy', () => {

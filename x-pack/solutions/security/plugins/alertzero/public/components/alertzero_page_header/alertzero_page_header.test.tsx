@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -12,9 +15,9 @@ import { useKibanaTimeZone } from '../../hooks/use_kibana_time_zone';
 import { AlertZeroPageHeader } from './alertzero_page_header';
 import type { AlertZeroPageHeaderProps } from './alertzero_page_header';
 
-jest.mock('../../hooks/use_kibana_time_zone');
+vi.mock('../../hooks/use_kibana_time_zone');
 
-(useKibanaTimeZone as jest.Mock).mockReturnValue('UTC');
+(useKibanaTimeZone as Mock).mockReturnValue('UTC');
 
 const setup = (props: AlertZeroPageHeaderProps = {}) =>
   render(
@@ -77,11 +80,11 @@ describe('AlertZeroPageHeader', () => {
    */
   describe('greeting', () => {
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     const greetingAtUtcHour = (hour: number, minute = 0) => {
-      jest.useFakeTimers().setSystemTime(Date.UTC(2026, 8, 14, hour, minute));
+      vi.useFakeTimers().setSystemTime(Date.UTC(2026, 8, 14, hour, minute));
       setup({ eventCount: 1 });
       return heading();
     };
@@ -107,7 +110,7 @@ describe('AlertZeroPageHeader', () => {
      * options themselves is what pins the fix on every engine.
      */
     it('should ask Intl for the 0-23 cycle by name rather than via hour12', () => {
-      const spy = jest.spyOn(Intl, 'DateTimeFormat');
+      const spy = vi.spyOn(Intl, 'DateTimeFormat');
       setup({ eventCount: 1 });
 
       const options = spy.mock.calls.map(([, opts]) => opts).filter((opts) => opts?.hour);

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -69,7 +71,7 @@ describe('Header', () => {
 
   it('calls onDeleteClick when clicking delete', async () => {
     const user = createUser();
-    const onDeleteClick = jest.fn();
+    const onDeleteClick = vi.fn();
     renderHeader({ onDeleteClick });
 
     await waitFor(() => {

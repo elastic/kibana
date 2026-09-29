@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { getExpirationStatus } from './get_expiration_status';
 
 const CURRENT_MOCK_DATE = '2025-01-01T00:00:00.000Z';
 
 beforeEach(() => {
-  jest.useFakeTimers().setSystemTime(new Date(CURRENT_MOCK_DATE));
+  vi.useFakeTimers().setSystemTime(new Date(CURRENT_MOCK_DATE));
 });
 
 const setup = ({

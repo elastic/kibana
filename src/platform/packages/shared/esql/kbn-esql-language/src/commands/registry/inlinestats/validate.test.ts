@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from '../stats/validate';
 import { Parser } from '@elastic/esql';
@@ -22,7 +24,7 @@ const inlinestatsExpectErrors = (
 
 describe('INLINE STATS Validation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('INLINE STATS <aggregates> [ BY <grouping> ]', () => {

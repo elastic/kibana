@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { type RenderResult } from '@testing-library/react';
 import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_utils';
@@ -24,7 +26,7 @@ describe('Microsoft Defender for Endpoint Connector UI', () => {
     renderProps = {
       readOnly: false,
       isEdit: false,
-      registerPreSubmitValidator: jest.fn(),
+      registerPreSubmitValidator: vi.fn(),
     };
     connectorFormProps = {
       id: 'test',

@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 
 // Resolve backoff sleeps instantly so retry/fallback paths run without waiting.
-jest.mock('timers/promises', () => ({
-  setTimeout: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('timers/promises', () => {
+      const mocked = {
+      setTimeout: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   bulkCreateWithInferenceFallback,
@@ -22,9 +27,9 @@ import {
 
 const createLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger);
 
 const okResponse = (): BulkResponse => ({
@@ -103,7 +108,7 @@ describe('countRawBulkInferenceErrors', () => {
 
 describe('bulkCreateWithInferenceFallback', () => {
   it('returns immediately on first success without falling back', async () => {
-    const attempt = jest.fn().mockResolvedValue(okResponse());
+    const attempt = vi.fn().mockResolvedValue(okResponse());
     const response = await bulkCreateWithInferenceFallback(createLogger(), attempt);
     expect(response.errors).toBe(false);
     expect(attempt).toHaveBeenCalledTimes(1);
@@ -111,7 +116,7 @@ describe('bulkCreateWithInferenceFallback', () => {
   });
 
   it('throws without retrying on a non-inference error', async () => {
-    const attempt = jest.fn().mockResolvedValue(otherErrorResponse());
+    const attempt = vi.fn().mockResolvedValue(otherErrorResponse());
     await expect(bulkCreateWithInferenceFallback(createLogger(), attempt)).rejects.toThrow(
       /non-inference error/
     );
@@ -124,7 +129,7 @@ describe('bulkCreateWithInferenceFallback', () => {
       took: 0,
       items: [...inferenceErrorResponse().items, ...otherErrorResponse().items],
     };
-    const attempt = jest.fn().mockResolvedValue(mixed);
+    const attempt = vi.fn().mockResolvedValue(mixed);
     await expect(bulkCreateWithInferenceFallback(createLogger(), attempt)).rejects.toThrow(
       /mixed errors/
     );
@@ -132,7 +137,7 @@ describe('bulkCreateWithInferenceFallback', () => {
   });
 
   it('retries inference failures and returns when one succeeds', async () => {
-    const attempt = jest
+    const attempt = vi
       .fn()
       .mockResolvedValueOnce(inferenceErrorResponse())
       .mockResolvedValueOnce(okResponse());
@@ -144,7 +149,7 @@ describe('bulkCreateWithInferenceFallback', () => {
   });
 
   it('falls back to writing without embedding after exhausting inference retries', async () => {
-    const attempt = jest
+    const attempt = vi
       .fn()
       .mockResolvedValueOnce(inferenceErrorResponse())
       .mockResolvedValueOnce(inferenceErrorResponse())
@@ -159,7 +164,7 @@ describe('bulkCreateWithInferenceFallback', () => {
   });
 
   it('retries a thrown TimeoutError and returns when a later attempt succeeds', async () => {
-    const attempt = jest
+    const attempt = vi
       .fn()
       .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
       .mockResolvedValueOnce(okResponse());
@@ -172,7 +177,7 @@ describe('bulkCreateWithInferenceFallback', () => {
   });
 
   it('falls back to writing without embedding when every attempt throws a TimeoutError', async () => {
-    const attempt = jest
+    const attempt = vi
       .fn()
       .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
       .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
@@ -187,7 +192,7 @@ describe('bulkCreateWithInferenceFallback', () => {
   });
 
   it('rethrows a non-inference rejection without retrying or falling back', async () => {
-    const attempt = jest.fn().mockRejectedValue(new Error('mapping conflict'));
+    const attempt = vi.fn().mockRejectedValue(new Error('mapping conflict'));
 
     await expect(bulkCreateWithInferenceFallback(createLogger(), attempt)).rejects.toThrow(
       /mapping conflict/
@@ -196,7 +201,7 @@ describe('bulkCreateWithInferenceFallback', () => {
   });
 
   it('throws when the embedding-stripped fallback also fails', async () => {
-    const attempt = jest
+    const attempt = vi
       .fn()
       .mockResolvedValueOnce(inferenceErrorResponse())
       .mockResolvedValueOnce(inferenceErrorResponse())

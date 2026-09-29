@@ -7,41 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 
 export const fatalErrorMock = fatalErrorsServiceMock.createSetupContract();
 export const coreSystemMock = {
-  setup: jest.fn().mockResolvedValue({
+  setup: vi.fn().mockResolvedValue({
     fatalErrors: fatalErrorMock,
   }),
-  start: jest.fn().mockResolvedValue({
+  start: vi.fn().mockResolvedValue({
     application: applicationServiceMock.createInternalStartContract(),
   }),
 };
-jest.doMock('./core_system', () => ({
-  CoreSystem: jest.fn().mockImplementation(() => coreSystemMock),
-}));
+vi.doMock('./core_system', () => {
+      const mocked = {
+      CoreSystem: vi.fn().mockImplementation(() => coreSystemMock),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const apmSystem = {
-  setup: jest.fn().mockResolvedValue(undefined),
-  start: jest.fn().mockResolvedValue(undefined),
+  setup: vi.fn().mockResolvedValue(undefined),
+  start: vi.fn().mockResolvedValue(undefined),
 };
-export const ApmSystemConstructor = jest.fn().mockImplementation(() => apmSystem);
-jest.doMock('./apm_system', () => ({
-  ApmSystem: ApmSystemConstructor,
-}));
+export const ApmSystemConstructor = vi.fn().mockImplementation(() => apmSystem);
+vi.doMock('./apm_system', () => {
+      const mocked = {
+      ApmSystem: ApmSystemConstructor,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const i18nLoad = jest.fn().mockResolvedValue(undefined);
-export const i18nInitDefault = jest.fn().mockReturnValue(undefined);
-export const i18nGetIsInitialized = jest.fn().mockReturnValue(false);
-export const setAvailableLocalesMock = jest.fn();
-jest.doMock('@kbn/i18n', () => ({
-  i18n: {
-    ...jest.requireActual('@kbn/i18n').i18n,
-    load: i18nLoad,
-    initDefault: i18nInitDefault,
-    getIsInitialized: i18nGetIsInitialized,
-  },
-  setAvailableLocales: setAvailableLocalesMock,
-}));
+export const i18nLoad = vi.fn().mockResolvedValue(undefined);
+export const i18nInitDefault = vi.fn().mockReturnValue(undefined);
+export const i18nGetIsInitialized = vi.fn().mockReturnValue(false);
+export const setAvailableLocalesMock = vi.fn();
+vi.doMock('@kbn/i18n', async () => {
+      const mocked = {
+      i18n: {
+        ...(await vi.importActual('@kbn/i18n')).i18n,
+        load: i18nLoad,
+        initDefault: i18nInitDefault,
+        getIsInitialized: i18nGetIsInitialized,
+      },
+      setAvailableLocales: setAvailableLocalesMock,
+    };
+      return { ...mocked, default: mocked };
+    });

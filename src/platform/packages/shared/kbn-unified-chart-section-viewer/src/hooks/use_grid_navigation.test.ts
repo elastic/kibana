@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { KeyboardEvent, RefObject } from 'react';
 import { createRef } from 'react';
 import { keys } from '@elastic/eui';
@@ -63,7 +65,7 @@ describe('useGridNavigation', () => {
       result.current.handleFocusCell(1, 3);
     });
 
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     act(() => {
       result.current.handleKeyDown({
         key: keys.ARROW_DOWN,

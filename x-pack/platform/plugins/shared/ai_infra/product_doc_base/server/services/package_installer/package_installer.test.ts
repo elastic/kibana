@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   downloadToDiskMock,
   createIndexMock,
@@ -108,7 +110,7 @@ describe('PackageInstaller', () => {
 
   describe('installPackage', () => {
     it('deletes the downloaded artifact after a successful install', async () => {
-      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      openZipArchiveMock.mockResolvedValue({ close: vi.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
       downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
 
@@ -122,7 +124,7 @@ describe('PackageInstaller', () => {
     });
 
     it('deletes the existing index only after the archive has been downloaded and validated', async () => {
-      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      openZipArchiveMock.mockResolvedValue({ close: vi.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
       downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
 
@@ -139,7 +141,7 @@ describe('PackageInstaller', () => {
     });
 
     it('keeps the existing index when the archive fails validation', async () => {
-      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      openZipArchiveMock.mockResolvedValue({ close: vi.fn() });
       downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
       validateArtifactArchiveMock.mockReturnValue({ valid: false, error: 'truncated' });
 
@@ -152,7 +154,7 @@ describe('PackageInstaller', () => {
     });
 
     it('only marks the status as installing once the archive is ready to replace the index', async () => {
-      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      openZipArchiveMock.mockResolvedValue({ close: vi.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
       downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
 
@@ -213,7 +215,7 @@ describe('PackageInstaller', () => {
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
       } as never);
-      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      openZipArchiveMock.mockResolvedValue({ close: vi.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
       downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
       populateIndexMock.mockRejectedValue(new Error('bulk failed'));
@@ -241,7 +243,7 @@ describe('PackageInstaller', () => {
 
     it('calls the steps with the right parameters', async () => {
       const zipArchive = {
-        close: jest.fn(),
+        close: vi.fn(),
       };
       openZipArchiveMock.mockResolvedValue(zipArchive);
 
@@ -319,7 +321,7 @@ describe('PackageInstaller', () => {
     });
 
     it('does not deploy local ELSER when installing with ELSER in EIS', async () => {
-      const zipArchive = { close: jest.fn() };
+      const zipArchive = { close: vi.fn() };
       openZipArchiveMock.mockResolvedValue(zipArchive);
       const artifactName = getArtifactName({
         productName: 'kibana',
@@ -389,7 +391,7 @@ describe('PackageInstaller', () => {
 
     it('closes the archive and calls setInstallationFailed if the installation fails', async () => {
       const zipArchive = {
-        close: jest.fn(),
+        close: vi.fn(),
       };
       openZipArchiveMock.mockResolvedValue(zipArchive);
 
@@ -433,7 +435,7 @@ describe('PackageInstaller', () => {
       fetchArtifactVersionsMock.mockResolvedValue({
         kibana: ['8.15', '8.16'],
       });
-      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+      vi.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
 
       await expect(packageInstaller.installProduct({ productName: 'kibana' })).resolves.toBe(true);
 
@@ -446,7 +448,7 @@ describe('PackageInstaller', () => {
 
     it('warns and skips when the repository has no version for the product', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({ kibana: [] });
-      jest.spyOn(packageInstaller, 'installPackage');
+      vi.spyOn(packageInstaller, 'installPackage');
 
       await expect(packageInstaller.installProduct({ productName: 'kibana' })).resolves.toBe(false);
 
@@ -469,7 +471,7 @@ describe('PackageInstaller', () => {
 
     beforeEach(() => {
       fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
-      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+      vi.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
     });
 
     it('installs a product that is not installed', async () => {
@@ -563,7 +565,7 @@ describe('PackageInstaller', () => {
 
     beforeEach(() => {
       fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
-      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+      vi.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
     });
 
     it('installs when the installed version differs from the selected version', async () => {
@@ -774,7 +776,7 @@ describe('PackageInstaller', () => {
         status: 'installed',
         version: '8.16',
       });
-      jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+      vi.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
 
       await packageInstaller.ensureOpenApiSpecUpToDate({
         inferenceId: defaultInferenceEndpoints.ELSER,
@@ -789,7 +791,7 @@ describe('PackageInstaller', () => {
         status: 'installed',
         version: '8.15',
       });
-      jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+      vi.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
 
       await packageInstaller.ensureOpenApiSpecUpToDate({
         inferenceId: defaultInferenceEndpoints.ELSER,
@@ -812,7 +814,7 @@ describe('PackageInstaller', () => {
         version: '8.16',
         updatedAt: '2026-09-17T10:30:00.000Z',
       });
-      jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+      vi.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
 
       await packageInstaller.ensureOpenApiSpecUpToDate({
         inferenceId: defaultInferenceEndpoints.ELSER,
@@ -830,7 +832,7 @@ describe('PackageInstaller', () => {
         version: '8.16',
         updatedAt: '2026-09-17T09:00:00.000Z',
       });
-      jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+      vi.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
 
       await packageInstaller.ensureOpenApiSpecUpToDate({
         inferenceId: defaultInferenceEndpoints.ELSER,
@@ -860,7 +862,7 @@ describe('PackageInstaller', () => {
         status: 'installed',
         version: 'latest-2026-08-20T23:08:00.384Z',
       });
-      jest.spyOn(serverlessInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+      vi.spyOn(serverlessInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
 
       await serverlessInstaller.ensureOpenApiSpecUpToDate({
         inferenceId: '.jina-embeddings-v5-text-small',
@@ -886,7 +888,7 @@ describe('PackageInstaller', () => {
     });
 
     it('passes the proxy URL to fetchArtifactVersions in installProduct', async () => {
-      jest.spyOn(proxyPackageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+      vi.spyOn(proxyPackageInstaller, 'installPackage').mockResolvedValue(undefined as never);
 
       fetchArtifactVersionsMock.mockResolvedValue({
         kibana: ['8.16'],
@@ -902,7 +904,7 @@ describe('PackageInstaller', () => {
 
     it('passes the proxy URL to downloadToDisk in installPackage', async () => {
       const zipArchive = {
-        close: jest.fn(),
+        close: vi.fn(),
       };
       openZipArchiveMock.mockResolvedValue(zipArchive);
       downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/artifact.zip`);
@@ -936,7 +938,7 @@ describe('PackageInstaller', () => {
 
   describe('uninstallAll', () => {
     it('calls uninstall for all packages', async () => {
-      jest.spyOn(packageInstaller, 'uninstallPackage');
+      vi.spyOn(packageInstaller, 'uninstallPackage');
       const totalProducts = Object.keys(DocumentationProduct).length;
       await packageInstaller.uninstallAll();
 
@@ -955,7 +957,7 @@ describe('PackageInstaller', () => {
     const VERSION_NEW = '2025.12.12';
 
     it('downloads and installs the latest version when no version is provided', async () => {
-      const zipArchive = { close: jest.fn() };
+      const zipArchive = { close: vi.fn() };
       openZipArchiveMock.mockResolvedValue(zipArchive);
       fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_OLD, VERSION_NEW]);
       downloadToDiskMock.mockResolvedValue(
@@ -1035,7 +1037,7 @@ describe('PackageInstaller', () => {
 
     it('does not deploy local ELSER when installing with ELSER in EIS', async () => {
       const inferenceId = defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
-      const zipArchive = { close: jest.fn() };
+      const zipArchive = { close: vi.fn() };
       openZipArchiveMock.mockResolvedValue(zipArchive);
       fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_NEW]);
       downloadToDiskMock.mockResolvedValue(
@@ -1059,7 +1061,7 @@ describe('PackageInstaller', () => {
     });
 
     it('calls setSecurityLabsInstallationFailed if installation fails', async () => {
-      const zipArchive = { close: jest.fn() };
+      const zipArchive = { close: vi.fn() };
       openZipArchiveMock.mockResolvedValue(zipArchive);
       fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_NEW]);
       const artifactName = getSecurityLabsArtifactName({
@@ -1134,7 +1136,7 @@ describe('PackageInstaller', () => {
         kibanaVersion,
         isServerless: true,
       });
-      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      openZipArchiveMock.mockResolvedValue({ close: vi.fn() });
       loadMappingFileMock.mockResolvedValue({
         properties: { semantic: { inference_id: '.elser', type: 'semantic_text' } },
       });
@@ -1266,15 +1268,15 @@ describe('PackageInstaller', () => {
 
   describe('installOpenAPISpec', () => {
     const getOpenApiArchive = () => ({
-      close: jest.fn(),
-      hasEntry: jest.fn().mockReturnValue(true),
-      getEntryPaths: jest
+      close: vi.fn(),
+      hasEntry: vi.fn().mockReturnValue(true),
+      getEntryPaths: vi
         .fn()
         .mockReturnValue([
           'kibana/content/content-0.ndjson',
           'elasticsearch/content/content-0.ndjson',
         ]),
-      getEntryContent: jest.fn().mockImplementation(async (entryPath: string) => {
+      getEntryContent: vi.fn().mockImplementation(async (entryPath: string) => {
         if (entryPath.endsWith('manifest.json')) {
           return Buffer.from(JSON.stringify({ formatVersion: TEST_FORMAT_VERSION }), 'utf-8');
         }

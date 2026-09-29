@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import React, { useCallback, useState } from 'react';
 import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
@@ -30,15 +33,15 @@ import {
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 
-jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
+vi.setConfig({ testTimeout: 15_000 }); // Costly tests, hitting 2 seconds execution time locally
 
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../../common/hooks/use_license', () => {
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/containers/source');
+vi.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isGoldPlus: jest.fn(),
+    isPlatinumPlus: vi.fn(),
+    isGoldPlus: vi.fn(),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -91,7 +94,7 @@ const expectReactNodeContainingMessage = (substring: string) =>
 describe('Event filter form', () => {
   const formPrefix = 'eventFilters-form';
 
-  let formProps: jest.Mocked<ArtifactFormComponentProps>;
+  let formProps: Mocked<ArtifactFormComponentProps>;
   let mockedContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let latestUpdatedItem: ArtifactFormComponentProps['item'];
@@ -151,8 +154,8 @@ describe('Event filter form', () => {
   };
 
   beforeEach(async () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useCurrentUser as Mock).mockReturnValue({ username: 'test-username' });
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: {},
         data: {},
@@ -167,10 +170,10 @@ describe('Event filter form', () => {
         },
       },
     });
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+    (licenseService.isPlatinumPlus as Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as Mock).mockImplementation(() => [
       false,
       {
         indexPatterns: stubIndexPattern,
@@ -182,7 +185,7 @@ describe('Event filter form', () => {
       mode: 'create',
       disabled: false,
       error: undefined,
-      onChange: jest.fn((updates) => {
+      onChange: vi.fn((updates) => {
         latestUpdatedItem = updates.item;
         isLatestUpdatedItemValid = updates.isValid;
       }),

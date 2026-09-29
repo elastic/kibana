@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 import { SessionExpired } from './session_expired';
@@ -12,7 +14,7 @@ import { LogoutReason } from '../../common/types';
 
 describe('#logout', () => {
   const application = applicationServiceMock.createStartContract();
-  const mockGetItem = jest.fn().mockReturnValue(null);
+  const mockGetItem = vi.fn().mockReturnValue(null);
   const CURRENT_URL = '/foo/bar?baz=quz#quuz';
   const LOGOUT_URL = '/logout';
   const TENANT = '/some-basepath';

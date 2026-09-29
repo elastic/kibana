@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React, { useEffect } from 'react';
 import { screen, render } from '@testing-library/react';
@@ -23,7 +25,7 @@ describe('ActionsCellHost', () => {
     render(
       <ActionsCellHost
         {...props}
-        renderActionsCell={jest.fn(() => (
+        renderActionsCell={vi.fn(() => (
           <div data-test-subj="renderActionsCell" />
         ))}
       />

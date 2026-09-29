@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -80,8 +82,8 @@ describe('createConcreteWriteIndex', () => {
     });
 
     beforeEach(() => {
-      jest.resetAllMocks();
-      jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
+      vi.resetAllMocks();
+      vi.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
     });
 
     describe(`using ${label} for alert indices`, () => {
@@ -1489,7 +1491,7 @@ describe('createConcreteWriteIndex', () => {
 
 describe('setConcreteWriteIndex', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it(`should set the latest index as write index when none exists`, async () => {

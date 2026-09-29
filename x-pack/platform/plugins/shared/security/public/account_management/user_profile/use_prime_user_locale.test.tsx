@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -47,7 +49,7 @@ describe('usePrimeUserLocale', () => {
     );
 
     // Default: i18n.getLocale returns lowercased config locale.
-    jest.spyOn(i18n, 'getLocale').mockReturnValue('fr-fr');
+    vi.spyOn(i18n, 'getLocale').mockReturnValue('fr-fr');
 
     // Picker enabled with the five bundled locales — matches the schema default.
     setAvailableLocales([
@@ -60,7 +62,7 @@ describe('usePrimeUserLocale', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     setAvailableLocales([]);
   });
 

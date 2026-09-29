@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -28,7 +30,7 @@ describe('PipelineSelectOption', () => {
   const label = pipeline.pipelineName;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders pipeline selection option', () => {

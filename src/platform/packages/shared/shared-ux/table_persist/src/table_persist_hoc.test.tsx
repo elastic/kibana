@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { PureComponent } from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { withEuiTablePersist, type EuiTablePersistInjectedProps } from './table_persist_hoc';
 
-const mockUseEuiTablePersist = jest.fn().mockReturnValue({
+const mockUseEuiTablePersist = vi.fn().mockReturnValue({
   pageSize: 'mockPageSize',
   sorting: 'mockSorting',
   onTableChange: 'mockOnTableChange',
 });
 
-jest.mock('./use_table_persist', () => {
-  const original = jest.requireActual('./use_table_persist');
+vi.mock('./use_table_persist', async () => {
+  const original = (await vi.importActual('./use_table_persist'));
 
   return {
     ...original,
@@ -39,7 +41,7 @@ class TestComponent extends PureComponent<EuiTablePersistInjectedProps<any>> {
 
 describe('withEuiTablePersist', () => {
   it('should call useEuiTablePersist and return its values', () => {
-    const customOnTableChange = jest.fn();
+    const customOnTableChange = vi.fn();
     const pageSizeOptions = [5, 10, 25, 50];
 
     const WrappedComponent = withEuiTablePersist(TestComponent, {
@@ -70,8 +72,8 @@ describe('withEuiTablePersist', () => {
   });
 
   it('should allow override through props', () => {
-    const customOnTableChangeDefault = jest.fn();
-    const customOnTableChangeProp = jest.fn();
+    const customOnTableChangeDefault = vi.fn();
+    const customOnTableChangeProp = vi.fn();
     const pageSizeOptions = [5, 10, 25, 50];
 
     const WrappedComponent = withEuiTablePersist(TestComponent, {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createAttachmentServiceMock } from '../../../services/mocks';
 import { PersistableStateAndExternalReferencesLimiter } from './persistable_state_and_external_references';
 import {
@@ -30,7 +32,7 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
   const limiter = new PersistableStateAndExternalReferencesLimiter(attachmentService);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('public fields', () => {

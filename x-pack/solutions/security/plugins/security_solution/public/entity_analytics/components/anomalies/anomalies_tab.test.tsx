@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,16 +16,22 @@ import { ANOMALIES_TAB_ERROR_TEST_ID } from './test_ids';
 
 // ─── Hook mocks ──────────────────────────────────────────────────────────────
 
-const mockUseAnomalyOverview = jest.fn();
-const mockUseAnomalySummary = jest.fn();
+const mockUseAnomalyOverview = vi.fn();
+const mockUseAnomalySummary = vi.fn();
 
-jest.mock('../../api/hooks/use_anomaly_overview', () => ({
-  useAnomalyOverview: (...args: unknown[]) => mockUseAnomalyOverview(...args),
-}));
+vi.mock('../../api/hooks/use_anomaly_overview', () => {
+      const mocked = {
+      useAnomalyOverview: (...args: unknown[]) => mockUseAnomalyOverview(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../api/hooks/use_anomaly_summary', () => ({
-  useAnomalySummary: (...args: unknown[]) => mockUseAnomalySummary(...args),
-}));
+vi.mock('../../api/hooks/use_anomaly_summary', () => {
+      const mocked = {
+      useAnomalySummary: (...args: unknown[]) => mockUseAnomalySummary(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ─── Severity options ─────────────────────────────────────────────────────────
 
@@ -45,72 +53,87 @@ let onSeverityChange: ((opts: SeverityOption[]) => void) | undefined;
 
 // ─── Child component mocks ────────────────────────────────────────────────────
 
-jest.mock('@kbn/date-range-picker', () => ({
-  DateRangePicker: () => <div data-test-subj="mock-date-range-picker" />,
-}));
+vi.mock('@kbn/date-range-picker', () => {
+      const mocked = {
+      DateRangePicker: () => <div data-test-subj="mock-date-range-picker" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Capture onSelectTactic so tests can drive tactic selection.
 let onSelectTactic: ((tactic: string) => void) | undefined;
-jest.mock('./mitre/components/mitre_attack_chain', () => ({
-  MitreAttackChain: ({
-    onSelectTactic: handler,
-    selectedTactic,
-    anomalyCountByTactic,
-    triggeredTactics,
-    showPersistentFirstTacticBadge,
-  }: {
-    onSelectTactic?: (t: string) => void;
-    selectedTactic?: string | null;
-    anomalyCountByTactic?: Record<string, number>;
-    triggeredTactics: string[];
-    showPersistentFirstTacticBadge?: boolean;
-  }) => {
-    onSelectTactic = handler;
-    return (
-      <div
-        data-test-subj="mock-mitre-attack-chain"
-        data-selected-tactic={selectedTactic ?? ''}
-        data-tactic-counts={JSON.stringify(anomalyCountByTactic ?? {})}
-        data-triggered-tactics={JSON.stringify(triggeredTactics)}
-        data-show-persistent-first-tactic-badge={String(Boolean(showPersistentFirstTacticBadge))}
-        data-has-select-handler={String(handler !== undefined)}
-      />
-    );
-  },
-}));
+vi.mock('./mitre/components/mitre_attack_chain', () => {
+      const mocked = {
+      MitreAttackChain: ({
+        onSelectTactic: handler,
+        selectedTactic,
+        anomalyCountByTactic,
+        triggeredTactics,
+        showPersistentFirstTacticBadge,
+      }: {
+        onSelectTactic?: (t: string) => void;
+        selectedTactic?: string | null;
+        anomalyCountByTactic?: Record<string, number>;
+        triggeredTactics: string[];
+        showPersistentFirstTacticBadge?: boolean;
+      }) => {
+        onSelectTactic = handler;
+        return (
+          <div
+            data-test-subj="mock-mitre-attack-chain"
+            data-selected-tactic={selectedTactic ?? ''}
+            data-tactic-counts={JSON.stringify(anomalyCountByTactic ?? {})}
+            data-triggered-tactics={JSON.stringify(triggeredTactics)}
+            data-show-persistent-first-tactic-badge={String(Boolean(showPersistentFirstTacticBadge))}
+            data-has-select-handler={String(handler !== undefined)}
+          />
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./mitre/components/mitre_attack_chain_placeholder', () => ({
-  MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
-    <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
-  ),
-}));
+vi.mock('./mitre/components/mitre_attack_chain_placeholder', () => {
+      const mocked = {
+      MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
+        <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./anomalies_tab_timeline', () => ({
-  AnomalyTabTimelineSection: ({
-    isLoading,
-    isEmpty,
-  }: {
-    isLoading?: boolean;
-    isEmpty?: boolean;
-  }) => (
-    <div
-      data-test-subj="mock-timeline"
-      data-is-loading={String(Boolean(isLoading))}
-      data-is-empty={String(Boolean(isEmpty))}
-    />
-  ),
-}));
+vi.mock('./anomalies_tab_timeline', () => {
+      const mocked = {
+      AnomalyTabTimelineSection: ({
+        isLoading,
+        isEmpty,
+      }: {
+        isLoading?: boolean;
+        isEmpty?: boolean;
+      }) => (
+        <div
+          data-test-subj="mock-timeline"
+          data-is-loading={String(Boolean(isLoading))}
+          data-is-empty={String(Boolean(isEmpty))}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./anomalies_tab_table', () => ({
-  AnomalyTabTableSection: ({ isLoading }: { isLoading?: boolean }) => (
-    <div data-test-subj="mock-table" data-is-loading={String(Boolean(isLoading))} />
-  ),
-}));
+vi.mock('./anomalies_tab_table', () => {
+      const mocked = {
+      AnomalyTabTableSection: ({ isLoading }: { isLoading?: boolean }) => (
+        <div data-test-subj="mock-table" data-is-loading={String(Boolean(isLoading))} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ─── Infrastructure mocks ─────────────────────────────────────────────────────
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -120,25 +143,31 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { ml: {} } }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: { ml: {} } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ml-plugin/public', () => ({
-  ML_PAGES: { ANOMALY_DETECTION_JOBS_MANAGE: 'jobs' },
-  useMlManagementHref: () => '/ml/jobs',
-  useSeverityOptions: () => [
-    { val: 0, display: 'Low', color: '', threshold: { min: 0, max: 25 } },
-    { val: 25, display: 'Warning', color: '', threshold: { min: 25, max: 50 } },
-    { val: 50, display: 'Minor', color: '', threshold: { min: 50, max: 75 } },
-    { val: 75, display: 'Major', color: '', threshold: { min: 75, max: 100 } },
-    { val: 100, display: 'Critical', color: '', threshold: { min: 100 } },
-  ],
-  SeverityLegendControl: ({ onChange }: { onChange: (opts: SeverityOption[]) => void }) => {
-    onSeverityChange = onChange;
-    return <div data-test-subj="mock-severity-control" />;
-  },
-}));
+vi.mock('@kbn/ml-plugin/public', () => {
+      const mocked = {
+      ML_PAGES: { ANOMALY_DETECTION_JOBS_MANAGE: 'jobs' },
+      useMlManagementHref: () => '/ml/jobs',
+      useSeverityOptions: () => [
+        { val: 0, display: 'Low', color: '', threshold: { min: 0, max: 25 } },
+        { val: 25, display: 'Warning', color: '', threshold: { min: 25, max: 50 } },
+        { val: 50, display: 'Minor', color: '', threshold: { min: 50, max: 75 } },
+        { val: 75, display: 'Major', color: '', threshold: { min: 75, max: 100 } },
+        { val: 100, display: 'Critical', color: '', threshold: { min: 100 } },
+      ],
+      SeverityLegendControl: ({ onChange }: { onChange: (opts: SeverityOption[]) => void }) => {
+        onSeverityChange = onChange;
+        return <div data-test-subj="mock-severity-control" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

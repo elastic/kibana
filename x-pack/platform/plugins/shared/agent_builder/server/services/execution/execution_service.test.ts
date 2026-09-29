@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { lastValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -33,20 +36,23 @@ import {
 import { findConversationEvent } from './utils/chat_response';
 
 // Mock persistence module
-const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
-  create: jest.fn(),
-  get: jest.fn(),
-  updateStatus: jest.fn(),
-  appendEvents: jest.fn(),
-  updateHeartbeat: jest.fn(),
-  peek: jest.fn(),
-  readEvents: jest.fn(),
-  find: jest.fn().mockResolvedValue([]),
+const mockExecutionClient: Mocked<AgentExecutionClient> = {
+  create: vi.fn(),
+  get: vi.fn(),
+  updateStatus: vi.fn(),
+  appendEvents: vi.fn(),
+  updateHeartbeat: vi.fn(),
+  peek: vi.fn(),
+  readEvents: vi.fn(),
+  find: vi.fn().mockResolvedValue([]),
 };
 
-jest.mock('./persistence', () => ({
-  createAgentExecutionClient: () => mockExecutionClient,
-}));
+vi.mock('./persistence', () => {
+      const mocked = {
+      createAgentExecutionClient: () => mockExecutionClient,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const conflictError = () =>
   Object.assign(new Error('version conflict'), {
@@ -54,33 +60,42 @@ const conflictError = () =>
   });
 
 // Mock execution_runner module
-const mockHandleAgentExecution = jest.fn();
-const mockCollectAndWriteEvents = jest.fn();
+const mockHandleAgentExecution = vi.fn();
+const mockCollectAndWriteEvents = vi.fn();
 
-jest.mock('./execution_runner', () => ({
-  handleAgentExecution: (...args: any[]) => mockHandleAgentExecution(...args),
-  collectAndWriteEvents: (...args: any[]) => mockCollectAndWriteEvents(...args),
-}));
+vi.mock('./execution_runner', () => {
+      const mocked = {
+      handleAgentExecution: (...args: any[]) => mockHandleAgentExecution(...args),
+      collectAndWriteEvents: (...args: any[]) => mockCollectAndWriteEvents(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock abort monitor
-jest.mock('./task/abort_monitor', () => ({
-  AbortMonitor: jest.fn().mockImplementation(() => ({
-    start: jest.fn(),
-    stop: jest.fn(),
-    getSignal: jest.fn().mockReturnValue(new AbortController().signal),
-  })),
-}));
+vi.mock('./task/abort_monitor', () => {
+      const mocked = {
+      AbortMonitor: vi.fn().mockImplementation(() => ({
+        start: vi.fn(),
+        stop: vi.fn(),
+        getSignal: vi.fn().mockReturnValue(new AbortController().signal),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock heartbeat reporter
-jest.mock('./task/heartbeat_reporter', () => ({
-  HeartbeatReporter: jest.fn().mockImplementation(() => ({
-    start: jest.fn(),
-    stop: jest.fn(),
-  })),
-}));
+vi.mock('./task/heartbeat_reporter', () => {
+      const mocked = {
+      HeartbeatReporter: vi.fn().mockImplementation(() => ({
+        start: vi.fn(),
+        stop: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockTaskManagerSchedule = jest.fn();
-const mockTaskManagerEnsureScheduled = jest.fn();
+const mockTaskManagerSchedule = vi.fn();
+const mockTaskManagerEnsureScheduled = vi.fn();
 
 import { createAgentExecutionService } from './execution_service';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
@@ -94,35 +109,35 @@ describe('AgentExecutionService', () => {
   } as any;
 
   const uiSettings = {
-    asScopedToClient: jest.fn(),
+    asScopedToClient: vi.fn(),
   } as any;
 
   const savedObjects = {
-    getScopedClient: jest.fn(),
+    getScopedClient: vi.fn(),
   } as any;
 
   const meteringService = {
-    reportExecution: jest.fn(),
+    reportExecution: vi.fn(),
   } as any;
 
   const attachmentsService: AttachmentServiceStart = {
-    validateAttachmentInputs: jest.fn().mockImplementation(async (attachments) =>
+    validateAttachmentInputs: vi.fn().mockImplementation(async (attachments) =>
       attachments?.map((attachment: { type: string; data: unknown }) => ({
         id: 'attachment-1',
         type: attachment.type,
         data: attachment.data,
       }))
     ),
-    getTypeDefinition: jest.fn(),
-    getRegisteredTypeIds: jest.fn().mockReturnValue([]),
-    createStateManager: jest.fn(),
-    mergeAttachmentInputs: jest.fn(),
+    getTypeDefinition: vi.fn(),
+    getRegisteredTypeIds: vi.fn().mockReturnValue([]),
+    createStateManager: vi.fn(),
+    mergeAttachmentInputs: vi.fn(),
   };
 
   const conversationClient = createConversationClientMock();
   const conversationService = {
-    getScopedClient: jest.fn().mockImplementation(async () => conversationClient),
-    getScopedClientAsUser: jest.fn().mockImplementation(async () => conversationClient),
+    getScopedClient: vi.fn().mockImplementation(async () => conversationClient),
+    getScopedClientAsUser: vi.fn().mockImplementation(async () => conversationClient),
   };
 
   const service = createAgentExecutionService({
@@ -132,7 +147,7 @@ describe('AgentExecutionService', () => {
     inference: {} as any,
     conversationService: conversationService as any,
     agentService: {} as any,
-    runAgent: jest.fn(),
+    runAgent: vi.fn(),
     attachmentsService,
     uiSettings,
     savedObjects,
@@ -141,8 +156,8 @@ describe('AgentExecutionService', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (attachmentsService.validateAttachmentInputs as jest.Mock).mockImplementation(
+    vi.clearAllMocks();
+    (attachmentsService.validateAttachmentInputs as Mock).mockImplementation(
       async (attachments) =>
         attachments?.map((attachment: { type: string; data: unknown }) => ({
           id: 'attachment-1',
@@ -283,7 +298,7 @@ describe('AgentExecutionService', () => {
     });
 
     it('validates attachments and throws on invalid attachment', async () => {
-      (attachmentsService.validateAttachmentInputs as jest.Mock).mockRejectedValue(
+      (attachmentsService.validateAttachmentInputs as Mock).mockRejectedValue(
         new Error('Attachment validation failed: boom')
       );
 
@@ -643,7 +658,7 @@ describe('AgentExecutionService', () => {
     });
 
     it('reports terminalPersisted=false when the record never lands within the bound', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         mockExecutionClient.get.mockResolvedValue({
           executionId: 'exec-1',
@@ -656,14 +671,14 @@ describe('AgentExecutionService', () => {
         });
 
         const promise = service.abortExecution('exec-1');
-        await jest.advanceTimersByTimeAsync(ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS + 1000);
+        await vi.advanceTimersByTimeAsync(ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS + 1000);
 
         expect(await promise).toEqual({ acknowledged: true, terminalPersisted: false });
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining('did not record its interruption')
         );
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
@@ -768,32 +783,36 @@ describe('AgentExecutionService', () => {
   describe('followExecution', () => {
     // Detailed behavior is tested in execution_follower.test.ts.
     // This smoke test verifies that service.followExecution delegates correctly.
-    it('should delegate to followExecution$ and return an observable', (done) => {
-      const fakeEvent = { type: 'message_chunk', data: { message_id: 'm1', text_chunk: 'hello' } };
+    it('should delegate to followExecution$ and return an observable', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      // peek: failed with 1 event
-      mockExecutionClient.peek.mockResolvedValueOnce({
-        status: ExecutionStatus.failed,
-        eventCount: 1,
-      });
-      mockExecutionClient.readEvents.mockResolvedValueOnce({
-        events: [fakeEvent],
-        status: ExecutionStatus.failed,
-      } as any);
+              const fakeEvent = { type: 'message_chunk', data: { message_id: 'm1', text_chunk: 'hello' } };
 
-      const receivedEvents: any[] = [];
+              // peek: failed with 1 event
+              mockExecutionClient.peek.mockResolvedValueOnce({
+                status: ExecutionStatus.failed,
+                eventCount: 1,
+              });
+              mockExecutionClient.readEvents.mockResolvedValueOnce({
+                events: [fakeEvent],
+                status: ExecutionStatus.failed,
+              } as any);
 
-      service.followExecution('exec-1').subscribe({
-        next: (event) => receivedEvents.push(event),
-        error: () => {
-          // We expect an error (failed status) — just verify events were emitted before it
-          expect(receivedEvents).toHaveLength(1);
-          expect(receivedEvents[0]).toEqual(fakeEvent);
-          done();
-        },
-        complete: () => done.fail('Expected an error, not completion'),
-      });
-    });
+              const receivedEvents: any[] = [];
+
+              service.followExecution('exec-1').subscribe({
+                next: (event) => receivedEvents.push(event),
+                error: () => {
+                  // We expect an error (failed status) — just verify events were emitted before it
+                  expect(receivedEvents).toHaveLength(1);
+                  expect(receivedEvents[0]).toEqual(fakeEvent);
+                  done();
+                },
+                complete: () => done.fail('Expected an error, not completion'),
+              });
+            
+        }));
   });
 
   describe('executeAgent with metadata', () => {
@@ -1202,7 +1221,7 @@ describe('AgentExecutionService', () => {
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.appendEvents.mockResolvedValue(conversation);
       conversationClient.create.mockResolvedValue(conversation);
-      (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
+      (attachmentsService.createStateManager as Mock).mockReturnValue({
         getAccessedRefs: () => [],
         getAll: () => [],
         drainChanges: () => [],
@@ -1255,7 +1274,7 @@ describe('AgentExecutionService', () => {
 
     it('persists an attachment-only message with its attachment refs', async () => {
       const attachmentRef = { attachment_id: 'attachment-1', version: 1, actor: 'user' as const };
-      (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
+      (attachmentsService.createStateManager as Mock).mockReturnValue({
         getAccessedRefs: () => [attachmentRef],
         getAll: () => [],
         drainChanges: () => [],

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { getSummarizedAlerts } from './get_summarized_alerts';
@@ -22,7 +24,7 @@ describe('getSummarizedAlerts', () => {
   const alerts = { ...newAlert1, ...newAlert2 };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should call alertsClient.getSummarizedAlerts with the correct params', async () => {

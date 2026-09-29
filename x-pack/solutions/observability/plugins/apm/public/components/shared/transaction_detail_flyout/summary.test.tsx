@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TransactionDetailFlyoutSummary } from './summary';
 
-const mockUseTransactionDetailFlyoutContext = jest.fn();
-jest.mock('./transaction_detail_flyout_context', () => ({
-  useTransactionDetailFlyoutContext: () => mockUseTransactionDetailFlyoutContext(),
-}));
+const mockUseTransactionDetailFlyoutContext = vi.fn();
+vi.mock('./transaction_detail_flyout_context', () => {
+      const mocked = {
+      useTransactionDetailFlyoutContext: () => mockUseTransactionDetailFlyoutContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const FILTERS = {
   serviceName: 'checkout',

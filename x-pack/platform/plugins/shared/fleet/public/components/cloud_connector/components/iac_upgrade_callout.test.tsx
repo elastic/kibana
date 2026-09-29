@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,7 +20,7 @@ describe('IacUpgradeCallout', () => {
     checkedAt: undefined,
     canUpdate: true,
     isUpdating: false,
-    onUpdateStack: jest.fn(),
+    onUpdateStack: vi.fn(),
   };
 
   const renderComponent = (props = {}) =>
@@ -29,7 +31,7 @@ describe('IacUpgradeCallout', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the deployment-id hint and disables the button when canUpdate is false', () => {
@@ -75,7 +77,7 @@ describe('IacUpgradeCallout', () => {
   });
 
   it('calls onUpdateStack when the update button is clicked', () => {
-    const onUpdateStack = jest.fn();
+    const onUpdateStack = vi.fn();
     renderComponent({ onUpdateStack, canUpdate: true });
 
     const button = screen.getByTestId(

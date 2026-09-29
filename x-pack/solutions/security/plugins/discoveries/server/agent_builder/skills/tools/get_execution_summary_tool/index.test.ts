@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -70,7 +72,7 @@ describe('GET_EXECUTION_SUMMARY_TOOL_ID', () => {
 describe('getExecutionSummaryTool', () => {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchClientMock.createScopedClusterClient();
-  const mockGetWorkflowExecution = jest.fn<
+  const mockGetWorkflowExecution = vi.fn<
     ReturnType<WorkflowExecutionFetcher['getWorkflowExecution']>,
     Parameters<WorkflowExecutionFetcher['getWorkflowExecution']>
   >();
@@ -83,7 +85,7 @@ describe('getExecutionSummaryTool', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a tool with the expected id', () => {

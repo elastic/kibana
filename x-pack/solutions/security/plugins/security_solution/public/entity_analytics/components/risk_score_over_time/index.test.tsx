@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { RiskScoreOverTime } from '.';
@@ -12,22 +15,28 @@ import { TestProviders } from '../../../common/mock';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
+vi.mock('@elastic/charts', () => {
+  const original = require('@elastic/charts');
   return {
     ...original,
-    LineSeries: jest.fn().mockImplementation(() => <></>),
+    LineSeries: vi.fn().mockImplementation(() => <></>),
   };
 });
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const props = {
   riskEntity: EntityType.host,
@@ -42,7 +51,7 @@ const props = {
 
 describe('Risk Score Over Time', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -15,20 +18,26 @@ import { bench } from './bench';
 import type { InitialBenchConfig } from './config/types';
 
 // Mock workspace operations to avoid real git checkouts
-jest.mock('@kbn/workspaces', () => ({
-  activateWorktreeOrUseSourceRepo: jest.fn(),
-}));
+vi.mock('@kbn/workspaces', () => {
+      const mocked = {
+      activateWorktreeOrUseSourceRepo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock collectConfigPaths to avoid git ls-files in temp directory
-jest.mock('./config/collect_config_paths', () => ({
-  collectConfigPaths: jest.fn(),
-}));
+vi.mock('./config/collect_config_paths', () => {
+      const mocked = {
+      collectConfigPaths: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { activateWorktreeOrUseSourceRepo } from '@kbn/workspaces';
 import { collectConfigPaths } from './config/collect_config_paths';
 
 // Type the mocked functions
-const mockedCollectConfigPaths = collectConfigPaths as jest.MockedFunction<
+const mockedCollectConfigPaths = collectConfigPaths as MockedFunction<
   typeof collectConfigPaths
 >;
 
@@ -45,8 +54,8 @@ describe('bench E2E', () => {
     getDir: () => string;
     ensureCheckout: () => Promise<void>;
     ensureBootstrap: () => Promise<void>;
-    ensureBuild: jest.Mock<Promise<void>, []>;
-    exec: jest.Mock;
+    ensureBuild: Mock<Promise<void>, []>;
+    exec: Mock;
   };
 
   beforeAll(() => {
@@ -125,11 +134,11 @@ describe('bench E2E', () => {
       getDir: () => tempDir,
       ensureCheckout: async () => {},
       ensureBootstrap: async () => {},
-      ensureBuild: jest.fn(async () => {}),
-      exec: jest.fn(),
+      ensureBuild: vi.fn(async () => {}),
+      exec: vi.fn(),
     });
 
-    (activateWorktreeOrUseSourceRepo as jest.Mock).mockResolvedValue(createMockWorkspace());
+    (activateWorktreeOrUseSourceRepo as Mock).mockResolvedValue(createMockWorkspace());
 
     // Create a log that captures output
     log = new ToolingLog({
@@ -153,8 +162,8 @@ describe('bench E2E', () => {
 
   beforeEach(() => {
     capturedOutput = [];
-    (activateWorktreeOrUseSourceRepo as jest.Mock).mockReset();
-    (activateWorktreeOrUseSourceRepo as jest.Mock).mockResolvedValue(createMockWorkspace());
+    (activateWorktreeOrUseSourceRepo as Mock).mockReset();
+    (activateWorktreeOrUseSourceRepo as Mock).mockResolvedValue(createMockWorkspace());
     mockedCollectConfigPaths.mockReset();
 
     // Mock collectConfigPaths to return the fast config file
@@ -415,7 +424,7 @@ describe('bench E2E', () => {
     );
 
     mockedCollectConfigPaths.mockResolvedValue([buildDirConfigPath]);
-    (activateWorktreeOrUseSourceRepo as jest.Mock)
+    (activateWorktreeOrUseSourceRepo as Mock)
       .mockResolvedValueOnce(createMockWorkspace('left-workspace'))
       .mockResolvedValueOnce(createMockWorkspace('right-workspace'));
 

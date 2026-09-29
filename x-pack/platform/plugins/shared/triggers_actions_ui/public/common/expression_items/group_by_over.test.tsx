@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { GroupByExpression } from './group_by_over';
 import { render, screen, fireEvent, configure } from '@testing-library/react';
@@ -13,9 +15,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 describe('group by expression', () => {
   configure({ testIdAttribute: 'data-test-subj' });
   it('renders with builtin group by types', async () => {
-    const onChangeSelectedTermField = jest.fn();
-    const onChangeSelectedGroupBy = jest.fn();
-    const onChangeSelectedTermSize = jest.fn();
+    const onChangeSelectedTermField = vi.fn();
+    const onChangeSelectedGroupBy = vi.fn();
+    const onChangeSelectedTermSize = vi.fn();
     render(
       <IntlProvider locale="en">
         <GroupByExpression
@@ -37,7 +39,7 @@ describe('group by expression', () => {
   });
 
   it('clears selected agg field if fields does not contain current selection', async () => {
-    const onChangeSelectedTermField = jest.fn();
+    const onChangeSelectedTermField = vi.fn();
     render(
       <IntlProvider locale="en">
         <GroupByExpression
@@ -64,7 +66,7 @@ describe('group by expression', () => {
   });
 
   it('clears selected agg field if there is unknown field', async () => {
-    const onChangeSelectedTermField = jest.fn();
+    const onChangeSelectedTermField = vi.fn();
     render(
       <IntlProvider locale="en">
         <GroupByExpression
@@ -91,7 +93,7 @@ describe('group by expression', () => {
   });
 
   it('clears selected agg field if groupBy field is all', async () => {
-    const onChangeSelectedTermField = jest.fn();
+    const onChangeSelectedTermField = vi.fn();
     render(
       <IntlProvider locale="en">
         <GroupByExpression
@@ -119,7 +121,7 @@ describe('group by expression', () => {
   });
 
   it('calls onChangeSelectedTermField when a termField is selected', async () => {
-    const onChangeSelectedTermField = jest.fn();
+    const onChangeSelectedTermField = vi.fn();
     render(
       <IntlProvider locale="en">
         <GroupByExpression
@@ -169,7 +171,7 @@ describe('group by expression', () => {
   });
 
   it('calls onChangeSelectedTermField when multiple termFields are selected', async () => {
-    const onChangeSelectedTermField = jest.fn();
+    const onChangeSelectedTermField = vi.fn();
     render(
       <IntlProvider locale="en">
         <GroupByExpression
@@ -220,7 +222,7 @@ describe('group by expression', () => {
   });
 
   it('do NOT clear selected agg field if fields is undefined', async () => {
-    const onChangeSelectedTermField = jest.fn();
+    const onChangeSelectedTermField = vi.fn();
     render(
       <IntlProvider locale="en">
         <GroupByExpression
@@ -238,7 +240,7 @@ describe('group by expression', () => {
   });
 
   it('do NOT clear selected agg field if fields is an empty array', async () => {
-    const onChangeSelectedTermField = jest.fn();
+    const onChangeSelectedTermField = vi.fn();
     render(
       <IntlProvider locale="en">
         <GroupByExpression

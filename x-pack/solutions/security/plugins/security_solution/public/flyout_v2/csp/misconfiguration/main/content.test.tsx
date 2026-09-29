@@ -5,30 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { Content } from './content';
 
-const mockCspBody = jest.fn(() => <div data-test-subj="mockCspFlyoutBody" />);
+const mockCspBody = vi.fn(() => <div data-test-subj="mockCspFlyoutBody" />);
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      cloudSecurityPosture: {
-        getCloudSecurityPostureMisconfigurationFlyout: () => ({
-          Body: mockCspBody,
-        }),
-      },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          cloudSecurityPosture: {
+            getCloudSecurityPostureMisconfigurationFlyout: () => ({
+              Body: mockCspBody,
+            }),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const finding = { rule: { name: 'My Rule' } } as unknown as CspFinding;
 
 describe('<Content /> (misconfiguration)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the CSP finding body', () => {

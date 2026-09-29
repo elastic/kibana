@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { sampleDocWithSortId } from '../../__mocks__/es_results';
 
 import { listMock } from '@kbn/lists-plugin/server/mocks';
@@ -18,9 +20,9 @@ describe('createSetToFilterAgainst', () => {
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listClient = listMock.getListClient();
-    listClient.searchListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = vi.fn(({ value }) =>
       Promise.resolve(
         value.map((item) => ({
           ...getSearchListItemResponseMock(),
@@ -32,11 +34,11 @@ describe('createSetToFilterAgainst', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns an empty array if list return is empty', async () => {
-    listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
+    listClient.searchListItemByValues = vi.fn().mockResolvedValue([]);
     const field = await createSetToFilterAgainst({
       events,
       field: 'source.ip',

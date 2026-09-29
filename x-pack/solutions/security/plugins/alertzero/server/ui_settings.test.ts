@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { registerUiSettings } from './ui_settings';
@@ -13,7 +15,7 @@ describe('registerUiSettings', () => {
   const register = () => {
     const { uiSettings } = coreMock.createSetup();
     registerUiSettings(uiSettings);
-    return (uiSettings.register as jest.Mock).mock.calls[0][0];
+    return (uiSettings.register as Mock).mock.calls[0][0];
   };
 
   it('registers the AlertZero enablement setting', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { SentinelRulesJsonFileUploadProps } from './rules_json_file_upload';
@@ -12,8 +14,8 @@ import { SentinelRulesJsonFileUpload } from './rules_json_file_upload';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import { TestProviders } from '../../../../../../../../common/mock';
 
-const mockCreateMigration: CreateMigration = jest.fn();
-const mockOnRulesFileChanged = jest.fn();
+const mockCreateMigration: CreateMigration = vi.fn();
+const mockOnRulesFileChanged = vi.fn();
 const migrationName = 'test migration name';
 
 const defaultProps: SentinelRulesJsonFileUploadProps = {
@@ -69,7 +71,7 @@ const validDirectArray = JSON.stringify([
 
 describe('SentinelRulesJsonFileUpload', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the upload button', () => {

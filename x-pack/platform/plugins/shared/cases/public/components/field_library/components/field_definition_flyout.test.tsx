@@ -5,37 +5,45 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FieldDefinitionFlyout } from './field_definition_flyout';
 import { renderWithTestingProviders } from '../../../common/mock';
 
-const mockYamlEditorProps = jest.fn();
-jest.mock('./field_definition_yaml_editor', () => ({
-  FieldDefinitionYamlEditor: ({
-    value,
-    onChange,
-    isEditing,
-  }: {
-    value: string;
-    onChange: (v: string) => void;
-    isEditing?: boolean;
-  }) => {
-    mockYamlEditorProps({ isEditing });
-    return (
-      <textarea
-        data-test-subj="fieldDefinitionYamlInput"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    );
-  },
-}));
+const mockYamlEditorProps = vi.fn();
+vi.mock('./field_definition_yaml_editor', () => {
+      const mocked = {
+      FieldDefinitionYamlEditor: ({
+        value,
+        onChange,
+        isEditing,
+      }: {
+        value: string;
+        onChange: (v: string) => void;
+        isEditing?: boolean;
+      }) => {
+        mockYamlEditorProps({ isEditing });
+        return (
+          <textarea
+            data-test-subj="fieldDefinitionYamlInput"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./field_definition_preview', () => ({
-  FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
-}));
+vi.mock('./field_definition_preview', () => {
+      const mocked = {
+      FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const VALID_YAML = `name: my_field
 label: "My Field"
@@ -45,13 +53,13 @@ type: keyword
 
 const defaultProps = {
   owner: 'securitySolution',
-  onSave: jest.fn(),
-  onClose: jest.fn(),
+  onSave: vi.fn(),
+  onClose: vi.fn(),
 };
 
 describe('FieldDefinitionFlyout — isGlobal checkbox', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the isGlobal checkbox unchecked by default', () => {
@@ -139,7 +147,7 @@ describe('FieldDefinitionFlyout — isGlobal checkbox', () => {
 
 describe('FieldDefinitionFlyout — YAML editor mode', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes isEditing: false to the YAML editor when creating', () => {
@@ -175,7 +183,7 @@ describe('FieldDefinitionFlyout — permanent identity', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the read-only identity (name and type) when editing', () => {
@@ -286,7 +294,7 @@ validation:
 `;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the permanent-identity notice with the parsed name and type when creating', () => {

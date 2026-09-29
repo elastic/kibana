@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { render } from '@testing-library/react';
@@ -28,7 +30,7 @@ describe('RedirectWithOffset', () => {
   ) {
     history.replace(location);
 
-    jest.spyOn(useApmPluginContextExports, 'useApmPluginContext').mockReturnValue({
+    vi.spyOn(useApmPluginContextExports, 'useApmPluginContext').mockReturnValue({
       core: {
         http: {
           basePath: {

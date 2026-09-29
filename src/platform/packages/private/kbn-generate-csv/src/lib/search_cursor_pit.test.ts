@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -49,7 +52,7 @@ function mockSuccessfulCreationPIT(
   esClient: IScopedClusterClient,
   pitId: string = 'somewhat-pit-id'
 ) {
-  return jest
+  return vi
     .spyOn(esClient.asCurrentUser, 'openPointInTime')
     .mockResolvedValue({ id: pitId } as OpenPointInTimeResponse);
 }
@@ -61,12 +64,12 @@ describe('CSV Export Search Cursor', () => {
   let logger: Logger;
   let cursor: TestSearchCursorPit;
 
-  let openPointInTimeSpy: jest.SpyInstance<Promise<estypes.OpenPointInTimeResponse>>;
+  let openPointInTimeSpy: MockInstance<Promise<estypes.OpenPointInTimeResponse>>;
 
   beforeEach(() => {
     settings = {
       scroll: {
-        duration: jest.fn(() => '10m'),
+        duration: vi.fn(() => '10m'),
         size: 500,
       },
       includeFrozen: false,
@@ -97,7 +100,7 @@ describe('CSV Export Search Cursor', () => {
     });
 
     it('supports pit and max_concurrent_shard_requests', async () => {
-      const dataSearchSpy = jest
+      const dataSearchSpy = vi
         .spyOn(data, 'search')
         .mockReturnValue(Rx.of({ rawResponse: { hits: { hits: [] } } }));
 
@@ -156,7 +159,7 @@ describe('CSV Export Search Cursor', () => {
     });
 
     it('suppresses max_concurrent_shard_requests from search body', async () => {
-      const dataSearchSpy = jest
+      const dataSearchSpy = vi
         .spyOn(data, 'search')
         .mockReturnValue(Rx.of({ rawResponse: { hits: { hits: [] } } }));
 
@@ -191,7 +194,7 @@ describe('CSV Export Search Cursor', () => {
     });
 
     it('throws an error if PIT creation fails', async () => {
-      openPointInTimeSpy = jest
+      openPointInTimeSpy = vi
         .spyOn(es.asCurrentUser, 'openPointInTime')
         .mockRejectedValue(
           new Error('Wops!', { cause: new Error('Original error message: Wat?') })
@@ -210,7 +213,7 @@ describe('CSV Export Search Cursor', () => {
     });
 
     it('throws an error if PIT creation fails without an error message', async () => {
-      openPointInTimeSpy = jest
+      openPointInTimeSpy = vi
         .spyOn(es.asCurrentUser, 'openPointInTime')
         .mockResolvedValue({} as OpenPointInTimeResponse);
       cursor = new TestSearchCursorPit(

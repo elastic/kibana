@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import {
@@ -17,13 +20,13 @@ import { useAlertsQueryImpl } from './use_alerts_query';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsViewContext } from './use_hosts_view';
 
-jest.mock('./use_unified_search');
-jest.mock('./use_hosts_view');
+vi.mock('./use_unified_search');
+vi.mock('./use_hosts_view');
 
-const mockUseUnifiedSearchContext = useUnifiedSearchContext as jest.MockedFunction<
+const mockUseUnifiedSearchContext = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext
 >;
-const mockUseHostsViewContext = useHostsViewContext as jest.MockedFunction<
+const mockUseHostsViewContext = useHostsViewContext as MockedFunction<
   typeof useHostsViewContext
 >;
 
@@ -43,7 +46,7 @@ const hasAlertStatusTerm = (query: object, status: AlertStatus): boolean =>
 
 describe('useAlertsQueryImpl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseHostsViewContext.mockReturnValue({
       hostNodes: [{ name: HOST_NAME }],
     } as ReturnType<typeof useHostsViewContext>);

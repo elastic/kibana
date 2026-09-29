@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useDispatch } from 'react-redux-v7';
@@ -16,65 +19,89 @@ import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { Cases } from '.';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../common/lib/kibana'),
-  useKibana: jest.fn(),
-  useNavigation: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/lib/kibana')),
+      useKibana: vi.fn(),
+      useNavigation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/user_privileges', () => ({
-  useUserPrivileges: jest.fn(),
-}));
+vi.mock('../../common/components/user_privileges', () => {
+      const mocked = {
+      useUserPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn(),
-}));
+vi.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => {
+      const mocked = {
+      useAlertsPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_upselling', () => ({
-  useUpsellingMessage: jest.fn(),
-}));
+vi.mock('../../common/hooks/use_upselling', () => {
+      const mocked = {
+      useUpsellingMessage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../notes/hooks/use_fetch_notes', () => ({
-  useFetchNotes: jest.fn(),
-}));
+vi.mock('../../notes/hooks/use_fetch_notes', () => {
+      const mocked = {
+      useFetchNotes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/page_wrapper', () => ({
-  SecuritySolutionPageWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../common/components/page_wrapper', () => {
+      const mocked = {
+      SecuritySolutionPageWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/utils/route/spy_routes', () => ({
-  SpyRoute: () => null,
-}));
+vi.mock('../../common/utils/route/spy_routes', () => {
+      const mocked = {
+      SpyRoute: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Cases page', () => {
-  const mockGetCases = jest.fn();
-  const mockCanUseCases = jest.fn();
-  const mockReportEvent = jest.fn();
-  const mockGetAppUrl = jest.fn();
-  const mockNavigateTo = jest.fn();
-  const mockDispatch = jest.fn();
+  const mockGetCases = vi.fn();
+  const mockCanUseCases = vi.fn();
+  const mockReportEvent = vi.fn();
+  const mockGetAppUrl = vi.fn();
+  const mockNavigateTo = vi.fn();
+  const mockDispatch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
-    (useNavigation as jest.Mock).mockReturnValue({
+    (useDispatch as Mock).mockReturnValue(mockDispatch);
+    (useNavigation as Mock).mockReturnValue({
       getAppUrl: mockGetAppUrl,
       navigateTo: mockNavigateTo,
     });
-    (useUpsellingMessage as jest.Mock).mockReturnValue('upselling-message');
-    (useFetchNotes as jest.Mock).mockReturnValue({ onLoad: jest.fn() });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, hasAlertsAll: true });
+    (useUpsellingMessage as Mock).mockReturnValue('upselling-message');
+    (useFetchNotes as Mock).mockReturnValue({ onLoad: vi.fn() });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, hasAlertsAll: true });
 
     mockGetCases.mockReturnValue(null);
     mockCanUseCases.mockReturnValue({ read: true, create: true, update: true, delete: true });
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           ui: { getCases: mockGetCases },
@@ -84,7 +111,7 @@ describe('Cases page', () => {
       },
     });
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { read: true },
       rulesPrivileges: { rules: { read: true } },
     });

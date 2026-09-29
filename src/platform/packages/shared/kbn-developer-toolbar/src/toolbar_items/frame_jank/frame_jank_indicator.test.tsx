@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { PerformanceInfo } from './performance_monitor';
@@ -17,9 +19,9 @@ import type { INPInfo } from './inp_monitor';
 import { INPMonitor } from './inp_monitor';
 import { FrameJankIndicator, getPerformanceWarning } from './frame_jank_indicator';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const ReactModule = jest.requireActual<typeof React>('react');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
+  const ReactModule = (require('react') as typeof React);
   const MockToolTip = ({
     children,
     content,
@@ -131,34 +133,34 @@ describe('FrameJankIndicator warnings', () => {
   let inpCallback: InpCallback;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.spyOn(PerformanceMonitor.prototype, 'subscribe').mockImplementation((callback) => {
+    vi.useFakeTimers();
+    vi.spyOn(PerformanceMonitor.prototype, 'subscribe').mockImplementation((callback) => {
       perfCallback = callback;
-      return jest.fn();
+      return vi.fn();
     });
-    jest.spyOn(LongTaskMonitor.prototype, 'subscribe').mockImplementation((callback) => {
+    vi.spyOn(LongTaskMonitor.prototype, 'subscribe').mockImplementation((callback) => {
       taskCallback = callback;
-      return jest.fn();
+      return vi.fn();
     });
-    jest.spyOn(INPMonitor.prototype, 'subscribe').mockImplementation((callback) => {
+    vi.spyOn(INPMonitor.prototype, 'subscribe').mockImplementation((callback) => {
       inpCallback = callback;
-      return jest.fn();
+      return vi.fn();
     });
-    jest.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(true);
-    jest.spyOn(PerformanceMonitor.prototype, 'startMonitoring').mockImplementation();
-    jest.spyOn(PerformanceMonitor.prototype, 'destroy').mockImplementation();
-    jest.spyOn(LongTaskMonitor.prototype, 'startMonitoring').mockImplementation();
-    jest.spyOn(LongTaskMonitor.prototype, 'destroy').mockImplementation();
-    jest.spyOn(LongTaskMonitor.prototype, 'isSupported').mockReturnValue(true);
-    jest.spyOn(INPMonitor.prototype, 'startMonitoring').mockImplementation();
-    jest.spyOn(INPMonitor.prototype, 'destroy').mockImplementation();
-    jest.spyOn(INPMonitor.prototype, 'isSupported').mockReturnValue(true);
+    vi.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(true);
+    vi.spyOn(PerformanceMonitor.prototype, 'startMonitoring').mockImplementation();
+    vi.spyOn(PerformanceMonitor.prototype, 'destroy').mockImplementation();
+    vi.spyOn(LongTaskMonitor.prototype, 'startMonitoring').mockImplementation();
+    vi.spyOn(LongTaskMonitor.prototype, 'destroy').mockImplementation();
+    vi.spyOn(LongTaskMonitor.prototype, 'isSupported').mockReturnValue(true);
+    vi.spyOn(INPMonitor.prototype, 'startMonitoring').mockImplementation();
+    vi.spyOn(INPMonitor.prototype, 'destroy').mockImplementation();
+    vi.spyOn(INPMonitor.prototype, 'isSupported').mockReturnValue(true);
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   const emit = ({
@@ -200,7 +202,7 @@ describe('FrameJankIndicator warnings', () => {
   });
 
   it('keeps other warnings when a timing source is unsupported', () => {
-    jest.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(false);
+    vi.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(false);
     const { unmount } = render(<FrameJankIndicator />);
     act(() =>
       taskCallback({
@@ -212,8 +214,8 @@ describe('FrameJankIndicator warnings', () => {
     expect(screen.getByText('Jank —').getAttribute('data-color')).toBe('danger');
     unmount();
 
-    jest.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(true);
-    jest.spyOn(INPMonitor.prototype, 'isSupported').mockReturnValue(false);
+    vi.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(true);
+    vi.spyOn(INPMonitor.prototype, 'isSupported').mockReturnValue(false);
     render(<FrameJankIndicator />);
     fireEvent.focus(screen.getByLabelText('Performance monitor'));
     expect(screen.getByRole('tooltip').textContent).toContain('Not supported in this browser.');

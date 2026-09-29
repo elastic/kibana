@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MsearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { SyntheticsEsClient, applyExcludedDataTiersToQuery } from './lib';
@@ -21,7 +23,7 @@ describe('SyntheticsEsClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('msearch', () => {

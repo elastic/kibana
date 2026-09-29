@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { act } from '@testing-library/react';
 
 import { useUpdateAttackDiscoverySchedule } from './use_update_schedule';
@@ -17,37 +20,37 @@ import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
-jest.mock('./use_find_schedules');
-jest.mock('./use_get_schedule');
-jest.mock('../api');
-jest.mock('../../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('./use_find_schedules');
+vi.mock('./use_get_schedule');
+vi.mock('../api');
+vi.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../../common/lib/kibana');
 
-const updateAttackDiscoveryScheduleMock = updateAttackDiscoverySchedule as jest.MockedFunction<
+const updateAttackDiscoveryScheduleMock = updateAttackDiscoverySchedule as MockedFunction<
   typeof updateAttackDiscoverySchedule
 >;
 
-const invalidateFindAttackDiscoveryScheduleMock = jest.fn();
+const invalidateFindAttackDiscoveryScheduleMock = vi.fn();
 const mockUseInvalidateFindAttackDiscoverySchedule =
-  useInvalidateFindAttackDiscoverySchedule as jest.MockedFunction<
+  useInvalidateFindAttackDiscoverySchedule as MockedFunction<
     typeof useInvalidateFindAttackDiscoverySchedule
   >;
 
-const invalidateGetAttackDiscoveryScheduleMock = jest.fn();
+const invalidateGetAttackDiscoveryScheduleMock = vi.fn();
 const mockUseInvalidateGetAttackDiscoverySchedule =
-  useInvalidateGetAttackDiscoverySchedule as jest.MockedFunction<
+  useInvalidateGetAttackDiscoverySchedule as MockedFunction<
     typeof useInvalidateGetAttackDiscoverySchedule
   >;
 
 describe('useUpdateAttackDiscoverySchedule', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
-  let reportEventMock: jest.Mock;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let reportEventMock: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    reportEventMock = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    reportEventMock = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent: reportEventMock,
@@ -56,19 +59,19 @@ describe('useUpdateAttackDiscoverySchedule', () => {
     });
 
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
 
     updateAttackDiscoveryScheduleMock.mockReturnValue(
-      {} as unknown as jest.Mocked<ReturnType<typeof updateAttackDiscoverySchedule>>
+      {} as unknown as Mocked<ReturnType<typeof updateAttackDiscoverySchedule>>
     );
 
     mockUseInvalidateFindAttackDiscoverySchedule.mockReturnValue(
-      invalidateFindAttackDiscoveryScheduleMock as unknown as jest.Mocked<
+      invalidateFindAttackDiscoveryScheduleMock as unknown as Mocked<
         ReturnType<typeof useInvalidateFindAttackDiscoverySchedule>
       >
     );
     mockUseInvalidateGetAttackDiscoverySchedule.mockReturnValue(
-      invalidateGetAttackDiscoveryScheduleMock as unknown as jest.Mocked<
+      invalidateGetAttackDiscoveryScheduleMock as unknown as Mocked<
         ReturnType<typeof useInvalidateGetAttackDiscoverySchedule>
       >
     );

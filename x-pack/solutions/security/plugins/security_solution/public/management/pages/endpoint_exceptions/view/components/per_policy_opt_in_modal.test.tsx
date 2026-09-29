@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EndpointExceptionsPerPolicyOptInModalProps } from './per_policy_opt_in_modal';
 import { EndpointExceptionsPerPolicyOptInModal } from './per_policy_opt_in_modal';
@@ -20,8 +22,8 @@ describe('EndpointExceptionsPerPolicyOptInModal', () => {
 
   beforeEach(() => {
     props = {
-      onDismiss: jest.fn(),
-      onConfirm: jest.fn(),
+      onDismiss: vi.fn(),
+      onConfirm: vi.fn(),
       isLoading: false,
     };
 

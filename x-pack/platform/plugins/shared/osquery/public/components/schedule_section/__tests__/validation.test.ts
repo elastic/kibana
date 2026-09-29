@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateScheduleFormData } from '../validation';
 import { createDefaultScheduleFormData } from '../types';
 import type { ScheduleFormData } from '../types';
@@ -30,11 +32,11 @@ const START = new Date('2026-06-20T00:00:00.000Z');
 
 describe('validateScheduleFormData', () => {
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(NOW);
+    vi.useFakeTimers().setSystemTime(NOW);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('interval mode', () => {

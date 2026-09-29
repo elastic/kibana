@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { PercentageModeOptionProps } from './percentage_mode';
@@ -19,7 +21,7 @@ describe('PercentageModeOption', () => {
   beforeAll(() => {
     props = {
       percentageMode: true,
-      setValue: jest.fn(),
+      setValue: vi.fn(),
     };
   });
 

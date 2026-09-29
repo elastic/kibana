@@ -7,18 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'path';
 import type { ModuleDiscoveryInfo } from './types';
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo/root',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFindPackageForPath = jest.fn();
-jest.mock('@kbn/repo-packages', () => ({
-  findPackageForPath: (...args: unknown[]) => mockFindPackageForPath(...args),
-}));
+const mockFindPackageForPath = vi.fn();
+vi.mock('@kbn/repo-packages', () => {
+      const mocked = {
+      findPackageForPath: (...args: unknown[]) => mockFindPackageForPath(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   filterModulesByAffectedConfigs,
@@ -64,13 +72,13 @@ describe('affected_modules', () => {
 
   beforeEach(() => {
     mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
-    jest.spyOn(mockLog, 'info').mockImplementation(jest.fn());
-    jest.spyOn(mockLog, 'warning').mockImplementation(jest.fn());
+    vi.spyOn(mockLog, 'info').mockImplementation(vi.fn());
+    vi.spyOn(mockLog, 'warning').mockImplementation(vi.fn());
     setupFindPackageMock();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('markModulesAffectedStatusFromSet', () => {

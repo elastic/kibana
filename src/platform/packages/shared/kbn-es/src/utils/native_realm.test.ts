@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { NativeRealm } from './native_realm';
 import { ToolingLog } from '@kbn/tooling-log';
 
 const mockClient = {
   xpack: {
-    info: jest.fn(),
+    info: vi.fn(),
   },
   cluster: {
-    health: jest.fn(),
+    health: vi.fn(),
   },
   security: {
-    changePassword: jest.fn(),
-    getUser: jest.fn(),
-    putRole: jest.fn(),
-    putUser: jest.fn(),
+    changePassword: vi.fn(),
+    getUser: vi.fn(),
+    putRole: vi.fn(),
+    putUser: vi.fn(),
   },
 };
 
@@ -37,7 +39,7 @@ beforeEach(() => {
 });
 
 afterAll(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 function mockXPackInfo(available: boolean, enabled: boolean) {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { renderHook } from '@testing-library/react';
@@ -22,41 +25,47 @@ import {
 } from '../url/search_sessions_integration';
 
 const mockKbnUrlStateStorage = {
-  get: jest.fn(),
+  get: vi.fn(),
 } as unknown as IKbnUrlStateStorage;
 
-jest.mock('../url', () => ({
-  extractDashboardState: jest.fn(),
-  loadAndRemoveDashboardState: jest.fn(),
-}));
+vi.mock('../url', () => {
+      const mocked = {
+      extractDashboardState: vi.fn(),
+      loadAndRemoveDashboardState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../url/search_sessions_integration', () => ({
-  createSessionRestorationDataProvider: jest.fn(),
-  getSearchSessionIdFromURL: jest.fn(),
-  getSessionURLObservable: jest.fn(),
-  removeSearchSessionIdFromURL: jest.fn(),
-}));
+vi.mock('../url/search_sessions_integration', () => {
+      const mocked = {
+      createSessionRestorationDataProvider: vi.fn(),
+      getSearchSessionIdFromURL: vi.fn(),
+      getSessionURLObservable: vi.fn(),
+      removeSearchSessionIdFromURL: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useCreationOptions', () => {
-  const validateOutcome = jest.fn().mockReturnValue('valid');
+  const validateOutcome = vi.fn().mockReturnValue('valid');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jest.spyOn(screenshotModeService, 'isScreenshotMode').mockReturnValue(false);
-    jest.spyOn(screenshotModeService, 'getScreenshotContext').mockReturnValue(undefined);
-    (mockKbnUrlStateStorage.get as jest.Mock).mockReturnValue(undefined);
-    (extractDashboardState as jest.Mock).mockReturnValue({});
-    (loadAndRemoveDashboardState as jest.Mock).mockReturnValue({});
-    (getSearchSessionIdFromURL as jest.Mock).mockReturnValue(undefined);
-    (getSessionURLObservable as jest.Mock).mockReturnValue(
+    vi.spyOn(screenshotModeService, 'isScreenshotMode').mockReturnValue(false);
+    vi.spyOn(screenshotModeService, 'getScreenshotContext').mockReturnValue(undefined);
+    (mockKbnUrlStateStorage.get as Mock).mockReturnValue(undefined);
+    (extractDashboardState as Mock).mockReturnValue({});
+    (loadAndRemoveDashboardState as Mock).mockReturnValue({});
+    (getSearchSessionIdFromURL as Mock).mockReturnValue(undefined);
+    (getSessionURLObservable as Mock).mockReturnValue(
       new BehaviorSubject<string | undefined>(undefined)
     );
   });
 
   it('clears history.state after merging locator dashboard payload', async () => {
     const history = createMemoryHistory();
-    const replaceSpy = jest.spyOn(history, 'replace');
+    const replaceSpy = vi.spyOn(history, 'replace');
     history.replace({
       pathname: '/',
       search: '',
@@ -67,7 +76,7 @@ describe('useCreationOptions', () => {
       },
     });
     replaceSpy.mockClear();
-    (extractDashboardState as jest.Mock).mockReturnValue({
+    (extractDashboardState as Mock).mockReturnValue({
       title: 'From locator',
       viewMode: 'edit',
     });
@@ -100,7 +109,7 @@ describe('useCreationOptions', () => {
 
   it('does not clear history.state when there is no locator dashboard payload', async () => {
     const history = createMemoryHistory();
-    const replaceSpy = jest.spyOn(history, 'replace');
+    const replaceSpy = vi.spyOn(history, 'replace');
     history.replace({
       pathname: '/',
       search: '',

@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockLogger } from '../../__mocks__';
 
-jest.mock('@kbn/core/server', () => ({
-  SavedObjectsErrorHelpers: {
-    isNotFoundError: jest.fn(),
-  },
-}));
+vi.mock('@kbn/core/server', () => {
+      const mocked = {
+      SavedObjectsErrorHelpers: {
+        isNotFoundError: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { getSavedObjectAttributesFromRepo, incrementUICounter } from './telemetry';
 
 describe('Telemetry helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getSavedObjectAttributesFromRepo', () => {
@@ -28,13 +34,13 @@ describe('Telemetry helpers', () => {
       const errorSavedObjectsMock = {} as any;
 
       // Without log warning (not found)
-      (SavedObjectsErrorHelpers.isNotFoundError as jest.Mock).mockImplementationOnce(() => true);
+      (SavedObjectsErrorHelpers.isNotFoundError as Mock).mockImplementationOnce(() => true);
       await getSavedObjectAttributesFromRepo('some_id', errorSavedObjectsMock, mockLogger);
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
 
       // With log warning
-      (SavedObjectsErrorHelpers.isNotFoundError as jest.Mock).mockImplementationOnce(() => false);
+      (SavedObjectsErrorHelpers.isNotFoundError as Mock).mockImplementationOnce(() => false);
       await getSavedObjectAttributesFromRepo('some_id', errorSavedObjectsMock, mockLogger);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -44,9 +50,9 @@ describe('Telemetry helpers', () => {
   });
 
   describe('incrementUICounter', () => {
-    const incrementCounterMock = jest.fn();
+    const incrementCounterMock = vi.fn();
     const savedObjectsMock = {
-      createInternalRepository: jest.fn(() => ({
+      createInternalRepository: vi.fn(() => ({
         incrementCounter: incrementCounterMock,
       })),
     } as any;

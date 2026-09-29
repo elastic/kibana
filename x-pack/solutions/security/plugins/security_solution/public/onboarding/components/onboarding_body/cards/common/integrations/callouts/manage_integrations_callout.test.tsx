@@ -4,21 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ManageIntegrationsCallout } from './manage_integrations_callout';
 import { TestProviders } from '../../../../../../../common/mock/test_providers';
-jest.mock('../../../../../../../common/lib/integrations/hooks/integration_context');
-jest.mock('../../../../../../../common/hooks/use_add_integrations_url', () => ({
-  useAddIntegrationsUrl: jest.fn().mockReturnValue({
-    href: '/test-url',
-    onClick: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../../../common/lib/integrations/hooks/integration_context');
+vi.mock('../../../../../../../common/hooks/use_add_integrations_url', () => {
+      const mocked = {
+      useAddIntegrationsUrl: vi.fn().mockReturnValue({
+        href: '/test-url',
+        onClick: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ManageIntegrationsCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders nothing when activeIntegrationsCount is 0', () => {

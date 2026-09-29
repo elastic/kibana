@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, screen, waitFor, within } from '@testing-library/react';
 
@@ -18,10 +21,10 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('../lib/servicenow/use_get_choices');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('../lib/servicenow/use_get_choices');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const useGetChoicesMock = useGetChoices as jest.Mock;
+const useGetChoicesMock = useGetChoices as Mock;
 
 const actionParams = {
   subAction: 'pushToService',
@@ -51,7 +54,7 @@ const connector: ActionConnector = createMockActionConnector({
   name: 'Test',
 });
 
-const editAction = jest.fn();
+const editAction = vi.fn();
 const defaultProps = {
   actionConnector: connector,
   actionParams,
@@ -143,7 +146,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
   let onChoicesSuccess = (choices: Choice[]) => {};
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetChoicesMock.mockImplementation((args) => {
       onChoicesSuccess = args.onSuccess;
       return choicesResponse;

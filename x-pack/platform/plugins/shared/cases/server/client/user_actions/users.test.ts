@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createUserActionServiceMock } from '../../services/mocks';
 import { createMockClient } from '../metrics/test_utils/client';
 import { createCasesClientMockArgs } from '../mocks';
@@ -13,9 +16,9 @@ import { mockCases } from '../../mocks';
 import type { CaseResolveResponse } from '../../../common/types/api';
 import { getUserProfiles } from '../cases/utils';
 
-jest.mock('../cases/utils');
+vi.mock('../cases/utils');
 
-const getUserProfilesMock = getUserProfiles as jest.Mock;
+const getUserProfilesMock = getUserProfiles as Mock;
 
 describe('getUsers', () => {
   const casesClient = createMockClient();
@@ -46,7 +49,7 @@ describe('getUsers', () => {
   clientArgs.services.userActionService = userActionService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('removes empty uids from getUserProfiles call', async () => {

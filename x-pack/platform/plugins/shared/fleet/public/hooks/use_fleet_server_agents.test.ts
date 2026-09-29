@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { sendGetAllFleetServerAgents } from './use_fleet_server_agents';
 import { sendGetAgents, sendGetPackagePolicies } from './use_request';
 
-jest.mock('./use_request', () => ({
-  sendGetAgents: jest.fn(),
-  sendGetPackagePolicies: jest.fn(),
-}));
+vi.mock('./use_request', () => {
+      const mocked = {
+      sendGetAgents: vi.fn(),
+      sendGetPackagePolicies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('sendGetAllFleetServerAgents', () => {
   beforeEach(() => {
-    (sendGetPackagePolicies as jest.Mock).mockResolvedValue({
+    (sendGetPackagePolicies as Mock).mockResolvedValue({
       data: {
         items: [{ policy_id: '1' }],
       },
     });
   });
   it('should return all fleet server agents', async () => {
-    (sendGetAgents as jest.Mock).mockResolvedValue({
+    (sendGetAgents as Mock).mockResolvedValue({
       data: {
         items: [{ id: '1' }],
         total: 1,
@@ -35,7 +41,7 @@ describe('sendGetAllFleetServerAgents', () => {
   });
 
   it('should return only total count', async () => {
-    (sendGetAgents as jest.Mock).mockResolvedValue({
+    (sendGetAgents as Mock).mockResolvedValue({
       data: {
         items: [],
         total: 1,

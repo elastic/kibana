@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
@@ -35,12 +37,15 @@ import {
 } from '../../../../data_fetching/cascaded_documents_fetcher';
 import type { DiscoverServices } from '../../../../../../build_services';
 
-jest.mock('@kbn/unified-data-table', () => ({
-  ...jest.requireActual('@kbn/unified-data-table'),
-  UnifiedDataTable: jest.fn(() => <div data-test-subj="unifiedDataTableMock" />),
-}));
+vi.mock('@kbn/unified-data-table', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/unified-data-table')),
+      UnifiedDataTable: vi.fn(() => <div data-test-subj="unifiedDataTableMock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const unifiedDataTableMock = jest.mocked(UnifiedDataTable);
+const unifiedDataTableMock = vi.mocked(UnifiedDataTable);
 
 const esqlQuery: AggregateQuery = { esql: 'FROM logs | STATS count() BY extension' };
 const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewWithTimefieldMock);
@@ -61,11 +66,11 @@ const createVirtualizerController = () =>
 
 const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   const stateManager: CascadedDocumentsStateManager = {
-    getIsActiveInstance: jest.fn(() => true),
-    getCascadedDocuments: jest.fn(() => undefined),
-    getColumnsMeta: jest.fn(() => ({})),
-    setCascadedDocuments: jest.fn(),
-    setColumnsMeta: jest.fn(),
+    getIsActiveInstance: vi.fn(() => true),
+    getCascadedDocuments: vi.fn(() => undefined),
+    getColumnsMeta: vi.fn(() => ({})),
+    setCascadedDocuments: vi.fn(),
+    setColumnsMeta: vi.fn(),
   };
   const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
     scopedEbtManager: services.ebtManager.createScopedEBTManager(),
@@ -98,7 +103,7 @@ const renderLeafCellWithContext = ({
           showTimeCol={true}
           dataView={dataViewWithTimefieldMock}
           showKeyboardShortcuts={false}
-          onUpdateDataGridDensity={jest.fn()}
+          onUpdateDataGridDensity={vi.fn()}
         />
       </CascadedDocumentsProvider>
     </DiscoverTestProvider>
@@ -118,7 +123,7 @@ const createContextValue = ({
   >;
   services: DiscoverServices;
 }) => {
-  const getExpandedDocSetter = jest.fn(
+  const getExpandedDocSetter = vi.fn(
     (owner: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> => {
       if (owner !== cellId) {
         throw new Error(`Unexpected owner: ${owner}`);
@@ -128,7 +133,7 @@ const createContextValue = ({
     }
   );
 
-  const getRenderDocumentViewMetaSetter = jest.fn(
+  const getRenderDocumentViewMetaSetter = vi.fn(
     (owner: string): UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined => {
       if (owner !== cellId) {
         throw new Error(`Unexpected owner: ${owner}`);
@@ -152,13 +157,13 @@ const createContextValue = ({
     expandedDocOwner$: new BehaviorSubject<string | undefined>(currentOwner),
     getExpandedDocSetter,
     getRenderDocumentViewMetaSetter,
-    cascadeGroupingChangeHandler: jest.fn(),
-    onUpdateESQLQuery: jest.fn(),
-    openInNewTab: jest.fn(),
-    getDataCascadeUiState: jest.fn(),
-    getDataGridUiStateMap: jest.fn(),
-    setDataCascadeUiState: jest.fn(),
-    setDataGridUiState: jest.fn(),
+    cascadeGroupingChangeHandler: vi.fn(),
+    onUpdateESQLQuery: vi.fn(),
+    openInNewTab: vi.fn(),
+    getDataCascadeUiState: vi.fn(),
+    getDataGridUiStateMap: vi.fn(),
+    setDataCascadeUiState: vi.fn(),
+    setDataGridUiState: vi.fn(),
   };
 
   return {
@@ -170,13 +175,13 @@ const createContextValue = ({
 
 describe('ESQLDataCascadeLeafCell', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes owner-bound props to the leaf grid when the leaf owns the expanded doc', () => {
     const services = createDiscoverServicesMock();
-    const ownerBoundSetExpandedDoc = jest.fn();
-    const ownerBoundSetRenderDocumentViewMeta = jest.fn();
+    const ownerBoundSetExpandedDoc = vi.fn();
+    const ownerBoundSetRenderDocumentViewMeta = vi.fn();
     const { contextValue, getExpandedDocSetter, getRenderDocumentViewMetaSetter } =
       createContextValue({
         currentOwner: cellId,
@@ -203,8 +208,8 @@ describe('ESQLDataCascadeLeafCell', () => {
 
   it('updates leaf ownership wiring when the expanded doc owner changes', () => {
     const services = createDiscoverServicesMock();
-    const ownerBoundSetExpandedDoc = jest.fn();
-    const ownerBoundSetRenderDocumentViewMeta = jest.fn();
+    const ownerBoundSetExpandedDoc = vi.fn();
+    const ownerBoundSetRenderDocumentViewMeta = vi.fn();
     const initialContext = createContextValue({
       currentOwner: 'other-leaf',
       ownerBoundSetExpandedDoc,

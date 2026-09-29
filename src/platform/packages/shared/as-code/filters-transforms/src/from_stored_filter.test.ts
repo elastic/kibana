@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AsCodeFilter, AsCodeGroupFilter } from '@kbn/as-code-filters-schema';
 import { FilterStateStore } from '@kbn/es-query-constants';
 import { fromStoredFilter } from './from_stored_filter';
@@ -23,7 +25,7 @@ describe('fromStoredFilter', () => {
   describe('Input validation', () => {
     it('should return undefined for null/undefined input when logger provided', () => {
       const mockLogger = {
-        warn: jest.fn(),
+        warn: vi.fn(),
       } as any;
 
       const resultNull = fromStoredFilter(null, mockLogger);

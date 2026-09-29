@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { EventLogService } from '../services/event_log_service/event_log_service';
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
 import { ExecutionHistoryClient } from './execution_history_client';
@@ -20,14 +23,14 @@ const baseArgs = (overrides: Partial<ListRuleExecutionsArgs> = {}): ListRuleExec
 
 interface Mocks {
   eventLogService: EventLogService;
-  findRuleExecutions: jest.SpiedFunction<EventLogService['findRuleExecutions']>;
+  findRuleExecutions: MockInstance<EventLogService['findRuleExecutions']>;
   client: ExecutionHistoryClient;
 }
 
 const createMocks = (spaceId = 'default'): Mocks => {
   const { eventLogService } = createEventLogService();
 
-  const findRuleExecutions = jest
+  const findRuleExecutions = vi
     .spyOn(eventLogService, 'findRuleExecutions')
     .mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 });
 

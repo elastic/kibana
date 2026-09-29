@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { createEsSearchIterable } from './create_es_search_iterable';
@@ -21,15 +24,15 @@ const makeSearchResponse = (ids: string[], pitId = 'pit-1') => ({
 });
 
 describe('createEsSearchIterable', () => {
-  let esClient: jest.Mocked<
+  let esClient: Mocked<
     Pick<ElasticsearchClient, 'search' | 'openPointInTime' | 'closePointInTime'>
   >;
 
   beforeEach(() => {
     esClient = {
-      search: jest.fn(),
-      openPointInTime: jest.fn().mockResolvedValue({ id: 'pit-1' }),
-      closePointInTime: jest.fn().mockResolvedValue({}),
+      search: vi.fn(),
+      openPointInTime: vi.fn().mockResolvedValue({ id: 'pit-1' }),
+      closePointInTime: vi.fn().mockResolvedValue({}),
     };
   });
 

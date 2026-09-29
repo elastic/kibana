@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const actualHelpers = jest.requireActual('./resolve_helpers');
+import { vi } from 'vitest';
 
-export const splitIntoBucketsMock = jest.fn().mockImplementation(actualHelpers.splitIntoBuckets);
+const actualHelpers = (await vi.importActual('./resolve_helpers'));
 
-jest.doMock('./resolve_helpers', () => {
+export const splitIntoBucketsMock = vi.fn().mockImplementation(actualHelpers.splitIntoBuckets);
+
+vi.doMock('./resolve_helpers', () => {
   return {
     ...actualHelpers,
     splitIntoBuckets: splitIntoBucketsMock,

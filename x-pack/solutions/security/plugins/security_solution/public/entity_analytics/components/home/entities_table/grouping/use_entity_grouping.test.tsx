@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { renderHook } from '@testing-library/react';
@@ -22,25 +25,34 @@ import {
   useFetchUnfilteredResolutionGroupData,
 } from './use_fetch_grouped_data';
 
-jest.mock('@kbn/grouping', () => ({
-  ...jest.requireActual('@kbn/grouping'),
-  useGrouping: jest.fn(() => ({
-    selectedGroups: [],
-    setSelectedGroups: jest.fn(),
-    groupsUnit: jest.fn(),
-    options: [],
-  })),
-}));
+vi.mock('@kbn/grouping', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/grouping')),
+      useGrouping: vi.fn(() => ({
+        selectedGroups: [],
+        setSelectedGroups: vi.fn(),
+        groupsUnit: vi.fn(),
+        options: [],
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/use_has_entity_resolution_license', () => ({
-  useHasEntityResolutionLicense: jest.fn(() => false),
-}));
+vi.mock('../../../../../common/hooks/use_has_entity_resolution_license', () => {
+      const mocked = {
+      useHasEntityResolutionLicense: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_fetch_grouped_data', () => ({
-  useFetchGroupedData: jest.fn(() => ({ data: undefined, isFetching: false })),
-  useFetchUnfilteredResolutionGroupData: jest.fn(() => ({ data: undefined, isFetching: false })),
-  useFetchFilteredResolutionGroupData: jest.fn(() => ({ data: undefined, isFetching: false })),
-}));
+vi.mock('./use_fetch_grouped_data', () => {
+      const mocked = {
+      useFetchGroupedData: vi.fn(() => ({ data: undefined, isFetching: false })),
+      useFetchUnfilteredResolutionGroupData: vi.fn(() => ({ data: undefined, isFetching: false })),
+      useFetchFilteredResolutionGroupData: vi.fn(() => ({ data: undefined, isFetching: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataView = { fields: [] } as unknown as DataView;
 
@@ -57,13 +69,13 @@ const createMockState = (overrides: Partial<EntityURLStateResult> = {}): EntityU
     queryError: undefined,
     pageSize: 25,
     pageIndex: 0,
-    setUrlQuery: jest.fn(),
+    setUrlQuery: vi.fn(),
     filters: [],
-    getRowsFromPages: jest.fn(() => []),
-    onChangeItemsPerPage: jest.fn(),
-    onResetFilters: jest.fn(),
-    onSort: jest.fn(),
-    onChangePage: jest.fn(),
+    getRowsFromPages: vi.fn(() => []),
+    onChangeItemsPerPage: vi.fn(),
+    onResetFilters: vi.fn(),
+    onSort: vi.fn(),
+    onChangePage: vi.fn(),
     ...overrides,
   } as EntityURLStateResult);
 
@@ -102,21 +114,21 @@ describe('getAggregationsByGroupField', () => {
 });
 
 describe('useEntityGrouping — license gating', () => {
-  const mockUseGrouping = useGrouping as jest.Mock;
+  const mockUseGrouping = useGrouping as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    vi.clearAllMocks();
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
     mockUseGrouping.mockReturnValue({
       selectedGroups: [],
-      setSelectedGroups: jest.fn(),
-      groupsUnit: jest.fn(),
+      setSelectedGroups: vi.fn(),
+      groupsUnit: vi.fn(),
       options: [],
     });
   });
 
   it('excludes Resolution from grouping options when license is inactive', () => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
     renderHook(
       () =>
         useEntityGrouping({
@@ -133,7 +145,7 @@ describe('useEntityGrouping — license gating', () => {
   });
 
   it('includes Resolution in grouping options when license is active', () => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
     renderHook(
       () =>
         useEntityGrouping({
@@ -151,15 +163,15 @@ describe('useEntityGrouping — license gating', () => {
 });
 
 describe('useEntityGrouping — entity type plain-field query', () => {
-  const mockUseGrouping = useGrouping as jest.Mock;
+  const mockUseGrouping = useGrouping as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    vi.clearAllMocks();
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
     mockUseGrouping.mockReturnValue({
       selectedGroups: [ENTITY_GROUPING_OPTIONS.ENTITY_TYPE],
-      setSelectedGroups: jest.fn(),
-      groupsUnit: jest.fn(),
+      setSelectedGroups: vi.fn(),
+      groupsUnit: vi.fn(),
       options: [],
     });
   });
@@ -176,7 +188,7 @@ describe('useEntityGrouping — entity type plain-field query', () => {
       { wrapper }
     );
 
-    const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
+    const { query } = (useFetchGroupedData as Mock).mock.calls[0][0];
     expect(query.runtime_mappings).toBeUndefined();
     expect(query.aggs?.groupByFields?.terms?.field).toBe(ENTITY_FIELDS.ENTITY_TYPE);
     expect(query.aggs?.groupByFields?.terms?.size).toBe(ALLOWED_ENTITY_TYPES.length);
@@ -194,7 +206,7 @@ describe('useEntityGrouping — entity type plain-field query', () => {
       { wrapper }
     );
 
-    const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
+    const { query } = (useFetchGroupedData as Mock).mock.calls[0][0];
     expect(query.aggs?.groupByFields?.aggs?.entityType).toEqual({
       terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 },
     });
@@ -212,7 +224,7 @@ describe('useEntityGrouping — entity type plain-field query', () => {
       { wrapper }
     );
 
-    const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
+    const { query } = (useFetchGroupedData as Mock).mock.calls[0][0];
     expect(query.aggs?.nullGroupItems).toEqual({ missing: { field: ENTITY_FIELDS.ENTITY_TYPE } });
     expect(query.aggs?.unitsCount).toEqual({ value_count: { field: ENTITY_FIELDS.ENTITY_TYPE } });
     expect(query.aggs?.groupsCount).toEqual({ cardinality: { field: ENTITY_FIELDS.ENTITY_TYPE } });
@@ -230,7 +242,7 @@ describe('useEntityGrouping — entity type plain-field query', () => {
       { wrapper }
     );
 
-    const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
+    const { query } = (useFetchGroupedData as Mock).mock.calls[0][0];
     // offset 2*25=50 is past the allowed-type bucket window, so it clamps to 0.
     expect(query.aggs?.groupByFields?.aggs?.bucket_truncate?.bucket_sort?.from).toBe(0);
     expect(query.aggs?.groupByFields?.aggs?.bucket_truncate?.bucket_sort?.size).toBe(25);
@@ -248,27 +260,27 @@ describe('useEntityGrouping — entity type plain-field query', () => {
       { wrapper }
     );
 
-    const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
+    const { query } = (useFetchGroupedData as Mock).mock.calls[0][0];
     // Three allowed types with page size 2 produce pages starting at offsets 0 and 2.
     expect(query.aggs?.groupByFields?.aggs?.bucket_truncate?.bucket_sort?.from).toBe(2);
   });
 });
 
 describe('useEntityGrouping — filtered and unfiltered routing', () => {
-  const mockUnfilteredResolutionResult = useFetchUnfilteredResolutionGroupData as jest.Mock;
-  const mockFilteredResolutionResult = useFetchFilteredResolutionGroupData as jest.Mock;
-  const mockUseGrouping = useGrouping as jest.Mock;
+  const mockUnfilteredResolutionResult = useFetchUnfilteredResolutionGroupData as Mock;
+  const mockFilteredResolutionResult = useFetchFilteredResolutionGroupData as Mock;
+  const mockUseGrouping = useGrouping as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
     mockUnfilteredResolutionResult.mockReturnValue({ data: undefined, isFetching: false });
     mockFilteredResolutionResult.mockReturnValue({ data: undefined, isFetching: false });
-    (useFetchGroupedData as jest.Mock).mockReturnValue({ data: undefined, isFetching: false });
+    (useFetchGroupedData as Mock).mockReturnValue({ data: undefined, isFetching: false });
     mockUseGrouping.mockReturnValue({
       selectedGroups: [ENTITY_GROUPING_OPTIONS.RESOLUTION],
-      setSelectedGroups: jest.fn(),
-      groupsUnit: jest.fn(),
+      setSelectedGroups: vi.fn(),
+      groupsUnit: vi.fn(),
       options: [],
     });
   });
@@ -435,21 +447,21 @@ describe('useEntityGrouping — filtered and unfiltered routing', () => {
 });
 
 describe('useEntityGrouping — filtered resolution data wiring', () => {
-  const mockFilteredResolutionResult = useFetchFilteredResolutionGroupData as jest.Mock;
-  const mockUseGrouping = useGrouping as jest.Mock;
+  const mockFilteredResolutionResult = useFetchFilteredResolutionGroupData as Mock;
+  const mockUseGrouping = useGrouping as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    (useFetchUnfilteredResolutionGroupData as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
+    (useFetchUnfilteredResolutionGroupData as Mock).mockReturnValue({
       data: undefined,
       isFetching: false,
     });
-    (useFetchGroupedData as jest.Mock).mockReturnValue({ data: undefined, isFetching: false });
+    (useFetchGroupedData as Mock).mockReturnValue({ data: undefined, isFetching: false });
     mockUseGrouping.mockReturnValue({
       selectedGroups: [ENTITY_GROUPING_OPTIONS.RESOLUTION],
-      setSelectedGroups: jest.fn(),
-      groupsUnit: jest.fn(),
+      setSelectedGroups: vi.fn(),
+      groupsUnit: vi.fn(),
       options: [],
     });
     mockFilteredResolutionResult.mockReturnValue({
@@ -510,21 +522,21 @@ describe('useEntityGrouping — filtered resolution data wiring', () => {
 });
 
 describe('useEntityGrouping — synthesized resolution bucket shape', () => {
-  const mockUnfilteredResolutionResult = useFetchUnfilteredResolutionGroupData as jest.Mock;
-  const mockUseGrouping = useGrouping as jest.Mock;
+  const mockUnfilteredResolutionResult = useFetchUnfilteredResolutionGroupData as Mock;
+  const mockUseGrouping = useGrouping as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    (useFetchFilteredResolutionGroupData as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
+    (useFetchFilteredResolutionGroupData as Mock).mockReturnValue({
       data: undefined,
       isFetching: false,
     });
-    (useFetchGroupedData as jest.Mock).mockReturnValue({ data: undefined, isFetching: false });
+    (useFetchGroupedData as Mock).mockReturnValue({ data: undefined, isFetching: false });
     mockUseGrouping.mockReturnValue({
       selectedGroups: [ENTITY_GROUPING_OPTIONS.RESOLUTION],
-      setSelectedGroups: jest.fn(),
-      groupsUnit: jest.fn(),
+      setSelectedGroups: vi.fn(),
+      groupsUnit: vi.fn(),
       options: [],
     });
     mockUnfilteredResolutionResult.mockReturnValue({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -22,37 +24,52 @@ import { ConversationStreamService } from '../../services/events/conversation_st
 import { queryKeys } from '../query_keys';
 import { useConversation, useConversationReadOnly } from './use_conversation';
 
-jest.mock('../context/conversation/use_conversation_id', () => ({
-  useConversationId: jest.fn(),
-}));
+vi.mock('../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../context/streaming/streaming_context', () => ({
-  useStreamingContext: jest.fn(),
-  useStreamRecord: jest.fn(),
-}));
+vi.mock('../context/streaming/streaming_context', () => {
+      const mocked = {
+      useStreamingContext: vi.fn(),
+      useStreamRecord: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGet = jest.fn();
+const mockGet = vi.fn();
 
-jest.mock('./use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({ conversationsService: { get: mockGet } }),
-}));
+vi.mock('./use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({ conversationsService: { get: mockGet } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../context/conversation/conversation_context', () => ({
-  useConversationContext: () => ({}),
-}));
+vi.mock('../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_last_agent_id', () => ({
-  useLastAgentId: () => ({ agentId: undefined }),
-}));
+vi.mock('./use_last_agent_id', () => {
+      const mocked = {
+      useLastAgentId: () => ({ agentId: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const stubConversationStreamService = new ConversationStreamService({
   getChatEvents$: () => NEVER,
   getStreamEnded$: () => NEVER,
 });
 
-const mockUseConversationId = jest.mocked(useConversationId);
-const mockUseStreamingContext = jest.mocked(useStreamingContext);
-const mockUseStreamRecord = jest.mocked(useStreamRecord);
+const mockUseConversationId = vi.mocked(useConversationId);
+const mockUseStreamingContext = vi.mocked(useStreamingContext);
+const mockUseStreamRecord = vi.mocked(useStreamRecord);
 
 const conversationId = 'conversation-1';
 
@@ -99,27 +116,27 @@ const createWrapper = () => {
 
 describe('useConversation polling', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     mockUseConversationId.mockReturnValue(conversationId);
     mockUseStreamingContext.mockReturnValue({
       activeStreams: new Map(),
       byConversationId: {},
       conversationStreamService: stubConversationStreamService,
-      mutateSendMessage: jest.fn(),
-      mutateResumeRound: jest.fn(),
-      cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateSendMessage: vi.fn(),
+      mutateResumeRound: vi.fn(),
+      cancelStream: vi.fn(),
+      cancelAllStreams: vi.fn(),
     });
     mockUseStreamRecord.mockReturnValue({});
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
-  const advance = (ms: number) => act(async () => void jest.advanceTimersByTime(ms));
+  const advance = (ms: number) => act(async () => void vi.advanceTimersByTime(ms));
 
   it('does not poll a private conversation with no members', async () => {
     mockGet.mockResolvedValue(createFetchedConversation(privateAcl));
@@ -206,10 +223,10 @@ describe('useConversation polling', () => {
       activeStreams: new Map([[conversationId, { type: 'send' }]]),
       byConversationId: {},
       conversationStreamService: stubConversationStreamService,
-      mutateSendMessage: jest.fn(),
-      mutateResumeRound: jest.fn(),
-      cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateSendMessage: vi.fn(),
+      mutateResumeRound: vi.fn(),
+      cancelStream: vi.fn(),
+      cancelAllStreams: vi.fn(),
     });
   };
 
@@ -278,7 +295,7 @@ describe('useConversation polling', () => {
 
 describe('useConversationReadOnly', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseConversationId.mockReturnValue(conversationId);
     mockUseStreamRecord.mockReturnValue({});
   });
@@ -288,10 +305,10 @@ describe('useConversationReadOnly', () => {
       activeStreams: isStreaming ? new Map([[conversationId, { type: 'send' }]]) : new Map(),
       byConversationId: {},
       conversationStreamService: stubConversationStreamService,
-      mutateSendMessage: jest.fn(),
-      mutateResumeRound: jest.fn(),
-      cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateSendMessage: vi.fn(),
+      mutateResumeRound: vi.fn(),
+      cancelStream: vi.fn(),
+      cancelAllStreams: vi.fn(),
     });
 
   it('reports loading while an opened conversation is fetched for the first time', async () => {

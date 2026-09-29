@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import moment from 'moment';
@@ -23,12 +25,12 @@ const NOW = new Date('2025-06-15T12:00:00Z');
 
 describe('UpdatedAtCell', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(NOW);
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders a dash when `updatedAt` is undefined', () => {

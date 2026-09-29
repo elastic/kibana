@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -21,16 +23,16 @@ import type { ISearchStart } from './types';
 import { BackgroundSearchNotifier } from './session/background_search_notifier';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
-jest.mock('./session/background_search_notifier');
-const BackgroundSearchNotifierMock = jest.mocked(BackgroundSearchNotifier);
+vi.mock('./session/background_search_notifier');
+const BackgroundSearchNotifierMock = vi.mocked(BackgroundSearchNotifier);
 
 describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
   const initializerContext = coreMock.createPluginInitializerContext();
-  jest.useFakeTimers();
-  initializerContext.config.get = jest.fn().mockReturnValue({
+  vi.useFakeTimers();
+  initializerContext.config.get = vi.fn().mockReturnValue({
     search: { aggs: { shardDelay: { enabled: false } }, sessions: { enabled: true } },
   });
 
@@ -38,14 +40,14 @@ describe('Search service', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     searchService = new SearchService(initializerContext);
-    jest.advanceTimersByTime(30000);
+    vi.advanceTimersByTime(30000);
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
       const setup = searchService.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
-        expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
+        expressions: { registerFunction: vi.fn(), registerType: vi.fn() },
         management: managementPluginMock.createSetupContract(),
       } as unknown as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
@@ -60,7 +62,7 @@ describe('Search service', () => {
     beforeEach(() => {
       searchService.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
-        expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
+        expressions: { registerFunction: vi.fn(), registerType: vi.fn() },
         management: managementPluginMock.createSetupContract(),
       } as unknown as SearchServiceSetupDependencies);
       data = searchService.start(mockCoreStart, {

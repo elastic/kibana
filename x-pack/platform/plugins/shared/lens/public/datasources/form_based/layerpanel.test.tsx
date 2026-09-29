@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { FormBasedPrivateState, TermsIndexPatternColumn } from '@kbn/lens-common';
 import type { FormBasedLayerPanelProps } from './layerpanel';
@@ -17,13 +19,11 @@ import { renderWithProviders } from '../../test_utils/test_utils';
 Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { value: 400 });
 Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { value: 200 });
 
-jest.mock('@kbn/unified-search-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/unified-search-plugin/public');
+vi.mock('@kbn/unified-search-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/unified-search-plugin/public'));
   return {
     ...actual,
-    DataViewsList: jest.requireActual(
-      '@kbn/unified-search-plugin/public/dataview_picker/dataview_list'
-    ).DataViewsList,
+    DataViewsList: (await vi.importActual('@kbn/unified-search-plugin/public/dataview_picker/dataview_list')).DataViewsList,
   };
 });
 
@@ -180,7 +180,7 @@ describe('Layer Data Panel', () => {
     defaultProps = {
       layerId: 'first',
       state: initialState,
-      onChangeIndexPattern: jest.fn(),
+      onChangeIndexPattern: vi.fn(),
       dataViews: {
         indexPatternRefs: [
           { id: '1', title: 'my-fake-index-pattern' },

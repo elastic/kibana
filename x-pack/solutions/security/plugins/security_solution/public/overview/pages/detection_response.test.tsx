@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
@@ -16,39 +18,63 @@ import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks/mock_data_view';
 import { defaultImplementation } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../components/detection_response/alerts_by_status', () => ({
-  AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
-}));
+vi.mock('../components/detection_response/alerts_by_status', () => {
+      const mocked = {
+      AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/detection_response/cases_table', () => ({
-  CasesTable: () => <div data-test-subj="mock_CasesTable" />,
-}));
+vi.mock('../components/detection_response/cases_table', () => {
+      const mocked = {
+      CasesTable: () => <div data-test-subj="mock_CasesTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/detection_response/host_alerts_table', () => ({
-  HostAlertsTable: () => <div data-test-subj="mock_HostAlertsTable" />,
-}));
+vi.mock('../components/detection_response/host_alerts_table', () => {
+      const mocked = {
+      HostAlertsTable: () => <div data-test-subj="mock_HostAlertsTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/detection_response/rule_alerts_table', () => ({
-  RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
-}));
+vi.mock('../components/detection_response/rule_alerts_table', () => {
+      const mocked = {
+      RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/detection_response/user_alerts_table', () => ({
-  UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
-}));
+vi.mock('../components/detection_response/user_alerts_table', () => {
+      const mocked = {
+      UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/detection_response/cases_by_status', () => ({
-  CasesByStatus: () => <div data-test-subj="mock_CasesByStatus" />,
-}));
+vi.mock('../components/detection_response/cases_by_status', () => {
+      const mocked = {
+      CasesByStatus: () => <div data-test-subj="mock_CasesByStatus" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/search_bar', () => ({
-  SiemSearchBar: () => <div data-test-subj="mock_globalSearchBar" />,
-}));
+vi.mock('../../common/components/search_bar', () => {
+      const mocked = {
+      SiemSearchBar: () => <div data-test-subj="mock_globalSearchBar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/filters_global', () => ({
-  FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+vi.mock('../../common/components/filters_global', () => {
+      const mocked = {
+      FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/empty_prompt');
+vi.mock('../../common/components/empty_prompt');
 
 const defaultUseAlertsPrivilegesReturn = {
   hasAlertsRead: true,
@@ -59,22 +85,28 @@ const defaultUseSignalIndexReturn = {
   signalIndexName: '',
 };
 
-const mockUseSignalIndex = jest.fn(() => defaultUseSignalIndexReturn);
-jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
-  useSignalIndex: () => mockUseSignalIndex(),
-}));
-const mockUseAlertsPrivileges = jest.fn(() => defaultUseAlertsPrivilegesReturn);
-jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: () => mockUseAlertsPrivileges(),
-}));
+const mockUseSignalIndex = vi.fn(() => defaultUseSignalIndexReturn);
+vi.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => {
+      const mocked = {
+      useSignalIndex: () => mockUseSignalIndex(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseAlertsPrivileges = vi.fn(() => defaultUseAlertsPrivilegesReturn);
+vi.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => {
+      const mocked = {
+      useAlertsPrivileges: () => mockUseAlertsPrivileges(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultUseCasesPermissionsReturn = readCasesPermissions();
 
 const mockedUseKibana = mockUseKibana();
-const mockCanUseCases = jest.fn();
+const mockCanUseCases = vi.fn();
 
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../common/lib/kibana'));
 
   return {
     ...original,
@@ -92,11 +124,11 @@ jest.mock('../../common/lib/kibana', () => {
 
 describe('DetectionResponse', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
     mockCanUseCases.mockReturnValue(defaultUseCasesPermissionsReturn);
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'ready' });
   });
@@ -118,7 +150,7 @@ describe('DetectionResponse', () => {
   });
 
   it('should render landing page if index not exist', () => {
-    jest.mocked(useDataView).mockImplementation(defaultImplementation);
+    vi.mocked(useDataView).mockImplementation(defaultImplementation);
 
     const result = render(
       <TestProviders>
@@ -134,7 +166,7 @@ describe('DetectionResponse', () => {
   });
 
   it('should render loader if dataview is loading', () => {
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'loading' });
 

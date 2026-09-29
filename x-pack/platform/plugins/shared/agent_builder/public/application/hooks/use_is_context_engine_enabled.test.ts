@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useIsContextEngineEnabled } from './use_is_context_engine_enabled';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useUiSetting } = jest.requireMock('@kbn/kibana-react-plugin/public');
+const { useUiSetting } = (await vi.importMock('@kbn/kibana-react-plugin/public'));
 
 describe('useIsContextEngineEnabled', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   // The explicit `false` default matters: the setting is registered by agent_builder_sml, and
   // `uiSettings.get` throws on an unknown key when no default is supplied.

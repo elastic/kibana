@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
@@ -15,7 +17,7 @@ import { getActionResponses } from './utils';
 describe('getActionResponses', () => {
   it('returns aggregated action response stats', async () => {
     const search = {
-      search: jest.fn().mockReturnValue(
+      search: vi.fn().mockReturnValue(
         of({
           rawResponse: {
             aggregations: {

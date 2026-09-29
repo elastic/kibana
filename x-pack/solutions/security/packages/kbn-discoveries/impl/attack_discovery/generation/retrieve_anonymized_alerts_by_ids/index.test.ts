@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, type WorkflowDetailDto, type WorkflowExecutionDto } from '@kbn/workflows';
 
@@ -14,10 +17,10 @@ import { retrieveAnonymizedAlertsByIds } from '.';
 
 describe('retrieveAnonymizedAlertsByIds', () => {
   const logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const request = {} as KibanaRequest;
@@ -98,10 +101,10 @@ describe('retrieveAnonymizedAlertsByIds', () => {
   };
 
   const buildApi = (): WorkflowsManagementApi => ({
-    getWorkflow: jest.fn().mockResolvedValue(workflow),
-    getWorkflowExecution: jest.fn().mockResolvedValue(completedExecution),
-    runWorkflow: jest.fn().mockResolvedValue('by-ids-run-id'),
-    scheduleWorkflow: jest.fn(),
+    getWorkflow: vi.fn().mockResolvedValue(workflow),
+    getWorkflowExecution: vi.fn().mockResolvedValue(completedExecution),
+    runWorkflow: vi.fn().mockResolvedValue('by-ids-run-id'),
+    scheduleWorkflow: vi.fn(),
   });
 
   const baseParams = {
@@ -119,7 +122,7 @@ describe('retrieveAnonymizedAlertsByIds', () => {
 
     await retrieveAnonymizedAlertsByIds({ ...baseParams, workflowsManagementApi });
 
-    const inputs = (workflowsManagementApi.runWorkflow as jest.Mock).mock.calls[0][2] as Record<
+    const inputs = (workflowsManagementApi.runWorkflow as Mock).mock.calls[0][2] as Record<
       string,
       unknown
     >;
@@ -141,7 +144,7 @@ describe('retrieveAnonymizedAlertsByIds', () => {
     });
 
     expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(workflowId, 'team-a', request);
-    expect((workflowsManagementApi.runWorkflow as jest.Mock).mock.calls[0][1]).toBe('team-a');
+    expect((workflowsManagementApi.runWorkflow as Mock).mock.calls[0][1]).toBe('team-a');
   });
 
   it('requests exactly the curated alert count via size', async () => {
@@ -149,7 +152,7 @@ describe('retrieveAnonymizedAlertsByIds', () => {
 
     await retrieveAnonymizedAlertsByIds({ ...baseParams, workflowsManagementApi });
 
-    const inputs = (workflowsManagementApi.runWorkflow as jest.Mock).mock.calls[0][2] as Record<
+    const inputs = (workflowsManagementApi.runWorkflow as Mock).mock.calls[0][2] as Record<
       string,
       unknown
     >;
@@ -162,7 +165,7 @@ describe('retrieveAnonymizedAlertsByIds', () => {
 
     await retrieveAnonymizedAlertsByIds({ ...baseParams, workflowsManagementApi });
 
-    const inputs = (workflowsManagementApi.runWorkflow as jest.Mock).mock.calls[0][2] as Record<
+    const inputs = (workflowsManagementApi.runWorkflow as Mock).mock.calls[0][2] as Record<
       string,
       unknown
     >;
@@ -196,7 +199,7 @@ describe('retrieveAnonymizedAlertsByIds', () => {
 
   it('warns when curated ids were requested but none resolved', async () => {
     const workflowsManagementApi = buildApi();
-    (workflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+    (workflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue({
       ...completedExecution,
       stepExecutions: [
         {
@@ -215,7 +218,7 @@ describe('retrieveAnonymizedAlertsByIds', () => {
     await retrieveAnonymizedAlertsByIds({ ...baseParams, workflowsManagementApi });
 
     expect(
-      (logger.warn as jest.Mock).mock.calls.some(([message]) =>
+      (logger.warn as Mock).mock.calls.some(([message]) =>
         String(message).includes('none resolved')
       )
     ).toBe(true);
@@ -223,7 +226,7 @@ describe('retrieveAnonymizedAlertsByIds', () => {
 
   it('throws an AttackDiscoveryError when the retrieval workflow is missing', async () => {
     const workflowsManagementApi = buildApi();
-    (workflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(null);
+    (workflowsManagementApi.getWorkflow as Mock).mockResolvedValue(null);
 
     await expect(
       retrieveAnonymizedAlertsByIds({ ...baseParams, workflowsManagementApi })

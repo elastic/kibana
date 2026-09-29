@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,8 +19,8 @@ import {
 import { searchUnifiedAlerts } from '../api';
 import { getSearchUnifiedAlertsResponseMock } from '../__mocks__';
 
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('../api');
+vi.mock('../../../hooks/use_app_toasts');
+vi.mock('../api');
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -35,17 +38,17 @@ const createWrapper = () => {
 
 describe('useSearchUnifiedAlerts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
     });
   });
 
   it('should call searchUnifiedAlerts with correct params', async () => {
     const query = { query: { match_all: {} } };
     const mockResponse = getSearchUnifiedAlertsResponseMock();
-    (searchUnifiedAlerts as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (searchUnifiedAlerts as Mock).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useSearchUnifiedAlerts(query), {
       wrapper: createWrapper(),
@@ -65,7 +68,7 @@ describe('useSearchUnifiedAlerts', () => {
   it('should handle errors', async () => {
     const query = { query: { match_all: {} } };
     const error = new Error('Test error');
-    (searchUnifiedAlerts as jest.Mock).mockRejectedValueOnce(error);
+    (searchUnifiedAlerts as Mock).mockRejectedValueOnce(error);
 
     const { addError } = useAppToasts();
     const { result } = renderHook(() => useSearchUnifiedAlerts(query), {
@@ -85,7 +88,7 @@ describe('useSearchUnifiedAlerts', () => {
 describe('useInvalidateSearchUnifiedAlerts', () => {
   it('should invalidate queries', () => {
     const queryClient = new QueryClient();
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useInvalidateSearchUnifiedAlerts(), {
       wrapper: ({ children }: { children: React.ReactNode }) => (

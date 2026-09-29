@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,8 +19,8 @@ import { Form, useForm } from '../../../shared_imports';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { SelectInferenceId } from './select_inference_id';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiPopover: ({
@@ -38,7 +40,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/inference-endpoint-ui-common', () => {
+vi.mock('@kbn/inference-endpoint-ui-common', () => {
   const SERVICE_PROVIDERS = {
     elastic: { name: 'Elastic' },
     openai: { name: 'OpenAI' },
@@ -80,51 +82,57 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
   };
 });
 
-jest.mock('../../../../../services/api', () => ({
-  ...jest.requireActual('../../../../../services/api'),
-  useLoadInferenceEndpoints: jest.fn(),
-}));
+vi.mock('../../../../../services/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../services/api')),
+      useLoadInferenceEndpoints: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNavigateToUrl = jest.fn();
+const mockNavigateToUrl = vi.fn();
 
-jest.mock('../../../../../app_context', () => ({
-  ...jest.requireActual('../../../../../app_context'),
-  useAppContext: jest.fn(() => ({
-    core: {
-      application: {
-        navigateToUrl: mockNavigateToUrl,
-      },
-      http: {
-        basePath: {
-          get: jest.fn().mockReturnValue('/base-path'),
-        },
-      },
-    },
-    config: { enforceAdaptiveAllocations: false },
-    services: {
-      notificationService: {
-        toasts: {},
-      },
-    },
-    docLinks: {
-      links: {
-        inferenceManagement: {
-          inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
-        },
-      },
-    },
-    plugins: {
-      cloud: { isCloudEnabled: false },
-      share: {
-        url: {
-          locators: {
-            get: jest.fn(() => ({ useUrl: jest.fn().mockReturnValue('https://redirect.me') })),
+vi.mock('../../../../../app_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../app_context')),
+      useAppContext: vi.fn(() => ({
+        core: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+          },
+          http: {
+            basePath: {
+              get: vi.fn().mockReturnValue('/base-path'),
+            },
           },
         },
-      },
-    },
-  })),
-}));
+        config: { enforceAdaptiveAllocations: false },
+        services: {
+          notificationService: {
+            toasts: {},
+          },
+        },
+        docLinks: {
+          links: {
+            inferenceManagement: {
+              inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
+            },
+          },
+        },
+        plugins: {
+          cloud: { isCloudEnabled: false },
+          share: {
+            url: {
+              locators: {
+                get: vi.fn(() => ({ useUrl: vi.fn().mockReturnValue('https://redirect.me') })),
+              },
+            },
+          },
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DEFAULT_ENDPOINTS: InferenceAPIConfigResponse[] = [
   {
@@ -159,7 +167,7 @@ const DEFAULT_ENDPOINTS: InferenceAPIConfigResponse[] = [
   },
 ] as InferenceAPIConfigResponse[];
 
-const mockResendRequest = jest.fn();
+const mockResendRequest = vi.fn();
 
 const setupInferenceEndpointsMocks = ({
   data = DEFAULT_ENDPOINTS,
@@ -171,7 +179,7 @@ const setupInferenceEndpointsMocks = ({
   error?: ReturnType<typeof useLoadInferenceEndpoints>['error'];
 } = {}) => {
   mockResendRequest.mockClear();
-  jest.mocked(useLoadInferenceEndpoints).mockReturnValue({
+  vi.mocked(useLoadInferenceEndpoints).mockReturnValue({
     data,
     isInitialRequest: false,
     isLoading,
@@ -242,11 +250,11 @@ describe('SelectInferenceId', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
       delay: null,
     });
@@ -254,9 +262,9 @@ describe('SelectInferenceId', () => {
 
   afterEach(() => {
     act(() => {
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('WHEN component is rendered', () => {
@@ -581,7 +589,7 @@ describe('SelectInferenceId', () => {
     it('SHOULD fail form validation on submit', async () => {
       // No compatible "embedding" endpoints, so nothing is auto-selected.
       setupInferenceEndpointsMocks({ data: [] });
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
 
       await act(async () => {
         render(
@@ -601,7 +609,7 @@ describe('SelectInferenceId', () => {
   describe('WHEN fieldType is semantic_text and no endpoint is selected', () => {
     it('SHOULD pass form validation on submit (inference_id is optional)', async () => {
       setupInferenceEndpointsMocks({ data: [] });
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
 
       await act(async () => {
         render(

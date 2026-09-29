@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { configValidator, getConnectorType } from '.';
@@ -15,7 +17,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { InferencePutResponse } from '@elastic/elasticsearch/lib/api/types';
 
 let connectorType: SubActionConnectorType<Config, Secrets>;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 

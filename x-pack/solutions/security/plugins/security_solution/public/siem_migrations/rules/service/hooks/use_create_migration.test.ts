@@ -5,30 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useCreateMigration } from './use_create_migration';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { MigrationSource } from '../../../common/types';
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 describe('useCreateMigration', () => {
-  const createRuleMigration = jest.fn();
-  const getRuleMigrationStats = jest.fn();
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-  const onSuccess = jest.fn();
+  const createRuleMigration = vi.fn();
+  const getRuleMigrationStats = vi.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
+  const onSuccess = vi.fn();
   const rules: CreateRuleMigrationRulesRequestBody = [
     { id: 'test-rule' },
   ] as CreateRuleMigrationRulesRequestBody;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         siemMigrations: {

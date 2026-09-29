@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -27,7 +29,7 @@ const buildEsResponse = (aggs: Record<string, unknown> = {}) => ({
 
 describe('SnapshotService', () => {
   let esClientMock: ElasticsearchClientMock;
-  let repositoryMock: jest.Mocked<SLODefinitionRepository>;
+  let repositoryMock: Mocked<SLODefinitionRepository>;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();

@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./actions', () => ({
-  loadAction: jest.fn().mockResolvedValue({}),
-  saveAction: jest.fn(),
-  unloadAction: jest.fn(),
-  rebuildAllAction: jest.fn(),
-  emptyKibanaIndexAction: jest.fn(),
-  editAction: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('./actions', () => {
+      const mocked = {
+      loadAction: vi.fn().mockResolvedValue({}),
+      saveAction: vi.fn(),
+      unloadAction: vi.fn(),
+      rebuildAllAction: vi.fn(),
+      emptyKibanaIndexAction: vi.fn(),
+      editAction: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
@@ -86,7 +92,7 @@ describe('EsArchiver', () => {
 
   describe('load', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should pass dataOnly=true to loadAction when in dataOnly mode', async () => {
@@ -98,11 +104,11 @@ describe('EsArchiver', () => {
         baseDir: __dirname,
       });
 
-      (loadAction as jest.Mock).mockResolvedValue({});
+      (loadAction as Mock).mockResolvedValue({});
       await archiver.load('lib');
 
-      expect(loadAction as jest.Mock).toHaveBeenCalledTimes(1);
-      expect((loadAction as jest.Mock).mock.calls[0][0]).toMatchObject({
+      expect(loadAction as Mock).toHaveBeenCalledTimes(1);
+      expect((loadAction as Mock).mock.calls[0][0]).toMatchObject({
         dataOnly: true,
         kbnClient: undefined,
       });
@@ -118,11 +124,11 @@ describe('EsArchiver', () => {
         baseDir: __dirname,
       });
 
-      (loadAction as jest.Mock).mockResolvedValue({});
+      (loadAction as Mock).mockResolvedValue({});
       await archiver.load('lib');
 
-      expect(loadAction as jest.Mock).toHaveBeenCalledTimes(1);
-      expect((loadAction as jest.Mock).mock.calls[0][0]).toMatchObject({
+      expect(loadAction as Mock).toHaveBeenCalledTimes(1);
+      expect((loadAction as Mock).mock.calls[0][0]).toMatchObject({
         dataOnly: false,
         kbnClient,
       });

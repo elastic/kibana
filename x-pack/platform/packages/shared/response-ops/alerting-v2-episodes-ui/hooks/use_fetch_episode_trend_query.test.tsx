@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -13,10 +15,13 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { useFetchEpisodeTrendQuery } from './use_fetch_episode_trend_query';
 
-jest.mock('../utils/run_esql_async_search');
-jest.mock('./use_space_id', () => ({ useSpaceId: () => 'default' }));
+vi.mock('../utils/run_esql_async_search');
+vi.mock('./use_space_id', () => {
+      const mocked = { useSpaceId: () => 'default' };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRunEsqlAsyncSearch = jest.mocked(runEsqlAsyncSearch);
+const mockRunEsqlAsyncSearch = vi.mocked(runEsqlAsyncSearch);
 
 const mockServices = {
   data: {} as DataPublicPluginStart,
@@ -29,7 +34,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 describe('useFetchEpisodeTrendQuery', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('is disabled (does not fetch) when episodeId is undefined', () => {
     const { result } = renderHook(

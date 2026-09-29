@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
@@ -19,8 +22,8 @@ import { FileUpload } from './file_upload';
 
 describe('FileUpload', () => {
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
-  let onDone: jest.Mock;
-  let onError: jest.Mock;
+  let onDone: Mock;
+  let onError: Mock;
   let client: ReturnType<typeof createMockFilesClient>;
 
   async function initTestBed(props?: Partial<Props>) {
@@ -87,13 +90,13 @@ describe('FileUpload', () => {
       maxSizeBytes: 10000,
       http: {},
     }));
-    onDone = jest.fn();
-    onError = jest.fn();
+    onDone = vi.fn();
+    onError = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('shows the success message when upload completes', async () => {
@@ -192,7 +195,7 @@ describe('FileUpload', () => {
   });
 
   it('does not call onFilesSelected on mount', async () => {
-    const onFilesSelected = jest.fn();
+    const onFilesSelected = vi.fn();
 
     await initTestBed({ onFilesSelected });
 
@@ -200,7 +203,7 @@ describe('FileUpload', () => {
   });
 
   it('calls onFilesSelected with the picked files before upload', async () => {
-    const onFilesSelected = jest.fn();
+    const onFilesSelected = vi.fn();
     const picked = { name: 'test', size: 1 } as File;
 
     const { actions } = await initTestBed({ onFilesSelected });
@@ -213,7 +216,7 @@ describe('FileUpload', () => {
   });
 
   it('calls onFilesSelected with an empty array when the selection is cleared', async () => {
-    const onFilesSelected = jest.fn();
+    const onFilesSelected = vi.fn();
 
     const { actions } = await initTestBed({ onFilesSelected });
 

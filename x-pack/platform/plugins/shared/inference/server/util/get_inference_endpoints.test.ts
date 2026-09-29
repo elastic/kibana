@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
 describe('getInferenceEndpoints', () => {
-  let mockInferenceGet: jest.Mock;
+  let mockInferenceGet: Mock;
   let esClient: any;
 
   beforeEach(() => {
-    mockInferenceGet = jest.fn();
+    mockInferenceGet = vi.fn();
     esClient = { inference: { get: mockInferenceGet } };
   });
 

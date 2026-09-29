@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -25,19 +27,19 @@ import { JobList } from '../../crud_app/sections';
 import { JOBS } from './helpers/constants';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../crud_app/services', () => {
-  const services = jest.requireActual('../../crud_app/services');
+vi.mock('../../crud_app/services', async () => {
+  const services = (await vi.importActual('../../crud_app/services'));
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),
   };
 });
 
-jest.mock('../../kibana_services', () => {
-  const services = jest.requireActual('../../kibana_services');
+vi.mock('../../kibana_services', async () => {
+  const services = (await vi.importActual('../../kibana_services'));
   return {
     ...services,
-    getUiStatsReporter: jest.fn(() => () => {}),
+    getUiStatsReporter: vi.fn(() => () => {}),
   };
 });
 
@@ -64,7 +66,7 @@ describe('<JobList />', () => {
     };
 
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       startMock = coreMock.createStart();
       setHttp(startMock.http);
       initDocumentation(docLinksServiceMock.createStartContract());

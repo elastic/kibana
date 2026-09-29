@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { ApplicationUsageContext, TrackApplicationView } from './track_application_view';
 import type { IApplicationUsageTracker } from '../../plugin';
@@ -23,10 +26,10 @@ describe('TrackApplicationView', () => {
   });
 
   test('it tracks the component while it is rendered', async () => {
-    const applicationUsageTrackerMock: jest.Mocked<IApplicationUsageTracker> = {
-      trackApplicationViewUsage: jest.fn(),
-      flushTrackedView: jest.fn(),
-      updateViewClickCounter: jest.fn(),
+    const applicationUsageTrackerMock: Mocked<IApplicationUsageTracker> = {
+      trackApplicationViewUsage: vi.fn(),
+      flushTrackedView: vi.fn(),
+      updateViewClickCounter: vi.fn(),
     };
     expect(applicationUsageTrackerMock.trackApplicationViewUsage).not.toHaveBeenCalled();
     const viewId = 'testView';

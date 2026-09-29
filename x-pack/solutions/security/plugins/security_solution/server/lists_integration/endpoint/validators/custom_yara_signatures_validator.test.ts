@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { CustomYaraSignaturesValidator } from './custom_yara_signatures_validator';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
@@ -19,18 +22,21 @@ import type { Mutable } from 'utility-types';
 import { validateYaraRule } from '../../../endpoint/lib/libyara';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
-jest.mock('../../../endpoint/lib/libyara', () => ({
-  validateYaraRule: jest.fn(async () => ({
-    errors: [],
-    warnings: [],
-    errorCount: 0,
-    warningCount: 0,
-    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
-  })),
-  getYaraEngineVersion: jest.fn(async () => 'MOCKED_VERSION'),
-}));
+vi.mock('../../../endpoint/lib/libyara', () => {
+      const mocked = {
+      validateYaraRule: vi.fn(async () => ({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      })),
+      getYaraEngineVersion: vi.fn(async () => 'MOCKED_VERSION'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
+const mockValidateYaraRule = validateYaraRule as MockedFunction<typeof validateYaraRule>;
 
 describe('YARA Signatures API validations', () => {
   let mockEndpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;

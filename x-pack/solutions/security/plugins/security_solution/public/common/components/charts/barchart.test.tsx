@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { AxisStyle } from '@elastic/charts';
 import { BarSeries, Axis, ScaleType } from '@elastic/charts';
 import type { RenderResult } from '@testing-library/react';
@@ -16,37 +19,37 @@ import '../../mock/react_beautiful_dnd';
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import type { ChartSeriesData } from './common';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('@elastic/charts', () => {
-  const actual = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const actual = require('@elastic/charts');
 
   return {
     ...actual,
-    BarSeries: jest.fn(() => <div data-test-subj="bar-series-mock" />),
-    Axis: jest.fn(() => <div data-test-subj="axis-mock" />),
-    Chart: jest.fn((props) => <div data-test-subj="chart-mock">{props.children}</div>),
-    Settings: jest.fn(() => <div data-test-subj="settings-mock" />),
+    BarSeries: vi.fn(() => <div data-test-subj="bar-series-mock" />),
+    Axis: vi.fn(() => <div data-test-subj="axis-mock" />),
+    Chart: vi.fn((props) => <div data-test-subj="chart-mock">{props.children}</div>),
+    Settings: vi.fn(() => <div data-test-subj="settings-mock" />),
   };
 });
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
+    v1: vi.fn(() => 'uuid.v1()'),
+    v4: vi.fn(() => 'uuid.v4()'),
   };
 });
 
-const MockedBarSeries = BarSeries as jest.MockedFunction<typeof BarSeries>;
-const MockedAxis = Axis as jest.MockedFunction<typeof Axis>;
+const MockedBarSeries = BarSeries as MockedFunction<typeof BarSeries>;
+const MockedAxis = Axis as MockedFunction<typeof Axis>;
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -144,15 +147,15 @@ const mockConfig = {
     stackAccessors: ['g'],
   },
   axis: {
-    xTickFormatter: jest.fn(),
-    yTickFormatter: jest.fn(),
+    xTickFormatter: vi.fn(),
+    yTickFormatter: vi.fn(),
     tickSize: 8,
   },
   customHeight: 324,
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('BarChartBaseComponent', () => {
@@ -182,7 +185,7 @@ describe('BarChartBaseComponent', () => {
   });
 
   describe('render with customized configs', () => {
-    const mockNumberFormatter = jest.fn();
+    const mockNumberFormatter = vi.fn();
     const mockXAxisStyle = {
       tickLine: {
         size: 0,

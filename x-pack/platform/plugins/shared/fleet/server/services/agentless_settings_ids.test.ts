@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { ECH_AGENTLESS_OUTPUT_ID, ECH_AGENTLESS_FLEET_SERVER_HOST_ID } from '../constants';
 
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
@@ -14,56 +17,74 @@ import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { fleetServerHostService } from './fleet_server_host';
 
-jest.mock('.', () => ({
-  appContextService: {
-    getLogger: () => ({
-      debug: jest.fn(),
-      error: jest.fn(),
-    }),
-    getInternalUserSOClientWithoutSpaceExtension: () => ({}),
-  },
-}));
+vi.mock('.', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: () => ({
+          debug: vi.fn(),
+          error: vi.fn(),
+        }),
+        getInternalUserSOClientWithoutSpaceExtension: () => ({}),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agents/agentless_agent', () => ({
-  agentlessAgentService: {
-    getDefaultFleetServerId: jest.fn(),
-    getDefaultOutputId: jest.fn(),
-  },
-}));
+vi.mock('./agents/agentless_agent', () => {
+      const mocked = {
+      agentlessAgentService: {
+        getDefaultFleetServerId: vi.fn(),
+        getDefaultOutputId: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_policy', () => ({
-  agentPolicyService: {
-    fetchAllAgentPolicies: jest.fn(),
-    update: jest.fn(),
-  },
-  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('ingest-agent-policies'),
-}));
+vi.mock('./agent_policy', () => {
+      const mocked = {
+      agentPolicyService: {
+        fetchAllAgentPolicies: vi.fn(),
+        update: vi.fn(),
+      },
+      getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./package_policy', () => ({
-  packagePolicyService: {
-    findAllForAgentPolicy: jest.fn().mockResolvedValue([]),
-  },
-}));
+vi.mock('./package_policy', () => {
+      const mocked = {
+      packagePolicyService: {
+        findAllForAgentPolicy: vi.fn().mockResolvedValue([]),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./output', () => ({
-  outputService: {
-    get: jest.fn().mockResolvedValue({ id: 'es-default-output' }),
-  },
-}));
+vi.mock('./output', () => {
+      const mocked = {
+      outputService: {
+        get: vi.fn().mockResolvedValue({ id: 'es-default-output' }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./fleet_server_host', () => ({
-  fleetServerHostService: {
-    get: jest.fn().mockResolvedValue({ id: 'default-fleet-server' }),
-  },
-}));
+vi.mock('./fleet_server_host', () => {
+      const mocked = {
+      fleetServerHostService: {
+        get: vi.fn().mockResolvedValue({ id: 'default-fleet-server' }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAgentlessAgentService = agentlessAgentService as jest.Mocked<
+const mockedAgentlessAgentService = agentlessAgentService as Mocked<
   typeof agentlessAgentService
 >;
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
-const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+const mockedOutputService = outputService as Mocked<typeof outputService>;
+const mockedFleetServerHostService = fleetServerHostService as Mocked<
   typeof fleetServerHostService
 >;
 
@@ -75,7 +96,7 @@ async function* pages(...items: any[][]) {
 
 describe('ensureCorrectAgentlessSettingsIds', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAgentlessAgentService.getDefaultFleetServerId.mockReturnValue(
       ECH_AGENTLESS_FLEET_SERVER_HOST_ID
     );

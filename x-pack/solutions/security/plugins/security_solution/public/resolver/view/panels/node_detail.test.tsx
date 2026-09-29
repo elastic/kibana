@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import * as redux from 'react-redux-v7';
 import { render } from '@testing-library/react';
@@ -14,11 +17,11 @@ import { useCubeAssets } from '../use_cube_assets';
 import { useLinkProps } from '../use_link_props';
 import type { CellActionRendererProps } from '../../../flyout_v2/shared/components/cell_actions';
 
-const mockUseCubeAssets = useCubeAssets as jest.Mock;
-jest.mock('../use_cube_assets');
+const mockUseCubeAssets = useCubeAssets as Mock;
+vi.mock('../use_cube_assets');
 
-const mockUseLinkProps = useLinkProps as jest.Mock;
-jest.mock('../use_link_props');
+const mockUseLinkProps = useLinkProps as Mock;
+vi.mock('../use_link_props');
 
 const processEvent = {
   _id: 'test_id',
@@ -32,16 +35,16 @@ const processEvent = {
 };
 
 describe('<NodeDetailView />', () => {
-  const renderCellActions = jest.fn(({ children }: CellActionRendererProps) => children);
+  const renderCellActions = vi.fn(({ children }: CellActionRendererProps) => children);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseLinkProps.mockReturnValue({ href: '#', onClick: jest.fn() });
+    vi.clearAllMocks();
+    mockUseLinkProps.mockReturnValue({ href: '#', onClick: vi.fn() });
     mockUseCubeAssets.mockReturnValue({
       descriptionText: 'test process',
     });
-    jest.spyOn(redux, 'useSelector').mockReturnValueOnce('success');
-    jest.spyOn(redux, 'useSelector').mockReturnValueOnce(1);
+    vi.spyOn(redux, 'useSelector').mockReturnValueOnce('success');
+    vi.spyOn(redux, 'useSelector').mockReturnValueOnce(1);
   });
 
   it('should render', () => {
@@ -63,7 +66,7 @@ describe('<NodeDetailView />', () => {
   });
 
   it('should render process name as link when nodeEventOnClick is available', () => {
-    const nodeEventOnClick = jest.fn();
+    const nodeEventOnClick = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <NodeDetailView

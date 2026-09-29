@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import { evaluateUploadPackage, evaluateUploadedZipPackage } from './evaluate_upload_package';
 import type { EpmPackageItem } from './api';
 
-const mockGetInstalledPackages = jest.fn();
-const mockGetAllIntegrationNames = jest.fn();
+const mockGetInstalledPackages = vi.fn();
+const mockGetAllIntegrationNames = vi.fn();
 
-jest.mock('./api', () => ({
-  getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
-  getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrationNames(...args),
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
+      getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrationNames(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const uploadedPackage = (
   id: string,
@@ -250,7 +255,7 @@ describe('evaluateUploadedZipPackage', () => {
   const deps = { http: mockHttp };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetInstalledPackages.mockResolvedValue({ items: [] });
     mockGetAllIntegrationNames.mockResolvedValue([]);
   });

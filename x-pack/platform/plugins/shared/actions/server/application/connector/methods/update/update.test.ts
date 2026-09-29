@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
@@ -29,14 +32,14 @@ import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key'
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+    connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
       actual.connectorTypeIsDual(actionTypeId)
     ),
   };
@@ -46,26 +49,26 @@ const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient()
 const authorization = actionsAuthorizationMock.create();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const preSaveHook = jest.fn();
-const postSaveHook = jest.fn();
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
+const preSaveHook = vi.fn();
+const postSaveHook = vi.fn();
 const actionExecutor = actionExecutorMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const bulkExecutionEnqueuer = jest.fn();
-const getEventLogClient = jest.fn();
-const getAxiosInstanceWithAuth = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
+const getEventLogClient = vi.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 
 const actionTypeRegistry: ActionTypeRegistry = {
-  get: jest.fn(),
-  isSystemActionType: jest.fn().mockReturnValue(false),
-  ensureActionTypeEnabled: jest.fn(),
-  isDeprecated: jest.fn().mockReturnValue(false),
-  getUtils: jest.fn().mockReturnValue({
-    isHostnameAllowed: jest.fn().mockReturnValue(true),
-    isUriAllowed: jest.fn().mockReturnValue(true),
-    getMicrosoftGraphApiUrl: jest.fn(),
-    getProxySettings: jest.fn(),
+  get: vi.fn(),
+  isSystemActionType: vi.fn().mockReturnValue(false),
+  ensureActionTypeEnabled: vi.fn(),
+  isDeprecated: vi.fn().mockReturnValue(false),
+  getUtils: vi.fn().mockReturnValue({
+    isHostnameAllowed: vi.fn().mockReturnValue(true),
+    isUriAllowed: vi.fn().mockReturnValue(true),
+    getMicrosoftGraphApiUrl: vi.fn(),
+    getProxySettings: vi.fn(),
   }),
 } as unknown as ActionTypeRegistry;
 
@@ -134,13 +137,13 @@ const makeSavedObjectResult = (attributes: Record<string, unknown>) => ({
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   authorization.ensureAuthorized.mockResolvedValue(undefined);
   connectorTokenClient.deleteConnectorTokens.mockResolvedValue(undefined);
   authTypeRegistry.get.mockImplementation((authTypeId: string) => ({
     id: authTypeId,
     schema: z.object({}),
-    configure: jest.fn(async (_ctx, axiosInstance) => axiosInstance),
+    configure: vi.fn(async (_ctx, axiosInstance) => axiosInstance),
     authMode: authTypeId === 'oauth_authorization_code' ? 'per-user' : 'shared',
   }));
 });
@@ -149,7 +152,7 @@ describe('update()', () => {
   beforeEach(() => {
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingRawAction as never);
     unsecuredSavedObjectsClient.create.mockResolvedValue(savedObjectCreateResult as never);
-    (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+    (actionTypeRegistry.get as Mock).mockReturnValue(
       getConnectorType({
         validate: {
           config: { schema: z.any() },
@@ -319,7 +322,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         update({
@@ -355,7 +358,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await update({
         context: mockContext,
@@ -394,7 +397,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await update({
         context: mockContext,
@@ -559,7 +562,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await update({
         context: mockContext,
@@ -582,7 +585,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await update({
         context: mockContext,
@@ -605,7 +608,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         update({
@@ -624,7 +627,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         update({
@@ -636,7 +639,7 @@ describe('update()', () => {
     });
 
     test('calls validateConnector when connector validator is defined', async () => {
-      const connectorValidator = jest.fn().mockReturnValue(null);
+      const connectorValidator = vi.fn().mockReturnValue(null);
       const actionType = getConnectorType({
         validate: {
           config: { schema: z.any() },
@@ -645,7 +648,7 @@ describe('update()', () => {
           connector: connectorValidator,
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await update({
         context: mockContext,
@@ -665,7 +668,7 @@ describe('update()', () => {
           connector: () => 'config and secrets are incompatible',
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         update({
@@ -686,7 +689,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         update({
@@ -705,7 +708,7 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         update({
@@ -780,7 +783,7 @@ describe('update()', () => {
 
     test('evicts clients before deleting connector tokens', async () => {
       const callOrder: string[] = [];
-      const evictClientPool = jest.fn().mockImplementation(async () => {
+      const evictClientPool = vi.fn().mockImplementation(async () => {
         callOrder.push('evictClientPoolStarted');
         await Promise.resolve();
         callOrder.push('evictClientPoolFinished');
@@ -853,7 +856,7 @@ describe('update()', () => {
         },
         preSaveHook,
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await update({
         context: mockContext,
@@ -880,7 +883,7 @@ describe('update()', () => {
         },
         preSaveHook,
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         update({
@@ -900,7 +903,7 @@ describe('update()', () => {
         },
         postSaveHook,
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await update({
         context: mockContext,
@@ -950,7 +953,7 @@ describe('update()', () => {
           apiKey: previousApiKey,
         },
       } as never);
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      (actionTypeRegistry.get as Mock).mockReturnValue(
         getConnectorType({
           id: '.inboundWebhook',
           source: ACTION_TYPE_SOURCES.spec,
@@ -1058,10 +1061,10 @@ describe('update()', () => {
     };
 
     beforeEach(() => {
-      (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (connectorTypeIsDual as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
-      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (connectorTypeHasInboundEvents as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.inboundWebhook'
       );
       (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
@@ -1078,7 +1081,7 @@ describe('update()', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
         dualExisting as never
       );
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      (actionTypeRegistry.get as Mock).mockReturnValue(
         getConnectorType({
           id: '.dual',
           source: ACTION_TYPE_SOURCES.spec,
@@ -1409,7 +1412,7 @@ describe('update()', () => {
           actionTypeId: '.slack',
         },
       } as never);
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      (actionTypeRegistry.get as Mock).mockReturnValue(
         getConnectorType({
           id: '.slack',
           preSaveHook,

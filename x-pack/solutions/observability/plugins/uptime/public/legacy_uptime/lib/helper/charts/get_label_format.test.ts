@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getChartDateLabel } from './get_chart_date_label';
 
 describe('getChartLabelFormatter', () => {
   beforeEach(() => {
     // Thu, 19 Jul 2001 17:39:39 GMT
-    Date.now = jest.fn(() => 995564379100);
+    Date.now = vi.fn(() => 995564379100);
   });
 
   it('throws error for invalid date range', () => {

@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { of, throwError } from 'rxjs';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('@kbn/entity-store/public', () => ({
-  useEntityStoreEuidApi: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      useEntityStoreEuidApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useEntityEuidFromAlerts', () => {
-  const searchMock: jest.Mock = jest.fn();
-  const getEuidRuntimeMappingMock: jest.Mock = jest.fn();
+  const searchMock: Mock = vi.fn();
+  const getEuidRuntimeMappingMock: Mock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         data: {
           search: { search: searchMock },
@@ -31,7 +37,7 @@ describe('useEntityEuidFromAlerts', () => {
       },
     });
 
-    (useEntityStoreEuidApi as jest.Mock).mockReturnValue({
+    (useEntityStoreEuidApi as Mock).mockReturnValue({
       euid: {
         painless: {
           getEuidRuntimeMapping: getEuidRuntimeMappingMock,
@@ -64,7 +70,7 @@ describe('useEntityEuidFromAlerts', () => {
   });
 
   it('returns undefined euid and false isLoading when euidApi is null or undefined', () => {
-    (useEntityStoreEuidApi as jest.Mock).mockReturnValueOnce(null);
+    (useEntityStoreEuidApi as Mock).mockReturnValueOnce(null);
 
     const { result } = renderHook(() => useEntityEuidFromAlerts(defaultProps));
 

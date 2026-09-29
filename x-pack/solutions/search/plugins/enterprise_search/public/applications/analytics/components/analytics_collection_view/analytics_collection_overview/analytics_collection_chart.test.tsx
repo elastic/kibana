@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -19,16 +21,19 @@ import { FilterBy } from '../../../utils/get_formula_by_filter';
 
 import { AnalyticsCollectionChart } from './analytics_collection_chart';
 
-jest.mock('@elastic/charts', () => ({
-  ...jest.requireActual('@elastic/charts'),
-  AreaSeries: () => <div data-test-subj="areaSeries" />,
-  Axis: () => null,
-  Chart: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="chart">{children}</div>
-  ),
-  Settings: () => null,
-  Tooltip: () => null,
-}));
+vi.mock('@elastic/charts', () => {
+      const mocked = {
+      ...require('@elastic/charts'),
+      AreaSeries: () => <div data-test-subj="areaSeries" />,
+      Axis: () => null,
+      Chart: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="chart">{children}</div>
+      ),
+      Settings: () => null,
+      Tooltip: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AnalyticsCollectionChart', () => {
   const mockedData = Object.values(FilterBy).reduce(
@@ -50,7 +55,7 @@ describe('AnalyticsCollectionChart', () => {
     data: {},
     isLoading: false,
     selectedChart: FilterBy.Searches,
-    setSelectedChart: jest.fn(),
+    setSelectedChart: vi.fn(),
     timeRange: mockedTimeRange,
   };
 
@@ -59,7 +64,7 @@ describe('AnalyticsCollectionChart', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render chart and metrics for each chart', () => {

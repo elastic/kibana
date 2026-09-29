@@ -5,30 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ReactQueryHookRenderer } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { useQuery as _useQuery } from '@kbn/react-query';
 import { useGetTrustedDeviceSuggestions } from './use_get_trusted_device_suggestions';
 import { TrustedDevicesApiClient } from '../service/api_client';
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
   return {
     ...actualReactQueryModule,
-    useQuery: jest.fn((...args) => actualReactQueryModule.useQuery(...args)),
+    useQuery: vi.fn((...args) => actualReactQueryModule.useQuery(...args)),
   };
 });
 
-jest.mock('../service/api_client');
+vi.mock('../service/api_client');
 
-const useQueryMock = _useQuery as jest.Mock;
+const useQueryMock = _useQuery as Mock;
 
 describe('useGetTrustedDeviceSuggestions', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
     Parameters<typeof useGetTrustedDeviceSuggestions>,
     ReturnType<typeof useGetTrustedDeviceSuggestions>
   >;
-  let apiClientMock: jest.Mocked<TrustedDevicesApiClient>;
+  let apiClientMock: Mocked<TrustedDevicesApiClient>;
 
   beforeEach(() => {
     const testContext = createAppRootMockRenderer();
@@ -36,14 +39,14 @@ describe('useGetTrustedDeviceSuggestions', () => {
     renderReactQueryHook = testContext.renderReactQueryHook as typeof renderReactQueryHook;
 
     apiClientMock = {
-      getSuggestions: jest.fn(),
-    } as unknown as jest.Mocked<TrustedDevicesApiClient>;
+      getSuggestions: vi.fn(),
+    } as unknown as Mocked<TrustedDevicesApiClient>;
 
-    (TrustedDevicesApiClient as unknown as jest.Mock).mockImplementation(() => apiClientMock);
+    (TrustedDevicesApiClient as unknown as Mock).mockImplementation(() => apiClientMock);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call useQuery with correct parameters', async () => {

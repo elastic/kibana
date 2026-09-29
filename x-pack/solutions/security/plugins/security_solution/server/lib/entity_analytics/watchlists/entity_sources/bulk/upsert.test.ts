@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { WatchlistBulkEntity } from '../types';
 import { bulkUpsertOperationsFactory, UPDATE_SCRIPT_SOURCE } from './upsert';
@@ -17,7 +19,7 @@ describe('bulkUpsertOperationsFactory', () => {
   const targetIndex = '.entity-analytics.watchlists.test-watchlist-default';
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('generates scripted upsert operations for new entities', () => {

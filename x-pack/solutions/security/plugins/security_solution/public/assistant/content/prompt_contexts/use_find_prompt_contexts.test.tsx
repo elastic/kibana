@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { UseFindPromptContextsParams } from './use_find_prompt_contexts';
 import { useFindPromptContexts } from './use_find_prompt_contexts';
@@ -32,12 +35,12 @@ const mockPrompts = [
     prompt: 'ASSET ANALYSIS',
   },
 ];
-jest.mock('@kbn/elastic-assistant');
+vi.mock('@kbn/elastic-assistant');
 
 describe('useFindPromptContexts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: mockPrompts } });
+    vi.clearAllMocks();
+    (useFindPrompts as Mock).mockReturnValue({ data: { prompts: mockPrompts } });
   });
 
   it('calls getPromptContexts with the correct prompts mapped by category', () => {
@@ -82,7 +85,7 @@ describe('useFindPromptContexts', () => {
   });
 
   it('uses correct fallback values when the API does not contain the expected results', () => {
-    (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: [] } });
+    (useFindPrompts as Mock).mockReturnValue({ data: { prompts: [] } });
     const params = {} as unknown as UseFindPromptContextsParams;
 
     renderHook(() => useFindPromptContexts(params));

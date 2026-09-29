@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMockChangeHistoryAdapter } from './create_mock_adapter';
 import { createMockChangeHistoryDetails } from './change_history_fixtures';
 
@@ -65,8 +67,8 @@ describe('createMockChangeHistoryAdapter', () => {
   });
 
   it('forwards restore and pending-change hooks when provided', async () => {
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const getPendingChange = jest.fn().mockReturnValue({
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
+    const getPendingChange = vi.fn().mockReturnValue({
       id: 'pending-1',
       timestamp: '2026-06-16T13:00:00.000Z',
       actor: { name: 'Alice' },

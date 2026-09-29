@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const applyExportTransformsMock = jest.fn();
-jest.doMock('./apply_export_transforms', () => ({
-  applyExportTransforms: applyExportTransformsMock,
-}));
+import { vi } from 'vitest';
+
+export const applyExportTransformsMock = vi.fn();
+vi.doMock('./apply_export_transforms', () => {
+      const mocked = {
+      applyExportTransforms: applyExportTransformsMock,
+    };
+      return { ...mocked, default: mocked };
+    });

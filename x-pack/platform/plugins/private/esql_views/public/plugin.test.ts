@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
@@ -12,20 +15,29 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 import { EsqlViewsPlugin } from './plugin';
 
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: () => null,
-}));
+vi.mock('@kbn/app-header', () => {
+      const mocked = {
+      AppHeader: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: () => null,
-}));
+vi.mock('@kbn/esql/public', () => {
+      const mocked = {
+      ESQLLangEditor: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  createEsqlViewsManagementClient: () => ({
-    getViews: jest.fn().mockResolvedValue({ views: [] }),
-    deleteViews: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      createEsqlViewsManagementClient: () => ({
+        getViews: vi.fn().mockResolvedValue({ views: [] }),
+        deleteViews: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createPlugin = (enabled: boolean) =>
   new EsqlViewsPlugin(
@@ -48,7 +60,7 @@ describe('EsqlViewsPlugin', () => {
     const coreStart = coreMock.createStart();
     const management = managementPluginMock.createSetupContract();
     const share = sharePluginMock.createStartContract();
-    const getLocator = jest.spyOn(share.url.locators, 'get');
+    const getLocator = vi.spyOn(share.url.locators, 'get');
     core.getStartServices.mockResolvedValue([coreStart, { share }, undefined]);
 
     createPlugin(true).setup(core, { management });
@@ -61,14 +73,14 @@ describe('EsqlViewsPlugin', () => {
       mount: expect.any(Function),
     });
 
-    const registerApp = management.sections.section.data.registerApp as jest.MockedFunction<
+    const registerApp = management.sections.section.data.registerApp as MockedFunction<
       typeof management.sections.section.data.registerApp
     >;
     const [[registeredApp]] = registerApp.mock.calls;
     const mountParams = {
       ...coreMock.createAppMountParameters(),
       basePath: '/',
-      setBreadcrumbs: jest.fn(),
+      setBreadcrumbs: vi.fn(),
       theme: coreStart.theme,
     };
     let unmount: (() => void) | undefined;

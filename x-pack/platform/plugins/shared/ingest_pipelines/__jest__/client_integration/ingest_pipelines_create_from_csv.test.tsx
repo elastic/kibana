@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
@@ -21,8 +23,8 @@ import { getCreateFromCsvPath, ROUTES } from '../../public/application/services/
 
 import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -43,7 +45,7 @@ describe('<PipelinesCreateFromCsv />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderPipelinesCreateFromCsv = async () => {

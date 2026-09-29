@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AlertAction } from '../../../resources/datastreams/alert_actions';
@@ -47,10 +50,10 @@ const baseEnvelope = {
 };
 
 describe('AlertActionEventPublisher', () => {
-  jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+  vi.useFakeTimers().setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
 
   let publisher: AlertActionEventPublisher;
-  let eventBus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
+  let eventBus: Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let request: KibanaRequest;
 
   beforeEach(() => {
@@ -59,11 +62,11 @@ describe('AlertActionEventPublisher', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('emitEpisodeActions per action type', () => {

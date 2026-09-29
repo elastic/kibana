@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { validateTypeMigrations } from './validate_migrations';
@@ -19,7 +21,7 @@ describe('validateTypeMigrations', () => {
     changes: [
       {
         type: 'data_backfill',
-        backfillFn: jest.fn().mockReturnValue({ attributes: {} }),
+        backfillFn: vi.fn().mockReturnValue({ attributes: {} }),
       },
     ],
   };
@@ -49,8 +51,8 @@ describe('validateTypeMigrations', () => {
         convertToMultiNamespaceTypeVersion: '3.1.1',
         namespaceType: 'multiple',
         migrations: {
-          bar: jest.fn(),
-          '1.2.3': jest.fn(),
+          bar: vi.fn(),
+          '1.2.3': vi.fn(),
         },
         schemas: {
           '1.2.3': schema.object({ bar: schema.string() }),
@@ -104,7 +106,7 @@ describe('validateTypeMigrations', () => {
         migrations: {
           '1.2.3': {
             deferred: false,
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
         },
       });
@@ -117,7 +119,7 @@ describe('validateTypeMigrations', () => {
         const type = createType({
           name: 'foo',
           migrations: {
-            '8.11.0': jest.fn(),
+            '8.11.0': vi.fn(),
           },
         });
 
@@ -147,7 +149,7 @@ describe('validateTypeMigrations', () => {
         const type = createType({
           name: 'foo',
           migrations: {
-            '8.10.0': jest.fn(),
+            '8.10.0': vi.fn(),
           },
         });
 
@@ -177,7 +179,7 @@ describe('validateTypeMigrations', () => {
         const type = createType({
           name: 'foo',
           migrations: {
-            '8.7.0': jest.fn(),
+            '8.7.0': vi.fn(),
           },
         });
 

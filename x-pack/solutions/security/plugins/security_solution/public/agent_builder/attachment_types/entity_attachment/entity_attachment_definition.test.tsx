@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ReactElement } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -18,12 +21,12 @@ import {
   navigateToEntityAnalyticsWithFlyoutInApp,
 } from '../entity_explore_navigation';
 
-jest.mock('../entity_explore_navigation', () => {
-  const actual = jest.requireActual('../entity_explore_navigation');
+vi.mock('../entity_explore_navigation', async () => {
+  const actual = (await vi.importActual('../entity_explore_navigation'));
   return {
     ...actual,
-    navigateToEntityAnalyticsWithFlyoutInApp: jest.fn(),
-    navigateToEntityAnalyticsHomePageInApp: jest.fn(),
+    navigateToEntityAnalyticsWithFlyoutInApp: vi.fn(),
+    navigateToEntityAnalyticsHomePageInApp: vi.fn(),
   };
 });
 
@@ -32,8 +35,8 @@ const experimentalFeatures = {
   enableRiskScorePrivmonModifier: false,
 } as unknown as ExperimentalFeatures;
 
-const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
-const resolveSecurityCanvasContext = jest.fn();
+const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
+const resolveSecurityCanvasContext = vi.fn();
 
 const buildDefinition = ({
   withCanvas = true,
@@ -52,7 +55,7 @@ const buildDefinition = ({
     uiSettings:
       newFlyoutEnabled == null
         ? undefined
-        : ({ get: jest.fn(() => newFlyoutEnabled) } as unknown as IUiSettingsClient),
+        : ({ get: vi.fn(() => newFlyoutEnabled) } as unknown as IUiSettingsClient),
   });
 
 const attachmentOf = (data: unknown): EntityAttachment =>
@@ -62,12 +65,12 @@ describe('createEntityAttachmentDefinition', () => {
   describe('getActionButtons (Preview button)', () => {
     it('returns a single Preview button for a single host entity when Canvas is available', () => {
       const def = buildDefinition();
-      const openCanvas = jest.fn();
+      const openCanvas = vi.fn();
       const buttons = def.getActionButtons!({
         attachment: attachmentOf({ identifierType: 'host', identifier: 'alpha' }),
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
         openCanvas,
       });
 
@@ -81,14 +84,14 @@ describe('createEntityAttachmentDefinition', () => {
 
     it('returns a Preview button for single user and service entities', () => {
       const def = buildDefinition();
-      const openCanvas = jest.fn();
+      const openCanvas = vi.fn();
 
       for (const identifierType of ['user', 'service'] as const) {
         const buttons = def.getActionButtons!({
           attachment: attachmentOf({ identifierType, identifier: 'x' }),
           isSidebar: false,
           isCanvas: false,
-          updateOrigin: jest.fn(),
+          updateOrigin: vi.fn(),
           openCanvas,
         });
         expect(buttons).toHaveLength(1);
@@ -101,8 +104,8 @@ describe('createEntityAttachmentDefinition', () => {
         attachment: attachmentOf({ identifierType: 'generic', identifier: 'some-resource' }),
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
-        openCanvas: jest.fn(),
+        updateOrigin: vi.fn(),
+        openCanvas: vi.fn(),
       });
       expect(buttons).toEqual([]);
     });
@@ -118,17 +121,17 @@ describe('createEntityAttachmentDefinition', () => {
         }),
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
-        openCanvas: jest.fn(),
+        updateOrigin: vi.fn(),
+        openCanvas: vi.fn(),
       });
       expect(buttons).toEqual([]);
     });
 
     it('returns an "Open in Entity Analytics" action when rendered in Canvas (replaces Preview re-entry)', () => {
-      (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
-      (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
-      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
-      const closeCanvas = jest.fn();
+      (navigateToEntityAnalyticsWithFlyoutInApp as Mock).mockClear();
+      (navigateToEntityAnalyticsHomePageInApp as Mock).mockClear();
+      const searchSession = { clear: vi.fn() } as unknown as ISessionService;
+      const closeCanvas = vi.fn();
       const def = buildDefinition({ searchSession });
       const buttons = def.getActionButtons!({
         attachment: attachmentOf({
@@ -138,7 +141,7 @@ describe('createEntityAttachmentDefinition', () => {
         }),
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
         closeCanvas,
         // openCanvas intentionally omitted in canvas mode
       });
@@ -152,7 +155,7 @@ describe('createEntityAttachmentDefinition', () => {
 
       expect(closeCanvas).toHaveBeenCalledTimes(1);
       expect(closeCanvas.mock.invocationCallOrder[0]).toBeLessThan(
-        (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mock.invocationCallOrder[0]
+        (navigateToEntityAnalyticsWithFlyoutInApp as Mock).mock.invocationCallOrder[0]
       );
       expect(navigateToEntityAnalyticsWithFlyoutInApp).toHaveBeenCalledTimes(1);
       expect(navigateToEntityAnalyticsHomePageInApp).not.toHaveBeenCalled();
@@ -176,15 +179,15 @@ describe('createEntityAttachmentDefinition', () => {
     });
 
     it('falls back to Entity Analytics home from Canvas Open when the entity has no entityStoreId', () => {
-      (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
-      (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
-      const closeCanvas = jest.fn();
+      (navigateToEntityAnalyticsWithFlyoutInApp as Mock).mockClear();
+      (navigateToEntityAnalyticsHomePageInApp as Mock).mockClear();
+      const closeCanvas = vi.fn();
       const def = buildDefinition();
       const buttons = def.getActionButtons!({
         attachment: attachmentOf({ identifierType: 'host', identifier: 'alpha' }),
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
         closeCanvas,
       });
 
@@ -193,14 +196,14 @@ describe('createEntityAttachmentDefinition', () => {
 
       expect(closeCanvas).toHaveBeenCalledTimes(1);
       expect(closeCanvas.mock.invocationCallOrder[0]).toBeLessThan(
-        (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mock.invocationCallOrder[0]
+        (navigateToEntityAnalyticsHomePageInApp as Mock).mock.invocationCallOrder[0]
       );
       expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledTimes(1);
       expect(navigateToEntityAnalyticsWithFlyoutInApp).not.toHaveBeenCalled();
     });
 
     it('uses the v2 flyout URL contract when the new flyout setting is enabled', () => {
-      (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
+      (navigateToEntityAnalyticsWithFlyoutInApp as Mock).mockClear();
       const def = buildDefinition({ newFlyoutEnabled: true });
       const buttons = def.getActionButtons!({
         attachment: attachmentOf({
@@ -210,8 +213,8 @@ describe('createEntityAttachmentDefinition', () => {
         }),
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
-        closeCanvas: jest.fn(),
+        updateOrigin: vi.fn(),
+        closeCanvas: vi.fn(),
       });
 
       buttons[0].handler();
@@ -232,7 +235,7 @@ describe('createEntityAttachmentDefinition', () => {
         }),
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
       expect(buttons).toEqual([]);
     });
@@ -243,7 +246,7 @@ describe('createEntityAttachmentDefinition', () => {
         attachment: attachmentOf({ identifierType: 'generic', identifier: 'some-resource' }),
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
       expect(buttons).toEqual([]);
     });
@@ -254,7 +257,7 @@ describe('createEntityAttachmentDefinition', () => {
         attachment: attachmentOf({ identifierType: 'host', identifier: 'alpha' }),
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
         // openCanvas intentionally omitted
       });
       expect(buttons).toEqual([]);
@@ -286,20 +289,20 @@ describe('createEntityAttachmentDefinition', () => {
       attachment: attachmentOf({ identifierType: 'host', identifier: 'alpha' }),
       isSidebar: false,
       isCanvas: true,
-      updateOrigin: jest.fn(),
+      updateOrigin: vi.fn(),
     } as unknown as Parameters<
       NonNullable<ReturnType<typeof buildDefinition>['renderInlineContent']>
     >[0];
     const renderCallbacks = {
-      registerActionButtons: jest.fn(),
-      updateOrigin: jest.fn(),
-      closeCanvas: jest.fn(),
+      registerActionButtons: vi.fn(),
+      updateOrigin: vi.fn(),
+      closeCanvas: vi.fn(),
     } as unknown as Parameters<
       NonNullable<ReturnType<typeof buildDefinition>['renderCanvasContent']>
     >[1];
 
     it('forwards searchSession into the navigation provider wrapping canvas content', () => {
-      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const searchSession = { clear: vi.fn() } as unknown as ISessionService;
       const def = buildDefinition({ searchSession });
 
       const providerElement = def.renderCanvasContent!(
@@ -311,7 +314,7 @@ describe('createEntityAttachmentDefinition', () => {
     });
 
     it('forwards closeCanvas from canvas render callbacks into the navigation provider', () => {
-      const closeCanvas = jest.fn();
+      const closeCanvas = vi.fn();
       const def = buildDefinition();
 
       const providerElement = def.renderCanvasContent!(renderProps, {
@@ -323,7 +326,7 @@ describe('createEntityAttachmentDefinition', () => {
     });
 
     it('forwards searchSession into the inline content element', () => {
-      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const searchSession = { clear: vi.fn() } as unknown as ISessionService;
       const def = buildDefinition({ searchSession });
 
       const providerElement = def.renderInlineContent!(renderProps) as ReactElement<{

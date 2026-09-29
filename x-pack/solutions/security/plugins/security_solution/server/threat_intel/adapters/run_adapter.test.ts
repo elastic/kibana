@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { runAdapter, UnknownAdapterError } from './run_adapter';
 import type { AdapterRunContext, SourceHit } from './types';
@@ -13,7 +15,7 @@ const buildContext = (): AdapterRunContext => ({
   logger: loggingSystemMock.createLogger(),
   abortSignal: new AbortController().signal,
   now: () => new Date('2026-05-16T12:00:00.000Z'),
-  fetchFn: jest.fn() as unknown as typeof fetch,
+  fetchFn: vi.fn() as unknown as typeof fetch,
 });
 
 describe('runAdapter', () => {

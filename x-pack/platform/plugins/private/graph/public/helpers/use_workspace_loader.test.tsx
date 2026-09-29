@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { UseWorkspaceLoaderProps } from './use_workspace_loader';
 import { useWorkspaceLoader } from './use_workspace_loader';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -14,12 +16,12 @@ import type { Workspace } from '../types';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 
-jest.mock('react-router-dom', () => {
+vi.mock('react-router-dom', () => {
   const useLocation = () => ({
     search: '?query={}',
   });
 
-  const replaceFn = jest.fn();
+  const replaceFn = vi.fn();
 
   const useHistory = () => ({
     replace: replaceFn,
@@ -34,11 +36,11 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockContentClient = {
-  get: jest.fn().mockResolvedValue({
+  get: vi.fn().mockResolvedValue({
     item: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
     meta: { outcome: 'exactMatch' },
   }),
-  search: jest.fn().mockResolvedValue({ title: 'test', perPage: 1, total: 1, page: 1 }),
+  search: vi.fn().mockResolvedValue({ title: 'test', perPage: 1, total: 1, page: 1 }),
 } as unknown as ContentClient;
 
 describe('use_workspace_loader', () => {
@@ -68,7 +70,7 @@ describe('use_workspace_loader', () => {
       spaces: spacesPluginMock.createStartContract(),
       contentClient: {
         ...mockContentClient,
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           item: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
           meta: {
             outcome: 'aliasMatch',

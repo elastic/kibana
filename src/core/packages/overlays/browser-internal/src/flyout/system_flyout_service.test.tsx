@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 import { fireEvent, render } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -46,7 +48,7 @@ interface FlyoutManagerEvent {
 }
 
 const eventListeners = new Set<(event: FlyoutManagerEvent) => void>();
-const mockSubscribeToEvents = jest.fn((listener: (event: FlyoutManagerEvent) => void) => {
+const mockSubscribeToEvents = vi.fn((listener: (event: FlyoutManagerEvent) => void) => {
   eventListeners.add(listener);
   return () => {
     eventListeners.delete(listener);
@@ -61,13 +63,13 @@ const emitEvent = (event: FlyoutManagerEvent) => {
 // subscribes to state changes and reads `containerElement` to reset a stranded push offset.
 const stateListeners = new Set<() => void>();
 let mockManagerState: { containerElement: HTMLElement | null } = { containerElement: null };
-const mockManagerSubscribe = jest.fn((listener: () => void) => {
+const mockManagerSubscribe = vi.fn((listener: () => void) => {
   stateListeners.add(listener);
   return () => {
     stateListeners.delete(listener);
   };
 });
-const mockManagerGetState = jest.fn(() => mockManagerState);
+const mockManagerGetState = vi.fn(() => mockManagerState);
 
 /** Sets the manager's push container and notifies subscribers, mimicking a push flyout mounting. */
 const setManagerContainer = (containerElement: HTMLElement | null) => {
@@ -75,11 +77,11 @@ const setManagerContainer = (containerElement: HTMLElement | null) => {
   stateListeners.forEach((listener) => listener());
 };
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    getFlyoutManagerStore: jest.fn(() => ({
+    getFlyoutManagerStore: vi.fn(() => ({
       subscribeToEvents: mockSubscribeToEvents,
       subscribe: mockManagerSubscribe,
       getState: mockManagerGetState,
@@ -112,12 +114,12 @@ const getRenderedFlyout = (callIndex = 0) => {
   return controller.props.children({
     type: controller.props.initialType ?? 'overlay',
     size: controller.props.initialSize,
-    onResize: jest.fn(),
+    onResize: vi.fn(),
   });
 };
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('SystemFlyoutService', () => {
@@ -387,11 +389,11 @@ describe('SystemFlyoutService', () => {
     });
 
     it('accepts a custom onClose handler', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const ref = systemFlyouts.open(<div>System flyout content</div>, {
         onClose,
       });
-      const refClosed = jest.fn();
+      const refClosed = vi.fn();
       ref.onClose.then(refClosed);
 
       const euiFlyoutElement = getRenderedFlyout();
@@ -418,8 +420,8 @@ describe('SystemFlyoutService', () => {
       });
 
       it('closes flyouts independently', async () => {
-        const onClose1 = jest.fn();
-        const onClose2 = jest.fn();
+        const onClose1 = vi.fn();
+        const onClose2 = vi.fn();
         ref1.onClose.then(onClose1);
         ref2.onClose.then(onClose2);
 
@@ -450,7 +452,7 @@ describe('SystemFlyoutService', () => {
       mockReactDomRender.mock.calls[call][0].props.children.props.value;
 
     /** Silences the React error log a deliberate render failure produces. */
-    const silenceReactErrors = () => jest.spyOn(console, 'error').mockImplementation(() => {});
+    const silenceReactErrors = () => vi.spyOn(console, 'error').mockImplementation(() => {});
 
     it('renders the zones a content component declares: the header title is visible', () => {
       systemFlyouts.openTemplate({ session: 'never' }, content('My Flyout Title'));
@@ -508,7 +510,7 @@ describe('SystemFlyoutService', () => {
     it('tears down even when the content swallows the onClose it was given', () => {
       // EUI has already dropped the flyout by the time any handler runs, so a wrapper that
       // never calls through must not be able to leave it rendered and untracked.
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => (
         <FlyoutTemplate onClose={() => {}}>
           <FlyoutTemplate.Header title="Swallows close" />
@@ -524,7 +526,7 @@ describe('SystemFlyoutService', () => {
     });
 
     it('fires onClose from options once when the content passes the prop through', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const ref = systemFlyouts.openTemplate(
         { session: 'never', onClose },
         content('Passes through')
@@ -539,7 +541,7 @@ describe('SystemFlyoutService', () => {
 
     it('tears down even when the content onClose handler throws', () => {
       silenceReactErrors();
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => (
         <FlyoutTemplate
           onClose={() => {
@@ -565,7 +567,7 @@ describe('SystemFlyoutService', () => {
     });
 
     it('invokes onClose from options before closing the ref', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, content('Closeable'));
 
       expect((ref as SystemFlyoutRef).isClosed).toBe(false);
@@ -610,7 +612,7 @@ describe('SystemFlyoutService', () => {
     });
 
     it('applies the resolved props even when the content passes its own to FlyoutTemplate', () => {
-      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       systemFlyouts.openTemplate({ session: 'never', size: 'l' }, ({ onClose }) => (
         <FlyoutTemplate onClose={onClose} size="s">
           <FlyoutTemplate.Header title="Overridden" />
@@ -634,7 +636,7 @@ describe('SystemFlyoutService', () => {
       const error = silenceReactErrors();
       // The caller's `onClose` has to run: callers reset their own open state in it, and a
       // caller that still believes the flyout is open cannot reopen it.
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => {
         throw new Error('content blew up');
       });
@@ -730,7 +732,7 @@ describe('SystemFlyoutService', () => {
     it('resolves the onClose Promise', async () => {
       const ref = systemFlyouts.open(<div>System flyout content</div>);
 
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref.onClose.then(onCloseComplete);
       await ref.close();
       await ref.close();
@@ -920,7 +922,7 @@ describe('SystemFlyoutService', () => {
     });
 
     it('threads the consumer onResize through and wraps it for the flyout', () => {
-      const onResize = jest.fn();
+      const onResize = vi.fn();
       systemFlyouts.open(<div>content</div>, { size: 's', onResize });
 
       const controller = mockReactDomRender.mock.calls[0][0].props.children;

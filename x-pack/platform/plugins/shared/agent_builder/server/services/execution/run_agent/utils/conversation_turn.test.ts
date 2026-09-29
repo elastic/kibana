@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
@@ -380,7 +382,7 @@ describe('getPendingTurn', () => {
       ],
     });
     // Cannot happen with the real fold (both accept the same executions); simulate a divergence.
-    jest.spyOn(eventsToRoundsModule, 'eventsToRounds').mockReturnValueOnce([]);
+    vi.spyOn(eventsToRoundsModule, 'eventsToRounds').mockReturnValueOnce([]);
 
     expect(() => getPendingTurn(conversation)).toThrow(/no legacy round found for pending turn/);
   });

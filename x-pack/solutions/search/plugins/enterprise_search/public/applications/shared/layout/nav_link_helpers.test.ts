@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 import '../../__mocks__/react_router';
 
-jest.mock('../react_router_helpers/link_events', () => ({
-  letBrowserHandleEvent: jest.fn(),
-}));
+vi.mock('../react_router_helpers/link_events', () => {
+      const mocked = {
+      letBrowserHandleEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { letBrowserHandleEvent } from '../react_router_helpers/link_events';
 
@@ -18,12 +24,12 @@ import { generateNavLink, getNavLinkActive } from './nav_link_helpers';
 
 describe('generateNavLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibanaValues.history.location.pathname = '/';
   });
 
   it('generates React Router props for use within an EuiSideNavItem obj', () => {
-    (letBrowserHandleEvent as jest.Mock).mockReturnValueOnce(false);
+    (letBrowserHandleEvent as Mock).mockReturnValueOnce(false);
 
     const navItem = generateNavLink({ to: '/test' });
 
@@ -33,7 +39,7 @@ describe('generateNavLink', () => {
       isSelected: false,
     });
 
-    navItem.onClick({ preventDefault: jest.fn() } as any);
+    navItem.onClick({ preventDefault: vi.fn() } as any);
     expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test', {
       shouldNotCreateHref: false,
       shouldNotPrepend: false,

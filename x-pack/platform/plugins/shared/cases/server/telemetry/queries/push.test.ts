@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getPushedTelemetryData } from './push';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
@@ -26,7 +28,7 @@ describe('push', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('it returns the correct res', async () => {

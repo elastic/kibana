@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import numeral from '@elastic/numeral';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -63,12 +65,12 @@ const patternIndexNames: Record<string, string[]> = {
 
 const defaultProps: Props = {
   chartSelectedIndex: null,
-  setChartSelectedIndex: jest.fn(),
+  setChartSelectedIndex: vi.fn(),
 };
 
 describe('IndicesDetails', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     render(
       <TestExternalProviders>

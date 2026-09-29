@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { createReactQueryWrapper } from '../../../../common/mock';
 import { useFetchRelatedCases } from './use_fetch_related_cases';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      cases: {
-        api: {
-          getRelatedCases: jest.fn().mockResolvedValue([]),
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          cases: {
+            api: {
+              getRelatedCases: vi.fn().mockResolvedValue([]),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const eventId = 'eventId';
 

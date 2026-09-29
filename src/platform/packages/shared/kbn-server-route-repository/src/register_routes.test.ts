@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -26,14 +28,14 @@ const disabledAuthz = {
 };
 
 describe('registerRoutes', () => {
-  const post = jest.fn();
-  const postAddVersion = jest.fn();
-  const postWithVersion = jest.fn((_options) => {
+  const post = vi.fn();
+  const postAddVersion = vi.fn();
+  const postWithVersion = vi.fn((_options) => {
     return {
       addVersion: postAddVersion,
     };
   });
-  const createRouter = jest.fn().mockReturnValue({
+  const createRouter = vi.fn().mockReturnValue({
     post,
     versioned: {
       post: postWithVersion,
@@ -45,7 +47,7 @@ describe('registerRoutes', () => {
     },
   } as unknown as CoreSetup;
   const mockLogger = loggerMock.create();
-  const mockService = jest.fn();
+  const mockService = vi.fn();
 
   const mockContext = {};
   const mockRequest = {
@@ -55,19 +57,19 @@ describe('registerRoutes', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates a router and defines the routes', () => {
     callRegisterRoutes({
       'POST /internal/route': {
         endpoint: 'POST /internal/route',
-        handler: jest.fn(),
+        handler: vi.fn(),
         security: disabledAuthz,
       },
       'POST /api/public_route version': {
         endpoint: 'POST /api/public_route version',
-        handler: jest.fn(),
+        handler: vi.fn(),
         security: disabledAuthz,
       },
       'POST /api/internal_but_looks_like_public version': {
@@ -75,12 +77,12 @@ describe('registerRoutes', () => {
         options: {
           access: 'internal',
         },
-        handler: jest.fn(),
+        handler: vi.fn(),
         security: disabledAuthz,
       },
       'POST /internal/route_with_security': {
         endpoint: `POST /internal/route_with_security`,
-        handler: jest.fn(),
+        handler: vi.fn(),
         security: {
           authz: {
             enabled: false,
@@ -90,7 +92,7 @@ describe('registerRoutes', () => {
       },
       'POST /api/route_with_security version': {
         endpoint: `POST /api/route_with_security version`,
-        handler: jest.fn(),
+        handler: vi.fn(),
         security: {
           authz: {
             enabled: false,
@@ -225,7 +227,7 @@ describe('registerRoutes', () => {
   });
 
   it('calls the route handler with all dependencies', async () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     callRegisterRoutes({
       'POST /internal/route': {
@@ -253,7 +255,7 @@ describe('registerRoutes', () => {
   });
 
   it('wraps a plain route handler result into a response', async () => {
-    const handler = jest.fn().mockResolvedValue('result');
+    const handler = vi.fn().mockResolvedValue('result');
 
     callRegisterRoutes({
       'POST /internal/route': {
@@ -274,7 +276,7 @@ describe('registerRoutes', () => {
   });
 
   it('allows for route handlers to define a custom response', async () => {
-    const handler = jest
+    const handler = vi
       .fn()
       .mockResolvedValue(
         kibanaResponseFactory.custom({ statusCode: 201, body: { message: 'result' } })
@@ -295,7 +297,7 @@ describe('registerRoutes', () => {
   });
 
   it('translates errors thrown in a route handler to an error response', async () => {
-    const handler = jest.fn().mockRejectedValue(new Error('error'));
+    const handler = vi.fn().mockRejectedValue(new Error('error'));
 
     callRegisterRoutes({
       'POST /internal/route': {
@@ -316,7 +318,7 @@ describe('registerRoutes', () => {
   });
 
   describe('when using zod', () => {
-    const makeZodValidationObjectSpy = jest.spyOn(
+    const makeZodValidationObjectSpy = vi.spyOn(
       makeZodValidationObject,
       'makeZodValidationObject'
     );
@@ -338,7 +340,7 @@ describe('registerRoutes', () => {
         'POST /internal/route': {
           endpoint: 'POST /internal/route',
           params: zodParamsRt,
-          handler: jest.fn,
+          handler: vi.fn,
         },
       });
 
@@ -348,7 +350,7 @@ describe('registerRoutes', () => {
     });
 
     it('passes on params', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       callRegisterRoutes({
         'POST /internal/route': {
           endpoint: 'POST /internal/route',
@@ -411,7 +413,7 @@ describe('registerRoutes', () => {
         'POST /internal/route': {
           endpoint: 'POST /internal/route',
           params: iotsParamsRt,
-          handler: jest.fn,
+          handler: vi.fn,
         },
       });
 
@@ -420,7 +422,7 @@ describe('registerRoutes', () => {
     });
 
     it('decodes params', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       callRegisterRoutes({
         'POST /internal/route': {
           endpoint: 'POST /internal/route',

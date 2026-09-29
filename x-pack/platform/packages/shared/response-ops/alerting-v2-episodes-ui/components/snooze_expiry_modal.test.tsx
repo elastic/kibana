@@ -5,49 +5,57 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { openSnoozeExpiryModal } from './snooze_expiry_modal';
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: (node: unknown) => (element: HTMLElement) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { createRoot } = require('react-dom/client');
-    const root = createRoot(element);
-    root.render(node);
-    return () => root.unmount();
-  },
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: (node: unknown) => (element: HTMLElement) => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createRoot } = require('react-dom/client');
+        const root = createRoot(element);
+        root.render(node);
+        return () => root.unmount();
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-alert-snooze', () => ({
-  QuickSnoozePanel: ({
-    onScheduleChange,
-  }: {
-    onScheduleChange: (endDate: string | null | undefined) => void;
-  }) => (
-    <input
-      data-test-subj="snoozeFormInput"
-      onChange={(e) => {
-        const raw = (e.target as HTMLInputElement).value;
-        onScheduleChange(raw === '' ? null : raw);
-      }}
-    />
-  ),
-}));
+vi.mock('@kbn/response-ops-alert-snooze', () => {
+      const mocked = {
+      QuickSnoozePanel: ({
+        onScheduleChange,
+      }: {
+        onScheduleChange: (endDate: string | null | undefined) => void;
+      }) => (
+        <input
+          data-test-subj="snoozeFormInput"
+          onChange={(e) => {
+            const raw = (e.target as HTMLInputElement).value;
+            onScheduleChange(raw === '' ? null : raw);
+          }}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockOverlays = overlayServiceMock.createStartContract();
 const mockRendering = renderingServiceMock.create();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   mockOverlays.openModal.mockImplementation((mount: any) => {
     const div = document.createElement('div');
     document.body.appendChild(div);
     const unmount = mount(div);
-    const close = jest.fn(() => {
+    const close = vi.fn(() => {
       act(() => {
         if (typeof unmount === 'function') {
           unmount();

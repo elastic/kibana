@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -22,21 +25,30 @@ import {
 } from '../../test_utils/change_history_test_fixtures';
 import { TestProvider } from '../../test_utils/test_providers';
 
-jest.mock('../../provider/use_change_history_config', () => ({
-  useChangeHistoryConfig: jest.fn(),
-}));
+vi.mock('../../provider/use_change_history_config', () => {
+      const mocked = {
+      useChangeHistoryConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_change_history_detail', () => ({
-  useChangeHistoryDetail: jest.fn(),
-}));
+vi.mock('../../hooks/use_change_history_detail', () => {
+      const mocked = {
+      useChangeHistoryDetail: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_change_history_compare', () => ({
-  useChangeHistoryCompare: jest.fn(),
-}));
+vi.mock('../../hooks/use_change_history_compare', () => {
+      const mocked = {
+      useChangeHistoryCompare: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseChangeHistoryConfig = useChangeHistoryConfig as jest.Mock;
-const mockUseChangeHistoryDetail = useChangeHistoryDetail as jest.Mock;
-const mockUseChangeHistoryCompare = useChangeHistoryCompare as jest.Mock;
+const mockUseChangeHistoryConfig = useChangeHistoryConfig as Mock;
+const mockUseChangeHistoryDetail = useChangeHistoryDetail as Mock;
+const mockUseChangeHistoryCompare = useChangeHistoryCompare as Mock;
 
 const listItems: ChangeHistoryListItem[] = [
   {
@@ -89,10 +101,10 @@ describe('ChangeHistoryPreviewPanel', () => {
       objectId: TEST_OBJECT_ID,
       supports: { compare: true, restore: false, unsavedChanges: false },
       telemetry: {
-        reportDiffViewed: jest.fn(),
-        reportDiffChangeNavigated: jest.fn(),
+        reportDiffViewed: vi.fn(),
+        reportDiffChangeNavigated: vi.fn(),
       },
-      renderPreview: jest.fn(({ compareSpec }) => (
+      renderPreview: vi.fn(({ compareSpec }) => (
         <div data-test-subj="previewRender">{compareSpec ? 'with-compare' : 'without-compare'}</div>
       )),
     });

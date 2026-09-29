@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
@@ -21,7 +23,7 @@ describe('executeEsql', () => {
   const frozenExclusion = { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue(esqlResponse);
   });

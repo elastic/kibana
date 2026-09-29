@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { AuthzDisabled, RequestHandler, RouteConfig } from '@kbn/core/server';
@@ -27,16 +30,19 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
-jest.mock('../../otel/instrumentation', () => ({
-  securityTelemetry: {
-    recordLogoutAttempt: jest.fn(),
-  },
-}));
+vi.mock('../../otel/instrumentation', () => {
+      const mocked = {
+      securityTelemetry: {
+        recordLogoutAttempt: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Common authentication routes', () => {
-  let router: jest.Mocked<SecurityRouter>;
+  let router: Mocked<SecurityRouter>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
-  let license: jest.Mocked<SecurityLicense>;
+  let license: Mocked<SecurityLicense>;
   let mockContext: SecurityRequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
@@ -47,7 +53,7 @@ describe('Common authentication routes', () => {
 
     mockContext = coreMock.createCustomRequestHandlerContext({
       licensing: {
-        license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
+        license: { check: vi.fn().mockReturnValue({ check: 'valid' }) },
       },
     }) as unknown as SecurityRequestHandlerContext;
 
@@ -217,7 +223,7 @@ describe('Common authentication routes', () => {
     it('returns current user.', async () => {
       const mockUser = mockAuthenticatedUser();
       const coreContextMock = await mockContext.core;
-      (coreContextMock.security.authc.getCurrentUser as jest.Mock).mockReturnValue(mockUser);
+      (coreContextMock.security.authc.getCurrentUser as Mock).mockReturnValue(mockUser);
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 

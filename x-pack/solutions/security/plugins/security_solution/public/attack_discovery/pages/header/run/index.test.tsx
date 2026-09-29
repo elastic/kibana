@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -18,12 +20,12 @@ import { Run } from '.';
 
 const defaultProps = {
   isLoading: false,
-  onGenerate: jest.fn(),
+  onGenerate: vi.fn(),
 };
 
 describe('Run', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the run button with the expected text', () => {

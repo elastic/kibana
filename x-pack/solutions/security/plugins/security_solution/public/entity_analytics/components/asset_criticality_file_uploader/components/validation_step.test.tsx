@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import {
@@ -14,21 +16,24 @@ import { TestProviders } from '../../../../common/mock';
 
 import { downloadBlob } from '../../../../common/utils/download_blob';
 
-jest.mock('../../../../common/utils/download_blob');
+vi.mock('../../../../common/utils/download_blob');
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      telemetry: {
-        reportEvent: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          telemetry: {
+            reportEvent: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AssetCriticalityValidationStep', () => {
-  const mockOnConfirm = jest.fn();
-  const mockOnReturn = jest.fn();
+  const mockOnConfirm = vi.fn();
+  const mockOnReturn = vi.fn();
 
   const defaultProps: AssetCriticalityValidationStepProps = {
     validatedFile: {

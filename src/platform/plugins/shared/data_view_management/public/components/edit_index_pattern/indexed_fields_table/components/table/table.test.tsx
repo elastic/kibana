@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IndexedFieldItem } from '../../types';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -115,15 +117,15 @@ const compositeRuntimeDefinition = createIndexedField({
 
 const baseProps: Pick<React.ComponentProps<typeof Table>, 'euiTablePersist'> = {
   euiTablePersist: {
-    onTableChange: jest.fn(),
+    onTableChange: vi.fn(),
     pageSize: 10,
     sorting: { sort: { direction: 'asc', field: 'name' } },
   },
 };
 
 const renderTable = ({
-  deleteField = jest.fn(),
-  editField = jest.fn(),
+  deleteField = vi.fn(),
+  editField = vi.fn(),
   tableItems = items,
 }: {
   deleteField?: React.ComponentProps<typeof Table>['deleteField'];
@@ -144,11 +146,11 @@ const renderTable = ({
 
 describe('Table', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
+    vi.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should render normally', async () => {
@@ -214,7 +216,7 @@ describe('Table', () => {
 
   it('should allow edits', async () => {
     const user = userEvent.setup();
-    const editField = jest.fn();
+    const editField = vi.fn();
 
     renderTable({ editField });
 

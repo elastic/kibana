@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Query } from '@elastic/eui';
@@ -23,7 +25,7 @@ describe('RecentsFilterRenderer', () => {
       <RecentsFilterRenderer
         service={buildSource([])}
         query={Query.parse('')}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
       />
     );
     expect(container).toBeEmptyDOMElement();
@@ -34,7 +36,7 @@ describe('RecentsFilterRenderer', () => {
       <RecentsFilterRenderer
         service={buildSource([{ id: 'a' }])}
         query={Query.parse('')}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         label="Recents!"
       />
     );
@@ -46,7 +48,7 @@ describe('RecentsFilterRenderer', () => {
       <RecentsFilterRenderer
         service={buildSource([{ id: 'a' }])}
         query={Query.parse('')}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
       />
     );
 
@@ -61,7 +63,7 @@ describe('RecentsFilterRenderer', () => {
       <RecentsFilterRenderer
         service={buildSource([{ id: 'a' }])}
         query={Query.parse('is:recent')}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
       />
     );
 
@@ -69,7 +71,7 @@ describe('RecentsFilterRenderer', () => {
   });
 
   it('adds `is:recent` to the query on click when not yet active', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <RecentsFilterRenderer
         service={buildSource([{ id: 'a' }])}
@@ -85,7 +87,7 @@ describe('RecentsFilterRenderer', () => {
   });
 
   it('removes `is:recent` from the query on click when already active', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <RecentsFilterRenderer
         service={buildSource([{ id: 'a' }])}

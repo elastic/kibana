@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES, RESOLUTION_RULE_IDS } from '../../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../../constants';
@@ -15,11 +18,14 @@ import { registerResolutionRulesList } from './list';
 import { registerResolutionRulesEnable } from './enable';
 import { registerResolutionRulesDisable } from './disable';
 
-jest.mock('../../../middleware', () => ({
-  wrapMiddlewares: jest.fn((handler) => handler),
-}));
+vi.mock('../../../middleware', () => {
+      const mocked = {
+      wrapMiddlewares: vi.fn((handler) => handler),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedWrapMiddlewares = wrapMiddlewares as jest.MockedFunction<typeof wrapMiddlewares>;
+const mockedWrapMiddlewares = wrapMiddlewares as MockedFunction<typeof wrapMiddlewares>;
 
 interface RegisteredRoute {
   routeConfig: Record<string, unknown>;
@@ -31,11 +37,11 @@ const createRouter = (
   method: 'get' | 'put'
 ): { router: EntityStorePluginRouter; route: RegisteredRoute } => {
   const route = {} as RegisteredRoute;
-  const addVersion = jest.fn((versionConfig, handler) => {
+  const addVersion = vi.fn((versionConfig, handler) => {
     route.versionConfig = versionConfig;
     route.handler = handler;
   });
-  const register = jest.fn((routeConfig) => {
+  const register = vi.fn((routeConfig) => {
     route.routeConfig = routeConfig;
     return { addVersion };
   });
@@ -51,13 +57,13 @@ const createRouter = (
 };
 
 const createResponse = () => ({
-  ok: jest.fn((response) => response),
-  customError: jest.fn((response) => response),
+  ok: vi.fn((response) => response),
+  customError: vi.fn((response) => response),
 });
 
 describe('resolution rules routes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers and handles list with effective rule defaults', async () => {
@@ -72,7 +78,7 @@ describe('resolution rules routes', () => {
     ];
     const ctx = {
       entityStore: Promise.resolve({
-        entityResolutionRuleClient: { getEffectiveRules: jest.fn().mockResolvedValue(rules) },
+        entityResolutionRuleClient: { getEffectiveRules: vi.fn().mockResolvedValue(rules) },
       }),
     };
     const res = createResponse();
@@ -105,10 +111,10 @@ describe('resolution rules routes', () => {
       managed: true,
       enabled: true,
     };
-    const setEnabled = jest.fn().mockResolvedValue(rule);
+    const setEnabled = vi.fn().mockResolvedValue(rule);
     const ctx = {
       entityStore: Promise.resolve({
-        logger: { error: jest.fn() },
+        logger: { error: vi.fn() },
         entityResolutionRuleClient: { setEnabled },
       }),
     };
@@ -142,10 +148,10 @@ describe('resolution rules routes', () => {
       managed: true,
       enabled: false,
     };
-    const setEnabled = jest.fn().mockResolvedValue(rule);
+    const setEnabled = vi.fn().mockResolvedValue(rule);
     const ctx = {
       entityStore: Promise.resolve({
-        logger: { error: jest.fn() },
+        logger: { error: vi.fn() },
         entityResolutionRuleClient: { setEnabled },
       }),
     };
@@ -168,8 +174,8 @@ describe('resolution rules routes', () => {
     const error = SavedObjectsErrorHelpers.createGenericNotFoundError('Unknown resolution rule');
     const ctx = {
       entityStore: Promise.resolve({
-        logger: { error: jest.fn() },
-        entityResolutionRuleClient: { setEnabled: jest.fn().mockRejectedValue(error) },
+        logger: { error: vi.fn() },
+        entityResolutionRuleClient: { setEnabled: vi.fn().mockRejectedValue(error) },
       }),
     };
     const res = createResponse();

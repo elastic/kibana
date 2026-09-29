@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type ReactNode } from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -12,11 +14,11 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 
-const mockGetAllDeprecations = jest.fn();
-const mockResolveDeprecation = jest.fn();
-const mockSetBreadcrumbs = jest.fn();
-const mockAddContent = jest.fn();
-const mockRemoveContent = jest.fn();
+const mockGetAllDeprecations = vi.fn();
+const mockResolveDeprecation = vi.fn();
+const mockSetBreadcrumbs = vi.fn();
+const mockAddContent = vi.fn();
+const mockRemoveContent = vi.fn();
 
 interface PrivilegesCheckResult {
   hasPrivileges: boolean;
@@ -24,20 +26,23 @@ interface PrivilegesCheckResult {
   privilegesMissing: { cluster?: string[] };
 }
 
-jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/es-ui-shared-plugin/public'),
-  SectionLoading: ({ children }: { children: ReactNode }) => (
-    <div data-test-subj="sectionLoading">{children}</div>
-  ),
-  GlobalFlyout: {
-    useGlobalFlyout: () => ({
-      addContent: mockAddContent,
-      removeContent: mockRemoveContent,
-    }),
-  },
-  WithPrivileges: ({ children }: { children: (result: PrivilegesCheckResult) => ReactNode }) =>
-    children({ hasPrivileges: true, isLoading: false, privilegesMissing: {} }),
-}));
+vi.mock('@kbn/es-ui-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/es-ui-shared-plugin/public')),
+      SectionLoading: ({ children }: { children: ReactNode }) => (
+        <div data-test-subj="sectionLoading">{children}</div>
+      ),
+      GlobalFlyout: {
+        useGlobalFlyout: () => ({
+          addContent: mockAddContent,
+          removeContent: mockRemoveContent,
+        }),
+      },
+      WithPrivileges: ({ children }: { children: (result: PrivilegesCheckResult) => ReactNode }) =>
+        children({ hasPrivileges: true, isLoading: false, privilegesMissing: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices = {
   core: {
@@ -51,12 +56,15 @@ const mockServices = {
   },
 };
 
-jest.mock('../../app_context', () => ({
-  ...jest.requireActual('../../app_context'),
-  useAppContext: () => ({
-    services: mockServices,
-  }),
-}));
+vi.mock('../../app_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../app_context')),
+      useAppContext: () => ({
+        services: mockServices,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { KibanaDeprecationsList } from './kibana_deprecations';
 
@@ -107,7 +115,7 @@ const mockHistory = createMemoryHistory({ initialEntries: ['/kibana_deprecations
 
 describe('KibanaDeprecationsList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetAllDeprecations.mockResolvedValue(kibanaDeprecations);
   });
 

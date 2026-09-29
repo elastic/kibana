@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as esKuery from '@kbn/es-query';
 
 import {
@@ -23,7 +25,7 @@ import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 
 import { validateFilterKueryNode, validateKuery } from './filter_utils';
 
-jest.mock('../../services/app_context');
+vi.mock('../../services/app_context');
 
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
   describe('Agent policies', () => {

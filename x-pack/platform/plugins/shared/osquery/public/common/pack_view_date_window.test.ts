@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getPackViewDateWindow } from './pack_view_date_window';
 
 describe('getPackViewDateWindow', () => {
@@ -13,11 +15,11 @@ describe('getPackViewDateWindow', () => {
   const now = '2026-08-10T10:00:00.000Z';
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date(now));
+    vi.useFakeTimers().setSystemTime(new Date(now));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('scheduled execution', () => {

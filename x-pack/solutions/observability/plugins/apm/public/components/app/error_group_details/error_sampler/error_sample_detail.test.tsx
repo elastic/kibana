@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -14,58 +16,76 @@ import { ErrorSampleDetails } from './error_sample_detail';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  isPending: jest.fn((status: string) => status === 'loading'),
-  isSuccess: jest.fn((status: string) => status === 'success'),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-}));
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      isPending: vi.fn((status: string) => status === 'loading'),
+      isSuccess: vi.fn((status: string) => status === 'success'),
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
-    path: { groupId: 'test-group-id' },
-    query: {
-      rangeFrom: 'now-24h',
-      rangeTo: 'now',
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      errorId: 'error-id-1',
-      comparisonEnabled: false,
-      offset: undefined,
-    },
-  }),
-}));
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({
+        path: { groupId: 'test-group-id' },
+        query: {
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          errorId: 'error-id-1',
+          comparisonEnabled: false,
+          offset: undefined,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({
-    link: jest.fn(() => '/test-link'),
-  }),
-}));
+vi.mock('../../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => ({
+        link: vi.fn(() => '/test-link'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    start: '2025-01-01T00:00:00.000Z',
-    end: '2025-01-02T00:00:00.000Z',
-  }),
-}));
+vi.mock('../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        start: '2025-01-01T00:00:00.000Z',
+        end: '2025-01-02T00:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../context/url_params_context/use_url_params', () => ({
-  useLegacyUrlParams: () => ({
-    urlParams: {
-      detailTab: undefined,
-      offset: undefined,
-      comparisonEnabled: false,
-    },
-  }),
-}));
+vi.mock('../../../../context/url_params_context/use_url_params', () => {
+      const mocked = {
+      useLegacyUrlParams: () => ({
+        urlParams: {
+          detailTab: undefined,
+          offset: undefined,
+          comparisonEnabled: false,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./error_sample_contextual_insight', () => ({
-  ErrorSampleContextualInsight: () => null,
-}));
+vi.mock('./error_sample_contextual_insight', () => {
+      const mocked = {
+      ErrorSampleContextualInsight: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -94,13 +114,13 @@ const baseError = {
 
 describe('ErrorSampleDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders error details when transaction is undefined', () => {
     render(
       <ErrorSampleDetails
-        onSampleClick={jest.fn()}
+        onSampleClick={vi.fn()}
         errorSampleIds={['error-id-1']}
         errorSamplesFetchStatus={FETCH_STATUS.SUCCESS}
         errorData={{ error: baseError as any, transaction: undefined }}
@@ -129,7 +149,7 @@ describe('ErrorSampleDetails', () => {
 
     render(
       <ErrorSampleDetails
-        onSampleClick={jest.fn()}
+        onSampleClick={vi.fn()}
         errorSampleIds={['error-id-1']}
         errorSamplesFetchStatus={FETCH_STATUS.SUCCESS}
         errorData={{
@@ -149,7 +169,7 @@ describe('ErrorSampleDetails', () => {
   it('does not show loading skeleton when data is loaded', () => {
     render(
       <ErrorSampleDetails
-        onSampleClick={jest.fn()}
+        onSampleClick={vi.fn()}
         errorSampleIds={['error-id-1']}
         errorSamplesFetchStatus={FETCH_STATUS.SUCCESS}
         errorData={{ error: baseError as any, transaction: undefined }}
@@ -166,7 +186,7 @@ describe('ErrorSampleDetails', () => {
   it('renders error context for the selected error sample', () => {
     render(
       <ErrorSampleDetails
-        onSampleClick={jest.fn()}
+        onSampleClick={vi.fn()}
         errorSampleIds={['error-id-1']}
         errorSamplesFetchStatus={FETCH_STATUS.SUCCESS}
         errorData={{ error: baseError as any, transaction: undefined }}

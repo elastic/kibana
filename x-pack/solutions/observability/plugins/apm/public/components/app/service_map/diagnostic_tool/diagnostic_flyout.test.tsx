@@ -5,40 +5,60 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DiagnosticFlyout } from './diagnostic_flyout';
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
-}));
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({ start: '2024-01-01T00:00:00Z', end: '2024-01-01T01:00:00Z' }),
-}));
+vi.mock('../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({ start: '2024-01-01T00:00:00Z', end: '2024-01-01T01:00:00Z' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { notifications: { toasts: { addDanger: jest.fn() } } } }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({ services: { notifications: { toasts: { addDanger: vi.fn() } } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./diagnostic_configuration_form', () => ({
-  DiagnosticConfigurationForm: ({ sourceNode }: { sourceNode?: string }) => (
-    <div data-test-subj="diagnosticConfigurationForm" data-source-node={sourceNode ?? ''} />
-  ),
-}));
+vi.mock('./diagnostic_configuration_form', () => {
+      const mocked = {
+      DiagnosticConfigurationForm: ({ sourceNode }: { sourceNode?: string }) => (
+        <div data-test-subj="diagnosticConfigurationForm" data-source-node={sourceNode ?? ''} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./diagnostic_results', () => ({
-  DiagnosticResults: () => <div data-testid="diagnosticResults" />,
-}));
+vi.mock('./diagnostic_results', () => {
+      const mocked = {
+      DiagnosticResults: () => <div data-testid="diagnosticResults" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/technical_preview_badge', () => ({
-  TechnicalPreviewBadge: () => null,
-}));
+vi.mock('../../../shared/technical_preview_badge', () => {
+      const mocked = {
+      TechnicalPreviewBadge: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DiagnosticFlyout', () => {
   it('pre-populates sourceNode when selection is provided', () => {
     render(
-      <DiagnosticFlyout isOpen={true} onClose={jest.fn()} selection={{ id: 'my-service' } as any} />
+      <DiagnosticFlyout isOpen={true} onClose={vi.fn()} selection={{ id: 'my-service' } as any} />
     );
 
     expect(screen.getByTestId('diagnosticConfigurationForm')).toHaveAttribute(
@@ -48,7 +68,7 @@ describe('DiagnosticFlyout', () => {
   });
 
   it('leaves sourceNode empty when selection is omitted', () => {
-    render(<DiagnosticFlyout isOpen={true} onClose={jest.fn()} />);
+    render(<DiagnosticFlyout isOpen={true} onClose={vi.fn()} />);
 
     expect(screen.getByTestId('diagnosticConfigurationForm')).toHaveAttribute(
       'data-source-node',
@@ -57,7 +77,7 @@ describe('DiagnosticFlyout', () => {
   });
 
   it('renders nothing when isOpen is false', () => {
-    const { container } = render(<DiagnosticFlyout isOpen={false} onClose={jest.fn()} />);
+    const { container } = render(<DiagnosticFlyout isOpen={false} onClose={vi.fn()} />);
     expect(container).toBeEmptyDOMElement();
   });
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -21,18 +23,24 @@ import { waitFor } from '@testing-library/react';
 import { KibanaServices } from '../../common/lib/kibana';
 import type { CasesPermissions } from '../../../common';
 
-jest.mock('../../containers/api');
-jest.mock('./apply_template_modal', () => ({
-  ApplyTemplateModal: () => <div data-test-subj="apply-template-modal" />,
-}));
-jest.mock('../workflows/run_case_workflow_modal', () => ({
-  RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
-}));
+vi.mock('../../containers/api');
+vi.mock('./apply_template_modal', () => {
+      const mocked = {
+      ApplyTemplateModal: () => <div data-test-subj="apply-template-modal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../workflows/run_case_workflow_modal', () => {
+      const mocked = {
+      RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCanExecuteWorkflow = jest.fn(() => false);
+const mockCanExecuteWorkflow = vi.fn(() => false);
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
     useWorkflowsCapabilities: () => ({
@@ -42,13 +50,13 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
     useHistory: () => ({
-      useHistory: jest.fn(),
+      useHistory: vi.fn(),
     }),
   };
 });
@@ -60,7 +68,7 @@ const defaultProps = {
 
 describe('CaseView actions', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('clicking trash toggles modal', () => {
@@ -84,7 +92,7 @@ describe('CaseView actions', () => {
 
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+        writeText: vi.fn().mockImplementation(() => Promise.resolve()),
       },
       writable: true,
     });
@@ -125,7 +133,7 @@ describe('CaseView actions', () => {
   });
 
   it('toggle delete modal and confirm', async () => {
-    const deleteCasesSpy = jest
+    const deleteCasesSpy = vi
       .spyOn(api, 'deleteCases')
       .mockRejectedValue(new Error('useDeleteCases: Test error'));
 
@@ -151,14 +159,14 @@ describe('CaseView actions', () => {
 
   describe('Apply template action', () => {
     const enableTemplatesV2 = () =>
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
         >);
 
     it('does not show the apply template action when templates v2 is disabled', () => {
-      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
 
       const wrapper = mount(
         <TestProviders>
@@ -218,7 +226,7 @@ describe('CaseView actions', () => {
 
   describe('Run workflow action', () => {
     const enableRunWorkflows = () =>
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ runWorkflows: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -256,7 +264,7 @@ describe('CaseView actions', () => {
     });
 
     it('does not show the run workflow action when running workflows is disabled', () => {
-      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
 
       const wrapper = openActions();
 

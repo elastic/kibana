@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import moment from 'moment-timezone';
 import { Frequency } from '@kbn/rrule';
 import { updateMaintenanceWindow } from './update_maintenance_window';
@@ -59,9 +62,9 @@ const updatedMetadata = {
   updatedBy: 'updated-user',
 };
 
-const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
+const mockContext: Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
-  getModificationMetadata: jest.fn(),
+  getModificationMetadata: vi.fn(),
   savedObjectsClient,
   uiSettings,
 };
@@ -72,15 +75,15 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should call update with the correct parameters', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
@@ -101,7 +104,7 @@ describe('MaintenanceWindowClient - update', () => {
       id: 'test-id',
     } as unknown as SavedObject);
 
-    jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(secondTimestamp));
 
     const result = await updateMaintenanceWindow(mockContext, {
       id: 'test-id',
@@ -168,7 +171,7 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   it('should define a new expiration date if the new start time is above the previous expiration date', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const initialExpirationDate = moment(new Date()).tz('UTC').add(2, 'month');
     const mockMaintenanceWindow = getMockMaintenanceWindow({
@@ -190,7 +193,7 @@ describe('MaintenanceWindowClient - update', () => {
       id: 'test-id',
     } as unknown as SavedObject);
 
-    jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(secondTimestamp));
 
     const updatedStartTime = initialExpirationDate.add(2, 'month').toISOString();
     const updatedDuration = 24 * 60 * 60 * 1000; // 24h
@@ -249,7 +252,7 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   it('should not regenerate all events if schedule did not change', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const modifiedEvents = [
       { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' },
@@ -336,7 +339,7 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   it('should update maintenance window with scope', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const modifiedEvents = [
       { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' },
@@ -442,7 +445,7 @@ describe('MaintenanceWindowClient - update', () => {
   ])(
     'should generate wildcard query for keyword fields with KQL pattern: %s',
     async (kqlPattern, expectedWildcardValue) => {
-      jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+      vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
       const mockMaintenanceWindow = getMockMaintenanceWindow({
         schedule: {
@@ -511,7 +514,7 @@ describe('MaintenanceWindowClient - update', () => {
   );
 
   it('should remove maintenance window with scope', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const modifiedEvents = [
       { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' },
@@ -567,7 +570,7 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   it('should mirror a filters-only alerting scope into scopedQuery', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       schedule: {
@@ -627,7 +630,7 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   it('should throw if updating a maintenance window with invalid scope', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
     });
@@ -659,7 +662,7 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   it('should include attributes.scopeErrors with scope "alerting" when alerting kql is invalid', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
     });
@@ -691,7 +694,7 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   it('should include attributes.scopeErrors with scope "alertingV2" when alertingV2 kql is invalid', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
     });
@@ -723,7 +726,7 @@ describe('MaintenanceWindowClient - update', () => {
   });
 
   it('should throw if updating a maintenance window that has expired', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
     });

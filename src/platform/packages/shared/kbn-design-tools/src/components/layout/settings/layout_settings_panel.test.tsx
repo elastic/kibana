@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,11 +21,11 @@ import type { LayoutConfig } from '../../../lib/layout/layout_config';
 describe('LayoutSettingsPanel', () => {
   const defaultConfig = getDefaultLayoutConfig(16);
   let config: LayoutConfig;
-  let setConfig: jest.Mock;
+  let setConfig: Mock;
 
   beforeEach(() => {
     config = { ...defaultConfig };
-    setConfig = jest.fn();
+    setConfig = vi.fn();
   });
 
   it('should render all form fields for columns layout', () => {

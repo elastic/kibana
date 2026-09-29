@@ -5,114 +5,136 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { AttackDetailsContext } from '../../context';
 import { AttackEntitiesDetails } from './attack_entities_details';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
     useUiSetting: () => false,
   };
 });
 
-jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: () => ({
-    entityRecord: null,
-    isLoading: false,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: () => ({
+        entityRecord: null,
+        isLoading: false,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({
-    defaultMessage,
-    values,
-  }: {
-    defaultMessage: string;
-    values?: { userCount?: number; hostCount?: number };
-  }) => {
-    if (values?.userCount !== undefined) {
-      return (
-        <span>
-          {values.userCount === 1 ? 'User' : 'Users'}
-          {':'}
-        </span>
-      );
-    }
-    if (values?.hostCount !== undefined) {
-      return (
-        <span>
-          {values.hostCount === 1 ? 'Host' : 'Hosts'}
-          {':'}
-        </span>
-      );
-    }
-    return <span>{defaultMessage}</span>;
-  },
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      FormattedMessage: ({
+        defaultMessage,
+        values,
+      }: {
+        defaultMessage: string;
+        values?: { userCount?: number; hostCount?: number };
+      }) => {
+        if (values?.userCount !== undefined) {
+          return (
+            <span>
+              {values.userCount === 1 ? 'User' : 'Users'}
+              {':'}
+            </span>
+          );
+        }
+        if (values?.hostCount !== undefined) {
+          return (
+            <span>
+              {values.hostCount === 1 ? 'Host' : 'Hosts'}
+              {':'}
+            </span>
+          );
+        }
+        return <span>{defaultMessage}</span>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_header_data', () => ({
-  useHeaderData: jest.fn(),
-}));
+vi.mock('../../hooks/use_header_data', () => {
+      const mocked = {
+      useHeaderData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_original_alert_ids', () => ({
-  useOriginalAlertIds: jest.fn().mockReturnValue([]),
-}));
+vi.mock('../../hooks/use_original_alert_ids', () => {
+      const mocked = {
+      useOriginalAlertIds: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists', () => ({
-  useAttackEntitiesLists: jest.fn(),
-}));
+vi.mock('../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists', () => {
+      const mocked = {
+      useAttackEntitiesLists: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../document_details/left/components/user_details', () => ({
-  UserDetails: ({
-    userName,
-    timestamp,
-    scopeId,
-  }: {
-    userName: string;
-    timestamp: string;
-    scopeId: string;
-  }) => (
-    <div
-      data-test-subj="user-details"
-      data-user-name={userName}
-      data-timestamp={timestamp}
-      data-scope-id={scopeId}
-    >
-      {'UserDetails:'} {userName}
-    </div>
-  ),
-}));
+vi.mock('../../../document_details/left/components/user_details', () => {
+      const mocked = {
+      UserDetails: ({
+        userName,
+        timestamp,
+        scopeId,
+      }: {
+        userName: string;
+        timestamp: string;
+        scopeId: string;
+      }) => (
+        <div
+          data-test-subj="user-details"
+          data-user-name={userName}
+          data-timestamp={timestamp}
+          data-scope-id={scopeId}
+        >
+          {'UserDetails:'} {userName}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../document_details/left/components/host_details', () => ({
-  HostDetails: ({
-    hostName,
-    timestamp,
-    scopeId,
-  }: {
-    hostName: string;
-    timestamp: string;
-    scopeId: string;
-  }) => (
-    <div
-      data-test-subj="host-details"
-      data-host-name={hostName}
-      data-timestamp={timestamp}
-      data-scope-id={scopeId}
-    >
-      {'HostDetails:'} {hostName}
-    </div>
-  ),
-}));
+vi.mock('../../../document_details/left/components/host_details', () => {
+      const mocked = {
+      HostDetails: ({
+        hostName,
+        timestamp,
+        scopeId,
+      }: {
+        hostName: string;
+        timestamp: string;
+        scopeId: string;
+      }) => (
+        <div
+          data-test-subj="host-details"
+          data-host-name={hostName}
+          data-timestamp={timestamp}
+          data-scope-id={scopeId}
+        >
+          {'HostDetails:'} {hostName}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useHeaderData = jest.requireMock('../../hooks/use_header_data').useHeaderData as jest.Mock;
-const useAttackEntitiesLists = jest.requireMock(
-  '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists'
-).useAttackEntitiesLists as jest.Mock;
+const useHeaderData = (await vi.importMock('../../hooks/use_header_data')).useHeaderData as Mock;
+const useAttackEntitiesLists = (await vi.importMock('../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists')).useAttackEntitiesLists as Mock;
 
 const mockContextValue = {
   attackId: 'attack-1',
@@ -122,7 +144,7 @@ const mockContextValue = {
   browserFields: {},
   dataFormattedForFieldBrowser: [],
   searchHit: {},
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 };
 
 const renderWithProvider = (ui: React.ReactElement) =>
@@ -142,7 +164,7 @@ const renderWithProvider = (ui: React.ReactElement) =>
 
 describe('AttackEntitiesDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useHeaderData.mockReturnValue({ timestamp: '2024-01-01T00:00:00Z' });
     useAttackEntitiesLists.mockReturnValue({
       userEntityEntries: [],

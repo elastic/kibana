@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from './helpers';
@@ -28,7 +30,7 @@ describe('getPluginNameFromRequest', () => {
   } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('extracts plugin name from "x-kbn-context" request header', async () => {

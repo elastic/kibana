@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { TRANSFORM_STATE } from '../../../../common/constants';
@@ -13,7 +16,7 @@ import type { ResetTransformsResponseSchema } from '../../api_schemas/reset_tran
 
 import { resetTransforms } from './reset_transforms';
 
-const createEsClient = (resetTransform: jest.Mock) => ({
+const createEsClient = (resetTransform: Mock) => ({
   transform: { resetTransform },
 });
 
@@ -28,11 +31,11 @@ const createRequest = (
 
 describe('resetTransforms', () => {
   it('returns nested timeout results and stops the loop when a request times out', async () => {
-    const resetTransform = jest
+    const resetTransform = vi
       .fn()
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(new EsErrors.TimeoutError('Request timed out'));
-    const response = { forbidden: jest.fn() };
+    const response = { forbidden: vi.fn() };
 
     const results = (await resetTransforms(
       createRequest([
@@ -53,8 +56,8 @@ describe('resetTransforms', () => {
   });
 
   it('returns a forbidden response when resetting the transform fails with 403', async () => {
-    const resetTransform = jest.fn().mockRejectedValue({ statusCode: 403 });
-    const response = { forbidden: jest.fn().mockReturnValue({ status: 403 }) };
+    const resetTransform = vi.fn().mockRejectedValue({ statusCode: 403 });
+    const response = { forbidden: vi.fn().mockReturnValue({ status: 403 }) };
 
     const result = await resetTransforms(
       createRequest(),

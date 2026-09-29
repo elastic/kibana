@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { lazy } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RuleActionsMessage } from './rule_actions_message';
@@ -20,11 +22,14 @@ import {
 } from '../common/test_utils/actions_test_utils';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState } = jest.requireMock('../hooks');
+const { useRuleFormState } = (await vi.importMock('../hooks'));
 
 const ruleType = {
   id: '.es-query',
@@ -71,7 +76,7 @@ const ruleModel: RuleTypeModel = {
   requiresAppContext: false,
 };
 
-const mockOnParamsChange = jest.fn();
+const mockOnParamsChange = vi.fn();
 
 const mockedActionParamsFields = lazy(async () => ({
   default({ defaultMessage, selectedActionGroupId, errors, editAction }: ActionParamsProps<any>) {
@@ -116,7 +121,7 @@ describe('RuleActionsMessage', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should render correctly', async () => {

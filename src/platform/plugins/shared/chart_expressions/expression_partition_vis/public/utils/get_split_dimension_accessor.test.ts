@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createMockVisData } from '../mocks';
@@ -17,9 +19,9 @@ import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common'
 describe('getSplitDimensionAccessor', () => {
   const visData = createMockVisData();
 
-  const preparedFormatter1 = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
-  const preparedFormatter2 = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
-  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const preparedFormatter1 = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const preparedFormatter2 = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const defaultFormatter = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
 
   beforeEach(() => {
     defaultFormatter.mockClear();
@@ -52,7 +54,7 @@ describe('getSplitDimensionAccessor', () => {
       defaultFormatter
     );
     const formatter = formatters[visData.columns[1].id];
-    const spyOnFormatterConvert = jest.spyOn(formatter, 'convertToText');
+    const spyOnFormatterConvert = vi.spyOn(formatter, 'convertToText');
 
     expect(defaultFormatter).toHaveBeenCalledTimes(0);
     expect(typeof accessor).toBe('function');
@@ -71,7 +73,7 @@ describe('getSplitDimensionAccessor', () => {
     };
     const columns = [visData.columns[0], column, visData.columns[2]] as DatatableColumn[];
     const defaultFormatterReturnedVal = fieldFormatsMock.deserialize();
-    const spyOnDefaultFormatterConvert = jest.spyOn(defaultFormatterReturnedVal, 'convertToText');
+    const spyOnDefaultFormatterConvert = vi.spyOn(defaultFormatterReturnedVal, 'convertToText');
 
     defaultFormatter.mockReturnValueOnce(defaultFormatterReturnedVal);
 
@@ -97,7 +99,7 @@ describe('getSplitDimensionAccessor', () => {
     };
     const columns = [visData.columns[0], column, visData.columns[2]] as DatatableColumn[];
     const defaultFormatterReturnedVal = fieldFormatsMock.deserialize();
-    const spyOnDefaultFormatterConvert = jest.spyOn(defaultFormatterReturnedVal, 'convertToText');
+    const spyOnDefaultFormatterConvert = vi.spyOn(defaultFormatterReturnedVal, 'convertToText');
 
     defaultFormatter.mockReturnValueOnce(defaultFormatterReturnedVal);
 

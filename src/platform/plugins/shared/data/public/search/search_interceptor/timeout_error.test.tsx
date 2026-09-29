@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { render, screen } from '@testing-library/react';
@@ -17,7 +19,7 @@ const applicationMock = applicationServiceMock.createStartContract();
 
 describe('SearchTimeoutError', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should create contact admin message', () => {

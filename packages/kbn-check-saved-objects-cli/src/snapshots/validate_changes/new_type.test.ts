@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import path from 'path';
 import fs from 'fs';
 import { schema } from '@kbn/config-schema';
@@ -67,7 +69,7 @@ function buildNewType(
 }
 
 describe('validateChangesNewType', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   const callValidate = (
     to: MigrationInfoRecord,

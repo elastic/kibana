@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { asKQL } from './kql_encoder';
 import type { Workspace, WorkspaceNode } from '../types';
 
 describe('kql_encoder', () => {
-  let workspaceMock: jest.Mocked<Workspace>;
+  let workspaceMock: Mocked<Workspace>;
 
   beforeEach(() => {
     workspaceMock = {
       returnUnpackedGroupeds: (nodes: []) => nodes,
-      getSelectedOrAllNodes: jest.fn(() => [
+      getSelectedOrAllNodes: vi.fn(() => [
         {
           data: {
             field: 'fieldA',
@@ -34,7 +37,7 @@ describe('kql_encoder', () => {
           },
         },
       ]),
-    } as unknown as jest.Mocked<Workspace>;
+    } as unknown as Mocked<Workspace>;
   });
 
   it('should encode query as URI component', () => {

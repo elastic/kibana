@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { packagePolicyService } from '../package_policy';
@@ -24,22 +27,22 @@ import {
 import { getAgents } from './crud';
 import * as changePrivilegeRunner from './change_privilege_runner';
 
-jest.mock('../package_policy');
-jest.mock('./crud');
-jest.mock('./actions');
+vi.mock('../package_policy');
+vi.mock('./crud');
+vi.mock('./actions');
 
-jest.mock('./crud', () => {
+vi.mock('./crud', () => {
   return {
-    getAgents: jest.fn(),
-    getAgentsByKuery: jest.fn(),
-    openPointInTime: jest.fn(),
-    getAgentById: jest.fn(),
+    getAgents: vi.fn(),
+    getAgentsByKuery: vi.fn(),
+    openPointInTime: vi.fn(),
+    getAgentById: vi.fn(),
   };
 });
 
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
-const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+const mockedCreateAgentAction = createAgentAction as MockedFunction<typeof createAgentAction>;
+const mockedCreateErrorActionResults = createErrorActionResults as MockedFunction<
   typeof createErrorActionResults
 >;
 
@@ -51,14 +54,14 @@ describe('changeAgentPrivilegeLevel', () => {
   const policyId = 'policy-id';
 
   it('should throw an error if the agent does not exist', async () => {
-    (getAgentById as jest.Mock).mockRejectedValue(new Error(`Agent ${agentId} does not exist`));
+    (getAgentById as Mock).mockRejectedValue(new Error(`Agent ${agentId} does not exist`));
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
     ).rejects.toThrow(`Agent ${agentId} does not exist`);
   });
 
   it('should return early if the agent is already unprivileged', async () => {
-    (getAgentById as jest.Mock).mockResolvedValue({
+    (getAgentById as Mock).mockResolvedValue({
       local_metadata: { elastic: { agent: { unprivileged: true } } },
     } as any);
     const res = await changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {});
@@ -66,7 +69,7 @@ describe('changeAgentPrivilegeLevel', () => {
   });
 
   it('should throw an error if the agent is on an unsupported version', async () => {
-    (getAgentById as jest.Mock).mockResolvedValue({
+    (getAgentById as Mock).mockResolvedValue({
       agent: { version: '9.1.0' },
       policy_id: policyId,
     } as any);
@@ -78,7 +81,7 @@ describe('changeAgentPrivilegeLevel', () => {
   });
 
   it('should throw an error if the agent needs root privilege', async () => {
-    (getAgentById as jest.Mock).mockResolvedValue({
+    (getAgentById as Mock).mockResolvedValue({
       id: 'agent-id',
       agent: { version: '9.3.0' },
       policy_id: policyId,
@@ -102,7 +105,7 @@ describe('changeAgentPrivilegeLevel', () => {
   });
 
   it('should create a PRIVILEGE_LEVEL_CHANGE action with minimal options if the agent can become unprivileged', async () => {
-    (getAgentById as jest.Mock).mockResolvedValue({
+    (getAgentById as Mock).mockResolvedValue({
       agent: { version: '9.3.0' },
       policy_id: policyId,
     } as any);
@@ -137,7 +140,7 @@ describe('changeAgentPrivilegeLevel', () => {
   });
 
   it('should create a PRIVILEGE_LEVEL_CHANGE action with additional options if the agent can become unprivileged', async () => {
-    (getAgentById as jest.Mock).mockResolvedValue({
+    (getAgentById as Mock).mockResolvedValue({
       agent: { version: '9.3.0' },
       policy_id: policyId,
     } as any);
@@ -199,7 +202,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
 
   beforeEach(() => {
     // Reset mocks before each test
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     // Mock the createAgentAction response
     mockedCreateAgentAction.mockResolvedValue({
@@ -211,7 +214,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
   });
 
   it('should create a PRIVILEGE_LEVEL_CHANGE action for the specified agents', async () => {
-    (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+    (getAgents as Mock).mockResolvedValue([mockedAgent, mockedAgent]);
     const options = {
       user_info: {
         username: 'user1',
@@ -237,7 +240,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
   });
 
   it('should record error result if agent policies contain integrations that require root privilege', async () => {
-    (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+    (getAgents as Mock).mockResolvedValue([mockedAgent, mockedAgent]);
     const options = {
       user_info: {
         username: 'user1',
@@ -274,25 +277,25 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
 });
 
 describe('bulkChangeAgentsPrivilegeLevel kuery path — cheap count and sync/async branching', () => {
-  let mockGetAgentsByKuery: jest.SpyInstance;
-  let mockOpenPointInTime: jest.SpyInstance;
-  let mockBulkChangePrivilegeAgentsBatch: jest.SpyInstance;
-  let mockChangePrivilegeActionRunner: jest.SpyInstance;
+  let mockGetAgentsByKuery: MockInstance;
+  let mockOpenPointInTime: MockInstance;
+  let mockBulkChangePrivilegeAgentsBatch: MockInstance;
+  let mockChangePrivilegeActionRunner: MockInstance;
 
-  beforeEach(() => {
-    mockGetAgentsByKuery = jest.spyOn(jest.requireMock('./crud'), 'getAgentsByKuery');
-    mockOpenPointInTime = jest
-      .spyOn(jest.requireMock('./crud'), 'openPointInTime')
+  beforeEach(async () => {
+    mockGetAgentsByKuery = vi.spyOn((await vi.importMock('./crud')), 'getAgentsByKuery');
+    mockOpenPointInTime = vi
+      .spyOn((await vi.importMock('./crud')), 'openPointInTime')
       .mockResolvedValue('pit-id');
-    mockBulkChangePrivilegeAgentsBatch = jest
+    mockBulkChangePrivilegeAgentsBatch = vi
       .spyOn(changePrivilegeRunner, 'bulkChangePrivilegeAgentsBatch')
       .mockResolvedValue({ actionId: 'test-action-id' });
-    mockChangePrivilegeActionRunner = jest
+    mockChangePrivilegeActionRunner = vi
       .spyOn(changePrivilegeRunner, 'ChangePrivilegeActionRunner')
       .mockImplementation(
         () =>
           ({
-            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+            runActionAsyncTask: vi.fn().mockResolvedValue({ actionId: 'async-action-id' }),
           } as any)
       );
   });

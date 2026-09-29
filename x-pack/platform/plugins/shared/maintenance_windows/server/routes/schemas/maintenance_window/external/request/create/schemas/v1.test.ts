@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMaintenanceWindowRequestBodySchema } from './v1';
 
 const maintenanceWindow = {
@@ -36,13 +38,13 @@ describe('createMaintenanceWindowRequestBodySchema', () => {
   const mockCurrentDate = new Date('2021-05-05T00:00:00.000Z');
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers().setSystemTime(mockCurrentDate);
+    vi.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(mockCurrentDate);
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('validates correctly with all fields', () => {

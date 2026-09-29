@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { sendWaitForInputNotifications } from './send_wait_for_input_notifications';
 
 describe('sendWaitForInputNotifications', () => {
   const renderTemplate = (template: string) => template;
 
   it('sends slack_api #channel values as channelNames and ids as channelIds', async () => {
-    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+    const execute = vi.fn().mockResolvedValue({ status: 'ok' });
 
     await sendWaitForInputNotifications({
       channels: {

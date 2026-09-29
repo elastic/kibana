@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -12,9 +14,12 @@ import type { CoreStart } from '@kbn/core/public';
 
 import { useFooterLinks } from './use_footer_links';
 
-jest.mock('@kbn/cloud/connection_details', () => ({
-  openWiredConnectionDetails: jest.fn(),
-}));
+vi.mock('@kbn/cloud/connection_details', () => {
+      const mocked = {
+      openWiredConnectionDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createApplication = (
   overrides: {
@@ -30,7 +35,7 @@ const createApplication = (
       spaces: { manage: true },
       users: { save: true, ...overrides.users },
     },
-    getUrlForApp: jest.fn((appId: string, opts?: { path?: string }) =>
+    getUrlForApp: vi.fn((appId: string, opts?: { path?: string }) =>
       opts?.path ? `/app/${appId}/${opts.path}` : `/app/${appId}`
     ),
   } as unknown as CoreStart['application']);
@@ -41,7 +46,7 @@ const createCloud = (
   ({
     isCloudEnabled: true,
     serverless: { projectType: 'security' } as CloudStart['serverless'],
-    getPrivilegedUrls: jest.fn().mockResolvedValue({ usersAndRolesUrl: undefined }),
+    getPrivilegedUrls: vi.fn().mockResolvedValue({ usersAndRolesUrl: undefined }),
     ...overrides,
   } as unknown as CloudStart);
 
@@ -117,7 +122,7 @@ describe('useFooterLinks', () => {
   it('returns "Invite users" via Cloud for serverless when privileged URL is available', async () => {
     const application = createApplication();
     const cloudMock = createCloud({
-      getPrivilegedUrls: jest
+      getPrivilegedUrls: vi
         .fn()
         .mockResolvedValue({ usersAndRolesUrl: 'https://cloud.elastic.co/users' }),
     });

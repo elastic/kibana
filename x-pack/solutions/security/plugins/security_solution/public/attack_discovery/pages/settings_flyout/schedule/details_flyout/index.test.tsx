@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -19,20 +22,26 @@ import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
 import { mockAttackDiscoverySchedule } from '../../../mock/mock_attack_discovery_schedule';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 
-jest.mock('@kbn/inference-connectors');
-jest.mock('../logic/use_update_schedule');
-jest.mock('../logic/use_get_schedule');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../utils/convert_form_data', () => ({
-  convertFormDataInBaseSchedule: jest.fn().mockReturnValue({}),
-}));
-jest.mock('react-router-dom', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
+vi.mock('@kbn/inference-connectors');
+vi.mock('../logic/use_update_schedule');
+vi.mock('../logic/use_get_schedule');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../utils/convert_form_data', () => {
+      const mocked = {
+      convertFormDataInBaseSchedule: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockConnectors: unknown[] = [
   {
@@ -45,8 +54,8 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const updateAttackDiscoveryScheduleMock = jest.fn();
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const updateAttackDiscoveryScheduleMock = vi.fn();
 
 interface WorkflowsPrivilegesOptions {
   executeWorkflow?: boolean;
@@ -55,7 +64,7 @@ interface WorkflowsPrivilegesOptions {
 
 const defaultProps = {
   scheduleId: mockAttackDiscoverySchedule.id,
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 const renderComponent = async () => {
@@ -85,7 +94,7 @@ const setupUseKibana = (
         },
       },
       featureFlags: {
-        useBooleanValue: jest.fn().mockReturnValue(isWorkflowsEnabled),
+        useBooleanValue: vi.fn().mockReturnValue(isWorkflowsEnabled),
       },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
@@ -94,7 +103,7 @@ const setupUseKibana = (
         ...triggersActionsUiMock.createStart(),
       },
       uiSettings: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
       unifiedSearch: {
         ui: {
@@ -102,24 +111,24 @@ const setupUseKibana = (
         },
       },
     },
-  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+  } as unknown as Mocked<ReturnType<typeof useKibana>>);
 };
 
 describe('DetailsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     setupUseKibana();
 
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       isLoading: false,
       data: mockConnectors,
     });
-    (useUpdateAttackDiscoverySchedule as jest.Mock).mockReturnValue({
+    (useUpdateAttackDiscoverySchedule as Mock).mockReturnValue({
       isLoading: false,
       mutateAsync: updateAttackDiscoveryScheduleMock,
     });
-    (useGetAttackDiscoverySchedule as jest.Mock).mockReturnValue({
+    (useGetAttackDiscoverySchedule as Mock).mockReturnValue({
       isLoading: false,
       data: { schedule: mockAttackDiscoverySchedule },
     });
@@ -237,7 +246,7 @@ describe('DetailsFlyout', () => {
   describe('after a successful save', () => {
     beforeEach(() => {
       // Override connectors to include the connector that matches the mock schedule's connectorId
-      (useLoadConnectors as jest.Mock).mockReturnValue({
+      (useLoadConnectors as Mock).mockReturnValue({
         isLoading: false,
         data: [
           {

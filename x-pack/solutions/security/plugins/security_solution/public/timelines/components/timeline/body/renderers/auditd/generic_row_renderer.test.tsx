@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
@@ -19,24 +21,30 @@ import {
   createGenericFileRowRenderer,
 } from './generic_row_renderer';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../../../common/components/link_to');
-jest.mock('../../../../../../overview/components/events_by_dataset');
-jest.mock('../../../../../../common/components/draggables', () => ({
-  DraggableBadge: ({ value }: { value?: string | number | null }) => <>{value}</>,
-}));
-jest.mock('../netflow', () => ({
-  NetflowRenderer: () => null,
-}));
+vi.mock('../../../../../../common/components/link_to');
+vi.mock('../../../../../../overview/components/events_by_dataset');
+vi.mock('../../../../../../common/components/draggables', () => {
+      const mocked = {
+      DraggableBadge: ({ value }: { value?: string | number | null }) => <>{value}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../netflow', () => {
+      const mocked = {
+      NetflowRenderer: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();

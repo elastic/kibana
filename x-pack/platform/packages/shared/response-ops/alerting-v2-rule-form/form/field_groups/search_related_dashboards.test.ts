@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { resolveDashboardsByIds, searchRelatedDashboard } from './search_related_dashboards';
 
@@ -12,12 +14,12 @@ const DASHBOARD_ID = 'dashboard-1';
 const DASHBOARD_TITLE = 'Dashboard 1';
 const MISSING_DASHBOARD_ID = 'missing-dashboard';
 
-const search = jest.fn(async () => ({
+const search = vi.fn(async () => ({
   data: [{ id: DASHBOARD_ID, data: { title: DASHBOARD_TITLE }, meta: {} }],
   meta: { page: 1, per_page: 100, total: 1 },
 }));
 
-const findByIds = jest.fn(async (ids: string[]) =>
+const findByIds = vi.fn(async (ids: string[]) =>
   ids.map((id) =>
     id === DASHBOARD_ID
       ? { id, status: 'success', attributes: { title: DASHBOARD_TITLE } }
@@ -25,18 +27,18 @@ const findByIds = jest.fn(async (ids: string[]) =>
   )
 );
 
-const findDashboardsService = jest.fn(async () => ({
+const findDashboardsService = vi.fn(async () => ({
   search,
-  findById: jest.fn(),
+  findById: vi.fn(),
   findByIds,
-  findByTitle: jest.fn(),
+  findByTitle: vi.fn(),
 }));
 
 const dashboard = { findDashboardsService } as unknown as DashboardStart;
 
 describe('search related dashboards', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('searches dashboards via findDashboardsService().search', async () => {

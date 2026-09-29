@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
 
@@ -14,14 +17,14 @@ import { registerProjectTagsRoute } from './get_projects_tags';
 
 describe('get_projects_tags route', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createHandler = () => {
     const router = coreMock.createSetup().http.createRouter();
     registerProjectTagsRoute(router, coreMock.createPluginInitializerContext());
-    const handler = (router.post as jest.Mock).mock.calls[0][1];
-    const routeConfig = (router.post as jest.Mock).mock.calls[0][0];
+    const handler = (router.post as Mock).mock.calls[0][1];
+    const routeConfig = (router.post as Mock).mock.calls[0][0];
     return { handler, routeConfig };
   };
 

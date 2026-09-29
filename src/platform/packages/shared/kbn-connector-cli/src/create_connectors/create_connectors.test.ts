@@ -7,34 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { createConnectors } from './create_connectors';
 import { detectKibana, listConnectors, createConnector } from './kibana_client';
 import { loadManifests, resolveManifestSecrets } from './manifest_loader';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-jest.mock('./kibana_client');
-jest.mock('./manifest_loader');
+vi.mock('./kibana_client');
+vi.mock('./manifest_loader');
 
-const detectKibanaMock = detectKibana as jest.MockedFunction<typeof detectKibana>;
-const listConnectorsMock = listConnectors as jest.MockedFunction<typeof listConnectors>;
-const createConnectorMock = createConnector as jest.MockedFunction<typeof createConnector>;
-const loadManifestsMock = loadManifests as jest.MockedFunction<typeof loadManifests>;
-const resolveManifestSecretsMock = resolveManifestSecrets as jest.MockedFunction<
+const detectKibanaMock = detectKibana as MockedFunction<typeof detectKibana>;
+const listConnectorsMock = listConnectors as MockedFunction<typeof listConnectors>;
+const createConnectorMock = createConnector as MockedFunction<typeof createConnector>;
+const loadManifestsMock = loadManifests as MockedFunction<typeof loadManifests>;
+const resolveManifestSecretsMock = resolveManifestSecrets as MockedFunction<
   typeof resolveManifestSecrets
 >;
 
 const mockLog: ToolingLog = {
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  write: jest.fn(),
-  success: jest.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  write: vi.fn(),
+  success: vi.fn(),
 } as any;
 
 describe('createConnectors', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     detectKibanaMock.mockResolvedValue({ url: 'http://localhost:5601', auth: 'elastic:changeme' });
     listConnectorsMock.mockResolvedValue([]);
   });

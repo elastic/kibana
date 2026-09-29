@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '@kbn/alerting-v2-constants';
@@ -16,11 +18,11 @@ const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useSuggestedProfiles', () => {
-  const toasts = { addError: jest.fn() };
+  const toasts = { addError: vi.fn() };
   const errorTitle = 'Suggest failed';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -29,7 +31,7 @@ describe('useSuggestedProfiles', () => {
 
   it('calls suggest with an empty name when the search term is empty or whitespace-only', async () => {
     const profiles = [{ uid: 'u-1' }];
-    const suggest = jest.fn().mockResolvedValue(profiles);
+    const suggest = vi.fn().mockResolvedValue(profiles);
     const userProfile = { suggest } as unknown as UserProfileService;
 
     const { result } = renderHook(
@@ -55,7 +57,7 @@ describe('useSuggestedProfiles', () => {
 
   it('calls suggest with the internal path and trimmed name when the search term is non-empty', async () => {
     const profiles = [{ uid: 'u-1' }];
-    const suggest = jest.fn().mockResolvedValue(profiles);
+    const suggest = vi.fn().mockResolvedValue(profiles);
     const userProfile = { suggest } as unknown as UserProfileService;
 
     const { result } = renderHook(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
@@ -29,7 +32,7 @@ const makeAttachment = (ruleJson: string, label?: string) => ({
   type: 'security.rule',
   data: { text: ruleJson, ...(label ? { attachmentLabel: label } : {}) },
 });
-const mockAddAttachmentType = jest.fn();
+const mockAddAttachmentType = vi.fn();
 const mockAttachments: AttachmentServiceStartContract = {
   addAttachmentType: mockAddAttachmentType,
 } as unknown as AttachmentServiceStartContract;
@@ -39,12 +42,12 @@ const makeApplication = (canEdit: boolean) =>
     capabilities: {
       [RULES_FEATURE_LATEST]: { edit_rules: canEdit },
     },
-    navigateToApp: jest.fn(),
+    navigateToApp: vi.fn(),
   } as unknown as ApplicationStart);
 
 const makeUiSettings = (esqlEnabled = true) =>
   ({
-    get: jest.fn((key: string) => {
+    get: vi.fn((key: string) => {
       if (key === ENABLE_ESQL) return esqlEnabled;
       return undefined;
     }),
@@ -55,8 +58,8 @@ describe('createRuleAttachmentDefinition', () => {
 
   beforeEach(() => {
     aiRuleCreation = new AiRuleCreationService();
-    jest.spyOn(aiRuleCreation, 'requestSaveRule');
-    jest.spyOn(aiRuleCreation, 'setAiCreatedRule');
+    vi.spyOn(aiRuleCreation, 'requestSaveRule');
+    vi.spyOn(aiRuleCreation, 'setAiCreatedRule');
   });
 
   describe('definition shape', () => {
@@ -90,7 +93,7 @@ describe('createRuleAttachmentDefinition', () => {
         },
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       } as never);
     };
     const primaryLabel = (buttons: ReturnType<typeof buildButtons>) =>
@@ -225,8 +228,8 @@ describe('buildRuleActionButtons', () => {
 
   beforeEach(() => {
     aiRuleCreation = new AiRuleCreationService();
-    jest.spyOn(aiRuleCreation, 'requestSaveRule');
-    jest.spyOn(aiRuleCreation, 'setAiCreatedRule');
+    vi.spyOn(aiRuleCreation, 'requestSaveRule');
+    vi.spyOn(aiRuleCreation, 'setAiCreatedRule');
     window.history.pushState({}, '', '/');
     baseProps = {
       rule: { name: 'Test Rule', type: 'query' } as unknown as RuleResponse,
@@ -236,11 +239,11 @@ describe('buildRuleActionButtons', () => {
       intent: 'create',
       ruleId: undefined,
       attachmentId: 'air:testcard',
-      updateOrigin: jest.fn().mockResolvedValue(undefined),
+      updateOrigin: vi.fn().mockResolvedValue(undefined),
     };
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns no buttons when the user lacks RULES_UI_EDIT_PRIVILEGE', () => {
     expect(buildRuleActionButtons({ ...baseProps, application: makeApplication(false) })).toEqual(
@@ -298,7 +301,7 @@ describe('buildRuleActionButtons', () => {
     aiRuleCreation.requestSaveRule({ name: 'in flight' } as unknown as RuleResponse, {
       attachmentId: 'air:testcard',
     });
-    (aiRuleCreation.requestSaveRule as jest.Mock).mockClear();
+    (aiRuleCreation.requestSaveRule as Mock).mockClear();
     expect(aiRuleCreation.getIsSaving()).toBe(true);
 
     primaryButton(buildRuleActionButtons(baseProps))!.handler();

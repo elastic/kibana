@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { AgentType } from '@kbn/agent-builder-common';
 import type { AgentProperties } from './client/storage';
 import type { AgentProfileStorage } from './client/storage';
@@ -33,7 +36,7 @@ function createAgentSource(overrides: Partial<AgentProperties> = {}): AgentPrope
   };
 }
 
-function expectSearchWithSkillFilter(search: jest.Mock, spaceId: string, skillIds: string[]): void {
+function expectSearchWithSkillFilter(search: Mock, spaceId: string, skillIds: string[]): void {
   expect(search).toHaveBeenCalledWith(
     expect.objectContaining({
       track_total_hits: false,
@@ -47,21 +50,21 @@ function expectSearchWithSkillFilter(search: jest.Mock, spaceId: string, skillId
   );
 }
 
-function createMockStorage(searchImplementation: jest.Mock): jest.Mocked<AgentProfileStorage> {
-  const bulk = jest.fn().mockResolvedValue(undefined);
+function createMockStorage(searchImplementation: Mock): Mocked<AgentProfileStorage> {
+  const bulk = vi.fn().mockResolvedValue(undefined);
 
   return {
-    getClient: jest.fn().mockReturnValue({
+    getClient: vi.fn().mockReturnValue({
       search: searchImplementation,
       bulk,
     }),
-  } as unknown as jest.Mocked<AgentProfileStorage>;
+  } as unknown as Mocked<AgentProfileStorage>;
 }
 
 function createMockStorageSingleResponse(searchResponse: {
   hits: Array<{ _id: string; _source?: AgentProperties }>;
-}): jest.Mocked<AgentProfileStorage> {
-  const search = jest.fn().mockResolvedValue({
+}): Mocked<AgentProfileStorage> {
+  const search = vi.fn().mockResolvedValue({
     hits: {
       hits: searchResponse.hits,
     },
@@ -71,7 +74,7 @@ function createMockStorageSingleResponse(searchResponse: {
 
 describe('runSkillRefCleanup', () => {
   it('returns no agents when skillIds is empty without calling search', async () => {
-    const search = jest.fn();
+    const search = vi.fn();
     const storage = createMockStorage(search);
     const result = await runSkillRefCleanup({
       storage,
@@ -92,7 +95,7 @@ describe('runSkillRefCleanup', () => {
     });
     expect(result).toEqual({ agents: [] });
     expect(storage.getClient().bulk).not.toHaveBeenCalled();
-    expectSearchWithSkillFilter(storage.getClient().search as jest.Mock, SPACE_ID, ['skill-a']);
+    expectSearchWithSkillFilter(storage.getClient().search as Mock, SPACE_ID, ['skill-a']);
   });
 
   it('skips hits without _source', async () => {
@@ -107,7 +110,7 @@ describe('runSkillRefCleanup', () => {
     });
     expect(result).toEqual({ agents: [{ id: 'agent-2', name: 'Test Agent' }] });
     expect(storage.getClient().bulk).not.toHaveBeenCalled();
-    expectSearchWithSkillFilter(storage.getClient().search as jest.Mock, SPACE_ID, ['skill-a']);
+    expectSearchWithSkillFilter(storage.getClient().search as Mock, SPACE_ID, ['skill-a']);
   });
 
   it('returns no agents when Elasticsearch returns no matching hits', async () => {
@@ -119,7 +122,7 @@ describe('runSkillRefCleanup', () => {
     });
     expect(result).toEqual({ agents: [] });
     expect(storage.getClient().bulk).not.toHaveBeenCalled();
-    expectSearchWithSkillFilter(storage.getClient().search as jest.Mock, SPACE_ID, [
+    expectSearchWithSkillFilter(storage.getClient().search as Mock, SPACE_ID, [
       'skill-a',
       'skill-b',
     ]);
@@ -138,7 +141,7 @@ describe('runSkillRefCleanup', () => {
         },
       }),
     };
-    const search = jest
+    const search = vi
       .fn()
       .mockResolvedValueOnce({ hits: { hits: [matchingHit] } })
       .mockResolvedValueOnce({ hits: { hits: [] } });
@@ -202,9 +205,9 @@ describe('runSkillRefCleanup', () => {
       skillIds: ['skill-a'],
     });
     expect(result).toEqual({ agents: [{ id: 'agent-1', name: 'Test Agent' }] });
-    expectSearchWithSkillFilter(storage.getClient().search as jest.Mock, SPACE_ID, ['skill-a']);
+    expectSearchWithSkillFilter(storage.getClient().search as Mock, SPACE_ID, ['skill-a']);
     expect(storage.getClient().bulk).toHaveBeenCalledTimes(1);
-    const [bulkCall] = (storage.getClient().bulk as jest.Mock).mock.calls;
+    const [bulkCall] = (storage.getClient().bulk as Mock).mock.calls;
     const operations = bulkCall[0].operations;
     expect(operations).toHaveLength(1);
     expect(operations[0].index._id).toBe('doc-1');
@@ -213,7 +216,7 @@ describe('runSkillRefCleanup', () => {
   });
 
   it('executes exactly one search call', async () => {
-    const search = jest.fn().mockResolvedValue({
+    const search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -246,7 +249,7 @@ describe('runSkillRefCleanup', () => {
       spaceId: 'space-1',
       skillIds: ['skill-a', 'skill-z'],
     });
-    expectSearchWithSkillFilter(storage.getClient().search as jest.Mock, 'space-1', [
+    expectSearchWithSkillFilter(storage.getClient().search as Mock, 'space-1', [
       'skill-a',
       'skill-z',
     ]);
@@ -283,7 +286,7 @@ describe('runSkillRefCleanup', () => {
         ],
       });
       expect(storage.getClient().bulk).not.toHaveBeenCalled();
-      expectSearchWithSkillFilter(storage.getClient().search as jest.Mock, SPACE_ID, ['skill-a']);
+      expectSearchWithSkillFilter(storage.getClient().search as Mock, SPACE_ID, ['skill-a']);
     });
 
     it('returns agent id only when name is missing', async () => {
@@ -303,12 +306,12 @@ describe('runSkillRefCleanup', () => {
       });
       expect(result).toEqual({ agents: [{ id: 'agent-1' }] });
       expect(storage.getClient().bulk).not.toHaveBeenCalled();
-      expectSearchWithSkillFilter(storage.getClient().search as jest.Mock, SPACE_ID, ['skill-a']);
+      expectSearchWithSkillFilter(storage.getClient().search as Mock, SPACE_ID, ['skill-a']);
     });
   });
 
   it('logs error and rethrows when bulk fails', async () => {
-    const logger = { warn: jest.fn(), error: jest.fn() };
+    const logger = { warn: vi.fn(), error: vi.fn() };
     const storage = createMockStorageSingleResponse({
       hits: [
         {
@@ -319,7 +322,7 @@ describe('runSkillRefCleanup', () => {
         },
       ],
     });
-    (storage.getClient().bulk as jest.Mock).mockRejectedValue(new Error('Bulk failed'));
+    (storage.getClient().bulk as Mock).mockRejectedValue(new Error('Bulk failed'));
     await expect(
       runSkillRefCleanup({
         storage,
@@ -328,7 +331,7 @@ describe('runSkillRefCleanup', () => {
         logger: logger as unknown as import('@kbn/logging').Logger,
       })
     ).rejects.toThrow('Bulk failed');
-    expectSearchWithSkillFilter(storage.getClient().search as jest.Mock, SPACE_ID, ['skill-a']);
+    expectSearchWithSkillFilter(storage.getClient().search as Mock, SPACE_ID, ['skill-a']);
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Skill ref cleanup: bulk update failed')
     );

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import type { SerializedStyles } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -24,47 +27,53 @@ import { ESQLEditor } from './esql_editor';
 import { VALIDATION_DEBOUNCE_MS } from './hooks/use_query_validation';
 import type { ESQLEditorProps } from './types';
 
-const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
+const mockValidate = vi.fn().mockResolvedValue({ errors: [], warnings: [] });
 
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  ESQLLang: {
-    ...jest.requireActual('@kbn/code-editor').ESQLLang,
-    getEsqlLanguage: jest.fn(() => ({
-      id: 'esql',
-      name: 'ESQL',
-      extensions: ['.esql'],
-      aliases: ['ESQL', 'esql'],
-      mimetypes: ['application/esql'],
-    })),
-    validate: async () => mockValidate(),
-  },
-}));
+vi.mock('@kbn/code-editor', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/code-editor')),
+      ESQLLang: {
+        ...(await vi.importActual('@kbn/code-editor')).ESQLLang,
+        getEsqlLanguage: vi.fn(() => ({
+          id: 'esql',
+          name: 'ESQL',
+          extensions: ['.esql'],
+          aliases: ['ESQL', 'esql'],
+          mimetypes: ['application/esql'],
+        })),
+        validate: async () => mockValidate(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('monaco-promql', () => ({
-  promLanguageDefinition: {
-    id: 'promql',
-    extensions: ['.promql'],
-    aliases: [],
-    mimetypes: [],
-    loader: jest.fn().mockResolvedValue({
-      language: { tokenizer: { root: [] } },
-      languageConfiguration: {},
-    }),
-  },
-}));
+vi.mock('monaco-promql', () => {
+      const mocked = {
+      promLanguageDefinition: {
+        id: 'promql',
+        extensions: ['.promql'],
+        aliases: [],
+        mimetypes: [],
+        loader: vi.fn().mockResolvedValue({
+          language: { tokenizer: { root: [] } },
+          languageConfiguration: {},
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./lookup_join', () => {
+vi.mock('./lookup_join', () => {
   return {
-    useCanCreateLookupIndex: jest.fn().mockReturnValue(jest.fn().mockReturnValue(true)),
-    useLookupIndexCommand: jest.fn().mockReturnValue({
+    useCanCreateLookupIndex: vi.fn().mockReturnValue(vi.fn().mockReturnValue(true)),
+    useLookupIndexCommand: vi.fn().mockReturnValue({
       lookupIndexBadgeStyle: {} as SerializedStyles,
-      addLookupIndicesDecorator: jest.fn(),
+      addLookupIndicesDecorator: vi.fn(),
     }),
   };
 });
 
-window.performance.mark = jest.fn();
+window.performance.mark = vi.fn();
 
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
@@ -75,7 +84,7 @@ describe('ESQLEditor', () => {
   const corePluginMock = coreMock.createStart();
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
-  corePluginMock.http.get = jest.fn().mockImplementation((url: string) => {
+  corePluginMock.http.get = vi.fn().mockImplementation((url: string) => {
     if (url.includes('/internal/esql/autocomplete/sources/')) {
       return Promise.resolve([
         { name: 'test_index', hidden: false, type: 'index' },
@@ -86,7 +95,7 @@ describe('ESQLEditor', () => {
   });
 
   const kqlMock = kqlPluginMock.createStartContract();
-  (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+  (kqlMock.autocomplete.hasQuerySuggestions as Mock).mockReturnValue(true);
 
   const services = {
     uiSettings,
@@ -110,12 +119,12 @@ describe('ESQLEditor', () => {
   beforeEach(() => {
     props = {
       query: { esql: 'from test' },
-      onTextLangQueryChange: jest.fn(),
-      onTextLangQuerySubmit: jest.fn(),
+      onTextLangQueryChange: vi.fn(),
+      onTextLangQuerySubmit: vi.fn(),
     };
     mockValidate.mockResolvedValue({ errors: [], warnings: [] });
 
-    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
       (contextId, options) =>
         ({
           webkitBackingStorePixelRatio: 1,
@@ -126,7 +135,7 @@ describe('ESQLEditor', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should  render the editor component', async () => {
@@ -209,7 +218,7 @@ describe('ESQLEditor', () => {
     test('shown with errors enabled', async () => {
       const newProps = {
         ...props,
-        dataErrorsControl: { enabled: true, onChange: jest.fn() },
+        dataErrorsControl: { enabled: true, onChange: vi.fn() },
       };
       mockValidate.mockResolvedValue({
         errors: [
@@ -233,7 +242,7 @@ describe('ESQLEditor', () => {
     test('shown with errors disabled', async () => {
       const newProps = {
         ...props,
-        dataErrorsControl: { enabled: false, onChange: jest.fn() },
+        dataErrorsControl: { enabled: false, onChange: vi.fn() },
       };
       mockValidate.mockResolvedValue({
         errors: [
@@ -271,7 +280,7 @@ describe('ESQLEditor', () => {
   });
 
   it('displays server errors when query is submitted from editors parent', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const executedQuery = 'FROM logs | COMPLETION "prompt" WITH { "inference_id": "bad" }';
     const serverErrorMessage = 'Unknown inference_id [bad]';
@@ -311,7 +320,7 @@ describe('ESQLEditor', () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+      vi.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
     });
 
     await waitFor(() => {
@@ -320,7 +329,7 @@ describe('ESQLEditor', () => {
 
     await act(async () => {
       await userEvent
-        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .setup({ advanceTimers: vi.advanceTimersByTime })
         .click(screen.getByText('1 error'));
     });
 
@@ -328,11 +337,11 @@ describe('ESQLEditor', () => {
       expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
     });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('displays server warnings when query is submitted from editors parent', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const executedQuery = 'FROM logs';
     const serverWarningMessage = 'No limit defined, adding default limit of [1000].';
@@ -372,7 +381,7 @@ describe('ESQLEditor', () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+      vi.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
     });
 
     await waitFor(() => {
@@ -381,7 +390,7 @@ describe('ESQLEditor', () => {
 
     await act(async () => {
       await userEvent
-        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .setup({ advanceTimers: vi.advanceTimersByTime })
         .click(screen.getByText('1 warning'));
     });
 
@@ -389,7 +398,7 @@ describe('ESQLEditor', () => {
       expect(screen.getByText(serverWarningMessage)).toBeInTheDocument();
     });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should render warning if the warning and mergeExternalMessages props are set', async () => {

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DefaultEvaluators } from '@kbn/evals';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { createCanaryEvaluator } from './canary_evaluator';
 
 const makeEvaluators = (gapScore: number): DefaultEvaluators =>
   ({
-    criteria: jest.fn().mockReturnValue({
-      evaluate: jest.fn().mockResolvedValue({ score: gapScore }),
+    criteria: vi.fn().mockReturnValue({
+      evaluate: vi.fn().mockResolvedValue({ score: gapScore }),
     }),
   } as unknown as DefaultEvaluators);
 

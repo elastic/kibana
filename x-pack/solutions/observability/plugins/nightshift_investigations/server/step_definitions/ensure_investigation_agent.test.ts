@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
@@ -12,19 +14,25 @@ import { installDecisionTreeReinforcementAgent } from '../lib/install_decision_t
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import { ensureInvestigationAgentStepDefinition } from './ensure_investigation_agent';
 
-jest.mock('../lib/install_investigation_agent', () => ({
-  installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../lib/install_investigation_agent', () => {
+      const mocked = {
+      installInvestigationAgent: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/install_decision_tree_reinforcement_agent', () => ({
-  installDecisionTreeReinforcementAgent: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../lib/install_decision_tree_reinforcement_agent', () => {
+      const mocked = {
+      installDecisionTreeReinforcementAgent: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('ensureInvestigationAgentStepDefinition', () => {
-  const callKibanaApi = jest.fn().mockResolvedValue(undefined);
-  const agentBuilder = { agents: { ensure: jest.fn() } } as never;
+  const callKibanaApi = vi.fn().mockResolvedValue(undefined);
+  const agentBuilder = { agents: { ensure: vi.fn() } } as never;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     callKibanaApi.mockResolvedValue(undefined);
   });
 
@@ -33,10 +41,10 @@ describe('ensureInvestigationAgentStepDefinition', () => {
       input,
       rawInput: input,
       contextManager: {
-        getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'space-1' } }),
-        getFakeRequest: jest.fn(),
-        getScopedEsClient: jest.fn(),
-        renderInputTemplate: jest.fn((val) => val),
+        getContext: vi.fn().mockReturnValue({ workflow: { spaceId: 'space-1' } }),
+        getFakeRequest: vi.fn(),
+        getScopedEsClient: vi.fn(),
+        renderInputTemplate: vi.fn((val) => val),
         callKibanaApi,
       },
       logger: loggerMock.create(),
@@ -45,7 +53,7 @@ describe('ensureInvestigationAgentStepDefinition', () => {
       stepType: 'nightshift.ensureInvestigationAgent',
     } as never);
 
-  const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+  const availability = { cacheMode: 'space' as const, handler: vi.fn() };
 
   const run = (input: Record<string, unknown>) =>
     ensureInvestigationAgentStepDefinition({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   CASES_TEMPLATE_APPLIED_EVENT_TYPE,
@@ -17,13 +20,13 @@ describe('registerTemplateApplyEvents', () => {
   let analyticsService: ReturnType<typeof coreMock.createSetup>['analytics'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     analyticsService = coreMock.createSetup().analytics;
     registerTemplateApplyEvents({ analyticsService });
   });
 
   const getSchema = (eventType: string) => {
-    const call = (analyticsService.registerEventType as jest.Mock).mock.calls.find(
+    const call = (analyticsService.registerEventType as Mock).mock.calls.find(
       ([options]) => options.eventType === eventType
     );
 
@@ -33,7 +36,7 @@ describe('registerTemplateApplyEvents', () => {
   it('registers exactly the three apply-family event types', () => {
     expect(analyticsService.registerEventType).toHaveBeenCalledTimes(3);
     expect(
-      (analyticsService.registerEventType as jest.Mock).mock.calls
+      (analyticsService.registerEventType as Mock).mock.calls
         .map(([options]) => options.eventType)
         .sort()
     ).toEqual([

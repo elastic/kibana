@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import { TestProviders } from '../../common/mock';
 
 describe('renderAttachmentAction', () => {
   it('renders a BUTTON action with EuiButtonIcon inside EuiFlexItem', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const action = {
       type: AttachmentActionType.BUTTON as const,
       isPrimary: true,
@@ -36,7 +38,7 @@ describe('renderAttachmentAction', () => {
   });
 
   it('calls onClick when the BUTTON action button is clicked', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const action = {
       type: AttachmentActionType.BUTTON as const,
       isPrimary: true,
@@ -96,7 +98,7 @@ describe('renderAttachmentAction', () => {
       type: AttachmentActionType.BUTTON as const,
       label: 'Delete',
       iconType: 'trash',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     };
 
     render(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -13,15 +16,15 @@ import { EmptyPage } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('EmptyPage', () => {
-  const mockOnCreateClick = jest.fn();
+  const mockOnCreateClick = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -37,10 +40,10 @@ describe('EmptyPage', () => {
           },
         },
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(false),
+          useBooleanValue: vi.fn().mockReturnValue(false),
         },
       },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    } as unknown as Mocked<ReturnType<typeof useKibana>>);
   });
 
   it('renders the empty schedule state', () => {

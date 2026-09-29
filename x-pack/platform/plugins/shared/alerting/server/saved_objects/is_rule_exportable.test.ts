@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskRunnerFactory } from '../task_runner';
@@ -22,12 +25,12 @@ import { RULE_SAVED_OBJECT_TYPE } from '.';
 
 let ruleTypeRegistryParams: ConstructorOptions;
 let logger: MockedLogger;
-let mockedLicenseState: jest.Mocked<ILicenseState>;
+let mockedLicenseState: Mocked<ILicenseState>;
 const taskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   mockedLicenseState = licenseStateMock.create();
   logger = loggerMock.create();
   ruleTypeRegistryParams = {
@@ -58,7 +61,7 @@ describe('isRuleExportable', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: jest.fn(),
+      executor: vi.fn(),
       category: 'test',
       producer: 'alerts',
       solution: 'stack',
@@ -119,7 +122,7 @@ describe('isRuleExportable', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: false,
-      executor: jest.fn(),
+      executor: vi.fn(),
       category: 'test',
       producer: 'alerts',
       solution: 'stack',
@@ -183,7 +186,7 @@ describe('isRuleExportable', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: false,
-      executor: jest.fn(),
+      executor: vi.fn(),
       category: 'test',
       producer: 'alerts',
       solution: 'stack',

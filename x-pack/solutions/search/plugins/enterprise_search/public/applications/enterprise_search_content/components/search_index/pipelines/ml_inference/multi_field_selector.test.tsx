@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -23,15 +25,15 @@ const DEFAULT_VALUES = {
 };
 
 const DEFAULT_ACTIONS = {
-  addSelectedFieldsToMapping: jest.fn(),
-  removeFieldFromMapping: jest.fn(),
-  selectFields: jest.fn(),
-  setTargetField: jest.fn(),
+  addSelectedFieldsToMapping: vi.fn(),
+  removeFieldFromMapping: vi.fn(),
+  selectFields: vi.fn(),
+  setTargetField: vi.fn(),
 };
 
 describe('MultiFieldMapping', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({});
     setMockActions(DEFAULT_ACTIONS);
   });
@@ -154,7 +156,7 @@ describe('SelectedFieldMappings', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({});
     setMockActions(DEFAULT_ACTIONS);
   });

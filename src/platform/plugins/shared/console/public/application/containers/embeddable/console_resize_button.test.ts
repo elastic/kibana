@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { EuiThemeComputed } from '@elastic/eui';
 import { getCurrentConsoleMaxSize } from './console_resize_button';
 
 describe('Console Resizing Tests', () => {
   describe('getCurrentConsoleMaxSize', () => {
-    let getElementByIdSpy: jest.SpyInstance;
+    let getElementByIdSpy: MockInstance;
     let mockBase: number;
     let mockAppRect: { height: number };
     let mockTheme: EuiThemeComputed<{}>;
@@ -21,7 +24,7 @@ describe('Console Resizing Tests', () => {
       mockBase = 16;
       mockAppRect = { height: 1000 };
       mockTheme = { base: mockBase } as unknown as EuiThemeComputed<{}>;
-      getElementByIdSpy = jest.spyOn(document, 'getElementById');
+      getElementByIdSpy = vi.spyOn(document, 'getElementById');
       getElementByIdSpy.mockImplementation((id: string) => {
         if (id === 'app-fixed-viewport') {
           return {

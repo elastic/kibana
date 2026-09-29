@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useDiscoverFieldForBreakdown } from './use_discover_field_for_breakdown';
 import type { Dimension } from '../../../../types';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../../common/constants';
 
 describe('useDiscoverFieldForBreakdown', () => {
-  const mockOnDimensionsChange = jest.fn();
+  const mockOnDimensionsChange = vi.fn();
 
   const createDimension = (name: string): Dimension => ({
     name,
@@ -24,7 +26,7 @@ describe('useDiscoverFieldForBreakdown', () => {
   const regionDimension = createDimension('region');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when breakdownField is undefined', () => {

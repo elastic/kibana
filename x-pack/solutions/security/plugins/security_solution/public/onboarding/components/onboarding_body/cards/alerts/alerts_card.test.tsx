@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { AlertsCard } from './alerts_card';
 import { TestProviders } from '../../../../../common/mock/test_providers';
@@ -11,25 +14,28 @@ import { render } from '@testing-library/react';
 import { OnboardingContextProvider } from '../../../onboarding_context';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
-jest.mock('../../../../../common/experimental_features_service', () => ({
-  ExperimentalFeaturesService: { get: jest.fn() },
-}));
-const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;
-const mockIsCardComplete = jest.fn();
-const mockIsCardAvailable = jest.fn();
+vi.mock('../../../../../common/experimental_features_service', () => {
+      const mocked = {
+      ExperimentalFeaturesService: { get: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockExperimentalFeatures = ExperimentalFeaturesService.get as Mock;
+const mockIsCardComplete = vi.fn();
+const mockIsCardAvailable = vi.fn();
 
 const props = {
-  setComplete: jest.fn(),
-  checkComplete: jest.fn(),
-  isCardComplete: jest.fn(),
-  setExpandedCardId: jest.fn(),
-  isCardAvailable: jest.fn(),
+  setComplete: vi.fn(),
+  checkComplete: vi.fn(),
+  isCardComplete: vi.fn(),
+  setExpandedCardId: vi.fn(),
+  isCardAvailable: vi.fn(),
 };
 
 describe('AlertsCard', () => {
   beforeEach(() => {
     mockExperimentalFeatures.mockReturnValue({});
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('description should be in the document', () => {

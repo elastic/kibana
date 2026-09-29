@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ESFilter } from '@kbn/es-types';
 import type { AnomaliesSearchParams } from '.';
 import { getAnomalies } from '.';
 
-const getFiltersFromMock = (mock: jest.Mock) => {
+const getFiltersFromMock = (mock: Mock) => {
   const [[searchParams]] = mock.mock.calls;
   return searchParams.query.bool.filter;
 };
@@ -31,14 +34,14 @@ describe('getAnomalies', () => {
   });
 
   it('calls the provided mlAnomalySearch function', async () => {
-    const mockMlAnomalySearch = jest.fn();
+    const mockMlAnomalySearch = vi.fn();
     await getAnomalies(searchParams, mockMlAnomalySearch);
 
     expect(mockMlAnomalySearch).toHaveBeenCalled();
   });
 
   it('passes anomalyThreshold as part of the query', async () => {
-    const mockMlAnomalySearch = jest.fn();
+    const mockMlAnomalySearch = vi.fn();
     await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
     const criteria = getBoolCriteriaFromFilters(filters);
@@ -49,7 +52,7 @@ describe('getAnomalies', () => {
   });
 
   it('passes time range as part of the query', async () => {
-    const mockMlAnomalySearch = jest.fn();
+    const mockMlAnomalySearch = vi.fn();
     await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
     const criteria = getBoolCriteriaFromFilters(filters);
@@ -70,7 +73,7 @@ describe('getAnomalies', () => {
   });
 
   it('passes a single jobId as part of the query', async () => {
-    const mockMlAnomalySearch = jest.fn();
+    const mockMlAnomalySearch = vi.fn();
     await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
     const criteria = getBoolCriteriaFromFilters(filters);
@@ -88,7 +91,7 @@ describe('getAnomalies', () => {
   });
 
   it('passes multiple jobIds as part of the query', async () => {
-    const mockMlAnomalySearch = jest.fn();
+    const mockMlAnomalySearch = vi.fn();
     searchParams.jobIds = ['jobId1', 'jobId2'];
     await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
@@ -107,7 +110,7 @@ describe('getAnomalies', () => {
   });
 
   it('ignores anomalies that do not have finalized scores', async () => {
-    const mockMlAnomalySearch = jest.fn();
+    const mockMlAnomalySearch = vi.fn();
     await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
 

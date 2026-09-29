@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
@@ -299,12 +301,12 @@ const notFoundError = new errors.ResponseError({
 describe('fetchMlInferencePipelines lib function', () => {
   const mockClient = {
     ingest: {
-      getPipeline: jest.fn(),
+      getPipeline: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return @ml-inference pipelines', async () => {
@@ -365,12 +367,12 @@ describe('getMlInferencePipelineProcessorNamesFromPipelines', () => {
 describe('fetchPipelineProcessorInferenceData lib function', () => {
   const mockClient = {
     ingest: {
-      getPipeline: jest.fn(),
+      getPipeline: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the inference processor data for the pipelines', async () => {
@@ -474,16 +476,16 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
 describe('getMlModelConfigsForModelIds lib function', () => {
   const mockClient = {
     ml: {
-      getTrainedModels: jest.fn(),
-      getTrainedModelsStats: jest.fn(),
+      getTrainedModels: vi.fn(),
+      getTrainedModelsStats: vi.fn(),
     },
   };
   const mockTrainedModelsProvider = {
-    getTrainedModels: jest.fn(),
+    getTrainedModels: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   mockClient.ml.getTrainedModels.mockImplementation(() =>
@@ -590,16 +592,16 @@ describe('getMlModelConfigsForModelIds lib function', () => {
 describe('fetchAndAddTrainedModelData lib function', () => {
   const mockClient = {
     ml: {
-      getTrainedModels: jest.fn(),
-      getTrainedModelsStats: jest.fn(),
+      getTrainedModels: vi.fn(),
+      getTrainedModelsStats: vi.fn(),
     },
   };
   const mockTrainedModelsProvider = {
-    getTrainedModels: jest.fn(),
+    getTrainedModels: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should update the pipeline processor data with model type of deployment status info', async () => {
@@ -712,19 +714,19 @@ describe('fetchAndAddTrainedModelData lib function', () => {
 describe('fetchMlInferencePipelineProcessors lib function', () => {
   const mockClient = {
     ingest: {
-      getPipeline: jest.fn(),
+      getPipeline: vi.fn(),
     },
     ml: {
-      getTrainedModels: jest.fn(),
-      getTrainedModelsStats: jest.fn(),
+      getTrainedModels: vi.fn(),
+      getTrainedModelsStats: vi.fn(),
     },
   };
   const mockTrainedModelsProvider = {
-    getTrainedModels: jest.fn(),
+    getTrainedModels: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when Machine Learning is disabled in the current space', () => {

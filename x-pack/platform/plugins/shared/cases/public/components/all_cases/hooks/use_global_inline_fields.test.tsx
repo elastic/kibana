@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useGlobalInlineFields } from './use_global_inline_fields';
 import { useGetFieldDefinitions } from '../../field_library/hooks/use_get_field_definitions';
 
-jest.mock('../../field_library/hooks/use_get_field_definitions');
-const useGetFieldDefinitionsMock = useGetFieldDefinitions as jest.Mock;
+vi.mock('../../field_library/hooks/use_get_field_definitions');
+const useGetFieldDefinitionsMock = useGetFieldDefinitions as Mock;
 
 describe('useGlobalInlineFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('filters out display-only (e.g. MARKDOWN) fields — they hold no per-case value', () => {

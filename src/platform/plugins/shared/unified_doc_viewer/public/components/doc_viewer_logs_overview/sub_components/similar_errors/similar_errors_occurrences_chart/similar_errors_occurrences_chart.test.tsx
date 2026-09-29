@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SimilarErrorsOccurrencesChart } from '.';
@@ -18,28 +21,34 @@ import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 const NULLIFY_HEADER = 'SET unmapped_fields = "NULLIFY";';
 
-const mockUseDataSourcesContext = jest.fn(() => ({
+const mockUseDataSourcesContext = vi.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },
   profileId: 'test-profile',
 }));
 
-jest.mock('../../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: () => mockUseDataSourcesContext(),
-}));
+vi.mock('../../../../../hooks/use_data_sources', () => {
+      const mocked = {
+      useDataSourcesContext: () => mockUseDataSourcesContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../content_framework/chart', () => ({
-  ContentFrameworkChart: ({ children, title, ...rest }: any) => (
-    <div data-test-subj="ContentFrameworkChart" {...rest}>
-      <h3>{title}</h3>
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../../content_framework/chart', () => {
+      const mocked = {
+      ContentFrameworkChart: ({ children, title, ...rest }: any) => (
+        <div data-test-subj="ContentFrameworkChart" {...rest}>
+          <h3>{title}</h3>
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedGetParentApi: (() => any) | undefined;
 
-jest.mock('@kbn/embeddable-plugin/public', () => {
-  const original = jest.requireActual('@kbn/embeddable-plugin/public');
+vi.mock('@kbn/embeddable-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/embeddable-plugin/public'));
   return {
     ...original,
     EmbeddableRenderer: ({ type, getParentApi }: any) => {
@@ -49,7 +58,7 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
   };
 });
 
-const mockBuild = jest.fn();
+const mockBuild = vi.fn();
 
 setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, {
@@ -57,30 +66,30 @@ setUnifiedDocViewerServices(
       query: {
         timefilter: {
           timefilter: {
-            getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+            getTime: vi.fn(() => ({ from: 'now-15m', to: 'now' })),
           },
         },
       },
       dataViews: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
     },
   })
 );
 
-jest.mock('@kbn/lens-embeddable-utils', () => {
+vi.mock('@kbn/lens-embeddable-utils', () => {
   return {
-    LensConfigBuilder: jest.fn().mockImplementation(() => ({
+    LensConfigBuilder: vi.fn().mockImplementation(() => ({
       build: mockBuild,
     })),
   };
 });
 
-const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
+const LensConfigBuilderMock = LensConfigBuilder as MockedClass<typeof LensConfigBuilder>;
 
 describe('SimilarErrorsOccurrencesChart', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedGetParentApi = undefined;
     mockUseDataSourcesContext.mockReturnValue({
       indexes: { logs: 'logs-*', apm: {} },

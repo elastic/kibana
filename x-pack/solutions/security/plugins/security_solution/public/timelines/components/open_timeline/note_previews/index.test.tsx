@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
@@ -28,29 +31,29 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_selector');
-jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
-jest.mock('../../../../data_view_manager/hooks/use_data_view');
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_selector');
+vi.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+vi.mock('../../../../data_view_manager/hooks/use_data_view');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
 
-jest.mock('./hooks/use_delete_note');
+vi.mock('./hooks/use_delete_note');
 
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/user_privileges');
 
-const deleteMutateMock = jest.fn();
+const deleteMutateMock = vi.fn();
 
 describe('NotePreviews', () => {
   let mockResults: OpenTimelineResult[];
@@ -64,24 +67,24 @@ describe('NotePreviews', () => {
     note1updated = moment('2019-03-24T04:12:33.000Z').valueOf();
     note2updated = moment(note1updated).add(1, 'minute').valueOf();
     note3updated = moment(note2updated).add(1, 'minute').valueOf();
-    (useDeepEqualSelector as jest.Mock).mockReset();
-    (useDeleteNote as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as Mock).mockReset();
+    (useDeleteNote as Mock).mockReturnValue({
       mutate: deleteMutateMock,
-      onSuccess: jest.fn(),
-      onError: jest.fn(),
+      onSuccess: vi.fn(),
+      onError: vi.fn(),
       isLoading: false,
     });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: {
         crud: true,
       },
     });
-    (useSelectedPatterns as jest.Mock).mockReturnValue(['test1', 'test2']);
-    jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: jest.fn() });
+    (useSelectedPatterns as Mock).mockReturnValue(['test1', 'test2']);
+    vi.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
+    (useExpandableFlyoutApi as Mock).mockReturnValue({ openFlyout: vi.fn() });
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   test('it renders a note preview for each note when isModal is false', () => {
@@ -196,7 +199,7 @@ describe('NotePreviews', () => {
 
   test('it renders timeline description as a note when showTimelineDescription is true and timelineId is defined', () => {
     const timeline = mockTimelineResults[0];
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+    (useDeepEqualSelector as Mock).mockReturnValue(timeline);
 
     const wrapper = mountWithI18nProvider(
       <NotePreviews notes={[]} showTimelineDescription timelineId="test-timeline-id" />,
@@ -212,7 +215,7 @@ describe('NotePreviews', () => {
 
   test('it does`t render timeline description as a note when it is undefined', () => {
     const timeline = mockTimelineResults[0];
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({ ...timeline, description: undefined });
+    (useDeepEqualSelector as Mock).mockReturnValue({ ...timeline, description: undefined });
 
     const wrapper = mountWithI18nProvider(<NotePreviews notes={[]} />, {
       wrappingComponent: createReactQueryWrapper(),
@@ -223,7 +226,7 @@ describe('NotePreviews', () => {
 
   test('it should disable the delete note button if the savedObjectId is falsy', () => {
     const timeline = mockTimelineResults[0];
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+    (useDeepEqualSelector as Mock).mockReturnValue(timeline);
 
     const wrapper = mountWithI18nProvider(
       <NotePreviews
@@ -247,7 +250,7 @@ describe('NotePreviews', () => {
 
   test('it should enable the delete button if the savedObjectId exists', () => {
     const timeline = mockTimelineResults[0];
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+    (useDeepEqualSelector as Mock).mockReturnValue(timeline);
 
     const wrapper = mountWithI18nProvider(
       <NotePreviews
@@ -272,7 +275,7 @@ describe('NotePreviews', () => {
 
   test('should render toggle event details action by default', () => {
     const timeline = mockTimelineResults[0];
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+    (useDeepEqualSelector as Mock).mockReturnValue(timeline);
 
     const wrapper = mountWithI18nProvider(
       <TestProviders>
@@ -300,7 +303,7 @@ describe('NotePreviews', () => {
 
   test('should not render toggle event details action when showToggleEventDetailsAction is false ', () => {
     const timeline = mockTimelineResults[0];
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+    (useDeepEqualSelector as Mock).mockReturnValue(timeline);
 
     const wrapper = mountWithI18nProvider(
       <TestProviders>
@@ -330,7 +333,7 @@ describe('NotePreviews', () => {
   describe('Toggle event details', () => {
     const renderWithNote = () => {
       const timeline = mockTimelineResults[0];
-      (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+      (useDeepEqualSelector as Mock).mockReturnValue(timeline);
 
       return render(
         <TestProviders>
@@ -355,8 +358,8 @@ describe('NotePreviews', () => {
     };
 
     it('should open the legacy expandable flyout when the new flyout is disabled', () => {
-      const openFlyout = jest.fn();
-      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout });
+      const openFlyout = vi.fn();
+      (useExpandableFlyoutApi as Mock).mockReturnValue({ openFlyout });
 
       const { getByTestId } = renderWithNote();
 
@@ -376,7 +379,7 @@ describe('NotePreviews', () => {
     });
 
     it('should open the new document flyout (from pattern) when the new flyout is enabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       const { getByTestId } = renderWithNote();
 
@@ -395,7 +398,7 @@ describe('NotePreviews', () => {
       const timeline = {
         ...mockTimelineResults[0],
       };
-      (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+      (useDeepEqualSelector as Mock).mockReturnValue(timeline);
 
       render(
         <TestProviders>
@@ -438,14 +441,14 @@ describe('NotePreviews', () => {
 
   describe('Insuffiecient privileges', () => {
     it('should not show the delete note button', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         notesPrivileges: {
           crud: false,
         },
       });
 
       const timeline = mockTimelineResults[0];
-      (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+      (useDeepEqualSelector as Mock).mockReturnValue(timeline);
 
       const wrapper = mountWithI18nProvider(
         <NotePreviews

@@ -5,39 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 
-const mockHttpGet = jest.fn();
+const mockHttpGet = vi.fn();
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
-    try {
-      const res = await queryFn();
-      return Promise.resolve(res);
-    } catch (e) {
-      // opts.onError(e);
-    }
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
+        try {
+          const res = await queryFn();
+          return Promise.resolve(res);
+        } catch (e) {
+          // opts.onError(e);
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: {
-        get: mockHttpGet,
-      },
-      notifications: {
-        toasts: {
-          addError: jest.fn(),
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          http: {
+            get: mockHttpGet,
+          },
+          notifications: {
+            toasts: {
+              addError: vi.fn(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchQueryRulesSets Hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return query rules sets', async () => {
@@ -48,7 +56,7 @@ describe('useFetchQueryRulesSets Hook', () => {
       },
     ];
     mockHttpGet.mockReturnValue(queryRulesSets);
-    const { useFetchQueryRulesSets } = jest.requireActual('./use_fetch_query_rules_sets');
+    const { useFetchQueryRulesSets } = (await vi.importActual('./use_fetch_query_rules_sets'));
 
     const { result } = renderHook(() => useFetchQueryRulesSets());
     await waitFor(() => expect(result.current).resolves.toStrictEqual(queryRulesSets));

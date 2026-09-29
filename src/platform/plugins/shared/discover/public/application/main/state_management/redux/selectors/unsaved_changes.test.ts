@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
@@ -310,7 +312,7 @@ describe('selectHasUnsavedChanges', () => {
 
       const { profilesManagerMock, dataSourceProfileProviderMock } = createContextAwarenessMocks();
       services.profilesManager = profilesManagerMock;
-      jest.mocked(dataSourceProfileProviderMock.resolve).mockReturnValue({
+      vi.mocked(dataSourceProfileProviderMock.resolve).mockReturnValue({
         isMatch: true,
         context: {
           category: DataSourceCategory.Metrics,

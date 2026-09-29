@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import useObservable from 'react-use/lib/useObservable';
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
 import React from 'react';
@@ -23,12 +25,12 @@ const kibanaReactContextMock = createKibanaReactContext({
   mlServices: {
     mlApi: {
       annotations: {
-        indexAnnotation: jest.fn().mockResolvedValue({}),
-        deleteAnnotation: jest.fn().mockResolvedValue({}),
+        indexAnnotation: vi.fn().mockResolvedValue({}),
+        deleteAnnotation: vi.fn().mockResolvedValue({}),
       },
     },
   },
-  notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+  notifications: { toasts: { addDanger: vi.fn(), addSuccess: vi.fn() } },
 } as unknown as Partial<CoreStart>);
 
 const MlAnnotationUpdatesContextProvider = ({

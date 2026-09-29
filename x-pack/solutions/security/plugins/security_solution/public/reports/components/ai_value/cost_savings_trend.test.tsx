@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CostSavingsTrend } from './cost_savings_trend';
@@ -18,47 +21,65 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 
 // Mock dependencies
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      useToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_license', () => ({
-  licenseService: {
-    isEnterprise: jest.fn(),
-  },
-}));
+vi.mock('../../../common/hooks/use_license', () => {
+      const mocked = {
+      licenseService: {
+        isEnterprise: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../assistant/use_assistant_availability', () => ({
-  useAssistantAvailability: jest.fn(),
-}));
+vi.mock('../../../assistant/use_assistant_availability', () => {
+      const mocked = {
+      useAssistantAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_find_cost_savings_prompts', () => ({
-  useFindCostSavingsPrompts: jest.fn(),
-}));
+vi.mock('../../hooks/use_find_cost_savings_prompts', () => {
+      const mocked = {
+      useFindCostSavingsPrompts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_signal_index_with_default', () => ({
-  useSignalIndexWithDefault: jest.fn(),
-}));
+vi.mock('../../hooks/use_signal_index_with_default', () => {
+      const mocked = {
+      useSignalIndexWithDefault: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock VisualizationEmbeddable
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-}));
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
+      const mocked = {
+      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockLicenseService = licenseService as jest.Mocked<typeof licenseService>;
-const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
-const mockUseFindCostSavingsPrompts = useFindCostSavingsPrompts as jest.MockedFunction<
+const mockUseKibana = useKibana as Mock;
+const mockLicenseService = licenseService as Mocked<typeof licenseService>;
+const mockUseAssistantAvailability = useAssistantAvailability as Mock;
+const mockUseFindCostSavingsPrompts = useFindCostSavingsPrompts as MockedFunction<
   typeof useFindCostSavingsPrompts
 >;
-const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
+const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as MockedFunction<
   typeof useSignalIndexWithDefault
 >;
 
@@ -79,27 +100,27 @@ describe('CostSavingsTrend', () => {
     ({
       services: {
         http: {
-          fetch: jest.fn(),
+          fetch: vi.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false),
+          getBooleanValue: vi.fn().mockReturnValue(false),
         },
         notifications: {
           toasts: {
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
-            addWarning: jest.fn(),
+            addError: vi.fn(),
+            addSuccess: vi.fn(),
+            addWarning: vi.fn(),
           },
         },
         inference: {
-          chatComplete: jest.fn(),
+          chatComplete: vi.fn(),
         },
         uiSettings: {
-          get: jest.fn().mockReturnValue('test-connector-id'),
+          get: vi.fn().mockReturnValue('test-connector-id'),
         },
         settings: {
           client: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
         ...overrides,
@@ -107,7 +128,7 @@ describe('CostSavingsTrend', () => {
     } as Partial<StartServices>);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue(createMockKibanaServices());
 
     mockLicenseService.isEnterprise.mockReturnValue(true);

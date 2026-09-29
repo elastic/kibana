@@ -5,31 +5,40 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useInfiniteOverviewTrendsRequests } from './use_infinite_overview_trends_requests';
 import { WrappedHelper } from '../../../utils/testing';
 import type { OverviewStatusMetaData } from '../overview/types';
 import * as reduxHooks from 'react-redux-v7';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn(),
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_overview_trends_requests', () => ({
-  useOverviewTrendsRequests: jest.fn(),
-}));
+vi.mock('./use_overview_trends_requests', () => {
+      const mocked = {
+      useOverviewTrendsRequests: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useOverviewTrendsRequests } from './use_overview_trends_requests';
 
-const mockUseOverviewTrendsRequests = useOverviewTrendsRequests as jest.MockedFunction<
+const mockUseOverviewTrendsRequests = useOverviewTrendsRequests as MockedFunction<
   typeof useOverviewTrendsRequests
 >;
 
 describe('useInfiniteOverviewTrendsRequests', () => {
-  const mockDispatch = jest.fn();
-  const mockUseSelector = jest.fn();
+  const mockDispatch = vi.fn();
+  const mockUseSelector = vi.fn();
 
   const createMockMonitor = (configId: string, locationId: string) =>
     ({
@@ -48,9 +57,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (reduxHooks.useDispatch as jest.Mock).mockReturnValue(mockDispatch);
-    (reduxHooks.useSelector as jest.Mock).mockImplementation(mockUseSelector);
+    vi.clearAllMocks();
+    (reduxHooks.useDispatch as Mock).mockReturnValue(mockDispatch);
+    (reduxHooks.useSelector as Mock).mockImplementation(mockUseSelector);
     mockUseSelector.mockReturnValue({});
   });
 

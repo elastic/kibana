@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { invalidateUiamAPIKeys } from './invalidate_api_keys';
 
@@ -20,7 +22,7 @@ describe('invalidateUiamAPIKeys', () => {
   });
 
   test('authenticates the forged request with a raw UIAM credential as-is', async () => {
-    const invalidateUiamApiKeyFn = jest.fn().mockResolvedValue(invalidateResult);
+    const invalidateUiamApiKeyFn = vi.fn().mockResolvedValue(invalidateResult);
 
     await invalidateUiamAPIKeys(
       { uiamApiKey: 'essu_secret', apiKeyId: 'key-id' },
@@ -34,7 +36,7 @@ describe('invalidateUiamAPIKeys', () => {
   });
 
   test('normalizes a `base64(id:secret)` UIAM key before authenticating the forged request', async () => {
-    const invalidateUiamApiKeyFn = jest.fn().mockResolvedValue(invalidateResult);
+    const invalidateUiamApiKeyFn = vi.fn().mockResolvedValue(invalidateResult);
 
     await invalidateUiamAPIKeys(
       {

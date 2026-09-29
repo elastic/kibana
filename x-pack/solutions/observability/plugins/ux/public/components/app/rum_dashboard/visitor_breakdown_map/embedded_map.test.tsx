@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -26,7 +28,7 @@ describe('Embedded Map', () => {
 });
 
 const mockMapsStartService = {
-  Map: jest.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
+  Map: vi.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
 };
 
 const mockCore: () => any[] = () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,11 +15,14 @@ import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '@kbn/cloud-security-p
 import type { AzureCredentialsType } from '../types';
 
 // Mock the TechnicalPreviewText component
-jest.mock('../common', () => ({
-  TechnicalPreviewText: () => (
-    <span data-test-subj="technical-preview-text">{'Technical preview'}</span>
-  ),
-}));
+vi.mock('../common', () => {
+      const mocked = {
+      TechnicalPreviewText: () => (
+        <span data-test-subj="technical-preview-text">{'Technical preview'}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
@@ -38,10 +43,10 @@ const mockOptions = [
 ];
 
 describe('AzureCredentialTypeSelector', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {

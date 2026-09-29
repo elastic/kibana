@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
@@ -76,38 +79,38 @@ const ESCALATION_TEMPLATE = {
   },
 };
 
-const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
-  get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION),
+const makeClient = (overrides: Record<string, Mock> = {}) => ({
+  get: vi.fn().mockResolvedValue(MOCK_INVESTIGATION),
   // bulkGet returns a Map<id, conversation>; default resolves each id as a valid investigation.
-  bulkGet: jest.fn().mockImplementation(async (ids: string[]) => {
+  bulkGet: vi.fn().mockImplementation(async (ids: string[]) => {
     return new Map(
       ids.map((id) => [id, { ...MOCK_INVESTIGATION, id, template_id: INVESTIGATION_TEMPLATE_ID }])
     );
   }),
-  list: jest.fn(),
-  search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-  create: jest.fn().mockResolvedValue(MOCK_ESCALATION),
-  patchMetadata: jest.fn().mockResolvedValue({
+  list: vi.fn(),
+  search: vi.fn().mockResolvedValue({ results: [], total: 0 }),
+  create: vi.fn().mockResolvedValue(MOCK_ESCALATION),
+  patchMetadata: vi.fn().mockResolvedValue({
     conversation: MOCK_ESCALATION,
     changedFields: [ESCALATION_LINKED_INVESTIGATIONS_FIELD],
   }),
-  update: jest.fn().mockResolvedValue(MOCK_ESCALATION),
+  update: vi.fn().mockResolvedValue(MOCK_ESCALATION),
   ...overrides,
 });
 
-const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
+const makeService = (clientOverrides: Record<string, Mock> = {}) => {
   const client = makeClient(clientOverrides);
-  const getConversationClient = jest.fn().mockResolvedValue(client);
+  const getConversationClient = vi.fn().mockResolvedValue(client);
   const conversationTemplates = {
-    get: jest.fn().mockResolvedValue(ESCALATION_TEMPLATE),
-    list: jest.fn(),
+    get: vi.fn().mockResolvedValue(ESCALATION_TEMPLATE),
+    list: vi.fn(),
   };
 
   // Minimal stub — only needed for setStatus / getClosePreview tests.
   const investigationStatusService = {
-    getPreview: jest.fn().mockResolvedValue({ pending_proposal_count: 0, pending_proposals: [] }),
-    listPendingProposalsForRequest: jest.fn().mockResolvedValue([]),
-    setStatus: jest.fn().mockResolvedValue({
+    getPreview: vi.fn().mockResolvedValue({ pending_proposal_count: 0, pending_proposals: [] }),
+    listPendingProposalsForRequest: vi.fn().mockResolvedValue([]),
+    setStatus: vi.fn().mockResolvedValue({
       conversation_id: '',
       status: 'closed',
       dismissed_proposal_ids: [],
@@ -162,7 +165,7 @@ describe('EscalationsService.create', () => {
 
   it('never calls applyTemplate — escalation is born with the escalation template', async () => {
     const { service, client } = makeService();
-    const applyTemplate = jest.fn();
+    const applyTemplate = vi.fn();
     Object.assign(client, { applyTemplate });
 
     await service.create(request, {
@@ -176,7 +179,7 @@ describe('EscalationsService.create', () => {
 
   it('throws InvalidLinkedInvestigationError when linked_investigation_id is not an investigation', async () => {
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         ...MOCK_INVESTIGATION,
         template_id: 'escalation', // not an investigation
       }),
@@ -234,7 +237,7 @@ describe('EscalationsService.create', () => {
 
   it('does NOT copy status — lets the escalation template default (open) apply', async () => {
     const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         ...MOCK_INVESTIGATION,
         metadata: { ...INVESTIGATION_METADATA, status: 'closed' },
       }),
@@ -356,7 +359,7 @@ describe('EscalationsService.create', () => {
 describe('EscalationsService.update', () => {
   it('throws NotAnEscalationError when target is not an escalation', async () => {
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         ...MOCK_INVESTIGATION,
         template_id: INVESTIGATION_TEMPLATE_ID,
       }),
@@ -369,7 +372,7 @@ describe('EscalationsService.update', () => {
 
   it('calls patchMetadata when linked_investigations are provided (appends, not replaces)', async () => {
     const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'escalation-1',
         template_id: ESCALATION_TEMPLATE_ID,
         metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1'] },
@@ -391,7 +394,7 @@ describe('EscalationsService.update', () => {
 
   it('deduplicates linked_investigations — does not add an existing id again', async () => {
     const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'escalation-1',
         template_id: ESCALATION_TEMPLATE_ID,
         metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1', 'inv-2'] },
@@ -409,7 +412,7 @@ describe('EscalationsService.update', () => {
 
   it('calls client.update when title is provided', async () => {
     const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'escalation-1',
         template_id: ESCALATION_TEMPLATE_ID,
         metadata: {},
@@ -423,7 +426,7 @@ describe('EscalationsService.update', () => {
 
   it('does not call patchMetadata for a title-only update', async () => {
     const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'escalation-1',
         template_id: ESCALATION_TEMPLATE_ID,
         metadata: {},
@@ -437,7 +440,7 @@ describe('EscalationsService.update', () => {
 
   it('does not call client.update for a links-only update', async () => {
     const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'escalation-1',
         template_id: ESCALATION_TEMPLATE_ID,
         metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [] },
@@ -461,7 +464,7 @@ describe('EscalationsService.list', () => {
 
   it('calls client.search with the fixed non-closed escalations filter', async () => {
     const { service, client } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
+      search: vi.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
     });
 
     await service.list(request, { page: 1, per_page: 50, status: 'open' });
@@ -487,7 +490,7 @@ describe('EscalationsService.list', () => {
 
   it('uses metadata.status: "closed" filter when status is "closed"', async () => {
     const { service, client } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      search: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
     await service.list(request, { page: 1, per_page: 50, status: 'closed' });
@@ -498,18 +501,18 @@ describe('EscalationsService.list', () => {
       })
     );
     // Must not also apply the "not closed" clause.
-    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    const { filter } = (client.search as Mock).mock.calls[0][0] as { filter: string };
     expect(filter).not.toContain('not (metadata.status');
   });
 
   it('uses template-only filter (no status clause) when status is "all"', async () => {
     const { service, client } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      search: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
     await service.list(request, { page: 1, per_page: 50, status: 'all' });
 
-    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    const { filter } = (client.search as Mock).mock.calls[0][0] as { filter: string };
     // Template clause must be present.
     expect(filter).toContain(`template_id: "${ESCALATION_TEMPLATE_ID}"`);
     // No status filtering at all.
@@ -518,7 +521,7 @@ describe('EscalationsService.list', () => {
 
   it('passes sort updated_at desc explicitly to client.search', async () => {
     const { service, client } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      search: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
     await service.list(request, { page: 1, per_page: 50, status: 'open' });
@@ -532,7 +535,7 @@ describe('EscalationsService.list', () => {
 
   it('passes page and per_page through to client.search', async () => {
     const { service, client } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      search: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
     await service.list(request, { page: 3, per_page: 25, status: 'open' });
@@ -542,7 +545,7 @@ describe('EscalationsService.list', () => {
 
   it('wraps the client result in the pagination envelope', async () => {
     const { service } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 42 }),
+      search: vi.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 42 }),
     });
 
     const result = await service.list(request, { page: 2, per_page: 10, status: 'open' });
@@ -555,7 +558,7 @@ describe('EscalationsService.list', () => {
 
   it('returns empty results and total 0 when client.search returns nothing', async () => {
     const { service } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      search: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
     const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
@@ -568,7 +571,7 @@ describe('EscalationsService.list', () => {
 
   it('forwards the search string to client.search as query', async () => {
     const { service, client } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      search: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
     await service.list(request, { page: 1, per_page: 50, status: 'open', search: 'critical' });
@@ -578,7 +581,7 @@ describe('EscalationsService.list', () => {
 
   it('omits query from client.search when search is not provided', async () => {
     const { service, client } = makeService({
-      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      search: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
     await service.list(request, { page: 1, per_page: 50, status: 'open' });
@@ -921,7 +924,7 @@ describe('EscalationsService.listLinkedInvestigations', () => {
 
   it('returns empty results when no investigations are linked', async () => {
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue(makeEscalation([])),
+      get: vi.fn().mockResolvedValue(makeEscalation([])),
     });
 
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
@@ -931,8 +934,8 @@ describe('EscalationsService.listLinkedInvestigations', () => {
 
   it('returns summaries in the stored order', async () => {
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'inv-b'])),
-      bulkGet: jest.fn().mockResolvedValue(
+      get: vi.fn().mockResolvedValue(makeEscalation(['inv-a', 'inv-b'])),
+      bulkGet: vi.fn().mockResolvedValue(
         new Map([
           ['inv-a', INV_A],
           ['inv-b', INV_B],
@@ -947,8 +950,8 @@ describe('EscalationsService.listLinkedInvestigations', () => {
 
   it('maps status "closed" to "closed"', async () => {
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue(makeEscalation(['inv-b'])),
-      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-b', INV_B]])),
+      get: vi.fn().mockResolvedValue(makeEscalation(['inv-b'])),
+      bulkGet: vi.fn().mockResolvedValue(new Map([['inv-b', INV_B]])),
     });
 
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
@@ -959,8 +962,8 @@ describe('EscalationsService.listLinkedInvestigations', () => {
   it('defaults missing status to "open"', async () => {
     const invNoStatus = { ...INV_A, metadata: {} };
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a'])),
-      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-a', invNoStatus]])),
+      get: vi.fn().mockResolvedValue(makeEscalation(['inv-a'])),
+      bulkGet: vi.fn().mockResolvedValue(new Map([['inv-a', invNoStatus]])),
     });
 
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
@@ -970,9 +973,9 @@ describe('EscalationsService.listLinkedInvestigations', () => {
 
   it('silently drops ids that bulkGet could not resolve (inaccessible / deleted)', async () => {
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'inv-missing'])),
+      get: vi.fn().mockResolvedValue(makeEscalation(['inv-a', 'inv-missing'])),
       // bulkGet only resolves inv-a; inv-missing is absent from the map
-      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-a', INV_A]])),
+      bulkGet: vi.fn().mockResolvedValue(new Map([['inv-a', INV_A]])),
     });
 
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
@@ -982,7 +985,7 @@ describe('EscalationsService.listLinkedInvestigations', () => {
 
   it('throws NotAnEscalationError when the target is not an escalation', async () => {
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'not-an-escalation',
         template_id: INVESTIGATION_TEMPLATE_ID,
         title: 'Oops',
@@ -997,8 +1000,8 @@ describe('EscalationsService.listLinkedInvestigations', () => {
 
   it('includes agent_id in each summary', async () => {
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a'])),
-      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-a', INV_A]])),
+      get: vi.fn().mockResolvedValue(makeEscalation(['inv-a'])),
+      bulkGet: vi.fn().mockResolvedValue(new Map([['inv-a', INV_A]])),
     });
 
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
@@ -1016,8 +1019,8 @@ describe('EscalationsService.listLinkedInvestigations', () => {
       agent_id: 'agent-3',
     };
     const { service } = makeService({
-      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'another-escalation'])),
-      bulkGet: jest.fn().mockResolvedValue(
+      get: vi.fn().mockResolvedValue(makeEscalation(['inv-a', 'another-escalation'])),
+      bulkGet: vi.fn().mockResolvedValue(
         new Map([
           ['inv-a', INV_A],
           ['another-escalation', escalationEntry],

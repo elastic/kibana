@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAnomalyChartPanelHighlight } from './use_anomaly_chart_panel_highlight';
 
-jest.mock('@kbn/ml-anomaly-utils', () => ({
-  useSeverityColor: (score: number) => {
-    if (score >= 75) return '#ff0000';
-    if (score >= 50) return '#ff9900';
-    return '#ffcc00';
-  },
-}));
+vi.mock('@kbn/ml-anomaly-utils', () => {
+      const mocked = {
+      useSeverityColor: (score: number) => {
+        if (score >= 75) return '#ff0000';
+        if (score >= 50) return '#ff9900';
+        return '#ffcc00';
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAnomalyChartPanelHighlight', () => {
   it('returns undefined when no anomaly score is provided', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { fetchProvider } from './fetch';
@@ -21,8 +23,8 @@ describe('fetchProvider', () => {
     const kibanaIndex = '123';
     const getIndexForType = () => Promise.resolve(kibanaIndex);
     mockLogger = {
-      warn: jest.fn(),
-      debug: jest.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
     } as any;
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     fetchFn = fetchProvider(getIndexForType, mockLogger);

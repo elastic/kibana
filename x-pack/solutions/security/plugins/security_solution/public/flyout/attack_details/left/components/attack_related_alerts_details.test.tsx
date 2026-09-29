@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -13,23 +16,26 @@ import { useAttackDetailsContext } from '../../context';
 import { useOriginalAlertIds } from '../../hooks/use_original_alert_ids';
 import { ATTACK_DETAILS_LEFT_INSIGHTS_CORRELATION_TABLE } from '../../constants/test_ids';
 
-const mockCorrelationsDetailsAlertsTable = jest.fn((props: { 'data-test-subj'?: string }) => (
+const mockCorrelationsDetailsAlertsTable = vi.fn((props: { 'data-test-subj'?: string }) => (
   <div data-test-subj={props['data-test-subj']}>{'CorrelationsDetailsAlertsTable'}</div>
 ));
 
-jest.mock('../../context');
-jest.mock('../../hooks/use_original_alert_ids');
+vi.mock('../../context');
+vi.mock('../../hooks/use_original_alert_ids');
 
-jest.mock(
+vi.mock(
   '../../../../flyout_v2/document/tools/correlations/components/correlations_details_alerts_table',
-  () => ({
-    CorrelationsDetailsAlertsTable: (props: { [key: string]: unknown }) =>
-      mockCorrelationsDetailsAlertsTable(props),
-  })
+  () => {
+      const mocked = {
+        CorrelationsDetailsAlertsTable: (props: { [key: string]: unknown }) =>
+          mockCorrelationsDetailsAlertsTable(props),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseAttackDetailsContext = useAttackDetailsContext as jest.Mock;
-const mockUseOriginalAlertIds = useOriginalAlertIds as jest.Mock;
+const mockUseAttackDetailsContext = useAttackDetailsContext as Mock;
+const mockUseOriginalAlertIds = useOriginalAlertIds as Mock;
 
 const mockContext = {
   scopeId: 'timeline-1',
@@ -38,7 +44,7 @@ const mockContext = {
 
 describe('AttackRelatedAlertsDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAttackDetailsContext.mockReturnValue(mockContext);
     mockUseOriginalAlertIds.mockReturnValue(['alert-1', 'alert-2']);
   });

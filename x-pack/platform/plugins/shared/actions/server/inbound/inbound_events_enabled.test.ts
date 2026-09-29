@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   assertInboundEventsToggleAllowed,
   resolveCreateInboundEventsEnabled,
@@ -13,15 +15,15 @@ import {
   shouldMintInboundIdentity,
 } from './inbound_events_enabled';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeIsInboundOnly: jest.fn(
+    connectorTypeIsInboundOnly: vi.fn(
       (actionTypeId: string) => actionTypeId === '.inboundWebhook'
     ),
-    connectorTypeIsDual: jest.fn((actionTypeId: string) => actionTypeId === '.dual'),
-    connectorTypeHasInboundEvents: jest.fn(
+    connectorTypeIsDual: vi.fn((actionTypeId: string) => actionTypeId === '.dual'),
+    connectorTypeHasInboundEvents: vi.fn(
       (actionTypeId: string) => actionTypeId === '.inboundWebhook' || actionTypeId === '.dual'
     ),
   };

@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from './use_kibana';
 import { useSpaceId } from './use_space_id';
 import { createStartServicesMock, createUseKibanaMockValue } from '../mocks';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useSpaceId', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the current space ID', async () => {
     const services = createStartServicesMock();
-    (services.spaces.getActiveSpace as jest.Mock).mockResolvedValue({ id: 'my-space' });
+    (services.spaces.getActiveSpace as Mock).mockResolvedValue({ id: 'my-space' });
     mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
 
     const { result } = renderHook(() => useSpaceId());
@@ -35,7 +38,7 @@ describe('useSpaceId', () => {
 
   it('should return undefined initially before space is loaded', () => {
     const services = createStartServicesMock();
-    (services.spaces.getActiveSpace as jest.Mock).mockResolvedValue({ id: 'default' });
+    (services.spaces.getActiveSpace as Mock).mockResolvedValue({ id: 'default' });
     mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
 
     const { result } = renderHook(() => useSpaceId());

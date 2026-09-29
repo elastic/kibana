@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
@@ -17,8 +19,8 @@ import { uiamServiceMock } from '../../uiam/uiam_service.mock';
 
 describe('UiamOAuth', () => {
   let uiamOAuth: UiamOAuth;
-  let mockLicense: jest.Mocked<SecurityLicense>;
-  let mockUiam: jest.Mocked<UiamServicePublic>;
+  let mockLicense: Mocked<SecurityLicense>;
+  let mockUiam: Mocked<UiamServicePublic>;
   let logger: Logger;
 
   const createMockRequest = (authHeader?: string): KibanaRequest => {

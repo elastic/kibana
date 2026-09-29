@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { reportMetrics } from './report_metrics';
 import type { CliOptions, SetupProjectResult, BuildApiMapResult, AllPluginStats } from '../types';
 
 // Mock dependencies
-jest.mock('@kbn/ci-stats-reporter', () => ({
-  CiStatsReporter: {
-    fromEnv: jest.fn(() => ({
-      metrics: jest.fn(),
-    })),
-  },
-}));
+vi.mock('@kbn/ci-stats-reporter', () => {
+      const mocked = {
+      CiStatsReporter: {
+        fromEnv: vi.fn(() => ({
+          metrics: vi.fn(),
+        })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 
@@ -37,16 +43,16 @@ describe('reportMetrics', () => {
     });
 
     transaction = {
-      startSpan: jest.fn(() => ({
-        end: jest.fn(),
+      startSpan: vi.fn(() => ({
+        end: vi.fn(),
       })),
     };
 
     mockReporter = {
-      metrics: jest.fn(),
+      metrics: vi.fn(),
     };
 
-    (CiStatsReporter.fromEnv as jest.Mock).mockReturnValue(mockReporter);
+    (CiStatsReporter.fromEnv as Mock).mockReturnValue(mockReporter);
 
     const mockPlugin = {
       id: 'test-plugin',

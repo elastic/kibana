@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PathConfigType } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createDataFolder } from './create_data_folder';
 import { mkdir } from './fs';
 
-jest.mock('./fs', () => ({
-  mkdir: jest.fn(() => Promise.resolve('')),
-}));
+vi.mock('./fs', () => {
+      const mocked = {
+      mkdir: vi.fn(() => Promise.resolve('')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mkdirMock = mkdir as jest.Mock;
+const mkdirMock = mkdir as Mock;
 
 describe('createDataFolder', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -31,7 +37,7 @@ describe('createDataFolder', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls `mkdir` with the correct parameters', async () => {

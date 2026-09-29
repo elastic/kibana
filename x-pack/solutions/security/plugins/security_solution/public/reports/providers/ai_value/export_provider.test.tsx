@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { useHistory } from 'react-router-dom';
@@ -17,20 +20,20 @@ import { useKibana } from '../../../common/lib/kibana';
 import { AIValueReportEventTypes } from '../../../common/lib/telemetry/events/ai_value_report/types';
 import type { AIValueReportParams } from '../../../../common/locators/ai_value_report/locator';
 
-jest.mock('react-router', () => {
+vi.mock('react-router', () => {
   return {
-    useHistory: jest.fn(),
+    useHistory: vi.fn(),
   };
 });
 
-jest.mock('../../../common/lib/kibana', () => {
+vi.mock('../../../common/lib/kibana', () => {
   return {
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
   };
 });
-const useHistoryMock = useHistory as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
-const reportEventMock = jest.fn();
+const useHistoryMock = useHistory as Mock;
+const useKibanaMock = useKibana as Mock;
+const reportEventMock = vi.fn();
 
 type ContextValue = ReturnType<typeof useAIValueExportContext>;
 
@@ -109,7 +112,7 @@ describe('AIValueExportContext', () => {
   const setInsight = (insight: string) => act(() => context?.setInsight(insight));
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     Object.defineProperties(global, {
       crypto: { value: webcrypto, writable: true },
     });

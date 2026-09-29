@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useLocalStorage } from './use_local_storage';
 
@@ -56,8 +58,8 @@ describe('useLocalStorage', () => {
   });
 
   it('should listen for storage events to window, and remove the listener upon unmount', () => {
-    const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
-    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
 
     const { unmount } = renderHook(() => useLocalStorage(key, defaultValue));
 

@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveSolution } from './use_active_solution';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.mocked(useKibana);
+const mockUseKibana = vi.mocked(useKibana);
 
 function mockActiveSolutionNavId(solutionNavId: string | null) {
   mockUseKibana.mockReturnValue({
@@ -31,7 +36,7 @@ function mockActiveSolutionNavId(solutionNavId: string | null) {
 
 describe('useActiveSolution', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns undefined in classic-nav mode (no active solution)', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { IToasts } from '@kbn/core/public';
@@ -20,18 +23,18 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: Providers });
 };
 
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+vi.mock('../../common/lib/kibana');
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('Update Api Key', () => {
-  const onCancel = jest.fn();
-  const apiUpdateApiKeyCall = jest.fn();
-  const setIsLoadingState = jest.fn();
-  const onUpdated = jest.fn();
-  const onSearchPopulate = jest.fn();
+  const onCancel = vi.fn();
+  const apiUpdateApiKeyCall = vi.fn();
+  const setIsLoadingState = vi.fn();
+  const onUpdated = vi.fn();
+  const onSearchPopulate = vi.fn();
 
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
 
   beforeAll(() => {
     useKibanaMock().services.notifications.toasts = {
@@ -41,7 +44,7 @@ describe('Update Api Key', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Render modal updates Api Key', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ArtifactListPageProps } from '../artifact_list_page';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,8 +26,8 @@ import { entriesToConditionEntries } from '../../../../common/utils/exception_li
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getDeferred } from '../../../mocks/utils';
 
-jest.mock('../../../../common/components/user_privileges');
-const useUserPrivileges = _useUserPrivileges as jest.Mock;
+vi.mock('../../../../common/components/user_privileges');
+const useUserPrivileges = _useUserPrivileges as Mock;
 
 describe('When the flyout is opened in the ArtifactListPage component', () => {
   let render: (

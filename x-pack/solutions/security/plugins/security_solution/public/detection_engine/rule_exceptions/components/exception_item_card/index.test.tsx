@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -15,7 +17,7 @@ import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/res
 import { TestProviders } from '../../../../common/mock';
 import { ExceptionItemCard } from '.';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('ExceptionItemCard', () => {
   it('it renders header, item meta information and conditions', () => {
@@ -25,8 +27,8 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          onDeleteException={jest.fn()}
-          onEditException={jest.fn()}
+          onDeleteException={vi.fn()}
+          onEditException={vi.fn()}
           exceptionItem={exceptionItem}
           isEndpoint={false}
           listAndReferences={{
@@ -73,8 +75,8 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          onDeleteException={jest.fn()}
-          onEditException={jest.fn()}
+          onDeleteException={vi.fn()}
+          onEditException={vi.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}
@@ -121,8 +123,8 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions
-          onDeleteException={jest.fn()}
-          onEditException={jest.fn()}
+          onDeleteException={vi.fn()}
+          onEditException={vi.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}
@@ -158,14 +160,14 @@ describe('ExceptionItemCard', () => {
   });
 
   it('it invokes "onEditException" when edit button clicked', () => {
-    const mockOnEditException = jest.fn();
+    const mockOnEditException = vi.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          onDeleteException={jest.fn()}
+          onDeleteException={vi.fn()}
           onEditException={mockOnEditException}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
@@ -216,14 +218,14 @@ describe('ExceptionItemCard', () => {
   });
 
   it('it invokes "onEditException" when edit button clicked when "isEndpoint" is "true"', () => {
-    const mockOnEditException = jest.fn();
+    const mockOnEditException = vi.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          onDeleteException={jest.fn()}
+          onDeleteException={vi.fn()}
           onEditException={mockOnEditException}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
@@ -274,7 +276,7 @@ describe('ExceptionItemCard', () => {
   });
 
   it('it invokes "onDeleteException" when delete button clicked', () => {
-    const mockOnDeleteException = jest.fn();
+    const mockOnDeleteException = vi.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
@@ -282,7 +284,7 @@ describe('ExceptionItemCard', () => {
         <ExceptionItemCard
           disableActions={false}
           onDeleteException={mockOnDeleteException}
-          onEditException={jest.fn()}
+          onEditException={vi.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}
@@ -336,7 +338,7 @@ describe('ExceptionItemCard', () => {
   });
 
   it('it invokes "onDeleteException" when delete button clicked when "isEndpoint" is "true"', () => {
-    const mockOnDeleteException = jest.fn();
+    const mockOnDeleteException = vi.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
@@ -344,7 +346,7 @@ describe('ExceptionItemCard', () => {
         <ExceptionItemCard
           disableActions={false}
           onDeleteException={mockOnDeleteException}
-          onEditException={jest.fn()}
+          onEditException={vi.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint
@@ -404,8 +406,8 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          onDeleteException={jest.fn()}
-          onEditException={jest.fn()}
+          onDeleteException={vi.fn()}
+          onEditException={vi.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
           isEndpoint={false}

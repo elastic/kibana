@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Aggregators } from './types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
@@ -13,7 +15,7 @@ import { getViewInAppUrl } from './get_view_in_app_url';
 
 describe('getViewInAppUrl', () => {
   const logsLocator = {
-    getRedirectUrl: jest.fn(() => 'mockedGetRedirectUrl'),
+    getRedirectUrl: vi.fn(() => 'mockedGetRedirectUrl'),
   } as unknown as LocatorPublic<LogsLocatorParams>;
   const startedAt = '2023-12-07T16:30:15.403Z';
   const endedAt = '2023-12-07T20:30:15.403Z';
@@ -24,7 +26,7 @@ describe('getViewInAppUrl', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should return empty string if logsLocator is not provided', () => {
@@ -76,7 +78,7 @@ describe('getViewInAppUrl', () => {
   });
 
   it('should extend the time range with the lookback window', () => {
-    const mockDateNow = jest
+    const mockDateNow = vi
       .spyOn(global.Date, 'now')
       .mockImplementation(() => new Date('2026-01-01T00:00:00.000Z').valueOf());
 

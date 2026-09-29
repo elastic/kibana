@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { InferenceConnector } from '@kbn/inference-common';
 import type {
@@ -18,10 +20,10 @@ const createSearchInferenceEndpointsMock = (
   feature?: InferenceFeatureConfig
 ): SearchInferenceEndpointsPluginStart => ({
   features: {
-    get: jest.fn().mockReturnValue(feature),
+    get: vi.fn().mockReturnValue(feature),
   } as any,
   endpoints: {
-    getForFeature: jest.fn().mockResolvedValue({ endpoints, warnings: [], soEntryFound: false }),
+    getForFeature: vi.fn().mockResolvedValue({ endpoints, warnings: [], soEntryFound: false }),
   },
 });
 

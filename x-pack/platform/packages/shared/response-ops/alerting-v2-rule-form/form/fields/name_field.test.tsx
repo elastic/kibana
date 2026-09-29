@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -159,7 +161,7 @@ describe('NameField', () => {
   it('does not show a length error when submitted with a name of exactly 256 characters', async () => {
     const queryClient = createTestQueryClient();
     const services = createMockServices();
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
       const form = useForm<FormValues>({

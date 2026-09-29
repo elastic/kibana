@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setupCapabilities } from './capabilities';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { Capabilities, CoreStart } from '@kbn/core/server';
@@ -95,7 +97,7 @@ describe('setupCapabilities', () => {
     const security = securityMock.createStart();
     security.authz.mode.useRbacForRequest.mockReturnValue(true);
 
-    const mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: false });
+    const mockCheckPrivileges = vi.fn().mockResolvedValue({ hasAllRequested: false });
     security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(mockCheckPrivileges);
     coreSetup.getStartServices.mockResolvedValue([
       undefined as unknown as CoreStart,
@@ -137,7 +139,7 @@ describe('setupCapabilities', () => {
     const security = securityMock.createStart();
     security.authz.mode.useRbacForRequest.mockReturnValue(true);
 
-    const mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
+    const mockCheckPrivileges = vi.fn().mockResolvedValue({ hasAllRequested: true });
     security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(mockCheckPrivileges);
     coreSetup.getStartServices.mockResolvedValue([
       undefined as unknown as CoreStart,
@@ -174,7 +176,7 @@ describe('setupCapabilities', () => {
     const coreSetup = coreMock.createSetup();
     const security = securityMock.createStart();
     security.authz.mode.useRbacForRequest.mockReturnValue(true);
-    const mockCheckPrivileges = jest
+    const mockCheckPrivileges = vi
       .fn()
       .mockRejectedValue(new Error('this should not have been called'));
     security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(mockCheckPrivileges);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -19,7 +21,7 @@ import { getMockTimelinesTableProps } from './mocks';
 import * as i18n from '../translations';
 import { TestProvidersComponent, createMockStore, mockGlobalState } from '../../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('TimelinesTable', () => {
   let mockResults: OpenTimelineResult[];
@@ -192,7 +194,7 @@ describe('TimelinesTable', () => {
   });
 
   test('it invokes onTableChange with the expected parameters when a table header is clicked to sort it', () => {
-    const onTableChange = jest.fn();
+    const onTableChange = vi.fn();
     const testProps: TimelinesTableProps = {
       ...getMockTimelinesTableProps(mockResults),
       onTableChange,
@@ -214,7 +216,7 @@ describe('TimelinesTable', () => {
   });
 
   test('it invokes onSelectionChange when a row is selected', () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     const testProps: TimelinesTableProps = {
       ...getMockTimelinesTableProps(mockResults),
       onSelectionChange,

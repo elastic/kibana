@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidNamespaceSourceFields,
@@ -142,10 +144,10 @@ describe('getEntityExpandItems entity filter actions', () => {
   const createMockEntityFilterActions = (
     overrides: Partial<EntityFilterActions> = {}
   ): EntityFilterActions => ({
-    toggleEntityFilter: jest.fn(),
-    isEntityFilterActive: jest.fn().mockReturnValue(false),
-    toggleRelatedEvents: jest.fn(),
-    isRelatedEventsActive: jest.fn().mockReturnValue(false),
+    toggleEntityFilter: vi.fn(),
+    isEntityFilterActive: vi.fn().mockReturnValue(false),
+    toggleRelatedEvents: vi.fn(),
+    isRelatedEventsActive: vi.fn().mockReturnValue(false),
     ...overrides,
   });
 
@@ -183,7 +185,7 @@ describe('getEntityExpandItems entity filter actions', () => {
 
   it('toggles entity filter to hide when actor filter is already active', () => {
     const entityFilterActions = createMockEntityFilterActions({
-      isEntityFilterActive: jest.fn().mockImplementation((role) => role === 'actor'),
+      isEntityFilterActive: vi.fn().mockImplementation((role) => role === 'actor'),
     });
 
     const items = getEntityExpandItems({
@@ -215,7 +217,7 @@ describe('getEntityExpandItems entity filter actions', () => {
 
   it('toggles related events to hide when already active', () => {
     const entityFilterActions = createMockEntityFilterActions({
-      isRelatedEventsActive: jest.fn().mockReturnValue(true),
+      isRelatedEventsActive: vi.fn().mockReturnValue(true),
     });
 
     const items = getEntityExpandItems({
@@ -232,7 +234,7 @@ describe('getEntityExpandItems entity filter actions', () => {
 
   it('calls onClose when filter item is clicked', () => {
     const entityFilterActions = createMockEntityFilterActions();
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     const items = getEntityExpandItems({
       nodeId: 'user:testuser@default',
@@ -586,7 +588,7 @@ describe('getEntityFilterSpecClauses', () => {
   it('preserves the EUID DSL and namespace translation metadata', () => {
     const dsl = { term: { 'user.id': 'alice' } };
     const namespaceSourceValues = { 'data_stream.dataset': 'okta.system' };
-    const getNamespaceSourcePrefix = jest.fn();
+    const getNamespaceSourcePrefix = vi.fn();
     expect(
       getEntityFilterSpecClauses(
         { kind: 'dsl', dsl, namespaceSourceValues, getNamespaceSourcePrefix },

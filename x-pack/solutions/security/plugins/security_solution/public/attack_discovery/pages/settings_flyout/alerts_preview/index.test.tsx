@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import * as uuid from 'uuid';
@@ -13,34 +15,43 @@ import { AlertsPreview } from '.';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertsTable } from '../../../../detections/components/alerts_table';
 
-jest.mock('../../../../detections/components/alerts_table', () => ({
-  AlertsTable: jest.fn(() => <div>{'Mocked Alerts Table'}</div>),
-}));
+vi.mock('../../../../detections/components/alerts_table', () => {
+      const mocked = {
+      AlertsTable: vi.fn(() => <div>{'Mocked Alerts Table'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('mocked-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('mocked-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      triggersActionsUi: {
-        actionTypeRegistry: {
-          has: jest.fn(),
-          register: jest.fn(),
-          get: jest.fn(),
-          list: jest.fn(),
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          triggersActionsUi: {
+            actionTypeRegistry: {
+              has: vi.fn(),
+              register: vi.fn(),
+              get: vi.fn(),
+              list: vi.fn(),
+            },
+            ruleTypeRegistry: {
+              has: vi.fn(),
+              register: vi.fn(),
+              get: vi.fn(),
+              list: vi.fn(),
+            },
+          },
         },
-        ruleTypeRegistry: {
-          has: jest.fn(),
-          register: jest.fn(),
-          get: jest.fn(),
-          list: jest.fn(),
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertsPreview', () => {
   it('renders the alerts preview', () => {

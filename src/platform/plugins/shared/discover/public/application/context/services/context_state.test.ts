@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Filter } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getState } from './context_state';
@@ -17,8 +19,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
-discoverServiceMock.data.query.filterManager.getAppFilters = jest.fn(() => []);
-discoverServiceMock.data.query.filterManager.getGlobalFilters = jest.fn(() => []);
+discoverServiceMock.data.query.filterManager.getAppFilters = vi.fn(() => []);
+discoverServiceMock.data.query.filterManager.getGlobalFilters = vi.fn(() => []);
 const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {

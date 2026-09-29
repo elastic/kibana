@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { useActionPolicyForm } from './use_action_policy_form';
 import { DEFAULT_FORM_STATE } from './constants';
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  isActionValid: (action: {
-    source: 'existing' | 'inline';
-    workflowId?: string | null;
-    connectorId?: string | null;
-    params?: string;
-  }) =>
-    action.source === 'existing'
-      ? Boolean(action.workflowId)
-      : action.connectorId != null && (action.params ?? '').trim() !== '',
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      isActionValid: (action: {
+        source: 'existing' | 'inline';
+        workflowId?: string | null;
+        connectorId?: string | null;
+        params?: string;
+      }) =>
+        action.source === 'existing'
+          ? Boolean(action.workflowId)
+          : action.connectorId != null && (action.params ?? '').trim() !== '',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
@@ -45,8 +50,8 @@ describe('useActionPolicyForm', () => {
     it('returns isEditMode as false', () => {
       const { result } = renderHook(() =>
         useActionPolicyForm({
-          onSubmitCreate: jest.fn(),
-          onSubmitUpdate: jest.fn(),
+          onSubmitCreate: vi.fn(),
+          onSubmitUpdate: vi.fn(),
         })
       );
 
@@ -56,8 +61,8 @@ describe('useActionPolicyForm', () => {
     it('initializes form with DEFAULT_FORM_STATE', () => {
       const { result } = renderHook(() =>
         useActionPolicyForm({
-          onSubmitCreate: jest.fn(),
-          onSubmitUpdate: jest.fn(),
+          onSubmitCreate: vi.fn(),
+          onSubmitUpdate: vi.fn(),
         })
       );
 
@@ -65,11 +70,11 @@ describe('useActionPolicyForm', () => {
     });
 
     it('calls onSubmitCreate with the raw form values on submit', async () => {
-      const onSubmitCreate = jest.fn();
+      const onSubmitCreate = vi.fn();
       const { result } = renderHook(() =>
         useActionPolicyForm({
           onSubmitCreate,
-          onSubmitUpdate: jest.fn(),
+          onSubmitUpdate: vi.fn(),
         })
       );
 
@@ -100,7 +105,7 @@ describe('useActionPolicyForm', () => {
   describe('submit gating (isSubmitEnabled)', () => {
     it('is disabled without a name or destination', () => {
       const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
+        useActionPolicyForm({ onSubmitCreate: vi.fn(), onSubmitUpdate: vi.fn() })
       );
 
       expect(result.current.isSubmitEnabled).toBe(false);
@@ -108,7 +113,7 @@ describe('useActionPolicyForm', () => {
 
     it('is enabled with only a valid inline action and no existing destinations', async () => {
       const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
+        useActionPolicyForm({ onSubmitCreate: vi.fn(), onSubmitUpdate: vi.fn() })
       );
 
       await act(async () => {
@@ -129,7 +134,7 @@ describe('useActionPolicyForm', () => {
 
     it('is disabled when an inline action is incomplete', async () => {
       const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
+        useActionPolicyForm({ onSubmitCreate: vi.fn(), onSubmitUpdate: vi.fn() })
       );
 
       await act(async () => {
@@ -154,8 +159,8 @@ describe('useActionPolicyForm', () => {
       const { result } = renderHook(() =>
         useActionPolicyForm({
           initialValues: EXISTING_POLICY,
-          onSubmitCreate: jest.fn(),
-          onSubmitUpdate: jest.fn(),
+          onSubmitCreate: vi.fn(),
+          onSubmitUpdate: vi.fn(),
         })
       );
 
@@ -166,8 +171,8 @@ describe('useActionPolicyForm', () => {
       const { result } = renderHook(() =>
         useActionPolicyForm({
           initialValues: EXISTING_POLICY,
-          onSubmitCreate: jest.fn(),
-          onSubmitUpdate: jest.fn(),
+          onSubmitCreate: vi.fn(),
+          onSubmitUpdate: vi.fn(),
         })
       );
 
@@ -193,8 +198,8 @@ describe('useActionPolicyForm', () => {
       const { result } = renderHook(() =>
         useActionPolicyForm({
           initialValues: policyWithoutThrottle,
-          onSubmitCreate: jest.fn(),
-          onSubmitUpdate: jest.fn(),
+          onSubmitCreate: vi.fn(),
+          onSubmitUpdate: vi.fn(),
         })
       );
 
@@ -203,11 +208,11 @@ describe('useActionPolicyForm', () => {
     });
 
     it('calls onSubmitUpdate with id, raw form values, and version on submit', async () => {
-      const onSubmitUpdate = jest.fn();
+      const onSubmitUpdate = vi.fn();
       const { result } = renderHook(() =>
         useActionPolicyForm({
           initialValues: EXISTING_POLICY,
-          onSubmitCreate: jest.fn(),
+          onSubmitCreate: vi.fn(),
           onSubmitUpdate,
         })
       );
@@ -235,12 +240,12 @@ describe('useActionPolicyForm', () => {
     });
 
     it('does not call onSubmitCreate in edit mode', async () => {
-      const onSubmitCreate = jest.fn();
+      const onSubmitCreate = vi.fn();
       const { result } = renderHook(() =>
         useActionPolicyForm({
           initialValues: EXISTING_POLICY,
           onSubmitCreate,
-          onSubmitUpdate: jest.fn(),
+          onSubmitUpdate: vi.fn(),
         })
       );
 

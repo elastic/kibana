@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { type PropsWithChildren } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -14,9 +17,12 @@ import * as getReportingHealthModule from '../apis/get_reporting_health';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { HttpSetup } from '@kbn/core-http-browser';
 
-jest.mock('../apis/get_reporting_health', () => ({
-  getReportingHealth: jest.fn(),
-}));
+vi.mock('../apis/get_reporting_health', () => {
+      const mocked = {
+      getReportingHealth: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockHttpService = httpServiceMock.create() as unknown as HttpSetup;
 
@@ -26,12 +32,12 @@ const wrapper = ({ children }: PropsWithChildren) => (
 
 describe('useGetReportingHealthQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getReportingHealth with correct arguments', async () => {
     const mockHealth = { status: 'ok' };
-    (getReportingHealthModule.getReportingHealth as jest.Mock).mockResolvedValue(mockHealth);
+    (getReportingHealthModule.getReportingHealth as Mock).mockResolvedValue(mockHealth);
 
     const { result } = renderHook(() => useGetReportingHealthQuery({ http: mockHttpService }), {
       wrapper,

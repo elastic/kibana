@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import _ from 'lodash';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { SavedObjectsSerializer } from './serializer';
@@ -26,11 +28,11 @@ const createMockedTypeRegistry = ({
   accessControlEnabled?: boolean;
 }): ISavedObjectTypeRegistryInternal => {
   const typeRegistry: Partial<ISavedObjectTypeRegistryInternal> = {
-    isNamespaceAgnostic: jest.fn().mockReturnValue(isNamespaceAgnostic),
-    isSingleNamespace: jest.fn().mockReturnValue(isSingleNamespace),
-    isMultiNamespace: jest.fn().mockReturnValue(isMultiNamespace),
-    setAccessControlEnabled: jest.fn(),
-    isAccessControlEnabled: jest.fn().mockReturnValue(accessControlEnabled),
+    isNamespaceAgnostic: vi.fn().mockReturnValue(isNamespaceAgnostic),
+    isSingleNamespace: vi.fn().mockReturnValue(isSingleNamespace),
+    isMultiNamespace: vi.fn().mockReturnValue(isMultiNamespace),
+    setAccessControlEnabled: vi.fn(),
+    isAccessControlEnabled: vi.fn().mockReturnValue(accessControlEnabled),
   };
   return typeRegistry as ISavedObjectTypeRegistryInternal;
 };

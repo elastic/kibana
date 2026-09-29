@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { fetch as undiciFetch, Agent } from 'undici';
 
@@ -23,27 +25,33 @@ import {
   type IacProvisionerRenderRequest,
 } from './iac_provisioner';
 
-jest.mock('undici', () => ({
-  fetch: jest.fn(),
-  Agent: jest.fn().mockImplementation((opts) => ({ __agentOptions: opts })),
-}));
-jest.mock('./app_context');
+vi.mock('undici', () => {
+      const mocked = {
+      fetch: vi.fn(),
+      Agent: vi.fn().mockImplementation((opts) => ({ __agentOptions: opts })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./app_context');
 
-jest.mock('@kbn/server-http-tools', () => ({
-  ...jest.requireActual('@kbn/server-http-tools'),
-  // rejectUnauthorized: false mirrors the real SslConfig default (it carries
-  // server-side client-auth semantics) — the service must NOT propagate it to
-  // the outbound Agent, so the Agent assertion below would catch it if it did.
-  SslConfig: jest.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
-    rejectUnauthorized: false,
-    certificate,
-    key,
-    certificateAuthorities,
-  })),
-}));
+vi.mock('@kbn/server-http-tools', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/server-http-tools')),
+      // rejectUnauthorized: false mirrors the real SslConfig default (it carries
+      // server-side client-auth semantics) — the service must NOT propagate it to
+      // the outbound Agent, so the Agent assertion below would catch it if it did.
+      SslConfig: vi.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
+        rejectUnauthorized: false,
+        certificate,
+        key,
+        certificateAuthorities,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedFetch = jest.mocked(undiciFetch);
-const mockedAgent = jest.mocked(Agent);
+const mockedFetch = vi.mocked(undiciFetch);
+const mockedAgent = vi.mocked(Agent);
 
 const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
 
@@ -75,13 +83,13 @@ const jsonResponse = (status: number, body: unknown) =>
   } as any);
 
 function mockFeatureFlag(enabled = true) {
-  jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
-    getBooleanValue$: jest.fn().mockReturnValue(of(enabled)),
+  vi.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
+    getBooleanValue$: vi.fn().mockReturnValue(of(enabled)),
   } as any);
 }
 
 function mockConfig(overrides: Record<string, unknown> = {}) {
-  jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+  vi.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: true },
     iacProvisioner: {
       api: {
@@ -91,26 +99,26 @@ function mockConfig(overrides: Record<string, unknown> = {}) {
       ...overrides,
     },
   } as any);
-  jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+  vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
   mockFeatureFlag(true);
 }
 
 function mockLogger() {
   const logger = {
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn(),
-    get: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+    get: vi.fn(),
   };
   logger.get.mockReturnValue(logger);
-  jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
+  vi.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
   return logger;
 }
 
 describe('IacProvisionerService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('throws IacProvisionerConfigError when the feature flag is off', async () => {
@@ -346,7 +354,7 @@ describe('IacProvisionerService', () => {
   });
 
   it('aborts the request after the render timeout and maps to IacProvisionerUnavailableError', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockConfig();
     mockLogger();
     // fetch never settles on its own; it only rejects once the abort signal
@@ -362,9 +370,9 @@ describe('IacProvisionerService', () => {
 
     const promise = iacProvisionerService.renderTemplate(RENDER_REQUEST);
     const assertion = expect(promise).rejects.toThrow(IacProvisionerUnavailableError);
-    await jest.advanceTimersByTimeAsync(30_000);
+    await vi.advanceTimersByTimeAsync(30_000);
     await assertion;
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('throws IacProvisionerConfigError when only the certificate is configured', async () => {

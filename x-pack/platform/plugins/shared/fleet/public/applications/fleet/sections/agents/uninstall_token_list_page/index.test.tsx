@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
@@ -28,11 +31,14 @@ import type {
 
 import { UninstallTokenListPage } from '.';
 
-jest.mock('../../../../../hooks/use_request/uninstall_tokens', () => ({
-  useGetUninstallToken: jest.fn(),
-  useGetUninstallTokens: jest.fn(),
-  getUninstallTokenValue: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_request/uninstall_tokens', () => {
+      const mocked = {
+      useGetUninstallToken: vi.fn(),
+      useGetUninstallTokens: vi.fn(),
+      getUninstallTokenValue: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type MockResponseType<DataType> = Pick<
   UseRequestResponse<DataType, RequestError>,
@@ -46,12 +52,12 @@ describe('UninstallTokenList page', () => {
     return renderer.render(<UninstallTokenListPage />);
   };
 
-  const useGetUninstallTokenMock = useGetUninstallToken as jest.Mock;
-  const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
-  const getUninstallTokenValueMock = getUninstallTokenValue as jest.Mock;
+  const useGetUninstallTokenMock = useGetUninstallToken as Mock;
+  const useGetUninstallTokensMock = useGetUninstallTokens as Mock;
+  const getUninstallTokenValueMock = getUninstallTokenValue as Mock;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when loading tokens', () => {

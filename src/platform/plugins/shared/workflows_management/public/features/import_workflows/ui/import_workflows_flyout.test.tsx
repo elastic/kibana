@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,31 +21,34 @@ import { useTelemetry } from '../../../hooks/use_telemetry';
 import { parseImportFile } from '../lib/parse_import_file';
 import type { ClientPreflightResult } from '../lib/parse_import_file';
 
-jest.mock('../lib/parse_import_file');
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_telemetry');
-jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => ({
-  WorkflowsTriggersList: ({ triggers }: { triggers: Array<{ type: string }> }) => (
-    <span data-test-subj="mock-triggers-list">
-      {triggers.map((t) => t.type).join(', ') || 'No triggers'}
-    </span>
-  ),
-}));
+vi.mock('../lib/parse_import_file');
+vi.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_telemetry');
+vi.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => {
+      const mocked = {
+      WorkflowsTriggersList: ({ triggers }: { triggers: Array<{ type: string }> }) => (
+        <span data-test-subj="mock-triggers-list">
+          {triggers.map((t) => t.type).join(', ') || 'No triggers'}
+        </span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseImportFile>;
+const mockParseImportFile = parseImportFile as MockedFunction<typeof parseImportFile>;
 
 // var avoids TDZ when the hoisted jest.mock factory assigns these before `let` would init
-const mockCheckWorkflowIdConflicts = jest.fn();
-const mockBulkCreateWorkflows = jest.fn();
-jest.mock('@kbn/workflows-ui', () => {
+const mockCheckWorkflowIdConflicts = vi.fn();
+const mockBulkCreateWorkflows = vi.fn();
+vi.mock('@kbn/workflows-ui', () => {
   return {
     useRunWorkflow: () => ({
-      mutate: jest.fn(),
-      mutateAsync: jest.fn(),
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       isLoading: false,
       data: undefined,
       error: null,
-      reset: jest.fn(),
+      reset: vi.fn(),
     }),
     useWorkflowsApi: () => ({
       checkWorkflowIdConflicts: mockCheckWorkflowIdConflicts,
@@ -51,8 +57,8 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseTelemetry = useTelemetry as jest.MockedFunction<typeof useTelemetry>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseTelemetry = useTelemetry as MockedFunction<typeof useTelemetry>;
 
 const createWorkflowPreview = (props: Partial<WorkflowPreview>): WorkflowPreview => ({
   id: 'test',
@@ -82,8 +88,8 @@ const createTestQueryClient = () =>
     logger: { log: () => {}, warn: () => {}, error: () => {} },
   });
 
-const renderFlyout = (props: Partial<{ onClose: jest.Mock }> = {}) => {
-  const onClose = props.onClose ?? jest.fn();
+const renderFlyout = (props: Partial<{ onClose: Mock }> = {}) => {
+  const onClose = props.onClose ?? vi.fn();
   const queryClient = createTestQueryClient();
   const result = render(
     <QueryClientProvider client={queryClient}>
@@ -152,24 +158,24 @@ const createPreflightResult = (
 
 describe('ImportWorkflowsFlyout', () => {
   let mockToasts: {
-    addSuccess: jest.Mock;
-    addWarning: jest.Mock;
-    addDanger: jest.Mock;
-    addError: jest.Mock;
+    addSuccess: Mock;
+    addWarning: Mock;
+    addDanger: Mock;
+    addError: Mock;
   };
-  let mockTelemetry: Record<string, jest.Mock>;
+  let mockTelemetry: Record<string, Mock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockToasts = {
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      addDanger: jest.fn(),
-      addError: jest.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addDanger: vi.fn(),
+      addError: vi.fn(),
     };
     mockTelemetry = {
-      reportWorkflowImported: jest.fn(),
-      reportWorkflowExported: jest.fn(),
+      reportWorkflowImported: vi.fn(),
+      reportWorkflowExported: vi.fn(),
     };
     mockUseKibana.mockReturnValue({
       services: {

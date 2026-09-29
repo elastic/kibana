@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -30,90 +32,123 @@ const mockMetadataState: MockMetadataState = {
   metadata: undefined,
 };
 
-jest.mock('react-router-dom', () => ({
-  useRouteMatch: () => ({
-    params: { type: 'pod', node: 'pod-1' },
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useRouteMatch: () => ({
+        params: { type: 'pod', node: 'pod-1' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/metrics-data-access-plugin/common', () => ({
-  findInventoryModel: () => ({
-    metrics: { requiredTsvb: [] },
-  }),
-}));
+vi.mock('@kbn/metrics-data-access-plugin/common', () => {
+      const mocked = {
+      findInventoryModel: () => ({
+        metrics: { requiredTsvb: [] },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_metrics_breadcrumbs', () => ({
-  useMetricsBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../hooks/use_metrics_breadcrumbs', () => {
+      const mocked = {
+      useMetricsBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_parent_breadcrumb_resolver', () => ({
-  useParentBreadcrumbResolver: () => ({
-    getBreadcrumbOptions: () => ({
-      text: mockInventoryTitle,
-      link: { href: '/app/metrics/inventory' },
-    }),
-  }),
-}));
+vi.mock('../../../hooks/use_parent_breadcrumb_resolver', () => {
+      const mocked = {
+      useParentBreadcrumbResolver: () => ({
+        getBreadcrumbOptions: () => ({
+          text: mockInventoryTitle,
+          link: { href: '/app/metrics/inventory' },
+        }),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/metrics_source', () => ({
-  useSourceContext: () => ({ sourceId: 'default' }),
-}));
+vi.mock('../../../containers/metrics_source', () => {
+      const mocked = {
+      useSourceContext: () => ({ sourceId: 'default' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_metrics_time', () => ({
-  useMetricsTimeContext: () => ({
-    timeRange: { from: 'now-1h', to: 'now', interval: '>=1m' },
-    parsedTimeRange: { from: 1, to: 2 },
-    setTimeRange: jest.fn(),
-    refreshInterval: 0,
-    setRefreshInterval: jest.fn(),
-    isAutoReloading: false,
-    setAutoReload: jest.fn(),
-    triggerRefresh: jest.fn(),
-  }),
-}));
+vi.mock('./hooks/use_metrics_time', () => {
+      const mocked = {
+      useMetricsTimeContext: () => ({
+        timeRange: { from: 'now-1h', to: 'now', interval: '>=1m' },
+        parsedTimeRange: { from: 1, to: 2 },
+        setTimeRange: vi.fn(),
+        refreshInterval: 0,
+        setRefreshInterval: vi.fn(),
+        isAutoReloading: false,
+        setAutoReload: vi.fn(),
+        triggerRefresh: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/asset_details/hooks/use_metadata', () => ({
-  useMetadata: () => mockMetadataState,
-}));
+vi.mock('../../../components/asset_details/hooks/use_metadata', () => {
+      const mocked = {
+      useMetadata: () => mockMetadataState,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../header/use_metrics_app_header_menu', () => ({
-  useMetricsAppHeaderMenu: () => ({
-    menu: { items: [] },
-    flyouts: null,
-  }),
-}));
+vi.mock('../header/use_metrics_app_header_menu', () => {
+      const mocked = {
+      useMetricsAppHeaderMenu: () => ({
+        menu: { items: [] },
+        flyouts: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/loading', () => ({
-  InfraLoadingPanel: () => <div data-test-subj="metricDetailLoadingPanel" />,
-}));
+vi.mock('../../../components/loading', () => {
+      const mocked = {
+      InfraLoadingPanel: () => <div data-test-subj="metricDetailLoadingPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/node_details_page', () => ({
-  NodeDetailsPage: () => <div data-test-subj="metricDetailNodePage" />,
-}));
+vi.mock('./components/node_details_page', () => {
+      const mocked = {
+      NodeDetailsPage: () => <div data-test-subj="metricDetailNodePage" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let lastInfraPageTemplateProps: { onboardingFlow?: string; hasDataOverride?: boolean } = {};
 
-jest.mock('../../../components/shared/templates/infra_page_template', () => ({
-  InfraPageTemplate: ({
-    children,
-    header,
-    onboardingFlow,
-    hasDataOverride,
-  }: {
-    children: React.ReactNode;
-    header?: React.ReactNode;
-    onboardingFlow?: string;
-    hasDataOverride?: boolean;
-  }) => {
-    lastInfraPageTemplateProps = { onboardingFlow, hasDataOverride };
-    return (
-      <div data-test-subj="infraPageTemplate">
-        {header}
-        {children}
-      </div>
-    );
-  },
-}));
+vi.mock('../../../components/shared/templates/infra_page_template', () => {
+      const mocked = {
+      InfraPageTemplate: ({
+        children,
+        header,
+        onboardingFlow,
+        hasDataOverride,
+      }: {
+        children: React.ReactNode;
+        header?: React.ReactNode;
+        onboardingFlow?: string;
+        hasDataOverride?: boolean;
+      }) => {
+        lastInfraPageTemplateProps = { onboardingFlow, hasDataOverride };
+        return (
+          <div data-test-subj="infraPageTemplate">
+            {header}
+            {children}
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderPage = () =>
   render(

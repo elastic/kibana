@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ScriptsLibraryClientInterface } from './types';
 import { createMockEndpointAppContextService } from '../../mocks';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -21,19 +24,19 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RuleParams } from '../../../lib/detection_engine/rule_schema';
 import type { SanitizedRule } from '@kbn/alerting-types';
 
-jest.mock('@kbn/files-plugin/server', () => {
-  const actual = jest.requireActual('@kbn/files-plugin/server');
+vi.mock('@kbn/files-plugin/server', async () => {
+  const actual = (await vi.importActual('@kbn/files-plugin/server'));
   return {
     ...actual,
-    createEsFileClient: jest.fn(),
+    createEsFileClient: vi.fn(),
   };
 });
 
-const createEsFileClientMock = _createEsFileClient as jest.Mock;
+const createEsFileClientMock = _createEsFileClient as Mock;
 
 describe('scripts library client', () => {
   let endpointAppServicesMock: EndpointAppContextService;
-  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
+  let soClientMock: Mocked<SavedObjectsClientContract>;
   let scriptsClient: ScriptsLibraryClientInterface;
   let filesPluginClient: ReturnType<typeof createFileClientMock>;
   let rulesClient: ReturnType<typeof ScriptsLibraryMock.createRulesClient>;
@@ -43,7 +46,7 @@ describe('scripts library client', () => {
     endpointAppServicesMock = createMockEndpointAppContextService();
 
     soClientMock =
-      endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
+      endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as Mocked<SavedObjectsClientContract>;
     rulesClient = ScriptsLibraryMock.createRulesClient();
 
     const filesPluginMocks = ScriptsLibraryMock.createFilesPluginClient({
@@ -95,7 +98,7 @@ describe('scripts library client', () => {
     it('should create a file record and upload file content to it', async () => {
       await scriptsClient.create(createBodyMock);
       const scriptSoId = (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create as jest.Mock
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create as Mock
       ).mock.calls[0][2].id;
 
       expect(filesPluginClient.create).toHaveBeenCalledWith({

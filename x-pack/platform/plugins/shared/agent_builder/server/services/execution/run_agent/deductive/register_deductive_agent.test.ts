@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerDeductiveAgent } from './register_deductive_agent';
 
 const setup = () => {
-  const registerGlobal = jest.fn();
-  const register = jest.fn();
+  const registerGlobal = vi.fn();
+  const register = vi.fn();
   const agents = {
     register,
-    registerType: jest.fn(),
-    registerAiIndexResolver: jest.fn(),
+    registerType: vi.fn(),
+    registerAiIndexResolver: vi.fn(),
   } as any;
   const uiSettings = { registerGlobal } as any;
-  const coreSetup = { getStartServices: jest.fn() } as any;
+  const coreSetup = { getStartServices: vi.fn() } as any;
   return { coreSetup, uiSettings, agents, registerGlobal, register };
 };
 

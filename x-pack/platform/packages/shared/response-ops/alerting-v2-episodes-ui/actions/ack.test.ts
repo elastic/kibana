@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createAckAction } from './ack';
@@ -45,7 +47,7 @@ const makeDeps = () => ({
 });
 
 describe('createAckAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('compatible when at least one episode is not acked', () => {
     expect(
@@ -68,7 +70,7 @@ describe('createAckAction', () => {
       actionId: 'ALERTING_V2_ACK_EPISODE',
       isCompatible: (ep: AlertEpisode) =>
         (ep.source_action_context as ClassicAlertActionContext).workflowStatus !== 'acknowledged',
-      execute: jest.fn(),
+      execute: vi.fn(),
     };
     expect(
       createAckAction(makeDeps(), extension).isCompatible({
@@ -90,7 +92,7 @@ describe('createAckAction', () => {
       actionId: 'ALERTING_V2_ACK_EPISODE',
       isCompatible: (ep: AlertEpisode) =>
         (ep.source_action_context as ClassicAlertActionContext).workflowStatus !== 'acknowledged',
-      execute: jest.fn(),
+      execute: vi.fn(),
     };
     expect(
       createAckAction(makeDeps(), extension).isCompatible({
@@ -108,8 +110,8 @@ describe('createAckAction', () => {
 
   it('execute: POSTs per-episode ACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkAckEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
-    const onSuccess = jest.fn();
+    vi.spyOn(bulk, 'bulkAckEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
+    const onSuccess = vi.fn();
     await createAckAction(deps).execute({
       episodes: [
         makeEpisode({ 'episode.id': 'e1', group_hash: 'g1' }),
@@ -127,15 +129,15 @@ describe('createAckAction', () => {
 
   it('execute: dispatches to extension for source episodes in mixed selection', async () => {
     const deps = makeDeps();
-    const extensionExecute = jest.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
+    const extensionExecute = vi.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
     const extension = {
       actionId: 'ALERTING_V2_ACK_EPISODE',
       isCompatible: () => true,
       execute: extensionExecute,
     };
 
-    jest.spyOn(bulk, 'bulkAckEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
-    const onSuccess = jest.fn();
+    vi.spyOn(bulk, 'bulkAckEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
+    const onSuccess = vi.fn();
 
     await createAckAction(deps, extension).execute({
       episodes: [makeEpisode({ 'episode.id': 'e1', group_hash: 'g1' }), makeClassicEpisode('c1')],
@@ -149,8 +151,8 @@ describe('createAckAction', () => {
 
   it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkAckEpisodeActions').mockRejectedValue(new Error('network error'));
-    const onSuccess = jest.fn();
+    vi.spyOn(bulk, 'bulkAckEpisodeActions').mockRejectedValue(new Error('network error'));
+    const onSuccess = vi.fn();
     await createAckAction(deps).execute({
       episodes: [makeEpisode()],
       onSuccess,

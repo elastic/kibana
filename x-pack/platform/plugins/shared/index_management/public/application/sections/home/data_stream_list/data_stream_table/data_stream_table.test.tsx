@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,8 +16,8 @@ import { DataStreamTable } from './data_stream_table';
 
 let mockSelectedNames = new Set<string>();
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   const EuiInMemoryTable = ({
     items,
@@ -81,72 +83,105 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/shared-ux-table-persist', () => ({
-  useEuiTablePersist: () => ({
-    pageSize: 20,
-    sorting: {},
-    onTableChange: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/shared-ux-table-persist', () => {
+      const mocked = {
+      useEuiTablePersist: () => ({
+        pageSize: 20,
+        sorting: {},
+        onTableChange: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../app_context', () => ({
-  useAppContext: () => ({
-    config: {
-      enableSizeAndDocCount: false,
-      enableDataStreamStats: false,
-      enableTogglingDataRetention: false,
-    },
-  }),
-}));
+vi.mock('../../../../app_context', () => {
+      const mocked = {
+      useAppContext: () => ({
+        config: {
+          enableSizeAndDocCount: false,
+          enableDataStreamStats: false,
+          enableTogglingDataRetention: false,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../shared_imports', () => ({
-  reactRouterNavigate: () => ({}),
-}));
+vi.mock('../../../../../shared_imports', () => {
+      const mocked = {
+      reactRouterNavigate: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../components', () => ({
-  DataHealth: () => null,
-}));
+vi.mock('../../../../components', () => {
+      const mocked = {
+      DataHealth: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../data_stream_badges', () => ({
-  DataStreamsBadges: () => null,
-}));
+vi.mock('../data_stream_badges', () => {
+      const mocked = {
+      DataStreamsBadges: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../data_stream_detail_panel', () => ({
-  ConditionalWrap: ({ children }: any) => <>{children}</>,
-}));
+vi.mock('../data_stream_detail_panel', () => {
+      const mocked = {
+      ConditionalWrap: ({ children }: any) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../delete_data_stream_confirmation_modal', () => ({
-  DeleteDataStreamConfirmationModal: () => null,
-}));
+vi.mock('../delete_data_stream_confirmation_modal', () => {
+      const mocked = {
+      DeleteDataStreamConfirmationModal: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../edit_data_retention_modal', () => ({
-  EditDataRetentionModal: () => null,
-}));
+vi.mock('../edit_data_retention_modal', () => {
+      const mocked = {
+      EditDataRetentionModal: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../data_stream_actions_menu', () => ({
-  DataStreamActionsMenu: ({ dataStreamActions }: any) => (
-    <div data-test-subj="dataStreamActionsMenu">
-      {dataStreamActions.map((action: any) => (
-        <button
-          key={action['data-test-subj'] ?? action.name}
-          type="button"
-          data-test-subj={action['data-test-subj']}
-          onClick={action.onClick}
-        >
-          {action.name}
-        </button>
-      ))}
-    </div>
-  ),
-}));
+vi.mock('../data_stream_actions_menu', () => {
+      const mocked = {
+      DataStreamActionsMenu: ({ dataStreamActions }: any) => (
+        <div data-test-subj="dataStreamActionsMenu">
+          {dataStreamActions.map((action: any) => (
+            <button
+              key={action['data-test-subj'] ?? action.name}
+              type="button"
+              data-test-subj={action['data-test-subj']}
+              onClick={action.onClick}
+            >
+              {action.name}
+            </button>
+          ))}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../data_retention_value', () => ({
-  DataRetentionValue: () => <span data-test-subj="dataRetentionValue">retention</span>,
-}));
+vi.mock('../data_retention_value', () => {
+      const mocked = {
+      DataRetentionValue: () => <span data-test-subj="dataRetentionValue">retention</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components', () => ({
-  FilterListButton: () => null,
-}));
+vi.mock('../../components', () => {
+      const mocked = {
+      FilterListButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -196,13 +231,13 @@ describe('DataStreamTable', () => {
     renderWithIntl(
       <DataStreamTable
         dataStreams={[dataStream]}
-        reload={jest.fn()}
+        reload={vi.fn()}
         history={createHistory()}
         includeStats={false}
         filters=""
         viewFilters={{ hidden: true, managed: true } as any}
-        onViewFilterChange={jest.fn()}
-        setIncludeStats={jest.fn()}
+        onViewFilterChange={vi.fn()}
+        setIncludeStats={vi.fn()}
       />
     );
 
@@ -223,13 +258,13 @@ describe('DataStreamTable', () => {
     renderWithIntl(
       <DataStreamTable
         dataStreams={[dataStream]}
-        reload={jest.fn()}
+        reload={vi.fn()}
         history={createHistory()}
         includeStats={false}
         filters=""
         viewFilters={{ hidden: true, managed: true } as any}
-        onViewFilterChange={jest.fn()}
-        setIncludeStats={jest.fn()}
+        onViewFilterChange={vi.fn()}
+        setIncludeStats={vi.fn()}
       />
     );
 
@@ -253,13 +288,13 @@ describe('DataStreamTable', () => {
     renderWithIntl(
       <DataStreamTable
         dataStreams={[dataStream]}
-        reload={jest.fn()}
+        reload={vi.fn()}
         history={createHistory()}
         includeStats={false}
         filters=""
         viewFilters={{ hidden: true, managed: true } as any}
-        onViewFilterChange={jest.fn()}
-        setIncludeStats={jest.fn()}
+        onViewFilterChange={vi.fn()}
+        setIncludeStats={vi.fn()}
       />
     );
 
@@ -281,13 +316,13 @@ describe('DataStreamTable', () => {
     renderWithIntl(
       <DataStreamTable
         dataStreams={[dataStream]}
-        reload={jest.fn()}
+        reload={vi.fn()}
         history={createHistory()}
         includeStats={false}
         filters=""
         viewFilters={{ hidden: true, managed: true } as any}
-        onViewFilterChange={jest.fn()}
-        setIncludeStats={jest.fn()}
+        onViewFilterChange={vi.fn()}
+        setIncludeStats={vi.fn()}
       />
     );
 

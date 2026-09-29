@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MetricEmbeddableProps } from './metric_embeddable';
 import { MetricEmbeddable } from './metric_embeddable';
 import type { RenderResult } from '@testing-library/react';
@@ -13,9 +15,9 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 
-jest.mock('../../../common/components/visualization_actions/actions');
+vi.mock('../../../common/components/visualization_actions/actions');
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('MetricEmbeddable', () => {
   const testProps = {

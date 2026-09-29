@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import * as permissionsHooks from '../../hooks/use_fleet_permissions';
 import { render } from '../../utils/testing/rtl_helpers';
@@ -15,23 +17,26 @@ import type { SyntheticsSettingsContextValues } from '../../contexts/synthetics_
 import { fireEvent } from '@testing-library/react';
 import { kibanaService } from '../../../../utils/kibana_service';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useGeneratedHtmlId: () => 'mocked-id',
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useGeneratedHtmlId: () => 'mocked-id',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GettingStartedPage', () => {
   beforeEach(() => {
-    jest.spyOn(privateLocationsHooks, 'usePrivateLocationsAPI').mockReturnValue({
+    vi.spyOn(privateLocationsHooks, 'usePrivateLocationsAPI').mockReturnValue({
       loading: false,
       privateLocations: [],
       deleteLoading: false,
-      onCreateLocationAPI: jest.fn(),
-      onDeleteLocationAPI: jest.fn(),
-      onEditLocationAPI: jest.fn(),
+      onCreateLocationAPI: vi.fn(),
+      onDeleteLocationAPI: vi.fn(),
+      onEditLocationAPI: vi.fn(),
       createLoading: false,
     });
-    jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
+    vi.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
   });
   it('works with cloud locations', () => {
     const { getByText } = render(<GettingStartedPage />, {
@@ -76,7 +81,7 @@ describe('GettingStartedPage', () => {
   });
 
   it('shows need agent flyout when isAddingNewPrivateLocation is true and agentPolicies.length === 0', async () => {
-    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+    vi.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
       canSave: true,
     } as SyntheticsSettingsContextValues);
 
@@ -133,7 +138,7 @@ describe('GettingStartedPage', () => {
   });
 
   it('shows permissions tooltip when the user does not have permissions', async () => {
-    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+    vi.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
       canSave: false,
     } as SyntheticsSettingsContextValues);
     const { getByText, getByRole, queryByLabelText, queryByRole, findByText } = render(

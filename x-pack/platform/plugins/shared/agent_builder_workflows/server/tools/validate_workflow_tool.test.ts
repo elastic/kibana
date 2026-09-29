@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { registerValidateWorkflowTool } from './validate_workflow_tool';
@@ -16,11 +18,11 @@ describe('registerValidateWorkflowTool', () => {
   let registeredTool: BuiltinToolDefinition;
 
   const mockApi = {
-    validateWorkflow: jest.fn(),
+    validateWorkflow: vi.fn(),
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockApi.validateWorkflow.mockResolvedValue({
       valid: true,
       errors: [],
@@ -29,7 +31,7 @@ describe('registerValidateWorkflowTool', () => {
 
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltinToolDefinition) => {
+        register: vi.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },

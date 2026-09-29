@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AccessControlClient } from './access_control_client';
 
 const createMockHttp = () => ({
-  get: jest.fn(),
-  post: jest.fn(),
-  delete: jest.fn(),
-  put: jest.fn(),
-  patch: jest.fn(),
-  fetch: jest.fn(),
-  head: jest.fn(),
-  options: jest.fn(),
-  addLoadingCountSource: jest.fn(),
-  getLoadingCount$: jest.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
+  delete: vi.fn(),
+  put: vi.fn(),
+  patch: vi.fn(),
+  fetch: vi.fn(),
+  head: vi.fn(),
+  options: vi.fn(),
+  addLoadingCountSource: vi.fn(),
+  getLoadingCount$: vi.fn(),
   anonymousPaths: {} as any,
   externalUrl: {} as any,
   staticAssets: {} as any,
   basePath: {} as any,
-  intercept: jest.fn(),
+  intercept: vi.fn(),
 });
 
 describe('AccessControlClient', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import {
@@ -25,50 +28,68 @@ import { InvestigateInTimelineButton } from '../../../../../common/components/ev
 import { buildAlertsKqlFilter } from '../../../alerts_table/actions';
 import { AttackAiAssistantButton } from './attack_ai_assistant_button';
 
-jest.mock('../../../../../common/components/event_details/investigate_in_timeline_button', () => ({
-  InvestigateInTimelineButton: jest.fn(({ children, 'data-test-subj': dataTestSubj }) => (
-    <div data-test-subj={dataTestSubj}>{children}</div>
-  )),
-}));
+vi.mock('../../../../../common/components/event_details/investigate_in_timeline_button', () => {
+      const mocked = {
+      InvestigateInTimelineButton: vi.fn(({ children, 'data-test-subj': dataTestSubj }) => (
+        <div data-test-subj={dataTestSubj}>{children}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./attack_ai_assistant_button', () => ({
-  AttackAiAssistantButton: jest.fn(() => (
-    <div data-test-subj="mock-attack-ai-assistant-button">{'AttackAiAssistantButton'}</div>
-  )),
-}));
+vi.mock('./attack_ai_assistant_button', () => {
+      const mocked = {
+      AttackAiAssistantButton: vi.fn(() => (
+        <div data-test-subj="mock-attack-ai-assistant-button">{'AttackAiAssistantButton'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../alerts_table/actions', () => ({
-  buildAlertsKqlFilter: jest.fn(),
-}));
+vi.mock('../../../alerts_table/actions', () => {
+      const mocked = {
+      buildAlertsKqlFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../attack_discovery/helpers', () => ({
-  ...jest.requireActual('../../../../../attack_discovery/helpers'),
-  getTacticMetadata: jest.fn(() => []),
-}));
+vi.mock('../../../../../attack_discovery/helpers', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../attack_discovery/helpers')),
+      getTacticMetadata: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain',
-  () => ({
-    AttackChain: jest.fn(() => <div data-test-subj="mock-attack-chain">{'AttackChain'}</div>),
-  })
+  () => {
+      const mocked = {
+        AttackChain: vi.fn(() => <div data-test-subj="mock-attack-chain">{'AttackChain'}</div>),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock(
+vi.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
-  () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown, alertIds }) => (
-      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
-        {markdown}
-      </div>
-    )),
-  })
+  () => {
+      const mocked = {
+        AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown, alertIds }) => (
+          <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
+            {markdown}
+          </div>
+        )),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('@kbn/elastic-assistant-common', () => {
-  const originalModule = jest.requireActual('@kbn/elastic-assistant-common');
+vi.mock('@kbn/elastic-assistant-common', async () => {
+  const originalModule = (await vi.importActual('@kbn/elastic-assistant-common'));
   return {
     ...originalModule,
-    replaceAnonymizedValuesWithOriginalValues: jest.fn(
+    replaceAnonymizedValuesWithOriginalValues: vi.fn(
       ({ messageContent }) => `${messageContent} (replaced)`
     ),
   };
@@ -95,9 +116,9 @@ describe('SummaryTab', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getTacticMetadata as jest.Mock).mockReturnValue([]);
-    (buildAlertsKqlFilter as jest.Mock).mockReturnValue({ query: 'mock-query' });
+    vi.clearAllMocks();
+    (getTacticMetadata as Mock).mockReturnValue([]);
+    (buildAlertsKqlFilter as Mock).mockReturnValue({ query: 'mock-query' });
   });
 
   it('renders the summary tab', () => {
@@ -144,7 +165,7 @@ describe('SummaryTab', () => {
   });
 
   it('renders AttackChain when tacticMetadata is present', () => {
-    (getTacticMetadata as jest.Mock).mockReturnValue(['some-tactic']);
+    (getTacticMetadata as Mock).mockReturnValue(['some-tactic']);
     renderSummaryTab();
 
     expect(screen.getByTestId(ATTACK_CHAIN_TITLE_TEST_ID)).toBeInTheDocument();
@@ -157,7 +178,7 @@ describe('SummaryTab', () => {
   });
 
   it('does not render AttackChain when tacticMetadata is empty', () => {
-    (getTacticMetadata as jest.Mock).mockReturnValue([]);
+    (getTacticMetadata as Mock).mockReturnValue([]);
     renderSummaryTab();
 
     expect(screen.queryByTestId(ATTACK_CHAIN_TITLE_TEST_ID)).not.toBeInTheDocument();

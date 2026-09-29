@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { z } from '@kbn/zod/v4';
 import { buildFieldsZodValidator } from './build_fields_zod_validator';
 import {
@@ -419,7 +421,7 @@ describe('applyInputDefaults', () => {
       },
     });
 
-    const renderer = jest.fn((value: unknown) => value);
+    const renderer = vi.fn((value: unknown) => value);
     applyInputDefaults(
       { name: '{{ user }}', settings: { locale: '{{ locale }}' } },
       inputsSchema,

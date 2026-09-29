@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { MouseEvent } from 'react';
 import type { BulkActionsProps } from './use_bulk_action_items';
@@ -12,37 +15,43 @@ import { useBulkActionItems } from './use_bulk_action_items';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('../../../lib/kibana');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../hooks/use_app_toasts');
+vi.mock('../../../lib/kibana');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runDocumentWorkflowPanel: [],
 });
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
-  () => ({
-    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
-  })
+  () => {
+      const mocked = {
+        useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
-(useAppToasts as jest.Mock).mockReturnValue({
-  addSuccess: jest.fn(),
-  addError: jest.fn(),
+(useAppToasts as Mock).mockReturnValue({
+  addSuccess: vi.fn(),
+  addError: vi.fn(),
 });
 
 function renderUseBulkActionItems(props?: Partial<BulkActionsProps>) {
   return renderHook(() =>
     useBulkActionItems({
       eventIds: ['mockEventId'],
-      setEventsDeleted: jest.fn(),
-      setEventsLoading: jest.fn(),
+      setEventsDeleted: vi.fn(),
+      setEventsLoading: vi.fn(),
       ...props,
     })
   );
@@ -50,7 +59,7 @@ function renderUseBulkActionItems(props?: Partial<BulkActionsProps>) {
 
 describe('useBulkActionItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
@@ -104,7 +113,7 @@ describe('useBulkActionItems', () => {
   });
 
   it('exposes custom actions for composed bulk action menus', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     // Use a neutral icon value — 'briefcase' is NOT set here because icon decoration for
     // the add-to-case action is the responsibility of EventsTableBulkActionMenu, not this hook.
     const { result } = renderUseBulkActionItems({
@@ -130,12 +139,12 @@ describe('useBulkActionItems', () => {
   it('partitions custom actions by their declared group', () => {
     const { result } = renderUseBulkActionItems({
       customBulkActions: [
-        { key: 'case-action', label: 'Case action', groupId: 'cases', onClick: jest.fn() },
+        { key: 'case-action', label: 'Case action', groupId: 'cases', onClick: vi.fn() },
         {
           key: 'timeline-action',
           label: 'Timeline action',
           groupId: 'timeline',
-          onClick: jest.fn(),
+          onClick: vi.fn(),
         },
       ],
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { SpanStatusCode } from '@opentelemetry/api';
 import { ApmMiddleware } from './apm_middleware';
 import { createRuleExecutionMiddlewareContext } from './test_utils';
@@ -12,35 +15,38 @@ import { collectStreamResults, createPipelineStream, createRulePipelineState } f
 import { getDefaultTracer } from '@kbn/default-tracer';
 
 const mockSpan = {
-  setStatus: jest.fn(),
-  recordException: jest.fn(),
-  end: jest.fn(),
-  isRecording: jest.fn().mockReturnValue(true),
+  setStatus: vi.fn(),
+  recordException: vi.fn(),
+  end: vi.fn(),
+  isRecording: vi.fn().mockReturnValue(true),
 };
 
-const mockStartSpan = jest.fn(() => mockSpan);
+const mockStartSpan = vi.fn(() => mockSpan);
 
-jest.mock('@kbn/default-tracer', () => ({
-  getDefaultTracer: jest.fn(() => ({
-    startSpan: mockStartSpan,
-  })),
-}));
+vi.mock('@kbn/default-tracer', () => {
+      const mocked = {
+      getDefaultTracer: vi.fn(() => ({
+        startSpan: mockStartSpan,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getDefaultTracerMock = getDefaultTracer as jest.MockedFunction<typeof getDefaultTracer>;
+const getDefaultTracerMock = getDefaultTracer as MockedFunction<typeof getDefaultTracer>;
 
 describe('ApmMiddleware', () => {
   let middleware: ApmMiddleware;
 
   beforeEach(() => {
     middleware = new ApmMiddleware();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSpan.isRecording.mockReturnValue(true);
   });
 
   it('wraps the stream in an OpenTelemetry span and sets success status', async () => {
     const state = createRulePipelineState();
     const context = createRuleExecutionMiddlewareContext();
-    const next = jest.fn().mockReturnValue(createPipelineStream([state]));
+    const next = vi.fn().mockReturnValue(createPipelineStream([state]));
 
     const results = await collectStreamResults(
       middleware.execute(context, next, createPipelineStream([state]))
@@ -58,7 +64,7 @@ describe('ApmMiddleware', () => {
     const context = createRuleExecutionMiddlewareContext();
     const error = new Error('stream error');
 
-    const next = jest.fn().mockReturnValue(
+    const next = vi.fn().mockReturnValue(
       (async function* () {
         throw error;
       })()
@@ -80,7 +86,7 @@ describe('ApmMiddleware', () => {
     const state1 = createRulePipelineState();
     const state2 = createRulePipelineState();
     const context = createRuleExecutionMiddlewareContext();
-    const next = jest.fn().mockReturnValue(createPipelineStream([state1, state2]));
+    const next = vi.fn().mockReturnValue(createPipelineStream([state1, state2]));
 
     const results = await collectStreamResults(
       middleware.execute(context, next, createPipelineStream([state1, state2]))
@@ -96,7 +102,7 @@ describe('ApmMiddleware', () => {
 
     const state = createRulePipelineState();
     const context = createRuleExecutionMiddlewareContext();
-    const next = jest.fn().mockReturnValue(createPipelineStream([state]));
+    const next = vi.fn().mockReturnValue(createPipelineStream([state]));
 
     const results = await collectStreamResults(
       middleware.execute(context, next, createPipelineStream([state]))

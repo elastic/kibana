@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -15,13 +17,13 @@ const actions = [
     key: 'edit',
     children: 'Edit',
     icon: 'pencil',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   },
   {
     key: 'delete',
     children: 'Delete',
     icon: 'trash',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   },
 ];
 

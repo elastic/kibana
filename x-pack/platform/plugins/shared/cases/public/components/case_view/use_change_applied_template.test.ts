@@ -5,39 +5,50 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
 import type { Field } from '../../../common/types/domain/template/fields';
 import { computeNewExtendedFields, useChangeAppliedTemplate } from './use_change_applied_template';
 
-const mockPatchCase = jest.fn();
-jest.mock('../../containers/api', () => ({
-  ...jest.requireActual('../../containers/api'),
-  patchCase: (...args: unknown[]) => mockPatchCase(...args),
-}));
+const mockPatchCase = vi.fn();
+vi.mock('../../containers/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../containers/api')),
+      patchCase: (...args: unknown[]) => mockPatchCase(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReportTemplateApplied = jest.fn();
-const mockReportTemplateCleared = jest.fn();
-jest.mock('../../analytics/templates/use_template_apply_ebt', () => ({
-  useTemplateAppliedEBT: () => mockReportTemplateApplied,
-  useTemplateClearedEBT: () => mockReportTemplateCleared,
-}));
+const mockReportTemplateApplied = vi.fn();
+const mockReportTemplateCleared = vi.fn();
+vi.mock('../../analytics/templates/use_template_apply_ebt', () => {
+      const mocked = {
+      useTemplateAppliedEBT: () => mockReportTemplateApplied,
+      useTemplateClearedEBT: () => mockReportTemplateCleared,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockShowSuccessToast = jest.fn();
-const mockShowErrorToast = jest.fn();
-const mockShowInfoToast = jest.fn();
-jest.mock('../../common/use_cases_toast', () => ({
-  useCasesToast: () => ({
-    showSuccessToast: mockShowSuccessToast,
-    showErrorToast: mockShowErrorToast,
-    showInfoToast: mockShowInfoToast,
-  }),
-}));
+const mockShowSuccessToast = vi.fn();
+const mockShowErrorToast = vi.fn();
+const mockShowInfoToast = vi.fn();
+vi.mock('../../common/use_cases_toast', () => {
+      const mocked = {
+      useCasesToast: () => ({
+        showSuccessToast: mockShowSuccessToast,
+        showErrorToast: mockShowErrorToast,
+        showInfoToast: mockShowInfoToast,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The hook exposes a "Reload page" action on success; jsdom doesn't implement reload, so stub it.
 const originalLocation = window.location;
-const mockReload = jest.fn();
+const mockReload = vi.fn();
 beforeAll(() => {
   Object.defineProperty(window, 'location', {
     configurable: true,
@@ -171,7 +182,7 @@ describe('computeNewExtendedFields', () => {
 
 describe('useChangeAppliedTemplate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPatchCase.mockResolvedValue([caseWithTemplate]);
   });
 
@@ -514,7 +525,7 @@ describe('useChangeAppliedTemplate', () => {
     it('reports once even though the caller also passes its own onSuccess', async () => {
       // The sidebar always passes a per-call onSuccess to close its modal. A report added there as
       // well would double-count, and each suite mocks the other side, so assert it here.
-      const callerOnSuccess = jest.fn();
+      const callerOnSuccess = vi.fn();
       const { result } = renderMutation();
 
       act(() => {

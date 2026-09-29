@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ChatContextMenu } from './chat_context_menu';
 import { useConfirmModal } from '../hooks';
 
-jest.mock('../hooks/use_confirm_modal', () => ({
-  useConfirmModal: jest.fn(() => ({
-    element: <div data-test-subj="confirmModal" />,
-    confirm: jest.fn(() => Promise.resolve(true)),
-  })),
-}));
+vi.mock('../hooks/use_confirm_modal', () => {
+      const mocked = {
+      useConfirmModal: vi.fn(() => ({
+        element: <div data-test-subj="confirmModal" />,
+        confirm: vi.fn(() => Promise.resolve(true)),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ChatContextMenu', () => {
-  const onCopyToClipboardClick = jest.fn();
-  const onCopyUrlClick = jest.fn();
-  const onDeleteClick = jest.fn();
-  const onDuplicateConversationClick = jest.fn();
-  const onArchiveConversation = jest.fn();
+  const onCopyToClipboardClick = vi.fn();
+  const onCopyUrlClick = vi.fn();
+  const onDeleteClick = vi.fn();
+  const onDuplicateConversationClick = vi.fn();
+  const onArchiveConversation = vi.fn();
 
   const renderComponent = (props = {}) =>
     render(
@@ -40,7 +46,7 @@ describe('ChatContextMenu', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders without errors', () => {
@@ -101,9 +107,9 @@ describe('ChatContextMenu', () => {
   });
 
   it('does not call onDeleteClick when delete is canceled', async () => {
-    (useConfirmModal as jest.Mock).mockReturnValue({
+    (useConfirmModal as Mock).mockReturnValue({
       element: <div data-test-subj="confirmModal" />,
-      confirm: jest.fn(() => Promise.resolve(false)),
+      confirm: vi.fn(() => Promise.resolve(false)),
     });
 
     renderComponent();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Status } from './status';
@@ -12,29 +14,38 @@ import { TestProviders } from '../../../../common/mock';
 import { HEADER_STATUS_BLOCK_TEST_ID } from '../constants/test_ids';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
+vi.mock('../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./status_popover_button', () => ({
-  StatusPopoverButton: ({
-    hit,
-    disabled,
-    onAttackUpdated: _onAttackUpdated,
-  }: {
-    hit: DataTableRecord;
-    disabled: boolean;
-    onAttackUpdated: () => void;
-  }) => (
-    <div data-test-subj="status-popover" data-disabled={String(disabled)}>
-      {String(hit.flattened['kibana.alert.workflow_status'])}
-    </div>
-  ),
-}));
+vi.mock('./status_popover_button', () => {
+      const mocked = {
+      StatusPopoverButton: ({
+        hit,
+        disabled,
+        onAttackUpdated: _onAttackUpdated,
+      }: {
+        hit: DataTableRecord;
+        disabled: boolean;
+        onAttackUpdated: () => void;
+      }) => (
+        <div data-test-subj="status-popover" data-disabled={String(disabled)}>
+          {String(hit.flattened['kibana.alert.workflow_status'])}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/empty_value', () => ({
-  getEmptyTagValue: jest.fn(() => <div data-test-subj="empty-tag">{'-'}</div>),
-}));
+vi.mock('../../../../common/components/empty_value', () => {
+      const mocked = {
+      getEmptyTagValue: vi.fn(() => <div data-test-subj="empty-tag">{'-'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildHit = (
   overrides: Record<string, unknown> = {},
@@ -52,10 +63,10 @@ const buildHit = (
   } as unknown as DataTableRecord);
 
 describe('<Status /> (v2)', () => {
-  const onAttackUpdated = jest.fn();
+  const onAttackUpdated = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders the status block container', () => {

@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import { EditEpisodeAssigneeModal } from './edit_episode_assignee_modal';
 
-const mockOnApply = jest.fn();
-const mockOnClose = jest.fn();
+const mockOnApply = vi.fn();
+const mockOnClose = vi.fn();
 
-jest.mock('./episode_assignee_panel', () => ({
-  EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
-  EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
-    <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
-      {'Apply'}
-    </button>
-  ),
-}));
+vi.mock('./episode_assignee_panel', () => {
+      const mocked = {
+      EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
+      EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
+        <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
+          {'Apply'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderModal = (episodeCount?: number) =>
   render(
@@ -32,7 +37,7 @@ const renderModal = (episodeCount?: number) =>
     />
   );
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('EditEpisodeAssigneeModal', () => {
   it('renders the picker flush, without a modal body wrapper around it', () => {

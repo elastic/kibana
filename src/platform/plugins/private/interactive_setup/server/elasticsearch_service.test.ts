@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { BehaviorSubject } from 'rxjs';
 import tls from 'tls';
@@ -22,13 +25,16 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
 import { ElasticsearchConnectionStatus } from '../common';
 
-jest.mock('tls');
-jest.mock('@kbn/core/server', () => ({
-  pollEsNodesVersion: jest.fn(),
-}));
+vi.mock('tls');
+vi.mock('@kbn/core/server', () => {
+      const mocked = {
+      pollEsNodesVersion: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const tlsConnectMock = tls.connect as jest.MockedFunction<typeof tls.connect>;
-const mockPollEsNodesVersion = pollEsNodesVersion as jest.MockedFunction<typeof pollEsNodesVersion>;
+const tlsConnectMock = tls.connect as MockedFunction<typeof tls.connect>;
+const mockPollEsNodesVersion = pollEsNodesVersion as MockedFunction<typeof pollEsNodesVersion>;
 
 function mockCompatibility(isCompatible: boolean, message?: string) {
   mockPollEsNodesVersion.mockReturnValue(
@@ -87,8 +93,8 @@ describe('ElasticsearchService', () => {
     });
 
     describe('#connectionStatus$', () => {
-      beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
-      afterEach(() => jest.useRealTimers());
+      beforeEach(() => vi.useFakeTimers({ legacyFakeTimers: true }));
+      afterEach(() => vi.useRealTimers());
 
       it('does not repeat ping request if have multiple subscriptions', async () => {
         mockConnectionStatusClient.asInternalUser.ping.mockRejectedValue(
@@ -98,19 +104,19 @@ describe('ElasticsearchService', () => {
           )
         );
 
-        const mockHandler1 = jest.fn();
-        const mockHandler2 = jest.fn();
+        const mockHandler1 = vi.fn();
+        const mockHandler2 = vi.fn();
         setupContract.connectionStatus$.subscribe(mockHandler1);
         setupContract.connectionStatus$.subscribe(mockHandler2);
 
-        jest.advanceTimersByTime(0);
+        vi.advanceTimersByTime(0);
         await nextTick();
 
         // Late subscription.
-        const mockHandler3 = jest.fn();
+        const mockHandler3 = vi.fn();
         setupContract.connectionStatus$.subscribe(mockHandler3);
 
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).toHaveBeenCalledTimes(1);
@@ -130,10 +136,10 @@ describe('ElasticsearchService', () => {
           )
         );
 
-        const mockHandler = jest.fn();
+        const mockHandler = vi.fn();
         setupContract.connectionStatus$.subscribe(mockHandler);
 
-        jest.advanceTimersByTime(0);
+        vi.advanceTimersByTime(0);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).toHaveBeenCalledTimes(1);
@@ -142,13 +148,13 @@ describe('ElasticsearchService', () => {
 
         mockHandler.mockClear();
 
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).toHaveBeenCalledTimes(2);
         expect(mockHandler).not.toHaveBeenCalled();
 
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).toHaveBeenCalledTimes(3);
@@ -163,10 +169,10 @@ describe('ElasticsearchService', () => {
           )
         );
 
-        const mockHandler = jest.fn();
+        const mockHandler = vi.fn();
         setupContract.connectionStatus$.subscribe(mockHandler);
 
-        jest.advanceTimersByTime(0);
+        vi.advanceTimersByTime(0);
         await nextTick();
 
         // Initial ping (connection error).
@@ -180,7 +186,7 @@ describe('ElasticsearchService', () => {
             interactiveSetupMock.createApiResponse({ statusCode: 401, body: {} })
           )
         );
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).toHaveBeenCalledTimes(2);
@@ -190,7 +196,7 @@ describe('ElasticsearchService', () => {
         mockHandler.mockClear();
         mockConnectionStatusClient.asInternalUser.ping.mockClear();
 
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).not.toHaveBeenCalled();
@@ -200,10 +206,10 @@ describe('ElasticsearchService', () => {
       it('checks connection status only once if connection is known to be configured right from start', async () => {
         mockConnectionStatusClient.asInternalUser.ping.mockResponse(true);
 
-        const mockHandler = jest.fn();
+        const mockHandler = vi.fn();
         setupContract.connectionStatus$.subscribe(mockHandler);
 
-        jest.advanceTimersByTime(0);
+        vi.advanceTimersByTime(0);
         await nextTick();
 
         // Initial ping (connection error).
@@ -214,13 +220,13 @@ describe('ElasticsearchService', () => {
         mockHandler.mockClear();
         mockConnectionStatusClient.asInternalUser.ping.mockClear();
 
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).not.toHaveBeenCalled();
         expect(mockHandler).not.toHaveBeenCalled();
 
-        const mockHandler2 = jest.fn();
+        const mockHandler2 = vi.fn();
         setupContract.connectionStatus$.subscribe(mockHandler2);
 
         // Source observable is complete, and handler should be called immediately.
@@ -230,7 +236,7 @@ describe('ElasticsearchService', () => {
         mockHandler2.mockClear();
 
         // No status check should be made after the first attempt.
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).not.toHaveBeenCalled();
@@ -246,10 +252,10 @@ describe('ElasticsearchService', () => {
           )
         );
 
-        const mockHandler = jest.fn();
+        const mockHandler = vi.fn();
         const mockSubscription = setupContract.connectionStatus$.subscribe(mockHandler);
 
-        jest.advanceTimersByTime(0);
+        vi.advanceTimersByTime(0);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).toHaveBeenCalledTimes(1);
@@ -260,13 +266,13 @@ describe('ElasticsearchService', () => {
         mockHandler.mockClear();
         mockConnectionStatusClient.asInternalUser.ping.mockClear();
 
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).not.toHaveBeenCalled();
         expect(mockHandler).not.toHaveBeenCalled();
 
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).not.toHaveBeenCalled();
@@ -280,10 +286,10 @@ describe('ElasticsearchService', () => {
           )
         );
 
-        const mockHandler = jest.fn();
+        const mockHandler = vi.fn();
         setupContract.connectionStatus$.subscribe(mockHandler);
 
-        jest.advanceTimersByTime(0);
+        vi.advanceTimersByTime(0);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).toHaveBeenCalledTimes(1);
@@ -293,7 +299,7 @@ describe('ElasticsearchService', () => {
         mockHandler.mockClear();
         mockConnectionStatusClient.asInternalUser.ping.mockClear();
 
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).not.toHaveBeenCalled();
@@ -306,10 +312,10 @@ describe('ElasticsearchService', () => {
           new errors.ProductNotSupportedError('product-name', { body: {} })
         );
 
-        const mockHandler = jest.fn();
+        const mockHandler = vi.fn();
         setupContract.connectionStatus$.subscribe(mockHandler);
 
-        jest.advanceTimersByTime(0);
+        vi.advanceTimersByTime(0);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).toHaveBeenCalledTimes(1);
@@ -319,7 +325,7 @@ describe('ElasticsearchService', () => {
         mockHandler.mockClear();
         mockConnectionStatusClient.asInternalUser.ping.mockClear();
 
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
         await nextTick();
 
         expect(mockConnectionStatusClient.asInternalUser.ping).not.toHaveBeenCalled();
@@ -657,13 +663,13 @@ some weird+ca/with
         );
 
         tlsConnectMock.mockReturnValue({
-          once: jest.fn((event, fn) => {
+          once: vi.fn((event, fn) => {
             if (event === 'secureConnect') {
               fn();
             }
           }),
-          getPeerCertificate: jest.fn().mockReturnValue({ raw: Buffer.from('cert') }),
-          destroy: jest.fn(),
+          getPeerCertificate: vi.fn().mockReturnValue({ raw: Buffer.from('cert') }),
+          destroy: vi.fn(),
         } as unknown as tls.TLSSocket);
 
         await expect(setupContract.ping('https://localhost:9200')).resolves.toEqual({
@@ -691,7 +697,7 @@ some weird+ca/with
         );
 
         tlsConnectMock.mockReturnValue({
-          once: jest.fn((event, fn) => {
+          once: vi.fn((event, fn) => {
             if (event === 'error') {
               fn(new Error('some-message'));
             }

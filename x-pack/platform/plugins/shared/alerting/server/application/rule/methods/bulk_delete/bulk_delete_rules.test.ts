@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { schema } from '@kbn/config-schema';
@@ -34,26 +37,32 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => ({
-  softDeleteGapsByQuery: jest.fn(),
-}));
+vi.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => {
+      const mocked = {
+      softDeleteGapsByQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const softDeleteGapsByQueryMock = softDeleteGapsByQuery as jest.Mock;
+const softDeleteGapsByQueryMock = softDeleteGapsByQuery as Mock;
 
 const logger = loggerMock.create();
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
 
 const mockAlertsService = {
-  setAlertsToUntracked: jest.fn().mockResolvedValue([]),
+  setAlertsToUntracked: vi.fn().mockResolvedValue([]),
 };
 
 const kibanaVersion = 'v8.2.0';
-const createAPIKeyMock = jest.fn();
+const createAPIKeyMock = vi.fn();
 const {
   rulesClientParams,
   taskManager,
@@ -83,7 +92,7 @@ const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
 });
 
@@ -91,17 +100,17 @@ setGlobalDate();
 
 describe('bulkDelete', () => {
   let rulesClient: RulesClient;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = {
       saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2, enabledRuleForBulkOps3],
     } as unknown
   ) => {
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValue({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield response;
         },
@@ -150,7 +159,7 @@ describe('bulkDelete', () => {
       validLegacyConsumers: [],
     });
 
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient = (await rulesClientParams.getActionsClient()) as Mocked<ActionsClient>;
     actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
 
@@ -216,10 +225,10 @@ describe('bulkDelete', () => {
   test('invalidates UIAM ApiKeys as well', async () => {
     rulesClient = new RulesClient({ ...rulesClientParams, shouldGrantUiam: true });
 
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield {
             saved_objects: [
@@ -254,10 +263,10 @@ describe('bulkDelete', () => {
   test('does not invalidate API keys created by user', async () => {
     rulesClient = new RulesClient({ ...rulesClientParams, shouldGrantUiam: true });
 
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield {
             saved_objects: [
@@ -410,28 +419,28 @@ describe('bulkDelete', () => {
         statuses: [getBulkOperationStatusErrorResponse(409)],
       });
 
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRuleForBulkOps2] };
         },
@@ -487,22 +496,22 @@ describe('bulkDelete', () => {
         ],
       });
 
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRuleForBulkOps2] };
         },
@@ -683,7 +692,7 @@ describe('bulkDelete', () => {
   });
 
   describe('auditLogger', () => {
-    jest.spyOn(auditLogger, 'log').mockImplementation();
+    vi.spyOn(auditLogger, 'log').mockImplementation();
 
     test('logs audit event when deleting rules', async () => {
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
@@ -804,9 +813,9 @@ describe('bulkDelete', () => {
 
   describe('change tracking', () => {
     const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
@@ -934,7 +943,7 @@ describe('bulkDelete', () => {
       setRuleType();
 
       const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+      const dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(startTimeMs);
 
       try {
         await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
@@ -991,28 +1000,28 @@ describe('bulkDelete', () => {
         .mockResolvedValueOnce({ statuses: [getBulkOperationStatusErrorResponse(409)] })
         .mockResolvedValueOnce({ statuses: [getBulkOperationStatusErrorResponse(409)] });
 
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [enabledRuleForBulkOps2] };
           },
         })
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [enabledRuleForBulkOps2] };
           },
         })
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [enabledRuleForBulkOps2] };
           },
         })
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [enabledRuleForBulkOps2] };
           },
@@ -1041,16 +1050,16 @@ describe('bulkDelete', () => {
           statuses: [{ id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true }],
         });
 
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
           },
         })
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [enabledRuleForBulkOps2] };
           },
@@ -1111,16 +1120,16 @@ describe('bulkDelete', () => {
           statuses: [{ id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true }],
         });
 
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
           },
         })
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [enabledRuleForBulkOps2] };
           },

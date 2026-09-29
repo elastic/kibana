@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Metric } from '@kbn/monitoring-collection-plugin/server';
@@ -11,7 +14,7 @@ import { registerNodeCollector } from './register_node_collector';
 import type { NodeRulesMetric } from './types';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '.';
 
-jest.mock('./in_memory_metrics');
+vi.mock('./in_memory_metrics');
 
 describe('registerNodeCollector()', () => {
   const monitoringCollection = monitoringCollectionMock.createSetup();
@@ -19,7 +22,7 @@ describe('registerNodeCollector()', () => {
   const inMemoryMetrics = new InMemoryMetrics(logger);
 
   afterEach(() => {
-    (inMemoryMetrics.getInMemoryMetric as jest.Mock).mockClear();
+    (inMemoryMetrics.getInMemoryMetric as Mock).mockClear();
   });
 
   it('should get in memory rule metrics', async () => {
@@ -33,7 +36,7 @@ describe('registerNodeCollector()', () => {
     expect(metricTypes.length).toBe(1);
     expect(metricTypes[0]).toBe('node_rules');
 
-    (inMemoryMetrics.getInMemoryMetric as jest.Mock).mockImplementation((metric) => {
+    (inMemoryMetrics.getInMemoryMetric as Mock).mockImplementation((metric) => {
       switch (metric) {
         case IN_MEMORY_METRICS.RULE_FAILURES:
           return 2;

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateRequiredGroupInDefaultActions } from './v1';
 
 describe('validateRequiredGroupInDefaultActions', () => {
-  const isSystemAction = jest.fn().mockImplementation((id) => id === 'system_action-id');
+  const isSystemAction = vi.fn().mockImplementation((id) => id === 'system_action-id');
 
   it('throws an error if the action is missing the group', () => {
     expect(() =>

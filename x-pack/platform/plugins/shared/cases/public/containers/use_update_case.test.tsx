@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,36 +19,48 @@ import { useCasesToast } from '../common/use_cases_toast';
 import { casesQueriesKeys } from './constants';
 import { basicCaseFixture } from './test_fixtures';
 
-jest.mock('./api', () => ({
-  getCase: jest.fn(),
-  patchCase: jest.fn(),
-}));
-jest.mock('../common/lib/kibana', () => ({
-  useToasts: jest.fn(),
-}));
-jest.mock('../common/use_cases_toast', () => ({
-  useCasesToast: jest.fn(),
-}));
-jest.mock('./utils', () => ({
-  createUpdateSuccessToaster: jest.fn().mockReturnValue({
-    title: 'Updated "Another horrible breach!!"',
-    className: 'eui-textBreakWord',
-  }),
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      getCase: vi.fn(),
+      patchCase: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../common/lib/kibana', () => {
+      const mocked = {
+      useToasts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../common/use_cases_toast', () => {
+      const mocked = {
+      useCasesToast: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./utils', () => {
+      const mocked = {
+      createUpdateSuccessToaster: vi.fn().mockReturnValue({
+        title: 'Updated "Another horrible breach!!"',
+        className: 'eui-textBreakWord',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUpdateCase', () => {
   const updateKey: UpdateKey = 'description';
 
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
-  const showErrorToast = jest.fn();
-  (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast });
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError });
+  const showErrorToast = vi.fn();
+  (useCasesToast as Mock).mockReturnValue({ showErrorToast });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (api.patchCase as jest.Mock).mockResolvedValue([basicCaseFixture]);
-    (api.getCase as jest.Mock).mockResolvedValue(basicCaseFixture);
+    vi.clearAllMocks();
+    (api.patchCase as Mock).mockResolvedValue([basicCaseFixture]);
+    (api.getCase as Mock).mockResolvedValue(basicCaseFixture);
   });
 
   const createQueryClient = () =>
@@ -69,7 +84,7 @@ describe('useUpdateCase', () => {
 
   it('patch case and refresh the case page', async () => {
     const queryClient = createQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useUpdateCase(), {
       wrapper: getWrapper(queryClient),
@@ -87,7 +102,7 @@ describe('useUpdateCase', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const patchCaseSpy = jest.spyOn(api, 'patchCase');
+    const patchCaseSpy = vi.spyOn(api, 'patchCase');
     const queryClient = createQueryClient();
     const { result } = renderHook(() => useUpdateCase(), {
       wrapper: getWrapper(queryClient),
@@ -135,11 +150,11 @@ describe('useUpdateCase', () => {
       body: { statusCode: 409 },
     });
 
-    const patchCaseSpy = jest
+    const patchCaseSpy = vi
       .spyOn(api, 'patchCase')
       .mockRejectedValueOnce(conflictError)
       .mockResolvedValueOnce([{ ...latestCase, description: sampleUpdate.updateValue }]);
-    const getCaseSpy = jest.spyOn(api, 'getCase').mockResolvedValue(latestCase);
+    const getCaseSpy = vi.spyOn(api, 'getCase').mockResolvedValue(latestCase);
     const queryClient = createQueryClient();
 
     const { result } = renderHook(() => useUpdateCase(), {
@@ -161,7 +176,7 @@ describe('useUpdateCase', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest.spyOn(api, 'patchCase').mockRejectedValue(new Error('useUpdateCase: Test error'));
+    vi.spyOn(api, 'patchCase').mockRejectedValue(new Error('useUpdateCase: Test error'));
     const queryClient = createQueryClient();
 
     const { result } = renderHook(() => useUpdateCase(), {

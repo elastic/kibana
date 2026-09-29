@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 
@@ -13,7 +15,7 @@ import { EncryptionError, EncryptionErrorOperation } from './crypto';
 import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 interface ConversionTestOptions {
@@ -76,7 +78,7 @@ describe('createMigration()', () => {
 
   describe('migration of an existing type', () => {
     it('uses the type in the current service for both input and migration types when none are specified', async () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
+      const instantiateServiceWithLegacyType = vi.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
 
@@ -129,10 +131,10 @@ describe('createMigration()', () => {
     });
 
     it('throws error on decryption failure if shouldMigrateIfDecryptionFails is false', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
+      const instantiateServiceWithLegacyType = vi.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn((doc) => doc);
+      const migrationFunc = vi.fn((doc) => doc);
 
       const migrationCreator = getCreateMigration(
         encryptionSavedObjectService,
@@ -180,10 +182,10 @@ describe('createMigration()', () => {
     });
 
     it('throws error on decryption failure if shouldMigrateIfDecryptionFails is true but error is not encryption error', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
+      const instantiateServiceWithLegacyType = vi.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn((doc) => doc);
+      const migrationFunc = vi.fn((doc) => doc);
 
       const migrationCreator = getCreateMigration(
         encryptionSavedObjectService,
@@ -233,10 +235,10 @@ describe('createMigration()', () => {
     });
 
     it('runs migration function on decryption failure if shouldMigrateIfDecryptionFails is true and error is encryption error', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
+      const instantiateServiceWithLegacyType = vi.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn((doc) => doc);
+      const migrationFunc = vi.fn((doc) => doc);
 
       const migrationCreator = getCreateMigration(
         encryptionSavedObjectService,
@@ -303,10 +305,10 @@ describe('createMigration()', () => {
     });
 
     it('throws error on migration failure', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
+      const instantiateServiceWithLegacyType = vi.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn(() => {
+      const migrationFunc = vi.fn(() => {
         throw new Error('migration failed!');
       });
 
@@ -354,10 +356,10 @@ describe('createMigration()', () => {
     });
 
     it('throws error on migration failure even if shouldMigrateIfDecryptionFails is true', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
+      const instantiateServiceWithLegacyType = vi.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn(() => {
+      const migrationFunc = vi.fn(() => {
         throw new Error('migration failed!');
       });
 
@@ -406,10 +408,10 @@ describe('createMigration()', () => {
     });
 
     it('throws error on encryption failure', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
+      const instantiateServiceWithLegacyType = vi.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn((doc) => doc);
+      const migrationFunc = vi.fn((doc) => doc);
 
       const migrationCreator = getCreateMigration(
         encryptionSavedObjectService,
@@ -465,10 +467,10 @@ describe('createMigration()', () => {
     });
 
     it('throws error on encryption failure even if shouldMigrateIfDecryptionFails is true', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
+      const instantiateServiceWithLegacyType = vi.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn((doc) => doc);
+      const migrationFunc = vi.fn((doc) => doc);
 
       const migrationCreator = getCreateMigration(
         encryptionSavedObjectService,
@@ -528,7 +530,7 @@ describe('createMigration()', () => {
   describe('migration of a single legacy type', () => {
     it('uses the input type as the migration type when omitted', async () => {
       const serviceWithLegacyType = encryptedSavedObjectsServiceMock.create();
-      const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
+      const instantiateServiceWithLegacyType = vi.fn(() => serviceWithLegacyType);
 
       const migrationCreator = getCreateMigration(
         encryptionSavedObjectService,
@@ -588,7 +590,7 @@ describe('createMigration()', () => {
         expectedEncryptDescriptorNamespace,
         expectedIsTypeBeingConverted,
       }: ConversionTestOptions) => {
-        const instantiateServiceWithLegacyType = jest.fn(() =>
+        const instantiateServiceWithLegacyType = vi.fn(() =>
           encryptedSavedObjectsServiceMock.create()
         );
 
@@ -753,7 +755,7 @@ describe('createMigration()', () => {
   describe('migration across two legacy types', () => {
     const serviceWithInputLegacyType = encryptedSavedObjectsServiceMock.create();
     const serviceWithMigrationLegacyType = encryptedSavedObjectsServiceMock.create();
-    const instantiateServiceWithLegacyType = jest.fn();
+    const instantiateServiceWithLegacyType = vi.fn();
 
     function createMigration() {
       instantiateServiceWithLegacyType

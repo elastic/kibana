@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
@@ -28,13 +31,13 @@ import {
 } from './per_os_device_control_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
-jest.mock('../../../../../../common/hooks/use_license');
-jest.mock('../hooks/use_get_device_control_component');
+vi.mock('../../../../../../common/hooks/use_license');
+vi.mock('../hooks/use_get_device_control_component');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
-const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
+const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as Mock;
 
 describe('PerOsDeviceControlCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsDeviceControl;
@@ -49,7 +52,7 @@ describe('PerOsDeviceControlCard', () => {
   };
 
   const getUpdatedPolicy = (): PolicyConfig => {
-    const onChange = props.onChange as jest.Mock;
+    const onChange = props.onChange as Mock;
     return onChange.mock.calls[onChange.mock.calls.length - 1][0].updatedPolicy;
   };
 
@@ -75,7 +78,7 @@ describe('PerOsDeviceControlCard', () => {
     };
     props = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../lib/kibana';
 import { useMessagesStorage } from './use_messages_storage';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('useLocalStorage', () => {
   beforeEach(() => {

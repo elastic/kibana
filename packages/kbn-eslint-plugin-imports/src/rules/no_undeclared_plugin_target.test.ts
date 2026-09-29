@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RuleTester } from 'eslint';
 import { NoUndeclaredPluginTargetRule } from './no_undeclared_plugin_target';
 
@@ -54,7 +56,7 @@ const MOCK_MANIFESTS: Record<string, any> = {
  * getPackageIdForPath returns '@kbn/my-plugin' for files in 'my-plugin/' prefix,
  * otherwise '@kbn/other-plugin'.
  */
-jest.mock('../get_import_resolver', () => {
+vi.mock('../get_import_resolver', () => {
   return {
     getImportResolver() {
       return {
@@ -73,7 +75,7 @@ jest.mock('../get_import_resolver', () => {
   };
 });
 
-jest.mock('../helpers/repo_source_classifier', () => {
+vi.mock('../helpers/repo_source_classifier', () => {
   return {
     getRepoSourceClassifier() {
       return {

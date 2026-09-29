@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   ToolAvailabilityContext,
   ToolAvailabilityConfig,
@@ -16,12 +19,12 @@ import { ToolAvailabilityCache } from './availability_cache';
 
 describe('ToolAvailabilityCache', () => {
   let cache: ToolAvailabilityCache;
-  let mockHandler: jest.Mock<Promise<ToolAvailabilityResult>>;
+  let mockHandler: Mock<Promise<ToolAvailabilityResult>>;
   let context: ToolAvailabilityContext;
 
   beforeEach(() => {
     cache = new ToolAvailabilityCache();
-    mockHandler = jest.fn();
+    mockHandler = vi.fn();
     context = {
       request: httpServerMock.createKibanaRequest(),
       uiSettings: uiSettingsServiceMock.createClient(),
@@ -201,8 +204,8 @@ describe('ToolAvailabilityCache', () => {
 
     it('allows different tools to have different TTL configurations', async () => {
       const result: ToolAvailabilityResult = { status: 'available' };
-      const handler1 = jest.fn().mockResolvedValue(result);
-      const handler2 = jest.fn().mockResolvedValue(result);
+      const handler1 = vi.fn().mockResolvedValue(result);
+      const handler2 = vi.fn().mockResolvedValue(result);
 
       const shortTtlConfig: ToolAvailabilityConfig = {
         handler: handler1,

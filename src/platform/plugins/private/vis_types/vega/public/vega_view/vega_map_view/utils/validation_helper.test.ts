@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { validateZoomSettings } from './validation_helper';
 
 type ValidateZoomSettingsParams = Parameters<typeof validateZoomSettings>;
@@ -22,7 +24,7 @@ describe('vega_map_view/validation_helper', () => {
     let onWarn: OnWarnType;
 
     beforeEach(() => {
-      onWarn = jest.fn();
+      onWarn = vi.fn();
       mapConfig = {
         maxZoom: 10,
         minZoom: 5,

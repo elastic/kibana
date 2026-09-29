@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
@@ -28,7 +30,7 @@ import { EvaluateMatchersStep } from './evaluate_matchers_step';
 
 describe('EvaluateMatchersStep', () => {
   let loggerService: LoggerService;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let step: EvaluateMatchersStep;
 
   beforeEach(() => {
@@ -241,7 +243,7 @@ describe('EvaluateMatchersStep', () => {
         }),
       })
     );
-    const warnMessage = (mockLogger.warn as jest.Mock).mock.calls[0][0] as string;
+    const warnMessage = (mockLogger.warn as Mock).mock.calls[0][0] as string;
     expect(warnMessage).not.toContain('invalid kql (((');
   });
 

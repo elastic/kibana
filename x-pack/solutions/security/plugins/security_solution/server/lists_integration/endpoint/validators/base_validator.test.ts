@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   createMockEndpointAppContextService,
@@ -47,7 +50,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
   let kibanaRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let exceptionLikeItem: ExceptionItemLikeOptions;
   let validator: BaseValidatorMock;
-  let packagePolicyService: jest.Mocked<PackagePolicyClient>;
+  let packagePolicyService: Mocked<PackagePolicyClient>;
   let initValidator: (withNoAuth?: boolean, withBasicLicense?: boolean) => BaseValidatorMock;
 
   beforeEach(() => {
@@ -57,7 +60,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
     const servicesStart = createMockEndpointAppContextServiceStartContract();
 
     packagePolicyService = servicesStart.fleetStartServices
-      .packagePolicyService as jest.Mocked<PackagePolicyClient>;
+      .packagePolicyService as Mocked<PackagePolicyClient>;
 
     endpointAppContextServices = new EndpointAppContextService();
     endpointAppContextServices.setup(createMockEndpointAppContextServiceSetupContract());
@@ -67,16 +70,16 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       if (withNoAuth) {
         const fleetAuthz = createFleetAuthzMock();
         fleetAuthz.fleet.all = false;
-        (servicesStart.fleetStartServices.authz.fromRequest as jest.Mock).mockResolvedValue(
+        (servicesStart.fleetStartServices.authz.fromRequest as Mock).mockResolvedValue(
           fleetAuthz
         );
-        (servicesStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue(
+        (servicesStart.security.authc.getCurrentUser as Mock).mockReturnValue(
           securityMock.createMockAuthenticatedUser()
         );
       }
 
       if (withBasicLicense) {
-        (servicesStart.licenseService.isPlatinumPlus as jest.Mock).mockResolvedValue(false);
+        (servicesStart.licenseService.isPlatinumPlus as Mock).mockResolvedValue(false);
       }
 
       validator = new BaseValidatorMock(endpointAppContextServices, kibanaRequest);
@@ -159,7 +162,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
   });
 
   it('should validate policy ids for by policy artifacts', async () => {
-    const getActiveSpaceMock = jest.spyOn(endpointAppContextServices, 'getActiveSpace');
+    const getActiveSpaceMock = vi.spyOn(endpointAppContextServices, 'getActiveSpace');
     getActiveSpaceMock.mockResolvedValue({
       id: asSpaceId('default'),
       name: 'default',
@@ -176,7 +179,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
   });
 
   it('should throw if policy ids for by policy artifacts are not valid', async () => {
-    const getActiveSpaceMock = jest.spyOn(endpointAppContextServices, 'getActiveSpace');
+    const getActiveSpaceMock = vi.spyOn(endpointAppContextServices, 'getActiveSpace');
     getActiveSpaceMock.mockResolvedValue({
       id: asSpaceId('default'),
       name: 'default',
@@ -235,11 +238,11 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
     beforeEach(() => {
       authzMock = getEndpointAuthzInitialStateMock();
       endpointAppContextServices = createMockEndpointAppContextService();
-      (endpointAppContextServices.getEndpointAuthz as jest.Mock).mockResolvedValue(authzMock);
+      (endpointAppContextServices.getEndpointAuthz as Mock).mockResolvedValue(authzMock);
       setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
       validator = new BaseValidatorMock(endpointAppContextServices, kibanaRequest);
       packagePolicyService = endpointAppContextServices.getInternalFleetServices()
-        .packagePolicy as jest.Mocked<PackagePolicyClient>;
+        .packagePolicy as Mocked<PackagePolicyClient>;
       packagePolicyService.listIds.mockResolvedValue({
         items: ['policy-1', 'policy-2'],
         total: 2,
@@ -546,7 +549,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       });
 
       it('should call validator callback on all items with the item type converted to exception item', async () => {
-        const validateFn = jest.fn().mockResolvedValue(undefined);
+        const validateFn = vi.fn().mockResolvedValue(undefined);
         const importItems: PromiseFromStreams = {
           items: [item1Mock(), item2Mock()],
           lists: [],
@@ -586,7 +589,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       });
 
       it('should modify data in place', async () => {
-        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+        const validateFn = vi.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
           item.name = `modified ${item.name}`;
           item.tags = [...item.tags, 'cheese'];
         });
@@ -620,7 +623,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       });
 
       it('should put errors in items array when validator throws', async () => {
-        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+        const validateFn = vi.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
           if (item.name === 'name 2') {
             throw new Error('houston, we have a problem');
           }
@@ -651,7 +654,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         const expectedItems = cloneDeep(importItems);
 
-        const validateFn = jest.fn();
+        const validateFn = vi.fn();
 
         await expect(
           validator._validatePreImportItems(importItems, validateFn)
@@ -713,7 +716,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         it('should error when artifact is not visible in current space', async () => {
           // Artifact owned by another space with no policies assigned (not visible)
           exceptionLikeItem.tags = [buildSpaceOwnerIdTag('other-space')];
-          (endpointAppContextServices.getAccessibleSpaces as jest.Mock).mockResolvedValue([
+          (endpointAppContextServices.getAccessibleSpaces as Mock).mockResolvedValue([
             { id: DEFAULT_SPACE_ID, name: 'default', disabledFeatures: [] },
             { id: 'other-space', name: 'other', disabledFeatures: [] },
           ]);

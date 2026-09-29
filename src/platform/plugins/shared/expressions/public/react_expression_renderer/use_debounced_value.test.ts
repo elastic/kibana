@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useDebouncedValue } from './use_debounced_value';
 
 describe('useDebouncedValue', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should return the initial value', () => {
@@ -44,7 +46,7 @@ describe('useDebouncedValue', () => {
 
     hook.rerender('something else');
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     const [value, isPending] = hook.result.current;
@@ -59,12 +61,12 @@ describe('useDebouncedValue', () => {
 
     hook.rerender('something else');
     act(() => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
 
     hook.rerender('another value');
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     const [value] = hook.result.current;

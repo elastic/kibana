@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react';
@@ -12,17 +14,20 @@ import { MlCpsCapabilityContext } from '../../../hooks/use_infra_ml_cps';
 import { useLogAnalysisJobProjectRouting } from './use_log_analysis_job_project_routing';
 import type { JobSummary } from './api/ml_get_jobs_summary_api';
 
-const mockUseKibanaContextForPlugin = jest.fn();
+const mockUseKibanaContextForPlugin = vi.fn();
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCpsEnabled = (isCpsEnabled: boolean) => {
   mockUseKibanaContextForPlugin.mockReturnValue({
     services: {
       cps: isCpsEnabled ? { isTierEligible: true, cpsManager: {} } : undefined,
-      featureFlags: { useBooleanValue: jest.fn().mockReturnValue(true) },
+      featureFlags: { useBooleanValue: vi.fn().mockReturnValue(true) },
     },
   });
 };

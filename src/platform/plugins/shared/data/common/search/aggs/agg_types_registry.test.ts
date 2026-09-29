@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AggTypesRegistrySetup } from './agg_types_registry';
 import { AggTypesRegistry } from './agg_types_registry';
 import type { BucketAggType } from './buckets/bucket_agg_type';
@@ -24,11 +26,11 @@ export function mockGetFieldFormatsStart() {
 }
 
 // Mocked uiSettings shared among aggs unit tests
-const mockGetConfig = jest.fn((key) => key);
+const mockGetConfig = vi.fn((key) => key);
 
 /** @internal */
 export const mockAggTypesDependencies: AggTypesDependencies = {
-  calculateBounds: jest.fn(),
+  calculateBounds: vi.fn(),
   getFieldFormatsStart: mockGetFieldFormatsStart,
   getConfig: mockGetConfig,
 };
@@ -45,7 +47,7 @@ describe('AggTypesRegistry', () => {
     registry = new AggTypesRegistry();
     setup = registry.setup();
     start = registry.start({
-      calculateBounds: jest.fn(),
+      calculateBounds: vi.fn(),
       getFieldFormatsStart: mockGetFieldFormatsStart,
       getConfig: mockGetConfig,
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
@@ -60,12 +63,12 @@ describe('revert changes routine', () => {
   };
 
   it('reverts changes', async () => {
-    const setState = jest.fn();
+    const setState = vi.fn();
     const modal = {
-      close: jest.fn(() => Promise.resolve()),
+      close: vi.fn(() => Promise.resolve()),
     } as Partial<OverlayRef> as OverlayRef;
 
-    const toasts = { addSuccess: jest.fn() } as Partial<IToasts> as IToasts;
+    const toasts = { addSuccess: vi.fn() } as Partial<IToasts> as IToasts;
 
     revert({
       setState,
@@ -76,7 +79,7 @@ describe('revert changes routine', () => {
     });
 
     expect(setState).toHaveBeenCalled();
-    expect((toasts.addSuccess as jest.Mock).mock.calls[0][0]).toMatchInlineSnapshot(`
+    expect((toasts.addSuccess as Mock).mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "text": "The most recently saved version of this annotation group has been restored.",
         "title": "Reverted \\"My library group\\"",

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -14,12 +17,15 @@ import { getFlappingSettingsRoute } from './get_flapping_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
 
-jest.mock('../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   rulesSettingsClient = rulesSettingsClientMock.create();
 });
 
@@ -49,7 +55,7 @@ describe('getFlappingSettingsRoute', () => {
       }
     `);
 
-    (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValue({
+    (rulesSettingsClient.flapping().get as Mock).mockResolvedValue({
       enabled: true,
       lookBackWindow: 10,
       statusChangeThreshold: 10,

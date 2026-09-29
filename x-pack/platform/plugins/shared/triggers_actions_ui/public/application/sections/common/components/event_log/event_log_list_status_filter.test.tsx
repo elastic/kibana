@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,15 +16,18 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { EventLogListStatusFilter } from './event_log_list_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 
-jest.mock('../../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+  (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
 });
 
-const onChangeMock = jest.fn();
+const onChangeMock = vi.fn();
 
 describe('event_log_list_status_filter', () => {
   beforeEach(() => {

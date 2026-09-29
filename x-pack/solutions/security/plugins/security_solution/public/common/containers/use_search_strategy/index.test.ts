@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useSearch, useSearchStrategy } from '.';
 
 import { renderHook, act } from '@testing-library/react';
@@ -16,18 +19,21 @@ import type {
 } from '../../../../common/search_strategy';
 import { of, throwError } from 'rxjs';
 
-jest.mock('@kbn/securitysolution-hook-utils');
+vi.mock('@kbn/securitysolution-hook-utils');
 
-const mockAddToastError = jest.fn();
-const mockAddToastWarning = jest.fn();
-jest.mock('../../hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn(() => ({
-    addError: mockAddToastError,
-    addWarning: mockAddToastWarning,
-  })),
-}));
+const mockAddToastError = vi.fn();
+const mockAddToastWarning = vi.fn();
+vi.mock('../../hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn(() => ({
+        addError: mockAddToastError,
+        addWarning: mockAddToastWarning,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSearch = jest.fn(() =>
+const mockSearch = vi.fn(() =>
   // default to completed response
   of({
     rawResponse: {},
@@ -35,8 +41,8 @@ const mockSearch = jest.fn(() =>
     isRunning: false,
   })
 );
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
+vi.mock('../../lib/kibana', async () => {
+  const original = (await vi.importActual('../../lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -53,19 +59,22 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 
-const mockEndTracking = jest.fn();
-const mockStartTracking = jest.fn(() => ({
+const mockEndTracking = vi.fn();
+const mockStartTracking = vi.fn(() => ({
   endTracking: mockEndTracking,
 }));
-jest.mock('../../lib/apm/use_track_http_request', () => ({
-  useTrackHttpRequest: () => ({ startTracking: mockStartTracking }),
-}));
+vi.mock('../../lib/apm/use_track_http_request', () => {
+      const mocked = {
+      useTrackHttpRequest: () => ({ startTracking: mockStartTracking }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAbortController = new AbortController();
-mockAbortController.abort = jest.fn();
+mockAbortController.abort = vi.fn();
 
 const useObservableHookResult = {
-  start: jest.fn(),
+  start: vi.fn(),
   error: null,
   result: null,
   loading: false,
@@ -85,13 +94,13 @@ const request = {
 
 describe('useSearchStrategy', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(window, 'AbortController').mockRestore();
+    vi.clearAllMocks();
+    vi.spyOn(window, 'AbortController').mockRestore();
   });
 
   it("returns the provided initial result while the query hasn't returned data", () => {
     const initialResult = {};
-    (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
+    (useObservable as Mock).mockReturnValue(useObservableHookResult);
 
     const { result } = renderHook(() =>
       useSearchStrategy<FactoryQueryTypes>({ ...userSearchStrategyProps, initialResult })
@@ -101,9 +110,9 @@ describe('useSearchStrategy', () => {
   });
 
   it('calls start with the given request', () => {
-    const start = jest.fn();
+    const start = vi.fn();
 
-    (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
+    (useObservable as Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result } = renderHook(() =>
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
@@ -116,7 +125,7 @@ describe('useSearchStrategy', () => {
   it('returns inspect', () => {
     const dsl = 'testDsl';
 
-    (useObservable as jest.Mock).mockReturnValue({
+    (useObservable as Mock).mockReturnValue({
       ...useObservableHookResult,
       result: {
         rawResponse: {},
@@ -139,7 +148,7 @@ describe('useSearchStrategy', () => {
   it('shows toast error when the API returns error', () => {
     const error = 'test error';
     const errorMessage = 'error message title';
-    (useObservable as jest.Mock).mockReturnValue({
+    (useObservable as Mock).mockReturnValue({
       ...useObservableHookResult,
       error,
     });
@@ -154,7 +163,7 @@ describe('useSearchStrategy', () => {
   it('does not show toast error if showErrorToast = false', () => {
     const error = 'test error';
     const errorMessage = 'error message title';
-    (useObservable as jest.Mock).mockReturnValue({
+    (useObservable as Mock).mockReturnValue({
       ...useObservableHookResult,
       error,
     });
@@ -171,9 +180,9 @@ describe('useSearchStrategy', () => {
   });
 
   it('start should be called when search is called ', () => {
-    const start = jest.fn();
+    const start = vi.fn();
 
-    (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
+    (useObservable as Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result } = renderHook(() =>
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
@@ -185,9 +194,9 @@ describe('useSearchStrategy', () => {
   });
 
   it('refetch should execute the previous search again with the same params', async () => {
-    const start = jest.fn();
+    const start = vi.fn();
 
-    (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
+    (useObservable as Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result, rerender } = renderHook(() =>
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
@@ -204,9 +213,9 @@ describe('useSearchStrategy', () => {
   });
 
   it('aborts previous search when a subsequent search is triggered', async () => {
-    jest.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
+    vi.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
 
-    (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
+    (useObservable as Mock).mockReturnValue(useObservableHookResult);
 
     const { result } = renderHook(() =>
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
@@ -219,9 +228,9 @@ describe('useSearchStrategy', () => {
   });
 
   it('aborts search when component unmounts', async () => {
-    jest.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
+    vi.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
 
-    (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
+    (useObservable as Mock).mockReturnValue(useObservableHookResult);
 
     const { result, unmount } = renderHook(() =>
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
@@ -234,10 +243,10 @@ describe('useSearchStrategy', () => {
   });
 
   it('calls start with the AbortController signal', () => {
-    jest.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
-    const start = jest.fn();
+    vi.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
+    const start = vi.fn();
 
-    (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
+    (useObservable as Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result } = renderHook(() =>
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
@@ -251,7 +260,7 @@ describe('useSearchStrategy', () => {
   });
 
   it('abort = true will cancel any running request', () => {
-    jest.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
+    vi.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
     const localProps = { ...userSearchStrategyProps, abort: false };
 
     const { rerender } = renderHook(() => useSearchStrategy<FactoryQueryTypes>(localProps));

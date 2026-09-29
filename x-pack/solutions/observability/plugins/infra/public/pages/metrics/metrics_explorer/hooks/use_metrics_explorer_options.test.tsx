@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type {
   MetricsExplorerOptions,
@@ -18,27 +21,33 @@ import {
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
-jest.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_kibana');
 
-const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.MockedFunction<
+const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
 
 let PREFILL: Record<string, any> = {};
-jest.mock('../../../../alerting/use_alert_prefill', () => ({
-  useAlertPrefillContext: () => ({
-    metricThresholdPrefill: {
-      setPrefillOptions(opts: Record<string, any>) {
-        PREFILL = opts;
-      },
-    },
-  }),
-}));
+vi.mock('../../../../alerting/use_alert_prefill', () => {
+      const mocked = {
+      useAlertPrefillContext: () => ({
+        metricThresholdPrefill: {
+          setPrefillOptions(opts: Record<string, any>) {
+            PREFILL = opts;
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
-  useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
-  useSyncKibanaTimeFilterTime: () => [() => {}],
-}));
+vi.mock('../../../../hooks/use_kibana_timefilter_time', () => {
+      const mocked = {
+      useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
+      useSyncKibanaTimeFilterTime: () => [() => {}],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderUseMetricsExplorerOptionsHook = () => renderHook(() => useMetricsExplorerOptions());
 

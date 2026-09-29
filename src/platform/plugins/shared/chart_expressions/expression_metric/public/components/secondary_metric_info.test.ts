@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { VisParams } from '@kbn/visualizations-common';
 import { getMetricFormatter } from './helpers';
@@ -29,11 +31,14 @@ const INCREASE_ICON = '↑';
 const DECREASE_ICON = '↓';
 const STABLE_ICON = '=';
 
-jest.mock('./helpers', () => ({
-  getMetricFormatter: jest.fn(() => (value: any) => value && String(value)),
-}));
+vi.mock('./helpers', () => {
+      const mocked = {
+      getMetricFormatter: vi.fn(() => (value: any) => value && String(value)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetMetricFormatter = jest.mocked(getMetricFormatter);
+const mockGetMetricFormatter = vi.mocked(getMetricFormatter);
 
 describe('getSecondaryMetricInfo', () => {
   const columns = [
@@ -68,7 +73,7 @@ describe('getSecondaryMetricInfo', () => {
   };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns the column name as the label', () => {

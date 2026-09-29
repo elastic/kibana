@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -14,13 +17,19 @@ import { useGetScheduledList } from './use_get_scheduled_list';
 import { testQueryClient } from '../test_utils/test_query_client';
 import { useKibana } from '@kbn/reporting-public';
 
-jest.mock('@kbn/reporting-public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/reporting-public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../apis/get_scheduled_reports_list', () => ({
-  getScheduledReportsList: jest.fn(),
-}));
+vi.mock('../apis/get_scheduled_reports_list', () => {
+      const mocked = {
+      getScheduledReportsList: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useGetScheduledList', () => {
   const http = httpServiceMock.createStartContract();
@@ -30,8 +39,8 @@ describe('useGetScheduledList', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         http,
       },
@@ -39,7 +48,7 @@ describe('useGetScheduledList', () => {
   });
 
   it('calls getScheduledList with correct arguments', async () => {
-    (getScheduledReportsList as jest.Mock).mockResolvedValueOnce({ data: [] });
+    (getScheduledReportsList as Mock).mockResolvedValueOnce({ data: [] });
 
     const { result } = renderHook(() => useGetScheduledList({}), {
       wrapper,

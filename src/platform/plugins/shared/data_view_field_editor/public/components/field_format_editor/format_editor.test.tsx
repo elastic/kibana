@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type {
   FieldFormatEditorFactory,
   FormatEditorProps as FieldFormatEditorProps,
@@ -31,8 +33,8 @@ const testEditorFactory: FieldFormatEditorFactory = Object.assign(async () => Te
 });
 
 const createFormatEditors = (editorFactory?: FieldFormatEditorFactory): FieldFormatEditors => ({
-  getAll: jest.fn(() => (editorFactory ? [editorFactory] : [])),
-  getById: jest.fn(() => editorFactory) as FieldFormatEditors['getById'],
+  getAll: vi.fn(() => (editorFactory ? [editorFactory] : [])),
+  getById: vi.fn(() => editorFactory) as FieldFormatEditors['getById'],
 });
 
 const defaultProps: FormatEditorComponentProps = {
@@ -41,8 +43,8 @@ const defaultProps: FormatEditorComponentProps = {
   fieldFormatId: 'number',
   fieldFormatParams: {},
   fieldType: 'number',
-  onChange: jest.fn(),
-  onError: jest.fn(),
+  onChange: vi.fn(),
+  onError: vi.fn(),
 };
 
 describe('FieldFormatEditor', () => {

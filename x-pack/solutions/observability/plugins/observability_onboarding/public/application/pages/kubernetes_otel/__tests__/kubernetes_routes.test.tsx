@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -28,27 +31,36 @@ const LocationProbe: React.FC = () => {
   );
 };
 
-jest.mock('../..', () => ({
-  AutoDetectPage: () => null,
-  LandingPage: () => <div data-test-subj="landingPageStub" />,
-  OtelLogsPage: () => null,
-  FirehosePage: () => null,
-  OtelApmPage: () => null,
-  CloudForwarderPage: () => null,
-  KubernetesOtelPage: () => <div data-test-subj="kubernetesOtelPageStub" />,
-  KubernetesPage: () => <div data-test-subj="kubernetesEaPageStub" />,
-}));
+vi.mock('../..', () => {
+      const mocked = {
+      AutoDetectPage: () => null,
+      LandingPage: () => <div data-test-subj="landingPageStub" />,
+      OtelLogsPage: () => null,
+      FirehosePage: () => null,
+      OtelApmPage: () => null,
+      CloudForwarderPage: () => null,
+      KubernetesOtelPage: () => <div data-test-subj="kubernetesOtelPageStub" />,
+      KubernetesPage: () => <div data-test-subj="kubernetesEaPageStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
-  useFlowBreadcrumb: jest.fn(),
-}));
+vi.mock('../../../shared/use_flow_breadcrumbs', () => {
+      const mocked = {
+      useFlowBreadcrumb: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/use_managed_otlp_service_availability', () => ({
-  useManagedOtlpServiceAvailability: () => false,
-}));
+vi.mock('../../../shared/use_managed_otlp_service_availability', () => {
+      const mocked = {
+      useManagedOtlpServiceAvailability: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeAll(() => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = vi.fn();
 });
 
 const createObservabilityServices = (
@@ -76,11 +88,11 @@ const createObservabilityServices = (
       managedOtlpServiceUrl: '',
     },
     observabilityRuleTypeRegistry: {
-      register: jest.fn(),
-      getFormatter: jest.fn(() => undefined),
-      list: jest.fn(() => []),
+      register: vi.fn(),
+      getFormatter: vi.fn(() => undefined),
+      list: vi.fn(() => []),
     },
-    useRulesLink: jest.fn(() => ({ href: '/' })),
+    useRulesLink: vi.fn(() => ({ href: '/' })),
   } as ObservabilityPublicStart,
 });
 
@@ -88,7 +100,7 @@ const renderFlow = (flagEnabled: boolean, path: string) => {
   const coreStart = coreMock.createStart();
   const services = createObservabilityServices(coreStart);
   const featureFlags = services.featureFlags as CoreStart['featureFlags'] & {
-    useBooleanValue: jest.Mock;
+    useBooleanValue: Mock;
   };
   featureFlags.useBooleanValue.mockImplementation((id: string, fallback: boolean) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? flagEnabled : fallback

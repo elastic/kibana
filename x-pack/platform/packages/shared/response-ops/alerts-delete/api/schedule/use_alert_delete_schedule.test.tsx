@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { useAlertDeleteSchedule } from './use_alert_delete_schedule';
@@ -16,11 +19,11 @@ import type { AlertDeleteParams } from '@kbn/alerting-types';
 
 const http = httpServiceMock.createStartContract();
 
-jest.mock('./create_alert_delete_schedule');
+vi.mock('./create_alert_delete_schedule');
 
 describe('useAlertDeleteSchedule', () => {
-  const mockOnSuccess = jest.fn();
-  const mockOnError = jest.fn();
+  const mockOnSuccess = vi.fn();
+  const mockOnError = vi.fn();
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -34,7 +37,7 @@ describe('useAlertDeleteSchedule', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call onSuccess when the mutation succeeds', async () => {
@@ -43,7 +46,7 @@ describe('useAlertDeleteSchedule', () => {
       inactiveAlertDeleteThreshold: 10,
       categoryIds: ['management'],
     };
-    (createAlertDeleteSchedule as jest.Mock).mockResolvedValueOnce({ success: true });
+    (createAlertDeleteSchedule as Mock).mockResolvedValueOnce({ success: true });
 
     const { result } = renderHook(
       () =>
@@ -69,8 +72,8 @@ describe('useAlertDeleteSchedule', () => {
 });
 
 describe('useAlertDeleteSchedule with muted console.errors', () => {
-  const mockOnSuccess = jest.fn();
-  const mockOnError = jest.fn();
+  const mockOnSuccess = vi.fn();
+  const mockOnError = vi.fn();
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -91,7 +94,7 @@ describe('useAlertDeleteSchedule with muted console.errors', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call onError when the mutation fails', async () => {
@@ -109,7 +112,7 @@ describe('useAlertDeleteSchedule with muted console.errors', () => {
       request: {} as unknown as Request,
       message: 'Internal Server Error',
     };
-    (createAlertDeleteSchedule as jest.Mock).mockRejectedValueOnce(mockError);
+    (createAlertDeleteSchedule as Mock).mockRejectedValueOnce(mockError);
 
     const { result } = renderHook(
       () =>

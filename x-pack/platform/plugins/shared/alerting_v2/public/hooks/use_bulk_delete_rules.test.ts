@@ -5,36 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useBulkDeleteRules } from './use_bulk_delete_rules';
 
-const mockBulkDeleteRules = jest.fn();
-const mockDeleteRulesByQuery = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddWarning = jest.fn();
-const mockAddDanger = jest.fn();
+const mockBulkDeleteRules = vi.fn();
+const mockDeleteRulesByQuery = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddWarning = vi.fn();
+const mockAddDanger = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'notifications') {
-      return {
-        toasts: {
-          addSuccess: mockAddSuccess,
-          addWarning: mockAddWarning,
-          addDanger: mockAddDanger,
-        },
-      };
-    }
-    // RulesApi
-    return {
-      bulkDeleteRules: mockBulkDeleteRules,
-      deleteRulesByQuery: mockDeleteRulesByQuery,
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'notifications') {
+          return {
+            toasts: {
+              addSuccess: mockAddSuccess,
+              addWarning: mockAddWarning,
+              addDanger: mockAddDanger,
+            },
+          };
+        }
+        // RulesApi
+        return {
+          bulkDeleteRules: mockBulkDeleteRules,
+          deleteRulesByQuery: mockDeleteRulesByQuery,
+        };
+      },
+      CoreStart: (key: string) => key,
     };
-  },
-  CoreStart: (key: string) => key,
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -47,7 +52,7 @@ const createWrapper = () => {
 
 describe('useBulkDeleteRules', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the by-ID endpoint with the provided ids', async () => {
@@ -148,7 +153,7 @@ describe('useBulkDeleteRules', () => {
   it('invalidates rule list queries on success', async () => {
     mockBulkDeleteRules.mockResolvedValueOnce({ affected_count: 1, errors: [] });
     const { Wrapper, queryClient } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 

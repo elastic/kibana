@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -18,69 +21,90 @@ import {
 } from '../../../components/osquery_page_header_context';
 import { useSavedQuery } from '../../../saved_queries';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ savedQueryId: 'test-saved-query-id' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => ({ savedQueryId: 'test-saved-query-id' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
-const mockUseRouterNavigate = jest.fn();
+const mockUseKibana = vi.fn();
+const mockUseRouterNavigate = vi.fn();
 
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-  useRouterNavigate: (path: string) => {
-    mockUseRouterNavigate(path);
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+      useRouterNavigate: (path: string) => {
+        mockUseRouterNavigate(path);
 
-    return { onClick: jest.fn(), href: path };
-  },
-}));
+        return { onClick: vi.fn(), href: path };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMutateAsync = jest.fn().mockResolvedValue(undefined);
+const mockMutateAsync = vi.fn().mockResolvedValue(undefined);
 
-jest.mock('../../../saved_queries', () => ({
-  useSavedQuery: jest.fn(() => ({
-    isLoading: false,
-    data: {
-      id: 'test-saved-query-id',
-      saved_object_id: 'test-saved-query-id',
-      description: '',
-      query: 'SELECT * FROM uptime',
-      prebuilt: false,
-    },
-    error: null,
-  })),
-  useDeleteSavedQuery: jest.fn(() => ({ mutateAsync: jest.fn() })),
-  useUpdateSavedQuery: jest.fn(() => ({ mutateAsync: jest.fn() })),
-}));
+vi.mock('../../../saved_queries', () => {
+      const mocked = {
+      useSavedQuery: vi.fn(() => ({
+        isLoading: false,
+        data: {
+          id: 'test-saved-query-id',
+          saved_object_id: 'test-saved-query-id',
+          description: '',
+          query: 'SELECT * FROM uptime',
+          prebuilt: false,
+        },
+        error: null,
+      })),
+      useDeleteSavedQuery: vi.fn(() => ({ mutateAsync: vi.fn() })),
+      useUpdateSavedQuery: vi.fn(() => ({ mutateAsync: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_queries/use_copy_saved_query', () => ({
-  useCopySavedQuery: jest.fn(() => ({
-    mutateAsync: mockMutateAsync,
-    isLoading: false,
-  })),
-}));
+vi.mock('../../../saved_queries/use_copy_saved_query', () => {
+      const mocked = {
+      useCopySavedQuery: vi.fn(() => ({
+        mutateAsync: mockMutateAsync,
+        isLoading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./form', () => ({
-  EditSavedQueryForm: (props: { onDirtyStateChange?: (isDirty: boolean) => void }) => (
-    <div data-test-subj="edit-saved-query-form">
-      <button data-test-subj="make-form-dirty" onClick={() => props.onDirtyStateChange?.(true)}>
-        Make form dirty
-      </button>
-      <button data-test-subj="make-form-clean" onClick={() => props.onDirtyStateChange?.(false)}>
-        Make form clean
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./form', () => {
+      const mocked = {
+      EditSavedQueryForm: (props: { onDirtyStateChange?: (isDirty: boolean) => void }) => (
+        <div data-test-subj="edit-saved-query-form">
+          <button data-test-subj="make-form-dirty" onClick={() => props.onDirtyStateChange?.(true)}>
+            Make form dirty
+          </button>
+          <button data-test-subj="make-form-clean" onClick={() => props.onDirtyStateChange?.(false)}>
+            Make form clean
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/layouts', () => ({
-  fullWidthFormContentCss: {},
-}));
+vi.mock('../../../components/layouts', () => {
+      const mocked = {
+      fullWidthFormContentCss: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTestQueryClient = () =>
   new QueryClient({
@@ -122,16 +146,16 @@ const setupKibana = (overrides: Record<string, unknown> = {}) => {
         },
       },
       notifications: {
-        toasts: { addSuccess: jest.fn(), addError: jest.fn() },
+        toasts: { addSuccess: vi.fn(), addError: vi.fn() },
       },
-      http: { post: jest.fn(), get: jest.fn() },
+      http: { post: vi.fn(), get: vi.fn() },
     },
   });
 };
 
 describe('EditSavedQueryPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
     mockMutateAsync.mockResolvedValue(undefined);
   });
@@ -262,7 +286,7 @@ describe('EditSavedQueryPage', () => {
 
   describe('page chrome', () => {
     it('publishes a fallback header title when the saved query fails to load', () => {
-      (useSavedQuery as jest.Mock).mockReturnValue({
+      (useSavedQuery as Mock).mockReturnValue({
         isLoading: false,
         data: undefined,
         error: new Error('nope'),

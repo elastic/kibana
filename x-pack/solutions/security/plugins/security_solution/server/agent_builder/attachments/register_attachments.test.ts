@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
@@ -19,7 +21,7 @@ const createMockAgentBuilder = () => {
   return {
     mock: {
       attachments: {
-        registerType: jest.fn((type: AttachmentTypeDefinition) => {
+        registerType: vi.fn((type: AttachmentTypeDefinition) => {
           registeredTypes.push(type);
         }),
       },
@@ -33,7 +35,7 @@ describe('registerAttachments', () => {
     const { mock, registeredTypes } = createMockAgentBuilder();
     const logger = loggingSystemMock.createLogger() as unknown as Logger;
     const core = {
-      getStartServices: jest.fn(),
+      getStartServices: vi.fn(),
     } as unknown as SecuritySolutionPluginCoreSetupDependencies;
 
     await registerAttachments(mock, core, logger, { ...allowedExperimentalValues });

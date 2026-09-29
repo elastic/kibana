@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CustomContentContextAttachmentData } from '../../common/panel_context_attachment';
 import { registerPanelPreviewHandler, previewPanelVersion } from './panel_preview_registry';
 
@@ -19,7 +21,7 @@ const makeData = (embeddableId: string): CustomContentContextAttachmentData => (
 // embeddable id rather than relying on execution order.
 describe('panel preview registry', () => {
   it('routes a version to the handler registered for its embeddable_id', () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     registerPanelPreviewHandler('routes', handler);
 
     const data = makeData('routes');
@@ -28,8 +30,8 @@ describe('panel preview registry', () => {
   });
 
   it('routes to the matching panel only when several are registered', () => {
-    const first = jest.fn();
-    const second = jest.fn();
+    const first = vi.fn();
+    const second = vi.fn();
     registerPanelPreviewHandler('multi-a', first);
     registerPanelPreviewHandler('multi-b', second);
 
@@ -44,7 +46,7 @@ describe('panel preview registry', () => {
   });
 
   it('stops routing after unregistering', () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     const unregister = registerPanelPreviewHandler('unregister', handler);
 
     unregister();
@@ -54,8 +56,8 @@ describe('panel preview registry', () => {
   });
 
   it('keeps the newer handler when a remount re-registers the same id', () => {
-    const stale = jest.fn();
-    const fresh = jest.fn();
+    const stale = vi.fn();
+    const fresh = vi.fn();
     const unregisterStale = registerPanelPreviewHandler('remount', stale);
     registerPanelPreviewHandler('remount', fresh);
 

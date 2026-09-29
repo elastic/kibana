@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createDataViewSelectedListener } from './data_view_selected';
 import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
@@ -17,8 +19,8 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 
 const mockDataViewsService = {
-  getDataViewLazy: jest.fn(),
-  create: jest.fn().mockResolvedValue({
+  getDataViewLazy: vi.fn(),
+  create: vi.fn().mockResolvedValue({
     id: 'adhoc_test-*',
     isPersisted: () => false,
     toSpec: () => ({ id: 'adhoc_test-*', title: 'test-*' }),
@@ -84,23 +86,23 @@ const mockedState: RootState = {
   },
 };
 
-const mockDispatch = jest.fn();
-const mockGetState = jest.fn(() => mockedState);
+const mockDispatch = vi.fn();
+const mockGetState = vi.fn(() => mockedState);
 const mockSpaces = {
-  getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+  getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
 } as unknown as SpacesPluginStart;
 const mockStorage = {
-  set: jest.fn(),
-  get: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  set: vi.fn(),
+  get: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 } as unknown as Storage;
-const mockToastsDanger = jest.fn();
+const mockToastsDanger = vi.fn();
 
 const mockListenerApi = {
   dispatch: mockDispatch,
   getState: mockGetState,
-  cancelActiveListeners: jest.fn(),
+  cancelActiveListeners: vi.fn(),
   signal: { aborted: false },
 } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
@@ -108,7 +110,7 @@ describe('createDataViewSelectedListener', () => {
   let listener: ReturnType<typeof createDataViewSelectedListener>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listener = createDataViewSelectedListener({
       dataViews: mockDataViewsService,
       notifications: {
@@ -250,7 +252,7 @@ describe('createDataViewSelectedListener', () => {
   });
 
   it('should show toast and fallback to default when getDataViewLazy fails without fallback patterns', async () => {
-    jest.mocked(mockDataViewsService.getDataViewLazy).mockRejectedValue(new Error('conflict'));
+    vi.mocked(mockDataViewsService.getDataViewLazy).mockRejectedValue(new Error('conflict'));
 
     await listener.effect(
       selectDataViewAsync({ id: 'conflicted-id', scope: PageScope.default }),
@@ -282,7 +284,7 @@ describe('createDataViewSelectedListener', () => {
       spaces: mockSpaces,
       storage: mockStorage,
     });
-    jest.mocked(mockDataViewsService.getDataViewLazy).mockRejectedValue(new Error('conflict'));
+    vi.mocked(mockDataViewsService.getDataViewLazy).mockRejectedValue(new Error('conflict'));
 
     await analyzerListener.effect(
       selectDataViewAsync({ id: 'conflicted-id', scope: PageScope.analyzer }),

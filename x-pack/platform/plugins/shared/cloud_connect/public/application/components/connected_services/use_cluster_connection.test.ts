@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useClusterConnection } from './use_cluster_connection';
 import { useCloudConnectedAppContext } from '../../app_context';
 import type { ClusterDetails } from '../../../types';
 
-jest.mock('../../app_context');
+vi.mock('../../app_context');
 
 describe('use_cluster_connection', () => {
   describe('useClusterConnection - auto-enable EIS', () => {
-    const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.MockedFunction<
+    const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as MockedFunction<
       typeof useCloudConnectedAppContext
     >;
 
-    const mockSetJustConnected = jest.fn();
-    const mockSetAutoEnablingEis = jest.fn();
-    const mockUpdateServices = jest.fn();
-    const mockAddError = jest.fn();
-    const mockResendRequest = jest.fn();
+    const mockSetJustConnected = vi.fn();
+    const mockSetAutoEnablingEis = vi.fn();
+    const mockUpdateServices = vi.fn();
+    const mockAddError = vi.fn();
+    const mockResendRequest = vi.fn();
 
     const createMockClusterDetails = (overrides: Partial<ClusterDetails> = {}): ClusterDetails => ({
       id: 'cluster-123',
@@ -60,7 +63,7 @@ describe('use_cluster_connection', () => {
 
     const createMockContext = (overrides: Record<string, any> = {}) => ({
       apiService: {
-        useLoadClusterDetails: jest.fn().mockReturnValue({
+        useLoadClusterDetails: vi.fn().mockReturnValue({
           data: createMockClusterDetails(),
           isLoading: false,
           error: null,
@@ -82,7 +85,7 @@ describe('use_cluster_connection', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should auto-enable EIS when justConnected is true and all conditions are met', async () => {
@@ -127,7 +130,7 @@ describe('use_cluster_connection', () => {
         createMockContext({
           justConnected: true,
           apiService: {
-            useLoadClusterDetails: jest.fn().mockReturnValue({
+            useLoadClusterDetails: vi.fn().mockReturnValue({
               data: clusterDetailsWithEisEnabled,
               isLoading: false,
               error: null,
@@ -172,7 +175,7 @@ describe('use_cluster_connection', () => {
         createMockContext({
           justConnected: true,
           apiService: {
-            useLoadClusterDetails: jest.fn().mockReturnValue({
+            useLoadClusterDetails: vi.fn().mockReturnValue({
               data: clusterDetailsWithInactiveSubscription,
               isLoading: false,
               error: null,

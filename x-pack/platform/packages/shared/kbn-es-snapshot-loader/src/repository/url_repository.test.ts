@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createUrlRepository } from './url_repository';
@@ -38,7 +40,7 @@ describe('createUrlRepository', () => {
   });
 
   it('registers a URL repository in Elasticsearch', async () => {
-    const createRepository = jest.fn().mockResolvedValue(undefined);
+    const createRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
         createRepository,
@@ -66,7 +68,7 @@ describe('createUrlRepository', () => {
   });
 
   it('registers with verify: true when explicitly requested', async () => {
-    const createRepository = jest.fn().mockResolvedValue(undefined);
+    const createRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
         createRepository,

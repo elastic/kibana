@@ -5,54 +5,68 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
-jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
-}));
-
-jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
-  useIlmPhasesColorAndDescription: () => ({
-    ilmPhases: {
-      hot: { color: '#FF0000', description: 'Hot desc' },
-      warm: { color: '#FFA500', description: 'Warm desc' },
-      cold: { color: '#0000FF', description: 'Cold desc' },
-      frozen: { color: '#00FFFF', description: 'Frozen desc' },
-      delete: { color: '#808080', description: 'Delete desc' },
-    },
-  }),
-}));
-
-jest.mock('../ilm_phase_select/ilm_phase_select', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  IlmPhaseSelect: ({ onSelect, renderButton }: any) => {
-    // Keep the flyout's real `renderButton` (and its data-test-subj), but make it deterministic
-    // for tests: clicking the button adds the cold phase.
-    const buttonProps = {
-      disabled: false,
-      onClick: () => onSelect('cold'),
+vi.mock('../../../../../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
     };
-    return <div>{renderButton(buttonProps)}</div>;
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {},
-    dependencies: {
-      start: {
-        streams: {
-          streamsRepositoryClient: {},
+vi.mock('../../hooks/use_ilm_phases_color_and_description', () => {
+      const mocked = {
+      useIlmPhasesColorAndDescription: () => ({
+        ilmPhases: {
+          hot: { color: '#FF0000', description: 'Hot desc' },
+          warm: { color: '#FFA500', description: 'Warm desc' },
+          cold: { color: '#0000FF', description: 'Cold desc' },
+          frozen: { color: '#00FFFF', description: 'Frozen desc' },
+          delete: { color: '#808080', description: 'Delete desc' },
         },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../ilm_phase_select/ilm_phase_select', () => {
+      const mocked = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      IlmPhaseSelect: ({ onSelect, renderButton }: any) => {
+        // Keep the flyout's real `renderButton` (and its data-test-subj), but make it deterministic
+        // for tests: clicking the button adds the cold phase.
+        const buttonProps = {
+          disabled: false,
+          onClick: () => onSelect('cold'),
+        };
+        return <div>{renderButton(buttonProps)}</div>;
       },
-    },
-    isServerless: false,
-  }),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {},
+        dependencies: {
+          start: {
+            streams: {
+              streamsRepositoryClient: {},
+            },
+          },
+        },
+        isServerless: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DATA_TEST_SUBJ = 'streamsEditIlmPhasesFlyout';
 
@@ -71,9 +85,9 @@ const renderFlyout = (
   props: Partial<React.ComponentProps<typeof EditIlmPhasesFlyout>> = {},
   options: { initialSelectedPhase?: PhaseName } = {}
 ) => {
-  const onClose = jest.fn();
-  const onChange = jest.fn();
-  const onSave = jest.fn();
+  const onClose = vi.fn();
+  const onChange = vi.fn();
+  const onSave = vi.fn();
 
   const initialPhases: IlmPolicyPhases = props.initialPhases ?? {
     hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -83,7 +97,7 @@ const renderFlyout = (
     current: ((phase: PhaseName | undefined) => void) | null;
   } = { current: null };
 
-  const onSelectedPhaseChange = jest.fn();
+  const onSelectedPhaseChange = vi.fn();
 
   const Wrapper = () => {
     const [selectedPhase, setSelectedPhase] = React.useState<PhaseName | undefined>(
@@ -242,7 +256,7 @@ describe('EditIlmPhasesFlyout', () => {
 
   describe('min_age', () => {
     it('updates min_age when the move-after value changes (scoped to selected panel)', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const initialPhases: IlmPolicyPhases = {
         hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
         warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
@@ -328,7 +342,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('restores the last min_age value on blur when cleared', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       renderFlyout(
         {
           initialPhases: {
@@ -369,7 +383,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('revalidates dependent phases when warm min_age changes (cold becomes valid without direct edits)', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const initialPhases: IlmPolicyPhases = {
         hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
         warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
@@ -413,7 +427,7 @@ describe('EditIlmPhasesFlyout', () => {
 
   describe('downsampling', () => {
     it('toggles downsampling on warm and emits output with the default interval', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialPhases: {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -448,7 +462,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('restores the last downsampling interval value on blur when cleared', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialPhases: {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -512,7 +526,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('defaults warm downsample interval to 2x the previous enabled downsample interval', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialPhases: {
           hot: {
@@ -554,7 +568,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('shows readonly as checked and disabled while downsampling is enabled, and preserves the previous readonly state when disabled', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout(
         {
           initialPhases: {
@@ -614,7 +628,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('revalidates cold downsampling interval when re-enabling cold (warm interval changed while cold disabled)', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       const { setSelectedPhase } = renderFlyout(
         {
@@ -731,7 +745,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('updates snapshot repository for cold+frozen (shared field)', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const initialPhases: IlmPolicyPhases = {
         hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
         cold: {
@@ -807,7 +821,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('invokes refresh callback when refreshing snapshot repositories (scoped)', async () => {
-      const onRefresh = jest.fn();
+      const onRefresh = vi.fn();
       renderFlyout({
         initialPhases: {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -831,7 +845,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('surfaces repository validation per-phase (frozen always, cold only when cold snapshots enabled)', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
 
       // Frozen enabled, but repository is missing -> should mark frozen tab as invalid.
       // Cold is enabled but snapshots are not enabled -> cold tab should not be marked invalid due to repo error.
@@ -872,7 +886,7 @@ describe('EditIlmPhasesFlyout', () => {
 
   describe('phase removal', () => {
     it('removes a non-hot phase and emits updated output', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialPhases: {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -937,7 +951,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('disables remove when there is no hot phase and only one non-delete phase', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialPhases: {
           warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
@@ -955,7 +969,7 @@ describe('EditIlmPhasesFlyout', () => {
     });
 
     it('disables remove when delete is the only enabled phase', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialPhases: {
           delete: { name: 'delete', min_age: '60d' },
@@ -975,10 +989,10 @@ describe('EditIlmPhasesFlyout', () => {
 
   describe('onChange emission', () => {
     it('debounces rapid user edits into a single onChange', async () => {
-      jest.useFakeTimers();
-      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      vi.useFakeTimers();
+      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       try {
-        const onChange = jest.fn();
+        const onChange = vi.fn();
         renderFlyout(
           {
             onChange,
@@ -992,7 +1006,7 @@ describe('EditIlmPhasesFlyout', () => {
         );
 
         await act(async () => {
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
         });
         onChange.mockClear();
         clearTimeoutSpy.mockClear();
@@ -1011,7 +1025,7 @@ describe('EditIlmPhasesFlyout', () => {
         expect(onChange).toHaveBeenCalledTimes(0);
 
         await act(async () => {
-          jest.advanceTimersByTime(100);
+          vi.advanceTimersByTime(100);
         });
 
         expect(onChange).toHaveBeenCalledTimes(1);
@@ -1026,15 +1040,15 @@ describe('EditIlmPhasesFlyout', () => {
         expect(clearTimeoutSpy).toHaveBeenCalled();
       } finally {
         clearTimeoutSpy.mockRestore();
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     it('cleans up a pending debounced onChange on unmount', async () => {
-      jest.useFakeTimers();
-      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      vi.useFakeTimers();
+      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       try {
-        const onChange = jest.fn();
+        const onChange = vi.fn();
         const { unmount } = renderFlyout(
           {
             onChange,
@@ -1048,7 +1062,7 @@ describe('EditIlmPhasesFlyout', () => {
         );
 
         await act(async () => {
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
         });
         onChange.mockClear();
         clearTimeoutSpy.mockClear();
@@ -1065,15 +1079,15 @@ describe('EditIlmPhasesFlyout', () => {
         unmount();
 
         await act(async () => {
-          jest.runOnlyPendingTimers();
-          jest.advanceTimersByTime(100);
+          vi.runOnlyPendingTimers();
+          vi.advanceTimersByTime(100);
         });
 
         expect(onChange).toHaveBeenCalledTimes(0);
         expect(clearTimeoutSpy).toHaveBeenCalled();
       } finally {
         clearTimeoutSpy.mockRestore();
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -15,11 +17,14 @@ import { DEFAULT_FORM_STATE } from '../constants';
 import { NotificationControlsSection } from './notification_controls_section';
 import type { ActionPolicyFormState } from '../types';
 
-const mockUseFetchRuleEventFields = jest.fn();
+const mockUseFetchRuleEventFields = vi.fn();
 
-jest.mock('../../../../hooks/use_fetch_rule_event_fields', () => ({
-  useFetchRuleEventFields: (matcher?: string) => mockUseFetchRuleEventFields(matcher),
-}));
+vi.mock('../../../../hooks/use_fetch_rule_event_fields', () => {
+      const mocked = {
+      useFetchRuleEventFields: (matcher?: string) => mockUseFetchRuleEventFields(matcher),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderSection = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) => {
   const TestComponent = () => {

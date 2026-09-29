@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { getTimeseriesIndices } from './timeseries_indices';
 
 const mockResult = { indices: [{ name: 'my_ts_index', mode: 'time_series', aliases: [] }] };
 
-const createHttp = () => ({ get: jest.fn().mockResolvedValue(mockResult) } as unknown as HttpStart);
+const createHttp = () => ({ get: vi.fn().mockResolvedValue(mockResult) } as unknown as HttpStart);
 
 describe('getTimeseriesIndices', () => {
   it('calls the correct route', async () => {
@@ -28,14 +31,14 @@ describe('getTimeseriesIndices', () => {
   it('does not include projectRouting when not provided', async () => {
     const http = createHttp();
     await getTimeseriesIndices(http);
-    const callArgs = (http.get as jest.Mock).mock.calls[0][1];
+    const callArgs = (http.get as Mock).mock.calls[0][1];
     expect(callArgs.query).toBeUndefined();
   });
 
   it('includes projectRouting when provided', async () => {
     const http = createHttp();
     await getTimeseriesIndices(http, '_alias:*');
-    const { query } = (http.get as jest.Mock).mock.calls[0][1];
+    const { query } = (http.get as Mock).mock.calls[0][1];
     expect(query.projectRouting).toBe('_alias:*');
   });
 
@@ -43,7 +46,7 @@ describe('getTimeseriesIndices', () => {
     const http = createHttp();
     const controller = new AbortController();
     await getTimeseriesIndices(http, undefined, controller.signal);
-    const callArgs = (http.get as jest.Mock).mock.calls[0][1];
+    const callArgs = (http.get as Mock).mock.calls[0][1];
     expect(callArgs.signal).toBe(controller.signal);
   });
 

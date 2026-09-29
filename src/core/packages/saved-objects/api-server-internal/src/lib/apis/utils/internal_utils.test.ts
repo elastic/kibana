@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { omit } from 'lodash';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -409,9 +412,9 @@ describe('#normalizeNamespace', () => {
 });
 
 describe('#getCurrentTime', () => {
-  let dateNowSpy: jest.SpyInstance<number, []>;
+  let dateNowSpy: MockInstance<number, []>;
 
-  beforeAll(() => (dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => 1631307600000)));
+  beforeAll(() => (dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => 1631307600000)));
   afterAll(() => dateNowSpy.mockRestore());
 
   it('returns the current time', () => {

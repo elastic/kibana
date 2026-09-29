@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { rawConfigService, configService, logger, mockServer } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -19,18 +22,18 @@ import { Root } from '.';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
-let mockConsoleError: jest.SpyInstance;
+let mockConsoleError: MockInstance;
 
 beforeEach(() => {
-  jest.spyOn(global.process, 'exit').mockReturnValue(undefined as never);
-  mockConsoleError = jest.spyOn(console, 'error').mockReturnValue(undefined);
+  vi.spyOn(global.process, 'exit').mockReturnValue(undefined as never);
+  mockConsoleError = vi.spyOn(console, 'error').mockReturnValue(undefined);
   logger.upgrade.mockResolvedValue(undefined);
   rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
   configService.atPath.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   logger.asLoggerFactory.mockClear();
   logger.stop.mockClear();
   rawConfigService.getConfig$.mockClear();
@@ -102,7 +105,7 @@ test('upgrades logging configuration after setup', async () => {
 });
 
 test('stops services on "shutdown"', async () => {
-  const mockOnShutdown = jest.fn();
+  const mockOnShutdown = vi.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
 
   await root.preboot();
@@ -121,7 +124,7 @@ test('stops services on "shutdown"', async () => {
 });
 
 test('stops services on "shutdown" an calls `onShutdown` with error passed to `shutdown`', async () => {
-  const mockOnShutdown = jest.fn();
+  const mockOnShutdown = vi.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
 
   await root.preboot();
@@ -141,7 +144,7 @@ test('stops services on "shutdown" an calls `onShutdown` with error passed to `s
 });
 
 test('only shutdowns once', async () => {
-  const mockOnShutdown = jest.fn();
+  const mockOnShutdown = vi.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
 
   await root.preboot();
@@ -156,7 +159,7 @@ test('only shutdowns once', async () => {
 });
 
 test('fails and stops services if server preboot fails', async () => {
-  const mockOnShutdown = jest.fn();
+  const mockOnShutdown = vi.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
 
   const serverError = new Error('server failed');
@@ -175,7 +178,7 @@ test('fails and stops services if server preboot fails', async () => {
 });
 
 test('fails and stops services if server setup fails', async () => {
-  const mockOnShutdown = jest.fn();
+  const mockOnShutdown = vi.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
 
   const serverError = new Error('server failed');
@@ -195,7 +198,7 @@ test('fails and stops services if server setup fails', async () => {
 });
 
 test('fails and stops services if initial logger upgrade fails', async () => {
-  const mockOnShutdown = jest.fn();
+  const mockOnShutdown = vi.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
 
   const loggingUpgradeError = new Error('logging config upgrade failed');
@@ -219,7 +222,7 @@ test('fails and stops services if initial logger upgrade fails', async () => {
 
 test('stops services if consequent logger upgrade fails', async () => {
   const onShutdown = new BehaviorSubject<string | null>(null);
-  const mockOnShutdown = jest.fn(() => {
+  const mockOnShutdown = vi.fn(() => {
     onShutdown.next('completed');
     onShutdown.complete();
   });
@@ -258,7 +261,7 @@ test('stops services if consequent logger upgrade fails', async () => {
 });
 
 test('handles migrator-only node exception', async () => {
-  const mockOnShutdown = jest.fn();
+  const mockOnShutdown = vi.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
   mockServer.start.mockImplementation(() => {
     throw new CriticalError('Test', 'MigratioOnlyNode', 0);

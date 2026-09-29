@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -13,7 +16,7 @@ import type { AttackDiscoveryGeneration } from '@kbn/elastic-assistant-common/im
 import { getGeneration } from '.';
 import type { AttackDiscoveryDataClient } from '../../../../../../lib/attack_discovery/persistence';
 
-jest.mock('@kbn/securitysolution-es-utils');
+vi.mock('@kbn/securitysolution-es-utils');
 
 interface ErrorWithStatusCode extends Error {
   statusCode?: number;
@@ -22,8 +25,8 @@ interface ErrorWithStatusCode extends Error {
 describe('getGeneration', () => {
   const mockLogger = loggingSystemMock.createLogger();
   const mockDataClient = {
-    getAttackDiscoveryGenerationById: jest.fn(),
-  } as unknown as jest.Mocked<AttackDiscoveryDataClient>;
+    getAttackDiscoveryGenerationById: vi.fn(),
+  } as unknown as Mocked<AttackDiscoveryDataClient>;
 
   const mockAuthenticatedUser = {
     username: 'test-user',
@@ -72,8 +75,8 @@ describe('getGeneration', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (transformError as jest.Mock).mockImplementation((error) => ({
+    vi.clearAllMocks();
+    (transformError as Mock).mockImplementation((error) => ({
       statusCode: error.statusCode || 500,
       message: error.message || 'Unknown error',
     }));
@@ -113,7 +116,7 @@ describe('getGeneration', () => {
       error404.statusCode = 404;
       mockDataClient.getAttackDiscoveryGenerationById.mockRejectedValueOnce(error404);
 
-      (transformError as jest.Mock).mockReturnValueOnce({
+      (transformError as Mock).mockReturnValueOnce({
         statusCode: 404,
         message: 'Not found',
       });
@@ -135,7 +138,7 @@ describe('getGeneration', () => {
       error404.statusCode = 404;
       mockDataClient.getAttackDiscoveryGenerationById.mockRejectedValueOnce(error404);
 
-      (transformError as jest.Mock).mockReturnValueOnce({
+      (transformError as Mock).mockReturnValueOnce({
         statusCode: 404,
         message: 'Not found',
       });
@@ -153,7 +156,7 @@ describe('getGeneration', () => {
       error500.statusCode = 500;
       mockDataClient.getAttackDiscoveryGenerationById.mockRejectedValueOnce(error500);
 
-      (transformError as jest.Mock).mockReturnValueOnce({
+      (transformError as Mock).mockReturnValueOnce({
         statusCode: 500,
         message: 'Internal server error',
       });
@@ -167,7 +170,7 @@ describe('getGeneration', () => {
       error403.statusCode = 403;
       mockDataClient.getAttackDiscoveryGenerationById.mockRejectedValueOnce(error403);
 
-      (transformError as jest.Mock).mockReturnValueOnce({
+      (transformError as Mock).mockReturnValueOnce({
         statusCode: 403,
         message: 'Forbidden',
       });
@@ -180,7 +183,7 @@ describe('getGeneration', () => {
       const genericError = new Error('Generic error');
       mockDataClient.getAttackDiscoveryGenerationById.mockRejectedValueOnce(genericError);
 
-      (transformError as jest.Mock).mockReturnValueOnce({
+      (transformError as Mock).mockReturnValueOnce({
         statusCode: 500,
         message: 'Generic error',
       });
@@ -195,7 +198,7 @@ describe('getGeneration', () => {
       error404.statusCode = 404;
       mockDataClient.getAttackDiscoveryGenerationById.mockRejectedValueOnce(error404);
 
-      (transformError as jest.Mock).mockReturnValueOnce({
+      (transformError as Mock).mockReturnValueOnce({
         statusCode: 404,
         message: 'Not found',
       });
@@ -210,7 +213,7 @@ describe('getGeneration', () => {
       error404.statusCode = 404;
       mockDataClient.getAttackDiscoveryGenerationById.mockRejectedValueOnce(error404);
 
-      (transformError as jest.Mock).mockReturnValueOnce({
+      (transformError as Mock).mockReturnValueOnce({
         statusCode: 404,
         message: 'Not found',
       });

@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-jest.mock('@kbn/inference-tracing', () => ({
-  // Avoid initializing tracing in unit tests (can keep Jest alive).
-  withInferenceContext: (fn: () => unknown) => fn(),
-}));
-jest.mock('../utils/tracing', () => ({
-  withTaskSpan: jest.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
-  withEvaluatorSpan: jest.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
-  getCurrentTraceId: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
+vi.mock('@kbn/inference-tracing', () => {
+      const mocked = {
+      // Avoid initializing tracing in unit tests (can keep Jest alive).
+      withInferenceContext: (fn: () => unknown) => fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils/tracing', () => {
+      const mocked = {
+      withTaskSpan: vi.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
+      withEvaluatorSpan: vi.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
+      getCurrentTraceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/inference-common';
@@ -23,11 +32,11 @@ import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tra
 import { KibanaEvalsClient } from './client';
 
 describe('KibanaEvalsClient', () => {
-  const mockLog: jest.Mocked<SomeDevLog> = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
+  const mockLog: Mocked<SomeDevLog> = {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
   } as any;
 
   const model: Model = {
@@ -46,13 +55,13 @@ describe('KibanaEvalsClient', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getCurrentTraceId as jest.Mock).mockReturnValue('default-trace-id');
+    vi.clearAllMocks();
+    (getCurrentTraceId as Mock).mockReturnValue('default-trace-id');
   });
 
   it('runs trusted upstream examples and retains dataset and example IDs', async () => {
-    const upsertDataset = jest.fn().mockResolvedValue('stored-dataset-id');
-    const onEvaluationComplete = jest.fn();
+    const upsertDataset = vi.fn().mockResolvedValue('stored-dataset-id');
+    const onEvaluationComplete = vi.fn();
     const dataset = {
       id: 'stored-dataset-id',
       name: 'curated-dataset',
@@ -62,7 +71,7 @@ describe('KibanaEvalsClient', () => {
     const client = createClient({
       upsertDataset,
       onEvaluationComplete,
-      getDatasetByName: jest.fn().mockResolvedValue(dataset),
+      getDatasetByName: vi.fn().mockResolvedValue(dataset),
     });
     const [result] = await client.runExperiment(
       {
@@ -245,7 +254,7 @@ describe('KibanaEvalsClient', () => {
 
     const mockTaskTraceId = 'task-trace-id';
     const mockEvalTraceId = 'evaluator-trace-id';
-    (getCurrentTraceId as jest.Mock)
+    (getCurrentTraceId as Mock)
       .mockReturnValueOnce(mockTaskTraceId)
       .mockReturnValueOnce(mockEvalTraceId);
 
@@ -279,7 +288,7 @@ describe('KibanaEvalsClient', () => {
       },
     ];
 
-    (getCurrentTraceId as jest.Mock).mockReturnValue(null);
+    (getCurrentTraceId as Mock).mockReturnValue(null);
 
     const [exp] = await client.runExperiment({ datasets: [dataset], task }, evaluators);
     const runKeys = Object.keys(exp.runs);
@@ -343,7 +352,7 @@ describe('KibanaEvalsClient', () => {
       },
     ];
 
-    (getCurrentTraceId as jest.Mock).mockReturnValue('client-task-span-trace');
+    (getCurrentTraceId as Mock).mockReturnValue('client-task-span-trace');
 
     const [exp] = await client.runExperiment({ datasets: [dataset], task }, evaluators);
 
@@ -377,7 +386,7 @@ describe('KibanaEvalsClient', () => {
       },
     ];
 
-    (getCurrentTraceId as jest.Mock).mockReturnValue('client-task-span-trace');
+    (getCurrentTraceId as Mock).mockReturnValue('client-task-span-trace');
 
     await client.runExperiment({ datasets: [dataset], task }, evaluators);
 
@@ -408,7 +417,7 @@ describe('KibanaEvalsClient', () => {
       },
     ];
 
-    (getCurrentTraceId as jest.Mock).mockReturnValue('client-task-span-trace');
+    (getCurrentTraceId as Mock).mockReturnValue('client-task-span-trace');
 
     await client.runExperiment({ datasets: [dataset], task }, evaluators);
 
@@ -462,16 +471,16 @@ describe('KibanaEvalsClient', () => {
   });
 
   it('upserts dataset and resolves upstream dataset when trustUpstreamDataset=true', async () => {
-    const getDatasetByName = jest.fn().mockResolvedValue({
+    const getDatasetByName = vi.fn().mockResolvedValue({
       id: 'upstream-dataset-id',
       name: 'external-dataset',
       description: 'resolved from ES',
       examples: [{ input: { q: 'resolved' }, output: { expected: 'answer' } }],
     });
-    const upsertDataset = jest.fn().mockResolvedValue('server-assigned-id');
+    const upsertDataset = vi.fn().mockResolvedValue('server-assigned-id');
     const client = createClient({ getDatasetByName, upsertDataset });
 
-    const task = jest.fn(async () => ({ ok: true }));
+    const task = vi.fn(async () => ({ ok: true }));
     const evaluator: Evaluator<EvaluationDataset['examples'][number], { ok: boolean }> = {
       name: 'AlwaysOne',
       kind: 'CODE',
@@ -509,11 +518,11 @@ describe('KibanaEvalsClient', () => {
   });
 
   it('stamps scores with the dataset id the server assigned', async () => {
-    const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+    const onEvaluationComplete = vi.fn().mockResolvedValue(undefined);
     const client = createClient({
       repetitions: 1,
       onEvaluationComplete,
-      upsertDataset: jest.fn().mockResolvedValue('server-assigned-id'),
+      upsertDataset: vi.fn().mockResolvedValue('server-assigned-id'),
     });
 
     const [exp] = await client.runExperiment(
@@ -538,7 +547,7 @@ describe('KibanaEvalsClient', () => {
   it('falls back to the upstream dataset id when nothing persists the dataset', async () => {
     const client = createClient({
       repetitions: 1,
-      getDatasetByName: jest.fn().mockResolvedValue({
+      getDatasetByName: vi.fn().mockResolvedValue({
         id: 'upstream-dataset-id',
         name: 'ds',
         description: 'desc',
@@ -607,7 +616,7 @@ describe('KibanaEvalsClient', () => {
     ];
 
     it('invokes the callback once per evaluator per example per repetition', async () => {
-      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const onEvaluationComplete = vi.fn().mockResolvedValue(undefined);
       const client = createClient({ repetitions: 2, onEvaluationComplete });
 
       await client.runExperiment(
@@ -620,7 +629,7 @@ describe('KibanaEvalsClient', () => {
     });
 
     it('passes correct event data to the callback', async () => {
-      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const onEvaluationComplete = vi.fn().mockResolvedValue(undefined);
       const client = createClient({ repetitions: 1, onEvaluationComplete });
 
       const [exp] = await client.runExperiment(
@@ -654,7 +663,7 @@ describe('KibanaEvalsClient', () => {
     });
 
     it('reports each evaluator kind and judge model on the event', async () => {
-      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const onEvaluationComplete = vi.fn().mockResolvedValue(undefined);
       const client = createClient({ repetitions: 1, onEvaluationComplete });
       const judgeModel = { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' };
 
@@ -688,7 +697,7 @@ describe('KibanaEvalsClient', () => {
     });
 
     it('reads the judge model only after the evaluator resolves', async () => {
-      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const onEvaluationComplete = vi.fn().mockResolvedValue(undefined);
       const client = createClient({ repetitions: 1, onEvaluationComplete });
       // Mirrors EvaluatorApiClient, which only learns its model from the response.
       let lateModel: { id: string } | undefined;
@@ -718,7 +727,7 @@ describe('KibanaEvalsClient', () => {
     });
 
     it('reads the evaluator version after the evaluator resolves', async () => {
-      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const onEvaluationComplete = vi.fn().mockResolvedValue(undefined);
       const client = createClient({ repetitions: 1, onEvaluationComplete });
       let resolvedVersion: string | undefined;
 
@@ -745,7 +754,7 @@ describe('KibanaEvalsClient', () => {
     });
 
     it('uses stringified exampleIndex when example has no id', async () => {
-      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const onEvaluationComplete = vi.fn().mockResolvedValue(undefined);
       const client = createClient({ repetitions: 1, onEvaluationComplete });
 
       const noIdDataset: EvaluationDataset = {
@@ -763,7 +772,7 @@ describe('KibanaEvalsClient', () => {
     });
 
     it('does not abort the experiment when the callback throws', async () => {
-      const onEvaluationComplete = jest.fn().mockRejectedValue(new Error('ES write failed'));
+      const onEvaluationComplete = vi.fn().mockRejectedValue(new Error('ES write failed'));
       const client = createClient({ repetitions: 1, onEvaluationComplete });
 
       const [exp] = await client.runExperiment(

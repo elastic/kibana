@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -45,7 +48,7 @@ const eventLogger = eventLoggerMock.create();
 const eventLogClient = eventLogClientMock.create();
 const backfillClient = backfillClientMock.create();
 
-const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
+const rulesClientParamsBase: Mocked<ConstructorOptions> = {
   request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
@@ -54,25 +57,25 @@ const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
-  getUserName: jest.fn().mockResolvedValue('elastic'),
-  getProfileUid: jest.fn(),
-  createAPIKey: jest.fn(),
-  cloneAPIKey: jest.fn(),
+  getUserName: vi.fn().mockResolvedValue('elastic'),
+  getProfileUid: vi.fn(),
+  createAPIKey: vi.fn(),
+  cloneAPIKey: vi.fn(),
   logger: loggingSystemMock.create().get() as Logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
+  getActionsClient: vi.fn(),
+  getEventLogClient: vi.fn(),
   kibanaVersion,
   auditLogger,
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
+  isAuthenticationTypeAPIKey: vi.fn(),
+  getAuthenticationAPIKey: vi.fn(),
+  getAlertIndicesAlias: vi.fn(),
   alertsService: null,
   backfillClient,
-  isSystemAction: jest.fn(),
+  isSystemAction: vi.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
@@ -127,7 +130,7 @@ describe('updateGapAutoFillScheduler()', () => {
   let rulesClient: RulesClient;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       saved_objects: [],
@@ -281,7 +284,7 @@ describe('updateGapAutoFillScheduler()', () => {
 
   test('logs and rethrows when authorization fails', async () => {
     setupSchedulerSo();
-    (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
+    (authorization.bulkEnsureAuthorized as Mock).mockImplementationOnce(() => {
       throw new Error('no access');
     });
 

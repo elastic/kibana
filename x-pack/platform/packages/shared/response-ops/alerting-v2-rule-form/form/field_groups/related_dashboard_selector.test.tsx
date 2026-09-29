@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -35,13 +37,13 @@ const DASHBOARD_ID = 'dashboard-123';
 const DASHBOARD_TITLE = 'Dashboard 123';
 const MISSING_DASHBOARD_ID = 'missing-dashboard';
 
-const mockSearch = jest.fn(async () => ({
+const mockSearch = vi.fn(async () => ({
   data: [{ id: DASHBOARD_ID, data: { title: DASHBOARD_TITLE }, meta: {} }],
   meta: { page: 1, per_page: 100, total: 1 },
 }));
 
 // Resolves only DASHBOARD_ID; any other id is reported as a not-found (deleted) artifact.
-const mockFindByIds = jest.fn(async (ids: string[]) =>
+const mockFindByIds = vi.fn(async (ids: string[]) =>
   ids.map((id) =>
     id === DASHBOARD_ID
       ? { id, status: 'success', attributes: { title: DASHBOARD_TITLE } }
@@ -49,11 +51,11 @@ const mockFindByIds = jest.fn(async (ids: string[]) =>
   )
 );
 
-const mockFindDashboardsService = jest.fn(async () => ({
+const mockFindDashboardsService = vi.fn(async () => ({
   search: mockSearch,
-  findById: jest.fn(),
+  findById: vi.fn(),
   findByIds: mockFindByIds,
-  findByTitle: jest.fn(),
+  findByTitle: vi.fn(),
 }));
 
 const mockDashboard = {
@@ -91,7 +93,7 @@ const createComposeFormWrapper = (
 
 describe('RelatedDashboardSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the related dashboards selector', () => {

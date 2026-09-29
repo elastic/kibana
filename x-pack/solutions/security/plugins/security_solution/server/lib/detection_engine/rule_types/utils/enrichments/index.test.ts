@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { enrichEvents } from '.';
 import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
@@ -18,22 +21,31 @@ import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/s
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import type { ExperimentalFeatures } from '../../../../../../common';
 
-jest.mock('./search_enrichments', () => ({
-  searchEnrichments: jest.fn(),
-}));
-const mockSearchEnrichments = searchEnrichments as jest.Mock;
+vi.mock('./search_enrichments', () => {
+      const mocked = {
+      searchEnrichments: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockSearchEnrichments = searchEnrichments as Mock;
 
-jest.mock('./utils/is_index_exist', () => ({
-  isIndexExist: jest.fn(),
-}));
-const mockIsIndexExist = isIndexExist as jest.Mock;
+vi.mock('./utils/is_index_exist', () => {
+      const mocked = {
+      isIndexExist: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockIsIndexExist = isIndexExist as Mock;
 
-jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
-  euid: {
-    getEuidFromObjectForSearch: jest.fn(),
-  },
-}));
-const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
+vi.mock('@kbn/entity-store/common/euid_helpers', () => {
+      const mocked = {
+      euid: {
+        getEuidFromObjectForSearch: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as Mock;
 
 const hostEnrichmentResponse = [
   {
@@ -326,11 +338,11 @@ describe('enrichEvents', () => {
   });
 
   describe(`with entityAnalyticsEntityStoreV2 = true`, () => {
-    let mockListEntities: jest.Mock;
+    let mockListEntities: Mock;
     let entityStoreCrudClient: EntityStoreCRUDClient;
 
     beforeEach(() => {
-      mockListEntities = jest.fn().mockResolvedValue({ entities: [] });
+      mockListEntities = vi.fn().mockResolvedValue({ entities: [] });
       entityStoreCrudClient = {
         listEntities: mockListEntities,
       } as unknown as EntityStoreCRUDClient;

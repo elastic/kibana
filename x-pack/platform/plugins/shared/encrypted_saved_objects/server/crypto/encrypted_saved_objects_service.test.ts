@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Crypto } from '@elastic/node-crypto';
 import nodeCrypto from '@elastic/node-crypto';
 
@@ -16,11 +19,11 @@ import { EncryptionError } from './encryption_error';
 
 function createNodeCryptMock(encryptionKey: string) {
   const crypto = nodeCrypto({ encryptionKey });
-  const nodeCryptoMock: jest.Mocked<Crypto> = {
-    encrypt: jest.fn(),
-    decrypt: jest.fn(),
-    encryptSync: jest.fn(),
-    decryptSync: jest.fn(),
+  const nodeCryptoMock: Mocked<Crypto> = {
+    encrypt: vi.fn(),
+    decrypt: vi.fn(),
+    encryptSync: vi.fn(),
+    decryptSync: vi.fn(),
   };
 
   // Call actual `@elastic/node-crypto` by default, but allow to override implementation in tests.
@@ -40,7 +43,7 @@ function createNodeCryptMock(encryptionKey: string) {
   return nodeCryptoMock;
 }
 
-let mockNodeCrypto: jest.Mocked<Crypto>;
+let mockNodeCrypto: Mocked<Crypto>;
 let service: EncryptedSavedObjectsService;
 beforeEach(() => {
   mockNodeCrypto = createNodeCryptMock('encryption-key-abc');
@@ -51,7 +54,7 @@ beforeEach(() => {
   });
 });
 
-afterEach(() => jest.resetAllMocks());
+afterEach(() => vi.resetAllMocks());
 
 describe('#registerType', () => {
   it('throws if `attributesToEncrypt` is empty', () => {
@@ -1312,8 +1315,8 @@ describe('#decryptAttributes', () => {
 
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three', attrFour: null };
 
-    let decryptionOnlyCryptoOne: jest.Mocked<Crypto>;
-    let decryptionOnlyCryptoTwo: jest.Mocked<Crypto>;
+    let decryptionOnlyCryptoOne: Mocked<Crypto>;
+    let decryptionOnlyCryptoTwo: Mocked<Crypto>;
     beforeEach(() => {
       decryptionOnlyCryptoOne = createNodeCryptMock('old-key-one');
       decryptionOnlyCryptoTwo = createNodeCryptMock('old-key-two');
@@ -2252,8 +2255,8 @@ describe('#decryptAttributesSync', () => {
 
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three', attrFour: null };
 
-    let decryptionOnlyCryptoOne: jest.Mocked<Crypto>;
-    let decryptionOnlyCryptoTwo: jest.Mocked<Crypto>;
+    let decryptionOnlyCryptoOne: Mocked<Crypto>;
+    let decryptionOnlyCryptoTwo: Mocked<Crypto>;
     beforeEach(() => {
       decryptionOnlyCryptoOne = createNodeCryptMock('old-key-one');
       decryptionOnlyCryptoTwo = createNodeCryptMock('old-key-two');
@@ -2485,7 +2488,7 @@ describe('#__dangerousClone', () => {
   });
 
   it('dangerously exposes string attributes from overrides', () => {
-    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+    const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
     service.__dangerousClone([
       {
@@ -2508,7 +2511,7 @@ describe('#__dangerousClone', () => {
   });
 
   it('dangerously exposes object attributes without dangerouslyExposeValue from overrides', () => {
-    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+    const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
     service.__dangerousClone([
       {
@@ -2536,7 +2539,7 @@ describe('#__dangerousClone', () => {
       attributesToEncrypt: new Set(['secret']),
     });
 
-    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+    const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
     service.__dangerousClone();
 
@@ -2549,7 +2552,7 @@ describe('#__dangerousClone', () => {
   });
 
   it('preserves dangerouslyExposeValue when already set to true', () => {
-    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+    const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
     service.__dangerousClone([
       {
@@ -2567,7 +2570,7 @@ describe('#__dangerousClone', () => {
   });
 
   it('sets dangerouslyExposeValue to true if it was already set to false', () => {
-    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+    const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
     service.__dangerousClone([
       {

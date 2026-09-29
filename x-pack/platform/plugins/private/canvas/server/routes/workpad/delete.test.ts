@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteWorkpadRoute } from './delete';
@@ -62,7 +64,7 @@ describe('DELETE workpad', () => {
       },
     });
 
-    (mockRouteContext.core.savedObjects.client.delete as jest.Mock).mockImplementationOnce(() => {
+    (mockRouteContext.core.savedObjects.client.delete as Mock).mockImplementationOnce(() => {
       throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 

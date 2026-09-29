@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { UpdateMissingIndex } from './update_missing_index';
@@ -39,7 +41,7 @@ describe('UpdateMissingIndex', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -72,7 +74,7 @@ describe('UpdateMissingIndex', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -98,7 +100,7 @@ describe('UpdateMissingIndex', () => {
         failed: 0,
       },
     });
-    const setMissingIndexPatternFlyoutOpen = jest.fn();
+    const setMissingIndexPatternFlyoutOpen = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <UpdateMissingIndex
@@ -147,7 +149,7 @@ describe('UpdateMissingIndex', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -185,7 +187,7 @@ describe('UpdateMissingIndex', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );

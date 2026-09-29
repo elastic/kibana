@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildWorkflowExecutionDocument } from './build_workflow_execution_document';
@@ -45,7 +47,7 @@ const baseParams = {
 describe('buildWorkflowExecutionDocument', () => {
   it('uses the explicit execution space instead of the context or global workflow storage space', () => {
     const context = { spaceId: 'foreign-space', inputs: { message: 'test input' } };
-    const getConcurrencyGroupKey = jest.fn(() => null);
+    const getConcurrencyGroupKey = vi.fn(() => null);
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
       workflow: { ...baseWorkflow, spaceId: '*' },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { CertSort } from './certificates_list';
 import { CertificateList } from './certificates_list';
@@ -25,7 +27,7 @@ describe('CertificateList', () => {
       <CertificateList
         page={page}
         sort={sort}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         certificates={{ loading: false, total: 0, certs: [] }}
       />
     );
@@ -47,7 +49,7 @@ describe('CertificateList', () => {
       <CertificateList
         page={page}
         sort={sort}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         certificates={{
           loading: false,
           total: 1,

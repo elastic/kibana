@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, fireEvent, screen } from '@testing-library/react';
 import { RecentCasesFilters, caseFilterOptions } from '.';
@@ -12,7 +14,7 @@ import type { FilterMode } from '../types';
 import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('Severity form field', () => {
-  const setFilterBy = jest.fn();
+  const setFilterBy = vi.fn();
   const filterBy: FilterMode = 'recentlyCreated';
 
   const props = {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { UserActionParameters } from '../types';
 import { ExtendedFieldsUserActionBuilder } from './extended_fields';
 
@@ -29,17 +31,17 @@ describe('ExtendedFieldsUserActionBuilder', () => {
   let builder: ExtendedFieldsUserActionBuilder;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     builder = new ExtendedFieldsUserActionBuilder();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('builds the action correctly', () => {

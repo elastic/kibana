@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useRestoreDataViewManagerStateFromURL } from './use_sync_url_state';
 import * as globalQueryString from '../../common/utils/global_query_string';
 
 import { PageScope } from '../constants';
 
-jest.mock('../../common/utils/global_query_string');
+vi.mock('../../common/utils/global_query_string');
 
 describe('useRestoreDataViewManagerStateFromURL', () => {
-  const mockUseInitializeUrlParam = globalQueryString.useInitializeUrlParam as jest.Mock;
+  const mockUseInitializeUrlParam = globalQueryString.useInitializeUrlParam as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseInitializeUrlParam.mockImplementation((_key, cb) => cb);
   });
 
   it('should call initDataViewSelection for each scope', () => {
-    const initDataViewSelection = jest.fn();
+    const initDataViewSelection = vi.fn();
     renderHook(() =>
       useRestoreDataViewManagerStateFromURL(initDataViewSelection, PageScope.default)
     );

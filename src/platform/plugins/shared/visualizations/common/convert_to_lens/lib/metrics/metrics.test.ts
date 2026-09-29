@@ -7,37 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { SchemaConfig } from '../../..';
 import type { ExtendedColumnConverterArgs } from '../convert';
 import { convertMetricToColumns } from './metrics';
 
-const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();
-const mockConvertToOtherParentPipelineAggColumns = jest.fn();
-const mockConvertToPercentileColumn = jest.fn();
-const mockConvertToPercentileRankColumn = jest.fn();
-const mockConvertToSiblingPipelineColumns = jest.fn();
-const mockConvertToStdDeviationFormulaColumns = jest.fn();
-const mockConvertToLastValueColumn = jest.fn();
-const mockConvertToCumulativeSumAggColumn = jest.fn();
-const mockConvertToColumnInPercentageMode = jest.fn();
+const mockConvertMetricAggregationColumnWithoutSpecialParams = vi.fn();
+const mockConvertToOtherParentPipelineAggColumns = vi.fn();
+const mockConvertToPercentileColumn = vi.fn();
+const mockConvertToPercentileRankColumn = vi.fn();
+const mockConvertToSiblingPipelineColumns = vi.fn();
+const mockConvertToStdDeviationFormulaColumns = vi.fn();
+const mockConvertToLastValueColumn = vi.fn();
+const mockConvertToCumulativeSumAggColumn = vi.fn();
+const mockConvertToColumnInPercentageMode = vi.fn();
 
-jest.mock('../convert', () => ({
-  convertMetricAggregationColumnWithoutSpecialParams: jest.fn(() =>
-    mockConvertMetricAggregationColumnWithoutSpecialParams()
-  ),
-  convertToOtherParentPipelineAggColumns: jest.fn(() =>
-    mockConvertToOtherParentPipelineAggColumns()
-  ),
-  convertToPercentileColumn: jest.fn(() => mockConvertToPercentileColumn()),
-  convertToPercentileRankColumn: jest.fn(() => mockConvertToPercentileRankColumn()),
-  convertToSiblingPipelineColumns: jest.fn(() => mockConvertToSiblingPipelineColumns()),
-  convertToStdDeviationFormulaColumns: jest.fn(() => mockConvertToStdDeviationFormulaColumns()),
-  convertToLastValueColumn: jest.fn(() => mockConvertToLastValueColumn()),
-  convertToCumulativeSumAggColumn: jest.fn(() => mockConvertToCumulativeSumAggColumn()),
-  convertToColumnInPercentageMode: jest.fn(() => mockConvertToColumnInPercentageMode()),
-}));
+vi.mock('../convert', () => {
+      const mocked = {
+      convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
+        mockConvertMetricAggregationColumnWithoutSpecialParams()
+      ),
+      convertToOtherParentPipelineAggColumns: vi.fn(() =>
+        mockConvertToOtherParentPipelineAggColumns()
+      ),
+      convertToPercentileColumn: vi.fn(() => mockConvertToPercentileColumn()),
+      convertToPercentileRankColumn: vi.fn(() => mockConvertToPercentileRankColumn()),
+      convertToSiblingPipelineColumns: vi.fn(() => mockConvertToSiblingPipelineColumns()),
+      convertToStdDeviationFormulaColumns: vi.fn(() => mockConvertToStdDeviationFormulaColumns()),
+      convertToLastValueColumn: vi.fn(() => mockConvertToLastValueColumn()),
+      convertToCumulativeSumAggColumn: vi.fn(() => mockConvertToCumulativeSumAggColumn()),
+      convertToColumnInPercentageMode: vi.fn(() => mockConvertToColumnInPercentageMode()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const visType = 'heatmap';
 
@@ -45,7 +51,7 @@ describe('convertMetricToColumns invalid cases', () => {
   const dataView = stubLogstashDataView;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
@@ -61,7 +67,7 @@ describe('convertMetricToColumns invalid cases', () => {
 
   const aggs: ExtendedColumnConverterArgs<METRIC_TYPES>['aggs'] = [];
 
-  test.each<[string, Parameters<typeof convertMetricToColumns>, null, jest.Mock | undefined]>([
+  test.each<[string, Parameters<typeof convertMetricToColumns>, null, Mock | undefined]>([
     [
       'null if agg is not supported',
       [
@@ -411,7 +417,7 @@ describe('convertMetricToColumns valid cases', () => {
   const aggs: ExtendedColumnConverterArgs<METRIC_TYPES>['aggs'] = [];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const result = [{}];
@@ -428,7 +434,7 @@ describe('convertMetricToColumns valid cases', () => {
     mockConvertToColumnInPercentageMode.mockReturnValue(result);
   });
 
-  test.each<[string, Parameters<typeof convertMetricToColumns>, Array<{}>, jest.Mock]>([
+  test.each<[string, Parameters<typeof convertMetricToColumns>, Array<{}>, Mock]>([
     [
       'array of columns if supported agg AVG is valid',
       [

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { resolveBaseConnectorType } from './use_connector_type_decorations';
 
 const mockBuiltInStepTypes = new Set([
@@ -29,21 +31,30 @@ const mockRegisteredStepDefinitions = new Map<string, { id: string }>([
   ['ai.summarize', { id: 'ai.summarize' }],
 ]);
 
-jest.mock('@kbn/workflows', () => ({
-  ...jest.requireActual('@kbn/workflows'),
-  isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
-  getBuiltInStepStability: jest.fn().mockReturnValue(undefined),
-}));
+vi.mock('@kbn/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows')),
+      isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
+      getBuiltInStepStability: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/step_schemas', () => ({
-  stepSchemas: {
-    getStepDefinition: (id: string) => mockRegisteredStepDefinitions.get(id),
-  },
-}));
+vi.mock('../../../../../common/step_schemas', () => {
+      const mocked = {
+      stepSchemas: {
+        getStepDefinition: (id: string) => mockRegisteredStepDefinitions.get(id),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/schema', () => ({
-  getCachedAllConnectorsMap: jest.fn().mockReturnValue(new Map()),
-}));
+vi.mock('../../../../../common/schema', () => {
+      const mocked = {
+      getCachedAllConnectorsMap: vi.fn().mockReturnValue(new Map()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('resolveBaseConnectorType', () => {
   describe('built-in step types preserve full type', () => {

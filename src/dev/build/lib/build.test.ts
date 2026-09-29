@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Build } from './build';
@@ -21,7 +23,7 @@ const linuxArmPlatform = config.getPlatform('linux', 'arm64');
 const windowsPlatform = config.getPlatform('win32', 'x64');
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const defaultBuild = new Build(config);

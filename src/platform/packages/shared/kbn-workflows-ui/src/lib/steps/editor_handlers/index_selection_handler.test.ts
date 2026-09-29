@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IndexKind, MatchedItem } from '@kbn/data-views-plugin/public';
 import type { SelectionContext } from '@kbn/workflows/types/latest';
 import {
@@ -38,18 +41,18 @@ const EMPTY_CONTEXT: SelectionContext<Record<string, unknown>, { index: string }
 };
 
 interface MockDataViews {
-  getIndices: jest.Mock;
+  getIndices: Mock;
 }
 
 function createServices(): {
   services: IndexSelectionHandlerServices;
   dataViews: MockDataViews;
-  getUrlForApp: jest.Mock;
+  getUrlForApp: Mock;
 } {
   const dataViews: MockDataViews = {
-    getIndices: jest.fn(),
+    getIndices: vi.fn(),
   };
-  const getUrlForApp = jest
+  const getUrlForApp = vi
     .fn()
     .mockImplementation(
       (app: string, opts?: { deepLinkId?: string; path?: string }) =>

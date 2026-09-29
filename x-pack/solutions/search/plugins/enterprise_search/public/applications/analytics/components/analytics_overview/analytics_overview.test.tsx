@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -17,9 +19,12 @@ import type { AnalyticsCollection } from '../../../../../common/types/analytics'
 
 import { AnalyticsOverview } from './analytics_overview';
 
-jest.mock('../../utils/find_or_create_data_view', () => ({
-  findOrCreateDataView: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../utils/find_or_create_data_view', () => {
+      const mocked = {
+      findOrCreateDataView: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockValues = {
   analyticsCollections: [
@@ -34,12 +39,12 @@ const mockValues = {
 };
 
 const mockActions = {
-  fetchAnalyticsCollections: jest.fn(),
+  fetchAnalyticsCollections: vi.fn(),
 };
 
 describe('AnalyticsOverview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('empty state', () => {

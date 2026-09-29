@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockCopyToClipboard = jest.fn((_value: string) => true);
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+import { vi } from 'vitest';
+
+const mockCopyToClipboard = vi.fn((_value: string) => true);
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     copyToClipboard: (value: string) => mockCopyToClipboard(value),
@@ -47,8 +49,8 @@ describe('withoutTrailingDefaultCopyCellAction', () => {
 });
 
 describe('createTriggerEventSummaryCopyPayloadCellAction', () => {
-  const addInfo = jest.fn();
-  const addWarning = jest.fn();
+  const addInfo = vi.fn();
+  const addWarning = vi.fn();
   const toastNotifications = { addInfo, addWarning } as unknown as ToastsStart;
 
   const MockCellButton = (props: React.ComponentProps<typeof EuiButtonEmpty>) => (
@@ -75,7 +77,7 @@ describe('createTriggerEventSummaryCopyPayloadCellAction', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCopyToClipboard.mockReturnValue(true);
   });
 

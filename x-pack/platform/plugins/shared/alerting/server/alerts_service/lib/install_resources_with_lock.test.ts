@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import { ReplaySubject } from 'rxjs';
@@ -30,10 +32,10 @@ describe('getInstallLockRetryDelayMs', () => {
 });
 
 describe('installResourcesWithLock', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('runs the install directly when no lock manager is provided', async () => {
-    const installFn = jest.fn().mockResolvedValue(undefined);
+    const installFn = vi.fn().mockResolvedValue(undefined);
 
     await installResourcesWithLock({ lockId: 'lock-a', logger, installFn });
 
@@ -41,8 +43,8 @@ describe('installResourcesWithLock', () => {
   });
 
   it('runs the install inside the lock when acquired', async () => {
-    const installFn = jest.fn().mockResolvedValue(undefined);
-    const lockManager = createLockManager(jest.fn(async (_lockId, cb) => cb()));
+    const installFn = vi.fn().mockResolvedValue(undefined);
+    const lockManager = createLockManager(vi.fn(async (_lockId, cb) => cb()));
 
     await installResourcesWithLock({
       lockManager,
@@ -56,8 +58,8 @@ describe('installResourcesWithLock', () => {
   });
 
   it('retries acquisition and succeeds once the lock frees up', async () => {
-    const installFn = jest.fn().mockResolvedValue(undefined);
-    const withLock = jest
+    const installFn = vi.fn().mockResolvedValue(undefined);
+    const withLock = vi
       .fn()
       .mockRejectedValueOnce(new LockAcquisitionError('held'))
       .mockRejectedValueOnce(new LockAcquisitionError('held'))
@@ -84,8 +86,8 @@ describe('installResourcesWithLock', () => {
 
   it('aborts lock retries when the plugin stops', async () => {
     const pluginStop$ = new ReplaySubject<void>(1);
-    const installFn = jest.fn().mockResolvedValue(undefined);
-    const withLock = jest.fn().mockRejectedValue(new LockAcquisitionError('held'));
+    const installFn = vi.fn().mockResolvedValue(undefined);
+    const withLock = vi.fn().mockRejectedValue(new LockAcquisitionError('held'));
 
     const installation = installResourcesWithLock({
       lockManager: createLockManager(withLock),
@@ -104,8 +106,8 @@ describe('installResourcesWithLock', () => {
 
   it('does not start installation when the plugin stops during acquisition', async () => {
     const pluginStop$ = new ReplaySubject<void>(1);
-    const installFn = jest.fn().mockResolvedValue(undefined);
-    const withLock = jest.fn(async (_lockId: string, cb: () => Promise<void>) => {
+    const installFn = vi.fn().mockResolvedValue(undefined);
+    const withLock = vi.fn(async (_lockId: string, cb: () => Promise<void>) => {
       pluginStop$.next();
       await cb();
     });
@@ -126,8 +128,8 @@ describe('installResourcesWithLock', () => {
 
   it('logs and propagates install failures (non lock-acquisition errors) without retrying', async () => {
     const installError = new Error('install failed');
-    const withLock = jest.fn(async (_lockId: string, cb: () => Promise<void>) => cb());
-    const installFn = jest.fn().mockRejectedValue(installError);
+    const withLock = vi.fn(async (_lockId: string, cb: () => Promise<void>) => cb());
+    const installFn = vi.fn().mockRejectedValue(installError);
 
     await expect(
       installResourcesWithLock({
@@ -148,8 +150,8 @@ describe('installResourcesWithLock', () => {
   });
 
   it('rethrows shutdown without logging an error', async () => {
-    const withLock = jest.fn(async (_lockId: string, cb: () => Promise<void>) => cb());
-    const installFn = jest.fn().mockRejectedValue(new InstallShutdownError());
+    const withLock = vi.fn(async (_lockId: string, cb: () => Promise<void>) => cb());
+    const installFn = vi.fn().mockRejectedValue(new InstallShutdownError());
 
     await expect(
       installResourcesWithLock({

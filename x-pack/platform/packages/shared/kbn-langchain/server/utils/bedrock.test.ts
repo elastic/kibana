@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { handleBedrockChunk } from './bedrock';
@@ -63,10 +65,10 @@ const mockChunks = [
 
 describe('handleBedrockChunk', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should call chunkHandler when a chunk has been decoded', () => {
-    const chunkHandler = jest.fn();
+    const chunkHandler = vi.fn();
     const bedrockBuffer: Uint8Array = new Uint8Array(0);
     const result = handleBedrockChunk({
       chunk: mockChunks[2],

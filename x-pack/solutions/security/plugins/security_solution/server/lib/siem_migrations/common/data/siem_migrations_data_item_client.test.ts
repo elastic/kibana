@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
@@ -18,7 +21,7 @@ type SearchApiResponse = Awaited<ReturnType<typeof SearchApi>>;
 
 class TestSiemMigrationsDataItemClient extends SiemMigrationsDataItemClient<ItemDocument> {
   protected type = 'rule' as const;
-  public getVendor = jest.fn().mockResolvedValue('qradar');
+  public getVendor = vi.fn().mockResolvedValue('qradar');
   protected getSortOptions(_sort?: SiemMigrationSort) {
     return [];
   }
@@ -30,7 +33,7 @@ describe('SiemMigrationsDataItemClient', () => {
     elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
 
   const logger = loggingSystemMock.createLogger();
-  const indexNameProvider = jest
+  const indexNameProvider = vi
     .fn()
     .mockResolvedValue('.kibana-siem-rule-migrations-rules-default');
   const currentUser = {
@@ -50,13 +53,13 @@ describe('SiemMigrationsDataItemClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getStats', () => {
     it('queries ES using isEligibleForTranslation filter', async () => {
       (
-        esClient.asInternalUser.search as unknown as jest.MockedFn<typeof SearchApi>
+        esClient.asInternalUser.search as unknown as MockedFunction<typeof SearchApi>
       ).mockResolvedValueOnce({
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {
@@ -88,7 +91,7 @@ describe('SiemMigrationsDataItemClient', () => {
   describe('getAllStats', () => {
     it('queries ES using eligibility filter', async () => {
       (
-        esClient.asInternalUser.search as unknown as jest.MockedFn<typeof SearchApi>
+        esClient.asInternalUser.search as unknown as MockedFunction<typeof SearchApi>
       ).mockResolvedValueOnce({
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {
@@ -124,9 +127,9 @@ describe('SiemMigrationsDataItemClient', () => {
 
   describe('searchBatches', () => {
     it('rolls forward PIT id between pages', async () => {
-      (esClient.asInternalUser.openPointInTime as jest.Mock).mockResolvedValue({ id: 'pit-1' });
+      (esClient.asInternalUser.openPointInTime as Mock).mockResolvedValue({ id: 'pit-1' });
 
-      const searchMock = esClient.asInternalUser.search as unknown as jest.MockedFn<
+      const searchMock = esClient.asInternalUser.search as unknown as MockedFunction<
         typeof SearchApi
       >;
       searchMock

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { executeConnectorRoute } from './execute';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
@@ -16,9 +19,12 @@ import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { NEVER, Subject } from 'rxjs';
 import { actionsConfigMock } from '../../../actions_config.mock';
 
-jest.mock('../../verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
+vi.mock('../../verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function mockRequest(overrides: Record<string, unknown> = {}) {
   return {
@@ -28,13 +34,13 @@ function mockRequest(overrides: Record<string, unknown> = {}) {
 }
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
+  vi.resetAllMocks();
+  (verifyAccessAndContext as Mock).mockImplementation((license, handler) => handler);
 });
 
 describe('executeConnectorRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('executes an action with proper parameters', async () => {
@@ -161,7 +167,7 @@ describe('executeConnectorRoute', () => {
       status: 'ok',
     });
 
-    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
+    (verifyAccessAndContext as Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 

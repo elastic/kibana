@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,27 +17,33 @@ import {
   type RuleOption,
 } from './execution_history_search_bar';
 
-const mockUseFetchRules = jest.fn();
+const mockUseFetchRules = vi.fn();
 
-jest.mock('../../../hooks/use_fetch_rules', () => ({
-  useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
-}));
+vi.mock('../../../hooks/use_fetch_rules', () => {
+      const mocked = {
+      useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockCanReadRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (typeof token === 'function') {
-      return {
-        canRead: () => mockCanReadRules,
-        canWrite: () => mockCanReadRules,
-        can: () => mockCanReadRules,
-      };
-    }
-    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (typeof token === 'function') {
+          return {
+            canRead: () => mockCanReadRules,
+            canWrite: () => mockCanReadRules,
+            can: () => mockCanReadRules,
+          };
+        }
+        throw new Error(`Unexpected token in useService mock: ${String(token)}`);
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const rule = (id: string, name: string) => ({ id, metadata: { name } });
 
@@ -62,9 +70,9 @@ const setup = (
     onOutcomeChange: (value: PolicyOutcomeFilter) => void;
   }> = {}
 ) => {
-  const onRuleFiltersChange = overrides.onRuleFiltersChange ?? jest.fn();
-  const onSearchChange = overrides.onSearchChange ?? jest.fn();
-  const onOutcomeChange = overrides.onOutcomeChange ?? jest.fn();
+  const onRuleFiltersChange = overrides.onRuleFiltersChange ?? vi.fn();
+  const onSearchChange = overrides.onSearchChange ?? vi.fn();
+  const onOutcomeChange = overrides.onOutcomeChange ?? vi.fn();
 
   render(
     <I18nProvider>
@@ -90,7 +98,7 @@ const openRuleFilter = async () => {
 
 describe('ExecutionHistorySearchBar — rule filter combobox', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCanReadRules = true;
     mockRules();
   });
@@ -212,9 +220,9 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
       render(
         <I18nProvider>
           <ExecutionHistorySearchBar
-            onSearchChange={jest.fn()}
+            onSearchChange={vi.fn()}
             outcome="all"
-            onOutcomeChange={jest.fn()}
+            onOutcomeChange={vi.fn()}
             showRuleFilter={false}
           />
         </I18nProvider>
@@ -229,9 +237,9 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
       render(
         <I18nProvider>
           <ExecutionHistorySearchBar
-            onSearchChange={jest.fn()}
+            onSearchChange={vi.fn()}
             outcome="all"
-            onOutcomeChange={jest.fn()}
+            onOutcomeChange={vi.fn()}
             showRuleFilter={false}
           />
         </I18nProvider>

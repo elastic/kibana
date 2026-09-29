@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
 import { fetchConnectorById } from './fetch_connector_by_id';
@@ -25,7 +27,7 @@ const createInferenceConnector = (
 describe('fetchConnectorById', () => {
   it('should call the connector-by-id endpoint and return the mapped AIConnector', async () => {
     const connector = createInferenceConnector({ connectorId: 'my-id', name: 'My Connector' });
-    const httpGet = jest.fn().mockResolvedValue({ connector });
+    const httpGet = vi.fn().mockResolvedValue({ connector });
     const http = { get: httpGet } as unknown as HttpSetup;
 
     const result = await fetchConnectorById(http, 'my-id');
@@ -38,7 +40,7 @@ describe('fetchConnectorById', () => {
 
   it('should encode the connector ID in the URL', async () => {
     const connector = createInferenceConnector({ connectorId: 'id/with/slashes' });
-    const httpGet = jest.fn().mockResolvedValue({ connector });
+    const httpGet = vi.fn().mockResolvedValue({ connector });
     const http = { get: httpGet } as unknown as HttpSetup;
 
     await fetchConnectorById(http, 'id/with/slashes');
@@ -47,7 +49,7 @@ describe('fetchConnectorById', () => {
   });
 
   it('should return undefined when the endpoint returns 404', async () => {
-    const httpGet = jest.fn().mockRejectedValue({
+    const httpGet = vi.fn().mockRejectedValue({
       response: { status: 404 },
     });
     const http = { get: httpGet } as unknown as HttpSetup;
@@ -58,7 +60,7 @@ describe('fetchConnectorById', () => {
   });
 
   it('should rethrow non-404 errors', async () => {
-    const httpGet = jest.fn().mockRejectedValue({
+    const httpGet = vi.fn().mockRejectedValue({
       response: { status: 500 },
       message: 'Internal Server Error',
     });

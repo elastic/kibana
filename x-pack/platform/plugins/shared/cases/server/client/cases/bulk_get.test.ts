@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
 import { mockCases } from '../../mocks';
@@ -54,7 +56,7 @@ describe('bulkGet', () => {
     );
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it(`throws when trying to fetch more than ${MAX_BULK_GET_CASES} cases`, async () => {

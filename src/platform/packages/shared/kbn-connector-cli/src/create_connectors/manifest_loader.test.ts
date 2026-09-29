@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { resolveManifestSecrets } from './manifest_loader';
 import { vaultRead } from './vault';
 import type { Manifest } from './types';
 
-jest.mock('./vault');
-const vaultReadMock = vaultRead as jest.MockedFunction<typeof vaultRead>;
+vi.mock('./vault');
+const vaultReadMock = vaultRead as MockedFunction<typeof vaultRead>;
 
 describe('resolveManifestSecrets', () => {
-  afterEach(() => jest.resetAllMocks());
+  afterEach(() => vi.resetAllMocks());
 
   it('resolves static values directly', async () => {
     const manifest: Manifest = {

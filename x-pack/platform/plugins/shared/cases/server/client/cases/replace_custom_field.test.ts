@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 import { mockCases } from '../../mocks';
@@ -30,7 +32,7 @@ describe('Replace custom field', () => {
   const casesClient = createCasesClientMock();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // These tests assert the exact custom-field patch payload; the extended_fields
     // mirroring (templates flag ON) is covered by dedicated tests below.
     clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
@@ -39,7 +41,7 @@ describe('Replace custom field', () => {
       [mockCases[0].id]: 1,
     });
 
-    casesClient.configure.get = jest.fn().mockResolvedValue([
+    casesClient.configure.get = vi.fn().mockResolvedValue([
       {
         owner: mockCases[0].attributes.owner,
         customFields: [
@@ -435,7 +437,7 @@ describe('Replace custom field', () => {
       clientArgsWithFlag.services.caseService.patchCase.mockResolvedValue({ ...theCase });
 
       const casesClientLocal = createCasesClientMock();
-      casesClientLocal.configure.get = jest.fn().mockResolvedValue([
+      casesClientLocal.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: [
@@ -476,7 +478,7 @@ describe('Replace custom field', () => {
       clientArgsNoFlag.services.caseService.patchCase.mockResolvedValue({ ...theCase });
 
       const casesClientLocal = createCasesClientMock();
-      casesClientLocal.configure.get = jest.fn().mockResolvedValue([
+      casesClientLocal.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: [
@@ -525,7 +527,7 @@ describe('Replace custom field', () => {
       });
 
       const casesClientLocal = createCasesClientMock();
-      casesClientLocal.configure.get = jest.fn().mockResolvedValue([
+      casesClientLocal.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: [
@@ -575,7 +577,7 @@ describe('Replace custom field', () => {
       });
 
       const casesClientLocal = createCasesClientMock();
-      casesClientLocal.configure.get = jest.fn().mockResolvedValue([
+      casesClientLocal.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: [
@@ -624,7 +626,7 @@ describe('Replace custom field', () => {
       });
 
       const casesClientLocal = createCasesClientMock();
-      casesClientLocal.configure.get = jest.fn().mockResolvedValue([
+      casesClientLocal.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: [
@@ -665,7 +667,7 @@ describe('Replace custom field', () => {
       clientArgsWithFlag.services.caseService.patchCase.mockResolvedValue({ ...theCase });
 
       const casesClientLocal = createCasesClientMock();
-      casesClientLocal.configure.get = jest.fn().mockResolvedValue([
+      casesClientLocal.configure.get = vi.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
           customFields: [

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useLoadingState } from './use_loading_state';
 import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
@@ -15,28 +18,31 @@ import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-pl
 import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
-jest.mock('./use_date_picker');
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_reload_request_time');
+vi.mock('./use_date_picker');
+vi.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_reload_request_time');
 
-jest.mock('@kbn/data-plugin/public', () => ({
-  ...jest.requireActual('@kbn/data-plugin/public'),
-  waitUntilNextSessionCompletes$: jest.fn(),
-}));
+vi.mock('@kbn/data-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/data-plugin/public')),
+      waitUntilNextSessionCompletes$: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useDatePickerContextMock = useDatePickerContext as jest.MockedFunction<
+const useDatePickerContextMock = useDatePickerContext as MockedFunction<
   typeof useDatePickerContext
 >;
 
-const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
+const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
 
-const waitUntilNextSessionCompletesMock$ = waitUntilNextSessionCompletes$ as jest.MockedFunction<
+const waitUntilNextSessionCompletesMock$ = waitUntilNextSessionCompletes$ as MockedFunction<
   typeof waitUntilNextSessionCompletes$
 >;
 
-const useRequestTimeContextMock = useReloadRequestTimeContext as jest.MockedFunction<
+const useRequestTimeContextMock = useReloadRequestTimeContext as MockedFunction<
   typeof useReloadRequestTimeContext
 >;
 
@@ -50,7 +56,7 @@ describe('useLoadingState', () => {
 
   const sessionState$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
 
-  const updateReloadRequestTimeMock = jest.fn();
+  const updateReloadRequestTimeMock = vi.fn();
 
   const mockRequestTimeContext = () => {
     useRequestTimeContextMock.mockReturnValue({
@@ -87,7 +93,7 @@ describe('useLoadingState', () => {
 
   beforeEach(() => {
     subscription = new Subscription();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     // @ts-expect-error upgrade typescript v5.9.3
     waitUntilNextSessionCompletesMock$.mockReturnValue(of(SearchSessionState.None));
     mockRequestTimeContext();
@@ -96,9 +102,9 @@ describe('useLoadingState', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
     subscription.unsubscribe();
   });
 
@@ -120,7 +126,7 @@ describe('useLoadingState', () => {
       result.current.requestState$.next('running');
       result.current.requestState$.next('running');
       autoRefreshTick$.next(null); // auto-refresh ticks
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     await waitFor(() => expect(receivedValue).toBe(true));
@@ -145,7 +151,7 @@ describe('useLoadingState', () => {
       result.current.requestState$.next('running');
       result.current.requestState$.next('done');
       autoRefreshTick$.next(null); // auto-refresh ticks
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     await waitFor(() => expect(receivedValue).toBe(false));
@@ -162,7 +168,7 @@ describe('useLoadingState', () => {
 
     act(() => {
       autoRefreshTick$.next(null);
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     // only the mount call must  happen
@@ -180,7 +186,7 @@ describe('useLoadingState', () => {
 
     act(() => {
       autoRefreshTick$.next(null);
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     await waitFor(() => expect(updateReloadRequestTimeMock).toHaveBeenCalledTimes(2));

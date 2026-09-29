@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import {
   getCompletionItemProvider,
@@ -23,39 +26,48 @@ import { isDeprecatedStepType } from '../../../../../common/schema';
 const emptyRegistry = createMockWorkflowContextRegistry();
 
 // Mock dependencies
-jest.mock('./suggestions/get_suggestions', () => ({
-  getSuggestions: jest.fn(() => []),
-  isInsideLoopBody: jest.fn(() => false),
-}));
+vi.mock('./suggestions/get_suggestions', () => {
+      const mocked = {
+      getSuggestions: vi.fn(() => []),
+      isInsideLoopBody: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./context/build_autocomplete_context', () => ({
-  buildAutocompleteContext: jest.fn(() => ({
-    path: ['triggers', 0, 'type'],
-    linePrefix: '  - type:',
-    lineSuffix: '',
-    isInEsqlQueryField: false,
-  })),
-}));
+vi.mock('./context/build_autocomplete_context', () => {
+      const mocked = {
+      buildAutocompleteContext: vi.fn(() => ({
+        path: ['triggers', 0, 'type'],
+        linePrefix: '  - type:',
+        lineSuffix: '',
+        isInEsqlQueryField: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/schema', () => ({
-  isDeprecatedStepType: jest.fn(() => false),
-}));
+vi.mock('../../../../../common/schema', () => {
+      const mocked = {
+      isDeprecatedStepType: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getCompletionItemProvider', () => {
   let mockModel: monaco.editor.ITextModel;
   let mockPosition: monaco.Position;
   let mockCompletionContext: monaco.languages.CompletionContext;
-  let getState: jest.Mock;
+  let getState: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clearAllYamlProviders();
     interceptMonacoYamlProvider();
 
     mockModel = {
       uri: { toString: () => 'file:///test.yaml' },
-      getValueInRange: jest.fn(),
-      getLineContent: jest.fn(),
+      getValueInRange: vi.fn(),
+      getLineContent: vi.fn(),
     } as any;
 
     mockPosition = {
@@ -67,8 +79,8 @@ describe('getCompletionItemProvider', () => {
       triggerKind: monaco.languages.CompletionTriggerKind.Invoke,
     } as monaco.languages.CompletionContext;
 
-    getState = jest.fn(() => ({} as any));
-    (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
+    getState = vi.fn(() => ({} as any));
+    (isDeprecatedStepType as Mock).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -126,7 +138,7 @@ describe('getCompletionItemProvider', () => {
       getSuggestions.mockReturnValueOnce([]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             {
               label: '#/kibana/definitions/alertingV2NotificationGroup',
@@ -180,7 +192,7 @@ describe('getCompletionItemProvider', () => {
       ]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             {
               label: 'scheduled',
@@ -219,7 +231,7 @@ describe('getCompletionItemProvider', () => {
       ]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             {
               label: 'kibana.createCaseDefaultSpace',
@@ -236,7 +248,7 @@ describe('getCompletionItemProvider', () => {
       };
 
       const deprecatedStepTypes = new Set(['kibana.createCase', 'kibana.createCaseDefaultSpace']);
-      (isDeprecatedStepType as jest.Mock).mockImplementation((stepType: string) =>
+      (isDeprecatedStepType as Mock).mockImplementation((stepType: string) =>
         deprecatedStepTypes.has(stepType)
       );
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
@@ -267,7 +279,7 @@ describe('getCompletionItemProvider', () => {
       ]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             {
               label: 'alerting.episodeAcked',
@@ -303,7 +315,7 @@ describe('getCompletionItemProvider', () => {
       getSuggestions.mockReturnValueOnce([]);
 
       const yamlProviderPlain: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             {
               label: 'alert',
@@ -315,7 +327,7 @@ describe('getCompletionItemProvider', () => {
       };
 
       const yamlProviderSnippet: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             {
               label: 'alert',
@@ -358,7 +370,7 @@ describe('getCompletionItemProvider', () => {
       ]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             {
               label: 'alert',
@@ -398,7 +410,7 @@ describe('getCompletionItemProvider', () => {
       ]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             {
               label: 'alert',
@@ -438,14 +450,14 @@ describe('getCompletionItemProvider', () => {
       ]);
 
       const provider1: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [{ label: 'provider1-suggestion', insertText: 'provider1' }],
           incomplete: false,
         }),
       };
 
       const provider2: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [{ label: 'provider2-suggestion', insertText: 'provider2' }],
           incomplete: false,
         }),
@@ -478,14 +490,14 @@ describe('getCompletionItemProvider', () => {
       getSuggestions.mockReturnValueOnce([]);
 
       const provider1: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [],
           incomplete: false,
         }),
       };
 
       const provider2: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [],
           incomplete: true, // This should make the result incomplete
         }),
@@ -511,11 +523,11 @@ describe('getCompletionItemProvider', () => {
       getSuggestions.mockReturnValueOnce([]);
 
       const provider1: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockRejectedValue(new Error('Provider 1 failed')),
+        provideCompletionItems: vi.fn().mockRejectedValue(new Error('Provider 1 failed')),
       };
 
       const provider2: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [{ label: 'provider2-suggestion', insertText: 'provider2' }],
           incomplete: false,
         }),
@@ -581,7 +593,7 @@ describe('getCompletionItemProvider', () => {
       getSuggestions.mockReturnValueOnce([]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [
             { label: 'consts', insertText: 'consts' },
             { label: 'description', insertText: 'description' },
@@ -625,7 +637,7 @@ describe('getCompletionItemProvider', () => {
       getSuggestions.mockReturnValueOnce([]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue({
+        provideCompletionItems: vi.fn().mockResolvedValue({
           suggestions: [{ label: 'should-not-appear', insertText: 'nope' }],
           incomplete: false,
         }),
@@ -651,11 +663,11 @@ describe('getCompletionItemProvider', () => {
       getSuggestions.mockReturnValueOnce([]);
 
       const provider1: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue(null),
+        provideCompletionItems: vi.fn().mockResolvedValue(null),
       };
 
       const provider2: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn().mockResolvedValue(undefined),
+        provideCompletionItems: vi.fn().mockResolvedValue(undefined),
       };
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);

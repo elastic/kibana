@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -32,16 +35,16 @@ import type {
 
 // Stub out the Kibana platform wiring; tests override `useOpenContentEditor`
 // per-case to observe the `open` path end-to-end.
-jest.mock('@kbn/content-management-content-editor', () => {
-  const ReactModule = jest.requireActual('react') as typeof React;
+vi.mock('@kbn/content-management-content-editor', () => {
+  const ReactModule = require('react') as typeof React;
   return {
     ContentEditorKibanaProvider: ({ children }: { children: React.ReactNode }) =>
       ReactModule.createElement(ReactModule.Fragment, null, children),
-    useOpenContentEditor: jest.fn(() => jest.fn()),
+    useOpenContentEditor: vi.fn(() => vi.fn()),
   };
 });
 
-const mockUseOpenContentEditor = useOpenContentEditor as jest.Mock;
+const mockUseOpenContentEditor = useOpenContentEditor as Mock;
 
 describe('ContentListClientProvider', () => {
   const createMockItem = (id: string): UserContentCommonSchema => ({
@@ -57,14 +60,14 @@ describe('ContentListClientProvider', () => {
 
   const createMockFindItems = (
     items: UserContentCommonSchema[] = []
-  ): jest.Mock<ReturnType<TableListViewFindItemsFn>> => {
-    return jest.fn().mockResolvedValue({ hits: items, total: items.length });
+  ): Mock<ReturnType<TableListViewFindItemsFn>> => {
+    return vi.fn().mockResolvedValue({ hits: items, total: items.length });
   };
 
   // Only `uiSettings.get` is read; the Content Editor surface goes through the mocked provider.
   const createMockCore = (pageSize = 20): ContentListKibanaCore =>
     ({
-      uiSettings: { get: jest.fn(() => pageSize) },
+      uiSettings: { get: vi.fn(() => pageSize) },
     } as unknown as ContentListKibanaCore);
 
   const createMockServices = (): ContentListClientServices => ({});
@@ -114,7 +117,7 @@ describe('ContentListClientProvider', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('context provision', () => {
@@ -376,7 +379,7 @@ describe('ContentListClientProvider', () => {
           findItems: createMockFindItems([janeItem, maxItem]),
           services: {
             userProfiles: {
-              bulkResolve: jest.fn().mockResolvedValue([]),
+              bulkResolve: vi.fn().mockResolvedValue([]),
             },
           },
         }),
@@ -482,13 +485,13 @@ describe('ContentListClientProvider', () => {
 
   describe('starred support gating', () => {
     const createMockFavoritesClient = (): FavoritesClientPublic => ({
-      getFavorites: jest.fn().mockResolvedValue({ favoriteIds: [], favoriteMetadata: {} }),
-      addFavorite: jest.fn(),
-      removeFavorite: jest.fn(),
-      isAvailable: jest.fn().mockResolvedValue(true),
-      getFavoriteType: jest.fn().mockReturnValue('dashboard'),
-      reportAddFavoriteClick: jest.fn(),
-      reportRemoveFavoriteClick: jest.fn(),
+      getFavorites: vi.fn().mockResolvedValue({ favoriteIds: [], favoriteMetadata: {} }),
+      addFavorite: vi.fn(),
+      removeFavorite: vi.fn(),
+      isAvailable: vi.fn().mockResolvedValue(true),
+      getFavoriteType: vi.fn().mockReturnValue('dashboard'),
+      reportAddFavoriteClick: vi.fn(),
+      reportRemoveFavoriteClick: vi.fn(),
     });
 
     it('does not crash when favorites service is provided but starred feature is disabled', () => {
@@ -541,7 +544,7 @@ describe('ContentListClientProvider', () => {
   describe('content editor wiring', () => {
     /** Returns the spy `useOpenContentEditor` will hand back on the next render. */
     const stubOpenContentEditor = () => {
-      const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+      const openContentEditor = vi.fn<() => void, [OpenContentEditorParams]>(() => vi.fn());
       mockUseOpenContentEditor.mockReturnValue(openContentEditor);
       return openContentEditor;
     };
@@ -562,7 +565,7 @@ describe('ContentListClientProvider', () => {
 
     const captureFlyoutOnSave = (
       open: NonNullable<ReturnType<typeof captureOpen>['open']>,
-      openContentEditor: jest.Mock<() => void, [OpenContentEditorParams]>
+      openContentEditor: Mock<() => void, [OpenContentEditorParams]>
     ) => {
       act(() => {
         open({ id: '1', title: 'Item 1' });
@@ -598,7 +601,7 @@ describe('ContentListClientProvider', () => {
       // Regression: the old path injected onItemAction into item.actions.inspect.
       stubOpenContentEditor();
 
-      const archiveOnItemAction = jest.fn();
+      const archiveOnItemAction = vi.fn();
       const { result } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper({
           features: { contentEditor: { isReadonly: true } },
@@ -617,7 +620,7 @@ describe('ContentListClientProvider', () => {
     // on save, so the post-save refetch returned stale rows.
     it('clears the strategy cache before the React Query invalidation runs', async () => {
       const findItems = createMockFindItems([createMockItem('1')]);
-      const consumerOnSave = jest.fn(async () => {});
+      const consumerOnSave = vi.fn(async () => {});
       const openContentEditor = stubOpenContentEditor();
 
       const { open, dataSource } = captureOpen({

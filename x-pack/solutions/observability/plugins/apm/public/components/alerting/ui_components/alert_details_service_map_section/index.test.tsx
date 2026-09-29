@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -28,27 +30,39 @@ import { AlertDetailsServiceMapSection } from '.';
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../../../app/service_map/ebt_constants';
 
-const mockUseApmEmbeddableDeps = jest.fn();
+const mockUseApmEmbeddableDeps = vi.fn();
 
-jest.mock('../../context/apm_embeddable_deps_context', () => ({
-  useApmEmbeddableDeps: () => mockUseApmEmbeddableDeps(),
-}));
+vi.mock('../../context/apm_embeddable_deps_context', () => {
+      const mocked = {
+      useApmEmbeddableDeps: () => mockUseApmEmbeddableDeps(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../embeddable/embeddable_context', () => ({
-  ApmEmbeddableContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../../embeddable/embeddable_context', () => {
+      const mocked = {
+      ApmEmbeddableContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockServiceMapEmbeddable = jest.fn((_props: unknown) => (
+const mockServiceMapEmbeddable = vi.fn((_props: unknown) => (
   <div data-test-subj="mockServiceMapEmbeddable" />
 ));
 
-jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
-  ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
-}));
+vi.mock('../../../../embeddable/service_map/service_map_embeddable', () => {
+      const mocked = {
+      ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../embeddable/service_map/get_service_map_url', () => ({
-  getServiceMapUrl: jest.fn(() => '/app/apm/service-map'),
-}));
+vi.mock('../../../../embeddable/service_map/get_service_map_url', () => {
+      const mocked = {
+      getServiceMapUrl: vi.fn(() => '/app/apm/service-map'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function makeAlert(
   fields: Partial<AlertDetailsAppSectionProps['alert']['fields']> = {}
@@ -135,7 +149,7 @@ function getEmbeddableFlyoutOptions() {
 
 describe('AlertDetailsServiceMapSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the section when platinum license and service map are available', () => {

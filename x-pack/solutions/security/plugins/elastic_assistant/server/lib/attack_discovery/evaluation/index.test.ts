@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
@@ -18,42 +20,51 @@ import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { mockExperimentConnector } from './__mocks__/mock_experiment_connector';
 import { getLlmType } from '../../../routes/utils';
 
-jest.mock('@kbn/langchain/server', () => ({
-  ...jest.requireActual('@kbn/langchain/server'),
+vi.mock('@kbn/langchain/server', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/langchain/server')),
 
-  ActionsClientLlm: jest.fn(),
-}));
+      ActionsClientLlm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('langsmith/evaluation', () => ({
-  evaluate: jest.fn(async (predict: Function) =>
-    predict({
-      overrides: {
-        errors: ['test-error'],
-      },
-    })
-  ),
-}));
+vi.mock('langsmith/evaluation', () => {
+      const mocked = {
+      evaluate: vi.fn(async (predict: Function) =>
+        predict({
+          overrides: {
+            errors: ['test-error'],
+          },
+        })
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/get_custom_evaluator', () => ({
-  getCustomEvaluator: jest.fn(),
-}));
+vi.mock('./helpers/get_custom_evaluator', () => {
+      const mocked = {
+      getCustomEvaluator: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/get_evaluator_llm', () => {
-  const mockLlm = jest.fn() as unknown as ActionsClientLlm;
+vi.mock('./helpers/get_evaluator_llm', () => {
+  const mockLlm = vi.fn() as unknown as ActionsClientLlm;
 
   return {
-    getEvaluatorLlm: jest.fn().mockResolvedValue(mockLlm),
+    getEvaluatorLlm: vi.fn().mockResolvedValue(mockLlm),
   };
 });
 const actionsClient = {
-  get: jest.fn(),
+  get: vi.fn(),
 } as unknown as ActionsClient;
 const alertsIndexPattern = 'test-alerts-index-pattern';
 const connectorTimeout = 1000;
 const datasetName = 'test-dataset';
 const evaluationId = 'test-evaluation-id';
 const evaluatorConnectorId = 'test-evaluator-connector-id';
-const getInferenceConnectorById = jest.fn();
+const getInferenceConnectorById = vi.fn();
 const inferenceClient = {} as InferenceClient;
 const langSmithApiKey = 'test-api-key';
 const langSmithProject = 'test-lang-smith-project';
@@ -105,7 +116,7 @@ const graphs: Array<{
   };
 
   const graph = {
-    invoke: jest.fn().mockResolvedValue({}),
+    invoke: vi.fn().mockResolvedValue({}),
   } as unknown as DefaultAttackDiscoveryGraph;
 
   return {
@@ -119,13 +130,13 @@ const graphs: Array<{
 
 const attackDiscoveryGraphs: AttackDiscoveryGraphMetadata[] = [
   {
-    getDefaultAttackDiscoveryGraph: jest.fn().mockReturnValue(graphs[0].graph),
+    getDefaultAttackDiscoveryGraph: vi.fn().mockReturnValue(graphs[0].graph),
     graphType: 'attack-discovery',
   },
 ];
 
 describe('evaluateAttackDiscovery', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('evaluates the attack discovery graphs', async () => {
     await evaluateAttackDiscovery({

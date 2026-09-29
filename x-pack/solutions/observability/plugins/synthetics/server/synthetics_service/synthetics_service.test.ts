@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { CoreStart } from '@kbn/core/server';
@@ -20,14 +23,14 @@ import * as apiKeys from './get_api_key';
 import type { SyntheticsServerSetup } from '../types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
-jest.mock('axios', () => jest.fn());
+vi.mock('axios', () => vi.fn());
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
 
 const mockLicense = () => {
-  mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+  mockCoreStart.elasticsearch.client.asInternalUser.license.get = vi.fn().mockResolvedValue({
     license: {
       status: 'active',
       uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
@@ -68,7 +71,7 @@ const getFakePayload = (locations: HeartbeatConfig['locations']) => {
 
 describe('SyntheticsService', () => {
   const mockEsClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   };
 
   const logger = loggerMock.create();
@@ -77,7 +80,7 @@ describe('SyntheticsService', () => {
     logger,
     syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: {
-      bulkUpdate: jest.fn(),
+      bulkUpdate: vi.fn(),
     },
     basePath: {
       publicBaseUrl: 'https://localhost:5601',
@@ -121,7 +124,7 @@ describe('SyntheticsService', () => {
     });
     serverMock.config = mockConfig;
     if (serverMock.savedObjectsClient) {
-      serverMock.savedObjectsClient.find = jest.fn().mockResolvedValue({
+      serverMock.savedObjectsClient.find = vi.fn().mockResolvedValue({
         saved_objects: [
           getFakePayload([
             {
@@ -148,17 +151,17 @@ describe('SyntheticsService', () => {
     service.locations = locations;
     service.isAllowed = true;
 
-    jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
-    jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
+    vi.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+    vi.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
-    service.getMaintenanceWindows = jest.fn();
+    service.getMaintenanceWindows = vi.fn();
 
     return { service, locations };
   };
 
   beforeEach(() => {
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
-    jest.clearAllMocks();
+    (axios as MockedFunction<typeof axios>).mockReset();
+    vi.clearAllMocks();
   });
 
   it('setup properly', async () => {
@@ -229,7 +232,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       await service.addConfigs({ monitor: payload } as any, []);
 
@@ -243,20 +246,20 @@ describe('SyntheticsService', () => {
   });
 
   describe('apiKey errors', () => {
-    jest.spyOn(apiKeys, 'getAPIKeyForSyntheticsService').mockResolvedValue({
+    vi.spyOn(apiKeys, 'getAPIKeyForSyntheticsService').mockResolvedValue({
       isValid: false,
     });
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('does not call api and does not throw error when monitors.length === 0', async () => {
       const { service } = getMockedService();
-      jest.spyOn(service, 'getOutput').mockRestore();
+      vi.spyOn(service, 'getOutput').mockRestore();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       await service.pushConfigs(ALL_SPACES_ID);
 
@@ -269,7 +272,7 @@ describe('SyntheticsService', () => {
 
     it('throws error when api key is invalid and monitors.length > 0', async () => {
       const { service, locations } = getMockedService();
-      jest.spyOn(service, 'getOutput').mockRestore();
+      vi.spyOn(service, 'getOutput').mockRestore();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         monitors: [
@@ -279,7 +282,7 @@ describe('SyntheticsService', () => {
         ],
       });
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       await service.pushConfigs(ALL_SPACES_ID);
 
@@ -293,7 +296,7 @@ describe('SyntheticsService', () => {
     it('includes the isEdit flag on edit requests', async () => {
       const { service, locations } = getMockedService();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       const payload = getFakePayload([locations[0]]);
 
@@ -310,7 +313,7 @@ describe('SyntheticsService', () => {
     it('includes the license level flag on edit requests', async () => {
       const { service, locations } = getMockedService();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       const payload = getFakePayload([locations[0]]);
 
@@ -327,7 +330,7 @@ describe('SyntheticsService', () => {
     it('includes the license level flag on add config requests', async () => {
       const { service, locations } = getMockedService();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       const payload = getFakePayload([locations[0]]);
 
@@ -352,7 +355,7 @@ describe('SyntheticsService', () => {
         ],
       });
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       await service.pushConfigs(ALL_SPACES_ID);
 
@@ -375,7 +378,7 @@ describe('SyntheticsService', () => {
       async (isExpired, errorMessage) => {
         const { service, locations } = getMockedService();
 
-        mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest
+        mockCoreStart.elasticsearch.client.asInternalUser.license.get = vi
           .fn()
           .mockResolvedValue({
             license: isExpired
@@ -402,7 +405,7 @@ describe('SyntheticsService', () => {
           },
         });
 
-        (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+        (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
         await expect(service.pushConfigs(ALL_SPACES_ID)).rejects.toThrow(errorMessage);
       }
@@ -412,9 +415,9 @@ describe('SyntheticsService', () => {
   describe('getSyntheticsParams', () => {
     it('returns the params for all spaces', async () => {
       const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
+      vi.spyOn(service, 'getSyntheticsParams').mockRestore();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         params: [
@@ -436,7 +439,7 @@ describe('SyntheticsService', () => {
 
     it('returns the params for specific space', async () => {
       const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
+      vi.spyOn(service, 'getSyntheticsParams').mockRestore();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         params: [
@@ -461,7 +464,7 @@ describe('SyntheticsService', () => {
 
     it('returns the space limited params', async () => {
       const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
+      vi.spyOn(service, 'getSyntheticsParams').mockRestore();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         params: [
@@ -483,7 +486,7 @@ describe('SyntheticsService', () => {
 
     it('returns the params from mixed spaces', async () => {
       const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
+      vi.spyOn(service, 'getSyntheticsParams').mockRestore();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         params: [
@@ -538,17 +541,17 @@ describe('SyntheticsService', () => {
     });
     service.apiClient.locations = locations;
     service.locations = locations;
-    jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
-    jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
+    vi.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+    vi.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
-    service.getMaintenanceWindows = jest.fn();
+    service.getMaintenanceWindows = vi.fn();
 
     it('paginates the results', async () => {
       serverMock.config = mockConfig;
 
       mockLicense();
 
-      const syncSpy = jest.spyOn(service.apiClient, 'syncMonitors');
+      const syncSpy = vi.spyOn(service.apiClient, 'syncMonitors');
 
       let num = -1;
       const data = times(10000).map((n) => {
@@ -568,7 +571,7 @@ describe('SyntheticsService', () => {
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({ monitors: data });
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      (axios as MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       await service.pushConfigs(ALL_SPACES_ID);
 
@@ -610,7 +613,7 @@ describe('SyntheticsService', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       logger.error.mockClear();
       logger.debug.mockClear();
     });

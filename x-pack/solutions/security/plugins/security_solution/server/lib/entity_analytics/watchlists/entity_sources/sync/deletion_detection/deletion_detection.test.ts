@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -15,28 +18,28 @@ import type { WatchlistDataSources } from '../../../../../../../common/api/entit
 import type { WatchlistsByEuid } from '../../../entities/service';
 import { createDeletionDetectionService } from './deletion_detection';
 
-const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
+const createMockCrudClient = (): Mocked<CRUDClient> =>
   ({
-    searchLatestEntities: jest
+    searchLatestEntities: vi
       .fn()
       .mockResolvedValue({ records: [], total: 0, inspect: { dsl: [], response: [] } }),
-    bulkUpdateEntity: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<CRUDClient>);
+    bulkUpdateEntity: vi.fn().mockResolvedValue([]),
+  } as unknown as Mocked<CRUDClient>);
 
 const emptyWatchlistsByEuid: WatchlistsByEuid = new Map();
 
-jest.mock('../../infra/entity_source_client');
-jest.mock('../../bulk/soft_delete');
+vi.mock('../../infra/entity_source_client');
+vi.mock('../../bulk/soft_delete');
 
 const { WatchlistEntitySourceClient, mockGetLastFullSyncMarker, mockUpdateLastFullSyncMarker } =
-  jest.requireMock('../../infra/entity_source_client') as {
-    WatchlistEntitySourceClient: jest.Mock;
-    mockGetLastFullSyncMarker: jest.Mock;
-    mockUpdateLastFullSyncMarker: jest.Mock;
+  (await vi.importMock('../../infra/entity_source_client')) as {
+    WatchlistEntitySourceClient: Mock;
+    mockGetLastFullSyncMarker: Mock;
+    mockUpdateLastFullSyncMarker: Mock;
   };
 
-const { applyBulkRemoveSource } = jest.requireMock('../../bulk/soft_delete') as {
-  applyBulkRemoveSource: jest.Mock;
+const { applyBulkRemoveSource } = (await vi.importMock('../../bulk/soft_delete')) as {
+  applyBulkRemoveSource: Mock;
 };
 
 describe('DeletionDetectionService', () => {
@@ -85,7 +88,7 @@ describe('DeletionDetectionService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: no stale entities found
     esClient.search.mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },

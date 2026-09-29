@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TourQueueStateManager } from './tour_queue_state';
 import type { TourId } from '..';
 
@@ -14,11 +17,11 @@ const TOUR_1 = 'tour1' as TourId;
 const TOUR_2 = 'tour2' as TourId;
 
 // Mock getOrder to return mocked TOUR_REGISTRY orders
-jest.mock('..', () => {
-  const actual = jest.requireActual('..');
+vi.mock('..', async () => {
+  const actual = (await vi.importActual('..'));
   return {
     ...actual,
-    getOrder: jest.fn((tourId: TourId) => {
+    getOrder: vi.fn((tourId: TourId) => {
       const TOUR_REGISTRY: Record<string, number> = {
         tour1: 1,
         tour2: 2,
@@ -30,11 +33,11 @@ jest.mock('..', () => {
 
 describe('TourQueueStateManager', () => {
   let tourQueue: TourQueueStateManager;
-  let subscriber: jest.Mock;
+  let subscriber: Mock;
 
   beforeEach(() => {
     tourQueue = new TourQueueStateManager();
-    subscriber = jest.fn();
+    subscriber = vi.fn();
   });
 
   describe('register', () => {

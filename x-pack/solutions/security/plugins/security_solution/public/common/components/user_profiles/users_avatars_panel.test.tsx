@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -27,7 +29,7 @@ const renderUsersAvatarsPanel = (userProfiles = [mockUserProfiles[0]], maxVisibl
 
 describe('<UsersAvatarsPanel />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render component', () => {

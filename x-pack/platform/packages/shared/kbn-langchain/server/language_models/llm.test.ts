@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { InferenceClient } from '@kbn/inference-common';
@@ -23,15 +26,15 @@ const mockLogger = loggerMock.create();
 const prompt = 'Do you know my name?';
 
 const getDebugMessages = (): string[] =>
-  (mockLogger.debug as jest.Mock).mock.calls.map(([arg]) =>
+  (mockLogger.debug as Mock).mock.calls.map(([arg]) =>
     typeof arg === 'function' ? (arg as () => string)() : String(arg)
   );
 
 describe('ActionsClientLlm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     actionsClient.execute.mockImplementation(
-      jest.fn().mockImplementation(() => ({
+      vi.fn().mockImplementation(() => ({
         data: mockActionResponse,
         status: 'ok',
       }))
@@ -88,7 +91,7 @@ describe('ActionsClientLlm', () => {
     });
     it('executes with the expected arguments when llmType is inference', async () => {
       actionsClient.execute.mockImplementation(
-        jest.fn().mockImplementation(() => ({
+        vi.fn().mockImplementation(() => ({
           data: {
             choices: [
               {
@@ -151,7 +154,7 @@ describe('ActionsClientLlm', () => {
 
     it('logs the response content at debug when llmType is inference', async () => {
       actionsClient.execute.mockImplementation(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           data: {
             choices: [
               {
@@ -178,7 +181,7 @@ describe('ActionsClientLlm', () => {
 
     it('logs the serviceMessage at debug when the action result status is error', async () => {
       actionsClient.execute.mockImplementation(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           message: 'action-result-message',
           serviceMessage: 'action-result-service-message',
           status: 'error',
@@ -218,7 +221,7 @@ describe('ActionsClientLlm', () => {
       const invalidContent = { message: 1234 };
 
       actionsClient.execute.mockImplementation(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           data: invalidContent,
           status: 'ok',
         })
@@ -237,11 +240,11 @@ describe('ActionsClientLlm', () => {
 
     describe('isInferenceEndpoint', () => {
       const mockInferenceClient = {
-        chatComplete: jest.fn(),
+        chatComplete: vi.fn(),
       } as unknown as InferenceClient;
 
       beforeEach(() => {
-        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+        (mockInferenceClient.chatComplete as Mock).mockResolvedValue({
           content: 'Hello, world',
         });
       });
@@ -301,7 +304,7 @@ describe('ActionsClientLlm', () => {
       });
 
       it('logs the error at debug when inferenceClient.chatComplete rejects', async () => {
-        (mockInferenceClient.chatComplete as jest.Mock).mockRejectedValue(
+        (mockInferenceClient.chatComplete as Mock).mockRejectedValue(
           new Error('quota exceeded')
         );
         const actionsClientLlm = new ActionsClientLlm({
@@ -331,7 +334,7 @@ describe('ActionsClientLlm', () => {
       });
 
       it('propagates errors from inferenceClient.chatComplete', async () => {
-        (mockInferenceClient.chatComplete as jest.Mock).mockRejectedValue(
+        (mockInferenceClient.chatComplete as Mock).mockRejectedValue(
           new Error('quota exceeded')
         );
 

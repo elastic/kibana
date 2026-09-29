@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-jest.mock('./access_agreement');
-jest.mock('./capture_url');
-jest.mock('./logged_out');
-jest.mock('./login');
-jest.mock('./logout');
-jest.mock('./overwritten_session');
-jest.mock('./reset_session');
-jest.mock('./unauthenticated');
+import { vi } from 'vitest';
+
+vi.mock('./access_agreement');
+vi.mock('./capture_url');
+vi.mock('./logged_out');
+vi.mock('./login');
+vi.mock('./logout');
+vi.mock('./overwritten_session');
+vi.mock('./reset_session');
+vi.mock('./unauthenticated');
 
 import { coreMock } from '@kbn/core/public/mocks';
 

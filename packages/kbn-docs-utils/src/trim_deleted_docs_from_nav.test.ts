@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Fsp from 'fs/promises';
 import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
 
 // Mock fs/promises
-jest.mock('fs/promises');
+vi.mock('fs/promises');
 
 // Mock getAllDocFileIds
-jest.mock('./mdx/get_all_doc_file_ids', () => ({
-  getAllDocFileIds: jest.fn(() => Promise.resolve(['doc1', 'doc2', 'doc3'])),
-}));
+vi.mock('./mdx/get_all_doc_file_ids', () => {
+      const mocked = {
+      getAllDocFileIds: vi.fn(() => Promise.resolve(['doc1', 'doc2', 'doc3'])),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const log = new ToolingLog({
   level: 'silent',
@@ -27,7 +33,7 @@ const log = new ToolingLog({
 
 describe('trimDeletedDocsFromNav', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('removes deleted doc IDs from nav', async () => {
@@ -49,14 +55,14 @@ describe('trimDeletedDocsFromNav', () => {
       ],
     };
 
-    (Fsp.readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockNav));
-    (Fsp.writeFile as jest.Mock).mockResolvedValue(undefined);
+    (Fsp.readFile as Mock).mockResolvedValue(JSON.stringify(mockNav));
+    (Fsp.writeFile as Mock).mockResolvedValue(undefined);
 
     await trimDeletedDocsFromNav(log, initialDocIds, outputDir);
 
     // Should have called writeFile to update nav
     expect(Fsp.writeFile).toHaveBeenCalled();
-    const writeCall = (Fsp.writeFile as jest.Mock).mock.calls[0];
+    const writeCall = (Fsp.writeFile as Mock).mock.calls[0];
     const updatedNav = JSON.parse(writeCall[1]);
 
     // doc4 and doc5 should be removed
@@ -78,7 +84,7 @@ describe('trimDeletedDocsFromNav', () => {
       ],
     };
 
-    (Fsp.readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockNav));
+    (Fsp.readFile as Mock).mockResolvedValue(JSON.stringify(mockNav));
 
     await trimDeletedDocsFromNav(log, initialDocIds, outputDir);
 
@@ -90,7 +96,7 @@ describe('trimDeletedDocsFromNav', () => {
     const initialDocIds = ['doc1'];
     const outputDir = Path.resolve(__dirname, 'test_output');
 
-    (Fsp.readFile as jest.Mock).mockRejectedValue(new Error('File not found'));
+    (Fsp.readFile as Mock).mockRejectedValue(new Error('File not found'));
 
     await expect(trimDeletedDocsFromNav(log, initialDocIds, outputDir)).rejects.toThrow(
       'unable to read dev-docs nav'
@@ -101,7 +107,7 @@ describe('trimDeletedDocsFromNav', () => {
     const initialDocIds = ['doc1'];
     const outputDir = Path.resolve(__dirname, 'test_output');
 
-    (Fsp.readFile as jest.Mock).mockResolvedValue('invalid json {');
+    (Fsp.readFile as Mock).mockResolvedValue('invalid json {');
 
     await expect(trimDeletedDocsFromNav(log, initialDocIds, outputDir)).rejects.toThrow(
       'unable to parse nav'
@@ -119,13 +125,13 @@ describe('trimDeletedDocsFromNav', () => {
       ],
     };
 
-    (Fsp.readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockNav) + '\n');
-    (Fsp.writeFile as jest.Mock).mockResolvedValue(undefined);
+    (Fsp.readFile as Mock).mockResolvedValue(JSON.stringify(mockNav) + '\n');
+    (Fsp.writeFile as Mock).mockResolvedValue(undefined);
 
     await trimDeletedDocsFromNav(log, initialDocIds, outputDir);
 
     expect(Fsp.writeFile).toHaveBeenCalled();
-    const writeCall = (Fsp.writeFile as jest.Mock).mock.calls[0];
+    const writeCall = (Fsp.writeFile as Mock).mock.calls[0];
     expect(writeCall[1].endsWith('\n')).toBe(true);
   });
 
@@ -150,13 +156,13 @@ describe('trimDeletedDocsFromNav', () => {
       ],
     };
 
-    (Fsp.readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockNav));
-    (Fsp.writeFile as jest.Mock).mockResolvedValue(undefined);
+    (Fsp.readFile as Mock).mockResolvedValue(JSON.stringify(mockNav));
+    (Fsp.writeFile as Mock).mockResolvedValue(undefined);
 
     await trimDeletedDocsFromNav(log, initialDocIds, outputDir);
 
     expect(Fsp.writeFile).toHaveBeenCalled();
-    const writeCall = (Fsp.writeFile as jest.Mock).mock.calls[0];
+    const writeCall = (Fsp.writeFile as Mock).mock.calls[0];
     const updatedNav = JSON.parse(writeCall[1]);
 
     // doc4 should be removed from nested structure

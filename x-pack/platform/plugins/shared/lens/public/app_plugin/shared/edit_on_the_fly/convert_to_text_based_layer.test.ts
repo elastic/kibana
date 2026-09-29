@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   FormBasedPrivateState,
   TextBasedPersistedState,
@@ -177,7 +179,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
     ),
   ];
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns undefined when layersToConvert is empty', () => {
     expect(

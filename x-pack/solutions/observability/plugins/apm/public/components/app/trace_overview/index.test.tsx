@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS, AppHeader as MockAppHeaderComponent } from '@kbn/app-header';
@@ -20,54 +23,63 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 // context and the Discover locator from `useApmPluginContext` to compute its href.
 // Both contexts are mocked here so we can exercise the composed tree without
 // spinning up the full APM providers.
-jest.mock('../../../context/apm_index_settings/use_apm_index_settings_context');
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context');
-jest.mock('../../../hooks/use_apm_params');
+vi.mock('../../../context/apm_index_settings/use_apm_index_settings_context');
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context');
+vi.mock('../../../hooks/use_apm_params');
 
 // The provider internally calls `useKibana` + `useFetcher` to load index
 // settings; we mock it as a pass-through and rely on the
 // `useApmIndexSettingsContext` mock above to drive the consumed values.
-jest.mock('../../../context/apm_index_settings/apm_index_settings_context', () => ({
-  ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../context/apm_index_settings/apm_index_settings_context', () => {
+      const mocked = {
+      ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Render ApmMainTemplate as a thin wrapper that passes `header` straight into a real AppHeader
 // (so we exercise menu-building without the template's own dependencies).
 // MockAppHeaderComponent is aliased to start with "Mock" so Jest's factory out-of-scope check permits it.
-jest.mock('../../routing/templates/apm_main_template', () => ({
-  ApmMainTemplate: ({
-    header,
-    searchBar,
-    children,
-  }: {
-    header?: ApmMainTemplateHeaderProps;
-    searchBar?: React.ReactNode;
-    children: React.ReactNode;
-  }) => (
-    <div data-test-subj="apmMainTemplateMock">
-      {header ? <MockAppHeaderComponent {...header} /> : null}
-      {searchBar}
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../routing/templates/apm_main_template', () => {
+      const mocked = {
+      ApmMainTemplate: ({
+        header,
+        searchBar,
+        children,
+      }: {
+        header?: ApmMainTemplateHeaderProps;
+        searchBar?: React.ReactNode;
+        children: React.ReactNode;
+      }) => (
+        <div data-test-subj="apmMainTemplateMock">
+          {header ? <MockAppHeaderComponent {...header} /> : null}
+          {searchBar}
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../breadcrumb', () => ({
-  Breadcrumb: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../breadcrumb', () => {
+      const mocked = {
+      Breadcrumb: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TRACES_INDEX = 'traces-apm-*';
 
-const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as jest.MockedFunction<
+const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as MockedFunction<
   typeof useApmIndexSettingsContext
 >;
-const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
   typeof useApmPluginContext
 >;
-const mockUseApmParams = useApmParams as jest.MockedFunction<typeof useApmParams>;
+const mockUseApmParams = useApmParams as MockedFunction<typeof useApmParams>;
 
-const mockGetRedirectUrl = jest.fn<string | undefined, [unknown]>();
-const mockLocatorGet = jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
+const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();
+const mockLocatorGet = vi.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
 
 async function renderTraceOverview() {
   const view = render(
@@ -108,7 +120,7 @@ describe('TraceOverview', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders AppHeader with title "Traces"', async () => {

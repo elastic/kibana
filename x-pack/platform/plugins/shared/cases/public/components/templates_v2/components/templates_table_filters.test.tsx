@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
@@ -27,11 +29,11 @@ describe('TemplatesTableFilters', () => {
     isDeleted: false,
   };
 
-  const onQueryParamsChange = jest.fn();
-  const onRefresh = jest.fn();
+  const onQueryParamsChange = vi.fn();
+  const onRefresh = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

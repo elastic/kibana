@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
@@ -14,14 +17,14 @@ import { appContextService } from '../..';
 
 import { compileTemplate, mergeCompiledTemplates } from './agent';
 
-jest.mock('../../app_context');
+vi.mock('../../app_context');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-let mockedLogger: jest.Mocked<Logger>;
+let mockedLogger: Mocked<Logger>;
 
 function getMockedMetaVariable() {
   return {

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createConversationCoherenceEvaluator } from '.';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-jest.mock('p-retry', () => {
-  return jest.fn(async (fn: () => Promise<any>, opts?: any) => {
+vi.mock('p-retry', () => {
+  return vi.fn(async (fn: () => Promise<any>, opts?: any) => {
     const retries = opts?.retries ?? 0;
     let lastError: any;
     for (let attempt = 1; attempt <= retries + 1; attempt++) {
@@ -29,10 +31,10 @@ jest.mock('p-retry', () => {
 
 function createMockLog(): ToolingLog {
   return {
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
   } as unknown as ToolingLog;
 }
 
@@ -47,12 +49,12 @@ function createMockInferenceClient(
   error?: Error
 ): BoundInferenceClient {
   const promptFn = error
-    ? jest.fn().mockRejectedValue(error)
-    : jest.fn().mockResolvedValue({
+    ? vi.fn().mockRejectedValue(error)
+    : vi.fn().mockResolvedValue({
         toolCalls: scores ? [{ function: { name: 'score_coherence', arguments: scores } }] : [],
       });
 
-  return { prompt: promptFn, bindTo: jest.fn() } as unknown as BoundInferenceClient;
+  return { prompt: promptFn, bindTo: vi.fn() } as unknown as BoundInferenceClient;
 }
 
 describe('createConversationCoherenceEvaluator', () => {
@@ -218,7 +220,7 @@ describe('createConversationCoherenceEvaluator', () => {
     };
 
     const inferenceClient = {
-      prompt: jest.fn().mockImplementation(() => {
+      prompt: vi.fn().mockImplementation(() => {
         callCount++;
         if (callCount < 3) {
           return Promise.reject(new Error('Transient LLM error'));
@@ -227,7 +229,7 @@ describe('createConversationCoherenceEvaluator', () => {
           toolCalls: [{ function: { name: 'score_coherence', arguments: goodScores } }],
         });
       }),
-      bindTo: jest.fn(),
+      bindTo: vi.fn(),
     } as unknown as BoundInferenceClient;
 
     const log = createMockLog();
@@ -247,8 +249,8 @@ describe('createConversationCoherenceEvaluator', () => {
 
   it('logs error on final retry failure', async () => {
     const inferenceClient = {
-      prompt: jest.fn().mockRejectedValue(new Error('Persistent failure')),
-      bindTo: jest.fn(),
+      prompt: vi.fn().mockRejectedValue(new Error('Persistent failure')),
+      bindTo: vi.fn(),
     } as unknown as BoundInferenceClient;
 
     const log = createMockLog();

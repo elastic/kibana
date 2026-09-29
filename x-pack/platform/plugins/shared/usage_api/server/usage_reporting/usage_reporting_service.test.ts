@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import https from 'https';
 import type { Response } from 'node-fetch';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -12,20 +15,23 @@ import { UsageReportingService, type UsageReportingConfig } from './usage_report
 import type { UsageRecord } from './types';
 import { METERING_RETRY_ATTEMPTS, METERING_RETRY_BASE_DELAY_MS } from './constants';
 
-jest.mock('node-fetch');
-jest.mock('@kbn/server-http-tools', () => ({
-  SslConfig: jest.fn().mockImplementation(() => ({
-    rejectUnauthorized: true,
-    certificate: 'mock-cert-content',
-    key: 'mock-key-content',
-    certificateAuthorities: ['mock-ca-content'],
-  })),
-  sslSchema: {
-    validate: jest.fn().mockReturnValue({}),
-  },
-}));
+vi.mock('node-fetch');
+vi.mock('@kbn/server-http-tools', () => {
+      const mocked = {
+      SslConfig: vi.fn().mockImplementation(() => ({
+        rejectUnauthorized: true,
+        certificate: 'mock-cert-content',
+        key: 'mock-key-content',
+        certificateAuthorities: ['mock-ca-content'],
+      })),
+      sslSchema: {
+        validate: vi.fn().mockReturnValue({}),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const fetchMock = jest.requireMock('node-fetch').default as jest.Mock;
+const fetchMock = (await vi.importMock('node-fetch')).default as Mock;
 
 const createRecord = (id = 'rec-1'): UsageRecord => ({
   id,
@@ -52,7 +58,7 @@ const errorResponse = (status = 500): Partial<Response> => ({ ok: false, status 
 
 const advanceThroughRetries = async () => {
   for (let i = 0; i < METERING_RETRY_ATTEMPTS - 1; i++) {
-    await jest.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS * Math.pow(2, i));
+    await vi.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS * Math.pow(2, i));
   }
 };
 
@@ -60,13 +66,13 @@ describe('UsageReportingService', () => {
   let logger: MockedLogger;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     logger = loggerMock.create();
     fetchMock.mockReset();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const createService = (configOverrides: Partial<UsageReportingConfig> = {}) =>
@@ -95,7 +101,7 @@ describe('UsageReportingService', () => {
       const service = createService();
       const promise = service.reportUsage([createRecord()]);
 
-      await jest.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS);
+      await vi.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS);
       await promise;
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -111,7 +117,7 @@ describe('UsageReportingService', () => {
       const service = createService();
       const promise = service.reportUsage([createRecord()]);
 
-      await jest.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS);
+      await vi.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS);
       await promise;
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -168,10 +174,10 @@ describe('UsageReportingService', () => {
 
       expect(fetchMock).toHaveBeenCalledTimes(1);
 
-      await jest.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS);
+      await vi.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS);
       expect(fetchMock).toHaveBeenCalledTimes(2);
 
-      await jest.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS * 2);
+      await vi.advanceTimersByTimeAsync(METERING_RETRY_BASE_DELAY_MS * 2);
       await promise;
 
       expect(fetchMock).toHaveBeenCalledTimes(3);

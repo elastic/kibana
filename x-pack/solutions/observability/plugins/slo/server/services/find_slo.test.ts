@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { Paginated } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
@@ -16,8 +18,8 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryResult, SummarySearchClient } from './summary_search_client/types';
 
 describe('FindSLO', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
-  let mockSummarySearchClient: jest.Mocked<SummarySearchClient>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
+  let mockSummarySearchClient: Mocked<SummarySearchClient>;
   let findSLO: FindSLO;
 
   beforeEach(() => {

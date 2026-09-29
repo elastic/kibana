@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { omit } from 'lodash/fp';
 
 import {
@@ -390,7 +392,7 @@ describe('helpers', () => {
     ];
 
     test('it includes the expected content in the `fetch` request', async () => {
-      const mockFetch = jest.fn().mockResolvedValue(mockUnallowedValuesResponse);
+      const mockFetch = vi.fn().mockResolvedValue(mockUnallowedValuesResponse);
       const abortController = new AbortController();
 
       await fetchUnallowedValues({
@@ -413,7 +415,7 @@ describe('helpers', () => {
     });
 
     test('it returns the expected unallowed values', async () => {
-      const mockFetch = jest.fn().mockResolvedValue(mockUnallowedValuesResponse);
+      const mockFetch = vi.fn().mockResolvedValue(mockUnallowedValuesResponse);
 
       const result = await fetchUnallowedValues({
         abortController: new AbortController(),
@@ -479,7 +481,7 @@ describe('helpers', () => {
 
     test('it throws the expected error when fetch fails', async () => {
       const error = 'simulated error';
-      const mockFetch = jest.fn().mockImplementation(() => {
+      const mockFetch = vi.fn().mockImplementation(() => {
         throw new Error(error);
       });
 

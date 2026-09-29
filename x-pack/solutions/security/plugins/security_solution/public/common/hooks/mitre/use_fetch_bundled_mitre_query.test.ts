@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,43 +14,46 @@ import { useFetchLegacyMitreQuery } from './use_fetch_bundled_mitre_query';
 
 // Minimal stubs that satisfy MitreTactic / MitreTechnique / MitreSubTechnique shapes.
 // The dynamic import is resolved synchronously by Jest so no async delay occurs.
-jest.mock('../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({
-  tactics: [
-    {
-      id: 'TA0001',
-      name: 'Initial Access',
-      reference: 'https://attack.mitre.org/tactics/TA0001/',
-      value: 'initialAccess',
-      label: 'Initial Access',
-    },
-  ],
-  techniques: [
-    {
-      id: 'T1190',
-      name: 'Exploit Public-Facing Application',
-      reference: 'https://attack.mitre.org/techniques/T1190/',
-      value: 'exploitPublicFacingApplication',
-      label: 'Exploit Public-Facing Application',
-      tactics: ['initial-access'],
-    },
-  ],
-  subtechniques: [
-    {
-      id: 'T1078.001',
-      name: 'Default Accounts',
-      reference: 'https://attack.mitre.org/techniques/T1078/001/',
-      value: 'defaultAccounts',
-      label: 'Default Accounts',
-      tactics: ['initial-access'],
-      techniqueId: 'T1078',
-    },
-  ],
-}));
+vi.mock('../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => {
+      const mocked = {
+      tactics: [
+        {
+          id: 'TA0001',
+          name: 'Initial Access',
+          reference: 'https://attack.mitre.org/tactics/TA0001/',
+          value: 'initialAccess',
+          label: 'Initial Access',
+        },
+      ],
+      techniques: [
+        {
+          id: 'T1190',
+          name: 'Exploit Public-Facing Application',
+          reference: 'https://attack.mitre.org/techniques/T1190/',
+          value: 'exploitPublicFacingApplication',
+          label: 'Exploit Public-Facing Application',
+          tactics: ['initial-access'],
+        },
+      ],
+      subtechniques: [
+        {
+          id: 'T1078.001',
+          name: 'Default Accounts',
+          reference: 'https://attack.mitre.org/techniques/T1078/001/',
+          value: 'defaultAccounts',
+          label: 'Default Accounts',
+          tactics: ['initial-access'],
+          techniqueId: 'T1078',
+        },
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
-    logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    logger: { log: vi.fn(), warn: vi.fn(), error: vi.fn() },
   });
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);

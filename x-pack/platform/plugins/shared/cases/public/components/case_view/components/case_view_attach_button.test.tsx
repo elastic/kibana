@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
@@ -22,23 +25,29 @@ import {
 } from '../../timeline_context';
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 
-jest.mock('../../attachments/file/upload_file_modal', () => ({
-  UploadFileModal: () => <div data-test-subj="upload-file-modal-mock" />,
-}));
+vi.mock('../../attachments/file/upload_file_modal', () => {
+      const mocked = {
+      UploadFileModal: () => <div data-test-subj="upload-file-modal-mock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockTrackAttachButtonClicked = jest.fn();
-const mockTrackAttachMenuItemClicked = jest.fn();
-jest.mock('../../../analytics/use_attach_button_ebt', () => ({
-  useAttachButtonClickedEBT: () => mockTrackAttachButtonClicked,
-  useAttachMenuItemClickedEBT: () => mockTrackAttachMenuItemClicked,
-}));
+const mockTrackAttachButtonClicked = vi.fn();
+const mockTrackAttachMenuItemClicked = vi.fn();
+vi.mock('../../../analytics/use_attach_button_ebt', () => {
+      const mocked = {
+      useAttachButtonClickedEBT: () => mockTrackAttachButtonClicked,
+      useAttachMenuItemClickedEBT: () => mockTrackAttachMenuItemClicked,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/use_create_attachments');
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+vi.mock('../../../containers/use_create_attachments');
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
 
-jest.mock('../use_on_refresh_case_view_page');
+vi.mock('../use_on_refresh_case_view_page');
 
-const getConfigMock = jest.spyOn(KibanaServices, 'getConfig');
+const getConfigMock = vi.spyOn(KibanaServices, 'getConfig');
 const getCasesConfig = (attachmentsEnabled: boolean): ReturnType<typeof KibanaServices.getConfig> =>
   ({ attachments: { enabled: attachmentsEnabled } } as ReturnType<typeof KibanaServices.getConfig>);
 
@@ -77,11 +86,11 @@ describe('CaseViewAttachButton', () => {
   // userEvent can click the menu items rendered inside it.
   const user = userEvent.setup({ pointerEventsCheck: PointerEventsCheckLevel.Never });
 
-  const createAttachmentsMutate = jest.fn();
-  const refreshCaseViewPageMock = useRefreshCaseViewPage() as jest.Mock;
+  const createAttachmentsMutate = vi.fn();
+  const refreshCaseViewPageMock = useRefreshCaseViewPage() as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getConfigMock.mockReturnValue(getCasesConfig(false));
     useCreateAttachmentsMock.mockReturnValue({
       isLoading: false,

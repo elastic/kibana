@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { InspectorViewRegistry } from './view_registry';
 import type { InspectorViewDescription } from './types';
 
@@ -37,7 +39,7 @@ describe('InspectorViewRegistry', () => {
   });
 
   it('should emit a change event when registering a view', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     registry.once('change', listener);
     registry.register(createMockView());
     expect(listener).toHaveBeenCalled();
@@ -81,7 +83,7 @@ describe('InspectorViewRegistry', () => {
     });
 
     it('should pass the adapters to the callbacks', () => {
-      const shouldShow = jest.fn();
+      const shouldShow = vi.fn();
       const view1 = createMockView({ shouldShow });
       registry.register(view1);
       const adapter = { foo: () => null };

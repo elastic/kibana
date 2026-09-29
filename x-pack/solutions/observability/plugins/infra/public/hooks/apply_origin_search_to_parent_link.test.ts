@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MouseEvent } from 'react';
 import { applyOriginSearchToParentLink } from './apply_origin_search_to_parent_link';
 
 describe('applyOriginSearchToParentLink', () => {
-  const navigateToApp = jest.fn();
+  const navigateToApp = vi.fn();
   const baseLink = {
     href: '/s/obs/app/metrics/hosts',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   };
 
   beforeEach(() => {
@@ -35,7 +37,7 @@ describe('applyOriginSearchToParentLink', () => {
     const result = applyOriginSearchToParentLink({
       link: {
         href: '/s/obs/app/metrics/explorer',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
       },
       originAppId: 'metrics',
       originPathname: '/explorer',
@@ -62,7 +64,7 @@ describe('applyOriginSearchToParentLink', () => {
       altKey: false,
       ctrlKey: false,
       shiftKey: false,
-      preventDefault: jest.fn(),
+      preventDefault: vi.fn(),
     } as unknown as MouseEvent;
 
     result.onClick?.(event);

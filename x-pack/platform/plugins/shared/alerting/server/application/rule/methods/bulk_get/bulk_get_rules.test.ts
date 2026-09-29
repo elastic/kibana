@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { transformRuleSoToSanitizedRule } from '../../transforms';
 import { bulkGetRulesSo } from '../../../../data/rule';
 import { bulkGetRules } from './bulk_get_rules';
@@ -18,31 +21,31 @@ import {
   checkAuthorizationAndGetTotal,
 } from '../../../../rules_client/lib';
 
-jest.mock('../../transforms', () => {
+vi.mock('../../transforms', () => {
   return {
-    transformRuleSoToSanitizedRule: jest.fn(),
+    transformRuleSoToSanitizedRule: vi.fn(),
   };
 });
 
-jest.mock('../../../../data/rule', () => {
+vi.mock('../../../../data/rule', () => {
   return {
-    bulkGetRulesSo: jest.fn(),
+    bulkGetRulesSo: vi.fn(),
   };
 });
 
-jest.mock('../../../../rules_client/lib', () => {
+vi.mock('../../../../rules_client/lib', () => {
   return {
-    getAuthorizationFilter: jest.fn(),
-    checkAuthorizationAndGetTotal: jest.fn(),
+    getAuthorizationFilter: vi.fn(),
+    checkAuthorizationAndGetTotal: vi.fn(),
   };
 });
 
 const rulesClientContext = rulesClientContextMock.create();
-const transformRuleSoToSanitizedRuleMock = transformRuleSoToSanitizedRule as jest.Mock;
-const bulkGetRulesSoMock = bulkGetRulesSo as jest.Mock;
-const auditLoggerMock = rulesClientContext.auditLogger?.log as jest.Mock;
-const getAuthorizationFilterMock = getAuthorizationFilter as jest.Mock;
-const checkAuthorizationAndGetTotalMock = checkAuthorizationAndGetTotal as jest.Mock;
+const transformRuleSoToSanitizedRuleMock = transformRuleSoToSanitizedRule as Mock;
+const bulkGetRulesSoMock = bulkGetRulesSo as Mock;
+const auditLoggerMock = rulesClientContext.auditLogger?.log as Mock;
+const getAuthorizationFilterMock = getAuthorizationFilter as Mock;
+const checkAuthorizationAndGetTotalMock = checkAuthorizationAndGetTotal as Mock;
 
 const getRule = (id: string, alertTypeId: string, consumer: string) => ({
   id,
@@ -71,7 +74,7 @@ describe('bulkGetRules', () => {
   let results: BulkGetRulesResponse<RuleParams>;
   let testRules: ReturnType<typeof getTestRules>;
   beforeEach(async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     testRules = getTestRules();
     ruleIds = testRules.all.map(({ id }) => id);
     transformRuleSoToSanitizedRuleMock.mockImplementation((_, rule) => {

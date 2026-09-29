@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -25,15 +28,15 @@ import {
   anUnhealthyTransformHealth,
 } from '../../../data/slo/health';
 
-jest.mock('../../../hooks/use_fetch_slo_health');
-jest.mock('../../../hooks/use_repair_slo');
-jest.mock('../../../hooks/use_permissions');
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_fetch_slo_health');
+vi.mock('../../../hooks/use_repair_slo');
+vi.mock('../../../hooks/use_permissions');
+vi.mock('../../../hooks/use_kibana');
 
-const mockUseFetchSloHealth = useFetchSloHealth as jest.MockedFunction<typeof useFetchSloHealth>;
-const mockUseRepairSlo = useRepairSlo as jest.MockedFunction<typeof useRepairSlo>;
-const mockUsePermissions = usePermissions as jest.MockedFunction<typeof usePermissions>;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseFetchSloHealth = useFetchSloHealth as MockedFunction<typeof useFetchSloHealth>;
+const mockUseRepairSlo = useRepairSlo as MockedFunction<typeof useRepairSlo>;
+const mockUsePermissions = usePermissions as MockedFunction<typeof usePermissions>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const mockSlo: SLOWithSummaryResponse = cloneDeep({
   ...baseSlo,
@@ -41,11 +44,11 @@ const mockSlo: SLOWithSummaryResponse = cloneDeep({
   name: 'Test SLO',
 });
 
-const mockRepairSlo = jest.fn();
+const mockRepairSlo = vi.fn();
 
 describe('SloHealthCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseRepairSlo.mockReturnValue({
       mutate: mockRepairSlo,
       isLoading: false,
@@ -61,16 +64,16 @@ describe('SloHealthCallout', () => {
         },
         notifications: {
           toasts: {
-            addSuccess: jest.fn(),
-            addError: jest.fn(),
-            addDanger: jest.fn(),
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
+            addDanger: vi.fn(),
           },
         },
         share: {
           url: {
             locators: {
               get: () => ({
-                getRedirectUrl: jest.fn(),
+                getRedirectUrl: vi.fn(),
               }),
             },
           },

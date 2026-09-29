@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -17,7 +19,7 @@ import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 describe('FileDownloadButton', () => {
   describe('isIcon', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders download button with correct href', async () => {
@@ -38,7 +40,7 @@ describe('FileDownloadButton', () => {
 
   describe('not isIcon', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders download button with correct href', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -22,7 +25,7 @@ describe('MappingInfoPanel', () => {
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;
   beforeEach(() => {
     rolesAPI = rolesAPIClientMock.create();
-    (rolesAPI as jest.Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
+    (rolesAPI as Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
       { name: 'foo_role' },
       { name: 'bar role' },
     ] as Role[]);
@@ -108,7 +111,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'create' as any,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       canUseInlineScripts: true,
       canUseStoredScripts: false,
       validateForm: false,
@@ -149,7 +152,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'create' as any,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       canUseInlineScripts: false,
       canUseStoredScripts: true,
       validateForm: false,
@@ -190,7 +193,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'create' as any,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       canUseInlineScripts: false,
       canUseStoredScripts: false,
       validateForm: false,

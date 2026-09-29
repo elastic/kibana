@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import Path from 'path';
 import * as Rx from 'rxjs';
 import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
@@ -22,28 +25,28 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Rx.Observable, 'Rx.Observable'));
 expect.addSnapshotSerializer(createAnyInstanceSerializer(TestLog));
 
-jest.mock('./watcher');
-const { Watcher } = jest.requireMock('./watcher');
+vi.mock('./watcher');
+const { Watcher } = (await vi.importMock('./watcher'));
 
-jest.mock('./optimizer');
-const { Optimizer } = jest.requireMock('./optimizer');
+vi.mock('./optimizer');
+const { Optimizer } = (await vi.importMock('./optimizer'));
 
-jest.mock('./dev_server');
-const { DevServer } = jest.requireMock('./dev_server');
+vi.mock('./dev_server');
+const { DevServer } = (await vi.importMock('./dev_server'));
 
-jest.mock('./base_path_proxy');
-const { getBasePathProxyServer } = jest.requireMock('./base_path_proxy');
+vi.mock('./base_path_proxy');
+const { getBasePathProxyServer } = (await vi.importMock('./base_path_proxy'));
 
-jest.mock('@kbn/ci-stats-reporter');
-const { CiStatsReporter } = jest.requireMock('@kbn/ci-stats-reporter');
+vi.mock('@kbn/ci-stats-reporter');
+const { CiStatsReporter } = (await vi.importMock('@kbn/ci-stats-reporter'));
 
 const mockBasePathProxy = {
   targetPort: 9999,
   basePath: '/foo/bar',
   host: 'localhost',
   port: 5601,
-  start: jest.fn(),
-  stop: jest.fn(),
+  start: vi.fn(),
+  stop: vi.fn(),
 };
 
 let log: TestLog;
@@ -55,7 +58,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockBasePathProxy.start.mockReset();
   mockBasePathProxy.stop.mockReset();
 });
@@ -206,10 +209,10 @@ describe('#start()/#stop()', () => {
   let watcherRun$: Rx.Subject<void>;
   let devServerRun$: Rx.Subject<void>;
   let devServerReady$: Rx.Subject<void>;
-  let processExitMock: jest.SpyInstance;
+  let processExitMock: MockInstance;
 
   beforeAll(() => {
-    processExitMock = jest.spyOn(process, 'exit').mockImplementation(
+    processExitMock = vi.spyOn(process, 'exit').mockImplementation(
       // @ts-expect-error process.exit isn't supposed to return
       () => {}
     );
@@ -220,8 +223,8 @@ describe('#start()/#stop()', () => {
       optimizerRun$ = new Rx.Subject();
       optimizerReady$ = new Rx.Subject();
       return {
-        isReady$: jest.fn(() => optimizerReady$),
-        getPhase$: jest.fn(() => Rx.NEVER),
+        isReady$: vi.fn(() => optimizerReady$),
+        getPhase$: vi.fn(() => Rx.NEVER),
         run$: optimizerRun$,
       };
     });
@@ -229,21 +232,21 @@ describe('#start()/#stop()', () => {
       watcherRun$ = new Rx.Subject();
       return {
         run$: watcherRun$,
-        optimizerShouldRestart$: jest.fn(() => Rx.NEVER),
+        optimizerShouldRestart$: vi.fn(() => Rx.NEVER),
       };
     });
     DevServer.mockImplementation(() => {
       devServerRun$ = new Rx.Subject();
       devServerReady$ = new Rx.Subject();
       return {
-        isReady$: jest.fn(() => devServerReady$),
-        getPhase$: jest.fn(() => Rx.NEVER),
+        isReady$: vi.fn(() => devServerReady$),
+        getPhase$: vi.fn(() => Rx.NEVER),
         run$: devServerRun$,
       };
     });
     CiStatsReporter.fromEnv.mockImplementation(() => {
       return {
-        isEnabled: jest.fn().mockReturnValue(false),
+        isEnabled: vi.fn().mockReturnValue(false),
       };
     });
   });

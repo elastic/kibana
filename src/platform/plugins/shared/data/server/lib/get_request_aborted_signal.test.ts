@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { getRequestAbortedSignal } from './get_request_aborted_signal';
 
 describe('abortableRequestHandler', () => {
-  jest.useFakeTimers({ legacyFakeTimers: true });
+  vi.useFakeTimers({ legacyFakeTimers: true });
 
   it('should call abort if disconnected', () => {
     const abortedSubject = new Subject<void>();
     const aborted$ = abortedSubject.asObservable();
-    const onAborted = jest.fn();
+    const onAborted = vi.fn();
 
     const signal = getRequestAbortedSignal(aborted$);
     signal.addEventListener('abort', onAborted);
@@ -26,7 +28,7 @@ describe('abortableRequestHandler', () => {
     expect(onAborted).not.toHaveBeenCalled();
 
     abortedSubject.next();
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     // Should be aborted and call onAborted after disconnecting
     expect(signal.aborted).toBe(true);

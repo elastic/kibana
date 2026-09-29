@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getBuckets } from './get_buckets';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 
 describe('get buckets', () => {
-  let clientSpy: jest.Mock;
+  let clientSpy: Mock;
 
   beforeEach(async () => {
-    clientSpy = jest.fn().mockResolvedValueOnce({
+    clientSpy = vi.fn().mockResolvedValueOnce({
       hits: {
         total: 100,
       },

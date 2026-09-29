@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { addConnector } from './add_connector_api_logic';
@@ -13,7 +15,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 describe('addConnectorApiLogic', () => {
   const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('addConnector', () => {
     it('calls correct api', async () => {

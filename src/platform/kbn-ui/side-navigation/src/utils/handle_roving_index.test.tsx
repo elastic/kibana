@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useRef } from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
@@ -37,7 +39,7 @@ describe('handleRovingIndex', () => {
   };
 
   it('moves focus to the next element on ArrowDown', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<RovingMenu />);
     focusButton(0);
 
@@ -47,7 +49,7 @@ describe('handleRovingIndex', () => {
   });
 
   it('moves focus to the previous element on ArrowUp', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<RovingMenu />);
     focusButton(2);
 
@@ -57,7 +59,7 @@ describe('handleRovingIndex', () => {
   });
 
   it('jumps to first and last elements with Home/End keys', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<RovingMenu />);
     focusButton(1);
 
@@ -69,7 +71,7 @@ describe('handleRovingIndex', () => {
   });
 
   it('ignores keys unrelated to navigation', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<RovingMenu />);
     focusButton(0);
 

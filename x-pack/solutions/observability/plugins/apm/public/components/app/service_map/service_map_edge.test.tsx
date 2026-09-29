@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
@@ -13,8 +15,8 @@ import { ServiceMapEdge } from './service_map_edge';
 import type { ServiceMapEdgeData } from '../../../../common/service_map';
 import { MOCK_PRIMARY_COLOR, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({

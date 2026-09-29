@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 import { DataViewSource } from './data_view_source';
@@ -30,19 +32,19 @@ function makeDataViewMock(
 ): DataView {
   const fields = overrides.fields ?? [];
   const fieldsApi = {
-    getAll: jest.fn(() => fields),
-    getByName: jest.fn((n: string) => fields.find((f) => f.name === n)),
+    getAll: vi.fn(() => fields),
+    getByName: vi.fn((n: string) => fields.find((f) => f.name === n)),
   };
   const timeFieldName = overrides.timeFieldName;
   return {
     id: 'id' in overrides ? overrides.id : 'dv-id',
     timeFieldName,
     type: overrides.type,
-    getName: jest.fn(() => overrides.name ?? 'My Data View'),
-    getIndexPattern: jest.fn(() => overrides.indexPattern ?? 'logs-*'),
-    isPersisted: jest.fn(() => overrides.persisted ?? true),
-    getTimeField: jest.fn(() => fields.find((f) => f.name === timeFieldName)),
-    isTimeBased: jest.fn(() => !!timeFieldName && !!fields.find((f) => f.name === timeFieldName)),
+    getName: vi.fn(() => overrides.name ?? 'My Data View'),
+    getIndexPattern: vi.fn(() => overrides.indexPattern ?? 'logs-*'),
+    isPersisted: vi.fn(() => overrides.persisted ?? true),
+    getTimeField: vi.fn(() => fields.find((f) => f.name === timeFieldName)),
+    isTimeBased: vi.fn(() => !!timeFieldName && !!fields.find((f) => f.name === timeFieldName)),
     fields: fieldsApi,
   } as unknown as DataView;
 }

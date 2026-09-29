@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchStackProductUsage } from './fetch_stack_product_usage';
 
@@ -17,7 +19,7 @@ describe('fetchStackProductUsage', () => {
   };
 
   it('should use appropiate query parameters', async () => {
-    const searchMock = jest.fn().mockImplementation(() => ({
+    const searchMock = vi.fn().mockImplementation(() => ({
       aggregations: {
         uuids: {
           buckets: [
@@ -62,7 +64,7 @@ describe('fetchStackProductUsage', () => {
 
   it('should get the usage data', async () => {
     const callCluster = {
-      search: jest.fn().mockImplementation(() => ({
+      search: vi.fn().mockImplementation(() => ({
         aggregations: {
           uuids: {
             buckets: [
@@ -100,7 +102,7 @@ describe('fetchStackProductUsage', () => {
 
   it('should handle both collection types', async () => {
     const callCluster = {
-      search: jest.fn().mockImplementation(() => ({
+      search: vi.fn().mockImplementation(() => ({
         aggregations: {
           uuids: {
             buckets: [

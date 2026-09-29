@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { BasePayload } from '@kbn/reporting-common/types';
@@ -91,8 +93,8 @@ describe('Event Logger', () => {
 
   it(`logExecutionStart`, () => {
     const logger = new factory(mockReport);
-    jest.spyOn(logger.completionLogger, 'startTiming');
-    jest.spyOn(logger.completionLogger, 'stopTiming');
+    vi.spyOn(logger.completionLogger, 'startTiming');
+    vi.spyOn(logger.completionLogger, 'stopTiming');
     const result = logger.logExecutionStart();
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
@@ -114,8 +116,8 @@ describe('Event Logger', () => {
 
   it(`logExecutionComplete`, () => {
     const logger = new factory(mockReport);
-    jest.spyOn(logger.completionLogger, 'startTiming');
-    jest.spyOn(logger.completionLogger, 'stopTiming');
+    vi.spyOn(logger.completionLogger, 'startTiming');
+    vi.spyOn(logger.completionLogger, 'stopTiming');
     logger.logExecutionStart();
 
     const result = logger.logExecutionComplete({

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { EuiThemeComputed } from '@elastic/eui';
 import { isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
@@ -18,24 +21,36 @@ import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
 
-jest.mock('../../../../common/schema', () => ({
-  getAllConnectors: jest.fn(),
-  isDeprecatedStepType: jest.fn(() => false),
-}));
-jest.mock('../../../trigger_schemas', () => ({
-  triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
-}));
-jest.mock('@kbn/workflows', () => ({
-  ...jest.requireActual('@kbn/workflows'),
-  isDynamicConnector: jest.fn(),
-}));
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: jest.fn(
-      (key: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage
-    ),
-  },
-}));
+vi.mock('../../../../common/schema', () => {
+      const mocked = {
+      getAllConnectors: vi.fn(),
+      isDeprecatedStepType: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: { getTriggerDefinitions: vi.fn(() => []) },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows')),
+      isDynamicConnector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: vi.fn(
+          (key: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage
+        ),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getActionOptions', () => {
   const mockEuiTheme = {
@@ -54,16 +69,16 @@ describe('getActionOptions', () => {
     },
   } as unknown as EuiThemeComputed<{}>;
 
-  let mockWorkflowsExtensions: jest.Mocked<WorkflowsExtensionsPublicPluginStart>;
+  let mockWorkflowsExtensions: Mocked<WorkflowsExtensionsPublicPluginStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockWorkflowsExtensions = workflowsExtensionsMock.createStart();
 
-    (getAllConnectors as jest.Mock).mockReturnValue([]);
-    (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
-    (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
+    (getAllConnectors as Mock).mockReturnValue([]);
+    (isDeprecatedStepType as Mock).mockReturnValue(false);
+    (isDynamicConnector as MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => false
     );
   });
@@ -93,7 +108,7 @@ describe('getActionOptions', () => {
   });
 
   it('should set stability tech_preview for registered event-driven trigger options', () => {
-    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+    (triggerSchemas.getTriggerDefinitions as Mock).mockReturnValueOnce([
       {
         id: 'cases.updated',
         title: 'Case updated',
@@ -120,7 +135,7 @@ describe('getActionOptions', () => {
   });
 
   it('should group registered triggers by namespace inside the triggers menu', () => {
-    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+    (triggerSchemas.getTriggerDefinitions as Mock).mockReturnValueOnce([
       {
         id: 'cases.caseCreated',
         title: 'Cases - Case created',
@@ -159,7 +174,7 @@ describe('getActionOptions', () => {
   });
 
   it('should set pathIds on trigger namespace groups for navigation from search', () => {
-    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+    (triggerSchemas.getTriggerDefinitions as Mock).mockReturnValueOnce([
       {
         id: 'cases.caseCreated',
         title: 'Cases - Case created',
@@ -230,7 +245,7 @@ describe('getActionOptions', () => {
       outputSchema: z.object({}),
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
@@ -275,7 +290,7 @@ describe('getActionOptions', () => {
       outputSchema: z.object({}),
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
@@ -313,7 +328,7 @@ describe('getActionOptions', () => {
       outputSchema: z.object({}),
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
@@ -355,7 +370,7 @@ describe('getActionOptions', () => {
       outputSchema: z.object({}),
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+    (getAllConnectors as Mock).mockReturnValue(mockConnectors);
     mockWorkflowsExtensions.getStepDefinition.mockImplementation((type: string) => {
       if (type === 'cases.createCase') {
         return mockCasesStepDefinition as any;
@@ -410,7 +425,7 @@ describe('getActionOptions', () => {
         outputSchema: z.object({}),
       } as any;
     });
-    (getAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+    (getAllConnectors as Mock).mockReturnValue(mockConnectors);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
     const dataGroup = result.find((group) => group.id === 'data');
@@ -431,7 +446,7 @@ describe('getActionOptions', () => {
       description: 'Elasticsearch Search',
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
@@ -455,7 +470,7 @@ describe('getActionOptions', () => {
       description: '<strong>Search</strong> &amp; inspect &amp;lt;safe&amp;gt;.',
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
@@ -474,7 +489,7 @@ describe('getActionOptions', () => {
       summary: 'Kibana Summary',
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
@@ -499,8 +514,8 @@ describe('getActionOptions', () => {
       summary: 'Create a case',
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
-    (isDeprecatedStepType as jest.Mock).mockImplementation(
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
+    (isDeprecatedStepType as Mock).mockImplementation(
       (stepType: string) => stepType === 'kibana.createCase'
     );
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
@@ -524,7 +539,7 @@ describe('getActionOptions', () => {
       stability: 'tech_preview' as const,
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
@@ -548,7 +563,7 @@ describe('getActionOptions', () => {
       patterns: ['/api/saved_objects'],
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
@@ -572,9 +587,9 @@ describe('getActionOptions', () => {
       instances: [{ id: 'instance1' }, { id: 'instance2' }],
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
-    (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
+    (isDynamicConnector as MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => true
     );
 
@@ -601,9 +616,9 @@ describe('getActionOptions', () => {
       instances: [{ id: 'instance1' }],
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
-    (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
+    (isDynamicConnector as MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => true
     );
 
@@ -657,9 +672,9 @@ describe('getActionOptions', () => {
       },
     ];
 
-    (getAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+    (getAllConnectors as Mock).mockReturnValue(mockConnectors);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
-    (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
+    (isDynamicConnector as MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => true
     );
 
@@ -701,7 +716,7 @@ describe('getActionOptions', () => {
       outputSchema: z.object({}),
     };
 
-    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (getAllConnectors as Mock).mockReturnValue([mockConnector]);
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);

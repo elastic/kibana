@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { DefaultInspectorAdapters, TablesAdapter } from '@kbn/expressions-plugin/common';
 
@@ -12,7 +14,7 @@ import type { Request } from './types';
 import { RequestStatus } from './types';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 
-const mockOnLoad = jest.fn();
+const mockOnLoad = vi.fn();
 const mockRequests = [
   {
     id: '1',
@@ -66,7 +68,7 @@ const mockAdapters = {
 
 describe('useEmbeddableInspect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when onEmbeddableLoad is provided', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -14,13 +17,19 @@ import { bulkEnableScheduledReports } from '../apis/bulk_enable_scheduled_report
 import { testQueryClient } from '../test_utils/test_query_client';
 import { useKibana } from '@kbn/reporting-public';
 
-jest.mock('@kbn/reporting-public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/reporting-public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../apis/bulk_enable_scheduled_reports', () => ({
-  bulkEnableScheduledReports: jest.fn(),
-}));
+vi.mock('../apis/bulk_enable_scheduled_reports', () => {
+      const mocked = {
+      bulkEnableScheduledReports: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useBulkEnable', () => {
   const http = httpServiceMock.createStartContract();
@@ -31,7 +40,7 @@ describe('useBulkEnable', () => {
   );
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         http,
         notifications: {
@@ -39,11 +48,11 @@ describe('useBulkEnable', () => {
         },
       },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls bulkEnableScheduledReports with correct arguments', async () => {
-    (bulkEnableScheduledReports as jest.Mock).mockResolvedValueOnce({
+    (bulkEnableScheduledReports as Mock).mockResolvedValueOnce({
       scheduled_report_ids: ['random_schedule_report_1'],
       errors: [],
       total: 1,
@@ -70,7 +79,7 @@ describe('useBulkEnable', () => {
   });
 
   it('throws error', async () => {
-    (bulkEnableScheduledReports as jest.Mock).mockRejectedValueOnce({});
+    (bulkEnableScheduledReports as Mock).mockRejectedValueOnce({});
 
     const { result } = renderHook(() => useBulkEnable(), {
       wrapper,

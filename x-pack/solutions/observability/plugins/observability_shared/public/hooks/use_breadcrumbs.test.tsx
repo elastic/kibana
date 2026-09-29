@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -14,8 +16,8 @@ import { useBreadcrumbs } from './use_breadcrumbs';
 import { BehaviorSubject } from 'rxjs';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 
-const setBreadcrumbs = jest.fn();
-const setTitle = jest.fn();
+const setBreadcrumbs = vi.fn();
+const setTitle = vi.fn();
 const kibanaServices = {
   application: { getUrlForApp: () => {}, navigateToApp: () => {} },
   chrome: {
@@ -38,7 +40,7 @@ function Wrapper({ children }: React.PropsWithChildren) {
 
 describe('useBreadcrumbs', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when setBreadcrumbs and setTitle are not defined', () => {

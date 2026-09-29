@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import type { SavedTimeline, Note } from '../../../../../common/api/timeline';
@@ -77,13 +80,13 @@ describe('pickSavedTimeline', () => {
   });
 
   beforeAll(() => {
-    Date = jest.fn(() => ({
-      valueOf: jest.fn().mockReturnValue(mockDateNow),
+    Date = vi.fn(() => ({
+      valueOf: vi.fn().mockReturnValue(mockDateNow),
     })) as unknown as DateConstructor;
   });
 
   afterAll(() => {
-    (Date as unknown as jest.Mock).mockRestore();
+    (Date as unknown as Mock).mockRestore();
   });
 
   describe('Set create / update time correctly ', () => {

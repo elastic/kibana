@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -17,43 +19,52 @@ import type { AddDataTab } from '../../services/add_data/add_data_service';
 import type { TutorialDirectoryHeaderLinkComponent } from '../../services/tutorials/tutorial_service';
 import { TutorialDirectory } from './tutorial_directory';
 
-const mockSetBreadcrumbs = jest.fn();
-const mockHistoryPush = jest.fn();
-const mockGetAddDataTabs = jest.fn<AddDataTab[], []>(() => []);
-const mockGetDirectoryHeaderLinks = jest.fn<TutorialDirectoryHeaderLinkComponent[], []>(() => []);
-const mockGetUrlForApp = jest.fn(
+const mockSetBreadcrumbs = vi.fn();
+const mockHistoryPush = vi.fn();
+const mockGetAddDataTabs = vi.fn<AddDataTab[], []>(() => []);
+const mockGetDirectoryHeaderLinks = vi.fn<TutorialDirectoryHeaderLinkComponent[], []>(() => []);
+const mockGetUrlForApp = vi.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
-const mockAddBasePath = jest.fn((url: string) => url);
+const mockAddBasePath = vi.fn((url: string) => url);
 
-jest.mock('../kibana_services', () => ({
-  getServices: () => ({
-    addDataService: {
-      getAddDataTabs: mockGetAddDataTabs,
-    },
-    tutorialService: {
-      getDirectoryHeaderLinks: mockGetDirectoryHeaderLinks,
-    },
-    chrome: {
-      setBreadcrumbs: mockSetBreadcrumbs,
-    },
-    application: {
-      getUrlForApp: mockGetUrlForApp,
-    },
-    history: {
-      push: mockHistoryPush,
-      location: { hash: '#/tutorial_directory/sampleData' },
-    },
-  }),
-}));
+vi.mock('../kibana_services', () => {
+      const mocked = {
+      getServices: () => ({
+        addDataService: {
+          getAddDataTabs: mockGetAddDataTabs,
+        },
+        tutorialService: {
+          getDirectoryHeaderLinks: mockGetDirectoryHeaderLinks,
+        },
+        chrome: {
+          setBreadcrumbs: mockSetBreadcrumbs,
+        },
+        application: {
+          getUrlForApp: mockGetUrlForApp,
+        },
+        history: {
+          push: mockHistoryPush,
+          location: { hash: '#/tutorial_directory/sampleData' },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../load_tutorials', () => ({
-  getTutorials: jest.fn(async () => []),
-}));
+vi.mock('../load_tutorials', () => {
+      const mocked = {
+      getTutorials: vi.fn(async () => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/home-sample-data-tab', () => ({
-  SampleDataTab: () => <div data-test-subj="sampleDataTab" />,
-}));
+vi.mock('@kbn/home-sample-data-tab', () => {
+      const mocked = {
+      SampleDataTab: () => <div data-test-subj="sampleDataTab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TutorialDirectory', () => {
   beforeEach(() => {

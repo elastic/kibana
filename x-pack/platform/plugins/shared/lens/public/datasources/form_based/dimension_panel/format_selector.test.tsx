@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { FormatSelectorProps } from './format_selector';
 import { FormatSelector } from './format_selector';
@@ -15,7 +18,7 @@ import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 const props = {
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   selectedColumn: {
     label: 'Max of bytes',
     dataType: 'number',
@@ -37,18 +40,18 @@ describe('FormatSelector', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    (props.onChange as jest.Mock).mockClear();
+    (props.onChange as Mock).mockClear();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
   });
   it('updates the format decimals', async () => {
     renderFormatSelector();
@@ -68,7 +71,7 @@ describe('FormatSelector', () => {
   it('updates the suffix', async () => {
     renderFormatSelector();
     await user.type(screen.getByTestId('indexPattern-dimension-formatSuffix'), 'GB');
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
     expect(props.onChange).toHaveBeenCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
   });
 
@@ -88,7 +91,7 @@ describe('FormatSelector', () => {
       ).getByRole('combobox');
       await user.click(durationEndInput);
       fireEvent.click(screen.getByText('Hours'));
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
       expect(props.onChange).toHaveBeenCalledWith({
         id: 'duration',
         params: { toUnit: 'asHours' },

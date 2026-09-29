@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,8 +15,8 @@ import type { UserProfileData } from '@kbn/user-profile-components';
 import { SpacesPreferencesModal } from './spaces_preference_modal';
 
 describe('SpacesPreferencesModal', () => {
-  const closeModal = jest.fn();
-  let updateUserProfile: jest.Mock;
+  const closeModal = vi.fn();
+  let updateUserProfile: Mock;
 
   const renderModal = (userProfile: UserProfileData = { userSettings: {} }) =>
     render(
@@ -27,8 +30,8 @@ describe('SpacesPreferencesModal', () => {
   const getRememberSelectedSpaceSwitch = () => screen.getByRole('switch');
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    updateUserProfile = jest.fn().mockResolvedValue({});
+    vi.clearAllMocks();
+    updateUserProfile = vi.fn().mockResolvedValue({});
   });
 
   it('renders the modal with the remember last selected space switch', () => {

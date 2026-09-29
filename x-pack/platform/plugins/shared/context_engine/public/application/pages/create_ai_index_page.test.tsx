@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -21,28 +23,37 @@ import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_p
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
-jest.mock('../hooks/use_data_connectors', () => ({
-  useDataConnectors: () => ({
-    connectors: [],
-    connectorNameById: new Map(),
-    connectorActionTypeById: new Map(),
-    isLoading: false,
-  }),
-}));
+vi.mock('../hooks/use_data_connectors', () => {
+      const mocked = {
+      useDataConnectors: () => ({
+        connectors: [],
+        connectorNameById: new Map(),
+        connectorActionTypeById: new Map(),
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => ({
-    agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
-    isLoading: false,
-    error: undefined,
-  }),
-}));
+vi.mock('../hooks/use_agent_builder_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: () => ({
+        agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+        isLoading: false,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseIndices = jest.fn();
+const mockUseIndices = vi.fn();
 
-jest.mock('../hooks/use_indices', () => ({
-  useIndices: (args: { search: string; enabled: boolean }) => mockUseIndices(args),
-}));
+vi.mock('../hooks/use_indices', () => {
+      const mocked = {
+      useIndices: (args: { search: string; enabled: boolean }) => mockUseIndices(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -85,7 +96,7 @@ describe('CreateAiIndexPage', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a back button linking to the AI indexes landing page', () => {

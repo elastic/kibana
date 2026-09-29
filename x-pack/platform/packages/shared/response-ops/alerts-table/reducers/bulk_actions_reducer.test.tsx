@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useMemo, useReducer } from 'react';
 import { render, screen, within, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -28,7 +30,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useTagsAction } from '../components/tags/use_tags_action';
 
-jest.mock('../components/tags/use_tags_action');
+vi.mock('../components/tags/use_tags_action');
 
 const columns = [
   {
@@ -46,7 +48,7 @@ type AlertsTableWithBulkActionsContextProps = TestAlertsDataGridProps & {
   renderContext?: Partial<RenderContext<AdditionalContext>>;
 };
 
-const mockRefresh = jest.mocked(mockRenderContext.refresh);
+const mockRefresh = vi.mocked(mockRenderContext.refresh);
 const mockCaseService = mockRenderContext.services.cases!;
 
 const queryClient = new QueryClient(testQueryClientConfig);
@@ -60,7 +62,7 @@ afterAll(() => {
 });
 
 describe('AlertsDataGrid bulk actions', () => {
-  const mockUseTagsAction = jest.mocked(useTagsAction);
+  const mockUseTagsAction = vi.mocked(useTagsAction);
 
   beforeEach(() => {
     // Reset and set up the mock for tags action
@@ -68,10 +70,10 @@ describe('AlertsDataGrid bulk actions', () => {
     mockUseTagsAction.mockImplementation(() => ({
       isFlyoutOpen: false,
       selectedAlerts: [],
-      openFlyout: jest.fn(),
-      onClose: jest.fn(),
-      onSaveTags: jest.fn(),
-      getAction: jest.fn(),
+      openFlyout: vi.fn(),
+      onClose: vi.fn(),
+      onSaveTags: vi.fn(),
+      getAction: vi.fn(),
     }));
   });
 
@@ -192,7 +194,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
   describe('when the additionalBulkActions option is not set', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should show the bulk actions column with mute/unmute actions', async () => {
@@ -217,7 +219,7 @@ describe('AlertsDataGrid bulk actions', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterAll(() => {
@@ -306,7 +308,7 @@ describe('AlertsDataGrid bulk actions', () => {
     });
 
     it('should pass the case ids when selecting alerts', async () => {
-      const mockOnClick = jest.fn();
+      const mockOnClick = vi.fn();
       const newAlerts: Alert[] = [
         {
           _id: 'alert0',
@@ -401,7 +403,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
   describe('when the additionalBulkActions option is set', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should show the bulk actions column', async () => {
@@ -608,7 +610,7 @@ describe('AlertsDataGrid bulk actions', () => {
     describe('and the toolbar is on ', () => {
       describe('and a bulk action is executed', () => {
         it('should return the selected alert ids', async () => {
-          const mockOnClick = jest.fn();
+          const mockOnClick = vi.fn();
           const props = {
             ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
@@ -680,7 +682,7 @@ describe('AlertsDataGrid bulk actions', () => {
         });
 
         describe('and the callback to represent the loading state is executed', () => {
-          const mockOnClick = jest.fn();
+          const mockOnClick = vi.fn();
           const props: TestAlertsDataGridProps = {
             ...dataGridPropsWithBulkActions,
             additionalBulkActions: [
@@ -823,7 +825,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
         describe('and executing a bulk action', () => {
           it('should return the are all selected flag set to true', async () => {
-            const mockOnClick = jest.fn();
+            const mockOnClick = vi.fn();
             const props = {
               ...dataGridPropsWithBulkActions,
               initialBulkActionsState: {

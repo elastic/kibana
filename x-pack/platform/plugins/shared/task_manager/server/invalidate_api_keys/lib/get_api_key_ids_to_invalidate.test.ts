@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getApiKeyIdsToInvalidate } from './get_api_key_ids_to_invalidate';
 import type {
@@ -47,17 +50,17 @@ const mockInvalidatePendingUIAMApiKeyObject = {
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
-    getDecryptedAsInternalUser: jest.fn(),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn((findOptions, deps) =>
+    getDecryptedAsInternalUser: vi.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: vi.fn((findOptions, deps) =>
       savedObjectsClientMock.create().createPointInTimeFinder(findOptions, deps)
     ),
-  } as unknown as jest.Mocked<EncryptedSavedObjectsClient>;
+  } as unknown as Mocked<EncryptedSavedObjectsClient>;
 }
 
 describe('getApiKeyIdsToInvalidate', () => {
   describe('with encryptedSavedObjectsClient', () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     const encryptedSavedObjectsClient = createEncryptedSavedObjectsClientMock();
 

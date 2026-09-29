@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 
 describe('AgentBuilderDashboardsPlugin', () => {
   it('registers the dashboard attachment type, skill, and SML type', () => {
-    const registerAttachmentType = jest.fn();
-    const registerSkill = jest.fn();
-    const registerSmlType = jest.fn();
+    const registerAttachmentType = vi.fn();
+    const registerSkill = vi.fn();
+    const registerSmlType = vi.fn();
 
     const plugin = new AgentBuilderDashboardsPlugin(coreMock.createPluginInitializerContext());
 

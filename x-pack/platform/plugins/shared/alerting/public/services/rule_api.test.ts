@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Rule, RuleType } from '../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRule, loadRuleType, loadRuleTypes } from './rule_api';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('loadRuleTypes', () => {
   test('should call get rule types API', async () => {

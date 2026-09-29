@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { TimedItemBuffer } from './timed_item_buffer';
 import { runItemBufferTests } from './__test__/run_item_buffer_tests';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 beforeEach(() => {
-  jest.clearAllTimers();
+  vi.clearAllTimers();
 });
 
 describe('TimedItemBuffer', () => {
   runItemBufferTests(TimedItemBuffer);
 
   test('does not do unnecessary flushes', () => {
-    const onFlush = jest.fn();
+    const onFlush = vi.fn();
     const buf = new TimedItemBuffer({
       onFlush,
       maxItemAge: 3,
@@ -34,22 +36,22 @@ describe('TimedItemBuffer', () => {
   });
 
   test('does not do extra flush after timeout if buffer was flushed during timeout wait', () => {
-    const onFlush = jest.fn();
+    const onFlush = vi.fn();
     const buf = new TimedItemBuffer({
       onFlush,
       maxItemAge: 10,
     });
 
     buf.write(0);
-    jest.advanceTimersByTime(3);
+    vi.advanceTimersByTime(3);
     buf.flush();
-    jest.advanceTimersByTime(11);
+    vi.advanceTimersByTime(11);
 
     expect(onFlush).toHaveBeenCalledTimes(1);
   });
 
   test('flushes buffer automatically after timeout reached', () => {
-    const onFlush = jest.fn();
+    const onFlush = vi.fn();
     const buf = new TimedItemBuffer({
       onFlush,
       maxItemAge: 2,
@@ -59,13 +61,13 @@ describe('TimedItemBuffer', () => {
     buf.write(2);
     expect(onFlush).toHaveBeenCalledTimes(0);
 
-    jest.advanceTimersByTime(3);
+    vi.advanceTimersByTime(3);
     expect(onFlush).toHaveBeenCalledTimes(1);
     expect(onFlush).toHaveBeenCalledWith([1, 2]);
   });
 
   test('does not call flush after timeout if flush was triggered because buffer size reached', () => {
-    const onFlush = jest.fn();
+    const onFlush = vi.fn();
     const buf = new TimedItemBuffer({
       onFlush,
       flushOnMaxItems: 2,
@@ -76,12 +78,12 @@ describe('TimedItemBuffer', () => {
     buf.write(2);
 
     expect(onFlush).toHaveBeenCalledTimes(1);
-    jest.advanceTimersByTime(3);
+    vi.advanceTimersByTime(3);
     expect(onFlush).toHaveBeenCalledTimes(1);
   });
 
   test('does not automatically flush if `.clear()` was called', () => {
-    const onFlush = jest.fn();
+    const onFlush = vi.fn();
     const buf = new TimedItemBuffer({
       onFlush,
       flushOnMaxItems: 25,
@@ -90,11 +92,11 @@ describe('TimedItemBuffer', () => {
 
     buf.write(1);
     buf.write(2);
-    jest.advanceTimersByTime(1);
+    vi.advanceTimersByTime(1);
     buf.clear();
 
     expect(onFlush).toHaveBeenCalledTimes(0);
-    jest.advanceTimersByTime(6);
+    vi.advanceTimersByTime(6);
     expect(onFlush).toHaveBeenCalledTimes(0);
   });
 });

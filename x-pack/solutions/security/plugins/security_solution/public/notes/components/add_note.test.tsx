@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -13,18 +15,21 @@ import { AddNote, CREATE_NOTE_ERROR } from './add_note';
 import { ADD_NOTE_BUTTON_TEST_ID, ADD_NOTE_MARKDOWN_TEST_ID } from './test_ids';
 import { ReqStatus } from '../store/notes.slice';
 
-jest.mock('../../flyout/document_details/shared/hooks/use_which_flyout');
+vi.mock('../../flyout/document_details/shared/hooks/use_which_flyout');
 
-const mockAddError = jest.fn();
-jest.mock('../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+const mockAddError = vi.fn();
+vi.mock('../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -133,7 +138,7 @@ describe('AddNote', () => {
   });
 
   it('should call onNodeAdd callback when it is available', async () => {
-    const onNodeAdd = jest.fn();
+    const onNodeAdd = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>

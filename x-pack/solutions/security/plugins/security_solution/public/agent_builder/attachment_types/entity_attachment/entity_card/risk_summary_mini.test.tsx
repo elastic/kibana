@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,19 +14,25 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskStats } from '../../../../../common/search_strategy';
 import { RiskSummaryMini } from './risk_summary_mini';
 
-jest.mock('../../../../entity_analytics/components/severity/common', () => ({
-  RiskScoreLevel: ({ severity }: { severity?: string }) => (
-    <span data-test-subj="riskScoreLevelMock">{severity}</span>
-  ),
-}));
+vi.mock('../../../../entity_analytics/components/severity/common', () => {
+      const mocked = {
+      RiskScoreLevel: ({ severity }: { severity?: string }) => (
+        <span data-test-subj="riskScoreLevelMock">{severity}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../entity_analytics/components/home/entities_table/risk_score_cell', () => ({
-  RiskScoreCell: ({ riskScore }: { riskScore?: number }) => (
-    <span data-test-subj="riskScoreCellMock">
-      {typeof riskScore === 'number' ? riskScore : '—'}
-    </span>
-  ),
-}));
+vi.mock('../../../../entity_analytics/components/home/entities_table/risk_score_cell', () => {
+      const mocked = {
+      RiskScoreCell: ({ riskScore }: { riskScore?: number }) => (
+        <span data-test-subj="riskScoreCellMock">
+          {typeof riskScore === 'number' ? riskScore : '—'}
+        </span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const stats = (override: Partial<RiskStats> = {}): RiskStats =>
   ({

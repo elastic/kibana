@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { parseDocument } from 'yaml';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
@@ -26,11 +28,11 @@ describe('getRegisteredTriggerConditionDefinition', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(mockDefinition);
+    vi.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(mockDefinition);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns the registered definition when path is triggers[i].on.condition and type is registered', () => {
@@ -55,7 +57,7 @@ describe('getRegisteredTriggerConditionDefinition', () => {
   });
 
   it('returns undefined when trigger type is not registered', () => {
-    jest.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(undefined);
+    vi.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(undefined);
     const doc = parseDocument(`triggers:
   - type: manual
     on:
@@ -75,11 +77,11 @@ describe('isCursorInKqlTriggerConditionField', () => {
   };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('is true when offset is inside condition value for a registered trigger', () => {
-    jest.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(mockDefinition);
+    vi.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(mockDefinition);
     const marker = '|<-';
     const withMarker = `version: "1"
 triggers:
@@ -98,7 +100,7 @@ triggers:
   });
 
   it('is false for built-in trigger type in condition (unregistered)', () => {
-    jest.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(undefined);
+    vi.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(undefined);
     const marker = '|<-';
     const withMarker = `version: "1"
 triggers:
@@ -113,7 +115,7 @@ triggers:
   });
 
   it('is false when cursor is outside the condition scalar', () => {
-    jest.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(mockDefinition);
+    vi.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(mockDefinition);
     const yaml = `version: "1"
 name: test
 `;

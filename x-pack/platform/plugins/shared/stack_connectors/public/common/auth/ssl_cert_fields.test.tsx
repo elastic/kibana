@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { SSLCertFields } from './ssl_cert_fields';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -16,22 +19,25 @@ import * as i18n from './translations';
 
 const certTypeDefaultValue: SSLCertType = SSLCertType.CRT;
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
-  useConnectorContext: jest.fn(),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+      const mocked = {
+      useConnectorContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SSLCertFields', () => {
   beforeEach(() => {
-    (useConnectorContext as jest.Mock).mockReturnValue({
+    (useConnectorContext as Mock).mockReturnValue({
       services: { isWebhookSslWithPfxEnabled: true },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   it('renders all fields for certType=CRT', async () => {
     render(
@@ -70,7 +76,7 @@ describe('SSLCertFields', () => {
 
   describe('Validation', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('validates correctly with a PFX', async () => {
@@ -240,18 +246,18 @@ describe('SSLCertFields', () => {
 
 describe('validation with PFX disabled', () => {
   beforeEach(() => {
-    (useConnectorContext as jest.Mock).mockReturnValue({
+    (useConnectorContext as Mock).mockReturnValue({
       services: { isWebhookSslWithPfxEnabled: false },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not render PFX tab when PFX is disabled', async () => {
     render(
-      <AuthFormTestProvider onSubmit={jest.fn()}>
+      <AuthFormTestProvider onSubmit={vi.fn()}>
         <SSLCertFields
           readOnly={false}
           certTypeDefaultValue={certTypeDefaultValue}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { EvalsTaskContext } from '../types';
 import { createAgentBuilderConverseTaskProvider } from './agent_builder_converse';
 
@@ -13,23 +16,23 @@ const OTHER_TRACE_ID = 'b'.repeat(32);
 const ALL_ZERO_TRACE_ID = '0'.repeat(32);
 
 const buildContext = (
-  callKibanaApi: jest.Mock,
+  callKibanaApi: Mock,
   overrides: Partial<EvalsTaskContext> = {}
 ): EvalsTaskContext =>
   ({
     input: { question: 'What is Elastic?' },
     connectorId: 'my-connector',
     agentId: 'my-agent',
-    logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     abortSignal: new AbortController().signal,
-    getInferenceClient: jest.fn(),
+    getInferenceClient: vi.fn(),
     callKibanaApi,
     ...overrides,
   } as unknown as EvalsTaskContext);
 
 describe('agentBuilder.converse task provider', () => {
   it('returns the round trace id and the agent message', async () => {
-    const callKibanaApi = jest.fn(async () => ({
+    const callKibanaApi = vi.fn(async () => ({
       status: 200,
       headers: {},
       body: { response: { message: 'Elastic is a search company.' }, trace_id: VALID_TRACE_ID },
@@ -43,7 +46,7 @@ describe('agentBuilder.converse task provider', () => {
   });
 
   it('takes the first id when the round returns an array of trace ids', async () => {
-    const callKibanaApi = jest.fn(async () => ({
+    const callKibanaApi = vi.fn(async () => ({
       status: 200,
       headers: {},
       body: { response: { message: 'ok' }, trace_id: [OTHER_TRACE_ID, VALID_TRACE_ID] },
@@ -56,7 +59,7 @@ describe('agentBuilder.converse task provider', () => {
   });
 
   it('normalizes the all-zero (tracing-disabled) trace id to undefined', async () => {
-    const callKibanaApi = jest.fn(async () => ({
+    const callKibanaApi = vi.fn(async () => ({
       status: 200,
       headers: {},
       body: { response: { message: 'ok' }, trace_id: ALL_ZERO_TRACE_ID },
@@ -69,7 +72,7 @@ describe('agentBuilder.converse task provider', () => {
   });
 
   it('throws when no agent id is provided', async () => {
-    const callKibanaApi = jest.fn();
+    const callKibanaApi = vi.fn();
     const provider = createAgentBuilderConverseTaskProvider();
 
     await expect(provider.run(buildContext(callKibanaApi, { agentId: undefined }))).rejects.toThrow(

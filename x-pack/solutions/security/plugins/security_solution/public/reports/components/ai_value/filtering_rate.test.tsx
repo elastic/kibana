@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FilteringRate } from './filtering_rate';
@@ -13,21 +16,30 @@ import { ComparePercentage } from './compare_percentage';
 import { formatPercent, getTimeRangeAsDays } from './metrics';
 
 // Mock dependencies
-jest.mock('./alert_filtering_metric', () => ({
-  AlertFilteringMetric: jest.fn(() => <div data-test-subj="mock-alert-filtering-metric" />),
-}));
+vi.mock('./alert_filtering_metric', () => {
+      const mocked = {
+      AlertFilteringMetric: vi.fn(() => <div data-test-subj="mock-alert-filtering-metric" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compare_percentage', () => ({
-  ComparePercentage: jest.fn(() => <div data-test-subj="mock-compare-percentage" />),
-}));
+vi.mock('./compare_percentage', () => {
+      const mocked = {
+      ComparePercentage: vi.fn(() => <div data-test-subj="mock-compare-percentage" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./metrics', () => ({
-  formatPercent: jest.fn(),
-  getTimeRangeAsDays: jest.fn(),
-}));
+vi.mock('./metrics', () => {
+      const mocked = {
+      formatPercent: vi.fn(),
+      getTimeRangeAsDays: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFormatPercent = formatPercent as jest.MockedFunction<typeof formatPercent>;
-const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof getTimeRangeAsDays>;
+const mockFormatPercent = formatPercent as MockedFunction<typeof formatPercent>;
+const mockGetTimeRangeAsDays = getTimeRangeAsDays as MockedFunction<typeof getTimeRangeAsDays>;
 
 const defaultProps = {
   isSample: false as const,
@@ -41,7 +53,7 @@ const defaultProps = {
 
 describe('FilteringRate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFormatPercent.mockReturnValue('60.0%');
     mockGetTimeRangeAsDays.mockReturnValue('30');
   });

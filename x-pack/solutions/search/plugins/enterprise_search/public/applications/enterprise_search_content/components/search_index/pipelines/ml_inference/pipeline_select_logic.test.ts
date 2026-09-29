@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import type { MlModel } from '../../../../../../../common/types/ml';
@@ -86,7 +88,7 @@ describe('PipelineSelectLogic', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mountFetchMlInferencePipelineProcessorsApiLogic();
     mountFetchMlInferencePipelinesApiLogic();
     mount();
@@ -96,7 +98,7 @@ describe('PipelineSelectLogic', () => {
     describe('selectExistingPipeline', () => {
       it('updates inference pipeline configuration', () => {
         mount(DEFAULT_VALUES);
-        jest.spyOn(PipelineSelectLogic.actions, 'setInferencePipelineConfiguration');
+        vi.spyOn(PipelineSelectLogic.actions, 'setInferencePipelineConfiguration');
 
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess(DEFAULT_PIPELINES);
         PipelineSelectLogic.actions.selectExistingPipeline('my-pipeline');
@@ -116,7 +118,7 @@ describe('PipelineSelectLogic', () => {
       });
       it('does not update inference pipeline configuration if pipeline name is not in list of fetched pipelines', () => {
         mount(DEFAULT_VALUES);
-        jest.spyOn(PipelineSelectLogic.actions, 'setInferencePipelineConfiguration');
+        vi.spyOn(PipelineSelectLogic.actions, 'setInferencePipelineConfiguration');
 
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess(DEFAULT_PIPELINES);
         PipelineSelectLogic.actions.selectExistingPipeline('nonexistent-pipeline');
@@ -127,7 +129,7 @@ describe('PipelineSelectLogic', () => {
       });
       it('does not update inference pipeline configuration if inference processor cannot be parsed from fetched pipeline', () => {
         mount(DEFAULT_VALUES);
-        jest.spyOn(PipelineSelectLogic.actions, 'setInferencePipelineConfiguration');
+        vi.spyOn(PipelineSelectLogic.actions, 'setInferencePipelineConfiguration');
 
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
           'my-pipeline': {

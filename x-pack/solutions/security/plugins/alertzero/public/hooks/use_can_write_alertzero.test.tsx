@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERTZERO_FEATURE_ID } from '../../common/constants';
 import { useCanWriteAlertZero } from './use_can_write_alertzero';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.mocked(useKibana);
+const mockUseKibana = vi.mocked(useKibana);
 
 describe('useCanWriteAlertZero', () => {
   it('is true when the AlertZero write capability is granted', () => {

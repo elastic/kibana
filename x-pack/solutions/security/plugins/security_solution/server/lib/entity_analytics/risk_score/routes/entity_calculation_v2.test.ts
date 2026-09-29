@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
@@ -31,20 +34,23 @@ import { buildAlertFilters } from '../maintainer/steps/build_alert_filters';
 
 const entityId = 'host:test-host-name';
 
-jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
-  euid: {
-    dsl: {
-      getEuidFilterBasedOnDocument: jest.fn().mockReturnValue({ term: { 'entity.id': entityId } }),
-    },
-  },
-}));
-jest.mock('../get_risk_inputs_index');
-jest.mock('../../risk_engine/utils/saved_object_configuration');
-jest.mock('../maintainer/steps/score_base_entities');
-jest.mock('../maintainer/steps/run_resolution_scoring_step');
-jest.mock('../maintainer/utils/fetch_watchlist_configs');
-jest.mock('../is_id_based_risk_scoring_enabled');
-jest.mock('../maintainer/steps/build_alert_filters');
+vi.mock('@kbn/entity-store/common/euid_helpers', () => {
+      const mocked = {
+      euid: {
+        dsl: {
+          getEuidFilterBasedOnDocument: vi.fn().mockReturnValue({ term: { 'entity.id': entityId } }),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../get_risk_inputs_index');
+vi.mock('../../risk_engine/utils/saved_object_configuration');
+vi.mock('../maintainer/steps/score_base_entities');
+vi.mock('../maintainer/steps/run_resolution_scoring_step');
+vi.mock('../maintainer/utils/fetch_watchlist_configs');
+vi.mock('../is_id_based_risk_scoring_enabled');
+vi.mock('../maintainer/steps/build_alert_filters');
 
 const defaultEngineConfig = {
   dataViewId: 'default-dataview-id',
@@ -64,8 +70,8 @@ describe('entity risk score V2 calculation route', () => {
   let clients: MockClients;
   let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
-  let getStartServicesMock: jest.Mock;
-  let mockCrudClient: jest.Mocked<EntityStoreCRUDClient>;
+  let getStartServicesMock: Mock;
+  let mockCrudClient: Mocked<EntityStoreCRUDClient>;
 
   const defaultBody = {
     identifier: 'test-host-name',
@@ -74,7 +80,7 @@ describe('entity risk score V2 calculation route', () => {
   };
 
   beforeEach(() => {
-    getStartServicesMock = jest.fn().mockResolvedValue([
+    getStartServicesMock = vi.fn().mockResolvedValue([
       {},
       {
         security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
@@ -90,24 +96,24 @@ describe('entity risk score V2 calculation route', () => {
     );
 
     mockCrudClient = {
-      listEntities: jest.fn().mockResolvedValue({ entities: [entityDocMock] }),
-    } as unknown as jest.Mocked<EntityStoreCRUDClient>;
+      listEntities: vi.fn().mockResolvedValue({ entities: [entityDocMock] }),
+    } as unknown as Mocked<EntityStoreCRUDClient>;
     context.securitySolution.getEntityStoreUpdateClient.mockReturnValue(mockCrudClient);
 
-    (getConfiguration as jest.Mock).mockResolvedValue(defaultEngineConfig);
-    (getRiskInputsIndex as jest.Mock).mockResolvedValue({ index: 'default-alerts-index' });
-    (buildAlertFilters as jest.Mock).mockReturnValue([]);
-    (fetchWatchlistConfigs as jest.Mock).mockResolvedValue(new Map());
-    (getIsIdBasedRiskScoringEnabled as jest.Mock).mockResolvedValue(false);
-    (scoreBaseEntities as jest.Mock).mockResolvedValue({ scores: {}, scoresWritten: 0 });
-    (runResolutionScoringStep as jest.Mock).mockResolvedValue({ scores: {}, scoresWritten: 0 });
+    (getConfiguration as Mock).mockResolvedValue(defaultEngineConfig);
+    (getRiskInputsIndex as Mock).mockResolvedValue({ index: 'default-alerts-index' });
+    (buildAlertFilters as Mock).mockReturnValue([]);
+    (fetchWatchlistConfigs as Mock).mockResolvedValue(new Map());
+    (getIsIdBasedRiskScoringEnabled as Mock).mockResolvedValue(false);
+    (scoreBaseEntities as Mock).mockResolvedValue({ scores: {}, scoresWritten: 0 });
+    (runResolutionScoringStep as Mock).mockResolvedValue({ scores: {}, scoresWritten: 0 });
 
     riskScoreEntityCalculationRouteV2(server.router, getStartServicesMock, logger);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   const buildRequest = (overrides: object = {}) =>
@@ -159,7 +165,7 @@ describe('entity risk score V2 calculation route', () => {
   });
 
   it('throws an error when no risk engine configuration is found', async () => {
-    (getConfiguration as jest.Mock).mockResolvedValue(null);
+    (getConfiguration as Mock).mockResolvedValue(null);
 
     const response = await server.inject(
       buildRequest(),
@@ -172,7 +178,7 @@ describe('entity risk score V2 calculation route', () => {
 
   it('filters alerts for the given entity', async () => {
     const engineFilter = { term: { 'kibana.alert.workflow_status': 'open' } };
-    (buildAlertFilters as jest.Mock).mockReturnValue([engineFilter]);
+    (buildAlertFilters as Mock).mockReturnValue([engineFilter]);
 
     await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
@@ -196,7 +202,7 @@ describe('entity risk score V2 calculation route', () => {
 
   it('runs resolution scoring against the entity itself when no resolved entity exists', async () => {
     // override default mock that returns an entity with a resolved_to
-    mockCrudClient.listEntities = jest
+    mockCrudClient.listEntities = vi
       .fn()
       .mockResolvedValue({ entities: [{ entity: { id: entityId } }] });
 
@@ -210,8 +216,8 @@ describe('entity risk score V2 calculation route', () => {
   it('uses the same run ID across base and resolution scoring', async () => {
     await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
-    const { calculationRunId: baseRunId } = (scoreBaseEntities as jest.Mock).mock.calls[0][0];
-    const { calculationRunId: resolutionRunId } = (runResolutionScoringStep as jest.Mock).mock
+    const { calculationRunId: baseRunId } = (scoreBaseEntities as Mock).mock.calls[0][0];
+    const { calculationRunId: resolutionRunId } = (runResolutionScoringStep as Mock).mock
       .calls[0][0];
 
     expect(baseRunId).toBeDefined();
@@ -233,7 +239,7 @@ describe('entity risk score V2 calculation route', () => {
   });
 
   it('returns 400 and skips scoring when entity is not found', async () => {
-    mockCrudClient.listEntities = jest.fn().mockResolvedValue({ entities: [] });
+    mockCrudClient.listEntities = vi.fn().mockResolvedValue({ entities: [] });
 
     const response = await server.inject(
       buildRequest(),
@@ -246,7 +252,7 @@ describe('entity risk score V2 calculation route', () => {
   });
 
   it('throws an error on unhandled exceptions', async () => {
-    (scoreBaseEntities as jest.Mock).mockRejectedValue(new Error('unexpected'));
+    (scoreBaseEntities as Mock).mockRejectedValue(new Error('unexpected'));
 
     const response = await server.inject(
       buildRequest(),

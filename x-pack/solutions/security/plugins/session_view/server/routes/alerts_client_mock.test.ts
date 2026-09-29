@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ConstructorOptions } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -49,7 +52,7 @@ const getResponse = async () => {
 };
 
 const createAlertsClientParams = () => {
-  const getAlertIndicesAliasMock = jest.fn();
+  const getAlertIndicesAliasMock = vi.fn();
   const alertingAuthMock = alertingAuthorizationMock.create();
 
   const authorizedRuleTypes = new Map([
@@ -84,15 +87,15 @@ const createAlertsClientParams = () => {
 
   const auditLogger = auditLoggerMock.create();
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient(getResponse());
-  const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+  const alertsClientParams: Mocked<ConstructorOptions> = {
     logger: loggingSystemMock.create().get(),
     authorization: alertingAuthMock,
     auditLogger,
     ruleDataService: ruleDataServiceMock.create(),
     esClient: esClientMock,
     esClientScoped: esClientMock,
-    getRuleType: jest.fn(),
-    getRuleList: jest.fn(),
+    getRuleType: vi.fn(),
+    getRuleList: vi.fn(),
     getAlertIndicesAlias: getAlertIndicesAliasMock,
   };
 

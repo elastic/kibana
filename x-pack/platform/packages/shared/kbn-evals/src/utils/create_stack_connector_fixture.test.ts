@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { v5 } from 'uuid';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { StackConnectorDefinition } from './eval_connector';
@@ -47,21 +50,21 @@ describe('createStackConnectorFixture', () => {
 
   const expectedUuid = v5(predefinedConnector.id, v5.DNS);
 
-  let mockFetch: jest.Mock;
-  let mockLog: jest.Mocked<ToolingLog>;
-  let mockUse: jest.Mock;
+  let mockFetch: Mock;
+  let mockLog: Mocked<ToolingLog>;
+  let mockUse: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delete process.env.KBN_EVALS_AWAIT_CCM_CONNECTORS;
-    mockFetch = jest.fn().mockResolvedValue(undefined);
+    mockFetch = vi.fn().mockResolvedValue(undefined);
     mockLog = {
-      info: jest.fn(),
-      debug: jest.fn(),
-      warning: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+      warning: vi.fn(),
+      error: vi.fn(),
     } as any;
-    mockUse = jest.fn().mockResolvedValue(undefined);
+    mockUse = vi.fn().mockResolvedValue(undefined);
   });
 
   afterEach(() => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { createRef } from 'react';
 import { act, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -23,13 +26,13 @@ import '../../lib/tests/mocks';
 const defaultLayoutConfig = getDefaultLayoutConfig(16);
 
 describe('EditOverlay', () => {
-  let setIsEditMode: jest.Mock;
+  let setIsEditMode: Mock;
   let target: HTMLDivElement;
   let originalElementsFromPoint: typeof document.elementsFromPoint;
   let originalRAF: typeof requestAnimationFrame;
 
   beforeEach(() => {
-    setIsEditMode = jest.fn();
+    setIsEditMode = vi.fn();
     originalElementsFromPoint = document.elementsFromPoint;
     originalRAF = window.requestAnimationFrame;
     // Flush rAF synchronously so pointer-move assertions work immediately
@@ -67,8 +70,8 @@ describe('EditOverlay', () => {
   const getClone = () => document.querySelector(`[${DEVTOOL_MANAGED_ATTR}]`) as HTMLElement | null;
 
   it('should register and clean up event listeners', () => {
-    const addSpy = jest.spyOn(document, 'addEventListener');
-    const removeSpy = jest.spyOn(document, 'removeEventListener');
+    const addSpy = vi.spyOn(document, 'addEventListener');
+    const removeSpy = vi.spyOn(document, 'removeEventListener');
 
     const { unmount } = renderWithI18n(
       <EditOverlay
@@ -98,7 +101,7 @@ describe('EditOverlay', () => {
   });
 
   it('should show hover outline when moving over a valid element', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     renderWithI18n(
       <EditOverlay
@@ -122,7 +125,7 @@ describe('EditOverlay', () => {
     toolbar.id = DEVELOPER_TOOLBAR_ID;
     document.body.appendChild(toolbar);
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([toolbar, target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([toolbar, target]);
 
     renderWithI18n(
       <EditOverlay
@@ -144,7 +147,7 @@ describe('EditOverlay', () => {
   });
 
   it('should create a clone and hide original when dragging an element', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     renderWithI18n(
       <EditOverlay
@@ -179,7 +182,7 @@ describe('EditOverlay', () => {
 
   it('should preserve original transform and restore on resetAll', () => {
     target.style.transform = 'rotate(45deg)';
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
     const handleRef = createRef<EditOverlayHandle>();
 
     renderWithI18n(
@@ -219,7 +222,7 @@ describe('EditOverlay', () => {
   });
 
   it('should stop dragging on pointer up', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     renderWithI18n(
       <EditOverlay
@@ -255,7 +258,7 @@ describe('EditOverlay', () => {
   });
 
   it('should allow re-dragging a previously edited element', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     renderWithI18n(
       <EditOverlay
@@ -296,7 +299,7 @@ describe('EditOverlay', () => {
 
     // Second drag: re-grab the clone
     // Mock elementsFromPoint to return the clone this time
-    document.elementsFromPoint = jest.fn().mockReturnValue([clone]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([clone]);
 
     act(() => {
       fireEvent.pointerDown(document, { clientX: 85, clientY: 70 });
@@ -310,7 +313,7 @@ describe('EditOverlay', () => {
   });
 
   it('should exit edit mode without resetting on Escape', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     renderWithI18n(
       <EditOverlay
@@ -349,7 +352,7 @@ describe('EditOverlay', () => {
     measureOverlay.id = MEASURE_OVERLAY_ID;
     document.body.appendChild(measureOverlay);
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     renderWithI18n(
       <EditOverlay
@@ -388,7 +391,7 @@ describe('EditOverlay', () => {
     toolbar.id = DEVELOPER_TOOLBAR_ID;
     document.body.appendChild(toolbar);
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([toolbar, target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([toolbar, target]);
 
     renderWithI18n(
       <EditOverlay
@@ -399,7 +402,7 @@ describe('EditOverlay', () => {
       />
     );
 
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     const event = new PointerEvent('pointerdown', {
       clientX: 75,
       clientY: 60,
@@ -416,7 +419,7 @@ describe('EditOverlay', () => {
   });
 
   it('should abort drag on window blur', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([target]);
 
     renderWithI18n(
       <EditOverlay

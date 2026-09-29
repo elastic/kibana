@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent } from '@testing-library/react';
 
 import React from 'react';
@@ -17,27 +19,30 @@ import { createFleetTestRendererMock } from '../../../../mock';
 
 import { ConfiguredSettings } from '.';
 
-const mockUpdateAgentPolicy = jest.fn();
-const mockUpdateAdvancedSettingsHasErrors = jest.fn();
+const mockUpdateAgentPolicy = vi.fn();
+const mockUpdateAdvancedSettingsHasErrors = vi.fn();
 
-jest.mock('../../sections/agent_policy/components/agent_policy_form', () => ({
-  useAgentPolicyFormContext: () => ({
-    updateAdvancedSettingsHasErrors: mockUpdateAdvancedSettingsHasErrors,
-    updateAgentPolicy: mockUpdateAgentPolicy,
-    agentPolicy: {
-      advanced_settings: {
-        agent_limits_go_max_procs: 0,
-        agent_download_timeout: '120s',
-      },
-    },
-  }),
-}));
+vi.mock('../../sections/agent_policy/components/agent_policy_form', () => {
+      const mocked = {
+      useAgentPolicyFormContext: () => ({
+        updateAdvancedSettingsHasErrors: mockUpdateAdvancedSettingsHasErrors,
+        updateAgentPolicy: mockUpdateAgentPolicy,
+        agentPolicy: {
+          advanced_settings: {
+            agent_limits_go_max_procs: 0,
+            agent_download_timeout: '120s',
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ConfiguredSettings', () => {
   const testRenderer = createFleetTestRendererMock();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function render(settingsConfig: SettingsConfig[]) {

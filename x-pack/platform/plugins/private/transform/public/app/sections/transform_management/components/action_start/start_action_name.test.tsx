@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,7 +17,7 @@ import { StartActionName } from './start_action_name';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
 const queryClient = new QueryClient();
 

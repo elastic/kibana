@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
@@ -85,7 +87,7 @@ describe('useWindowBlurDataMonitoringTrigger', () => {
 
   it('reports awaiting data only once when telemetry context changes after blur', () => {
     const services = buildHostPageServices();
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     services.analytics.reportEvent = reportEvent;
     const wrapper: React.FC<React.PropsWithChildren> = ({ children }) => (
       <KibanaContextProvider services={services}>{children}</KibanaContextProvider>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -13,11 +16,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createTestQueryClient } from '../../test_utils';
 import { useQueryExecution } from './use_query_execution';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLResults: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetESQLResults = getESQLResults as jest.Mock;
+const mockGetESQLResults = getESQLResults as Mock;
 
 const createWrapper = () => {
   const queryClient = createTestQueryClient();
@@ -26,12 +32,12 @@ const createWrapper = () => {
   );
 };
 
-const data = { search: { search: jest.fn() } } as unknown as DataPublicPluginStart;
+const data = { search: { search: vi.fn() } } as unknown as DataPublicPluginStart;
 const timeRange = { from: 'now-15m', to: 'now' };
 
 describe('useQueryExecution', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has not run until run() is called', () => {

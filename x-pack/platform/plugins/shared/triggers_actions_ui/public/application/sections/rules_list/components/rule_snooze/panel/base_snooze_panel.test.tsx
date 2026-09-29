@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -20,10 +22,10 @@ describe('BaseSnoozePanel', () => {
         showCancel={false}
         scheduledSnoozes={[]}
         activeSnoozes={[]}
-        snoozeRule={jest.fn()}
-        unsnoozeRule={jest.fn()}
-        navigateToScheduler={jest.fn()}
-        onRemoveAllSchedules={jest.fn()}
+        snoozeRule={vi.fn()}
+        unsnoozeRule={vi.fn()}
+        navigateToScheduler={vi.fn()}
+        onRemoveAllSchedules={vi.fn()}
       />
     );
     expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
@@ -42,10 +44,10 @@ describe('BaseSnoozePanel', () => {
         showCancel={false}
         scheduledSnoozes={[]}
         activeSnoozes={[]}
-        snoozeRule={jest.fn()}
-        unsnoozeRule={jest.fn()}
-        navigateToScheduler={jest.fn()}
-        onRemoveAllSchedules={jest.fn()}
+        snoozeRule={vi.fn()}
+        unsnoozeRule={vi.fn()}
+        navigateToScheduler={vi.fn()}
+        onRemoveAllSchedules={vi.fn()}
       />
     );
     expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
@@ -60,10 +62,10 @@ describe('BaseSnoozePanel', () => {
         showCancel={true}
         scheduledSnoozes={[]}
         activeSnoozes={[]}
-        snoozeRule={jest.fn()}
-        unsnoozeRule={jest.fn()}
-        navigateToScheduler={jest.fn()}
-        onRemoveAllSchedules={jest.fn()}
+        snoozeRule={vi.fn()}
+        unsnoozeRule={vi.fn()}
+        navigateToScheduler={vi.fn()}
+        onRemoveAllSchedules={vi.fn()}
       />
     );
     expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
@@ -95,10 +97,10 @@ describe('BaseSnoozePanel', () => {
           },
         ]}
         activeSnoozes={[]}
-        snoozeRule={jest.fn()}
-        unsnoozeRule={jest.fn()}
-        navigateToScheduler={jest.fn()}
-        onRemoveAllSchedules={jest.fn()}
+        snoozeRule={vi.fn()}
+        unsnoozeRule={vi.fn()}
+        navigateToScheduler={vi.fn()}
+        onRemoveAllSchedules={vi.fn()}
       />
     );
     expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
@@ -160,10 +162,10 @@ describe('BaseSnoozePanel', () => {
           },
         ]}
         activeSnoozes={[]}
-        snoozeRule={jest.fn()}
-        unsnoozeRule={jest.fn()}
-        navigateToScheduler={jest.fn()}
-        onRemoveAllSchedules={jest.fn()}
+        snoozeRule={vi.fn()}
+        unsnoozeRule={vi.fn()}
+        navigateToScheduler={vi.fn()}
+        onRemoveAllSchedules={vi.fn()}
       />
     );
 

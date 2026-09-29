@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -29,14 +32,14 @@ import type { TransformManager } from './transform_manager';
 
 describe('CreateSLO', () => {
   let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockLogger: jest.Mocked<MockedLogger>;
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
-  let mockTransformManager: jest.Mocked<TransformManager>;
-  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
+  let mockSavedObjectsClient: Mocked<SavedObjectsClientContract>;
+  let mockLogger: Mocked<MockedLogger>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
+  let mockTransformManager: Mocked<TransformManager>;
+  let mockSummaryTransformManager: Mocked<TransformManager>;
   let createSLO: CreateSLO;
 
-  jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
+  vi.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   beforeEach(() => {
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();

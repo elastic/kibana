@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -16,11 +19,14 @@ import type { ChangeHistoryChangesSummaryRenderFn } from '../../types/change_his
 import { TestProvider } from '../../test_utils/test_providers';
 import { ChangeHistoryItem } from './change_history_item';
 
-jest.mock('../../provider/use_change_history_config', () => ({
-  useChangeHistoryConfig: jest.fn(),
-}));
+vi.mock('../../provider/use_change_history_config', () => {
+      const mocked = {
+      useChangeHistoryConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseChangeHistoryConfig = useChangeHistoryConfig as jest.Mock;
+const mockUseChangeHistoryConfig = useChangeHistoryConfig as Mock;
 
 const baseItem: ChangeHistoryListItem = {
   id: 'evt-1',
@@ -39,10 +45,10 @@ const renderItem = (
   overrides?: Partial<ChangeHistoryListItem>,
   options?: {
     selected?: boolean;
-    onClick?: jest.Mock;
+    onClick?: Mock;
     modalSelection?: {
-      requestCompareToVersion?: jest.Mock;
-      requestRestoreVersion?: jest.Mock;
+      requestCompareToVersion?: Mock;
+      requestRestoreVersion?: Mock;
     };
   }
 ) =>
@@ -50,15 +56,15 @@ const renderItem = (
     <ChangeHistoryModalSelectionContext.Provider
       value={
         options?.modalSelection ?? {
-          requestCompareToVersion: jest.fn(),
-          requestRestoreVersion: jest.fn(),
+          requestCompareToVersion: vi.fn(),
+          requestRestoreVersion: vi.fn(),
         }
       }
     >
       <ChangeHistoryItem
         item={{ ...baseItem, ...overrides }}
         selected={options?.selected ?? false}
-        onClick={options?.onClick ?? jest.fn()}
+        onClick={options?.onClick ?? vi.fn()}
       />
     </ChangeHistoryModalSelectionContext.Provider>,
     { wrapper: TestProvider }
@@ -117,7 +123,7 @@ describe('ChangeHistoryItem', () => {
   });
 
   it('selects the item when a non-expandable comment is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderItem({ comment: 'Restored from backup' }, { onClick });
 
     fireEvent.click(screen.getByTestId('changeHistoryItemComment'));
@@ -138,7 +144,7 @@ describe('ChangeHistoryItem', () => {
   });
 
   it('calls compare from default row actions', () => {
-    const requestCompareToVersion = jest.fn();
+    const requestCompareToVersion = vi.fn();
     renderItem(
       { id: 'evt-2', isCurrent: false, metadata: { version: 5 } },
       { modalSelection: { requestCompareToVersion } }
@@ -158,7 +164,7 @@ describe('ChangeHistoryItem', () => {
       ),
     });
 
-    const requestRestoreVersion = jest.fn();
+    const requestRestoreVersion = vi.fn();
     renderItem(
       { id: 'evt-2', isCurrent: false, metadata: { version: 5 } },
       { modalSelection: { requestRestoreVersion } }

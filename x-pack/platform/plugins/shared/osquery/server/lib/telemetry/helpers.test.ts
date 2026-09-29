@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { PackSavedObject, SavedQuerySavedObject } from '../../common/types';
@@ -21,7 +23,7 @@ import { TELEMETRY_EBT_PACK_EVENT, TELEMETRY_EBT_SAVED_QUERY_EVENT } from './con
  */
 const registeredSchema = (eventType: string): Record<string, { type?: string }> => {
   const schemas = new Map<string, Record<string, { type?: string }>>();
-  const registerEventType = jest.fn(({ eventType: type, schema }) => {
+  const registerEventType = vi.fn(({ eventType: type, schema }) => {
     schemas.set(type, schema);
   }) as unknown as AnalyticsServiceSetup['registerEventType'];
 

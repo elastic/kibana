@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Case } from '../../../common/types/domain';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 
@@ -25,9 +27,12 @@ import {
 } from '../mocks';
 import { search } from './search';
 
-jest.mock('@kbn/spaces-plugin/server/lib/utils/namespace', () => ({
-  spaceIdToNamespace: jest.fn().mockReturnValue('space1'),
-}));
+vi.mock('@kbn/spaces-plugin/server/lib/utils/namespace', () => {
+      const mocked = {
+      spaceIdToNamespace: vi.fn().mockReturnValue('space1'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('search', () => {
   const configureMock = [
@@ -55,7 +60,7 @@ describe('search', () => {
     },
   ];
   const casesClientMock = createCasesClientMock();
-  casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
+  casesClientMock.configure.get = vi.fn().mockResolvedValue(configureMock);
 
   describe('search', () => {
     const clientArgs = createCasesClientMockArgs();
@@ -76,7 +81,7 @@ describe('search', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('calls searchCasesGroupedByID with correct parameters', async () => {
@@ -217,10 +222,10 @@ describe('search', () => {
         mttr: 120,
       },
     });
-    casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
+    casesClientMock.configure.get = vi.fn().mockResolvedValue(configureMock);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('when foo:bar attribute in request payload', async () => {
@@ -392,7 +397,7 @@ describe('search', () => {
     });
 
     it('throws error when no customFields in configuration', async () => {
-      casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+      casesClientMock.configure.get = vi.fn().mockResolvedValue([]);
       const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
         owner: 'cases',

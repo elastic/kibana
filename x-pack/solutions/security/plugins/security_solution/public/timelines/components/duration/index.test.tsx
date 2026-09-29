@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -13,7 +15,7 @@ import { ONE_MILLISECOND_AS_NANOSECONDS } from '../formatted_duration/helpers';
 
 import { Duration } from '.';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('Duration', () => {
   test('it renders the expected formatted duration', () => {

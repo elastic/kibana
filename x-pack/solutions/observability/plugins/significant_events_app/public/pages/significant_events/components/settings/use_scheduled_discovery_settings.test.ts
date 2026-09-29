@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
@@ -19,13 +21,13 @@ import { useScheduledDiscoverySettings } from './use_scheduled_discovery_setting
 
 const createClient = (values: Record<string, boolean | number>) =>
   ({
-    get: jest.fn((key: string, defaultValue: boolean | number) => values[key] ?? defaultValue),
-    set: jest.fn().mockResolvedValue(undefined),
+    get: vi.fn((key: string, defaultValue: boolean | number) => values[key] ?? defaultValue),
+    set: vi.fn().mockResolvedValue(undefined),
   } as unknown as IUiSettingsClient);
 
 const createHttp = () =>
   ({
-    put: jest.fn().mockResolvedValue({}),
+    put: vi.fn().mockResolvedValue({}),
   } as unknown as HttpSetup);
 
 describe('useScheduledDiscoverySettings', () => {

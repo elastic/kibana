@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 
@@ -31,21 +34,24 @@ import { FleetSetupResponseSchema, GetAgentsSetupResponseSchema } from '.';
 const fleetSetupWithErrorHandler = withDefaultErrorHandler(fleetSetupHandler);
 const getFleetStatusWithErrorHandler = withDefaultErrorHandler(getFleetStatusHandler);
 
-jest.mock('../../services/setup', () => {
+vi.mock('../../services/setup', async () => {
   return {
-    ...jest.requireActual('../../services/setup'),
-    setupFleet: jest.fn(),
+    ...(await vi.importActual('../../services/setup')),
+    setupFleet: vi.fn(),
   };
 });
 
-jest.mock('../../services/fleet_server');
-jest.mock('../../services/secrets', () => ({
-  isSecretStorageEnabled: jest.fn().mockResolvedValue(true),
-  isSSLSecretStorageEnabled: jest.fn().mockResolvedValue(true),
-  isActionSecretStorageEnabled: jest.fn().mockResolvedValue(true),
-}));
+vi.mock('../../services/fleet_server');
+vi.mock('../../services/secrets', () => {
+      const mocked = {
+      isSecretStorageEnabled: vi.fn().mockResolvedValue(true),
+      isSSLSecretStorageEnabled: vi.fn().mockResolvedValue(true),
+      isActionSecretStorageEnabled: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
+const mockSetupFleet = setupFleet as MockedFunction<typeof setupFleet>;
 
 describe('FleetSetupHandler', () => {
   let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve'>>;
@@ -59,7 +65,7 @@ describe('FleetSetupHandler', () => {
         uninstallTokenService: {
           asCurrentUser: createUninstallTokenServiceMock(),
         },
-        getAllSpaces: jest.fn(),
+        getAllSpaces: vi.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -85,7 +91,7 @@ describe('FleetSetupHandler', () => {
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appContextService.stop();
   });
 
@@ -161,7 +167,7 @@ describe('FleetStatusHandler', () => {
         uninstallTokenService: {
           asCurrentUser: createUninstallTokenServiceMock(),
         },
-        getAllSpaces: jest.fn(),
+        getAllSpaces: vi.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -187,15 +193,15 @@ describe('FleetStatusHandler', () => {
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appContextService.stop();
   });
 
   it('POST /status w/200 and body without missing requirements', async () => {
-    jest
+    vi
       .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
       .mockResolvedValue(true);
-    jest.mocked(hasFleetServers).mockResolvedValue(true);
+    vi.mocked(hasFleetServers).mockResolvedValue(true);
     await getFleetStatusWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,
@@ -216,10 +222,10 @@ describe('FleetStatusHandler', () => {
   });
 
   it('POST /status w/200 and body with missing requirements', async () => {
-    jest
+    vi
       .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
       .mockResolvedValue(false);
-    jest.mocked(hasFleetServers).mockResolvedValue(false);
+    vi.mocked(hasFleetServers).mockResolvedValue(false);
     await getFleetStatusWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,
@@ -242,7 +248,7 @@ describe('FleetStatusHandler', () => {
   });
 
   it('POST /status  w/200 with fleet server standalone', async () => {
-    jest.mocked(hasFleetServers).mockResolvedValue(false);
+    vi.mocked(hasFleetServers).mockResolvedValue(false);
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
@@ -250,7 +256,7 @@ describe('FleetStatusHandler', () => {
         },
       } as any)
     );
-    jest
+    vi
       .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
       .mockResolvedValue(true);
     await getFleetStatusWithErrorHandler(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
@@ -17,9 +20,12 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockBackfillResult: Backfill = {
   id: 'abc',
@@ -53,7 +59,7 @@ const mockBackfillResult: Backfill = {
 
 describe('getBackfillRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should get the backfill', async () => {
@@ -96,7 +102,7 @@ describe('getBackfillRoute', () => {
 
     getBackfillRoute(router, licenseState);
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
     const [, handler] = router.get.mock.calls[0];
@@ -108,7 +114,7 @@ describe('getBackfillRoute', () => {
 
 describe('getBackfillPublicRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should register the public route with the correct path', async () => {

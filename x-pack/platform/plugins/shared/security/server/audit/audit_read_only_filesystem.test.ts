@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -115,10 +117,10 @@ describeUnlessRoot('AuditService on a read-only filesystem', () => {
       logging,
       http,
       status,
-      getCurrentUser: jest.fn(),
-      getSpaceId: jest.fn(),
-      getSID: jest.fn(),
-      recordAuditLoggingUsage: jest.fn(),
+      getCurrentUser: vi.fn(),
+      getSpaceId: vi.fn(),
+      getSID: vi.fn(),
+      recordAuditLoggingUsage: vi.fn(),
     });
   };
 

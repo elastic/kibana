@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
@@ -34,9 +37,9 @@ import {
   UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS,
 } from './unenroll_inactive_agents_task';
 
-jest.mock('../services');
-jest.mock('../services/agents');
-jest.mock('../services/agents/unenroll_action_runner');
+vi.mock('../services');
+vi.mock('../services/agents');
+vi.mock('../services/agents/unenroll_action_runner');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -52,8 +55,8 @@ const MOCK_TASK_INSTANCE = {
   taskType: TYPE,
 };
 
-const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
+const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
 
 describe('UnenrollInactiveAgentsTask', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -62,8 +65,8 @@ describe('UnenrollInactiveAgentsTask', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: UnenrollInactiveAgentsTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  const mockedUnenrollBatch = jest.mocked(unenrollBatch);
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
+  const mockedUnenrollBatch = vi.mocked(unenrollBatch);
 
   const unenrollBatchSize = 3;
   const agents = [
@@ -88,8 +91,8 @@ describe('UnenrollInactiveAgentsTask', () => {
   ];
 
   const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-    jest.fn().mockResolvedValue(
-      jest.fn(async function* () {
+    vi.fn().mockResolvedValue(
+      vi.fn(async function* () {
         yield items;
       })()
     );
@@ -109,7 +112,7 @@ describe('UnenrollInactiveAgentsTask', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Task lifecycle', () => {
@@ -155,11 +158,11 @@ describe('UnenrollInactiveAgentsTask', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('Should schedule eligible agents with a future start_time', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2025-06-01T00:00:00.000Z'));
+      vi.useFakeTimers().setSystemTime(new Date('2025-06-01T00:00:00.000Z'));
       mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
       // esClient.search returns empty (no already-scheduled actions, no due actions)
       esClient.search.mockResolvedValue({
@@ -174,7 +177,7 @@ describe('UnenrollInactiveAgentsTask', () => {
         startTime: expectedStartTime,
         actionId: expect.stringContaining(SCHEDULED_UNENROLL_ACTION_ID_PREFIX),
       });
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('Should skip agents that are already scheduled for unenrollment', async () => {
@@ -203,7 +206,7 @@ describe('UnenrollInactiveAgentsTask', () => {
 
     it('Should execute due scheduled actions that have no CANCEL', async () => {
       const now = new Date('2025-06-01T02:00:00.000Z');
-      jest.useFakeTimers().setSystemTime(now);
+      vi.useFakeTimers().setSystemTime(now);
       mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
 
       esClient.search
@@ -244,12 +247,12 @@ describe('UnenrollInactiveAgentsTask', () => {
           skipActionCreation: true,
         })
       );
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('Should NOT execute due action if a CANCEL exists', async () => {
       const now = new Date('2025-06-01T02:00:00.000Z');
-      jest.useFakeTimers().setSystemTime(now);
+      vi.useFakeTimers().setSystemTime(now);
       mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
       // Schedule phase finds no eligible agents
       mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
@@ -285,12 +288,12 @@ describe('UnenrollInactiveAgentsTask', () => {
 
       await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('Should skip due action if agent is no longer inactive', async () => {
       const now = new Date('2025-06-01T02:00:00.000Z');
-      jest.useFakeTimers().setSystemTime(now);
+      vi.useFakeTimers().setSystemTime(now);
       mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
 
       esClient.search
@@ -321,7 +324,7 @@ describe('UnenrollInactiveAgentsTask', () => {
 
       await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('Should not run if task is outdated', async () => {
@@ -350,8 +353,8 @@ describe('UnenrollInactiveAgentsTask', () => {
     it('Should process agent policies in batches', async () => {
       const firstAgentPoliciesBatch = [createAgentPolicyMock({ id: 'agent-policy-1' })];
       const secondAgentPoliciesBatch = [createAgentPolicyMock({ id: 'agent-policy-2' })];
-      mockAgentPolicyService.fetchAllAgentPolicies = jest.fn().mockResolvedValue(
-        jest.fn(async function* () {
+      mockAgentPolicyService.fetchAllAgentPolicies = vi.fn().mockResolvedValue(
+        vi.fn(async function* () {
           yield firstAgentPoliciesBatch;
           yield secondAgentPoliciesBatch;
         })()
@@ -403,11 +406,11 @@ describe('UnenrollInactiveAgentsTask', () => {
     const policy2 = createAgentPolicyMock({ id: 'agent-policy-2', unenroll_timeout: 300 });
 
     beforeEach(() => {
-      jest.useFakeTimers().setSystemTime(new Date('2025-06-01'));
+      vi.useFakeTimers().setSystemTime(new Date('2025-06-01'));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('Should get a query that only gets agents that have been inactive for longer than the unenroll_timeout', async () => {

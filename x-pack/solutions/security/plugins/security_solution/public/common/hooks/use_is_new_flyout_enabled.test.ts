@@ -5,26 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useIsNewFlyoutEnabled } from './use_is_new_flyout_enabled';
 import { useKibana } from '../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 import { ENABLE_NEW_FLYOUT_SETTING } from '../../../common/constants';
 
-jest.mock('../lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('./use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useIsNewFlyoutEnabled', () => {
-  let mockUiSettingsGet: jest.Mock;
+  let mockUiSettingsGet: Mock;
 
   beforeEach(() => {
-    mockUiSettingsGet = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    mockUiSettingsGet = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: {
         uiSettings: {
           get: mockUiSettingsGet,
@@ -34,11 +43,11 @@ describe('useIsNewFlyoutEnabled', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns true when the flag is off and the user opted in via the advanced setting', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(false);
     mockUiSettingsGet.mockReturnValue(true);
 
     const { result } = renderHook(() => useIsNewFlyoutEnabled());
@@ -49,7 +58,7 @@ describe('useIsNewFlyoutEnabled', () => {
   });
 
   it('returns false when the flag is off and the advanced setting is explicitly off', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(false);
     mockUiSettingsGet.mockReturnValue(false);
 
     const { result } = renderHook(() => useIsNewFlyoutEnabled());
@@ -60,7 +69,7 @@ describe('useIsNewFlyoutEnabled', () => {
   });
 
   it('returns false when the flag is on, ignoring any value stored for the advanced setting', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
     // Even if a stale `true` is still stored for the setting, the feature flag wins.
     mockUiSettingsGet.mockReturnValue(true);
 

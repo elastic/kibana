@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AgentPolicy, Output } from '../../types';
 import { createAppContextStartContractMock, createSavedObjectClientMock } from '../../mocks';
 import { appContextService } from '../app_context';
@@ -16,15 +19,15 @@ import { OutputNotFoundError } from '../../errors';
 
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 
-jest.mock('../output');
-jest.mock('../../routes/agent/source_uri_utils');
-jest.mock('../fleet_server_host');
-jest.mock('../fleet_proxies');
+vi.mock('../output');
+vi.mock('../../routes/agent/source_uri_utils');
+vi.mock('../fleet_server_host');
+vi.mock('../fleet_proxies');
 
-const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
-const mockedGetDownloadSourcesForAgentPolicy = getDownloadSourcesForAgentPolicy as jest.Mock;
-const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as jest.Mock;
-const mockedBulkGetFleetProxies = bulkGetFleetProxies as jest.Mock;
+const mockedOutputService = outputService as Mocked<typeof outputService>;
+const mockedGetDownloadSourcesForAgentPolicy = getDownloadSourcesForAgentPolicy as Mock;
+const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as Mock;
+const mockedBulkGetFleetProxies = bulkGetFleetProxies as Mock;
 
 const soClientMock = createSavedObjectClientMock();
 
@@ -59,7 +62,7 @@ describe('fetchRelatedSavedObjects', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('output ID resolution', () => {

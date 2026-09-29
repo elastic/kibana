@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import { setTimeout as timer } from 'timers/promises';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
@@ -47,7 +49,7 @@ const defaultConfig = {
 describe('UserActivityService', () => {
   let service: InternalUserActivityServiceSetup;
   let core: ReturnType<typeof mockCoreContext.create>;
-  let loggingService: jest.Mocked<InternalLoggingServiceSetup>;
+  let loggingService: Mocked<InternalLoggingServiceSetup>;
 
   beforeEach(() => {
     core = mockCoreContext.create();

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 const originalResizeObserver = global.ResizeObserver;
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 const originalClientHeightDescriptor = Object.getOwnPropertyDescriptor(
@@ -14,12 +16,12 @@ const originalClientHeightDescriptor = Object.getOwnPropertyDescriptor(
   'clientHeight'
 );
 
-const mockResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+const mockResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }));
-const mockedScrollIntoView = jest.fn();
+const mockedScrollIntoView = vi.fn();
 
 beforeAll(() => {
   global.ResizeObserver = mockResizeObserver;
@@ -27,19 +29,19 @@ beforeAll(() => {
 });
 
 const areFakeTimersEnabled = () =>
-  typeof jest.isMockFunction === 'function' && jest.isMockFunction(setTimeout);
+  typeof vi.isMockFunction === 'function' && vi.isMockFunction(setTimeout);
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   mockedScrollIntoView.mockClear();
   localStorage.clear();
 });
 
 afterEach(() => {
   if (areFakeTimersEnabled()) {
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
   }
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 afterAll(() => {
@@ -50,5 +52,5 @@ afterAll(() => {
     Object.defineProperty(HTMLElement.prototype, 'clientHeight', originalClientHeightDescriptor);
   }
 
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });

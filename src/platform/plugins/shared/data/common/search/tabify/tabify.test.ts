@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { tabifyAggResponse } from './tabify';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BucketAggParam, IAggConfig, IAggConfigs } from '../aggs';
@@ -61,7 +63,7 @@ describe('tabifyAggResponse Integration', () => {
         }),
       } as unknown as DataView;
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry, probability }, jest.fn());
+      return new AggConfigs(indexPattern, aggs, { typesRegistry, probability }, vi.fn());
     };
 
     const mockAggConfig = (agg: any): IAggConfig => agg as unknown as IAggConfig;
@@ -119,7 +121,7 @@ describe('tabifyAggResponse Integration', () => {
       test('does not call write if scaleMetricValues is not set', () => {
         const aggConfigs = createAggConfigs([{ type: 'count' } as any]);
 
-        const writeMock = jest.fn();
+        const writeMock = vi.fn();
         aggConfigs.getRequestAggs()[0].write = writeMock;
 
         tabifyAggResponse(aggConfigs, enrichResponseWithSampling(metricOnly), {
@@ -133,7 +135,7 @@ describe('tabifyAggResponse Integration', () => {
           { type: 'count', params: { scaleMetricValues: true } } as any,
         ]);
 
-        const writeMock = jest.fn(() => ({}));
+        const writeMock = vi.fn(() => ({}));
         aggConfigs.getRequestAggs()[0].write = writeMock;
 
         tabifyAggResponse(aggConfigs, enrichResponseWithSampling(metricOnly), {

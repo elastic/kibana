@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { BucketAggs } from '.';
@@ -20,17 +22,20 @@ import type {
 } from '../../types';
 import type { SchemaConfig } from '../../..';
 
-const mockConvertToDateHistogramColumn = jest.fn();
-const mockConvertToFiltersColumn = jest.fn();
-const mockConvertToTermsColumn = jest.fn();
-const mockConvertToRangeColumn = jest.fn();
+const mockConvertToDateHistogramColumn = vi.fn();
+const mockConvertToFiltersColumn = vi.fn();
+const mockConvertToTermsColumn = vi.fn();
+const mockConvertToRangeColumn = vi.fn();
 
-jest.mock('../convert', () => ({
-  convertToDateHistogramColumn: jest.fn(() => mockConvertToDateHistogramColumn()),
-  convertToFiltersColumn: jest.fn(() => mockConvertToFiltersColumn()),
-  convertToTermsColumn: jest.fn(() => mockConvertToTermsColumn()),
-  convertToRangeColumn: jest.fn(() => mockConvertToRangeColumn()),
-}));
+vi.mock('../convert', () => {
+      const mocked = {
+      convertToDateHistogramColumn: vi.fn(() => mockConvertToDateHistogramColumn()),
+      convertToFiltersColumn: vi.fn(() => mockConvertToFiltersColumn()),
+      convertToTermsColumn: vi.fn(() => mockConvertToTermsColumn()),
+      convertToRangeColumn: vi.fn(() => mockConvertToRangeColumn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertBucketToColumns', () => {
   const field = stubLogstashDataView.fields[0].name;
@@ -163,7 +168,7 @@ describe('convertBucketToColumns', () => {
   const visType = 'heatmap';
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test.each<

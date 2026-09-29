@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -13,7 +15,7 @@ import { IndexDataEnricher } from '../../../services/index_data_enricher';
 
 import { registerPrivilegesRoute } from './register_privileges_route';
 
-jest.mock('../../../services/index_data_enricher');
+vi.mock('../../../services/index_data_enricher');
 
 const httpService = httpServiceMock.createSetupContract();
 
@@ -59,7 +61,7 @@ describe('GET privileges', () => {
       },
       indexDataEnricher: mockedIndexDataEnricher,
       lib: {
-        handleEsError: jest.fn(),
+        handleEsError: vi.fn(),
       },
     });
 
@@ -76,7 +78,7 @@ describe('GET privileges', () => {
     };
 
     const routeContextMock = mockRouteContext({
-      hasPrivileges: jest.fn().mockResolvedValueOnce(privilegesResponseMock),
+      hasPrivileges: vi.fn().mockResolvedValueOnce(privilegesResponseMock),
     });
 
     const request = httpServerMock.createKibanaRequest();
@@ -100,7 +102,7 @@ describe('GET privileges', () => {
     };
 
     const routeContextMock = mockRouteContext({
-      hasPrivileges: jest.fn().mockResolvedValueOnce(privilegesResponseMock),
+      hasPrivileges: vi.fn().mockResolvedValueOnce(privilegesResponseMock),
     });
 
     const request = httpServerMock.createKibanaRequest();
@@ -134,7 +136,7 @@ describe('GET privileges', () => {
         },
         indexDataEnricher: mockedIndexDataEnricher,
         lib: {
-          handleEsError: jest.fn(),
+          handleEsError: vi.fn(),
         },
       });
 
@@ -143,7 +145,7 @@ describe('GET privileges', () => {
 
     it('should return the default privileges response', async () => {
       const routeContextMock = mockRouteContext({
-        hasPrivileges: jest.fn(),
+        hasPrivileges: vi.fn(),
       });
 
       const request = httpServerMock.createKibanaRequest();

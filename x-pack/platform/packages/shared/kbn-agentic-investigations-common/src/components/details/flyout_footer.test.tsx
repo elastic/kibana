@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -31,7 +33,7 @@ const openEscalationButtonName = ACTIONS_TRANSLATIONS.buttons.openEscalation;
 
 describe('ConversationDetailsFlyoutFooter', () => {
   it('calls the supplied onOpenChat rather than reaching for Kibana services', () => {
-    const onOpenChat = jest.fn();
+    const onOpenChat = vi.fn();
 
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter
@@ -51,7 +53,7 @@ describe('ConversationDetailsFlyoutFooter', () => {
       <ConversationDetailsFlyoutFooter
         investigation={investigation}
         isOpenedFromChat
-        onOpenChat={jest.fn()}
+        onOpenChat={vi.fn()}
       />
     );
 
@@ -59,13 +61,13 @@ describe('ConversationDetailsFlyoutFooter', () => {
   });
 
   it('opens the escalation modal via onOpenEscalation when the button is clicked', () => {
-    const onOpenEscalation = jest.fn(() => <div>Escalation modal</div>);
+    const onOpenEscalation = vi.fn(() => <div>Escalation modal</div>);
 
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter
         investigation={investigation}
         isOpenedFromChat={false}
-        onOpenChat={jest.fn()}
+        onOpenChat={vi.fn()}
         onOpenEscalation={onOpenEscalation}
       />
     );
@@ -84,7 +86,7 @@ describe('ConversationDetailsFlyoutFooter', () => {
       <ConversationDetailsFlyoutFooter
         investigation={investigation}
         isOpenedFromChat={false}
-        onOpenChat={jest.fn()}
+        onOpenChat={vi.fn()}
         onCloseInvestigation={() => <div>Dismiss proposal</div>}
       />
     );

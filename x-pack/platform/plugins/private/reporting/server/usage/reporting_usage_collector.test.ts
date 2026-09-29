@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { ReportingCore } from '..';
@@ -28,7 +31,7 @@ describe('Reporting Usage Collector', () => {
   });
 
   it('instantiates the collector object', () => {
-    const registerCollectorSpy = jest.spyOn(usageCollectionSetup, 'registerCollector');
+    const registerCollectorSpy = vi.spyOn(usageCollectionSetup, 'registerCollector');
     registerReportingUsageCollector(
       mockReporting,
       new Promise(() => taskManagerStart),
@@ -70,9 +73,9 @@ describe('Reporting Usage Collector', () => {
 
   it('should return an error message if fetching data fails', async () => {
     const usageCollectionMock = {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      makeUsageCollector: vi.fn(),
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
     taskManagerStart.get.mockRejectedValueOnce(new Error('error message'));
     const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
       resolve(taskManagerStart);
@@ -95,9 +98,9 @@ describe('Reporting Usage Collector', () => {
 
   it('should return the task state including error messages', async () => {
     const usageCollectionMock = {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      makeUsageCollector: vi.fn(),
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
     const mockStats = {
       has_errors: true,
       error_messages: ['an error message'],

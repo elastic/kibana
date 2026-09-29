@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
@@ -14,10 +16,10 @@ import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../../common/a
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 
-const mockFetchAllTimeline = jest.fn();
-jest.mock('../../../containers/all', () => {
+const mockFetchAllTimeline = vi.fn();
+vi.mock('../../../containers/all', () => {
   return {
-    useGetAllTimeline: jest.fn(() => ({
+    useGetAllTimeline: vi.fn(() => ({
       fetchAllTimeline: mockFetchAllTimeline,
       timelines: [],
     })),
@@ -26,9 +28,9 @@ jest.mock('../../../containers/all', () => {
 describe('SelectableTimeline', () => {
   const props = {
     hideUntitled: false,
-    getSelectableOptions: jest.fn().mockReturnValue([]),
-    onClosePopover: jest.fn(),
-    onTimelineChange: jest.fn(),
+    getSelectableOptions: vi.fn().mockReturnValue([]),
+    onClosePopover: vi.fn(),
+    onTimelineChange: vi.fn(),
     timelineType: TimelineTypeEnum.default,
   };
 
@@ -41,7 +43,7 @@ describe('SelectableTimeline', () => {
       });
 
       afterAll(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       test('render placeholder', () => {
@@ -59,7 +61,7 @@ describe('SelectableTimeline', () => {
       });
 
       afterAll(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       test('render placeholder', () => {
@@ -91,7 +93,7 @@ describe('SelectableTimeline', () => {
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('should be called with correct args', () => {

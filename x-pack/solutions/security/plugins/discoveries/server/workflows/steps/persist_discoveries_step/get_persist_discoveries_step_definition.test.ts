@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
@@ -13,25 +16,34 @@ import { resolveConnectorDetails } from '../../helpers/resolve_connector_details
 import { validateAttackDiscoveries } from '../../../routes/post/validate/helpers/validate_attack_discoveries';
 import { authenticateAndGetSpace } from '../default_validation_step/helpers/authenticate_and_get_space';
 
-jest.mock('../../helpers/resolve_connector_details', () => ({
-  resolveConnectorDetails: jest.fn(),
-}));
+vi.mock('../../helpers/resolve_connector_details', () => {
+      const mocked = {
+      resolveConnectorDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../routes/post/validate/helpers/validate_attack_discoveries', () => ({
-  validateAttackDiscoveries: jest.fn(),
-}));
+vi.mock('../../../routes/post/validate/helpers/validate_attack_discoveries', () => {
+      const mocked = {
+      validateAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../default_validation_step/helpers/authenticate_and_get_space', () => ({
-  authenticateAndGetSpace: jest.fn(),
-}));
+vi.mock('../default_validation_step/helpers/authenticate_and_get_space', () => {
+      const mocked = {
+      authenticateAndGetSpace: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockResolveConnectorDetails = resolveConnectorDetails as jest.MockedFunction<
+const mockResolveConnectorDetails = resolveConnectorDetails as MockedFunction<
   typeof resolveConnectorDetails
 >;
-const mockValidateAttackDiscoveries = validateAttackDiscoveries as jest.MockedFunction<
+const mockValidateAttackDiscoveries = validateAttackDiscoveries as MockedFunction<
   typeof validateAttackDiscoveries
 >;
-const mockAuthenticateAndGetSpace = authenticateAndGetSpace as jest.MockedFunction<
+const mockAuthenticateAndGetSpace = authenticateAndGetSpace as MockedFunction<
   typeof authenticateAndGetSpace
 >;
 
@@ -43,27 +55,27 @@ const TEST_GENERATION_SOURCE = 'test-producer';
 
 describe('getPersistDiscoveriesStepDefinition', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockAdhocAttackDiscoveryDataClient = {
-    getReader: jest.fn(),
-    getWriter: jest.fn(),
-    indexNameWithNamespace: jest.fn(),
+    getReader: vi.fn(),
+    getWriter: vi.fn(),
+    indexNameWithNamespace: vi.fn(),
   } as unknown as IRuleDataClient;
 
-  const mockActionsClient = { get: jest.fn() };
+  const mockActionsClient = { get: vi.fn() };
 
-  const mockGetStartServices = jest.fn().mockResolvedValue({
+  const mockGetStartServices = vi.fn().mockResolvedValue({
     coreStart: {
       elasticsearch: {
         client: {
           asInternalUser: {
             indices: {
-              refresh: jest.fn(),
+              refresh: vi.fn(),
             },
           },
         },
@@ -71,7 +83,7 @@ describe('getPersistDiscoveriesStepDefinition', () => {
     },
     pluginsStart: {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+        getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
       },
     },
   });
@@ -85,11 +97,11 @@ describe('getPersistDiscoveriesStepDefinition', () => {
 
   const mockContext = {
     contextManager: {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         execution: { id: 'workflow-run-1' },
         workflow: { id: 'workflow-1' },
       }),
-      getFakeRequest: jest.fn().mockReturnValue({
+      getFakeRequest: vi.fn().mockReturnValue({
         headers: {},
       }),
     },
@@ -114,8 +126,8 @@ describe('getPersistDiscoveriesStepDefinition', () => {
       with_replacements: false,
     },
     logger: {
-      error: jest.fn(),
-      info: jest.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
     },
   };
 
@@ -128,7 +140,7 @@ describe('getPersistDiscoveriesStepDefinition', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockResolveConnectorDetails.mockResolvedValue({
       actionTypeId: '.gen-ai',

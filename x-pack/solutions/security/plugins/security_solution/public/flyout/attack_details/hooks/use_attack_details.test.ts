@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import {
@@ -13,44 +16,56 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { useAttackDetails } from './use_attack_details';
 
-jest.mock('@kbn/elastic-assistant-common', () => {
-  const actual = jest.requireActual('@kbn/elastic-assistant-common');
+vi.mock('@kbn/elastic-assistant-common', async () => {
+  const actual = (await vi.importActual('@kbn/elastic-assistant-common'));
   return {
     ...actual,
-    transformAttackDiscoveryAlertDocumentToApi: jest.fn(),
-    transformAttackDiscoveryAlertFromApi: jest.fn(),
+    transformAttackDiscoveryAlertDocumentToApi: vi.fn(),
+    transformAttackDiscoveryAlertFromApi: vi.fn(),
   };
 });
 
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: () => ({ dataView: { getRuntimeMappings: () => ({}) } }),
-}));
+vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: () => ({ dataView: { getRuntimeMappings: () => ({}) } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../data_view_manager/hooks/use_browser_fields', () => ({
-  useBrowserFields: () => ({}),
-}));
+vi.mock('../../../data_view_manager/hooks/use_browser_fields', () => {
+      const mocked = {
+      useBrowserFields: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../timelines/containers/details', () => ({
-  useTimelineEventsDetails: jest.fn(),
-}));
+vi.mock('../../../timelines/containers/details', () => {
+      const mocked = {
+      useTimelineEventsDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../document_details/shared/hooks/use_get_fields_data', () => ({
-  useGetFieldsData: () => ({ getFieldsData: () => null }),
-}));
+vi.mock('../../document_details/shared/hooks/use_get_fields_data', () => {
+      const mocked = {
+      useGetFieldsData: () => ({ getFieldsData: () => null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockTransformDocumentToApi = transformAttackDiscoveryAlertDocumentToApi as jest.Mock;
-const mockTransformFromApi = transformAttackDiscoveryAlertFromApi as jest.Mock;
-const useTimelineEventsDetails = jest.requireMock('../../../timelines/containers/details')
-  .useTimelineEventsDetails as jest.Mock;
+const mockTransformDocumentToApi = transformAttackDiscoveryAlertDocumentToApi as Mock;
+const mockTransformFromApi = transformAttackDiscoveryAlertFromApi as Mock;
+const useTimelineEventsDetails = (await vi.importMock('../../../timelines/containers/details'))
+  .useTimelineEventsDetails as Mock;
 
-const mockRefetch = jest.fn();
+const mockRefetch = vi.fn();
 
 const createSearchHit = (source: Record<string, unknown> | undefined, index?: string) =>
   source !== undefined ? { _id: 'attack-1', _index: index, _source: source } : undefined;
 
 describe('useAttackDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useTimelineEventsDetails.mockReturnValue([false, [], createSearchHit({}), null, mockRefetch]);
     mockTransformDocumentToApi.mockReturnValue({ alert_ids: [], title: 'Test' });
     mockTransformFromApi.mockReturnValue({

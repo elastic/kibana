@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, screen } from '@testing-library/react';
@@ -12,7 +14,7 @@ import type { ToastsApi } from '@kbn/core/public';
 import { RuleRoute, getRuleSummary } from './rule_route';
 import type { Rule, RuleSummary, RuleType } from '../../../../types';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -30,7 +32,7 @@ describe('rules_summary_route', () => {
 
 describe('getRuleState useEffect handler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches rule summary', async () => {
@@ -42,7 +44,7 @@ describe('getRuleState useEffect handler', () => {
     loadRuleSummary.mockImplementationOnce(async () => ruleSummary);
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
 
     await getRuleSummary(rule.id, loadRuleSummary, setRuleSummary, toastNotifications);
@@ -76,7 +78,7 @@ describe('getRuleState useEffect handler', () => {
     });
 
     const toastNotifications = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as ToastsApi;
     await getRuleSummary(rule.id, loadRuleSummary, setRuleSummary, toastNotifications);
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
@@ -88,14 +90,14 @@ describe('getRuleState useEffect handler', () => {
 
 function mockApis() {
   return {
-    loadRuleSummary: jest.fn(),
-    requestRefresh: jest.fn(),
+    loadRuleSummary: vi.fn(),
+    requestRefresh: vi.fn(),
   };
 }
 
 function mockStateSetter() {
   return {
-    setRuleSummary: jest.fn(),
+    setRuleSummary: vi.fn(),
   };
 }
 

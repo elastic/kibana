@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type {
   ElasticsearchClient,
   KibanaResponseFactory,
@@ -23,33 +26,36 @@ import type { Agent } from '../../../common/types';
 
 import { rollbackAgentHandler, bulkRollbackAgentHandler } from './rollback_handlers';
 
-jest.mock('../../../common', () => {
-  const actual = jest.requireActual('../../../common');
+vi.mock('../../../common', async () => {
+  const actual = (await vi.importActual('../../../common'));
   return {
     ...actual,
-    getFileMetadataIndexName: jest.fn((integration: string) => `.fleet-fileds-${integration}-meta`),
-    getFileDataIndexName: jest.fn((integration: string) => `.fleet-fileds-${integration}-data`),
+    getFileMetadataIndexName: vi.fn((integration: string) => `.fleet-fileds-${integration}-meta`),
+    getFileDataIndexName: vi.fn((integration: string) => `.fleet-fileds-${integration}-data`),
   };
 });
 
-jest.mock('../../services/agents', () => ({
-  getAgentById: jest.fn(),
-  sendRollbackAgentAction: jest.fn(),
-  sendRollbackAgentsActions: jest.fn(),
-}));
+vi.mock('../../services/agents', () => {
+      const mocked = {
+      getAgentById: vi.fn(),
+      sendRollbackAgentAction: vi.fn(),
+      sendRollbackAgentsActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Rollback handlers', () => {
-  let esClientMock: jest.Mocked<ElasticsearchClient>;
-  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
+  let esClientMock: Mocked<ElasticsearchClient>;
+  let soClientMock: Mocked<SavedObjectsClientContract>;
   let mockContext: any;
   let mockRequest: any;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
 
   const mockAgentId = 'agent-id-1';
   const mockActionId = 'action-id-123';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
     soClientMock = savedObjectsClientMock.create();
@@ -82,8 +88,8 @@ describe('Rollback handlers', () => {
         upgraded_at: '2023-01-01T00:00:00Z',
       };
 
-      (getAgentById as jest.Mock).mockResolvedValue(mockAgent);
-      (AgentService.sendRollbackAgentAction as jest.Mock).mockResolvedValue(mockActionId);
+      (getAgentById as Mock).mockResolvedValue(mockAgent);
+      (AgentService.sendRollbackAgentAction as Mock).mockResolvedValue(mockActionId);
 
       await rollbackAgentHandler(mockContext, mockRequest, mockResponse);
 
@@ -106,8 +112,8 @@ describe('Rollback handlers', () => {
       };
       const serviceError = new AgentRollbackError('No rollback available');
 
-      (getAgentById as jest.Mock).mockResolvedValue(mockAgent);
-      (AgentService.sendRollbackAgentAction as jest.Mock).mockRejectedValue(serviceError);
+      (getAgentById as Mock).mockResolvedValue(mockAgent);
+      (AgentService.sendRollbackAgentAction as Mock).mockRejectedValue(serviceError);
 
       await expect(rollbackAgentHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
         serviceError
@@ -130,7 +136,7 @@ describe('Rollback handlers', () => {
         },
       };
 
-      (AgentService.sendRollbackAgentsActions as jest.Mock).mockResolvedValue({
+      (AgentService.sendRollbackAgentsActions as Mock).mockResolvedValue({
         actionIds: mockActionIds,
       });
 
@@ -161,7 +167,7 @@ describe('Rollback handlers', () => {
         },
       };
 
-      (AgentService.sendRollbackAgentsActions as jest.Mock).mockResolvedValue({
+      (AgentService.sendRollbackAgentsActions as Mock).mockResolvedValue({
         actionIds: mockActionIds,
       });
 
@@ -191,7 +197,7 @@ describe('Rollback handlers', () => {
         },
       };
 
-      (AgentService.sendRollbackAgentsActions as jest.Mock).mockResolvedValue({
+      (AgentService.sendRollbackAgentsActions as Mock).mockResolvedValue({
         actionIds: mockActionIds,
       });
 
@@ -220,7 +226,7 @@ describe('Rollback handlers', () => {
         },
       };
 
-      (AgentService.sendRollbackAgentsActions as jest.Mock).mockRejectedValue(serviceError);
+      (AgentService.sendRollbackAgentsActions as Mock).mockRejectedValue(serviceError);
 
       await expect(
         bulkRollbackAgentHandler(mockContext, mockRequest, mockResponse)
@@ -238,7 +244,7 @@ describe('Rollback handlers', () => {
         },
       };
 
-      (AgentService.sendRollbackAgentsActions as jest.Mock).mockResolvedValue({
+      (AgentService.sendRollbackAgentsActions as Mock).mockResolvedValue({
         actionIds: [],
       });
 

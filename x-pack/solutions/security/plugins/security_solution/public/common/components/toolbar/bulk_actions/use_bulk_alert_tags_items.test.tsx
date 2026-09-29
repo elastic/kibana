@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { act, fireEvent, render, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
@@ -17,11 +20,11 @@ import { useSetAlertTags } from './use_set_alert_tags';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('./use_set_alert_tags');
-jest.mock('../../../lib/kibana');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('./use_set_alert_tags');
+vi.mock('../../../lib/kibana');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
 const defaultProps: UseBulkAlertTagsItemsProps = {
   refetch: () => {},
@@ -37,8 +40,8 @@ const mockTagItems = [
 
 const renderPanel = (panel: UseBulkAlertTagsPanel) => {
   const content = panel.renderContent({
-    closePopoverMenu: jest.fn(),
-    setIsBulkActionsLoading: jest.fn(),
+    closePopoverMenu: vi.fn(),
+    setIsBulkActionsLoading: vi.fn(),
     alertItems: mockTagItems,
   });
   return render(content);
@@ -46,8 +49,8 @@ const renderPanel = (panel: UseBulkAlertTagsPanel) => {
 
 describe('useBulkAlertTagsItems', () => {
   beforeEach(() => {
-    (useSetAlertTags as jest.Mock).mockReturnValue(jest.fn());
-    (useUiSetting$ as jest.Mock).mockReturnValue([['default-test-tag-1']]);
+    (useSetAlertTags as Mock).mockReturnValue(vi.fn());
+    (useUiSetting$ as Mock).mockReturnValue([['default-test-tag-1']]);
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
@@ -71,7 +74,7 @@ describe('useBulkAlertTagsItems', () => {
   });
 
   it('should still render alert tagging panel when useSetAlertTags is null', () => {
-    (useSetAlertTags as jest.Mock).mockReturnValue(null);
+    (useSetAlertTags as Mock).mockReturnValue(null);
     const { result } = renderHook(() => useBulkAlertTagsItems(defaultProps), {
       wrapper: TestProviders,
     });
@@ -84,8 +87,8 @@ describe('useBulkAlertTagsItems', () => {
   });
 
   it('should call setAlertTags on submit', () => {
-    const mockSetAlertTags = jest.fn();
-    (useSetAlertTags as jest.Mock).mockReturnValue(mockSetAlertTags);
+    const mockSetAlertTags = vi.fn();
+    (useSetAlertTags as Mock).mockReturnValue(mockSetAlertTags);
     const { result } = renderHook(() => useBulkAlertTagsItems(defaultProps), {
       wrapper: TestProviders,
     });

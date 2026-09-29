@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { collectStreamResults, createRulePipelineState } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -16,7 +18,7 @@ import type { RuleExecutionMiddlewareContext } from '../middleware/types';
 
 const createStep = (name: string): RuleExecutionStep => ({
   name,
-  executeStream: jest.fn((input) => input),
+  executeStream: vi.fn((input) => input),
 });
 
 const createContext = (
@@ -58,7 +60,7 @@ describe('MetricsMiddleware', () => {
     const recorder: MetricRecorder = {
       name: 'r',
       observes: 'all',
-      record: jest.fn(),
+      record: vi.fn(),
     };
     const middleware = new MetricsMiddleware([recorder], loggerService);
     const step = createStep('any');
@@ -75,7 +77,7 @@ describe('MetricsMiddleware', () => {
 
   it('invokes recorders that observe all steps for every continue emission', async () => {
     const { loggerService } = createLoggerService();
-    const record = jest.fn();
+    const record = vi.fn();
     const recorder: MetricRecorder = { name: 'all', observes: 'all', record };
     const middleware = new MetricsMiddleware([recorder], loggerService);
     const step = createStep('step1');
@@ -113,8 +115,8 @@ describe('MetricsMiddleware', () => {
 
   it('filters recorders by step name when observes is scoped', async () => {
     const { loggerService } = createLoggerService();
-    const recordMatching = jest.fn();
-    const recordOther = jest.fn();
+    const recordMatching = vi.fn();
+    const recordOther = vi.fn();
     const middleware = new MetricsMiddleware(
       [
         { name: 'match', observes: { stepName: 'step1' }, record: recordMatching },
@@ -141,7 +143,7 @@ describe('MetricsMiddleware', () => {
 
   it('does not invoke recorders on halt emissions', async () => {
     const { loggerService } = createLoggerService();
-    const record = jest.fn();
+    const record = vi.fn();
     const middleware = new MetricsMiddleware(
       [{ name: 'all', observes: 'all', record }],
       loggerService
@@ -171,7 +173,7 @@ describe('MetricsMiddleware', () => {
         throw new Error('recorder failure');
       },
     };
-    const ok = jest.fn();
+    const ok = vi.fn();
     const middleware = new MetricsMiddleware(
       [failing, { name: 'ok', observes: 'all', record: ok }],
       loggerService

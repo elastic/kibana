@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -21,9 +23,12 @@ import { MockUrlParamsContextProvider } from '../../../../context/url_params_con
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { useServiceIconBadges } from './use_service_icon_badges';
 
-jest.mock('@kbn/react-kibana-context-theme', () => ({
-  useKibanaIsDarkMode: () => false,
-}));
+vi.mock('@kbn/react-kibana-context-theme', () => {
+      const mocked = {
+      useKibanaIsDarkMode: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -31,7 +36,7 @@ const KibanaReactContext = createKibanaReactContext({
 
 function Wrapper({ children }: { children?: ReactNode }) {
   const mockPluginContext = merge({}, mockApmPluginContextValue, {
-    core: { http: { get: jest.fn() } },
+    core: { http: { get: vi.fn() } },
   }) as unknown as ApmPluginContextValue;
 
   return (
@@ -79,14 +84,14 @@ const defaultProps = {
 
 describe('useServiceIconBadges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a loading badge while icons are fetching', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: undefined,
       status: fetcherHook.FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -100,10 +105,10 @@ describe('useServiceIconBadges', () => {
   });
 
   it('renders no icon badges when metadata has no icons', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: {},
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -119,14 +124,14 @@ describe('useServiceIconBadges', () => {
   });
 
   it('renders service, container, and cloud icon badges when present', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: {
         agentName: 'java',
         containerType: 'Kubernetes',
         cloudProvider: 'aws',
       },
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -141,12 +146,12 @@ describe('useServiceIconBadges', () => {
   });
 
   it('renders an OpenTelemetry badge for OTel agents', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: {
         agentName: 'opentelemetry/java',
       },
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(

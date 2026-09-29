@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getSavedObjectsCountsMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./get_saved_object_counts', () => ({
-  getSavedObjectsCounts: getSavedObjectsCountsMock,
-}));
+export const getSavedObjectsCountsMock = vi.fn();
+
+vi.doMock('./get_saved_object_counts', () => {
+      const mocked = {
+      getSavedObjectsCounts: getSavedObjectsCountsMock,
+    };
+      return { ...mocked, default: mocked };
+    });

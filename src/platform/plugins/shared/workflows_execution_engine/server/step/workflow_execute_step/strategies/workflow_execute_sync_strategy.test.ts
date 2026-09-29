@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -30,24 +33,24 @@ const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
 
 describe('WorkflowExecuteSyncStrategy', () => {
   let strategy: WorkflowExecuteSyncStrategy;
-  let mockEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
-  let mockExecRepo: jest.Mocked<WorkflowExecutionRepository>;
-  let mockStepRepo: jest.Mocked<StepExecutionRepository>;
-  let mockStepRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockLogger: jest.Mocked<IWorkflowEventLogger>;
+  let mockEngine: Mocked<WorkflowsExecutionEnginePluginStart>;
+  let mockExecRepo: Mocked<WorkflowExecutionRepository>;
+  let mockStepRepo: Mocked<StepExecutionRepository>;
+  let mockStepRuntime: Mocked<StepExecutionRuntime>;
+  let mockLogger: Mocked<IWorkflowEventLogger>;
   let mockRequest: KibanaRequest;
 
   beforeEach(() => {
     mockEngine = {
-      executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'child-exec-1' }),
+      executeWorkflow: vi.fn().mockResolvedValue({ workflowExecutionId: 'child-exec-1' }),
     } as any;
 
     mockExecRepo = {
-      getWorkflowExecutionById: jest.fn(),
+      getWorkflowExecutionById: vi.fn(),
     } as any;
 
     mockStepRepo = {
-      getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
+      getStepExecutionsByWorkflowExecution: vi.fn().mockResolvedValue([]),
     } as any;
 
     mockStepRuntime = {
@@ -60,16 +63,16 @@ describe('WorkflowExecuteSyncStrategy', () => {
       },
       node: { stepId: 'sync-step-1' },
       abortController: new AbortController(),
-      getCurrentStepState: jest.fn().mockReturnValue(undefined),
-      setCurrentStepState: jest.fn(),
-      tryEnterWaitUntil: jest.fn().mockReturnValue(true),
-      updateWorkflowExecution: jest.fn(),
+      getCurrentStepState: vi.fn().mockReturnValue(undefined),
+      setCurrentStepState: vi.fn(),
+      tryEnterWaitUntil: vi.fn().mockReturnValue(true),
+      updateWorkflowExecution: vi.fn(),
     } as any;
 
     mockLogger = {
-      logInfo: jest.fn(),
-      logDebug: jest.fn(),
-      logError: jest.fn(),
+      logInfo: vi.fn(),
+      logDebug: vi.fn(),
+      logError: vi.fn(),
     } as any;
 
     mockRequest = {} as KibanaRequest;

@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { setTimeout } from 'timers/promises';
 import { asyncMapWithLimit } from './async';
 
 const NUMS = [1, 2, 3, 4];
-const ident = jest.fn(async function ident<T>(x: T) {
+const ident = vi.fn(async function ident<T>(x: T) {
   return await x;
 });
-const double = jest.fn(async function double(x: number) {
+const double = vi.fn(async function double(x: number) {
   return x * 2;
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 it('resolves with an empty array', async () => {
@@ -47,7 +49,7 @@ it('rejects when limit it not >= 1', async () => {
 });
 
 it('rejects with the first error produced and stops calling mapFn', async () => {
-  const map = jest.fn(async (num) => {
+  const map = vi.fn(async (num) => {
     if (num % 2 === 0) {
       throw new Error('even numbers are not supported');
     }

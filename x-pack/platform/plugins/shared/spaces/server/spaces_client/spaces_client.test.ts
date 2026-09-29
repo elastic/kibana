@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
@@ -20,16 +23,16 @@ import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';
 
 const createMockDebugLogger = () => {
-  return jest.fn();
+  return vi.fn();
 };
 
 const createMockNpreClient = (): INpreClient => {
   return {
-    getNpre: jest.fn().mockResolvedValue(undefined),
-    canGetNpre: jest.fn().mockResolvedValue(true),
-    putNpre: jest.fn().mockResolvedValue(undefined),
-    deleteNpre: jest.fn().mockResolvedValue(undefined),
-    canPutNpre: jest.fn().mockResolvedValue(true),
+    getNpre: vi.fn().mockResolvedValue(undefined),
+    canGetNpre: vi.fn().mockResolvedValue(true),
+    putNpre: vi.fn().mockResolvedValue(undefined),
+    deleteNpre: vi.fn().mockResolvedValue(undefined),
+    canPutNpre: vi.fn().mockResolvedValue(true),
   } as unknown as INpreClient;
 };
 
@@ -1650,7 +1653,7 @@ describe('projectRouting functionality', () => {
       } as any);
       const mockConfig = createMockConfig();
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
+      (mockNpreClient.getNpre as Mock).mockResolvedValue('project:test-project');
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1682,7 +1685,7 @@ describe('projectRouting functionality', () => {
       } as any);
       const mockConfig = createMockConfig();
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canGetNpre as jest.Mock).mockResolvedValue(false);
+      (mockNpreClient.canGetNpre as Mock).mockResolvedValue(false);
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1746,8 +1749,8 @@ describe('projectRouting functionality', () => {
       } as any);
       const mockConfig = createMockConfig();
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
-      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
+      (mockNpreClient.canPutNpre as Mock).mockResolvedValue(true);
+      (mockNpreClient.getNpre as Mock).mockResolvedValue('project:test-project');
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1816,7 +1819,7 @@ describe('projectRouting functionality', () => {
       mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
       const mockConfig = createMockConfig();
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(false);
+      (mockNpreClient.canPutNpre as Mock).mockResolvedValue(false);
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1925,8 +1928,8 @@ describe('projectRouting functionality', () => {
       } as any);
       const mockConfig = createMockConfig();
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
-      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:updated-project');
+      (mockNpreClient.canPutNpre as Mock).mockResolvedValue(true);
+      (mockNpreClient.getNpre as Mock).mockResolvedValue('project:updated-project');
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1970,8 +1973,8 @@ describe('projectRouting functionality', () => {
       } as any);
       const mockConfig = createMockConfig();
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
-      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue(undefined);
+      (mockNpreClient.canPutNpre as Mock).mockResolvedValue(true);
+      (mockNpreClient.getNpre as Mock).mockResolvedValue(undefined);
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -2101,7 +2104,7 @@ describe('projectRouting functionality', () => {
       mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
       const mockConfig = createMockConfig();
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.deleteNpre as jest.Mock).mockRejectedValue(
+      (mockNpreClient.deleteNpre as Mock).mockRejectedValue(
         new errors.ResponseError({
           statusCode: 404,
           body: {

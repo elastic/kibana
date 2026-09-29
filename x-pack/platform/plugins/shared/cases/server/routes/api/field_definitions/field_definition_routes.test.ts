@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { stringify as yamlStringify } from 'yaml';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
@@ -42,33 +44,33 @@ const makeFieldDef = (overrides: Partial<FieldDefinition> = {}): FieldDefinition
 const toSavedObject = (fd: FieldDefinition) => ({ attributes: fd });
 
 const createMockFieldDefinitionsClient = () => ({
-  getFieldDefinitions: jest.fn(async () => ({
+  getFieldDefinitions: vi.fn(async () => ({
     fieldDefinitions: [makeFieldDef()],
     total: 1,
   })),
-  getFieldDefinition: jest.fn(async () => toSavedObject(makeFieldDef())),
-  createFieldDefinition: jest.fn(async () => toSavedObject(makeFieldDef())),
-  validateCreateFieldDefinition: jest.fn(async () => undefined),
-  updateFieldDefinition: jest.fn(async () =>
+  getFieldDefinition: vi.fn(async () => toSavedObject(makeFieldDef())),
+  createFieldDefinition: vi.fn(async () => toSavedObject(makeFieldDef())),
+  validateCreateFieldDefinition: vi.fn(async () => undefined),
+  updateFieldDefinition: vi.fn(async () =>
     toSavedObject(makeFieldDef({ description: 'Updated' }))
   ),
-  validateUpdateFieldDefinition: jest.fn(async () => undefined),
-  deleteFieldDefinition: jest.fn(async () => undefined),
+  validateUpdateFieldDefinition: vi.fn(async () => undefined),
+  deleteFieldDefinition: vi.fn(async () => undefined),
 });
 
 const createMockContext = (client = createMockFieldDefinitionsClient()) => ({
   cases: {
-    getCasesClient: jest.fn().mockResolvedValue({ fieldDefinitions: client }),
+    getCasesClient: vi.fn().mockResolvedValue({ fieldDefinitions: client }),
   },
 });
 
 const createMockResponse = () => ({
-  ok: jest.fn(),
-  badRequest: jest.fn(),
-  notFound: jest.fn(),
-  conflict: jest.fn(),
-  forbidden: jest.fn(),
-  noContent: jest.fn(),
+  ok: vi.fn(),
+  badRequest: vi.fn(),
+  notFound: vi.fn(),
+  conflict: vi.fn(),
+  forbidden: vi.fn(),
+  noContent: vi.fn(),
 });
 
 describe('Public Field Definition Routes', () => {

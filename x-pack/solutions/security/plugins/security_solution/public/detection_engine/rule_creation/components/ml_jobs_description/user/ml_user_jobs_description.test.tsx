@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
@@ -12,7 +15,7 @@ import { MlUserJobsDescription } from './ml_user_jobs_description';
 
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 
-jest.mock(
+vi.mock(
   './ml_user_job_description',
   () =>
     ({
@@ -22,9 +25,9 @@ jest.mock(
     } as Record<string, React.FC<{ job: MlSummaryJob }>>)
 );
 
-jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs');
+vi.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs');
 
-const useInstalledSecurityJobsMock = useInstalledSecurityJobs as jest.Mock;
+const useInstalledSecurityJobsMock = useInstalledSecurityJobs as Mock;
 
 describe('MlUsersJobDescription', () => {
   it('should render null if user permissions absent', () => {

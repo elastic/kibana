@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { healthRoute } from './health';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { HealthStatus } from '@kbn/alerting-types';
@@ -19,9 +21,12 @@ import type { RegistryAlertTypeWithAuth } from '../../../../authorization';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const alerting = alertsMock.createStart();
 const currentDate = new Date().toISOString();
@@ -56,7 +61,7 @@ const ruleTypes: RegistryAlertTypeWithAuth[] = [
 ];
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   alerting.getFrameworkHealth.mockResolvedValue({
     decryptionHealth: {
       status: HealthStatus.OK,

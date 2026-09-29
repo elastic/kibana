@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -27,42 +30,42 @@ import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { outputService } from './output';
 
-jest.mock('./app_context');
-jest.mock('./preconfiguration');
-jest.mock('./preconfiguration/outputs');
-jest.mock('./preconfiguration/fleet_proxies');
-jest.mock('./preconfiguration/space_settings');
-jest.mock('./preconfiguration/fleet_server_host');
-jest.mock('./preconfiguration/download_source');
-jest.mock('./preconfiguration/delete_unenrolled_agent_setting');
-jest.mock('./settings');
-jest.mock('./output');
-jest.mock('./download_source');
-jest.mock('./epm/packages');
-jest.mock('./setup/managed_package_policies');
-jest.mock('./setup/upgrade_package_install_version');
-jest.mock('./setup/ensure_fleet_global_es_assets');
-jest.mock('./setup/update_deprecated_component_templates');
-jest.mock('./epm/elasticsearch/template/install', () => {
+vi.mock('./app_context');
+vi.mock('./preconfiguration');
+vi.mock('./preconfiguration/outputs');
+vi.mock('./preconfiguration/fleet_proxies');
+vi.mock('./preconfiguration/space_settings');
+vi.mock('./preconfiguration/fleet_server_host');
+vi.mock('./preconfiguration/download_source');
+vi.mock('./preconfiguration/delete_unenrolled_agent_setting');
+vi.mock('./settings');
+vi.mock('./output');
+vi.mock('./download_source');
+vi.mock('./epm/packages');
+vi.mock('./setup/managed_package_policies');
+vi.mock('./setup/upgrade_package_install_version');
+vi.mock('./setup/ensure_fleet_global_es_assets');
+vi.mock('./setup/update_deprecated_component_templates');
+vi.mock('./epm/elasticsearch/template/install', async () => {
   return {
-    ...jest.requireActual('./epm/elasticsearch/template/install'),
+    ...(await vi.importActual('./epm/elasticsearch/template/install')),
   };
 });
-jest.mock('./backfill_agentless');
-jest.mock('./epm/packages/install');
-jest.mock('./setup/upgrade_agent_policy_schema_version');
-jest.mock('./setup/fleet_synced_integrations');
-jest.mock('./epm/kibana/assets/saved_objects');
+vi.mock('./backfill_agentless');
+vi.mock('./epm/packages/install');
+vi.mock('./setup/upgrade_agent_policy_schema_version');
+vi.mock('./setup/fleet_synced_integrations');
+vi.mock('./epm/kibana/assets/saved_objects');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 
-const mockedMethodThrowsError = (mockFn: jest.Mock) =>
+const mockedMethodThrowsError = (mockFn: Mock) =>
   mockFn.mockImplementation(() => {
     throw new Error('SO method mocked to throw');
   });
 
 class CustomTestError extends Error {}
-const mockedMethodThrowsCustom = (mockFn: jest.Mock) =>
+const mockedMethodThrowsCustom = (mockFn: Mock) =>
   mockFn.mockImplementation(() => {
     throw new CustomTestError('method mocked to throw');
   });
@@ -93,34 +96,34 @@ describe('setupFleet', () => {
     mockedAppContextService.getLogger.mockReturnValue(startService.logger);
     mockedAppContextService.getTaskManagerStart.mockReturnValue(startService.taskManagerStart);
 
-    (getInstallations as jest.Mock).mockResolvedValueOnce({
+    (getInstallations as Mock).mockResolvedValueOnce({
       saved_objects: [],
     });
 
-    (ensurePreconfiguredPackagesAndPolicies as jest.Mock).mockResolvedValue({
+    (ensurePreconfiguredPackagesAndPolicies as Mock).mockResolvedValue({
       nonFatalErrors: [],
     });
 
-    (setupUpgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
-    (getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig as jest.Mock).mockResolvedValue([]);
-    (isPackageInstalled as jest.Mock).mockResolvedValue(true);
-    (upgradeAgentPolicySchemaVersion as jest.Mock).mockResolvedValue(undefined);
-    (createCCSIndexPatterns as jest.Mock).mockResolvedValue(undefined);
-    (getSpaceAwareSaveobjectsClients as jest.Mock).mockReturnValue({});
-    (outputService.ensureDefaultOutput as jest.Mock).mockResolvedValue({
+    (setupUpgradeManagedPackagePolicies as Mock).mockResolvedValue([]);
+    (getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig as Mock).mockResolvedValue([]);
+    (isPackageInstalled as Mock).mockResolvedValue(true);
+    (upgradeAgentPolicySchemaVersion as Mock).mockResolvedValue(undefined);
+    (createCCSIndexPatterns as Mock).mockResolvedValue(undefined);
+    (getSpaceAwareSaveobjectsClients as Mock).mockReturnValue({});
+    (outputService.ensureDefaultOutput as Mock).mockResolvedValue({
       defaultOutput: { id: 'test-default-output', name: 'test' },
     });
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.stop();
   });
 
   describe('should reject with any error thrown underneath', () => {
     it('SO client throws plain Error', async () => {
       const soClient = getMockedSoClient();
-      mockedMethodThrowsError(getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig as jest.Mock);
+      mockedMethodThrowsError(getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig as Mock);
 
       const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
@@ -130,7 +133,7 @@ describe('setupFleet', () => {
     it('SO client throws other error', async () => {
       const soClient = getMockedSoClient();
 
-      mockedMethodThrowsCustom(setupUpgradeManagedPackagePolicies as jest.Mock);
+      mockedMethodThrowsCustom(setupUpgradeManagedPackagePolicies as Mock);
 
       const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
@@ -183,7 +186,7 @@ describe('setupFleet', () => {
       warnings: null,
     } as any);
 
-    (ensurePreconfiguredPackagesAndPolicies as jest.Mock).mockResolvedValueOnce({
+    (ensurePreconfiguredPackagesAndPolicies as Mock).mockResolvedValueOnce({
       nonFatalErrors: [{ error: responseError, package: { name: 'test', version: '1.0.0' } }],
     });
 
@@ -210,7 +213,7 @@ describe('setupFleet', () => {
       package: { name: 'test', version: '1.0.0' },
     }));
 
-    (ensurePreconfiguredPackagesAndPolicies as jest.Mock).mockResolvedValueOnce({
+    (ensurePreconfiguredPackagesAndPolicies as Mock).mockResolvedValueOnce({
       nonFatalErrors: manyErrors,
     });
 
@@ -227,11 +230,11 @@ describe('setupFleet', () => {
 
     const messageSigningError = new MessageSigningError('test');
     mockedAppContextService.getMessageSigningService.mockImplementation(() => ({
-      generateKeyPair: jest.fn().mockRejectedValueOnce(messageSigningError),
-      rotateKeyPair: jest.fn(),
+      generateKeyPair: vi.fn().mockRejectedValueOnce(messageSigningError),
+      rotateKeyPair: vi.fn(),
       isEncryptionAvailable: true,
-      sign: jest.fn(),
-      getPublicKey: jest.fn(),
+      sign: vi.fn(),
+      getPublicKey: vi.fn(),
     }));
 
     const result = await setupFleet(soClient, esClient);
@@ -248,9 +251,9 @@ describe('setupFleet', () => {
 });
 
 describe('_runSetupWithLock', () => {
-  let mockedWithLock: jest.Mock<any, any, any>;
+  let mockedWithLock: Mock<any, any, any>;
   beforeEach(() => {
-    mockedWithLock = jest.fn();
+    mockedWithLock = vi.fn();
     mockedAppContextService.getLockManagerService.mockReturnValue({
       withLock: mockedWithLock as any,
     } as any);
@@ -264,7 +267,7 @@ describe('_runSetupWithLock', () => {
         return fn();
       });
 
-    const setupFn = jest.fn();
+    const setupFn = vi.fn();
     await _runSetupWithLock(setupFn);
 
     expect(setupFn).toHaveBeenCalled();
@@ -276,7 +279,7 @@ describe('_runSetupWithLock', () => {
       return fn();
     });
 
-    const setupFn = jest.fn();
+    const setupFn = vi.fn();
     setupFn.mockRejectedValue(new Error('test'));
 
     await expect(_runSetupWithLock(setupFn)).rejects.toThrow(/test/);

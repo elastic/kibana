@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
@@ -12,7 +14,7 @@ import { appContextService } from '../app_context';
 
 import { getSpaceSettings, saveSpaceSettings } from './space_settings';
 
-jest.mock('../app_context');
+vi.mock('../app_context');
 
 describe('saveSpaceSettings', () => {
   function createSavedsClientMock(settingsAttributes?: any) {
@@ -28,7 +30,7 @@ describe('saveSpaceSettings', () => {
       );
     }
 
-    jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(client);
+    vi.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(client);
 
     return client;
   }
@@ -117,7 +119,7 @@ describe('getSpaceSettings', () => {
       );
     }
 
-    jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(client);
+    vi.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(client);
 
     return client;
   }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createTracedLogger } from '.';
@@ -14,7 +16,7 @@ const mockLogger = loggingSystemMock.createLogger();
 
 describe('createTracedLogger', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('trace', () => {

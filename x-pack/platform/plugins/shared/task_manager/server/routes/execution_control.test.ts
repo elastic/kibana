@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SecurityServiceStart } from '@kbn/core/server';
 import { ReservedPrivilegesSet } from '@kbn/core/server';
@@ -16,8 +19,8 @@ import { taskExecutionControlServiceMock } from '../execution_control/task_execu
 const createDefinitions = () => {
   const definitions = new TaskTypeDictionary(loggingSystemMock.createLogger());
   definitions.registerTaskDefinitions({
-    foo: { title: 'foo', createTaskRunner: jest.fn() },
-    bar: { title: 'bar', createTaskRunner: jest.fn() },
+    foo: { title: 'foo', createTaskRunner: vi.fn() },
+    bar: { title: 'bar', createTaskRunner: vi.fn() },
   });
   return definitions;
 };
@@ -77,7 +80,7 @@ describe('executionControlRoutes', () => {
   describe('_status', () => {
     it('returns the persisted state', async () => {
       const { router, service } = setup();
-      (service.read as jest.Mock).mockResolvedValue({
+      (service.read as Mock).mockResolvedValue({
         paused: true,
         paused_task_types: ['foo'],
         updated_at: '2024-01-01T00:00:00.000Z',
@@ -102,7 +105,7 @@ describe('executionControlRoutes', () => {
   describe('_pause', () => {
     it('globally pauses when no task types are given', async () => {
       const { router, service } = setup();
-      (service.update as jest.Mock).mockImplementation(async (mutator) => {
+      (service.update as Mock).mockImplementation(async (mutator) => {
         const next = mutator({ paused: false, pausedTaskTypes: [] });
         return { paused: next.paused, paused_task_types: next.pausedTaskTypes, updated_at: 'x' };
       });
@@ -111,7 +114,7 @@ describe('executionControlRoutes', () => {
 
       await handler(ctx, req, res);
 
-      const mutator = (service.update as jest.Mock).mock.calls[0][0];
+      const mutator = (service.update as Mock).mock.calls[0][0];
       expect(mutator({ paused: false, pausedTaskTypes: ['keep'] })).toEqual({
         paused: true,
         pausedTaskTypes: ['keep'],
@@ -121,7 +124,7 @@ describe('executionControlRoutes', () => {
 
     it('unions requested task types into the paused list', async () => {
       const { router, service } = setup();
-      (service.update as jest.Mock).mockResolvedValue({
+      (service.update as Mock).mockResolvedValue({
         paused: false,
         paused_task_types: ['foo'],
         updated_at: 'x',
@@ -134,7 +137,7 @@ describe('executionControlRoutes', () => {
 
       await handler(ctx, req, res);
 
-      const mutator = (service.update as jest.Mock).mock.calls[0][0];
+      const mutator = (service.update as Mock).mock.calls[0][0];
       expect(mutator({ paused: false, pausedTaskTypes: ['bar'] })).toEqual({
         paused: false,
         pausedTaskTypes: ['bar', 'foo'],
@@ -161,7 +164,7 @@ describe('executionControlRoutes', () => {
   describe('_resume', () => {
     it('clears the global pause and all paused types on a full resume', async () => {
       const { router, service } = setup();
-      (service.update as jest.Mock).mockResolvedValue({
+      (service.update as Mock).mockResolvedValue({
         paused: false,
         paused_task_types: [],
         updated_at: 'x',
@@ -171,7 +174,7 @@ describe('executionControlRoutes', () => {
 
       await handler(ctx, req, res);
 
-      const mutator = (service.update as jest.Mock).mock.calls[0][0];
+      const mutator = (service.update as Mock).mock.calls[0][0];
       expect(mutator({ paused: true, pausedTaskTypes: ['foo', 'bar'] })).toEqual({
         paused: false,
         pausedTaskTypes: [],
@@ -180,7 +183,7 @@ describe('executionControlRoutes', () => {
 
     it('removes only the requested task types', async () => {
       const { router, service } = setup();
-      (service.update as jest.Mock).mockResolvedValue({
+      (service.update as Mock).mockResolvedValue({
         paused: false,
         paused_task_types: ['bar'],
         updated_at: 'x',
@@ -190,7 +193,7 @@ describe('executionControlRoutes', () => {
 
       await handler(ctx, req, res);
 
-      const mutator = (service.update as jest.Mock).mock.calls[0][0];
+      const mutator = (service.update as Mock).mock.calls[0][0];
       expect(mutator({ paused: true, pausedTaskTypes: ['foo', 'bar'] })).toEqual({
         paused: true,
         pausedTaskTypes: ['bar'],
@@ -199,7 +202,7 @@ describe('executionControlRoutes', () => {
 
     it('accepts unknown task types (does not validate), so a stranded paused type can be cleared', async () => {
       const { router, service } = setup();
-      (service.update as jest.Mock).mockResolvedValue({
+      (service.update as Mock).mockResolvedValue({
         paused: false,
         paused_task_types: [],
         updated_at: 'x',
@@ -213,7 +216,7 @@ describe('executionControlRoutes', () => {
       await handler(ctx, req, res);
 
       expect(res.badRequest).not.toHaveBeenCalled();
-      const mutator = (service.update as jest.Mock).mock.calls[0][0];
+      const mutator = (service.update as Mock).mock.calls[0][0];
       // Removing an unknown/stranded type leaves other paused types intact.
       expect(mutator({ paused: false, pausedTaskTypes: ['gone:type', 'keep:type'] })).toEqual({
         paused: false,

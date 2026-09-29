@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-jest.mock('../epm/packages');
-jest.mock('../app_context');
+import { vi } from 'vitest';
+
+vi.mock('../epm/packages');
+vi.mock('../app_context');
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -443,7 +445,7 @@ packageInfoCache.set('non_dynamic_pkg-1.0.0', {
 describe('storedPackagePoliciesToAgentPermissions()', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableOtelIntegrations: true,
     } as any);
   });
@@ -696,7 +698,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
   it('Filters out disallowed cluster privileges and logs a warning', async () => {
     const mockLogger = loggingSystemMock.createLogger();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
 
     const packagePolicies: PackagePolicy[] = [
       {
@@ -752,7 +754,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
   it('Omits cluster descriptor when all declared cluster privileges are disallowed', async () => {
     const mockLogger = loggingSystemMock.createLogger();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
 
     const packagePolicies: PackagePolicy[] = [
       {
@@ -2010,7 +2012,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
 
     it('does not append .otel when enableOtelIntegrations is false', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
         enableOtelIntegrations: false,
       } as any);
 

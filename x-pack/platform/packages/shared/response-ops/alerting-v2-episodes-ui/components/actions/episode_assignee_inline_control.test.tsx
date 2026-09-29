@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,30 +14,36 @@ import userEvent from '@testing-library/user-event';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { EpisodeAssigneeInlineControl } from './episode_assignee_inline_control';
 
-const mockOnApply = jest.fn();
+const mockOnApply = vi.fn();
 
-jest.mock('./episode_assignee_panel', () => ({
-  EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
-  EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
-    <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
-      {'Apply'}
-    </button>
-  ),
-}));
+vi.mock('./episode_assignee_panel', () => {
+      const mocked = {
+      EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
+      EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
+        <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
+          {'Apply'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../assignee_cell', () => ({
-  AlertEpisodeAssigneeCell: ({
-    assigneeUid,
-    isTooltipFocusable,
-  }: {
-    assigneeUid: string | null;
-    isTooltipFocusable?: boolean;
-  }) => (
-    <span data-test-subj="assigneeCellStub" data-tooltip-focusable={String(isTooltipFocusable)}>
-      {assigneeUid}
-    </span>
-  ),
-}));
+vi.mock('../assignee_cell', () => {
+      const mocked = {
+      AlertEpisodeAssigneeCell: ({
+        assigneeUid,
+        isTooltipFocusable,
+      }: {
+        assigneeUid: string | null;
+        isTooltipFocusable?: boolean;
+      }) => (
+        <span data-test-subj="assigneeCellStub" data-tooltip-focusable={String(isTooltipFocusable)}>
+          {assigneeUid}
+        </span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUserProfile = {} as UserProfileService;
 
@@ -49,7 +57,7 @@ const renderControl = (props: { isDisabled?: boolean; assigneeUid?: string | nul
     />
   );
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('EpisodeAssigneeInlineControl', () => {
   it('renders a circled plus button', () => {

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { appContextService } from '../app_context';
@@ -16,9 +19,12 @@ import { bulkRequestDiagnostics, requestDiagnostics } from './request_diagnostic
 import * as crud from './crud';
 import * as requestDiagnosticsActionRunner from './request_diagnostics_action_runner';
 
-jest.mock('../secrets', () => ({
-  isActionSecretStorageEnabled: jest.fn(),
-}));
+vi.mock('../secrets', () => {
+      const mocked = {
+      isActionSecretStorageEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('requestDiagnostics', () => {
   beforeEach(async () => {
@@ -101,10 +107,10 @@ describe('requestDiagnostics', () => {
 });
 
 describe('bulkRequestDiagnostics kuery path — cheap count and sync/async branching', () => {
-  let mockGetAgentsByKuery: jest.SpyInstance;
-  let mockOpenPointInTime: jest.SpyInstance;
-  let mockRequestDiagnosticsBatch: jest.SpyInstance;
-  let mockRequestDiagnosticsActionRunner: jest.SpyInstance;
+  let mockGetAgentsByKuery: MockInstance;
+  let mockOpenPointInTime: MockInstance;
+  let mockRequestDiagnosticsBatch: MockInstance;
+  let mockRequestDiagnosticsActionRunner: MockInstance;
 
   beforeEach(async () => {
     const { soClient } = createClientMock();
@@ -113,17 +119,17 @@ describe('bulkRequestDiagnostics kuery path — cheap count and sync/async branc
         withoutSpaceExtensions: soClient,
       })
     );
-    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery');
-    mockOpenPointInTime = jest.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
-    mockRequestDiagnosticsBatch = jest
+    mockGetAgentsByKuery = vi.spyOn(crud, 'getAgentsByKuery');
+    mockOpenPointInTime = vi.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
+    mockRequestDiagnosticsBatch = vi
       .spyOn(requestDiagnosticsActionRunner, 'requestDiagnosticsBatch')
       .mockResolvedValue({ actionId: 'test-action-id' });
-    mockRequestDiagnosticsActionRunner = jest
+    mockRequestDiagnosticsActionRunner = vi
       .spyOn(requestDiagnosticsActionRunner, 'RequestDiagnosticsActionRunner')
       .mockImplementation(
         () =>
           ({
-            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+            runActionAsyncTask: vi.fn().mockResolvedValue({ actionId: 'async-action-id' }),
           } as any)
       );
   });

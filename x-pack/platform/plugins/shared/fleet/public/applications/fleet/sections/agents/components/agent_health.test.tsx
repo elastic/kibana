@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent } from '@testing-library/react';
@@ -15,7 +17,7 @@ import type { Agent } from '../../../types';
 
 import { AgentHealth } from './agent_health';
 
-jest.mock('./agent_upgrade_modal', () => {
+vi.mock('./agent_upgrade_modal', () => {
   return {
     AgentUpgradeAgentModal: () => <>Upgrade Modal</>,
   };

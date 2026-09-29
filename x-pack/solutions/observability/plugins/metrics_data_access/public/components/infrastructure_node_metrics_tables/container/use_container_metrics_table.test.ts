@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
@@ -19,13 +22,16 @@ import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';
 import { createMetricsClientMock } from '../test_helpers';
 
-jest.mock('../shared', () => ({
-  ...jest.requireActual('../shared'),
-  useInfrastructureNodeMetrics: jest.fn(),
-}));
+vi.mock('../shared', async () => {
+      const mocked = {
+      ...(await vi.importActual('../shared')),
+      useInfrastructureNodeMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useContainerMetricsTable hook', () => {
-  const useInfrastructureNodeMetricsMock = useInfrastructureNodeMetrics as jest.MockedFunction<
+  const useInfrastructureNodeMetricsMock = useInfrastructureNodeMetrics as MockedFunction<
     typeof useInfrastructureNodeMetrics
   >;
 

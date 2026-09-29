@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableSearch } from './table_search';
 import React from 'react';
 
 describe('TableSearchComponent', () => {
-  const mockSetSearchKey = jest.fn();
+  const mockSetSearchKey = vi.fn();
 
   it('renders correctly', () => {
     render(<TableSearch searchKey="" setSearchKey={mockSetSearchKey} />);

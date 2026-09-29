@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { deleteSynonymRule } from './delete_synonym_rule';
 
 describe('delete synonym rule lib function', () => {
   const mockClient = {
     synonyms: {
-      deleteSynonymRule: jest.fn(),
+      deleteSynonymRule: vi.fn(),
     },
   };
 

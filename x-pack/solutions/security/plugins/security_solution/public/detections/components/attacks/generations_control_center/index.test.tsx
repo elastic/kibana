@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -21,36 +24,48 @@ import {
   GENERATIONS_CONTROL_CENTER_FLYOUT_TEST_ID,
 } from '.';
 
-jest.mock('../../../../attack_discovery/pages/use_get_attack_discovery_generations', () => ({
-  useGetAttackDiscoveryGenerations: jest.fn(),
-}));
+vi.mock('../../../../attack_discovery/pages/use_get_attack_discovery_generations', () => {
+      const mocked = {
+      useGetAttackDiscoveryGenerations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_poll_generations', () => ({
-  usePollGenerations: jest.fn(),
-}));
+vi.mock('./use_poll_generations', () => {
+      const mocked = {
+      usePollGenerations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../attack_discovery/pages/results/history/generations', () => ({
-  Generations: ({ onViewDetails }: { onViewDetails?: (executionUuid: string) => void }) => (
-    <div data-test-subj="mockGenerations">
-      <button
-        data-test-subj="mockViewDetails"
-        onClick={() => onViewDetails?.('uuid-1')}
-        type="button"
-      />
-    </div>
-  ),
-}));
+vi.mock('../../../../attack_discovery/pages/results/history/generations', () => {
+      const mocked = {
+      Generations: ({ onViewDetails }: { onViewDetails?: (executionUuid: string) => void }) => (
+        <div data-test-subj="mockGenerations">
+          <button
+            data-test-subj="mockViewDetails"
+            onClick={() => onViewDetails?.('uuid-1')}
+            type="button"
+          />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../attack_discovery/pages/loading_callout/workflow_execution_details_flyout/workflow_execution_details',
-  () => ({
-    WorkflowExecutionDetails: ({ executionUuid }: { executionUuid?: string }) => (
-      <div data-test-subj="mockWorkflowExecutionDetails">{executionUuid}</div>
-    ),
-  })
+  () => {
+      const mocked = {
+        WorkflowExecutionDetails: ({ executionUuid }: { executionUuid?: string }) => (
+          <div data-test-subj="mockWorkflowExecutionDetails">{executionUuid}</div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseGetAttackDiscoveryGenerations = useGetAttackDiscoveryGenerations as jest.Mock;
+const mockUseGetAttackDiscoveryGenerations = useGetAttackDiscoveryGenerations as Mock;
 
 const succeededGeneration: AttackDiscoveryGeneration = {
   connector_id: 'gpt41Azure',
@@ -71,16 +86,16 @@ const dismissedGeneration: AttackDiscoveryGeneration = {
 const defaultProps = {
   aiConnectors: getMockConnectors(),
   localStorageAttackDiscoveryMaxAlerts: '100',
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 describe('GenerationsControlCenterFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetAttackDiscoveryGenerations.mockReturnValue({
-      cancelRequest: jest.fn(),
+      cancelRequest: vi.fn(),
       data: { generations: [succeededGeneration] },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -106,9 +121,9 @@ describe('GenerationsControlCenterFlyout', () => {
 
   it('renders the empty state when there are no non-dismissed generations', () => {
     mockUseGetAttackDiscoveryGenerations.mockReturnValue({
-      cancelRequest: jest.fn(),
+      cancelRequest: vi.fn(),
       data: { generations: [dismissedGeneration] },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -122,9 +137,9 @@ describe('GenerationsControlCenterFlyout', () => {
 
   it('does NOT render the empty state before the generations request resolves', () => {
     mockUseGetAttackDiscoveryGenerations.mockReturnValue({
-      cancelRequest: jest.fn(),
+      cancelRequest: vi.fn(),
       data: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -176,7 +191,7 @@ describe('GenerationsControlCenterFlyout', () => {
   });
 
   it('calls onClose when the flyout close button is clicked', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     render(
       <TestProviders>

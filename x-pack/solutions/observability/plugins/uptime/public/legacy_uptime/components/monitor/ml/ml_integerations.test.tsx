@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MLIntegrationComponent } from './ml_integeration';
 import { renderWithRouter, shallowWithRouter } from '../../../lib';
@@ -15,10 +17,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 const core = coreMock.createStart();
 describe('ML Integrations', () => {
   beforeEach(() => {
-    const spy = jest.spyOn(redux, 'useDispatch');
-    spy.mockReturnValue(jest.fn());
+    const spy = vi.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(vi.fn());
 
-    const spy1 = jest.spyOn(redux, 'useSelector');
+    const spy1 = vi.spyOn(redux, 'useSelector');
     spy1.mockReturnValue(true);
   });
 

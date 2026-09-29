@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
@@ -198,7 +200,7 @@ describe('getProfileAppStateDefaults', () => {
       const { profilesManagerMock: profilesManager, dataSourceProfileProviderMock } =
         createContextAwarenessMocks();
 
-      dataSourceProfileProviderMock.profile.getDefaultAppState = jest.fn(() => () => ({
+      dataSourceProfileProviderMock.profile.getDefaultAppState = vi.fn(() => () => ({
         columns: [{ name: 'message', width: 100 }, { name: '_source' }],
       }));
 

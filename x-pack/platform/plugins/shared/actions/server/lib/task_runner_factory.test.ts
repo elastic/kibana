@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import sinon from 'sinon';
 import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { ActionExecutor } from './action_executor';
@@ -45,7 +48,7 @@ const executeParamsFields = [
   'taskInfo',
   'source',
 ];
-const spaceIdToNamespace = jest.fn();
+const spaceIdToNamespace = vi.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const mockedActionExecutor = actionExecutorMock.create();
@@ -82,27 +85,27 @@ beforeAll(() => {
 afterAll(() => fakeTimer.restore());
 
 const services = {
-  log: jest.fn(),
+  log: vi.fn(),
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 
 const unsecuredServices = {
-  log: jest.fn(),
+  log: vi.fn(),
   savedObjectsClient: savedObjectsRepositoryMock.create(),
 };
 
 const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
-  getServices: jest.fn().mockReturnValue(services),
-  getUnsecuredServices: jest.fn().mockReturnValue(unsecuredServices),
+  getServices: vi.fn().mockReturnValue(services),
+  getUnsecuredServices: vi.fn().mockReturnValue(unsecuredServices),
   actionTypeRegistry,
-  getActionsAuthorizationWithRequest: jest.fn().mockReturnValue(actionsAuthorizationMock.create()),
+  getActionsAuthorizationWithRequest: vi.fn().mockReturnValue(actionsAuthorizationMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger,
   inMemoryConnectors: [],
   analyticsService: analyticsServiceMock.createAnalyticsServiceStart(),
   security: securityServiceMock.createStart(),
-  getCurrentUserProfileIdFromAPIKey: jest.fn().mockResolvedValue(undefined),
+  getCurrentUserProfileIdFromAPIKey: vi.fn().mockResolvedValue(undefined),
 };
 
 const taskRunnerFactoryInitializerParams = {
@@ -115,8 +118,8 @@ const taskRunnerFactoryInitializerParams = {
 
 describe('Task Runner Factory', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
     actionExecutorInitializerParams.getServices.mockReturnValue(services);
   });
 
@@ -963,7 +966,7 @@ describe('Task Runner Factory', () => {
     }
     expect(err).toBeDefined();
     expect(isRetryableError(err)).toEqual(false);
-    expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    expect(taskRunnerFactoryInitializerParams.logger.error as Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message`,
       {
         labels: {
@@ -1018,7 +1021,7 @@ describe('Task Runner Factory', () => {
     }
 
     expect(err).toBeDefined();
-    expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    expect(taskRunnerFactoryInitializerParams.logger.error as Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message: Service message`,
       {
         labels: {
@@ -1117,7 +1120,7 @@ describe('Task Runner Factory', () => {
       err = e;
     }
     expect(err).toBeDefined();
-    expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    expect(taskRunnerFactoryInitializerParams.logger.error as Mock).toHaveBeenCalledWith(
       `Action '2' failed: Fail`,
       {
         labels: {
@@ -1223,7 +1226,7 @@ describe('Task Runner Factory', () => {
   });
 
   test('throws error if it cannot fetch task data', async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     const error = new Error('test');
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(error);
 

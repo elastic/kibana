@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { MultiSelectFilter } from './multi_select_filter';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -13,7 +15,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 // Failing: See https://github.com/elastic/kibana/issues/183663
 describe('multi select filter', () => {
   it('should render the amount of options available', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const props = {
       id: 'tags',
       buttonLabel: 'Tags',
@@ -36,7 +38,7 @@ describe('multi select filter', () => {
   });
 
   it('hides the limit reached warning when a selected tag is removed', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const props = {
       id: 'tags',
       buttonLabel: 'Tags',
@@ -70,7 +72,7 @@ describe('multi select filter', () => {
   });
 
   it('displays the limit reached warning when the maximum number of tags is selected', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const props = {
       id: 'tags',
       buttonLabel: 'Tags',
@@ -107,7 +109,7 @@ describe('multi select filter', () => {
   });
 
   it('should not call onChange when the limit has been reached', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const props = {
       id: 'tags',
       buttonLabel: 'Tags',
@@ -137,7 +139,7 @@ describe('multi select filter', () => {
   });
 
   it('should remove selected option if it suddenly disappeared from the list', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const props = {
       id: 'tags',
       buttonLabel: 'Tags',
@@ -160,7 +162,7 @@ describe('multi select filter', () => {
 
   it('activates custom renderOption when set', async () => {
     const TEST_ID = 'test-render-option-id';
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const renderOption = () => <div data-test-subj={TEST_ID} />;
     const props = {
       id: 'tags',
@@ -181,7 +183,7 @@ describe('multi select filter', () => {
   });
 
   it('should not show the amount of options if hideActiveOptionsNumber is active', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const props = {
       id: 'tags',
       buttonLabel: 'Tags',

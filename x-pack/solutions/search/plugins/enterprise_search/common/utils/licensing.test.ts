@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
 import { License } from '@kbn/licensing-plugin/common/license';
@@ -41,7 +43,7 @@ describe('licensing utils', () => {
   const unavailableLicense = new License({ signature: '' });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('hasEnterpriseLicense', () => {

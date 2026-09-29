@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import { setTimeout as timer } from 'timers/promises';
 import { Subject } from 'rxjs';
 import type { Logger } from '@kbn/logging';
@@ -19,7 +21,7 @@ import { logOverallStatusChanges } from './log_overall_status';
 describe('logOverallStatusChanges', () => {
   let overall$: Subject<ServiceStatus>;
   let stop$: Subject<void>;
-  let loggerFactory: jest.Mocked<ILoggingSystem>;
+  let loggerFactory: Mocked<ILoggingSystem>;
   let l: Logger; // using short name for clarity
 
   beforeEach(() => {

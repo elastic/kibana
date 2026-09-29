@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { extractDiamond, extractDiamondLlmOutputSchema } from './extract_diamond';
@@ -24,16 +26,16 @@ const buildModel = ({
   singleCall: () => Promise<unknown>;
   perVertex?: Array<() => Promise<unknown>>;
 }) => {
-  const singleInvoke = jest.fn().mockImplementation(singleCall);
+  const singleInvoke = vi.fn().mockImplementation(singleCall);
   let vertexCall = 0;
-  const vertexInvoke = jest.fn().mockImplementation(() => {
+  const vertexInvoke = vi.fn().mockImplementation(() => {
     const next = perVertex[vertexCall] ?? (() => Promise.reject(new Error('no stub')));
     vertexCall += 1;
     return next();
   });
 
   let structuredCall = 0;
-  const withStructuredOutput = jest.fn().mockImplementation(() => {
+  const withStructuredOutput = vi.fn().mockImplementation(() => {
     structuredCall += 1;
     return structuredCall === 1 ? { invoke: singleInvoke } : { invoke: vertexInvoke };
   });
@@ -52,7 +54,7 @@ describe('extractDiamond', () => {
   const params = { text: 'FIN7 targeted a retail chain with Carbanak.' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the single-call result when it succeeds', async () => {

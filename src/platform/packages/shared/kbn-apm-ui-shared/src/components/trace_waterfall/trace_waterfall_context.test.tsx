@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { TraceItem } from '@kbn/apm-types';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
@@ -464,7 +466,7 @@ describe('TraceWaterfallContextProvider - controlled/uncontrolled showCriticalPa
     });
 
     it('calls onShowCriticalPathChange when provided in uncontrolled mode', () => {
-      const onShowCriticalPathChange = jest.fn();
+      const onShowCriticalPathChange = vi.fn();
       const { result } = renderHook(() => useTraceWaterfallContext(), {
         wrapper: createWrapper({ onShowCriticalPathChange }),
       });
@@ -496,7 +498,7 @@ describe('TraceWaterfallContextProvider - controlled/uncontrolled showCriticalPa
     });
 
     it('does not update internal state when setShowCriticalPath is called', () => {
-      const onShowCriticalPathChange = jest.fn();
+      const onShowCriticalPathChange = vi.fn();
       const { result } = renderHook(() => useTraceWaterfallContext(), {
         wrapper: createWrapper({ showCriticalPath: false, onShowCriticalPathChange }),
       });

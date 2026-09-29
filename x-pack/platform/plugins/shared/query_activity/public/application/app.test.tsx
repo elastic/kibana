@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -21,12 +24,12 @@ const renderApp = () =>
     </MockAppHeaderProvider>
   );
 
-jest.mock('./app_context', () => ({
+vi.mock('./app_context', () => ({
   __esModule: true,
-  useQueryActivityAppContext: jest.fn(),
+  useQueryActivityAppContext: vi.fn(),
 }));
 
-const mockUseQueryActivityAppContext = useQueryActivityAppContext as jest.MockedFunction<
+const mockUseQueryActivityAppContext = useQueryActivityAppContext as MockedFunction<
   typeof useQueryActivityAppContext
 >;
 
@@ -46,21 +49,21 @@ const createQuery = (overrides: Partial<RunningQuery> = {}): RunningQuery => ({
 const mockContext = (overrides: Partial<QueryActivityAppContextValue> = {}) =>
   ({
     chrome: {
-      setBreadcrumbs: jest.fn(),
-      docTitle: { change: jest.fn() },
+      setBreadcrumbs: vi.fn(),
+      docTitle: { change: vi.fn() },
     } as any,
-    http: { basePath: { prepend: jest.fn((path: string) => path) } } as any,
+    http: { basePath: { prepend: vi.fn((path: string) => path) } } as any,
     notifications: {
       toasts: {
-        addSuccess: jest.fn(),
-        addDanger: jest.fn(),
+        addSuccess: vi.fn(),
+        addDanger: vi.fn(),
       },
     } as any,
     apiService: {
-      useLoadQueryActivity: jest.fn(),
-      cancelTask: jest.fn(),
+      useLoadQueryActivity: vi.fn(),
+      cancelTask: vi.fn(),
     } as any,
-    url: { locators: { get: jest.fn(() => undefined) } } as any,
+    url: { locators: { get: vi.fn(() => undefined) } } as any,
     docLinks: {
       links: {
         management: {
@@ -79,7 +82,7 @@ const mockContext = (overrides: Partial<QueryActivityAppContextValue> = {}) =>
 
 describe('QueryActivityApp', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     window.localStorage.clear();
   });
 
@@ -107,17 +110,17 @@ describe('QueryActivityApp', () => {
 
   it('renders the table when the user can view tasks and data is available', async () => {
     const query = createQuery({ taskId: 'node1:render' });
-    const resendRequest = jest.fn();
+    const resendRequest = vi.fn();
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [query] },
           isLoading: false,
           error: null,
           resendRequest,
         })),
-        cancelTask: jest.fn(),
+        cancelTask: vi.fn(),
       } as any,
     });
 
@@ -135,17 +138,17 @@ describe('QueryActivityApp', () => {
   it('refreshes query activity from the AppHeader primary action', async () => {
     const user = userEvent.setup();
     const query = createQuery({ taskId: 'node1:refresh' });
-    const resendRequest = jest.fn();
+    const resendRequest = vi.fn();
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [query] },
           isLoading: false,
           error: null,
           resendRequest,
         })),
-        cancelTask: jest.fn(),
+        cancelTask: vi.fn(),
       } as any,
     });
 
@@ -161,17 +164,17 @@ describe('QueryActivityApp', () => {
   it('shows a success toast and refreshes when stopping a query succeeds', async () => {
     const user = userEvent.setup();
     const query = createQuery({ taskId: 'node1:stop-app' });
-    const resendRequest = jest.fn();
+    const resendRequest = vi.fn();
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [query] },
           isLoading: false,
           error: null,
           resendRequest,
         })),
-        cancelTask: jest.fn().mockResolvedValue({ error: undefined }),
+        cancelTask: vi.fn().mockResolvedValue({ error: undefined }),
       } as any,
     });
 

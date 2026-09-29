@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -21,10 +24,13 @@ import type { ResponseActionsClient } from './services';
 
 // Keep the real `./services` module, but replace the response actions client factory so tests can
 // assert exactly what `getInternalResponseActionsClient()` hands it.
-jest.mock('./services', () => ({
-  ...jest.requireActual('./services'),
-  getResponseActionsClient: jest.fn(),
-}));
+vi.mock('./services', async () => {
+      const mocked = {
+      ...(await vi.importActual('./services')),
+      getResponseActionsClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getResponseActionsClient } from './services';
 
@@ -38,7 +44,7 @@ describe('test endpoint app context services', () => {
     let service: EndpointAppContextService;
     let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
 
-    const remoteInfoMock = () => startContract.esClient.cluster.remoteInfo as unknown as jest.Mock;
+    const remoteInfoMock = () => startContract.esClient.cluster.remoteInfo as unknown as Mock;
 
     const startService = (defendRemoteOutputCcs: boolean) => {
       const base = createMockEndpointAppContextServiceStartContract();
@@ -111,7 +117,7 @@ describe('test endpoint app context services', () => {
     const startService = (cpsActive: boolean) => {
       startContract = {
         ...createMockEndpointAppContextServiceStartContract(),
-        isCpsActive: jest.fn().mockResolvedValue(cpsActive),
+        isCpsActive: vi.fn().mockResolvedValue(cpsActive),
       };
       service.setup(createMockEndpointAppContextServiceSetupContract());
       service.start(startContract);
@@ -201,7 +207,7 @@ describe('test endpoint app context services', () => {
     const startService = (cpsActive: boolean) => {
       startContract = {
         ...createMockEndpointAppContextServiceStartContract(),
-        isCpsActive: jest.fn().mockResolvedValue(cpsActive),
+        isCpsActive: vi.fn().mockResolvedValue(cpsActive),
       };
       service.setup(createMockEndpointAppContextServiceSetupContract());
       service.start(startContract);
@@ -242,7 +248,7 @@ describe('test endpoint app context services', () => {
         name: 'Some Space',
         disabledFeatures: [],
       };
-      jest.spyOn(service, 'getActiveSpace').mockResolvedValue(expectedSpace);
+      vi.spyOn(service, 'getActiveSpace').mockResolvedValue(expectedSpace);
 
       const result = await (await service.asScoped(request)).getSpace();
 
@@ -254,13 +260,13 @@ describe('test endpoint app context services', () => {
   describe('getCurrentUsername', () => {
     let service: EndpointAppContextService;
     let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
-    let getCurrentUserMock: jest.Mock;
+    let getCurrentUserMock: Mock;
 
     const startService = () => {
       startContract = createMockEndpointAppContextServiceStartContract();
       service.setup(createMockEndpointAppContextServiceSetupContract());
       service.start(startContract);
-      getCurrentUserMock = startContract.security.authc.getCurrentUser as jest.Mock;
+      getCurrentUserMock = startContract.security.authc.getCurrentUser as Mock;
     };
 
     beforeEach(() => {
@@ -295,7 +301,7 @@ describe('test endpoint app context services', () => {
   describe('getInternalResponseActionsClient', () => {
     let service: EndpointAppContextService;
 
-    const responseActionsClientFactoryMock = getResponseActionsClient as jest.Mock;
+    const responseActionsClientFactoryMock = getResponseActionsClient as Mock;
     const fakeClient = {} as ResponseActionsClient;
 
     const startService = () => {
@@ -332,7 +338,7 @@ describe('test endpoint app context services', () => {
       startContract.security.authc.getCurrentUser.mockReturnValue(
         securityMock.createMockAuthenticatedUser({ username: 'some-analyst' })
       );
-      const getCurrentUserMock = startContract.security.authc.getCurrentUser as jest.Mock;
+      const getCurrentUserMock = startContract.security.authc.getCurrentUser as Mock;
 
       const client = service.getInternalResponseActionsClient({
         spaceId: 'default',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,12 +17,12 @@ import { AlertEpisodeAssigneeCell } from './assignee_cell';
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
-const mockBulkGet = jest.fn();
+const mockBulkGet = vi.fn();
 const mockUserProfile = { bulkGet: mockBulkGet } as unknown as UserProfileService;
 
 describe('AlertEpisodeAssigneeCell', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

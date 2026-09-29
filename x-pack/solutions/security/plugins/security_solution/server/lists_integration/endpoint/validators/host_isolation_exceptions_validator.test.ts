@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { CreateExceptionListItemOptions } from '@kbn/lists-plugin/server';
@@ -42,7 +44,7 @@ describe('Endpoint Exceptions API validations', () => {
 
     beforeEach(() => {
       const endpointAppContextService = createMockEndpointAppContextService();
-      (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
+      (endpointAppContextService.getEndpointAuthz as Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock()
       );
       validator = new HostIsolationExceptionsValidator(

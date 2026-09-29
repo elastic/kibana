@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // eslint-disable-next-line max-classes-per-file
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
@@ -15,14 +17,26 @@ import type { Unmount } from '@kbn/management-plugin/public/types';
 import { usersManagementApp } from './users_management_app';
 import { securityMock } from '../../mocks';
 
-jest.mock('./users_grid', () => ({ UsersGridPage: () => 'Users Page' }));
-jest.mock('./edit_user', () => ({
-  CreateUserPage: () => 'Create User Page',
-  EditUserPage: () => 'Edit User Page',
-}));
+vi.mock('./users_grid', () => {
+      const mocked = { UsersGridPage: () => 'Users Page' };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./edit_user', () => {
+      const mocked = {
+      CreateUserPage: () => 'Create User Page',
+      EditUserPage: () => 'Edit User Page',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./user_api_client', () => ({ UserAPIClient: class {} }));
-jest.mock('../roles', () => ({ RolesAPIClient: class {} }));
+vi.mock('./user_api_client', () => {
+      const mocked = { UserAPIClient: class {} };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../roles', () => {
+      const mocked = { RolesAPIClient: class {} };
+      return { ...mocked, default: mocked };
+    });
 
 const element = document.body.appendChild(document.createElement('div'));
 
@@ -32,7 +46,7 @@ describe('usersManagementApp', () => {
     const coreStartMock = coreMock.createStart();
     getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const { authc } = securityMock.createSetup();
-    const setBreadcrumbs = jest.fn();
+    const setBreadcrumbs = vi.fn();
     const history = scopedHistoryMock.create({ pathname: '/create' });
     coreStartMock.application.capabilities = {
       ...coreStartMock.application.capabilities,

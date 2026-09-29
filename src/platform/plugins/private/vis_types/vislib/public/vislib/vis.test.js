@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import _ from 'lodash';
 import $ from 'jquery';
 import {
@@ -43,7 +45,7 @@ dataArray.forEach(function (data, i) {
       mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
       mockedSVGElementGetBBox = setSVGElementGetBBox(100);
       mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
-      mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
+      mockWidth = vi.spyOn($.prototype, 'width').mockReturnValue(900);
     });
 
     beforeEach(() => {

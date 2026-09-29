@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createTickFormatter } from './tick_formatter';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 import { setFieldFormats } from '../../../services';
@@ -18,7 +20,7 @@ const mockUiSettings = {
     return mockUiSettings[item];
   },
   getUpdate$: () => ({
-    subscribe: jest.fn(),
+    subscribe: vi.fn(),
   }),
   [UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: true,
   [UI_SETTINGS.QUERY_STRING_OPTIONS]: {},
@@ -32,7 +34,7 @@ const mockCore = {
   uiSettings: mockUiSettings,
   http: {
     basePath: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   },
 };

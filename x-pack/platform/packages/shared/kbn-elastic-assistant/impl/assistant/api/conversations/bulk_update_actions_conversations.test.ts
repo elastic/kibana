@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { bulkUpdateConversations } from './bulk_update_actions_conversations';
 import type { ConversationCategory } from '@kbn/elastic-assistant-common';
 import {
@@ -41,7 +43,7 @@ const conversation2 = {
   title: 'Conversation 2',
 };
 const toasts = {
-  addError: jest.fn(),
+  addError: vi.fn(),
 };
 describe('bulkUpdateConversations', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -49,7 +51,7 @@ describe('bulkUpdateConversations', () => {
   beforeEach(() => {
     httpMock = httpServiceMock.createSetupContract();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should send a POST request with the correct parameters and receive a successful response', async () => {
     const conversationsActions = {

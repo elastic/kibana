@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { TestProviders } from '../../../../common/mock';
@@ -14,14 +17,14 @@ import { useRefreshCaseViewPage as getRefreshCaseViewPageMock } from '../../../c
 import { useConsumeLensReturn } from './use_consume_lens_return';
 import { PENDING_LENS_ATTACH_STORAGE_ID } from './constants';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../containers/use_create_attachments');
-jest.mock('../../../case_view/use_on_refresh_case_view_page');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../containers/use_create_attachments');
+vi.mock('../../../case_view/use_on_refresh_case_view_page');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useToastsMock = useToasts as jest.Mock;
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
-const refreshCaseViewPage = getRefreshCaseViewPageMock() as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useToastsMock = useToasts as Mock;
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
+const refreshCaseViewPage = getRefreshCaseViewPageMock() as Mock;
 
 const pending = {
   caseId: 'case-1',
@@ -31,18 +34,18 @@ const pending = {
 };
 
 describe('useConsumeLensReturn', () => {
-  const mutateAsync = jest.fn().mockResolvedValue(undefined);
-  const addSuccess = jest.fn();
-  const getIncomingEmbeddablePackage = jest.fn();
-  const cmGet = jest.fn();
-  const getTime = jest.fn();
-  const storageGet = jest.fn();
-  const storageRemove = jest.fn();
+  const mutateAsync = vi.fn().mockResolvedValue(undefined);
+  const addSuccess = vi.fn();
+  const getIncomingEmbeddablePackage = vi.fn();
+  const cmGet = vi.fn();
+  const getTime = vi.fn();
+  const storageGet = vi.fn();
+  const storageRemove = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCreateAttachmentsMock.mockReturnValue({ mutateAsync, isLoading: false });
-    useToastsMock.mockReturnValue({ addSuccess, addError: jest.fn() });
+    useToastsMock.mockReturnValue({ addSuccess, addError: vi.fn() });
     getTime.mockReturnValue({ from: 'now-24h', to: 'now', mode: 'relative' });
     cmGet.mockResolvedValue({
       item: { attributes: { state: { query: {} } }, references: [] },
@@ -53,7 +56,7 @@ describe('useConsumeLensReturn', () => {
         contentManagement: { client: { get: cmGet } },
         data: { query: { timefilter: { timefilter: { getTime } } } },
         embeddable: { getStateTransfer: () => ({ getIncomingEmbeddablePackage }) },
-        storage: { get: storageGet, set: jest.fn(), remove: storageRemove },
+        storage: { get: storageGet, set: vi.fn(), remove: storageRemove },
       },
     });
   });

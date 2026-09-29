@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,23 +15,29 @@ import { ServiceHeaderBadges } from './service_header_badges';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
 
-const mockUseServiceSloContext = jest.fn();
-jest.mock('../../../../context/service_slo/use_service_slo_context', () => ({
-  useServiceSloContext: () => mockUseServiceSloContext(),
-}));
+const mockUseServiceSloContext = vi.fn();
+vi.mock('../../../../context/service_slo/use_service_slo_context', () => {
+      const mocked = {
+      useServiceSloContext: () => mockUseServiceSloContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseApmPluginContext = jest.fn();
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => mockUseApmPluginContext(),
-}));
+const mockUseApmPluginContext = vi.fn();
+vi.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => mockUseApmPluginContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Production `getRedirectUrl` builds `/app/r?...`. The mock must return that path so
 // tests fail if the badge uses it instead of `getUrl` (in-app `/app/apm/...`).
 const SHARE_REDIRECT_URL = '/app/r?l=APM_LOCATOR&lz=compressed-payload';
 
-const mockGetRedirectUrl = jest.fn().mockReturnValue(SHARE_REDIRECT_URL);
+const mockGetRedirectUrl = vi.fn().mockReturnValue(SHARE_REDIRECT_URL);
 
-const mockGetUrl = jest.fn().mockImplementation(async ({ serviceName, query }: any) => {
+const mockGetUrl = vi.fn().mockImplementation(async ({ serviceName, query }: any) => {
   const params = new URLSearchParams();
   Object.entries(query ?? {}).forEach(([k, v]) => {
     if (v !== undefined) params.set(k, String(v));
@@ -40,7 +48,7 @@ const mockGetUrl = jest.fn().mockImplementation(async ({ serviceName, query }: a
 const mockShare = {
   url: {
     locators: {
-      get: jest.fn().mockReturnValue({
+      get: vi.fn().mockReturnValue({
         getUrl: mockGetUrl,
         getRedirectUrl: mockGetRedirectUrl,
       }),
@@ -48,44 +56,59 @@ const mockShare = {
   },
 };
 
-jest.mock('../../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({
-    link: (path: string, { path: pathParams, query }: any) =>
-      `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
-        query
-      ).toString()}`,
-  }),
-}));
+vi.mock('../../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => ({
+        link: (path: string, { path: pathParams, query }: any) =>
+          `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
+            query
+          ).toString()}`,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseApmParams = jest.fn();
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useApmParams: () => mockUseApmParams(),
-}));
+const mockUseApmParams = vi.fn();
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => mockUseApmParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseApmServiceContext = jest.fn();
-jest.mock('../../../../context/apm_service/use_apm_service_context', () => ({
-  useApmServiceContext: () => mockUseApmServiceContext(),
-}));
+const mockUseApmServiceContext = vi.fn();
+vi.mock('../../../../context/apm_service/use_apm_service_context', () => {
+      const mocked = {
+      useApmServiceContext: () => mockUseApmServiceContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseApmRoutePath = jest.fn();
-jest.mock('../../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: () => mockUseApmRoutePath(),
-}));
+const mockUseApmRoutePath = vi.fn();
+vi.mock('../../../../hooks/use_apm_route_path', () => {
+      const mocked = {
+      useApmRoutePath: () => mockUseApmRoutePath(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetcher = jest.fn();
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  useFetcher: () => mockUseFetcher(),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-}));
+const mockUseFetcher = vi.fn();
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: () => mockUseFetcher(),
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockKibanaServices = jest.fn();
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+const mockKibanaServices = vi.fn();
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useKibana: () => mockKibanaServices(),
@@ -104,7 +127,7 @@ const baseQuery = {
 const defaultProps = {
   start: '2026-01-01T00:00:00.000Z',
   end: '2026-01-02T00:00:00.000Z',
-  onSloClick: jest.fn(),
+  onSloClick: vi.fn(),
   alertsTabHref: '/services/test-service/alerts',
 };
 
@@ -208,7 +231,7 @@ function setupMocks({
 
 describe('ServiceHeaderBadges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows alerts badge when there are active alerts', () => {

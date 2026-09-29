@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { OnlySearchSourceRuleParams } from '../types';
 import {
   createSearchSourceMock,
@@ -83,14 +86,14 @@ describe('fetchSearchSourceQuery', () => {
   const dataViewMock = createDataView();
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 
   beforeAll(() => {
-    jest.resetAllMocks();
-    global.Date.now = jest.fn(() => fakeNow.getTime());
+    vi.resetAllMocks();
+    global.Date.now = vi.fn(() => fakeNow.getTime());
   });
 
   describe('updateSearchSource', () => {
@@ -475,17 +478,17 @@ describe('fetchSearchSourceQuery', () => {
         },
       };
 
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(dataViewMock)
+      (searchSourceInstanceMock.getField as Mock).mockImplementationOnce(
+        vi.fn().mockReturnValue(dataViewMock)
       );
-      (searchSourceInstanceMock.setField as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(undefined)
+      (searchSourceInstanceMock.setField as Mock).mockImplementationOnce(
+        vi.fn().mockReturnValue(undefined)
       );
-      (searchSourceInstanceMock.createChild as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(searchSourceInstanceMock)
+      (searchSourceInstanceMock.createChild as Mock).mockImplementationOnce(
+        vi.fn().mockReturnValue(searchSourceInstanceMock)
       );
-      (searchSourceInstanceMock.fetch as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(response)
+      (searchSourceInstanceMock.fetch as Mock).mockImplementationOnce(
+        vi.fn().mockReturnValue(response)
       );
 
       // const searchSourceInstance = createSearchSourceMock({}, response);
@@ -502,8 +505,8 @@ describe('fetchSearchSourceQuery', () => {
             url: {
               // @ts-expect-error
               locators: {
-                get: jest.fn().mockReturnValue({
-                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                get: vi.fn().mockReturnValue({
+                  getRedirectUrl: vi.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
                 } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
               },
             },
@@ -588,17 +591,17 @@ describe('fetchSearchSourceQuery', () => {
         hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
       };
 
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(dataViewMock)
+      (searchSourceInstanceMock.getField as Mock).mockImplementationOnce(
+        vi.fn().mockReturnValue(dataViewMock)
       );
-      (searchSourceInstanceMock.setField as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(undefined)
+      (searchSourceInstanceMock.setField as Mock).mockImplementationOnce(
+        vi.fn().mockReturnValue(undefined)
       );
-      (searchSourceInstanceMock.createChild as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(searchSourceInstanceMock)
+      (searchSourceInstanceMock.createChild as Mock).mockImplementationOnce(
+        vi.fn().mockReturnValue(searchSourceInstanceMock)
       );
-      (searchSourceInstanceMock.fetch as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(response)
+      (searchSourceInstanceMock.fetch as Mock).mockImplementationOnce(
+        vi.fn().mockReturnValue(response)
       );
 
       // const searchSourceInstance = createSearchSourceMock({}, response);
@@ -615,8 +618,8 @@ describe('fetchSearchSourceQuery', () => {
             url: {
               // @ts-expect-error
               locators: {
-                get: jest.fn().mockReturnValue({
-                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                get: vi.fn().mockReturnValue({
+                  getRedirectUrl: vi.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
                 } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
               },
             },
@@ -753,7 +756,7 @@ describe('fetchSearchSourceQuery', () => {
       `);
 
       const locatorMock = {
-        getRedirectUrl: jest.fn(() => 'test1/app/r?l=DISCOVER_APP_LOCATOR'),
+        getRedirectUrl: vi.fn(() => 'test1/app/r?l=DISCOVER_APP_LOCATOR'),
       } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
 
       const dataViews = {
@@ -814,12 +817,12 @@ describe('fetchSearchSourceQuery', () => {
       const { dateStart, dateEnd } = getTimeRange();
 
       const locatorMock = {
-        getRedirectUrl: jest.fn(() => 'test1/app/r?l=DISCOVER_APP_LOCATOR'),
+        getRedirectUrl: vi.fn(() => 'test1/app/r?l=DISCOVER_APP_LOCATOR'),
       } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
 
       const dataViews = {
         ...dataViewPluginMocks.createStartContract(),
-        create: jest
+        create: vi
           .fn()
           .mockImplementation(
             (spec: DataViewSpec) => new DataView({ spec, fieldFormats: fieldFormatsMock })

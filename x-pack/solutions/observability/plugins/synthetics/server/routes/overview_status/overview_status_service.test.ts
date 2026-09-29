@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import {
@@ -32,7 +34,7 @@ const germanyLoc = {
 };
 
 const allLocations: any = [japanLoc, germanyLoc];
-jest.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
+vi.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
   publicLocations: allLocations,
   privateLocations: [],
   allLocations,
@@ -144,7 +146,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
           "allIds": Array [
@@ -312,7 +314,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
@@ -426,7 +428,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
           "allIds": Array [
@@ -573,7 +575,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest
+      overviewStatusService.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue(monitorsWithDifferingIds as any);
 
@@ -636,7 +638,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest
+      service.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
@@ -679,7 +681,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest
+      service.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
@@ -733,7 +735,7 @@ describe('current status route', () => {
           },
         };
         const service = new OverviewStatusService(routeContext);
-        service.getMonitorConfigs = jest
+        service.getMonitorConfigs = vi
           .fn()
           .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
@@ -786,7 +788,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest
+      service.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
@@ -829,7 +831,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest
+      service.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc, apLoc])]);
 
@@ -871,7 +873,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest
+      service.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
@@ -898,7 +900,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest
+      service.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc, apLoc], false)]);
 
@@ -941,7 +943,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest
+      service.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
@@ -982,7 +984,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest
+      service.getMonitorConfigs = vi
         .fn()
         .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc, apLoc])]);
 
@@ -1005,7 +1007,7 @@ describe('current status route', () => {
   });
 
   describe('getStatus', () => {
-    jest.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
+    vi.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
       publicLocations: allLocations,
       privateLocations: [],
       allLocations: [
@@ -1026,7 +1028,7 @@ describe('current status route', () => {
       [['North America - US Central', 'US Central QA'], 2],
       [undefined, 2],
     ])('handles disabled count when using location filters', async (locations, disabledCount) => {
-      const getAll = jest.fn().mockResolvedValue([
+      const getAll = vi.fn().mockResolvedValue([
         {
           type: 'synthetics-monitor',
           id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
@@ -1204,7 +1206,7 @@ describe('current status route', () => {
       [['North America - US Central', 'US Central QA'], 1],
       [undefined, 1],
     ])('handles pending count when using location filters', async (locations, pending) => {
-      const getAll = jest.fn().mockResolvedValue([
+      const getAll = vi.fn().mockResolvedValue([
         {
           type: 'synthetics-monitor',
           id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
@@ -1328,7 +1330,7 @@ describe('current status route', () => {
         },
       };
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -1429,7 +1431,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -1508,7 +1510,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -1604,7 +1606,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -1658,7 +1660,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -1709,7 +1711,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([]);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -1735,7 +1737,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([]);
 
       await overviewStatusService.getOverviewStatus();
 
@@ -1766,7 +1768,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([]);
 
       await overviewStatusService.getOverviewStatus();
 
@@ -1849,7 +1851,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -1933,7 +1935,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -2013,7 +2015,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -2062,7 +2064,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       await overviewStatusService.getOverviewStatus();
 
@@ -2105,7 +2107,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -2155,7 +2157,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       await overviewStatusService.getOverviewStatus();
 
@@ -2245,7 +2247,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -2290,7 +2292,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       await overviewStatusService.getOverviewStatus();
 
@@ -2327,7 +2329,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       await overviewStatusService.getOverviewStatus();
 
@@ -2379,7 +2381,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       await overviewStatusService.getOverviewStatus();
 
@@ -2426,7 +2428,7 @@ describe('current status route', () => {
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       const result = await overviewStatusService.getOverviewStatus();
 
@@ -2544,7 +2546,7 @@ describe('current status route', () => {
             syntheticsEsClient
           )
         );
-        overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+        overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
         const result = await overviewStatusService.getOverviewStatus();
 
@@ -2565,7 +2567,7 @@ describe('current status route', () => {
         const overviewStatusService = new OverviewStatusService(
           buildRouteContext({}, syntheticsEsClient)
         );
-        overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+        overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
         const result = await overviewStatusService.getOverviewStatus();
 
@@ -2650,7 +2652,7 @@ describe('current status route', () => {
               syntheticsEsClient
             )
           );
-          overviewStatusService.getMonitorConfigs = jest
+          overviewStatusService.getMonitorConfigs = vi
             .fn()
             .mockResolvedValue(testMonitors as any);
 
@@ -2705,7 +2707,7 @@ describe('current status route', () => {
               syntheticsEsClient
             )
           );
-          overviewStatusService.getMonitorConfigs = jest
+          overviewStatusService.getMonitorConfigs = vi
             .fn()
             .mockResolvedValue(testMonitors as any);
 
@@ -2755,7 +2757,7 @@ describe('current status route', () => {
               syntheticsEsClient
             )
           );
-          overviewStatusService.getMonitorConfigs = jest
+          overviewStatusService.getMonitorConfigs = vi
             .fn()
             .mockResolvedValue(testMonitors as any);
 
@@ -2788,7 +2790,7 @@ describe('current status route', () => {
               syntheticsEsClient
             )
           );
-          overviewStatusService.getMonitorConfigs = jest
+          overviewStatusService.getMonitorConfigs = vi
             .fn()
             .mockResolvedValue(testMonitors as any);
 
@@ -2812,7 +2814,7 @@ describe('current status route', () => {
             syntheticsEsClient
           )
         );
-        overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+        overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
         await overviewStatusService.getOverviewStatus();
 
@@ -2831,7 +2833,7 @@ describe('current status route', () => {
         const overviewStatusService = new OverviewStatusService(
           buildRouteContext({}, syntheticsEsClient)
         );
-        overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+        overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
         await overviewStatusService.getOverviewStatus();
 
@@ -3051,7 +3053,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await service.getOverviewStatus();
 
@@ -3093,7 +3095,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await service.getOverviewStatus();
 
@@ -3125,7 +3127,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await service.getOverviewStatus();
 
@@ -3152,7 +3154,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
       return service.getOverviewStatus();
     };
 
@@ -3223,7 +3225,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await service.getOverviewStatus();
 
@@ -3274,7 +3276,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await service.getOverviewStatus();
 
@@ -3330,7 +3332,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await service.getOverviewStatus();
 
@@ -3361,7 +3363,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       await service.getOverviewStatus();
 
@@ -3392,7 +3394,7 @@ describe('current status route', () => {
       };
       const service = new OverviewStatusService(routeContext);
       // id1 is a real saved-object monitor.
-      service.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
       const result = await service.getOverviewStatus();
 
@@ -3422,7 +3424,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await service.getOverviewStatus();
 
@@ -3450,7 +3452,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([] as any);
 
       const result = await service.getOverviewStatus();
 

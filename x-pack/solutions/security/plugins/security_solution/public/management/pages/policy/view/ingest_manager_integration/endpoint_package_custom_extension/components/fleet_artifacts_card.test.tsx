@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
@@ -17,15 +20,15 @@ import { EventFiltersApiClient } from '../../../../../event_filters/service/api_
 import { FleetArtifactsCard } from './fleet_artifacts_card';
 import { EVENT_FILTERS_LABELS } from '..';
 
-jest.mock('../../../../../../../common/lib/kibana');
+vi.mock('../../../../../../../common/lib/kibana');
 
 describe('Fleet artifacts card', () => {
   let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let mockedContext: AppContextTestRender;
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
-  let addDanger: jest.Mock = jest.fn();
-  const useToastsMock = useToasts as jest.Mock;
+  let addDanger: Mock = vi.fn();
+  const useToastsMock = useToasts as Mock;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
@@ -59,7 +62,7 @@ describe('Fleet artifacts card', () => {
     });
   });
   beforeEach(() => {
-    addDanger = jest.fn();
+    addDanger = vi.fn();
   });
 
   it('should render correctly', async () => {

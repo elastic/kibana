@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
@@ -26,28 +28,34 @@ function mockTrigger(
   return { ...definition, eventSchema: mockEventSchema };
 }
 
-jest.mock('../../../widgets/workflow_yaml_editor/lib/get_stability_note', () => ({
-  getExtensionStability: jest.fn(() => 'tech_preview'),
-}));
+vi.mock('../../../widgets/workflow_yaml_editor/lib/get_stability_note', () => {
+      const mocked = {
+      getExtensionStability: vi.fn(() => 'tech_preview'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: jest.fn(
-      (
-        key: string,
-        { defaultMessage, values }: { defaultMessage: string; values?: Record<string, string> }
-      ) => {
-        if (!values) {
-          return defaultMessage;
-        }
-        return Object.entries(values).reduce(
-          (message, [placeholder, value]) => message.replace(`{${placeholder}}`, value),
-          defaultMessage
-        );
-      }
-    ),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: vi.fn(
+          (
+            key: string,
+            { defaultMessage, values }: { defaultMessage: string; values?: Record<string, string> }
+          ) => {
+            if (!values) {
+              return defaultMessage;
+            }
+            return Object.entries(values).reduce(
+              (message, [placeholder, value]) => message.replace(`{${placeholder}}`, value),
+              defaultMessage
+            );
+          }
+        ),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('build_trigger_options', () => {
   const mockEuiTheme = {
@@ -60,7 +68,7 @@ describe('build_trigger_options', () => {
   } as unknown as EuiThemeComputed<{}>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getTriggerNamespace', () => {

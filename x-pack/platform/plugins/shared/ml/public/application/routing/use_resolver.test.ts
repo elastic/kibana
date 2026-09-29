@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useRouteResolver } from './use_resolver';
 import type { MlLicenseInfo } from '../../../common/license/ml_license';
 
-jest.mock('../contexts/kibana');
-jest.mock('../capabilities/check_capabilities');
+vi.mock('../contexts/kibana');
+vi.mock('../capabilities/check_capabilities');
 
 describe('useResolver', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('redirects to the home page if ML is disabled', async () => {
-    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+    (useMlLicenseInfo as Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: false,
     });
     renderHook(() => useRouteResolver('full', ['canCreateJob']));
@@ -28,7 +31,7 @@ describe('useResolver', () => {
   });
 
   it('redirects to the home page if license is not sufficient', async () => {
-    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+    (useMlLicenseInfo as Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: true,
       isMinimumLicense: false,
     });
@@ -37,7 +40,7 @@ describe('useResolver', () => {
   });
 
   it('redirects to the data viz page if license is not full', async () => {
-    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+    (useMlLicenseInfo as Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: true,
       isMinimumLicense: true,
       isFullLicense: false,
@@ -49,7 +52,7 @@ describe('useResolver', () => {
   });
 
   it('does not redirect if license requirements are met', async () => {
-    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+    (useMlLicenseInfo as Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: true,
       isMinimumLicense: true,
       isFullLicense: false,
@@ -61,7 +64,7 @@ describe('useResolver', () => {
 
   // FIXME
   it.skip('redirects to the access denied page if some required capabilities are missing', async () => {
-    (usePermissionCheck as jest.Mock<boolean[]>).mockReturnValueOnce([false]);
+    (usePermissionCheck as Mock<boolean[]>).mockReturnValueOnce([false]);
 
     renderHook(() => useRouteResolver('full', ['canGetCalendars']));
     await waitFor(() => new Promise((resolve) => resolve(null)));

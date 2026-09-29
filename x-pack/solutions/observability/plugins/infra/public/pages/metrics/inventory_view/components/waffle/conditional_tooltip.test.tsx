@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -12,27 +15,33 @@ import { ConditionalToolTip } from './conditional_tooltip';
 import type { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 
-jest.mock('../../../../../containers/metrics_source', () => ({
-  useSourceContext: () => ({ sourceId: 'default' }),
-}));
+vi.mock('../../../../../containers/metrics_source', () => {
+      const mocked = {
+      useSourceContext: () => ({ sourceId: 'default' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../containers/plugin_config_context');
-jest.mock('../../hooks/use_snaphot');
+vi.mock('../../../../../containers/plugin_config_context');
+vi.mock('../../hooks/use_snaphot');
 import { escapeQuotes } from '@kbn/es-query';
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
-jest.mock('../../hooks/use_waffle_options');
-jest.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
-  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
-}));
+vi.mock('../../hooks/use_waffle_options');
+vi.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => {
+      const mocked = {
+      useIsPodSchemaSelectorEnabled: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 
-const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
-const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.Mock<
+const mockedUseSnapshot = useSnapshot as Mock<ReturnType<typeof useSnapshot>>;
+const mockedUseWaffleOptionsContext = useWaffleOptionsContext as Mock<
   ReturnType<typeof useWaffleOptionsContext>
 >;
-const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as jest.MockedFunction<
+const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as MockedFunction<
   typeof useIsPodSchemaSelectorEnabled
 >;
 
@@ -91,7 +100,7 @@ const buildWaffleOptions = (
       tx: { name: 'tx', units: 'bytes' },
     },
   },
-  setWaffleOptions: jest.fn(),
+  setWaffleOptions: vi.fn(),
 });
 
 const buildBaseSnapshotResponse = (metricNames: string[]): ReturnType<typeof useSnapshot> => ({
@@ -110,14 +119,14 @@ const buildBaseSnapshotResponse = (metricNames: string[]): ReturnType<typeof use
   error: null,
   loading: false,
   interval: '60s',
-  reload: jest.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
+  reload: vi.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
 });
 
 describe('ConditionalToolTip', () => {
   const currentTime = Date.now();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
   });
 

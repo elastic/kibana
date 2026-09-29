@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -18,9 +21,12 @@ import {
 } from './tool';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ki_feature_create tool', () => {
   const logger = loggingSystemMock.createLogger();
@@ -28,15 +34,15 @@ describe('ki_feature_create tool', () => {
   const request = {} as unknown as KibanaRequest;
   const uiSettings = {} as unknown as IUiSettingsClient;
   const telemetry = {
-    trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
+    trackAgentBuilderKnowledgeIndicatorCreated: vi.fn(),
   } as unknown as EbtTelemetryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses the expected tool id', () => {
-    const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
+    const getScopedClients = vi.fn() as unknown as MockedFunction<GetScopedClients>;
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
       server,
@@ -49,7 +55,7 @@ describe('ki_feature_create tool', () => {
   });
 
   it('uses always confirmation policy with custom prompt', async () => {
-    const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
+    const getScopedClients = vi.fn() as unknown as MockedFunction<GetScopedClients>;
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
       server,
@@ -84,11 +90,11 @@ describe('ki_feature_create tool', () => {
   });
 
   it('availability returns available when access check succeeds', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValueOnce(undefined);
+    (assertSignificantEventsAccess as Mock).mockResolvedValueOnce(undefined);
 
-    const getScopedClients = jest.fn(async () => {
+    const getScopedClients = vi.fn(async () => {
       return { licensing: {}, uiSettingsClient: {} } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    }) as unknown as MockedFunction<GetScopedClients>;
 
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -102,11 +108,11 @@ describe('ki_feature_create tool', () => {
   });
 
   it('availability returns unavailable when access check throws', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockRejectedValueOnce(new Error('nope'));
+    (assertSignificantEventsAccess as Mock).mockRejectedValueOnce(new Error('nope'));
 
-    const getScopedClients = jest.fn(async () => {
+    const getScopedClients = vi.fn(async () => {
       return { licensing: {}, uiSettingsClient: {} } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    }) as unknown as MockedFunction<GetScopedClients>;
 
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -120,16 +126,16 @@ describe('ki_feature_create tool', () => {
   });
 
   it('tracks success telemetry when feature KI is created', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertSignificantEventsAccess as Mock).mockResolvedValue(undefined);
 
     const featureClient = {
-      bulk: jest.fn().mockResolvedValue(undefined),
+      bulk: vi.fn().mockResolvedValue(undefined),
     };
 
-    const getScopedClients = jest.fn(async () => {
+    const getScopedClients = vi.fn(async () => {
       return {
         streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
+          getStream: vi.fn().mockResolvedValue({
             name: 'logs.test',
             ingest: {
               classic: { field_overrides: {} },
@@ -139,11 +145,11 @@ describe('ki_feature_create tool', () => {
             },
           }),
         },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue(featureClient),
         licensing: {},
-        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
+        uiSettingsClient: { get: vi.fn().mockResolvedValue(false) },
       } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    }) as unknown as MockedFunction<GetScopedClients>;
 
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -178,16 +184,16 @@ describe('ki_feature_create tool', () => {
   });
 
   it('tracks failure telemetry when feature KI creation fails', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertSignificantEventsAccess as Mock).mockResolvedValue(undefined);
 
     const featureClient = {
-      bulk: jest.fn().mockRejectedValue(new Error('write failed')),
+      bulk: vi.fn().mockRejectedValue(new Error('write failed')),
     };
 
-    const getScopedClients = jest.fn(async () => {
+    const getScopedClients = vi.fn(async () => {
       return {
         streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
+          getStream: vi.fn().mockResolvedValue({
             name: 'logs.test',
             ingest: {
               classic: { field_overrides: {} },
@@ -197,11 +203,11 @@ describe('ki_feature_create tool', () => {
             },
           }),
         },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue(featureClient),
         licensing: {},
-        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
+        uiSettingsClient: { get: vi.fn().mockResolvedValue(false) },
       } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    }) as unknown as MockedFunction<GetScopedClients>;
 
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,

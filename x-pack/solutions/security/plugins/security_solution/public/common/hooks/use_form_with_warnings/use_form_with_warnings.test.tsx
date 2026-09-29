@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -90,7 +92,7 @@ describe('useFormWithWarn', () => {
 
   describe('input w/o warnings', () => {
     it('submits form successfully', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
       await typeText('someValue');
@@ -108,7 +110,7 @@ describe('useFormWithWarn', () => {
 
   describe('w/ warnings', () => {
     it('submits form successfully', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
       await typeText('warning');
@@ -132,7 +134,7 @@ describe('useFormWithWarn', () => {
 
   describe('w/ errors', () => {
     it('passes validation errors to submit handler', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
       await typeText('error');
@@ -156,7 +158,7 @@ describe('useFormWithWarn', () => {
 
   describe('w/ errors and warnings', () => {
     it('passes validation errors and warnings to submit handler', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
       await typeText('error warning');

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetRuleTagsQuery } from './use_get_rule_tags_query';
 import { getRuleTags } from '../apis/get_rule_tags';
@@ -17,8 +19,8 @@ import React from 'react';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
 
-jest.mock('../apis/get_rule_tags');
-const mockGetRuleTags = jest.mocked(getRuleTags);
+vi.mock('../apis/get_rule_tags');
+const mockGetRuleTags = vi.mocked(getRuleTags);
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -41,7 +43,7 @@ describe('useGetRuleTagsQuery', () => {
 
   afterEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the getRuleTags API and collect the tags into one array', async () => {

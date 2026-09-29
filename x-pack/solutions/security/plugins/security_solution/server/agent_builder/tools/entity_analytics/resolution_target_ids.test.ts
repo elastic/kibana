@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
@@ -32,16 +34,16 @@ describe('resolution_target_ids', () => {
   });
 
   describe('resolveResolutionTargetEntityId', () => {
-    const logger = { debug: jest.fn(), warn: jest.fn() } as unknown as Logger;
+    const logger = { debug: vi.fn(), warn: vi.fn() } as unknown as Logger;
     const esClient = {} as ElasticsearchClient;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns the target entity.id from the resolution group', async () => {
-      const createResolutionClient = jest.fn().mockReturnValue({
-        getResolutionGroup: jest.fn().mockResolvedValue({
+      const createResolutionClient = vi.fn().mockReturnValue({
+        getResolutionGroup: vi.fn().mockResolvedValue({
           target: { entity: { id: 'user:canonical' } },
         }),
       });
@@ -69,8 +71,8 @@ describe('resolution_target_ids', () => {
     });
 
     it('returns null when the lookup throws', async () => {
-      const createResolutionClient = jest.fn().mockReturnValue({
-        getResolutionGroup: jest.fn().mockRejectedValue(new Error('not found')),
+      const createResolutionClient = vi.fn().mockReturnValue({
+        getResolutionGroup: vi.fn().mockRejectedValue(new Error('not found')),
       });
 
       await expect(
@@ -86,8 +88,8 @@ describe('resolution_target_ids', () => {
     });
 
     it('returns null when the target document has no entity.id', async () => {
-      const createResolutionClient = jest.fn().mockReturnValue({
-        getResolutionGroup: jest.fn().mockResolvedValue({
+      const createResolutionClient = vi.fn().mockReturnValue({
+        getResolutionGroup: vi.fn().mockResolvedValue({
           target: { entity: { name: 'only-name' } },
         }),
       });

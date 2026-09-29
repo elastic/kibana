@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
@@ -17,27 +20,27 @@ import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../../common/constants';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { renderWithTestingProviders } from '../../../common/mock';
 
-jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
+vi.mock('../../../containers/user_profiles/use_suggest_user_profiles');
 
-const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as Mock;
 
 describe('AssigneesFilterPopover', () => {
   let defaultProps: AssigneesFilterPopoverProps;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     defaultProps = {
       currentUserProfile: undefined,
       selectedAssignees: [],
       isLoading: false,
-      onSelectionChange: jest.fn(),
+      onSelectionChange: vi.fn(),
     };
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
   });
 
   it('calls onSelectionChange when 1 user is selected', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     const props = { ...defaultProps, onSelectionChange };
 
     renderWithTestingProviders(<AssigneesFilterPopover {...props} />);
@@ -60,7 +63,7 @@ describe('AssigneesFilterPopover', () => {
   });
 
   it('calls onSelectionChange with a single user when different users are selected', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     const props = { ...defaultProps, onSelectionChange };
     renderWithTestingProviders(<AssigneesFilterPopover {...props} />);
 
@@ -190,7 +193,7 @@ describe('AssigneesFilterPopover', () => {
   });
 
   it('filters cases with no assignees', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     const props = { ...defaultProps, onSelectionChange };
     renderWithTestingProviders(<AssigneesFilterPopover {...props} />);
 
@@ -209,7 +212,7 @@ describe('AssigneesFilterPopover', () => {
   });
 
   it('filters cases with no assignees and users', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     const props = { ...defaultProps, onSelectionChange };
     renderWithTestingProviders(<AssigneesFilterPopover {...props} />);
 
@@ -240,7 +243,7 @@ describe('AssigneesFilterPopover', () => {
   });
 
   it('hides no assignee filtering when searching', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     const props = { ...defaultProps, onSelectionChange };
     renderWithTestingProviders(<AssigneesFilterPopover {...props} />);
 

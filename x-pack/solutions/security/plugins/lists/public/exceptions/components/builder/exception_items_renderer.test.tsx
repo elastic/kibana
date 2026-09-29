@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -27,11 +29,11 @@ const { autocomplete: autocompleteStartMock } = kqlPluginMock.createStartContrac
 describe('ExceptionBuilderComponent', () => {
   let wrapper: ReactWrapper;
 
-  const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
+  const getValueSuggestionsMock = vi.fn().mockResolvedValue(['value 1', 'value 2']);
 
   afterEach(() => {
     getValueSuggestionsMock.mockClear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     wrapper.unmount();
   });
 
@@ -55,7 +57,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           listType="detection"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -104,7 +106,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           listType="detection"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -151,7 +153,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           listType="detection"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -189,7 +191,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           listType="detection"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -221,7 +223,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           listNamespaceType="single"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -258,7 +260,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           listNamespaceType="single"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -318,7 +320,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           listNamespaceType="single"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -387,7 +389,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           listNamespaceType="single"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -436,7 +438,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           listNamespaceType="single"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -473,7 +475,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           listNamespaceType="single"
           ruleName="Test rule"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       </EuiProvider>
@@ -513,7 +515,7 @@ describe('ExceptionBuilderComponent', () => {
             listType="detection"
             listNamespaceType="single"
             ruleName="Test rule"
-            onChange={jest.fn()}
+            onChange={vi.fn()}
             showValueListModal={MockedShowValueListModal}
           />
         </EuiProvider>

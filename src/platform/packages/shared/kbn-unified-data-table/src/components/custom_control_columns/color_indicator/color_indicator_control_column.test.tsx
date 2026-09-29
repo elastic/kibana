@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
 import { getColorIndicatorControlColumn } from './color_indicator_control_column';
@@ -16,7 +18,7 @@ import { UnifiedDataTableContext } from '../../../table_context';
 
 describe('ColorIndicatorControlColumn', () => {
   it('should render the component', () => {
-    const getRowIndicator = jest.fn(() => ({ color: 'red', label: 'error' }));
+    const getRowIndicator = vi.fn(() => ({ color: 'red', label: 'error' }));
     const column = getColorIndicatorControlColumn({
       getRowIndicator,
     });
@@ -31,7 +33,7 @@ describe('ColorIndicatorControlColumn', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );

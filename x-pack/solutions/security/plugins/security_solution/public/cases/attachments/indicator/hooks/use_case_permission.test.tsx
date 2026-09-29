@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
@@ -18,7 +20,7 @@ import { APP_ID } from '../../../../../common/constants';
 
 const casesServiceMock = casesPluginMock.createStartContract();
 
-const mockCanUseCases = jest.fn();
+const mockCanUseCases = vi.fn();
 
 const getProviderComponent =
   (mockedServices: unknown) =>
@@ -45,7 +47,7 @@ describe('useCasePermission', () => {
   let hookResult: RenderHookResult<boolean, unknown>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls canUseCases scoped to the securitySolution owner', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { errors } from '@elastic/elasticsearch';
@@ -18,14 +20,14 @@ import { FilteringValidationState } from '../types/connectors';
 describe('updateFiltering lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2024-05-25T12:00:00.000Z'));
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-05-25T12:00:00.000Z'));
   });
 
   it('should activate connector filtering draft', async () => {

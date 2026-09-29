@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { CoreSetup } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('@kbn/react-kibana-mount', () => {
-  const original = jest.requireActual('@kbn/react-kibana-mount');
+vi.mock('@kbn/react-kibana-mount', async () => {
+  const original = (await vi.importActual('@kbn/react-kibana-mount'));
 
   return {
     ...original,
@@ -45,10 +47,10 @@ describe('RuntimeFieldsPlugin', () => {
   });
 
   test('should call core.overlays.openFlyout when opening the editor', async () => {
-    const onSaveSpy = jest.fn();
+    const onSaveSpy = vi.fn();
 
     const coreStart = coreMock.createStart();
-    const openFlyout = jest.spyOn(coreStart.overlays, 'openFlyout');
+    const openFlyout = vi.spyOn(coreStart.overlays, 'openFlyout');
 
     // RuntimeFieldsPlugin expects theme in start services.
     coreStart.theme = themeServiceMock.createStartContract();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -12,27 +14,39 @@ import { FilterLists } from './filter_lists';
 
 // Mocking the child components to just assert that they get the data
 // received via the async call using mlApi in the main component.
-jest.mock('../../../components/help_menu', () => ({
-  HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
-}));
-jest.mock('./header', () => ({
-  FilterListsHeader: ({ totalCount }) => (
-    <div data-test-subj="mockFilterListsHeader">{totalCount}</div>
-  ),
-}));
-jest.mock('./table', () => ({
-  FilterListsTable: ({ filterLists, selectedFilterLists }) => (
-    <div
-      data-test-subj="mockFilterListsTable"
-      data-filter-lists={JSON.stringify(filterLists)}
-      data-selected-filter-lists={JSON.stringify(selectedFilterLists)}
-    />
-  ),
-}));
+vi.mock('../../../components/help_menu', () => {
+      const mocked = {
+      HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./header', () => {
+      const mocked = {
+      FilterListsHeader: ({ totalCount }) => (
+        <div data-test-subj="mockFilterListsHeader">{totalCount}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./table', () => {
+      const mocked = {
+      FilterListsTable: ({ filterLists, selectedFilterLists }) => (
+        <div
+          data-test-subj="mockFilterListsTable"
+          data-filter-lists={JSON.stringify(filterLists)}
+          data-selected-filter-lists={JSON.stringify(selectedFilterLists)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../capabilities/check_capabilities', () => ({
-  checkPermission: () => true,
-}));
+vi.mock('../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      checkPermission: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the call for loading the list of filters.
 const mockTestFilter = {
@@ -57,17 +71,20 @@ const mockKibanaProp = {
 };
 
 const mockReact = React;
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (type) => {
-    const EnhancedType = (props) => {
-      return mockReact.createElement(type, {
-        ...props,
-        kibana: mockKibanaProp,
-      });
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      withKibana: (type) => {
+        const EnhancedType = (props) => {
+          return mockReact.createElement(type, {
+            ...props,
+            kibana: mockKibanaProp,
+          });
+        };
+        return EnhancedType;
+      },
     };
-    return EnhancedType;
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const props = {
   canCreateFilter: true,

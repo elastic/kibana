@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getSuggestions } from './suggestions';
 import {
   IconChartVerticalBullet,
@@ -45,10 +47,13 @@ const MOCKED_DEFAULT_COLOR_PALETTE = {
   },
 };
 
-jest.mock('@kbn/coloring', () => ({
-  ...jest.requireActual('@kbn/coloring'),
-  applyPaletteParams: jest.fn().mockReturnValue(stops),
-}));
+vi.mock('@kbn/coloring', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/coloring')),
+      applyPaletteParams: vi.fn().mockReturnValue(stops),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const metricColumn = {
   columnId: 'metric-column',

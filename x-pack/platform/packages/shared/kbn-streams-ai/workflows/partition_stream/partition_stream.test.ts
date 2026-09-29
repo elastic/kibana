@@ -5,41 +5,50 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ToolCallback } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import { partitionStream } from '.';
 
-jest.mock('../../src/cluster_logs/cluster_logs', () => ({
-  clusterLogs: jest.fn(),
-}));
+vi.mock('../../src/cluster_logs/cluster_logs', () => {
+      const mocked = {
+      clusterLogs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/inference-prompt-utils', () => ({
-  executeAsReasoningAgent: jest.fn(),
-}));
+vi.mock('@kbn/inference-prompt-utils', () => {
+      const mocked = {
+      executeAsReasoningAgent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 
-const mockClusterLogs = clusterLogs as jest.MockedFunction<typeof clusterLogs>;
-const mockExecuteAsReasoningAgent = executeAsReasoningAgent as jest.MockedFunction<
+const mockClusterLogs = clusterLogs as MockedFunction<typeof clusterLogs>;
+const mockExecuteAsReasoningAgent = executeAsReasoningAgent as MockedFunction<
   typeof executeAsReasoningAgent
 >;
 
 describe('partitionStream', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
 
   const mockEsClient = {
-    count: jest.fn(),
+    count: vi.fn(),
   } as unknown as ElasticsearchClient;
   const mockInferenceClient = {} as BoundInferenceClient;
   const mockSignal = new AbortController().signal;
-  const mockGetFeatures = jest.fn().mockResolvedValue([]);
+  const mockGetFeatures = vi.fn().mockResolvedValue([]);
 
   const createMockDefinition = (
     routing: Streams.WiredStream.Definition['ingest']['wired']['routing'] = []
@@ -77,7 +86,7 @@ describe('partitionStream', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('reason: no_clusters', () => {
@@ -138,7 +147,7 @@ describe('partitionStream', () => {
         },
       ]);
 
-      (mockEsClient.count as jest.Mock).mockResolvedValueOnce({ count: 0 });
+      (mockEsClient.count as Mock).mockResolvedValueOnce({ count: 0 });
 
       const result = await partitionStream({
         ...defaultParams,
@@ -182,7 +191,7 @@ describe('partitionStream', () => {
         },
       ]);
 
-      (mockEsClient.count as jest.Mock).mockResolvedValueOnce({ count: 100 });
+      (mockEsClient.count as Mock).mockResolvedValueOnce({ count: 100 });
 
       const result = await partitionStream({
         ...defaultParams,
@@ -220,7 +229,7 @@ describe('partitionStream', () => {
         },
       ]);
 
-      (mockEsClient.count as jest.Mock).mockResolvedValueOnce({ count: 50 });
+      (mockEsClient.count as Mock).mockResolvedValueOnce({ count: 50 });
 
       const result = await partitionStream({
         ...defaultParams,
@@ -256,7 +265,7 @@ describe('partitionStream', () => {
         },
       ]);
 
-      (mockEsClient.count as jest.Mock).mockResolvedValueOnce({ count: 100 });
+      (mockEsClient.count as Mock).mockResolvedValueOnce({ count: 100 });
 
       const result = await partitionStream({
         ...defaultParams,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeleteAllConversationsParams } from './delete_all_conversations';
@@ -19,17 +21,17 @@ export const getDeleteAllConversationsOptionsMock = (): DeleteAllConversationsPa
 
 describe('deleteAllConversations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Delete all conversations', async () => {
     const mockResponse = { deleted: 1 };
     const options = getDeleteAllConversationsOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue(mockResponse);
+    options.esClient.deleteByQuery = vi.fn().mockResolvedValue(mockResponse);
 
     const deletedConversations = await deleteAllConversations(options);
     expect(deletedConversations).toEqual(mockResponse);
@@ -38,7 +40,7 @@ describe('deleteAllConversations', () => {
   test('throw error if no conversation was deleted', async () => {
     const mockResponse = { deleted: 0 };
     const options = getDeleteAllConversationsOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue(mockResponse);
+    options.esClient.deleteByQuery = vi.fn().mockResolvedValue(mockResponse);
 
     await expect(deleteAllConversations(options)).rejects.toThrow(
       'No conversations have been deleted.'
@@ -48,7 +50,7 @@ describe('deleteAllConversations', () => {
   test('handles error from deleteByQuery', async () => {
     const mockError = new Error('Test Error');
     const options = getDeleteAllConversationsOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockRejectedValue(mockError);
+    options.esClient.deleteByQuery = vi.fn().mockRejectedValue(mockError);
 
     await expect(deleteAllConversations(options)).rejects.toThrow(mockError);
   });

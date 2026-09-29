@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -35,18 +38,24 @@ const licenseMock: LicenseGetResponse = {
   },
 };
 
-jest.mock('axios', () => jest.fn());
-jest.mock('./utils/sanitize_error', () => ({
-  getSanitizedError: jest.fn().mockImplementation(() => 'sanitized error'),
-}));
-jest.mock('@kbn/server-http-tools', () => ({
-  ...jest.requireActual('@kbn/server-http-tools'),
-  SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
-}));
+vi.mock('axios', () => vi.fn());
+vi.mock('./utils/sanitize_error', () => {
+      const mocked = {
+      getSanitizedError: vi.fn().mockImplementation(() => 'sanitized error'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/server-http-tools', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/server-http-tools')),
+      SslConfig: vi.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
 
-mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+mockCoreStart.elasticsearch.client.asInternalUser.license.get = vi.fn().mockResolvedValue({
   license: {
     status: 'active',
     uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
@@ -66,7 +75,7 @@ mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockRe
 describe('getHttpsAgent', () => {
   it('does not use certs if basic auth is set', () => {
     const apiClient = new ServiceAPIClient(
-      jest.fn() as unknown as Logger,
+      vi.fn() as unknown as Logger,
       { username: 'u', password: 'p' },
       { isDev: true, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
@@ -77,7 +86,7 @@ describe('getHttpsAgent', () => {
 
   it('rejectUnauthorised is true for requests out of localhost even in dev', () => {
     const apiClient = new ServiceAPIClient(
-      jest.fn() as unknown as Logger,
+      vi.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
       { isDev: true, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
@@ -88,7 +97,7 @@ describe('getHttpsAgent', () => {
 
   it('use rejectUnauthorised as true out of dev for localhost', () => {
     const apiClient = new ServiceAPIClient(
-      jest.fn() as unknown as Logger,
+      vi.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
       { isDev: false, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
@@ -99,7 +108,7 @@ describe('getHttpsAgent', () => {
 
   it('uses certs when defined', () => {
     const apiClient = new ServiceAPIClient(
-      jest.fn() as unknown as Logger,
+      vi.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
       { isDev: false, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
@@ -111,12 +120,12 @@ describe('getHttpsAgent', () => {
 
 describe('checkAccountAccessStatus', () => {
   beforeEach(() => {
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
+    (axios as MockedFunction<typeof axios>).mockReset();
   });
 
   it('includes a header with the kibana version', async () => {
     const apiClient = new ServiceAPIClient(
-      jest.fn() as unknown as Logger,
+      vi.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' }, manifestUrl: 'http://localhost' } as ServiceConfig,
       { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
     );
@@ -130,7 +139,7 @@ describe('checkAccountAccessStatus', () => {
       },
     ];
 
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    (axios as MockedFunction<typeof axios>).mockResolvedValue({
       status: 200,
       statusText: 'ok',
       headers: {},
@@ -163,7 +172,7 @@ describe('checkAccountAccessStatus', () => {
       },
     ];
     const error = new Error('Request failed', { someConfig: 'someValue' } as any);
-    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(error);
+    (axios as MockedFunction<typeof axios>).mockRejectedValue(error);
 
     await apiClient.checkAccountAccessStatus();
 
@@ -179,7 +188,7 @@ describe('checkAccountAccessStatus', () => {
 
 describe('syncMonitors', () => {
   beforeEach(() => {
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
+    (axios as MockedFunction<typeof axios>).mockReset();
   });
 
   it('logs a sanitized error if callAPI fails', async () => {
@@ -198,11 +207,11 @@ describe('syncMonitors', () => {
       },
     ];
     const error = new Error('Request failed', { someConfig: 'someValue' } as any);
-    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(error);
+    (axios as MockedFunction<typeof axios>).mockRejectedValue(error);
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
-    jest.spyOn(apiClient, 'callAPI').mockRejectedValueOnce(error);
+    vi.spyOn(apiClient, 'callAPI').mockRejectedValueOnce(error);
 
     await apiClient.syncMonitors({
       monitors: testMonitors,
@@ -222,8 +231,8 @@ describe('syncMonitors', () => {
 
 describe('callAPI', () => {
   beforeEach(() => {
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
-    jest.clearAllMocks();
+    (axios as MockedFunction<typeof axios>).mockReset();
+    vi.clearAllMocks();
   });
 
   const logger = loggerMock.create();
@@ -235,7 +244,7 @@ describe('callAPI', () => {
   };
 
   it('it calls service endpoint when adding monitors with basic auth', async () => {
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    const axiosSpy = (axios as MockedFunction<typeof axios>).mockResolvedValue({
       status: 200,
       statusText: 'ok',
       headers: {},
@@ -249,7 +258,7 @@ describe('callAPI', () => {
       coreStart: mockCoreStart,
     } as SyntheticsServerSetup);
 
-    const spy = jest.spyOn(apiClient, 'callServiceEndpoint');
+    const spy = vi.spyOn(apiClient, 'callServiceEndpoint');
 
     apiClient.locations = testLocations;
 
@@ -387,7 +396,7 @@ describe('callAPI', () => {
   });
 
   it('it calls service endpoint when adding monitors with tls auth', async () => {
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    const axiosSpy = (axios as MockedFunction<typeof axios>).mockResolvedValue({
       status: 200,
       statusText: 'ok',
       headers: {},
@@ -447,7 +456,7 @@ describe('callAPI', () => {
   });
 
   it('Calls the `/run` endpoint when calling `runOnce`', async () => {
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    const axiosSpy = (axios as MockedFunction<typeof axios>).mockResolvedValue({
       status: 200,
       statusText: 'ok',
       headers: {},
@@ -501,7 +510,7 @@ describe('callAPI', () => {
   });
 
   it('Calls the `/monitors/sync` endpoint when calling `syncMonitors`', async () => {
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    const axiosSpy = (axios as MockedFunction<typeof axios>).mockResolvedValue({
       status: 200,
       statusText: 'ok',
       headers: {},
@@ -562,7 +571,7 @@ describe('callAPI', () => {
 
   it('splits the payload into multiple requests if the payload is too large', async () => {
     const requests: number[] = [];
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockImplementation((req: any) => {
+    const axiosSpy = (axios as MockedFunction<typeof axios>).mockImplementation((req: any) => {
       requests.push(req.data.monitors.length);
       if (req.data.monitors.length > 100) {
         // throw 413 error

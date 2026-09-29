@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -12,9 +15,9 @@ import { useConnectors } from './use_connectors';
 import { useKibana } from './use_kibana';
 import { INFERENCE_CONNECTORS_QUERY_KEY } from '../../common/constants';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -24,10 +27,10 @@ const createWrapper = () => {
 };
 
 describe('useConnectors', () => {
-  const mockGet = jest.fn();
+  const mockGet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({ services: { http: { get: mockGet } } });
   });
 

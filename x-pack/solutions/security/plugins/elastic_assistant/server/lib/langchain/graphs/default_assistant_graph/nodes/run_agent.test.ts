@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { runAgent } from './run_agent';
 import type { AIMessageChunk } from '@langchain/core/messages';
@@ -16,14 +19,14 @@ import type { Runnable } from '@langchain/core/runnables';
 class ModelForTesting {
   private result: string;
 
-  withConfig: jest.Mock;
-  invoke: jest.Mock;
+  withConfig: Mock;
+  invoke: Mock;
 
   constructor(result: string) {
     this.result = result;
 
-    this.withConfig = jest.fn().mockReturnThis();
-    this.invoke = jest.fn().mockResolvedValue(new AIMessage(this.result));
+    this.withConfig = vi.fn().mockReturnThis();
+    this.invoke = vi.fn().mockResolvedValue(new AIMessage(this.result));
   }
 }
 
@@ -31,7 +34,7 @@ describe('run agent', () => {
   const mockLoggerFactory = loggingSystemMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('invoke called with correct params', async () => {

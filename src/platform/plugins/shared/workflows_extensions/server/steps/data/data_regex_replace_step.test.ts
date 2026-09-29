@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { OrStringRecursive } from '@kbn/utility-types';
 import { dataRegexReplaceStepDefinition } from './data_regex_replace_step';
 import type { StepHandlerContext } from '../../step_registry/types';
@@ -27,17 +29,17 @@ describe('dataRegexReplaceStepDefinition', () => {
     input,
     rawInput: input as OrStringRecursive<{ pattern: string; replacement: string }>,
     contextManager: {
-      getContext: jest.fn(),
-      renderInputTemplate: jest.fn((val) => val),
-      getScopedEsClient: jest.fn(),
-      getFakeRequest: jest.fn(),
-      callKibanaApi: jest.fn(),
+      getContext: vi.fn(),
+      renderInputTemplate: vi.fn((val) => val),
+      getScopedEsClient: vi.fn(),
+      getFakeRequest: vi.fn(),
+      callKibanaApi: vi.fn(),
     },
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',

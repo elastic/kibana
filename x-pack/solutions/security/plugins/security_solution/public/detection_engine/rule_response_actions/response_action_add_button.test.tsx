@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import userEvent from '@testing-library/user-event';
@@ -15,9 +18,9 @@ import { useLicense } from '../../common/hooks/use_license';
 import { PLATINUM_ONLY_TOOLTIP, ResponseActionAddButton } from './response_action_add_button';
 import { responseActionTypes } from './get_supported_response_actions';
 
-jest.mock('../../common/hooks/use_license');
+vi.mock('../../common/hooks/use_license');
 
-const useLicenseMock = useLicense as jest.Mock;
+const useLicenseMock = useLicense as Mock;
 
 describe('ResponseActionAddButton', () => {
   let testContext: AppContextTestRender;
@@ -32,8 +35,8 @@ describe('ResponseActionAddButton', () => {
         <Form form={form}>
           <ResponseActionAddButton
             supportedResponseActionTypes={responseActionTypes}
-            addActionType={jest.fn()}
-            updateActionTypeId={jest.fn()}
+            addActionType={vi.fn()}
+            updateActionTypeId={vi.fn()}
           />
         </Form>
       );

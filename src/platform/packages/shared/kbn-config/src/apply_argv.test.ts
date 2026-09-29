@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Config } from '..';
 import { ObjectToConfigAdapter } from '..';
 
@@ -62,7 +64,7 @@ test('ignores unknown', () => {
   };
 
   const config = new ObjectToConfigAdapter({});
-  jest.spyOn(config, 'set');
+  vi.spyOn(config, 'set');
 
   overrideConfigWithArgv(config, argv);
 

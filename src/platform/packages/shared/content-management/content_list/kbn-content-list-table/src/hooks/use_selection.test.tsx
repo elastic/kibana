@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { ContentListProvider, type SelectionConfig } from '@kbn/content-list-provider';
@@ -19,7 +21,7 @@ const mockItems: ContentListItem[] = [
 ];
 
 describe('useSelection', () => {
-  const mockFindItems = jest.fn(
+  const mockFindItems = vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: mockItems,
       total: mockItems.length,
@@ -43,11 +45,11 @@ describe('useSelection', () => {
           actions: {
             delete: withDeleteBulkAction
               ? {
-                  onBulkAction: jest.fn(async () => {}),
+                  onBulkAction: vi.fn(async () => {}),
                   restriction: getDeleteRestriction,
                 }
               : {
-                  onItemAction: jest.fn(),
+                  onItemAction: vi.fn(),
                   restriction: getDeleteRestriction,
                 },
           },
@@ -71,7 +73,7 @@ describe('useSelection', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when selection is supported', () => {
@@ -126,7 +128,7 @@ describe('useSelection', () => {
 
   describe('with a SelectionConfig', () => {
     it('forwards the `selectable` predicate to EUI', () => {
-      const selectable = jest.fn((item: ContentListItem) => item.id !== '2');
+      const selectable = vi.fn((item: ContentListItem) => item.id !== '2');
 
       const { result } = renderHook(() => useSelection(), {
         wrapper: createWrapper({ selection: { selectable } }),
@@ -140,7 +142,7 @@ describe('useSelection', () => {
     });
 
     it('forwards the `selectableMessage` callback to EUI and coerces `undefined` to an empty string', () => {
-      const selectableMessage = jest.fn(
+      const selectableMessage = vi.fn(
         (selectable: boolean, item: ContentListItem): string | undefined =>
           selectable ? undefined : `${item.title} cannot be selected`
       );

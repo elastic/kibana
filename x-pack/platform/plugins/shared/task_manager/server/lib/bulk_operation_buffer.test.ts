@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { mockLogger } from '../test_utils';
 
 import type { Entity, ErrorOutput, BulkOperation } from './bulk_operation_buffer';
@@ -42,7 +45,7 @@ function errorAttempts(task: TaskInstance): Err<ErrorOutput> {
 describe('Bulk Operation Buffer', () => {
   describe('createBuffer()', () => {
     test('batches up multiple Operation calls', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn(([task1, task2]) => {
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn(([task1, task2]) => {
         return Promise.resolve([incrementAttempts(task1), incrementAttempts(task2)]);
       });
 
@@ -59,7 +62,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('batch updates can be customised to execute after a certain period', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn((tasks) => {
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn((tasks) => {
         return Promise.resolve(tasks.map(incrementAttempts));
       });
 
@@ -89,7 +92,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('batch updates are executed once queue hits a certain bound', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn((tasks) => {
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn((tasks) => {
         return Promise.resolve(tasks.map(incrementAttempts));
       });
 
@@ -121,7 +124,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('queue upper bound is reset after each flush', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn((tasks) => {
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn((tasks) => {
         return Promise.resolve(tasks.map(incrementAttempts));
       });
 
@@ -150,7 +153,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('handles both resolutions and rejections at individual task level', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn(
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn(
         ([task1, task2, task3]) => {
           return Promise.resolve([
             incrementAttempts(task1),
@@ -178,7 +181,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('handles bulkUpdate failure', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn(() => {
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn(() => {
         return Promise.reject(new Error('bulkUpdate is an illusion'));
       });
 
@@ -213,7 +216,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('logs unknown bulk operation results', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn(
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn(
         ([task1, task2, task3]) => {
           return Promise.resolve([
             incrementAttempts(task1),

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { AttackDiscoveryGraphState } from '../../../graphs';
@@ -40,7 +42,7 @@ const initialGraphState: AttackDiscoveryGraphState = {
 };
 
 describe('getRefineOrEndEdge', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it("returns 'end' when the refined results were generated", () => {
     const state: AttackDiscoveryGraphState = {

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import {
   ALERT_INTENDED_TIMESTAMP,
   ALERT_REASON,
@@ -55,7 +57,7 @@ const publicBaseUrl = 'testKibanaBasePath.com';
 const alertUuid = 'test-uuid';
 const docId = 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71';
 const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-const buildReasonMessageStub = jest.fn();
+const buildReasonMessageStub = vi.fn();
 
 describe('transformHitToAlert', () => {
   it('should strip non-ECS compliant sub-fields of `event.action` field', () => {

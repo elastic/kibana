@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import {
@@ -38,9 +40,9 @@ describe('ProfilesTable', () => {
         page: 1,
         perPage: 20,
         isManageMode: true,
-        onPageChange: jest.fn(),
-        onEditProfile: jest.fn(),
-        onDeleteProfile: jest.fn(),
+        onPageChange: vi.fn(),
+        onEditProfile: vi.fn(),
+        onDeleteProfile: vi.fn(),
       })
     );
 
@@ -64,9 +66,9 @@ describe('ProfilesTable', () => {
         perPage: 20,
         isManageMode: true,
         dataViewTitlesById: { 'dv-1': 'logs-*' },
-        onPageChange: jest.fn(),
-        onEditProfile: jest.fn(),
-        onDeleteProfile: jest.fn(),
+        onPageChange: vi.fn(),
+        onEditProfile: vi.fn(),
+        onDeleteProfile: vi.fn(),
       })
     );
 
@@ -109,9 +111,9 @@ describe('ProfilesTable', () => {
         page: 1,
         perPage: 20,
         isManageMode: true,
-        onPageChange: jest.fn(),
-        onEditProfile: jest.fn(),
-        onDeleteProfile: jest.fn(),
+        onPageChange: vi.fn(),
+        onEditProfile: vi.fn(),
+        onDeleteProfile: vi.fn(),
       })
     );
 

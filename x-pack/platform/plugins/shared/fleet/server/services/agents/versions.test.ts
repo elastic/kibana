@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { readFile } from 'fs/promises';
 
 import fetch from 'node-fetch';
@@ -21,10 +24,10 @@ import {
 let mockKibanaVersion = '300.0.0';
 let mockConfig: DeepPartial<FleetConfigType> = {};
 
-const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
+const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
 const mockLogger = loggerMock.create();
 
-jest.mock('../app_context', () => {
+vi.mock('../app_context', () => {
   return {
     appContextService: {
       getLogger: () => mockLogger,
@@ -34,15 +37,15 @@ jest.mock('../app_context', () => {
   };
 });
 
-jest.mock('fs/promises');
-jest.mock('node-fetch');
+vi.mock('fs/promises');
+vi.mock('node-fetch');
 
-const mockedReadFile = readFile as jest.MockedFunction<typeof readFile>;
-const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockedReadFile = readFile as MockedFunction<typeof readFile>;
+const mockedFetch = fetch as MockedFunction<typeof fetch>;
 
 const emptyResponse = {
   status: 200,
-  text: jest.fn().mockResolvedValue(JSON.stringify({})),
+  text: vi.fn().mockResolvedValue(JSON.stringify({})),
 } as any;
 
 beforeEach(() => {
@@ -57,7 +60,7 @@ describe('getLatestAvailableAgentVersion', () => {
     mockedReadFile.mockResolvedValue(`["8.13.0", "8.12.2", "8.12.1", "8.12.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -101,7 +104,7 @@ describe('getLatestAvailableAgentVersion', () => {
     mockedReadFile.mockResolvedValue(`["8.13.0", "8.12.2", "8.12.1", "8.12.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -137,7 +140,7 @@ describe('getLatestAvailableAgentVersion', () => {
     );
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -175,7 +178,7 @@ describe('getLatestAgentAvailableDockerImageVersion', () => {
     );
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -275,7 +278,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -307,7 +310,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -346,7 +349,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -393,7 +396,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -418,7 +421,7 @@ describe('getAvailableVersions', () => {
 
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -480,7 +483,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.10.4", "8.10.2", "8.10.1", "8.9.0", "7.17.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
@@ -516,7 +519,7 @@ describe('getAvailableVersions', () => {
     // add in the api call just to make sure it doesnt contain anything on return
     mockedFetch.mockResolvedValueOnce({
       status: 200,
-      text: jest.fn().mockResolvedValue(
+      text: vi.fn().mockResolvedValue(
         JSON.stringify([
           [
             {

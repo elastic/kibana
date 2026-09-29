@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -72,7 +74,7 @@ describe('getDiscoverLocatorParams', () => {
     const currentTab = toolkit.getCurrentTab();
     const { dataSource, ...appState } = currentTab.appState;
     const dataViewSpec = dataViewMock.toMinimalSpec();
-    jest.spyOn(dataViewMock, 'isPersisted').mockReturnValue(false);
+    vi.spyOn(dataViewMock, 'isPersisted').mockReturnValue(false);
 
     expect(
       getDiscoverLocatorParams({

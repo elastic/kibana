@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -29,7 +31,7 @@ describe('InspectIlmPolicyFlyout primaryAction', () => {
 
   it('renders the primary action label and calls onClick with the policy name', async () => {
     const user = userEvent.setup();
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     renderWithTheme(
       <InspectIlmPolicyFlyout
@@ -54,7 +56,7 @@ describe('InspectIlmPolicyFlyout primaryAction', () => {
 
   it('disables the primary action when isDisabled is true', async () => {
     const user = userEvent.setup();
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     renderWithTheme(
       <InspectIlmPolicyFlyout

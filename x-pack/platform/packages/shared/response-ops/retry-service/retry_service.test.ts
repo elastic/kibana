@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
 import { RetryService } from './retry_service';
@@ -17,19 +20,19 @@ class RetryServiceTestClass extends RetryService {
 }
 
 describe('RetryService', () => {
-  const nextBackOff = jest.fn();
-  const cb = jest.fn();
+  const nextBackOff = vi.fn();
+  const cb = vi.fn();
 
   const backOffFactory: BackoffFactory = {
     create: () => ({ nextBackOff }),
   };
 
-  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
   let service: RetryService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     nextBackOff.mockReturnValue(1);
     service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar');

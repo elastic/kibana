@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -13,13 +16,13 @@ import { useAttacksPrivileges } from './use_attacks_privileges';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useGetMissingIndexPrivileges } from '../../../../attack_discovery/pages/use_get_missing_index_privileges';
 
-jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../attack_discovery/pages/use_get_missing_index_privileges');
+vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../attack_discovery/pages/use_get_missing_index_privileges');
 
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.MockedFunction<
+const mockUseAlertsPrivileges = useAlertsPrivileges as MockedFunction<
   typeof useAlertsPrivileges
 >;
-const mockUseGetMissingIndexPrivileges = useGetMissingIndexPrivileges as jest.MockedFunction<
+const mockUseGetMissingIndexPrivileges = useGetMissingIndexPrivileges as MockedFunction<
   typeof useGetMissingIndexPrivileges
 >;
 
@@ -31,7 +34,7 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useAttacksPrivileges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { v4 as uuidV4 } from 'uuid';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -23,8 +26,8 @@ import {
 
 import { FleetActionsClient } from './client';
 
-jest.mock('../audit_logging');
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+vi.mock('../audit_logging');
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
 describe('actions', () => {
   let fleetActionsClient: FleetActionsClient;

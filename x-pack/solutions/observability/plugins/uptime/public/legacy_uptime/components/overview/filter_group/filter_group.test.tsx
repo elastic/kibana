@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
@@ -19,7 +21,7 @@ describe('FilterGroup', () => {
     ['expands filter group for Scheme filter'],
     ['expands filter group for Tag filter'],
   ])('handles loading', async (popoverButtonLabel) => {
-    jest.spyOn(Hooks, 'useValuesList').mockReturnValue({
+    vi.spyOn(Hooks, 'useValuesList').mockReturnValue({
       values: [],
       loading: true,
     });
@@ -90,7 +92,7 @@ describe('FilterGroup', () => {
       ],
     ],
   ])('displays filter item counts when clicked', async (popoverButtonLabel, values) => {
-    const spy = jest.spyOn(Hooks, 'useValuesList');
+    const spy = vi.spyOn(Hooks, 'useValuesList');
     for (let i = 0; i < 4; i++) {
       spy.mockReturnValueOnce({
         values: values[i],

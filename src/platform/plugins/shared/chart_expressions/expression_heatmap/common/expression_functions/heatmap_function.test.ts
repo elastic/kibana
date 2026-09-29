@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { heatmapFunction } from './heatmap_function';
 import type { HeatmapArguments } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
@@ -78,7 +80,7 @@ describe('interpreter/functions#heatmap', () => {
           reset: () => {},
         },
       },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
 
     await fn(context, args, handlers);
@@ -94,7 +96,7 @@ describe('interpreter/functions#heatmap', () => {
     };
     const handlers = {
       variables: { overrides },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
     const result = await fn(context, args, handlers);
 

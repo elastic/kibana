@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
@@ -14,20 +16,23 @@ import { mockHistory } from '../../../common/utils/route/mocks';
 import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { AttackDiscoveryMovedPage } from '.';
 
-const mockReportEvent = jest.fn();
-const mockGetUrlForApp = jest.fn(() => '/app/management/kibana/settings?query=Enable+alerts');
+const mockReportEvent = vi.fn();
+const mockGetUrlForApp = vi.fn(() => '/app/management/kibana/settings?query=Enable+alerts');
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: { getUrlForApp: mockGetUrlForApp },
-      telemetry: { reportEvent: mockReportEvent },
-    },
-  }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: { getUrlForApp: mockGetUrlForApp },
+          telemetry: { reportEvent: mockReportEvent },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./assets/simplify.light.svg', () => 'simplify-light-svg-stub');
-jest.mock('./assets/simplify.dark.svg', () => 'simplify-dark-svg-stub');
+vi.mock('./assets/simplify.light.svg', () => 'simplify-light-svg-stub');
+vi.mock('./assets/simplify.dark.svg', () => 'simplify-dark-svg-stub');
 
 describe('AttackDiscoveryMovedPage', () => {
   beforeEach(() => {

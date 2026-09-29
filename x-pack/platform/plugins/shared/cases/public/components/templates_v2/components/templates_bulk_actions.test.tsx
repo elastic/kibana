@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
@@ -16,9 +19,9 @@ import { TemplatesBulkActions } from './templates_bulk_actions';
 import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../../common/mock';
 import * as api from '../api/api';
 
-jest.mock('../api/api');
+vi.mock('../api/api');
 
-const apiMock = api as jest.Mocked<typeof api>;
+const apiMock = api as Mocked<typeof api>;
 
 describe('TemplatesBulkActions', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -58,16 +61,16 @@ describe('TemplatesBulkActions', () => {
   ];
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
-    jest.clearAllMocks();
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
+    vi.clearAllMocks();
     coreStart = coreMock.createStart() as unknown as CoreStart;
     apiMock.bulkDeleteTemplates.mockResolvedValue({
       success: true,
@@ -212,7 +215,7 @@ describe('TemplatesBulkActions', () => {
   });
 
   it('calls onActionSuccess callback after successful bulk delete', async () => {
-    const onActionSuccess = jest.fn();
+    const onActionSuccess = vi.fn();
     renderWithTestingProviders(
       <TemplatesBulkActions selectedTemplates={mockTemplates} onActionSuccess={onActionSuccess} />
     );

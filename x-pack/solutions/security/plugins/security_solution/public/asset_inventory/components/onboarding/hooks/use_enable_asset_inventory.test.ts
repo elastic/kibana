@@ -5,40 +5,54 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useEnableAssetInventory } from './use_enable_asset_inventory';
 import { createTestProviderWrapper } from '../../../test/test_provider';
 import { mockUseOnboardingSuccessCallout } from './use_onboarding_success_callout.mock';
 
-const mockInstallEntityStore = jest.fn();
-const mockPostInstallAssetInventoryDataView = jest.fn();
-const mockRefetchStatus = jest.fn();
-const mockShowOnboardingSuccessCallout = jest.fn();
+const mockInstallEntityStore = vi.fn();
+const mockPostInstallAssetInventoryDataView = vi.fn();
+const mockRefetchStatus = vi.fn();
+const mockShowOnboardingSuccessCallout = vi.fn();
 
-jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store', () => ({
-  useInstallEntityStoreMutation: () => ({
-    mutateAsync: mockInstallEntityStore,
-  }),
-}));
+vi.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store', () => {
+      const mocked = {
+      useInstallEntityStoreMutation: () => ({
+        mutateAsync: mockInstallEntityStore,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_asset_inventory_routes', () => ({
-  useAssetInventoryRoutes: () => ({
-    postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
-  }),
-}));
+vi.mock('../../../hooks/use_asset_inventory_routes', () => {
+      const mocked = {
+      useAssetInventoryRoutes: () => ({
+        postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_asset_inventory_status', () => ({
-  useAssetInventoryStatus: () => ({
-    refetch: mockRefetchStatus,
-  }),
-}));
+vi.mock('../../../hooks/use_asset_inventory_status', () => {
+      const mocked = {
+      useAssetInventoryStatus: () => ({
+        refetch: mockRefetchStatus,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_onboarding_success_callout', () => ({
-  useOnboardingSuccessCallout: () =>
-    mockUseOnboardingSuccessCallout({
-      showOnboardingSuccessCallout: mockShowOnboardingSuccessCallout,
-    }),
-}));
+vi.mock('./use_onboarding_success_callout', () => {
+      const mocked = {
+      useOnboardingSuccessCallout: () =>
+        mockUseOnboardingSuccessCallout({
+          showOnboardingSuccessCallout: mockShowOnboardingSuccessCallout,
+        }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderHookWithWrapper = () =>
   renderHook(() => useEnableAssetInventory(), {
@@ -47,7 +61,7 @@ const renderHookWithWrapper = () =>
 
 describe('useEnableAssetInventory', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Success', () => {
@@ -105,7 +119,7 @@ describe('useEnableAssetInventory', () => {
 
   describe('Error', () => {
     it('surfaces a server error message when the mutation rejects', async () => {
-      jest.spyOn(console, 'error').mockReturnValue();
+      vi.spyOn(console, 'error').mockReturnValue();
 
       mockInstallEntityStore.mockRejectedValue({
         body: {

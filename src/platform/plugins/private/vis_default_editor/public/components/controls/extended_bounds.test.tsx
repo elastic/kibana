@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
@@ -19,8 +21,8 @@ describe('ExtendedBoundsParamEditor', () => {
 
   beforeEach(() => {
     defaultProps = {
-      setValue: jest.fn(),
-      setValidity: jest.fn(),
+      setValue: vi.fn(),
+      setValidity: vi.fn(),
     };
   });
 

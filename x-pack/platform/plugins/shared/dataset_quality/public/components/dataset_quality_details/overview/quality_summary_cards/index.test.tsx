@@ -5,26 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import QualitySummaryCards from '.';
 
-jest.mock('../../../../hooks/use_overview_summary_panel', () => ({
-  useOverviewSummaryPanel: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_overview_summary_panel', () => {
+      const mocked = {
+      useOverviewSummaryPanel: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_quality_issues_docs_chart', () => ({
-  useQualityIssuesDocsChart: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_quality_issues_docs_chart', () => {
+      const mocked = {
+      useQualityIssuesDocsChart: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_dataset_quality_details_state', () => ({
-  useDatasetQualityDetailsState: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_dataset_quality_details_state', () => {
+      const mocked = {
+      useDatasetQualityDetailsState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_failure_store_modal', () => ({
-  useFailureStoreModal: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_failure_store_modal', () => {
+      const mocked = {
+      useFailureStoreModal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 import { useQualityIssuesDocsChart } from '../../../../hooks/use_quality_issues_docs_chart';
@@ -32,10 +47,10 @@ import { useDatasetQualityDetailsState } from '../../../../hooks/use_dataset_qua
 import { useFailureStoreModal } from '../../../../hooks/use_failure_store_modal';
 
 describe('QualitySummaryCards', () => {
-  const mockUseOverviewSummaryPanel = useOverviewSummaryPanel as jest.Mock;
-  const mockUseQualityIssuesDocsChart = useQualityIssuesDocsChart as jest.Mock;
-  const mockUseDatasetQualityDetailsState = useDatasetQualityDetailsState as jest.Mock;
-  const mockUseFailureStoreModal = useFailureStoreModal as jest.Mock;
+  const mockUseOverviewSummaryPanel = useOverviewSummaryPanel as Mock;
+  const mockUseQualityIssuesDocsChart = useQualityIssuesDocsChart as Mock;
+  const mockUseDatasetQualityDetailsState = useDatasetQualityDetailsState as Mock;
+  const mockUseFailureStoreModal = useFailureStoreModal as Mock;
 
   const defaultSummaryPanelData = {
     totalDocsCount: '10000',
@@ -49,7 +64,7 @@ describe('QualitySummaryCards', () => {
   };
 
   const defaultDocsTrendChartData = {
-    handleDocsTrendChartChange: jest.fn(),
+    handleDocsTrendChartChange: vi.fn(),
   };
 
   const defaultDetailsState = {
@@ -60,11 +75,11 @@ describe('QualitySummaryCards', () => {
   };
 
   const defaultFailureStoreModal = {
-    openModal: jest.fn(),
+    openModal: vi.fn(),
     canUserReadFailureStore: true,
     canUserManageFailureStore: true,
     hasFailureStore: true,
-    renderModal: jest.fn(() => null),
+    renderModal: vi.fn(() => null),
   };
 
   const defaultProps = {
@@ -72,7 +87,7 @@ describe('QualitySummaryCards', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseOverviewSummaryPanel.mockReturnValue(defaultSummaryPanelData);
     mockUseQualityIssuesDocsChart.mockReturnValue(defaultDocsTrendChartData);
     mockUseDatasetQualityDetailsState.mockReturnValue(defaultDetailsState);
@@ -137,7 +152,7 @@ describe('QualitySummaryCards', () => {
   });
 
   it('calls handleDocsTrendChartChange when degraded card is clicked', () => {
-    const handleDocsTrendChartChange = jest.fn();
+    const handleDocsTrendChartChange = vi.fn();
 
     mockUseQualityIssuesDocsChart.mockReturnValue({
       handleDocsTrendChartChange,
@@ -154,7 +169,7 @@ describe('QualitySummaryCards', () => {
   });
 
   it('calls handleDocsTrendChartChange when failed card is clicked', () => {
-    const handleDocsTrendChartChange = jest.fn();
+    const handleDocsTrendChartChange = vi.fn();
 
     mockUseQualityIssuesDocsChart.mockReturnValue({
       handleDocsTrendChartChange,
@@ -172,7 +187,7 @@ describe('QualitySummaryCards', () => {
     ['Degraded documents', 'failed'],
     ['Failed documents', 'degraded'],
   ] as const)('does not select the %s card while loading', (cardTitle, selectedCard) => {
-    const handleDocsTrendChartChange = jest.fn();
+    const handleDocsTrendChartChange = vi.fn();
 
     mockUseQualityIssuesDocsChart.mockReturnValue({
       handleDocsTrendChartChange,
@@ -202,7 +217,7 @@ describe('QualitySummaryCards', () => {
   });
 
   it('does not call handleDocsTrendChartChange when the already-selected card is clicked', () => {
-    const handleDocsTrendChartChange = jest.fn();
+    const handleDocsTrendChartChange = vi.fn();
 
     mockUseQualityIssuesDocsChart.mockReturnValue({
       handleDocsTrendChartChange,
@@ -233,7 +248,7 @@ describe('QualitySummaryCards', () => {
   });
 
   it('calls openModal when enable failure store button is clicked', () => {
-    const openModal = jest.fn();
+    const openModal = vi.fn();
 
     mockUseFailureStoreModal.mockReturnValue({
       ...defaultFailureStoreModal,
@@ -252,7 +267,7 @@ describe('QualitySummaryCards', () => {
   });
 
   it('renders failure store modal when renderModal is called', () => {
-    const renderModal = jest.fn(() => <div data-testid="failure-store-modal">Modal</div>);
+    const renderModal = vi.fn(() => <div data-testid="failure-store-modal">Modal</div>);
 
     mockUseFailureStoreModal.mockReturnValue({
       ...defaultFailureStoreModal,

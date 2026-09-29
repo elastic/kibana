@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../../../collectors/mocks';
 import { nameColumn } from './name';
@@ -23,7 +26,7 @@ const setup = ({
 }: {
   kibanaVersion?: string;
   uiSession?: UISession;
-  onBackgroundSearchOpened?: jest.Mock;
+  onBackgroundSearchOpened?: Mock;
 } = {}) => {
   const user = userEvent.setup();
   const core = coreMock.createStart();
@@ -82,7 +85,7 @@ describe('name column', () => {
       it('should call onBackgroundSearchOpened', async () => {
         // Given
         const mockSession = getUiSessionMock({ status: SearchSessionStatus.COMPLETE });
-        const onBackgroundSearchOpened = jest.fn();
+        const onBackgroundSearchOpened = vi.fn();
 
         // When
         const { user } = setup({ uiSession: mockSession, onBackgroundSearchOpened });
@@ -98,7 +101,7 @@ describe('name column', () => {
       it('should NOT navigate in app when onBackgroundSearchOpened prevents the default behavior', async () => {
         // Given
         const mockSession = getUiSessionMock({ status: SearchSessionStatus.COMPLETE });
-        const onBackgroundSearchOpened = jest.fn<void, Parameters<BackgroundSearchOpenedHandler>>(
+        const onBackgroundSearchOpened = vi.fn<void, Parameters<BackgroundSearchOpenedHandler>>(
           ({ event }) => event.preventDefault()
         );
 

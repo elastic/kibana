@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
@@ -92,7 +94,7 @@ describe('createFiltersFromMultiValueClickAction', () => {
 
     const dataStart = dataPluginMock.createStartContract();
     const dataViews = dataViewPluginMocks.createStartContract();
-    dataViews.get = jest.fn().mockResolvedValue({
+    dataViews.get = vi.fn().mockResolvedValue({
       id: 'logstash-*',
       fields: {
         getByName: () => mockField,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,26 +16,38 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentId } from '../../../hooks/use_conversation';
 
-jest.mock('../../../context/conversation/conversation_context', () => ({
-  useConversationContext: jest.fn(),
-}));
+vi.mock('../../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/agents/use_agents', () => ({
-  useAgentBuilderAgents: jest.fn(),
-}));
+vi.mock('../../../hooks/agents/use_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_conversation', () => ({
-  useAgentId: jest.fn(),
-}));
+vi.mock('../../../hooks/use_conversation', () => {
+      const mocked = {
+      useAgentId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Stub child: EmbeddableConversationList renders a conversation list — irrelevant here
-jest.mock('./embeddable_conversation_list', () => ({
-  EmbeddableConversationList: () => null,
-}));
+vi.mock('./embeddable_conversation_list', () => {
+      const mocked = {
+      EmbeddableConversationList: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // EUI useEuiTheme — conversations_popover_view accesses size.* and colors.* inline
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -44,37 +59,43 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/ebt-click', () => ({
-  getEbtProps: jest.fn(() => ({})),
-}));
+vi.mock('@kbn/ebt-click', () => {
+      const mocked = {
+      getEbtProps: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/agent_avatar', () => ({
-  AgentAvatar: () => null,
-}));
+vi.mock('../../common/agent_avatar', () => {
+      const mocked = {
+      AgentAvatar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversationContext = jest.mocked(useConversationContext);
-const mockUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
-const mockUseAgentId = jest.mocked(useAgentId);
+const mockUseConversationContext = vi.mocked(useConversationContext);
+const mockUseAgentBuilderAgents = vi.mocked(useAgentBuilderAgents);
+const mockUseAgentId = vi.mocked(useAgentId);
 
-const renderView = (onClose = jest.fn()) =>
+const renderView = (onClose = vi.fn()) =>
   render(
     <IntlProvider locale="en">
       <ConversationsPopoverView
         panelHeight={500}
         panelWidth={300}
-        onSwitchToAgents={jest.fn()}
+        onSwitchToAgents={vi.fn()}
         onClose={onClose}
       />
     </IntlProvider>
   );
 
 describe('ConversationsPopoverView — New chat button', () => {
-  let setConversationId: jest.Mock;
-  let resetAttachments: jest.Mock;
+  let setConversationId: Mock;
+  let resetAttachments: Mock;
 
   beforeEach(() => {
-    setConversationId = jest.fn();
-    resetAttachments = jest.fn();
+    setConversationId = vi.fn();
+    resetAttachments = vi.fn();
 
     mockUseConversationContext.mockReturnValue({
       setConversationId,
@@ -91,7 +112,7 @@ describe('ConversationsPopoverView — New chat button', () => {
   });
 
   it('calls resetAttachments and setConversationId when "New chat" is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderView(onClose);
 
     fireEvent.click(screen.getByTestId('agentBuilderEmbeddableNewChatButton'));

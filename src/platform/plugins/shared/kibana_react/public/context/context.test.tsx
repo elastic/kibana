@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
@@ -187,7 +189,7 @@ test('notifications wrapper uses the closest notifications service', () => {
   const core1 = {
     notifications: {
       toasts: {
-        add: jest.fn(),
+        add: vi.fn(),
       },
     } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
@@ -195,7 +197,7 @@ test('notifications wrapper uses the closest notifications service', () => {
   const core2 = {
     notifications: {
       toasts: {
-        add: jest.fn(),
+        add: vi.fn(),
       },
     } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
@@ -224,7 +226,7 @@ test('overlays wrapper uses available overlays service, higher up in <KibanaCont
     overlays: overlayServiceMock.createStartContract(),
     notifications: {
       toasts: {
-        add: jest.fn(),
+        add: vi.fn(),
       },
     } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
@@ -232,7 +234,7 @@ test('overlays wrapper uses available overlays service, higher up in <KibanaCont
   const core2 = {
     notifications: {
       toasts: {
-        add: jest.fn(),
+        add: vi.fn(),
       },
     } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;

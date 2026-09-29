@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -12,12 +15,12 @@ import { useGetPipeline } from '../../../../hooks';
 
 import { PackagePolicyEditorDatastreamPipelines } from './datastream_pipelines';
 
-const mockedUseGetPipeline = useGetPipeline as jest.MockedFunction<typeof useGetPipeline>;
+const mockedUseGetPipeline = useGetPipeline as MockedFunction<typeof useGetPipeline>;
 
-jest.mock('../../../../hooks', () => {
+vi.mock('../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
-    useGetPipeline: jest.fn(),
+    ...(await vi.importActual('../../../../hooks')),
+    useGetPipeline: vi.fn(),
   };
 });
 

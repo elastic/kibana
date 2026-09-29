@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { UseAlertsTableQueryParamsOptions } from './use_alerts_table_query_params';
 import { useAlertsTableQueryParams } from './use_alerts_table_query_params';
 import { BulkActionsVerbs } from '../types';
 
-const mockDispatchBulkAction = jest.fn();
-const mockSetPageIndex = jest.fn();
+const mockDispatchBulkAction = vi.fn();
+const mockSetPageIndex = vi.fn();
 const defaultOptions: UseAlertsTableQueryParamsOptions = {
   ruleTypeIds: ['ruleType1'],
   consumers: ['consumer1'],
@@ -55,7 +57,7 @@ const optionsTriggeringReset = [
 
 describe('useAlertsTableQueryParams', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return all the query params', () => {

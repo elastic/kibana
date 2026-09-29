@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import type { Parent } from 'unist';
 import type { MutableNode } from './markdown_plugins';
@@ -33,17 +36,17 @@ import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
 import dedent from 'dedent';
 
-jest.mock('@kbn/agent-builder-visualizations', () => {
+vi.mock('@kbn/agent-builder-visualizations', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const _React = require('react'); // Use require to avoid hoisting issues with jest.mock
   return {
-    VisualizeESQL: jest.fn(() =>
+    VisualizeESQL: vi.fn(() =>
       _React.createElement('span', { 'data-test-subj': 'visualize-esql' })
     ),
-    VisualizeLens: jest.fn(() =>
+    VisualizeLens: vi.fn(() =>
       _React.createElement('span', { 'data-test-subj': 'visualize-lens' })
     ),
-    InlineVisualization: jest.fn(() =>
+    InlineVisualization: vi.fn(() =>
       _React.createElement('span', { 'data-test-subj': 'inline-visualization' })
     ),
   };
@@ -53,27 +56,36 @@ const application = {} as ApplicationStart;
 const http = {} as HttpStart;
 const uiSettings = {} as IUiSettingsClient;
 
-jest.mock('../../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_steps_from_saved_turns', () => ({
-  useStepsFromSavedTurns: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_steps_from_saved_turns', () => {
+      const mocked = {
+      useStepsFromSavedTurns: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../context/conversation/conversation_context', () => ({
-  useConversationContext: jest.fn(),
-}));
+vi.mock('../../../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockVisualizeESQL = VisualizeESQL as jest.MockedFunction<any>;
-const mockInlineVisualization = InlineVisualization as jest.MockedFunction<any>;
-const useAgentBuilderServicesMock = useAgentBuilderServices as jest.MockedFunction<
+const mockVisualizeESQL = VisualizeESQL as MockedFunction<any>;
+const mockInlineVisualization = InlineVisualization as MockedFunction<any>;
+const useAgentBuilderServicesMock = useAgentBuilderServices as MockedFunction<
   typeof useAgentBuilderServices
 >;
-const useStepsFromSavedTurnsMock = useStepsFromSavedTurns as jest.MockedFunction<
+const useStepsFromSavedTurnsMock = useStepsFromSavedTurns as MockedFunction<
   typeof useStepsFromSavedTurns
 >;
-const useConversationContextMock = useConversationContext as jest.MockedFunction<
+const useConversationContextMock = useConversationContext as MockedFunction<
   typeof useConversationContext
 >;
 
@@ -127,7 +139,7 @@ function createStartDependencies() {
     uiActions: {},
     embeddable: {},
     // Read when assembling the custom content renderer's services.
-    data: { search: { search: jest.fn() } },
+    data: { search: { search: vi.fn() } },
     unifiedSearch: {
       ui: {
         SearchBar: () => null,
@@ -157,12 +169,12 @@ describe('chat_message_text', () => {
       isEmbeddedContext: false,
       browserApiTools: undefined,
       conversationActions: {
-        invalidateConversation: jest.fn(),
-        onExecutionStarted: jest.fn(),
-        onExecutionTerminated: jest.fn(),
-        refetchConversation: jest.fn(),
-        deleteConversation: jest.fn(),
-        renameConversation: jest.fn(),
+        invalidateConversation: vi.fn(),
+        onExecutionStarted: vi.fn(),
+        onExecutionTerminated: vi.fn(),
+        refetchConversation: vi.fn(),
+        deleteConversation: vi.fn(),
+        renameConversation: vi.fn(),
       },
     });
   });

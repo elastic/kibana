@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { getByTestId, queryByTestId } from '@testing-library/react';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -15,18 +18,27 @@ import { baseSlo } from '../../../data/slo';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { hasSloGroupBy, SloOverviewPanelContent } from './slo_overview_panel_content';
 
-jest.mock('../../../hooks/use_fetch_slo_details');
-jest.mock('./slo_overview', () => ({
-  SloOverview: () => <div data-test-subj="slo-overview">SloOverview</div>,
-}));
-jest.mock('./slo_overview_grid', () => ({
-  SloCardChartList: () => <div data-test-subj="slo-card-chart-list">SloCardChartList</div>,
-}));
-jest.mock('./group_view/group_view', () => ({
-  GroupSloView: () => <div data-test-subj="group-slo-view">GroupSloView</div>,
-}));
+vi.mock('../../../hooks/use_fetch_slo_details');
+vi.mock('./slo_overview', () => {
+      const mocked = {
+      SloOverview: () => <div data-test-subj="slo-overview">SloOverview</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./slo_overview_grid', () => {
+      const mocked = {
+      SloCardChartList: () => <div data-test-subj="slo-card-chart-list">SloCardChartList</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./group_view/group_view', () => {
+      const mocked = {
+      GroupSloView: () => <div data-test-subj="group-slo-view">GroupSloView</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useFetchSloDetailsMock = useFetchSloDetails as jest.MockedFunction<typeof useFetchSloDetails>;
+const useFetchSloDetailsMock = useFetchSloDetails as MockedFunction<typeof useFetchSloDetails>;
 
 const defaultProps = {
   sloId: 'slo-123',
@@ -71,7 +83,7 @@ describe('SloOverviewPanelContent', () => {
       isRefetching: false,
       isSuccess: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -123,7 +135,7 @@ describe('SloOverviewPanelContent', () => {
       isRefetching: false,
       isSuccess: true,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { container } = render(<SloOverviewPanelContent {...defaultProps} />);
@@ -141,7 +153,7 @@ describe('SloOverviewPanelContent', () => {
       isRefetching: false,
       isSuccess: true,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { container } = render(
@@ -160,7 +172,7 @@ describe('SloOverviewPanelContent', () => {
       isRefetching: false,
       isSuccess: true,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { container } = render(<SloOverviewPanelContent {...defaultProps} />);
@@ -179,7 +191,7 @@ describe('SloOverviewPanelContent', () => {
       isRefetching: false,
       isSuccess: true,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { container } = render(<SloOverviewPanelContent {...defaultProps} sloId={undefined} />);

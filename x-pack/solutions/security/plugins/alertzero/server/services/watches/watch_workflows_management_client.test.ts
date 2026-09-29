@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ALERTZERO_ACTION_WORKFLOW_IDS } from '@kbn/workflows/managed';
@@ -13,7 +15,7 @@ import { WatchWorkflowsManagementClientImpl } from './watch_workflows_management
 
 describe('WatchWorkflowsManagementClientImpl', () => {
   it('searches failed AlertZero managed executions from the last 24 hours', async () => {
-    const searchExecutionsView = jest.fn().mockResolvedValue({ results: [], total: 0 });
+    const searchExecutionsView = vi.fn().mockResolvedValue({ results: [], total: 0 });
     const client = new WatchWorkflowsManagementClientImpl({
       searchExecutionsView,
     } as unknown as NonNullable<WorkflowsServerPluginSetup['management']>);

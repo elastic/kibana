@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -26,34 +29,34 @@ import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_aler
 import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
 
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
-const scheduleActions = jest.fn();
-const replaceState = jest.fn(() => ({ scheduleActions }));
-const mockCreateAlert = jest.fn(() => ({ replaceState, scheduleActions }));
-const mockGetAlert = jest.fn();
-const mockGetRecoveredAlerts = jest.fn().mockReturnValue([]);
-const mockSetLimitReached = jest.fn();
+const scheduleActions = vi.fn();
+const replaceState = vi.fn(() => ({ scheduleActions }));
+const mockCreateAlert = vi.fn(() => ({ replaceState, scheduleActions }));
+const mockGetAlert = vi.fn();
+const mockGetRecoveredAlerts = vi.fn().mockReturnValue([]);
+const mockSetLimitReached = vi.fn();
 const mockCreateAlertFactory = {
   create: mockCreateAlert,
   get: mockGetAlert,
-  hasReachedAlertLimit: jest.fn().mockReturnValue(false),
+  hasReachedAlertLimit: vi.fn().mockReturnValue(false),
   alertLimit: {
-    getValue: jest.fn().mockReturnValue(1000),
+    getValue: vi.fn().mockReturnValue(1000),
     setLimitReached: mockSetLimitReached,
-    checkLimitUsage: jest.fn(),
+    checkLimitUsage: vi.fn(),
   },
   done: () => ({
     getRecoveredAlerts: mockGetRecoveredAlerts,
   }),
 };
-jest.mock('../alert/create_alert_factory', () => {
-  const original = jest.requireActual('../alert/create_alert_factory');
+vi.mock('../alert/create_alert_factory', async () => {
+  const original = (await vi.importActual('../alert/create_alert_factory'));
   return {
     ...original,
-    getPublicAlertFactory: jest.fn().mockImplementation(() => {
+    getPublicAlertFactory: vi.fn().mockImplementation(() => {
       return {
         create: mockCreateAlert,
         alertLimit: {
-          getValue: jest.fn().mockReturnValue(1000),
+          getValue: vi.fn().mockReturnValue(1000),
           setLimitReached: mockSetLimitReached,
         },
         done: () => ({
@@ -61,38 +64,41 @@ jest.mock('../alert/create_alert_factory', () => {
         }),
       };
     }),
-    createAlertFactory: jest.fn().mockImplementation(() => mockCreateAlertFactory),
+    createAlertFactory: vi.fn().mockImplementation(() => mockCreateAlertFactory),
   };
 });
 
-jest.mock('../lib', () => {
-  const original = jest.requireActual('../lib');
+vi.mock('../lib', async () => {
+  const original = (await vi.importActual('../lib'));
   return {
     ...original,
-    processAlerts: jest.fn(),
-    setFlapping: jest.fn(),
+    processAlerts: vi.fn(),
+    setFlapping: vi.fn(),
   };
 });
 
-jest.mock('../lib/flapping/determine_flapping_alerts', () => {
+vi.mock('../lib/flapping/determine_flapping_alerts', () => {
   return {
-    determineFlappingAlerts: jest.fn(),
+    determineFlappingAlerts: vi.fn(),
   };
 });
 
-jest.mock('../lib/determine_delayed_alerts', () => {
+vi.mock('../lib/determine_delayed_alerts', () => {
   return {
-    determineDelayedAlerts: jest.fn(),
+    determineDelayedAlerts: vi.fn(),
   };
 });
 
-jest.mock('../task_runner/log_alerts', () => ({ logAlerts: jest.fn() }));
+vi.mock('../task_runner/log_alerts', () => {
+      const mocked = { logAlerts: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 const alertingEventLogger = alertingEventLoggerMock.create();
 
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleType: Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -100,7 +106,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   category: 'test',
   producer: 'alerts',
   solution: 'stack',
@@ -140,7 +146,7 @@ const fakeRequest = {
       url: '/',
     },
   },
-  getSavedObjectsClient: jest.fn(),
+  getSavedObjectsClient: vi.fn(),
 } as unknown as KibanaRequest;
 
 const defaultExecutionOpts = {
@@ -157,7 +163,7 @@ const defaultExecutionOpts = {
 
 describe('Legacy Alerts Client', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
   });
 
@@ -213,7 +219,7 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('initializeExecution() should set snooze config on active alerts with a matching snoozed instance', async () => {
-    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const setSnoozeConfigSpy = vi.spyOn(Alert.prototype, 'setSnoozeConfig');
     const alertsClient = new LegacyAlertsClient({
       alertingEventLogger,
       logger,
@@ -239,7 +245,7 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('initializeExecution() should set snooze config on recovered alerts with a matching snoozed instance', async () => {
-    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const setSnoozeConfigSpy = vi.spyOn(Alert.prototype, 'setSnoozeConfig');
     const alertsClient = new LegacyAlertsClient({
       alertingEventLogger,
       logger,
@@ -267,7 +273,7 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('initializeExecution() should not set snooze config on alerts without a matching snoozed instance', async () => {
-    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const setSnoozeConfigSpy = vi.spyOn(Alert.prototype, 'setSnoozeConfig');
     const alertsClient = new LegacyAlertsClient({
       alertingEventLogger,
       logger,
@@ -415,7 +421,7 @@ describe('Legacy Alerts Client', () => {
       ],
       maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
     });
-    (processAlerts as jest.Mock).mockReturnValue({
+    (processAlerts as Mock).mockReturnValue({
       newAlerts: {},
       activeAlerts: {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
@@ -505,7 +511,7 @@ describe('Legacy Alerts Client', () => {
       },
     };
 
-    (processAlerts as jest.Mock).mockReturnValue({
+    (processAlerts as Mock).mockReturnValue({
       newAlerts: {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
       },
@@ -581,7 +587,7 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('determineFlappingAlerts() should call determineFlappingAlerts', async () => {
-    (determineFlappingAlerts as jest.Mock).mockReturnValue({
+    (determineFlappingAlerts as Mock).mockReturnValue({
       newAlerts: {},
       activeAlerts: {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
@@ -627,7 +633,7 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('determineDelayedAlerts() should call determineDelayedAlerts', async () => {
-    (determineDelayedAlerts as jest.Mock).mockReturnValue({
+    (determineDelayedAlerts as Mock).mockReturnValue({
       newAlerts: {},
       activeAlerts: {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),

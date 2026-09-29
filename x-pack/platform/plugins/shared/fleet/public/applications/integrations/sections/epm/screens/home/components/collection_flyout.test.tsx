@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -27,7 +29,7 @@ function renderFlyout(props: Partial<React.ComponentProps<typeof CollectionFlyou
     title: 'Nginx collection',
     description: 'Choose your preferred Nginx integration.',
     variants: [makeVariant()],
-    onClose: jest.fn(),
+    onClose: vi.fn(),
   };
   return render(
     <I18nProvider>
@@ -65,7 +67,7 @@ describe('CollectionFlyout', () => {
   });
 
   it('calls onClose when the close button is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const { getByLabelText } = renderFlyout({ onClose });
     fireEvent.click(getByLabelText('Close this dialog'));
     expect(onClose).toHaveBeenCalledTimes(1);

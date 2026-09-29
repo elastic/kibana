@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -14,11 +16,11 @@ import { createNameColumn } from './name';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
 
-const openScheduleDetailsMock = jest.fn();
+const openScheduleDetailsMock = vi.fn();
 
 describe('Name Column', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const column = createNameColumn({
       openScheduleDetails: openScheduleDetailsMock,

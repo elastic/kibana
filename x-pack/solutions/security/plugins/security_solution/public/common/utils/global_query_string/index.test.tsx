@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import {
@@ -20,20 +22,23 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => mockHistory,
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => mockHistory,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultLinkInfo: LinkInfo = {
   id: SecurityPageName.alerts,
@@ -41,12 +46,15 @@ const defaultLinkInfo: LinkInfo = {
   title: 'test title',
 };
 
-const mockLinkInfo = jest.fn().mockResolvedValue(defaultLinkInfo);
+const mockLinkInfo = vi.fn().mockResolvedValue(defaultLinkInfo);
 
-jest.mock('../../links', () => ({
-  ...jest.requireActual('../../links'),
-  useLinkInfo: () => mockLinkInfo(),
-}));
+vi.mock('../../links', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../links')),
+      useLinkInfo: () => mockLinkInfo(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('global query string', () => {
   const makeStore = (globalUrlParam: GlobalUrlParam) =>
@@ -71,7 +79,7 @@ describe('global query string', () => {
     });
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     window.location.search = '?';
   });
   describe('useInitializeUrlParam', () => {
@@ -79,7 +87,7 @@ describe('global query string', () => {
       const urlParamKey = 'testKey';
       window.location.search = '?testKey=(test:(value:123))';
 
-      const onInitialize = jest.fn();
+      const onInitialize = vi.fn();
 
       renderHook(() => useInitializeUrlParam(urlParamKey, onInitialize), {
         wrapper: makeWrapper(),

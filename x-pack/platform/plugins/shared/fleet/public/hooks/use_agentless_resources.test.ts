@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { useStartServices } from './use_core';
 import { useAgentlessResources } from './use_agentless_resources';
 
-jest.mock('./use_core');
+vi.mock('./use_core');
 
 const mockStorage = {
-  get: jest.fn(),
-  set: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
 };
 
-const mockUseStartServices = useStartServices as jest.MockedFunction<typeof useStartServices>;
+const mockUseStartServices = useStartServices as MockedFunction<typeof useStartServices>;
 
 describe('useAgentlessResources hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseStartServices.mockReturnValue({
       storage: mockStorage,
     } as any);

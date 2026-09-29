@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -16,12 +18,12 @@ const upgradeMessage = 'Please upgrade...';
 
 const mockActions = <div data-test-subj="mockActions" />;
 
-jest.mock('@kbn/security-solution-navigation', () => {
-  const original = jest.requireActual('@kbn/security-solution-navigation');
+vi.mock('@kbn/security-solution-navigation', async () => {
+  const original = (await vi.importActual('@kbn/security-solution-navigation'));
   return {
     ...original,
     useNavigation: () => ({
-      navigateTo: jest.fn(),
+      navigateTo: vi.fn(),
     }),
   };
 });

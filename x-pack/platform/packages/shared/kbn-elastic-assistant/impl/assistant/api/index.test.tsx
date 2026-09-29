@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ApiConfig } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
@@ -13,10 +16,10 @@ import type { FetchConnectorExecuteAction } from '.';
 import { fetchConnectorExecuteAction } from '.';
 import { API_ERROR } from '../translations';
 
-jest.mock('@kbn/core-http-browser');
+vi.mock('@kbn/core-http-browser');
 
 const mockHttp = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 } as unknown as HttpSetup;
 
 const apiConfig: Record<'openai' | 'bedrock' | 'gemini', ApiConfig> = {
@@ -63,12 +66,12 @@ const staticDefaults = {
 };
 describe('API tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetchConnectorExecuteAction', () => {
     it('calls the non-stream API when assistantStreamingEnabled is false', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+      (mockHttp.fetch as Mock).mockResolvedValue({ status: 'error' });
 
       await fetchConnectorExecuteAction({
         ...fetchConnectorArgs,
@@ -148,7 +151,7 @@ describe('API tests', () => {
     });
 
     it('calls the api with the expected optional request parameters', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+      (mockHttp.fetch as Mock).mockResolvedValue({ status: 'error' });
 
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
@@ -170,7 +173,7 @@ describe('API tests', () => {
     });
 
     it('returns API_ERROR when the response status is error and langchain is on', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+      (mockHttp.fetch as Mock).mockResolvedValue({ status: 'error' });
 
       const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
 
@@ -182,7 +185,7 @@ describe('API tests', () => {
     });
 
     it('returns API_ERROR + error message on non streaming responses', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+      (mockHttp.fetch as Mock).mockResolvedValue({
         status: 'error',
         service_message: 'an error message',
       });
@@ -201,7 +204,7 @@ describe('API tests', () => {
     });
 
     it('returns API_ERROR when the response status is error, langchain is off, and response is not a reader', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+      (mockHttp.fetch as Mock).mockResolvedValue({ status: 'error' });
 
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
@@ -217,9 +220,9 @@ describe('API tests', () => {
     });
 
     it('returns API_ERROR when the response is error, langchain is off, and response is a reader', async () => {
-      const mockReader = jest.fn();
-      (mockHttp.fetch as jest.Mock).mockRejectedValue({
-        response: { body: { getReader: jest.fn().mockImplementation(() => mockReader) } },
+      const mockReader = vi.fn();
+      (mockHttp.fetch as Mock).mockRejectedValue({
+        response: { body: { getReader: vi.fn().mockImplementation(() => mockReader) } },
       });
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
@@ -235,7 +238,7 @@ describe('API tests', () => {
     });
 
     it('returns API_ERROR when there are no choices', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
+      (mockHttp.fetch as Mock).mockResolvedValue({ status: 'ok', data: '' });
 
       const result = await fetchConnectorExecuteAction({
         ...fetchConnectorArgs,
@@ -248,7 +251,7 @@ describe('API tests', () => {
     it('returns the original when `content` is not JSON', async () => {
       const response = 'plain text content';
 
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+      (mockHttp.fetch as Mock).mockResolvedValue({
         status: 'ok',
         data: response,
       });

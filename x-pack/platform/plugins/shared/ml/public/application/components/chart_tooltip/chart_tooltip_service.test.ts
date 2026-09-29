@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { TooltipData } from './chart_tooltip_service';
 import { ChartTooltipService, getChartTooltipDefaultState } from './chart_tooltip_service';
 
@@ -16,7 +18,7 @@ describe('ChartTooltipService', () => {
   });
 
   test('should update the tooltip state on show and hide', () => {
-    const spy = jest.fn();
+    const spy = vi.fn();
 
     service.tooltipState$.subscribe(spy);
 
@@ -49,7 +51,7 @@ describe('ChartTooltipService', () => {
   });
 
   test('update the tooltip state only on a new value', () => {
-    const spy = jest.fn();
+    const spy = vi.fn();
 
     service.tooltipState$.subscribe(spy);
 

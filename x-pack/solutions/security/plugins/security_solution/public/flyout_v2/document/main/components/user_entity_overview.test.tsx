@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -42,28 +45,31 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...originalModule,
     useKibana: () => ({ services: { telemetry: mockedTelemetry } }),
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock(
+vi.mock(
   '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
 const mockAlertData = {
@@ -76,15 +82,15 @@ const mockAlertData = {
   },
 };
 
-const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
-jest.mock('../../../../common/containers/use_global_time', () => {
+const mockUseGlobalTime = vi.fn().mockReturnValue({ from, to });
+vi.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
 });
 
-const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+const mockUseRiskScore = useRiskScore as Mock;
+vi.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
 const renderUserEntityOverview = (
   extraProps: Partial<React.ComponentProps<typeof UserEntityOverview>> = {}
@@ -102,9 +108,9 @@ const renderUserEntityOverview = (
 
 describe('<UserEntityOverview />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
-    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    (useMisconfigurationPreview as Mock).mockReturnValue({});
+    (useAlertsByStatus as Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   describe('entity data', () => {
@@ -196,7 +202,7 @@ describe('<UserEntityOverview />', () => {
     });
 
     it('should render alert count when data is available', () => {
-      (useAlertsByStatus as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as Mock).mockReturnValue({
         isLoading: false,
         items: mockAlertData,
       });
@@ -206,7 +212,7 @@ describe('<UserEntityOverview />', () => {
     });
 
     it('opens user alert details when clicking alert count with enableEntityLinks', () => {
-      (useAlertsByStatus as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as Mock).mockReturnValue({
         isLoading: false,
         items: mockAlertData,
       });
@@ -239,7 +245,7 @@ describe('<UserEntityOverview />', () => {
     });
 
     it('should render misconfiguration when data is available', () => {
-      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+      (useMisconfigurationPreview as Mock).mockReturnValue({
         data: { count: { passed: 1, failed: 2 } },
       });
 

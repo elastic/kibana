@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
@@ -17,75 +20,90 @@ import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attac
 import { workflowExecutor, type WorkflowExecutorDeps } from '.';
 import { executeGenerationWorkflow } from '../../../routes/generate/helpers';
 
-const mockIsWorkflowsEnabledForSpace = jest.fn();
+const mockIsWorkflowsEnabledForSpace = vi.fn();
 
-jest.mock('../../is_workflows_enabled_for_space', () => ({
-  isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
-}));
+vi.mock('../../is_workflows_enabled_for_space', () => {
+      const mocked = {
+      isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGenerateHash = jest.fn().mockReturnValue('mock-alert-hash');
-const mockTransformToBaseAlertDocument = jest.fn().mockReturnValue({
+const mockGenerateHash = vi.fn().mockReturnValue('mock-alert-hash');
+const mockTransformToBaseAlertDocument = vi.fn().mockReturnValue({
   'kibana.alert.url': 'https://localhost:5601/app/security/attack_discovery/mock-doc-id',
 });
-const mockGetMarkdownFields = jest.fn().mockReturnValue({
+const mockGetMarkdownFields = vi.fn().mockReturnValue({
   detailsMarkdown: 'mock details',
   entitySummaryMarkdown: 'mock entity',
   summaryMarkdown: 'mock summary',
   title: 'mock title',
 });
 
-const mockBackfillAttackIdsBestEffort = jest.fn().mockResolvedValue(undefined);
+const mockBackfillAttackIdsBestEffort = vi.fn().mockResolvedValue(undefined);
 
-jest.mock('@kbn/attack-discovery-schedules-common', () => ({
-  // Faithful inline copy of the pure aggregator (the real implementation is
-  // covered by the package's own unit test). Requiring the actual barrel here
-  // would evaluate schedule params that depend on the mocked
-  // `@kbn/elastic-assistant-common` module below.
-  buildAlertIdToAttackIdsMap: ({
-    attacks,
-  }: {
-    attacks: Array<{ alertIds: string[]; attackId: string }>;
-  }) =>
-    attacks.reduce<Record<string, string[]>>(
-      (acc, { alertIds, attackId }) =>
-        alertIds.reduce(
-          (innerAcc, alertId) => ({
-            ...innerAcc,
-            [alertId]: [...(innerAcc[alertId] ?? []), attackId],
-          }),
-          acc
+vi.mock('@kbn/attack-discovery-schedules-common', () => {
+      const mocked = {
+      // Faithful inline copy of the pure aggregator (the real implementation is
+      // covered by the package's own unit test). Requiring the actual barrel here
+      // would evaluate schedule params that depend on the mocked
+      // `@kbn/elastic-assistant-common` module below.
+      buildAlertIdToAttackIdsMap: ({
+        attacks,
+      }: {
+        attacks: Array<{ alertIds: string[]; attackId: string }>;
+      }) =>
+        attacks.reduce<Record<string, string[]>>(
+          (acc, { alertIds, attackId }) =>
+            alertIds.reduce(
+              (innerAcc, alertId) => ({
+                ...innerAcc,
+                [alertId]: [...(innerAcc[alertId] ?? []), attackId],
+              }),
+              acc
+            ),
+          {}
         ),
-      {}
-    ),
-  backfillAttackIdsBestEffort: (...args: unknown[]) => mockBackfillAttackIdsBestEffort(...args),
-  generateAttackDiscoveryAlertHash: (...args: unknown[]) => mockGenerateHash(...args),
-  // Faithful inline copy of the shared normalizer (the real implementation is
-  // covered by the package's own unit test); handles snake_case + camelCase keys.
-  normalizeAttackDiscovery: (raw: Record<string, unknown>) => ({
-    alertIds: raw.alertIds ?? raw.alert_ids ?? [],
-    detailsMarkdown: raw.detailsMarkdown ?? raw.details_markdown ?? '',
-    entitySummaryMarkdown: raw.entitySummaryMarkdown ?? raw.entity_summary_markdown,
-    id: raw.id,
-    mitreAttackTactics: raw.mitreAttackTactics ?? raw.mitre_attack_tactics,
-    summaryMarkdown: raw.summaryMarkdown ?? raw.summary_markdown ?? '',
-    timestamp: raw.timestamp ?? '',
-    title: raw.title ?? '',
-  }),
-  transformToBaseAlertDocument: (...args: unknown[]) => mockTransformToBaseAlertDocument(...args),
-}));
+      backfillAttackIdsBestEffort: (...args: unknown[]) => mockBackfillAttackIdsBestEffort(...args),
+      generateAttackDiscoveryAlertHash: (...args: unknown[]) => mockGenerateHash(...args),
+      // Faithful inline copy of the shared normalizer (the real implementation is
+      // covered by the package's own unit test); handles snake_case + camelCase keys.
+      normalizeAttackDiscovery: (raw: Record<string, unknown>) => ({
+        alertIds: raw.alertIds ?? raw.alert_ids ?? [],
+        detailsMarkdown: raw.detailsMarkdown ?? raw.details_markdown ?? '',
+        entitySummaryMarkdown: raw.entitySummaryMarkdown ?? raw.entity_summary_markdown,
+        id: raw.id,
+        mitreAttackTactics: raw.mitreAttackTactics ?? raw.mitre_attack_tactics,
+        summaryMarkdown: raw.summaryMarkdown ?? raw.summary_markdown ?? '',
+        timestamp: raw.timestamp ?? '',
+        title: raw.title ?? '',
+      }),
+      transformToBaseAlertDocument: (...args: unknown[]) => mockTransformToBaseAlertDocument(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/elastic-assistant-common', () => ({
-  getAttackDiscoveryMarkdownFields: (...args: unknown[]) => mockGetMarkdownFields(...args),
-}));
+vi.mock('@kbn/elastic-assistant-common', () => {
+      const mocked = {
+      getAttackDiscoveryMarkdownFields: (...args: unknown[]) => mockGetMarkdownFields(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../routes/generate/helpers', () => ({
-  executeGenerationWorkflow: jest.fn(),
-}));
+vi.mock('../../../routes/generate/helpers', () => {
+      const mocked = {
+      executeGenerationWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/task-manager-plugin/server', () => ({
-  createTaskRunError: jest.fn((error, source) => ({ message: error.message, source })),
-  TaskErrorSource: { USER: 'USER', FRAMEWORK: 'FRAMEWORK' },
-}));
+vi.mock('@kbn/task-manager-plugin/server', () => {
+      const mocked = {
+      createTaskRunError: vi.fn((error, source) => ({ message: error.message, source })),
+      TaskErrorSource: { USER: 'USER', FRAMEWORK: 'FRAMEWORK' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAttackDiscovery = {
   alertIds: ['alert-1', 'alert-2'],
@@ -178,9 +196,9 @@ describe('workflowExecutor', () => {
     state: {},
   };
 
-  const mockGetEventLogIndex = jest.fn().mockResolvedValue('.kibana-event-log-test');
-  const mockGetEventLogger = jest.fn().mockResolvedValue({ logEvent: jest.fn() });
-  const mockGetStartServices = jest.fn().mockResolvedValue({
+  const mockGetEventLogIndex = vi.fn().mockResolvedValue('.kibana-event-log-test');
+  const mockGetEventLogger = vi.fn().mockResolvedValue({ logEvent: vi.fn() });
+  const mockGetStartServices = vi.fn().mockResolvedValue({
     coreStart: {},
     pluginsStart: { security: { authz: {} } },
   });
@@ -197,13 +215,13 @@ describe('workflowExecutor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockIsWorkflowsEnabledForSpace.mockResolvedValue(true);
 
-    (executeGenerationWorkflow as jest.Mock).mockResolvedValue(mockSuccessOutcome);
+    (executeGenerationWorkflow as Mock).mockResolvedValue(mockSuccessOutcome);
 
-    (ruleExecutorServices.alertsClient.report as jest.Mock).mockReturnValue({
+    (ruleExecutorServices.alertsClient.report as Mock).mockReturnValue({
       uuid: 'mock-alert-doc-id',
     });
   });
@@ -370,8 +388,8 @@ describe('workflowExecutor', () => {
     await workflowExecutor({ deps, options });
     await workflowExecutor({ deps, options });
 
-    const firstUuid = (executeGenerationWorkflow as jest.Mock).mock.calls[0][0].executionUuid;
-    const secondUuid = (executeGenerationWorkflow as jest.Mock).mock.calls[1][0].executionUuid;
+    const firstUuid = (executeGenerationWorkflow as Mock).mock.calls[0][0].executionUuid;
+    const secondUuid = (executeGenerationWorkflow as Mock).mock.calls[1][0].executionUuid;
 
     expect(firstUuid).not.toBe(secondUuid);
     expect(typeof firstUuid).toBe('string');
@@ -410,7 +428,7 @@ describe('workflowExecutor', () => {
 
   it('throws a USER TaskRunError for 4xx errors', async () => {
     const userError = Object.assign(new Error('Bad request'), { statusCode: 400 });
-    (executeGenerationWorkflow as jest.Mock).mockRejectedValueOnce(userError);
+    (executeGenerationWorkflow as Mock).mockRejectedValueOnce(userError);
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await expect(workflowExecutor({ deps, options })).rejects.toEqual(
@@ -422,7 +440,7 @@ describe('workflowExecutor', () => {
 
   it('rethrows non-4xx errors without wrapping in TaskRunError', async () => {
     const serverError = new Error('Internal server error');
-    (executeGenerationWorkflow as jest.Mock).mockRejectedValueOnce(serverError);
+    (executeGenerationWorkflow as Mock).mockRejectedValueOnce(serverError);
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await expect(workflowExecutor({ deps, options })).rejects.toThrow('Internal server error');
@@ -431,7 +449,7 @@ describe('workflowExecutor', () => {
   });
 
   it('logs an error when the generation workflow fails', async () => {
-    (executeGenerationWorkflow as jest.Mock).mockRejectedValueOnce(
+    (executeGenerationWorkflow as Mock).mockRejectedValueOnce(
       new Error('Generation workflow failure')
     );
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
@@ -444,7 +462,7 @@ describe('workflowExecutor', () => {
   });
 
   it('aborts the scheduled pipeline when the caller is unauthorized to execute workflows (backstop)', async () => {
-    (executeGenerationWorkflow as jest.Mock).mockRejectedValueOnce(
+    (executeGenerationWorkflow as Mock).mockRejectedValueOnce(
       new WorkflowExecutionAuthorizationError(['workflowsManagement:execute'])
     );
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
@@ -488,7 +506,7 @@ describe('workflowExecutor', () => {
   it('throws a USER TaskRunError for non-Error 4xx throws', async () => {
     const errorString = 'string error with status 400';
     const errorObj = Object.assign(errorString, { statusCode: 400 });
-    (executeGenerationWorkflow as jest.Mock).mockRejectedValueOnce(errorObj);
+    (executeGenerationWorkflow as Mock).mockRejectedValueOnce(errorObj);
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await expect(workflowExecutor({ deps, options })).rejects.toEqual(
@@ -499,7 +517,7 @@ describe('workflowExecutor', () => {
   });
 
   it('logs non-Error thrown values as strings', async () => {
-    (executeGenerationWorkflow as jest.Mock).mockRejectedValueOnce('raw string error');
+    (executeGenerationWorkflow as Mock).mockRejectedValueOnce('raw string error');
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await expect(workflowExecutor({ deps, options })).rejects.toBe('raw string error');
@@ -613,7 +631,7 @@ describe('workflowExecutor', () => {
     });
 
     it('throws when outcome is validation_failed', async () => {
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         outcome: 'validation_failed',
       });
       const options = { ...executorOptions } as unknown as RuleExecutorOptions;
@@ -637,7 +655,7 @@ describe('workflowExecutor', () => {
         title: 'second title',
       };
 
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -649,7 +667,7 @@ describe('workflowExecutor', () => {
 
       mockGenerateHash.mockReturnValueOnce('hash-1').mockReturnValueOnce('hash-2');
 
-      (ruleExecutorServices.alertsClient.report as jest.Mock)
+      (ruleExecutorServices.alertsClient.report as Mock)
         .mockReturnValueOnce({ uuid: 'doc-id-1' })
         .mockReturnValueOnce({ uuid: 'doc-id-2' });
 
@@ -700,7 +718,7 @@ describe('workflowExecutor', () => {
         title: 'second title',
       };
 
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -712,7 +730,7 @@ describe('workflowExecutor', () => {
 
       mockGenerateHash.mockReturnValueOnce('hash-1').mockReturnValueOnce('hash-2');
 
-      (ruleExecutorServices.alertsClient.report as jest.Mock)
+      (ruleExecutorServices.alertsClient.report as Mock)
         .mockReturnValueOnce({ uuid: 'doc-id-1' })
         .mockReturnValueOnce({ uuid: 'doc-id-2' });
 
@@ -732,7 +750,7 @@ describe('workflowExecutor', () => {
     });
 
     it('does not call backfillAttackIdsBestEffort when outcome is validation_failed', async () => {
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         outcome: 'validation_failed',
       });
 
@@ -756,7 +774,7 @@ describe('workflowExecutor', () => {
         title: 'snake title',
       };
 
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -795,7 +813,7 @@ describe('workflowExecutor', () => {
         title: 'transformed title',
       };
 
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -825,7 +843,7 @@ describe('workflowExecutor', () => {
         title: 'transformed title',
       };
 
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -845,7 +863,7 @@ describe('workflowExecutor', () => {
     });
 
     it('does not call alertsClient.report when the handover is empty', async () => {
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -860,7 +878,7 @@ describe('workflowExecutor', () => {
     });
 
     it('logs a warning when the handover is empty', async () => {
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -877,7 +895,7 @@ describe('workflowExecutor', () => {
     });
 
     it('does not call backfillAttackIdsBestEffort when the handover is empty', async () => {
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -892,7 +910,7 @@ describe('workflowExecutor', () => {
     });
 
     it('does not call alertsClient.report when the handover is absent', async () => {
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
@@ -907,7 +925,7 @@ describe('workflowExecutor', () => {
     });
 
     it('logs a warning when the handover is absent', async () => {
-      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+      (executeGenerationWorkflow as Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { searchEntitiesV2, searchEntitiesV2Batch } from './search_entities';
 
 describe('searchEntitiesV2', () => {
   it('throws when filterQuery is not valid JSON', async () => {
     const esClient = {
-      search: jest.fn(),
+      search: vi.fn(),
     } as unknown as ElasticsearchClient;
 
     await expect(
@@ -29,7 +31,7 @@ describe('searchEntitiesV2', () => {
   });
 
   it('searches the v2 latest index with entity type and filter clauses', async () => {
-    const search = jest.fn().mockResolvedValue({
+    const search = vi.fn().mockResolvedValue({
       hits: {
         total: 1,
         hits: [
@@ -87,7 +89,7 @@ describe('searchEntitiesV2Batch', () => {
   };
 
   it('returns [] and issues no request when queries is empty', async () => {
-    const msearch = jest.fn();
+    const msearch = vi.fn();
     const esClient = { msearch } as unknown as ElasticsearchClient;
 
     const result = await searchEntitiesV2Batch({ esClient, namespace: 'default', queries: [] });
@@ -97,7 +99,7 @@ describe('searchEntitiesV2Batch', () => {
   });
 
   it('resolves the index once and issues a single msearch for multiple queries', async () => {
-    const msearch = jest.fn().mockResolvedValue({
+    const msearch = vi.fn().mockResolvedValue({
       responses: [
         { hits: { total: 1, hits: [{ _source: { entity: { id: 'a' } } }] } },
         { hits: { total: 0, hits: [] } },
@@ -133,7 +135,7 @@ describe('searchEntitiesV2Batch', () => {
   });
 
   it('surfaces a per-item ES error without failing the whole batch', async () => {
-    const msearch = jest.fn().mockResolvedValue({
+    const msearch = vi.fn().mockResolvedValue({
       responses: [
         { error: { type: 'search_phase_execution_exception', reason: 'boom' } },
         { hits: { total: 0, hits: [] } },
@@ -152,7 +154,7 @@ describe('searchEntitiesV2Batch', () => {
   });
 
   it('surfaces a missing msearch response as a per-item error without throwing', async () => {
-    const msearch = jest.fn().mockResolvedValue({
+    const msearch = vi.fn().mockResolvedValue({
       responses: [{ hits: { total: 0, hits: [] } }],
     });
     const esClient = { msearch } as unknown as ElasticsearchClient;
@@ -168,7 +170,7 @@ describe('searchEntitiesV2Batch', () => {
   });
 
   it('surfaces a per-item filterQuery parse error without issuing a request for it', async () => {
-    const msearch = jest.fn().mockResolvedValue({
+    const msearch = vi.fn().mockResolvedValue({
       responses: [{ hits: { total: 0, hits: [] } }],
     });
     const esClient = { msearch } as unknown as ElasticsearchClient;

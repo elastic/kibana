@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
@@ -15,40 +18,46 @@ import type { ApiDescribeTypeResultData } from './describe_api_type';
 import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryDefinition, LoadedApi } from '../../api';
 
-jest.mock('../../api/registry', () => ({
-  ...jest.requireActual('../../api/registry'),
-  getRegistries: jest.fn(),
-}));
+vi.mock('../../api/registry', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../api/registry')),
+      getRegistries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockBigDescription = 'x'.repeat(2_000);
 
-jest.mock('@elastic/schemas/es/json/_types.json', () => ({
-  $defs: {
-    Duration: { type: 'string', description: 'A duration such as "30s".' },
-    QueryContainer: {
-      type: 'object',
-      description: 'x'.repeat(2_000),
-      properties: {
-        bool: { $ref: './_types.json#/$defs/BoolQuery' },
-        term: { $ref: './_types.json#/$defs/OversizedTermQuery' },
+vi.mock('@elastic/schemas/es/json/_types.json', () => {
+      const mocked = {
+      $defs: {
+        Duration: { type: 'string', description: 'A duration such as "30s".' },
+        QueryContainer: {
+          type: 'object',
+          description: 'x'.repeat(2_000),
+          properties: {
+            bool: { $ref: './_types.json#/$defs/BoolQuery' },
+            term: { $ref: './_types.json#/$defs/OversizedTermQuery' },
+          },
+        },
+        BoolQuery: {
+          type: 'object',
+          properties: { must: { $ref: './_types.json#/$defs/Duration' } },
+        },
+        OversizedTermQuery: { type: 'object', description: 'x'.repeat(2_000) },
       },
-    },
-    BoolQuery: {
-      type: 'object',
-      properties: { must: { $ref: './_types.json#/$defs/Duration' } },
-    },
-    OversizedTermQuery: { type: 'object', description: 'x'.repeat(2_000) },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRegistries = jest.mocked(getRegistries);
+const mockGetRegistries = vi.mocked(getRegistries);
 
 const createLoadedApi = (definition: ApiRegistryDefinition): LoadedApi => ({
   definition,
-  buildRequest: jest.fn(),
+  buildRequest: vi.fn(),
 });
 
-const createRegistry = (loadApi: jest.Mock): ApiRegistry => ({
+const createRegistry = (loadApi: Mock): ApiRegistry => ({
   manifest: [],
   loadApi,
 });
@@ -74,14 +83,14 @@ const searchApi: ApiRegistryDefinition = {
 };
 
 describe('createDescribeApiTypeTool', () => {
-  let loadApi: jest.Mock;
+  let loadApi: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    loadApi = jest.fn();
+    vi.clearAllMocks();
+    loadApi = vi.fn();
     mockGetRegistries.mockResolvedValue({
       elasticsearch: createRegistry(loadApi),
-      kibana: createRegistry(jest.fn()),
+      kibana: createRegistry(vi.fn()),
     });
   });
 

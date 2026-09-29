@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import type { PackageInfo } from '@kbn/config';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -70,12 +73,12 @@ const createHandler = ({
     incrementUsageCounter,
   });
 
-  return (router.get as jest.Mock).mock.calls[0][1] as Function;
+  return (router.get as Mock).mock.calls[0][1] as Function;
 };
 
 describe('registerStatusRoute', () => {
   it('increments a usage counter for unauthenticated redacted status responses', async () => {
-    const incrementUsageCounter = jest.fn();
+    const incrementUsageCounter = vi.fn();
     const handler = createHandler({ incrementUsageCounter });
     const response = mockRouter.createResponseFactory();
 
@@ -104,13 +107,13 @@ describe('registerStatusRoute', () => {
   });
 
   it('bypasses the monitor privilege check for authenticated status page callers', async () => {
-    const incrementUsageCounter = jest.fn();
+    const incrementUsageCounter = vi.fn();
     const handler = createHandler({
       incrementUsageCounter,
       statusPageBypassMonitorPrivilege: true,
     });
     const response = mockRouter.createResponseFactory();
-    const hasPrivileges = jest.fn();
+    const hasPrivileges = vi.fn();
 
     await handler(
       {

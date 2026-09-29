@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { of } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
@@ -28,8 +31,8 @@ import {
 } from '../constants';
 import type { ConfigurationService } from './configuration';
 
-jest.mock('./receiver');
-jest.mock('./sender');
+vi.mock('./receiver');
+vi.mock('./sender');
 
 const makeBucket = (
   serviceName: string,
@@ -85,11 +88,11 @@ const makeBucket = (
   };
 };
 
-const createMockConfigurationService = (): jest.Mocked<ConfigurationService> =>
+const createMockConfigurationService = (): Mocked<ConfigurationService> =>
   ({
-    start: jest.fn(),
-    stop: jest.fn(),
-    getOtelTelemetryConfiguration$: jest
+    start: vi.fn(),
+    stop: vi.fn(),
+    getOtelTelemetryConfiguration$: vi
       .fn()
       .mockReturnValue(of(DEFAULT_OTEL_TELEMETRY_CONFIGURATION)),
   } as any);
@@ -97,47 +100,47 @@ const createMockConfigurationService = (): jest.Mocked<ConfigurationService> =>
 describe('OtelTelemetryService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let service: OtelTelemetryService;
-  let taskManager: jest.Mocked<TaskManagerSetupContract>;
-  let taskManagerStart: jest.Mocked<TaskManagerStartContract>;
-  let analytics: jest.Mocked<AnalyticsServiceStart>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let receiver: jest.Mocked<OtelTelemetryReceiver>;
-  let sender: jest.Mocked<OtelTelemetrySender>;
-  let configurationService: jest.Mocked<ConfigurationService>;
+  let taskManager: Mocked<TaskManagerSetupContract>;
+  let taskManagerStart: Mocked<TaskManagerStartContract>;
+  let analytics: Mocked<AnalyticsServiceStart>;
+  let esClient: Mocked<ElasticsearchClient>;
+  let receiver: Mocked<OtelTelemetryReceiver>;
+  let sender: Mocked<OtelTelemetrySender>;
+  let configurationService: Mocked<ConfigurationService>;
   const telemetryConfigProvider = createMockTelemetryConfigProvider();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     logger = loggingSystemMock.createLogger();
 
     taskManager = {
-      registerTaskDefinitions: jest.fn(),
-    } as unknown as jest.Mocked<TaskManagerSetupContract>;
+      registerTaskDefinitions: vi.fn(),
+    } as unknown as Mocked<TaskManagerSetupContract>;
 
     taskManagerStart = {
-      ensureScheduled: jest.fn().mockResolvedValue({
+      ensureScheduled: vi.fn().mockResolvedValue({
         id: TASK_ID,
         schedule: { interval: TASK_INTERVAL },
       }),
-    } as unknown as jest.Mocked<TaskManagerStartContract>;
+    } as unknown as Mocked<TaskManagerStartContract>;
 
     analytics = {
-      reportEvent: jest.fn(),
-    } as unknown as jest.Mocked<AnalyticsServiceStart>;
+      reportEvent: vi.fn(),
+    } as unknown as Mocked<AnalyticsServiceStart>;
 
-    esClient = {} as jest.Mocked<ElasticsearchClient>;
+    esClient = {} as Mocked<ElasticsearchClient>;
 
     receiver = {
-      fetchAllSignals: jest.fn(),
-    } as unknown as jest.Mocked<OtelTelemetryReceiver>;
+      fetchAllSignals: vi.fn(),
+    } as unknown as Mocked<OtelTelemetryReceiver>;
 
     sender = {
-      report: jest.fn(),
-    } as unknown as jest.Mocked<OtelTelemetrySender>;
+      report: vi.fn(),
+    } as unknown as Mocked<OtelTelemetrySender>;
 
-    (OtelTelemetryReceiver as jest.Mock).mockImplementation(() => receiver);
-    (OtelTelemetrySender as jest.Mock).mockImplementation(() => sender);
+    (OtelTelemetryReceiver as Mock).mockImplementation(() => receiver);
+    (OtelTelemetrySender as Mock).mockImplementation(() => sender);
 
     configurationService = createMockConfigurationService();
     service = new OtelTelemetryService(logger, configurationService);

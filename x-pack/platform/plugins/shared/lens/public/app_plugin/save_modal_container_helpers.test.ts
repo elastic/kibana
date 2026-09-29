@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { makeDefaultServices } from '../mocks';
 import { redirectToDashboard } from './save_modal_container_helpers';
 import type { LensSerializedState } from '..';
@@ -16,7 +18,7 @@ describe('redirectToDashboard', () => {
   const mockServices = makeDefaultServices();
 
   it('should call the navigateToWithEmbeddablePackages with the correct args if originatingApp is given', () => {
-    const navigateToWithEmbeddablePackagesSpy = jest.fn();
+    const navigateToWithEmbeddablePackagesSpy = vi.fn();
     const transferService = {
       ...mockServices.stateTransfer,
       navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesSpy,
@@ -25,7 +27,7 @@ describe('redirectToDashboard', () => {
       embeddableInput,
       dashboardId: 'id',
       originatingApp: 'security',
-      getOriginatingPath: jest.fn(),
+      getOriginatingPath: vi.fn(),
       stateTransfer: transferService,
     });
     expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('security', {
@@ -35,7 +37,7 @@ describe('redirectToDashboard', () => {
   });
 
   it('should call the navigateToWithEmbeddablePackages with the correct args if originatingApp is an empty string', () => {
-    const navigateToWithEmbeddablePackagesSpy = jest.fn();
+    const navigateToWithEmbeddablePackagesSpy = vi.fn();
     const transferService = {
       ...mockServices.stateTransfer,
       navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesSpy,
@@ -44,7 +46,7 @@ describe('redirectToDashboard', () => {
       embeddableInput,
       dashboardId: 'id',
       originatingApp: '',
-      getOriginatingPath: jest.fn(),
+      getOriginatingPath: vi.fn(),
       stateTransfer: transferService,
     });
     expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('dashboards', {

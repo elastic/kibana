@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import DateMath from '@kbn/datemath';
 import moment from 'moment';
 import { parseAbsoluteDate } from './parse_absolute_date';
@@ -14,7 +16,7 @@ describe('parseAbsoluteDate', () => {
   const MOCK_VALUE = 132435465789;
 
   beforeEach(() => {
-    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy = vi.spyOn(DateMath, 'parse');
     dateMathSpy.mockReturnValue(moment(MOCK_VALUE));
   });
 

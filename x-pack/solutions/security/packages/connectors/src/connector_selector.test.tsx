@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ConnectorSelector } from './connector_selector';
@@ -13,8 +15,8 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 const testSubj = 'connector-selector';
 
 describe('ConnectorSelector', () => {
-  const mockOnChange = jest.fn();
-  const mockOnNewConnectorClicked = jest.fn();
+  const mockOnChange = vi.fn();
+  const mockOnNewConnectorClicked = vi.fn();
 
   const connectors = [
     { id: '1', name: 'Connector One', isPreconfigured: true },
@@ -23,12 +25,12 @@ describe('ConnectorSelector', () => {
 
   const mockSettings = {
     client: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   } as unknown as SettingsStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render with provided connectors', () => {

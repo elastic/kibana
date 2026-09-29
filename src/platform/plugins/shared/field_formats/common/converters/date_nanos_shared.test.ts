@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment-timezone';
 import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos_shared';
 import type { FieldFormatsGetConfigFn } from '../types';
@@ -195,7 +197,7 @@ describe('Date Nanos Format', () => {
         pattern: 'MMM D, YYYY @ HH:mm:ss.SSS',
         timezone: 'UTC',
       },
-      jest.fn()
+      vi.fn()
     );
     expect(dateNanos.convertToReact('<script>alert("test")</script>')).toBe(
       '<script>alert("test")</script>'

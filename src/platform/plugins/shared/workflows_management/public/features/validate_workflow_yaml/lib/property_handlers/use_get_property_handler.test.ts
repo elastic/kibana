@@ -7,40 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useGetPropertyHandler } from './use_get_property_handler';
 import { getPropertyHandler } from '../../../../../common/schema';
 import type { InternalStepsEditorHandlers } from '../../../../common/context/internal_steps/editor_handlers/editor_handlers';
 import { useWorkflowsContext } from '../../../../common/context/workflows_context';
 
-jest.mock('../../../../../common/schema', () => ({
-  getPropertyHandler: jest.fn(),
-}));
+vi.mock('../../../../../common/schema', () => {
+      const mocked = {
+      getPropertyHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/context/workflows_context', () => ({
-  useWorkflowsContext: jest.fn(),
-}));
+vi.mock('../../../../common/context/workflows_context', () => {
+      const mocked = {
+      useWorkflowsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetPropertyHandler = getPropertyHandler as jest.MockedFunction<typeof getPropertyHandler>;
-const mockUseWorkflowsContext = useWorkflowsContext as jest.MockedFunction<
+const mockGetPropertyHandler = getPropertyHandler as MockedFunction<typeof getPropertyHandler>;
+const mockUseWorkflowsContext = useWorkflowsContext as MockedFunction<
   typeof useWorkflowsContext
 >;
 
 describe('useGetPropertyHandler', () => {
   const contractHandler = {
-    selection: { search: jest.fn(), resolve: jest.fn(), getDetails: jest.fn() },
+    selection: { search: vi.fn(), resolve: vi.fn(), getDetails: vi.fn() },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns internal handler when present on config scope', () => {
     const internalHandler = {
-      selection: { search: jest.fn(), resolve: jest.fn(), getDetails: jest.fn() },
+      selection: { search: vi.fn(), resolve: vi.fn(), getDetails: vi.fn() },
     };
     const internalStepsEditorHandlers = {
-      getEditorHandlers: jest.fn().mockReturnValue({
+      getEditorHandlers: vi.fn().mockReturnValue({
         config: { foo: internalHandler },
       }),
     } as unknown as InternalStepsEditorHandlers;
@@ -53,10 +62,10 @@ describe('useGetPropertyHandler', () => {
 
   it('returns internal handler when present on input scope', () => {
     const internalHandler = {
-      selection: { search: jest.fn(), resolve: jest.fn(), getDetails: jest.fn() },
+      selection: { search: vi.fn(), resolve: vi.fn(), getDetails: vi.fn() },
     };
     const internalStepsEditorHandlers = {
-      getEditorHandlers: jest.fn().mockReturnValue({
+      getEditorHandlers: vi.fn().mockReturnValue({
         input: { bar: internalHandler },
       }),
     } as unknown as InternalStepsEditorHandlers;
@@ -69,7 +78,7 @@ describe('useGetPropertyHandler', () => {
 
   it('falls back to contract getPropertyHandler when internal has no handler', () => {
     const internalStepsEditorHandlers = {
-      getEditorHandlers: jest.fn().mockReturnValue({
+      getEditorHandlers: vi.fn().mockReturnValue({
         config: {},
       }),
     } as unknown as InternalStepsEditorHandlers;
@@ -84,7 +93,7 @@ describe('useGetPropertyHandler', () => {
   it('prefers internal handler when both could apply', () => {
     const internalHandler = { selection: { a: 1 } };
     const internalStepsEditorHandlers = {
-      getEditorHandlers: jest.fn().mockReturnValue({
+      getEditorHandlers: vi.fn().mockReturnValue({
         input: { k: internalHandler },
       }),
     } as unknown as InternalStepsEditorHandlers;
@@ -98,7 +107,7 @@ describe('useGetPropertyHandler', () => {
 
   it('returns null when neither internal nor contract provides a handler', () => {
     const internalStepsEditorHandlers = {
-      getEditorHandlers: jest.fn().mockReturnValue(undefined),
+      getEditorHandlers: vi.fn().mockReturnValue(undefined),
     } as unknown as InternalStepsEditorHandlers;
     mockUseWorkflowsContext.mockReturnValue({ internalStepsEditorHandlers });
     mockGetPropertyHandler.mockReturnValue(null);

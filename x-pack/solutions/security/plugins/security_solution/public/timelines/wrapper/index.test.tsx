@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -39,38 +42,44 @@ const createVisibleTimelineStore = () =>
     },
   });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../components/timeline', () => ({
-  StatefulTimeline: () => <div />,
-}));
-jest.mock('../../common/hooks/timeline/use_timeline_save_prompt');
-jest.mock('../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../components/timeline', () => {
+      const mocked = {
+      StatefulTimeline: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/timeline/use_timeline_save_prompt');
+vi.mock('../../common/hooks/use_is_new_flyout_enabled');
 
-const mockGetFlyoutManagerState = jest.fn(() => ({ sessions: [] as unknown[] }));
-const mockCloseFlyout = jest.fn();
-const mockCloseAllFlyouts = jest.fn();
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  getFlyoutManagerStore: jest.fn(() => ({
-    getState: mockGetFlyoutManagerState,
-    closeFlyout: mockCloseFlyout,
-    closeAllFlyouts: mockCloseAllFlyouts,
-    addUnmanagedFlyout: jest.fn(),
-    closeUnmanagedFlyout: jest.fn(),
-  })),
-}));
+const mockGetFlyoutManagerState = vi.fn(() => ({ sessions: [] as unknown[] }));
+const mockCloseFlyout = vi.fn();
+const mockCloseAllFlyouts = vi.fn();
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      getFlyoutManagerStore: vi.fn(() => ({
+        getState: mockGetFlyoutManagerState,
+        closeFlyout: mockCloseFlyout,
+        closeAllFlyouts: mockCloseAllFlyouts,
+        addUnmanagedFlyout: vi.fn(),
+        closeUnmanagedFlyout: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TimelineWrapper', () => {
   const props = {
-    onAppLeave: jest.fn(),
+    onAppLeave: vi.fn(),
     timelineId: TimelineId.test,
   };
 
@@ -79,7 +88,7 @@ describe('TimelineWrapper', () => {
     mockCloseFlyout.mockClear();
     mockCloseAllFlyouts.mockClear();
     mockGetFlyoutManagerState.mockReturnValue({ sessions: [] });
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(false);
   });
 
   it('should render correctly the main timeline elements', () => {
@@ -132,14 +141,14 @@ describe('TimelineWrapper', () => {
 
   describe('legacy expandable flyout (new flyout system disabled)', () => {
     beforeEach(() => {
-      (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
+      (useIsNewFlyoutEnabled as Mock).mockReturnValue(false);
     });
 
     it('should not bubble the esc keydown to the underlying flyout when the timeline modal is visible', async () => {
       // The expandable flyout (e.g. the graph investigation view) registers a window-level
       // keydown listener too. The timeline wrapper mounts first (persistent app shell), so its
       // listener runs first and must stop the event before the flyout's listener fires.
-      const underlyingFlyoutHandler = jest.fn();
+      const underlyingFlyoutHandler = vi.fn();
 
       render(
         <TestProviders store={createVisibleTimelineStore()}>
@@ -164,7 +173,7 @@ describe('TimelineWrapper', () => {
     });
 
     it('should let the esc keydown reach the underlying flyout when the timeline modal is not visible', async () => {
-      const underlyingFlyoutHandler = jest.fn();
+      const underlyingFlyoutHandler = vi.fn();
 
       render(
         <TestProviders>
@@ -187,7 +196,7 @@ describe('TimelineWrapper', () => {
 
   describe('new (EUI-managed) flyout system enabled', () => {
     beforeEach(() => {
-      (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
+      (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
     });
 
     it('should close a main-level flyout opened from within Timeline via closeAllFlyouts, and not the timeline itself', async () => {
@@ -342,7 +351,7 @@ describe('TimelineWrapper', () => {
       // Asserts the sibling window keydown listener (representing a managed flyout's own
       // EuiWindowEvent handler) never runs, since we stop propagation ourselves - even when we
       // end up closing Timeline rather than the flyout itself.
-      const underlyingFlyoutHandler = jest.fn();
+      const underlyingFlyoutHandler = vi.fn();
       mockGetFlyoutManagerState.mockReturnValue({
         sessions: [
           { mainFlyoutId: 'flyout-a', childFlyoutId: null, historyKey: preTimelineHistoryKey },

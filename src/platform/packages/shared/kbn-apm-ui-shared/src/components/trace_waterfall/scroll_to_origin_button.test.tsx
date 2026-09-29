@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -33,7 +35,7 @@ describe('ScrollToOriginButton', () => {
   });
 
   it('calls onClick when clicked and not disabled', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderButton({ isDisabled: false, onClick });
 
     fireEvent.click(screen.getByTestId('waterfallScrollToOriginButton'));

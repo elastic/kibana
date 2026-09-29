@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { LogMeta } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { EcsLogAdapter } from './adapter';
@@ -12,14 +14,14 @@ import { EcsLogAdapter } from './adapter';
 describe('EcsLogAdapter', () => {
   const logger = loggingSystemMock.createLogger();
   beforeAll(() => {
-    jest
+    vi
       .spyOn(global.Date, 'now')
       .mockImplementationOnce(() => new Date('2021-04-12T16:00:00.000Z').valueOf())
       .mockImplementationOnce(() => new Date('2021-04-12T16:02:00.000Z').valueOf());
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('captures a log event', () => {

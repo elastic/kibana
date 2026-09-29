@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,15 +20,15 @@ import { useFetchPrompts } from '../../../api';
 import { mockSystemPrompts } from '../../../../mock/system_prompt';
 import type { DefinedUseQueryResult } from '@kbn/react-query';
 
-jest.mock('../../../api/prompts/use_fetch_prompts');
+vi.mock('../../../api/prompts/use_fetch_prompts');
 const http = {
-  fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
+  fetch: vi.fn().mockResolvedValue(defaultAssistantFeatures),
 } as unknown as HttpSetup;
 
-jest.mocked(useFetchPrompts).mockReturnValue({
+vi.mocked(useFetchPrompts).mockReturnValue({
   data: { page: 1, perPage: 1000, data: mockSystemPrompts, total: 10 },
   isLoading: false,
-  refetch: jest.fn().mockResolvedValue({
+  refetch: vi.fn().mockResolvedValue({
     isLoading: false,
     data: {
       ...mockSystemPrompts,
@@ -49,9 +51,9 @@ const props: Props = {
   ],
   isSettingsModalVisible: false,
   isClearable: true,
-  onSystemPromptSelectionChange: jest.fn(),
+  onSystemPromptSelectionChange: vi.fn(),
   selectedPrompt: { id: 'default-system-prompt', content: '', name: '', promptType: 'system' },
-  setIsSettingsModalVisible: jest.fn(),
+  setIsSettingsModalVisible: vi.fn(),
 };
 
 const mockUseAssistantContext = {
@@ -74,10 +76,10 @@ const mockUseAssistantContext = {
       isDefault: true,
     },
   ],
-  setAllSystemPrompts: jest.fn(),
+  setAllSystemPrompts: vi.fn(),
 };
-jest.mock('../../../../assistant_context', () => {
-  const original = jest.requireActual('../../../../assistant_context');
+vi.mock('../../../../assistant_context', async () => {
+  const original = (await vi.importActual('../../../../assistant_context'));
 
   return {
     ...original,
@@ -86,7 +88,7 @@ jest.mock('../../../../assistant_context', () => {
 });
 
 describe('SelectSystemPrompt', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the prompt super select', () => {
     const { getByTestId } = render(<SelectSystemPrompt {...props} />);
@@ -101,7 +103,7 @@ describe('SelectSystemPrompt', () => {
   });
 
   it('clears the selected system prompt when the clear button is clicked', async () => {
-    const clearSelectedSystemPrompt = jest.fn();
+    const clearSelectedSystemPrompt = vi.fn();
 
     const { getByTestId } = render(
       <SelectSystemPrompt {...props} clearSelectedSystemPrompt={clearSelectedSystemPrompt} />

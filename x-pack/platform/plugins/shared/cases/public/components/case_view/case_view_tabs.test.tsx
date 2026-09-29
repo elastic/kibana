@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,16 +25,16 @@ import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 
-jest.mock('../../containers/use_get_case');
-jest.mock('../../common/navigation/hooks');
-jest.mock('../../common/hooks');
-jest.mock('../../containers/use_get_case_file_stats');
-jest.mock('./use_case_observables');
+vi.mock('../../containers/use_get_case');
+vi.mock('../../common/navigation/hooks');
+vi.mock('../../common/hooks');
+vi.mock('../../containers/use_get_case_file_stats');
+vi.mock('./use_case_observables');
 
-const useFetchCaseMock = useGetCase as jest.Mock;
-const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
-const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
-const useGetCaseObservablesMock = useCaseObservables as jest.Mock;
+const useFetchCaseMock = useGetCase as Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as Mock;
+const useGetCaseFileStatsMock = useGetCaseFileStats as Mock;
+const useGetCaseObservablesMock = useCaseObservables as Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -73,7 +76,7 @@ describe('CaseViewTabs', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render CaseViewTabs', async () => {

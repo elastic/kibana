@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getListTemplate } from './get_list_template';
 
-jest.mock('./list_mappings.json', () => ({
-  dynamic: 'strict',
-  properties: {},
-}));
+vi.mock('./list_mappings.json', () => {
+      const mocked = {
+      dynamic: 'strict',
+      properties: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('get_list_template', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns a list template with the string filled in', async () => {

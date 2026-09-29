@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked } from 'vitest';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Subject } from 'rxjs';
@@ -87,12 +90,12 @@ import type { EndpointAppContext } from '../../types';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
-jest.mock('../../services', () => {
-  const realModule = jest.requireActual('../../services');
+vi.mock('../../services', async () => {
+  const realModule = (await vi.importActual('../../services'));
 
   return {
     ...realModule,
-    getResponseActionsClient: jest.fn((...args) => {
+    getResponseActionsClient: vi.fn((...args) => {
       return realModule.getResponseActionsClient(...args);
     }),
   };
@@ -115,17 +118,17 @@ const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 
 const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
 
 describe('Response actions', () => {
-  let getActionDetailsByIdSpy: jest.SpyInstance;
+  let getActionDetailsByIdSpy: MockInstance;
 
   beforeEach(() => {
-    getActionDetailsByIdSpy = jest
+    getActionDetailsByIdSpy = vi
       .spyOn(ActionDetailsService, 'getActionDetailsById')
       .mockResolvedValue(new EndpointActionGenerator('seed').generateActionDetails());
   });
 
   describe('handler', () => {
     let endpointAppContextService: EndpointAppContextService;
-    let mockResponse: jest.Mocked<KibanaResponseFactory>;
+    let mockResponse: Mocked<KibanaResponseFactory>;
     let licenseService: LicenseService;
     let licenseEmitter: Subject<ILicense>;
     let endpointContext: EndpointAppContext;
@@ -152,7 +155,7 @@ describe('Response actions', () => {
       mockScopedClient.asInternalUser = startContract.esClient as ElasticsearchClientMock;
       mockResponse = httpServerMock.createResponseFactory();
       (
-        startContract.fleetStartServices.messageSigningService?.sign as jest.Mock
+        startContract.fleetStartServices.messageSigningService?.sign as Mock
       ).mockImplementation(() => {
         return {
           data: 'thisisthedata',
@@ -218,7 +221,7 @@ describe('Response actions', () => {
           }
         );
         const asUser = mockUser ? mockUser : superUser;
-        (ctx.core.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(() => asUser);
+        (ctx.core.security.authc.getCurrentUser as Mock).mockImplementationOnce(() => asUser);
 
         const metadataResponse = docGen.generateHostMetadata();
 
@@ -279,7 +282,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: [AgentID],
@@ -296,7 +299,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           user_id: testUser.username,
@@ -312,7 +315,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ comment }),
@@ -335,7 +338,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           action_id: expect.any(String),
@@ -360,7 +363,7 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           timeout: 300,
@@ -379,7 +382,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: [agentId],
@@ -394,7 +397,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -411,7 +414,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -428,7 +431,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -445,7 +448,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -462,7 +465,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -479,7 +482,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -496,7 +499,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -513,7 +516,7 @@ describe('Response actions', () => {
       });
 
       expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -536,7 +539,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -569,7 +572,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -603,7 +606,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -639,7 +642,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -674,7 +677,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -707,7 +710,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -742,7 +745,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -778,7 +781,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -816,7 +819,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -851,7 +854,7 @@ describe('Response actions', () => {
         );
 
         expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             signed: {
@@ -1059,8 +1062,8 @@ describe('Response actions', () => {
       }, []);
 
       describe.each(agentTypesSupportingCancelAction)(`for agent type: %s`, (agentType) => {
-        let fetchActionByIdSpy: jest.SpyInstance;
-        let responseActionsClientMockInstance: jest.Mocked<Pick<ResponseActionsClient, 'cancel'>>;
+        let fetchActionByIdSpy: MockInstance;
+        let responseActionsClientMockInstance: Mocked<Pick<ResponseActionsClient, 'cancel'>>;
         let originalGetResponseActionsClientMock: ((...args: any) => any) | undefined;
 
         const mockIsolateAction: Partial<LogsEndpointAction> = {
@@ -1096,15 +1099,15 @@ describe('Response actions', () => {
 
           // Store the original mock implementation
           originalGetResponseActionsClientMock =
-            (getResponseActionsClientMock as jest.Mock).getMockImplementation() || jest.fn();
+            (getResponseActionsClientMock as Mock).getMockImplementation() || vi.fn();
 
-          fetchActionByIdSpy = jest
+          fetchActionByIdSpy = vi
             .spyOn(fetchActionUtils, 'fetchActionRequestById')
             .mockResolvedValue(mockIsolateAction as LogsEndpointAction);
 
           // Mock the response actions client
           responseActionsClientMockInstance = {
-            cancel: jest.fn().mockResolvedValue({
+            cancel: vi.fn().mockResolvedValue({
               id: 'mock-cancel-action-id',
               agents: ['agent-id'],
               command: 'cancel',
@@ -1122,7 +1125,7 @@ describe('Response actions', () => {
             }),
           };
 
-          (getResponseActionsClientMock as jest.Mock).mockReturnValue(
+          (getResponseActionsClientMock as Mock).mockReturnValue(
             responseActionsClientMockInstance
           );
         });
@@ -1131,13 +1134,13 @@ describe('Response actions', () => {
           fetchActionByIdSpy.mockRestore();
           // Restore the original mock implementation
           if (originalGetResponseActionsClientMock) {
-            (getResponseActionsClientMock as jest.Mock).mockImplementation(
+            (getResponseActionsClientMock as Mock).mockImplementation(
               originalGetResponseActionsClientMock
             );
           } else {
-            (getResponseActionsClientMock as jest.Mock).mockRestore();
+            (getResponseActionsClientMock as Mock).mockRestore();
           }
-          jest.clearAllMocks();
+          vi.clearAllMocks();
         });
 
         it('allows cancel action when user has baseline permissions for isolate command', async () => {
@@ -1298,7 +1301,7 @@ describe('Response actions', () => {
           fetchActionByIdSpy.mockResolvedValue(mockIsolateAction);
 
           // Mock the response actions client to simulate action already completed
-          responseActionsClientMockInstance.cancel = jest
+          responseActionsClientMockInstance.cancel = vi
             .fn()
             .mockRejectedValue(
               new ResponseActionsClientError(
@@ -1364,7 +1367,7 @@ describe('Response actions', () => {
     let httpRequestMock: ReturnType<UploadHttpApiTestSetupMock['createRequestMock']>;
     let httpHandlerContextMock: UploadHttpApiTestSetupMock['httpHandlerContextMock'];
     let httpResponseMock: UploadHttpApiTestSetupMock['httpResponseMock'];
-    let fleetFilesClientMock: jest.Mocked<FleetToHostFileClientInterface>;
+    let fleetFilesClientMock: Mocked<FleetToHostFileClientInterface>;
     let callHandler: () => ReturnType<UploadRequestHandler>;
     let fileContent: HapiReadableStream;
     let createdUploadAction: ActionDetails;
@@ -1376,7 +1379,7 @@ describe('Response actions', () => {
       httpRequestMock = testSetup.createRequestMock();
 
       fleetFilesClientMock =
-        (await testSetup.endpointAppContextMock.service.getFleetToHostFilesClient()) as jest.Mocked<FleetToHostFileClientInterface>;
+        (await testSetup.endpointAppContextMock.service.getFleetToHostFilesClient()) as Mocked<FleetToHostFileClientInterface>;
 
       fileContent = createHapiReadableStreamMock();
 
@@ -1402,7 +1405,7 @@ describe('Response actions', () => {
         testSetup.httpHandlerContextMock.securitySolution = currentSecuritySolution.then(
           (resolved) => ({
             ...resolved,
-            getEndpointAuthz: jest.fn().mockResolvedValue(getEndpointAuthzInitialStateMock(authz)),
+            getEndpointAuthz: vi.fn().mockResolvedValue(getEndpointAuthzInitialStateMock(authz)),
           })
         );
       };
@@ -1415,10 +1418,10 @@ describe('Response actions', () => {
         command: 'upload',
       });
 
-      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as Mock) = vi
         .fn()
         .mockReturnValue({
-          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+          getMetadataForEndpoints: vi.fn().mockResolvedValue([
             {
               elastic: {
                 agent: {
@@ -1442,7 +1445,7 @@ describe('Response actions', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should create a file', async () => {
@@ -1523,7 +1526,7 @@ describe('Response actions', () => {
 
       httpHandlerContextMock.actions = Promise.resolve({
         getActionsClient: () => sentinelOneMock.createConnectorActionsClient(),
-      } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
+      } as unknown as Mocked<ActionsApiRequestHandlerContext>);
 
       // Set the esClient to be used in the handler context
       // eslint-disable-next-line require-atomic-updates
@@ -1548,7 +1551,7 @@ describe('Response actions', () => {
         testSetup.httpHandlerContextMock.securitySolution = currentSecuritySolution.then(
           (resolved) => ({
             ...resolved,
-            getEndpointAuthz: jest.fn().mockResolvedValue(getEndpointAuthzInitialStateMock(authz)),
+            getEndpointAuthz: vi.fn().mockResolvedValue(getEndpointAuthzInitialStateMock(authz)),
           })
         );
       };
@@ -1556,10 +1559,10 @@ describe('Response actions', () => {
       // Set up authorization for isolate operations
       setupAuthz({ canIsolateHost: true });
 
-      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as Mock) = vi
         .fn()
         .mockReturnValue({
-          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+          getMetadataForEndpoints: vi.fn().mockResolvedValue([
             {
               elastic: {
                 agent: {
@@ -1586,7 +1589,7 @@ describe('Response actions', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it.each([
@@ -1629,7 +1632,7 @@ describe('Response actions', () => {
 
       httpHandlerContextMock.actions = Promise.resolve({
         getActionsClient: () => sentinelOneMock.createConnectorActionsClient(),
-      } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
+      } as unknown as Mocked<ActionsApiRequestHandlerContext>);
 
       // Set the esClient to be used in the handler context
       // eslint-disable-next-line require-atomic-updates
@@ -1649,10 +1652,10 @@ describe('Response actions', () => {
       });
       registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
 
-      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as Mock) = vi
         .fn()
         .mockReturnValue({
-          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+          getMetadataForEndpoints: vi.fn().mockResolvedValue([
             {
               elastic: {
                 agent: {
@@ -1679,7 +1682,7 @@ describe('Response actions', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should use the Microsoft Defender response actions client', async () => {
@@ -1710,7 +1713,7 @@ describe('Response actions', () => {
 
       httpHandlerContextMock.actions = Promise.resolve({
         getActionsClient: () => actionsClientMock.create(),
-      } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
+      } as unknown as Mocked<ActionsApiRequestHandlerContext>);
 
       // Set the esClient to be used in the handler context
       // eslint-disable-next-line require-atomic-updates
@@ -1740,7 +1743,7 @@ describe('Response actions', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should error if feature flag is disabled', async () => {
@@ -1770,8 +1773,8 @@ describe('Response actions', () => {
     });
 
     it('should call memory dump client method', async () => {
-      const mockEndpointCLient = { memoryDump: jest.fn().mockResolvedValue({}) };
-      (getResponseActionsClientMock as jest.Mock).mockReturnValue(mockEndpointCLient);
+      const mockEndpointCLient = { memoryDump: vi.fn().mockResolvedValue({}) };
+      (getResponseActionsClientMock as Mock).mockReturnValue(mockEndpointCLient);
       await callHandler();
 
       expect(mockEndpointCLient.memoryDump).toHaveBeenCalledWith({
@@ -1783,7 +1786,7 @@ describe('Response actions', () => {
 
     it('should error if user does not have permissions to perform action', async () => {
       (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
       ).mockResolvedValue({
         canExecuteActions: false,
       });

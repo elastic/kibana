@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useDataView } from './use_data_view';
@@ -32,13 +34,13 @@ const dataViews = [
 const mockServices = {
   ...createDiscoverServicesMock(),
   dataViews: {
-    get: jest.fn((dataViewId: string) =>
+    get: vi.fn((dataViewId: string) =>
       Promise.resolve(dataViews.find(({ id }) => id === dataViewId))
     ),
-    create: jest.fn((spec) => Promise.resolve(spec)),
+    create: vi.fn((spec) => Promise.resolve(spec)),
   },
 } as unknown as DiscoverServices;
-const mockDataViewsGet = jest.spyOn(mockServices.dataViews, 'get');
+const mockDataViewsGet = vi.spyOn(mockServices.dataViews, 'get');
 
 const render = async ({ dataViewId }: { dataViewId: string }) => {
   const hookResult = renderHook(() => useDataView({ index: dataViewId }), {

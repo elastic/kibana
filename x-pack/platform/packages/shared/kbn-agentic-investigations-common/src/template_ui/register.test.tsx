@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -41,9 +43,9 @@ const conversation: Conversation = {
 };
 
 const attachmentsService = {
-  addAttachmentType: jest.fn(),
-  getAttachmentUiDefinition: jest.fn(),
-  getClient: jest.fn(),
+  addAttachmentType: vi.fn(),
+  getAttachmentUiDefinition: vi.fn(),
+  getClient: vi.fn(),
 } as unknown as AttachmentServiceStartContract;
 
 /**
@@ -54,10 +56,10 @@ const attachmentsService = {
 const createFakeService = () => {
   const tabs = new Map<string, ConversationTemplateTabDefinition>();
   const templates = new Map<string, ConversationTemplateUIDefinition>();
-  const openFullscreenConversation = jest.fn();
+  const openFullscreenConversation = vi.fn();
   const context: ConversationTemplateUIContext = {
     attachmentsService,
-    openSidebarConversation: jest.fn(),
+    openSidebarConversation: vi.fn(),
     openFullscreenConversation,
   };
 
@@ -120,7 +122,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
 
   it('threads renderProposedActions into the overview tab with the conversation id', async () => {
     const { contract } = createFakeService();
-    const renderProposedActions = jest.fn(({ conversationId }: { conversationId: string }) => (
+    const renderProposedActions = vi.fn(({ conversationId }: { conversationId: string }) => (
       <span>proposed actions for {conversationId}</span>
     ));
     register(contract, { renderProposedActions });
@@ -240,7 +242,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     // The escalation button loads on the same lazy chunk as Open in chat; wiring one in gives a
     // reliable element to await, so the assertion below cannot pass merely because the chunk
     // has not resolved yet (the Suspense fallback is `null`).
-    register(contract, { renderEscalationModal: jest.fn(() => <div>Escalation modal</div>) });
+    register(contract, { renderEscalationModal: vi.fn(() => <div>Escalation modal</div>) });
     const Footer = getSlot(contract, 'investigation', 'footer');
 
     renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat />);
@@ -251,10 +253,10 @@ describe('registerAgenticInvestigationTemplateUI', () => {
 
   it('calls renderAssignees with the conversation id, templateId, uids, and refetchConversation', async () => {
     const { contract } = createFakeService();
-    const renderAssignees: RenderAssignees = jest.fn(() => null);
+    const renderAssignees: RenderAssignees = vi.fn(() => null);
     register(contract, { renderAssignees });
     const Header = getSlot(contract, 'investigation', 'header');
-    const refetchConversation = jest.fn();
+    const refetchConversation = vi.fn();
 
     renderWithKibanaRenderContext(
       <Header
@@ -329,7 +331,7 @@ describe('registerEscalationTemplateUI', () => {
 
   it('calls renderAssignees with templateId "escalation"', async () => {
     const { contract } = createFakeService();
-    const renderAssignees: RenderAssignees = jest.fn(() => null);
+    const renderAssignees: RenderAssignees = vi.fn(() => null);
 
     registerEscalationTemplateUI({
       conversationTemplates: contract,
@@ -340,7 +342,7 @@ describe('registerEscalationTemplateUI', () => {
 
     const Header = contract.getTemplateUIDefinition('escalation')?.detailsFlyout?.header;
     if (!Header) throw new Error('Expected header');
-    const refetchConversation = jest.fn();
+    const refetchConversation = vi.fn();
 
     renderWithKibanaRenderContext(
       <Header
@@ -398,7 +400,7 @@ describe('registerEscalationTemplateUI', () => {
 
   it('renders the overview tab and forwards linkedInvestigationIds to renderLinkedInvestigations', async () => {
     const { contract } = createFakeService();
-    const renderLinkedInvestigations: RenderLinkedInvestigations = jest.fn(() => null);
+    const renderLinkedInvestigations: RenderLinkedInvestigations = vi.fn(() => null);
 
     registerEscalationTemplateUI({
       conversationTemplates: contract,
@@ -432,7 +434,7 @@ describe('registerEscalationTemplateUI', () => {
   it('navigates via openFullscreenConversation with openDetails:true when onOpenInvestigation is called', async () => {
     const { contract, openFullscreenConversation } = createFakeService();
     let capturedOnOpen: ((args: { conversationId: string; agentId: string }) => void) | undefined;
-    const renderLinkedInvestigations: RenderLinkedInvestigations = jest.fn((props) => {
+    const renderLinkedInvestigations: RenderLinkedInvestigations = vi.fn((props) => {
       capturedOnOpen = props.onOpenInvestigation;
       return null;
     });

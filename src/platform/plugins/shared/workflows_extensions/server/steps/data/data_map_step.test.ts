@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dataMapStepDefinition } from './data_map_step';
 import type { StepHandlerContext } from '../../step_registry/types';
 
@@ -40,17 +42,17 @@ const createMockContext = (
   config: { items: unknown },
   input: { fields: Record<string, unknown> }
 ): StepHandlerContext<any, any> => {
-  const getContext = jest.fn(() => ({}));
+  const getContext = vi.fn(() => ({}));
   return {
     config,
     input,
     rawInput: input,
     contextManager: {
       getContext,
-      renderInputTemplate: jest.fn((templateInput, additionalContext) => {
+      renderInputTemplate: vi.fn((templateInput, additionalContext) => {
         return resolveValue(templateInput, additionalContext) as typeof templateInput;
       }),
-      createTemplateRenderer: jest.fn(() => {
+      createTemplateRenderer: vi.fn(() => {
         const workflowContext = getContext();
         return <T>(templateInput: T, additionalContext?: Record<string, unknown>) =>
           resolveValue(templateInput, {
@@ -60,10 +62,10 @@ const createMockContext = (
       }),
     } as any,
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
@@ -107,7 +109,7 @@ describe('dataMapStepDefinition', () => {
         },
       };
       const context = createMockContext(config, input);
-      jest
+      vi
         .mocked(context.contextManager.getContext)
         .mockReturnValue({ workflow: { name: 'cached workflow' } } as any);
 

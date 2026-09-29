@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ConfigPath } from '@kbn/config';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -181,7 +183,7 @@ describe('CoreUsageDataService', () => {
           savedObjectsStartPromise,
           changedDeprecatedConfigPath$,
         });
-        const myUsageCounter = { incrementCounter: jest.fn() };
+        const myUsageCounter = { incrementCounter: vi.fn() };
         coreUsageData.registerUsageCounter(myUsageCounter);
         coreUsageData.incrementUsageCounter({ counterName: 'test' });
         expect(myUsageCounter.incrementCounter).toHaveBeenCalledWith({ counterName: 'test' });
@@ -201,7 +203,7 @@ describe('CoreUsageDataService', () => {
           changedDeprecatedConfigPath$,
         });
         const myUsageCounter = {
-          incrementCounter: jest.fn(() => {
+          incrementCounter: vi.fn(() => {
             throw new Error('Something is really wrong');
           }),
         };
@@ -295,7 +297,7 @@ describe('CoreUsageDataService', () => {
 
       it('returns core metrics for default config', async () => {
         const { getCoreUsageData } = setup();
-        expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
+        await expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
           Object {
             "config": Object {
               "deprecatedKeys": Object {
@@ -731,7 +733,7 @@ describe('CoreUsageDataService', () => {
           elasticsearch,
         });
 
-        const mockGetMarkedAsSafe = jest.fn().mockReturnValue({});
+        const mockGetMarkedAsSafe = vi.fn().mockReturnValue({});
         // @ts-expect-error
         service.getMarkedAsSafe = mockGetMarkedAsSafe;
         await getConfigsUsageData();

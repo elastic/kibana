@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { installWithTimeout } from './install_with_timeout';
@@ -16,7 +18,7 @@ describe('installWithTimeout', () => {
   let pluginStop$: Subject<void>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     pluginStop$ = new ReplaySubject(1);
   });
 

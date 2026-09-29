@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { useEffect, useRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -55,7 +58,7 @@ describe('useFormData() hook', () => {
   const HookListener = React.memo(HookListenerComp);
 
   describe('form data updates', () => {
-    let onChangeSpy: jest.Mock;
+    let onChangeSpy: Mock;
 
     const getLastMockValue = () => {
       return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn<Form1>;
@@ -73,7 +76,7 @@ describe('useFormData() hook', () => {
     };
 
     beforeEach(() => {
-      onChangeSpy = jest.fn();
+      onChangeSpy = vi.fn();
     });
 
     test('should return the form data', () => {
@@ -100,7 +103,7 @@ describe('useFormData() hook', () => {
   });
 
   describe('format form data', () => {
-    let onChangeSpy: jest.Mock;
+    let onChangeSpy: Mock;
 
     const getLastMockValue = () => {
       return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn<Form2>;
@@ -119,7 +122,7 @@ describe('useFormData() hook', () => {
     };
 
     beforeEach(() => {
-      onChangeSpy = jest.fn();
+      onChangeSpy = vi.fn();
     });
 
     test('should expose a handler to build the form data', () => {
@@ -137,7 +140,7 @@ describe('useFormData() hook', () => {
 
   describe('options', () => {
     describe('watch', () => {
-      let onChangeSpy: jest.Mock;
+      let onChangeSpy: Mock;
 
       const getLastMockValue = () => {
         return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn<Form3>;
@@ -160,7 +163,7 @@ describe('useFormData() hook', () => {
       };
 
       beforeEach(() => {
-        onChangeSpy = jest.fn();
+        onChangeSpy = vi.fn();
       });
 
       test('should not listen to changes on fields we are not interested in', async () => {
@@ -193,7 +196,7 @@ describe('useFormData() hook', () => {
     });
 
     describe('form', () => {
-      let onChangeSpy: jest.Mock;
+      let onChangeSpy: Mock;
 
       const getLastMockValue = () => {
         return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn;
@@ -215,7 +218,7 @@ describe('useFormData() hook', () => {
       };
 
       beforeEach(() => {
-        onChangeSpy = jest.fn();
+        onChangeSpy = vi.fn();
       });
 
       test('should allow a form to be provided when the hook is called outside of the FormDataContext', async () => {
@@ -235,8 +238,8 @@ describe('useFormData() hook', () => {
     });
 
     describe('onChange', () => {
-      let onChangeSpy: jest.Mock;
-      let validationSpy: jest.Mock;
+      let onChangeSpy: Mock;
+      let validationSpy: Mock;
 
       const TestComp = () => {
         const { form } = useForm();
@@ -264,8 +267,8 @@ describe('useFormData() hook', () => {
       };
 
       beforeEach(() => {
-        onChangeSpy = jest.fn();
-        validationSpy = jest.fn();
+        onChangeSpy = vi.fn();
+        validationSpy = vi.fn();
       });
 
       test('should call onChange handler _before_ running the validations', async () => {

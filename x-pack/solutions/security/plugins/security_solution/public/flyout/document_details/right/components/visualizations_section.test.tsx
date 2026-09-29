@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -37,54 +40,66 @@ import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 
-jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
-jest.mock(
+vi.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   '../../../../flyout_v2/document/main/hooks/use_alert_prevalence_from_process_tree',
-  () => ({
-    useAlertPrevalenceFromProcessTree: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        useAlertPrevalenceFromProcessTree: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
+const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as Mock;
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
-jest.mock('../../shared/hooks/use_navigate_to_session_view');
-jest.mock('../../shared/hooks/use_navigate_to_graph_visualization');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+vi.mock('../../shared/hooks/use_navigate_to_session_view');
+vi.mock('../../shared/hooks/use_navigate_to_graph_visualization');
 
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => vi.fn(),
   };
 });
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
+vi.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 
-jest.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview');
-jest.mock('../../../../common/hooks/use_upselling');
+vi.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview');
+vi.mock('../../../../common/hooks/use_upselling');
 
-const mockUseGraphPreview = useGraphPreview as jest.Mock;
-const mockUseUpsellingComponent = useUpsellingComponent as jest.Mock;
+const mockUseGraphPreview = useGraphPreview as Mock;
+const mockUseUpsellingComponent = useUpsellingComponent as Mock;
 
-jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
-  useFetchGraphData: jest.fn(),
-}));
+vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
+      const mocked = {
+      useFetchGraphData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
+const mockUseFetchGraphData = useFetchGraphData as Mock;
 
-jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
-  uiMetricService: {
-    trackUiMetric: jest.fn(),
-  },
-}));
+vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
+      const mocked = {
+      uiMetricService: {
+        trackUiMetric: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
+const uiMetricServiceMock = uiMetricService as Mocked<typeof uiMetricService>;
 
 const panelContextValue = {
   ...mockContextValue,
@@ -103,16 +118,16 @@ const renderVisualizationsSection = (contextValue = panelContextValue) =>
   );
 
 describe('<VisualizationsSection />', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseExpandSection = vi.mocked(useExpandSection);
 
   beforeEach(() => {
-    (useNavigateToSessionView as jest.Mock).mockReturnValue({
-      navigateToSessionView: jest.fn(),
+    (useNavigateToSessionView as Mock).mockReturnValue({
+      navigateToSessionView: vi.fn(),
     });
-    (useNavigateToGraphVisualization as jest.Mock).mockReturnValue({
-      navigateToGraphVisualization: jest.fn(),
+    (useNavigateToGraphVisualization as Mock).mockReturnValue({
+      navigateToGraphVisualization: vi.fn(),
     });
-    (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
+    (useSelectedPatterns as Mock).mockReturnValue(['index']);
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
@@ -151,8 +166,8 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render the component expanded if value is true in local storage', () => {
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
-      investigateInTimelineAlertClick: jest.fn(),
+    (useInvestigateInTimeline as Mock).mockReturnValue({
+      investigateInTimelineAlertClick: vi.fn(),
     });
     mockUseExpandSection.mockReturnValue(true);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -20,11 +23,11 @@ import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_gene
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import type { Lead } from '../../../../../common/entity_analytics/lead_generation/types';
 
-jest.mock('../../../../lib/entity_analytics/lead_generation/lead_data_client');
-jest.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
+vi.mock('../../../../lib/entity_analytics/lead_generation/lead_data_client');
+vi.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
 
-const mockCreateLeadDataClient = createLeadDataClient as jest.Mock;
-const mockGetUserLeadPrivileges = getUserLeadPrivileges as jest.Mock;
+const mockCreateLeadDataClient = createLeadDataClient as Mock;
+const mockGetUserLeadPrivileges = getUserLeadPrivileges as Mock;
 
 const makeTestLead = (overrides: Partial<Lead> = {}): Lead => {
   const timestamp = overrides.timestamp ?? new Date().toISOString();
@@ -67,16 +70,16 @@ describe('listLeadsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = listLeadsTool(mockCore, mockLogger, mockExperimentalFeatures);
 
-  let mockFindLeads: jest.Mock;
-  let mockGetStatus: jest.Mock;
+  let mockFindLeads: Mock;
+  let mockGetStatus: Mock;
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
 
-    mockFindLeads = jest.fn();
-    mockGetStatus = jest.fn();
+    mockFindLeads = vi.fn();
+    mockGetStatus = vi.fn();
     mockCreateLeadDataClient.mockReturnValue({
       findLeads: mockFindLeads,
       getStatus: mockGetStatus,

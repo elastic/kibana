@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -28,7 +31,7 @@ import { WorkflowExecutionRepository } from './repositories/workflow_execution_r
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {
-  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>;
   let workflowExecutionRepository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
   let logger: Logger;
@@ -60,7 +63,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     workflowExecutionsDataClient = createMockWorkflowDataClient();
     workflowExecutionRepository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
     stepExecutionRepository = new StepExecutionRepository(createMockStepDataClient());
-    jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+    vi.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     logger = loggingSystemMock.create().get();
     workflow = {
       id: 'test-workflow-id',
@@ -85,7 +88,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     };
 
     currentTaskInstance = createMockTaskInstance();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when no existing non-terminal scheduled execution exists', () => {
@@ -245,7 +248,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
         expect(result.skipped).toBe(true);
         expect(workflowExecutionsDataClient.bulk).toHaveBeenCalled();
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       }
     });
 
@@ -269,7 +272,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
         expect(result.skipped).toBe(false);
         expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       }
     });
 
@@ -844,7 +847,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       // Queue drain promotes QUEUED→PENDING while keeping the backlog item's older taskRunAt
       // and starts it via workflow:run; that PENDING must not be treated as an orphan.
       const priorRunAt = new Date('2024-01-01T09:00:00Z').toISOString();
-      const hasActiveTaskForExecution = jest.fn().mockResolvedValue(true);
+      const hasActiveTaskForExecution = vi.fn().mockResolvedValue(true);
       workflowExecutionsDataClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -888,7 +891,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
     it('still reaps prior-taskRunAt PENDING when TM has no active work for the execution', async () => {
       const priorRunAt = new Date('2024-01-01T09:00:00Z').toISOString();
-      const hasActiveTaskForExecution = jest.fn().mockResolvedValue(false);
+      const hasActiveTaskForExecution = vi.fn().mockResolvedValue(false);
       workflowExecutionsDataClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -1077,12 +1080,12 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 });
 
 describe('elastic-apm-node dynamic import pattern', () => {
-  const mockStartSpan = jest.fn().mockReturnValue({ end: jest.fn() });
-  const mockSetLabel = jest.fn();
+  const mockStartSpan = vi.fn().mockReturnValue({ end: vi.fn() });
+  const mockSetLabel = vi.fn();
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.mock('elastic-apm-node', () => ({
+    vi.resetModules();
+    vi.doMock('elastic-apm-node', () => ({
       __esModule: true,
       default: {
         startSpan: mockStartSpan,
@@ -1094,7 +1097,7 @@ describe('elastic-apm-node dynamic import pattern', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should access startSpan on the default export when using destructured import', async () => {

@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mapValuesOfMap, groupIntoMap } from './map_utils';
 
 describe('groupIntoMap', () => {
   it('returns an empty map when there are no items to map', () => {
-    const groupBy = jest.fn();
+    const groupBy = vi.fn();
 
     expect(groupIntoMap([], groupBy)).toEqual(new Map());
     expect(groupBy).not.toHaveBeenCalled();
   });
 
   it('calls groupBy for each item in the collection', () => {
-    const groupBy = jest.fn();
+    const groupBy = vi.fn();
 
     groupIntoMap([{ id: 1 }, { id: 2 }, { id: 3 }], groupBy);
 
@@ -63,7 +65,7 @@ describe('groupIntoMap', () => {
 
 describe('mapValuesOfMap', () => {
   it('applys the mapper to each value in a map', () => {
-    const mapper = jest.fn();
+    const mapper = vi.fn();
 
     const even = Symbol('even');
     const odd = Symbol('odd');

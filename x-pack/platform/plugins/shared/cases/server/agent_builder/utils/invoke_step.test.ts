@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { ServerHandlerStepDefinition } from '@kbn/workflows-extensions/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -29,7 +31,7 @@ const buildStepDef = (
 
 describe('invokeStepHandler', () => {
   it('puts an agent actionSource on the step config', async () => {
-    const handler = jest.fn().mockResolvedValue({ output: { case: { id: 'case-1' } } });
+    const handler = vi.fn().mockResolvedValue({ output: { case: { id: 'case-1' } } });
 
     await invokeStepHandler(
       buildStepDef(handler),
@@ -58,7 +60,7 @@ describe('invokeStepHandler', () => {
   });
 
   it('omits actionSource when the tool has no run context', async () => {
-    const handler = jest.fn().mockResolvedValue({ output: {} });
+    const handler = vi.fn().mockResolvedValue({ output: {} });
 
     await invokeStepHandler(buildStepDef(handler), {}, buildToolContext());
 

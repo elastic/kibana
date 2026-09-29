@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -15,11 +18,11 @@ import { ExperimentalFeaturesService } from '../../../experimental_features_serv
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 
-jest.mock('../../../experimental_features_service');
+vi.mock('../../../experimental_features_service');
 
 describe('isAgentTypeAndActionSupported() util', () => {
   const enableFeatures = (overrides: Partial<ExperimentalFeatures> = {}): void => {
-    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+    (ExperimentalFeaturesService.get as Mock).mockReturnValue({
       ...allowedExperimentalValues,
       responseActionsSentinelOneRunScriptEnabled: true,
       ...overrides,
@@ -30,7 +33,7 @@ describe('isAgentTypeAndActionSupported() util', () => {
   };
 
   const resetFeatures = (): void => {
-    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+    (ExperimentalFeaturesService.get as Mock).mockReturnValue({
       ...allowedExperimentalValues,
     });
   };

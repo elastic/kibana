@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 const mockProtectedKeystoreData =
   '1:4BnWfydL8NwFIQJg+VQKe0jlIs7uXtty6+++yaWPbSB' +
   'KIX3d9nPfQ20K1C6Xh26E/gMJAQ9jh7BxK0+W3lt/iDJBJn44wqX3pQ0189iGkNBL0ibDCc' +
@@ -17,39 +19,42 @@ const mockUnprotectedKeystoreData =
   'fGfJSy4mHBBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqh' +
   'I4lzJ9MRy21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn().mockImplementation((path) => {
-    if (path.includes('data/unprotected')) {
-      return JSON.stringify(mockUnprotectedKeystoreData);
-    }
+vi.mock('fs', () => {
+      const mocked = {
+      readFileSync: vi.fn().mockImplementation((path) => {
+        if (path.includes('data/unprotected')) {
+          return JSON.stringify(mockUnprotectedKeystoreData);
+        }
 
-    if (path.includes('data/protected')) {
-      return JSON.stringify(mockProtectedKeystoreData);
-    }
+        if (path.includes('data/protected')) {
+          return JSON.stringify(mockProtectedKeystoreData);
+        }
 
-    if (path.includes('keystore_correct_password_file')) {
-      return 'changeme';
-    }
+        if (path.includes('keystore_correct_password_file')) {
+          return 'changeme';
+        }
 
-    if (path.includes('keystore_incorrect_password_file')) {
-      return 'wrongpassword';
-    }
+        if (path.includes('keystore_incorrect_password_file')) {
+          return 'wrongpassword';
+        }
 
-    if (path.includes('data/test') || path.includes('data/nonexistent')) {
-      throw { code: 'ENOENT' };
-    }
+        if (path.includes('data/test') || path.includes('data/nonexistent')) {
+          throw { code: 'ENOENT' };
+        }
 
-    throw { code: 'EACCES' };
-  }),
-  existsSync: jest.fn().mockImplementation((path) => {
-    return (
-      path.includes('data/unprotected') ||
-      path.includes('data/protected') ||
-      path.includes('inaccessible')
-    );
-  }),
-  writeFileSync: jest.fn(),
-}));
+        throw { code: 'EACCES' };
+      }),
+      existsSync: vi.fn().mockImplementation((path) => {
+        return (
+          path.includes('data/unprotected') ||
+          path.includes('data/protected') ||
+          path.includes('inaccessible')
+        );
+      }),
+      writeFileSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import sinon from 'sinon';
 import { readFileSync } from 'fs';
@@ -96,7 +101,7 @@ describe('Keystore', () => {
     const env = process.env;
 
     beforeEach(() => {
-      jest.resetModules();
+      vi.resetModules();
       process.env = { ...env };
     });
 
@@ -275,6 +280,6 @@ describe('Keystore', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 });

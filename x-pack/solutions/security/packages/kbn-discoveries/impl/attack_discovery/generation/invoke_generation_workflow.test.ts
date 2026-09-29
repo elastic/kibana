@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ExecutionStatus, type WorkflowDetailDto, type WorkflowExecutionDto } from '@kbn/workflows';
@@ -17,27 +20,33 @@ import type {
 } from './invoke_alert_retrieval_workflow';
 import { invokeGenerationWorkflow } from './invoke_generation_workflow';
 
-const mockWriteAttackDiscoveryEvent = jest.fn();
+const mockWriteAttackDiscoveryEvent = vi.fn();
 
-jest.mock('../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED: 'generate-step-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED: 'generate-step-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED: 'generate-step-succeeded',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED: 'generate-step-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED: 'generate-step-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED: 'generate-step-succeeded',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/persistence', () => ({
-  getDurationNanoseconds: jest.fn().mockReturnValue(1000000),
-}));
+vi.mock('../../lib/persistence', () => {
+      const mocked = {
+      getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('invokeGenerationWorkflow', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockRequest = {} as KibanaRequest;
@@ -49,14 +58,14 @@ describe('invokeGenerationWorkflow', () => {
   } as AuthenticatedUser;
 
   const mockEventLogger = {
-    logEvent: jest.fn(),
+    logEvent: vi.fn(),
   } as unknown as IEventLogger;
 
   const mockWorkflowsManagementApi: WorkflowsManagementApi = {
-    getWorkflow: jest.fn(),
-    getWorkflowExecution: jest.fn(),
-    runWorkflow: jest.fn(),
-    scheduleWorkflow: jest.fn(),
+    getWorkflow: vi.fn(),
+    getWorkflowExecution: vi.fn(),
+    runWorkflow: vi.fn(),
+    scheduleWorkflow: vi.fn(),
   };
 
   const mockAlertRetrievalResult: AlertRetrievalResult = {
@@ -183,21 +192,21 @@ describe('invokeGenerationWorkflow', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('when workflow executes successfully', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -352,7 +361,7 @@ describe('invokeGenerationWorkflow', () => {
     it('does NOT include additional_context in workflow inputs when not in workflowConfig', async () => {
       await invokeGenerationWorkflow(defaultProps);
 
-      const workflowInputs = (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mock
+      const workflowInputs = (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mock
         .calls[0][2] as Record<string, unknown>;
 
       expect(workflowInputs).not.toHaveProperty('additional_context');
@@ -395,7 +404,7 @@ describe('invokeGenerationWorkflow', () => {
 
       await invokeGenerationWorkflow(propsWithBothContexts);
 
-      const workflowInputs = (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mock
+      const workflowInputs = (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mock
         .calls[0][2] as Record<string, unknown>;
 
       expect(workflowInputs.additional_context).toContain('Focus on lateral movement');
@@ -434,7 +443,7 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when workflow is not found', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(null);
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(null);
     });
 
     it('throws an AttackDiscoveryError', async () => {
@@ -469,7 +478,7 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when workflow has no definition', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         definition: null,
       });
@@ -497,7 +506,7 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when workflow is not valid', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         valid: false,
       });
@@ -525,7 +534,7 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when workflow is not enabled', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         enabled: false,
       });
@@ -559,11 +568,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockFailedExecution
       );
     });
@@ -599,11 +608,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockContextLengthExecution
       );
     });
@@ -627,11 +636,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockSkippedExecution
       );
     });
@@ -668,11 +677,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCancelledExecution
       );
     });
@@ -704,11 +713,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockTimedOutExecution
       );
     });
@@ -735,11 +744,11 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when execution is not found during polling', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(null);
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(null);
     });
 
     it('throws an error', async () => {
@@ -756,11 +765,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithoutStep
       );
     });
@@ -770,7 +779,7 @@ describe('invokeGenerationWorkflow', () => {
 
       const expectation = expect(promise).rejects.toBeInstanceOf(AttackDiscoveryError);
 
-      await jest.advanceTimersByTimeAsync(6000);
+      await vi.advanceTimersByTimeAsync(6000);
 
       await expectation;
     });
@@ -782,7 +791,7 @@ describe('invokeGenerationWorkflow', () => {
         errorCategory: 'workflow_error',
       });
 
-      await jest.advanceTimersByTimeAsync(6000);
+      await vi.advanceTimersByTimeAsync(6000);
 
       await expectation;
     });
@@ -794,7 +803,7 @@ describe('invokeGenerationWorkflow', () => {
         'Generation step not found in generation workflow execution'
       );
 
-      await jest.advanceTimersByTimeAsync(6000);
+      await vi.advanceTimersByTimeAsync(6000);
 
       await expectation;
     });
@@ -812,11 +821,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithNoOutput
       );
     });
@@ -842,8 +851,8 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when scheduleWorkflow throws', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockRejectedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockRejectedValue(
         new Error('Failed to run workflow')
       );
     });
@@ -894,11 +903,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithStringReplacements
       );
     });
@@ -922,11 +931,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithEmptyOutput
       );
     });
@@ -963,11 +972,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock)
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock)
         .mockResolvedValueOnce(mockRunningExecution)
         .mockResolvedValue(mockCompletedExecution);
     });
@@ -976,7 +985,7 @@ describe('invokeGenerationWorkflow', () => {
       const promise = invokeGenerationWorkflow(defaultProps);
 
       // Advance timers to trigger polling
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
       const result = await promise;
 
@@ -990,12 +999,12 @@ describe('invokeGenerationWorkflow', () => {
       const promise = invokeGenerationWorkflow(defaultProps);
 
       // Advance timers to trigger polling
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
       await promise;
 
       expect(mockLogger.debug).toHaveBeenCalledWith(expect.any(Function));
-      const debugCalls = (mockLogger.debug as jest.Mock).mock.calls;
+      const debugCalls = (mockLogger.debug as Mock).mock.calls;
       const pollingDebugCall = debugCalls.find((call) => {
         const arg = call[0];
         return typeof arg === 'function' && arg().includes('Waiting for workflow to complete');
@@ -1006,11 +1015,11 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when writeAttackDiscoveryEvent fails for succeeded event', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
       // generate-step-started (ok) → generate-step-succeeded (ok) → generation-succeeded (fails)
@@ -1032,8 +1041,8 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when writeAttackDiscoveryEvent fails for failed event', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockRejectedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockRejectedValue(
         new Error('Workflow error')
       );
       mockWriteAttackDiscoveryEvent.mockRejectedValue(new Error('Event logging failed'));
@@ -1065,13 +1074,13 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     it('throws timeout error when max wait time is exceeded', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       const timeoutApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn().mockResolvedValue(mockWorkflow),
-        getWorkflowExecution: jest.fn().mockResolvedValue(mockPendingExecution),
-        runWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
-        scheduleWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
+        getWorkflow: vi.fn().mockResolvedValue(mockWorkflow),
+        getWorkflowExecution: vi.fn().mockResolvedValue(mockPendingExecution),
+        runWorkflow: vi.fn().mockResolvedValue('workflow-run-id'),
+        scheduleWorkflow: vi.fn().mockResolvedValue('workflow-run-id'),
       };
 
       // Verify the API would return non-terminal status
@@ -1082,7 +1091,7 @@ describe('invokeGenerationWorkflow', () => {
       expect(execution?.status).toBe('pending');
 
       // Restore fake timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
   });
 
@@ -1103,11 +1112,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithInvalidReplacements
       );
     });
@@ -1121,11 +1130,11 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when filter is not provided', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -1149,11 +1158,11 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when end and start are not provided', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -1184,11 +1193,11 @@ describe('invokeGenerationWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'workflow-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockFailedExecutionNoMessage
       );
     });
@@ -1202,11 +1211,11 @@ describe('invokeGenerationWorkflow', () => {
 
   describe('when scheduleWorkflow is used to acquire execution ID before the workflow runs', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
         'scheduled-run-id'
       );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });

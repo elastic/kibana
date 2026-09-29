@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-jest.mock('axios', () => ({
-  create: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
+vi.mock('axios', () => {
+      const mocked = {
+      create: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { requestOAuthJWTToken } from './request_oauth_jwt_token';
 
-const createAxiosInstanceMock = axios.create as jest.Mock;
-const axiosInstanceMock = jest.fn();
+const createAxiosInstanceMock = axios.create as Mock;
+const axiosInstanceMock = vi.fn();
 
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 describe('requestOAuthJWTToken', () => {
   beforeEach(() => {

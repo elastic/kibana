@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { StreamsPluginStartDependencies } from '../../types';
@@ -20,7 +22,7 @@ const makeCoreWithSolution = (
   const pluginsStart = {
     spaces: {
       spacesService: {
-        getActiveSpace: jest.fn().mockResolvedValue({ solution }),
+        getActiveSpace: vi.fn().mockResolvedValue({ solution }),
       },
     },
   };
@@ -81,7 +83,7 @@ describe('getStreamsToolAvailability', () => {
     const pluginsStart = {
       spaces: {
         spacesService: {
-          getActiveSpace: jest.fn().mockRejectedValue(new Error('spaces unavailable')),
+          getActiveSpace: vi.fn().mockRejectedValue(new Error('spaces unavailable')),
         },
       },
     };

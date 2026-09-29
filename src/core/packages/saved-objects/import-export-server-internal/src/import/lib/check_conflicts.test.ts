@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 import {
@@ -17,9 +20,12 @@ import {
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { checkConflicts } from './check_conflicts';
 
-jest.mock('uuid', () => ({
-  v4: () => 'uuidv4',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'uuidv4',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckConflictsParams = Parameters<typeof checkConflicts>[0];
@@ -63,7 +69,7 @@ const obj3Error = getResultMock.unresolvableConflict(obj3.type, obj3.id);
 const obj4Error = getResultMock.invalidType(obj4.type, obj4.id);
 
 describe('#checkConflicts', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
   let socCheckConflicts: (typeof savedObjectsClient)['checkConflicts'];
 
   const setupParams = (partial: {

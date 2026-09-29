@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('getGoogleOAuthJwtAccessToken', () => {
-  const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const logger = loggingSystemMock.create().get() as Mocked<Logger>;
   const credentialsJson = {
     type: 'service_account',
     project_id: '',
@@ -32,8 +35,8 @@ describe('getGoogleOAuthJwtAccessToken', () => {
   };
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
   });
 
   it('should get access token successfully', async () => {
@@ -42,11 +45,14 @@ describe('getGoogleOAuthJwtAccessToken', () => {
       connectorToken: null,
     });
 
-    jest.mock('google-auth-library', () => ({
-      GoogleAuth: jest.fn().mockImplementation(() => ({
-        getAccessToken: jest.fn().mockResolvedValue('mocked_access_token'), // Success case
-      })),
-    }));
+    vi.doMock('google-auth-library', () => {
+          const mocked = {
+              GoogleAuth: vi.fn().mockImplementation(() => ({
+                getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
+              })),
+            };
+          return { ...mocked, default: mocked };
+        });
 
     // Dynamically import the function after mocking
     const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
@@ -100,11 +106,14 @@ describe('getGoogleOAuthJwtAccessToken', () => {
       },
     });
 
-    jest.mock('google-auth-library', () => ({
-      GoogleAuth: jest.fn().mockImplementation(() => ({
-        getAccessToken: jest.fn().mockResolvedValue('mocked_access_token'), // Success case
-      })),
-    }));
+    vi.doMock('google-auth-library', () => {
+          const mocked = {
+              GoogleAuth: vi.fn().mockImplementation(() => ({
+                getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
+              })),
+            };
+          return { ...mocked, default: mocked };
+        });
 
     // Dynamically import the function after mocking
     const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
@@ -123,11 +132,14 @@ describe('getGoogleOAuthJwtAccessToken', () => {
   it('logs warning when getting connector token fails', async () => {
     const mockError = new Error('Failed to fetch token');
     connectorTokenClient.get.mockRejectedValue(mockError); // Simulate failure
-    jest.mock('google-auth-library', () => ({
-      GoogleAuth: jest.fn().mockImplementation(() => ({
-        getAccessToken: jest.fn().mockResolvedValue('mocked_access_token'), // Success case
-      })),
-    }));
+    vi.doMock('google-auth-library', () => {
+          const mocked = {
+              GoogleAuth: vi.fn().mockImplementation(() => ({
+                getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
+              })),
+            };
+          return { ...mocked, default: mocked };
+        });
 
     // Dynamically import the function after mocking
     const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
@@ -145,11 +157,14 @@ describe('getGoogleOAuthJwtAccessToken', () => {
   });
 
   it('throws an error when Google Auth fails', async () => {
-    jest.mock('google-auth-library', () => ({
-      GoogleAuth: jest.fn().mockImplementation(() => ({
-        getAccessToken: jest.fn().mockRejectedValue(new Error('Google Auth Error')),
-      })),
-    }));
+    vi.doMock('google-auth-library', () => {
+          const mocked = {
+              GoogleAuth: vi.fn().mockImplementation(() => ({
+                getAccessToken: vi.fn().mockRejectedValue(new Error('Google Auth Error')),
+              })),
+            };
+          return { ...mocked, default: mocked };
+        });
 
     connectorTokenClient.get.mockResolvedValue({ connectorToken: null, hasErrors: false });
 

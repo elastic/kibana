@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 import { apiIndex, connectorIndex } from '../../../__mocks__/view_index.mock';
 
@@ -61,7 +63,7 @@ describe('PipelinesLogic', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mountFetchIndexApiWrapperLogic();
     mountDetachMlInferencePipelineApiLogic();
     mountFetchCustomPipelineApiLogic();
@@ -76,7 +78,7 @@ describe('PipelinesLogic', () => {
   describe('actions', () => {
     it('should set showPipelineSettings to false and call fetchApiSuccess', async () => {
       CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
-      PipelinesLogic.actions.fetchIndexApiSuccess = jest.fn();
+      PipelinesLogic.actions.fetchIndexApiSuccess = vi.fn();
       PipelinesLogic.actions.setPipelineState(newPipeline);
       PipelinesLogic.actions.openPipelineSettings();
       PipelinesLogic.actions.apiSuccess({ connectorId: 'a', pipeline: newPipeline });
@@ -152,9 +154,9 @@ describe('PipelinesLogic', () => {
     });
     describe('createCustomPipelineSuccess', () => {
       it('should call flashSuccessToast and update pipelines', () => {
-        PipelinesLogic.actions.setPipelineState = jest.fn();
-        PipelinesLogic.actions.savePipeline = jest.fn();
-        PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
+        PipelinesLogic.actions.setPipelineState = vi.fn();
+        PipelinesLogic.actions.savePipeline = vi.fn();
+        PipelinesLogic.actions.fetchCustomPipeline = vi.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
         PipelinesLogic.actions.createCustomPipelineSuccess({ [connectorIndex.name]: {} });
         expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline created', {
@@ -207,7 +209,7 @@ describe('PipelinesLogic', () => {
     });
     describe('savePipeline', () => {
       it('should call makeRequest', () => {
-        PipelinesLogic.actions.makeRequest = jest.fn();
+        PipelinesLogic.actions.makeRequest = vi.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
         PipelinesLogic.actions.savePipeline();
         expect(PipelinesLogic.actions.makeRequest).toHaveBeenCalledWith({
@@ -254,8 +256,8 @@ describe('PipelinesLogic', () => {
     });
     describe('detachMlPipelineSuccess', () => {
       it('re-fetches pipeline data', async () => {
-        jest.spyOn(PipelinesLogic.actions, 'fetchMlInferenceProcessors');
-        jest.spyOn(PipelinesLogic.actions, 'fetchCustomPipeline');
+        vi.spyOn(PipelinesLogic.actions, 'fetchMlInferenceProcessors');
+        vi.spyOn(PipelinesLogic.actions, 'fetchCustomPipeline');
         CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
         DetachMlInferencePipelineApiLogic.actions.apiSuccess({
           updated: 'mock-pipeline-name',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import { FileLimiter } from './files';
 import { createFileRequests, createUnifiedFileRequests, createUserRequests } from '../test_utils';
@@ -21,7 +23,7 @@ describe('FileLimiter', () => {
   const file = new FileLimiter(mockFileService);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('public fields', () => {

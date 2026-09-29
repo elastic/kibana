@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { DiscoverSessionApiClassicTabBase } from '@kbn/as-code-discover-schema';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
@@ -25,16 +27,16 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 
 const mockDrilldownTransforms = {
-  transformIn: jest.fn().mockImplementation((state: DiscoverSessionEmbeddableState) => ({
+  transformIn: vi.fn().mockImplementation((state: DiscoverSessionEmbeddableState) => ({
     state,
     references: [],
   })),
-  transformOut: jest.fn().mockImplementation((state: StoredSearchEmbeddableState) => state),
+  transformOut: vi.fn().mockImplementation((state: StoredSearchEmbeddableState) => state),
 } as unknown as DrilldownTransforms;
 
 describe('searchEmbeddableTransforms', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('transformOut', () => {

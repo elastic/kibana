@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import _ from 'lodash';
 
 import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
@@ -20,7 +22,7 @@ describe('pointSeriesChartDataFromTable', function () {
   beforeAll(() => {
     setFormatService({
       deserialize: () => ({
-        convertToText: jest.fn((v) => v),
+        convertToText: vi.fn((v) => v),
       }),
     } as any);
   });

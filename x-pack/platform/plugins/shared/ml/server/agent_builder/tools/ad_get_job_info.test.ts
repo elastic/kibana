@@ -5,31 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
 import { createAdGetJobInfoTool } from './ad_get_job_info';
 import { AD_GET_JOB_INFO_TOOL_ID } from './tool_ids';
 
-const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+const resolveMlCapabilities = vi.fn().mockResolvedValue(getAdminCapabilities());
 const adGetJobInfoTool = createAdGetJobInfoTool(resolveMlCapabilities);
 
 const createMlMock = () => ({
-  getJobs: jest.fn().mockResolvedValue({ jobs: [] }),
-  getJobStats: jest.fn().mockResolvedValue({ jobs: [] }),
-  getDatafeeds: jest.fn().mockResolvedValue({ datafeeds: [] }),
-  getModelSnapshots: jest.fn().mockResolvedValue({ model_snapshots: [] }),
-  getCalendars: jest.fn().mockResolvedValue({ calendars: [] }),
-  getCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
-  info: jest.fn().mockResolvedValue({ version: '8.0.0' }),
+  getJobs: vi.fn().mockResolvedValue({ jobs: [] }),
+  getJobStats: vi.fn().mockResolvedValue({ jobs: [] }),
+  getDatafeeds: vi.fn().mockResolvedValue({ datafeeds: [] }),
+  getModelSnapshots: vi.fn().mockResolvedValue({ model_snapshots: [] }),
+  getCalendars: vi.fn().mockResolvedValue({ calendars: [] }),
+  getCalendarEvents: vi.fn().mockResolvedValue({ events: [] }),
+  info: vi.fn().mockResolvedValue({ version: '8.0.0' }),
 });
 
 const createEsClientMock = (mlMock = createMlMock()) => ({
   asInternalUser: {
     ml: mlMock,
-    search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
     esql: {
-      query: jest.fn().mockResolvedValue({ columns: [], values: [] }),
+      query: vi.fn().mockResolvedValue({ columns: [], values: [] }),
     },
   },
 });

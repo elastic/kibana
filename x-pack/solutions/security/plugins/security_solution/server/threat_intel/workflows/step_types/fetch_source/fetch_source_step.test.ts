@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { buildFetchSourceStepDefinition } from './fetch_source_step';
 import { runAdapter, UnknownAdapterError } from '../../../adapters';
 import type { SourceHit } from '../../../adapters';
 
-jest.mock('../../../adapters', () => {
-  const actual = jest.requireActual('../../../adapters');
-  return { ...actual, runAdapter: jest.fn() };
+vi.mock('../../../adapters', async () => {
+  const actual = (await vi.importActual('../../../adapters'));
+  return { ...actual, runAdapter: vi.fn() };
 });
 
-const runAdapterMock = runAdapter as jest.Mock;
+const runAdapterMock = runAdapter as Mock;
 
 const SOURCE: SourceHit = {
   _id: 'rss:mandiant-research',
@@ -37,7 +40,7 @@ const buildStep = () => {
 
 describe('buildFetchSourceStepDefinition handler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a descriptive error when source arrives as a string', async () => {

@@ -7,30 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { Observable } from 'rxjs';
 
 export const MockCapabilitiesService = capabilitiesServiceMock.create();
-export const CapabilitiesServiceConstructor = jest
+export const CapabilitiesServiceConstructor = vi
   .fn()
   .mockImplementation(() => MockCapabilitiesService);
-jest.doMock('@kbn/core-capabilities-browser-internal', () => ({
-  CapabilitiesService: CapabilitiesServiceConstructor,
-}));
+vi.doMock('@kbn/core-capabilities-browser-internal', () => {
+      const mocked = {
+      CapabilitiesService: CapabilitiesServiceConstructor,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const MockHistory = {
-  push: jest.fn(),
-  replace: jest.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
 };
-export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
-jest.doMock('history', () => ({
-  createBrowserHistory: createBrowserHistoryMock,
-}));
+export const createBrowserHistoryMock = vi.fn().mockReturnValue(MockHistory);
+vi.doMock('history', () => {
+      const mocked = {
+      createBrowserHistory: createBrowserHistoryMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const parseAppUrlMock = jest.fn();
-export const getLocationObservableMock = jest.fn(() => new Observable());
-jest.doMock('./utils', () => {
-  const original = jest.requireActual('./utils');
+export const parseAppUrlMock = vi.fn();
+export const getLocationObservableMock = vi.fn(() => new Observable());
+vi.doMock('./utils', async () => {
+  const original = (await vi.importActual('./utils'));
 
   return {
     ...original,
@@ -39,9 +47,9 @@ jest.doMock('./utils', () => {
   };
 });
 
-export const registerAnalyticsContextProviderMock = jest.fn();
-jest.doMock('./register_analytics_context_provider', () => {
-  const original = jest.requireActual('./register_analytics_context_provider');
+export const registerAnalyticsContextProviderMock = vi.fn();
+vi.doMock('./register_analytics_context_provider', async () => {
+  const original = (await vi.importActual('./register_analytics_context_provider'));
 
   return {
     ...original,
@@ -49,4 +57,4 @@ jest.doMock('./register_analytics_context_provider', () => {
   };
 });
 
-window.performance.mark = jest.fn();
+window.performance.mark = vi.fn();

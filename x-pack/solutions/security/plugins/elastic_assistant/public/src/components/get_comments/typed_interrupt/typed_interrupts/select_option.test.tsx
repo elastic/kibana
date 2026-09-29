@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type {
@@ -14,7 +16,7 @@ import type {
 import { SelectOption } from './select_option';
 
 describe('SelectOption', () => {
-  const mockResumeGraph = jest.fn();
+  const mockResumeGraph = vi.fn();
   const defaultInterrupt: SelectOptionInterruptValue = {
     type: 'SELECT_OPTION',
     threadId: 'test-thread-id',
@@ -40,7 +42,7 @@ describe('SelectOption', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the description', () => {

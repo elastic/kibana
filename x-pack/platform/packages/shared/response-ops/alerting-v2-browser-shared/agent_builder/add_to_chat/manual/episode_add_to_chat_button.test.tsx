@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AlertEpisode, RuleResponse } from '@kbn/alerting-v2-schemas';
@@ -12,11 +14,14 @@ import { EpisodeAddToChatButton } from './episode_add_to_chat_button';
 import { AddToChatButton } from './add_to_chat_button';
 import type { ManualAddToChatServices } from './use_manual_add_to_chat';
 
-jest.mock('./add_to_chat_button', () => ({
-  AddToChatButton: jest.fn(() => <div data-test-subj="addToChatButtonStub" />),
-}));
+vi.mock('./add_to_chat_button', () => {
+      const mocked = {
+      AddToChatButton: vi.fn(() => <div data-test-subj="addToChatButtonStub" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddToChatButton = jest.mocked(AddToChatButton);
+const mockAddToChatButton = vi.mocked(AddToChatButton);
 
 const mockEpisode = {
   'episode.id': 'ep-1',
@@ -34,7 +39,7 @@ const services: ManualAddToChatServices = { agentBuilder: undefined };
 
 describe('EpisodeAddToChatButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('packages the episode and rule for the generic add to chat button', () => {

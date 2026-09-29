@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
@@ -16,28 +19,31 @@ import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_e
 import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
 
-jest.mock('../../hooks/use_get_knowledge_base_entries');
-jest.mock('../../hooks/use_create_knowledge_base_entry');
-jest.mock('../../hooks/use_import_knowledge_base_entries');
-jest.mock('../../hooks/use_delete_knowledge_base_entry');
-jest.mock('@kbn/ai-assistant/src/hooks');
-jest.mock('@kbn/ai-assistant/src/hooks/use_inference_endpoints', () => ({
-  useInferenceEndpoints: () => ({
-    inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
-    isLoading: false,
-  }),
-}));
+vi.mock('../../hooks/use_get_knowledge_base_entries');
+vi.mock('../../hooks/use_create_knowledge_base_entry');
+vi.mock('../../hooks/use_import_knowledge_base_entries');
+vi.mock('../../hooks/use_delete_knowledge_base_entry');
+vi.mock('@kbn/ai-assistant/src/hooks');
+vi.mock('@kbn/ai-assistant/src/hooks/use_inference_endpoints', () => {
+      const mocked = {
+      useInferenceEndpoints: () => ({
+        inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useGetKnowledgeBaseEntriesMock = useGetKnowledgeBaseEntries as jest.Mock;
-const useCreateKnowledgeBaseEntryMock = useCreateKnowledgeBaseEntry as jest.Mock;
-const useImportKnowledgeBaseEntriesMock = useImportKnowledgeBaseEntries as jest.Mock;
-const useDeleteKnowledgeBaseEntryMock = useDeleteKnowledgeBaseEntry as jest.Mock;
-const useGenAIConnectorsMock = useGenAIConnectors as jest.Mock;
-const useKnowledgeBaseMock = useKnowledgeBase as jest.Mock;
+const useGetKnowledgeBaseEntriesMock = useGetKnowledgeBaseEntries as Mock;
+const useCreateKnowledgeBaseEntryMock = useCreateKnowledgeBaseEntry as Mock;
+const useImportKnowledgeBaseEntriesMock = useImportKnowledgeBaseEntries as Mock;
+const useDeleteKnowledgeBaseEntryMock = useDeleteKnowledgeBaseEntry as Mock;
+const useGenAIConnectorsMock = useGenAIConnectors as Mock;
+const useKnowledgeBaseMock = useKnowledgeBase as Mock;
 
-const createMock = jest.fn(() => Promise.resolve());
-const importMock = jest.fn(() => Promise.resolve());
-const deleteMock = jest.fn(() => Promise.resolve());
+const createMock = vi.fn(() => Promise.resolve());
+const importMock = vi.fn(() => Promise.resolve());
+const deleteMock = vi.fn(() => Promise.resolve());
 
 describe('KnowledgeBaseTab', () => {
   beforeEach(() => {
@@ -54,8 +60,8 @@ describe('KnowledgeBaseTab', () => {
     useGenAIConnectorsMock.mockReturnValue({
       loading: false,
       connectors: [{ id: 'test', name: 'test' }],
-      selectConnector: jest.fn(),
-      reloadConnectors: jest.fn(),
+      selectConnector: vi.fn(),
+      reloadConnectors: vi.fn(),
     });
   });
 
@@ -71,7 +77,7 @@ describe('KnowledgeBaseTab', () => {
         },
         isInstalling: false,
         isPolling: false,
-        install: jest.fn(),
+        install: vi.fn(),
       });
     });
 
@@ -92,7 +98,7 @@ describe('KnowledgeBaseTab', () => {
           loading: false,
         },
         isInstalling: false,
-        install: jest.fn(),
+        install: vi.fn(),
       });
     });
 
@@ -115,7 +121,7 @@ describe('KnowledgeBaseTab', () => {
           },
         },
         isInstalling: false,
-        install: jest.fn(),
+        install: vi.fn(),
       });
     });
 
@@ -133,7 +139,7 @@ describe('KnowledgeBaseTab', () => {
           },
         },
         isInstalling: false,
-        install: jest.fn(),
+        install: vi.fn(),
       });
 
       await act(async () => {
@@ -155,7 +161,7 @@ describe('KnowledgeBaseTab', () => {
           },
         },
         isInstalling: false,
-        install: jest.fn(),
+        install: vi.fn(),
       });
     });
 
@@ -248,7 +254,7 @@ describe('KnowledgeBaseTab', () => {
     describe('when there are entries', () => {
       beforeEach(() => {
         useGetKnowledgeBaseEntriesMock.mockReturnValue({
-          refetch: jest.fn(),
+          refetch: vi.fn(),
           loading: false,
           entries: [
             {

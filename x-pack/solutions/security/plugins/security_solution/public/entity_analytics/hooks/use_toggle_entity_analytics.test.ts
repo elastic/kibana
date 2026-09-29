@@ -5,22 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { useToggleEntityAnalytics } from './use_toggle_entity_analytics';
 
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-jest.mock('../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
-}));
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+vi.mock('../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInstallEntityStore = jest.fn().mockResolvedValue({});
-const mockStartEntityStore = jest.fn().mockResolvedValue({});
-const mockStopEntityStore = jest.fn().mockResolvedValue({});
+const mockInstallEntityStore = vi.fn().mockResolvedValue({});
+const mockStartEntityStore = vi.fn().mockResolvedValue({});
+const mockStopEntityStore = vi.fn().mockResolvedValue({});
 
 let mockInstallEntityStoreMutationReturn: {
-  mutateAsync: jest.Mock;
+  mutateAsync: Mock;
   isLoading: boolean;
   isError: boolean;
   error: unknown;
@@ -31,24 +37,27 @@ let mockEntityStoreStatusReturn: {
   isLoading?: boolean;
 };
 
-jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
-  useInstallEntityStoreMutation: () => mockInstallEntityStoreMutationReturn,
-  useStartEntityStoreMutation: () => ({
-    mutateAsync: mockStartEntityStore,
-    isLoading: false,
-    isError: false,
-    error: null,
-  }),
-  useStopEntityStoreMutation: () => ({
-    mutateAsync: mockStopEntityStore,
-    isLoading: false,
-    isError: false,
-    error: null,
-  }),
-  useEntityStoreStatus: () => mockEntityStoreStatusReturn,
-}));
+vi.mock('../components/entity_store/hooks/use_entity_store', () => {
+      const mocked = {
+      useInstallEntityStoreMutation: () => mockInstallEntityStoreMutationReturn,
+      useStartEntityStoreMutation: () => ({
+        mutateAsync: mockStartEntityStore,
+        isLoading: false,
+        isError: false,
+        error: null,
+      }),
+      useStopEntityStoreMutation: () => ({
+        mutateAsync: mockStopEntityStore,
+        isLoading: false,
+        isError: false,
+        error: null,
+      }),
+      useEntityStoreStatus: () => mockEntityStoreStatusReturn,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSaveSettings = jest.fn().mockResolvedValue(undefined);
+const mockSaveSettings = vi.fn().mockResolvedValue(undefined);
 const defaultOptions = {
   selectedSettingsMatchSavedSettings: true,
   onSaveSettings: mockSaveSettings,
@@ -57,7 +66,7 @@ const defaultOptions = {
 
 describe('useToggleEntityAnalytics', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockInstallEntityStoreMutationReturn = {
       mutateAsync: mockInstallEntityStore,
       isLoading: false,

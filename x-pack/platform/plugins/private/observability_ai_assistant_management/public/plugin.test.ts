@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import { BehaviorSubject } from 'rxjs';
@@ -50,7 +52,7 @@ describe('Observability AI Assistant Management plugin', () => {
 
   const createCoreSetupMock = (): CoreSetup<any, any> =>
     ({
-      getStartServices: jest.fn().mockResolvedValue([{} as any, {} as any, {} as any]),
+      getStartServices: vi.fn().mockResolvedValue([{} as any, {} as any, {} as any]),
     } as any);
 
   describe('Licensing', () => {
@@ -60,7 +62,7 @@ describe('Observability AI Assistant Management plugin', () => {
     beforeEach(async () => {
       plugin = new AiAssistantManagementObservabilityPlugin({
         config: {
-          get: jest.fn(() => ({
+          get: vi.fn(() => ({
             logSourcesEnabled: true,
             spacesEnabled: true,
           })),

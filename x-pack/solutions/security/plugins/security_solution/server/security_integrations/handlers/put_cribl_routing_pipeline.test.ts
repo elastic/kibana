@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE } from '../../../common/constants';
@@ -12,10 +15,10 @@ import { putCriblRoutingPipeline } from './put_cribl_routing_pipeline';
 
 const createLogger = (): Logger =>
   ({
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
   } as unknown as Logger);
 
 const createPolicy = (routeEntriesJson: string): NewPackagePolicy =>
@@ -35,15 +38,15 @@ const createPolicy = (routeEntriesJson: string): NewPackagePolicy =>
   } as unknown as NewPackagePolicy);
 
 describe('putCriblRoutingPipeline', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let esClient: Mocked<ElasticsearchClient>;
   let logger: Logger;
 
   beforeEach(() => {
     esClient = {
       transport: {
-        request: jest.fn().mockResolvedValue({ acknowledged: true }),
+        request: vi.fn().mockResolvedValue({ acknowledged: true }),
       },
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+    } as unknown as Mocked<ElasticsearchClient>;
     logger = createLogger();
   });
 
@@ -117,7 +120,7 @@ describe('putCriblRoutingPipeline', () => {
   });
 
   it('rethrows Elasticsearch failures with apiPassThrough', async () => {
-    (esClient.transport.request as jest.Mock).mockRejectedValue({
+    (esClient.transport.request as Mock).mockRejectedValue({
       statusCode: 403,
       message: 'forbidden',
     });

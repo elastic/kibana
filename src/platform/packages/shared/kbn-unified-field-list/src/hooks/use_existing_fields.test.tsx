@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createStubDataView, stubFieldSpecMap } from '@kbn/data-plugin/public/stubs';
@@ -36,7 +39,7 @@ const rollupAggsMock = {
   },
 };
 
-jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(async () => ({
+vi.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(async () => ({
   indexPatternTitle: 'test',
   existingFieldNames: [],
 }));
@@ -60,7 +63,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       },
     },
   });
-  jest.spyOn(dataViewWithRestrictions, 'getAggregationRestrictions');
+  vi.spyOn(dataViewWithRestrictions, 'getAggregationRestrictions');
 
   beforeEach(() => {
     const dataViews = dataViewPluginMocks.createStartContract();
@@ -81,14 +84,14 @@ describe('UnifiedFieldList useExistingFields', () => {
       return [dataView, anotherDataView, dataViewWithRestrictions].find((dw) => dw.id === id)!;
     });
 
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
-    (dataViewWithRestrictions.getAggregationRestrictions as jest.Mock).mockClear();
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockClear();
+    (dataViewWithRestrictions.getAggregationRestrictions as Mock).mockClear();
     resetExistingFieldsCache();
   });
 
   it('should work correctly based on the specified data view', async () => {
     const dataViewId = dataView.id!;
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(async () => {
       return {
         existingFieldNames: [dataView.fields[0].name],
       };
@@ -147,7 +150,7 @@ describe('UnifiedFieldList useExistingFields', () => {
 
   it('should work correctly with multiple readers', async () => {
     const dataViewId = dataView.id!;
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(async () => {
       return {
         existingFieldNames: [dataView.fields[0].name],
       };
@@ -195,7 +198,7 @@ describe('UnifiedFieldList useExistingFields', () => {
 
   it('should work correctly if load fails', async () => {
     const dataViewId = dataView.id!;
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(async () => {
       throw new Error('test');
     });
 
@@ -224,7 +227,7 @@ describe('UnifiedFieldList useExistingFields', () => {
   });
 
   it('should work correctly for multiple data views', async () => {
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(
       async ({ dataView: currentDataView }) => {
         return {
           existingFieldNames: [currentDataView.fields[0].name],
@@ -294,7 +297,7 @@ describe('UnifiedFieldList useExistingFields', () => {
 
   it('should work correctly for data views with restrictions', async () => {
     const dataViewId = dataViewWithRestrictions.id!;
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(async () => {
       throw new Error('test');
     });
 
@@ -324,7 +327,7 @@ describe('UnifiedFieldList useExistingFields', () => {
   });
 
   it('should work correctly for when data views are changed', async () => {
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(
       async ({ dataView: currentDataView }) => {
         return {
           existingFieldNames: [currentDataView.fields[0].name],
@@ -402,7 +405,7 @@ describe('UnifiedFieldList useExistingFields', () => {
   });
 
   it('should work correctly for when params are changed', async () => {
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(
       async ({ dataView: currentDataView }) => {
         return {
           existingFieldNames: [currentDataView.fields[0].name],
@@ -476,7 +479,7 @@ describe('UnifiedFieldList useExistingFields', () => {
   });
 
   it('should call onNoData callback only once', async () => {
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(async () => {
       return {
         existingFieldNames: ['_id'],
       };
@@ -489,7 +492,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       toDate: '2020-01-01',
       query: { query: '', language: 'lucene' },
       filters: [],
-      onNoData: jest.fn(),
+      onNoData: vi.fn(),
     };
     const hookFetcher = renderHook(useExistingFieldsFetcher, {
       initialProps: params,
@@ -540,7 +543,7 @@ describe('UnifiedFieldList useExistingFields', () => {
   it('should include newFields', async () => {
     const newFields = [{ name: 'test', type: 'keyword', searchable: true, aggregatable: true }];
 
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(
       async ({ dataView: currentDataView }) => {
         return {
           existingFieldNames: [currentDataView.fields[0].name],
@@ -596,13 +599,13 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     it('should use initialExistingFieldsInfo instead of fetching', async () => {
       const dataViewId = dataView.id!;
-      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+      (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(async () => {
         return {
           existingFieldNames: [dataView.fields[0].name],
         };
       });
 
-      const onInitialExistingFieldsInfoChange = jest.fn();
+      const onInitialExistingFieldsInfoChange = vi.fn();
 
       renderHook(useExistingFieldsFetcher, {
         initialProps: {
@@ -670,13 +673,13 @@ describe('UnifiedFieldList useExistingFields', () => {
     ])(
       'should not use initialExistingFieldsInfo if "%s"',
       async (type, initialExistingFieldsInfo) => {
-        (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+        (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(async () => {
           return {
             existingFieldNames: [dataView.fields[0].name],
           };
         });
 
-        const onInitialExistingFieldsInfoChange = jest.fn();
+        const onInitialExistingFieldsInfoChange = vi.fn();
 
         renderHook(useExistingFieldsFetcher, {
           initialProps: {

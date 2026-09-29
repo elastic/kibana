@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
@@ -12,24 +15,27 @@ import { getScheduleMock } from '../../../lib/schedules/__mocks__/schedules.mock
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import { registerUpdateScheduleRoute } from './update_schedule';
 
-jest.mock('../../../lib/assert_workflows_enabled', () => ({
-  assertWorkflowsEnabled: jest.fn().mockResolvedValue(null),
-}));
+vi.mock('../../../lib/assert_workflows_enabled', () => {
+      const mocked = {
+      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAnalytics = coreMock.createSetup().analytics;
 import { createScheduleDataClient } from '../../../lib/schedules/create_schedule_data_client';
 import { transformUpdatePropsFromApi } from '@kbn/discoveries/impl/lib/schedules/transforms/transform_update_props_from_api';
 import { transformScheduleToApi } from '@kbn/discoveries/impl/lib/schedules/transforms/transform_schedule_to_api';
 
-jest.mock('../../../lib/schedules/create_schedule_data_client');
-jest.mock('@kbn/discoveries/impl/lib/schedules/transforms/transform_update_props_from_api');
-jest.mock('@kbn/discoveries/impl/lib/schedules/transforms/transform_schedule_to_api');
+vi.mock('../../../lib/schedules/create_schedule_data_client');
+vi.mock('@kbn/discoveries/impl/lib/schedules/transforms/transform_update_props_from_api');
+vi.mock('@kbn/discoveries/impl/lib/schedules/transforms/transform_schedule_to_api');
 
-const mockGetSchedule = jest.fn();
-const mockUpdateSchedule = jest.fn();
+const mockGetSchedule = vi.fn();
+const mockUpdateSchedule = vi.fn();
 const mockDataClient = { getSchedule: mockGetSchedule, updateSchedule: mockUpdateSchedule };
 
-const logger = { debug: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn(), error: vi.fn(), info: vi.fn() } as unknown as Logger;
 
 const validUpdateBody = {
   name: 'Test',
@@ -41,35 +47,35 @@ const validUpdateBody = {
   schedule: { interval: '10m' },
 };
 
-const getStartServices = jest.fn().mockResolvedValue({
+const getStartServices = vi.fn().mockResolvedValue({
   coreStart: {},
-  pluginsStart: { actions: { getActionsClientWithRequest: jest.fn() } },
+  pluginsStart: { actions: { getActionsClientWithRequest: vi.fn() } },
 });
 
 describe('registerUpdateScheduleRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (createScheduleDataClient as jest.Mock).mockResolvedValue(mockDataClient);
+    vi.clearAllMocks();
+    (createScheduleDataClient as Mock).mockResolvedValue(mockDataClient);
     mockGetSchedule.mockResolvedValue(getScheduleMock());
     mockUpdateSchedule.mockResolvedValue(getScheduleMock());
-    (transformUpdatePropsFromApi as jest.Mock).mockReturnValue({ name: 'internal-updated' });
-    (transformScheduleToApi as jest.Mock).mockReturnValue({ name: 'api-updated' });
+    (transformUpdatePropsFromApi as Mock).mockReturnValue({ name: 'internal-updated' });
+    (transformScheduleToApi as Mock).mockReturnValue({ name: 'api-updated' });
   });
 
   it('returns 404 when workflows feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as Mock).mockResolvedValueOnce(mockNotFoundResponse);
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
     const handler = addVersionMock.mock.calls[0][1];
     const request = httpServerMock.createKibanaRequest({ params: { id: 's1' }, body: {} });
     const response = httpServerMock.createResponseFactory();
-    const context = { alerting: Promise.resolve({ getRulesClient: jest.fn() }) };
+    const context = { alerting: Promise.resolve({ getRulesClient: vi.fn() }) };
 
     const result = await handler(context, request, response);
 
@@ -79,8 +85,8 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('returns 200 with the updated schedule on success', async () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -92,9 +98,9 @@ describe('registerUpdateScheduleRoute', () => {
     });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
@@ -106,8 +112,8 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('calls getSchedule before calling transformUpdatePropsFromApi', async () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -119,16 +125,16 @@ describe('registerUpdateScheduleRoute', () => {
     });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
     await handler(context, request, response);
 
     const getScheduleOrder = mockGetSchedule.mock.invocationCallOrder[0];
-    const transformOrder = (transformUpdatePropsFromApi as jest.Mock).mock.invocationCallOrder[0];
+    const transformOrder = (transformUpdatePropsFromApi as Mock).mock.invocationCallOrder[0];
     expect(getScheduleOrder).toBeLessThan(transformOrder);
   });
 
@@ -144,8 +150,8 @@ describe('registerUpdateScheduleRoute', () => {
     );
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -157,9 +163,9 @@ describe('registerUpdateScheduleRoute', () => {
     });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
@@ -175,8 +181,8 @@ describe('registerUpdateScheduleRoute', () => {
     mockGetSchedule.mockResolvedValue(getScheduleMock());
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -188,9 +194,9 @@ describe('registerUpdateScheduleRoute', () => {
     });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
@@ -201,7 +207,7 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('does NOT inject DEFAULT_WORKFLOW_CONFIG into a pre-FF schedule update', async () => {
     mockGetSchedule.mockResolvedValue(getScheduleMock());
-    (transformUpdatePropsFromApi as jest.Mock).mockImplementation(
+    (transformUpdatePropsFromApi as Mock).mockImplementation(
       (_body, existingWorkflowConfig) => ({
         name: 'internal-updated',
         workflowConfig: existingWorkflowConfig,
@@ -209,8 +215,8 @@ describe('registerUpdateScheduleRoute', () => {
     );
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -222,9 +228,9 @@ describe('registerUpdateScheduleRoute', () => {
     });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
@@ -237,11 +243,11 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('returns 404 when the feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as Mock).mockResolvedValueOnce(mockNotFoundResponse);
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -249,7 +255,7 @@ describe('registerUpdateScheduleRoute', () => {
 
     const request = httpServerMock.createKibanaRequest({ body: {}, params: { id: 's1' } });
     const response = httpServerMock.createResponseFactory();
-    const context = { alerting: Promise.resolve({ getRulesClient: jest.fn() }) };
+    const context = { alerting: Promise.resolve({ getRulesClient: vi.fn() }) };
 
     const result = await handler(context, request, response);
 
@@ -259,8 +265,8 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -277,8 +283,8 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('registers the route with ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -297,8 +303,8 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('registers the route with ALERTS_API_READ in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -315,8 +321,8 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('registers the route with the workflows read + execute privileges in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -336,8 +342,8 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('returns a 400 error and does not update when the alerts index targets another space', async () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -352,9 +358,9 @@ describe('registerUpdateScheduleRoute', () => {
     });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
@@ -365,8 +371,8 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('returns a custom error when the update fails', async () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.put as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -379,9 +385,9 @@ describe('registerUpdateScheduleRoute', () => {
     });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 

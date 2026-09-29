@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import execa from 'execa';
 import { filtersMatch } from './filters_match';
 
-jest.mock('execa', () => jest.fn());
+vi.mock('execa', () => vi.fn());
 
-const mockedExeca = execa as jest.MockedFunction<typeof execa>;
+const mockedExeca = execa as MockedFunction<typeof execa>;
 
 describe('filtersMatch', () => {
   beforeEach(() => {

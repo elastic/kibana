@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { DataViewsContract, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TextBasedPersistedState } from '@kbn/lens-common';
 import type { HttpStart } from '@kbn/core/public';
@@ -19,11 +22,14 @@ import {
 import { sampleIndexPatterns, mockDataViewsService } from './mocks';
 import { documentField } from '../datasources/form_based/document_field';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLTimeField: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLTimeField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
+const mockGetESQLTimeField = getESQLTimeField as MockedFunction<typeof getESQLTimeField>;
 
 describe('loader', () => {
   describe('loadIndexPatternRefs', () => {
@@ -36,7 +42,7 @@ describe('loader', () => {
   describe('loadIndexPatterns', () => {
     it('should not load index patterns that are already loaded', async () => {
       const dataViewsService = mockDataViewsService();
-      dataViewsService.get = jest.fn(() =>
+      dataViewsService.get = vi.fn(() =>
         Promise.reject('mockIndexPatternService.get should not have been called')
       );
 
@@ -66,7 +72,7 @@ describe('loader', () => {
         cache: {},
         patterns: ['foo'],
         dataViews: {
-          get: jest.fn(async () => ({
+          get: vi.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
             metaFields: [],
@@ -104,11 +110,11 @@ describe('loader', () => {
               },
             ],
           })),
-          getIdsWithTitle: jest.fn(async () => ({
+          getIdsWithTitle: vi.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
           })),
-          create: jest.fn(),
+          create: vi.fn(),
         } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
       });
 
@@ -125,7 +131,7 @@ describe('loader', () => {
         cache: {},
         patterns: ['foo'],
         dataViews: {
-          get: jest.fn(async () => ({
+          get: vi.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
             metaFields: ['timestamp'],
@@ -163,11 +169,11 @@ describe('loader', () => {
               },
             ],
           })),
-          getIdsWithTitle: jest.fn(async () => ({
+          getIdsWithTitle: vi.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
           })),
-          create: jest.fn(),
+          create: vi.fn(),
         } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
       });
 
@@ -179,7 +185,7 @@ describe('loader', () => {
         cache: {},
         patterns: ['foo'],
         dataViews: {
-          get: jest.fn(async () => ({
+          get: vi.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
             metaFields: ['timestamp'],
@@ -220,11 +226,11 @@ describe('loader', () => {
               },
             ],
           })),
-          getIdsWithTitle: jest.fn(async () => ({
+          getIdsWithTitle: vi.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
           })),
-          create: jest.fn(),
+          create: vi.fn(),
         } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
       });
 
@@ -234,7 +240,7 @@ describe('loader', () => {
     });
 
     it('should call the refresh callback when loading new indexpatterns', async () => {
-      const onIndexPatternRefresh = jest.fn();
+      const onIndexPatternRefresh = vi.fn();
       await loadIndexPatterns({
         cache: {
           '2': sampleIndexPatterns['2'],
@@ -248,7 +254,7 @@ describe('loader', () => {
     });
 
     it('should not call the refresh callback when using the cache', async () => {
-      const onIndexPatternRefresh = jest.fn();
+      const onIndexPatternRefresh = vi.fn();
       await loadIndexPatterns({
         cache: sampleIndexPatterns,
         patterns: ['1', '2'],
@@ -261,7 +267,7 @@ describe('loader', () => {
 
     it('should load one of the not used indexpatterns if all used ones are not available', async () => {
       const dataViewsService = {
-        get: jest.fn(async (id: string) => {
+        get: vi.fn(async (id: string) => {
           if (id === '3') {
             return {
               id: '3',
@@ -275,7 +281,7 @@ describe('loader', () => {
           }
           return Promise.reject();
         }),
-        getIdsWithTitle: jest.fn(),
+        getIdsWithTitle: vi.fn(),
       } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
       const cache = await loadIndexPatterns({
         cache: {},
@@ -301,14 +307,14 @@ describe('loader', () => {
   describe('ensureIndexPattern', () => {
     it('should throw if the requested indexPattern cannot be loaded', async () => {
       const err = Error('NOPE!');
-      const onError = jest.fn();
+      const onError = vi.fn();
       const cache = await ensureIndexPattern({
         id: '3',
         dataViews: {
-          get: jest.fn(async () => {
+          get: vi.fn(async () => {
             throw err;
           }),
-          getIdsWithTitle: jest.fn(),
+          getIdsWithTitle: vi.fn(),
         } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
         onError,
       });
@@ -318,7 +324,7 @@ describe('loader', () => {
     });
 
     it('should ensure the requested indexpattern is loaded into the cache', async () => {
-      const onError = jest.fn();
+      const onError = vi.fn();
       const cache = await ensureIndexPattern({
         id: '2',
         dataViews: mockDataViewsService(),
@@ -363,7 +369,7 @@ describe('loader', () => {
 
     beforeEach(() => {
       mockGetESQLTimeField.mockReset();
-      (mockDataViews.clearInstanceCache as jest.Mock).mockClear();
+      (mockDataViews.clearInstanceCache as Mock).mockClear();
     });
 
     it('should return adHocDataViews unchanged when textBasedState is undefined', async () => {

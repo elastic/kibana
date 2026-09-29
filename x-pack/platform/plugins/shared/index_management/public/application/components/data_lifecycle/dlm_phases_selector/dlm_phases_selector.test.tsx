@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
@@ -22,13 +24,13 @@ const BASE_PROPS: Omit<DlmPhasesSelectorProps, 'onChange'> = {
     isCloudEnabled: true,
     canManageLicense: true,
     trialDaysLeft: undefined,
-    onUpgrade: jest.fn(),
+    onUpgrade: vi.fn(),
     subscriptionFeaturesUrl: 'https://www.elastic.co/subscriptions/cloud',
   },
 };
 
 const renderSelector = (props?: Partial<DlmPhasesSelectorProps>) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const result = render(
     <IntlProvider>
       <DlmPhasesSelector {...BASE_PROPS} onChange={onChange} {...props} />
@@ -40,7 +42,7 @@ const renderSelector = (props?: Partial<DlmPhasesSelectorProps>) => {
 
 describe('DlmPhasesSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the required hot phase and collapsed optional phases', () => {
@@ -139,7 +141,7 @@ describe('DlmPhasesSelector', () => {
   });
 
   it('disables frozen phase when a default snapshot repository is unavailable', async () => {
-    const onRefreshDefaultSnapshotRepository = jest.fn();
+    const onRefreshDefaultSnapshotRepository = vi.fn();
     const { getByLabelText, getByRole, getByText, queryByText, queryByTestId } = renderSelector({
       hasDefaultSnapshotRepository: false,
       onRefreshDefaultSnapshotRepository,
@@ -162,7 +164,7 @@ describe('DlmPhasesSelector', () => {
   });
 
   it('closes the default snapshot repository modal when repository validation passes', async () => {
-    const onRefreshDefaultSnapshotRepository = jest.fn();
+    const onRefreshDefaultSnapshotRepository = vi.fn();
     const { getByRole, queryByText, rerender } = renderSelector({
       hasDefaultSnapshotRepository: false,
       onRefreshDefaultSnapshotRepository,

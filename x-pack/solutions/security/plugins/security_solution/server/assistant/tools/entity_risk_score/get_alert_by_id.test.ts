@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import { createGetAlertsById } from './get_alert_by_id';
 
 const mockEsClient = {
-  search: jest.fn(),
+  search: vi.fn(),
 } as unknown as ElasticsearchClient;
 
 const mockAnonymizationFields: AnonymizationFieldResponse[] = [
@@ -26,7 +29,7 @@ const mockAnonymizationFields: AnonymizationFieldResponse[] = [
 
 describe('createGetAlertsById', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return alerts data by ids', async () => {
@@ -50,7 +53,7 @@ describe('createGetAlertsById', () => {
       },
     };
 
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockResponse);
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
@@ -75,7 +78,7 @@ describe('createGetAlertsById', () => {
 
   it('should filter out non-allowed anonymization fields', async () => {
     const mockResponse = { hits: { hits: [] } };
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockResponse);
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
@@ -87,7 +90,7 @@ describe('createGetAlertsById', () => {
       anonymizationFields: mockAnonymizationFields,
     });
 
-    const calledWith = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+    const calledWith = (mockEsClient.search as Mock).mock.calls[0][0];
     const fields = calledWith.fields.map((f: { field: string }) => f.field);
 
     expect(fields).not.toContain('event.action');
@@ -98,7 +101,7 @@ describe('createGetAlertsById', () => {
 
   it('should return empty object when no hits are found', async () => {
     const mockResponse = { hits: { hits: [] } };
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockResponse);
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
@@ -115,7 +118,7 @@ describe('createGetAlertsById', () => {
 
   it('should handle empty ids array', async () => {
     const mockResponse = { hits: { hits: [] } };
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockResponse);
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
@@ -142,7 +145,7 @@ describe('createGetAlertsById', () => {
 
   it('should handle empty anonymization fields', async () => {
     const mockResponse = { hits: { hits: [] } };
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockResponse);
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
@@ -154,7 +157,7 @@ describe('createGetAlertsById', () => {
       anonymizationFields: [],
     });
 
-    const calledWith = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+    const calledWith = (mockEsClient.search as Mock).mock.calls[0][0];
     expect(calledWith.fields).toEqual([]);
   });
 });

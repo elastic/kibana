@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { InferenceConnector } from './inference';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -18,7 +21,7 @@ const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 
 describe('InferenceConnector', () => {
-  let mockError: jest.Mock;
+  let mockError: Mock;
   const logger = loggingSystemMock.createLogger();
   const mockResponse: InferenceInferenceResponse = {
     completion: [
@@ -34,7 +37,7 @@ describe('InferenceConnector', () => {
 
     beforeEach(() => {
       mockEsClient.inference.inference.mockResolvedValue(mockResponse);
-      mockError = jest.fn().mockImplementation(() => {
+      mockError = vi.fn().mockImplementation(() => {
         throw new Error('API Error');
       });
     });
@@ -151,7 +154,7 @@ describe('InferenceConnector', () => {
 
     beforeEach(() => {
       mockEsClient.inference.inference.mockResolvedValue(mockResponseRerank);
-      mockError = jest.fn().mockImplementation(() => {
+      mockError = vi.fn().mockImplementation(() => {
         throw new Error('API Error');
       });
     });
@@ -198,7 +201,7 @@ describe('InferenceConnector', () => {
 
     beforeEach(() => {
       mockEsClient.inference.inference.mockResolvedValue(mockResponse);
-      mockError = jest.fn().mockImplementation(() => {
+      mockError = vi.fn().mockImplementation(() => {
         throw new Error('API Error');
       });
     });
@@ -273,7 +276,7 @@ describe('InferenceConnector', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       // @ts-ignore
       mockStream();
     });
@@ -340,7 +343,7 @@ describe('InferenceConnector', () => {
         statusCode: 200,
       });
 
-      const signal = jest.fn() as unknown as AbortSignal;
+      const signal = vi.fn() as unknown as AbortSignal;
       await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'Hello world', role: 'user' }] },
         signal,

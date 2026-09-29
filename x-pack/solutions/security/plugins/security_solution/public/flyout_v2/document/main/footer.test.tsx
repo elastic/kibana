@@ -5,23 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Footer } from './footer';
 
-jest.mock('./components/footer_ai_actions', () => ({
-  FooterAiActions: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="footerAiActions" data-hit-id={hit.id} />
-  ),
-}));
-const mockTakeAction = jest.fn();
-jest.mock('./components/take_action', () => ({
-  TakeAction: ({ hit, onAlertUpdated }: { hit: DataTableRecord; onAlertUpdated: () => void }) => {
-    mockTakeAction({ hit, onAlertUpdated });
-    return <div data-test-subj="takeAction" data-hit-id={hit.id} />;
-  },
-}));
+vi.mock('./components/footer_ai_actions', () => {
+      const mocked = {
+      FooterAiActions: ({ hit }: { hit: DataTableRecord }) => (
+        <div data-test-subj="footerAiActions" data-hit-id={hit.id} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockTakeAction = vi.fn();
+vi.mock('./components/take_action', () => {
+      const mocked = {
+      TakeAction: ({ hit, onAlertUpdated }: { hit: DataTableRecord; onAlertUpdated: () => void }) => {
+        mockTakeAction({ hit, onAlertUpdated });
+        return <div data-test-subj="takeAction" data-hit-id={hit.id} />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (): DataTableRecord =>
   ({
@@ -30,12 +38,12 @@ const createMockHit = (): DataTableRecord =>
     flattened: {},
   } as DataTableRecord);
 
-const mockOnAlertUpdated = jest.fn();
-const mockOnShowNotes = jest.fn();
+const mockOnAlertUpdated = vi.fn();
+const mockOnShowNotes = vi.fn();
 
 describe('<Footer />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders FooterAiActions with the provided hit', () => {
@@ -64,7 +72,7 @@ describe('<Footer />', () => {
 
   it('passes onAlertUpdated to TakeAction', () => {
     const hit = createMockHit();
-    const onAlertUpdated = jest.fn();
+    const onAlertUpdated = vi.fn();
 
     render(<Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={mockOnShowNotes} />);
 

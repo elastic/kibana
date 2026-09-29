@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux-v7';
 import { useSavedDataViews } from './use_saved_data_views';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../common/constants';
 
-jest.mock('react-redux-v7', () => ({
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useSavedDataViews', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not transform saved data views', () => {
@@ -47,7 +53,7 @@ describe('useSavedDataViews', () => {
     ];
 
     // Mock the useSelector to return our test data
-    (useSelector as jest.Mock).mockReturnValue({
+    (useSelector as Mock).mockReturnValue({
       dataViews: mockDataViews,
     });
 
@@ -84,7 +90,7 @@ describe('useSavedDataViews', () => {
 
   it('should handle empty data views array', () => {
     // Mock the useSelector to return an empty array
-    (useSelector as jest.Mock).mockReturnValue({
+    (useSelector as Mock).mockReturnValue({
       dataViews: [],
     });
 
@@ -111,7 +117,7 @@ describe('useSavedDataViews', () => {
     ];
 
     // Mock the useSelector
-    (useSelector as jest.Mock).mockReturnValue({
+    (useSelector as Mock).mockReturnValue({
       dataViews: mockDataViews,
     });
 

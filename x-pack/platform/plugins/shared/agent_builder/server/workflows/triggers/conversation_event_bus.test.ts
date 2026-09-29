@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { TimelineEventType, EventActorType } from '@kbn/agent-builder-common';
 import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
@@ -28,8 +30,8 @@ describe('ConversationEventBus attachment events', () => {
   it('fans out emitAttachmentEvents to every registered listener with the request', () => {
     const bus = createConversationEventBus();
     const request = httpServerMock.createKibanaRequest();
-    const listenerA = jest.fn();
-    const listenerB = jest.fn();
+    const listenerA = vi.fn();
+    const listenerB = vi.fn();
     bus.onAttachmentEvents(listenerA);
     bus.onAttachmentEvents(listenerB);
 
@@ -44,7 +46,7 @@ describe('ConversationEventBus attachment events', () => {
 
   it('does not deliver attachment events to metadata listeners', () => {
     const bus = createConversationEventBus();
-    const metadataListener = jest.fn();
+    const metadataListener = vi.fn();
     bus.onMetadataPatched(metadataListener);
 
     bus.emitAttachmentEvents(httpServerMock.createKibanaRequest(), {

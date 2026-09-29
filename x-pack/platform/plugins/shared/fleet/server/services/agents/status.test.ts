@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -23,7 +25,7 @@ import {
 describe('getAgentStatusForAgentPolicy', () => {
   beforeEach(async () => {
     const soClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: 'agentPolicyId',
@@ -47,7 +49,7 @@ describe('getAgentStatusForAgentPolicy', () => {
 
   it('should return agent status for agent policy', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: {
           status: {
             buckets: [
@@ -66,7 +68,7 @@ describe('getAgentStatusForAgentPolicy', () => {
     };
 
     const soClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: 'agentPolicyId',
@@ -110,7 +112,7 @@ describe('getAgentStatusForAgentPolicy', () => {
 
   it('retries on 503', async () => {
     const esClient = {
-      search: jest
+      search: vi
         .fn()
         .mockRejectedValueOnce(
           new EsErrors.ResponseError({ warnings: [], meta: {} as any, statusCode: 503 })
@@ -134,7 +136,7 @@ describe('getAgentStatusForAgentPolicy', () => {
     };
 
     const soClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: 'agentPolicyId',
@@ -178,7 +180,7 @@ describe('getAgentStatusForAgentPolicy', () => {
 
   it('calls esClient.search with correct parameters when agentPolicyIds are provided', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: {
           status: {
             buckets: [
@@ -191,7 +193,7 @@ describe('getAgentStatusForAgentPolicy', () => {
     };
 
     const soClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           { id: 'agentPolicyId1', attributes: { name: 'Policy 1' } },
           { id: 'agentPolicyId2', attributes: { name: 'Policy 2' } },
@@ -241,7 +243,7 @@ describe('getAgentStatusForAgentPolicy', () => {
 
   it('matches version-specific policy variants when a single agentPolicyId is provided', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: {
           status: {
             buckets: [{ key: 'online', doc_count: 1 }],
@@ -251,7 +253,7 @@ describe('getAgentStatusForAgentPolicy', () => {
     };
 
     const soClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [{ id: 'agentPolicyId', attributes: { name: 'Policy 1' } }],
       }),
     };

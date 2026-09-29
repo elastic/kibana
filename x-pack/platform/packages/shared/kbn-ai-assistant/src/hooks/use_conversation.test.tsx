@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { merge } from 'lodash';
@@ -40,29 +43,29 @@ type MockedService = DeeplyMockedKeys<Omit<AIAssistantAppService, 'conversations
 };
 
 const mockService: MockedService = {
-  callApi: jest.fn(),
-  isEnabled: jest.fn(),
-  start: jest.fn(),
-  register: jest.fn(),
-  setScreenContext: jest.fn(),
-  getScreenContexts: jest.fn(),
+  callApi: vi.fn(),
+  isEnabled: vi.fn(),
+  start: vi.fn(),
+  register: vi.fn(),
+  setScreenContext: vi.fn(),
+  getScreenContexts: vi.fn(),
   conversations: {
-    openNewConversation: jest.fn(),
+    openNewConversation: vi.fn(),
     predefinedConversation$: new Observable(),
   },
-  navigate: jest.fn().mockReturnValue(of()),
+  navigate: vi.fn().mockReturnValue(of()),
   scope$: new BehaviorSubject<AssistantScope[]>(['all']) as MockedService['scope$'],
-  setScopes: jest.fn(),
-  getScopes: jest.fn(),
+  setScopes: vi.fn(),
+  getScopes: vi.fn(),
 };
 
 const mockChatService = createMockChatService();
 
-const addErrorMock = jest.fn();
+const addErrorMock = vi.fn();
 
 const useKibanaMockServices = {
   uiSettings: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
   observabilityAIAssistant: {
     useChat: createUseChat({
@@ -82,7 +85,7 @@ describe('useConversation', () => {
   );
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('with initial messages and a conversation id', () => {
@@ -99,7 +102,7 @@ describe('useConversation', () => {
               },
             ],
             initialConversationId: 'foo',
-            onConversationDuplicate: jest.fn(),
+            onConversationDuplicate: vi.fn(),
           },
           wrapper,
         })
@@ -114,7 +117,7 @@ describe('useConversation', () => {
         initialProps: {
           chatService: mockChatService,
           connectorId: 'my-connector',
-          onConversationDuplicate: jest.fn(),
+          onConversationDuplicate: vi.fn(),
         },
         wrapper,
       });
@@ -149,7 +152,7 @@ describe('useConversation', () => {
               },
             },
           ],
-          onConversationDuplicate: jest.fn(),
+          onConversationDuplicate: vi.fn(),
         },
         wrapper,
       });
@@ -192,7 +195,7 @@ describe('useConversation', () => {
           chatService: mockChatService,
           connectorId: 'my-connector',
           initialConversationId: 'my-conversation-id',
-          onConversationDuplicate: jest.fn(),
+          onConversationDuplicate: vi.fn(),
         },
         wrapper,
       });
@@ -241,7 +244,7 @@ describe('useConversation', () => {
           chatService: mockChatService,
           connectorId: 'my-connector',
           initialConversationId: 'my-conversation-id',
-          onConversationDuplicate: jest.fn(),
+          onConversationDuplicate: vi.fn(),
         },
         wrapper,
       });
@@ -260,7 +263,7 @@ describe('useConversation', () => {
 
   describe('when chat completes', () => {
     const subject: Subject<StreamingChatResponseEventWithoutError> = new Subject();
-    let onConversationUpdate: jest.Mock;
+    let onConversationUpdate: Mock;
     const expectedMessages = [
       {
         '@timestamp': expect.any(String),
@@ -305,7 +308,7 @@ describe('useConversation', () => {
         )
       );
 
-      onConversationUpdate = jest.fn();
+      onConversationUpdate = vi.fn();
 
       // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
@@ -329,7 +332,7 @@ describe('useConversation', () => {
             },
           ],
           onConversationUpdate,
-          onConversationDuplicate: jest.fn(),
+          onConversationDuplicate: vi.fn(),
         },
         wrapper,
       });
@@ -395,31 +398,35 @@ describe('useConversation', () => {
 
   describe('when the title is updated', () => {
     describe('without a stored conversation', () => {
-      it('throws an error', (done) => {
-        try {
-          const { result } = renderHook(useConversation, {
-            initialProps: {
-              chatService: mockChatService,
-              connectorId: 'my-connector',
-              initialMessages: [
-                {
-                  '@timestamp': new Date().toISOString(),
-                  message: { content: '', role: MessageRole.User },
-                },
-              ],
-              initialConversationId: 'foo',
-              onConversationDuplicate: jest.fn(),
-            },
-            wrapper,
-          });
+      it('throws an error', () =>
+          new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-          result.current.saveTitle('my-new-title');
-        } catch (e) {
-          expect(e).toBeInstanceOf(Error);
-          expect(e.message).toBe('Cannot set initialMessages if initialConversationId is set');
-          done();
-        }
-      });
+                  try {
+                    const { result } = renderHook(useConversation, {
+                      initialProps: {
+                        chatService: mockChatService,
+                        connectorId: 'my-connector',
+                        initialMessages: [
+                          {
+                            '@timestamp': new Date().toISOString(),
+                            message: { content: '', role: MessageRole.User },
+                          },
+                        ],
+                        initialConversationId: 'foo',
+                        onConversationDuplicate: vi.fn(),
+                      },
+                      wrapper,
+                    });
+
+                    result.current.saveTitle('my-new-title');
+                  } catch (e) {
+                    expect(e).toBeInstanceOf(Error);
+                    expect(e.message).toBe('Cannot set initialMessages if initialConversationId is set');
+                    done();
+                  }
+                
+          }));
     });
 
     describe('with a stored conversation', () => {
@@ -453,7 +460,7 @@ describe('useConversation', () => {
               chatService: mockChatService,
               connectorId: 'my-connector',
               initialConversationId: 'my-conversation-id',
-              onConversationDuplicate: jest.fn(),
+              onConversationDuplicate: vi.fn(),
             },
             wrapper,
           });

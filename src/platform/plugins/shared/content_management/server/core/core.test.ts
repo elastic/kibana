@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { ContentClient } from '../content_client/content_client';
@@ -39,11 +41,11 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { createMockedMSearchStorage } from './mocks/in_memory_storage';
 
-const spyMsearch = jest.fn();
+const spyMsearch = vi.fn();
 const getmSearchSpy = () => spyMsearch;
 
-jest.mock('./msearch', () => {
-  const original = jest.requireActual('./msearch');
+vi.mock('./msearch', async () => {
+  const original = (await vi.importActual('./msearch'));
   class MSearchService {
     search(...args: any[]) {
       getmSearchSpy()(...args);
@@ -66,13 +68,13 @@ const setup = ({
 }: { registerFooType?: boolean; storage?: ContentStorage; latestVersion?: number } = {}) => {
   const ctx: StorageContext = {
     request: mockRouter.createFakeKibanaRequest({}),
-    requestHandlerContext: jest.mocked<RequestHandlerContext>({} as any),
+    requestHandlerContext: vi.mocked<RequestHandlerContext>({} as any),
     version: {
       latest: latestVersion,
       request: 1,
     },
     utils: {
-      getTransforms: jest.fn(),
+      getTransforms: vi.fn(),
     },
   };
 
@@ -418,7 +420,7 @@ describe('Content Core', () => {
             api: { eventBus },
           } = coreSetup;
 
-          const listener = jest.fn();
+          const listener = vi.fn();
           const subscription = eventBus.events$.subscribe(listener);
 
           const event: GetItemStart = {
@@ -441,7 +443,7 @@ describe('Content Core', () => {
             api: { eventBus },
           } = coreSetup;
 
-          const listener = jest.fn();
+          const listener = vi.fn();
           // Listen to all "getItemStart" events, regardless of the content type
           const unsubscribe = eventBus.on('getItemStart', listener);
 
@@ -472,7 +474,7 @@ describe('Content Core', () => {
           } = coreSetup;
 
           expect(() => {
-            eventBus.on('getItemStart', FOO_CONTENT_ID, jest.fn());
+            eventBus.on('getItemStart', FOO_CONTENT_ID, vi.fn());
           }).toThrow('Invalid content type [foo].');
 
           cleanUp();
@@ -489,7 +491,7 @@ describe('Content Core', () => {
 
           await crud(FOO_CONTENT_ID).create(ctx, { title: 'Hello' }, { id: '1234' });
 
-          const listener = jest.fn();
+          const listener = vi.fn();
 
           // Listen to "getItemStart" events *only* on the "foo" content type
           eventBus.on('getItemStart', FOO_CONTENT_ID, listener);
@@ -529,7 +531,7 @@ describe('Content Core', () => {
               id: '1234',
             });
 
-            const listener = jest.fn();
+            const listener = vi.fn();
             const sub = eventBus.events$.subscribe(listener);
 
             const promise = fooContentCrud!.get(ctx, '1234', { someOption: 'baz' });
@@ -561,7 +563,7 @@ describe('Content Core', () => {
             listener.mockReset();
 
             const errorMessage = 'Ohhh no!';
-            const reject = jest.fn();
+            const reject = vi.fn();
             await fooContentCrud!.get(ctx, '1234', { errorToThrow: errorMessage }).catch(reject);
 
             const getItemError: GetItemError = {
@@ -595,7 +597,7 @@ describe('Content Core', () => {
               id: '5678',
             });
 
-            const listener = jest.fn();
+            const listener = vi.fn();
             const sub = eventBus.events$.subscribe(listener);
 
             const promise = fooContentCrud!.bulkGet(ctx, ['1234', '5678'], { someOption: 'baz' });
@@ -633,7 +635,7 @@ describe('Content Core', () => {
             listener.mockReset();
 
             const errorMessage = 'Ohhh no!';
-            const reject = jest.fn();
+            const reject = vi.fn();
             await fooContentCrud!
               .bulkGet(ctx, ['1234', '5678'], { errorToThrow: errorMessage })
               .catch(reject);
@@ -662,7 +664,7 @@ describe('Content Core', () => {
 
             const data = { title: 'Hello' };
 
-            const listener = jest.fn();
+            const listener = vi.fn();
             const sub = eventBus.events$.subscribe(listener);
 
             const promise = fooContentCrud!.create(ctx, data, {
@@ -695,7 +697,7 @@ describe('Content Core', () => {
             listener.mockReset();
 
             const errorMessage = 'Ohhh no!';
-            const reject = jest.fn();
+            const reject = vi.fn();
             await fooContentCrud!
               .create(ctx, data, {
                 id: '1234',
@@ -732,7 +734,7 @@ describe('Content Core', () => {
               }
             );
 
-            const listener = jest.fn();
+            const listener = vi.fn();
             const sub = eventBus.events$.subscribe(listener);
 
             const data = { title: 'Updated' };
@@ -767,7 +769,7 @@ describe('Content Core', () => {
             listener.mockReset();
 
             const errorMessage = 'Ohhh no!';
-            const reject = jest.fn();
+            const reject = vi.fn();
             await fooContentCrud!
               .update(ctx, '1234', data, {
                 errorToThrow: errorMessage,
@@ -804,7 +806,7 @@ describe('Content Core', () => {
               }
             );
 
-            const listener = jest.fn();
+            const listener = vi.fn();
             const sub = eventBus.events$.subscribe(listener);
 
             const promise = await fooContentCrud!.delete(ctx, '1234', { someOptions: 'baz' });
@@ -832,7 +834,7 @@ describe('Content Core', () => {
             listener.mockReset();
 
             const errorMessage = 'Ohhh no!';
-            const reject = jest.fn();
+            const reject = vi.fn();
             await fooContentCrud!
               .delete(ctx, '1234', {
                 errorToThrow: errorMessage,
@@ -866,7 +868,7 @@ describe('Content Core', () => {
               id: '1234',
             });
 
-            const listener = jest.fn();
+            const listener = vi.fn();
             const sub = eventBus.events$.subscribe(listener);
 
             const query = { text: 'Hell' };
@@ -897,7 +899,7 @@ describe('Content Core', () => {
             listener.mockReset();
 
             const errorMessage = 'Ohhh no!';
-            const reject = jest.fn();
+            const reject = vi.fn();
             await fooContentCrud!
               .search(ctx, query, {
                 errorToThrow: errorMessage,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { EuiListTestHarness } from '@kbn/test-eui-helpers';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -32,11 +34,11 @@ import {
   INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
 } from './constants';
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
 // Driving the full multi-step wizard in setup hooks is intrinsically heavy and runs
 // ~10x slower under CI parallel load, so give every hook and test a single generous budget.
-jest.setTimeout(60000);
+vi.setConfig({ testTimeout: 60000 });
 
 describe('<TemplateCreate />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -49,8 +51,8 @@ describe('<TemplateCreate />', () => {
   let completeStepFive: ReturnType<typeof createTemplateCreateActions>['completeStepFive'];
 
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
@@ -485,7 +487,7 @@ describe('<TemplateCreate />', () => {
 
       // Second attempt succeeds and sends the expected payload
       httpRequestsMockHelpers.setCreateTemplateResponse({});
-      const postMock = jest.mocked(httpSetup.post);
+      const postMock = vi.mocked(httpSetup.post);
       postMock.mockClear();
 
       await clickSaveAndAwaitExit();
@@ -555,7 +557,7 @@ describe('<TemplateCreate />', () => {
       await completeStepFive();
 
       // Clear previous post calls to isolate this test
-      const postMock = jest.mocked(httpSetup.post);
+      const postMock = vi.mocked(httpSetup.post);
       postMock.mockClear();
 
       // Click the Preview tab in the review step

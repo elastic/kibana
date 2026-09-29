@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useMissingLookupsListStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock/test_providers';
@@ -12,17 +15,17 @@ import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_r
 import { getRuleMigrationStatsMock } from '../../../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_migrations/constants';
 
-jest.mock('../../../../../../service/hooks/use_upsert_resources');
-const mockUseUpsertResources = useUpsertResources as jest.Mock;
+vi.mock('../../../../../../service/hooks/use_upsert_resources');
+const mockUseUpsertResources = useUpsertResources as Mock;
 
 describe('useMissingLookupsListStep', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns step props', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: false,
       error: null,
     });
@@ -32,8 +35,8 @@ describe('useMissingLookupsListStep', () => {
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
       uploadedLookups: {},
-      addUploadedLookups: jest.fn(),
-      onCopied: jest.fn(),
+      addUploadedLookups: vi.fn(),
+      onCopied: vi.fn(),
     };
     const { result } = renderHook(() => useMissingLookupsListStep(props), {
       wrapper: TestProviders,
@@ -48,7 +51,7 @@ describe('useMissingLookupsListStep', () => {
 
   it('returns step props with `loading` status', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: true,
       error: null,
     });
@@ -58,8 +61,8 @@ describe('useMissingLookupsListStep', () => {
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
       uploadedLookups: {},
-      addUploadedLookups: jest.fn(),
-      onCopied: jest.fn(),
+      addUploadedLookups: vi.fn(),
+      onCopied: vi.fn(),
     };
     const { result } = renderHook(() => useMissingLookupsListStep(props), {
       wrapper: TestProviders,
@@ -74,7 +77,7 @@ describe('useMissingLookupsListStep', () => {
 
   it('returns step props with `danger` status', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: false,
       error: new Error('Failed!'),
     });
@@ -84,8 +87,8 @@ describe('useMissingLookupsListStep', () => {
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
       uploadedLookups: {},
-      addUploadedLookups: jest.fn(),
-      onCopied: jest.fn(),
+      addUploadedLookups: vi.fn(),
+      onCopied: vi.fn(),
     };
     const { result } = renderHook(() => useMissingLookupsListStep(props), {
       wrapper: TestProviders,

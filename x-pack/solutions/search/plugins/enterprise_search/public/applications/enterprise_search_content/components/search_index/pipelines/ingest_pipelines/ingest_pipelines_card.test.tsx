@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../../__mocks__/view_index.mock';
 
-jest.mock('./default_pipeline_item', () => ({
-  DefaultPipelineItem: () => <div data-test-subj="defaultPipelineItem" />,
-}));
-jest.mock('./custom_pipeline_item', () => ({
-  CustomPipelineItem: () => <div data-test-subj="customPipelineItem" />,
-}));
+vi.mock('./default_pipeline_item', () => {
+      const mocked = {
+      DefaultPipelineItem: () => <div data-test-subj="defaultPipelineItem" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./custom_pipeline_item', () => {
+      const mocked = {
+      CustomPipelineItem: () => <div data-test-subj="customPipelineItem" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 
@@ -47,9 +55,9 @@ const DEFAULT_VALUES = {
 
 describe('IngestPipelinesCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({ ...DEFAULT_VALUES });
-    setMockActions({ fetchCustomPipeline: jest.fn(), makeRequest: jest.fn() });
+    setMockActions({ fetchCustomPipeline: vi.fn(), makeRequest: vi.fn() });
   });
 
   it('renders with default ingest pipeline', () => {

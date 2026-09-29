@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -12,33 +15,39 @@ import { SearchSynonymsOverview } from './overview';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      console: undefined,
-      history: { push: jest.fn(), location: { search: '' } },
-      searchNavigation: {
-        useClassicNavigation: jest.fn(),
-        breadcrumbs: {
-          setSearchBreadCrumbs: jest.fn(),
-          clearBreadcrumbs: jest.fn(),
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          console: undefined,
+          history: { push: vi.fn(), location: { search: '' } },
+          searchNavigation: {
+            useClassicNavigation: vi.fn(),
+            breadcrumbs: {
+              setSearchBreadCrumbs: vi.fn(),
+              clearBreadcrumbs: vi.fn(),
+            },
+          },
+          chrome: {
+            getChromeStyle: vi.fn().mockReturnValue('classic'),
+          },
         },
-      },
-      chrome: {
-        getChromeStyle: jest.fn().mockReturnValue('classic'),
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_synonyms_sets', () => ({
-  useFetchSynonymsSets: jest.fn(() => ({
-    data: undefined,
-    isLoading: false,
-    isError: true,
-    error: { body: { statusCode: 500 } },
-  })),
-}));
+vi.mock('../../hooks/use_fetch_synonyms_sets', () => {
+      const mocked = {
+      useFetchSynonymsSets: vi.fn(() => ({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error: { body: { statusCode: 500 } },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Search Synonyms Overview', () => {
   const queryClient = new QueryClient();
@@ -58,7 +67,7 @@ describe('Search Synonyms Overview', () => {
   });
 
   it('should show error prompt when we get a missing permissions error', () => {
-    (useFetchSynonymsSets as jest.Mock).mockReturnValue({
+    (useFetchSynonymsSets as Mock).mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: true,

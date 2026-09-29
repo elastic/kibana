@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Subject, firstValueFrom, lastValueFrom, take, toArray } from 'rxjs';
 import { UserStorageClient } from './user_storage_client';
 import type { UserStorageApi } from './user_storage_api';
 
-const apiMock = (): jest.Mocked<UserStorageApi> =>
+const apiMock = (): Mocked<UserStorageApi> =>
   ({
-    get: jest.fn().mockReturnValue(new Promise(() => {})), // never resolves by default
-    set: jest.fn(),
-    remove: jest.fn(),
-  } as unknown as jest.Mocked<UserStorageApi>);
+    get: vi.fn().mockReturnValue(new Promise(() => {})), // never resolves by default
+    set: vi.fn(),
+    remove: vi.fn(),
+  } as unknown as Mocked<UserStorageApi>);
 
 const buildClient = (initialValues: Record<string, unknown> = {}, available = true) => {
   const api = apiMock();
@@ -64,7 +67,7 @@ describe('UserStorageClient', () => {
     it('emits the default once from get$ and never publishes an http error', async () => {
       const { client, api } = buildClient({}, false);
       const emissions: unknown[] = [];
-      const httpErrors = jest.fn();
+      const httpErrors = vi.fn();
       client.getHttpError$().subscribe(httpErrors);
       client.get$('key', 'fallback').subscribe((v) => emissions.push(v));
 
@@ -77,7 +80,7 @@ describe('UserStorageClient', () => {
 
     it('rejects set() locally without issuing a request or publishing an http error', async () => {
       const { client, api } = buildClient({}, false);
-      const httpErrors = jest.fn();
+      const httpErrors = vi.fn();
       client.getHttpError$().subscribe(httpErrors);
 
       await expect(client.set('key', 'value')).rejects.toThrow(
@@ -90,7 +93,7 @@ describe('UserStorageClient', () => {
 
     it('rejects remove() locally without issuing a request or publishing an http error', async () => {
       const { client, api } = buildClient({}, false);
-      const httpErrors = jest.fn();
+      const httpErrors = vi.fn();
       client.getHttpError$().subscribe(httpErrors);
 
       await expect(client.remove('key')).rejects.toThrow(
@@ -253,8 +256,8 @@ describe('UserStorageClient', () => {
     it('emits the current value to every subscriber of the same observable', () => {
       const { client } = buildClient({ key: 'cached' });
       const value$ = client.get$<string>('key');
-      const first = jest.fn();
-      const second = jest.fn();
+      const first = vi.fn();
+      const second = vi.fn();
 
       value$.subscribe(first);
       value$.subscribe(second);
@@ -381,7 +384,7 @@ describe('UserStorageClient', () => {
       api.get.mockReturnValueOnce(fetch1.promise);
       api.set.mockResolvedValue('written');
 
-      const httpErrors = jest.fn();
+      const httpErrors = vi.fn();
       client.getHttpError$().subscribe(httpErrors);
       const emissions: unknown[] = [];
       client.get$<string>('key', 'default').subscribe((v) => emissions.push(v));
@@ -425,7 +428,7 @@ describe('UserStorageClient', () => {
       api.get.mockReturnValueOnce(fetch1.promise).mockReturnValueOnce(fetch2.promise);
       api.remove.mockResolvedValue(undefined);
 
-      const httpErrors = jest.fn();
+      const httpErrors = vi.fn();
       client.getHttpError$().subscribe(httpErrors);
 
       const get1 = client.get<string>('key', 'server-default');
@@ -475,7 +478,7 @@ describe('UserStorageClient', () => {
       const { client, done$ } = buildClient({ key: 'seed' });
 
       const errors$ = client.getHttpError$();
-      const completed = jest.fn();
+      const completed = vi.fn();
       client.get$<string>('key').subscribe({ complete: completed });
 
       done$.complete();

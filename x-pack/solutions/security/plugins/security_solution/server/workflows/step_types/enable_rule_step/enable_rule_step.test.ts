@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { enableRuleStepDefinition } from './enable_rule_step';
@@ -26,14 +29,14 @@ const bulkActionBody = (
 });
 
 describe('enableRuleStepDefinition', () => {
-  let mockContextManager: jest.Mocked<Context['contextManager']>;
+  let mockContextManager: Mocked<Context['contextManager']>;
   let mockContext: Context;
 
   beforeEach(() => {
     mockContextManager = {
-      callKibanaApi: jest.fn(),
-      getFakeRequest: jest.fn(),
-    } as unknown as jest.Mocked<Context['contextManager']>;
+      callKibanaApi: vi.fn(),
+      getFakeRequest: vi.fn(),
+    } as unknown as Mocked<Context['contextManager']>;
 
     mockContext = {
       input: { ids: ['rule-1', 'rule-2'] },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import expect from 'expect';
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -17,8 +20,8 @@ describe('Index mapping route', () => {
     request: unknown,
     response: unknown
   ) => Promise<unknown>;
-  let mockGetMapping: jest.Mock;
-  let mockResponse: { ok: jest.Mock; custom: jest.Mock };
+  let mockGetMapping: Mock;
+  let mockResponse: { ok: Mock; custom: Mock };
 
   const createMockContext = (): AutomaticImportPluginRequestHandlerContext =>
     ({
@@ -29,27 +32,27 @@ describe('Index mapping route', () => {
     } as unknown as AutomaticImportPluginRequestHandlerContext);
 
   beforeEach(() => {
-    mockGetMapping = jest.fn();
+    mockGetMapping = vi.fn();
     mockResponse = {
-      ok: jest.fn().mockImplementation((value) => value),
-      custom: jest.fn().mockImplementation((value) => value),
+      ok: vi.fn().mockImplementation((value) => value),
+      custom: vi.fn().mockImplementation((value) => value),
     };
 
     const routeHandlers: Record<string, { handler: typeof routeHandler }> = {};
     const mockRouter = {
       versioned: {
-        get: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        get: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation((_versionConfig: unknown, handler: typeof routeHandler) => {
               routeHandlers[`GET:${config.path}`] = { handler };
-              return { addVersion: jest.fn() };
+              return { addVersion: vi.fn() };
             }),
         })),
-        post: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
-        delete: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
-        patch: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
-        put: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
+        post: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
+        delete: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
+        patch: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
+        put: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
       },
     };
 

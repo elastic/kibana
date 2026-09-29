@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { ObjectType } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -19,8 +21,8 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Invalidate sessions routes', () => {
-  let router: jest.Mocked<SecurityRouter>;
-  let session: jest.Mocked<PublicMethodsOf<Session>>;
+  let router: Mocked<SecurityRouter>;
+  let session: Mocked<PublicMethodsOf<Session>>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;

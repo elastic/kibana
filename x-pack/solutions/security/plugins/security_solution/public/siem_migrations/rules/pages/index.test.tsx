@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import hash from 'object-hash';
 import { createMemoryHistory } from 'history';
@@ -29,40 +31,40 @@ import {
 import * as useGetMissingResourcesModule from '../../common/hooks/use_get_missing_resources';
 import type { SiemMigrationsService } from '../../service';
 
-jest.mock('../../../common/components/page_wrapper', () => {
+vi.mock('../../../common/components/page_wrapper', () => {
   return {
-    SecuritySolutionPageWrapper: jest.fn(({ children }) => {
+    SecuritySolutionPageWrapper: vi.fn(({ children }) => {
       return <div data-test-subj="SecuritySolutionPageWrapper">{children}</div>;
     }),
   };
 });
 
-const useLatestStatsSpy = jest.spyOn(useLatestStatsModule, 'useLatestStats');
-const useNavigationSpy = jest.spyOn(useNavigationModule, 'useNavigation');
-const useGetIntegrationsSpy = jest.spyOn(useGetIntegrationsModule, 'useGetIntegrations');
-const useInvalidateGetMigrationRulesSpy = jest.spyOn(
+const useLatestStatsSpy = vi.spyOn(useLatestStatsModule, 'useLatestStats');
+const useNavigationSpy = vi.spyOn(useNavigationModule, 'useNavigation');
+const useGetIntegrationsSpy = vi.spyOn(useGetIntegrationsModule, 'useGetIntegrations');
+const useInvalidateGetMigrationRulesSpy = vi.spyOn(
   useGetMigrationRulesModule,
   'useInvalidateGetMigrationRules'
 );
-const useInvalidateGetMigrationTranslationStatsSpy = jest.spyOn(
+const useInvalidateGetMigrationTranslationStatsSpy = vi.spyOn(
   useGetMigrationTranslationStatsModule,
   'useInvalidateGetMigrationTranslationStats'
 );
 
-const useGetMigrationRulesSpy = jest.spyOn(useGetMigrationRulesModule, 'useGetMigrationRules');
+const useGetMigrationRulesSpy = vi.spyOn(useGetMigrationRulesModule, 'useGetMigrationRules');
 // missing detection privileges
-const useMissingPrivilegesSpy = jest.spyOn(useMissingPrivilegesModule, 'useMissingPrivileges');
+const useMissingPrivilegesSpy = vi.spyOn(useMissingPrivilegesModule, 'useMissingPrivileges');
 // missing migration privileges
-const useGetMigrationMissingPrivilegesSpy = jest.spyOn(
+const useGetMigrationMissingPrivilegesSpy = vi.spyOn(
   useGetMigrationMissingPrivilegesModule,
   'useGetMigrationMissingPrivileges'
 );
-const useCalloutStorageSpy = jest.spyOn(useCallOutStorageModule, 'useCallOutStorage');
-const useGetMissingResourcesSpy = jest.spyOn(
+const useCalloutStorageSpy = vi.spyOn(useCallOutStorageModule, 'useCallOutStorage');
+const useGetMissingResourcesSpy = vi.spyOn(
   useGetMissingResourcesModule,
   'useGetMissingResources'
 );
-const useGetMigrationTranslationStatsSpy = jest.spyOn(
+const useGetMigrationTranslationStatsSpy = vi.spyOn(
   useGetMigrationTranslationStatsModule,
   'useGetMigrationTranslationStats'
 );
@@ -80,8 +82,8 @@ const defaultProps: MigrationRulesPageProps = {
   },
 };
 
-const mockNavigateTo = jest.fn();
-const mockGetIntegrations = jest.fn();
+const mockNavigateTo = vi.fn();
+const mockGetIntegrations = vi.fn();
 
 const mockMissingDetectionsPrivileges: useMissingPrivilegesModule.MissingPrivileges = {
   featurePrivileges: [],
@@ -94,14 +96,14 @@ const mockGetMigrationMissingPrivileges = {
 
 const mockVisibleCallStorageResult = {
   isVisible: () => true,
-  dismiss: jest.fn(),
-  getVisibleMessageIds: jest.fn(() => []),
+  dismiss: vi.fn(),
+  getVisibleMessageIds: vi.fn(() => []),
 };
 
 const mockHiddenCallStorageResult = {
   isVisible: () => false,
-  dismiss: jest.fn(),
-  getVisibleMessageIds: jest.fn(() => []),
+  dismiss: vi.fn(),
+  getVisibleMessageIds: vi.fn(() => []),
 };
 
 const defaultStartServicesMock = createStartServicesMock();
@@ -112,8 +114,8 @@ const startServicesMock = {
     ...defaultStartServicesMock.siemMigrations,
     rules: {
       ...defaultStartServicesMock.siemMigrations.rules,
-      hasMissingCapabilities: jest.fn().mockReturnValue(false),
-      getMissingCapabilities: jest.fn().mockReturnValue([]),
+      hasMissingCapabilities: vi.fn().mockReturnValue(false),
+      getMissingCapabilities: vi.fn().mockReturnValue([]),
     },
   } as unknown as SiemMigrationsService,
 };
@@ -143,7 +145,7 @@ function renderTestComponent(args?: { migrationId?: string; wrapper?: React.Comp
 }
 
 const mockUseMigrationRuleTransationStats: typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats =
-  jest.fn((migrationId: string) => {
+  vi.fn((migrationId: string) => {
     const result = structuredClone(mockedMigrationTranslationStats)[migrationId];
     return {
       data: result,
@@ -153,7 +155,7 @@ const mockUseMigrationRuleTransationStats: typeof useGetMigrationTranslationStat
     >;
   });
 
-const mockUseGetMigrationRules: typeof useGetMigrationRulesModule.useGetMigrationRules = jest.fn(
+const mockUseGetMigrationRules: typeof useGetMigrationRulesModule.useGetMigrationRules = vi.fn(
   ({ migrationId }) => {
     const { data, total } = mockedMigrationResultsObj[migrationId];
     return {
@@ -169,14 +171,14 @@ const mockUseGetMigrationRules: typeof useGetMigrationRulesModule.useGetMigratio
 describe('Migrations: Translated Rules Page', () => {
   beforeEach(() => {
     useLatestStatsSpy.mockReturnValue(mockedLatestStatsEmpty);
-    useNavigationSpy.mockReturnValue({ navigateTo: mockNavigateTo, getAppUrl: jest.fn() });
+    useNavigationSpy.mockReturnValue({ navigateTo: mockNavigateTo, getAppUrl: vi.fn() });
     useGetIntegrationsSpy.mockReturnValue({
       getIntegrations: mockGetIntegrations,
       isLoading: false,
       error: null,
     });
-    useInvalidateGetMigrationTranslationStatsSpy.mockReturnValue(jest.fn());
-    useInvalidateGetMigrationRulesSpy.mockReturnValue(jest.fn());
+    useInvalidateGetMigrationTranslationStatsSpy.mockReturnValue(vi.fn());
+    useInvalidateGetMigrationRulesSpy.mockReturnValue(vi.fn());
     useMissingPrivilegesSpy.mockReturnValue(mockMissingDetectionsPrivileges);
     useGetMigrationMissingPrivilegesSpy.mockReturnValue(
       mockGetMigrationMissingPrivileges as unknown as ReturnType<
@@ -186,14 +188,14 @@ describe('Migrations: Translated Rules Page', () => {
     useCalloutStorageSpy.mockReturnValue(mockHiddenCallStorageResult);
     useGetMigrationRulesSpy.mockImplementation(mockUseGetMigrationRules);
     useGetMissingResourcesSpy.mockReturnValue({
-      getMissingResources: jest.fn(() => []),
+      getMissingResources: vi.fn(() => []),
       isLoading: false,
     } as unknown as ReturnType<typeof useGetMissingResourcesModule.useGetMissingResources>);
 
     useGetMigrationTranslationStatsSpy.mockImplementation(mockUseMigrationRuleTransationStats);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('With No MigrationId', () => {

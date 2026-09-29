@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ChartType } from '@kbn/visualization-utils';
@@ -738,7 +740,7 @@ describe('suggestionsApi', () => {
       preferredSeriesType: 'bar_stacked',
       legend: { isVisible: false, position: 'left' as const },
     };
-    const xyGetSuggestions = jest.fn(({ state }: { state?: unknown }) => [
+    const xyGetSuggestions = vi.fn(({ state }: { state?: unknown }) => [
       {
         score: 0.5,
         title: 'XY chart',
@@ -746,7 +748,7 @@ describe('suggestionsApi', () => {
         previewIcon: 'empty',
       },
     ]);
-    const metricGetSuggestions = jest.fn(() => [
+    const metricGetSuggestions = vi.fn(() => [
       {
         score: 0.6,
         title: 'Metric',
@@ -941,7 +943,7 @@ describe('suggestionsApi', () => {
 
   test('calls isSubtypeSupported and passes chartType as subVisualizationId when supported', async () => {
     const dataView = { id: 'index1' } as unknown as DataView;
-    const isSubtypeSupportedMock = jest.fn().mockReturnValue(true);
+    const isSubtypeSupportedMock = vi.fn().mockReturnValue(true);
 
     const visualizationMap = {
       testVis: {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import {
   getInstalledPackages,
@@ -19,7 +21,7 @@ describe('API functions', () => {
 
   beforeEach(() => {
     mockHttp = httpServiceMock.createStartContract();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getInstalledPackages', () => {

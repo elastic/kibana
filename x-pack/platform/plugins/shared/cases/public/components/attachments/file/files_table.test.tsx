@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
@@ -17,7 +19,7 @@ import userEvent from '@testing-library/user-event';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
 describe('FilesTable', () => {
-  const onTableChange = jest.fn();
+  const onTableChange = vi.fn();
   const defaultProps = {
     caseId: 'foobar',
     items: [basicFileMock],
@@ -27,7 +29,7 @@ describe('FilesTable', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

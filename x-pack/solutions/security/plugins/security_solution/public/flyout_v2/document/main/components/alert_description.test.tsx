@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -18,7 +20,7 @@ import {
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
 
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/user_privileges');
 
 const createMockHit = (flattened: DataTableRecord['flattened'], index = ''): DataTableRecord =>
   ({
@@ -69,7 +71,7 @@ const NO_DATA_MESSAGE = "There's no description for this rule.";
 
 describe('<AlertDescription />', () => {
   beforeEach(() => {
-    jest.mocked(useUserPrivileges).mockReturnValue({
+    vi.mocked(useUserPrivileges).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
@@ -89,7 +91,7 @@ describe('<AlertDescription />', () => {
   });
 
   it('should render rule summary button when onShowRuleSummary is provided', () => {
-    const onShowRuleSummary = jest.fn();
+    const onShowRuleSummary = vi.fn();
     const { getByTestId } = renderDescription({
       hit: alertHitWithDescription,
       onShowRuleSummary,
@@ -100,7 +102,7 @@ describe('<AlertDescription />', () => {
   });
 
   it('should call onShowRuleSummary when rule summary button is clicked', () => {
-    const onShowRuleSummary = jest.fn();
+    const onShowRuleSummary = vi.fn();
     const { getByTestId } = renderDescription({
       hit: alertHitWithDescription,
       onShowRuleSummary,
@@ -114,7 +116,7 @@ describe('<AlertDescription />', () => {
   it('should render rule summary button as disabled for a rule preview document', () => {
     const { getByTestId } = renderDescription({
       hit: previewAlertHit,
-      onShowRuleSummary: jest.fn(),
+      onShowRuleSummary: vi.fn(),
     });
 
     expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -122,7 +124,7 @@ describe('<AlertDescription />', () => {
   });
 
   it('should render rule summary button as disabled when user cannot read rules', () => {
-    jest.mocked(useUserPrivileges).mockReturnValue({
+    vi.mocked(useUserPrivileges).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
@@ -132,7 +134,7 @@ describe('<AlertDescription />', () => {
 
     const { getByTestId } = renderDescription({
       hit: alertHitWithDescription,
-      onShowRuleSummary: jest.fn(),
+      onShowRuleSummary: vi.fn(),
     });
 
     expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -142,7 +144,7 @@ describe('<AlertDescription />', () => {
   it('should render rule summary button as disabled for a remote document', () => {
     const { getByTestId } = renderDescription({
       hit: remoteAlertHit,
-      onShowRuleSummary: jest.fn(),
+      onShowRuleSummary: vi.fn(),
     });
 
     expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();

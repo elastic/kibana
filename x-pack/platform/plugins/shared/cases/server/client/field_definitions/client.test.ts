@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -272,7 +274,7 @@ describe('createFieldDefinitionsSubClient', () => {
     });
 
     it('increments identity rejection counters for the changed parts', async () => {
-      const usageCounter = { domainId: 'cases', incrementCounter: jest.fn() };
+      const usageCounter = { domainId: 'cases', incrementCounter: vi.fn() };
       client = createFieldDefinitionsSubClient({ ...clientArgs, usageCounter });
 
       await expect(
@@ -302,7 +304,7 @@ describe('createFieldDefinitionsSubClient', () => {
       // identity names throw so this still covers the rejection helper.
       const usageCounter = {
         domainId: 'cases',
-        incrementCounter: jest.fn().mockImplementation((args: { counterName: string }) => {
+        incrementCounter: vi.fn().mockImplementation((args: { counterName: string }) => {
           if (
             args.counterName === 'fieldIdentityImmutableName' ||
             args.counterName === 'fieldIdentityImmutableType'
@@ -728,7 +730,7 @@ describe('createFieldDefinitionsSubClient', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('increments create and create-global when isGlobal is true', async () => {
@@ -894,7 +896,7 @@ describe('createFieldDefinitionsSubClient', () => {
       // behavior across cases, attachments, and templates, not something specific to this client.
       const throwingCounter = {
         domainId: 'cases',
-        incrementCounter: jest.fn().mockImplementation((args: { counterName: string }) => {
+        incrementCounter: vi.fn().mockImplementation((args: { counterName: string }) => {
           if (args.counterName === 'create_field_definition') {
             throw new Error('counter unavailable');
           }

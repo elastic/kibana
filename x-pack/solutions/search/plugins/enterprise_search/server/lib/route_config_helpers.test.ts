@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 
 const mockBuffer = {};
-jest.mock('@kbn/config-schema', () => ({
-  schema: {
-    buffer: () => mockBuffer,
-    object: () => ({}),
-  },
-}));
+vi.mock('@kbn/config-schema', () => {
+      const mocked = {
+      schema: {
+        buffer: () => mockBuffer,
+        object: () => ({}),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockSchema = schema.object({});
 

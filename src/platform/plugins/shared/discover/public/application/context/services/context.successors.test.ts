@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { get, last } from 'lodash';
 import { SortDirection } from '@kbn/data-plugin/public';
@@ -51,7 +53,7 @@ describe('context successors', function () {
         isTimeNanosBased: () => false,
         popularizeField: () => {},
         fields: {
-          getByName: jest.fn(),
+          getByName: vi.fn(),
         },
       } as unknown as DataView;
 
@@ -60,7 +62,7 @@ describe('context successors', function () {
       dataPluginMock = {
         search: {
           searchSource: {
-            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
+            createEmpty: vi.fn().mockImplementation(() => mockSearchSource),
           },
         },
       } as unknown as DataPublicPluginStart;
@@ -216,7 +218,7 @@ describe('context successors', function () {
       dataPluginMock = {
         search: {
           searchSource: {
-            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
+            createEmpty: vi.fn().mockImplementation(() => mockSearchSource),
           },
         },
       } as unknown as DataPublicPluginStart;
@@ -288,9 +290,9 @@ describe('context successors', function () {
       dataPluginMock = {
         search: {
           searchSource: {
-            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
+            createEmpty: vi.fn().mockImplementation(() => mockSearchSource),
           },
-          showWarnings: jest.fn((adapter, callback) => {
+          showWarnings: vi.fn((adapter, callback) => {
             callback(searchResponseIncompleteWarningLocalCluster, {});
           }),
         },

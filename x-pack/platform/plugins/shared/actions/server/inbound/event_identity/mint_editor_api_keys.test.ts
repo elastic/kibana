@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
@@ -28,11 +31,11 @@ const createSecurityService = ({ withUiam = false }: { withUiam?: boolean } = {}
 };
 
 describe('mintConnectorEventIdentity', () => {
-  const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const logger = loggingSystemMock.create().get() as Mocked<Logger>;
   const request = httpServerMock.createKibanaRequest();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('grants an ES API key from the save request', async () => {

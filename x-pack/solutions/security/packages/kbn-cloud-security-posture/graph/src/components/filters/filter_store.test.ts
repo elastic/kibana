@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Filter } from '@kbn/es-query';
 import {
   FilterStore,
@@ -82,7 +84,7 @@ describe('FilterStore', () => {
   describe('subscribe', () => {
     it('should notify subscribers when filters change', () => {
       const store = new FilterStore(uniqueScopeId());
-      const callback = jest.fn();
+      const callback = vi.fn();
       const subscription = store.subscribe(callback);
 
       // BehaviorSubject emits current value on subscribe
@@ -238,7 +240,7 @@ describe('FilterStore', () => {
   describe('subscribeToExpandedEntityIds', () => {
     it('should notify subscribers when expanded entity IDs change', () => {
       const store = new FilterStore(uniqueScopeId());
-      const callback = jest.fn();
+      const callback = vi.fn();
       const subscription = store.subscribeToExpandedEntityIds(callback);
 
       // BehaviorSubject emits current value on subscribe
@@ -286,7 +288,7 @@ describe('FilterStore', () => {
   describe('subscribeToPinnedEuids', () => {
     it('should notify subscribers when pinned EUIDs change', () => {
       const store = new FilterStore(uniqueScopeId());
-      const callback = jest.fn();
+      const callback = vi.fn();
       const subscription = store.subscribeToPinnedEuids(callback);
 
       // BehaviorSubject emits current value on subscribe
@@ -503,7 +505,7 @@ describe('registry functions', () => {
     });
 
     it('should return undefined and warn when store does not exist', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const result = getFilterStore('non-existent');
       expect(result).toBeUndefined();
       expect(warnSpy).toHaveBeenCalled();
@@ -517,7 +519,7 @@ describe('registry functions', () => {
       getOrCreateFilterStore(id);
       destroyFilterStore(id);
 
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       expect(getFilterStore(id)).toBeUndefined();
       warnSpy.mockRestore();
     });

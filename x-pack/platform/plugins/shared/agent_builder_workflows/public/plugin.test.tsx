@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { registerWorkflowAttachmentRenderers } from './attachment_types';
 import { AgentBuilderWorkflowsPlugin } from './plugin';
 import type { PluginSetupDependencies, PluginStartDependencies } from './types';
 
-jest.mock('./attachment_types', () => ({
-  registerWorkflowAttachmentRenderers: jest.fn(),
-}));
+vi.mock('./attachment_types', () => {
+      const mocked = {
+      registerWorkflowAttachmentRenderers: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const registerWorkflowAttachmentRenderersMock =
-  registerWorkflowAttachmentRenderers as jest.MockedFunction<
+  registerWorkflowAttachmentRenderers as MockedFunction<
     typeof registerWorkflowAttachmentRenderers
   >;
 
@@ -23,22 +29,22 @@ const flushPromises = () => new Promise(process.nextTick);
 
 describe('AgentBuilderWorkflowsPlugin', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const setupPlugin = () => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
 
-    const attachments = { addAttachmentType: jest.fn() };
-    const telemetry = { reportWorkflowCreated: jest.fn() };
-    const queryClient = { getQueryData: jest.fn() };
+    const attachments = { addAttachmentType: vi.fn() };
+    const telemetry = { reportWorkflowCreated: vi.fn() };
+    const queryClient = { getQueryData: vi.fn() };
 
     const depsStart = {
       agentBuilder: { attachments },
       workflowsManagement: {
-        getTelemetry: jest.fn().mockResolvedValue(telemetry),
-        getQueryClient: jest.fn().mockResolvedValue(queryClient),
+        getTelemetry: vi.fn().mockResolvedValue(telemetry),
+        getQueryClient: vi.fn().mockResolvedValue(queryClient),
       },
     } as unknown as PluginStartDependencies;
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -48,7 +50,7 @@ describe('useKi', () => {
       id: 'ki-1',
       document: { type: 'playbook', title: 'Refund playbook' },
     };
-    (core.http.get as jest.Mock).mockResolvedValue(response);
+    (core.http.get as Mock).mockResolvedValue(response);
 
     const { result } = renderUseKi(core, {
       aiIndexId: 'sample-ki',

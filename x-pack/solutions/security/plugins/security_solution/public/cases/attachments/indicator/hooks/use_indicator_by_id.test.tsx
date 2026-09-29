@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -13,8 +16,8 @@ import { useIndicatorById } from './use_indicator_by_id';
 import { createFetchIndicatorById } from '../services/fetch_indicator_by_id';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 
-jest.mock('../services/fetch_indicator_by_id');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../services/fetch_indicator_by_id');
+vi.mock('../../../../common/lib/kibana');
 
 const indicatorByIdQueryResult = { _id: 'testId' } as unknown as Indicator;
 
@@ -30,13 +33,13 @@ const renderUseIndicatorById = (initialProps = { indicatorId: 'testId' }) =>
   });
 
 describe('useIndicatorById()', () => {
-  type MockedCreateFetchIndicators = jest.MockedFunction<typeof createFetchIndicatorById>;
-  let indicatorsQuery: jest.MockedFunction<ReturnType<typeof createFetchIndicatorById>>;
+  type MockedCreateFetchIndicators = MockedFunction<typeof createFetchIndicatorById>;
+  let indicatorsQuery: MockedFunction<ReturnType<typeof createFetchIndicatorById>>;
 
-  beforeEach(jest.clearAllMocks);
+  beforeEach(vi.clearAllMocks);
 
   beforeEach(() => {
-    indicatorsQuery = jest.fn();
+    indicatorsQuery = vi.fn();
     (createFetchIndicatorById as MockedCreateFetchIndicators).mockReturnValue(indicatorsQuery);
   });
 

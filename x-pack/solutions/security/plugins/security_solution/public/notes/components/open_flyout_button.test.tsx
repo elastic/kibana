@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../common/mock';
@@ -20,9 +23,9 @@ import { createFlyoutApiMock } from '../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../flyout_v2/use_flyout_api');
-jest.mock('../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../flyout_v2/use_flyout_api');
+vi.mock('../../common/hooks/use_is_new_flyout_enabled');
 
 const mockEventId = 'eventId';
 const mockTimelineId = 'timelineId';
@@ -31,12 +34,12 @@ describe('OpenFlyoutButtonIcon', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     flyoutApi = createFlyoutApiMock();
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: jest.fn() });
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
+    (useExpandableFlyoutApi as Mock).mockReturnValue({ openFlyout: vi.fn() });
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
   });
 
   it('should render the chevron icon', () => {
@@ -54,8 +57,8 @@ describe('OpenFlyoutButtonIcon', () => {
   });
 
   it('should open the legacy expandable flyout when the new flyout is disabled', () => {
-    const openFlyout = jest.fn();
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout });
+    const openFlyout = vi.fn();
+    (useExpandableFlyoutApi as Mock).mockReturnValue({ openFlyout });
 
     const { getByTestId } = render(
       <TestProviders>
@@ -83,7 +86,7 @@ describe('OpenFlyoutButtonIcon', () => {
   });
 
   it('should open the new document flyout (from pattern) when the new flyout is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     const { getByTestId } = render(
       <TestProviders>

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { KueryNode } from '@kbn/es-query';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
@@ -40,7 +42,7 @@ async function OperationSuccessful() {
   return mockSuccessfulResult;
 }
 
-const conflictOperationMock = jest.fn();
+const conflictOperationMock = vi.fn();
 
 function getOperationConflictsTimes(times: number) {
   return async function OperationConflictsTimes() {
@@ -71,7 +73,7 @@ function getOperationConflictsTimes(times: number) {
 
 describe('retryIfBulkEditConflicts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should work when operation is a success', async () => {

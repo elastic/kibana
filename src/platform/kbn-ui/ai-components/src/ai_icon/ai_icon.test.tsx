@@ -7,19 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { AiIcon } from './ai_icon';
 
-const mockUseSvgAiGradient = jest.fn();
-jest.mock('../gradient_styles/use_ai_gradient_styles', () => ({
-  useSvgAiGradient: () => mockUseSvgAiGradient(),
-}));
+const mockUseSvgAiGradient = vi.fn();
+vi.mock('../gradient_styles/use_ai_gradient_styles', () => {
+      const mocked = {
+      useSvgAiGradient: () => mockUseSvgAiGradient(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../gradient_styles/svg_ai_gradient_defs', () => ({
-  SvgAiGradientDefs: () => <div data-test-subj="svg-ai-gradient-defs" />,
-}));
+vi.mock('../gradient_styles/svg_ai_gradient_defs', () => {
+      const mocked = {
+      SvgAiGradientDefs: () => <div data-test-subj="svg-ai-gradient-defs" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultSvgGradient = {
   gradientId: 'test-gradient',
@@ -28,7 +36,7 @@ const defaultSvgGradient = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseSvgAiGradient.mockReturnValue(defaultSvgGradient);
 });
 

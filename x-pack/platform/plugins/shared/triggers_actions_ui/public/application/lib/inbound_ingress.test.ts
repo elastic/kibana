@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import {
@@ -15,12 +17,12 @@ import {
   shouldRotateInboundAfterSave,
 } from './inbound_ingress';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
-    connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
+    connectorTypeIsDual: vi.fn((id: string) => id === '.dual'),
+    connectorTypeIsInboundOnly: vi.fn((id: string) => id === '.inboundWebhook'),
   };
 });
 

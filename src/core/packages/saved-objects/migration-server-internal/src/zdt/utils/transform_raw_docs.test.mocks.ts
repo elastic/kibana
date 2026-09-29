@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const migrateRawDocsSafelyMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('../../core/migrate_raw_docs', () => {
-  const actual = jest.requireActual('../../core/migrate_raw_docs');
+export const migrateRawDocsSafelyMock = vi.fn();
+
+vi.doMock('../../core/migrate_raw_docs', async () => {
+  const actual = (await vi.importActual('../../core/migrate_raw_docs'));
   return {
     ...actual,
     migrateRawDocsSafely: migrateRawDocsSafelyMock,

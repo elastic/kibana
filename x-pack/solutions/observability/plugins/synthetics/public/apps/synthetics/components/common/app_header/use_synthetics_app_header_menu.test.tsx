@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
@@ -14,9 +16,9 @@ import {
   type SyntheticsAppHeaderMenuOptions,
 } from './use_synthetics_app_header_menu';
 
-const mockInspectorOpen = jest.fn();
-const mockUiSettingsGet = jest.fn(() => true);
-const mockDispatch = jest.fn();
+const mockInspectorOpen = vi.fn();
+const mockUiSettingsGet = vi.fn(() => true);
+const mockDispatch = vi.fn();
 const mockMonitorList = {
   loaded: true,
   data: { absoluteTotal: 2 },
@@ -26,71 +28,104 @@ const mockOverviewStatus = {
   allConfigs: [{ origin: 'ui' }],
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      inspector: { open: mockInspectorOpen },
-      uiSettings: { get: mockUiSettingsGet },
-      observability: {
-        useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
-      },
-      application: {
-        capabilities: { uptime: { save: true } },
-        getUrlForApp: () => '/app/synthetics',
-      },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          inspector: { open: mockInspectorOpen },
+          uiSettings: { get: mockUiSettingsGet },
+          observability: {
+            useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
+          },
+          application: {
+            capabilities: { uptime: { save: true } },
+            getUrlForApp: () => '/app/synthetics',
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/exploratory-view-plugin/public', () => ({
-  createExploratoryViewUrl: () => '/app/exploratory-view',
-}));
+vi.mock('@kbn/exploratory-view-plugin/public', () => {
+      const mocked = {
+      createExploratoryViewUrl: () => '/app/exploratory-view',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsSettingsContext: () => ({ basePath: '', isDev: false }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsSettingsContext: () => ({ basePath: '', isDev: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks', () => ({
-  useEnablement: () => ({ isEnabled: true, isServiceAllowed: true }),
-  useGetUrlParams: () => ({ dateRangeStart: 'now-24h', dateRangeEnd: 'now' }),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useEnablement: () => ({ isEnabled: true, isServiceAllowed: true }),
+      useGetUrlParams: () => ({ dateRangeStart: 'now-24h', dateRangeEnd: 'now' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_capabilities', () => ({
-  useCanEditSynthetics: () => true,
-}));
+vi.mock('../../../../../hooks/use_capabilities', () => {
+      const mocked = {
+      useCanEditSynthetics: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => ({
-  useDispatch: () => mockDispatch,
-  useSelector: (selector: (state: unknown) => unknown) => selector({}),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: () => mockDispatch,
+      useSelector: (selector: (state: unknown) => unknown) => selector({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state', () => ({
-  selectMonitorListState: () => mockMonitorList,
-  selectAlertFlyoutVisibility: () => null,
-  setAlertFlyoutVisible: (payload: unknown) => payload,
-}));
+vi.mock('../../../state', () => {
+      const mocked = {
+      selectMonitorListState: () => mockMonitorList,
+      selectAlertFlyoutVisibility: () => null,
+      setAlertFlyoutVisible: (payload: unknown) => payload,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state/overview_status', () => ({
-  selectOverviewStatus: () => mockOverviewStatus,
-  isExternalOverviewMonitor: () => false,
-}));
+vi.mock('../../../state/overview_status', () => {
+      const mocked = {
+      selectOverviewStatus: () => mockOverviewStatus,
+      isExternalOverviewMonitor: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../alerts/hooks/use_synthetics_rules', () => ({
-  useSyntheticsRules: () => ({
-    loading: false,
-    defaultRules: { statusRule: { id: 's' }, tlsRule: { id: 't' } },
-    EditAlertFlyout: null,
-    NewRuleFlyout: null,
-  }),
-}));
+vi.mock('../../alerts/hooks/use_synthetics_rules', () => {
+      const mocked = {
+      useSyntheticsRules: () => ({
+        loading: false,
+        defaultRules: { statusRule: { id: 's' }, tlsRule: { id: 't' } },
+        EditAlertFlyout: null,
+        NewRuleFlyout: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../settings/synthetics_diagnostics_flyout', () => ({
-  SyntheticsDiagnosticsFlyoutLauncher: () => null,
-}));
+vi.mock('../../settings/synthetics_diagnostics_flyout', () => {
+      const mocked = {
+      SyntheticsDiagnosticsFlyoutLauncher: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderMenuHook(options?: SyntheticsAppHeaderMenuOptions) {
   return renderHook(() => useSyntheticsAppHeaderMenu(options), {
@@ -181,7 +216,7 @@ describe('useSyntheticsAppHeaderMenu', () => {
       id: 'inspectConfiguration',
       label: 'Inspect configuration',
       iconType: 'inspect',
-      run: jest.fn(),
+      run: vi.fn(),
     };
     const { result } = renderMenuHook({
       showCreateMonitor: true,

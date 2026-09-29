@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -17,11 +20,14 @@ import type { UseQueryResult } from '@kbn/react-query';
 import { useScanFailures } from '../../hooks/use_scan_failures';
 import { ScanFailureCallout } from './scan_failure_callout';
 
-jest.mock('../../hooks/use_scan_failures', () => ({
-  useScanFailures: jest.fn(),
-}));
+vi.mock('../../hooks/use_scan_failures', () => {
+      const mocked = {
+      useScanFailures: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useScanFailuresMock = useScanFailures as jest.MockedFunction<typeof useScanFailures>;
+const useScanFailuresMock = useScanFailures as MockedFunction<typeof useScanFailures>;
 
 const queryResult = (
   value: Pick<UseQueryResult<ScanFailuresResponse>, 'data' | 'error' | 'isLoading'>

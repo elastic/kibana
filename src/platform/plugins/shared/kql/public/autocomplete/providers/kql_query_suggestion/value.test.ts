@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
@@ -23,7 +25,7 @@ describe('Kuery value suggestions', () => {
 
   beforeEach(() => {
     autocompleteServiceMock = {
-      getValueSuggestions: jest.fn(({ field }) => {
+      getValueSuggestions: vi.fn(({ field }) => {
         let res: any[];
 
         if (field.type === 'boolean') {
@@ -49,7 +51,7 @@ describe('Kuery value suggestions', () => {
       indexPatterns: [indexPatternResponse],
     } as unknown as QuerySuggestionGetFnArgs;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return a function', () => {

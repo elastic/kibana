@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -16,43 +19,64 @@ import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_histo
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('../components/ai_summary_section', () => ({
-  AISummarySection: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="mock-ai-summary-section" data-hit-id={(hit as { id: string }).id} />
-  ),
-}));
+vi.mock('../components/ai_summary_section', () => {
+      const mocked = {
+      AISummarySection: ({ hit }: { hit: DataTableRecord }) => (
+        <div data-test-subj="mock-ai-summary-section" data-hit-id={(hit as { id: string }).id} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/visualizations_section', () => ({
-  VisualizationsSection: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="mock-visualizations-section" data-hit-id={(hit as { id: string }).id} />
-  ),
-}));
+vi.mock('../components/visualizations_section', () => {
+      const mocked = {
+      VisualizationsSection: ({ hit }: { hit: DataTableRecord }) => (
+        <div data-test-subj="mock-visualizations-section" data-hit-id={(hit as { id: string }).id} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/insights_section', () => ({
-  InsightsSection: jest.fn(() => <div data-test-subj="mock-insights-section" />),
-}));
+vi.mock('../components/insights_section', () => {
+      const mocked = {
+      InsightsSection: vi.fn(() => <div data-test-subj="mock-insights-section" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/is_in_security_app');
+vi.mock('../../../../common/hooks/is_in_security_app');
 
 // Keep the tool panels light: they are only referenced as children of the (mocked) system flyout.
-jest.mock('../../tools/correlations', () => ({
-  CorrelationsDetails: () => <div data-test-subj="mock-correlations-details" />,
-}));
-jest.mock('../../tools/entities', () => ({
-  EntitiesDetails: () => <div data-test-subj="mock-entities-details" />,
-}));
-jest.mock('../../../document/main/document_flyout_wrapper', () => ({
-  DocumentFlyoutWrapper: () => <div data-test-subj="mock-document-flyout-wrapper" />,
-}));
-jest.mock('../../../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
-}));
-jest.mock('../../../shared/hooks/use_default_flyout_properties', () => {
-  const actual = jest.requireActual('../../../shared/hooks/use_default_flyout_properties');
-  return { ...actual, useDefaultDocumentFlyoutProperties: jest.fn(() => ({})) };
+vi.mock('../../tools/correlations', () => {
+      const mocked = {
+      CorrelationsDetails: () => <div data-test-subj="mock-correlations-details" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../tools/entities', () => {
+      const mocked = {
+      EntitiesDetails: () => <div data-test-subj="mock-entities-details" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../document/main/document_flyout_wrapper', () => {
+      const mocked = {
+      DocumentFlyoutWrapper: () => <div data-test-subj="mock-document-flyout-wrapper" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/hooks/use_default_flyout_properties', async () => {
+  const actual = (await vi.importActual('../../../shared/hooks/use_default_flyout_properties'));
+  return { ...actual, useDefaultDocumentFlyoutProperties: vi.fn(() => ({})) };
 });
 
-const mockedInsightsSection = jest.mocked(InsightsSection);
+const mockedInsightsSection = vi.mocked(InsightsSection);
 
 const buildHit = (extra: Record<string, unknown> = {}): DataTableRecord =>
   ({
@@ -70,24 +94,24 @@ const buildHit = (extra: Record<string, unknown> = {}): DataTableRecord =>
 const renderTab = (
   hit: DataTableRecord,
   {
-    openSystemFlyout = jest.fn(),
-    renderCellActions = jest.fn(),
-  }: { openSystemFlyout?: jest.Mock; renderCellActions?: jest.Mock } = {}
+    openSystemFlyout = vi.fn(),
+    renderCellActions = vi.fn(),
+  }: { openSystemFlyout?: Mock; renderCellActions?: Mock } = {}
 ) => {
   const startServices = createStartServicesMock();
-  openSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+  openSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
   startServices.overlays = { ...startServices.overlays, openSystemFlyout };
   return render(
     <TestProviders startServices={startServices}>
-      <OverviewTab hit={hit} onAttackUpdated={jest.fn()} renderCellActions={renderCellActions} />
+      <OverviewTab hit={hit} onAttackUpdated={vi.fn()} renderCellActions={renderCellActions} />
     </TestProviders>
   );
 };
 
 describe('<OverviewTab />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+    vi.clearAllMocks();
+    vi.mocked(useIsInSecurityApp).mockReturnValue(true);
   });
 
   it('renders the overview tab container', () => {
@@ -127,7 +151,7 @@ describe('<OverviewTab />', () => {
   });
 
   it('opens the Entities tool as a system flyout when onShowEntities is invoked', () => {
-    const openSystemFlyout = jest.fn();
+    const openSystemFlyout = vi.fn();
     renderTab(buildHit(), { openSystemFlyout });
 
     const { onShowEntities } = mockedInsightsSection.mock.calls[0][0];
@@ -140,7 +164,7 @@ describe('<OverviewTab />', () => {
   });
 
   it('opens the Correlations tool as a system flyout when onShowCorrelations is invoked', () => {
-    const openSystemFlyout = jest.fn();
+    const openSystemFlyout = vi.fn();
     renderTab(buildHit(), { openSystemFlyout });
 
     const { onShowCorrelations } = mockedInsightsSection.mock.calls[0][0];
@@ -153,8 +177,8 @@ describe('<OverviewTab />', () => {
   });
 
   it('uses the discover history key when outside the security app', () => {
-    jest.mocked(useIsInSecurityApp).mockReturnValue(false);
-    const openSystemFlyout = jest.fn();
+    vi.mocked(useIsInSecurityApp).mockReturnValue(false);
+    const openSystemFlyout = vi.fn();
     renderTab(buildHit(), { openSystemFlyout });
 
     const { onShowEntities } = mockedInsightsSection.mock.calls[0][0];

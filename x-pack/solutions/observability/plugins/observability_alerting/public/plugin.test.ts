@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { App, AppUpdater, AppUpdatableFields } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -24,7 +26,7 @@ import {
 const APP_STUB: App = {
   id: OBSERVABILITY_ALERTING_APP_ID,
   title: 'Alerting',
-  mount: jest.fn(),
+  mount: vi.fn(),
 };
 
 const readLatestUpdate = async (
@@ -61,7 +63,7 @@ describe('ObservabilityAlertingPlugin', () => {
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
           CreateRuleOptionsFlyout: () => null,
-          createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
+          createAlertingV2HostApp: vi.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(
               Object.entries(paths).map(([k, v]) => [k, { app: appId, pathPrefix: v }])
             )

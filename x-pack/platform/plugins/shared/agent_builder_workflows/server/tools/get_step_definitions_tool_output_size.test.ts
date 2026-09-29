@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { builtInStepDefinitions, getElasticsearchConnectors } from '@kbn/workflows';
 import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
 
-jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
-  getAllConnectors: () => {
-    const { getElasticsearchConnectors: getEs } = jest.requireActual('@kbn/workflows');
-    return getEs();
-  },
-  addDynamicConnectorsToCache: jest.fn(),
-  getCachedAllConnectorsMap: () => null,
-  getDeprecatedStepMetadata: () => undefined,
-}));
+vi.mock('@kbn/workflows-management-plugin/common/schema', () => {
+      const mocked = {
+      getAllConnectors: async () => {
+        const { getElasticsearchConnectors: getEs } = (await vi.importActual('@kbn/workflows'));
+        return getEs();
+      },
+      addDynamicConnectorsToCache: vi.fn(),
+      getCachedAllConnectorsMap: () => null,
+      getDeprecatedStepMetadata: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MAX_CHARS_PER_STEP = 5000;
 
@@ -26,13 +31,13 @@ describe('get_step_definitions output size', () => {
   beforeAll(() => {
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: { handler: (params: any, context: any) => Promise<any> }) => {
+        register: vi.fn((tool: { handler: (params: any, context: any) => Promise<any> }) => {
           registeredTool = tool;
         }),
       },
     } as any;
     registerGetStepDefinitionsTool(agentBuilder, {
-      getAvailableConnectors: jest
+      getAvailableConnectors: vi
         .fn()
         .mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
     } as any);

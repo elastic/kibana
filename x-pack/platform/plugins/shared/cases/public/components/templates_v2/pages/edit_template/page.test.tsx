@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
@@ -13,42 +15,63 @@ import { EditTemplatePage } from './page';
 import { mockedTestProvidersOwner, TestProviders } from '../../../../common/mock';
 import { CASES_TEMPLATE_UPDATED_EVENT_TYPE } from '../../../../../common/constants';
 
-const mockUseTemplateViewParams = jest.fn();
-const mockNavigateToCasesTemplates = jest.fn();
-jest.mock('../../../../common/navigation', () => ({
-  ...jest.requireActual('../../../../common/navigation'),
-  useTemplateViewParams: () => mockUseTemplateViewParams(),
-  useCasesTemplatesNavigation: () => ({
-    navigateToCasesTemplates: mockNavigateToCasesTemplates,
-    getCasesTemplatesUrl: jest.fn().mockReturnValue('/app/security/cases/configure/templates'),
-  }),
-}));
+const mockUseTemplateViewParams = vi.fn();
+const mockNavigateToCasesTemplates = vi.fn();
+vi.mock('../../../../common/navigation', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/navigation')),
+      useTemplateViewParams: () => mockUseTemplateViewParams(),
+      useCasesTemplatesNavigation: () => ({
+        navigateToCasesTemplates: mockNavigateToCasesTemplates,
+        getCasesTemplatesUrl: vi.fn().mockReturnValue('/app/security/cases/configure/templates'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMutateAsync = jest.fn();
-const mockUseGetTemplate = jest.fn();
-jest.mock('../../hooks/use_get_template', () => ({
-  useGetTemplate: () => mockUseGetTemplate(),
-}));
+const mockMutateAsync = vi.fn();
+const mockUseGetTemplate = vi.fn();
+vi.mock('../../hooks/use_get_template', () => {
+      const mocked = {
+      useGetTemplate: () => mockUseGetTemplate(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_update_template', () => ({
-  useUpdateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
-}));
+vi.mock('../../hooks/use_update_template', () => {
+      const mocked = {
+      useUpdateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/template_form', () => ({
-  TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
-}));
+vi.mock('../../components/template_form', () => {
+      const mocked = {
+      TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/template_preview', () => ({
-  TemplatePreview: () => <div data-test-subj="template-preview" />,
-}));
+vi.mock('../../components/template_preview', () => {
+      const mocked = {
+      TemplatePreview: () => <div data-test-subj="template-preview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/use_cases_local_storage', () => ({
-  useCasesLocalStorage: () => ['', jest.fn(), jest.fn()],
-}));
+vi.mock('../../../../common/use_cases_local_storage', () => {
+      const mocked = {
+      useCasesLocalStorage: () => ['', vi.fn(), vi.fn()],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../use_breadcrumbs', () => ({
-  useCasesTemplatesBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../use_breadcrumbs', () => {
+      const mocked = {
+      useCasesTemplatesBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const capturedTemplateFormLayoutProps: {
   onCreate?: (
@@ -57,21 +80,24 @@ const capturedTemplateFormLayoutProps: {
     isEnabled: boolean
   ) => Promise<void>;
 } = {};
-const mockTemplateFormLayout = jest.fn();
-jest.mock('../../components/template_form_layout', () => ({
-  TemplateFormLayout: (props: {
-    title: string;
-    isLoading?: boolean;
-    onCreate: (
-      data: { definition: string },
-      metadata: { name: string; description: string; tags: string[] },
-      isEnabled: boolean
-    ) => Promise<void>;
-  }) => {
-    capturedTemplateFormLayoutProps.onCreate = props.onCreate;
-    return mockTemplateFormLayout(props);
-  },
-}));
+const mockTemplateFormLayout = vi.fn();
+vi.mock('../../components/template_form_layout', () => {
+      const mocked = {
+      TemplateFormLayout: (props: {
+        title: string;
+        isLoading?: boolean;
+        onCreate: (
+          data: { definition: string },
+          metadata: { name: string; description: string; tags: string[] },
+          isEnabled: boolean
+        ) => Promise<void>;
+      }) => {
+        capturedTemplateFormLayoutProps.onCreate = props.onCreate;
+        return mockTemplateFormLayout(props);
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EditTemplatePage', () => {
   let coreStart: CoreStart;
@@ -84,7 +110,7 @@ describe('EditTemplatePage', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     coreStart = coreMock.createStart() as unknown as CoreStart;
     mockMutateAsync.mockResolvedValue(undefined);
     mockTemplateFormLayout.mockImplementation(({ initialMetadata, isLoading }) => (

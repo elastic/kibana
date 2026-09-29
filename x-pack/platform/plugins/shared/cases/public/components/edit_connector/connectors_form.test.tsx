@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
@@ -20,17 +23,17 @@ import { useGetFields } from '../connectors/resilient/use_get_fields';
 import { renderWithTestingProviders } from '../../common/mock';
 import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../connectors/resilient/use_get_fields');
+vi.mock('../../common/lib/kibana');
+vi.mock('../connectors/servicenow/use_get_choices');
+vi.mock('../connectors/resilient/use_get_fields');
 
-const useGetChoicesMock = useGetChoices as jest.Mock;
-const useGetFieldsMock = useGetFields as jest.Mock;
+const useGetChoicesMock = useGetChoices as Mock;
+const useGetFieldsMock = useGetFields as Mock;
 
 describe('ConnectorsForm ', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
-  const onSubmit = jest.fn();
-  const onCancel = jest.fn();
+  const onSubmit = vi.fn();
+  const onCancel = vi.fn();
 
   const caseConnectorsWithFields = {
     ...caseConnectors,
@@ -64,7 +67,7 @@ describe('ConnectorsForm ', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetChoicesMock.mockReturnValue({ isLoading: false, data: { data: choices } });
     useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
   });

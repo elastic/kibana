@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -30,8 +32,8 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
 });
 
 describe('ActionPolicySnoozeButton', () => {
-  const onSnooze = jest.fn();
-  const onCancelSnooze = jest.fn();
+  const onSnooze = vi.fn();
+  const onCancelSnooze = vi.fn();
 
   const renderButton = (policy: ActionPolicyResponse) =>
     render(
@@ -46,7 +48,7 @@ describe('ActionPolicySnoozeButton', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a bell icon when snoozedUntil is null (not snoozed)', () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -26,10 +29,10 @@ import {
 } from '@kbn/controls-constants';
 import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl/matchers';
 
-jest.mock('@kbn/esql-utils', () => {
-  const actual = jest.requireActual('@kbn/esql-utils');
+vi.mock('@kbn/esql-utils', async () => {
+  const actual = (await vi.importActual('@kbn/esql-utils'));
   return {
-    getESQLResults: jest.fn().mockResolvedValue({
+    getESQLResults: vi.fn().mockResolvedValue({
       response: {
         columns: [
           {
@@ -40,10 +43,10 @@ jest.mock('@kbn/esql-utils', () => {
         values: [['v1'], ['v2']],
       },
     }),
-    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
-    getValuesFromQueryField: jest.fn().mockReturnValue('field'),
-    getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
+    getIndexPatternFromESQLQuery: vi.fn().mockReturnValue('index1'),
+    getLimitFromESQLQuery: vi.fn().mockReturnValue(1000),
+    getValuesFromQueryField: vi.fn().mockReturnValue('field'),
+    getESQLQueryColumnsRaw: vi.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
     getVariableNamePrefix: actual.getVariableNamePrefix,
     ESQLValuesPreview: actual.ESQLValuesPreview,
     appendStatsByToQuery: actual.appendStatsByToQuery,
@@ -68,16 +71,16 @@ describe('ValueControlForm', () => {
     data: dataMock,
   };
 
-  services.core.http.post = jest
+  services.core.http.post = vi
     .fn()
     .mockImplementation((_url: string) => Promise.resolve({ timeField: '@timestamp' }));
 
   const defaultProps = {
     initialVariableType: ESQLVariableType.TIME_LITERAL,
     queryString: 'FROM foo | STATS BY BUCKET(@timestamp,)',
-    onSaveControl: jest.fn(),
-    closeFlyout: jest.fn(),
-    onCancelControl: jest.fn(),
+    onSaveControl: vi.fn(),
+    closeFlyout: vi.fn(),
+    onCancelControl: vi.fn(),
     search: searchMock,
     esqlVariables: [],
     ariaLabelledBy: 'esqlControlsFlyoutTitle',
@@ -127,7 +130,7 @@ describe('ValueControlForm', () => {
     });
 
     it('should call the onCreateControl callback, if no initialState is given', async () => {
-      const onCreateControlSpy = jest.fn();
+      const onCreateControlSpy = vi.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <KibanaContextProvider services={services}>
@@ -152,7 +155,7 @@ describe('ValueControlForm', () => {
     });
 
     it('should call the onCancelControl callback, if Cancel button is clicked', async () => {
-      const onCancelControlSpy = jest.fn();
+      const onCancelControlSpy = vi.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <KibanaContextProvider services={services}>
@@ -209,7 +212,7 @@ describe('ValueControlForm', () => {
         esql_query: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
         control_type: EsqlControlType.STATIC_VALUES,
       } as OptionsListESQLControlState;
-      const onEditControlSpy = jest.fn();
+      const onEditControlSpy = vi.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <KibanaContextProvider services={services}>
@@ -315,7 +318,7 @@ describe('ValueControlForm', () => {
           control_type: EsqlControlType.VALUES_FROM_QUERY,
         } as OptionsListESQLControlState;
 
-        const getESQLResultsMock = getESQLResults as jest.Mock;
+        const getESQLResultsMock = getESQLResults as Mock;
         getESQLResultsMock.mockClear();
 
         render(
@@ -350,7 +353,7 @@ describe('ValueControlForm', () => {
       });
 
       it("should show the 'no results' callout", async () => {
-        (getESQLResults as jest.Mock).mockResolvedValueOnce({
+        (getESQLResults as Mock).mockResolvedValueOnce({
           response: {
             columns: [],
           },

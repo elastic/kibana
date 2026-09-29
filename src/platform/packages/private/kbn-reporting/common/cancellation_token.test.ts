@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { CancellationToken } from './cancellation_token';
 
 describe('Cancellation Token', () => {
   it('registers callbacks for cancellation events', () => {
     const cancellationToken = new CancellationToken();
-    const onCancelled = jest.fn();
+    const onCancelled = vi.fn();
     cancellationToken.on(onCancelled);
     cancellationToken.cancel();
 
@@ -21,7 +23,7 @@ describe('Cancellation Token', () => {
 
   it('emits a cancellation event immediately when already cancelled', () => {
     const cancellationToken = new CancellationToken();
-    const onCancelled = jest.fn();
+    const onCancelled = vi.fn();
     cancellationToken.cancel();
     cancellationToken.on(onCancelled);
 
@@ -30,7 +32,7 @@ describe('Cancellation Token', () => {
 
   it('binds the `on` method properly so that it can be passed around', () => {
     const cancellationToken = new CancellationToken();
-    const onCancelled = jest.fn();
+    const onCancelled = vi.fn();
     const unboundOn = cancellationToken.on;
 
     cancellationToken.cancel();
@@ -41,7 +43,7 @@ describe('Cancellation Token', () => {
 
   it('binds the `cancel` method properly so that it can be passed around', () => {
     const cancellationToken = new CancellationToken();
-    const onCancelled = jest.fn();
+    const onCancelled = vi.fn();
     const unboundCancel = cancellationToken.cancel;
 
     unboundCancel();

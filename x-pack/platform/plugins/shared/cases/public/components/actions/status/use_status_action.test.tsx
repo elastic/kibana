@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useStatusAction } from './use_status_action';
 import { basicCase } from '../../../containers/mock';
@@ -15,14 +18,14 @@ import { useShouldDisableStatus } from './use_should_disable_status';
 import { TestProviders } from '../../../common/mock';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 
-jest.mock('../../user_actions/use_user_permissions');
-jest.mock('./use_should_disable_status');
-jest.mock('../../../containers/use_bulk_update_case');
+vi.mock('../../user_actions/use_user_permissions');
+vi.mock('./use_should_disable_status');
+vi.mock('../../../containers/use_bulk_update_case');
 
 describe('useStatusAction', () => {
-  const onAction = jest.fn();
-  const onActionSuccess = jest.fn();
-  const mutate = jest.fn();
+  const onAction = vi.fn();
+  const onActionSuccess = vi.fn();
+  const mutate = vi.fn();
 
   const getUpdateSuccessToastFromLastCall = (updateSummary?: UpdateSummary[]) => {
     const updateCall = mutate.mock.calls.at(-1)?.[0] as
@@ -38,14 +41,14 @@ describe('useStatusAction', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUpdateCases as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useUpdateCases as Mock).mockReturnValue({
       mutate,
       isLoading: false,
     });
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
+    (useShouldDisableStatus as Mock).mockReturnValue(() => false);
 
-    (useUserPermissions as jest.Mock).mockReturnValue({
+    (useUserPermissions as Mock).mockReturnValue({
       canUpdate: true,
       canReopenCase: true,
     });
@@ -308,7 +311,7 @@ describe('useStatusAction', () => {
   ];
 
   it.each(disabledTests)('disables the status button correctly: %s', async (status, index) => {
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
+    (useShouldDisableStatus as Mock).mockReturnValue(() => true);
 
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
@@ -337,7 +340,7 @@ describe('useStatusAction', () => {
   );
 
   it('respects user permissions when everything is false', () => {
-    (useUserPermissions as jest.Mock).mockReturnValue({
+    (useUserPermissions as Mock).mockReturnValue({
       canUpdate: false,
       canReopenCase: false,
     });
@@ -353,7 +356,7 @@ describe('useStatusAction', () => {
   });
 
   it('respects user permissions when only reopen is true', () => {
-    (useUserPermissions as jest.Mock).mockReturnValue({
+    (useUserPermissions as Mock).mockReturnValue({
       canUpdate: false,
       canReopenCase: true,
     });

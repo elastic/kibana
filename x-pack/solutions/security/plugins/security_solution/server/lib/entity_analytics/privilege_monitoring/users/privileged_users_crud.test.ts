@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createPrivilegedUsersCrudService } from './privileged_users_crud';
@@ -45,7 +47,7 @@ describe('createPrivilegedUsersCrudService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
     crudService = createPrivilegedUsersCrudService({

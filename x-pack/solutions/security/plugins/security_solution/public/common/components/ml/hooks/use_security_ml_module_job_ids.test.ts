@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import type { Module, ModuleJob } from '../../ml_popover/types';
@@ -16,10 +19,10 @@ import { getAllMlModules } from '../api/get_all_ml_modules';
 import { useSecurityMlModuleJobIds } from './use_security_ml_module_job_ids';
 import { TestProviders } from '../../../mock';
 
-jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
-jest.mock('../../../../../common/machine_learning/has_ml_license');
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('../api/get_all_ml_modules');
+vi.mock('../../../../../common/machine_learning/has_ml_user_permissions');
+vi.mock('../../../../../common/machine_learning/has_ml_license');
+vi.mock('../../../hooks/use_app_toasts');
+vi.mock('../api/get_all_ml_modules');
 
 const buildJob = (id: string, groups: string[]): ModuleJob => ({
   id,
@@ -48,22 +51,22 @@ const buildModule = (id: string, jobs: ModuleJob[]): Module => ({
 });
 
 describe('useSecurityMlModuleJobIds', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
   });
 
   describe('when the user has permissions', () => {
     beforeEach(() => {
-      (hasMlUserPermissions as jest.Mock).mockReturnValue(true);
-      (hasMlLicense as jest.Mock).mockReturnValue(true);
+      (hasMlUserPermissions as Mock).mockReturnValue(true);
+      (hasMlLicense as Mock).mockReturnValue(true);
     });
 
     it('returns the job ids of jobs in the security/siem ML groups across all modules', async () => {
-      (getAllMlModules as jest.Mock).mockResolvedValue([
+      (getAllMlModules as Mock).mockResolvedValue([
         buildModule('module-1', [
           buildJob('security-job', ['security']),
           buildJob('other-job', ['other']),
@@ -80,7 +83,7 @@ describe('useSecurityMlModuleJobIds', () => {
     });
 
     it('renders a toast error if the ML call fails', async () => {
-      (getAllMlModules as jest.Mock).mockRejectedValue('whoops');
+      (getAllMlModules as Mock).mockRejectedValue('whoops');
 
       renderHook(() => useSecurityMlModuleJobIds(), {
         wrapper: TestProviders,
@@ -96,8 +99,8 @@ describe('useSecurityMlModuleJobIds', () => {
 
   describe('when the user does not have valid permissions', () => {
     beforeEach(() => {
-      (hasMlUserPermissions as jest.Mock).mockReturnValue(false);
-      (hasMlLicense as jest.Mock).mockReturnValue(false);
+      (hasMlUserPermissions as Mock).mockReturnValue(false);
+      (hasMlLicense as Mock).mockReturnValue(false);
     });
 
     it('does not fetch modules and returns an empty job list', () => {

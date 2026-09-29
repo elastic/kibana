@@ -5,44 +5,58 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updatePrivilegedMonitoringSourceIndex, MAX_PER_PAGE } from './update_source_index';
 import { monitoringEntitySourceTypeName } from '../saved_objects/monitoring_entity_source_type';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 
-const mockShouldRunSourceMigrationFactory = jest.fn();
-jest.mock('../data_sources/migrations/check_if_entity_source_migration', () => ({
-  shouldRunSourceMigrationFactory: () => mockShouldRunSourceMigrationFactory(),
-}));
+const mockShouldRunSourceMigrationFactory = vi.fn();
+vi.mock('../data_sources/migrations/check_if_entity_source_migration', () => {
+      const mocked = {
+      shouldRunSourceMigrationFactory: () => mockShouldRunSourceMigrationFactory(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMigrateSourceIndex = jest.fn();
-jest.mock('../data_sources/migrations/source_index_update', () => ({
-  migrateSourceIndexFactory: () => mockMigrateSourceIndex,
-}));
+const mockMigrateSourceIndex = vi.fn();
+vi.mock('../data_sources/migrations/source_index_update', () => {
+      const mocked = {
+      migrateSourceIndexFactory: () => mockMigrateSourceIndex,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDeleteUsersWithSourceIndex = jest.fn();
-jest.mock('../data_sources/migrations/delete_user_with_source_indices', () => ({
-  deleteUsersWithSourceIndexFactory: () => mockDeleteUsersWithSourceIndex,
-}));
+const mockDeleteUsersWithSourceIndex = vi.fn();
+vi.mock('../data_sources/migrations/delete_user_with_source_indices', () => {
+      const mocked = {
+      deleteUsersWithSourceIndexFactory: () => mockDeleteUsersWithSourceIndex,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockApiKeyManager = {
-  getClient: jest.fn().mockResolvedValue({
+  getClient: vi.fn().mockResolvedValue({
     clusterClient: { asCurrentUser: {} },
   }),
 };
 
-jest.mock('../auth/api_key', () => ({
-  getApiKeyManager: () => mockApiKeyManager,
-}));
+vi.mock('../auth/api_key', () => {
+      const mocked = {
+      getApiKeyManager: () => mockApiKeyManager,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLogger = {
-  info: jest.fn(),
-  error: jest.fn(),
+  info: vi.fn(),
+  error: vi.fn(),
 } as unknown as EntityAnalyticsMigrationsParams['logger'];
 
-const mockGetStartServices = jest.fn();
+const mockGetStartServices = vi.fn();
 
 const mockSoClient = {
-  find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+  find: vi.fn().mockResolvedValue({ saved_objects: [] }),
 };
 
 const mockCore = {
@@ -52,14 +66,14 @@ const mockCore = {
     },
   },
   savedObjects: {
-    createInternalRepository: jest.fn().mockReturnValue(mockSoClient),
+    createInternalRepository: vi.fn().mockReturnValue(mockSoClient),
   },
 };
 const mockSecurity = {};
 const mockEncryptedSavedObjects = {};
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('updatePrivilegedMonitoringSourceIndex', () => {
@@ -69,7 +83,7 @@ describe('updatePrivilegedMonitoringSourceIndex', () => {
   } as unknown as EntityAnalyticsMigrationsParams;
 
   it('skips migration if shouldRunMigration returns false', async () => {
-    mockShouldRunSourceMigrationFactory.mockReturnValue(jest.fn().mockResolvedValue(false));
+    mockShouldRunSourceMigrationFactory.mockReturnValue(vi.fn().mockResolvedValue(false));
     mockGetStartServices.mockResolvedValue([
       mockCore,
       { security: mockSecurity, encryptedSavedObjects: mockEncryptedSavedObjects },
@@ -82,7 +96,7 @@ describe('updatePrivilegedMonitoringSourceIndex', () => {
   });
 
   it('runs migration for each saved object and deletes users with source index', async () => {
-    mockShouldRunSourceMigrationFactory.mockReturnValue(jest.fn().mockResolvedValue(true));
+    mockShouldRunSourceMigrationFactory.mockReturnValue(vi.fn().mockResolvedValue(true));
     mockGetStartServices.mockResolvedValue([
       mockCore,
       { security: mockSecurity, encryptedSavedObjects: mockEncryptedSavedObjects },
@@ -115,7 +129,7 @@ describe('updatePrivilegedMonitoringSourceIndex', () => {
   });
 
   it('does not throw if there are no saved objects', async () => {
-    mockShouldRunSourceMigrationFactory.mockReturnValue(jest.fn().mockResolvedValue(true));
+    mockShouldRunSourceMigrationFactory.mockReturnValue(vi.fn().mockResolvedValue(true));
     mockGetStartServices.mockResolvedValue([
       mockCore,
       { security: mockSecurity, encryptedSavedObjects: mockEncryptedSavedObjects },
@@ -130,7 +144,7 @@ describe('updatePrivilegedMonitoringSourceIndex', () => {
 
   describe('with spaceId defined', () => {
     it('scopes the shouldRun check, SO query, and user deletion to the specified space', async () => {
-      const mockShouldRunMigration = jest.fn().mockResolvedValue(true);
+      const mockShouldRunMigration = vi.fn().mockResolvedValue(true);
       mockShouldRunSourceMigrationFactory.mockReturnValue(mockShouldRunMigration);
       mockGetStartServices.mockResolvedValue([
         mockCore,
@@ -156,7 +170,7 @@ describe('updatePrivilegedMonitoringSourceIndex', () => {
   });
 
   it('logs error and skips if api key manager returns no client', async () => {
-    mockShouldRunSourceMigrationFactory.mockReturnValue(jest.fn().mockResolvedValue(true));
+    mockShouldRunSourceMigrationFactory.mockReturnValue(vi.fn().mockResolvedValue(true));
     mockGetStartServices.mockResolvedValue([
       mockCore,
       { security: mockSecurity, encryptedSavedObjects: mockEncryptedSavedObjects },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 
 import {
@@ -20,18 +23,21 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../comm
 
 import { isAgentlessSetupDefault, useAgentless, useSetupTechnology } from './setup_technology';
 
-jest.mock('../../../../../services');
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  sendGetOneAgentPolicy: jest.fn(),
-  sendGetOneFleetServerHost: jest.fn().mockResolvedValue({}),
-  sendGetOneOutput: jest.fn().mockResolvedValue({}),
-  useStartServices: jest.fn(),
-  useConfig: jest.fn(),
-}));
-jest.mock('../../../../../../../../common/services/generate_new_agent_policy');
+vi.mock('../../../../../services');
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      sendGetOneAgentPolicy: vi.fn(),
+      sendGetOneFleetServerHost: vi.fn().mockResolvedValue({}),
+      sendGetOneOutput: vi.fn().mockResolvedValue({}),
+      useStartServices: vi.fn(),
+      useConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../../../../common/services/generate_new_agent_policy');
 
-type MockFn = jest.MockedFunction<any>;
+type MockFn = MockedFunction<any>;
 
 describe('useAgentless', () => {
   beforeEach(() => {
@@ -44,7 +50,7 @@ describe('useAgentless', () => {
         isCloudEnabled: false,
       },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return isAgentlessEnabled as falsy when agentless is not enabled', () => {
@@ -242,9 +248,9 @@ describe('useAgentless', () => {
 });
 
 describe('useSetupTechnology', () => {
-  const setNewAgentPolicy = jest.fn();
-  const updatePackagePolicyMock = jest.fn();
-  const setSelectedPolicyTabMock = jest.fn();
+  const setNewAgentPolicy = vi.fn();
+  const updatePackagePolicyMock = vi.fn();
+  const setSelectedPolicyTabMock = vi.fn();
   const newAgentPolicyMock = {
     name: 'mock_new_agent_policy',
     namespace: 'default',
@@ -356,7 +362,7 @@ describe('useSetupTechnology', () => {
         ...overrides,
       };
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('default values', () => {

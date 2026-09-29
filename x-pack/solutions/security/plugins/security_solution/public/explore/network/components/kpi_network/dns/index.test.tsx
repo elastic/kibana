@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import React from 'react';
 import { dnsStatItems, NetworkKpiDns } from '.';
 import { KpiBaseComponent } from '../../../../components/kpi';
 
-jest.mock('../../../../components/kpi');
+vi.mock('../../../../components/kpi');
 
 describe('DNS KPI', () => {
   const from = new Date('2023-12-30').toISOString();
   const to = new Date('2023-12-31').toISOString();
-  const MockKpiBaseComponent = KpiBaseComponent as unknown as jest.Mock;
+  const MockKpiBaseComponent = KpiBaseComponent as unknown as Mock;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {

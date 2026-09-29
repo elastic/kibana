@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, screen } from '@testing-library/react';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -25,38 +28,44 @@ import {
 import type { SloEventType } from '../../types';
 import type { TimeRange } from '@kbn/es-query';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_fetch_apm_indices');
-jest.mock('../../../../hooks/use_get_preview_data');
-jest.mock('../../utils/discover_links/get_discover_link');
-jest.mock('../../utils/discover_links/get_apm_traces_esql_link');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_fetch_apm_indices');
+vi.mock('../../../../hooks/use_get_preview_data');
+vi.mock('../../utils/discover_links/get_discover_link');
+vi.mock('../../utils/discover_links/get_apm_traces_esql_link');
 
 let capturedOnBarClick: ((timeRange: TimeRange, eventType: SloEventType) => void) | undefined;
-jest.mock('./good_bad_events_chart', () => ({
-  GoodBadEventsChart: (props: {
-    onBarClick?: (timeRange: TimeRange, eventType: SloEventType) => void;
-  }) => {
-    capturedOnBarClick = props.onBarClick;
-    return <div />;
-  },
-}));
-jest.mock('./metric_timeslice_events_chart', () => ({
-  MetricTimesliceEventsChart: () => <div />,
-}));
+vi.mock('./good_bad_events_chart', () => {
+      const mocked = {
+      GoodBadEventsChart: (props: {
+        onBarClick?: (timeRange: TimeRange, eventType: SloEventType) => void;
+      }) => {
+        capturedOnBarClick = props.onBarClick;
+        return <div />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./metric_timeslice_events_chart', () => {
+      const mocked = {
+      MetricTimesliceEventsChart: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchApmIndicesMock = useFetchApmIndices as jest.Mock;
-const useGetPreviewDataMock = useGetPreviewData as jest.Mock;
-const getDiscoverLinkMock = getDiscoverLink as jest.Mock;
-const getApmTracesEsqlLinkMock = getApmTracesEsqlLink as jest.Mock;
-const navigateToApmTracesEsqlLinkMock = navigateToApmTracesEsqlLink as jest.Mock;
-const openInDiscoverMock = openInDiscover as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchApmIndicesMock = useFetchApmIndices as Mock;
+const useGetPreviewDataMock = useGetPreviewData as Mock;
+const getDiscoverLinkMock = getDiscoverLink as Mock;
+const getApmTracesEsqlLinkMock = getApmTracesEsqlLink as Mock;
+const navigateToApmTracesEsqlLinkMock = navigateToApmTracesEsqlLink as Mock;
+const openInDiscoverMock = openInDiscover as Mock;
 
 const RANGE = { from: new Date('2024-01-01T00:00:00Z'), to: new Date('2024-01-02T00:00:00Z') };
 
 describe('EventsChartPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({ services: { discover: {}, uiSettings: {} } });
     useFetchApmIndicesMock.mockReturnValue({
       data: { transaction: 'traces-apm*,apm-*', metric: 'metrics-apm*' },

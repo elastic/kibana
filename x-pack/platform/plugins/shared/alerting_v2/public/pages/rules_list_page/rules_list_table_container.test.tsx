@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ContentListProvider } from '@kbn/content-list';
@@ -15,12 +17,10 @@ import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { MockLocatorProvider } from '../../test_utils/test_providers';
 
-const mockNavigateToUrl = jest.fn();
+const mockNavigateToUrl = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -42,51 +42,72 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-const mockDeleteMutate = jest.fn();
-const mockUseDeleteRule = jest.fn();
-jest.mock('../../hooks/use_delete_rule', () => ({
-  useDeleteRule: () => mockUseDeleteRule(),
-}));
+const mockDeleteMutate = vi.fn();
+const mockUseDeleteRule = vi.fn();
+vi.mock('../../hooks/use_delete_rule', () => {
+      const mocked = {
+      useDeleteRule: () => mockUseDeleteRule(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBulkDeleteMutate = jest.fn();
-jest.mock('../../hooks/use_bulk_delete_rules', () => ({
-  useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
-}));
+const mockBulkDeleteMutate = vi.fn();
+vi.mock('../../hooks/use_bulk_delete_rules', () => {
+      const mocked = {
+      useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBulkEnableMutate = jest.fn();
-const mockBulkDisableMutate = jest.fn();
-const mockUseBulkEnableRules = jest.fn();
-const mockUseBulkDisableRules = jest.fn();
-jest.mock('../../hooks/use_bulk_enable_disable_rules', () => ({
-  useBulkEnableRules: () => mockUseBulkEnableRules(),
-  useBulkDisableRules: () => mockUseBulkDisableRules(),
-}));
+const mockBulkEnableMutate = vi.fn();
+const mockBulkDisableMutate = vi.fn();
+const mockUseBulkEnableRules = vi.fn();
+const mockUseBulkDisableRules = vi.fn();
+vi.mock('../../hooks/use_bulk_enable_disable_rules', () => {
+      const mocked = {
+      useBulkEnableRules: () => mockUseBulkEnableRules(),
+      useBulkDisableRules: () => mockUseBulkDisableRules(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockToggleEnabledMutate = jest.fn();
-const mockUseToggleRuleEnabled = jest.fn();
-jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
-  useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
-}));
+const mockToggleEnabledMutate = vi.fn();
+const mockUseToggleRuleEnabled = vi.fn();
+vi.mock('../../hooks/use_toggle_rule_enabled', () => {
+      const mocked = {
+      useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUpdateApiKeyMutate = jest.fn();
-jest.mock('../../hooks/use_bulk_update_rule_api_key', () => ({
-  useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateApiKeyMutate, isLoading: false }),
-}));
+const mockUpdateApiKeyMutate = vi.fn();
+vi.mock('../../hooks/use_bulk_update_rule_api_key', () => {
+      const mocked = {
+      useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateApiKeyMutate, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRunRuleMutate = jest.fn();
-const mockUseRunRule = jest.fn();
-jest.mock('../../hooks/use_run_rule', () => ({
-  useRunRule: () => mockUseRunRule(),
-}));
+const mockRunRuleMutate = vi.fn();
+const mockUseRunRule = vi.fn();
+vi.mock('../../hooks/use_run_rule', () => {
+      const mocked = {
+      useRunRule: () => mockUseRunRule(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockToRulesQueryParams = jest.fn((..._args: unknown[]) => ({
+const mockToRulesQueryParams = vi.fn((..._args: unknown[]) => ({
   filter: undefined as string | undefined,
   search: undefined as string | undefined,
 }));
-jest.mock('./rules_query_params', () => ({
-  ...jest.requireActual('./rules_query_params'),
-  toRulesQueryParams: (...args: unknown[]) => mockToRulesQueryParams(...args),
-}));
+vi.mock('./rules_query_params', async () => {
+      const mocked = {
+      ...(await vi.importActual('./rules_query_params')),
+      toRulesQueryParams: (...args: unknown[]) => mockToRulesQueryParams(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRules = [
   {
@@ -115,8 +136,8 @@ const toListItem = (rule: RuleApiResponse) => ({
   rule,
 });
 
-const mockOnEditInFlyout = jest.fn();
-const mockOnCloneInFlyout = jest.fn();
+const mockOnEditInFlyout = vi.fn();
+const mockOnCloneInFlyout = vi.fn();
 
 const renderContainer = ({ total = mockRules.length }: { total?: number } = {}) => {
   return render(
@@ -156,7 +177,7 @@ const waitForRules = async () => {
 
 describe('RulesListTableContainer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     contentListQueryClient.clear();
     mockToRulesQueryParams.mockReturnValue({ filter: undefined, search: undefined });
     mockUseDeleteRule.mockReturnValue({

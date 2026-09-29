@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { VersionedRouter } from '@kbn/core-http-server';
@@ -17,24 +19,27 @@ import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constant
 
 // We mock getLensResponseItem to avoid setting up a complex LensConfigBuilder
 // just to test the pagination logic for now, which doesn't rely on the actual data formatting.
-jest.mock('./utils', () => ({
-  getLensResponseItem: jest.fn().mockImplementation((builder, item) => item),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      getLensResponseItem: vi.fn().mockImplementation((builder, item) => item),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Lens API - Visualizations Search Route', () => {
   it('maps API per_page to internal perPage/limit and vice versa', async () => {
     // Setup Router Mocks
-    const mockRoute = { addVersion: jest.fn() };
+    const mockRoute = { addVersion: vi.fn() };
     const mockRouter = {
-      get: jest.fn().mockReturnValue(mockRoute),
+      get: vi.fn().mockReturnValue(mockRoute),
     } as unknown as VersionedRouter<RequestHandlerContext>;
 
     // Setup Content Management Mocks
-    const mockSearch = jest.fn().mockResolvedValue({
+    const mockSearch = vi.fn().mockResolvedValue({
       result: { hits: [], pagination: { total: 0 } },
     });
-    const mockFor = jest.fn().mockReturnValue({ search: mockSearch });
-    const mockGetForRequest = jest.fn().mockReturnValue({ for: mockFor });
+    const mockFor = vi.fn().mockReturnValue({ search: mockSearch });
+    const mockGetForRequest = vi.fn().mockReturnValue({ for: mockFor });
     const mockContentManagement = {
       contentClient: { getForRequest: mockGetForRequest },
     } as unknown as ContentManagementServerSetup;
@@ -61,8 +66,8 @@ describe('Lens API - Visualizations Search Route', () => {
 
     // Setup request and response mocks using core testing utilities
     const mockCtx = {
-      resolve: jest.fn().mockResolvedValue({
-        core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } },
+      resolve: vi.fn().mockResolvedValue({
+        core: { featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) } },
       }),
     } as unknown as RequestHandlerContext;
     const mockReq = httpServerMock.createKibanaRequest({
@@ -74,7 +79,7 @@ describe('Lens API - Visualizations Search Route', () => {
     });
 
     const mockRes = httpServerMock.createResponseFactory();
-    mockRes.ok = jest.fn().mockImplementation((payload) => payload);
+    mockRes.ok = vi.fn().mockImplementation((payload) => payload);
 
     // Invoke the handler
     const responsePayload = (await routeHandler(mockCtx, mockReq, mockRes)) as {
@@ -109,9 +114,9 @@ describe('Lens API - Visualizations Search Route', () => {
   });
 
   it('applies lensSearchResponseBodySchema defaults to data items via .parse()', async () => {
-    const mockRoute = { addVersion: jest.fn() };
+    const mockRoute = { addVersion: vi.fn() };
     const mockRouter = {
-      get: jest.fn().mockReturnValue(mockRoute),
+      get: vi.fn().mockReturnValue(mockRoute),
     } as unknown as VersionedRouter<RequestHandlerContext>;
 
     // A minimal metric hit intentionally missing `ignore_global_filters` — a field that carries
@@ -128,11 +133,11 @@ describe('Lens API - Visualizations Search Route', () => {
       meta: {},
     };
 
-    const mockSearch = jest.fn().mockResolvedValue({
+    const mockSearch = vi.fn().mockResolvedValue({
       result: { hits: [hitWithoutDefault], pagination: { total: 1 } },
     });
-    const mockFor = jest.fn().mockReturnValue({ search: mockSearch });
-    const mockGetForRequest = jest.fn().mockReturnValue({ for: mockFor });
+    const mockFor = vi.fn().mockReturnValue({ search: mockSearch });
+    const mockGetForRequest = vi.fn().mockReturnValue({ for: mockFor });
     const mockContentManagement = {
       contentClient: { getForRequest: mockGetForRequest },
     } as unknown as ContentManagementServerSetup;
@@ -149,8 +154,8 @@ describe('Lens API - Visualizations Search Route', () => {
     const routeHandler = mockRoute.addVersion.mock.calls[0][1];
 
     const mockCtx = {
-      resolve: jest.fn().mockResolvedValue({
-        core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } },
+      resolve: vi.fn().mockResolvedValue({
+        core: { featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) } },
       }),
     } as unknown as RequestHandlerContext;
 
@@ -159,7 +164,7 @@ describe('Lens API - Visualizations Search Route', () => {
     });
 
     const mockRes = httpServerMock.createResponseFactory();
-    mockRes.ok = jest.fn().mockImplementation((payload) => payload);
+    mockRes.ok = vi.fn().mockImplementation((payload) => payload);
 
     await routeHandler(mockCtx, mockReq, mockRes);
 

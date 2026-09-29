@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -24,15 +27,18 @@ import { getHistoryItems, getStorageStats } from '../history_local_storage';
 import { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import type { StarredQueryItem } from './esql_starred_queries_service';
 
-jest.mock('../history_local_storage', () => ({
-  getHistoryItems: jest.fn(),
-  getStorageStats: jest.fn(() => ({ queryCount: 0, storageSizeKB: 0 })),
-  getTrimmedQuery: jest.fn((query: string) => query.trim()),
-  dateFormat: 'MMM. DD, YY HH:mm:ss',
-}));
+vi.mock('../history_local_storage', () => {
+      const mocked = {
+      getHistoryItems: vi.fn(),
+      getStorageStats: vi.fn(() => ({ queryCount: 0, storageSizeKB: 0 })),
+      getTrimmedQuery: vi.fn((query: string) => query.trim()),
+      dateFormat: 'MMM. DD, YY HH:mm:ss',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetHistoryItems = getHistoryItems as jest.MockedFunction<typeof getHistoryItems>;
-const mockGetStorageStats = getStorageStats as jest.MockedFunction<typeof getStorageStats>;
+const mockGetHistoryItems = getHistoryItems as MockedFunction<typeof getHistoryItems>;
+const mockGetStorageStats = getStorageStats as MockedFunction<typeof getStorageStats>;
 
 const mockHistoryItems = [
   {
@@ -63,9 +69,9 @@ const createMockStarredQueriesService = (items: StarredQueryItem[] = []) =>
   ({
     queries$: new BehaviorSubject(items),
     discardModalVisibility$: new BehaviorSubject(false),
-    renderStarredButton: jest.fn(() => null),
-    checkIfQueryIsStarred: jest.fn(() => false),
-    onDiscardModalClose: jest.fn(async () => {}),
+    renderStarredButton: vi.fn(() => null),
+    checkIfQueryIsStarred: vi.fn(() => false),
+    onDiscardModalClose: vi.fn(async () => {}),
   } as unknown as EsqlStarredQueriesService);
 
 describe('Starred and History queries components', () => {
@@ -87,7 +93,7 @@ describe('Starred and History queries components', () => {
 
   describe('QueryHistoryAction', () => {
     it('should render the history action component as a button if is spaceReduced is undefined', () => {
-      render(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen />);
+      render(<QueryHistoryAction toggleHistory={vi.fn()} isHistoryOpen />);
       expect(
         screen.getByTestId('ESQLEditor-toggle-query-history-button-container')
       ).toBeInTheDocument();
@@ -98,7 +104,7 @@ describe('Starred and History queries components', () => {
     });
 
     it('should render the history action component as an icon if is spaceReduced is true', () => {
-      render(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen isSpaceReduced />);
+      render(<QueryHistoryAction toggleHistory={vi.fn()} isHistoryOpen isSpaceReduced />);
       expect(screen.getByTestId('ESQLEditor-toggle-query-history-icon')).toBeInTheDocument();
     });
   });
@@ -280,8 +286,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={1024}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={200}
             starredQueriesService={starredQueriesService}
           />
@@ -315,8 +321,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={1024}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -334,8 +340,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={1024}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -354,8 +360,8 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={1024}
             isSpaceReduced={true}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -373,8 +379,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={1024}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -397,8 +403,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={1024}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={200}
             starredQueriesService={null}
           />
@@ -416,8 +422,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={800}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -435,8 +441,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={800}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -486,8 +492,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={800}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -522,8 +528,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={800}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -553,8 +559,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={800}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -587,8 +593,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={800}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -613,8 +619,8 @@ describe('Starred and History queries components', () => {
           <HistoryAndStarredQueriesTabs
             containerCSS={{}}
             containerWidth={800}
-            onUpdateAndSubmit={jest.fn()}
-            onClose={jest.fn()}
+            onUpdateAndSubmit={vi.fn()}
+            onClose={vi.fn()}
             height={400}
             starredQueriesService={null}
           />

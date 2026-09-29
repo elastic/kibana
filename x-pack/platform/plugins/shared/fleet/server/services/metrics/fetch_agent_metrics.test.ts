@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { CoreSetup } from '@kbn/core/server';
 
 import { fetchAgentMetrics } from './fetch_agent_metrics';
 
-jest.mock('../../collectors/agent_collectors', () => {
+vi.mock('../../collectors/agent_collectors', () => {
   return {
-    getAgentUsage: jest.fn().mockResolvedValue({}),
+    getAgentUsage: vi.fn().mockResolvedValue({}),
   };
 });
 

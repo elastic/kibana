@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { RenderIacTemplateIntegration } from '../../common/types/rest_spec/iac_provisioner';
@@ -14,9 +16,9 @@ import { getPackageInfo } from './epm/packages';
 
 import { buildIacProvisionerIntegrations, isBuildError } from './iac_provisioner_integrations';
 
-jest.mock('./epm/packages');
+vi.mock('./epm/packages');
 
-const mockedGetPackageInfo = jest.mocked(getPackageInfo);
+const mockedGetPackageInfo = vi.mocked(getPackageInfo);
 
 const savedObjectsClient = savedObjectsClientMock.create();
 

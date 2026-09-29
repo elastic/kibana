@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { HomeLink } from './home_link';
 import * as useApmRouterModule from '../../../../hooks/use_apm_router';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
-jest.mock('@elastic/eui', () => ({
-  EuiLink: ({ children, ...props }: any) => <a {...props}>{children || 'Link'}</a>,
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      EuiLink: ({ children, ...props }: any) => <a {...props}>{children || 'Link'}</a>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('HomeLink', () => {
-  const mockLink = jest.fn();
+  const mockLink = vi.fn();
 
   beforeEach(() => {
     mockLink.mockClear();
-    jest.spyOn(useApmRouterModule, 'useApmRouter').mockReturnValue({
+    vi.spyOn(useApmRouterModule, 'useApmRouter').mockReturnValue({
       link: mockLink,
     } as any);
   });

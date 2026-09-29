@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,8 +14,8 @@ import { SelectTemplatesStep } from './select_templates_step';
 import type { ParsedTemplateEntry, ParseYamlError } from '../hooks/use_parse_yaml';
 
 describe('SelectTemplatesStep', () => {
-  const mockOnSelectionChange = jest.fn();
-  const mockOnRowClick = jest.fn();
+  const mockOnSelectionChange = vi.fn();
+  const mockOnRowClick = vi.fn();
 
   const mockNewTemplate: ParsedTemplateEntry = {
     name: 'New Template',
@@ -53,7 +55,7 @@ describe('SelectTemplatesStep', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders empty state when no templates and no errors', () => {

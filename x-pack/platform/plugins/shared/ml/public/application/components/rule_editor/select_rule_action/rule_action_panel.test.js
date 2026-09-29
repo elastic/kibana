@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -14,7 +16,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { RuleActionPanel } from './rule_action_panel';
 
-jest.mock('../../../services/job_service', () => 'mlJobService');
+vi.mock('../../../services/job_service', () => 'mlJobService');
 
 // Mock the call for loading a filter.
 // The mock is hoisted to the top, so need to prefix the filter variable
@@ -101,10 +103,10 @@ describe('RuleActionPanel', () => {
     },
   };
 
-  const setEditRuleIndex = jest.fn(() => {});
-  const updateRuleAtIndex = jest.fn(() => {});
-  const deleteRuleAtIndex = jest.fn(() => {});
-  const addItemToFilterList = jest.fn(() => {});
+  const setEditRuleIndex = vi.fn(() => {});
+  const updateRuleAtIndex = vi.fn(() => {});
+  const deleteRuleAtIndex = vi.fn(() => {});
+  const addItemToFilterList = vi.fn(() => {});
 
   const requiredProps = {
     job,

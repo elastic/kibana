@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { extractAuthzDescription } from './extract_authz_description';
 import type { InternalRouterRoute } from './type';
@@ -17,7 +19,7 @@ describe('extractAuthzDescription', () => {
     const route: InternalRouterRoute = {
       path: '/foo',
       options: { access: 'internal' },
-      handler: jest.fn(),
+      handler: vi.fn(),
       validationSchemas: { request: { body: schema.object({}) } },
       method: 'get',
       isVersioned: false,

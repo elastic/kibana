@@ -5,61 +5,66 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { renderWithHostPageProviders } from '../../pages/host/__tests__/test_helpers';
 import { MaskedCodeBlock, maskSecretValues } from './masked_code_block';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiButtonIcon: ({
-    'aria-label': ariaLabel,
-    'aria-pressed': ariaPressed,
-    'data-test-subj': dataTestSubj,
-    iconType,
-    onClick,
-  }: {
-    'aria-label': string;
-    'aria-pressed'?: boolean;
-    'data-test-subj'?: string;
-    iconType: string;
-    onClick: () => void;
-  }) => (
-    <button
-      aria-label={ariaLabel}
-      aria-pressed={ariaPressed}
-      data-icon-type={iconType}
-      data-test-subj={dataTestSubj}
-      onClick={onClick}
-    />
-  ),
-  EuiCodeBlock: ({
-    children,
-    overflowHeight,
-    'data-test-subj': dataTestSubj,
-  }: {
-    children: React.ReactNode;
-    overflowHeight?: number | string;
-    'data-test-subj'?: string;
-  }) => (
-    <div data-test-subj={dataTestSubj}>
-      {children}
-      {overflowHeight ? <button>Expand</button> : null}
-    </div>
-  ),
-  EuiCopy: ({
-    textToCopy,
-    children,
-  }: {
-    textToCopy: string;
-    children: (copy: () => void) => React.ReactNode;
-  }) => (
-    <span data-test-subj="mockEuiCopy" data-text-to-copy={textToCopy}>
-      {children(jest.fn())}
-    </span>
-  ),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiButtonIcon: ({
+        'aria-label': ariaLabel,
+        'aria-pressed': ariaPressed,
+        'data-test-subj': dataTestSubj,
+        iconType,
+        onClick,
+      }: {
+        'aria-label': string;
+        'aria-pressed'?: boolean;
+        'data-test-subj'?: string;
+        iconType: string;
+        onClick: () => void;
+      }) => (
+        <button
+          aria-label={ariaLabel}
+          aria-pressed={ariaPressed}
+          data-icon-type={iconType}
+          data-test-subj={dataTestSubj}
+          onClick={onClick}
+        />
+      ),
+      EuiCodeBlock: ({
+        children,
+        overflowHeight,
+        'data-test-subj': dataTestSubj,
+      }: {
+        children: React.ReactNode;
+        overflowHeight?: number | string;
+        'data-test-subj'?: string;
+      }) => (
+        <div data-test-subj={dataTestSubj}>
+          {children}
+          {overflowHeight ? <button>Expand</button> : null}
+        </div>
+      ),
+      EuiCopy: ({
+        textToCopy,
+        children,
+      }: {
+        textToCopy: string;
+        children: (copy: () => void) => React.ReactNode;
+      }) => (
+        <span data-test-subj="mockEuiCopy" data-text-to-copy={textToCopy}>
+          {children(vi.fn())}
+        </span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MaskedCodeBlock', () => {
   it('masks secret values in displayed snippets', () => {

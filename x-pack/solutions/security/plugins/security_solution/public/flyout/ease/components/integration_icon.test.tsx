@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import React from 'react';
@@ -18,15 +21,15 @@ import {
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 
-jest.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
-jest.mock('@kbn/fleet-plugin/public/hooks');
+vi.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
+vi.mock('@kbn/fleet-plugin/public/hooks');
 
 const LOADING_SKELETON_TEST_ID = `${INTEGRATION_TEST_ID}-${INTEGRATION_LOADING_SKELETON_TEST_ID}`;
 const ICON_TEST_ID = `${INTEGRATION_TEST_ID}-${INTEGRATION_ICON_TEST_ID}`;
 
 describe('IntegrationIcon', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return a single integration icon', () => {
@@ -40,11 +43,11 @@ describe('IntegrationIcon', () => {
         version: '0.1.0',
       },
     ];
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
+    (useFetchIntegrations as Mock).mockReturnValue({
       installedPackages,
       isLoading: false,
     });
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    (usePackageIconType as Mock).mockReturnValue('iconType');
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
@@ -56,7 +59,7 @@ describe('IntegrationIcon', () => {
   });
 
   it('should return the loading skeleton is integrations are loading', () => {
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
+    (useFetchIntegrations as Mock).mockReturnValue({
       installedPackages: [],
       isLoading: true,
     });

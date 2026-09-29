@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -16,14 +19,14 @@ import { getInstalledPackageWithAssets } from '../epm/packages/get';
 
 import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastream_features';
 
-const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
+const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as MockedFunction<
   typeof updateCurrentWriteIndices
 >;
 
-jest.mock('../epm/packages', () => {
+vi.mock('../epm/packages', () => {
   return {
-    getInstallation: jest.fn(),
-    getPackageInfo: jest.fn().mockResolvedValue({
+    getInstallation: vi.fn(),
+    getPackageInfo: vi.fn().mockResolvedValue({
       data_streams: [
         {
           dataset: 'test',
@@ -35,7 +38,7 @@ jest.mock('../epm/packages', () => {
 });
 
 function mockGetInstalledPackageWithAssets(installation: any) {
-  jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+  vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
     packageInfo: {
       name: 'test',
       data_streams: [
@@ -49,36 +52,42 @@ function mockGetInstalledPackageWithAssets(installation: any) {
   } as any);
 }
 
-jest.mock('../epm/packages/get', () => ({
-  getInstalledPackageWithAssets: jest.fn().mockResolvedValue({
-    packageInfo: {
-      name: 'test',
-      data_streams: [
-        {
-          dataset: 'test',
-          type: 'metrics',
+vi.mock('../epm/packages/get', () => {
+      const mocked = {
+      getInstalledPackageWithAssets: vi.fn().mockResolvedValue({
+        packageInfo: {
+          name: 'test',
+          data_streams: [
+            {
+              dataset: 'test',
+              type: 'metrics',
+            },
+          ],
         },
-      ],
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../app_context');
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+vi.mock('../app_context');
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-jest.mock('../epm/elasticsearch/template/template', () => ({
-  updateCurrentWriteIndices: jest.fn(),
-  isTotalFieldsLimitError: (err: any): boolean => {
-    const reason: string = err?.body?.error?.reason ?? '';
-    return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
-  },
-}));
-jest.mock('../epm/elasticsearch/template/install', () => {
+vi.mock('../epm/elasticsearch/template/template', () => {
+      const mocked = {
+      updateCurrentWriteIndices: vi.fn(),
+      isTotalFieldsLimitError: (err: any): boolean => {
+        const reason: string = err?.body?.error?.reason ?? '';
+        return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../epm/elasticsearch/template/install', () => {
   return {
-    prepareDataStreamTemplates: jest.fn().mockResolvedValue([
+    prepareDataStreamTemplates: vi.fn().mockResolvedValue([
       {
         componentTemplates: {
           'metrics-test.test@package': {
@@ -196,10 +205,10 @@ describe('experimental_datastream_features', () => {
     esClient.cluster.getComponentTemplate.mockClear();
     esClient.cluster.putComponentTemplate.mockClear();
     mockedAppContextService.getLogger.mockReturnValue({
-      warn: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
-      error: jest.fn(),
+      warn: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
     } as any);
 
     esClient.cluster.getComponentTemplate.mockResolvedValueOnce({

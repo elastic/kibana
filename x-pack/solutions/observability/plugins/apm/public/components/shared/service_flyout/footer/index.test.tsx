@@ -5,20 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ServiceFlyoutFooter } from '.';
 
-const mockUseServiceFlyoutLinks = jest.fn();
-jest.mock('../hooks/use_service_flyout_links', () => ({
-  useServiceFlyoutLinks: () => mockUseServiceFlyoutLinks(),
-}));
+const mockUseServiceFlyoutLinks = vi.fn();
+vi.mock('../hooks/use_service_flyout_links', () => {
+      const mocked = {
+      useServiceFlyoutLinks: () => mockUseServiceFlyoutLinks(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseServiceFlyoutContext = jest.fn();
-jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-}));
+const mockUseServiceFlyoutContext = vi.fn();
+vi.mock('../service_flyout_context', () => {
+      const mocked = {
+      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function makeLinks({
   tracesHref = '/app/discover/traces',
@@ -60,14 +68,14 @@ function setupContext({ alerts = true, slos = true } = {}) {
     capabilities: makeCapabilities({ alerts, slos }),
     filters: {
       environment: 'production',
-      setEnvironment: jest.fn(),
+      setEnvironment: vi.fn(),
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       start: '2026-01-01T00:00:00.000Z',
       end: '2026-01-01T00:15:00.000Z',
-      setRange: jest.fn(),
+      setRange: vi.fn(),
       refreshToken: 0,
-      onRefresh: jest.fn(),
+      onRefresh: vi.fn(),
     },
   });
 }
@@ -86,7 +94,7 @@ function openActionsMenu() {
 
 describe('ServiceFlyoutFooter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupContext();
     mockUseServiceFlyoutLinks.mockReturnValue(makeLinks());
   });
@@ -142,14 +150,14 @@ describe('ServiceFlyoutFooter', () => {
       },
       filters: {
         environment: 'production',
-        setEnvironment: jest.fn(),
+        setEnvironment: vi.fn(),
         rangeFrom: 'now-15m',
         rangeTo: 'now',
         start: '2026-01-01T00:00:00.000Z',
         end: '2026-01-01T00:15:00.000Z',
-        setRange: jest.fn(),
+        setRange: vi.fn(),
         refreshToken: 0,
-        onRefresh: jest.fn(),
+        onRefresh: vi.fn(),
       },
     });
     renderFooter();
@@ -209,14 +217,14 @@ describe('ServiceFlyoutFooter', () => {
       capabilities: { ...makeCapabilities(), loading: true },
       filters: {
         environment: 'production',
-        setEnvironment: jest.fn(),
+        setEnvironment: vi.fn(),
         rangeFrom: 'now-15m',
         rangeTo: 'now',
         start: '2026-01-01T00:00:00.000Z',
         end: '2026-01-01T00:15:00.000Z',
-        setRange: jest.fn(),
+        setRange: vi.fn(),
         refreshToken: 0,
-        onRefresh: jest.fn(),
+        onRefresh: vi.fn(),
       },
     });
     renderFooter();
@@ -254,7 +262,7 @@ describe('ServiceFlyoutFooter', () => {
 
   describe('when openInDiscoverTab is provided', () => {
     it('shows "Open traces in a Discover tab" label for traces', () => {
-      mockUseServiceFlyoutLinks.mockReturnValue(makeLinks({ tracesOpenInDiscoverTab: jest.fn() }));
+      mockUseServiceFlyoutLinks.mockReturnValue(makeLinks({ tracesOpenInDiscoverTab: vi.fn() }));
       renderFooter();
       openActionsMenu();
 
@@ -273,7 +281,7 @@ describe('ServiceFlyoutFooter', () => {
     });
 
     it('calls openInDiscoverTab when the traces action is clicked', () => {
-      const mockOpenInDiscoverTab = jest.fn();
+      const mockOpenInDiscoverTab = vi.fn();
       mockUseServiceFlyoutLinks.mockReturnValue(
         makeLinks({ tracesOpenInDiscoverTab: mockOpenInDiscoverTab })
       );

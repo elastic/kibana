@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -33,22 +36,22 @@ import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_set
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
 let ruleType = getRuleType(coreSetup, false);
-const mockNow = jest.getRealSystemTime();
+const mockNow = vi.getRealSystemTime();
 
 describe('ruleType', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockNow);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockNow);
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ruleType = getRuleType(coreSetup, false);
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('rule type creation structure is the expected value', async () => {
@@ -684,15 +687,15 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      ruleServices.getDataViews = jest.fn().mockResolvedValueOnce({
+      ruleServices.getDataViews = vi.fn().mockResolvedValueOnce({
         ...dataViewPluginMocks.createStartContract(),
-        create: jest.fn().mockResolvedValueOnce({
+        create: vi.fn().mockResolvedValueOnce({
           ...dataViewMock.toSpec(),
           toSpec: () => dataViewMock.toSpec(),
           toMinimalSpec: () => dataViewMock.toSpec(),
         }),
       });
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
+      (searchSourceInstanceMock.getField as Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
         }
@@ -700,7 +703,7 @@ describe('ruleType', () => {
           return [];
         }
       });
-      (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce(searchResult);
+      (searchSourceInstanceMock.fetch as Mock).mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
 
@@ -711,7 +714,7 @@ describe('ruleType', () => {
       const params = defaultParams;
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
+      (searchSourceInstanceMock.getField as Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
           return { dataViewMock, getTimeField: () => undefined, id: 1234 };
         }
@@ -726,16 +729,16 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      ruleServices.getDataViews = jest.fn().mockResolvedValueOnce({
+      ruleServices.getDataViews = vi.fn().mockResolvedValueOnce({
         ...dataViewPluginMocks.createStartContract(),
-        create: jest.fn().mockResolvedValueOnce({
+        create: vi.fn().mockResolvedValueOnce({
           ...dataViewMock.toSpec(),
           toSpec: () => dataViewMock.toSpec(),
           getTimeField: () => dataViewMock.fields[1],
           toMinimalSpec: () => dataViewMock.toSpec(),
         }),
       });
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
+      (searchSourceInstanceMock.getField as Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
         }
@@ -744,7 +747,7 @@ describe('ruleType', () => {
         }
       });
 
-      (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce({
+      (searchSourceInstanceMock.fetch as Mock).mockResolvedValueOnce({
         hits: { total: 3, hits: [{}, {}, {}] },
       });
 

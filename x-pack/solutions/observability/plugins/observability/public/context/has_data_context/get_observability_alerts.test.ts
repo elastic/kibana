@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import { getObservabilityAlerts } from './get_observability_alerts';
 
@@ -14,7 +16,7 @@ describe('getObservabilityAlerts', () => {
   const originalConsole = global.console;
   beforeAll(() => {
     // mocks console to avoid poluting the test output
-    global.console = { error: jest.fn() } as unknown as typeof console;
+    global.console = { error: vi.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {
@@ -28,7 +30,7 @@ describe('getObservabilityAlerts', () => {
       basePath,
     } as unknown as HttpSetup;
 
-    expect(getObservabilityAlerts({ http })).rejects.toThrow('Boom');
+    await expect(getObservabilityAlerts({ http })).rejects.toThrow('Boom');
   });
 
   it('Returns empty array when api return undefined', async () => {

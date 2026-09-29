@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,34 +18,43 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 import { TransformManagementSection } from './transform_management_section';
 
-jest.mock('../../services/navigation');
+vi.mock('../../services/navigation');
 
 const queryClient = new QueryClient();
 
-const mockUseTransformCapabilities = jest.fn();
-const mockUseGetTransformNodes = jest.fn();
-const mockUseGetTransforms = jest.fn();
+const mockUseTransformCapabilities = vi.fn();
+const mockUseGetTransformNodes = vi.fn();
+const mockUseGetTransforms = vi.fn();
 
-jest.mock('../../hooks', () => ({
-  useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
-  useTransformCapabilities: () => mockUseTransformCapabilities(),
-  useGetTransformNodes: () => mockUseGetTransformNodes(),
-  useGetTransforms: () => mockUseGetTransforms(),
-}));
+vi.mock('../../hooks', () => {
+      const mocked = {
+      useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
+      useTransformCapabilities: () => mockUseTransformCapabilities(),
+      useGetTransformNodes: () => mockUseGetTransformNodes(),
+      useGetTransforms: () => mockUseGetTransforms(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_get_transform_stats', () => ({
-  useGetTransformsStats: () => ({
-    isLoading: false,
-    error: null,
-    data: undefined,
-  }),
-}));
+vi.mock('../../hooks/use_get_transform_stats', () => {
+      const mocked = {
+      useGetTransformsStats: () => ({
+        isLoading: false,
+        error: null,
+        data: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../serverless_context', () => ({
-  useEnabledFeatures: () => ({ showNodeInfo: false }),
-}));
+vi.mock('../../serverless_context', () => {
+      const mocked = {
+      useEnabledFeatures: () => ({ showNodeInfo: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../alerting/transform_alerting_flyout', () => {
+vi.mock('../../../alerting/transform_alerting_flyout', () => {
   return {
     AlertRulesManageContext: {
       Provider: ({ children }: { children?: unknown }) => children ?? null,
@@ -53,26 +64,35 @@ jest.mock('../../../alerting/transform_alerting_flyout', () => {
   };
 });
 
-jest.mock('./components/transform_list/transforms_stats_bar', () => ({
-  TransformStatsBar: () => null,
-}));
+vi.mock('./components/transform_list/transforms_stats_bar', () => {
+      const mocked = {
+      TransformStatsBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/dangling_task_warning/dangling_task_warning', () => ({
-  DanglingTasksWarning: () => null,
-}));
+vi.mock('./components/dangling_task_warning/dangling_task_warning', () => {
+      const mocked = {
+      DanglingTasksWarning: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/transform_list', () => ({
-  TransformList: ({ transforms }: { transforms: Array<{ id: string }> }) =>
-    transforms.length === 0 ? (
-      <div data-test-subj="transformNoTransformsFound">
-        <button type="button" data-test-subj="transformButtonCreate">
-          Create your first transform
-        </button>
-      </div>
-    ) : (
-      <div data-test-subj="mockedTransformList" />
-    ),
-}));
+vi.mock('./components/transform_list', () => {
+      const mocked = {
+      TransformList: ({ transforms }: { transforms: Array<{ id: string }> }) =>
+        transforms.length === 0 ? (
+          <div data-test-subj="transformNoTransformsFound">
+            <button type="button" data-test-subj="transformButtonCreate">
+              Create your first transform
+            </button>
+          </div>
+        ) : (
+          <div data-test-subj="mockedTransformList" />
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderSection = () => {
   const history = createMemoryHistory();

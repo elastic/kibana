@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
@@ -91,7 +93,7 @@ describe('groupAndBulkCreate', () => {
       sharedParams,
       services: ruleServices,
       filter: { match_all: {} },
-      buildReasonMessage: jest.fn().mockReturnValue('reason'),
+      buildReasonMessage: vi.fn().mockReturnValue('reason'),
       groupByFields: ['host.name'],
       eventsTelemetry: undefined,
       isLoggedRequestsEnabled: false,

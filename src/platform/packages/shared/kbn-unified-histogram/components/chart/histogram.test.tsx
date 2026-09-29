@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HistogramProps } from './histogram';
 import type { UnifiedHistogramFetch$ } from '../../types';
 import React from 'react';
@@ -46,7 +49,7 @@ const getMockLensAttributes = async () => {
 };
 
 const getEmbeddableProps = () => {
-  const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent as jest.Mock;
+  const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent as Mock;
   expect(embeddable).toHaveBeenCalled();
 
   return embeddable.mock.calls[embeddable.mock.calls.length - 1][0];
@@ -96,7 +99,7 @@ const renderComponent = async ({
       timeInterval: fetchParams.timeInterval,
     },
     fetch$,
-    onLoad: jest.fn(),
+    onLoad: vi.fn(),
     withDefaultActions: undefined,
     dataView: fetchParams.dataView,
     abortController: fetchParams.abortController,
@@ -122,7 +125,7 @@ const renderComponent = async ({
 
 describe('Histogram', () => {
   beforeEach(() => {
-    (unifiedHistogramServicesMock.lens.EmbeddableComponent as jest.Mock)
+    (unifiedHistogramServicesMock.lens.EmbeddableComponent as Mock)
       .mockClear()
       .mockImplementation(() => <div>Lens embeddable</div>);
   });
@@ -222,7 +225,7 @@ describe('Histogram', () => {
       },
     };
 
-    jest
+    vi
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
 
@@ -245,7 +248,7 @@ describe('Histogram', () => {
     const onLoad = getEmbeddableProps().onLoad!;
     const adapters = createDefaultInspectorAdapters();
 
-    jest
+    vi
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ status: RequestStatus.ERROR } as any]);
 
@@ -277,7 +280,7 @@ describe('Histogram', () => {
       },
     };
 
-    jest
+    vi
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
 

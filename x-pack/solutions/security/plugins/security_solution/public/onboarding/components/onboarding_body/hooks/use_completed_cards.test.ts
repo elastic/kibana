@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { useCompletedCards } from './use_completed_cards';
 import type { OnboardingGroupConfig } from '../../../types';
@@ -13,24 +16,27 @@ import { mockReportCardComplete } from '../../__mocks__/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const defaultStoredCompletedCardIds: OnboardingCardId[] = [];
-const mockSetStoredCompletedCardIds = jest.fn();
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseStoredCompletedCardIds = jest.fn(() => [
+const mockSetStoredCompletedCardIds = vi.fn();
+const mockUseKibana = useKibana as Mock;
+const mockUseStoredCompletedCardIds = vi.fn(() => [
   defaultStoredCompletedCardIds,
   mockSetStoredCompletedCardIds,
 ]);
-jest.mock('../../hooks/use_stored_state', () => ({
-  ...jest.requireActual('../../hooks/use_stored_state'),
-  useStoredCompletedCardIds: () => mockUseStoredCompletedCardIds(),
-}));
+vi.mock('../../hooks/use_stored_state', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks/use_stored_state')),
+      useStoredCompletedCardIds: () => mockUseStoredCompletedCardIds(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../onboarding_context');
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../onboarding_context');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...original,
-    useKibana: jest.fn().mockReturnValue({
-      services: { notifications: { toasts: { addError: jest.fn() } } },
+    useKibana: vi.fn().mockReturnValue({
+      services: { notifications: { toasts: { addError: vi.fn() } } },
     }),
   };
 });
@@ -38,29 +44,29 @@ jest.mock('../../../../common/lib/kibana', () => {
 const cardComplete = {
   id: 'card-completed' as OnboardingCardId,
   title: 'card completed',
-  checkComplete: jest.fn().mockResolvedValue(true),
+  checkComplete: vi.fn().mockResolvedValue(true),
 };
 const cardComplete2 = {
   id: 'card-completed-2' as OnboardingCardId,
   title: 'card completed 2',
-  checkComplete: jest.fn().mockResolvedValue({ isComplete: true }),
+  checkComplete: vi.fn().mockResolvedValue({ isComplete: true }),
 };
 const cardIncomplete = {
   id: 'card-incomplete' as OnboardingCardId,
   title: 'card incomplete',
-  checkComplete: jest.fn().mockResolvedValue(false),
+  checkComplete: vi.fn().mockResolvedValue(false),
 };
 const cardBadgeText = {
   id: 'card-badge-text' as OnboardingCardId,
   title: 'card badge text',
-  checkComplete: jest
+  checkComplete: vi
     .fn()
     .mockResolvedValue({ isComplete: true, completeBadgeText: 'custom badge text' }),
 };
 const cardIncompleteAdditionalBadges = {
   id: 'card-additional-badges' as OnboardingCardId,
   title: 'card badge text',
-  checkComplete: jest.fn().mockResolvedValue({
+  checkComplete: vi.fn().mockResolvedValue({
     isComplete: false,
     additionalBadges: ['additional badge'],
   }),
@@ -68,16 +74,16 @@ const cardIncompleteAdditionalBadges = {
 const cardMetadata = {
   id: 'card-metadata' as OnboardingCardId,
   title: 'card metadata',
-  checkComplete: jest
+  checkComplete: vi
     .fn()
     .mockResolvedValue({ isComplete: true, metadata: { custom: 'metadata' } }),
 };
-const mockAddError = jest.fn();
+const mockAddError = vi.fn();
 const mockError = new Error('Failed to check complete');
 const cardCheckCompleteFailed = {
   id: 'card-failed' as OnboardingCardId,
   title: 'card failed',
-  checkComplete: jest.fn().mockRejectedValue(mockError),
+  checkComplete: vi.fn().mockRejectedValue(mockError),
 };
 
 const mockCardsGroupConfig = [
@@ -102,7 +108,7 @@ const flushPromises = () => new Promise(setImmediate);
 
 describe('useCompletedCards Hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when checkComplete functions are rejected', () => {
@@ -120,7 +126,7 @@ describe('useCompletedCards Hook', () => {
 
     describe('when a the auto check is called', () => {
       beforeEach(async () => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         await act(async () => {
           renderResult.result.current.checkCardComplete(cardCheckCompleteFailed.id);
         });
@@ -194,7 +200,7 @@ describe('useCompletedCards Hook', () => {
 
     describe('when a card is marked as complete', () => {
       beforeEach(async () => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         act(() => {
           renderResult.result.current.setCardComplete(cardIncomplete.id, true);
         });
@@ -223,7 +229,7 @@ describe('useCompletedCards Hook', () => {
 
     describe('when a card is marked as incomplete', () => {
       beforeEach(async () => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         act(() => {
           renderResult.result.current.setCardComplete(cardComplete.id, false);
         });
@@ -249,7 +255,7 @@ describe('useCompletedCards Hook', () => {
 
     describe('when a the auto check is called', () => {
       beforeEach(async () => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         cardIncomplete.checkComplete.mockResolvedValueOnce(true);
         renderResult.result.current.checkCardComplete(cardIncomplete.id);
         await act(flushPromises);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { ExceptionListHeader } from '.';
@@ -12,21 +15,21 @@ import * as i18n from '../translations';
 import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
 
 import { useExceptionListHeader as useExceptionListHeaderMock } from './use_list_header';
-const onEditListDetails = jest.fn();
-const onExportList = jest.fn();
-const onDeleteList = jest.fn();
-const onManageRules = jest.fn();
-const onNavigate = jest.fn();
-const onDuplicateList = jest.fn();
-jest.mock('./use_list_header');
+const onEditListDetails = vi.fn();
+const onExportList = vi.fn();
+const onDeleteList = vi.fn();
+const onManageRules = vi.fn();
+const onNavigate = vi.fn();
+const onDuplicateList = vi.fn();
+vi.mock('./use_list_header');
 
 describe('ExceptionListHeader', () => {
   beforeAll(() => {
-    (useExceptionListHeaderMock as jest.Mock).mockReturnValue({
+    (useExceptionListHeaderMock as Mock).mockReturnValue({
       isModalVisible: false,
       listDetails: { name: 'List Name', description: '' },
-      onSave: jest.fn(),
-      onCancel: jest.fn(),
+      onSave: vi.fn(),
+      onCancel: vi.fn(),
     });
   });
 
@@ -113,11 +116,11 @@ describe('ExceptionListHeader', () => {
   });
 
   it('should render edit modal', () => {
-    (useExceptionListHeaderMock as jest.Mock).mockReturnValue({
+    (useExceptionListHeaderMock as Mock).mockReturnValue({
       isModalVisible: true,
       listDetails: { name: 'List Name', description: 'List description' },
-      onSave: jest.fn(),
-      onCancel: jest.fn(),
+      onSave: vi.fn(),
+      onCancel: vi.fn(),
     });
     const wrapper = render(
       <ExceptionListHeader
@@ -140,11 +143,11 @@ describe('ExceptionListHeader', () => {
   });
 
   it('should go back the page path when back button is clicked', () => {
-    (useExceptionListHeaderMock as jest.Mock).mockReturnValue({
+    (useExceptionListHeaderMock as Mock).mockReturnValue({
       isModalVisible: true,
       listDetails: { name: 'List Name', description: 'List description' },
-      onSave: jest.fn(),
-      onCancel: jest.fn(),
+      onSave: vi.fn(),
+      onCancel: vi.fn(),
     });
     const wrapper = render(
       <ExceptionListHeader

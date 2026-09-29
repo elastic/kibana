@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { OtelTelemetryReceiver } from './receiver';
@@ -15,7 +18,7 @@ const defaultConfig: OtelTelemetryConfiguration = DEFAULT_OTEL_TELEMETRY_CONFIGU
 
 describe('OtelTelemetryReceiver', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let esClient: Mocked<ElasticsearchClient>;
   let receiver: OtelTelemetryReceiver;
 
   const makeCompositeResponse = (
@@ -65,21 +68,21 @@ describe('OtelTelemetryReceiver', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     esClient = {
-      search: jest.fn(),
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+      search: vi.fn(),
+    } as unknown as Mocked<ElasticsearchClient>;
     receiver = new OtelTelemetryReceiver(logger, esClient);
   });
 
   describe('buildCompositeQuery', () => {
     it('should produce a query with correct structure using config values', async () => {
-      (esClient.search as jest.Mock).mockResolvedValue(makeCompositeResponse([]));
+      (esClient.search as Mock).mockResolvedValue(makeCompositeResponse([]));
 
       await receiver.fetchAllSignals(defaultConfig);
 
-      const call = (esClient.search as jest.Mock).mock.calls[0][0];
+      const call = (esClient.search as Mock).mock.calls[0][0];
 
       expect(call.size).toBe(0);
       expect(call.timeout).toBe(defaultConfig.query_timeout);
@@ -110,11 +113,11 @@ describe('OtelTelemetryReceiver', () => {
     });
 
     it('should include all expected sub-aggregations', async () => {
-      (esClient.search as jest.Mock).mockResolvedValue(makeCompositeResponse([]));
+      (esClient.search as Mock).mockResolvedValue(makeCompositeResponse([]));
 
       await receiver.fetchAllSignals(defaultConfig);
 
-      const comboAggs = (esClient.search as jest.Mock).mock.calls[0][0].aggs.combos.aggs;
+      const comboAggs = (esClient.search as Mock).mock.calls[0][0].aggs.combos.aggs;
       const sampleAggs = comboAggs.sample.aggs;
 
       const expectedTermsAggs = [
@@ -156,11 +159,11 @@ describe('OtelTelemetryReceiver', () => {
     });
 
     it('should use hardcoded agg sizes (5 for terms, 100 for scope_names)', async () => {
-      (esClient.search as jest.Mock).mockResolvedValue(makeCompositeResponse([]));
+      (esClient.search as Mock).mockResolvedValue(makeCompositeResponse([]));
 
       await receiver.fetchAllSignals(defaultConfig);
 
-      const sampleAggs = (esClient.search as jest.Mock).mock.calls[0][0].aggs.combos.aggs.sample
+      const sampleAggs = (esClient.search as Mock).mock.calls[0][0].aggs.combos.aggs.sample
         .aggs;
       expect(sampleAggs.scope_names.terms.size).toBe(100);
       expect(sampleAggs.sdk_names.terms.size).toBe(5);
@@ -169,13 +172,13 @@ describe('OtelTelemetryReceiver', () => {
 
   describe('fetchAllSignals', () => {
     it('should query all three signal index patterns', async () => {
-      (esClient.search as jest.Mock).mockResolvedValue(makeCompositeResponse([]));
+      (esClient.search as Mock).mockResolvedValue(makeCompositeResponse([]));
 
       await receiver.fetchAllSignals(defaultConfig);
 
       expect(esClient.search).toHaveBeenCalledTimes(3);
 
-      const indices = (esClient.search as jest.Mock).mock.calls.map(
+      const indices = (esClient.search as Mock).mock.calls.map(
         (call: [{ index: string }]) => call[0].index
       );
       expect(indices).toEqual([SIGNAL_INDICES.traces, SIGNAL_INDICES.metrics, SIGNAL_INDICES.logs]);
@@ -185,7 +188,7 @@ describe('OtelTelemetryReceiver', () => {
       const tracesBucket = { key: { service_name: 'svc-a', environment: null } };
       const metricsBucket = { key: { service_name: 'svc-b', environment: null } };
 
-      (esClient.search as jest.Mock)
+      (esClient.search as Mock)
         .mockResolvedValueOnce(makeCompositeResponse([tracesBucket]))
         .mockResolvedValueOnce(makeCompositeResponse([metricsBucket]))
         .mockResolvedValueOnce(makeCompositeResponse([]));
@@ -200,7 +203,7 @@ describe('OtelTelemetryReceiver', () => {
     });
 
     it('should handle per-signal errors gracefully', async () => {
-      (esClient.search as jest.Mock)
+      (esClient.search as Mock)
         .mockRejectedValueOnce(new Error('traces timeout'))
         .mockResolvedValueOnce(
           makeCompositeResponse([{ key: { service_name: 'svc', environment: null } }])
@@ -227,7 +230,7 @@ describe('OtelTelemetryReceiver', () => {
 
       const page2 = [{ key: { service_name: 'svc-last', environment: null } }];
 
-      (esClient.search as jest.Mock)
+      (esClient.search as Mock)
         .mockResolvedValueOnce(
           makeCompositeResponse(page1, { service_name: 'svc-999', environment: null })
         )
@@ -238,7 +241,7 @@ describe('OtelTelemetryReceiver', () => {
 
       expect(result.traces).toHaveLength(defaultConfig.composite_page_size + 1);
 
-      const secondCall = (esClient.search as jest.Mock).mock.calls[1][0];
+      const secondCall = (esClient.search as Mock).mock.calls[1][0];
       expect(secondCall.aggs.combos.composite.after).toEqual({
         service_name: 'svc-999',
         environment: null,
@@ -252,7 +255,7 @@ describe('OtelTelemetryReceiver', () => {
       }));
       const lastPage = [{ key: { service_name: 'svc-final', environment: null } }];
 
-      (esClient.search as jest.Mock)
+      (esClient.search as Mock)
         .mockResolvedValueOnce(
           makeCompositeResponse(largePage, { service_name: 'after-1', environment: null })
         )
@@ -283,7 +286,7 @@ describe('OtelTelemetryReceiver', () => {
         key: { service_name: `svc-${i}`, environment: null },
       }));
 
-      (esClient.search as jest.Mock)
+      (esClient.search as Mock)
         .mockResolvedValueOnce(
           makeCompositeResponse(largePage, { service_name: 'after-1', environment: null })
         )

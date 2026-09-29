@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { RulesClient } from '../rules_client';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -12,19 +15,19 @@ import type { AlertsService } from '../../alerts_service';
 import { getRulesClientMockParams } from '../../test_utils';
 
 const alertsService = {
-  isInitialized: jest.fn(),
-  createAlertsClient: jest.fn(),
-  muteAlertInstance: jest.fn(),
-  unmuteAlertInstance: jest.fn(),
-  getAlertSnoozeSnapshot: jest.fn(),
-  muteAllAlerts: jest.fn(),
-  unmuteAllAlerts: jest.fn(),
-  getContextInitializationPromise: jest.fn(),
-  register: jest.fn(),
-  isExistingAlert: jest.fn(),
-  setAlertsToUntracked: jest.fn(),
-  clearAlertFlappingHistory: jest.fn(),
-} as unknown as jest.Mocked<AlertsService>;
+  isInitialized: vi.fn(),
+  createAlertsClient: vi.fn(),
+  muteAlertInstance: vi.fn(),
+  unmuteAlertInstance: vi.fn(),
+  getAlertSnoozeSnapshot: vi.fn(),
+  muteAllAlerts: vi.fn(),
+  unmuteAllAlerts: vi.fn(),
+  getContextInitializationPromise: vi.fn(),
+  register: vi.fn(),
+  isExistingAlert: vi.fn(),
+  setAlertsToUntracked: vi.fn(),
+  clearAlertFlappingHistory: vi.fn(),
+} as unknown as Mocked<AlertsService>;
 
 const {
   rulesClientParams,
@@ -38,10 +41,10 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
   alertsService.getAlertSnoozeSnapshot.mockClear();
   alertsService.getAlertSnoozeSnapshot.mockResolvedValue({ 'host.name': 'web-01' });
-  (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue(['.alerts-default']);
+  (rulesClientParams.getAlertIndicesAlias as Mock).mockReturnValue(['.alerts-default']);
 });
 
 setGlobalDate();
@@ -316,7 +319,7 @@ describe('snoozeAlertInstance()', () => {
 
   describe('elasticsearch operations', () => {
     test('does not call getAlertSnoozeSnapshot when no alert indices exist', async () => {
-      (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
+      (rulesClientParams.getAlertIndicesAlias as Mock).mockReturnValue([]);
       const rulesClient = new RulesClient(rulesClientParams);
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',

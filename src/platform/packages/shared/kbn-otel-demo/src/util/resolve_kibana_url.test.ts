@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import fetch from 'node-fetch';
 import { resolveKibanaUrl } from './resolve_kibana_url';
 
-jest.mock('node-fetch', () => jest.fn());
+vi.mock('node-fetch', () => vi.fn());
 
 describe('resolveKibanaUrl', () => {
-  const mockFetch = fetch as unknown as jest.Mock;
+  const mockFetch = fetch as unknown as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should detect and append dev mode base path when redirect location is a relative path', async () => {
     mockFetch.mockResolvedValue({
       status: 302,
       headers: {
-        get: jest.fn().mockReturnValue('/abc'),
+        get: vi.fn().mockReturnValue('/abc'),
       },
     });
 
@@ -44,7 +47,7 @@ describe('resolveKibanaUrl', () => {
     mockFetch.mockResolvedValue({
       status: 302,
       headers: {
-        get: jest.fn().mockReturnValue('http://localhost:5601/wmy'),
+        get: vi.fn().mockReturnValue('http://localhost:5601/wmy'),
       },
     });
 
@@ -57,7 +60,7 @@ describe('resolveKibanaUrl', () => {
     mockFetch.mockResolvedValue({
       status: 200,
       headers: {
-        get: jest.fn().mockReturnValue(null),
+        get: vi.fn().mockReturnValue(null),
       },
     });
 
@@ -70,7 +73,7 @@ describe('resolveKibanaUrl', () => {
     mockFetch.mockResolvedValue({
       status: 302,
       headers: {
-        get: jest.fn().mockReturnValue('/app/home'),
+        get: vi.fn().mockReturnValue('/app/home'),
       },
     });
 
@@ -83,7 +86,7 @@ describe('resolveKibanaUrl', () => {
     mockFetch.mockResolvedValue({
       status: 302,
       headers: {
-        get: jest.fn().mockReturnValue(null),
+        get: vi.fn().mockReturnValue(null),
       },
     });
 
@@ -105,7 +108,7 @@ describe('resolveKibanaUrl', () => {
     mockFetch.mockResolvedValue({
       status: 301,
       headers: {
-        get: jest.fn().mockReturnValue('/xyz'),
+        get: vi.fn().mockReturnValue('/xyz'),
       },
     });
 
@@ -118,7 +121,7 @@ describe('resolveKibanaUrl', () => {
     mockFetch.mockResolvedValue({
       status: 302,
       headers: {
-        get: jest.fn().mockReturnValue('/abcd'),
+        get: vi.fn().mockReturnValue('/abcd'),
       },
     });
 
@@ -131,7 +134,7 @@ describe('resolveKibanaUrl', () => {
     mockFetch.mockResolvedValue({
       status: 302,
       headers: {
-        get: jest.fn().mockReturnValue('/ab'),
+        get: vi.fn().mockReturnValue('/ab'),
       },
     });
 
@@ -144,7 +147,7 @@ describe('resolveKibanaUrl', () => {
     mockFetch.mockResolvedValue({
       status: 302,
       headers: {
-        get: jest.fn().mockReturnValue('http://localhost:5601/app/home'),
+        get: vi.fn().mockReturnValue('http://localhost:5601/app/home'),
       },
     });
 

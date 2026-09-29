@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor, fireEvent } from '@testing-library/dom';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
@@ -18,25 +21,28 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn().mockResolvedValue({
-    id: 'mock-adhoc-dataview',
-    title: 'test_index',
-    type: 'esql',
-  }),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLAdHocDataview: vi.fn().mockResolvedValue({
+        id: 'mock-adhoc-dataview',
+        title: 'test_index',
+        type: 'esql',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Quick search visor', () => {
   const corePluginMock = coreMock.createStart();
   const kqlMock = kqlPluginMock.createStartContract();
-  (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+  (kqlMock.autocomplete.hasQuerySuggestions as Mock).mockReturnValue(true);
   const dataMock = dataPluginMock.createStartContract();
 
   const validLicense = {
     status: 'active',
-    hasAtLeast: jest.fn().mockReturnValue(true),
-    getFeature: jest.fn().mockReturnValue({ isEnabled: false, isAvailable: false }),
+    hasAtLeast: vi.fn().mockReturnValue(true),
+    getFeature: vi.fn().mockReturnValue({ isEnabled: false, isAvailable: false }),
   };
 
   const services = {
@@ -44,7 +50,7 @@ describe('Quick search visor', () => {
     data: dataMock,
     kql: kqlMock,
     esql: {
-      getLicense: jest.fn().mockResolvedValue(validLicense),
+      getLicense: vi.fn().mockResolvedValue(validLicense),
     },
   };
 
@@ -78,7 +84,7 @@ describe('Quick search visor', () => {
 
   let props: QuickSearchVisorProps;
   beforeEach(() => {
-    (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
+    (corePluginMock.http.get as Mock).mockImplementation((url: string) => {
       if (url.includes('/internal/esql/autocomplete/sources/')) {
         return Promise.resolve([
           { name: 'test_index', hidden: false, type: 'index' },
@@ -94,13 +100,13 @@ describe('Quick search visor', () => {
       query: 'FROM test_index',
       isSpaceReduced: false,
       isVisible: true,
-      onUpdateAndSubmitQuery: jest.fn(),
-      onToggleVisor: jest.fn(),
+      onUpdateAndSubmitQuery: vi.fn(),
+      onToggleVisor: vi.fn(),
     };
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the sources dropdown and the KQL query input', async () => {
@@ -141,8 +147,8 @@ describe('Quick search visor', () => {
   it('should not render the mode selector when license is not enterprise', async () => {
     const invalidLicense = {
       status: 'active',
-      hasAtLeast: jest.fn().mockReturnValue(false),
-      getFeature: jest.fn().mockReturnValue({ isEnabled: false, isAvailable: false }),
+      hasAtLeast: vi.fn().mockReturnValue(false),
+      getFeature: vi.fn().mockReturnValue({ isEnabled: false, isAvailable: false }),
     };
     services.esql.getLicense.mockResolvedValue(invalidLicense);
     const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
@@ -171,7 +177,7 @@ describe('Quick search visor', () => {
   });
 
   it('should show the no connector message when no connectors are configured', async () => {
-    (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
+    (corePluginMock.http.get as Mock).mockImplementation((url: string) => {
       if (url.includes('/internal/esql/autocomplete/sources/')) {
         return Promise.resolve([{ name: 'test_index', hidden: false, type: 'index' }]);
       }

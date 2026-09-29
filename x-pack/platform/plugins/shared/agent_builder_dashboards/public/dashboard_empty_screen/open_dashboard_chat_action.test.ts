@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
 import { createOpenDashboardChatAction } from './open_dashboard_chat_action';
 
 describe('createOpenDashboardChatAction', () => {
-  const openChat = jest.fn() as jest.MockedFunction<AgentBuilderPluginStart['openChat']>;
+  const openChat = vi.fn() as MockedFunction<AgentBuilderPluginStart['openChat']>;
 
   beforeEach(() => {
     openChat.mockClear();

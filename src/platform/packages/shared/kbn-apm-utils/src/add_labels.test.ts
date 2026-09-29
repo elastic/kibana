@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { trace } from '@opentelemetry/api';
 import type { AttributeValue } from '@opentelemetry/api';
 import apm from 'elastic-apm-node';
@@ -14,43 +17,46 @@ import apm from 'elastic-apm-node';
 import { addSpanLabels, addTransactionLabels } from './add_labels';
 import type { Labels } from './add_labels';
 
-jest.mock('elastic-apm-node', () => ({
+vi.mock('elastic-apm-node', () => ({
   __esModule: true,
   default: {
-    addLabels: jest.fn(),
+    addLabels: vi.fn(),
     currentTransaction: {
-      addLabels: jest.fn(),
+      addLabels: vi.fn(),
     },
   },
 }));
 
-jest.mock('@opentelemetry/api', () => ({
-  trace: {
-    getActiveSpan: jest.fn(),
-  },
-}));
+vi.mock('@opentelemetry/api', () => {
+      const mocked = {
+      trace: {
+        getActiveSpan: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface MockSpan {
-  setAttributes: jest.Mock<void, [Record<string, AttributeValue>]>;
-  isRecording: jest.Mock<boolean>;
+  setAttributes: Mock<void, [Record<string, AttributeValue>]>;
+  isRecording: Mock<boolean>;
 }
 
 interface MockApm {
-  addLabels: jest.Mock<void, [Labels, boolean?]>;
+  addLabels: Mock<void, [Labels, boolean?]>;
   currentTransaction?: {
-    addLabels: jest.Mock<void, [Labels, boolean?]>;
+    addLabels: Mock<void, [Labels, boolean?]>;
   };
 }
 
 const mockedApm = apm as unknown as MockApm;
-const getActiveSpanMock = trace.getActiveSpan as jest.MockedFunction<typeof trace.getActiveSpan>;
+const getActiveSpanMock = trace.getActiveSpan as MockedFunction<typeof trace.getActiveSpan>;
 
 const createMockSpan = (): MockSpan => ({
-  setAttributes: jest.fn(),
-  isRecording: jest.fn().mockReturnValue(true),
+  setAttributes: vi.fn(),
+  isRecording: vi.fn().mockReturnValue(true),
 });
 
-const getTransactionAddLabelsMock = (): jest.Mock<void, [Labels, boolean?]> => {
+const getTransactionAddLabelsMock = (): Mock<void, [Labels, boolean?]> => {
   if (!mockedApm.currentTransaction) {
     throw new Error('expected currentTransaction mock to be defined');
   }

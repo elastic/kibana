@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
-jest.mock('../lib/get_default_query_language', () => ({
-  getDefaultQueryLanguage: () => 'kuery',
-}));
+vi.mock('../lib/get_default_query_language', () => {
+      const mocked = {
+      getDefaultQueryLanguage: () => 'kuery',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { GaugePanelConfig } from './gauge';
 import type { PanelConfigProps } from './types';
@@ -22,7 +27,7 @@ describe('GaugePanelConfig', () => {
     const props = {
       fields: {},
       model: {},
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     } as unknown as PanelConfigProps;
     const wrapper = shallow(<GaugePanelConfig {...props} />);
 
@@ -34,7 +39,7 @@ describe('GaugePanelConfig', () => {
     const props = {
       fields: {},
       model: {},
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     } as unknown as PanelConfigProps;
     const wrapper = shallow(<GaugePanelConfig {...props} />);
 

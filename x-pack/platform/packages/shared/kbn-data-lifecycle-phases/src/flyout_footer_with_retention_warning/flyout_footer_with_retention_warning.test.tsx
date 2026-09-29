@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -107,8 +109,8 @@ describe('FlyoutFooterWithRetentionWarning', () => {
 
   it('shows custom cancel/apply labels and disables apply when requested', async () => {
     const user = userEvent.setup();
-    const onCancel = jest.fn();
-    const onApply = jest.fn();
+    const onCancel = vi.fn();
+    const onApply = vi.fn();
 
     renderWithTheme(
       <FlyoutFooterWithRetentionWarning

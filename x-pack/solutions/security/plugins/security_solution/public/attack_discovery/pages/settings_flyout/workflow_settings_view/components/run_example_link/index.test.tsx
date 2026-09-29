@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,9 +15,9 @@ import { TestProviders } from '../../../../../../common/mock';
 import { useWorkflowEditorLink } from '../../../../use_workflow_editor_link';
 import { RunExampleLink } from '.';
 
-jest.mock('../../../../use_workflow_editor_link');
+vi.mock('../../../../use_workflow_editor_link');
 
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
 const MOCK_RUN_EXAMPLE_URL = 'http://localhost:5601/s/default/app/workflows/workflow-run-example';
 
@@ -27,11 +30,11 @@ const renderComponent = () =>
 
 describe('RunExampleLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: MOCK_RUN_EXAMPLE_URL,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: 'workflow-run-example',
     });
   });
@@ -63,7 +66,7 @@ describe('RunExampleLink', () => {
   it('renders nothing when the run example workflow is not available', () => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
 

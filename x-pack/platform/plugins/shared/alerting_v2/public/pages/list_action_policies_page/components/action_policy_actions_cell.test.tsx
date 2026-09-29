@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,9 +14,12 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyActionsCell } from './action_policy_actions_cell';
 
 let mockIsLicenseValid = true;
-jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-}));
+vi.mock('../../../hooks/use_is_action_policies_license_valid', () => {
+      const mocked = {
+      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
@@ -41,11 +46,11 @@ const renderCell = (canWrite: boolean) =>
       <ActionPolicyActionsCell
         policy={createPolicy()}
         canWrite={canWrite}
-        onViewDetails={jest.fn()}
-        onEdit={jest.fn()}
-        onClone={jest.fn()}
-        onDelete={jest.fn()}
-        onUpdateApiKey={jest.fn()}
+        onViewDetails={vi.fn()}
+        onEdit={vi.fn()}
+        onClone={vi.fn()}
+        onDelete={vi.fn()}
+        onUpdateApiKey={vi.fn()}
       />
     </I18nProvider>
   );

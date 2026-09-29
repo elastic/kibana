@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type {
   TransformGetTransformResponse,
   TransformGetTransformStatsResponse,
@@ -19,14 +22,14 @@ import { transformHealthServiceProvider } from './transform_health_service';
 import type { TransformHealthRuleParams } from '@kbn/response-ops-rule-params/transform_health';
 
 describe('transformHealthServiceProvider', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let rulesClient: jest.Mocked<RulesClient>;
-  let fieldFormatsRegistry: jest.Mocked<FieldFormatsRegistry>;
+  let esClient: Mocked<ElasticsearchClient>;
+  let rulesClient: Mocked<RulesClient>;
+  let fieldFormatsRegistry: Mocked<FieldFormatsRegistry>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    (esClient.transform.getTransform as jest.Mock).mockImplementation(
+    (esClient.transform.getTransform as Mock).mockImplementation(
       async ({ transform_id: transformId }) => {
         return {
           transforms: [
@@ -48,19 +51,19 @@ describe('transformHealthServiceProvider', () => {
       }
     );
 
-    (esClient.transform.getTransformStats as jest.Mock).mockResolvedValue({
+    (esClient.transform.getTransformStats as Mock).mockResolvedValue({
       count: 2,
       transforms: [{}],
     } as unknown as TransformGetTransformStatsResponse);
 
     rulesClient = rulesClientMock.create();
     fieldFormatsRegistry = {
-      deserialize: jest.fn(),
-    } as unknown as jest.Mocked<FieldFormatsRegistry>;
+      deserialize: vi.fn(),
+    } as unknown as Mocked<FieldFormatsRegistry>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should fetch transform stats by transform IDs if the length does not exceed the URL limit', async () => {
@@ -95,7 +98,7 @@ describe('transformHealthServiceProvider', () => {
   it('should fetch all transform stats and filter by transform IDs if the length exceeds the URL limit', async () => {
     const transformIdPrefix = 'transform_with_a_very_long_id_that_result_in_long_url_for_sure_';
 
-    (esClient.transform.getTransform as jest.Mock).mockResolvedValue({
+    (esClient.transform.getTransform as Mock).mockResolvedValue({
       count: 3,
       transforms: [
         // Mock continuous transforms
@@ -110,7 +113,7 @@ describe('transformHealthServiceProvider', () => {
       ],
     } as unknown as TransformGetTransformResponse);
 
-    (esClient.transform.getTransformStats as jest.Mock).mockResolvedValue({
+    (esClient.transform.getTransformStats as Mock).mockResolvedValue({
       count: 2,
       transforms: [
         ...new Array(200).fill(null).map((_, i) => ({
@@ -151,7 +154,7 @@ describe('transformHealthServiceProvider', () => {
   it('should mention recovered transforms based on the previous state', async () => {
     const service = transformHealthServiceProvider({ esClient, rulesClient, fieldFormatsRegistry });
 
-    (esClient.transform.getTransformStats as jest.Mock).mockResolvedValue({
+    (esClient.transform.getTransformStats as Mock).mockResolvedValue({
       count: 2,
       transforms: [
         {
@@ -193,7 +196,7 @@ describe('transformHealthServiceProvider', () => {
   it('should work without previous execution state', async () => {
     const service = transformHealthServiceProvider({ esClient, rulesClient, fieldFormatsRegistry });
 
-    (esClient.transform.getTransformStats as jest.Mock).mockResolvedValue({
+    (esClient.transform.getTransformStats as Mock).mockResolvedValue({
       count: 2,
       transforms: [
         {

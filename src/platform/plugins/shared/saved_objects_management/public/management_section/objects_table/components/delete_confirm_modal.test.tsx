@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -37,12 +40,12 @@ const createObject = ({
 
 describe('DeleteConfirmModal', () => {
   const allowedTypes: SavedObjectManagementTypeInfo[] = [];
-  let onConfirm: jest.Mock;
-  let onCancel: jest.Mock;
+  let onConfirm: Mock;
+  let onCancel: Mock;
 
   beforeEach(() => {
-    onConfirm = jest.fn();
-    onCancel = jest.fn();
+    onConfirm = vi.fn();
+    onCancel = vi.fn();
   });
 
   it('displays a EuiLoadingElastic spinner if `isDeleting` is true', () => {

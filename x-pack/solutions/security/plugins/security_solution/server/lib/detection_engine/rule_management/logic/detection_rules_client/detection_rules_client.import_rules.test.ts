@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
@@ -29,9 +32,9 @@ import { createRuleImportErrorObject } from './methods/import_rules/errors';
 import { DETECTION_RULE_IMPORT_EVENT } from '../../../../telemetry/event_based/events';
 import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../api/constants';
 
-jest.mock('./methods/import_rules/check_rule_exception_references');
-jest.mock('./methods/import_rules/fetch_prebuilt_import_context');
-jest.mock('./methods/import_rules/find_installed_rules_by_signature_ids');
+vi.mock('./methods/import_rules/check_rule_exception_references');
+vi.mock('./methods/import_rules/fetch_prebuilt_import_context');
+vi.mock('./methods/import_rules/find_installed_rules_by_signature_ids');
 
 const emptyPrebuiltContext = () => ({
   matchingAssetsByRuleId: {},
@@ -45,10 +48,10 @@ describe('detectionRulesClient.importRules', () => {
   const rulesAuthz = getMockRulesAuthz();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (checkRuleExceptionReferences as jest.Mock).mockReturnValue([[], []]);
-    (fetchPrebuiltImportContext as jest.Mock).mockResolvedValue(emptyPrebuiltContext());
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValue({});
+    vi.clearAllMocks();
+    (checkRuleExceptionReferences as Mock).mockReturnValue([[], []]);
+    (fetchPrebuiltImportContext as Mock).mockResolvedValue(emptyPrebuiltContext());
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValue({});
 
     rulesClient = rulesClientMock.create();
     rulesClient.bulkCreateRules.mockResolvedValue({
@@ -56,7 +59,7 @@ describe('detectionRulesClient.importRules', () => {
       errors: [],
       total: 0,
     });
-    analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+    analytics = { reportEvent: vi.fn() } as unknown as AnalyticsServiceSetup;
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
@@ -188,7 +191,7 @@ describe('detectionRulesClient.importRules', () => {
     const r1 = { ...getImportRulesSchemaMock(), rule_id: 'new-rule' };
     const r2 = { ...getImportRulesSchemaMock(), rule_id: 'existing-rule' };
 
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
       'existing-rule': getRulesSchemaMock(),
     });
     rulesClient.bulkCreateRules.mockImplementationOnce(async (args) => ({
@@ -216,7 +219,7 @@ describe('detectionRulesClient.importRules', () => {
     const r2 = { ...getImportRulesSchemaMock(), rule_id: 'existing-rule' };
     const existingRule = { ...getRulesSchemaMock(), rule_id: 'existing-rule' };
 
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
       'existing-rule': existingRule,
     });
     rulesClient.update.mockResolvedValueOnce(
@@ -292,7 +295,7 @@ describe('detectionRulesClient.importRules', () => {
 
   it('forwards caller changeTracking to rulesClient.update verbatim on overwrite', async () => {
     const existingRule = { ...getRulesSchemaMock(), rule_id: 'existing-rule' };
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
       'existing-rule': existingRule,
     });
     rulesClient.update.mockResolvedValueOnce(
@@ -351,7 +354,7 @@ describe('detectionRulesClient.importRules', () => {
   });
 
   it('prebuilt rule without a version is rejected before any lookup', async () => {
-    (fetchPrebuiltImportContext as jest.Mock).mockResolvedValueOnce({
+    (fetchPrebuiltImportContext as Mock).mockResolvedValueOnce({
       ...emptyPrebuiltContext(),
       availableRuleAssetIds: new Set([getImportRulesSchemaMock().rule_id]),
     });
@@ -371,7 +374,7 @@ describe('detectionRulesClient.importRules', () => {
   });
 
   it('surfaces an ML authz failure as a per-rule error and skips the rule', async () => {
-    (buildMlAuthz().validateRuleType as jest.Mock).mockResolvedValueOnce({
+    (buildMlAuthz().validateRuleType as Mock).mockResolvedValueOnce({
       valid: false,
       message: 'ML auth failed',
     });
@@ -390,7 +393,7 @@ describe('detectionRulesClient.importRules', () => {
 
   it('surfaces exception reference errors while still creating the rule', async () => {
     const ruleToImport = getImportRulesSchemaMock();
-    (checkRuleExceptionReferences as jest.Mock).mockReturnValueOnce([
+    (checkRuleExceptionReferences as Mock).mockReturnValueOnce([
       [
         createRuleImportErrorObject({
           ruleId: ruleToImport.rule_id,
@@ -418,7 +421,7 @@ describe('detectionRulesClient.importRules', () => {
 
   it('overwrite branch: a thrown rulesClient.update error is re-paired to the rule_id', async () => {
     const ruleToImport = { ...getImportRulesSchemaMock(), rule_id: 'existing-rule' };
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
       'existing-rule': { ...getRulesSchemaMock(), rule_id: 'existing-rule' },
     });
     rulesClient.update.mockRejectedValueOnce(new Error('kaboom'));
@@ -448,10 +451,10 @@ describe('detectionRulesClient.importRules', () => {
       exceptions_list: danglingExceptionsList,
     };
 
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
       'existing-rule': { ...getRulesSchemaMock(), rule_id: 'existing-rule' },
     });
-    (checkRuleExceptionReferences as jest.Mock).mockReturnValueOnce([[], checkedExceptionsList]);
+    (checkRuleExceptionReferences as Mock).mockReturnValueOnce([[], checkedExceptionsList]);
     rulesClient.update.mockResolvedValueOnce(
       getRuleMock({ ...getQueryRuleParams(), ruleId: 'existing-rule' })
     );
@@ -487,7 +490,7 @@ describe('detectionRulesClient.importRules', () => {
       { ...getImportRulesSchemaMock(), rule_id: 'rule-1' },
       { ...getImportRulesSchemaMock(), rule_id: 'rule-2' },
     ];
-    (fetchPrebuiltImportContext as jest.Mock).mockRejectedValueOnce(new Error('search exploded'));
+    (fetchPrebuiltImportContext as Mock).mockRejectedValueOnce(new Error('search exploded'));
 
     const { successes, errors } = await subject.importRules({
       allowMissingConnectorSecrets: false,
@@ -507,7 +510,7 @@ describe('detectionRulesClient.importRules', () => {
       { ...getImportRulesSchemaMock(), rule_id: 'rule-1' },
       { ...getImportRulesSchemaMock(), rule_id: 'rule-2' },
     ];
-    (findInstalledRulesBySignatureIds as jest.Mock).mockRejectedValueOnce(
+    (findInstalledRulesBySignatureIds as Mock).mockRejectedValueOnce(
       new Error('find exploded')
     );
 
@@ -564,7 +567,7 @@ describe('detectionRulesClient.importRules', () => {
 
   it('emits detection_rule_import for a successful overwrite', async () => {
     const existingRule = { ...getRulesSchemaMock(), rule_id: 'existing-rule' };
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
       'existing-rule': existingRule,
     });
     rulesClient.update.mockResolvedValueOnce(
@@ -588,7 +591,7 @@ describe('detectionRulesClient.importRules', () => {
 
   it('does not emit for conflicts or failed creates', async () => {
     const existingRule = { ...getRulesSchemaMock(), rule_id: 'existing-rule' };
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
       'existing-rule': existingRule,
     });
     rulesClient.bulkCreateRules.mockImplementationOnce(async (args) => {
@@ -623,7 +626,7 @@ describe('detectionRulesClient.importRules', () => {
 
     expect(analytics.reportEvent).not.toHaveBeenCalled();
 
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
       'existing-rule': { ...getRulesSchemaMock(), rule_id: 'existing-rule' },
     });
     rulesClient.update.mockRejectedValueOnce(new Error('kaboom'));

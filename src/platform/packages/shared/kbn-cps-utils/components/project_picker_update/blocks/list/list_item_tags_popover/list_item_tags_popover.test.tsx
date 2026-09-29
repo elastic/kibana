@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,11 +17,11 @@ import type { ProjectPickerState } from '../../../state/reducers';
 import { FilterOperator, getFilterExpressionLookupKey } from '../../../utils/filter_input_codec';
 import { ProjectPickerListItemTagsPopover } from './list_item_tags_popover';
 
-const mockUseProjectPickerState = jest.fn();
-const mockUseProjectPickerActions = jest.fn();
+const mockUseProjectPickerState = vi.fn();
+const mockUseProjectPickerActions = vi.fn();
 
-jest.mock('../../../state', () => {
-  const actual = jest.requireActual('../../../state');
+vi.mock('../../../state', async () => {
+  const actual = (await vi.importActual('../../../state'));
   return {
     ...actual,
     useProjectPickerState: () => mockUseProjectPickerState(),
@@ -73,7 +75,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
 
 let currentState = createState();
 
-const addFilterExpression = jest.fn((payload: { expression: typeof envProdAExpression }) => {
+const addFilterExpression = vi.fn((payload: { expression: typeof envProdAExpression }) => {
   const id = getFilterExpressionLookupKey(payload.expression);
   const filterExpressions = new Map(currentState.filterExpressions);
   filterExpressions.set(id, { expression: payload.expression, enabled: true });
@@ -98,7 +100,7 @@ const renderTagsPopover = (stateOverrides: Partial<ProjectPickerState> = {}) => 
   anchor.textContent = 'Project tags trigger';
   document.body.appendChild(anchor);
 
-  const closeHandler = jest.fn();
+  const closeHandler = vi.fn();
 
   const view = render(
     <ProjectPickerListItemTagsPopover
@@ -118,7 +120,7 @@ const renderTagsPopover = (stateOverrides: Partial<ProjectPickerState> = {}) => 
 
 describe('ProjectPickerListItemTagsPopover', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     currentState = createState();
   });
 
@@ -165,7 +167,7 @@ describe('ProjectPickerListItemTagsPopover', () => {
       <ProjectPickerListItemTagsPopover
         button={document.body.querySelector('button')!}
         isOpen={true}
-        closeHandler={jest.fn()}
+        closeHandler={vi.fn()}
         projectTags={projectTags}
       />
     );

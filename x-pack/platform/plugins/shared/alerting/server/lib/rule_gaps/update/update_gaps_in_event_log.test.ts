@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mgetGaps } from '../mget_gaps';
 import { loggerMock } from '@kbn/logging-mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { Gap } from '../gap';
 import { alertingEventLoggerMock } from '../../alerting_event_logger/alerting_event_logger.mock';
 
-jest.mock('../mget_gaps');
-jest.useFakeTimers();
-jest.spyOn(global, 'setTimeout').mockImplementation((cb: () => void) => {
+vi.mock('../mget_gaps');
+vi.useFakeTimers();
+vi.spyOn(global, 'setTimeout').mockImplementation((cb: () => void) => {
   cb();
   return 0 as unknown as NodeJS.Timeout;
 });
@@ -26,15 +29,15 @@ describe('updateGapsInEventLog', () => {
   const mockLogger = loggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
   const alertingEventLogger = alertingEventLoggerMock.create();
-  const eventLoggerUpdateGapsMock = alertingEventLogger.updateGaps as jest.Mock;
+  const eventLoggerUpdateGapsMock = alertingEventLogger.updateGaps as Mock;
 
-  const mgetGapsMock = mgetGaps as jest.Mock;
+  const mgetGapsMock = mgetGaps as Mock;
   const prepareGaps = async (gaps: Gap[]) =>
     gaps.map((gap) => ({
       gap: gap.toObject(),
       internalFields: gap.internalFields as NonNullable<Gap['internalFields']>,
     }));
-  const prepareGapsMock = jest.fn(prepareGaps);
+  const prepareGapsMock = vi.fn(prepareGaps);
 
   const createTestGap = () =>
     new Gap({
@@ -53,7 +56,7 @@ describe('updateGapsInEventLog', () => {
   const testGap = createTestGap();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('happy path', () => {

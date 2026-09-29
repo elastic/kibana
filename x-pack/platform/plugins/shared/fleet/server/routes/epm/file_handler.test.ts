@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -20,17 +22,17 @@ import { getAsset } from '../../services/epm/archive/storage';
 
 import { getFileHandler } from './file_handler';
 
-jest.mock('../../services/app_context');
-jest.mock('../../services/epm/archive');
-jest.mock('../../services/epm/archive/storage');
-jest.mock('../../services/epm/packages/bundled_packages');
-jest.mock('../../services/epm/packages/get');
+vi.mock('../../services/app_context');
+vi.mock('../../services/epm/archive');
+vi.mock('../../services/epm/archive/storage');
+vi.mock('../../services/epm/packages/bundled_packages');
+vi.mock('../../services/epm/packages/get');
 
-const mockedGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
-const mockedGetInstallation = jest.mocked(getInstallation);
-const mockedGetFile = jest.mocked(getFile);
-const mockedUnpackBufferEntries = jest.mocked(unpackArchiveEntriesIntoMemory);
-const mockedGetAsset = jest.mocked(getAsset);
+const mockedGetBundledPackageByPkgKey = vi.mocked(getBundledPackageByPkgKey);
+const mockedGetInstallation = vi.mocked(getInstallation);
+const mockedGetFile = vi.mocked(getFile);
+const mockedUnpackBufferEntries = vi.mocked(unpackArchiveEntriesIntoMemory);
+const mockedGetAsset = vi.mocked(getAsset);
 
 function mockContext() {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
@@ -55,7 +57,7 @@ function mockContext() {
 describe('getFileHandler', () => {
   beforeEach(() => {
     const logger = loggingSystemMock.createLogger();
-    jest.mocked(appContextService).getLogger.mockReturnValue(logger);
+    vi.mocked(appContextService).getLogger.mockReturnValue(logger);
     mockedGetBundledPackageByPkgKey.mockReset();
     mockedUnpackBufferEntries.mockReset();
     mockedGetFile.mockReset();

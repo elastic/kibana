@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment-timezone';
 import { formatDateTimeLocal } from './formatting';
 
@@ -12,7 +14,7 @@ describe('formatDateTimeLocal', () => {
   const date = new Date('2020-01-02T03:04:05.000Z');
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('formats using an explicit timezone', () => {
@@ -20,7 +22,7 @@ describe('formatDateTimeLocal', () => {
   });
 
   it('treats dateFormat:tz=Browser as the guessed timezone', () => {
-    jest.spyOn(moment.tz, 'guess').mockReturnValue('America/Los_Angeles');
+    vi.spyOn(moment.tz, 'guess').mockReturnValue('America/Los_Angeles');
 
     expect(formatDateTimeLocal(date, 'Browser')).toEqual(
       moment.tz(date, 'America/Los_Angeles').format('LL LTS')
@@ -28,7 +30,7 @@ describe('formatDateTimeLocal', () => {
   });
 
   it('defaults to the guessed timezone when timezone is unset or null', () => {
-    jest.spyOn(moment.tz, 'guess').mockReturnValue('America/New_York');
+    vi.spyOn(moment.tz, 'guess').mockReturnValue('America/New_York');
 
     expect(formatDateTimeLocal(date)).toEqual(moment.tz(date, 'America/New_York').format('LL LTS'));
     expect(formatDateTimeLocal(date, null)).toEqual(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -15,9 +18,12 @@ import type { HttpSetup } from '@kbn/core/public';
 
 const mockHttp = {} as HttpSetup;
 
-jest.mock('../apis/update_schedule_report', () => ({
-  updateScheduleReport: jest.fn(),
-}));
+vi.mock('../apis/update_schedule_report', () => {
+      const mocked = {
+      updateScheduleReport: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
@@ -25,12 +31,12 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useUpdateScheduleReport', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call useScheduleReport with correct arguments and return data', async () => {
     const mockResponse = { id: 'report-123', title: 'Updated Report' };
-    (updateScheduleReport as jest.Mock).mockResolvedValue(mockResponse);
+    (updateScheduleReport as Mock).mockResolvedValue(mockResponse);
 
     const { result } = renderHook(() => useUpdateScheduleReport({ http: mockHttp }), {
       wrapper,

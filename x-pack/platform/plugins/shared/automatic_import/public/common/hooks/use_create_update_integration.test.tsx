@@ -5,31 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useCreateUpdateIntegration } from './use_create_update_integration';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as api from '../lib/api';
 
-jest.mock('../lib/api');
-const mockCreateIntegration = api.createIntegration as jest.Mock;
+vi.mock('../lib/api');
+const mockCreateIntegration = api.createIntegration as Mock;
 
-const mockToastsAddSuccess = jest.fn();
-const mockToastsAddError = jest.fn();
+const mockToastsAddSuccess = vi.fn();
+const mockToastsAddError = vi.fn();
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {},
-      notifications: {
-        toasts: {
-          addSuccess: mockToastsAddSuccess,
-          addError: mockToastsAddError,
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {},
+          notifications: {
+            toasts: {
+              addSuccess: mockToastsAddSuccess,
+              addError: mockToastsAddError,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -53,7 +59,7 @@ const createWrapper = () => {
 
 describe('useCreateUpdateIntegration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -128,7 +134,7 @@ describe('useCreateUpdateIntegration', () => {
   describe('failed mutation', () => {
     it('should show error toast on failure', async () => {
       // Suppress expected console.error from React Query's onError callback
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const error = new Error('Server error');
       mockCreateIntegration.mockRejectedValue(error);
@@ -162,7 +168,7 @@ describe('useCreateUpdateIntegration', () => {
 
     it('should set error state on failure', async () => {
       // Suppress expected console.error from React Query's onError callback
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const error = new Error('Server error');
       mockCreateIntegration.mockRejectedValue(error);

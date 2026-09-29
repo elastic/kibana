@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getOr } from 'lodash/fp';
 import React from 'react';
 
@@ -15,20 +17,20 @@ import { HostsType } from '../../store/model';
 import * as i18n from './translations';
 import { getUncommonColumnsCurated, getHostNames } from './columns';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../common/components/link_to');
+vi.mock('../../../../common/components/link_to');
 
 describe('Uncommon Process Columns', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
 
   const defaultProps = {
     data: mockData.edges,
@@ -37,7 +39,7 @@ describe('Uncommon Process Columns', () => {
     isInspect: false,
     loading: false,
     loadPage,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
     totalCount: mockData.totalCount,
     type: hostsModel.HostsType.page,
@@ -63,7 +65,7 @@ describe('Uncommon Process Columns', () => {
   });
 
   describe('#getUncommonColumnsCurated', () => {
-    const openHostFlyout = jest.fn();
+    const openHostFlyout = vi.fn();
 
     test('on hosts page, we expect to get all columns', () => {
       expect(getUncommonColumnsCurated(HostsType.page, openHostFlyout).length).toEqual(6);

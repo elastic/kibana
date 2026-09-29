@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import _ from 'lodash';
 import sinon from 'sinon';
 import type { Filter } from '@kbn/es-query';
@@ -147,8 +149,8 @@ describe('filter_manager', () => {
     });
 
     test('changing a disabled filter should fire only update event', async function () {
-      const updateStub = jest.fn();
-      const fetchStub = jest.fn();
+      const updateStub = vi.fn();
+      const fetchStub = vi.fn();
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, true, false, 'age', 34);
 
       filterManager.setFilters([f1]);
@@ -466,8 +468,8 @@ describe('filter_manager', () => {
     });
 
     test('should fire the update and fetch events', async function () {
-      const updateStub = jest.fn();
-      const fetchStub = jest.fn();
+      const updateStub = vi.fn();
+      const fetchStub = vi.fn();
 
       filterManager.getUpdates$().subscribe({
         next: updateStub,
@@ -659,8 +661,8 @@ describe('filter_manager', () => {
     });
 
     test('should fire the update and fetch events', async function () {
-      const updateStub = jest.fn();
-      const fetchStub = jest.fn();
+      const updateStub = vi.fn();
+      const fetchStub = vi.fn();
 
       filterManager.addFilters(readyFilters, false);
 
@@ -732,8 +734,8 @@ describe('filter_manager', () => {
       filterManager.addFilters(readyFilters);
       expect(filterManager.getFilters()).toHaveLength(3);
 
-      const updateStub = jest.fn();
-      const fetchStub = jest.fn();
+      const updateStub = vi.fn();
+      const fetchStub = vi.fn();
       filterManager.getUpdates$().subscribe({
         next: updateStub,
       });

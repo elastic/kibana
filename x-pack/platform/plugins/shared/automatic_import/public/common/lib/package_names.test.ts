@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import { fetchTakenPackageNames } from './package_names';
 
-const mockGetInstalledPackages = jest.fn();
-const mockGetAllIntegrationNames = jest.fn();
+const mockGetInstalledPackages = vi.fn();
+const mockGetAllIntegrationNames = vi.fn();
 
-jest.mock('./api', () => ({
-  getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
-  getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrationNames(...args),
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
+      getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrationNames(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockHttp = {} as HttpSetup;
 const deps = { http: mockHttp };
 
 describe('fetchTakenPackageNames', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetInstalledPackages.mockResolvedValue({ items: [] });
     mockGetAllIntegrationNames.mockResolvedValue([]);
   });

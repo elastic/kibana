@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -28,7 +30,7 @@ import { getRolesAPIClientMock } from '../roles_api_client.mock';
 import { getSecurityLicenseMock } from '../security_license.mock';
 
 const getUrlForApp = (appId: string) => appId;
-const navigateToUrl = jest.fn();
+const navigateToUrl = vi.fn();
 const spacesManager = spacesManagerMock.create();
 const getRolesAPIClient = getRolesAPIClientMock;
 const getPrivilegeAPIClient = getPrivilegeAPIClientMock;
@@ -49,8 +51,8 @@ const space = {
 };
 
 describe('EditSpaceAssignedRolesTab', () => {
-  const loadRolesSpy = jest.spyOn(spacesManager, 'getRolesForSpace');
-  const toastErrorSpy = jest.spyOn(notifications.toasts, 'addError');
+  const loadRolesSpy = vi.spyOn(spacesManager, 'getRolesForSpace');
+  const toastErrorSpy = vi.spyOn(notifications.toasts, 'addError');
 
   const TestComponent: React.FC<
     React.PropsWithChildren<{

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -17,15 +20,15 @@ import userEvent from '@testing-library/user-event';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
+const useApplicationCapabilitiesMock = useApplicationCapabilities as Mocked<
   typeof useApplicationCapabilities
 >;
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
 describe('Connectors', () => {
-  const onChangeConnector = jest.fn();
-  const handleShowEditFlyout = jest.fn();
-  const onAddNewConnector = jest.fn();
+  const onChangeConnector = vi.fn();
+  const handleShowEditFlyout = vi.fn();
+  const onAddNewConnector = vi.fn();
 
   const props: Props = {
     actionTypes,
@@ -41,7 +44,7 @@ describe('Connectors', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the connectors from group', () => {

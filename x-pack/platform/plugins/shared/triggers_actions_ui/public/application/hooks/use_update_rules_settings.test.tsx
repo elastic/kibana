@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { useUpdateRuleSettings } from './use_update_rules_settings';
 
-const mockAddDanger = jest.fn();
-const mockAddSuccess = jest.fn();
+const mockAddDanger = vi.fn();
+const mockAddSuccess = vi.fn();
 
-jest.mock('../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -27,17 +29,21 @@ jest.mock('../../common/lib/kibana', () => {
     },
   };
 });
-jest.mock('../lib/rule_api/update_query_delay_settings', () => ({
-  updateQueryDelaySettings: jest.fn(),
-}));
-jest.mock('../lib/rule_api/update_flapping_settings', () => ({
-  updateFlappingSettings: jest.fn(),
-}));
+vi.mock('../lib/rule_api/update_query_delay_settings', () => {
+      const mocked = {
+      updateQueryDelaySettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/rule_api/update_flapping_settings', () => {
+      const mocked = {
+      updateFlappingSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { updateQueryDelaySettings } = jest.requireMock(
-  '../lib/rule_api/update_query_delay_settings'
-);
-const { updateFlappingSettings } = jest.requireMock('../lib/rule_api/update_flapping_settings');
+const { updateQueryDelaySettings } = (await vi.importMock('../lib/rule_api/update_query_delay_settings'));
+const { updateFlappingSettings } = (await vi.importMock('../lib/rule_api/update_flapping_settings'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,7 +59,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useUpdateRuleSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call onSuccess if api succeeds', async () => {

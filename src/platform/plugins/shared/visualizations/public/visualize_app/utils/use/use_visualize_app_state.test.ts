@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
@@ -17,23 +20,23 @@ import { visualizeAppStateStub } from '../stubs';
 import { createVisualizeServicesMock } from '../mocks';
 import { VisualizeConstants } from '@kbn/visualizations-common';
 
-jest.mock('../utils');
-jest.mock('../create_visualize_app_state');
-jest.mock('@kbn/data-plugin/public');
+vi.mock('../utils');
+vi.mock('../create_visualize_app_state');
+vi.mock('@kbn/data-plugin/public');
 
-describe('useVisualizeAppState', () => {
-  const { visStateToEditorState } = jest.requireMock('../utils');
-  const { createVisualizeAppState } = jest.requireMock('../create_visualize_app_state');
-  const { connectToQueryState } = jest.requireMock('@kbn/data-plugin/public');
-  const stopStateSyncMock = jest.fn();
-  const stateContainerGetStateMock = jest.fn(() => visualizeAppStateStub);
-  const stopSyncingAppFiltersMock = jest.fn();
+describe('useVisualizeAppState', async () => {
+  const { visStateToEditorState } = (await vi.importMock('../utils'));
+  const { createVisualizeAppState } = (await vi.importMock('../create_visualize_app_state'));
+  const { connectToQueryState } = (await vi.importMock('@kbn/data-plugin/public'));
+  const stopStateSyncMock = vi.fn();
+  const stateContainerGetStateMock = vi.fn(() => visualizeAppStateStub);
+  const stopSyncingAppFiltersMock = vi.fn();
   const stateContainer = {
     getState: stateContainerGetStateMock,
     state$: new Observable(),
     transitions: {
-      updateVisState: jest.fn(),
-      set: jest.fn(),
+      updateVisState: vi.fn(),
+      set: vi.fn(),
     },
   };
 
@@ -47,13 +50,13 @@ describe('useVisualizeAppState', () => {
   const eventEmitter = new EventEmitter();
   const savedVisInstance = {
     vis: {
-      setState: jest.fn().mockResolvedValue({}),
+      setState: vi.fn().mockResolvedValue({}),
       data: {},
     },
     savedVis: {},
     embeddableHandler: {},
   } as unknown as SavedVisInstance;
-  let mockServices: jest.Mocked<VisualizeServices>;
+  let mockServices: Mocked<VisualizeServices>;
 
   beforeEach(() => {
     mockServices = createVisualizeServicesMock();

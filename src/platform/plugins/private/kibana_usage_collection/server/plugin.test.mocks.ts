@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { cloudDetectorMock } from './collectors/cloud/detector/cloud_detector.mock';
 
 const mock = cloudDetectorMock.create();
@@ -14,12 +16,18 @@ const mock = cloudDetectorMock.create();
 export const cloudDetailsMock = mock.getCloudDetails;
 export const detectCloudServiceMock = mock.detectCloudService;
 
-jest.doMock('./collectors/cloud/detector', () => ({
-  CloudDetector: jest.fn().mockImplementation(() => mock),
-}));
+vi.doMock('./collectors/cloud/detector', () => {
+      const mocked = {
+      CloudDetector: vi.fn().mockImplementation(() => mock),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const registerEbtCountersMock = jest.fn();
+export const registerEbtCountersMock = vi.fn();
 
-jest.doMock('./ebt_counters', () => ({
-  registerEbtCounters: registerEbtCountersMock,
-}));
+vi.doMock('./ebt_counters', () => {
+      const mocked = {
+      registerEbtCounters: registerEbtCountersMock,
+    };
+      return { ...mocked, default: mocked };
+    });

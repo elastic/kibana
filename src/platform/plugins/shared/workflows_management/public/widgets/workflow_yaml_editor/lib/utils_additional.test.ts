@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Node, Range } from 'yaml';
 import { getMonacoRangeFromYamlNode, getMonacoRangeFromYamlRange } from './utils';
 import { createMockMonacoModel } from '../../../shared/test_utils/mock_monaco';
@@ -17,24 +20,27 @@ import { createMockMonacoModel } from '../../../shared/test_utils/mock_monaco';
  * The mockMonacoModule uses jest.requireActual inside, so it needs to be called lazily.
  * The mock need to be inlined to work here.
  */
-jest.mock('@kbn/monaco', () => ({
-  ...jest.requireActual('@kbn/monaco'),
-  monaco: {
-    ...jest.requireActual<typeof import('@kbn/monaco')>('@kbn/monaco').monaco,
-    Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
-      startLineNumber: startLine,
-      startColumn: startCol,
-      endLineNumber: endLine,
-      endColumn: endCol,
-    })),
-  },
-}));
+vi.mock('@kbn/monaco', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/monaco')),
+      monaco: {
+        ...(await vi.importActual<typeof import('@kbn/monaco')>('@kbn/monaco')).monaco,
+        Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+          startLineNumber: startLine,
+          startColumn: startCol,
+          endLineNumber: endLine,
+          endColumn: endCol,
+        })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getMonacoRangeFromYamlNode', () => {
   const mockModel = createMockMonacoModel('0123456789\n0123456789\n');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null when node has no range', () => {
@@ -63,7 +69,7 @@ describe('getMonacoRangeFromYamlRange', () => {
   const mockModel = createMockMonacoModel('0123456789\n01234');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a Range from a yaml range tuple', () => {
@@ -83,7 +89,7 @@ describe('getMonacoRangeFromYamlRange', () => {
 
   it('returns null when getPositionAt returns falsy for start', () => {
     const nullModel = createMockMonacoModel('');
-    (nullModel.getPositionAt as jest.Mock).mockReturnValue(null);
+    (nullModel.getPositionAt as Mock).mockReturnValue(null);
 
     const range: Range = [0, 5, 15];
     const result = getMonacoRangeFromYamlRange(nullModel, range);

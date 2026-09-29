@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
@@ -31,7 +33,7 @@ const createEvent = (): SignificantEvent => ({
 
 const createClient = (response: BulkResponse) => {
   const dataStreamClient = {
-    create: jest.fn().mockResolvedValue(response),
+    create: vi.fn().mockResolvedValue(response),
   };
 
   return {
@@ -68,7 +70,7 @@ const createSearchClient = ({
   total: number;
   createdAt?: string;
 }) => {
-  const query = jest.fn(async (request: { query: string }) => {
+  const query = vi.fn(async (request: { query: string }) => {
     const { query: q } = request;
     if (q.includes('STATS total')) {
       return countResponse(total);

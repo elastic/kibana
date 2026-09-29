@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { NodeResponse } from '../__mocks__/mocks';
@@ -119,7 +121,7 @@ describe('getRuleMigrationAgent', () => {
     mockRetriever = new MockRuleMigrationsRetriever();
     mockTelemetryClient = new MockSiemMigrationTelemetryClient();
     mockEsqlKnowledgeBase = new MockEsqlKnowledgeBase();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('graph compilation', () => {

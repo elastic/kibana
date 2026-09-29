@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -24,8 +27,8 @@ import { EventFiltersApiClient } from '../../../../event_filters/service/api_cli
 import { ExceptionsListItemGenerator } from '../../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { buildPerPolicyTag } from '../../../../../../../common/endpoint/service/artifacts/utils';
 
-jest.mock('../../../../../../common/components/user_privileges');
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+vi.mock('../../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
@@ -42,7 +45,7 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   },
 });
 
-jest.setTimeout(10000);
+vi.setConfig({ testTimeout: 10000 });
 
 describe('Policy details artifacts list', () => {
   let render: (canWriteArtifact?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -51,13 +54,13 @@ describe('Policy details artifacts list', () => {
   let mockedContext: AppContextTestRender;
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
   let policy: PolicyData;
-  let handleOnDeleteActionCallbackMock: jest.Mock;
+  let handleOnDeleteActionCallbackMock: Mock;
   beforeEach(() => {
     policy = endpointGenerator.generatePolicyPackagePolicy();
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     ({ history } = mockedContext);
-    handleOnDeleteActionCallbackMock = jest.fn();
+    handleOnDeleteActionCallbackMock = vi.fn();
     render = async (canWriteArtifact = true) => {
       renderResult = mockedContext.render(
         <PolicyArtifactsList

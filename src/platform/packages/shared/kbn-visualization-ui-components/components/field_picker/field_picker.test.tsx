@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { FieldPickerProps } from './field_picker';
 import { FieldPicker } from './field_picker';
@@ -53,7 +55,7 @@ const generateProps = (customField = generateFieldWithLabelOfLength(20)) =>
         ],
       },
     ],
-    onChoose: jest.fn(),
+    onChoose: vi.fn(),
     fieldIsInvalid: false,
   } as unknown as FieldPickerProps<FieldOptionValue>);
 

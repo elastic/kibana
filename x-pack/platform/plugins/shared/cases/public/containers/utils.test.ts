@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   valueToUpdateIsSettings,
   valueToUpdateIsStatus,
@@ -278,8 +280,8 @@ describe('utils', () => {
     });
   });
 
-  describe('parseExtendedFieldSearch', () => {
-    const { parseExtendedFieldSearch } = jest.requireActual('./utils');
+  describe('parseExtendedFieldSearch', async () => {
+    const { parseExtendedFieldSearch } = (await vi.importActual('./utils'));
 
     it('returns empty filters and original text when no field:value pairs', () => {
       expect(parseExtendedFieldSearch('some text')).toEqual({

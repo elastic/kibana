@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -15,11 +17,11 @@ import { ProposalForbiddenError } from './errors';
 const request = httpServerMock.createKibanaRequest();
 
 const createSecurity = (hasAllRequested: boolean) => {
-  const checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested });
+  const checkPrivileges = vi.fn().mockResolvedValue({ hasAllRequested });
   return {
     security: {
       authz: {
-        checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+        checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(checkPrivileges),
         // Mirrors the real builder: the feature declares bare operation names,
         // and only the `api:` action is what `checkPrivileges` recognises.
         actions: { api: { get: (privilege: string) => `api:${privilege}` } },
@@ -42,7 +44,7 @@ const createChecker = (security?: SecurityPluginStart) => {
 
 describe('createProposalPrivilegesChecker', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('assertCanManage', () => {

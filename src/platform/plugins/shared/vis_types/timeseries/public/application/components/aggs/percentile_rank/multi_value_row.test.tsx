@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { MultiValueRow } from './multi_value_row';
@@ -21,9 +23,9 @@ describe('MultiValueRow', () => {
   const props = {
     model,
     enableColorPicker: true,
-    onChange: jest.fn(),
-    onDelete: jest.fn(),
-    onAdd: jest.fn(),
+    onChange: vi.fn(),
+    onDelete: vi.fn(),
+    onAdd: vi.fn(),
     disableAdd: false,
     disableDelete: false,
   };

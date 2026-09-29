@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import { writeAttackDiscoveryEvent } from '.';
@@ -14,9 +17,9 @@ import { attackDiscoveryDataClientMock } from '../../../../../../__mocks__/data_
 
 describe('writeAttackDiscoveryEvent', () => {
   const mockEventLogger = {
-    logEvent: jest.fn(),
+    logEvent: vi.fn(),
   } as {
-    logEvent: jest.Mock;
+    logEvent: Mock;
   } as unknown as IEventLogger;
   const mockDataClient =
     attackDiscoveryDataClientMock.create() as unknown as AttackDiscoveryDataClient;
@@ -41,7 +44,7 @@ describe('writeAttackDiscoveryEvent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('logs the attack discovery event', async () => {
@@ -60,7 +63,7 @@ describe('writeAttackDiscoveryEvent', () => {
     const longReason = 'a'.repeat(2000);
 
     await writeAttackDiscoveryEvent({ ...defaultProps, reason: longReason });
-    const eventArg = (mockEventLogger.logEvent as jest.Mock).mock.calls[0][0];
+    const eventArg = (mockEventLogger.logEvent as Mock).mock.calls[0][0];
 
     expect(eventArg.event.reason.length).toBe(1024);
   });
@@ -71,28 +74,28 @@ describe('writeAttackDiscoveryEvent', () => {
       alertsContextCount: undefined,
       newAlerts: undefined,
     });
-    const eventArg = (mockEventLogger.logEvent as jest.Mock).mock.calls[0][0];
+    const eventArg = (mockEventLogger.logEvent as Mock).mock.calls[0][0];
 
     expect(eventArg.kibana.alert.rule.execution.metrics).toBeUndefined();
   });
 
   it('logs event with event outcome success', async () => {
     await writeAttackDiscoveryEvent({ ...defaultProps, outcome: 'success', reason: undefined });
-    const eventArg = (mockEventLogger.logEvent as jest.Mock).mock.calls[0][0];
+    const eventArg = (mockEventLogger.logEvent as Mock).mock.calls[0][0];
 
     expect(eventArg.event.outcome).toBe('success');
   });
 
   it('logs event with event.outcome failure', async () => {
     await writeAttackDiscoveryEvent({ ...defaultProps, outcome: 'failure', reason: 'fail reason' });
-    const eventArg = (mockEventLogger.logEvent as jest.Mock).mock.calls[0][0];
+    const eventArg = (mockEventLogger.logEvent as Mock).mock.calls[0][0];
 
     expect(eventArg.event.outcome).toBe('failure');
   });
 
   it('logs event with the reason for the failure', async () => {
     await writeAttackDiscoveryEvent({ ...defaultProps, outcome: 'failure', reason: 'fail reason' });
-    const eventArg = (mockEventLogger.logEvent as jest.Mock).mock.calls[0][0];
+    const eventArg = (mockEventLogger.logEvent as Mock).mock.calls[0][0];
 
     expect(eventArg.event.reason).toBe('fail reason');
   });

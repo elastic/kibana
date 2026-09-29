@@ -5,41 +5,52 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 
 import { CreatePackagePolicySinglePageLayout } from './layout';
 
-jest.mock('../hooks/setup_technology', () => ({
-  useAgentless: () => ({
-    isAgentlessAgentPolicy: () => false,
-  }),
-}));
+vi.mock('../hooks/setup_technology', () => {
+      const mocked = {
+      useAgentless: () => ({
+        isAgentlessAgentPolicy: () => false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../layouts', () => ({
-  WithHeaderLayout: ({
-    restrictWidth,
-    restrictHeaderWidth,
-    children,
-  }: {
-    restrictWidth?: number;
-    restrictHeaderWidth?: number;
-    children?: React.ReactNode;
-  }) => (
-    <div
-      data-test-subj="withHeaderLayout"
-      data-restrict-width={String(restrictWidth)}
-      data-restrict-header-width={String(restrictHeaderWidth)}
-    >
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../../../layouts', () => {
+      const mocked = {
+      WithHeaderLayout: ({
+        restrictWidth,
+        restrictHeaderWidth,
+        children,
+      }: {
+        restrictWidth?: number;
+        restrictHeaderWidth?: number;
+        children?: React.ReactNode;
+      }) => (
+        <div
+          data-test-subj="withHeaderLayout"
+          data-restrict-width={String(restrictWidth)}
+          data-restrict-header-width={String(restrictHeaderWidth)}
+        >
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../components', () => ({
-  PackageIcon: () => null,
-}));
+vi.mock('../../../../../components', () => {
+      const mocked = {
+      PackageIcon: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderLayout = (useWidePageLayout?: boolean) =>
   render(

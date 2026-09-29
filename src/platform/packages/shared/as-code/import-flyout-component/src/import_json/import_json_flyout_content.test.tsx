@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,12 +20,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ImportJsonFlyoutContent } from './import_json_flyout_content';
 import type { ImportJsonFlyoutServices } from './types';
 
-const mockCaptureError = jest.fn();
-jest.mock('@elastic/apm-rum', () => ({
-  apm: {
-    captureError: (...args: unknown[]) => mockCaptureError(...args),
-  },
-}));
+const mockCaptureError = vi.fn();
+vi.mock('@elastic/apm-rum', () => {
+      const mocked = {
+      apm: {
+        captureError: (...args: unknown[]) => mockCaptureError(...args),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const VALID_STATE = { title: 'My Object', panels: [] };
 const VALID_FILE = new File([JSON.stringify(VALID_STATE)], 'object.json', {
@@ -39,16 +45,16 @@ const createServices = (): ImportJsonFlyoutServices => {
 };
 
 const renderFlyout = ({
-  sanitizeImportJson = jest.fn().mockResolvedValue({ data: VALID_STATE, warnings: [] }),
-  createFromJson = jest.fn().mockResolvedValue({ id: 'new-id', title: 'My Object' }),
-  onImportSuccess = jest.fn(),
-  closeFlyout = jest.fn(),
+  sanitizeImportJson = vi.fn().mockResolvedValue({ data: VALID_STATE, warnings: [] }),
+  createFromJson = vi.fn().mockResolvedValue({ id: 'new-id', title: 'My Object' }),
+  onImportSuccess = vi.fn(),
+  closeFlyout = vi.fn(),
   services = createServices(),
 }: {
-  sanitizeImportJson?: jest.Mock;
-  createFromJson?: jest.Mock;
-  onImportSuccess?: jest.Mock;
-  closeFlyout?: jest.Mock;
+  sanitizeImportJson?: Mock;
+  createFromJson?: Mock;
+  onImportSuccess?: Mock;
+  closeFlyout?: Mock;
   services?: ImportJsonFlyoutServices;
 } = {}) => {
   render(
@@ -79,7 +85,7 @@ const pickFile = async (file: File) => {
 
 describe('ImportJsonFlyoutContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the file picker and info callout with NDJSON note', () => {
@@ -104,7 +110,7 @@ describe('ImportJsonFlyoutContent', () => {
   it('shows a file size error without reading an oversized file', async () => {
     const { sanitizeImportJson } = renderFlyout();
     const oversized = new File(['{}'], 'big.json', { type: 'application/json' });
-    const readFile = jest.fn();
+    const readFile = vi.fn();
     Object.defineProperty(oversized, 'size', { value: 1_048_577 });
     Object.defineProperty(oversized, 'text', { value: readFile });
     await pickFile(oversized);
@@ -115,7 +121,7 @@ describe('ImportJsonFlyoutContent', () => {
   });
 
   it('shows the server error callout when sanitize rejects the file', async () => {
-    const sanitizeImportJson = jest.fn().mockRejectedValue(new Error('invalid'));
+    const sanitizeImportJson = vi.fn().mockRejectedValue(new Error('invalid'));
     renderFlyout({ sanitizeImportJson });
     await pickFile(VALID_FILE);
     await waitFor(() => expect(screen.getByTestId('testServerError')).toBeInTheDocument());
@@ -142,7 +148,7 @@ describe('ImportJsonFlyoutContent', () => {
     let resolveSanitize:
       | ((value: { data: typeof VALID_STATE; warnings: string[] }) => void)
       | undefined;
-    const sanitizeImportJson = jest.fn(
+    const sanitizeImportJson = vi.fn(
       (_raw: unknown, signal?: AbortSignal) =>
         new Promise<{ data: typeof VALID_STATE; warnings: string[] }>((resolve, reject) => {
           resolveSanitize = resolve;
@@ -173,7 +179,7 @@ describe('ImportJsonFlyoutContent', () => {
   });
 
   it('aborts sanitize when the flyout unmounts', async () => {
-    const sanitizeImportJson = jest.fn(
+    const sanitizeImportJson = vi.fn(
       (_raw: unknown, signal?: AbortSignal) =>
         new Promise<never>((_resolve, reject) => {
           signal?.addEventListener('abort', () => {
@@ -186,14 +192,14 @@ describe('ImportJsonFlyoutContent', () => {
         <ImportJsonFlyoutContent
           title="Import object"
           titleId="import-json-title"
-          closeFlyout={jest.fn()}
+          closeFlyout={vi.fn()}
           dataTestSubjPrefix="test"
           services={createServices()}
           isTechnicalPreview
           serverValidationErrorTitle="The file could not be imported."
           sanitizeImportJson={sanitizeImportJson}
-          createFromJson={jest.fn()}
-          onImportSuccess={jest.fn()}
+          createFromJson={vi.fn()}
+          onImportSuccess={vi.fn()}
         />
       </I18nProvider>
     );
@@ -207,7 +213,7 @@ describe('ImportJsonFlyoutContent', () => {
 
   it('shows collapsible warnings above the file picker but still allows import', async () => {
     const user = userEvent.setup();
-    const sanitizeImportJson = jest.fn().mockResolvedValue({
+    const sanitizeImportJson = vi.fn().mockResolvedValue({
       data: VALID_STATE,
       warnings: ['Panel "chart-1" could not be loaded'],
     });
@@ -231,7 +237,7 @@ describe('ImportJsonFlyoutContent', () => {
 
   it('shows potentially unavailable related items but still allows import', async () => {
     const user = userEvent.setup();
-    const sanitizeImportJson = jest.fn().mockResolvedValue({
+    const sanitizeImportJson = vi.fn().mockResolvedValue({
       data: VALID_STATE,
       warnings: [],
       relatedItems: [
@@ -266,7 +272,7 @@ describe('ImportJsonFlyoutContent', () => {
 
   it('shows sanitize warnings and related items as separate sections in one callout', async () => {
     const user = userEvent.setup();
-    const sanitizeImportJson = jest.fn().mockResolvedValue({
+    const sanitizeImportJson = vi.fn().mockResolvedValue({
       data: VALID_STATE,
       warnings: ['Panel "chart-1" could not be loaded'],
       relatedItems: [{ type: 'index-pattern', type_label: 'index-pattern', id: 'data-view-1' }],
@@ -295,7 +301,7 @@ describe('ImportJsonFlyoutContent', () => {
 
   it('resets a dismissed warning callout when another file is selected', async () => {
     const user = userEvent.setup();
-    const sanitizeImportJson = jest
+    const sanitizeImportJson = vi
       .fn()
       .mockResolvedValueOnce({
         data: VALID_STATE,
@@ -334,7 +340,7 @@ describe('ImportJsonFlyoutContent', () => {
   });
 
   it('shows a danger toast when createFromJson fails', async () => {
-    const createFromJson = jest.fn().mockRejectedValue(new Error('create failed'));
+    const createFromJson = vi.fn().mockRejectedValue(new Error('create failed'));
     const { services } = renderFlyout({ createFromJson });
     await pickFile(VALID_FILE);
     await waitFor(() => expect(screen.getByTestId('testImportButton')).toBeEnabled());

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -13,19 +16,19 @@ import { UserHostWorkingDir } from './user_host_working_dir';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { SecurityCellActions } from '../../../../../common/components/cell_actions';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../../common/components/cell_actions', () => {
+vi.mock('../../../../../common/components/cell_actions', () => {
   return {
-    SecurityCellActions: jest.fn(),
+    SecurityCellActions: vi.fn(),
     CellActionsMode: {
       HOVER_DOWN: 'hover-down',
       HOVER_RIGHT: 'hover-right',
@@ -37,13 +40,13 @@ jest.mock('../../../../../common/components/cell_actions', () => {
   };
 });
 
-const MockedSecurityCellActions = jest.fn(({ children }) => {
+const MockedSecurityCellActions = vi.fn(({ children }) => {
   return <div data-test-subj="mock-security-cell-actions">{children}</div>;
 });
 
 describe('UserHostWorkingDir', () => {
   beforeEach(() => {
-    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
+    (SecurityCellActions as unknown as Mock).mockImplementation(MockedSecurityCellActions);
   });
   const mount = useMountAppended();
 

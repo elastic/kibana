@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { AttackDiscoveryGraphState } from '../../../graphs';
@@ -34,7 +36,7 @@ const initialGraphState: AttackDiscoveryGraphState = {
 };
 
 describe('getRetrieveAnonymizedAlertsOrGenerateEdge', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns "generate" when anonymizedDocs is NOT empty, so there are alerts for the generate step', () => {
     const state: AttackDiscoveryGraphState = {

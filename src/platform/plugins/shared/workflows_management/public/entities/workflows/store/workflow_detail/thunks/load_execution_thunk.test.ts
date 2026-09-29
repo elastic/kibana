@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -16,25 +18,31 @@ import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { clearExecution, setExecution, setStepExecutionPages } from '../slice';
 
-const mockGetExecution = jest.fn();
-const mockGetExecutionSteps = jest.fn();
+const mockGetExecution = vi.fn();
+const mockGetExecutionSteps = vi.fn();
 
 // Mock the WorkflowApi class so loadExecutionThunk uses our mock
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => ({
-    getExecution: mockGetExecution,
-    getExecutionSteps: mockGetExecutionSteps,
-  })),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => ({
+        getExecution: mockGetExecution,
+        getExecutionSteps: mockGetExecutionSteps,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the computation utility
-jest.mock('../utils/computation', () => ({
-  performComputation: jest.fn(() => ({
-    yamlDocument: {},
-    yamlLineCounter: {},
-    workflowLookup: { steps: {} },
-  })),
-}));
+vi.mock('../utils/computation', () => {
+      const mocked = {
+      performComputation: vi.fn(() => ({
+        yamlDocument: {},
+        yamlLineCounter: {},
+        workflowLookup: { steps: {} },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockExecution: WorkflowExecutionDto = {
   spaceId: 'default',
@@ -70,7 +78,7 @@ describe('loadExecutionThunk', () => {
   let mockServices: MockServices;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetExecution.mockReset();
     mockGetExecutionSteps.mockReset();
 
@@ -107,7 +115,7 @@ describe('loadExecutionThunk', () => {
   });
 
   it('should compute execution data for a new execution id', async () => {
-    const { performComputation } = jest.requireMock('../utils/computation');
+    const { performComputation } = (await vi.importMock('../utils/computation'));
     mockGetExecution.mockResolvedValue(mockExecution);
 
     await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));

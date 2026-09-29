@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Action, Dispatch, MiddlewareAPI } from 'redux-toolkit-v1';
 import { makeConfigureStore, onActiveDataChange, setExecutionContext } from '.';
 import { mockStoreDeps } from '../mocks';
@@ -13,8 +15,8 @@ import type { Filter } from '@kbn/es-query';
 
 describe('state management initialization and middlewares', () => {
   let store: ReturnType<typeof makeConfigureStore>;
-  const updaterFn = jest.fn();
-  const customMiddleware = jest.fn(
+  const updaterFn = vi.fn();
+  const customMiddleware = vi.fn(
     (updater) => (_store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
       next(action);
       updater(action);
@@ -22,10 +24,10 @@ describe('state management initialization and middlewares', () => {
   );
   beforeEach(() => {
     store = makeConfigureStore(mockStoreDeps(), undefined, customMiddleware(updaterFn));
-    store.dispatch = jest.fn(store.dispatch);
+    store.dispatch = vi.fn(store.dispatch);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('customMiddleware', () => {

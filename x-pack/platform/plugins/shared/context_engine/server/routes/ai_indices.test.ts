@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -120,32 +123,32 @@ const kiBackingIndex = '.ds-ai-index-ds-customer_support-2026.01.01-000001';
 
 describe('ai indices routes', () => {
   let routes: Record<string, RegisteredRoute>;
-  let aiIndexService: jest.Mocked<
+  let aiIndexService: Mocked<
     Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
   >;
-  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
-  let workflowsManagementApi: jest.Mocked<DeleteWorkflowsApi>;
-  let scheduleService: jest.Mocked<FeedbackAnalysisScheduleService>;
-  let readService: jest.Mocked<AiIndexDataReadServiceApi>;
+  let improvementsService: Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
+  let workflowsManagementApi: Mocked<DeleteWorkflowsApi>;
+  let scheduleService: Mocked<FeedbackAnalysisScheduleService>;
+  let readService: Mocked<AiIndexDataReadServiceApi>;
   let readServiceParams: GetAiIndexDataReadServiceParams[];
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let actions: ReturnType<typeof actionsMock.createStart>;
-  let auditLogger: { log: jest.Mock };
-  let esSearch: jest.Mock;
-  let esEsqlQuery: jest.Mock;
-  let esGet: jest.Mock;
-  let esDeleteDataStream: jest.Mock;
-  let esDeleteIndex: jest.Mock;
-  let esInternalSearch: jest.Mock;
-  let esDeleteView: jest.Mock;
+  let auditLogger: { log: Mock };
+  let esSearch: Mock;
+  let esEsqlQuery: Mock;
+  let esGet: Mock;
+  let esDeleteDataStream: Mock;
+  let esDeleteIndex: Mock;
+  let esInternalSearch: Mock;
+  let esDeleteView: Mock;
   let spacesStart: ReturnType<typeof spacesMock.createStart>;
   let improvementsClients: unknown[];
   let improvementsSpaceIds: string[];
-  let getSpaces: jest.Mock;
-  let getAgentBuilder: jest.Mock;
-  let esResolveIndex: jest.Mock;
+  let getSpaces: Mock;
+  let getAgentBuilder: Mock;
+  let esResolveIndex: Mock;
   const logger = loggerMock.create();
   const defaultSpaceId = 'default';
 
@@ -153,7 +156,7 @@ describe('ai indices routes', () => {
     ({
       core: Promise.resolve({
         uiSettings: {
-          client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
+          client: { get: vi.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         security: { audit: { logger: auditLogger } },
         elasticsearch: {
@@ -184,7 +187,7 @@ describe('ai indices routes', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routes = {};
     featureFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
@@ -192,41 +195,41 @@ describe('ai indices routes', () => {
     actions = actionsMock.createStart();
     actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
     actionsClient.listTypes.mockResolvedValue(SUPPORTED_TYPE_IDS.map(buildConnectorType));
-    auditLogger = { log: jest.fn() };
-    esSearch = jest.fn();
-    esGet = jest.fn();
-    esEsqlQuery = jest.fn();
-    esDeleteDataStream = jest.fn().mockResolvedValue({ acknowledged: true });
-    esDeleteIndex = jest.fn().mockResolvedValue({ acknowledged: true });
-    esResolveIndex = jest.fn().mockResolvedValue({
+    auditLogger = { log: vi.fn() };
+    esSearch = vi.fn();
+    esGet = vi.fn();
+    esEsqlQuery = vi.fn();
+    esDeleteDataStream = vi.fn().mockResolvedValue({ acknowledged: true });
+    esDeleteIndex = vi.fn().mockResolvedValue({ acknowledged: true });
+    esResolveIndex = vi.fn().mockResolvedValue({
       indices: [{ name: 'logs-default', attributes: ['open'] }],
       aliases: [],
       data_streams: [],
     });
-    esInternalSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
-    esDeleteView = jest.fn().mockResolvedValue({ acknowledged: true });
+    esInternalSearch = vi.fn().mockResolvedValue({ hits: { hits: [] } });
+    esDeleteView = vi.fn().mockResolvedValue({ acknowledged: true });
     spacesStart = spacesMock.createStart();
     aiIndexService = {
-      create: jest.fn(),
-      put: jest.fn(),
-      get: jest.fn().mockResolvedValue(aiIndexItem),
-      list: jest.fn(),
-      delete: jest.fn(),
-      setFeedbackAnalysis: jest.fn(),
+      create: vi.fn(),
+      put: vi.fn(),
+      get: vi.fn().mockResolvedValue(aiIndexItem),
+      list: vi.fn(),
+      delete: vi.fn(),
+      setFeedbackAnalysis: vi.fn(),
     };
-    improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
+    improvementsService = { deleteByAiIndex: vi.fn().mockResolvedValue(undefined) };
     workflowsManagementApi = {
-      deleteWorkflows: jest.fn().mockResolvedValue({ failures: [] }),
+      deleteWorkflows: vi.fn().mockResolvedValue({ failures: [] }),
     };
     improvementsClients = [];
     improvementsSpaceIds = [];
-    getSpaces = jest.fn().mockResolvedValue(spacesStart);
-    getAgentBuilder = jest.fn().mockResolvedValue(undefined);
+    getSpaces = vi.fn().mockResolvedValue(spacesStart);
+    getAgentBuilder = vi.fn().mockResolvedValue(undefined);
     scheduleService = {
-      reconcile: jest.fn().mockResolvedValue(undefined),
-      remove: jest.fn().mockResolvedValue(undefined),
+      reconcile: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
     };
-    readService = { query: jest.fn(), describe: jest.fn(), list: jest.fn() };
+    readService = { query: vi.fn(), describe: vi.fn(), list: vi.fn() };
     readServiceParams = [];
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
@@ -244,10 +247,10 @@ describe('ai indices routes', () => {
 
     const router = {
       versioned: {
-        get: jest.fn(createVersionedRoute('GET')),
-        post: jest.fn(createVersionedRoute('POST')),
-        put: jest.fn(createVersionedRoute('PUT')),
-        delete: jest.fn(createVersionedRoute('DELETE')),
+        get: vi.fn(createVersionedRoute('GET')),
+        post: vi.fn(createVersionedRoute('POST')),
+        put: vi.fn(createVersionedRoute('PUT')),
+        delete: vi.fn(createVersionedRoute('DELETE')),
       },
     } as unknown as IRouter;
 
@@ -1512,10 +1515,10 @@ describe('ai indices routes', () => {
         registerAiIndexRoutes({
           router: {
             versioned: {
-              get: jest.fn(() => ({ addVersion: jest.fn() })),
-              post: jest.fn(() => ({ addVersion: jest.fn() })),
-              put: jest.fn(() => ({ addVersion: jest.fn() })),
-              delete: jest.fn((config) => ({
+              get: vi.fn(() => ({ addVersion: vi.fn() })),
+              post: vi.fn(() => ({ addVersion: vi.fn() })),
+              put: vi.fn(() => ({ addVersion: vi.fn() })),
+              delete: vi.fn((config) => ({
                 addVersion: (
                   versionConfig: RegisteredRoute['validate'],
                   handler: RequestHandler

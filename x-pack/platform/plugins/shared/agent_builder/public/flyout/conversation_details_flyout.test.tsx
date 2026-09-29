@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import { EuiFlyout, EuiProvider } from '@elastic/eui';
@@ -27,12 +29,12 @@ import {
   ConversationDetailsFlyoutSnapshot,
 } from './conversation_details_flyout';
 
-jest.mock('../application/hooks/use_conversation');
-jest.mock('../application/hooks/use_agent_builder_service');
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const { createElement } = jest.requireActual('react');
-  return { ...actual, EuiFlyout: jest.fn((props) => createElement(actual.EuiFlyout, props)) };
+vi.mock('../application/hooks/use_conversation');
+vi.mock('../application/hooks/use_agent_builder_service');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
+  const { createElement } = require('react');
+  return { ...actual, EuiFlyout: vi.fn((props) => createElement(actual.EuiFlyout, props)) };
 });
 
 const ERROR_BODY = 'Something went wrong while loading this conversation.';
@@ -58,8 +60,8 @@ it('provides the live attachment registry at registration without remounting tab
     conversationTemplatesService,
     context: {
       attachmentsService: createPublicAttachmentContract({ attachmentsService }),
-      openSidebarConversation: jest.fn(),
-      openFullscreenConversation: jest.fn(),
+      openSidebarConversation: vi.fn(),
+      openFullscreenConversation: vi.fn(),
     },
   });
   conversationTemplates.registerTab('test.details', ({ attachmentsService: service }) => ({
@@ -121,8 +123,8 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
             http: httpServiceMock.createSetupContract(),
           }),
         }),
-        openSidebarConversation: jest.fn(),
-        openFullscreenConversation: jest.fn(),
+        openSidebarConversation: vi.fn(),
+        openFullscreenConversation: vi.fn(),
       },
     });
     conversationTemplates.registerTab('test.first', () => ({
@@ -160,7 +162,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
   };
 
   const renderSnapshot = () => {
-    const get = jest.fn();
+    const get = vi.fn();
     const conversationsService = { get } as unknown as ConversationsService;
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const Wrapper = ({ children }: PropsWithChildren) => (
@@ -181,14 +183,14 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     return { get, renderResult };
   };
 
-  const advance = (ms: number) => act(async () => void jest.advanceTimersByTime(ms));
+  const advance = (ms: number) => act(async () => void vi.advanceTimersByTime(ms));
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('polls the conversation every 5 seconds while open', async () => {
@@ -287,8 +289,8 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
 
 describe('ConversationDetailsFlyout', () => {
   it('renders the template trailing actions in the menu bar', () => {
-    const trailingActions = jest.fn(() => [
-      { iconType: 'link', 'aria-label': 'Copy link', onClick: jest.fn() },
+    const trailingActions = vi.fn(() => [
+      { iconType: 'link', 'aria-label': 'Copy link', onClick: vi.fn() },
     ]);
     const conversationTemplatesService = new ConversationTemplatesService();
     createPublicConversationTemplatesContract({
@@ -299,8 +301,8 @@ describe('ConversationDetailsFlyout', () => {
             http: httpServiceMock.createSetupContract(),
           }),
         }),
-        openSidebarConversation: jest.fn(),
-        openFullscreenConversation: jest.fn(),
+        openSidebarConversation: vi.fn(),
+        openFullscreenConversation: vi.fn(),
       },
     }).registerTemplateUIDefinition('test', () => ({
       name: 'Test',
@@ -308,18 +310,18 @@ describe('ConversationDetailsFlyout', () => {
       detailsFlyout: { trailingActions },
     }));
     const conversation = createConversation();
-    jest.mocked(useConversation).mockReturnValue({
+    vi.mocked(useConversation).mockReturnValue({
       conversation,
       isLoading: false,
     } as ReturnType<typeof useConversation>);
-    jest.mocked(useAgentBuilderServices).mockReturnValue({
+    vi.mocked(useAgentBuilderServices).mockReturnValue({
       conversationTemplatesService,
     } as ReturnType<typeof useAgentBuilderServices>);
 
-    render(<ConversationDetailsFlyout onClose={jest.fn()} />, { wrapper: EuiProvider });
+    render(<ConversationDetailsFlyout onClose={vi.fn()} />, { wrapper: EuiProvider });
 
     // EUI's test-env EuiFlyout doesn't render the menu, so assert on the props it receives.
-    const [{ flyoutMenuProps }] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
+    const [{ flyoutMenuProps }] = vi.mocked(EuiFlyout).mock.lastCall ?? [{}];
     expect(trailingActions).toHaveBeenCalledWith({ conversation });
     expect(flyoutMenuProps?.trailingActions).toEqual(trailingActions.mock.results[0].value);
   });

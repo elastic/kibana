@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -14,9 +16,12 @@ import type { Agent } from '../../../../../common/types';
 
 import { CollectorDetail } from './collector_detail';
 
-jest.mock('./collector_detail_logs', () => ({
-  CollectorDetailLogs: () => <div data-test-subj="collectorDetailLogs">Logs content</div>,
-}));
+vi.mock('./collector_detail_logs', () => {
+      const mocked = {
+      CollectorDetailLogs: () => <div data-test-subj="collectorDetailLogs">Logs content</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeAgent = (overrides?: Partial<Agent>): Agent =>
   ({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -18,13 +21,13 @@ import { mockEISPreconfiguredEndpoints } from '../__mocks__/inference_endpoints'
 import { filterPreconfiguredEndpoints, connectorFromEndpoint } from '../utils/in_memory_connectors';
 
 describe('DynamicConnectorsPoller', () => {
-  jest.useFakeTimers({ legacyFakeTimers: true });
+  vi.useFakeTimers({ legacyFakeTimers: true });
 
   const logger = {
-    get: jest.fn(),
-  } as unknown as jest.Mocked<Logger>;
+    get: vi.fn(),
+  } as unknown as Mocked<Logger>;
   let mockLogger: MockedLogger;
-  const mockInferenceGet = jest.fn();
+  const mockInferenceGet = vi.fn();
   const mockClient = {
     inference: {
       get: mockInferenceGet,
@@ -52,8 +55,8 @@ describe('DynamicConnectorsPoller', () => {
     if (poller) {
       poller.stop();
     }
-    jest.clearAllTimers();
-    jest.clearAllMocks();
+    vi.clearAllTimers();
+    vi.clearAllMocks();
   });
 
   it(
@@ -295,7 +298,7 @@ describe('DynamicConnectorsPoller', () => {
       'does not start multiple polling processes if start is called multiple times',
       fakeSchedulers(async (advance) => {
         // @ts-expect-error - accessing private property for testing purposes
-        const subscribeSpy = jest.spyOn(poller.polling$, 'subscribe');
+        const subscribeSpy = vi.spyOn(poller.polling$, 'subscribe');
 
         poller.start();
         expect(subscribeSpy).toHaveBeenCalledTimes(1);

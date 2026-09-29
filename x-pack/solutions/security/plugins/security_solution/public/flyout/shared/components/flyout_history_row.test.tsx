@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import {
@@ -45,23 +48,29 @@ import {
   AttackDetailsRightPanelKey,
 } from '../../attack_details/constants/panel_keys';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  useExpandableFlyoutState: jest.fn(),
-  useExpandableFlyoutHistory: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      useExpandableFlyoutState: vi.fn(),
+      useExpandableFlyoutHistory: vi.fn(),
+      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
-  useFindAttackDiscoveries: jest.fn(),
-}));
-jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
-jest.mock('../../document_details/shared/hooks/use_basic_data_from_details_data');
-jest.mock('../../../flyout_v2/rule/main/hooks/use_rule_details');
-jest.mock('../../document_details/shared/hooks/use_event_details');
+vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => {
+      const mocked = {
+      useFindAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+vi.mock('../../document_details/shared/hooks/use_basic_data_from_details_data');
+vi.mock('../../../flyout_v2/rule/main/hooks/use_rule_details');
+vi.mock('../../document_details/shared/hooks/use_event_details');
 
 const flyoutContextValue = {
-  openFlyout: jest.fn(),
+  openFlyout: vi.fn(),
 } as unknown as ExpandableFlyoutApi;
 
 const rowItems: { [id: string]: FlyoutPanelHistory } = {
@@ -148,31 +157,31 @@ const mockedRuleResponse = {
   loading: false,
   isExistingRule: false,
   error: null,
-  refresh: jest.fn(),
+  refresh: vi.fn(),
 };
 
 describe('FlyoutHistoryRow', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
-    jest.mocked(useRuleDetails).mockReturnValue({
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    vi.mocked(useRuleDetails).mockReturnValue({
       ...mockedRuleResponse,
       rule: { name: 'rule name' } as RuleResponse,
       loading: false,
     });
-    (useEventDetails as jest.Mock).mockReturnValue({
+    (useEventDetails as Mock).mockReturnValue({
       dataFormattedForFieldBrowser: {},
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       loading: false,
     });
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: false });
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useBasicDataFromDetailsData as Mock).mockReturnValue({ isAlert: false });
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       data: { data: [{ title: 'Attack title' }], total: 1 },
       isLoading: false,
     });
   });
 
   it('should render document details history row when key is alert', () => {
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({
+    (useBasicDataFromDetailsData as Mock).mockReturnValue({
       isAlert: true,
       ruleName: 'rule name',
     });
@@ -270,16 +279,16 @@ describe('FlyoutHistoryRow', () => {
 
 describe('DocumentDetailsHistoryRow', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
-    (useEventDetails as jest.Mock).mockReturnValue({
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    (useEventDetails as Mock).mockReturnValue({
       dataFormattedForFieldBrowser: {},
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       loading: false,
     });
   });
 
   it('should render alert title when isAlert is true and rule name is defined', () => {
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({
+    (useBasicDataFromDetailsData as Mock).mockReturnValue({
       isAlert: true,
       ruleName: 'rule name',
     });
@@ -295,7 +304,7 @@ describe('DocumentDetailsHistoryRow', () => {
   });
 
   it('should render default alert title when isAlert is true and rule name is undefined', () => {
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
+    (useBasicDataFromDetailsData as Mock).mockReturnValue({ isAlert: true });
 
     const { getByTestId } = render(
       <TestProviders>
@@ -308,7 +317,7 @@ describe('DocumentDetailsHistoryRow', () => {
   });
 
   it('should render event title when isAlert is false', () => {
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: false });
+    (useBasicDataFromDetailsData as Mock).mockReturnValue({ isAlert: false });
 
     const { getByTestId } = render(
       <TestProviders>
@@ -321,7 +330,7 @@ describe('DocumentDetailsHistoryRow', () => {
   });
 
   it('should open document details flyout when clicked', () => {
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
+    (useBasicDataFromDetailsData as Mock).mockReturnValue({ isAlert: true });
 
     const { getByTestId } = render(
       <TestProviders>
@@ -335,8 +344,8 @@ describe('DocumentDetailsHistoryRow', () => {
 
 describe('RuleHistoryRow', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
-    jest.mocked(useRuleDetails).mockReturnValue({
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    vi.mocked(useRuleDetails).mockReturnValue({
       rule: { name: 'rule name' } as RuleResponse,
       loading: false,
       isExistingRule: false,
@@ -366,7 +375,7 @@ describe('RuleHistoryRow', () => {
 
 describe('GenericHistoryRow', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('should render the generic row component', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -160,7 +162,7 @@ describe('cloudOnboardingDeploymentService', () => {
             saved_objects: [makeSOResponse('deploy-1', attrs1), makeSOResponse('deploy-2', attrs2)],
           };
         },
-        close: jest.fn(),
+        close: vi.fn(),
       } as any);
 
       const results = await cloudOnboardingDeploymentService.getByConnectorId(soClient, 'conn-1');
@@ -181,7 +183,7 @@ describe('cloudOnboardingDeploymentService', () => {
         async *find() {
           yield { saved_objects: [] };
         },
-        close: jest.fn(),
+        close: vi.fn(),
       } as any);
 
       const results = await cloudOnboardingDeploymentService.getByConnectorId(

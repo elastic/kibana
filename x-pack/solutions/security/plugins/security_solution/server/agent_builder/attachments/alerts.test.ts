@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
@@ -35,15 +38,15 @@ const buildCoreMock = (hits: Array<{ _id: string; _source: unknown }> = []) => {
   const core = coreMock.createSetup();
   const scopedClient = {
     asCurrentUser: {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: { hits: hits.map((h) => ({ _id: h._id, _source: h._source })) },
       }),
     },
   };
   const elasticsearchMock = {
-    client: { asScoped: jest.fn().mockReturnValue(scopedClient) },
+    client: { asScoped: vi.fn().mockReturnValue(scopedClient) },
   };
-  (core.getStartServices as jest.Mock).mockResolvedValue([{ elasticsearch: elasticsearchMock }]);
+  (core.getStartServices as Mock).mockResolvedValue([{ elasticsearch: elasticsearchMock }]);
   return core as unknown as SecuritySolutionPluginCoreSetupDependencies;
 };
 
@@ -154,10 +157,10 @@ describe('createBulkAlertsAttachmentType', () => {
     it('logs a warn and returns placeholders when ES search throws', async () => {
       const core = coreMock.createSetup();
       const scopedClient = {
-        asCurrentUser: { search: jest.fn().mockRejectedValue(new Error('index not available')) },
+        asCurrentUser: { search: vi.fn().mockRejectedValue(new Error('index not available')) },
       };
-      (core.getStartServices as jest.Mock).mockResolvedValue([
-        { elasticsearch: { client: { asScoped: jest.fn().mockReturnValue(scopedClient) } } },
+      (core.getStartServices as Mock).mockResolvedValue([
+        { elasticsearch: { client: { asScoped: vi.fn().mockReturnValue(scopedClient) } } },
       ]);
       const logger = loggerMock.create();
       const attachmentType = createBulkAlertsAttachmentType(
@@ -200,13 +203,13 @@ describe('createBulkAlertsAttachmentType', () => {
       const rawCore = coreMock.createSetup();
       const scopedClient = {
         asCurrentUser: {
-          search: jest.fn().mockResolvedValue({
+          search: vi.fn().mockResolvedValue({
             hits: { hits: [{ _id: 'abc123', _source: mockAlertSource }] },
           }),
         },
       };
-      (rawCore.getStartServices as jest.Mock).mockResolvedValue([
-        { elasticsearch: { client: { asScoped: jest.fn().mockReturnValue(scopedClient) } } },
+      (rawCore.getStartServices as Mock).mockResolvedValue([
+        { elasticsearch: { client: { asScoped: vi.fn().mockReturnValue(scopedClient) } } },
       ]);
       const core = rawCore as unknown as SecuritySolutionPluginCoreSetupDependencies;
       const attachmentType = createBulkAlertsAttachmentType(core, mockLogger);
@@ -221,7 +224,7 @@ describe('createBulkAlertsAttachmentType', () => {
       const first = await formatted.getRepresentation?.();
 
       // Second read with the same attachment ID should return cached value without hitting ES
-      (rawCore.getStartServices as jest.Mock).mockClear();
+      (rawCore.getStartServices as Mock).mockClear();
       const formatted2 = await attachmentType.format(attachment, formatContext);
       const second = await formatted2.getRepresentation?.();
 

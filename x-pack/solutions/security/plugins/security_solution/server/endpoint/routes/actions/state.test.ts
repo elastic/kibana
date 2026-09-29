@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock, Mocked } from 'vitest';
+
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
@@ -29,8 +31,8 @@ interface CallRouteInterface {
 
 describe('when calling the Action state route handler', () => {
   let mockScopedEsClient: ScopedClusterClientMock;
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockSavedObjectClient: Mocked<SavedObjectsClientContract>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
   let callRoute: (
     routerMock: RouterMock,
     routePrefix: string,
@@ -51,7 +53,7 @@ describe('when calling the Action state route handler', () => {
         username: 'superuser',
         roles: ['superuser'],
       };
-      (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
+      (startContract.security.authc.getCurrentUser as Mock).mockImplementationOnce(
         () => superUser
       );
 

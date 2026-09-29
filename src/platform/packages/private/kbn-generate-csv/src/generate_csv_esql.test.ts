@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 
@@ -46,9 +49,9 @@ describe('CsvESQLGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: IScopedSearchClient;
   let mockConfig: ReportingConfigType['csv'];
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let uiSettingsClient: IUiSettingsClient;
-  let stream: jest.Mocked<Writable>;
+  let stream: Mocked<Writable>;
   let content: string;
 
   const getMockRawResponse = (
@@ -58,7 +61,7 @@ describe('CsvESQLGenerator', () => {
     }
   ): ESQLSearchResponse => esqlResponse;
 
-  const mockDataClientSearchDefault = jest.fn().mockImplementation(
+  const mockDataClientSearchDefault = vi.fn().mockImplementation(
     (): Rx.Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
       Rx.of({
         rawResponse: getMockRawResponse(),
@@ -66,7 +69,7 @@ describe('CsvESQLGenerator', () => {
   );
 
   const mockSearchResponse = (response: ESQLSearchResponse) => {
-    mockDataClient.search = jest.fn().mockImplementation(() =>
+    mockDataClient.search = vi.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: getMockRawResponse(response),
       })
@@ -75,14 +78,14 @@ describe('CsvESQLGenerator', () => {
 
   beforeEach(async () => {
     content = '';
-    stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
+    stream = { write: vi.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
     mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
     mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
     mockDataClient.search = mockDataClientSearchDefault;
     uiSettingsClient = uiSettingsServiceMock
       .createStartContract()
       .asScopedToClient(savedObjectsClientMock.create());
-    uiSettingsClient.get = jest.fn().mockImplementation((key): any => {
+    uiSettingsClient.get = vi.fn().mockImplementation((key): any => {
       switch (key) {
         case UI_SETTINGS_CSV_QUOTE_VALUES:
           return true;
@@ -231,7 +234,7 @@ describe('CsvESQLGenerator', () => {
     };
 
     let mockConfigWithAutoScrollDuration: ReportingConfigType['csv'];
-    let mockDataClientSearchFn: jest.MockedFunction<IScopedSearchClient['search']>;
+    let mockDataClientSearchFn: MockedFunction<IScopedSearchClient['search']>;
 
     beforeEach(() => {
       mockConfigWithAutoScrollDuration = {
@@ -242,14 +245,14 @@ describe('CsvESQLGenerator', () => {
         },
       };
 
-      mockDataClientSearchFn = jest.fn();
+      mockDataClientSearchFn = vi.fn();
 
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.clearAllTimers();
-      jest.useRealTimers();
+      vi.clearAllTimers();
+      vi.useRealTimers();
 
       mockDataClientSearchFn.mockRestore();
     });
@@ -309,7 +312,7 @@ describe('CsvESQLGenerator', () => {
         jobId
       ).generateData();
 
-      await jest.advanceTimersByTimeAsync(timeFromNowInMs);
+      await vi.advanceTimersByTimeAsync(timeFromNowInMs);
 
       expect(await generateCsvPromise).toEqual(
         expect.objectContaining({
@@ -386,7 +389,7 @@ describe('CsvESQLGenerator', () => {
         jobId
       ).generateData();
 
-      await jest.advanceTimersByTimeAsync(requestDuration);
+      await vi.advanceTimersByTimeAsync(requestDuration);
 
       expect(await generateCsvPromise).toEqual(
         expect.objectContaining({
@@ -849,7 +852,7 @@ describe('CsvESQLGenerator', () => {
   });
 
   it('handles unknown errors', async () => {
-    mockDataClient.search = jest.fn().mockImplementation(() => {
+    mockDataClient.search = vi.fn().mockImplementation(() => {
       throw new Error('An unknown error');
     });
     const generateCsv = new CsvESQLGenerator(
@@ -886,7 +889,7 @@ describe('CsvESQLGenerator', () => {
 
   describe('error codes', () => {
     it('returns the expected error code when authentication expires', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() => {
+      mockDataClient.search = vi.fn().mockImplementation(() => {
         throw new esErrors.ResponseError({ statusCode: 403, meta: {} as any, warnings: [] });
       });
 
@@ -965,10 +968,10 @@ describe('CsvESQLGenerator', () => {
         stream,
         jobId
       );
-      (mockDataClient.search as jest.Mock).mockClear();
+      (mockDataClient.search as Mock).mockClear();
       await generateCsv.generateData();
 
-      const callArgs = (mockDataClient.search as jest.Mock).mock.calls[0][0];
+      const callArgs = (mockDataClient.search as Mock).mock.calls[0][0];
       const searchParams = callArgs.params;
 
       // The ES range filter should have resolved, absolute times anchored to forceNow

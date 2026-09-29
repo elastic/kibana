@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
 import { render, screen, fireEvent, act } from '@testing-library/react';
@@ -93,8 +95,8 @@ const renderRecoveryStep = (
     queryCommitted: true,
     ...stateOverrides,
   });
-  const dispatch = jest.fn();
-  const onRecoveryTypeChange = jest.fn();
+  const dispatch = vi.fn();
+  const onRecoveryTypeChange = vi.fn();
   const services = createMockServices();
 
   const view = render(
@@ -205,7 +207,7 @@ describe('RecoveryConditionStep', () => {
   it('toggles custom recovery content without a hooks-order warning', () => {
     // React reports a mismatched hook count as a console.error, not a thrown
     // exception — assert on the former; `.not.toThrow()` would pass either way.
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     renderRecoveryStep({ strategy: recoveryStrategy.no_breach }, {}, SPLIT_QUERY);
 
     act(() => {

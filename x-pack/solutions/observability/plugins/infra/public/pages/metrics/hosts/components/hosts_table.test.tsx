@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -17,31 +20,37 @@ import { useHostCountContext } from '../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 
-jest.mock('@kbn/ebt-tools', () => ({
-  usePerformanceContext: () => ({ onPageReady: jest.fn() }),
-}));
-jest.mock('../hooks/use_hosts_table');
-jest.mock('../hooks/use_hosts_view');
-jest.mock('../hooks/use_host_count');
-jest.mock('../hooks/use_unified_search');
-jest.mock('../../../../hooks/use_time_range_metadata');
-jest.mock('./host_details_flyout/flyout_wrapper', () => ({
-  FlyoutWrapper: () => null,
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePerformanceContext: () => ({ onPageReady: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_hosts_table');
+vi.mock('../hooks/use_hosts_view');
+vi.mock('../hooks/use_host_count');
+vi.mock('../hooks/use_unified_search');
+vi.mock('../../../../hooks/use_time_range_metadata');
+vi.mock('./host_details_flyout/flyout_wrapper', () => {
+      const mocked = {
+      FlyoutWrapper: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseHostsTableContext = useHostsTableContext as jest.MockedFunction<
+const mockUseHostsTableContext = useHostsTableContext as MockedFunction<
   typeof useHostsTableContext
 >;
-const mockUseHostsViewContext = useHostsViewContext as jest.MockedFunction<
+const mockUseHostsViewContext = useHostsViewContext as MockedFunction<
   typeof useHostsViewContext
 >;
-const mockUseHostCountContext = useHostCountContext as jest.MockedFunction<
+const mockUseHostCountContext = useHostCountContext as MockedFunction<
   typeof useHostCountContext
 >;
-const mockUseUnifiedSearchContext = useUnifiedSearchContext as jest.MockedFunction<
+const mockUseUnifiedSearchContext = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext
 >;
-const mockUseTimeRangeMetadataContext = useTimeRangeMetadataContext as jest.MockedFunction<
+const mockUseTimeRangeMetadataContext = useTimeRangeMetadataContext as MockedFunction<
   typeof useTimeRangeMetadataContext
 >;
 
@@ -55,14 +64,14 @@ const hostRow = {
 const tableContext = {
   columns: [{ field: 'name', name: 'Name' }],
   isFlyoutOpen: false,
-  closeFlyout: jest.fn(),
+  closeFlyout: vi.fn(),
   clickedItem: undefined,
-  onTableChange: jest.fn(),
+  onTableChange: vi.fn(),
   pagination: { pageIndex: 0, pageSize: 10 },
   sorting: { field: 'name', direction: 'asc' as const },
-  selection: { onSelectionChange: jest.fn() },
+  selection: { onSelectionChange: vi.fn() },
   selectedItemsCount: 0,
-  filterSelectedHosts: jest.fn(),
+  filterSelectedHosts: vi.fn(),
 };
 
 const renderTable = () =>
@@ -76,7 +85,7 @@ const renderTable = () =>
 
 describe('HostsTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseHostsViewContext.mockReturnValue({
       loading: false,
     } as ReturnType<typeof useHostsViewContext>);

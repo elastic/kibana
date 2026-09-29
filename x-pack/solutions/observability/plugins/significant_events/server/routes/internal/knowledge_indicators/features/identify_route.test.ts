@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import {
   MAX_INFERENCE_DOCUMENT_BYTES,
@@ -14,42 +17,57 @@ import {
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { internalIdentifyKIFeaturesRoutes } from './identify_route';
 
-jest.mock('../../../utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../../utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetStreamSamplingSource = jest.fn();
-const mockGetStreamTypeFromDefinition = jest.fn();
-const mockIdentifyInferredFeatures = jest.fn();
-const mockIdentifyComputedFeatures = jest.fn();
-const mockShouldIdentifyFeatures = jest.fn();
+const mockGetStreamSamplingSource = vi.fn();
+const mockGetStreamTypeFromDefinition = vi.fn();
+const mockIdentifyInferredFeatures = vi.fn();
+const mockIdentifyComputedFeatures = vi.fn();
+const mockShouldIdentifyFeatures = vi.fn();
 
-jest.mock('@kbn/streams-schema', () => ({
-  getStreamSamplingSource: (...args: unknown[]) => mockGetStreamSamplingSource(...args),
-  getStreamTypeFromDefinition: (...args: unknown[]) => mockGetStreamTypeFromDefinition(...args),
-}));
+vi.mock('@kbn/streams-schema', () => {
+      const mocked = {
+      getStreamSamplingSource: (...args: unknown[]) => mockGetStreamSamplingSource(...args),
+      getStreamTypeFromDefinition: (...args: unknown[]) => mockGetStreamTypeFromDefinition(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/significant_events/features', () => ({
-  MS_PER_DAY: 86_400_000,
-  MAX_INFERENCE_DOCUMENTS_BYTES: 288 * 1024,
-  MAX_INFERENCE_DOCUMENT_BYTES: 32 * 1024,
-  MAX_INFERENCE_DOCUMENT_FIELDS: 100,
-  MAX_INFERENCE_FIELD_NAME_LENGTH: 1024,
-  buildTelemetry: jest.fn(),
-  prepareInferredSampling: jest.fn(),
-  identifyInferredFeatures: (...args: unknown[]) => mockIdentifyInferredFeatures(...args),
-  identifyComputedFeatures: (...args: unknown[]) => mockIdentifyComputedFeatures(...args),
-}));
+vi.mock('../../../../lib/significant_events/features', () => {
+      const mocked = {
+      MS_PER_DAY: 86_400_000,
+      MAX_INFERENCE_DOCUMENTS_BYTES: 288 * 1024,
+      MAX_INFERENCE_DOCUMENT_BYTES: 32 * 1024,
+      MAX_INFERENCE_DOCUMENT_FIELDS: 100,
+      MAX_INFERENCE_FIELD_NAME_LENGTH: 1024,
+      buildTelemetry: vi.fn(),
+      prepareInferredSampling: vi.fn(),
+      identifyInferredFeatures: (...args: unknown[]) => mockIdentifyInferredFeatures(...args),
+      identifyComputedFeatures: (...args: unknown[]) => mockIdentifyComputedFeatures(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/significant_events/features/should_identify_features', () => ({
-  shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
-}));
+vi.mock('../../../../lib/significant_events/features/should_identify_features', () => {
+      const mocked = {
+      shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled',
-  () => ({
-    isSignificantEventsSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(false),
-  })
+  () => {
+      const mocked = {
+        isSignificantEventsSemanticCodeSearchGroundingEnabled: vi.fn().mockResolvedValue(false),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const prepareRoute =
@@ -86,26 +104,26 @@ const createInferredParams = (
 });
 
 const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
-  getState: jest.fn().mockResolvedValue(state),
+  getState: vi.fn().mockResolvedValue(state),
 });
 
 const makeRequest = () => ({
   events: {
     aborted$: {
-      subscribe: jest.fn(),
+      subscribe: vi.fn(),
     },
   },
 });
 
 const makeRouteLogger = () => ({
-  error: jest.fn(),
-  warn: jest.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
 });
 
 const makeInferredHandlerParams = ({
-  ensureEnabled = jest.fn().mockResolvedValue(undefined),
+  ensureEnabled = vi.fn().mockResolvedValue(undefined),
 }: {
-  ensureEnabled?: jest.Mock;
+  ensureEnabled?: Mock;
 } = {}) => {
   const request = makeRequest();
   const routeLogger = makeRouteLogger();
@@ -118,7 +136,7 @@ const makeInferredHandlerParams = ({
   };
   const licensing = {};
   const maintenanceService = makeMaintenanceService();
-  const telemetry = { trackFeaturesIdentified: jest.fn() };
+  const telemetry = { trackFeaturesIdentified: vi.fn() };
   const identifyResult = { features: [], documentsSampled: 10 };
 
   mockGetStreamTypeFromDefinition.mockReturnValue('logs');
@@ -142,17 +160,17 @@ const makeInferredHandlerParams = ({
       },
     },
     request,
-    getScopedClients: jest.fn().mockResolvedValue({
+    getScopedClients: vi.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },
       streamDataEsClient: {},
-      streamsClient: { getStream: jest.fn().mockResolvedValue(stream) },
+      streamsClient: { getStream: vi.fn().mockResolvedValue(stream) },
       soClient: {},
       tuningConfig: {},
       licensing,
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+      getKnowledgeIndicatorClient: vi.fn().mockResolvedValue(kiClient),
     }),
     server,
-    logger: { get: jest.fn().mockReturnValue(routeLogger) },
+    logger: { get: vi.fn().mockReturnValue(routeLogger) },
     telemetry,
     syncWorkflowService: { ensureEnabled },
     maintenanceService,
@@ -201,15 +219,15 @@ const makeComputedHandlerParams = () => {
       },
     },
     request,
-    getScopedClients: jest.fn().mockResolvedValue({
+    getScopedClients: vi.fn().mockResolvedValue({
       streamDataEsClient,
-      streamsClient: { getStream: jest.fn().mockResolvedValue(stream) },
+      streamsClient: { getStream: vi.fn().mockResolvedValue(stream) },
       tuningConfig: {},
       licensing,
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+      getKnowledgeIndicatorClient: vi.fn().mockResolvedValue(kiClient),
     }),
     server,
-    logger: { get: jest.fn().mockReturnValue(routeLogger) },
+    logger: { get: vi.fn().mockReturnValue(routeLogger) },
     telemetry: {},
     maintenanceService,
   } as unknown as ComputedHandlerParams;
@@ -320,15 +338,15 @@ describe('feature identification route schemas', () => {
 
 describe('inferred feature identification route', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('rejects _identify/inferred with 409 while paused before touching inference', async () => {
-    const getKnowledgeIndicatorClient = jest.fn();
+    const getKnowledgeIndicatorClient = vi.fn();
     const handlerParams = {
       params: { path: { streamName: 'logs.test' }, body: null },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
       }),
@@ -403,7 +421,7 @@ describe('inferred feature identification route', () => {
   });
 
   it('returns identification results when sync workflow bootstrap fails', async () => {
-    const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
+    const ensureEnabled = vi.fn().mockRejectedValue(new Error('workflow unavailable'));
     const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({
       ensureEnabled,
     });
@@ -420,15 +438,15 @@ describe('inferred feature identification route', () => {
 
 describe('computed feature identification route', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('rejects _identify/computed with 409 while paused', async () => {
-    const getKnowledgeIndicatorClient = jest.fn();
+    const getKnowledgeIndicatorClient = vi.fn();
     const handlerParams = {
       params: { path: { streamName: 'logs.test' }, body: null },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
       }),
@@ -481,7 +499,7 @@ describe('computed feature identification route', () => {
 
 describe('should identify features route', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('allows _should_identify while paused', async () => {
@@ -494,9 +512,9 @@ describe('should identify features route', () => {
         query: { thresholdHours: 24 },
       },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue(kiClient),
       }),
       server: {},
       maintenanceService,

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-jest.mock('../constants', () => {
-  const { TYPE_DEFINITION } = jest.requireActual('../constants');
+import { vi } from 'vitest';
+
+vi.mock('../constants', async () => {
+  const { TYPE_DEFINITION } = (await vi.importActual('../constants'));
   return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
 });
 

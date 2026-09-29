@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,19 +21,22 @@ import { useAvailableCasesOwners } from '../../../../app/use_available_owners';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { UserPicker } from './user_picker';
 
-jest.mock('../../../../../containers/user_profiles/use_suggest_user_profiles');
-jest.mock('../../../../../containers/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../../../app/use_available_owners');
-jest.mock('../../../../../containers/user_profiles/api', () => ({
-  bulkGetUserProfiles: jest.fn(),
-}));
-jest.mock('../../../../cases_context/use_cases_context');
+vi.mock('../../../../../containers/user_profiles/use_suggest_user_profiles');
+vi.mock('../../../../../containers/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../app/use_available_owners');
+vi.mock('../../../../../containers/user_profiles/api', () => {
+      const mocked = {
+      bulkGetUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../cases_context/use_cases_context');
 
-const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
-const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
-const useAvailableCasesOwnersMock = useAvailableCasesOwners as jest.Mock;
-const mockBulkGetUserProfiles = api.bulkGetUserProfiles as jest.Mock;
-const useCasesContextMock = useCasesContext as jest.Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as Mock;
+const useAvailableCasesOwnersMock = useAvailableCasesOwners as Mock;
+const mockBulkGetUserProfiles = api.bulkGetUserProfiles as Mock;
+const useCasesContextMock = useCasesContext as Mock;
 
 const [alice, bob] = userProfiles;
 
@@ -49,7 +55,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   initialUsers,
   onConfirm,
   isSaving,
-  onSubmitResult = jest.fn(),
+  onSubmitResult = vi.fn(),
 }) => {
   const serialized = JSON.stringify(initialUsers ?? []);
   const form = useForm({
@@ -88,7 +94,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
 
 describe('UserPicker', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useCasesContextMock.mockReturnValue({ owner: ['securitySolution'] });
     // Mirror the real hook, which clears the "user typing" state by invoking onDebounce; a static
@@ -189,7 +195,7 @@ describe('UserPicker', () => {
 
   describe('inline actions', () => {
     it('shows actions after the selection changes and confirms it', async () => {
-      const onConfirm = jest.fn();
+      const onConfirm = vi.fn();
       useBulkGetUserProfilesMock.mockReturnValue({
         data: new Map(),
         isFetching: false,
@@ -208,7 +214,7 @@ describe('UserPicker', () => {
 
   describe('isRequired validation', () => {
     it('blocks form submission when isRequired is true and no user is selected', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired initialUsers={[]} onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -227,7 +233,7 @@ describe('UserPicker', () => {
     });
 
     it('allows form submission when isRequired is true and a user is pre-selected', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper
           isRequired
@@ -244,7 +250,7 @@ describe('UserPicker', () => {
     });
 
     it('allows form submission when isRequired is false and no user is selected', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired={false} initialUsers={[]} onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -255,7 +261,7 @@ describe('UserPicker', () => {
     });
 
     it('runs async profile validation on submit when users are selected', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper
           isRequired
@@ -296,7 +302,7 @@ describe('UserPicker', () => {
 
   describe('submitted value', () => {
     it('submits selected users as a JSON string', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper
           initialUsers={[{ uid: alice.uid, name: 'Damaged Raccoon' }]}
@@ -321,7 +327,7 @@ describe('UserPicker', () => {
     });
 
     it('submits an empty JSON array when no users are selected', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper initialUsers={[]} onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -338,7 +344,7 @@ describe('UserPicker', () => {
     });
 
     it('submits multiple selected users as a JSON array', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper
           initialUsers={[

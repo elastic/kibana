@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DataGridDensity } from '@kbn/unified-data-table';
 import type { AppliedProfile } from './composable_profile';
 import { getMergedAccessor } from './composable_profile';
@@ -21,7 +23,7 @@ const getCellRenderersParams = {
 
 describe('getMergedAccessor', () => {
   it('should return the base implementation if no profiles are provided', () => {
-    const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
+    const baseImpl: Profile['getCellRenderers'] = vi.fn(() => ({ base: vi.fn() }));
     const mergedAccessor = getMergedAccessor([], 'getCellRenderers', baseImpl);
     const result = mergedAccessor(getCellRenderersParams);
     expect(baseImpl).toHaveBeenCalled();
@@ -29,17 +31,17 @@ describe('getMergedAccessor', () => {
   });
 
   it('should merge the accessors in the correct order', () => {
-    const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
+    const baseImpl: Profile['getCellRenderers'] = vi.fn(() => ({ base: vi.fn() }));
     const profile1: AppliedProfile = {
-      getCellRenderers: jest.fn((prev) => (params) => ({
+      getCellRenderers: vi.fn((prev) => (params) => ({
         ...prev(params),
-        profile1: jest.fn(),
+        profile1: vi.fn(),
       })),
     };
     const profile2: AppliedProfile = {
-      getCellRenderers: jest.fn((prev) => (params) => ({
+      getCellRenderers: vi.fn((prev) => (params) => ({
         ...prev(params),
-        profile2: jest.fn(),
+        profile2: vi.fn(),
       })),
     };
     const mergedAccessor = getMergedAccessor([profile1, profile2], 'getCellRenderers', baseImpl);
@@ -56,14 +58,14 @@ describe('getMergedAccessor', () => {
   });
 
   it('should allow overwriting previous accessors', () => {
-    const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
+    const baseImpl: Profile['getCellRenderers'] = vi.fn(() => ({ base: vi.fn() }));
     const profile1: AppliedProfile = {
-      getCellRenderers: jest.fn(() => () => ({ profile1: jest.fn() })),
+      getCellRenderers: vi.fn(() => () => ({ profile1: vi.fn() })),
     };
     const profile2: AppliedProfile = {
-      getCellRenderers: jest.fn((prev) => (params) => ({
+      getCellRenderers: vi.fn((prev) => (params) => ({
         ...prev(params),
-        profile2: jest.fn(),
+        profile2: vi.fn(),
       })),
     };
     const mergedAccessor = getMergedAccessor([profile1, profile2], 'getCellRenderers', baseImpl);

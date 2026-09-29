@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { generateAllComputedFeatures } from '.';
@@ -15,7 +17,7 @@ import { errorLogsGenerator } from './error_logs';
 import { codeAnalysisGenerator } from './code_analysis';
 
 describe('generateAllComputedFeatures', () => {
-  const logger = { warn: jest.fn() } as unknown as Logger;
+  const logger = { warn: vi.fn() } as unknown as Logger;
   const options = {
     target: {
       id: 'logs.test-default',
@@ -29,14 +31,14 @@ describe('generateAllComputedFeatures', () => {
     logger,
   };
 
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   it('logs and skips a rejected generator while keeping the successful ones', async () => {
     [datasetAnalysisGenerator, logPatternsGenerator, codeAnalysisGenerator].forEach((generator) =>
-      jest.spyOn(generator, 'generate').mockResolvedValue(undefined)
+      vi.spyOn(generator, 'generate').mockResolvedValue(undefined)
     );
-    jest.spyOn(errorLogsGenerator, 'generate').mockRejectedValue(new Error('boom'));
-    jest.spyOn(logSamplesGenerator, 'generate').mockResolvedValue({ samples: [] });
+    vi.spyOn(errorLogsGenerator, 'generate').mockRejectedValue(new Error('boom'));
+    vi.spyOn(logSamplesGenerator, 'generate').mockResolvedValue({ samples: [] });
 
     const { features } = await generateAllComputedFeatures(options);
 
@@ -52,9 +54,9 @@ describe('generateAllComputedFeatures', () => {
       logPatternsGenerator,
       errorLogsGenerator,
     ].forEach((generator) =>
-      jest.spyOn(generator, 'generate').mockRejectedValue(new Error('boom'))
+      vi.spyOn(generator, 'generate').mockRejectedValue(new Error('boom'))
     );
-    jest.spyOn(codeAnalysisGenerator, 'generate').mockResolvedValue(undefined);
+    vi.spyOn(codeAnalysisGenerator, 'generate').mockResolvedValue(undefined);
 
     await expect(generateAllComputedFeatures(options)).rejects.toThrow(
       'All computed feature generators failed'
@@ -70,7 +72,7 @@ describe('generateAllComputedFeatures', () => {
       errorLogsGenerator,
       codeAnalysisGenerator,
     ].forEach((generator) =>
-      jest.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
+      vi.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
         seen.push(signal);
         return undefined;
       })
@@ -95,7 +97,7 @@ describe('generateAllComputedFeatures', () => {
       errorLogsGenerator,
       codeAnalysisGenerator,
     ].forEach((generator) =>
-      jest.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
+      vi.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
         if (signal.aborted) throw signal.reason;
         return undefined;
       })
@@ -115,7 +117,7 @@ describe('generateAllComputedFeatures', () => {
       logPatternsGenerator,
       errorLogsGenerator,
       codeAnalysisGenerator,
-    ].forEach((generator) => jest.spyOn(generator, 'generate').mockResolvedValue(undefined));
+    ].forEach((generator) => vi.spyOn(generator, 'generate').mockResolvedValue(undefined));
 
     await expect(generateAllComputedFeatures(options)).resolves.toEqual({
       features: [],

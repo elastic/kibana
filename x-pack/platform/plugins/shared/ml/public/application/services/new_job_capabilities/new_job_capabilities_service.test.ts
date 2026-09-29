@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mlJobCapsServiceFactory } from './new_job_capabilities_service';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
@@ -16,7 +18,7 @@ import mockCloudwatchResponse from '../__mocks__/cloudwatch_job_caps_response.js
 
 const mlApiServicesMock = {
   jobs: {
-    newJobCaps: jest.fn(() => Promise.resolve(mockCloudwatchResponse)),
+    newJobCaps: vi.fn(() => Promise.resolve(mockCloudwatchResponse)),
   },
 } as unknown as MlApi;
 

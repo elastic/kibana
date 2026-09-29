@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { getDiscoverInternalStateMock } from '../__mocks__/discover_state.mock';
@@ -31,7 +33,7 @@ describe('getConnectedCustomizationService', () => {
     const promise = new Promise<() => void>((resolve) => {
       resolveCallback = resolve;
     });
-    const callback = jest.fn(({}) => {
+    const callback = vi.fn(({}) => {
       return promise;
     });
     const customizationCallbacks: CustomizationCallback[] = [callback];
@@ -52,7 +54,7 @@ describe('getConnectedCustomizationService', () => {
     });
     let service: ConnectedCustomizationService | undefined;
     expect(callback).toHaveBeenCalledTimes(1);
-    const cleanup = jest.fn();
+    const cleanup = vi.fn();
     await act(async () => {
       resolveCallback(cleanup);
       await promise;

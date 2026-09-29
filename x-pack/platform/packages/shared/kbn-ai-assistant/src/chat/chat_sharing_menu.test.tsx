@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ChatSharingMenu } from './chat_sharing_menu';
 import { ConversationAccess } from '@kbn/observability-ai-assistant-plugin/public';
 
-const mockOnChangeConversationAccess = jest.fn();
+const mockOnChangeConversationAccess = vi.fn();
 
 describe('ChatSharingMenu', () => {
   const renderComponent = (props = {}) =>
@@ -25,7 +27,7 @@ describe('ChatSharingMenu', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the component correctly', () => {

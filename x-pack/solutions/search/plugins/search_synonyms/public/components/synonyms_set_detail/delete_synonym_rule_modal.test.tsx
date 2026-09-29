@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDeleteSynonymRule } from '../../hooks/use_delete_synonym_rule';
 import { DeleteSynonymRuleModal } from './delete_synonym_rule_modal';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
-jest.mock('../../hooks/use_delete_synonym_rule', () => ({
-  useDeleteSynonymRule: jest.fn(() => ({
-    mutate: jest.fn(),
-  })),
-}));
+vi.mock('../../hooks/use_delete_synonym_rule', () => {
+      const mocked = {
+      useDeleteSynonymRule: vi.fn(() => ({
+        mutate: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DeleteSynonymRuleModal', () => {
   const queryClient = new QueryClient();
@@ -24,13 +30,13 @@ describe('DeleteSynonymRuleModal', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not use mutation when cancel is pressed', () => {
-    const onClose = jest.fn();
-    const mutate = jest.fn();
-    (useDeleteSynonymRule as unknown as jest.Mock).mockReturnValue({
+    const onClose = vi.fn();
+    const mutate = vi.fn();
+    (useDeleteSynonymRule as unknown as Mock).mockReturnValue({
       mutate,
     });
     render(
@@ -49,10 +55,10 @@ describe('DeleteSynonymRuleModal', () => {
   });
 
   it('should delete the synonym rule when delete is pressed', () => {
-    const onClose = jest.fn();
-    const mutate = jest.fn();
+    const onClose = vi.fn();
+    const mutate = vi.fn();
 
-    (useDeleteSynonymRule as unknown as jest.Mock).mockReturnValue({
+    (useDeleteSynonymRule as unknown as Mock).mockReturnValue({
       mutate,
     });
 

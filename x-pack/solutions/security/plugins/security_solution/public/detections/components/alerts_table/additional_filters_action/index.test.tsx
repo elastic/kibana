@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 import { AdditionalFiltersAction } from '.';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
-jest.mock('../../../../common/lib/kibana');
+vi.useFakeTimers({ legacyFakeTimers: true });
+vi.mock('../../../../common/lib/kibana');
 
 describe('AdditionalFiltersAction', () => {
   describe('UtilityBarAdditionalFiltersContent', () => {
     test('does not show the showBuildingBlockAlerts checked if the showBuildingBlockAlerts is false', async () => {
-      const onShowBuildingBlockAlertsChanged = jest.fn();
+      const onShowBuildingBlockAlertsChanged = vi.fn();
       render(
         <TestProviders>
           <AdditionalFiltersAction
             onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
             areEventsLoading={false}
-            onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+            onShowOnlyThreatIndicatorAlertsChanged={vi.fn()}
             showBuildingBlockAlerts={false}
             showOnlyThreatIndicatorAlerts={false}
           />
@@ -42,9 +44,9 @@ describe('AdditionalFiltersAction', () => {
       render(
         <TestProviders>
           <AdditionalFiltersAction
-            onShowBuildingBlockAlertsChanged={jest.fn()}
+            onShowBuildingBlockAlertsChanged={vi.fn()}
             areEventsLoading={false}
-            onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+            onShowOnlyThreatIndicatorAlertsChanged={vi.fn()}
             showBuildingBlockAlerts={false}
             showOnlyThreatIndicatorAlerts={false}
           />
@@ -59,13 +61,13 @@ describe('AdditionalFiltersAction', () => {
     });
 
     test('does show the showBuildingBlockAlerts checked if the showBuildingBlockAlerts is true', async () => {
-      const onShowBuildingBlockAlertsChanged = jest.fn();
+      const onShowBuildingBlockAlertsChanged = vi.fn();
       render(
         <TestProviders>
           <AdditionalFiltersAction
             onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
             areEventsLoading={false}
-            onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+            onShowOnlyThreatIndicatorAlertsChanged={vi.fn()}
             showBuildingBlockAlerts={true}
             showOnlyThreatIndicatorAlerts={false}
           />
@@ -81,13 +83,13 @@ describe('AdditionalFiltersAction', () => {
     });
 
     test('Shows both filters checked with correct filter count badge if showBuildingBlockAlerts is true and showOnlyThreatIndicatorAlerts is true', async () => {
-      const onShowBuildingBlockAlertsChanged = jest.fn();
+      const onShowBuildingBlockAlertsChanged = vi.fn();
       render(
         <TestProviders>
           <AdditionalFiltersAction
             onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
             areEventsLoading={false}
-            onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+            onShowOnlyThreatIndicatorAlertsChanged={vi.fn()}
             showBuildingBlockAlerts={true}
             showOnlyThreatIndicatorAlerts={true}
           />

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import CspRouter from './csp_router';
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -15,27 +17,33 @@ import { createMemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
 import type { QueryClientProviderProps } from '@kbn/react-query';
 
-jest.mock('../pages', () => ({
-  Findings: () => <div data-test-subj="Findings">Findings</div>,
-  ComplianceDashboard: () => <div data-test-subj="ComplianceDashboard">ComplianceDashboard</div>,
-  VulnerabilityDashboard: () => (
-    <div data-test-subj="VulnerabilityDashboard">VulnerabilityDashboard</div>
-  ),
-  Rules: () => <div data-test-subj="Rules">Rules</div>,
-  Benchmarks: () => <div data-test-subj="Benchmarks">Benchmarks</div>,
-}));
+vi.mock('../pages', () => {
+      const mocked = {
+      Findings: () => <div data-test-subj="Findings">Findings</div>,
+      ComplianceDashboard: () => <div data-test-subj="ComplianceDashboard">ComplianceDashboard</div>,
+      VulnerabilityDashboard: () => (
+        <div data-test-subj="VulnerabilityDashboard">VulnerabilityDashboard</div>
+      ),
+      Rules: () => <div data-test-subj="Rules">Rules</div>,
+      Benchmarks: () => <div data-test-subj="Benchmarks">Benchmarks</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
-  QueryClient: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
+      QueryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CspRouter', () => {
   const originalCloudPosturePages = { ...constants.cloudPosturePages };
   const mockConstants = constants as { cloudPosturePages: Record<CspPage, CspPageNavigationItem> };
 
   const securityContext: CspSecuritySolutionContext = {
-    getFiltersGlobalComponent: jest.fn(),
+    getFiltersGlobalComponent: vi.fn(),
     getSpyRouteComponent: () => () => <div data-test-subj="mockedSpyRoute" />,
   };
 
@@ -50,7 +58,7 @@ describe('CspRouter', () => {
 
   beforeEach(() => {
     mockConstants.cloudPosturePages = originalCloudPosturePages;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     history = createMemoryHistory();
   });
 

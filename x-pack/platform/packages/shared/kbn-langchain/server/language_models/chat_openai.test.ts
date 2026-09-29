@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type OpenAI from 'openai';
 import type { Stream } from 'openai/streaming';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -16,7 +18,7 @@ import { DEFAULT_OPEN_AI_MODEL } from './constants';
 
 const connectorId = 'mock-connector-id';
 
-const mockExecute = jest.fn();
+const mockExecute = vi.fn();
 
 const mockLogger = loggerMock.create();
 
@@ -37,7 +39,7 @@ export async function* asyncGenerator() {
   // Mock implementation
   yield chunk;
 }
-const mockStreamExecute = jest.fn();
+const mockStreamExecute = vi.fn();
 
 const prompt = 'Do you know my name?';
 
@@ -55,7 +57,7 @@ const defaultArgs = {
 
 describe('ActionsClientChatOpenAI', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExecute.mockImplementation(() => ({
       data: mockChatCompletion,
       status: 'ok',
@@ -83,7 +85,7 @@ describe('ActionsClientChatOpenAI', () => {
   describe('OpenAI', () => {
     describe('completionWithRetry streaming: true', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockStreamExecute.mockImplementation(() => ({
           data: {
             consumerStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
@@ -98,7 +100,7 @@ describe('ActionsClientChatOpenAI', () => {
         model: DEFAULT_OPEN_AI_MODEL,
         n: 99,
         stop: ['a stop sequence'],
-        tools: [{ function: jest.fn(), type: 'function' }],
+        tools: [{ function: vi.fn(), type: 'function' }],
       };
       it('returns the expected data', async () => {
         actionsClient.execute.mockImplementation(mockStreamExecute);
@@ -159,7 +161,7 @@ describe('ActionsClientChatOpenAI', () => {
       });
 
       it('rejects with the expected error when the action result status is error', async () => {
-        const hasErrorStatus = jest.fn().mockImplementation(() => ({
+        const hasErrorStatus = vi.fn().mockImplementation(() => ({
           message: 'action-result-message',
           serviceMessage: 'action-result-service-message',
           status: 'error', // <-- error status
@@ -187,7 +189,7 @@ describe('ActionsClientChatOpenAI', () => {
   describe('Inference', () => {
     describe('completionWithRetry streaming: true', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockStreamExecute.mockImplementation(() => ({
           data: {
             consumerStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
@@ -202,7 +204,7 @@ describe('ActionsClientChatOpenAI', () => {
         model: DEFAULT_OPEN_AI_MODEL,
         n: 99,
         stop: ['a stop sequence'],
-        tools: [{ function: jest.fn(), type: 'function' }],
+        tools: [{ function: vi.fn(), type: 'function' }],
       };
       it('returns the expected data', async () => {
         actionsClient.execute.mockImplementation(mockStreamExecute);
@@ -244,7 +246,7 @@ describe('ActionsClientChatOpenAI', () => {
         model: DEFAULT_OPEN_AI_MODEL,
         n: 99,
         stop: ['a stop sequence'],
-        tools: [{ function: jest.fn(), type: 'function' }],
+        tools: [{ function: vi.fn(), type: 'function' }],
       };
       it('returns the expected data', async () => {
         const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
@@ -266,7 +268,7 @@ describe('ActionsClientChatOpenAI', () => {
                   temperature: 0.2,
                   n: 99,
                   stop: ['a stop sequence'],
-                  tools: [{ function: jest.fn(), type: 'function' }],
+                  tools: [{ function: vi.fn(), type: 'function' }],
                   messages: [{ role: 'user', content: 'Do you know my name?' }],
                 },
                 signal,

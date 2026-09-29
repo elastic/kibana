@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import moment from 'moment/moment';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -14,27 +17,42 @@ import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/_
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
 import { reportAttackDiscoveryGenerationSuccess } from './telemetry';
 
-jest.mock('lodash/fp', () => ({
-  uniq: jest.fn((arr) => Array.from(new Set(arr))),
-}));
+vi.mock('lodash/fp', () => {
+      const mocked = {
+      uniq: vi.fn((arr) => Array.from(new Set(arr))),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/securitysolution-es-utils', () => ({
-  transformError: jest.fn((err) => err),
-}));
-jest.mock('@kbn/langchain/server', () => ({
-  ActionsClientLlm: jest.fn(),
-}));
-jest.mock('../../evaluate/utils', () => ({
-  getLangSmithTracer: jest.fn().mockReturnValue([]),
-}));
-jest.mock('../../utils', () => ({
-  getLlmType: jest.fn().mockReturnValue('llm-type'),
-}));
-jest.mock('./telemetry', () => {
-  const actual = jest.requireActual('./telemetry');
+vi.mock('@kbn/securitysolution-es-utils', () => {
+      const mocked = {
+      transformError: vi.fn((err) => err),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/langchain/server', () => {
+      const mocked = {
+      ActionsClientLlm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../evaluate/utils', () => {
+      const mocked = {
+      getLangSmithTracer: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../utils', () => {
+      const mocked = {
+      getLlmType: vi.fn().mockReturnValue('llm-type'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./telemetry', async () => {
+  const actual = (await vi.importActual('./telemetry'));
   return {
     ...actual,
-    reportAttackDiscoveryGenerationSuccess: jest.fn(actual.reportAttackDiscoveryGenerationSuccess),
+    reportAttackDiscoveryGenerationSuccess: vi.fn(actual.reportAttackDiscoveryGenerationSuccess),
   };
 });
 
@@ -43,15 +61,15 @@ let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 describe('helpers', () => {
   const date = '2024-03-28T22:27:28.000Z';
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.setSystemTime(new Date(date));
+    vi.clearAllMocks();
+    vi.setSystemTime(new Date(date));
     mockLogger = loggingSystemMock.createLogger();
   });
 
@@ -66,7 +84,7 @@ describe('helpers', () => {
     const mockReplacements = {};
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should report attack discovery telemetry successfully', () => {
@@ -188,7 +206,7 @@ describe('helpers', () => {
     });
 
     it('calls logger.error when reporting telemetry throws', () => {
-      (reportAttackDiscoveryGenerationSuccess as jest.Mock).mockImplementation(() => {
+      (reportAttackDiscoveryGenerationSuccess as Mock).mockImplementation(() => {
         throw new Error('simulated error');
       });
 

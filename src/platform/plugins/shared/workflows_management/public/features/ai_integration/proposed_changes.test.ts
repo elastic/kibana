@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 let mockUndoRedoService: ReturnType<typeof createMockUndoRedoService> | undefined;
 
 const createMockUndoRedoService = () => {
@@ -15,18 +18,18 @@ const createMockUndoRedoService = () => {
   return {
     past,
     future,
-    pushElement: jest.fn((el: { undo: () => void; redo: () => void }) => {
+    pushElement: vi.fn((el: { undo: () => void; redo: () => void }) => {
       past.push(el);
       future.length = 0;
     }),
-    undo: jest.fn(() => {
+    undo: vi.fn(() => {
       const el = past.pop();
       if (el) {
         el.undo();
         future.push(el);
       }
     }),
-    redo: jest.fn(() => {
+    redo: vi.fn(() => {
       const el = future.pop();
       if (el) {
         el.redo();
@@ -36,21 +39,21 @@ const createMockUndoRedoService = () => {
   };
 };
 
-jest.mock('@kbn/monaco', () => {
+vi.mock('@kbn/monaco', () => {
   const createMockModel = (content: string, languageId: string = 'yaml') => {
     let value = content;
     return {
-      getValue: jest.fn(() => value),
-      setValue: jest.fn((v: string) => {
+      getValue: vi.fn(() => value),
+      setValue: vi.fn((v: string) => {
         value = v;
       }),
-      getLanguageId: jest.fn(() => languageId),
-      dispose: jest.fn(),
+      getLanguageId: vi.fn(() => languageId),
+      dispose: vi.fn(),
     };
   };
 
   return {
-    getUndoRedoService: jest.fn(() => mockUndoRedoService),
+    getUndoRedoService: vi.fn(() => mockUndoRedoService),
     monaco: {
       Range: class MockRange {
         public startLineNumber: number;
@@ -65,10 +68,10 @@ jest.mock('@kbn/monaco', () => {
         }
       },
       editor: {
-        createModel: jest.fn((content: string, languageId?: string) =>
+        createModel: vi.fn((content: string, languageId?: string) =>
           createMockModel(content, languageId)
         ),
-        colorizeModelLine: jest.fn(() => '<span>colorized</span>'),
+        colorizeModelLine: vi.fn(() => '<span>colorized</span>'),
         EditorOption: { fontInfo: 50 },
       },
     },
@@ -104,13 +107,13 @@ const createRealisticMockEditor = (initialContent: string) => {
 
   const model = {
     uri: { toString: () => 'inmemory://model/1' },
-    getLineCount: jest.fn(() => lines.length),
-    getLineMaxColumn: jest.fn((ln: number) => {
+    getLineCount: vi.fn(() => lines.length),
+    getLineMaxColumn: vi.fn((ln: number) => {
       if (ln < 1 || ln > lines.length) return 1;
       return lines[ln - 1].length + 1;
     }),
-    getValue: jest.fn(() => lines.join('\n')),
-    pushEditOperations: jest.fn(
+    getValue: vi.fn(() => lines.join('\n')),
+    pushEditOperations: vi.fn(
       (
         _s: unknown,
         ops: Array<{
@@ -129,7 +132,7 @@ const createRealisticMockEditor = (initialContent: string) => {
         return null;
       }
     ),
-    applyEdits: jest.fn(
+    applyEdits: vi.fn(
       (
         ops: Array<{
           range: {
@@ -162,47 +165,47 @@ const createRealisticMockEditor = (initialContent: string) => {
         return undefined;
       }
     ),
-    getLanguageId: jest.fn(() => 'yaml'),
-    getOptions: jest.fn(() => ({ tabSize: 2 })),
-    onDidChangeContent: jest.fn((listener: () => void) => {
+    getLanguageId: vi.fn(() => 'yaml'),
+    getOptions: vi.fn(() => ({ tabSize: 2 })),
+    onDidChangeContent: vi.fn((listener: () => void) => {
       contentChangeListeners.push(listener);
-      return { dispose: jest.fn() };
+      return { dispose: vi.fn() };
     }),
   };
 
   const domNode = {
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
   };
 
   return {
-    getDomNode: jest.fn(() => domNode),
-    getModel: jest.fn(() => model),
-    getOption: jest.fn(() => ({
+    getDomNode: vi.fn(() => domNode),
+    getModel: vi.fn(() => model),
+    getOption: vi.fn(() => ({
       fontFamily: 'monospace',
       fontSize: 14,
       lineHeight: 20,
       letterSpacing: 0,
       fontWeight: 'normal',
     })),
-    getLayoutInfo: jest.fn(() => ({
+    getLayoutInfo: vi.fn(() => ({
       contentLeft: 64,
       contentWidth: 800,
       verticalScrollbarWidth: 10,
     })),
-    getPosition: jest.fn(() => ({ lineNumber: 1 })),
-    revealLineInCenter: jest.fn(),
-    pushUndoStop: jest.fn(),
-    changeViewZones: jest.fn((cb: any) => {
+    getPosition: vi.fn(() => ({ lineNumber: 1 })),
+    revealLineInCenter: vi.fn(),
+    pushUndoStop: vi.fn(),
+    changeViewZones: vi.fn((cb: any) => {
       cb({
-        addZone: jest.fn(() => `zone-${zoneCounter++}`),
-        removeZone: jest.fn(),
+        addZone: vi.fn(() => `zone-${zoneCounter++}`),
+        removeZone: vi.fn(),
       });
     }),
-    createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-    deltaDecorations: jest.fn(() => []),
-    onMouseMove: jest.fn(() => ({ dispose: jest.fn() })),
-    onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
+    createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+    deltaDecorations: vi.fn(() => []),
+    onMouseMove: vi.fn(() => ({ dispose: vi.fn() })),
+    onDidChangeCursorPosition: vi.fn(() => ({ dispose: vi.fn() })),
     _simulateExternalContentChange: () => {
       contentChangeListeners.forEach((l) => l());
     },
@@ -221,7 +224,7 @@ describe('ProposalManager', () => {
   });
 
   it('initialize registers document hotkeys and editor hover targets', () => {
-    const addDocSpy = jest.spyOn(document, 'addEventListener');
+    const addDocSpy = vi.spyOn(document, 'addEventListener');
     const editor = createRealisticMockEditor('line1\nline2\nline3');
     manager.initialize(editor);
 
@@ -235,17 +238,17 @@ describe('ProposalManager', () => {
   });
 
   it('dispose removes document hotkeys and editor hover listeners', () => {
-    const addDocSpy = jest.spyOn(document, 'addEventListener');
-    const removeDocSpy = jest.spyOn(document, 'removeEventListener');
+    const addDocSpy = vi.spyOn(document, 'addEventListener');
+    const removeDocSpy = vi.spyOn(document, 'removeEventListener');
 
     const editor = createRealisticMockEditor('line1\nline2\nline3');
     manager.initialize(editor);
 
     const domNode = editor.getDomNode();
-    const enterHandler = (domNode.addEventListener as jest.Mock).mock.calls.find(
+    const enterHandler = (domNode.addEventListener as Mock).mock.calls.find(
       (c: unknown[]) => c[0] === 'mouseenter'
     )?.[1];
-    const leaveHandler = (domNode.addEventListener as jest.Mock).mock.calls.find(
+    const leaveHandler = (domNode.addEventListener as Mock).mock.calls.find(
       (c: unknown[]) => c[0] === 'mouseleave'
     )?.[1];
     const keyHandler = addDocSpy.mock.calls.find(
@@ -267,8 +270,8 @@ describe('ProposalManager', () => {
   });
 
   it('accept-all hotkey runs only while pointer is over editor surface', () => {
-    const addDocSpy = jest.spyOn(document, 'addEventListener');
-    const onAccept = jest.fn();
+    const addDocSpy = vi.spyOn(document, 'addEventListener');
+    const onAccept = vi.fn();
     const editor = createRealisticMockEditor('line1\nline2\nline3');
     manager.initialize(editor, { onAccept });
 
@@ -278,7 +281,7 @@ describe('ProposalManager', () => {
     )![1] as (e: KeyboardEvent) => void;
 
     const domNode = editor.getDomNode();
-    const enterHandler = (domNode.addEventListener as jest.Mock).mock.calls.find(
+    const enterHandler = (domNode.addEventListener as Mock).mock.calls.find(
       (c: unknown[]) => c[0] === 'mouseenter'
     )![1] as () => void;
 
@@ -288,8 +291,8 @@ describe('ProposalManager', () => {
       shiftKey: true,
       metaKey: true,
       altKey: false,
-      preventDefault: jest.fn(),
-      stopPropagation: jest.fn(),
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
     } as unknown as KeyboardEvent);
     expect(manager.hasPendingProposals()).toBe(true);
 
@@ -300,8 +303,8 @@ describe('ProposalManager', () => {
       shiftKey: true,
       metaKey: true,
       altKey: false,
-      preventDefault: jest.fn(),
-      stopPropagation: jest.fn(),
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
     } as unknown as KeyboardEvent);
 
     expect(manager.hasPendingProposals()).toBe(false);
@@ -311,8 +314,8 @@ describe('ProposalManager', () => {
   });
 
   it('decline-all hotkey runs only while pointer is over editor surface', () => {
-    const addDocSpy = jest.spyOn(document, 'addEventListener');
-    const onReject = jest.fn();
+    const addDocSpy = vi.spyOn(document, 'addEventListener');
+    const onReject = vi.fn();
     const original = 'line1\nline2\nline3\n';
     const editor = createRealisticMockEditor(original);
     manager.initialize(editor, { onReject });
@@ -323,7 +326,7 @@ describe('ProposalManager', () => {
     )![1] as (e: KeyboardEvent) => void;
 
     const domNode = editor.getDomNode();
-    const enterHandler = (domNode.addEventListener as jest.Mock).mock.calls.find(
+    const enterHandler = (domNode.addEventListener as Mock).mock.calls.find(
       (c: unknown[]) => c[0] === 'mouseenter'
     )![1] as () => void;
 
@@ -334,8 +337,8 @@ describe('ProposalManager', () => {
       shiftKey: false,
       metaKey: true,
       altKey: false,
-      preventDefault: jest.fn(),
-      stopPropagation: jest.fn(),
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
     } as unknown as KeyboardEvent);
 
     expect(editor.getModel().getValue()).toBe(original);
@@ -471,7 +474,7 @@ describe('ProposalManager', () => {
     });
 
     it('fires onAccept callback when last hunk is accepted', () => {
-      const onAccept = jest.fn();
+      const onAccept = vi.fn();
       const editor = createRealisticMockEditor('line1\nline2\n');
       manager.initialize(editor, { onAccept });
 
@@ -495,7 +498,7 @@ describe('ProposalManager', () => {
     });
 
     it('fires onReject callback when last hunk is rejected', () => {
-      const onReject = jest.fn();
+      const onReject = vi.fn();
       const editor = createRealisticMockEditor('line1\nline2\n');
       manager.initialize(editor, { onReject });
 
@@ -508,7 +511,7 @@ describe('ProposalManager', () => {
 
   describe('acceptAll', () => {
     it('clears all hunks and calls onAccept', () => {
-      const onAccept = jest.fn();
+      const onAccept = vi.fn();
       const editor = createRealisticMockEditor('line1\nline2\nline3\nline4\nline5\n');
       manager.initialize(editor, { onAccept });
 
@@ -534,7 +537,7 @@ describe('ProposalManager', () => {
 
   describe('rejectAll', () => {
     it('restores original content and calls onReject', () => {
-      const onReject = jest.fn();
+      const onReject = vi.fn();
       const original = 'line1\nline2\nline3\n';
       const editor = createRealisticMockEditor(original);
       manager.initialize(editor, { onReject });

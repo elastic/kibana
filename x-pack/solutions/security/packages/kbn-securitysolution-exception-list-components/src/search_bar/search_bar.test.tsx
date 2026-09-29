@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
@@ -17,8 +19,8 @@ describe('SearchBar', () => {
     const wrapper = render(
       <SearchBar
         listType={ExceptionListTypeEnum.DETECTION}
-        onSearch={jest.fn()}
-        onAddExceptionClick={jest.fn()}
+        onSearch={vi.fn()}
+        onAddExceptionClick={vi.fn()}
         isSearching={false}
         canAddException={false}
         dataTestSubj="searchBar"
@@ -29,13 +31,13 @@ describe('SearchBar', () => {
   });
 
   it('it invokes "onAddExceptionClick" when user selects to add an exception item', () => {
-    const mockOnAddExceptionClick = jest.fn();
+    const mockOnAddExceptionClick = vi.fn();
     const wrapper = render(
       <SearchBar
         canAddException={true}
         listType={ExceptionListTypeEnum.DETECTION}
         isSearching={false}
-        onSearch={jest.fn()}
+        onSearch={vi.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
         dataTestSubj="searchBar"
         addExceptionButtonText="Add rule exception"
@@ -50,13 +52,13 @@ describe('SearchBar', () => {
   });
 
   it('it invokes "onAddExceptionClick" when user selects to add an endpoint exception item', () => {
-    const mockOnAddExceptionClick = jest.fn();
+    const mockOnAddExceptionClick = vi.fn();
     const wrapper = render(
       <SearchBar
         canAddException={true}
         listType={ExceptionListTypeEnum.ENDPOINT}
         isSearching={false}
-        onSearch={jest.fn()}
+        onSearch={vi.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
         dataTestSubj="searchBar"
         addExceptionButtonText="Add endpoint exception"
@@ -70,14 +72,14 @@ describe('SearchBar', () => {
     expect(mockOnAddExceptionClick).toHaveBeenCalledWith('endpoint');
   });
   it('it invokes the "handlOnSearch" when the user add search query', () => {
-    const mockHandleOnSearch = jest.fn();
+    const mockHandleOnSearch = vi.fn();
     const wrapper = render(
       <SearchBar
         canAddException={true}
         listType={ExceptionListTypeEnum.ENDPOINT}
         isSearching={false}
         onSearch={mockHandleOnSearch}
-        onAddExceptionClick={jest.fn()}
+        onAddExceptionClick={vi.fn()}
         addExceptionButtonText="Add endpoint exception"
       />
     );

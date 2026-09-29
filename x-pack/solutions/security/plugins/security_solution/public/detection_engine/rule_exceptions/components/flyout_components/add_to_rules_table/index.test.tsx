@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, within } from '@testing-library/react';
 
@@ -13,23 +16,23 @@ import { TestProviders } from '../../../../../common/mock';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
-jest.mock('../../../../rule_management/logic/use_find_rules');
+vi.mock('../../../../rule_management/logic/use_find_rules');
 
 describe('ExceptionsAddToRulesTable', () => {
   it('should display the loading state while fetching rules', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: { rules: [], total: 0 },
       isFetched: false,
     });
     const wrapper = render(
-      <ExceptionsAddToRulesTable initiallySelectedRules={[]} onRuleSelectionChange={jest.fn()} />
+      <ExceptionsAddToRulesTable initiallySelectedRules={[]} onRuleSelectionChange={vi.fn()} />
     );
 
     expect(wrapper.getByTestId('exceptionItemViewerEmptyPromptsLoading')).toBeInTheDocument();
   });
 
   it('should display the fetched rule selected', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [getRulesSchemaMock(), { ...getRulesSchemaMock(), id: '345', name: 'My rule' }],
         total: 0,
@@ -40,7 +43,7 @@ describe('ExceptionsAddToRulesTable', () => {
       <TestProviders>
         <ExceptionsAddToRulesTable
           initiallySelectedRules={[{ ...getRulesSchemaMock(), id: '345', name: 'My rule' }]}
-          onRuleSelectionChange={jest.fn()}
+          onRuleSelectionChange={vi.fn()}
         />
       </TestProviders>
     );
@@ -51,14 +54,14 @@ describe('ExceptionsAddToRulesTable', () => {
   });
 
   it('should invoke the onRuleSelectionChange when link switch is clicked', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [getRulesSchemaMock(), { ...getRulesSchemaMock(), id: '345', name: 'My rule' }],
         total: 0,
       },
       isFetched: true,
     });
-    const onRuleSelectionChangeMock = jest.fn();
+    const onRuleSelectionChangeMock = vi.fn();
     const rule = { ...getRulesSchemaMock(), id: '345', name: 'My rule' };
     const { queryByTestId, getByText } = render(
       <TestProviders>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SyntheticsIndicesCache } from './synthetics_indices_cache';
 
 describe('SyntheticsIndicesCache', () => {
@@ -17,7 +19,7 @@ describe('SyntheticsIndicesCache', () => {
 
   it('returns the resolver value on the first call and caches it for subsequent calls', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
-    const resolver = jest.fn().mockResolvedValue('synthetics-*');
+    const resolver = vi.fn().mockResolvedValue('synthetics-*');
 
     const first = await cache.get('default', resolver);
     const second = await cache.get('default', resolver);
@@ -29,7 +31,7 @@ describe('SyntheticsIndicesCache', () => {
 
   it('re-resolves after the TTL has elapsed', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
-    const resolver = jest
+    const resolver = vi
       .fn()
       .mockResolvedValueOnce('synthetics-*')
       .mockResolvedValueOnce('synthetics-*,cluster-a:synthetics-*');
@@ -44,7 +46,7 @@ describe('SyntheticsIndicesCache', () => {
 
   it('does not re-resolve right before the TTL expires', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
-    const resolver = jest.fn().mockResolvedValue('synthetics-*');
+    const resolver = vi.fn().mockResolvedValue('synthetics-*');
 
     await cache.get('default', resolver);
     currentTime += 999;
@@ -55,8 +57,8 @@ describe('SyntheticsIndicesCache', () => {
 
   it('keeps separate entries per key', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
-    const defaultResolver = jest.fn().mockResolvedValue('synthetics-*');
-    const marketingResolver = jest
+    const defaultResolver = vi.fn().mockResolvedValue('synthetics-*');
+    const marketingResolver = vi
       .fn()
       .mockResolvedValue('synthetics-*,marketing-cluster:synthetics-*');
 
@@ -74,7 +76,7 @@ describe('SyntheticsIndicesCache', () => {
   it('coalesces concurrent misses against the same key into a single resolver call', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
     let resolvePromise: (value: string) => void = () => {};
-    const resolver = jest.fn().mockImplementation(
+    const resolver = vi.fn().mockImplementation(
       () =>
         new Promise<string>((resolve) => {
           resolvePromise = resolve;
@@ -98,7 +100,7 @@ describe('SyntheticsIndicesCache', () => {
   it('does not cache rejected results so the next caller retries', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
     const error = new Error('elasticsearch unavailable');
-    const resolver = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('synthetics-*');
+    const resolver = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('synthetics-*');
 
     await expect(cache.get('default', resolver)).rejects.toBe(error);
     await expect(cache.get('default', resolver)).resolves.toBe('synthetics-*');
@@ -108,7 +110,7 @@ describe('SyntheticsIndicesCache', () => {
   it('drops the in-flight entry after rejection so a later concurrent caller can retry', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
     const error = new Error('boom');
-    const resolver = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('synthetics-*');
+    const resolver = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('synthetics-*');
 
     const failing = cache.get('default', resolver);
     await expect(failing).rejects.toBe(error);
@@ -120,11 +122,11 @@ describe('SyntheticsIndicesCache', () => {
 
   it('invalidate(key) clears only that key', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 60_000, now });
-    const defaultResolver = jest
+    const defaultResolver = vi
       .fn()
       .mockResolvedValueOnce('synthetics-*')
       .mockResolvedValueOnce('synthetics-*,new:synthetics-*');
-    const marketingResolver = jest.fn().mockResolvedValue('marketing');
+    const marketingResolver = vi.fn().mockResolvedValue('marketing');
 
     await cache.get('default', defaultResolver);
     await cache.get('marketing', marketingResolver);
@@ -140,7 +142,7 @@ describe('SyntheticsIndicesCache', () => {
   it('does not repopulate entries when invalidate() races an in-flight resolve', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 60_000, now });
     let resolvePending: (value: string) => void = () => {};
-    const resolver = jest
+    const resolver = vi
       .fn()
       .mockImplementationOnce(
         () =>
@@ -162,7 +164,7 @@ describe('SyntheticsIndicesCache', () => {
   it('does not leak in-flight entries when an unrelated key is invalidated', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
     let resolvePending: (value: string) => void = () => {};
-    const spaceBResolver = jest
+    const spaceBResolver = vi
       .fn()
       .mockImplementationOnce(
         () =>
@@ -184,7 +186,7 @@ describe('SyntheticsIndicesCache', () => {
 
   it('drops expired entries instead of retaining them until overwrite', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
-    const resolver = jest
+    const resolver = vi
       .fn()
       .mockResolvedValueOnce('synthetics-*')
       .mockResolvedValueOnce('synthetics-*,refreshed:synthetics-*');
@@ -198,11 +200,11 @@ describe('SyntheticsIndicesCache', () => {
 
   it('invalidate() with no key clears every entry', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 60_000, now });
-    const defaultResolver = jest
+    const defaultResolver = vi
       .fn()
       .mockResolvedValueOnce('synthetics-*')
       .mockResolvedValueOnce('synthetics-*,refreshed:synthetics-*');
-    const marketingResolver = jest
+    const marketingResolver = vi
       .fn()
       .mockResolvedValueOnce('marketing')
       .mockResolvedValueOnce('marketing-refreshed');

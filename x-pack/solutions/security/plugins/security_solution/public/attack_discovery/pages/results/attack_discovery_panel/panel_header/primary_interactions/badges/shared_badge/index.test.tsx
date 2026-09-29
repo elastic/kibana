@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { UserEvent } from '@testing-library/user-event';
 import React from 'react';
@@ -54,16 +56,22 @@ const mockAttackDiscoveryNotAlert = {
   title: '',
 };
 
-const mockMutateAsync = jest.fn();
-const mockIsAttackDiscoveryAlert = jest.fn();
+const mockMutateAsync = vi.fn();
+const mockIsAttackDiscoveryAlert = vi.fn();
 
-jest.mock('../../../../../../use_attack_discovery_bulk', () => ({
-  useAttackDiscoveryBulk: () => ({ mutateAsync: mockMutateAsync }),
-}));
+vi.mock('../../../../../../use_attack_discovery_bulk', () => {
+      const mocked = {
+      useAttackDiscoveryBulk: () => ({ mutateAsync: mockMutateAsync }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../utils/is_attack_discovery_alert', () => ({
-  isAttackDiscoveryAlert: (...args: unknown[]) => mockIsAttackDiscoveryAlert(...args),
-}));
+vi.mock('../../../../../../utils/is_attack_discovery_alert', () => {
+      const mocked = {
+      isAttackDiscoveryAlert: (...args: unknown[]) => mockIsAttackDiscoveryAlert(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SharedBadge', () => {
   const defaultProps = { attackDiscovery: mockAttackDiscoveryAlert };
@@ -71,7 +79,7 @@ describe('SharedBadge', () => {
   let user: UserEvent;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockMutateAsync.mockClear();
     mockIsAttackDiscoveryAlert.mockImplementation(
       (obj) => obj === mockAttackDiscoveryAlert || obj === mockAttackDiscoveryAlertSingleUser

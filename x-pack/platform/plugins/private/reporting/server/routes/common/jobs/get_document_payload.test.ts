@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { Readable } from 'stream';
 
 import { JOB_STATUS } from '@kbn/reporting-common';
@@ -21,8 +24,8 @@ import { STATUS_CODES } from './constants';
 import { getDocumentPayloadFactory } from './get_document_payload';
 import { jobsQueryFactory } from './jobs_query';
 
-jest.mock('../../../lib/content_stream');
-jest.mock('./jobs_query');
+vi.mock('../../../lib/content_stream');
+vi.mock('./jobs_query');
 
 describe('getDocumentPayload', () => {
   let core: ReportingCore;
@@ -34,7 +37,7 @@ describe('getDocumentPayload', () => {
 
     getDocumentPayload = getDocumentPayloadFactory(core, { isInternal: false });
 
-    (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(
+    (getContentStream as MockedFunction<typeof getContentStream>).mockResolvedValue(
       new Readable({
         read() {
           this.push('something');
@@ -43,8 +46,8 @@ describe('getDocumentPayload', () => {
       }) as ContentStream
     );
 
-    (jobsQueryFactory as jest.MockedFunction<typeof jobsQueryFactory>).mockReturnValue({
-      getError: jest.fn(async () => 'Some error'),
+    (jobsQueryFactory as MockedFunction<typeof jobsQueryFactory>).mockReturnValue({
+      getError: vi.fn(async () => 'Some error'),
     } as unknown as ReturnType<typeof jobsQueryFactory>);
   });
 

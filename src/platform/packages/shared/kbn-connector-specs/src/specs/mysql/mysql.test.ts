@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 
 interface MockPool {
-  query: jest.Mock;
-  execute: jest.Mock;
-  end: jest.Mock;
+  query: Mock;
+  execute: Mock;
+  end: Mock;
 }
 
 const createMockPool = (): MockPool => ({
-  query: jest.fn().mockResolvedValue([[]]),
-  execute: jest.fn().mockResolvedValue([[]]),
-  end: jest.fn().mockResolvedValue(undefined),
+  query: vi.fn().mockResolvedValue([[]]),
+  execute: vi.fn().mockResolvedValue([[]]),
+  end: vi.fn().mockResolvedValue(undefined),
 });
 
 const makeConfig = (overrides: Record<string, unknown> = {}) => ({
@@ -34,8 +37,8 @@ const makeContext = (
 ): ActionContext =>
   ({
     config,
-    log: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
-    getClient: jest.fn().mockResolvedValue(pool),
+    log: { info: vi.fn(), debug: vi.fn(), error: vi.fn() },
+    getClient: vi.fn().mockResolvedValue(pool),
   } as unknown as ActionContext);
 
 // Convenience wrapper when pool behaviour needs to be inspected in the test.

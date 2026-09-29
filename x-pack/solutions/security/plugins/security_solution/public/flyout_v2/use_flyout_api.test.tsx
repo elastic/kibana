@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FlowTargetSourceDest } from '../../common/search_strategy/security_solution/network';
@@ -27,18 +29,18 @@ import { useSharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_
 import { createSharedToolsFlyoutApiMock } from './shared/tools/use_shared_tools_flyout_api.mock';
 import { useFlyoutApi } from './use_flyout_api';
 
-jest.mock('./attack/use_attack_flyout_api');
-jest.mock('./csp/use_csp_flyout_api');
-jest.mock('./document/use_document_flyout_api');
-jest.mock('./entity/use_entity_flyout_api');
-jest.mock('./ioc/use_ioc_flyout_api');
-jest.mock('./network/use_network_flyout_api');
-jest.mock('./rule/use_rule_flyout_api');
-jest.mock('./shared/tools/use_shared_tools_flyout_api');
+vi.mock('./attack/use_attack_flyout_api');
+vi.mock('./csp/use_csp_flyout_api');
+vi.mock('./document/use_document_flyout_api');
+vi.mock('./entity/use_entity_flyout_api');
+vi.mock('./ioc/use_ioc_flyout_api');
+vi.mock('./network/use_network_flyout_api');
+vi.mock('./rule/use_rule_flyout_api');
+vi.mock('./shared/tools/use_shared_tools_flyout_api');
 
 describe('useFlyoutApi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('exposes document, attack, CSP, entity, IOC, network, rule and shared-tools methods from composed hooks', () => {
@@ -50,14 +52,14 @@ describe('useFlyoutApi', () => {
     const networkApi = createNetworkFlyoutApiMock();
     const ruleApi = createRuleFlyoutApiMock();
     const sharedToolsApi = createSharedToolsFlyoutApiMock();
-    jest.mocked(useDocumentFlyoutApi).mockReturnValue(documentApi);
-    jest.mocked(useAttackFlyoutApi).mockReturnValue(attackApi);
-    jest.mocked(useCspFlyoutApi).mockReturnValue(cspApi);
-    jest.mocked(useEntityFlyoutApi).mockReturnValue(entityApi);
-    jest.mocked(useIocFlyoutApi).mockReturnValue(iocApi);
-    jest.mocked(useNetworkFlyoutApi).mockReturnValue(networkApi);
-    jest.mocked(useRuleFlyoutApi).mockReturnValue(ruleApi);
-    jest.mocked(useSharedToolsFlyoutApi).mockReturnValue(sharedToolsApi);
+    vi.mocked(useDocumentFlyoutApi).mockReturnValue(documentApi);
+    vi.mocked(useAttackFlyoutApi).mockReturnValue(attackApi);
+    vi.mocked(useCspFlyoutApi).mockReturnValue(cspApi);
+    vi.mocked(useEntityFlyoutApi).mockReturnValue(entityApi);
+    vi.mocked(useIocFlyoutApi).mockReturnValue(iocApi);
+    vi.mocked(useNetworkFlyoutApi).mockReturnValue(networkApi);
+    vi.mocked(useRuleFlyoutApi).mockReturnValue(ruleApi);
+    vi.mocked(useSharedToolsFlyoutApi).mockReturnValue(sharedToolsApi);
 
     const { result } = renderHook(() => useFlyoutApi());
 
@@ -89,7 +91,7 @@ describe('useFlyoutApi', () => {
       entityId: 'entity-1',
       scopeId: '',
       entityName: 'host-1',
-      onShowEntity: jest.fn(),
+      onShowEntity: vi.fn(),
     });
     result.current.openIocFlyout(iocParams);
     result.current.openIocFlyoutAsChild(iocParams);

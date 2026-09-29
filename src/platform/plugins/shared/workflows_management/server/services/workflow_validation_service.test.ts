@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
@@ -24,24 +27,24 @@ const makeDeps = (
   { listedConnectorTypes = [], stepDefinitions = {} }: MakeDepsOptions = {}
 ): {
   deps: WorkflowValidationDeps;
-  actionsClient: { getAll: jest.Mock };
-  actionsClientWithRequest: { listTypes: jest.Mock };
+  actionsClient: { getAll: Mock };
+  actionsClientWithRequest: { listTypes: Mock };
 } => {
-  const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
+  const actionsClient = { getAll: vi.fn().mockResolvedValue([]) };
   const actionsClientWithRequest = {
-    listTypes: jest.fn().mockResolvedValue(listedConnectorTypes),
+    listTypes: vi.fn().mockResolvedValue(listedConnectorTypes),
   };
   return {
     deps: {
       workflowsExtensions: {
         getAllTriggerDefinitions: () => listedTriggers as any,
-        isReady: jest.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockResolvedValue(undefined),
         getTriggerDefinition: (triggerType: string) =>
           listedTriggers.find(({ id }) => id === triggerType) as any,
         getStepDefinition: (stepTypeId: string) => stepDefinitions[stepTypeId] as any,
       } as any,
-      getActionsClient: jest.fn().mockResolvedValue(actionsClient) as any,
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
+      getActionsClient: vi.fn().mockResolvedValue(actionsClient) as any,
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClientWithRequest) as any,
     },
     actionsClient,
     actionsClientWithRequest,

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import fs from 'fs';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -14,10 +17,13 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { VerificationCode } from './verification_code';
 import { VerificationService } from './verification_service';
 
-jest.mock('fs');
-jest.mock('@kbn/utils', () => ({
-  getDataPath: jest.fn().mockReturnValue('/data/'),
-}));
+vi.mock('fs');
+vi.mock('@kbn/utils', () => {
+      const mocked = {
+      getDataPath: vi.fn().mockReturnValue('/data/'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const loggerMock = loggingSystemMock.createLogger();
 
@@ -37,7 +43,7 @@ describe('VerificationService', () => {
 
     it('should not return verification code if cannot write to disk', () => {
       const service = new VerificationService(loggerMock);
-      (fs.writeFileSync as jest.Mock).mockImplementationOnce(() => {
+      (fs.writeFileSync as Mock).mockImplementationOnce(() => {
         throw new Error('Write error');
       });
       const setup = service.setup();

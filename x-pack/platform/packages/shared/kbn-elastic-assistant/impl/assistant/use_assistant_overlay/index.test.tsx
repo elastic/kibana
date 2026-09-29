@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useAssistantOverlay } from '.';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import type { FetchCurrentUserConversations } from '../api';
@@ -12,33 +14,33 @@ import { useFetchCurrentUserConversations } from '../api';
 import { mockConnectors } from '../../mock/connectors';
 
 const mockUseAssistantContext = {
-  registerPromptContext: jest.fn(),
-  showAssistantOverlay: jest.fn(),
-  unRegisterPromptContext: jest.fn(),
+  registerPromptContext: vi.fn(),
+  showAssistantOverlay: vi.fn(),
+  unRegisterPromptContext: vi.fn(),
 };
-jest.mock('../../assistant_context', () => {
-  const original = jest.requireActual('../../assistant_context');
+vi.mock('../../assistant_context', async () => {
+  const original = (await vi.importActual('../../assistant_context'));
 
   return {
     ...original,
     useAssistantContext: () => mockUseAssistantContext,
   };
 });
-jest.mock('../api/conversations/use_fetch_current_user_conversations');
-const mockCreateConversation = jest.fn().mockResolvedValue({ id: 'conversation-id' });
-jest.mock('../use_conversation', () => {
+vi.mock('../api/conversations/use_fetch_current_user_conversations');
+const mockCreateConversation = vi.fn().mockResolvedValue({ id: 'conversation-id' });
+vi.mock('../use_conversation', () => {
   return {
-    useConversation: jest.fn(() => ({
+    useConversation: vi.fn(() => ({
       createConversation: mockCreateConversation,
       currentConversation: { id: 'conversation-id' },
     })),
   };
 });
 
-jest.mock('../../connectorland/helpers');
-jest.mock('@kbn/inference-connectors', () => {
+vi.mock('../../connectorland/helpers');
+vi.mock('@kbn/inference-connectors', () => {
   return {
-    useLoadConnectors: jest.fn(() => ({
+    useLoadConnectors: vi.fn(() => ({
       data: mockConnectors,
       error: null,
       isSuccess: true,
@@ -67,11 +69,11 @@ const mockData = {
 
 describe('useAssistantOverlay', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useFetchCurrentUserConversations).mockReturnValue({
       data: mockData,
       isLoading: false,
-      refetch: jest.fn().mockResolvedValue({
+      refetch: vi.fn().mockResolvedValue({
         isLoading: false,
         data: {
           pages: [
@@ -86,14 +88,14 @@ describe('useAssistantOverlay', () => {
       }),
       isFetched: true,
       isFetching: false,
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
     } as unknown as FetchCurrentUserConversations);
   });
 
   it('calls registerPromptContext with the expected context', async () => {
     const category = 'event';
     const description = 'test description';
-    const getPromptContext = jest.fn(() => Promise.resolve('test data'));
+    const getPromptContext = vi.fn(() => Promise.resolve('test data'));
     const id = 'test-id';
     const suggestedUserPrompt = 'test user prompt';
     const tooltip = 'test tooltip';

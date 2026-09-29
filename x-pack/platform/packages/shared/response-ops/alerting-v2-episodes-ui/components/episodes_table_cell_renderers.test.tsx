@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,8 +35,8 @@ const baseCellProps = {
   columnId: 'episode.status',
   dataView: {} as never,
   fieldFormats: {} as never,
-  closePopover: jest.fn(),
-  setCellProps: jest.fn(),
+  closePopover: vi.fn(),
+  setCellProps: vi.fn(),
   rowIndex: 0,
   colIndex: 0,
   columnsMeta: undefined,
@@ -78,8 +80,8 @@ describe('EpisodeStatusCell', () => {
 
 describe('EpisodeDurationCell', () => {
   const mockDataView = {
-    getFieldByName: jest.fn().mockReturnValue({ name: 'duration' }),
-    getFormatterForField: jest
+    getFieldByName: vi.fn().mockReturnValue({ name: 'duration' }),
+    getFormatterForField: vi
       .fn()
       .mockReturnValue({ convertToText: (value: number) => `${value} ms` }),
   } as never;
@@ -273,7 +275,7 @@ describe('EpisodeRuleCell', () => {
   });
 
   describe('with onRuleNameClick', () => {
-    const mockOnRuleNameClick = jest.fn();
+    const mockOnRuleNameClick = vi.fn();
 
     const renderRuleNameLink = () => {
       render(
@@ -416,7 +418,7 @@ describe('EpisodeRuleCell', () => {
 
   it('copies the full rule id when the unavailable rule label is clicked', async () => {
     const user = userEvent.setup();
-    const mockExecCommand = jest.fn().mockReturnValue(true);
+    const mockExecCommand = vi.fn().mockReturnValue(true);
     document.execCommand = mockExecCommand;
     const row = makeRow({ 'rule.id': 'deleted-rule-1234567890' });
     render(
@@ -603,7 +605,7 @@ describe('EpisodeRuleCell', () => {
   });
 
   it('calls getRuleDetailsHref with isSourceRule=true for a source episode', () => {
-    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/rules/v1-rule-id');
+    const mockGetRuleDetailsHref = vi.fn().mockReturnValue('/app/rules/v1-rule-id');
     const row = makeRow({
       'rule.id': 'v1-rule-id',
       source_id: 'classic-alerts',
@@ -623,7 +625,7 @@ describe('EpisodeRuleCell', () => {
   });
 
   it('calls getRuleDetailsHref with isSourceRule=false for a v2 episode', () => {
-    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/rules/r1');
+    const mockGetRuleDetailsHref = vi.fn().mockReturnValue('/app/rules/r1');
     const row = makeRow({ 'rule.id': 'r1' });
     render(
       <EpisodeRuleCell
@@ -639,8 +641,8 @@ describe('EpisodeRuleCell', () => {
   });
 
   it('treats a source episode whose cached rule has kind as a native v2 rule', () => {
-    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/alerting/rules/v2-rule-id');
-    const mockOnRuleNameClick = jest.fn();
+    const mockGetRuleDetailsHref = vi.fn().mockReturnValue('/app/alerting/rules/v2-rule-id');
+    const mockOnRuleNameClick = vi.fn();
     const v2Rule: Rule = { ...makeRule('V2 Rule'), kind: 'alert' };
     const row = makeRow({
       'rule.id': 'v2-rule-id',
@@ -667,7 +669,7 @@ describe('EpisodeRuleCell', () => {
   });
 
   it('omits href when getRuleDetailsHref returns no details route', () => {
-    const mockOnRuleNameClick = jest.fn();
+    const mockOnRuleNameClick = vi.fn();
     const row = makeRow({
       'rule.id': 'v1-rule-id',
       source_id: 'classic-alerts',
@@ -692,7 +694,7 @@ describe('EpisodeRuleCell', () => {
   });
 
   it('calls onRuleNameClick with sourceRuleInfo for a source episode', () => {
-    const mockOnRuleNameClick = jest.fn();
+    const mockOnRuleNameClick = vi.fn();
     const row = makeRow({
       'rule.id': 'v1-rule-id',
       source_id: 'classic-alerts',

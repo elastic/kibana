@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -20,11 +22,11 @@ import {
   JOB_DETAILS_TAB_JSON,
 } from '../../components';
 
-jest.mock('../../../../kibana_services', () => {
-  const services = jest.requireActual('../../../../kibana_services');
+vi.mock('../../../../kibana_services', async () => {
+  const services = (await vi.importActual('../../../../kibana_services'));
   return {
     ...services,
-    trackUiMetric: jest.fn(),
+    trackUiMetric: vi.fn(),
   };
 });
 
@@ -36,8 +38,8 @@ const defaultProps = {
   job: defaultJob,
   jobId: defaultJob.id,
   panelType: JOB_DETAILS_TAB_SUMMARY,
-  closeDetailPanel: jest.fn(),
-  openDetailPanel: jest.fn(),
+  closeDetailPanel: vi.fn(),
+  openDetailPanel: vi.fn(),
 };
 
 const renderComponent = (overrides = {}) => {
@@ -52,7 +54,7 @@ const renderComponent = (overrides = {}) => {
 
 describe('<DetailPanel />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('layout', () => {

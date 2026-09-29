@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -40,67 +42,79 @@ const mockSourceState: {
   },
   error: undefined,
   isLoading: false,
-  loadSource: jest.fn(),
+  loadSource: vi.fn(),
 };
 
-const mockGetRedirectUrl = jest.fn().mockReturnValue(HOSTS_ONBOARDING_HREF);
+const mockGetRedirectUrl = vi.fn().mockReturnValue(HOSTS_ONBOARDING_HREF);
 
 let mockLastPageTemplateProps: {
   'data-test-subj'?: string;
   noDataConfig?: NoDataConfig;
 } = {};
 
-jest.mock('../../../containers/metrics_source', () => ({
-  useSourceContext: () => mockSourceState,
-  useMetricsDataViewContext: () => ({ error: undefined, refetch: jest.fn() }),
-}));
+vi.mock('../../../containers/metrics_source', () => {
+      const mocked = {
+      useSourceContext: () => mockSourceState,
+      useMetricsDataViewContext: () => ({ error: undefined, refetch: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      observabilityAIAssistant: undefined,
-      observabilityShared: {
-        navigation: {
-          PageTemplate: (props: {
-            'data-test-subj'?: string;
-            noDataConfig?: NoDataConfig;
-            children?: React.ReactNode;
-          }) => {
-            mockLastPageTemplateProps = {
-              'data-test-subj': props['data-test-subj'],
-              noDataConfig: props.noDataConfig,
-            };
-            return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          observabilityAIAssistant: undefined,
+          observabilityShared: {
+            navigation: {
+              PageTemplate: (props: {
+                'data-test-subj'?: string;
+                noDataConfig?: NoDataConfig;
+                children?: React.ReactNode;
+              }) => {
+                mockLastPageTemplateProps = {
+                  'data-test-subj': props['data-test-subj'],
+                  noDataConfig: props.noDataConfig,
+                };
+                return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
+              },
+            },
           },
-        },
-      },
-      share: {
-        url: {
-          locators: {
-            get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+              },
+            },
           },
+          docLinks: { links: { observability: { guide: 'https://docs.example' } } },
         },
-      },
-      docLinks: { links: { observability: { guide: 'https://docs.example' } } },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetcher', () => ({
-  isPending: (status: string) =>
-    status === 'loading' || status === 'not_initiated' || status === 'pending',
-  useFetcher: () => ({
-    data: { hasData: mockFetcherState.hasData },
-    status: mockFetcherState.status,
-  }),
-}));
+vi.mock('../../../hooks/use_fetcher', () => {
+      const mocked = {
+      isPending: (status: string) =>
+        status === 'loading' || status === 'not_initiated' || status === 'pending',
+      useFetcher: () => ({
+        data: { hasData: mockFetcherState.hasData },
+        status: mockFetcherState.status,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useLinkProps: () => ({ href: '/app/metrics/settings' }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useLinkProps: () => ({ href: '/app/metrics/settings' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const resetSharedMocks = () => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockGetRedirectUrl.mockReturnValue(HOSTS_ONBOARDING_HREF);
   mockFetcherState.hasData = true;
   mockFetcherState.status = 'success';

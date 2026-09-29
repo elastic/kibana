@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { ResolverNode } from '../../../../../common/endpoint/types';
 import { ANALYZER_CROSS_PROJECT_RENDER_EVENT } from '../../../../lib/telemetry/event_based/events';
@@ -43,10 +46,10 @@ describe('countProjectsInResolverNodes', () => {
 });
 
 describe('reportAnalyzerCrossProjectRender', () => {
-  let analytics: jest.Mocked<Pick<AnalyticsServiceSetup, 'reportEvent'>>;
+  let analytics: Mocked<Pick<AnalyticsServiceSetup, 'reportEvent'>>;
 
   beforeEach(() => {
-    analytics = { reportEvent: jest.fn() };
+    analytics = { reportEvent: vi.fn() };
   });
 
   it('reports the project count when linked-project nodes are present', () => {

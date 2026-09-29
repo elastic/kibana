@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,14 +21,14 @@ import { AnalyticsNoDataPageProvider } from './services';
 import { AnalyticsNoDataPage } from './analytics_no_data_page';
 
 describe('AnalyticsNoDataPage', () => {
-  const onDataViewCreated = jest.fn();
+  const onDataViewCreated = vi.fn();
   const user = userEvent.setup();
 
   const services = getAnalyticsNoDataPageServicesMock();
   const servicesWithCustomBranding = getAnalyticsNoDataPageServicesMockWithCustomBranding();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', async () => {
@@ -70,10 +72,10 @@ describe('AnalyticsNoDataPage', () => {
 
   it('handles onTryESQL action when ES data exists but no data views', async () => {
     // Mock the services to simulate ES data exists but no user data views
-    jest.spyOn(services, 'hasESData').mockResolvedValue(true);
-    jest.spyOn(services, 'hasDataView').mockResolvedValue(false);
+    vi.spyOn(services, 'hasESData').mockResolvedValue(true);
+    vi.spyOn(services, 'hasDataView').mockResolvedValue(false);
 
-    const onTryESQL = jest.fn();
+    const onTryESQL = vi.fn();
 
     render(
       <AnalyticsNoDataPageProvider {...services}>
@@ -100,8 +102,8 @@ describe('AnalyticsNoDataPage', () => {
 
   it('renders appropriately when no ES data exists', async () => {
     // Mock the services to simulate no ES data exists
-    jest.spyOn(services, 'hasESData').mockResolvedValue(false);
-    jest.spyOn(services, 'hasDataView').mockResolvedValue(false);
+    vi.spyOn(services, 'hasESData').mockResolvedValue(false);
+    vi.spyOn(services, 'hasDataView').mockResolvedValue(false);
 
     const { container } = render(
       <AnalyticsNoDataPageProvider {...services}>

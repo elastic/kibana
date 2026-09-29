@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
@@ -54,14 +56,14 @@ describe('LinksEditor', () => {
   ];
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderEditor = (overrides?: Partial<LinksEditorProps>) => {
     const defaultProps = {
-      onSaveToLibrary: jest.fn().mockImplementation(() => Promise.resolve()),
-      onAddToDashboard: jest.fn(),
-      onClose: jest.fn(),
+      onSaveToLibrary: vi.fn().mockImplementation(() => Promise.resolve()),
+      onAddToDashboard: vi.fn(),
+      onClose: vi.fn(),
       isByReference: false,
       flyoutId: 'test-id',
     };
@@ -73,7 +75,7 @@ describe('LinksEditor', () => {
   };
 
   test('shows empty state with no links', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderEditor({ onClose });
     expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
       LinksStrings.editor.panelEditor.getCreateFlyoutTitle()
@@ -101,7 +103,7 @@ describe('LinksEditor', () => {
   });
 
   test('saving by reference panels calls onSaveToLibrary', async () => {
-    const onSaveToLibrary = jest.fn().mockImplementation(() => Promise.resolve());
+    const onSaveToLibrary = vi.fn().mockImplementation(() => Promise.resolve());
     renderEditor({ initialLinks: someLinks, onSaveToLibrary, isByReference: true });
 
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
@@ -111,7 +113,7 @@ describe('LinksEditor', () => {
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
-    const onAddToDashboard = jest.fn();
+    const onAddToDashboard = vi.fn();
     renderEditor({ initialLinks: someLinks, onAddToDashboard, isByReference: false });
 
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');

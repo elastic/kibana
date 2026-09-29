@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React, { isValidElement } from 'react';
 import { render } from '@testing-library/react';
 import { identity } from 'lodash';
@@ -30,8 +33,8 @@ const getAggFormat = (
 
 const createMockNestedFormat = (overrides: Partial<IFieldFormat> = {}) =>
   ({
-    convertToText: jest.fn().mockReturnValue('text'),
-    convertToReact: jest.fn(),
+    convertToText: vi.fn().mockReturnValue('text'),
+    convertToReact: vi.fn(),
     ...overrides,
   } as unknown as IFieldFormat);
 
@@ -42,10 +45,10 @@ const getReactConvertText = (format: IFieldFormat, value: unknown): string => {
 };
 
 describe('getAggsFormats', () => {
-  let getFormat: jest.MockedFunction<(mapping: SerializedFieldFormat) => IFieldFormat>;
+  let getFormat: MockedFunction<(mapping: SerializedFieldFormat) => IFieldFormat>;
 
   beforeEach(() => {
-    getFormat = jest.fn().mockImplementation(() => {
+    getFormat = vi.fn().mockImplementation(() => {
       const DefaultFieldFormat = FieldFormat.from(identity);
       return new DefaultFieldFormat();
     });
@@ -250,7 +253,7 @@ describe('getAggsFormats', () => {
         missingBucketLabel: 'missing bucket',
       },
     };
-    const mockReactConvert = jest.fn();
+    const mockReactConvert = vi.fn();
     const mockNestedFormat = createMockNestedFormat({ convertToReact: mockReactConvert });
 
     const format = getAggFormat(mapping, () => mockNestedFormat);
@@ -270,7 +273,7 @@ describe('getAggsFormats', () => {
         missingBucketLabel: 'missing bucket',
       },
     };
-    const mockReactConvert = jest.fn().mockReturnValue(
+    const mockReactConvert = vi.fn().mockReturnValue(
       <a href="http://example.com" target="_blank" rel="noopener noreferrer">
         example.com
       </a>
@@ -297,7 +300,7 @@ describe('getAggsFormats', () => {
         otherBucketLabel: 'Other',
       },
     };
-    const mockReactConvert = jest.fn();
+    const mockReactConvert = vi.fn();
     const mockNestedFormat = createMockNestedFormat({ convertToReact: mockReactConvert });
 
     const format = getAggFormat(mapping, () => mockNestedFormat);
@@ -315,7 +318,7 @@ describe('getAggsFormats', () => {
         separator: ' | ',
       },
     };
-    const mockReactConvert = jest.fn().mockImplementation((val) => (
+    const mockReactConvert = vi.fn().mockImplementation((val) => (
       <a href={`http://${val}`} target="_blank" rel="noopener noreferrer">
         {val}
       </a>

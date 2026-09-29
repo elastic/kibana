@@ -5,44 +5,65 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
 import { Misconfiguration } from '.';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding', () => ({
-  useMisconfigurationFinding: jest.fn(),
-}));
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding', () => {
+      const mocked = {
+      useMisconfigurationFinding: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/components/flyout_error', () => ({
-  FlyoutError: () => <div data-test-subj="mockFlyoutError" />,
-}));
+vi.mock('../../../shared/components/flyout_error', () => {
+      const mocked = {
+      FlyoutError: () => <div data-test-subj="mockFlyoutError" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/components/flyout_loading', () => ({
-  FlyoutLoading: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={dataTestSubj ?? 'mockFlyoutLoading'} />
-  ),
-}));
+vi.mock('../../../shared/components/flyout_loading', () => {
+      const mocked = {
+      FlyoutLoading: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+        <div data-test-subj={dataTestSubj ?? 'mockFlyoutLoading'} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./header', () => ({
-  Header: () => <div data-test-subj="mockMisconfigurationHeader" />,
-}));
+vi.mock('./header', () => {
+      const mocked = {
+      Header: () => <div data-test-subj="mockMisconfigurationHeader" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./content', () => ({
-  Content: () => <div data-test-subj="mockMisconfigurationContent" />,
-}));
+vi.mock('./content', () => {
+      const mocked = {
+      Content: () => <div data-test-subj="mockMisconfigurationContent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./footer', () => ({
-  Footer: () => <div data-test-subj="mockMisconfigurationFooter" />,
-}));
+vi.mock('./footer', () => {
+      const mocked = {
+      Footer: () => <div data-test-subj="mockMisconfigurationFooter" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useMisconfigurationFindingMock = useMisconfigurationFinding as jest.Mock;
+const useMisconfigurationFindingMock = useMisconfigurationFinding as Mock;
 
 const renderPanel = () => render(<Misconfiguration resourceId="resource-1" ruleId="rule-1" />);
 
 describe('<Misconfiguration />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the loading state while fetching the finding', () => {

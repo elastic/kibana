@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { getApmTracesDiscoverUrl } from './get_discover_link';
 
 describe('getApmTracesDiscoverUrl', () => {
-  const mockGetRedirectUrl = jest.fn(
+  const mockGetRedirectUrl = vi.fn(
     (params: Record<string, unknown>) => `https://discover?${JSON.stringify(params)}`
   );
 
   const mockShare = {
     url: {
       locators: {
-        get: jest.fn((id: string) =>
+        get: vi.fn((id: string) =>
           id === DISCOVER_APP_LOCATOR ? { getRedirectUrl: mockGetRedirectUrl } : undefined
         ),
       },
@@ -40,7 +42,7 @@ describe('getApmTracesDiscoverUrl', () => {
     return locatorParams.query.esql;
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns undefined when Discover locator is not available', () => {
     const emptyShare = {

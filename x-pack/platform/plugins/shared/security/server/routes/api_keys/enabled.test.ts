@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { RequestHandler } from '@kbn/core/server';
@@ -22,7 +24,7 @@ describe('API keys enabled', () => {
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     return coreMock.createCustomRequestHandlerContext({
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
 

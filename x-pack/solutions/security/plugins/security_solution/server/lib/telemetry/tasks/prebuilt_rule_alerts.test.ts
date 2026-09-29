@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
 import {
@@ -36,7 +38,7 @@ describe('security telemetry - detection rule alerts task test', () => {
       current: new Date().toISOString(),
     };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    mockTelemetryEventsSender.getTelemetryUsageCluster = jest
+    mockTelemetryEventsSender.getTelemetryUsageCluster = vi
       .fn()
       .mockReturnValue(telemetryUsageCounter);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
@@ -66,14 +68,14 @@ describe('security telemetry - detection rule alerts task test', () => {
       current: new Date().toISOString(),
     };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    mockTelemetryEventsSender.getTelemetryUsageCluster = jest
+    mockTelemetryEventsSender.getTelemetryUsageCluster = vi
       .fn()
       .mockReturnValue(telemetryUsageCounter);
-    const spyOnSend = jest
+    const spyOnSend = vi
       .spyOn(mockTelemetryEventsSender, 'sendOnDemand')
       .mockResolvedValue(undefined);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
-    mockTelemetryReceiver.fetchPrebuiltRuleAlertsBatch = jest
+    mockTelemetryReceiver.fetchPrebuiltRuleAlertsBatch = vi
       .fn()
       .mockImplementation(async function* () {
         yield prebuiltRuleAlertsEsql.response;

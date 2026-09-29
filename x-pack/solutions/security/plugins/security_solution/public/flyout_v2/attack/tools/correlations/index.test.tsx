@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -15,41 +18,50 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { ATTACK_CORRELATIONS_TABLE_TEST_ID, ATTACK_CORRELATIONS_TOOL_TEST_ID } from './test_ids';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../document/tools/correlations/hooks/use_paginated_alerts');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../common/hooks/is_in_security_app');
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn().mockReturnValue({
-    openPreviewPanel: jest.fn(),
-    closeFlyout: jest.fn(),
-    openFlyout: jest.fn(),
-    openLeftPanel: jest.fn(),
-    openRightPanel: jest.fn(),
-    closeLeftPanel: jest.fn(),
-    closeRightPanel: jest.fn(),
-    closePreviewPanel: jest.fn(),
-    previousPreviewPanel: jest.fn(),
-    state: undefined,
-  }),
-}));
-jest.mock('../../../../common/components/user_privileges', () => ({
-  useUserPrivileges: () => ({
-    timelinePrivileges: { read: true },
-    rulesPrivileges: { rules: { read: true } },
-  }),
-}));
-jest.mock('../../../shared/components/document_tools_flyout_header', () => ({
-  DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
-}));
+vi.mock('../../../document/tools/correlations/hooks/use_paginated_alerts');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../common/hooks/is_in_security_app');
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn().mockReturnValue({
+        openPreviewPanel: vi.fn(),
+        closeFlyout: vi.fn(),
+        openFlyout: vi.fn(),
+        openLeftPanel: vi.fn(),
+        openRightPanel: vi.fn(),
+        closeLeftPanel: vi.fn(),
+        closeRightPanel: vi.fn(),
+        closePreviewPanel: vi.fn(),
+        previousPreviewPanel: vi.fn(),
+        state: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/user_privileges', () => {
+      const mocked = {
+      useUserPrivileges: () => ({
+        timelinePrivileges: { read: true },
+        rulesPrivileges: { rules: { read: true } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/components/document_tools_flyout_header', () => {
+      const mocked = {
+      DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUsePaginatedAlerts = usePaginatedAlerts as jest.Mock;
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
-const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
+const mockUsePaginatedAlerts = usePaginatedAlerts as Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
+const mockUseIsInSecurityApp = useIsInSecurityApp as Mock;
 
 const mockHit: DataTableRecord = {
   id: 'attack-1',
@@ -63,8 +75,8 @@ const mockHit: DataTableRecord = {
 } as DataTableRecord;
 
 const defaultPaginatedAlertsResult = {
-  setPagination: jest.fn(),
-  setSorting: jest.fn(),
+  setPagination: vi.fn(),
+  setSorting: vi.fn(),
   data: [],
   loading: false,
   paginationConfig: {
@@ -92,7 +104,7 @@ const renderTool = ({
 
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsRead: true });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUsePaginatedAlerts.mockReturnValue(defaultPaginatedAlertsResult);
@@ -167,7 +179,7 @@ describe('CorrelationsDetails', () => {
         },
       });
 
-      const onShowAlert = jest.fn();
+      const onShowAlert = vi.fn();
       const { getByTestId } = renderTool({ alertIds: ['alert-id-1'], onShowAlert });
 
       fireEvent.click(getByTestId(`${ATTACK_CORRELATIONS_TABLE_TEST_ID}AlertPreviewButton`));

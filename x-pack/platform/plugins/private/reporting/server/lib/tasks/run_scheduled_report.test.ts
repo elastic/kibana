@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -45,7 +48,7 @@ interface StreamMock {
   write: (data: string) => void;
   fail: () => void;
   end: () => void;
-  destroy: jest.Mock;
+  destroy: Mock;
   transform: Transform;
   on: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
   once: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
@@ -74,7 +77,7 @@ function createStreamMock({
     end: () => {
       transform.end();
     },
-    destroy: jest.fn(),
+    destroy: vi.fn(),
     on: (event: string, listener: (...args: unknown[]) => void) => {
       transform.on(event, listener);
       return mock;
@@ -92,13 +95,16 @@ function createStreamMock({
 }
 
 let mockStream = createStreamMock();
-const mockGetContentStream = jest.fn();
-jest.mock('../content_stream', () => ({
-  getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
-  finishedWithNoPendingCallbacks: () => Promise.resolve(),
-}));
+const mockGetContentStream = vi.fn();
+vi.mock('../content_stream', () => {
+      const mocked = {
+      getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
+      finishedWithNoPendingCallbacks: () => Promise.resolve(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/notifications/email_notification_service');
+vi.mock('../../services/notifications/email_notification_service');
 
 const fakeRawRequest: FakeRawRequest = {
   headers: {
@@ -169,21 +175,21 @@ describe('Run Scheduled Report Task', () => {
   const notifications = notificationsMock.createStart();
   let emailNotificationService: EmailNotificationService;
   let logger: MockedLogger;
-  let notifyUsage: jest.Mock<any>;
+  let notifyUsage: Mock<any>;
 
-  const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
+  const runTaskFn = vi.fn().mockResolvedValue({ content_type: 'application/pdf' });
   beforeEach(async () => {
     configType = createMockConfigSchema();
     mockReporting = await createMockReportingCore(configType);
 
     soClient = await mockReporting.getInternalSoClient();
 
-    notifyUsage = jest.fn();
+    notifyUsage = vi.fn();
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: pdf scheduled export',
@@ -197,31 +203,31 @@ describe('Run Scheduled Report Task', () => {
   });
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetContentStream.mockImplementation(() => mockStream);
     logger = loggingSystemMock.createLogger();
-    soClient.get = jest.fn().mockImplementation(async () => {
+    soClient.get = vi.fn().mockImplementation(async () => {
       return scheduledReport;
     });
     reportStore = await mockReporting.getStore();
-    reportStore.addReport = jest.fn().mockImplementation(async () => {
+    reportStore.addReport = vi.fn().mockImplementation(async () => {
       return savedReport;
     });
-    reportStore.setReportError = jest.fn(() =>
+    reportStore.setReportError = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'noop',
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    reportStore.setReportFailed = jest.fn(() =>
+    reportStore.setReportFailed = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'test1',
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    reportStore.setReportWarning = jest.fn();
+    reportStore.setReportWarning = vi.fn();
     emailNotificationService = new EmailNotificationService({
       notifications,
     });
@@ -229,7 +235,7 @@ describe('Run Scheduled Report Task', () => {
 
   afterEach(() => {
     // some tests enable fake timers; restore real timers even if they fail mid-test
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('Instance setup', () => {
@@ -282,8 +288,8 @@ describe('Run Scheduled Report Task', () => {
   });
 
   it('create task runner', async () => {
-    logger.info = jest.fn();
-    logger.error = jest.fn();
+    logger.info = vi.fn();
+    logger.error = vi.fn();
 
     const task = new RunScheduledReportTask({
       reporting: mockReporting,
@@ -366,7 +372,7 @@ describe('Run Scheduled Report Task', () => {
       logger,
     });
 
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
@@ -436,7 +442,7 @@ describe('Run Scheduled Report Task', () => {
       config: configType,
       logger,
     });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
@@ -480,7 +486,7 @@ describe('Run Scheduled Report Task', () => {
       config: configType,
       logger,
     });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
@@ -512,7 +518,7 @@ describe('Run Scheduled Report Task', () => {
 
   it('sends telemetry event when job is claimed', async () => {
     const store = await mockReporting.getStore();
-    store.addReport = jest.fn().mockImplementation(
+    store.addReport = vi.fn().mockImplementation(
       (report) =>
         new SavedReport({
           ...report,
@@ -525,13 +531,13 @@ describe('Run Scheduled Report Task', () => {
         })
     );
 
-    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+    mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
     const task = new RunScheduledReportTask({
       reporting: mockReporting,
       config: configType,
       logger,
     });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
@@ -609,13 +615,13 @@ describe('Run Scheduled Report Task', () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'noop',
       name: 'Noop',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: () => new Promise(() => {}),
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: pdf scheduled export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
@@ -626,7 +632,7 @@ describe('Run Scheduled Report Task', () => {
       logger,
     });
 
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
       .spyOn(task, 'prepareJob')
       .mockResolvedValueOnce({
@@ -641,7 +647,7 @@ describe('Run Scheduled Report Task', () => {
         },
       } as never);
 
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
       .spyOn(task, 'getEventTracker')
       // @ts-ignore
@@ -684,7 +690,7 @@ describe('Run Scheduled Report Task', () => {
   });
 
   it('catches stream error during performJob and rejects the operation', async () => {
-    const streamFailRunTaskFn = jest.fn().mockImplementation((opts: { stream: StreamMock }) => {
+    const streamFailRunTaskFn = vi.fn().mockImplementation((opts: { stream: StreamMock }) => {
       const { stream } = opts;
       setImmediate(() => stream.fail());
       return new Promise(() => {}); // never resolve so the stream error throws
@@ -692,19 +698,19 @@ describe('Run Scheduled Report Task', () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'noop',
       name: 'Noop',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: streamFailRunTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: pdf scheduled export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportError = jest.fn(() =>
+    store.setReportError = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'noop',
@@ -712,9 +718,9 @@ describe('Run Scheduled Report Task', () => {
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
 
-    store.setReportFailed = jest.fn();
-    logger.error = jest.fn();
-    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+    store.setReportFailed = vi.fn();
+    logger.error = vi.fn();
+    mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
 
     const task = new RunScheduledReportTask({
       reporting: mockReporting,
@@ -722,7 +728,7 @@ describe('Run Scheduled Report Task', () => {
       logger,
     });
 
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
       .spyOn(task, 'prepareJob')
       .mockResolvedValueOnce({
@@ -737,7 +743,7 @@ describe('Run Scheduled Report Task', () => {
         },
       } as never);
 
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
       .spyOn(task, 'getEventTracker')
       // @ts-ignore
@@ -778,34 +784,34 @@ describe('Run Scheduled Report Task', () => {
   it('updates report with error message and failed status if error occurs during task run', async () => {
     const runAt = new Date('2023-10-01T00:00:00Z');
 
-    const runThisTaskFn = jest.fn().mockImplementation(() => {
+    const runThisTaskFn = vi.fn().mockImplementation(() => {
       throw new Error('failure generating report');
     });
     mockReporting.getExportTypesRegistry().register({
       id: 'test2',
       name: 'Test2',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runThisTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test2 scheduled export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test2',
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
     const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
-    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
-    store.setReportFailed = jest.fn(() =>
+    store.addReport = vi.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportFailed = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'test1',
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    store.setReportError = jest.fn();
+    store.setReportError = vi.fn();
 
     const task = new RunScheduledReportTask({
       reporting: mockReporting,
@@ -855,31 +861,31 @@ describe('Run Scheduled Report Task', () => {
   });
 
   it('should retry up to maxRetries', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const runAt = new Date('2023-10-01T00:00:00Z');
     configType = createMockConfigSchema({ capture: { maxAttempts: 2 } });
     mockReporting = await createMockReportingCore(configType);
-    const runThisTaskFn = jest.fn().mockImplementation(() => {
+    const runThisTaskFn = vi.fn().mockImplementation(() => {
       throw new Error('failure generating report');
     });
     mockReporting.getExportTypesRegistry().register({
       id: 'test2',
       name: 'Test2',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runThisTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test2 scheduled export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test2',
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
     const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
-    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
-    store.setReportFailed = jest.fn(() =>
+    store.addReport = vi.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportFailed = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'test1',
@@ -915,7 +921,7 @@ describe('Run Scheduled Report Task', () => {
     const expectPromise = expect(runPromise).rejects.toThrow('failure generating report');
     // Advance past all retry delays
     for (let i = 0; i < 10; i++) {
-      await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+      await vi.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
     }
     await expectPromise;
 
@@ -937,7 +943,7 @@ describe('Run Scheduled Report Task', () => {
       completed_at: expect.any(String),
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('timeout classification', () => {
@@ -948,14 +954,14 @@ describe('Run Scheduled Report Task', () => {
     const runTimedOutScheduledTask = async (
       result: Partial<TaskRunResult>,
       { maxAttempts }: { maxAttempts: number }
-    ): Promise<{ error: Error | undefined; runTaskMock: jest.Mock }> => {
-      jest.useFakeTimers();
+    ): Promise<{ error: Error | undefined; runTaskMock: Mock }> => {
+      vi.useFakeTimers();
       // A 1ms queue timeout ensures the internal timer cancels each attempt promptly.
       configType = createMockConfigSchema({ capture: { maxAttempts }, queue: { timeout: 1 } });
       mockReporting = await createMockReportingCore(configType);
       mockStream = createStreamMock();
 
-      const timedOutRunTaskFn = jest.fn().mockImplementation(
+      const timedOutRunTaskFn = vi.fn().mockImplementation(
         ({ cancellationToken }: { cancellationToken: CancellationToken }) =>
           new Promise<TaskRunResult>((resolve) => {
             cancellationToken.on(() => resolve(result as TaskRunResult));
@@ -964,13 +970,13 @@ describe('Run Scheduled Report Task', () => {
       mockReporting.getExportTypesRegistry().register({
         id: 'test2',
         name: 'Test2',
-        setup: jest.fn(),
-        start: jest.fn(),
+        setup: vi.fn(),
+        start: vi.fn(),
         createJob: () => new Promise(() => {}),
         runTask: timedOutRunTaskFn,
         shouldNotifyUsage: () => true,
         getFeatureUsageName: () => 'Reporting: test2 scheduled export',
-        notifyUsage: jest.fn(),
+        notifyUsage: vi.fn(),
         jobContentEncoding: 'base64',
         jobType: 'test2',
         validLicenses: [],
@@ -978,15 +984,15 @@ describe('Run Scheduled Report Task', () => {
 
       const store = await mockReporting.getStore();
       const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
-      store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
-      store.setReportFailed = jest.fn(() =>
+      store.addReport = vi.fn().mockImplementation(async () => thisSavedReport);
+      store.setReportFailed = vi.fn(() =>
         Promise.resolve({
           _id: 'test',
           jobtype: 'test1',
           status: 'processing',
         } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
       );
-      store.setReportError = jest.fn();
+      store.setReportError = vi.fn();
 
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
@@ -1018,10 +1024,10 @@ describe('Run Scheduled Report Task', () => {
       });
       // Advance past the internal queue timeout(s) and all retry delays.
       for (let i = 0; i < 10; i++) {
-        await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+        await vi.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
       }
       await runPromise;
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       return { error, runTaskMock: timedOutRunTaskFn };
     };
@@ -1049,25 +1055,25 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('force-fails a run whose runTask never honors the cancellation token', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       configType = createMockConfigSchema({ capture: { maxAttempts: 1 }, queue: { timeout: 1 } });
       mockReporting = await createMockReportingCore(configType);
       mockStream = createStreamMock();
 
       // Never resolves, and ignores the cancellation token entirely.
-      const hangingRunTaskFn = jest
+      const hangingRunTaskFn = vi
         .fn()
         .mockImplementation(() => new Promise<TaskRunResult>(() => {}));
       mockReporting.getExportTypesRegistry().register({
         id: 'test3',
         name: 'Test3',
-        setup: jest.fn(),
-        start: jest.fn(),
+        setup: vi.fn(),
+        start: vi.fn(),
         createJob: () => new Promise(() => {}),
         runTask: hangingRunTaskFn,
         shouldNotifyUsage: () => true,
         getFeatureUsageName: () => 'Reporting: test3 scheduled export',
-        notifyUsage: jest.fn(),
+        notifyUsage: vi.fn(),
         jobContentEncoding: 'base64',
         jobType: 'test3',
         validLicenses: [],
@@ -1075,15 +1081,15 @@ describe('Run Scheduled Report Task', () => {
 
       const store = await mockReporting.getStore();
       const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test3' });
-      store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
-      store.setReportFailed = jest.fn(() =>
+      store.addReport = vi.fn().mockImplementation(async () => thisSavedReport);
+      store.setReportFailed = vi.fn(() =>
         Promise.resolve({
           _id: 'test',
           jobtype: 'test3',
           status: 'processing',
         } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
       );
-      store.setReportError = jest.fn();
+      store.setReportError = vi.fn();
 
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
@@ -1113,10 +1119,10 @@ describe('Run Scheduled Report Task', () => {
       });
       // Advance past the internal queue timeout, the hard-timeout grace period, and all retry delays.
       for (let i = 0; i < 10; i++) {
-        await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+        await vi.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
       }
       await runPromise;
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       expect(hangingRunTaskFn).toHaveBeenCalled();
       expect(error).toBeInstanceOf(QueueTimeoutError);
@@ -1125,7 +1131,7 @@ describe('Run Scheduled Report Task', () => {
   // Regression test for https://github.com/elastic/kibana/issues/255230: after an attempt advances
   // the doc's seq_no, the retry must refresh the OCC values instead of reusing the stale ones.
   it('retries with fresh seq_no/primary_term and tears down the failed stream', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     configType = createMockConfigSchema({ capture: { maxAttempts: 2 } });
     mockReporting = await createMockReportingCore(configType);
 
@@ -1134,7 +1140,7 @@ describe('Run Scheduled Report Task', () => {
     const freshPrimaryTerm = 354001;
 
     // attempt 1 fails, attempt 2 succeeds
-    const runThisTaskFn = jest
+    const runThisTaskFn = vi
       .fn()
       .mockImplementationOnce(() => {
         throw new Error('failure generating report');
@@ -1143,13 +1149,13 @@ describe('Run Scheduled Report Task', () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'test2',
       name: 'Test2',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runThisTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test2 scheduled export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentEncoding: 'base64',
       jobContentExtension: 'csv',
       jobType: 'test2',
@@ -1164,7 +1170,7 @@ describe('Run Scheduled Report Task', () => {
 
     // refreshReportSeqNo re-fetches the doc; return the advanced values
     const { asInternalUser: esClient } = await mockReporting.getEsClient();
-    (esClient.get as unknown as jest.Mock).mockResolvedValue({
+    (esClient.get as unknown as Mock).mockResolvedValue({
       _id: savedReportData._id,
       _index: savedReportData._index,
       _seq_no: freshSeqNo,
@@ -1175,22 +1181,22 @@ describe('Run Scheduled Report Task', () => {
 
     const store = await mockReporting.getStore();
     const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
-    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
-    store.setReportError = jest.fn(() =>
+    store.addReport = vi.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportError = vi.fn(() =>
       Promise.resolve({
         _id: savedReportData._id,
         jobtype: 'test2',
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+    mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
 
     const task = new RunScheduledReportTask({
       reporting: mockReporting,
       config: configType,
       logger,
     });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValue({
@@ -1221,7 +1227,7 @@ describe('Run Scheduled Report Task', () => {
     const runPromise = taskRunner.run();
     // Advance past all retry delays
     for (let i = 0; i < 10; i++) {
-      await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+      await vi.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
     }
     await runPromise;
 
@@ -1247,12 +1253,12 @@ describe('Run Scheduled Report Task', () => {
     // the failed attempt's stream must be torn down so it can't keep writing
     expect(streamAttempt1.destroy).toHaveBeenCalled();
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('notify', () => {
     it('sends an email notification', async () => {
-      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -1304,7 +1310,7 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('handles invalid email template errors, reporting them in the notification text', async () => {
-      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -1388,7 +1394,7 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('sends an email notification with template variables in subject and body', async () => {
-      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -1550,7 +1556,7 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('logs a warning and sets the execution to warning when the report is larger than 10MB', async () => {
-      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -1595,7 +1601,7 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('logs a warning and sets the execution to warning when the notification service is not initialized', async () => {
-      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -1640,8 +1646,8 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('logs a warning and sets the execution to warning if the notification service throws an error', async () => {
-      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
-      jest
+      mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
+      vi
         .spyOn(emailNotificationService, 'notify')
         .mockRejectedValueOnce(new Error('This is a test error!'));
       const task = new RunScheduledReportTask({
@@ -1705,7 +1711,7 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('logs an error if there is an error thrown setting execution to warning', async () => {
-      jest
+      vi
         .spyOn(reportStore, 'setReportWarning')
         .mockRejectedValueOnce('Error setting status to warning');
       const task = new RunScheduledReportTask({

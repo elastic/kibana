@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
@@ -33,27 +36,27 @@ import {
 } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { AlertData } from '../../utils/types';
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/containers/source');
-jest.mock('../../logic/use_create_update_exception');
-jest.mock('../../logic/use_exception_flyout_data');
-jest.mock('@kbn/lists-plugin/public');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../rule_management/api/hooks/use_fetch_rule_by_id_query');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/containers/source');
+vi.mock('../../logic/use_create_update_exception');
+vi.mock('../../logic/use_exception_flyout_data');
+vi.mock('@kbn/lists-plugin/public');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../rule_management/api/hooks/use_fetch_rule_by_id_query');
 
-const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
+const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as Mock<
   ReturnType<typeof getExceptionBuilderComponentLazy>
 >;
-const mockUseAddOrUpdateException = useCreateOrUpdateException as jest.Mock<
+const mockUseAddOrUpdateException = useCreateOrUpdateException as Mock<
   ReturnType<typeof useCreateOrUpdateException>
 >;
-const mockFetchIndexPatterns = useFetchIndexPatterns as jest.Mock<
+const mockFetchIndexPatterns = useFetchIndexPatterns as Mock<
   ReturnType<typeof useFetchIndexPatterns>
 >;
-const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
-const mockUseFetchIndex = useFetchIndex as jest.Mock;
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+const mockUseSignalIndex = useSignalIndex as Mock<Partial<ReturnType<typeof useSignalIndex>>>;
+const mockUseFetchIndex = useFetchIndex as Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
 const alertDataMock: AlertData = {
   '@timestamp': '1234567890',
@@ -62,16 +65,16 @@ const alertDataMock: AlertData = {
 };
 
 describe('When the add exception modal is opened', () => {
-  let defaultEndpointItems: jest.SpyInstance<
+  let defaultEndpointItems: MockInstance<
     ReturnType<typeof helpers.defaultEndpointExceptionItems>
   >;
   beforeEach(() => {
     mockGetExceptionBuilderComponentLazy.mockReturnValue(
       <span data-test-subj="alertExceptionBuilder" />
     );
-    defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
+    defaultEndpointItems = vi.spyOn(helpers, 'defaultEndpointExceptionItems');
 
-    mockUseAddOrUpdateException.mockImplementation(() => [false, jest.fn()]);
+    mockUseAddOrUpdateException.mockImplementation(() => [false, vi.fn()]);
 
     mockUseSignalIndex.mockImplementation(() => ({
       loading: false,
@@ -88,7 +91,7 @@ describe('When the add exception modal is opened', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the modal is loading', () => {
@@ -111,8 +114,8 @@ describe('When the add exception modal is opened', () => {
           alertStatus={undefined}
           isEndpointItem={false}
           showAlertCloseOptions
-          onCancel={jest.fn()}
-          onConfirm={jest.fn()}
+          onCancel={vi.fn()}
+          onConfirm={vi.fn()}
         />
       );
     });
@@ -148,8 +151,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus={undefined}
             isEndpointItem
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         );
       });
@@ -199,8 +202,8 @@ describe('When the add exception modal is opened', () => {
                 alertStatus={undefined}
                 isEndpointItem
                 showAlertCloseOptions
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
+                onCancel={vi.fn()}
+                onConfirm={vi.fn()}
               />
             </TestProviders>
           );
@@ -319,8 +322,8 @@ describe('When the add exception modal is opened', () => {
               alertStatus="open"
               isEndpointItem
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -425,8 +428,8 @@ describe('When the add exception modal is opened', () => {
               alertStatus="open"
               isEndpointItem
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -518,8 +521,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus={undefined}
             isEndpointItem
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         );
       });
@@ -549,8 +552,8 @@ describe('When the add exception modal is opened', () => {
               alertStatus="open"
               isEndpointItem={false}
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -632,8 +635,8 @@ describe('When the add exception modal is opened', () => {
                 alertStatus="open"
                 isEndpointItem={false}
                 showAlertCloseOptions
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
+                onCancel={vi.fn()}
+                onConfirm={vi.fn()}
               />
             </TestProviders>
           ))()
@@ -664,8 +667,8 @@ describe('When the add exception modal is opened', () => {
                 alertStatus="open"
                 isEndpointItem={false}
                 showAlertCloseOptions
-                onCancel={jest.fn()}
-                onConfirm={jest.fn()}
+                onCancel={vi.fn()}
+                onConfirm={vi.fn()}
               />
             </TestProviders>
           ))()
@@ -697,8 +700,8 @@ describe('When the add exception modal is opened', () => {
           alertStatus={undefined}
           isEndpointItem={false}
           showAlertCloseOptions
-          onCancel={jest.fn()}
-          onConfirm={jest.fn()}
+          onCancel={vi.fn()}
+          onConfirm={vi.fn()}
         />
       );
     });
@@ -732,8 +735,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus="open"
             isEndpointItem={false}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         );
 
@@ -757,8 +760,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus="open"
             isEndpointItem={false}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         );
 
@@ -782,8 +785,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus="open"
             isEndpointItem={false}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         );
 
@@ -807,8 +810,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus="open"
             isEndpointItem={false}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         );
 
@@ -836,8 +839,8 @@ describe('When the add exception modal is opened', () => {
               alertStatus={undefined}
               isEndpointItem={false}
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -885,8 +888,8 @@ describe('When the add exception modal is opened', () => {
               alertStatus={undefined}
               isEndpointItem={false}
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -922,8 +925,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus="open"
             isEndpointItem={false}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         );
 
@@ -964,8 +967,8 @@ describe('When the add exception modal is opened', () => {
               alertStatus={undefined}
               isEndpointItem={false}
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -1025,8 +1028,8 @@ describe('When the add exception modal is opened', () => {
               alertStatus={undefined}
               isEndpointItem={false}
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -1083,8 +1086,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus="open"
             isEndpointItem
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );
@@ -1123,8 +1126,8 @@ describe('When the add exception modal is opened', () => {
             alertStatus="open"
             isEndpointItem={false}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );

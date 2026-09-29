@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskStoreMock } from '../task_store.mock';
@@ -20,7 +22,7 @@ describe('TaskManagerMetricsCollector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clock.restore();
   });
 
@@ -113,7 +115,7 @@ describe('TaskManagerMetricsCollector', () => {
       taskTypes: new Set(['taskType1', 'taskType2', 'taskType3', 'taskType4']),
       excludedTypes: new Set(['taskType4', 'taskType5']),
     });
-    const handler = jest.fn();
+    const handler = vi.fn();
     taskManagerMetricsCollector.events.subscribe(handler);
 
     expect(mockTaskStore.aggregate).toHaveBeenCalledTimes(1);
@@ -330,7 +332,7 @@ describe('TaskManagerMetricsCollector', () => {
       taskTypes,
       excludedTypes: taskTypes,
     });
-    const handler = jest.fn();
+    const handler = vi.fn();
     taskManagerMetricsCollector.events.subscribe(handler);
 
     await new Promise((resolve) => setImmediate(resolve));
@@ -399,7 +401,7 @@ describe('TaskManagerMetricsCollector', () => {
       taskTypes,
       excludedTypes: taskTypes,
     });
-    const handler = jest.fn();
+    const handler = vi.fn();
     taskManagerMetricsCollector.events.subscribe(handler);
 
     await new Promise((resolve) => setImmediate(resolve));

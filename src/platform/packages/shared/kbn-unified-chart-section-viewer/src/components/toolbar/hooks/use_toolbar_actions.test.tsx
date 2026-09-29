@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
@@ -22,10 +25,10 @@ import {
 import { SortSelector } from '../sort_selector';
 import * as metricsExperienceStateProvider from '../../observability/metrics/context/metrics_experience_state_provider';
 
-jest.mock('../../observability/metrics/context/metrics_experience_state_provider');
+vi.mock('../../observability/metrics/context/metrics_experience_state_provider');
 
 const useMetricsExperienceStateMock =
-  metricsExperienceStateProvider.useMetricsExperienceState as jest.MockedFunction<
+  metricsExperienceStateProvider.useMetricsExperienceState as MockedFunction<
     typeof metricsExperienceStateProvider.useMetricsExperienceState
   >;
 
@@ -41,7 +44,7 @@ const renderToolbarActionsHook = (externalServices?: ExternalServices) => {
       useToolbarActions({
         allDimensions: [],
         renderToggleActions: () => undefined,
-        onOpenGridSettings: jest.fn(),
+        onOpenGridSettings: vi.fn(),
       }),
     { wrapper }
   );
@@ -57,13 +60,13 @@ describe('useToolbarActions', () => {
   beforeEach(() => {
     useMetricsExperienceStateMock.mockReturnValue({
       selectedDimensions: [],
-      onDimensionsChange: jest.fn(),
+      onDimensionsChange: vi.fn(),
       isFullscreen: false,
-      onToggleFullscreen: jest.fn(),
+      onToggleFullscreen: vi.fn(),
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
-      onMetricsSortChange: jest.fn(),
+      onMetricsSortChange: vi.fn(),
       searchTerm: '',
-      onSearchTermChange: jest.fn(),
+      onSearchTermChange: vi.fn(),
     } as unknown as ReturnType<typeof metricsExperienceStateProvider.useMetricsExperienceState>);
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type {
@@ -17,7 +20,7 @@ import { runInvalidate } from './run_invalidate';
 let clock: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const invalidateApiKeyFn = jest.fn();
+const invalidateApiKeyFn = vi.fn();
 
 const mockInvalidatePendingApiKeyObject1 = {
   id: '1',
@@ -40,11 +43,11 @@ const mockInvalidatePendingApiKeyObject2 = {
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
-    getDecryptedAsInternalUser: jest.fn(),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn((findOptions, deps) =>
+    getDecryptedAsInternalUser: vi.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: vi.fn((findOptions, deps) =>
       savedObjectsClientMock.create().createPointInTimeFinder(findOptions, deps)
     ),
-  } as unknown as jest.Mocked<EncryptedSavedObjectsClient>;
+  } as unknown as Mocked<EncryptedSavedObjectsClient>;
 }
 const encryptedSavedObjectsClient = createEncryptedSavedObjectsClientMock();
 
@@ -54,7 +57,7 @@ describe('runInvalidate', () => {
   });
   afterAll(() => clock.restore());
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     clock.reset();
   });
 

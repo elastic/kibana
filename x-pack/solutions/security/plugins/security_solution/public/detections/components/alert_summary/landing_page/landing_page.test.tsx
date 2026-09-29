@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -18,7 +21,7 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
-jest.mock('../../../hooks/alert_summary/use_navigate_to_integrations_page');
+vi.mock('../../../hooks/alert_summary/use_navigate_to_integrations_page');
 
 const packages: PackageListItem[] = [
   {
@@ -46,7 +49,7 @@ const packages: PackageListItem[] = [
 
 describe('<LandingPage />', () => {
   it('should render all the components', () => {
-    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
+    (useNavigateToIntegrationsPage as Mock).mockReturnValue(vi.fn());
 
     const { getByTestId, queryByTestId } = render(<LandingPage packages={packages} />);
 
@@ -65,8 +68,8 @@ describe('<LandingPage />', () => {
   });
 
   it('should navigate to the fleet page when clicking on the more integrations button', () => {
-    const navigateToIntegrationsPage = jest.fn();
-    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(navigateToIntegrationsPage);
+    const navigateToIntegrationsPage = vi.fn();
+    (useNavigateToIntegrationsPage as Mock).mockReturnValue(navigateToIntegrationsPage);
 
     const { getByTestId } = render(<LandingPage packages={packages} />);
 

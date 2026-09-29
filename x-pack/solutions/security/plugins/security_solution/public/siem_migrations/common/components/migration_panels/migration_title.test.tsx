@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MigrationPanelTitle as MigrationTitle } from './migration_title';
@@ -17,13 +20,13 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { MigrationSource } from '../../types';
 
-jest.mock('../../../../common/lib/kibana/use_kibana');
+vi.mock('../../../../common/lib/kibana/use_kibana');
 
-const mockUpdateMigrationApi = jest.fn();
+const mockUpdateMigrationApi = vi.fn();
 
-jest.mock('../../hooks/use_delete_migrations');
-const useDeleteMigrationMock = useDeleteMigration as jest.Mock;
-const mockDeleteMigration = jest.fn();
+vi.mock('../../hooks/use_delete_migrations');
+const useDeleteMigrationMock = useDeleteMigration as Mock;
+const mockDeleteMigration = vi.fn();
 
 const mockMigrationStatsReady: RuleMigrationStats = {
   id: 'test-migration-id',
@@ -53,7 +56,7 @@ describe('MigrationPanelTitle', () => {
       isLoading: false,
     });
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         ...createStartServicesMock(),
         siemMigrations: {
@@ -68,7 +71,7 @@ describe('MigrationPanelTitle', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Basic rendering', () => {
@@ -269,7 +272,7 @@ describe('MigrationPanelTitle', () => {
 
   describe('Event handling', () => {
     it('should prevent event propagation on options button click', () => {
-      const mockStopPropagation = jest.fn();
+      const mockStopPropagation = vi.fn();
       const originalStopPropagation = Event.prototype.stopPropagation;
       Event.prototype.stopPropagation = mockStopPropagation;
 
@@ -284,7 +287,7 @@ describe('MigrationPanelTitle', () => {
     });
 
     it('should prevent event propagation on inline edit click', () => {
-      const mockStopPropagation = jest.fn();
+      const mockStopPropagation = vi.fn();
       const originalStopPropagation = Event.prototype.stopPropagation;
       Event.prototype.stopPropagation = mockStopPropagation;
 

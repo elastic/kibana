@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,8 +16,8 @@ import {
   resolveActiveQueryTab,
 } from './compose_discover_tabs';
 
-jest.mock('@kbn/code-editor', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('@kbn/code-editor', () => {
+  const ReactActual = require('react');
 
   return {
     ESQL_LANG_ID: 'esql',
@@ -65,19 +67,19 @@ describe('ComposeDiscoverTabs', () => {
     baseQuery,
     alertBlock,
     recoveryBlock,
-    onBaseQueryChange: jest.fn(),
-    onAlertBlockChange: jest.fn(),
-    onRecoveryBlockChange: jest.fn(),
-    onTabChange: jest.fn(),
+    onBaseQueryChange: vi.fn(),
+    onAlertBlockChange: vi.fn(),
+    onRecoveryBlockChange: vi.fn(),
+    onTabChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('mounts the recovery query editor with the recovery completion handler', async () => {
-    const onAlertEditorMount = jest.fn();
-    const onRecoveryEditorMount = jest.fn();
+    const onAlertEditorMount = vi.fn();
+    const onRecoveryEditorMount = vi.fn();
 
     render(
       <ComposeDiscoverTabs
@@ -101,8 +103,8 @@ describe('ComposeDiscoverTabs', () => {
         {...defaultProps}
         activeTab="alert"
         tabs={['base', 'alert']}
-        onAlertEditorMount={jest.fn()}
-        onRecoveryEditorMount={jest.fn()}
+        onAlertEditorMount={vi.fn()}
+        onRecoveryEditorMount={vi.fn()}
       />
     );
 
@@ -144,7 +146,7 @@ describe('ComposeDiscoverTabs', () => {
   });
 
   it('does not select the alert tab when it is disabled', () => {
-    const onTabChange = jest.fn();
+    const onTabChange = vi.fn();
 
     render(
       <I18nProvider>
@@ -164,7 +166,7 @@ describe('ComposeDiscoverTabs', () => {
   });
 
   it('switches to the base tab when alert is active without a base query', async () => {
-    const onTabChange = jest.fn();
+    const onTabChange = vi.fn();
 
     render(
       <I18nProvider>

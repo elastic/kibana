@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { IGNORE_ATTR } from '../constants';
 import { createLocation, flush, mockLayout, query, renderPage } from '../test_helpers';
 import { createTrailRecorder, isTrailControl, type TrailRecorder } from './trail';
@@ -30,7 +32,7 @@ describe('trail', () => {
 
   afterEach(() => {
     recorder.stop();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const labels = () => recorder.steps().map(({ label }) => label);
@@ -91,7 +93,7 @@ describe('trail', () => {
   });
 
   it('records only clicks that disclosed something, right away or once lazily loaded UI appears', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPage(`
       <button type="button" id="flyout">Open flyout</button>
       <button type="button" id="acknowledge">Acknowledge</button>
@@ -108,12 +110,12 @@ describe('trail', () => {
     query('#lazy').click();
     expect(labels()).toEqual(['Open flyout']);
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
     expect(labels()).toEqual(['Open flyout', 'Open lazy flyout']);
   });
 
   it('records a menu item whose submenu appears a frame later and takes the item away with its panel', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPage(`
       <div id="menu" role="menu"><button type="button" id="alerts">Create alert rule</button></div>
     `);
@@ -129,10 +131,10 @@ describe('trail', () => {
     });
 
     query('#alerts').click();
-    jest.advanceTimersByTime(20);
+    vi.advanceTimersByTime(20);
     // Lets the page change be observed.
     await Promise.resolve();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(labels()).toEqual(['Create alert rule']);
   });
@@ -154,7 +156,7 @@ describe('trail', () => {
   });
 
   it('does not credit a click with what a later click disclosed', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderPage(`
       <button type="button" id="delete">Delete</button>
       <button type="button" id="flyout">Open flyout</button>
@@ -177,7 +179,7 @@ describe('trail', () => {
 
     query('#acknowledge').click();
     query('#card').click();
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
     expect(labels()).toEqual(['Open flyout']);
   });
 

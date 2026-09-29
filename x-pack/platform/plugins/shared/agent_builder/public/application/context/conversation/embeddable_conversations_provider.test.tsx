@@ -5,22 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React, { useContext } from 'react';
 import { render, screen } from '@testing-library/react';
 import { ConversationContext } from './conversation_context';
 import { PinnedConversationProvider } from './embeddable_conversations_provider';
 
-const mockUseEffectiveSpaceDefaultAgent = jest.fn();
-jest.mock('../../hooks/use_space_default_agent', () => ({
-  useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
-}));
+const mockUseEffectiveSpaceDefaultAgent = vi.fn();
+vi.mock('../../hooks/use_space_default_agent', () => {
+      const mocked = {
+      useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
+    };
+      return { ...mocked, default: mocked };
+    });
 // Rendered by the component but irrelevant here (it has its own dependencies).
-jest.mock('./conversation_change_notifier', () => ({ ConversationChangeNotifier: () => null }));
+vi.mock('./conversation_change_notifier', () => {
+      const mocked = { ConversationChangeNotifier: () => null };
+      return { ...mocked, default: mocked };
+    });
 // Render the spinner as a marker so we can assert the isReady gate.
-jest.mock('../../components/redirects/redirect_loading', () => ({
-  RedirectLoading: () => <div>loading-spinner</div>,
-}));
+vi.mock('../../components/redirects/redirect_loading', () => {
+      const mocked = {
+      RedirectLoading: () => <div>loading-spinner</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const AgentIdConsumer = () => {
   const ctx = useContext(ConversationContext);
@@ -34,7 +45,7 @@ const baseValue = { agentId: 'elastic-ai-agent' } as NonNullable<
 
 describe('PinnedConversationProvider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('pins a restricted user to the effective space default agent', () => {

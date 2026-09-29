@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertingRulesCache } from './use_alerting_rules_cache';
@@ -14,9 +16,9 @@ import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
-jest.mock('react-use/lib/useAsync', () => ({
+vi.mock('react-use/lib/useAsync', () => ({
   __esModule: true,
-  default: jest.fn((fn: () => Promise<void>) => {
+  default: vi.fn((fn: () => Promise<void>) => {
     const result = fn();
     // The real hook captures rejections as `error`; swallow them so they don't go unhandled.
     result.catch(() => {});
@@ -28,7 +30,7 @@ const mockHttp = httpServiceMock.createStartContract();
 
 describe('useAlertingRulesCache', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return cached rules for already fetched rule IDs', async () => {
@@ -155,7 +157,7 @@ describe('useAlertingRulesCache', () => {
       metadata: { name: 'Classic Rule' },
     } as unknown as FindRulesResponse['items'][number];
     const dataSource = createTestEpisodeSource({
-      resolveRules: jest.fn().mockResolvedValue([classicRule]),
+      resolveRules: vi.fn().mockResolvedValue([classicRule]),
     });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(
@@ -185,7 +187,7 @@ describe('useAlertingRulesCache', () => {
       response: { status: 403 },
     });
     const dataSource = createTestEpisodeSource({
-      resolveRules: jest.fn().mockResolvedValue([classicRule]),
+      resolveRules: vi.fn().mockResolvedValue([classicRule]),
     });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(EpisodeDataSourceProvider, { dataSource }, children);
@@ -209,7 +211,7 @@ describe('useAlertingRulesCache', () => {
       message: 'Service Unavailable',
       response: { status: 503 },
     });
-    const dataSource = createTestEpisodeSource({ resolveRules: jest.fn().mockResolvedValue([]) });
+    const dataSource = createTestEpisodeSource({ resolveRules: vi.fn().mockResolvedValue([]) });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(EpisodeDataSourceProvider, { dataSource }, children);
 

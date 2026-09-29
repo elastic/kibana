@@ -5,27 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { getFlyoutManagerStore, useIsInManagedFlyout } from '@elastic/eui';
 import { useManagedContextFlyoutZIndex } from './use_managed_context_flyout_z_index';
 
-const mockGetState = jest.fn(() => ({ currentZIndex: 0 }));
+const mockGetState = vi.fn(() => ({ currentZIndex: 0 }));
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  getFlyoutManagerStore: jest.fn(() => ({ getState: mockGetState })),
-  useIsInManagedFlyout: jest.fn(),
-  useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      getFlyoutManagerStore: vi.fn(() => ({ getState: mockGetState })),
+      useIsInManagedFlyout: vi.fn(),
+      useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useManagedContextFlyoutZIndex', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetState.mockReturnValue({ currentZIndex: 0 });
   });
 
   it('returns undefined when not active', () => {
-    (useIsInManagedFlyout as jest.Mock).mockReturnValue(true);
+    (useIsInManagedFlyout as Mock).mockReturnValue(true);
 
     const { result } = renderHook(() => useManagedContextFlyoutZIndex(false));
 
@@ -34,7 +40,7 @@ describe('useManagedContextFlyoutZIndex', () => {
   });
 
   it('returns undefined when active but not inside a managed flyout (EUI handles stacking)', () => {
-    (useIsInManagedFlyout as jest.Mock).mockReturnValue(false);
+    (useIsInManagedFlyout as Mock).mockReturnValue(false);
 
     const { result } = renderHook(() => useManagedContextFlyoutZIndex(true));
 
@@ -43,7 +49,7 @@ describe('useManagedContextFlyoutZIndex', () => {
   });
 
   it('returns flyoutLevel + currentZIndex when active and inside a managed flyout', () => {
-    (useIsInManagedFlyout as jest.Mock).mockReturnValue(true);
+    (useIsInManagedFlyout as Mock).mockReturnValue(true);
     mockGetState.mockReturnValue({ currentZIndex: 5 });
 
     const { result } = renderHook(() => useManagedContextFlyoutZIndex(true));
@@ -52,7 +58,7 @@ describe('useManagedContextFlyoutZIndex', () => {
   });
 
   it('captures the z-index when opened and keeps it stable across re-renders', () => {
-    (useIsInManagedFlyout as jest.Mock).mockReturnValue(true);
+    (useIsInManagedFlyout as Mock).mockReturnValue(true);
     mockGetState.mockReturnValue({ currentZIndex: 5 });
 
     const { result, rerender } = renderHook(() => useManagedContextFlyoutZIndex(true));
@@ -66,7 +72,7 @@ describe('useManagedContextFlyoutZIndex', () => {
   });
 
   it('recomputes the next time it is opened', () => {
-    (useIsInManagedFlyout as jest.Mock).mockReturnValue(true);
+    (useIsInManagedFlyout as Mock).mockReturnValue(true);
     mockGetState.mockReturnValue({ currentZIndex: 5 });
 
     const { result, rerender } = renderHook(({ active }) => useManagedContextFlyoutZIndex(active), {

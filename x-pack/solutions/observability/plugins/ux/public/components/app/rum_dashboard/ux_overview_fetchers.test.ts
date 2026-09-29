@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of, throwError } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { HAS_RUM_DATA_TIERS } from '../../../services/data/has_rum_data_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { hasRumData } from './ux_overview_fetchers';
 
-jest.mock('../../../services/rest/create_call_apm_api', () => ({
-  callApmApi: jest.fn(),
-}));
+vi.mock('../../../services/rest/create_call_apm_api', () => {
+      const mocked = {
+      callApmApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const callApmApiMock = callApmApi as jest.Mock;
+const callApmApiMock = callApmApi as Mock;
 const INDEX = 'apm-*';
 const TIER_CLAUSE = { terms: { _tier: HAS_RUM_DATA_TIERS } };
 
@@ -46,7 +52,7 @@ const makeDataPlugin = (responses: {
   tiered: ReturnType<typeof hits>;
   unbounded: ReturnType<typeof hits>;
 }) => {
-  const search = jest.fn((request: SearchRequest) =>
+  const search = vi.fn((request: SearchRequest) =>
     of({
       rawResponse: isTiered(request) ? responses.tiered : responses.unbounded,
     })
@@ -63,7 +69,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('hasRumData', () => {
@@ -134,7 +140,7 @@ describe('hasRumData', () => {
   });
 
   it('rejects when the tier restricted query fails, rather than falling back', async () => {
-    const search = jest.fn(() => throwError(() => new Error('search failed')));
+    const search = vi.fn(() => throwError(() => new Error('search failed')));
     const plugin = { search: { search } } as unknown as DataPublicPluginStart;
 
     await expect(hasRumData({ dataStartPlugin: plugin, absoluteTime })).rejects.toThrow(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
 import {
@@ -17,7 +19,7 @@ import {
   endpointForensicAnalysisSkill,
 } from './endpoint_forensic_analysis_skill';
 
-const mockEsqlQuery = jest.fn();
+const mockEsqlQuery = vi.fn();
 const mockContext = {
   esClient: { asCurrentUser: { esql: { query: mockEsqlQuery } } },
 } as unknown as ToolHandlerContext;

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../common/constants';
@@ -14,20 +16,20 @@ describe('getIndexPipelineParameters', () => {
   const defaultMockClient = () => ({
     asCurrentUser: {
       indices: {
-        getMapping: jest.fn().mockResolvedValue({}),
+        getMapping: vi.fn().mockResolvedValue({}),
       },
       ingest: {
-        getPipeline: jest.fn().mockRejectedValue('Pipeline not found'),
+        getPipeline: vi.fn().mockRejectedValue('Pipeline not found'),
       },
       transport: {
-        request: jest.fn().mockResolvedValue({}),
+        request: vi.fn().mockResolvedValue({}),
       },
     },
   });
   let mockClient = defaultMockClient();
   let client: IScopedClusterClient;
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     mockClient = defaultMockClient();
     client = mockClient as unknown as IScopedClusterClient;
@@ -38,7 +40,7 @@ describe('getIndexPipelineParameters', () => {
     );
   });
   it('returns connector pipeline params if found', async () => {
-    mockClient.asCurrentUser.transport.request = jest.fn().mockResolvedValue({
+    mockClient.asCurrentUser.transport.request = vi.fn().mockResolvedValue({
       count: 1,
       results: [
         {
@@ -60,14 +62,14 @@ describe('getIndexPipelineParameters', () => {
     });
   });
   it('returns default pipeline if fetch custom throws', async () => {
-    mockClient.asCurrentUser.ingest.getPipeline = jest.fn().mockRejectedValue('Boom');
+    mockClient.asCurrentUser.ingest.getPipeline = vi.fn().mockRejectedValue('Boom');
 
     await expect(getIndexPipelineParameters('my-index', client)).resolves.toEqual(
       DEFAULT_PIPELINE_VALUES
     );
   });
   it('returns custom pipeline if found', async () => {
-    mockClient.asCurrentUser.ingest.getPipeline = jest.fn().mockResolvedValueOnce({
+    mockClient.asCurrentUser.ingest.getPipeline = vi.fn().mockResolvedValueOnce({
       'my-index': {
         fake: 'ingest-pipeline',
       },
@@ -81,7 +83,7 @@ describe('getIndexPipelineParameters', () => {
     });
   });
   it('returns default connector index pipeline if found in mapping', async () => {
-    mockClient.asCurrentUser.indices.getMapping = jest.fn().mockResolvedValueOnce({
+    mockClient.asCurrentUser.indices.getMapping = vi.fn().mockResolvedValueOnce({
       '.elastic-connectors-v1': {
         mappings: {
           _meta: {
@@ -104,7 +106,7 @@ describe('getIndexPipelineParameters', () => {
     });
   });
   it('returns connector params with custom pipeline name', async () => {
-    mockClient.asCurrentUser.indices.getMapping = jest.fn().mockResolvedValueOnce({
+    mockClient.asCurrentUser.indices.getMapping = vi.fn().mockResolvedValueOnce({
       '.elastic-connectors-v1': {
         mappings: {
           _meta: {
@@ -118,7 +120,7 @@ describe('getIndexPipelineParameters', () => {
         },
       },
     });
-    mockClient.asCurrentUser.ingest.getPipeline = jest.fn().mockResolvedValueOnce({
+    mockClient.asCurrentUser.ingest.getPipeline = vi.fn().mockResolvedValueOnce({
       'my-index': {
         fake: 'ingest-pipeline',
       },
@@ -132,7 +134,7 @@ describe('getIndexPipelineParameters', () => {
     });
   });
   it('returns defaults if get mapping fails with IndexNotFoundException', async () => {
-    mockClient.asCurrentUser.indices.getMapping = jest.fn().mockRejectedValue({
+    mockClient.asCurrentUser.indices.getMapping = vi.fn().mockRejectedValue({
       meta: {
         body: {
           error: {
@@ -147,7 +149,7 @@ describe('getIndexPipelineParameters', () => {
     );
   });
   it('throws if get mapping fails with non-IndexNotFoundException', async () => {
-    mockClient.asCurrentUser.indices.getMapping = jest.fn().mockRejectedValue('Boom');
+    mockClient.asCurrentUser.indices.getMapping = vi.fn().mockRejectedValue('Boom');
 
     await expect(getIndexPipelineParameters('my-index', client)).rejects.toEqual('Boom');
   });

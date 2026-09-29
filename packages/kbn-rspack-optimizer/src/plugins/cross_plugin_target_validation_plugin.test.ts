@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PluginEntry } from '../types';
 import { CrossPluginTargetValidationPlugin } from './cross_plugin_target_validation_plugin';
 
@@ -26,12 +28,12 @@ function createMockCompiler() {
   const compiler = {
     hooks: {
       compile: {
-        tap: jest.fn((_name: string, fn: (params: any) => void) => {
+        tap: vi.fn((_name: string, fn: (params: any) => void) => {
           fn({
             normalModuleFactory: {
               hooks: {
                 beforeResolve: {
-                  tapAsync: jest.fn((_n: string, handler: BeforeResolveHandler) => {
+                  tapAsync: vi.fn((_n: string, handler: BeforeResolveHandler) => {
                     beforeResolveHandler = handler;
                   }),
                 },
@@ -41,7 +43,7 @@ function createMockCompiler() {
         }),
       },
       afterCompile: {
-        tapAsync: jest.fn((_name: string, handler: AfterCompileHandler) => {
+        tapAsync: vi.fn((_name: string, handler: AfterCompileHandler) => {
           afterCompileHandler = handler;
         }),
       },

@@ -7,40 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { useLibraryEnabled } from '@kbn/workflows-ui';
 import { WorkflowsEmptyState, WorkflowsEmptyStateReadOnly } from './workflows_empty_state';
 import { TestProvider } from '../../shared/mocks/test_providers';
 
-const mockNavigateToApp = jest.fn();
+const mockNavigateToApp = vi.fn();
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        basePath: {
-          prepend: (path: string) => `/mock-base-path${path}`,
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {
+            basePath: {
+              prepend: (path: string) => `/mock-base-path${path}`,
+            },
+          },
+          application: { navigateToApp: mockNavigateToApp },
         },
-      },
-      application: { navigateToApp: mockNavigateToApp },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useLibraryEnabled: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useLibraryEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLibraryEnabled = jest.mocked(useLibraryEnabled);
+const mockUseLibraryEnabled = vi.mocked(useLibraryEnabled);
 
 const renderWithProviders = (component: React.ReactElement) =>
   render(<TestProvider>{component}</TestProvider>);
 
 describe('WorkflowsEmptyState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLibraryEnabled.mockReturnValue(false);
   });
 
@@ -52,7 +60,7 @@ describe('WorkflowsEmptyState', () => {
   });
 
   it('renders the create button when onCreateWorkflow is provided', () => {
-    const onCreateWorkflow = jest.fn();
+    const onCreateWorkflow = vi.fn();
     renderWithProviders(<WorkflowsEmptyState onCreateWorkflow={onCreateWorkflow} />);
 
     const createButton = screen.getByText('Create workflow');
@@ -82,7 +90,7 @@ describe('WorkflowsEmptyState', () => {
   });
 
   it('renders the "Example workflows" GitHub link when the library is disabled', () => {
-    renderWithProviders(<WorkflowsEmptyState onCreateWorkflow={jest.fn()} />);
+    renderWithProviders(<WorkflowsEmptyState onCreateWorkflow={vi.fn()} />);
 
     const link = screen.getByText('Example workflows').closest('a');
     expect(link).toHaveAttribute('href', 'https://github.com/elastic/workflows');
@@ -91,7 +99,7 @@ describe('WorkflowsEmptyState', () => {
 
   it('renders an "Explore library" button that navigates to the library when enabled', () => {
     mockUseLibraryEnabled.mockReturnValue(true);
-    renderWithProviders(<WorkflowsEmptyState onCreateWorkflow={jest.fn()} />);
+    renderWithProviders(<WorkflowsEmptyState onCreateWorkflow={vi.fn()} />);
 
     expect(screen.queryByText('Example workflows')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('Explore library'));

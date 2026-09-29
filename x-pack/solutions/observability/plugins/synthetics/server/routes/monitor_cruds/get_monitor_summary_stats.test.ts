@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getMonitorSummaryStatsRoute } from './get_monitor_summary_stats';
 import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../../common/runtime_types/heartbeat_monitor';
 
@@ -16,7 +18,7 @@ const aggregations = {
 };
 
 const runHandler = async (locationLabel: string) => {
-  const search = jest.fn().mockResolvedValue({ body: { aggregations } });
+  const search = vi.fn().mockResolvedValue({ body: { aggregations } });
   const route = getMonitorSummaryStatsRoute();
   const result = await route.handler({
     // @ts-expect-error partial implementation for testing
@@ -28,7 +30,7 @@ const runHandler = async (locationLabel: string) => {
 };
 
 describe('getMonitorSummaryStatsRoute', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('filters by observer.geo.name for a real location', async () => {
     const { filters, result } = await runHandler('North America - US East');

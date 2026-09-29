@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
@@ -24,23 +27,26 @@ import { useUpdateTemplate } from './use_update_template';
 import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
 
-jest.mock('../../../common/navigation/hooks', () => ({
-  ...jest.requireActual('../../../common/navigation/hooks'),
-  useCasesEditTemplateNavigation: jest.fn(),
-}));
+vi.mock('../../../common/navigation/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/navigation/hooks')),
+      useCasesEditTemplateNavigation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_bulk_delete_templates');
-jest.mock('./use_create_template');
-jest.mock('./use_update_template');
-jest.mock('./use_bulk_export_templates');
-jest.mock('../../../common/use_cases_toast');
+vi.mock('./use_bulk_delete_templates');
+vi.mock('./use_create_template');
+vi.mock('./use_update_template');
+vi.mock('./use_bulk_export_templates');
+vi.mock('../../../common/use_cases_toast');
 
-const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as jest.Mock;
-const useBulkDeleteTemplatesMock = useBulkDeleteTemplates as jest.Mock;
-const useCreateTemplateMock = useCreateTemplate as jest.Mock;
-const useUpdateTemplateMock = useUpdateTemplate as jest.Mock;
-const useBulkExportTemplatesMock = useBulkExportTemplates as jest.Mock;
-const useCasesToastMock = useCasesToast as jest.Mock;
+const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as Mock;
+const useBulkDeleteTemplatesMock = useBulkDeleteTemplates as Mock;
+const useCreateTemplateMock = useCreateTemplate as Mock;
+const useUpdateTemplateMock = useUpdateTemplate as Mock;
+const useBulkExportTemplatesMock = useBulkExportTemplates as Mock;
+const useCasesToastMock = useCasesToast as Mock;
 
 describe('useTemplatesActions', () => {
   let coreStart: CoreStart;
@@ -66,20 +72,20 @@ describe('useTemplatesActions', () => {
     isDefault: false,
   };
 
-  let consoleSpy: jest.SpyInstance;
-  const navigateToCasesEditTemplateMock = jest.fn();
-  const bulkDeleteTemplatesMock = jest.fn();
-  const cloneTemplateMock = jest.fn();
-  const updateTemplateMock = jest.fn();
-  const bulkExportTemplatesMock = jest.fn();
-  const showSuccessToastMock = jest.fn();
+  let consoleSpy: MockInstance;
+  const navigateToCasesEditTemplateMock = vi.fn();
+  const bulkDeleteTemplatesMock = vi.fn();
+  const cloneTemplateMock = vi.fn();
+  const updateTemplateMock = vi.fn();
+  const bulkExportTemplatesMock = vi.fn();
+  const showSuccessToastMock = vi.fn();
 
   beforeEach(() => {
     coreStart = coreMock.createStart() as unknown as CoreStart;
-    consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     useCasesEditTemplateNavigationMock.mockReturnValue({
       navigateToCasesEditTemplate: navigateToCasesEditTemplateMock,
-      getCasesEditTemplateUrl: jest.fn(),
+      getCasesEditTemplateUrl: vi.fn(),
     });
     useBulkDeleteTemplatesMock.mockReturnValue({
       mutate: bulkDeleteTemplatesMock,
@@ -99,13 +105,13 @@ describe('useTemplatesActions', () => {
     });
     useCasesToastMock.mockReturnValue({
       showSuccessToast: showSuccessToastMock,
-      showErrorToast: jest.fn(),
+      showErrorToast: vi.fn(),
     });
   });
 
   afterEach(() => {
     consoleSpy.mockRestore();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns all action handlers', () => {
@@ -309,7 +315,7 @@ describe('useTemplatesActions', () => {
   });
 
   it('forwards onDeleteSuccess through the callback it gives useBulkDeleteTemplates', () => {
-    const onDeleteSuccessMock = jest.fn();
+    const onDeleteSuccessMock = vi.fn();
     renderHook(() => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }), {
       wrapper,
     });
@@ -502,7 +508,7 @@ describe('useTemplatesActions', () => {
     });
 
     it('reports one deleted event and still refreshes the list', () => {
-      const onDeleteSuccessMock = jest.fn();
+      const onDeleteSuccessMock = vi.fn();
       const { result } = renderHook(
         () => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }),
         { wrapper }

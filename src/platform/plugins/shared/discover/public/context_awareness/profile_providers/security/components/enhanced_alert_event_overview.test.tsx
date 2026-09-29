@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -29,12 +31,12 @@ const hit = createMockHit({
 
 describe('EnhancedAlertEventOverview', () => {
   it('renders the security solution overview tab feature', async () => {
-    const renderFeature = jest.fn().mockReturnValue(<div>OverviewTab</div>);
+    const renderFeature = vi.fn().mockReturnValue(<div>OverviewTab</div>);
     const providerServices = {
       discoverShared: {
         features: {
           registry: {
-            getById: jest.fn().mockReturnValue({
+            getById: vi.fn().mockReturnValue({
               id: 'security-solution-alert-flyout-overview-tab',
               render: renderFeature,
             }),

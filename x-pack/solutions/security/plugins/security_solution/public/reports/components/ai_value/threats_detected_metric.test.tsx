@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ThreatsDetectedMetric } from './threats_detected_metric';
@@ -15,32 +18,44 @@ import { VisualizationContextMenuActions } from '../../../common/components/visu
 import * as i18n from './translations';
 
 // Mock dependencies
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-}));
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
+      const mocked = {
+      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../common/components/visualization_actions/lens_attributes/ai/threats_detected_metric',
-  () => ({
-    getThreatsDetectedMetricLensAttributes: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        getThreatsDetectedMetricLensAttributes: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./sample_metric', () => ({
-  SampleMetric: jest.fn(({ title }: { title: string }) => (
-    <div data-test-subj="mock-sample-metric">{title}</div>
-  )),
-}));
+vi.mock('./sample_metric', () => {
+      const mocked = {
+      SampleMetric: vi.fn(({ title }: { title: string }) => (
+        <div data-test-subj="mock-sample-metric">{title}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockGetThreatsDetectedMetricLensAttributes =
-  getThreatsDetectedMetricLensAttributes as jest.MockedFunction<
+  getThreatsDetectedMetricLensAttributes as MockedFunction<
     typeof getThreatsDetectedMetricLensAttributes
   >;
-const mockUseSpaceId = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
+const mockUseSpaceId = useSpaceId as MockedFunction<typeof useSpaceId>;
 
 const defaultProps = {
   isSample: false as const,
@@ -50,7 +65,7 @@ const defaultProps = {
 
 describe('ThreatsDetectedMetric', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSpaceId.mockReturnValue('test-space-id');
     mockGetThreatsDetectedMetricLensAttributes.mockReturnValue({
       description: '',
@@ -119,7 +134,7 @@ describe('ThreatsDetectedMetric', () => {
   it('passes getLensAttributes function to VisualizationEmbeddable', () => {
     render(<ThreatsDetectedMetric {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     expect(callArgs.getLensAttributes).toBeDefined();
     expect(callArgs.getLensAttributes).toEqual(expect.any(Function));
   });
@@ -127,7 +142,7 @@ describe('ThreatsDetectedMetric', () => {
   it('getLensAttributes function calls getThreatsDetectedMetricLensAttributes with correct args', () => {
     render(<ThreatsDetectedMetric {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -145,7 +160,7 @@ describe('ThreatsDetectedMetric', () => {
     mockUseSpaceId.mockReturnValue(undefined);
     render(<ThreatsDetectedMetric {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -179,9 +194,9 @@ describe('ThreatsDetectedMetric', () => {
 
   it('memoizes the component correctly', () => {
     const { rerender } = render(<ThreatsDetectedMetric {...defaultProps} />);
-    const initialCallCount = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length;
+    const initialCallCount = (VisualizationEmbeddable as unknown as Mock).mock.calls.length;
     rerender(<ThreatsDetectedMetric {...defaultProps} />);
-    expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length).toBe(
+    expect((VisualizationEmbeddable as unknown as Mock).mock.calls.length).toBe(
       initialCallCount
     );
     rerender(
@@ -191,7 +206,7 @@ describe('ThreatsDetectedMetric', () => {
         to="2023-02-28T23:59:59.999Z"
       />
     );
-    expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length).toBe(
+    expect((VisualizationEmbeddable as unknown as Mock).mock.calls.length).toBe(
       initialCallCount + 1
     );
   });

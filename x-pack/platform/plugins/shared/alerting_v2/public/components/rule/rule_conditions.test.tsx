@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,17 +14,23 @@ import type { RuleApiResponse } from '../../services/rules_api';
 import { getQueryOverflowHeight } from '../../utils/rule_display';
 import { RuleConditions } from './rule_conditions';
 
-jest.mock('@kbn/alerting-plugin/common', () => ({
-  formatDuration: (v: string) => v,
-}));
+vi.mock('@kbn/alerting-plugin/common', () => {
+      const mocked = {
+      formatDuration: (v: string) => v,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getIndexPatternFromESQLQuery: (query?: string) => {
-    if (!query) return '';
-    const match = query.match(/FROM\s+([^\s|]+)/i);
-    return match ? match[1] : '';
-  },
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getIndexPatternFromESQLQuery: (query?: string) => {
+        if (!query) return '';
+        const match = query.match(/FROM\s+([^\s|]+)/i);
+        return match ? match[1] : '';
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

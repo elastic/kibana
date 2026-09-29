@@ -5,30 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyDestinationsSummary } from './action_policy_destinations_summary';
 
-const mockGetUrlForApp = jest.fn();
+const mockGetUrlForApp = vi.fn();
 const mockApplicationService = { getUrlForApp: mockGetUrlForApp };
-const mockUseFetchWorkflow = jest.fn();
+const mockUseFetchWorkflow = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return mockApplicationService;
-    }
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'application') {
+          return mockApplicationService;
+        }
 
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_workflow', () => ({
-  useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
-}));
+vi.mock('../../hooks/use_fetch_workflow', () => {
+      const mocked = {
+      useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = (destinations: ActionPolicyDestination[]) =>
   render(
@@ -39,7 +47,7 @@ const renderComponent = (destinations: ActionPolicyDestination[]) =>
 
 describe('ActionPolicyDestinationsSummary', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetUrlForApp.mockImplementation((_appId: string, { path }: { path: string }) => {
       return `/app/workflows${path}`;
     });

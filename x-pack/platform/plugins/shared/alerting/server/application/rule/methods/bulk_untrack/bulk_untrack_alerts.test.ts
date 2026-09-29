@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { loggerMock } from '@kbn/logging-mocks';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
@@ -16,7 +18,7 @@ const logger = loggerMock.create();
 const alertsService = alertsServiceMock.create();
 
 const kibanaVersion = 'v8.2.0';
-const createAPIKeyMock = jest.fn();
+const createAPIKeyMock = vi.fn();
 
 const { rulesClientParams, taskManager, auditLogger } = getRulesClientMockParams({
   kibanaVersion,
@@ -29,7 +31,7 @@ describe('bulkUntrackAlerts()', () => {
   let rulesClient: RulesClient;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
   });
 

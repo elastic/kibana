@@ -5,30 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { ArtifactsSection } from './artifacts_section';
 
-jest.mock('./dashboard_artifacts_subsection', () => ({
-  DashboardArtifactsSubsection: () => (
-    <div data-test-subj="dashboardArtifactsSubsectionMock">dashboards</div>
-  ),
-}));
+vi.mock('./dashboard_artifacts_subsection', () => {
+      const mocked = {
+      DashboardArtifactsSubsection: () => (
+        <div data-test-subj="dashboardArtifactsSubsectionMock">dashboards</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./action_policies_artifacts_subsection', () => ({
-  ActionPoliciesArtifactsSubsection: () => (
-    <div data-test-subj="actionPoliciesArtifactsSubsectionMock">action policies</div>
-  ),
-}));
+vi.mock('./action_policies_artifacts_subsection', () => {
+      const mocked = {
+      ActionPoliciesArtifactsSubsection: () => (
+        <div data-test-subj="actionPoliciesArtifactsSubsectionMock">action policies</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCanRead = jest.fn();
+const mockCanRead = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  CoreStart: (key: string) => key,
-  useService: () => ({ canRead: mockCanRead }),
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      CoreStart: (key: string) => key,
+      useService: () => ({ canRead: mockCanRead }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const rule: RuleApiResponse = {
   id: 'rule-1',
@@ -46,7 +57,7 @@ const rule: RuleApiResponse = {
 
 describe('ArtifactsSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCanRead.mockReturnValue(true);
   });
 

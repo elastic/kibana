@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 
@@ -19,7 +21,7 @@ const enrichExpectErrors = (query: string, expectedErrors: string[], context = m
 
 describe('ENRICH Validation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('validates the most basic query', () => {

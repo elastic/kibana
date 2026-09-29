@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -37,10 +39,10 @@ const transaction = {
 
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
-    jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+    vi.spyOn(useFetcher, 'useFetcher').mockReturnValue({
       data: { customLinks: [] },
       status: useFetcher.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const component = render(
@@ -55,10 +57,10 @@ describe('Custom links', () => {
   });
 
   it('shows loading while custom links are fetched', () => {
-    jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+    vi.spyOn(useFetcher, 'useFetcher').mockReturnValue({
       data: { customLinks: [] },
       status: useFetcher.FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { getByTestId } = render(
@@ -78,10 +80,10 @@ describe('Custom links', () => {
       ],
     };
 
-    jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+    vi.spyOn(useFetcher, 'useFetcher').mockReturnValue({
       data: customLinks,
       status: useFetcher.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const component = render(
@@ -102,10 +104,10 @@ describe('Custom links', () => {
       ],
     };
 
-    jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+    vi.spyOn(useFetcher, 'useFetcher').mockReturnValue({
       data,
       status: useFetcher.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const component = render(
@@ -126,10 +128,10 @@ describe('Custom links', () => {
 
   describe('create custom link buttons', () => {
     it('shows create button below empty message', () => {
-      jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      vi.spyOn(useFetcher, 'useFetcher').mockReturnValue({
         data: { customLinks: [] },
         status: useFetcher.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const component = render(
@@ -151,10 +153,10 @@ describe('Custom links', () => {
         ],
       };
 
-      jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      vi.spyOn(useFetcher, 'useFetcher').mockReturnValue({
         data,
         status: useFetcher.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const component = render(

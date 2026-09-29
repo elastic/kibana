@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
@@ -14,12 +17,15 @@ import { getQueryDelaySettingsRoute } from './get_query_delay_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   rulesSettingsClient = rulesSettingsClientMock.create();
 });
 
@@ -49,7 +55,7 @@ describe('getQueryDelaySettingsRoute', () => {
       }
     `);
 
-    (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValue({
+    (rulesSettingsClient.queryDelay().get as Mock).mockResolvedValue({
       delay: 10,
       createdBy: 'test name',
       updatedBy: 'test name',

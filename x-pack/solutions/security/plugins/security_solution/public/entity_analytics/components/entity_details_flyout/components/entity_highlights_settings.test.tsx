@@ -5,28 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { TestProviders } from '../../../../common/mock';
 
-const mockOnChangeShowAnonymizedValues = jest.fn();
-const mockSetConnectorId = jest.fn();
-const mockClosePopover = jest.fn();
-const mockOpenPopover = jest.fn();
+const mockOnChangeShowAnonymizedValues = vi.fn();
+const mockSetConnectorId = vi.fn();
+const mockClosePopover = vi.fn();
+const mockOpenPopover = vi.fn();
 
-jest.mock(
+vi.mock(
   '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
-  () => ({
-    AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
-      <div data-test-subj="anonymizationSettingsModal">
-        <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
-          {'Close'}
-        </button>
-      </div>
-    ),
-  })
+  () => {
+      const mocked = {
+        AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+          <div data-test-subj="anonymizationSettingsModal">
+            <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+              {'Close'}
+            </button>
+          </div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('EntityHighlightsSettings', () => {
@@ -48,7 +53,7 @@ describe('EntityHighlightsSettings', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the settings button', () => {

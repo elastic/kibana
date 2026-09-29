@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { requestMock, serverMock } from '../__mocks__';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration_route.mock';
@@ -18,17 +21,17 @@ import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 import type { AlertsReindexOptions } from '../../../../../common/api/detection_engine/signals_migration';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
-jest.mock('../index/check_template_version');
-jest.mock('@kbn/securitysolution-es-utils', () => {
-  const original = jest.requireActual('@kbn/securitysolution-es-utils');
+vi.mock('../index/check_template_version');
+vi.mock('@kbn/securitysolution-es-utils', async () => {
+  const original = (await vi.importActual('@kbn/securitysolution-es-utils'));
   return {
     ...original,
-    getIndexAliases: jest.fn(),
+    getIndexAliases: vi.fn(),
   };
 });
-jest.mock('../../migrations/create_migration');
-jest.mock('../../migrations/get_index_versions_by_index');
-jest.mock('../../migrations/get_signal_versions_by_index');
+vi.mock('../../migrations/create_migration');
+vi.mock('../../migrations/get_index_versions_by_index');
+vi.mock('../../migrations/get_signal_versions_by_index');
 
 describe('creating signals migrations route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -37,12 +40,12 @@ describe('creating signals migrations route', () => {
   beforeEach(() => {
     server = serverMock.create();
 
-    (getIndexAliases as jest.Mock).mockResolvedValue([
+    (getIndexAliases as Mock).mockResolvedValue([
       { index: 'my-signals-index', isWriteIndex: false },
     ]);
-    (getTemplateVersion as jest.Mock).mockResolvedValue(SIGNALS_TEMPLATE_VERSION);
-    (getIndexVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': -1 });
-    (getSignalVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': [] });
+    (getTemplateVersion as Mock).mockResolvedValue(SIGNALS_TEMPLATE_VERSION);
+    (getIndexVersionsByIndex as Mock).mockResolvedValue({ 'my-signals-index': -1 });
+    (getSignalVersionsByIndex as Mock).mockResolvedValue({ 'my-signals-index': [] });
 
     createSignalsMigrationRoute(server.router, docLinks);
   });
@@ -67,7 +70,7 @@ describe('creating signals migrations route', () => {
   });
 
   it('rejects the request if template is not up to date', async () => {
-    (getTemplateVersion as jest.Mock).mockResolvedValue(SIGNALS_TEMPLATE_VERSION - 1);
+    (getTemplateVersion as Mock).mockResolvedValue(SIGNALS_TEMPLATE_VERSION - 1);
     const request = requestMock.create({
       method: 'post',
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -86,7 +89,7 @@ describe('creating signals migrations route', () => {
 
   it('returns an inline error if write index is out of date but specified', async () => {
     // stub index to be write index.
-    (getIndexAliases as jest.Mock).mockResolvedValue([
+    (getIndexAliases as Mock).mockResolvedValue([
       { index: 'my-signals-index', isWriteIndex: true },
     ]);
 

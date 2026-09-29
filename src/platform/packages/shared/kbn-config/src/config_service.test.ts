@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { first, map, take } from 'rxjs';
 
@@ -531,8 +533,8 @@ test('calls `applyDeprecations` with the correct parameters', async () => {
     docLinks: docLinksMock,
   };
 
-  const deprecationA = jest.fn();
-  const deprecationB = jest.fn();
+  const deprecationA = vi.fn();
+  const deprecationB = vi.fn();
 
   configService.addDeprecationProvider('foo', () => [deprecationA]);
   configService.addDeprecationProvider('bar', () => [deprecationB]);

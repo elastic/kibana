@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,10 +19,10 @@ import { getProjectPickerListItemSwitchTestSubj } from './blocks/list/list_item/
 import { ProjectPickerFlyoutContent } from './project_picker_flyout';
 
 class MockIntersectionObserver {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-  takeRecords = jest.fn(() => []);
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  takeRecords = vi.fn(() => []);
 }
 
 const originProject: CPSProject = {
@@ -47,7 +49,7 @@ const linkedProjectTwo: CPSProject = {
 const availableProjects = [originProject, linkedProjectOne, linkedProjectTwo];
 
 const createFetchProjectsByRouting = (projects: CPSProject[] = availableProjects) =>
-  jest.fn(async (routing?: ProjectRouting) => {
+  vi.fn(async (routing?: ProjectRouting) => {
     if (!routing) {
       return { origin: projects[0] ?? null, linkedProjects: projects.slice(1) };
     }
@@ -82,8 +84,8 @@ const createFetchProjectsByRouting = (projects: CPSProject[] = availableProjects
 const renderFlyout = (
   overrides: Partial<React.ComponentProps<typeof ProjectPickerFlyoutContent>> = {}
 ) => {
-  const onApplyChanges = overrides.onApplyChanges ?? jest.fn();
-  const onClose = overrides.onClose ?? jest.fn();
+  const onApplyChanges = overrides.onApplyChanges ?? vi.fn();
+  const onClose = overrides.onClose ?? vi.fn();
   const props: React.ComponentProps<typeof ProjectPickerFlyoutContent> = {
     availableProjects,
     defaultProjectRoutingGetter: () => PROJECT_ROUTING.ALL,
@@ -113,7 +115,7 @@ describe('ProjectPickerFlyoutContent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('disables Discard and Apply on mount', async () => {
@@ -151,7 +153,7 @@ describe('ProjectPickerFlyoutContent', () => {
   });
 
   it('keeps Apply disabled while an initial filter proposal is pending', async () => {
-    const fetchProjectsByRouting = jest.fn(() => new Promise<never>(() => {}));
+    const fetchProjectsByRouting = vi.fn(() => new Promise<never>(() => {}));
     renderFlyout({
       canApplyUnchangedProjectRouting: true,
       defaultProjectRoutingGetter: () => PROJECT_ROUTING.ALL,

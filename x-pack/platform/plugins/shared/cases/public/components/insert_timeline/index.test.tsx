@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
@@ -18,19 +21,19 @@ import { getFormMock } from '../__mock__/form';
 import { InsertTimeline } from '.';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
-jest.mock('../timeline_context/use_timeline_context');
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
+vi.mock('../timeline_context/use_timeline_context');
 
-const useFormMock = useForm as jest.Mock;
-const useTimelineContextMock = useTimelineContext as jest.Mock;
+const useFormMock = useForm as Mock;
+const useTimelineContextMock = useTimelineContext as Mock;
 
 describe('InsertTimeline ', () => {
   const formHookMock = getFormMock({ comment: 'someValue' });
   const mockTimelineIntegration = { ...timelineIntegrationMock };
-  const useInsertTimelineMock = jest.fn();
-  let attachTimeline = jest.fn();
+  const useInsertTimelineMock = vi.fn();
+  let attachTimeline = vi.fn();
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
   });
 

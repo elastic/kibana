@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { EMPTY } from 'rxjs';
 import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
@@ -22,8 +25,8 @@ describe('Create Insights Route Handler', () => {
   let router: SecuritySolutionPluginRouterMock;
   let mockAgentBuilder: {
     execution: {
-      executeAgent: jest.Mock;
-      findExecutions: jest.Mock;
+      executeAgent: Mock;
+      findExecutions: Mock;
     };
   };
 
@@ -36,11 +39,11 @@ describe('Create Insights Route Handler', () => {
 
     mockAgentBuilder = {
       execution: {
-        executeAgent: jest.fn().mockResolvedValue({ executionId: 'mock-exec-id', events$: EMPTY }),
-        findExecutions: jest.fn().mockResolvedValue([]),
+        executeAgent: vi.fn().mockResolvedValue({ executionId: 'mock-exec-id', events$: EMPTY }),
+        findExecutions: vi.fn().mockResolvedValue([]),
       },
     };
-    (mockEndpointContext.service.getAgentBuilder as jest.Mock).mockReturnValue(mockAgentBuilder);
+    (mockEndpointContext.service.getAgentBuilder as Mock).mockReturnValue(mockAgentBuilder);
 
     router = httpServiceMock.createRouter();
     registerCreateInsightsRoute(router, mockEndpointContext);
@@ -50,15 +53,15 @@ describe('Create Insights Route Handler', () => {
         core: {
           security: {
             authc: {
-              getCurrentUser: jest
+              getCurrentUser: vi
                 .fn()
                 .mockReturnValue({ username: 'test-user', roles: ['admin'] }),
             },
           },
         },
         securitySolution: {
-          getEndpointAuthz: jest.fn().mockResolvedValue(authz),
-          getSpaceId: jest.fn().mockReturnValue('default'),
+          getEndpointAuthz: vi.fn().mockResolvedValue(authz),
+          getSpaceId: vi.fn().mockReturnValue('default'),
         },
       };
 
@@ -172,7 +175,7 @@ describe('Create Insights Route Handler', () => {
         })
       );
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.executions).toHaveLength(2);
       expect(callBody.executions[0].executionId).toBe('existing-exec-id');
       expect(callBody.executions[1].executionId).toBe('mock-exec-id');
@@ -199,7 +202,7 @@ describe('Create Insights Route Handler', () => {
         })
       );
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.executions).toHaveLength(1);
       expect(callBody.executions[0]).toMatchObject({
         executionId: 'mock-exec-id',
@@ -225,7 +228,7 @@ describe('Create Insights Route Handler', () => {
 
       expect(mockAgentBuilder.execution.executeAgent).toHaveBeenCalledTimes(4);
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.executions).toHaveLength(4);
     });
 
@@ -279,7 +282,7 @@ describe('Create Insights Route Handler', () => {
 
       // Should still return 200 with the one successful execution
       expect(mockResponse.ok).toHaveBeenCalled();
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.executions).toHaveLength(1);
       expect(callBody.executions[0].executionId).toBe('exec-1');
 
@@ -295,8 +298,8 @@ describe('Create Insights Route Handler', () => {
 
   describe('telemetry', () => {
     it('reports scan_triggered event on successful scan', async () => {
-      const reportEventMock = jest.fn();
-      (mockEndpointContext.service.getTelemetryService as jest.Mock).mockReturnValue({
+      const reportEventMock = vi.fn();
+      (mockEndpointContext.service.getTelemetryService as Mock).mockReturnValue({
         reportEvent: reportEventMock,
       });
 
@@ -320,8 +323,8 @@ describe('Create Insights Route Handler', () => {
     });
 
     it('reports correct counts when some executions are deduplicated', async () => {
-      const reportEventMock = jest.fn();
-      (mockEndpointContext.service.getTelemetryService as jest.Mock).mockReturnValue({
+      const reportEventMock = vi.fn();
+      (mockEndpointContext.service.getTelemetryService as Mock).mockReturnValue({
         reportEvent: reportEventMock,
       });
 
@@ -362,8 +365,8 @@ describe('Create Insights Route Handler', () => {
     });
 
     it('reports failure count when executions fail to start', async () => {
-      const reportEventMock = jest.fn();
-      (mockEndpointContext.service.getTelemetryService as jest.Mock).mockReturnValue({
+      const reportEventMock = vi.fn();
+      (mockEndpointContext.service.getTelemetryService as Mock).mockReturnValue({
         reportEvent: reportEventMock,
       });
 

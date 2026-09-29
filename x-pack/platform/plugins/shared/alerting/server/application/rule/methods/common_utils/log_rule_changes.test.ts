@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObject } from '@kbn/core/server';
 import type { SavedObjectErrorResult } from '@kbn/core-saved-objects-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -20,7 +23,7 @@ const REFERENCE_TIMESTAMP_MS = Date.UTC(2026, 0, 15, 12, 30, 45, 678);
 const REFERENCE_TIMESTAMP_ISO = new Date(REFERENCE_TIMESTAMP_MS).toISOString();
 
 describe('logBulkRuleChanges', () => {
-  let changeTrackingService: jest.Mocked<IScopedChangeTrackingService>;
+  let changeTrackingService: Mocked<IScopedChangeTrackingService>;
 
   beforeEach(() => {
     changeTrackingService = createMockChangeTrackingService();
@@ -275,13 +278,13 @@ describe('logBulkRuleChanges', () => {
 
   it('swallows registry errors', async () => {
     const ruleTypeRegistry = {
-      get: jest.fn().mockImplementation(() => {
+      get: vi.fn().mockImplementation(() => {
         throw new Error('rule type missing');
       }),
-      ensureRuleTypeEnabled: jest.fn(),
-      has: jest.fn(),
-      register: jest.fn(),
-      list: jest.fn(),
+      ensureRuleTypeEnabled: vi.fn(),
+      has: vi.fn(),
+      register: vi.fn(),
+      list: vi.fn(),
     } as unknown as RulesClientContext['ruleTypeRegistry'];
     const context = buildContext({ changeTrackingService, ruleTypeRegistry });
 
@@ -411,7 +414,7 @@ describe('logBulkRuleChanges', () => {
 
     it('falls back to current time when neither timestamp nor so.updated_at is available', async () => {
       const FALLBACK_NOW = '2026-06-01T08:00:00.000Z';
-      jest.useFakeTimers({ now: new Date(FALLBACK_NOW).getTime() });
+      vi.useFakeTimers({ now: new Date(FALLBACK_NOW).getTime() });
 
       try {
         const context = buildContext({ changeTrackingService });
@@ -427,7 +430,7 @@ describe('logBulkRuleChanges', () => {
         const [changes] = changeTrackingService.logBulk.mock.calls[0];
         expect(changes[0].timestamp).toBe(FALLBACK_NOW);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
@@ -527,10 +530,10 @@ const buildErroredRuleSO = (id: string): SavedObjectErrorResult => ({
   error: { error: 'Conflict', message: 'version_conflict_engine_exception', statusCode: 409 },
 });
 
-const createMockChangeTrackingService = (): jest.Mocked<IScopedChangeTrackingService> => ({
-  log: jest.fn().mockResolvedValue(undefined),
-  logBulk: jest.fn().mockResolvedValue(undefined),
-  getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+const createMockChangeTrackingService = (): Mocked<IScopedChangeTrackingService> => ({
+  log: vi.fn().mockResolvedValue(undefined),
+  logBulk: vi.fn().mockResolvedValue(undefined),
+  getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
 });
 
 interface RuleTypeStub {
@@ -539,8 +542,8 @@ interface RuleTypeStub {
 }
 
 const createMockUiSettings = (securityRuleChangesHistoryEnabled = true) => {
-  const uiSettingsClient = { get: jest.fn().mockResolvedValue(securityRuleChangesHistoryEnabled) };
-  return { asScopedToClient: jest.fn().mockReturnValue(uiSettingsClient) };
+  const uiSettingsClient = { get: vi.fn().mockResolvedValue(securityRuleChangesHistoryEnabled) };
+  return { asScopedToClient: vi.fn().mockReturnValue(uiSettingsClient) };
 };
 
 const buildContext = (
@@ -550,24 +553,24 @@ const buildContext = (
   }
 ): RulesClientContext => {
   const ruleTypeRegistry = {
-    get: jest.fn().mockImplementation((alertTypeId: string) => {
+    get: vi.fn().mockImplementation((alertTypeId: string) => {
       const ruleType = ruleTypesByAlertTypeId[alertTypeId];
       if (!ruleType) {
         throw new Error(`No rule type registered for ${alertTypeId}`);
       }
       return ruleType;
     }),
-    ensureRuleTypeEnabled: jest.fn(),
-    has: jest.fn(),
-    register: jest.fn(),
-    list: jest.fn(),
+    ensureRuleTypeEnabled: vi.fn(),
+    has: vi.fn(),
+    register: vi.fn(),
+    list: vi.fn(),
   } as unknown as RulesClientContext['ruleTypeRegistry'];
 
   return {
     logger: loggingSystemMock.createLogger(),
     spaceId: 'default',
     ruleTypeRegistry,
-    isSystemAction: jest.fn().mockReturnValue(false),
+    isSystemAction: vi.fn().mockReturnValue(false),
     uiSettings: createMockUiSettings(),
     unsecuredSavedObjectsClient: {},
     ...overrides,

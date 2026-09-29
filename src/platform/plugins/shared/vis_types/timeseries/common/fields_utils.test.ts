@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import {
   getFieldsForTerms,
   toSanitizedFieldType,
@@ -125,11 +128,11 @@ describe('fields_utils', () => {
 
   describe('createCachedTextFieldValueFormatter and createCachedReactFieldValueFormatter', () => {
     let dataView: DataView;
-    let getFormatterForFieldSpy: jest.SpyInstance;
+    let getFormatterForFieldSpy: MockInstance;
 
     beforeEach(() => {
       dataView = stubLogstashDataView;
-      getFormatterForFieldSpy = jest.spyOn(dataView, 'getFormatterForField');
+      getFormatterForFieldSpy = vi.spyOn(dataView, 'getFormatterForField');
     });
 
     afterEach(() => {
@@ -153,11 +156,11 @@ describe('fields_utils', () => {
 
     test('should use default formatters in case of Data view not defined', () => {
       const textFieldFormatServiceMock = {
-        getDefaultInstance: jest.fn().mockReturnValue(new StringFormat()),
+        getDefaultInstance: vi.fn().mockReturnValue(new StringFormat()),
       } as unknown as FieldFormatsRegistry;
 
       const reactFieldFormatServiceMock = {
-        getDefaultInstance: jest.fn().mockReturnValue(new StringFormat()),
+        getDefaultInstance: vi.fn().mockReturnValue(new StringFormat()),
       } as unknown as FieldFormatsRegistry;
 
       const textCache = createCachedTextFieldValueFormatter(

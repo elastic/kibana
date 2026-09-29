@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   ChatEventType,
   AgentBuilderErrorCode,
@@ -22,15 +25,15 @@ const EXECUTION_ID = 'exec-1';
 
 const createMockExecutionClient = () =>
   ({
-    create: jest.fn(),
-    get: jest.fn(),
-    updateStatus: jest.fn(),
-    appendEvents: jest.fn(),
-    updateHeartbeat: jest.fn(),
-    peek: jest.fn(),
-    readEvents: jest.fn(),
-    find: jest.fn().mockResolvedValue([]),
-  } as jest.Mocked<AgentExecutionClient>);
+    create: vi.fn(),
+    get: vi.fn(),
+    updateStatus: vi.fn(),
+    appendEvents: vi.fn(),
+    updateHeartbeat: vi.fn(),
+    peek: vi.fn(),
+    readEvents: vi.fn(),
+    find: vi.fn().mockResolvedValue([]),
+  } as Mocked<AgentExecutionClient>);
 
 const messageChunkEvent = (text: string): ChatEvent =>
   ({
@@ -95,12 +98,12 @@ const collectEvents = (
 
 describe('followExecution$', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('emits events and completes when execution is immediately completed with roundComplete', async () => {
@@ -146,7 +149,7 @@ describe('followExecution$', () => {
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
     // Advance past the poll interval to trigger second poll
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
 
     const result = await promise;
 
@@ -206,7 +209,7 @@ describe('followExecution$', () => {
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
     // Advance past the drain retry delay
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS);
 
     const result = await promise;
 
@@ -229,7 +232,7 @@ describe('followExecution$', () => {
     executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.failed));
 
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
-    await jest.advanceTimersByTimeAsync(
+    await vi.advanceTimersByTimeAsync(
       constants.FOLLOW_TERMINAL_READ_MAX_RETRIES * constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS
     );
     const result = await promise;
@@ -248,7 +251,7 @@ describe('followExecution$', () => {
     executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.failed));
 
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
-    await jest.advanceTimersByTimeAsync(
+    await vi.advanceTimersByTimeAsync(
       constants.FOLLOW_TERMINAL_READ_MAX_RETRIES * constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS
     );
     const result = await promise;
@@ -266,7 +269,7 @@ describe('followExecution$', () => {
     executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.aborted));
 
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_ABORT_DRAIN_TIMEOUT_MS + 1000);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_ABORT_DRAIN_TIMEOUT_MS + 1000);
     const result = await promise;
 
     expect(result.error).toBeDefined();
@@ -289,7 +292,7 @@ describe('followExecution$', () => {
     executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.failed));
 
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
-    await jest.advanceTimersByTimeAsync(
+    await vi.advanceTimersByTimeAsync(
       constants.FOLLOW_TERMINAL_READ_MAX_RETRIES * constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS
     );
     const result = await promise;
@@ -367,7 +370,7 @@ describe('followExecution$', () => {
       const promise = collectEvents(
         followExecution$({ executionId: EXECUTION_ID, executionClient })
       );
-      await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
+      await vi.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
       const result = await promise;
 
       expect(result.events).toEqual([failed]);
@@ -447,7 +450,7 @@ describe('followExecution$', () => {
       const promise = collectEvents(
         followExecution$({ executionId: EXECUTION_ID, executionClient })
       );
-      await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
+      await vi.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
       const result = await promise;
 
       expect(result.events).toEqual([aborted]);
@@ -474,7 +477,7 @@ describe('followExecution$', () => {
       const promise = collectEvents(
         followExecution$({ executionId: EXECUTION_ID, executionClient })
       );
-      await jest.advanceTimersByTimeAsync(constants.FOLLOW_ABORT_DRAIN_TIMEOUT_MS);
+      await vi.advanceTimersByTimeAsync(constants.FOLLOW_ABORT_DRAIN_TIMEOUT_MS);
       const result = await promise;
 
       expect(result.events).toEqual([aborted]);
@@ -532,7 +535,7 @@ describe('followExecution$', () => {
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
     // Advance past the total timeout
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_TIMEOUT_MS + 1000);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_TIMEOUT_MS + 1000);
 
     const result = await promise;
 
@@ -552,7 +555,7 @@ describe('followExecution$', () => {
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
     // Advance past the heartbeat timeout
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS + 1000);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS + 1000);
 
     const result = await promise;
 
@@ -584,7 +587,7 @@ describe('followExecution$', () => {
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
     // Advance well past the heartbeat timeout — a silent-but-alive execution must survive.
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 2);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 2);
 
     const result = await promise;
 
@@ -611,7 +614,7 @@ describe('followExecution$', () => {
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
     // ~75s queued (150 polls) — past the heartbeat window, within the scheduled grace.
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 2);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 2);
 
     const result = await promise;
 
@@ -629,7 +632,7 @@ describe('followExecution$', () => {
 
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS + 1000);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS + 1000);
 
     const result = await promise;
 
@@ -664,14 +667,14 @@ describe('followExecution$', () => {
     });
 
     // Let first poll complete
-    await jest.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(0);
     expect(events).toHaveLength(1);
 
     // Unsubscribe
     subscription.unsubscribe();
 
     // Advance time — no more events should be emitted
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS * 5);
+    await vi.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS * 5);
     expect(events).toHaveLength(1);
   });
 });

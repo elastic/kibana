@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LifecyclePhase } from './lifecycle_phase';
@@ -66,7 +68,7 @@ describe('LifecyclePhase', () => {
     });
 
     it('should call onClick when clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<LifecyclePhase label="hot" color="#FF0000" onClick={onClick} canManageLifecycle />);
 
       const button = screen.getByRole('button');
@@ -88,8 +90,8 @@ describe('LifecyclePhase', () => {
     });
 
     it('should navigate to phase when edit flyout is open (no popover)', () => {
-      const onEditPhase = jest.fn();
-      const onClick = jest.fn();
+      const onEditPhase = vi.fn();
+      const onClick = vi.fn();
 
       render(
         <LifecyclePhase
@@ -110,8 +112,8 @@ describe('LifecyclePhase', () => {
     });
 
     it('does nothing when disableInteractions is true, even with an edit flyout open', () => {
-      const onEditPhase = jest.fn();
-      const onClick = jest.fn();
+      const onEditPhase = vi.fn();
+      const onClick = vi.fn();
 
       render(
         <LifecyclePhase
@@ -133,7 +135,7 @@ describe('LifecyclePhase', () => {
     });
 
     it('does not open the popover when disableInteractions is true', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       render(
         <LifecyclePhase
@@ -253,8 +255,8 @@ describe('LifecyclePhase', () => {
     });
 
     it('should display default repository required callout for frozen phase', () => {
-      const onCreateDefaultRepository = jest.fn();
-      const onRefreshDefaultRepository = jest.fn();
+      const onCreateDefaultRepository = vi.fn();
+      const onRefreshDefaultRepository = vi.fn();
 
       render(
         <LifecyclePhase
@@ -317,7 +319,7 @@ describe('LifecyclePhase', () => {
           color="#00FFFF"
           searchableSnapshot="aws-s3-repo"
           showEnterpriseCallout
-          onUpgradeEnterprise={jest.fn()}
+          onUpgradeEnterprise={vi.fn()}
           canManageLifecycle
         />
       );
@@ -377,7 +379,7 @@ describe('LifecyclePhase', () => {
           label="warm"
           color="#FFA500"
           showActions
-          onRemovePhase={jest.fn()}
+          onRemovePhase={vi.fn()}
           description="Warm phase description"
           canManageLifecycle
         />
@@ -394,7 +396,7 @@ describe('LifecyclePhase', () => {
           label="warm"
           color="#FFA500"
           showActions
-          onRemovePhase={jest.fn()}
+          onRemovePhase={vi.fn()}
           description="Warm phase description"
           canManageLifecycle={false}
         />
@@ -406,7 +408,7 @@ describe('LifecyclePhase', () => {
     });
 
     it('should call onRemovePhase when remove button is clicked', () => {
-      const onRemovePhase = jest.fn();
+      const onRemovePhase = vi.fn();
       render(
         <LifecyclePhase
           label="warm"
@@ -430,7 +432,7 @@ describe('LifecyclePhase', () => {
           label="hot"
           color="#FF0000"
           showActions
-          onRemovePhase={jest.fn()}
+          onRemovePhase={vi.fn()}
           description="Hot phase description"
           canManageLifecycle
         />
@@ -447,7 +449,7 @@ describe('LifecyclePhase', () => {
           label="warm"
           color="#FFA500"
           showActions
-          onRemovePhase={jest.fn()}
+          onRemovePhase={vi.fn()}
           description="Warm phase description"
           canManageLifecycle
           isRemoveDisabled
@@ -463,7 +465,7 @@ describe('LifecyclePhase', () => {
     });
 
     it('should not call onRemovePhase when disabled remove button is clicked', () => {
-      const onRemovePhase = jest.fn();
+      const onRemovePhase = vi.fn();
       render(
         <LifecyclePhase
           label="warm"

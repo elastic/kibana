@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
@@ -16,50 +18,68 @@ import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import type { AgentExplorerItem } from '../agent_list';
 
 // Mock the hooks
-const mockUseProgressiveFetcher = jest.fn();
-const mockUseApmParams = jest.fn();
-const mockUseTimeRange = jest.fn();
+const mockUseProgressiveFetcher = vi.fn();
+const mockUseApmParams = vi.fn();
+const mockUseTimeRange = vi.fn();
 
-jest.mock('../../../../../hooks/use_progressive_fetcher', () => ({
-  useProgressiveFetcher: () => mockUseProgressiveFetcher(),
-}));
+vi.mock('../../../../../hooks/use_progressive_fetcher', () => {
+      const mocked = {
+      useProgressiveFetcher: () => mockUseProgressiveFetcher(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_apm_params', () => ({
-  useApmParams: () => mockUseApmParams(),
-}));
+vi.mock('../../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => mockUseApmParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => mockUseTimeRange(),
-}));
+vi.mock('../../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => mockUseTimeRange(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock child components
-jest.mock('./agent_contextual_information', () => ({
-  AgentContextualInformation: ({ agentName, serviceName }: any) => (
-    <div data-test-subj="agent-contextual-information">
-      Agent: {agentName}, Service: {serviceName}
-    </div>
-  ),
-}));
+vi.mock('./agent_contextual_information', () => {
+      const mocked = {
+      AgentContextualInformation: ({ agentName, serviceName }: any) => (
+        <div data-test-subj="agent-contextual-information">
+          Agent: {agentName}, Service: {serviceName}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_instances_details', () => ({
-  AgentInstancesDetails: ({ serviceName, isLoading, items }: any) => (
-    <div data-test-subj="agent-instances-details">
-      Service: {serviceName}, Loading: {isLoading.toString()}, Items: {items.length}
-    </div>
-  ),
-}));
+vi.mock('./agent_instances_details', () => {
+      const mocked = {
+      AgentInstancesDetails: ({ serviceName, isLoading, items }: any) => (
+        <div data-test-subj="agent-instances-details">
+          Service: {serviceName}, Loading: {isLoading.toString()}, Items: {items.length}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock ResponsiveFlyout
-jest.mock('../../../../shared/responsive_flyout', () => ({
-  ResponsiveFlyout: ({ children, onClose }: { children: ReactNode; onClose: () => void }) => (
-    <div data-test-subj="responsive-flyout">
-      <button data-test-subj="close-flyout" onClick={onClose}>
-        Close
-      </button>
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../../shared/responsive_flyout', () => {
+      const mocked = {
+      ResponsiveFlyout: ({ children, onClose }: { children: ReactNode; onClose: () => void }) => (
+        <div data-test-subj="responsive-flyout">
+          <button data-test-subj="close-flyout" onClick={onClose}>
+            Close
+          </button>
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -74,7 +94,7 @@ const renderOptions = {
 };
 
 describe('AgentInstances', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
   const mockAgent: AgentExplorerItem = {
     serviceName: 'test-service',
     agentName: 'nodejs' as const,
@@ -99,7 +119,7 @@ describe('AgentInstances', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseApmParams.mockReturnValue(defaultMockParams);
     mockUseTimeRange.mockReturnValue(defaultMockTimeRange);
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
@@ -15,9 +17,9 @@ import type { UseUserAlertsItems } from './use_user_alerts_items';
 import { UserAlertsTable } from './user_alerts_table';
 
 const userName = 'crffn20qcs';
-const mockGetAppUrl = jest.fn();
-jest.mock('../../../../common/lib/kibana/hooks', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/hooks');
+const mockGetAppUrl = vi.fn();
+vi.mock('../../../../common/lib/kibana/hooks', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana/hooks'));
   return {
     ...original,
     useNavigation: () => ({
@@ -26,14 +28,14 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
   };
 });
 
-const mockNavigateToAlertsPageWithFilters = jest.fn();
-jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
+const mockNavigateToAlertsPageWithFilters = vi.fn();
+vi.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
     useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
-jest.mock('../../../../common/hooks/use_global_filter_query', () => {
+vi.mock('../../../../common/hooks/use_global_filter_query', () => {
   return {
     useGlobalFilterQuery: () => ({}),
   };
@@ -50,14 +52,17 @@ const defaultUseUserAlertsItemsReturn: UseUserAlertsItemsReturn = {
     setPage: () => null,
   },
 };
-const mockUseUserAlertsItems = jest.fn(() => defaultUseUserAlertsItemsReturn);
+const mockUseUserAlertsItems = vi.fn(() => defaultUseUserAlertsItemsReturn);
 const mockUseUserAlertsItemsReturn = (overrides: Partial<UseUserAlertsItemsReturn>) => {
   mockUseUserAlertsItems.mockReturnValueOnce({ ...defaultUseUserAlertsItemsReturn, ...overrides });
 };
 
-jest.mock('./use_user_alerts_items', () => ({
-  useUserAlertsItems: () => mockUseUserAlertsItems(),
-}));
+vi.mock('./use_user_alerts_items', () => {
+      const mocked = {
+      useUserAlertsItems: () => mockUseUserAlertsItems(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = () =>
   render(
@@ -68,7 +73,7 @@ const renderComponent = () =>
 
 describe('UserAlertsTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render empty table', () => {
@@ -122,7 +127,7 @@ describe('UserAlertsTable', () => {
   });
 
   it('should render the paginator if more than 4 results', () => {
-    const mockSetPage = jest.fn();
+    const mockSetPage = vi.fn();
 
     mockUseUserAlertsItemsReturn({
       pagination: {

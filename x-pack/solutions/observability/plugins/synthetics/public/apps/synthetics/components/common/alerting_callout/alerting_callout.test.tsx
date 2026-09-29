@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import * as redux from 'react-redux-v7';
@@ -12,20 +14,23 @@ import { render, makeSyntheticsPermissionsCore } from '../../../utils/testing/rt
 import { AlertingCallout, MISSING_RULES_PRIVILEGES_LABEL } from './alerting_callout';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
 
-jest.mock('../../../contexts', () => ({
-  ...jest.requireActual('../../../contexts'),
-  useSyntheticsStartPlugins: jest.fn().mockReturnValue({
-    share: {
-      url: {
-        locators: {
-          get: jest.fn().mockReturnValue({
-            getUrl: jest.fn().mockResolvedValue('url'),
-          }),
+vi.mock('../../../contexts', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../contexts')),
+      useSyntheticsStartPlugins: vi.fn().mockReturnValue({
+        share: {
+          url: {
+            locators: {
+              get: vi.fn().mockReturnValue({
+                getUrl: vi.fn().mockResolvedValue('url'),
+              }),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertingCallout', () => {
   it.each([
@@ -159,8 +164,8 @@ describe('AlertingCallout', () => {
   });
 
   it('does not dispatch getDynamicSettingsAction.get when settings are already loaded', () => {
-    const dispatchMock = jest.fn();
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(dispatchMock);
+    const dispatchMock = vi.fn();
+    vi.spyOn(redux, 'useDispatch').mockReturnValue(dispatchMock);
 
     render(<AlertingCallout />, {
       state: {
@@ -182,8 +187,8 @@ describe('AlertingCallout', () => {
   });
 
   it('dispatches getDynamicSettingsAction.get when settings are not yet loaded', () => {
-    const dispatchMock = jest.fn();
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(dispatchMock);
+    const dispatchMock = vi.fn();
+    vi.spyOn(redux, 'useDispatch').mockReturnValue(dispatchMock);
 
     render(<AlertingCallout />, {
       state: {

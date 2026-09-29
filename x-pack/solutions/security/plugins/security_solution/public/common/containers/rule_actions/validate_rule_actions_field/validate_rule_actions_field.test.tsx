@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { validateSingleAction, validateRuleActionsField } from './validate_rule_actions_field';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import type { FormHook } from '../../../../shared_imports';
-jest.mock('./utils');
+vi.mock('./utils');
 
 describe('validate_rule_actions_field', () => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
   describe('validateSingleAction', () => {
     it('should validate single action', async () => {
-      (validateActionParams as jest.Mock).mockReturnValue([]);
-      (validateMustache as jest.Mock).mockReturnValue([]);
+      (validateActionParams as Mock).mockReturnValue([]);
+      (validateMustache as Mock).mockReturnValue([]);
 
       expect(
         await validateSingleAction(
@@ -33,8 +36,8 @@ describe('validate_rule_actions_field', () => {
     });
 
     it('should validate single action with invalid mustache template', async () => {
-      (validateActionParams as jest.Mock).mockReturnValue([]);
-      (validateMustache as jest.Mock).mockReturnValue(['Message is not valid mustache template']);
+      (validateActionParams as Mock).mockReturnValue([]);
+      (validateMustache as Mock).mockReturnValue(['Message is not valid mustache template']);
 
       const errors = await validateSingleAction(
         {
@@ -53,8 +56,8 @@ describe('validate_rule_actions_field', () => {
     });
 
     it('should validate single action with non-uuid formatted id', async () => {
-      (validateMustache as jest.Mock).mockReturnValue([]);
-      (validateActionParams as jest.Mock).mockReturnValue([]);
+      (validateMustache as Mock).mockReturnValue([]);
+      (validateActionParams as Mock).mockReturnValue([]);
 
       const errors = await validateSingleAction(
         {
@@ -77,7 +80,7 @@ describe('validate_rule_actions_field', () => {
         path: '',
         value: [],
         form: {} as FormHook,
-        formData: jest.fn(),
+        formData: vi.fn(),
         errors: [],
         customData: { value: null, provider: () => Promise.resolve(null) },
       });
@@ -86,10 +89,10 @@ describe('validate_rule_actions_field', () => {
     });
 
     it('should validate multiple incorrect rule actions field', async () => {
-      (getActionTypeName as jest.Mock).mockReturnValueOnce('Slack');
-      (getActionTypeName as jest.Mock).mockReturnValueOnce('Pagerduty');
-      (validateActionParams as jest.Mock).mockReturnValue(['Summary is required']);
-      (validateMustache as jest.Mock).mockReturnValue(['Component is not valid mustache template']);
+      (getActionTypeName as Mock).mockReturnValueOnce('Slack');
+      (getActionTypeName as Mock).mockReturnValueOnce('Pagerduty');
+      (validateActionParams as Mock).mockReturnValue(['Summary is required']);
+      (validateMustache as Mock).mockReturnValue(['Component is not valid mustache template']);
       const validator = validateRuleActionsField(actionTypeRegistry);
 
       const result = await validator({
@@ -111,7 +114,7 @@ describe('validate_rule_actions_field', () => {
           },
         ],
         form: {} as FormHook,
-        formData: jest.fn(),
+        formData: vi.fn(),
         errors: [],
         customData: { value: null, provider: () => Promise.resolve(null) },
       });

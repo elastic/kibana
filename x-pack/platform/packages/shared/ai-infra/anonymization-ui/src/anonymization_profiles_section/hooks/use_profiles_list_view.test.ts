@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { UseQueryResult } from '@kbn/react-query';
 import { act, renderHook } from '@testing-library/react';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
@@ -13,9 +15,12 @@ import { useFindAllProfiles } from '../../common/services/profiles/hooks/use_fin
 import { TARGET_TYPE_INDEX } from '../../common/target_types';
 import { useProfilesListView } from './use_profiles_list_view';
 
-jest.mock('../../common/services/profiles/hooks/use_find_all_profiles', () => ({
-  useFindAllProfiles: jest.fn(),
-}));
+vi.mock('../../common/services/profiles/hooks/use_find_all_profiles', () => {
+      const mocked = {
+      useFindAllProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createProfile = (id: string): AnonymizationProfile => ({
   id,
@@ -32,21 +37,21 @@ const createProfile = (id: string): AnonymizationProfile => ({
 });
 
 const client = {
-  findProfiles: jest.fn(),
-  getProfile: jest.fn(),
-  createProfile: jest.fn(),
-  updateProfile: jest.fn(),
-  deleteProfile: jest.fn(),
+  findProfiles: vi.fn(),
+  getProfile: vi.fn(),
+  createProfile: vi.fn(),
+  updateProfile: vi.fn(),
+  deleteProfile: vi.fn(),
 };
 
 describe('useProfilesListView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('exposes default list state and maps query results', () => {
-    const refetch = jest.fn();
-    jest.mocked(useFindAllProfiles).mockReturnValue({
+    const refetch = vi.fn();
+    vi.mocked(useFindAllProfiles).mockReturnValue({
       data: [createProfile('1')],
       isLoading: false,
       error: undefined,
@@ -67,11 +72,11 @@ describe('useProfilesListView', () => {
   });
 
   it('resets pagination when filter setters are called', () => {
-    jest.mocked(useFindAllProfiles).mockReturnValue({
+    vi.mocked(useFindAllProfiles).mockReturnValue({
       data: [],
       isLoading: false,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     const { result } = renderHook(() =>
@@ -94,8 +99,8 @@ describe('useProfilesListView', () => {
   });
 
   it('forwards refetch', async () => {
-    const refetch = jest.fn().mockResolvedValue({ data: undefined });
-    jest.mocked(useFindAllProfiles).mockReturnValue({
+    const refetch = vi.fn().mockResolvedValue({ data: undefined });
+    vi.mocked(useFindAllProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: undefined,
@@ -114,11 +119,11 @@ describe('useProfilesListView', () => {
   });
 
   it('passes enabled flag to the profiles query', () => {
-    jest.mocked(useFindAllProfiles).mockReturnValue({
+    vi.mocked(useFindAllProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     renderHook(() =>
@@ -133,11 +138,11 @@ describe('useProfilesListView', () => {
   });
 
   it('normalizes unknown errors and preserves mapped API errors', () => {
-    jest.mocked(useFindAllProfiles).mockReturnValue({
+    vi.mocked(useFindAllProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('plain'),
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     const { result, rerender } = renderHook(() =>
@@ -149,11 +154,11 @@ describe('useProfilesListView', () => {
     expect(result.current.error?.kind).toBe('unknown');
     expect(result.current.error?.message).toBe('plain');
 
-    jest.mocked(useFindAllProfiles).mockReturnValue({
+    vi.mocked(useFindAllProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: mapProfilesApiError({ statusCode: 403 }),
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as UseQueryResult<AnonymizationProfile[]>);
     rerender();
     expect(result.current.error?.kind).toBe('forbidden');
@@ -164,11 +169,11 @@ describe('useProfilesListView', () => {
       { ...createProfile('1'), name: 'Global Anonymization Profile', targetId: '__kbn_global__' },
       { ...createProfile('2'), name: 'test', targetId: 'kibana_sample_data_ecommerce' },
     ];
-    jest.mocked(useFindAllProfiles).mockReturnValue({
+    vi.mocked(useFindAllProfiles).mockReturnValue({
       data: profiles,
       isLoading: false,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     const { result } = renderHook(() =>

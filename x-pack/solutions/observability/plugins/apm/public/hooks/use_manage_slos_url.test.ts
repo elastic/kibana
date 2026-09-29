@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Filter } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
@@ -13,7 +15,7 @@ import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { getManageSlosUrl } from './use_manage_slos_url';
 
 describe('getManageSlosUrl', () => {
-  const getRedirectUrl = jest.fn().mockReturnValue('/app/slo');
+  const getRedirectUrl = vi.fn().mockReturnValue('/app/slo');
   const sloListLocator = { getRedirectUrl } as unknown as LocatorPublic<SloListLocatorParams>;
 
   const getEnvironmentFilter = (): Filter | undefined => {

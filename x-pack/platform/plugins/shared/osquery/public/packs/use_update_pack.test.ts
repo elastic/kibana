@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../common/lib/kibana';
 import { useUpdatePack } from './use_update_pack';
 
-jest.mock('../common/lib/kibana');
+vi.mock('../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -23,18 +26,18 @@ const createWrapper = (queryClient: QueryClient) => {
 };
 
 describe('useUpdatePack error toast (6.9)', () => {
-  let mockHttp: { put: jest.Mock };
-  let mockToasts: { addSuccess: jest.Mock; addError: jest.Mock; remove: jest.Mock };
+  let mockHttp: { put: Mock };
+  let mockToasts: { addSuccess: Mock; addError: Mock; remove: Mock };
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHttp = { put: jest.fn() };
-    mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), remove: jest.fn() };
+    vi.clearAllMocks();
+    mockHttp = { put: vi.fn() };
+    mockToasts = { addSuccess: vi.fn(), addError: vi.fn(), remove: vi.fn() };
 
     useKibanaMock.mockReturnValue({
       services: {
-        application: { navigateToApp: jest.fn() },
+        application: { navigateToApp: vi.fn() },
         http: mockHttp,
         notifications: { toasts: mockToasts },
       },
@@ -82,7 +85,7 @@ describe('useUpdatePack error toast (6.9)', () => {
     // page re-renders pre-update queries (a deleted query reappears) until a
     // hard reload, because usePack caches it with keepPreviousData.
     mockHttp.put.mockResolvedValue({ data: { name: 'my-pack' } });
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useUpdatePack({ withRedirect: false }), {
       wrapper: createWrapper(queryClient),

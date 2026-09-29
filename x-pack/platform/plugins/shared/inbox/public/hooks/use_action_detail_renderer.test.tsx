@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
@@ -104,7 +106,7 @@ describe('useActionDetailRenderer', () => {
   it('falls back to null and logs when the loader rejects', async () => {
     const a = deferred();
     const renderers = new Map<string, InboxActionDetailRendererLoader>([['workflows', a.loader]]);
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const { result } = renderHook(() => useActionDetailRenderer('workflows'), {
       wrapper: wrapperFor(renderers),

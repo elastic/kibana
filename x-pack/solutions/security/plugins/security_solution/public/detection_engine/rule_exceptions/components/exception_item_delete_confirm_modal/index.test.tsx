@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -15,8 +17,8 @@ describe('ExceptionItemDeleteConfirmModal', () => {
     render(
       <ExceptionItemDeleteConfirmModal
         exceptionItemName="My exception"
-        onCancel={jest.fn()}
-        onConfirm={jest.fn()}
+        onCancel={vi.fn()}
+        onConfirm={vi.fn()}
       />
     );
 
@@ -26,11 +28,11 @@ describe('ExceptionItemDeleteConfirmModal', () => {
   });
 
   it('invokes onConfirm when the confirm button is clicked', () => {
-    const onConfirm = jest.fn();
+    const onConfirm = vi.fn();
     render(
       <ExceptionItemDeleteConfirmModal
         exceptionItemName="My exception"
-        onCancel={jest.fn()}
+        onCancel={vi.fn()}
         onConfirm={onConfirm}
       />
     );
@@ -41,12 +43,12 @@ describe('ExceptionItemDeleteConfirmModal', () => {
   });
 
   it('invokes onCancel when the cancel button is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     render(
       <ExceptionItemDeleteConfirmModal
         exceptionItemName="My exception"
         onCancel={onCancel}
-        onConfirm={jest.fn()}
+        onConfirm={vi.fn()}
       />
     );
 

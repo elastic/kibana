@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -15,17 +18,26 @@ import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
 import { createEventsWriteTool, eventsWriteSchema } from './tool';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
-  assertCanManageSignificantEvents: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_can_manage_significant_events', () => {
+      const mocked = {
+      assertCanManageSignificantEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./handler', () => ({
-  eventsWriteBulkHandler: jest.fn(),
-}));
+vi.mock('./handler', () => {
+      const mocked = {
+      eventsWriteBulkHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const input = {
   event_id: 'event-1',
@@ -37,13 +49,13 @@ const input = {
   confidence: 0.8,
 };
 
-const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
+const getFeatures = vi.fn().mockResolvedValue({ hits: [] });
 
-const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
-  const getScopedClients = jest.fn().mockResolvedValue({
-    getEventClient: jest.fn().mockReturnValue({}),
-    getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
-    getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
+const createTool = (telemetry: { trackAgentToolEventsWrite: Mock }) => {
+  const getScopedClients = vi.fn().mockResolvedValue({
+    getEventClient: vi.fn().mockReturnValue({}),
+    getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({ getFeatures }),
+    getAlertEventsClient: vi.fn().mockResolvedValue(undefined),
     licensing: {},
   });
   return createEventsWriteTool({
@@ -56,10 +68,10 @@ const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
 
 describe('events_write tool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getFeatures.mockResolvedValue({ hits: [] });
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
+    (assertSignificantEventsAccess as Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as Mock).mockResolvedValue(undefined);
   });
 
   it('enforces the batch bounds', () => {
@@ -272,7 +284,7 @@ describe('events_write tool', () => {
             ];
       return Promise.resolve({ hits });
     });
-    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+    (eventsWriteBulkHandler as Mock).mockResolvedValue([
       {
         index: 0,
         event_uuid: 'uuid-1',
@@ -283,7 +295,7 @@ describe('events_write tool', () => {
     ]);
 
     await invokeHandler(
-      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      createTool({ trackAgentToolEventsWrite: vi.fn() }) as never,
       {
         source: 'discovery',
         items: [
@@ -359,12 +371,12 @@ describe('events_write tool', () => {
         },
       ],
     });
-    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+    (eventsWriteBulkHandler as Mock).mockResolvedValue([
       { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
     ]);
 
     await invokeHandler(
-      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      createTool({ trackAgentToolEventsWrite: vi.fn() }) as never,
       {
         items: [
           {
@@ -393,13 +405,13 @@ describe('events_write tool', () => {
 
   it('writes unenriched causal features when the lookup fails', async () => {
     getFeatures.mockRejectedValue(new Error('ki index unavailable'));
-    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+    (eventsWriteBulkHandler as Mock).mockResolvedValue([
       { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
     ]);
     const causalFeatures = [{ feature_id: 'checkout-api', name: 'Checkout API' }];
 
     await invokeHandler(
-      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      createTool({ trackAgentToolEventsWrite: vi.fn() }) as never,
       { items: [{ ...input, causal_features: causalFeatures }] },
       createMockToolContext()
     );
@@ -413,7 +425,7 @@ describe('events_write tool', () => {
   });
 
   it('returns aligned results and tracks each item', async () => {
-    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+    (eventsWriteBulkHandler as Mock).mockResolvedValue([
       {
         index: 0,
         event_uuid: 'uuid-1',
@@ -430,7 +442,7 @@ describe('events_write tool', () => {
         error: { type: 'rejected', reason: 'busy', status: 429 },
       },
     ]);
-    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const telemetry = { trackAgentToolEventsWrite: vi.fn() };
     const result = await invokeHandler(
       createTool(telemetry) as never,
       { items: [input, { ...input, event_id: 'event-2', status: 'closed' }] },
@@ -449,7 +461,7 @@ describe('events_write tool', () => {
   });
 
   it('does not replace successful results when telemetry throws', async () => {
-    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+    (eventsWriteBulkHandler as Mock).mockResolvedValue([
       {
         index: 0,
         event_uuid: 'uuid-1',
@@ -459,7 +471,7 @@ describe('events_write tool', () => {
       },
     ]);
     const telemetry = {
-      trackAgentToolEventsWrite: jest.fn().mockImplementation(() => {
+      trackAgentToolEventsWrite: vi.fn().mockImplementation(() => {
         throw new Error('telemetry unavailable');
       }),
     };
@@ -476,11 +488,11 @@ describe('events_write tool', () => {
   });
 
   it('returns a classified validation error', async () => {
-    (eventsWriteBulkHandler as jest.Mock).mockRejectedValue(
+    (eventsWriteBulkHandler as Mock).mockRejectedValue(
       new BulkWriteError('validation_error', 'duplicate event_id')
     );
     const result = await invokeHandler(
-      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      createTool({ trackAgentToolEventsWrite: vi.fn() }) as never,
       { items: [input] },
       createMockToolContext()
     );

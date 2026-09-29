@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useGlobalTime } from '../../../../../../../common/containers/use_global_time';
 import moment from 'moment';
 import { useIntervalForHeatmap } from '../../../../../recent_anomalies/anomaly_heatmap_interval';
 
-jest.mock('../../../../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn(),
-}));
+vi.mock('../../../../../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useIntervalForHeatmap', () => {
-  const mockUseGlobalTime = useGlobalTime as jest.Mock;
+  const mockUseGlobalTime = useGlobalTime as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGlobalTime.mockReturnValue({
       from: 0,
       to: 0,

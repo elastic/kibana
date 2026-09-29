@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
@@ -52,8 +54,8 @@ describe('ProjectPicker', () => {
   const defaultProps: ProjectPickerProps = {
     defaultProjectRoutingGetter: () => undefined,
     currentProjectRoutingGetter: () => '',
-    onProjectRoutingChange: jest.fn(),
-    fetchProjectsByRouting: jest.fn().mockResolvedValue(mockProjectsData),
+    onProjectRoutingChange: vi.fn(),
+    fetchProjectsByRouting: vi.fn().mockResolvedValue(mockProjectsData),
     totalProjectCount: 3,
   };
 
@@ -72,13 +74,13 @@ describe('ProjectPicker', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.setItem(TOUR_STORAGE_KEY, 'true');
   });
 
   it('should show a skeleton while projects are loading', async () => {
     await renderProjectPicker({
-      fetchProjectsByRouting: jest.fn(() => new Promise(() => {})),
+      fetchProjectsByRouting: vi.fn(() => new Promise(() => {})),
     });
 
     expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
@@ -87,7 +89,7 @@ describe('ProjectPicker', () => {
 
   it('should render nothing when there is no origin project', async () => {
     await renderProjectPicker({
-      fetchProjectsByRouting: jest.fn().mockResolvedValue({
+      fetchProjectsByRouting: vi.fn().mockResolvedValue({
         origin: null,
         linkedProjects,
       }),
@@ -99,7 +101,7 @@ describe('ProjectPicker', () => {
   it('should render nothing when there are no linked projects', async () => {
     await renderProjectPicker({
       totalProjectCount: 1,
-      fetchProjectsByRouting: jest.fn().mockResolvedValue({
+      fetchProjectsByRouting: vi.fn().mockResolvedValue({
         origin: originProject,
         linkedProjects: [],
       }),
@@ -140,7 +142,7 @@ describe('ProjectPicker', () => {
   });
 
   it('does not call onProjectRoutingChange on mount when routing is already in sync', async () => {
-    const onProjectRoutingChange = jest.fn();
+    const onProjectRoutingChange = vi.fn();
     await renderProjectPicker({
       onProjectRoutingChange,
       currentProjectRoutingGetter: () => '_id:*',
@@ -152,7 +154,7 @@ describe('ProjectPicker', () => {
 
   it('should persist selection after closing the popover', async () => {
     let currentRouting: ProjectRouting = '';
-    const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+    const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
       currentRouting = routing;
     });
 
@@ -175,7 +177,7 @@ describe('ProjectPicker', () => {
 
   it('should update project routing when a project is excluded', async () => {
     let currentRouting: ProjectRouting = '';
-    const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+    const onProjectRoutingChange = vi.fn((routing: ProjectRouting) => {
       currentRouting = routing;
     });
 
@@ -194,7 +196,7 @@ describe('ProjectPicker', () => {
   });
 
   it('should render a disabled button when isDisabled is true', async () => {
-    const fetchProjectsByRouting = jest.fn().mockResolvedValue(mockProjectsData);
+    const fetchProjectsByRouting = vi.fn().mockResolvedValue(mockProjectsData);
     await renderProjectPicker({ isDisabled: true, fetchProjectsByRouting });
 
     const button = screen.getByTestId('cps-project-picker-button-disabled');
@@ -238,7 +240,7 @@ describe('ProjectPicker', () => {
 });
 
 describe('ProjectPickerContent', () => {
-  const mockFetchProjectsByRouting = jest.fn().mockResolvedValue(mockProjectsData);
+  const mockFetchProjectsByRouting = vi.fn().mockResolvedValue(mockProjectsData);
   const mockProjectRouting: ProjectRouting = '_id:*';
 
   it('can hide project routing controls and show only the project list', async () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { MutableRefObject } from 'react';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { suggest as suggestFn } from '@kbn/esql-language';
@@ -22,57 +25,69 @@ import { monaco } from '../../monaco_imports';
 import { createParser } from './parser';
 import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS, ESQLLang } from '../esql';
 
-const mockWorkerSetup = jest.fn<void, []>();
-const mockGetRequests = jest.fn();
+const mockWorkerSetup = vi.fn<void, []>();
+const mockGetRequests = vi.fn();
 
-const mockSuggest = jest.fn<ReturnType<typeof suggestFn>, Parameters<typeof suggestFn>>();
-const mockWrapAsMonacoSuggestions = jest.fn<ReturnType<typeof wrapFn>, Parameters<typeof wrapFn>>();
-const mockCheckForTripleQuotesAndEsqlQuery = jest.fn<
+const mockSuggest = vi.fn<ReturnType<typeof suggestFn>, Parameters<typeof suggestFn>>();
+const mockWrapAsMonacoSuggestions = vi.fn<ReturnType<typeof wrapFn>, Parameters<typeof wrapFn>>();
+const mockCheckForTripleQuotesAndEsqlQuery = vi.fn<
   ReturnType<typeof checkFn>,
   Parameters<typeof checkFn>
 >();
-const mockUnescapeInvalidChars = jest.fn<
+const mockUnescapeInvalidChars = vi.fn<
   ReturnType<typeof unescapeFn>,
   Parameters<typeof unescapeFn>
 >();
-const mockSetupConsoleErrorsProvider = jest.fn<
+const mockSetupConsoleErrorsProvider = vi.fn<
   ReturnType<typeof setupErrorsProviderFn>,
   Parameters<typeof setupErrorsProviderFn>
 >();
-const mockConsoleParsedRequestsProvider = jest.fn<
+const mockConsoleParsedRequestsProvider = vi.fn<
   InstanceType<typeof ParsedProviderCtor>,
   ConstructorParameters<typeof ParsedProviderCtor>
 >();
 
-jest.mock('@kbn/esql-language', () => ({
-  suggest: (...args: Parameters<typeof mockSuggest>) => mockSuggest(...args),
-  // esql_lexer_rules.ts reads this eagerly at module-load time to build its keyword list, so
-  // it needs a stub here even though this suite doesn't exercise highlighting.
-  esqlCommandRegistry: { getAllCommandNames: () => [] },
-}));
+vi.mock('@kbn/esql-language', () => {
+      const mocked = {
+      suggest: (...args: Parameters<typeof mockSuggest>) => mockSuggest(...args),
+      // esql_lexer_rules.ts reads this eagerly at module-load time to build its keyword list, so
+      // it needs a stub here even though this suite doesn't exercise highlighting.
+      esqlCommandRegistry: { getAllCommandNames: () => [] },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../esql/lib/converters/suggestions', () => ({
-  wrapAsMonacoSuggestions: (...args: Parameters<typeof mockWrapAsMonacoSuggestions>) =>
-    mockWrapAsMonacoSuggestions(...args),
-}));
+vi.mock('../esql/lib/converters/suggestions', () => {
+      const mocked = {
+      wrapAsMonacoSuggestions: (...args: Parameters<typeof mockWrapAsMonacoSuggestions>) =>
+        mockWrapAsMonacoSuggestions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils', () => ({
-  // `findRequestLineNumber` owns the backwards request-line scan and its lookback safeguards, which
-  // the lookback tests below exercise for real. Keep the actual implementation.
-  ...jest.requireActual('./utils'),
-  checkForTripleQuotesAndEsqlQuery: (
-    ...args: Parameters<typeof mockCheckForTripleQuotesAndEsqlQuery>
-  ) => mockCheckForTripleQuotesAndEsqlQuery(...args),
-  unescapeInvalidChars: (...args: Parameters<typeof mockUnescapeInvalidChars>) =>
-    mockUnescapeInvalidChars(...args),
-}));
+vi.mock('./utils', async () => {
+      const mocked = {
+      // `findRequestLineNumber` owns the backwards request-line scan and its lookback safeguards, which
+      // the lookback tests below exercise for real. Keep the actual implementation.
+      ...(await vi.importActual('./utils')),
+      checkForTripleQuotesAndEsqlQuery: (
+        ...args: Parameters<typeof mockCheckForTripleQuotesAndEsqlQuery>
+      ) => mockCheckForTripleQuotesAndEsqlQuery(...args),
+      unescapeInvalidChars: (...args: Parameters<typeof mockUnescapeInvalidChars>) =>
+        mockUnescapeInvalidChars(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./console_errors_provider', () => ({
-  setupConsoleErrorsProvider: (...args: Parameters<typeof mockSetupConsoleErrorsProvider>) =>
-    mockSetupConsoleErrorsProvider(...args),
-}));
+vi.mock('./console_errors_provider', () => {
+      const mocked = {
+      setupConsoleErrorsProvider: (...args: Parameters<typeof mockSetupConsoleErrorsProvider>) =>
+        mockSetupConsoleErrorsProvider(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./console_parsed_requests_provider', () => {
+vi.mock('./console_parsed_requests_provider', () => {
   function ConsoleParsedRequestsProvider(
     ...args: ConstructorParameters<typeof ParsedProviderCtor>
   ) {
@@ -84,7 +99,7 @@ jest.mock('./console_parsed_requests_provider', () => {
   return { ConsoleParsedRequestsProvider };
 });
 
-jest.mock('./console_worker_proxy', () => {
+vi.mock('./console_worker_proxy', () => {
   function ConsoleWorkerProxyService(this: { setup: () => void }) {
     this.setup = () => mockWorkerSetup();
   }
@@ -104,10 +119,10 @@ const createToken = (): { token: monaco.CancellationToken; dispose: () => void }
 
 const createActionsProvider = (): {
   actionsProvider: MutableRefObject<{ provideCompletionItems: ProvideCompletionItems } | null>;
-  provideCompletionItems: jest.MockedFunction<ProvideCompletionItems>;
+  provideCompletionItems: MockedFunction<ProvideCompletionItems>;
 } => {
   const completionList: monaco.languages.CompletionList = { suggestions: [] };
-  const provideCompletionItems = jest.fn<
+  const provideCompletionItems = vi.fn<
     ReturnType<ProvideCompletionItems>,
     Parameters<ProvideCompletionItems>
   >(() => completionList);
@@ -147,7 +162,7 @@ describe('console language', () => {
 
   const createdModels: monaco.editor.ITextModel[] = [];
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     while (createdModels.length) {
       createdModels.pop()?.dispose();
     }
@@ -157,7 +172,7 @@ describe('console language', () => {
     // Global mocks stay, but each test starts from a clean slate:
     // - clears call history
     // - resets per-test stubbed implementations
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     // The real getRequests always resolves an array (empty when nothing parses).
     mockGetRequests.mockResolvedValue([]);
   });
@@ -178,8 +193,8 @@ describe('console language', () => {
     const model = createModel(['{ "not": "a request line" }']);
     createdModels.push(model);
 
-    const getValueSpy = jest.spyOn(model, 'getValue');
-    const getValueInRangeSpy = jest.spyOn(model, 'getValueInRange');
+    const getValueSpy = vi.spyOn(model, 'getValue');
+    const getValueInRangeSpy = vi.spyOn(model, 'getValueInRange');
 
     await provider.provideCompletionItems!(model, new monaco.Position(1, 1), baseContext, token);
 
@@ -222,7 +237,7 @@ describe('console language', () => {
     const { token, dispose } = createToken();
 
     mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
-      jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+      (await vi.importActual('./utils')).checkForTripleQuotesAndEsqlQuery
     );
 
     const model = createModel(['GET _query', '{ "query": "FROM logs" }']);
@@ -245,7 +260,7 @@ describe('console language', () => {
     const model = createModel(lines);
     createdModels.push(model);
 
-    const getValueInRangeSpy = jest.spyOn(model, 'getValueInRange');
+    const getValueInRangeSpy = vi.spyOn(model, 'getValueInRange');
 
     await provider.provideCompletionItems!(model, new monaco.Position(2001, 1), baseContext, token);
 
@@ -270,7 +285,7 @@ describe('console language', () => {
     const model = createModel(['POST _query', '{ "query": "FROM logs" }']);
     createdModels.push(model);
 
-    const getValueInRangeSpy = jest.spyOn(model, 'getValueInRange');
+    const getValueInRangeSpy = vi.spyOn(model, 'getValueInRange');
 
     await provider.provideCompletionItems!(model, new monaco.Position(2, 7), baseContext, token);
 
@@ -428,7 +443,7 @@ describe('console language', () => {
     const { token, dispose } = createToken();
 
     mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
-      jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+      (await vi.importActual('./utils')).checkForTripleQuotesAndEsqlQuery
     );
     mockUnescapeInvalidChars.mockReturnValue('UNESCAPED_QUERY');
     mockSuggest.mockResolvedValue([]);
@@ -451,7 +466,7 @@ describe('console language', () => {
     const { token, dispose } = createToken();
 
     mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
-      jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+      (await vi.importActual('./utils')).checkForTripleQuotesAndEsqlQuery
     );
 
     const model = createModel([
@@ -477,7 +492,7 @@ describe('console language', () => {
     const { token, dispose } = createToken();
 
     mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
-      jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+      (await vi.importActual('./utils')).checkForTripleQuotesAndEsqlQuery
     );
     mockUnescapeInvalidChars.mockReturnValue('UNESCAPED_QUERY');
     mockSuggest.mockResolvedValue([]);
@@ -504,7 +519,7 @@ describe('console language', () => {
       const { token, dispose } = createToken();
 
       mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
-        jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+        (await vi.importActual('./utils')).checkForTripleQuotesAndEsqlQuery
       );
       mockUnescapeInvalidChars.mockReturnValue('UNESCAPED_QUERY');
       mockSuggest.mockResolvedValue([]);
@@ -540,7 +555,7 @@ describe('console language', () => {
       const { token, dispose } = createToken();
 
       mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
-        jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+        (await vi.importActual('./utils')).checkForTripleQuotesAndEsqlQuery
       );
 
       const lines = [
@@ -603,7 +618,7 @@ describe('console language', () => {
   });
 
   it('initializes even when ES|QL language fails to load', async () => {
-    jest.spyOn(ESQLLang, 'onLanguage').mockRejectedValueOnce(new Error('ES|QL load failed'));
+    vi.spyOn(ESQLLang, 'onLanguage').mockRejectedValueOnce(new Error('ES|QL load failed'));
 
     await expect(ConsoleLang.onLanguage?.()).resolves.toBeUndefined();
 

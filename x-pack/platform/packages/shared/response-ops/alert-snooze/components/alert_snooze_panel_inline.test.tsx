@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -14,8 +16,8 @@ import { DataConditionType } from './types';
 
 const MOCKED_NOW = '2026-03-09T19:05:00.000Z';
 
-jest.mock('moment', () => {
-  const actual = jest.requireActual('moment');
+vi.mock('moment', () => {
+  const actual = require('moment');
   return Object.assign(
     (...args: unknown[]) => (args.length ? actual(...args) : actual(MOCKED_NOW)),
     actual,
@@ -28,11 +30,11 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('AlertSnoozePanelInline', () => {
-  const onApplyMock = jest.fn();
-  const onBackMock = jest.fn();
+  const onApplyMock = vi.fn();
+  const onBackMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderPanel = (props: Partial<React.ComponentProps<typeof AlertSnoozePanelInline>> = {}) =>

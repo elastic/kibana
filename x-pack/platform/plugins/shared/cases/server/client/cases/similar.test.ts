@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { similar } from './similar';
@@ -21,7 +23,7 @@ describe('similar', () => {
   beforeEach(() => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
 
-    jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
+    vi.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
         ...mockCases[0].attributes,
@@ -54,7 +56,7 @@ describe('similar', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should execute query with observable type key and value and proper filters', async () => {
@@ -176,7 +178,7 @@ describe('similar', () => {
   });
 
   it('should not call findCases when the case has no observables', async () => {
-    jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
+    vi.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
         ...mockCases[0].attributes,
@@ -197,7 +199,7 @@ describe('similar', () => {
   });
 
   it('should not call findCases when unknown typeKey is specified for an observable', async () => {
-    jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
+    vi.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
         ...mockCases[0].attributes,

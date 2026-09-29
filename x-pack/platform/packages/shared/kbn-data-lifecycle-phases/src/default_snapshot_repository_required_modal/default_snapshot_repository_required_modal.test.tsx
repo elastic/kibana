@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -75,7 +77,7 @@ describe('DefaultSnapshotRepositoryRequiredModal', () => {
   });
 
   it('calls onCancel when cancel is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
 
     renderWithI18n(
       <DefaultSnapshotRepositoryRequiredModal
@@ -90,7 +92,7 @@ describe('DefaultSnapshotRepositoryRequiredModal', () => {
   });
 
   it('calls onRefresh when refresh is clicked', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
 
     renderWithI18n(
       <DefaultSnapshotRepositoryRequiredModal
@@ -105,7 +107,7 @@ describe('DefaultSnapshotRepositoryRequiredModal', () => {
   });
 
   it('disables refresh while refreshing', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
 
     renderWithI18n(
       <DefaultSnapshotRepositoryRequiredModal

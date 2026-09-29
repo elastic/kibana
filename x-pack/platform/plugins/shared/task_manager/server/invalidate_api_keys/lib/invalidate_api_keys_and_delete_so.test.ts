@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { invalidateApiKeysAndDeletePendingApiKeySavedObject } from './invalidate_api_keys_and_delete_so';
 
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const invalidateApiKeyFn = jest.fn();
+const invalidateApiKeyFn = vi.fn();
 
 describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should succeed when there are no api keys to invalidate', async () => {
@@ -151,7 +153,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
   });
 
   describe('UIAM API key invalidation', () => {
-    const invalidateUiamApiKeyFn = jest.fn();
+    const invalidateUiamApiKeyFn = vi.fn();
 
     beforeEach(() => {
       invalidateUiamApiKeyFn.mockReset();

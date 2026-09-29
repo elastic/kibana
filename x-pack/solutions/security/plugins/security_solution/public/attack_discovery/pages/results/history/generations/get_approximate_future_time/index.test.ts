@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 let mockShouldThrow = false;
-jest.mock('moment', () => {
-  const actualMoment = jest.requireActual('moment');
+vi.mock('moment', () => {
+  const actualMoment = require('moment');
   return (...args: unknown[]) => {
     if (mockShouldThrow) {
       throw new Error('forced error');
@@ -24,7 +26,7 @@ describe('getApproximateFutureTime', () => {
 
   afterEach(() => {
     mockShouldThrow = false;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns null if averageSuccessfulDurationNanoseconds is undefined', () => {

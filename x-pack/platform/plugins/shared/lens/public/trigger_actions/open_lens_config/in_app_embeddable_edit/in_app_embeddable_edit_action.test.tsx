@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -48,7 +50,7 @@ describe('inapp editing of Lens embeddable', () => {
           embeddableOutput$: undefined,
           renderComplete$,
         },
-        onUpdate: jest.fn(),
+        onUpdate: vi.fn(),
       };
       const isCompatible = await inAppEditAction.isCompatible(context);
 
@@ -77,7 +79,7 @@ describe('inapp editing of Lens embeddable', () => {
           embeddableOutput$: undefined,
           renderComplete$,
         },
-        onUpdate: jest.fn(),
+        onUpdate: vi.fn(),
       };
       const isCompatible = await inAppEditAction.isCompatible(context);
 
@@ -110,7 +112,7 @@ describe('inapp editing of Lens embeddable', () => {
           embeddableOutput$: undefined,
           renderComplete$,
         },
-        onUpdate: jest.fn(),
+        onUpdate: vi.fn(),
       };
       const isCompatible = await inAppEditAction.isCompatible(context);
 

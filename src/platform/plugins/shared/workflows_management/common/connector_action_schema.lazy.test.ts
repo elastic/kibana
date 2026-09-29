@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /**
  * Regression tests for the lazy-loading boundary in schema.ts (see #264175).
  *
@@ -35,7 +37,7 @@ const getLoadedHeavyModules = () => Object.keys(require.cache).filter(isHeavyMod
 
 describe('schema.ts lazy-loading boundary', () => {
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     for (const modulePath of Object.keys(require.cache)) {
       if (modulePath === SCHEMA_PATH || isHeavyModule(modulePath)) {
         delete require.cache[modulePath];

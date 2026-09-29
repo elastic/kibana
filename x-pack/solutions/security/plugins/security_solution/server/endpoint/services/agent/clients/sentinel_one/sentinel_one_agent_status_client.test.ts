@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getPendingActionsSummary } from '../../..';
 import { SentinelOneAgentStatusClient } from './sentinel_one_agent_status_client';
 import type { AgentStatusClientOptions } from '../lib/base_agent_status_client';
@@ -14,11 +17,14 @@ import { responseActionsClientMock } from '../../../actions/clients/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 
-jest.mock('../../..', () => ({
-  getPendingActionsSummary: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../../..', () => {
+      const mocked = {
+      getPendingActionsSummary: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getPendingActionsSummaryMock = getPendingActionsSummary as jest.Mock;
+const getPendingActionsSummaryMock = getPendingActionsSummary as Mock;
 
 describe('SentinelOneAgentStatusClient', () => {
   let constructorOptions: AgentStatusClientOptions;
@@ -38,13 +44,13 @@ describe('SentinelOneAgentStatusClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getAgentStatuses()', () => {
     it('should call ES search with the correct query for the given agent IDs', async () => {
       const agentIds = ['agent-1', 'agent-2'];
-      (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+      (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
         s1Generator.generateAgentEsSearchResponse([
           s1Generator.generateAgentEsSearchHit({
             sentinel_one: { agent: { agent: { id: 'agent-1' } } },
@@ -79,7 +85,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
     it('should call getPendingActionsSummary with the correct space and agent IDs', async () => {
       const agentIds = ['agent-1', 'agent-2'];
-      (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+      (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
         s1Generator.generateAgentEsSearchResponse([
           s1Generator.generateAgentEsSearchHit({
             sentinel_one: { agent: { agent: { id: 'agent-1' } } },
@@ -101,7 +107,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
     it('should include pending actions in the response', async () => {
       const agentId = 'agent-1';
-      (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+      (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
         s1Generator.generateAgentEsSearchResponse([
           s1Generator.generateAgentEsSearchHit({
             sentinel_one: { agent: { agent: { id: agentId } } },
@@ -119,7 +125,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
     it('should return empty pendingActions when no pending actions exist for agent', async () => {
       const agentId = 'agent-1';
-      (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+      (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
         s1Generator.generateAgentEsSearchResponse([
           s1Generator.generateAgentEsSearchHit({
             sentinel_one: { agent: { agent: { id: agentId } } },
@@ -141,7 +147,7 @@ describe('SentinelOneAgentStatusClient', () => {
         });
         // Field key is agentId (matched via uuid) but source agent.id is different
         hit.fields = { 'sentinel_one.agent.agent.id': [agentId] };
-        (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+        (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
           s1Generator.generateAgentEsSearchResponse([hit])
         );
 
@@ -152,7 +158,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
       it('should set found:true when agent.id matches the requested agentId', async () => {
         const agentId = 'agent-id-1';
-        (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+        (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
           s1Generator.generateAgentEsSearchResponse([
             s1Generator.generateAgentEsSearchHit({
               sentinel_one: { agent: { agent: { id: agentId }, uuid: 'different-uuid' } },
@@ -172,7 +178,7 @@ describe('SentinelOneAgentStatusClient', () => {
         });
         // Field key is agentId but source has different ids → found:false
         hit.fields = { 'sentinel_one.agent.agent.id': [agentId] };
-        (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+        (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
           s1Generator.generateAgentEsSearchResponse([hit])
         );
 
@@ -193,7 +199,7 @@ describe('SentinelOneAgentStatusClient', () => {
         'should set isolated:$expectedIsolated when network_status is "$networkStatus"',
         async ({ networkStatus, expectedIsolated }) => {
           const agentId = 'agent-1';
-          (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+          (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
             s1Generator.generateAgentEsSearchResponse([
               s1Generator.generateAgentEsSearchHit({
                 sentinel_one: { agent: { agent: { id: agentId }, network_status: networkStatus } },
@@ -220,7 +226,7 @@ describe('SentinelOneAgentStatusClient', () => {
         'should map to $expectedStatus when $description',
         async ({ agentOverrides, expectedStatus }) => {
           const agentId = 'agent-1';
-          (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+          (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
             s1Generator.generateAgentEsSearchResponse([
               s1Generator.generateAgentEsSearchHit({
                 sentinel_one: { agent: { agent: { id: agentId }, ...agentOverrides } },
@@ -238,7 +244,7 @@ describe('SentinelOneAgentStatusClient', () => {
     it('should populate lastSeen from sentinel_one.agent.last_active_date', async () => {
       const agentId = 'agent-1';
       const lastActiveDate = '2024-03-15T08:30:00Z';
-      (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+      (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
         s1Generator.generateAgentEsSearchResponse([
           s1Generator.generateAgentEsSearchHit({
             sentinel_one: { agent: { agent: { id: agentId }, last_active_date: lastActiveDate } },
@@ -253,7 +259,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
     it('should return the correct agentType of sentinel_one', async () => {
       const agentId = 'agent-1';
-      (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+      (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
         s1Generator.generateAgentEsSearchResponse([
           s1Generator.generateAgentEsSearchHit({
             sentinel_one: { agent: { agent: { id: agentId } } },
@@ -268,7 +274,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
     it('should return correct status records for multiple agents', async () => {
       const agentIds = ['agent-1', 'agent-2'];
-      (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+      (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
         s1Generator.generateAgentEsSearchResponse([
           s1Generator.generateAgentEsSearchHit({
             sentinel_one: {
@@ -312,7 +318,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
     it('should use empty string for lastSeen when last_active_date is missing', async () => {
       const agentId = 'agent-1';
-      (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+      (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
         s1Generator.generateAgentEsSearchResponse([
           s1Generator.generateAgentEsSearchHit({
             sentinel_one: { agent: { agent: { id: agentId }, last_active_date: '' } },
@@ -329,7 +335,7 @@ describe('SentinelOneAgentStatusClient', () => {
       it('should log an error and return default response for all agents when ES search fails', async () => {
         const agentIds = ['agent-1', 'agent-2'];
         const searchError = new Error('ES search failed');
-        (constructorOptions.esClient.search as jest.Mock).mockRejectedValueOnce(searchError);
+        (constructorOptions.esClient.search as Mock).mockRejectedValueOnce(searchError);
 
         const result = await client.getAgentStatuses(agentIds);
 
@@ -359,7 +365,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
       it('should log an AgentStatusClientError when ES search fails', async () => {
         const agentIds = ['agent-1'];
-        (constructorOptions.esClient.search as jest.Mock).mockRejectedValueOnce(
+        (constructorOptions.esClient.search as Mock).mockRejectedValueOnce(
           new Error('connection refused')
         );
 
@@ -371,7 +377,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
       it('should log an error and return default response when getPendingActionsSummary fails', async () => {
         const agentIds = ['agent-1'];
-        (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+        (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
           s1Generator.generateAgentEsSearchResponse([
             s1Generator.generateAgentEsSearchHit({
               sentinel_one: { agent: { agent: { id: 'agent-1' } } },
@@ -398,7 +404,7 @@ describe('SentinelOneAgentStatusClient', () => {
 
       it('should return default response when ES search returns no hits', async () => {
         const agentIds = ['agent-1'];
-        (constructorOptions.esClient.search as jest.Mock).mockResolvedValueOnce(
+        (constructorOptions.esClient.search as Mock).mockResolvedValueOnce(
           s1Generator.generateAgentEsSearchResponse([])
         );
 

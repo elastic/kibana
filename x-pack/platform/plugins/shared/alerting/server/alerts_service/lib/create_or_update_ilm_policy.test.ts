@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateIlmPolicy } from './create_or_update_ilm_policy';
@@ -32,8 +34,8 @@ const IlmPolicy = {
 
 describe('createOrUpdateIlmPolicy', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
+    vi.resetAllMocks();
+    vi.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
   it(`should call esClient to put ILM policy, stamped with a content hash`, async () => {

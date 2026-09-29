@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerTemplateRoutes } from '.';
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
@@ -21,7 +23,7 @@ describe('Component templates API', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Update index template - PUT /api/index_management/index_templates/{name}', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -16,27 +19,33 @@ import {
 } from './entity_graph_inline_content';
 import type { EntityGraphAttachment, EntityGraphAttachmentData } from './types';
 
-jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
-  useFetchGraphData: jest.fn(),
-}));
+vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
+      const mocked = {
+      useFetchGraphData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../flyout_v2/shared/components/graph_preview', () => ({
-  GraphPreview: ({
-    isLoading,
-    isError,
-    data,
-  }: {
-    isLoading: boolean;
-    isError: boolean;
-    data?: { nodes: unknown[] };
-  }) => (
-    <div data-test-subj="mockGraphPreview">
-      {isLoading ? 'loading' : isError ? 'error' : `nodes:${data?.nodes?.length ?? 0}`}
-    </div>
-  ),
-}));
+vi.mock('../../../flyout_v2/shared/components/graph_preview', () => {
+      const mocked = {
+      GraphPreview: ({
+        isLoading,
+        isError,
+        data,
+      }: {
+        isLoading: boolean;
+        isError: boolean;
+        data?: { nodes: unknown[] };
+      }) => (
+        <div data-test-subj="mockGraphPreview">
+          {isLoading ? 'loading' : isError ? 'error' : `nodes:${data?.nodes?.length ?? 0}`}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
+const mockUseFetchGraphData = useFetchGraphData as Mock;
 
 const hostData: EntityGraphAttachmentData = {
   identifierType: 'host',
@@ -60,7 +69,7 @@ const renderInline = (data: EntityGraphAttachmentData = hostData) => {
 
 describe('EntityGraphInlineContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseFetchGraphData.mockReturnValue({ isLoading: false, isError: false, data: undefined });
   });
 

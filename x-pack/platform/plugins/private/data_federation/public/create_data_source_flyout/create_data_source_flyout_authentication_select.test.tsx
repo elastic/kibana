@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -32,7 +34,7 @@ const renderSelect = ({
   authenticationMode?: CreateDataSourceAuthenticationMode;
   enableFederatedIdentity?: boolean;
 } = {}) => {
-  const onAuthenticationModeChange = jest.fn();
+  const onAuthenticationModeChange = vi.fn();
 
   const utils = render(
     <EuiProvider>

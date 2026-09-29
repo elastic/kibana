@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MAX_SUGGESTED_PROFILES } from '../../../common/constants';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserProfileService } from '.';
 
 describe('suggest', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('throws with invalid size field', async () => {

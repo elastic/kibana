@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -26,13 +29,16 @@ import {
   type StartServicesMock,
 } from '../../../mocks';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  SearchBar: MockSearchBar,
-  DataViewPicker: MockDataViewPicker,
-}));
+vi.mock('../../../hooks/use_kibana');
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      SearchBar: MockSearchBar,
+      DataViewPicker: MockDataViewPicker,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiProvider>
@@ -41,8 +47,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('WorkflowExecuteIndexForm - additional coverage', () => {
-  const mockSetValue = jest.fn();
-  const mockSetErrors = jest.fn();
+  const mockSetValue = vi.fn();
+  const mockSetErrors = vi.fn();
 
   const setupMocks = (overrides: Record<string, unknown> = {}) => {
     const { mockDataViews, mockData } = createIndexFormKibanaMocks();
@@ -74,7 +80,7 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('error handling', () => {
@@ -141,8 +147,8 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
 
       // Override the search mock to reject the fetch promise
       mockData.search.search.mockReturnValue({
-        pipe: jest.fn().mockReturnValue({
-          toPromise: jest.fn().mockRejectedValue(new Error('Search failed')),
+        pipe: vi.fn().mockReturnValue({
+          toPromise: vi.fn().mockRejectedValue(new Error('Search failed')),
         }),
       });
 
@@ -289,8 +295,8 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       const { mockData } = setupMocks();
 
       mockData.search.search.mockReturnValue({
-        pipe: jest.fn().mockReturnValue({
-          toPromise: jest.fn().mockRejectedValue('string error'),
+        pipe: vi.fn().mockReturnValue({
+          toPromise: vi.fn().mockRejectedValue('string error'),
         }),
       });
 

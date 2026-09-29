@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
@@ -26,7 +28,7 @@ interface SetupProps {
 }
 
 const setup = ({ defaultValue = '-15m', roundRelativeTime = false }: SetupProps = {}) => {
-  const onChange = jest.fn<void, Parameters<DateRangePickerProps['onChange']>>();
+  const onChange = vi.fn<void, Parameters<DateRangePickerProps['onChange']>>();
   const { result } = renderHook(() => useDateRangePickerContext(), {
     wrapper: ({ children }) => (
       <DateRangePickerProvider

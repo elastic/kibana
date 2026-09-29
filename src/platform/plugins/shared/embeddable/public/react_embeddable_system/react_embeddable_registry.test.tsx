@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   registerEmbeddablePublicDefinition,
   getEmbeddableDefinition,
@@ -17,7 +19,7 @@ describe('embeddable registry', () => {
   const getTestEmbeddableFactory = () =>
     Promise.resolve({
       type: 'test',
-      buildEmbeddable: jest.fn(),
+      buildEmbeddable: vi.fn(),
     } as EmbeddablePublicDefinition);
 
   it('throws an error if type is not lower case', () => {

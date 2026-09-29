@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -21,24 +23,24 @@ import { createEngineStatusService } from './status_service';
 import type { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 import type { MonitoringEngineDescriptor } from '../../../../../common/api/entity_analytics';
 
-const mockRemovePrivilegeMonitoringTask = jest.fn();
-const mockScheduleNow = jest.fn();
-jest.mock('../tasks/privilege_monitoring_task', () => {
+const mockRemovePrivilegeMonitoringTask = vi.fn();
+const mockScheduleNow = vi.fn();
+vi.mock('../tasks/privilege_monitoring_task', () => {
   return {
     removePrivilegeMonitoringTask: () => mockRemovePrivilegeMonitoringTask(),
     scheduleNow: () => mockScheduleNow(),
   };
 });
 
-const mockGetEngineDescriptor = jest.fn();
-const mockUpdateStatusEngineDescriptor = jest.fn();
-jest.mock('../saved_objects', () => {
+const mockGetEngineDescriptor = vi.fn();
+const mockUpdateStatusEngineDescriptor = vi.fn();
+vi.mock('../saved_objects', () => {
   return {
-    MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-      findByIndex: jest.fn(),
-      create: jest.fn(),
+    MonitoringEntitySourceDescriptorClient: vi.fn().mockImplementation(() => ({
+      findByIndex: vi.fn(),
+      create: vi.fn(),
     })),
-    PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
+    PrivilegeMonitoringEngineDescriptorClient: vi.fn().mockImplementation(() => ({
       get: mockGetEngineDescriptor,
       updateStatus: (
         status: Parameters<PrivilegeMonitoringEngineDescriptorClient['updateStatus']>[0]
@@ -50,7 +52,7 @@ describe('Privileged User Monitoring: Engine Status Service', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
-  const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
+  const auditMock = { log: vi.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();
 
   const savedObjectServiceMock = savedObjectsServiceMock.createStartContract();
@@ -69,7 +71,7 @@ describe('Privileged User Monitoring: Engine Status Service', () => {
   let dataClient: PrivilegeMonitoringDataClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
     statusService = createEngineStatusService(dataClient, mockSavedObjectClient);
   });

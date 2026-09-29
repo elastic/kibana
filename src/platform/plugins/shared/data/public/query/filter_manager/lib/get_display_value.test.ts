@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PhraseFilter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -22,7 +24,7 @@ import { NULL_LABEL } from '@kbn/field-formats-common';
 
 describe('getDisplayValueFromFilter', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns the value if string', () => {
@@ -68,40 +70,40 @@ describe('getDisplayValueFromFilter', () => {
   });
 
   it('phrase filters without formatter', () => {
-    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
+    vi.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
     expect(displayValue).toBe('ios');
   });
 
   it('phrase filters with formatter', () => {
     const mockFormatter = new (FieldFormat.from((value: string) => 'banana' + value))();
-    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
+    vi.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
     expect(displayValue).toBe('bananaios');
   });
 
   it('phrases filters without formatter', () => {
-    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
+    vi.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
     const displayValue = getDisplayValueFromFilter(phrasesFilter, [stubIndexPattern]);
     expect(displayValue).toBe('win xp, osx');
   });
 
   it('phrases filters with formatter', () => {
     const mockFormatter = new (FieldFormat.from((value: string) => 'banana' + value))();
-    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
+    vi.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
     const displayValue = getDisplayValueFromFilter(phrasesFilter, [stubIndexPattern]);
     expect(displayValue).toBe('bananawin xp, bananaosx');
   });
 
   it('range filters without formatter', () => {
-    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
+    vi.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
     const displayValue = getDisplayValueFromFilter(rangeFilter, [stubIndexPattern]);
     expect(displayValue).toBe('0 to 10');
   });
 
   it('range filters with formatter', () => {
     const mockFormatter = new (FieldFormat.from((value: string) => 'banana' + value))();
-    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
+    vi.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
     const displayValue = getDisplayValueFromFilter(rangeFilter, [stubIndexPattern]);
     expect(displayValue).toBe('banana0 to banana10');
   });
@@ -109,7 +111,7 @@ describe('getDisplayValueFromFilter', () => {
 
 describe('getFieldDisplayValueFromFilter', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns empty string if the data view is not found', () => {

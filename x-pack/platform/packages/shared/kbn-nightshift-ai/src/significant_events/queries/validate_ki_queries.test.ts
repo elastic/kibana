@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { computeValidationLookback } from './validate_ki_queries';
 
 const createEsClient = () => {
-  const query = jest.fn();
+  const query = vi.fn();
 
   return {
     esClient: { esql: { query } } as unknown as ElasticsearchClient,
@@ -18,9 +20,9 @@ const createEsClient = () => {
 };
 
 const logger = {
-  debug: jest.fn(),
-  warn: jest.fn(),
-  trace: jest.fn(),
+  debug: vi.fn(),
+  warn: vi.fn(),
+  trace: vi.fn(),
 } as unknown as Logger;
 
 const countResponse = (total: number) => ({
@@ -32,7 +34,7 @@ const signal = new AbortController().signal;
 
 describe('computeValidationLookback', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('probes the stream and keeps a narrow window when it is dense', async () => {

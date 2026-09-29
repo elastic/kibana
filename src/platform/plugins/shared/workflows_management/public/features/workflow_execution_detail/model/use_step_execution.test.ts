@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,10 +17,13 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useStepExecution } from './use_step_execution';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: jest.fn(),
-}));
-const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseWorkflowsApi = useWorkflowsApi as MockedFunction<typeof useWorkflowsApi>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -26,7 +32,7 @@ const createWrapper = (queryClient: QueryClient) => {
 };
 
 describe('useStepExecution', () => {
-  let mockGetStepExecution: jest.Mock;
+  let mockGetStepExecution: Mock;
   let queryClient: QueryClient;
 
   const stepResponse = {
@@ -37,8 +43,8 @@ describe('useStepExecution', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    mockGetStepExecution = jest.fn().mockResolvedValue(stepResponse);
+    vi.useFakeTimers();
+    mockGetStepExecution = vi.fn().mockResolvedValue(stepResponse);
     mockUseWorkflowsApi.mockReturnValue({
       getStepExecution: mockGetStepExecution,
     } as any);
@@ -50,7 +56,7 @@ describe('useStepExecution', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     queryClient.clear();
   });
 
@@ -91,7 +97,7 @@ describe('useStepExecution', () => {
 
     mockGetStepExecution.mockClear();
     await act(async () => {
-      jest.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
       await Promise.resolve();
     });
     expect(mockGetStepExecution).not.toHaveBeenCalled();
@@ -111,7 +117,7 @@ describe('useStepExecution', () => {
 
     mockGetStepExecution.mockClear();
     await act(async () => {
-      jest.advanceTimersByTime(5_000);
+      vi.advanceTimersByTime(5_000);
       await Promise.resolve();
     });
     await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalled());
@@ -132,14 +138,14 @@ describe('useStepExecution', () => {
     mockGetStepExecution.mockResolvedValue(stepResponse);
     mockGetStepExecution.mockClear();
     await act(async () => {
-      jest.advanceTimersByTime(5_000);
+      vi.advanceTimersByTime(5_000);
       await Promise.resolve();
     });
     await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalledTimes(1));
 
     mockGetStepExecution.mockClear();
     await act(async () => {
-      jest.advanceTimersByTime(15_000);
+      vi.advanceTimersByTime(15_000);
       await Promise.resolve();
     });
     expect(mockGetStepExecution).not.toHaveBeenCalled();
@@ -160,7 +166,7 @@ describe('useStepExecution', () => {
 
     mockGetStepExecution.mockClear();
     await act(async () => {
-      jest.advanceTimersByTime(5_000);
+      vi.advanceTimersByTime(5_000);
       await Promise.resolve();
     });
     await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalled());

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import type { AlertRetrievalResult } from '../../../../../invoke_alert_retrieval_workflow';
 import { resolveLegacySettledResult } from '.';
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const mockLegacyResult: AlertRetrievalResult = {
@@ -35,7 +37,7 @@ const mockLegacyResult: AlertRetrievalResult = {
 
 describe('resolveLegacySettledResult', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the result when fulfilled with a non-null value', () => {

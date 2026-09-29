@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -14,13 +16,13 @@ import { resolveSmlAttachItems } from './execute_sml_attach_items';
 
 const createMockScopedClient = (): IScopedClusterClient =>
   ({
-    asInternalUser: { search: jest.fn() } as unknown as ElasticsearchClient,
-    asCurrentUser: { search: jest.fn() } as unknown as ElasticsearchClient,
+    asInternalUser: { search: vi.fn() } as unknown as ElasticsearchClient,
+    asCurrentUser: { search: vi.fn() } as unknown as ElasticsearchClient,
   } as unknown as IScopedClusterClient);
 
-const mockCheckItemsAccess = jest.fn();
-const mockGetDocuments = jest.fn();
-const mockGetTypeDefinition = jest.fn();
+const mockCheckItemsAccess = vi.fn();
+const mockGetDocuments = vi.fn();
+const mockGetTypeDefinition = vi.fn();
 
 const createSmlService = (): SmlService =>
   ({
@@ -64,7 +66,7 @@ const baseParams = {
 
 describe('resolveSmlAttachItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls checkItemsAccess with unique entry ids', async () => {
@@ -184,9 +186,9 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
-      list: jest.fn(),
-      getSmlEntry: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue(undefined),
+      list: vi.fn(),
+      getSmlEntry: vi.fn(),
+      toAttachment: vi.fn().mockResolvedValue(undefined),
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
@@ -204,9 +206,9 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
-      list: jest.fn(),
-      getSmlEntry: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue({
+      list: vi.fn(),
+      getSmlEntry: vi.fn(),
+      toAttachment: vi.fn().mockResolvedValue({
         type: 'visualization',
         data: { layers: [] },
         origin: 'custom-origin',
@@ -234,9 +236,9 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
-      list: jest.fn(),
-      getSmlEntry: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue({
+      list: vi.fn(),
+      getSmlEntry: vi.fn(),
+      toAttachment: vi.fn().mockResolvedValue({
         type: 'visualization',
         data: { x: 1 },
         description: 'My asset',
@@ -267,9 +269,9 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'connector',
-      list: jest.fn(),
-      getSmlEntry: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue({
+      list: vi.fn(),
+      getSmlEntry: vi.fn(),
+      toAttachment: vi.fn().mockResolvedValue({
         type: 'connector',
         data: { connector_id: 'c1' },
       }),
@@ -290,9 +292,9 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
-      list: jest.fn(),
-      getSmlEntry: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue({ type: 'visualization', data: {} }),
+      list: vi.fn(),
+      getSmlEntry: vi.fn(),
+      toAttachment: vi.fn().mockResolvedValue({ type: 'visualization', data: {} }),
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
@@ -311,9 +313,9 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
-      list: jest.fn(),
-      getSmlEntry: jest.fn(),
-      toAttachment: jest.fn().mockRejectedValue(new Error('boom')),
+      list: vi.fn(),
+      getSmlEntry: vi.fn(),
+      toAttachment: vi.fn().mockRejectedValue(new Error('boom')),
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
@@ -337,9 +339,9 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map([['entry-ok', docOk]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
-      list: jest.fn(),
-      getSmlEntry: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue({ type: 'visualization', data: {} }),
+      list: vi.fn(),
+      getSmlEntry: vi.fn(),
+      toAttachment: vi.fn().mockResolvedValue({ type: 'visualization', data: {} }),
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,

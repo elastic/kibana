@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { initMonitorStatusAlertType } from './monitor_status';
 import { validateMonitorStatusParams as validate } from './lazy_wrapper/validate_monitor_status';
 
@@ -188,11 +190,11 @@ describe('monitor status alert type', () => {
     expect(
       initMonitorStatusAlertType({
         store: {
-          dispatch: jest.fn(),
-          getState: jest.fn(),
-          replaceReducer: jest.fn(),
-          subscribe: jest.fn(),
-          [Symbol.observable]: jest.fn(),
+          dispatch: vi.fn(),
+          getState: vi.fn(),
+          replaceReducer: vi.fn(),
+          subscribe: vi.fn(),
+          [Symbol.observable]: vi.fn(),
         },
         // @ts-ignore we don't need to test this functionality here because
         // it's not used by the code this file tests

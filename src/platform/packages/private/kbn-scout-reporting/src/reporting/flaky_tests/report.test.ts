@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -229,7 +231,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     new Map(testIds.map((testId) => [testId, [mainCounts()]]));
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('rejects a non-positive or fractional lookback', async () => {
@@ -248,28 +250,28 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   });
 
   it('drops tests of an excluded classification before the per-test lookups', async () => {
-    jest
+    vi
       .spyOn(queries, 'fetchFailingFiles')
       .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
-    jest
+    vi
       .spyOn(queries, 'fetchTestStats')
       .mockResolvedValue([
         statsRow({ testId: 'jest-flaky', failedBuilds: 3 }),
         statsRow({ testId: 'jest-broken', runs: 20, fails: 20, builds: 20, failedBuilds: 20 }),
       ]);
-    const fetchBranchCounts = jest
+    const fetchBranchCounts = vi
       .spyOn(queries, 'fetchBranchCounts')
       .mockResolvedValue(activeCounts(['jest-flaky']));
-    jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
-    const fetchBranchStats = jest
+    vi.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
+    const fetchBranchStats = vi
       .spyOn(queries, 'fetchBranchStats')
       .mockResolvedValue(activeBranchStats(['jest-flaky']));
-    jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
-    jest.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
-    const fetchSampleFailures = jest
+    vi.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
+    vi.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
+    const fetchSampleFailures = vi
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
-    jest.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
+    vi.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(
       es,
@@ -305,12 +307,12 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   });
 
   it('aggregates per framework, classifies, ranks, caps and decorates the result', async () => {
-    jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
+    vi.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
       { framework: 'jest', filePath: 'a.test.ts' },
       { framework: 'jest', filePath: 'b.test.ts' },
       { framework: 'playwright', filePath: 'c.spec.ts' },
     ]);
-    const fetchTestStats = jest
+    const fetchTestStats = vi
       .spyOn(queries, 'fetchTestStats')
       .mockImplementation(async (_es, _scope, framework) =>
         framework === 'jest'
@@ -328,7 +330,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
             ]
           : [statsRow({ testId: 'pw-flaky', framework: 'playwright', failedBuilds: 5 })]
       );
-    const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(
+    const fetchBranchCounts = vi.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(
       new Map([
         ...activeCounts(['jest-flaky-low', 'jest-broken', 'pw-flaky']),
         [
@@ -345,7 +347,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         ],
       ])
     );
-    jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(
+    vi.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(
       new Map([
         [
           'jest-flaky-high',
@@ -362,7 +364,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         ],
       ])
     );
-    const fetchSampleFailures = jest
+    const fetchSampleFailures = vi
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(
         new Map([
@@ -382,7 +384,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
       },
     ];
-    const fetchTargetStats = jest
+    const fetchTargetStats = vi
       .spyOn(queries, 'fetchTargetStats')
       .mockResolvedValue(new Map([['jest-flaky-high', targetStats]]));
     const errors = [
@@ -400,10 +402,10 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         lastFailedJobId: 'job-1',
       },
     ];
-    const fetchTestErrors = jest
+    const fetchTestErrors = vi
       .spyOn(queries, 'fetchTestErrors')
       .mockResolvedValue(new Map([['jest-flaky-high', errors]]));
-    const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(
+    const fetchBranchStats = vi.spyOn(queries, 'fetchBranchStats').mockResolvedValue(
       new Map([
         [
           'jest-flaky-high',
@@ -440,7 +442,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/1',
       },
     ];
-    const fetchFilePipelineStats = jest
+    const fetchFilePipelineStats = vi
       .spyOn(queries, 'fetchFilePipelineStats')
       .mockResolvedValue(new Map([[queries.fileStatsKey('jest', 'a.test.ts'), pipelineStats]]));
 
@@ -542,11 +544,11 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   });
 
   it('checks thresholds per branch before ranking, so the cap is filled with tests that qualify', async () => {
-    jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
+    vi.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
       { framework: 'jest', filePath: 'a.test.ts' },
       { framework: 'jest', filePath: 'b.test.ts' },
     ]);
-    jest.spyOn(queries, 'fetchTestStats').mockResolvedValue([
+    vi.spyOn(queries, 'fetchTestStats').mockResolvedValue([
       // 12 of 1000 in total is 1.2%, above the 1% required, but spread thin over two branches
       statsRow({ testId: 'diluted', builds: 1000, failedBuilds: 12 }),
       // 6 of 600 in total is 1%; on 9.5 alone it is 5 of 100
@@ -554,7 +556,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       statsRow({ testId: 'still-running', failedBuilds: 20 }),
     ]);
     // `diluted` outranks `flaky-on-9.5` and would have taken a slot had the check happened after the cap
-    const fetchBranchCounts = jest
+    const fetchBranchCounts = vi
       .spyOn(queries, 'fetchBranchCounts')
       .mockResolvedValue(
         new Map([
@@ -575,16 +577,16 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
           ...activeCounts(['still-running']),
         ])
       );
-    const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
-    const fetchBranchStats = jest
+    const fetchTestMetadata = vi.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
+    const fetchBranchStats = vi
       .spyOn(queries, 'fetchBranchStats')
       .mockResolvedValue(activeBranchStats(['flaky-on-9.5', 'still-running']));
-    jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
-    jest.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
-    const fetchSampleFailures = jest
+    vi.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
+    vi.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
+    const fetchSampleFailures = vi
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
-    jest.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
+    vi.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(
       es,
@@ -623,16 +625,16 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   });
 
   it('skips the remaining lookups once no test qualifies on a branch of its own', async () => {
-    jest
+    vi
       .spyOn(queries, 'fetchFailingFiles')
       .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
-    jest
+    vi
       .spyOn(queries, 'fetchTestStats')
       .mockResolvedValue([statsRow({ testId: 'skipped-since', failedBuilds: 30 })]);
-    jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(new Map());
-    const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
-    const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
-    const fetchTargetStats = jest.spyOn(queries, 'fetchTargetStats');
+    vi.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(new Map());
+    const fetchTestMetadata = vi.spyOn(queries, 'fetchTestMetadata');
+    const fetchBranchStats = vi.spyOn(queries, 'fetchBranchStats');
+    const fetchTargetStats = vi.spyOn(queries, 'fetchTargetStats');
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
 
@@ -644,15 +646,15 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   });
 
   it('skips metadata, branch stats and sample queries when nothing qualifies', async () => {
-    jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([]);
-    const fetchTestStats = jest.spyOn(queries, 'fetchTestStats');
-    const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts');
-    const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
-    const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
-    const fetchTargetStats = jest.spyOn(queries, 'fetchTargetStats');
-    const fetchTestErrors = jest.spyOn(queries, 'fetchTestErrors');
-    const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures');
-    const fetchFilePipelineStats = jest.spyOn(queries, 'fetchFilePipelineStats');
+    vi.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([]);
+    const fetchTestStats = vi.spyOn(queries, 'fetchTestStats');
+    const fetchBranchCounts = vi.spyOn(queries, 'fetchBranchCounts');
+    const fetchTestMetadata = vi.spyOn(queries, 'fetchTestMetadata');
+    const fetchBranchStats = vi.spyOn(queries, 'fetchBranchStats');
+    const fetchTargetStats = vi.spyOn(queries, 'fetchTargetStats');
+    const fetchTestErrors = vi.spyOn(queries, 'fetchTestErrors');
+    const fetchSampleFailures = vi.spyOn(queries, 'fetchSampleFailures');
+    const fetchFilePipelineStats = vi.spyOn(queries, 'fetchFilePipelineStats');
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
 

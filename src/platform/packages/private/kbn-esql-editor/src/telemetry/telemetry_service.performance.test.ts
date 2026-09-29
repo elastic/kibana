@@ -7,18 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ESQLEditorTelemetryService } from './telemetry_service';
 
-const mockMetricEvent = jest.fn();
+const mockMetricEvent = vi.fn();
 
-jest.mock('@kbn/ebt-tools', () => ({
-  ...jest.requireActual('@kbn/ebt-tools'),
-  reportPerformanceMetricEvent: (_: AnalyticsServiceStart, args: PerformanceMetricEvent) => {
-    mockMetricEvent(args);
-  },
-}));
+vi.mock('@kbn/ebt-tools', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/ebt-tools')),
+      reportPerformanceMetricEvent: (_: AnalyticsServiceStart, args: PerformanceMetricEvent) => {
+        mockMetricEvent(args);
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ESQLEditorTelemetryService performance metrics', () => {
   beforeEach(() => {
@@ -27,7 +32,7 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
 
   it('reports init latency payload', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 
@@ -46,7 +51,7 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
 
   it('reports input latency payload', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 
@@ -76,7 +81,7 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
 
   it('reports suggestions latency payload', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 
@@ -106,7 +111,7 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
 
   it('reports validation latency payload', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 
@@ -136,7 +141,7 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
 
   it('reports validation latency with callbacks duration', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 

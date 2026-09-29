@@ -5,39 +5,51 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { NotFoundRouteException } from '@kbn/typed-react-router-config';
 import { RouterErrorBoundary } from './router_error_boundary';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      observabilityShared: {
-        navigation: {
-          PageTemplate: ({ children }: { children: React.ReactNode }) => (
-            <div data-test-subj="page-template">{children}</div>
-          ),
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          observabilityShared: {
+            navigation: {
+              PageTemplate: ({ children }: { children: React.ReactNode }) => (
+                <div data-test-subj="page-template">{children}</div>
+              ),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-prompt-not-found', () => ({
-  ...jest.requireActual('@kbn/shared-ux-prompt-not-found'),
-  NotFoundPrompt: () => <div data-test-subj="not-found-prompt">Not Found</div>,
-}));
+vi.mock('@kbn/shared-ux-prompt-not-found', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/shared-ux-prompt-not-found')),
+      NotFoundPrompt: () => <div data-test-subj="not-found-prompt">Not Found</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-error-boundary', () => {
-  const ActualReact = jest.requireActual('react') as typeof import('react');
+vi.mock('@kbn/shared-ux-error-boundary', async () => {
+  const ActualReact = require('react') as typeof import('react');
 
   class KibanaErrorBoundaryMock extends ActualReact.Component<
     { children: React.ReactNode },
@@ -65,12 +77,12 @@ jest.mock('@kbn/shared-ux-error-boundary', () => {
   }
 
   return {
-    ...jest.requireActual('@kbn/shared-ux-error-boundary'),
+    ...(await vi.importActual('@kbn/shared-ux-error-boundary')),
     KibanaErrorBoundary: KibanaErrorBoundaryMock,
   };
 });
 
-const mockUseLocation = useLocation as jest.MockedFunction<typeof useLocation>;
+const mockUseLocation = useLocation as MockedFunction<typeof useLocation>;
 
 function ThrowError({ error }: { error: Error }): React.ReactElement {
   throw error;
@@ -85,11 +97,11 @@ describe('RouterErrorBoundary', () => {
       state: null,
       key: 'default',
     });
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders children when no error is thrown', () => {

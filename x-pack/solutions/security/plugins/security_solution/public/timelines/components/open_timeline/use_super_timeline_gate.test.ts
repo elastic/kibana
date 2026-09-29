@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { OpenTimelineResult } from './types';
 import { useSuperTimelineGate } from './use_super_timeline_gate';
@@ -13,17 +15,23 @@ import { SUPER_TIMELINE_TOO_FEW, SUPER_TIMELINE_TOO_MANY } from '../super_timeli
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(() => true),
-}));
+vi.mock('../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenSuperTimeline = jest.fn();
-const mockUseOpenSuperTimeline = jest.fn();
+const mockOpenSuperTimeline = vi.fn();
+const mockUseOpenSuperTimeline = vi.fn();
 
-jest.mock('../super_timeline/use_open_super_timeline', () => ({
-  useOpenSuperTimeline: (...args: unknown[]) => mockUseOpenSuperTimeline(...args),
-  MAX_SUPER_TIMELINE_COUNT: 10,
-}));
+vi.mock('../super_timeline/use_open_super_timeline', () => {
+      const mocked = {
+      useOpenSuperTimeline: (...args: unknown[]) => mockUseOpenSuperTimeline(...args),
+      MAX_SUPER_TIMELINE_COUNT: 10,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -48,7 +56,7 @@ const renderGate = (selectedItems: OpenTimelineResult[]) =>
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseOpenSuperTimeline.mockReturnValue({
     openSuperTimeline: mockOpenSuperTimeline,
     isLoading: false,
@@ -170,7 +178,7 @@ describe('useSuperTimelineGate', () => {
     });
 
     it('calls the closePopover callback', () => {
-      const closePopover = jest.fn();
+      const closePopover = vi.fn();
       const { result } = renderGate([makeItem('id-1'), makeItem('id-2')]);
       act(() => {
         result.current.handleOpen(closePopover);

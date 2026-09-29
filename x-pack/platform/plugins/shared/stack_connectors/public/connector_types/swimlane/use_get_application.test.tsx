@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import { getApplication } from './api';
 import { useGetApplication } from './use_get_application';
 
-jest.mock('./api');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('./api');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const getApplicationMock = getApplication as jest.Mock;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const getApplicationMock = getApplication as Mock;
 
 const action = {
   secrets: { apiToken: 'token' },
@@ -39,7 +42,7 @@ describe('useGetApplication', () => {
   const abortCtrl = new AbortController();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('init', async () => {

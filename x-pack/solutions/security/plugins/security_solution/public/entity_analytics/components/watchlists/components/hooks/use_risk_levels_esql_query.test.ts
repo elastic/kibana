@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
@@ -13,41 +16,59 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 
-jest.mock('@kbn/esql-utils', () => ({
-  prettifyQuery: jest.fn((query) => query),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      prettifyQuery: vi.fn((query) => query),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/use_error_toast', () => ({
-  useErrorToast: jest.fn(),
-}));
+vi.mock('../../../../../common/hooks/use_error_toast', () => {
+      const mocked = {
+      useErrorToast: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/esql/use_esql_global_filter', () => ({
-  useEsqlGlobalFilterQuery: jest.fn(),
-}));
+vi.mock('../../../../../common/hooks/esql/use_esql_global_filter', () => {
+      const mocked = {
+      useEsqlGlobalFilterQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/use_global_filter_query', () => ({
-  useGlobalFilterQuery: jest.fn(),
-}));
+vi.mock('../../../../../common/hooks/use_global_filter_query', () => {
+      const mocked = {
+      useGlobalFilterQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useRiskLevelsEsqlQuery', () => {
-  const mockUseKibana = useKibana as jest.Mock;
-  const mockUseEsqlGlobalFilterQuery = useEsqlGlobalFilterQuery as jest.Mock;
-  const mockUseGlobalFilterQuery = useGlobalFilterQuery as jest.Mock;
-  const mockUseQuery = useQuery as jest.Mock;
+  const mockUseKibana = useKibana as Mock;
+  const mockUseEsqlGlobalFilterQuery = useEsqlGlobalFilterQuery as Mock;
+  const mockUseGlobalFilterQuery = useGlobalFilterQuery as Mock;
+  const mockUseQuery = useQuery as Mock;
 
-  const mockRefetchQuery = jest.fn();
-  const mockSearch = jest.fn();
+  const mockRefetchQuery = vi.fn();
+  const mockSearch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockSearch.mockReturnValue(
       of({

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -107,7 +109,7 @@ describe('Range Agg', () => {
         {
           typesRegistry: mockAggTypesRegistry(),
         },
-        jest.fn()
+        vi.fn()
       );
     };
 

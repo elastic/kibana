@@ -5,36 +5,59 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { renderWithMlI18nContext } from '../../../test_utils/render_with_ml_context';
 
-jest.mock('../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToManagementMlLink: jest.fn(),
-}));
+vi.mock('../../../contexts/kibana/use_create_url', () => {
+      const mocked = {
+      useCreateAndNavigateToManagementMlLink: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/help_menu', () => ({
-  HelpMenu: () => <div id="mockHelpMenu" />,
-}));
+vi.mock('../../../components/help_menu', () => {
+      const mocked = {
+      HelpMenu: () => <div id="mockHelpMenu" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../capabilities/check_capabilities', () => ({
-  checkPermission: () => true,
-}));
-jest.mock('../../../license', () => ({
-  hasLicenseExpired: () => false,
-  isFullLicense: () => false,
-}));
-jest.mock('../../../capabilities/get_capabilities', () => ({
-  getCapabilities: () => {},
-}));
-jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
-  mlNodesAvailable: () => true,
-}));
-jest.mock('../../../capabilities/check_capabilities', () => ({
-  usePermissionCheck: () => [true, true],
-}));
+vi.mock('../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      checkPermission: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../license', () => {
+      const mocked = {
+      hasLicenseExpired: () => false,
+      isFullLicense: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../capabilities/get_capabilities', () => {
+      const mocked = {
+      getCapabilities: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../ml_nodes_check/check_ml_nodes', () => {
+      const mocked = {
+      mlNodesAvailable: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      usePermissionCheck: () => [true, true],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const calendarsMock = [
   {
@@ -67,29 +90,32 @@ const calendarsMock = [
   },
 ];
 
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  getCalendarSettingsData: jest.fn().mockImplementation(
-    () =>
-      new Promise((resolve) => {
-        resolve({
-          jobIds: ['test-job-one', 'test-job-2'],
-          groupIds: ['test-group-one', 'test-group-two'],
-          calendars: calendarsMock,
-        });
-      })
-  ),
-}));
+vi.mock('./utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils')),
+      getCalendarSettingsData: vi.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolve({
+              jobIds: ['test-job-one', 'test-job-2'],
+              groupIds: ['test-group-one', 'test-group-two'],
+              calendars: calendarsMock,
+            });
+          })
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddDanger = jest.fn();
+const mockAddDanger = vi.fn();
 const mockKibanaContext = {
   services: {
     application: {
-      navigateToApp: jest.fn(),
-      getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/calendars_list'),
+      navigateToApp: vi.fn(),
+      getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/calendars_list'),
     },
     docLinks: { links: { ml: { calendars: 'test' } } },
-    notifications: { toasts: { addDanger: mockAddDanger, addError: jest.fn() } },
+    notifications: { toasts: { addDanger: mockAddDanger, addError: vi.fn() } },
     mlServices: {
       mlApi: {
         calendars: () => {
@@ -109,7 +135,7 @@ const mockKibanaContext = {
 };
 
 const mockReact = React;
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+vi.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
   useKibana: () => mockKibanaContext,
   withKibana: (type) => {
@@ -123,10 +149,13 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   },
 }));
 
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => mockKibanaContext,
-  useNavigateToPath: () => jest.fn(),
-}));
+vi.mock('../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => mockKibanaContext,
+      useNavigateToPath: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { NewCalendar } from './new_calendar';
 

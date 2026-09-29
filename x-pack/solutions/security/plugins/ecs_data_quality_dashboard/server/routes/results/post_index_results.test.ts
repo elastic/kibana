@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { POST_INDEX_RESULTS } from '../../../common/constants';
 
 import { serverMock } from '../../__mocks__/server';
@@ -17,13 +19,16 @@ import type { CheckIndicesPrivilegesParam } from './privileges';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { API_CURRENT_USER_ERROR_MESSAGE } from '../../translations';
 
-const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
+const mockCheckIndicesPrivileges = vi.fn(({ indices }: CheckIndicesPrivilegesParam) =>
   Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
 );
-jest.mock('./privileges', () => ({
-  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
-    mockCheckIndicesPrivileges(params),
-}));
+vi.mock('./privileges', () => {
+      const mocked = {
+      checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+        mockCheckIndicesPrivileges(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const USER_PROFILE_UID = 'mocked_profile_uid';
 
@@ -40,7 +45,7 @@ describe('postIndexResultsRoute route', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       server = serverMock.create();
       logger = loggerMock.create();
@@ -115,7 +120,7 @@ describe('postIndexResultsRoute route', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       server = serverMock.create();
       logger = loggerMock.create();

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { initializeTrackPanel } from './track_panel';
@@ -51,16 +53,16 @@ describe('track panel', () => {
   } = api;
 
   document.documentElement.scrollTop = 100;
-  document.documentElement.scrollTo = jest.fn();
+  document.documentElement.scrollTo = vi.fn();
   Object.defineProperty(document.documentElement, 'clientHeight', {
     configurable: true,
     value: 600,
   });
-  const scrollToSpy = jest.spyOn(document.documentElement, 'scrollTo');
+  const scrollToSpy = vi.spyOn(document.documentElement, 'scrollTo');
 
   afterAll(() => {
     cleanup();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('expand panel', () => {
@@ -109,14 +111,14 @@ describe('track panel', () => {
     it('should scroll to panel when panel is below the viewport', async () => {
       setScrollToPanelId('scroll-to-panel-id');
       const mockPanelRef = document.createElement('div');
-      mockPanelRef.getBoundingClientRect = jest.fn(
+      mockPanelRef.getBoundingClientRect = vi.fn(
         () =>
           ({
             top: 200,
             bottom: 900,
           } as DOMRect)
       );
-      mockPanelRef.scrollIntoView = jest.fn();
+      mockPanelRef.scrollIntoView = vi.fn();
       expect(scrollPosition$.value).toBe(undefined);
 
       await scrollToPanel(mockPanelRef);
@@ -131,14 +133,14 @@ describe('track panel', () => {
     it('should scroll to panel when panel is above the viewport', async () => {
       setScrollToPanelId('scroll-to-panel-id');
       const mockPanelRef = document.createElement('div');
-      mockPanelRef.getBoundingClientRect = jest.fn(
+      mockPanelRef.getBoundingClientRect = vi.fn(
         () =>
           ({
             top: -100,
             bottom: 400,
           } as DOMRect)
       );
-      mockPanelRef.scrollIntoView = jest.fn();
+      mockPanelRef.scrollIntoView = vi.fn();
       expect(scrollPosition$.value).toBe(undefined);
 
       await scrollToPanel(mockPanelRef);
@@ -154,14 +156,14 @@ describe('track panel', () => {
       setScrollToPanelId('skip-scroll-to-panel-id');
 
       const mockPanelRef = document.createElement('div');
-      mockPanelRef.getBoundingClientRect = jest.fn(
+      mockPanelRef.getBoundingClientRect = vi.fn(
         () =>
           ({
             top: 200,
             bottom: 500,
           } as DOMRect)
       );
-      mockPanelRef.scrollIntoView = jest.fn();
+      mockPanelRef.scrollIntoView = vi.fn();
 
       await scrollToPanel(mockPanelRef);
       expect(mockPanelRef.getBoundingClientRect).toHaveBeenCalled();

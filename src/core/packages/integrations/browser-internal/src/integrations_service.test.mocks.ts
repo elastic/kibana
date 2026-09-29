@@ -7,22 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { CoreService } from '@kbn/core-base-browser-internal';
 
-const createCoreServiceMock = (): jest.Mocked<CoreService> => {
+const createCoreServiceMock = (): Mocked<CoreService> => {
   return {
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
+    setup: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
   };
 };
 
 export const styleServiceMock = createCoreServiceMock();
-jest.doMock('./styles', () => ({
-  StylesService: jest.fn(() => styleServiceMock),
-}));
+vi.doMock('./styles', () => {
+      const mocked = {
+      StylesService: vi.fn(() => styleServiceMock),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const momentServiceMock = createCoreServiceMock();
-jest.doMock('./moment', () => ({
-  MomentService: jest.fn(() => momentServiceMock),
-}));
+vi.doMock('./moment', () => {
+      const mocked = {
+      MomentService: vi.fn(() => momentServiceMock),
+    };
+      return { ...mocked, default: mocked };
+    });

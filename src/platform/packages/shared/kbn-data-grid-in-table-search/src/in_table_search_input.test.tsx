@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { InTableSearchInput } from './in_table_search_input';
@@ -14,10 +16,10 @@ import { INPUT_TEST_SUBJ, BUTTON_PREV_TEST_SUBJ, BUTTON_NEXT_TEST_SUBJ } from '.
 
 describe('InTableSearchInput', () => {
   it('renders input', async () => {
-    const goToPrevMatch = jest.fn();
-    const goToNextMatch = jest.fn();
-    const onChangeSearchTerm = jest.fn();
-    const onHideInput = jest.fn();
+    const goToPrevMatch = vi.fn();
+    const goToNextMatch = vi.fn();
+    const onChangeSearchTerm = vi.fn();
+    const onHideInput = vi.fn();
 
     const { container } = render(
       <InTableSearchInput
@@ -45,10 +47,10 @@ describe('InTableSearchInput', () => {
   });
 
   it('renders input when loading', async () => {
-    const goToPrevMatch = jest.fn();
-    const goToNextMatch = jest.fn();
-    const onChangeSearchTerm = jest.fn();
-    const onHideInput = jest.fn();
+    const goToPrevMatch = vi.fn();
+    const goToNextMatch = vi.fn();
+    const onChangeSearchTerm = vi.fn();
+    const onHideInput = vi.fn();
 
     const { container } = render(
       <InTableSearchInput
@@ -69,10 +71,10 @@ describe('InTableSearchInput', () => {
   });
 
   it('handles changes', async () => {
-    const goToPrevMatch = jest.fn();
-    const goToNextMatch = jest.fn();
-    const onChangeSearchTerm = jest.fn();
-    const onHideInput = jest.fn();
+    const goToPrevMatch = vi.fn();
+    const goToNextMatch = vi.fn();
+    const onChangeSearchTerm = vi.fn();
+    const onHideInput = vi.fn();
 
     render(
       <InTableSearchInput
@@ -96,10 +98,10 @@ describe('InTableSearchInput', () => {
   });
 
   it('hides on Escape', async () => {
-    const goToPrevMatch = jest.fn();
-    const goToNextMatch = jest.fn();
-    const onChangeSearchTerm = jest.fn();
-    const onHideInput = jest.fn();
+    const goToPrevMatch = vi.fn();
+    const goToNextMatch = vi.fn();
+    const onChangeSearchTerm = vi.fn();
+    const onHideInput = vi.fn();
 
     render(
       <InTableSearchInput
@@ -120,10 +122,10 @@ describe('InTableSearchInput', () => {
   });
 
   it('handles prev/next with keyboard shortcuts', async () => {
-    const goToPrevMatch = jest.fn();
-    const goToNextMatch = jest.fn();
-    const onChangeSearchTerm = jest.fn();
-    const onHideInput = jest.fn();
+    const goToPrevMatch = vi.fn();
+    const goToNextMatch = vi.fn();
+    const onChangeSearchTerm = vi.fn();
+    const onHideInput = vi.fn();
 
     render(
       <InTableSearchInput
@@ -148,10 +150,10 @@ describe('InTableSearchInput', () => {
   });
 
   it('applies the initial value', async () => {
-    const goToPrevMatch = jest.fn();
-    const goToNextMatch = jest.fn();
-    const onChangeSearchTerm = jest.fn();
-    const onHideInput = jest.fn();
+    const goToPrevMatch = vi.fn();
+    const goToNextMatch = vi.fn();
+    const onChangeSearchTerm = vi.fn();
+    const onHideInput = vi.fn();
 
     render(
       <InTableSearchInput

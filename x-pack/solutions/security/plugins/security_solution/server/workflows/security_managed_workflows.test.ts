@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
@@ -15,19 +18,19 @@ import * as threatIntelInstall from './threat_intel_workflow/install';
 import * as alertAnalysisInstall from './alert_analysis_workflow/install';
 import * as enumerate from './lib/enumerate_space_ids';
 
-jest.mock('./threat_intel_workflow/install');
-jest.mock('./alert_analysis_workflow/install');
-jest.mock('./lib/enumerate_space_ids');
+vi.mock('./threat_intel_workflow/install');
+vi.mock('./alert_analysis_workflow/install');
+vi.mock('./lib/enumerate_space_ids');
 
 describe('installSecurityManagedWorkflowsAndMarkReady', () => {
   const createManagedClient = () => ({
-    install: jest.fn().mockResolvedValue(undefined),
-    uninstall: jest.fn().mockResolvedValue(undefined),
-    ready: jest.fn().mockResolvedValue(undefined),
-    execute: jest.fn().mockResolvedValue('mock-execution-id'),
-    getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
-    listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
-    getWorkflowStatus: jest.fn().mockResolvedValue({
+    install: vi.fn().mockResolvedValue(undefined),
+    uninstall: vi.fn().mockResolvedValue(undefined),
+    ready: vi.fn().mockResolvedValue(undefined),
+    execute: vi.fn().mockResolvedValue('mock-execution-id'),
+    getInstalledWorkflowState: vi.fn().mockResolvedValue(null),
+    listInstalledWorkflowStates: vi.fn().mockResolvedValue([]),
+    getWorkflowStatus: vi.fn().mockResolvedValue({
       status: 'intact',
       workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
       definitionId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
@@ -44,15 +47,15 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (enumerate.enumerateSpaceIds as jest.Mock).mockResolvedValue(['default']);
-    (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as jest.Mock).mockResolvedValue(
+    vi.clearAllMocks();
+    (enumerate.enumerateSpaceIds as Mock).mockResolvedValue(['default']);
+    (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as Mock).mockResolvedValue(
       undefined
     );
-    (threatIntelInstall.installThreatIntelManagedWorkflows as jest.Mock).mockResolvedValue(
+    (threatIntelInstall.installThreatIntelManagedWorkflows as Mock).mockResolvedValue(
       undefined
     );
-    (threatIntelInstall.uninstallThreatIntelManagedWorkflows as jest.Mock).mockResolvedValue(
+    (threatIntelInstall.uninstallThreatIntelManagedWorkflows as Mock).mockResolvedValue(
       undefined
     );
   });
@@ -63,12 +66,12 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     managed.ready.mockImplementation(async () => {
       order.push('ready');
     });
-    (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as jest.Mock).mockImplementation(
+    (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as Mock).mockImplementation(
       async () => {
         order.push('alert');
       }
     );
-    (threatIntelInstall.installThreatIntelManagedWorkflows as jest.Mock).mockImplementation(
+    (threatIntelInstall.installThreatIntelManagedWorkflows as Mock).mockImplementation(
       async () => {
         order.push('ti');
       }
@@ -114,7 +117,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
 
   it('still calls ready when threat intel install fails', async () => {
     const managed = createManagedClient();
-    (threatIntelInstall.installThreatIntelManagedWorkflows as jest.Mock).mockRejectedValue(
+    (threatIntelInstall.installThreatIntelManagedWorkflows as Mock).mockRejectedValue(
       new Error('boom')
     );
     const workflowsExtensions = workflowsExtensionsMock.createStart();
@@ -133,7 +136,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
 
   it('still calls ready when alert analysis install fails', async () => {
     const managed = createManagedClient();
-    (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as jest.Mock).mockRejectedValue(
+    (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as Mock).mockRejectedValue(
       new Error('boom')
     );
     const workflowsExtensions = workflowsExtensionsMock.createStart();
@@ -178,7 +181,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     const managed = createManagedClient();
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
-    (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as jest.Mock).mockImplementation(
+    (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as Mock).mockImplementation(
       async ({ managedWorkflowsClient }) => {
         await managedWorkflowsClient.install(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
           spaceId: GLOBAL_WORKFLOW_SPACE_ID,

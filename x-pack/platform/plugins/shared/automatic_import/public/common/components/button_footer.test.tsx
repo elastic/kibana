@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,7 +18,7 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 
 describe('ButtonsFooter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('action button', () => {
@@ -27,7 +29,7 @@ describe('ButtonsFooter', () => {
     });
 
     it('should call onAction when clicked', () => {
-      const mockOnAction = jest.fn();
+      const mockOnAction = vi.fn();
       const result = render(<ButtonsFooter onAction={mockOnAction} />, { wrapper });
       const actionButton = result.getByTestId('buttonsFooter-actionButton');
       fireEvent.click(actionButton);
@@ -69,7 +71,7 @@ describe('ButtonsFooter', () => {
     });
 
     it('should call onCancel when clicked', () => {
-      const mockOnCancel = jest.fn();
+      const mockOnCancel = vi.fn();
       const result = render(<ButtonsFooter onCancel={mockOnCancel} />, { wrapper });
       const cancelButton = result.getByTestId('buttonsFooter-cancelButton');
       fireEvent.click(cancelButton);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -25,7 +27,7 @@ const renderWithIntl = (ui: React.ReactElement) =>
   );
 
 describe('<RolesGridPage />', () => {
-  let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
+  let apiClientMock: Mocked<PublicMethodsOf<RolesAPIClient>>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
   const { userProfile, theme, i18n, analytics, notifications, rendering } = coreMock.createStart();
 

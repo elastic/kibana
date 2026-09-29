@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -16,27 +19,30 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleChange, RuleChangeHistorySnapshot } from './types';
 import { ChangeTrackingService } from './service';
 
-jest.mock('@kbn/change-history', () => ({
-  ChangeHistoryClient: jest.fn(),
-}));
+vi.mock('@kbn/change-history', () => {
+      const mocked = {
+      ChangeHistoryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const ChangeHistoryClientMock = ChangeHistoryClient as jest.MockedClass<typeof ChangeHistoryClient>;
+const ChangeHistoryClientMock = ChangeHistoryClient as MockedClass<typeof ChangeHistoryClient>;
 
 interface MockChangeHistoryClient {
-  isInitialized: jest.Mock<boolean, []>;
-  initialize: jest.Mock<Promise<void>, [unknown]>;
-  logBulk: jest.Mock<Promise<void>, [unknown, unknown]>;
-  getHistory: jest.Mock<
+  isInitialized: Mock<boolean, []>;
+  initialize: Mock<Promise<void>, [unknown]>;
+  logBulk: Mock<Promise<void>, [unknown, unknown]>;
+  getHistory: Mock<
     Promise<{ items: unknown[]; total: number }>,
     [string, string, string, unknown]
   >;
 }
 
 const createMockClient = (): MockChangeHistoryClient => ({
-  isInitialized: jest.fn().mockReturnValue(false),
-  initialize: jest.fn().mockResolvedValue(undefined),
-  logBulk: jest.fn().mockResolvedValue(undefined),
-  getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+  isInitialized: vi.fn().mockReturnValue(false),
+  initialize: vi.fn().mockResolvedValue(undefined),
+  logBulk: vi.fn().mockResolvedValue(undefined),
+  getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
 });
 
 describe('ChangeTrackingService', () => {
@@ -49,7 +55,7 @@ describe('ChangeTrackingService', () => {
 
   const initializeService = (user: { username: string; profile_uid?: string } | null) => {
     const authService = coreMock.createStart().security.authc;
-    (authService.getCurrentUser as jest.Mock).mockReturnValue(user);
+    (authService.getCurrentUser as Mock).mockReturnValue(user);
     service.initialize({
       elasticsearchClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
       authService,
@@ -58,7 +64,7 @@ describe('ChangeTrackingService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ChangeHistoryClientMock.mockImplementation(
       () => createMockClient() as unknown as ChangeHistoryClient
     );

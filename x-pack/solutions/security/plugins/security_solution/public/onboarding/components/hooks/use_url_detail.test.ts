@@ -4,42 +4,60 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useUrlDetail, useSyncUrlDetails, getCardIdFromHash } from './use_url_detail';
 import { useHistory } from 'react-router-dom';
 
 // --- Mocks for dependencies ---
-jest.mock('@kbn/security-solution-navigation', () => ({
-  ...jest.requireActual('@kbn/security-solution-navigation'),
-  useNavigateTo: jest.fn(),
-  SecurityPageName: { landing: 'landing', siemMigrationsManage: 'siemMigrationsManage' },
-}));
+vi.mock('@kbn/security-solution-navigation', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/security-solution-navigation')),
+      useNavigateTo: vi.fn(),
+      SecurityPageName: { landing: 'landing', siemMigrationsManage: 'siemMigrationsManage' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_stored_state', () => ({
-  ...jest.requireActual('./use_stored_state'),
-  useStoredUrlDetails: jest.fn(),
-}));
+vi.mock('./use_stored_state', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_stored_state')),
+      useStoredUrlDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_topic_id', () => ({
-  ...jest.requireActual('./use_topic_id'),
-  useTopicId: jest.fn(),
-}));
+vi.mock('./use_topic_id', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_topic_id')),
+      useTopicId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_cloud_topic_id', () => ({
-  ...jest.requireActual('./use_cloud_topic_id'),
-  useCloudTopicId: jest.fn(),
-}));
+vi.mock('./use_cloud_topic_id', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_cloud_topic_id')),
+      useCloudTopicId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../onboarding_context', () => ({
-  ...jest.requireActual('../onboarding_context'),
-  useOnboardingContext: jest.fn(),
-}));
+vi.mock('../onboarding_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../onboarding_context')),
+      useOnboardingContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
   return {
     ...originalModule,
-    useHistory: jest.fn(),
+    useHistory: vi.fn(),
   };
 });
 
@@ -55,27 +73,27 @@ import type { History } from 'history';
 
 // --- Tests for useUrlDetail ---
 describe('useUrlDetail', () => {
-  let mockSetStoredUrlDetail: jest.Mock;
-  let mockNavigateTo: jest.Mock;
-  let mockReportCardOpen: jest.Mock;
+  let mockSetStoredUrlDetail: Mock;
+  let mockNavigateTo: Mock;
+  let mockReportCardOpen: Mock;
 
   beforeEach(() => {
-    mockSetStoredUrlDetail = jest.fn();
-    mockNavigateTo = jest.fn();
-    mockReportCardOpen = jest.fn();
+    mockSetStoredUrlDetail = vi.fn();
+    mockNavigateTo = vi.fn();
+    mockReportCardOpen = vi.fn();
 
     // By default, no stored detail
-    (useStoredUrlDetails as jest.Mock).mockReturnValue([null, mockSetStoredUrlDetail]);
-    (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
-    (useTopicId as jest.Mock).mockReturnValue(OnboardingTopicId.default);
-    (useOnboardingContext as jest.Mock).mockReturnValue({
+    (useStoredUrlDetails as Mock).mockReturnValue([null, mockSetStoredUrlDetail]);
+    (useNavigateTo as Mock).mockReturnValue({ navigateTo: mockNavigateTo });
+    (useTopicId as Mock).mockReturnValue(OnboardingTopicId.default);
+    (useOnboardingContext as Mock).mockReturnValue({
       spaceId: 'test-space',
       telemetry: { reportCardOpen: mockReportCardOpen },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the expected initial values', () => {
@@ -118,14 +136,14 @@ describe('useUrlDetail', () => {
 
   it('setCard updates the URL hash, stored detail and reports telemetry when a cardId is provided', () => {
     // Spy on history.replace (used in setHash)
-    const useHistoryMock = useHistory as unknown as jest.MockedFn<typeof useHistory>;
-    const replaceStateMock = jest.fn();
+    const useHistoryMock = useHistory as unknown as MockedFunction<typeof useHistory>;
+    const replaceStateMock = vi.fn();
 
     useHistoryMock.mockReturnValue({
       replace: replaceStateMock,
     } as unknown as History<unknown>);
 
-    (useTopicId as jest.Mock).mockReturnValue(OnboardingTopicId.default);
+    (useTopicId as Mock).mockReturnValue(OnboardingTopicId.default);
     const { result } = renderHook(() => useUrlDetail());
     const cardId = 'card1';
 
@@ -143,8 +161,8 @@ describe('useUrlDetail', () => {
 
   it('setCard updates the URL hash and stored detail without reporting telemetry when cardId is null', () => {
     // Spy on history.replace (used in setHash)
-    const useHistoryMock = useHistory as unknown as jest.MockedFn<typeof useHistory>;
-    const replaceStateMock = jest.fn();
+    const useHistoryMock = useHistory as unknown as MockedFunction<typeof useHistory>;
+    const replaceStateMock = vi.fn();
 
     useHistoryMock.mockReturnValue({
       replace: replaceStateMock,
@@ -192,33 +210,33 @@ describe('getCardIdFromHash', () => {
 
 // --- Tests for useSyncUrlDetails ---
 describe('useSyncUrlDetails', () => {
-  let mockSetStoredUrlDetail: jest.Mock;
-  let mockNavigateTo: jest.Mock;
-  let mockReportCardOpen: jest.Mock;
-  let mockStartGetCloudTopicId: jest.Mock;
-  let mockConfigHas: jest.Mock;
+  let mockSetStoredUrlDetail: Mock;
+  let mockNavigateTo: Mock;
+  let mockReportCardOpen: Mock;
+  let mockStartGetCloudTopicId: Mock;
+  let mockConfigHas: Mock;
   let mockCloudOnComplete: (topicId: OnboardingTopicId | null) => void;
 
   beforeEach(() => {
     window.history.replaceState({}, '', '/app/security/get_started');
-    mockSetStoredUrlDetail = jest.fn();
-    mockNavigateTo = jest.fn();
-    mockReportCardOpen = jest.fn();
-    mockStartGetCloudTopicId = jest.fn();
-    mockConfigHas = jest.fn().mockReturnValue(true);
+    mockSetStoredUrlDetail = vi.fn();
+    mockNavigateTo = vi.fn();
+    mockReportCardOpen = vi.fn();
+    mockStartGetCloudTopicId = vi.fn();
+    mockConfigHas = vi.fn().mockReturnValue(true);
 
     // Provide default values for the dependencies used inside useUrlDetail
-    (useStoredUrlDetails as jest.Mock).mockReturnValue([null, mockSetStoredUrlDetail]);
-    (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
-    (useTopicId as jest.Mock).mockReturnValue(OnboardingTopicId.default);
-    (useCloudTopicId as jest.Mock).mockImplementation(({ onComplete }) => {
+    (useStoredUrlDetails as Mock).mockReturnValue([null, mockSetStoredUrlDetail]);
+    (useNavigateTo as Mock).mockReturnValue({ navigateTo: mockNavigateTo });
+    (useTopicId as Mock).mockReturnValue(OnboardingTopicId.default);
+    (useCloudTopicId as Mock).mockImplementation(({ onComplete }) => {
       mockCloudOnComplete = onComplete;
       return {
         start: mockStartGetCloudTopicId,
         isLoading: false,
       };
     });
-    (useOnboardingContext as jest.Mock).mockReturnValue({
+    (useOnboardingContext as Mock).mockReturnValue({
       config: { has: mockConfigHas },
       spaceId: 'test-space',
       telemetry: { reportCardOpen: mockReportCardOpen },
@@ -226,7 +244,7 @@ describe('useSyncUrlDetails', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('updates stored detail and reports telemetry when URL detail differs from stored detail', () => {
@@ -244,7 +262,7 @@ describe('useSyncUrlDetails', () => {
 
   it('navigates to the stored detail when URL is empty and a stored detail exists', () => {
     // Simulate that a stored detail already exists
-    (useStoredUrlDetails as jest.Mock).mockReturnValue([
+    (useStoredUrlDetails as Mock).mockReturnValue([
       'customTopic#card1',
       mockSetStoredUrlDetail,
     ]);
@@ -258,7 +276,7 @@ describe('useSyncUrlDetails', () => {
   });
 
   it('clears stored siem migrations topic when URL is empty', () => {
-    (useStoredUrlDetails as jest.Mock).mockReturnValue([
+    (useStoredUrlDetails as Mock).mockReturnValue([
       OnboardingTopicId.siemMigrations,
       mockSetStoredUrlDetail,
     ]);
@@ -271,7 +289,7 @@ describe('useSyncUrlDetails', () => {
   });
 
   it('clears stored siem migrations topic with card detail when URL is empty', () => {
-    (useStoredUrlDetails as jest.Mock).mockReturnValue([
+    (useStoredUrlDetails as Mock).mockReturnValue([
       `${OnboardingTopicId.siemMigrations}#migrate_rules`,
       mockSetStoredUrlDetail,
     ]);
@@ -285,7 +303,7 @@ describe('useSyncUrlDetails', () => {
 
   it('calls startGetCloudTopicId when URL is empty and stored detail is undefined', () => {
     // Simulate no stored detail (undefined) – e.g. first time onboarding
-    (useStoredUrlDetails as jest.Mock).mockReturnValue([undefined, mockSetStoredUrlDetail]);
+    (useStoredUrlDetails as Mock).mockReturnValue([undefined, mockSetStoredUrlDetail]);
 
     renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
 
@@ -307,7 +325,7 @@ describe('useSyncUrlDetails', () => {
 
   it('clears stored detail if the stored topic is invalid', () => {
     // Simulate a stored detail with an invalid topic
-    (useStoredUrlDetails as jest.Mock).mockReturnValue([
+    (useStoredUrlDetails as Mock).mockReturnValue([
       'invalidTopic#card1',
       mockSetStoredUrlDetail,
     ]);

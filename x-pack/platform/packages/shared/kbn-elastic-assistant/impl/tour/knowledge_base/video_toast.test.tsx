@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VIDEO_PAGE, VideoToast } from './video_toast';
 
 describe('VideoToast', () => {
-  const onCloseMock = jest.fn();
+  const onCloseMock = vi.fn();
   beforeEach(() => {
-    jest.spyOn(window, 'open').mockImplementation(() => null);
+    vi.spyOn(window, 'open').mockImplementation(() => null);
     render(<VideoToast onClose={onCloseMock} />);
   });
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   it('should render the video toast', () => {
     const videoToast = screen.getByTestId('knowledgeBase-tour-step-2');

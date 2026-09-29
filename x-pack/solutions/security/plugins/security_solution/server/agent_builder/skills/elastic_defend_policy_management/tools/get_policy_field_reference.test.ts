@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -21,21 +23,21 @@ import {
 } from './get_policy_field_reference';
 import type { ExactFieldReferenceResult } from './get_policy_field_reference';
 
-jest.mock('./create_policy_tool', () => {
-  const actual = jest.requireActual('./create_policy_tool');
+vi.mock('./create_policy_tool', async () => {
+  const actual = (await vi.importActual('./create_policy_tool'));
   return {
     ...actual,
-    createPolicyTool: jest.fn((options) => actual.createPolicyTool(options)),
+    createPolicyTool: vi.fn((options) => actual.createPolicyTool(options)),
   };
 });
 
-const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
+const mockedCreatePolicyTool = vi.mocked(createPolicyTool);
 
 const SPACE_ID = 'space-marketing';
 
 const createGetStartServices = (): StartServicesAccessor =>
-  jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+  vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
   ]) as unknown as StartServicesAccessor;
 
 const createService = (canReadPolicyManagement: boolean) => {

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useMissingPrivileges } from './use_missing_privileges';
 import { useUserPrivileges } from '../components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../components/user_privileges/__mocks__';
 import { ALERTS_FEATURE_ID, RULES_FEATURE_ID } from '../../../common/constants';
 
-jest.mock('../components/user_privileges');
-jest.mock('../../detections/components/user_info');
+vi.mock('../components/user_privileges');
+vi.mock('../../detections/components/user_info');
 
 const detectionEnginePrivileges = {
   username: 'elastic',
@@ -88,13 +91,13 @@ const buildUseUserPrivilegesMockReturn = (
 
 describe('useMissingPrivileges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useUserPrivileges as jest.Mock).mockReturnValue(buildUseUserPrivilegesMockReturn());
+    (useUserPrivileges as Mock).mockReturnValue(buildUseUserPrivilegesMockReturn());
   });
 
   it('reports no privileges missing while detectionEnginePrivileges result is null', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue(
+    (useUserPrivileges as Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         detectionEnginePrivileges: {
           // @ts-expect-error partial mock
@@ -111,7 +114,7 @@ describe('useMissingPrivileges', () => {
   });
 
   it('reports missing rulesPrivileges if user cannot edit rules', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue(
+    (useUserPrivileges as Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
@@ -131,7 +134,7 @@ describe('useMissingPrivileges', () => {
   });
 
   it('reports missing alertsPrivileges if user cannot edit alerts', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue(
+    (useUserPrivileges as Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
@@ -151,7 +154,7 @@ describe('useMissingPrivileges', () => {
   });
 
   it('reports no privileges missing while listPrivileges result is null', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue(
+    (useUserPrivileges as Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         listPrivileges: {
           // @ts-expect-error partial mock
@@ -168,7 +171,7 @@ describe('useMissingPrivileges', () => {
   });
 
   it('reports missing "all" privilege for rules and alerts if user does not have edit permissions', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue(
+    (useUserPrivileges as Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
@@ -190,7 +193,7 @@ describe('useMissingPrivileges', () => {
   });
 
   it('reports no missing feature privileges if user can edit rules and alerts', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue(
+    (useUserPrivileges as Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
@@ -206,7 +209,7 @@ describe('useMissingPrivileges', () => {
   });
 
   it('reports complex index privileges when all data is available', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue(
+    (useUserPrivileges as Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           ...getUserPrivilegesMockDefaultValue().rulesPrivileges,

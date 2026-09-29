@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Subject } from 'rxjs';
 import type { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
@@ -36,7 +38,7 @@ describe('updateGlobalNavigation', () => {
         ...noObservabilityCapabilities,
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
-      const callback = jest.fn();
+      const callback = vi.fn();
       const updater$ = {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
@@ -51,7 +53,7 @@ describe('updateGlobalNavigation', () => {
     });
 
     it('marks the app inaccessible when casesFeatureId is absent from capabilities', () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const updater$ = {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
@@ -75,7 +77,7 @@ describe('updateGlobalNavigation', () => {
         [casesFeatureId]: { read_cases: false },
         ...noObservabilityCapabilities,
       } as unknown as ApplicationStart['capabilities'];
-      const callback = jest.fn();
+      const callback = vi.fn();
       const updater$ = {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
@@ -113,7 +115,7 @@ describe('updateGlobalNavigation', () => {
         { id: 'alerts', title: 'Alerts', order: 8001, path: '/alerts', visibleIn: [] },
         { id: 'rules', title: 'Rules', order: 8002, path: '/rules', visibleIn: [] },
       ];
-      const callback = jest.fn();
+      const callback = vi.fn();
       const updater$ = {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
@@ -141,7 +143,7 @@ describe('updateGlobalNavigation', () => {
         navLinks: { apm: true, logs: false, metrics: false, uptime: false },
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
-      const callback = jest.fn();
+      const callback = vi.fn();
       const updater$ = {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
@@ -173,7 +175,7 @@ describe('updateGlobalNavigation', () => {
 
         const deepLinks = [caseRoute];
 
-        const callback = jest.fn();
+        const callback = vi.fn();
         const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
@@ -211,7 +213,7 @@ describe('updateGlobalNavigation', () => {
 
         const deepLinks = [caseRoute];
 
-        const callback = jest.fn();
+        const callback = vi.fn();
         const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
@@ -243,7 +245,7 @@ describe('updateGlobalNavigation', () => {
             visibleIn: [],
           },
         ];
-        const callback = jest.fn();
+        const callback = vi.fn();
         const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
@@ -283,7 +285,7 @@ describe('updateGlobalNavigation', () => {
             visibleIn: [],
           },
         ];
-        const callback = jest.fn();
+        const callback = vi.fn();
         const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
@@ -321,7 +323,7 @@ describe('updateGlobalNavigation', () => {
             visibleIn: [],
           },
         ];
-        const callback = jest.fn();
+        const callback = vi.fn();
         const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;

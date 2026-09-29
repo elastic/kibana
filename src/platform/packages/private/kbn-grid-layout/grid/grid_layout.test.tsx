@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -25,7 +27,7 @@ import {
 import { EuiThemeProvider } from '@elastic/eui';
 import type { GridLayoutData } from './types';
 
-const onLayoutChange = jest.fn();
+const onLayoutChange = vi.fn();
 
 const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
   const props = {
@@ -40,7 +42,7 @@ const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
   const { rerender, ...rtlRest } = render(<GridLayout {...props} />, { wrapper: EuiThemeProvider });
 
   const gridLayout = screen.getByTestId('kbnGridLayout');
-  jest.spyOn(gridLayout, 'getBoundingClientRect').mockImplementation(() => {
+  vi.spyOn(gridLayout, 'getBoundingClientRect').mockImplementation(() => {
     return { top: 0, bottom: 500 } as DOMRect;
   });
 
@@ -86,7 +88,7 @@ describe('GridLayout', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('`onLayoutChange` gets called when layout prop changes', () => {
@@ -122,7 +124,7 @@ describe('GridLayout', () => {
   describe('dragging sections', () => {
     beforeAll(() => {
       // scroll into view is not mocked by RTL so we need to add this to prevent these tests from throwing
-      Element.prototype.scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = vi.fn();
     });
 
     it('section gets active when dragged', () => {
@@ -151,7 +153,7 @@ describe('GridLayout', () => {
 
       // assert that renderPanelContents has been called ONLY ONCE for each of 10 panels on initial render
       expect(mockRenderPanelContents).toHaveBeenCalledTimes(expectedInitPanelIdsInOrder.length);
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const panelHandle = getPanelHandle('panel1');
       mouseStartDragging(panelHandle);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -18,112 +20,136 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseInvestigationState = jest.fn<UseInvestigationStateResult, [unknown]>();
+const mockUseInvestigationState = vi.fn<UseInvestigationStateResult, [unknown]>();
 
-jest.mock('@kbn/investigation-output', () => ({
-  // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
-  useInvestigationState: (args: unknown) => mockUseInvestigationState(args),
-}));
+vi.mock('@kbn/investigation-output', () => {
+      const mocked = {
+      // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
+      useInvestigationState: (args: unknown) => mockUseInvestigationState(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_fetch_investigation_statuses', () => ({
-  useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
-}));
+vi.mock('../hooks/use_fetch_investigation_statuses', () => {
+      const mocked = {
+      useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
-jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => ({
-    features: [],
-    failedStreamNames: [],
-    isInitialLoading: false,
-    isFetching: false,
-    isError: false,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/use_fetch_stream_features', () => {
+      const mocked = {
+      useFetchStreamFeatures: () => ({
+        features: [],
+        failedStreamNames: [],
+        isInitialLoading: false,
+        isFetching: false,
+        isError: false,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../detection/change_point_lens_chart', () => ({
-  ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
-}));
+vi.mock('../detection/change_point_lens_chart', () => {
+      const mocked = {
+      ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_fetch_detection_occurrences', () => ({
-  useFetchDetectionOccurrences: () => ({
-    data: new Map([
-      [
-        'rule-uuid-001',
-        [
-          { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
-          { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
-        ],
-      ],
-    ]),
-    isLoading: false,
-    isError: false,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/use_fetch_detection_occurrences', () => {
+      const mocked = {
+      useFetchDetectionOccurrences: () => ({
+        data: new Map([
+          [
+            'rule-uuid-001',
+            [
+              { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
+              { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
+            ],
+          ],
+        ]),
+        isLoading: false,
+        isError: false,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
-  useFetchEventLifecycle: () => ({
-    data: {
-      detections: [
-        {
-          detection_id: 'det-1',
-          rule_name: 'latency-p95-spike',
-          rule_uuid: 'rule-uuid-001',
-          stream_name: 'logs.web-frontend',
-          change_point_type: 'spike',
-          '@timestamp': '2026-07-10T12:00:00Z',
+vi.mock('../hooks/use_fetch_event_lifecycle', () => {
+      const mocked = {
+      useFetchEventLifecycle: () => ({
+        data: {
+          detections: [
+            {
+              detection_id: 'det-1',
+              rule_name: 'latency-p95-spike',
+              rule_uuid: 'rule-uuid-001',
+              stream_name: 'logs.web-frontend',
+              change_point_type: 'spike',
+              '@timestamp': '2026-07-10T12:00:00Z',
+            },
+          ],
+          events: [],
         },
-      ],
-      events: [],
-    },
-    isLoading: false,
-    isError: false,
-    refetch: jest.fn(),
-  }),
-}));
+        isLoading: false,
+        isError: false,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenChat = jest.fn();
+const mockOpenChat = vi.fn();
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: { basePath: { prepend: (path: string) => path } },
-      agentBuilder: { openChat: mockOpenChat },
-      notifications: {
-        toasts: {
-          addSuccess: jest.fn(),
-        },
-      },
-      charts: {
-        theme: {
-          useChartsBaseTheme: () => ({}),
-          useSparklineOverrides: () => ({}),
-        },
-      },
-      share: {
-        url: {
-          locators: {
-            get: () => ({ getRedirectUrl: () => '/app/discover#redirect' }),
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: { basePath: { prepend: (path: string) => path } },
+          agentBuilder: { openChat: mockOpenChat },
+          notifications: {
+            toasts: {
+              addSuccess: vi.fn(),
+            },
+          },
+          charts: {
+            theme: {
+              useChartsBaseTheme: () => ({}),
+              useSparklineOverrides: () => ({}),
+            },
+          },
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: () => '/app/discover#redirect' }),
+              },
+            },
+          },
+          application: {
+            capabilities: {
+              nightshift: {
+                show: true,
+              },
+            },
+            getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
           },
         },
-      },
-      application: {
-        capabilities: {
-          nightshift: {
-            show: true,
-          },
-        },
-        getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockEvent: SignificantEvent = {
   '@timestamp': '2026-07-10T12:00:00Z',
@@ -156,7 +182,7 @@ describe('EventFlyout', () => {
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <EuiProvider>
-            <EventFlyout event={mockEvent} onClose={jest.fn()} {...props} />
+            <EventFlyout event={mockEvent} onClose={vi.fn()} {...props} />
           </EuiProvider>
         </QueryClientProvider>
       </I18nProvider>
@@ -372,7 +398,7 @@ describe('EventFlyout', () => {
   });
 
   it('calls onClose when flyout is closed', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderFlyout({ onClose });
 
     const closeButton = screen.getByTestId('euiFlyoutCloseButton');
@@ -389,7 +415,7 @@ describe('EventFlyout', () => {
   });
 
   it('closes the detection flyout without closing the event flyout', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderFlyout({ onClose });
 
     fireEvent.click(screen.getByTestId('nightshiftDetectionCard'));

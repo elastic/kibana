@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { z } from '@kbn/zod/v4';
 import { renderHook } from '@testing-library/react';
@@ -18,11 +21,11 @@ import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
-jest.mock('../../containers/use_get_case_file_stats');
-jest.mock('./use_case_observables');
+vi.mock('../../containers/use_get_case_file_stats');
+vi.mock('./use_case_observables');
 
-const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
-const useCaseObservablesMock = useCaseObservables as jest.Mock;
+const useGetCaseFileStatsMock = useGetCaseFileStats as Mock;
+const useCaseObservablesMock = useCaseObservables as Mock;
 
 const platinumLicense = licensingMock.createLicense({ license: { type: 'platinum' } });
 const basicLicense = licensingMock.createLicense({ license: { type: 'basic' } });
@@ -61,7 +64,7 @@ describe('useCaseAttachmentsTotal', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sums comments matching registered types (with a tab view) + file stats', () => {

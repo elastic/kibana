@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,15 +18,15 @@ import { useDisassociateExceptionList } from './use_disassociate_exception_list'
 const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('useDisassociateExceptionList', () => {
-  const onError = jest.fn();
-  const onSuccess = jest.fn();
+  const onError = vi.fn();
+  const onSuccess = vi.fn();
 
   beforeEach(() => {
-    jest.spyOn(api, 'patchRule').mockResolvedValue(getRulesSchemaMock());
+    vi.spyOn(api, 'patchRule').mockResolvedValue(getRulesSchemaMock());
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('initializes hook', async () => {

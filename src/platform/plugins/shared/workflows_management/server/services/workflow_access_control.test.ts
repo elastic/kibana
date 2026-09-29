@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { InvalidAccessControlError } from '@kbn/entity-access-control';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -40,23 +42,23 @@ describe('WorkflowAccessControlService', () => {
   let service: WorkflowAccessControlService;
   let crud: ConstructorParameters<typeof WorkflowAccessControlService>[1];
   let authz: ReturnType<typeof securityMock.createStart>['authz'];
-  const atSpace = jest.fn();
+  const atSpace = vi.fn();
 
   beforeEach(() => {
     core = coreMock.createStart();
     core.userProfile.getCurrentProfileId.mockResolvedValue('owner');
     document = makeDocument();
     authz = securityMock.createStart().authz;
-    jest.spyOn(authz.actions.api, 'get').mockImplementation((subject: string) => `api:${subject}`);
+    vi.spyOn(authz.actions.api, 'get').mockImplementation((subject: string) => `api:${subject}`);
     atSpace.mockReset().mockResolvedValue({ hasPrivilegeUids: ['reader'] });
     authz.checkUserProfilesPrivileges.mockReturnValue({ atSpace });
     crud = {
-      getWorkflowDocumentWithVersion: jest.fn(async () => ({
+      getWorkflowDocumentWithVersion: vi.fn(async () => ({
         source: document,
         seqNo: 1,
         primaryTerm: 1,
       })),
-      writeWorkflowDocumentWithOcc: jest.fn(async (_id, _spaceId, { document: updated }) => {
+      writeWorkflowDocumentWithOcc: vi.fn(async (_id, _spaceId, { document: updated }) => {
         document = updated;
         return document;
       }),
@@ -95,7 +97,7 @@ describe('WorkflowAccessControlService', () => {
     async (username) => {
       delete document.owner_id;
       delete document.access_control;
-      jest
+      vi
         .spyOn(core.security.authc, 'getCurrentUser')
         .mockReturnValue(securityMock.createMockAuthenticatedUser({ username }));
       const update = service.update('id', 'default', { access_mode: 'private' }, request);
@@ -278,7 +280,7 @@ describe('WorkflowAccessControlService', () => {
       entries: [{ type: 'user', id: 'reader', role: 'viewer', added_at: '2026-09-10' }],
     };
     const previousDocument = document;
-    jest.mocked(crud.writeWorkflowDocumentWithOcc).mockImplementation(async () => {
+    vi.mocked(crud.writeWorkflowDocumentWithOcc).mockImplementation(async () => {
       document = makeDocument();
       throw new WorkflowConflictError('Workflow was updated concurrently.', 'id');
     });
@@ -420,21 +422,21 @@ describe('WorkflowAccessControlService', () => {
 
   it('closes the search snapshot if execution filtering fails', async () => {
     const client = core.elasticsearch.client.asInternalUser;
-    jest
+    vi
       .mocked(client.openPointInTime)
       .mockResolvedValue({ id: 'pit', _shards: { total: 1, successful: 1, failed: 0 } });
-    jest.mocked(client.search).mockRejectedValue(new Error('Search failed'));
+    vi.mocked(client.search).mockRejectedValue(new Error('Search failed'));
     await expect(service.executionFilter('default', request)).rejects.toThrow('Search failed');
     expect(client.closePointInTime).toHaveBeenCalledWith({ id: 'pit' });
   });
 
   it('shares one execution filter and profile lookup within a request and space', async () => {
     const client = core.elasticsearch.client.asInternalUser;
-    jest.mocked(client.openPointInTime).mockResolvedValue({
+    vi.mocked(client.openPointInTime).mockResolvedValue({
       id: 'pit',
       _shards: { total: 1, successful: 1, failed: 0 },
     });
-    jest.mocked(client.search).mockResolvedValue({
+    vi.mocked(client.search).mockResolvedValue({
       took: 1,
       timed_out: false,
       _shards: { total: 1, successful: 1, failed: 0 },
@@ -475,12 +477,12 @@ describe('WorkflowAccessControlService', () => {
     'filters execution access for space=$workflowSpaceId, deleted=$deletedAt',
     async ({ workflowSpaceId, deletedAt }) => {
       const client = core.elasticsearch.client.asInternalUser;
-      jest.mocked(client.openPointInTime).mockResolvedValue({
+      vi.mocked(client.openPointInTime).mockResolvedValue({
         id: 'pit',
         _shards: { total: 1, successful: 1, failed: 0 },
       });
       const grant = { type: 'user', id: 'owner', role: 'viewer', added_at: '2026-09-22' };
-      jest.mocked(client.search).mockResolvedValue({
+      vi.mocked(client.search).mockResolvedValue({
         took: 1,
         timed_out: false,
         _shards: { total: 1, successful: 1, failed: 0 },
@@ -529,11 +531,11 @@ describe('WorkflowAccessControlService', () => {
     'rejects incomplete execution access results: timeout=$timedOut, failed shards=$failedShards',
     async ({ timedOut, failedShards }) => {
       const client = core.elasticsearch.client.asInternalUser;
-      jest.mocked(client.openPointInTime).mockResolvedValue({
+      vi.mocked(client.openPointInTime).mockResolvedValue({
         id: 'pit',
         _shards: { total: 1, successful: 1, failed: 0 },
       });
-      jest.mocked(client.search).mockResolvedValue({
+      vi.mocked(client.search).mockResolvedValue({
         pit_id: 'new-pit',
         took: 1,
         timed_out: timedOut,

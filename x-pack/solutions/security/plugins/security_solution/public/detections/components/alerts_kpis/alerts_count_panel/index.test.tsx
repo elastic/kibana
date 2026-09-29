@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -21,38 +24,41 @@ import { VisualizationEmbeddable } from '../../../../common/components/visualiza
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
-jest.mock('../../../../common/containers/use_global_time', () => {
-  const actual = jest.requireActual('../../../../common/containers/use_global_time');
+vi.mock('../../../../common/containers/use_global_time', async () => {
+  const actual = (await vi.importActual('../../../../common/containers/use_global_time'));
   return {
     ...actual,
-    useGlobalTime: jest
+    useGlobalTime: vi
       .fn()
-      .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() }),
+      .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
   };
 });
 
-jest.mock('../../../../common/containers/query_toggle');
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('../../../../common/containers/query_toggle');
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../../common/components/page/use_refetch_by_session');
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
-jest.mock('../../../../common/components/page/use_refetch_by_session');
-jest.mock('../common/hooks', () => ({
-  useInspectButton: jest.fn(),
-  useStackByFields: jest.fn().mockReturnValue(() => []),
-}));
+vi.mock('../../../../common/components/page/use_refetch_by_session');
+vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../../common/components/page/use_refetch_by_session');
+vi.mock('../common/hooks', () => {
+      const mocked = {
+      useInspectButton: vi.fn(),
+      useStackByFields: vi.fn().mockReturnValue(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetIsExpanded = jest.fn();
+const mockSetIsExpanded = vi.fn();
 const defaultProps = {
   inspectTitle: COUNTS,
   signalIndexName: 'signalIndexName',
   stackByField0: DEFAULT_STACK_BY_FIELD,
   stackByField1: DEFAULT_STACK_BY_FIELD1,
-  setStackByField0: jest.fn(),
-  setStackByField1: jest.fn(),
+  setStackByField0: vi.fn(),
+  setStackByField1: vi.fn(),
   isExpanded: true,
   setIsExpanded: mockSetIsExpanded,
   showBuildingBlockAlerts: false,
@@ -61,13 +67,13 @@ const defaultProps = {
   extraActions: [{ id: 'resetGroupByFields' }] as Action[],
 };
 
-const MockedVisualizationEmbeddable = VisualizationEmbeddable as jest.MockedFunction<
+const MockedVisualizationEmbeddable = VisualizationEmbeddable as MockedFunction<
   typeof VisualizationEmbeddable
 >;
 
 describe('AlertsCountPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {
@@ -107,8 +113,8 @@ it('it does NOT render the inspect button when a `chartOptionsContextMenu` is pr
       defaultStackByField={DEFAULT_STACK_BY_FIELD}
       defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
       queryId={queryId}
-      setStackBy={jest.fn()}
-      setStackByField1={jest.fn()}
+      setStackBy={vi.fn()}
+      setStackByField1={vi.fn()}
     />
   );
 

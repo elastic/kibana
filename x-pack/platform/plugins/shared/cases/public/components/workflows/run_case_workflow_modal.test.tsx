@@ -5,54 +5,59 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import { RunCaseWorkflowModal } from './run_case_workflow_modal';
 
 // Mock the RunWorkflowPanel from the workflows-ui package.
-jest.mock('@kbn/workflows-ui', () => ({
-  RunWorkflowPanel: ({
-    onClose,
-    onExecutionSettled,
-    inputs,
-    runWorkflow,
-    showSuccessToast,
-  }: {
-    onClose: () => void;
-    onExecutionSettled?: () => void;
-    inputs: unknown;
-    runWorkflow?: RunWorkflowExecutor;
-    showSuccessToast?: boolean;
-  }) => (
-    <div data-test-subj="run-workflow-panel-mock">
-      <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
-      <button data-test-subj="panel-close" type="button" onClick={onClose}>
-        {'Close'}
-      </button>
-      <button
-        data-test-subj="panel-settled"
-        type="button"
-        onClick={onExecutionSettled}
-        disabled={!onExecutionSettled}
-      >
-        {'Settled'}
-      </button>
-      <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
-      <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
-    </div>
-  ),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      RunWorkflowPanel: ({
+        onClose,
+        onExecutionSettled,
+        inputs,
+        runWorkflow,
+        showSuccessToast,
+      }: {
+        onClose: () => void;
+        onExecutionSettled?: () => void;
+        inputs: unknown;
+        runWorkflow?: RunWorkflowExecutor;
+        showSuccessToast?: boolean;
+      }) => (
+        <div data-test-subj="run-workflow-panel-mock">
+          <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
+          <button data-test-subj="panel-close" type="button" onClick={onClose}>
+            {'Close'}
+          </button>
+          <button
+            data-test-subj="panel-settled"
+            type="button"
+            onClick={onExecutionSettled}
+            disabled={!onExecutionSettled}
+          >
+            {'Settled'}
+          </button>
+          <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
+          <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RunCaseWorkflowModal', () => {
-  const onClose = jest.fn();
-  const mockExecutor: RunWorkflowExecutor = jest
+  const onClose = vi.fn();
+  const mockExecutor: RunWorkflowExecutor = vi
     .fn()
     .mockResolvedValue({ workflowExecutionId: 'exec-1' });
   const inputs = { event: { caseId: 'case-1', owner: 'securitySolution' } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the modal with the expected title', () => {
@@ -88,7 +93,7 @@ describe('RunCaseWorkflowModal', () => {
   });
 
   it('forwards the execution-settled callback to RunWorkflowPanel', () => {
-    const onExecutionSettled = jest.fn();
+    const onExecutionSettled = vi.fn();
     render(
       <RunCaseWorkflowModal
         inputs={inputs}

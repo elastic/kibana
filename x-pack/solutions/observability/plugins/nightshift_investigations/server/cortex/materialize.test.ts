@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { CortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import type { CortexPageStore } from './page_store';
 
-const createTelemetry = (): jest.Mocked<CortexTelemetry> => ({
-  reportHydrated: jest.fn(),
-  reportEditsApplied: jest.fn(),
+const createTelemetry = (): Mocked<CortexTelemetry> => ({
+  reportHydrated: vi.fn(),
+  reportEditsApplied: vi.fn(),
 });
 
 describe('materializeCortex', () => {
   it('writes README, INDEX, and each page into the sandbox workspace', async () => {
     const store: CortexPageStore = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         pages: [
           {
             id: 'cortex_service_checkout',
@@ -32,7 +35,7 @@ describe('materializeCortex', () => {
         ],
         stats: { total: 1, established: 1, total_corroborations: 2 },
       }),
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'cortex_service_checkout',
         title: 'Checkout',
         entity_type: 'service',
@@ -42,16 +45,16 @@ describe('materializeCortex', () => {
         slug: 'checkout',
         content: 'Checkout talks to Redis.',
       }),
-      upsert: jest.fn(),
-      create: jest.fn(),
-      corroborate: jest.fn(),
-      archive: jest.fn(),
-      pruneDuplicates: jest.fn().mockResolvedValue(0),
+      upsert: vi.fn(),
+      create: vi.fn(),
+      corroborate: vi.fn(),
+      archive: vi.fn(),
+      pruneDuplicates: vi.fn().mockResolvedValue(0),
     };
 
     const session = {
-      mkdirs: jest.fn().mockResolvedValue([true]),
-      writeFiles: jest.fn().mockResolvedValue([]),
+      mkdirs: vi.fn().mockResolvedValue([true]),
+      writeFiles: vi.fn().mockResolvedValue([]),
     } as unknown as SandboxSession;
 
     const telemetry = createTelemetry();
@@ -99,26 +102,26 @@ describe('materializeCortex', () => {
     ];
 
     const store: CortexPageStore = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         pages: summaries,
         stats: { total: 2, established: 1, total_corroborations: 3 },
       }),
-      get: jest.fn(async (id: string) => {
+      get: vi.fn(async (id: string) => {
         const summary = summaries.find((page) => page.id === id);
         return summary
           ? { ...summary, slug: summary.title.toLowerCase(), content: 'content' }
           : undefined;
       }),
-      upsert: jest.fn(),
-      create: jest.fn(),
-      corroborate: jest.fn(),
-      archive: jest.fn(),
-      pruneDuplicates: jest.fn().mockResolvedValue(0),
+      upsert: vi.fn(),
+      create: vi.fn(),
+      corroborate: vi.fn(),
+      archive: vi.fn(),
+      pruneDuplicates: vi.fn().mockResolvedValue(0),
     } as never;
 
     const session = {
-      mkdirs: jest.fn().mockResolvedValue([true]),
-      writeFiles: jest.fn().mockResolvedValue([]),
+      mkdirs: vi.fn().mockResolvedValue([true]),
+      writeFiles: vi.fn().mockResolvedValue([]),
     } as unknown as SandboxSession;
 
     const telemetry = createTelemetry();
@@ -131,12 +134,12 @@ describe('materializeCortex', () => {
       expect.objectContaining({ id: 'cortex_service_checkout' }),
     ]);
 
-    const [pageFiles] = (session.writeFiles as jest.Mock).mock.calls[0];
+    const [pageFiles] = (session.writeFiles as Mock).mock.calls[0];
     const paths = pageFiles.map((file: { path: string }) => file.path);
     expect(paths).toContain('/workspace/cortex/services/checkout.md');
     expect(paths).not.toContain('/workspace/cortex/services/legacy.md');
 
-    const [indexFiles] = (session.writeFiles as jest.Mock).mock.calls[1];
+    const [indexFiles] = (session.writeFiles as Mock).mock.calls[1];
     const index = indexFiles.find((file: { path: string }) => file.path.endsWith('INDEX.md'));
     expect(index.content.toString('utf8')).not.toContain('Legacy');
   });

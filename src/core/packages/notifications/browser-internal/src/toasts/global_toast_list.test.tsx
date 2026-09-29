@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Toast } from '@kbn/core-notifications-browser/src/types';
 import React, { type ComponentProps } from 'react';
 import { Observable, from, EMPTY, BehaviorSubject } from 'rxjs';
@@ -25,7 +27,7 @@ toastsTelemetry.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSe
 
 const sharedProps = {
   toasts$: EMPTY,
-  dismissToast: jest.fn(),
+  dismissToast: vi.fn(),
   reportEvent: toastsTelemetry.start({ analytics: mockAnalytics }),
 };
 
@@ -45,8 +47,8 @@ const createMockToast = (id: any, type?: ComponentProps<typeof EuiToast>['color'
 });
 
 it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
-  const unsubscribeSpy = jest.fn();
-  const subscribeSpy = jest.fn((observer) => {
+  const unsubscribeSpy = vi.fn();
+  const subscribeSpy = vi.fn((observer) => {
     observer.next([]);
     return unsubscribeSpy;
   });
@@ -95,11 +97,11 @@ describe('global_toast_list with duplicate elements', () => {
   }
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders the toast list with a single toast when toasts matching deduplication heuristics are passed', () => {
@@ -158,7 +160,7 @@ describe('global_toast_list with duplicate elements', () => {
     act(() => {
       // This is so that the toast fade out animation succesfully runs,
       // only after this is the dismiss method invoked
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(sharedProps.dismissToast).toHaveBeenCalledTimes(TOAST_DUPLICATE_COUNT);
@@ -171,16 +173,16 @@ describe('global_toast_list with duplicate elements', () => {
 
 describe('global_toast_list toast dismissal telemetry', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.resetAllMocks();
+    vi.useRealTimers();
+    vi.resetAllMocks();
   });
 
   it('does not invoke the reportEvent method when there is no recurring toast', async () => {
-    const onDimissReporterSpy = jest.spyOn(sharedProps.reportEvent, 'onDismissToast');
+    const onDimissReporterSpy = vi.spyOn(sharedProps.reportEvent, 'onDismissToast');
 
     const toastObservable$ = new BehaviorSubject([createMockToast(1)]);
 
@@ -203,7 +205,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
     act(() => {
       // This is so that the toast fade out animation succesfully runs,
       // only after this is the dismiss method invoked
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(sharedProps.dismissToast).toHaveBeenCalled();
@@ -215,7 +217,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
   it('does not invoke the reportEvent method for a recurring toast of the success type', () => {
     const REPEATED_TOAST_COUNT = 2;
 
-    const onDimissReporterSpy = jest.spyOn(sharedProps.reportEvent, 'onDismissToast');
+    const onDimissReporterSpy = vi.spyOn(sharedProps.reportEvent, 'onDismissToast');
 
     const toastObservable$ = new BehaviorSubject(
       Array.from(new Array(2)).map((_, idx) => createMockToast(idx, 'success'))
@@ -240,7 +242,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
     act(() => {
       // This is so that the toast fade out animation succesfully runs,
       // only after this is the dismiss method invoked
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(sharedProps.dismissToast).toHaveBeenCalledTimes(REPEATED_TOAST_COUNT);
@@ -252,7 +254,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
   it('invokes the reportEvent method for a recurring toast of allowed type that is not success', () => {
     const REPEATED_TOAST_COUNT = 4;
 
-    const onDimissReporterSpy = jest.spyOn(sharedProps.reportEvent, 'onDismissToast');
+    const onDimissReporterSpy = vi.spyOn(sharedProps.reportEvent, 'onDismissToast');
 
     const toastObservable$ = new BehaviorSubject(
       Array.from(new Array(REPEATED_TOAST_COUNT)).map((_, idx) => createMockToast(idx, 'warning'))
@@ -277,7 +279,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
     act(() => {
       // This is so that the toast fade out animation succesfully runs,
       // only after this is the dismiss method invoked
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(sharedProps.dismissToast).toHaveBeenCalledTimes(REPEATED_TOAST_COUNT);
@@ -294,7 +296,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
     const UNIQUE_TOASTS_COUNT = 4;
     const REPEATED_COUNT_PER_UNIQUE_TOAST = 2;
 
-    const onDimissReporterSpy = jest.spyOn(sharedProps.reportEvent, 'onDismissToast');
+    const onDimissReporterSpy = vi.spyOn(sharedProps.reportEvent, 'onDismissToast');
 
     const toastObservable$ = new BehaviorSubject<Toast[]>(
       Array.from(new Array(UNIQUE_TOASTS_COUNT)).reduce((acc, _, idx) => {
@@ -321,7 +323,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
     act(() => {
       // This is so that the toast fade out animation succesfully runs,
       // only after this is the dismiss method invoked
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(sharedProps.dismissToast).toHaveBeenCalledTimes(

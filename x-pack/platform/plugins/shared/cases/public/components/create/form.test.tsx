@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { within, waitFor, screen, fireEvent } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -30,22 +33,22 @@ import { useSuggestUserProfiles } from '../../containers/user_profiles/use_sugge
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 
-jest.mock('../../containers/use_post_case');
-jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_get_all_case_configurations');
-jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
-jest.mock('../../containers/user_profiles/use_get_current_user_profile');
-jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
-jest.mock('../app/use_available_owners');
+vi.mock('../../containers/use_post_case');
+vi.mock('../../containers/use_get_tags');
+vi.mock('../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../containers/configure/use_get_all_case_configurations');
+vi.mock('../../containers/user_profiles/use_suggest_user_profiles');
+vi.mock('../../containers/user_profiles/use_get_current_user_profile');
+vi.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
+vi.mock('../app/use_available_owners');
 
-const usePostCaseMock = usePostCase as jest.Mock;
-const useGetTagsMock = useGetTags as jest.Mock;
-const useGetSupportedActionConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
-const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
-const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
-const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const usePostCaseMock = usePostCase as Mock;
+const useGetTagsMock = useGetTags as Mock;
+const useGetSupportedActionConnectorsMock = useGetSupportedActionConnectors as Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as Mock;
+const useAvailableOwnersMock = useAvailableCasesOwners as Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as Mock;
 
 describe('CreateCaseForm', () => {
   const draftStorageKey = 'cases.caseView.createCase.description.markdownEditor';
@@ -54,23 +57,23 @@ describe('CreateCaseForm', () => {
   let casesFormProps: CreateCaseFormProps;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     casesFormProps = {
-      onCancel: jest.fn(),
-      onSuccess: jest.fn(),
+      onCancel: vi.fn(),
+      onSuccess: vi.fn(),
     };
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability']);
-    usePostCaseMock.mockReturnValue({ mutateAsync: jest.fn().mockResolvedValue({ id: '1' }) });
+    usePostCaseMock.mockReturnValue({ mutateAsync: vi.fn().mockResolvedValue({ id: '1' }) });
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetSupportedActionConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
@@ -80,7 +83,7 @@ describe('CreateCaseForm', () => {
 
   afterEach(() => {
     sessionStorage.removeItem(draftStorageKey);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with steps', async () => {
@@ -179,7 +182,7 @@ describe('CreateCaseForm', () => {
     }));
 
     // CreateCaseForm is React.memo — change a prop so the mock update is read.
-    rerender(<CreateCaseForm {...casesFormProps} onCancel={jest.fn()} />);
+    rerender(<CreateCaseForm {...casesFormProps} onCancel={vi.fn()} />);
 
     await waitFor(() => {
       expect(

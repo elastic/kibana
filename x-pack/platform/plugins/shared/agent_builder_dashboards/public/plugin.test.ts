@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
@@ -13,17 +15,20 @@ import {
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
-jest.mock('./attachment_types', () => ({
-  registerDashboardAttachmentUiDefinition: jest.fn(() => jest.fn()),
-  createIdGenerator: () => ({
-    current: 'draft-id',
-    next: jest.fn(),
-  }),
-}));
+vi.mock('./attachment_types', () => {
+      const mocked = {
+      registerDashboardAttachmentUiDefinition: vi.fn(() => vi.fn()),
+      createIdGenerator: () => ({
+        current: 'draft-id',
+        next: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AgentBuilderDashboardsPlugin', () => {
-  const registerActionAsync = jest.fn();
-  const openChat = jest.fn();
+  const registerActionAsync = vi.fn();
+  const openChat = vi.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
     ({
@@ -40,13 +45,13 @@ describe('AgentBuilderDashboardsPlugin', () => {
     ({
       agentBuilder: {
         openChat,
-        getAgentBuilderAccess: jest.fn(),
+        getAgentBuilderAccess: vi.fn(),
       },
       dashboard: {},
       share: {
         url: {
           locators: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       },

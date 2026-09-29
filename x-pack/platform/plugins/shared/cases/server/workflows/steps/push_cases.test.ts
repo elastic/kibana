@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import pRetry from 'p-retry';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { pushCasesStepDefinition } from './push_cases';
@@ -12,7 +15,7 @@ import { createStepHandlerContext } from './test_utils';
 import type { CasesClient } from '../../client';
 
 // Avoid real retry delays in tests; the onFailedAttempt callback is tested separately below.
-jest.mock('p-retry', () => jest.fn().mockImplementation((fn: () => Promise<unknown>) => fn()));
+vi.mock('p-retry', () => vi.fn().mockImplementation((fn: () => Promise<unknown>) => fn()));
 
 const caseWithConnector = {
   ...createCaseResponseFixture,
@@ -22,20 +25,20 @@ const caseWithConnector = {
 const createContext = (input: unknown) =>
   createStepHandlerContext({ input, stepType: 'cases.pushCases' });
 
-const makeCasesClient = (overrides: Partial<{ get: jest.Mock; push: jest.Mock }> = {}) => {
-  const get = overrides.get ?? jest.fn().mockResolvedValue(caseWithConnector);
-  const push = overrides.push ?? jest.fn().mockResolvedValue(caseWithConnector);
-  return jest.fn().mockResolvedValue({ cases: { get, push } } as unknown as CasesClient);
+const makeCasesClient = (overrides: Partial<{ get: Mock; push: Mock }> = {}) => {
+  const get = overrides.get ?? vi.fn().mockResolvedValue(caseWithConnector);
+  const push = overrides.push ?? vi.fn().mockResolvedValue(caseWithConnector);
+  return vi.fn().mockResolvedValue({ cases: { get, push } } as unknown as CasesClient);
 };
 
 describe('pushCasesStepDefinition', () => {
   beforeEach(() => {
-    (pRetry as unknown as jest.Mock).mockImplementation((fn: () => Promise<unknown>) => fn());
+    (pRetry as unknown as Mock).mockImplementation((fn: () => Promise<unknown>) => fn());
   });
 
   it('pushes a single case to its connector and returns the result', async () => {
     const pushedCase = { ...caseWithConnector, external_service: { connector_id: 'connector-1' } };
-    const push = jest.fn().mockResolvedValue(pushedCase);
+    const push = vi.fn().mockResolvedValue(pushedCase);
     const definition = pushCasesStepDefinition(makeCasesClient({ push }));
 
     const result = await definition.handler(createContext({ case_ids: ['case-1'] }));
@@ -54,11 +57,11 @@ describe('pushCasesStepDefinition', () => {
   it('pushes all cases to their connectors', async () => {
     const case1 = { ...caseWithConnector, id: 'case-1' };
     const case2 = { ...caseWithConnector, id: 'case-2' };
-    const get = jest
+    const get = vi
       .fn()
       .mockResolvedValueOnce({ ...caseWithConnector, id: 'case-1' })
       .mockResolvedValueOnce({ ...caseWithConnector, id: 'case-2' });
-    const push = jest.fn().mockResolvedValueOnce(case1).mockResolvedValueOnce(case2);
+    const push = vi.fn().mockResolvedValueOnce(case1).mockResolvedValueOnce(case2);
     const definition = pushCasesStepDefinition(makeCasesClient({ get, push }));
 
     const result = await definition.handler(createContext({ case_ids: ['case-1', 'case-2'] }));
@@ -97,7 +100,7 @@ describe('pushCasesStepDefinition', () => {
       updated_by: null,
     };
     const pushedCase = { ...caseWithConnector, comments: [unifiedComment] };
-    const push = jest.fn().mockResolvedValue(pushedCase);
+    const push = vi.fn().mockResolvedValue(pushedCase);
     const definition = pushCasesStepDefinition(makeCasesClient({ push }));
 
     const result = await definition.handler(createContext({ case_ids: ['case-1'] }));
@@ -126,8 +129,8 @@ describe('pushCasesStepDefinition', () => {
 
   it('skips push and returns the case as-is when no connector is configured', async () => {
     const caseWithoutConnector = { ...createCaseResponseFixture, connector: null };
-    const get = jest.fn().mockResolvedValue(caseWithoutConnector);
-    const push = jest.fn();
+    const get = vi.fn().mockResolvedValue(caseWithoutConnector);
+    const push = vi.fn();
     const definition = pushCasesStepDefinition(makeCasesClient({ get, push }));
 
     await definition.handler(createContext({ case_ids: ['case-1'] }));
@@ -137,8 +140,8 @@ describe('pushCasesStepDefinition', () => {
 
   it('skips push and returns the case as-is when a .none connector is configured', async () => {
     const caseWithoutNoneConnector = { ...createCaseResponseFixture };
-    const get = jest.fn().mockResolvedValue(caseWithoutNoneConnector);
-    const push = jest.fn();
+    const get = vi.fn().mockResolvedValue(caseWithoutNoneConnector);
+    const push = vi.fn();
     const definition = pushCasesStepDefinition(makeCasesClient({ get, push }));
 
     await definition.handler(createContext({ case_ids: ['case-1'] }));
@@ -147,7 +150,7 @@ describe('pushCasesStepDefinition', () => {
   });
 
   it('returns null in the output for a failed case push and logs the error', async () => {
-    const push = jest.fn().mockRejectedValue(new Error('push failed'));
+    const push = vi.fn().mockRejectedValue(new Error('push failed'));
     const context = createContext({ case_ids: ['case-1'] });
     const definition = pushCasesStepDefinition(makeCasesClient({ push }));
 
@@ -161,8 +164,8 @@ describe('pushCasesStepDefinition', () => {
 
   it('continues processing remaining cases when one push fails', async () => {
     const successCase = { ...caseWithConnector, id: 'case-2' };
-    const get = jest.fn().mockResolvedValue(caseWithConnector);
-    const push = jest
+    const get = vi.fn().mockResolvedValue(caseWithConnector);
+    const push = vi
       .fn()
       .mockRejectedValueOnce(new Error('push failed'))
       .mockResolvedValueOnce(successCase);
@@ -178,7 +181,7 @@ describe('pushCasesStepDefinition', () => {
   });
 
   it('logs a warning via onFailedAttempt for each failed push attempt', async () => {
-    (pRetry as unknown as jest.Mock).mockImplementationOnce(
+    (pRetry as unknown as Mock).mockImplementationOnce(
       (
         fn: () => Promise<unknown>,
         opts: { onFailedAttempt: (err: { attemptNumber: number; retriesLeft: number }) => void }
@@ -189,7 +192,7 @@ describe('pushCasesStepDefinition', () => {
         })
     );
 
-    const push = jest.fn().mockRejectedValue(new Error('timeout'));
+    const push = vi.fn().mockRejectedValue(new Error('timeout'));
     const context = createContext({ case_ids: ['case-1'] });
     const definition = pushCasesStepDefinition(makeCasesClient({ push }));
 
@@ -205,7 +208,7 @@ describe('pushCasesStepDefinition', () => {
 
   it('returns { error } when the cases client cannot be obtained', async () => {
     const clientError = new Error('unauthorized');
-    const definition = pushCasesStepDefinition(jest.fn().mockRejectedValue(clientError));
+    const definition = pushCasesStepDefinition(vi.fn().mockRejectedValue(clientError));
 
     const result = await definition.handler(createContext({ case_ids: ['case-1'] }));
 

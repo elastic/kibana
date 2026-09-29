@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { updateState } from './common';
 
 describe('updateState', () => {
-  let spy: jest.SpyInstance<string, []>;
+  let spy: MockInstance<string, []>;
   beforeEach(() => {
-    spy = jest.spyOn(Date.prototype, 'toISOString');
+    spy = vi.spyOn(Date.prototype, 'toISOString');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sets initial state values', () => {

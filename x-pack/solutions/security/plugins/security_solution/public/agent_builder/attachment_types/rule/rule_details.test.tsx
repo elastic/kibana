@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
@@ -26,14 +29,20 @@ import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants'
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
 
-jest.mock('../../../common/components/user_privileges/user_privileges_context', () => ({
-  ...jest.requireActual('../../../common/components/user_privileges/user_privileges_context'),
-  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../common/components/user_privileges/user_privileges_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/components/user_privileges/user_privileges_context')),
+      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../detection_engine/rule_management/logic/use_rule', () => ({
-  useRule: jest.fn().mockReturnValue({ data: undefined }),
-}));
+vi.mock('../../../detection_engine/rule_management/logic/use_rule', () => {
+      const mocked = {
+      useRule: vi.fn().mockReturnValue({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule = {
   name: 'Test Rule',
@@ -52,12 +61,12 @@ const makeApplication = () =>
       [SECURITY_FEATURE_ID]: { crud: true, show: true },
       [RULES_FEATURE_LATEST]: { edit_rules: true },
     },
-    navigateToApp: jest.fn(),
+    navigateToApp: vi.fn(),
   } as unknown as ApplicationStart);
 
 const makeUiSettings = () =>
   ({
-    get: jest.fn(),
+    get: vi.fn(),
   } as unknown as IUiSettingsClient);
 
 const renderInlineContent = (rule: Record<string, unknown>) => {
@@ -1124,7 +1133,7 @@ describe('RuleInlineContent integration', () => {
   });
 
   describe('diff accordion', () => {
-    const mockUseRule = useRule as jest.Mock;
+    const mockUseRule = useRule as Mock;
 
     afterEach(() => {
       mockUseRule.mockReturnValue({ data: undefined });

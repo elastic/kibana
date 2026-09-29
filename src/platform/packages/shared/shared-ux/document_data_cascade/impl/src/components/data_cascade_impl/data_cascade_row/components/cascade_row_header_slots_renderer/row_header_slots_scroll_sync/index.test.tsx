@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { useCallback, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import {
@@ -16,17 +19,17 @@ import {
 } from '.';
 
 let resizeObserverCallback: ResizeObserverCallback;
-const mockObserve = jest.fn();
-const mockUnobserve = jest.fn();
-const mockDisconnect = jest.fn();
+const mockObserve = vi.fn();
+const mockUnobserve = vi.fn();
+const mockDisconnect = vi.fn();
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   mockObserve.mockClear();
   mockUnobserve.mockClear();
   mockDisconnect.mockClear();
 
-  global.ResizeObserver = jest.fn((cb) => {
+  global.ResizeObserver = vi.fn((cb) => {
     resizeObserverCallback = cb;
     return {
       observe: mockObserve,
@@ -37,9 +40,9 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
-  jest.restoreAllMocks();
+  vi.runOnlyPendingTimers();
+  vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 // ---------------------------------------------------------------------------
@@ -69,7 +72,7 @@ const configureMockElement = (
     configurable: true,
   });
 
-  el.scrollTo = jest.fn((optsOrX?: ScrollToOptions | number) => {
+  el.scrollTo = vi.fn((optsOrX?: ScrollToOptions | number) => {
     if (typeof optsOrX === 'object') {
       internalScrollLeft = optsOrX?.left ?? 0;
     } else if (typeof optsOrX === 'number') {
@@ -136,7 +139,7 @@ const hoverContainer = (testId: string) => {
 describe('RowHeaderSlotsScrollSyncProvider', () => {
   describe('useRowHeaderSlotsScrollSync', () => {
     it('throws when used outside a provider', () => {
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const Orphan = () => {
         useRowHeaderSlotsScrollSync();
         return null;
@@ -337,7 +340,7 @@ describe('RowHeaderSlotsScrollSyncProvider', () => {
 
       // expire the leader lock
       act(() => {
-        jest.advanceTimersByTime(60);
+        vi.advanceTimersByTime(60);
       });
 
       // second can now become leader
@@ -361,7 +364,7 @@ describe('RowHeaderSlotsScrollSyncProvider', () => {
       hoverContainer('container-a');
 
       const b = screen.getByTestId('container-b');
-      const scrollToSpy = b.scrollTo as jest.Mock;
+      const scrollToSpy = b.scrollTo as Mock;
       scrollToSpy.mockClear();
 
       act(() => {

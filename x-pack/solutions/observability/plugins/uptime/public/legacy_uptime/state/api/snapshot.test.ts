@@ -5,27 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { fetchSnapshotCount } from './snapshot';
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
 
 describe('snapshot API', () => {
-  let fetchMock: jest.SpyInstance<Partial<unknown>>;
+  let fetchMock: MockInstance<Partial<unknown>>;
   let mockResponse: Partial<unknown>;
 
   beforeEach(() => {
     apiService.http = {
-      get: jest.fn(),
-      fetch: jest.fn(),
+      get: vi.fn(),
+      fetch: vi.fn(),
     } as any;
-    apiService.addInspectorRequest = jest.fn();
-    fetchMock = jest.spyOn(apiService.http, 'fetch');
+    apiService.addInspectorRequest = vi.fn();
+    fetchMock = vi.spyOn(apiService.http, 'fetch');
     mockResponse = { up: 3, down: 12, total: 15 };
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls url with expected params and returns response body on 200', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { TableId } from '@kbn/securitysolution-data-table';
 
@@ -31,11 +33,14 @@ const mockState = {
   },
 };
 
-jest.mock('@kbn/ui-actions-plugin/public', () => ({
-  ...jest.requireActual('@kbn/ui-actions-plugin/public'),
-  addFilterIn: () => {},
-  addFilterOut: () => {},
-}));
+vi.mock('@kbn/ui-actions-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/ui-actions-plugin/public')),
+      addFilterIn: () => {},
+      addFilterOut: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockStore = createMockStore(mockState);
 
@@ -44,7 +49,7 @@ describe('createFilterInCellActionFactory', () => {
   const filterInAction = createFilterInCellAction({ id: 'testAction' });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const context = {

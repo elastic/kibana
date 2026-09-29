@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import apm from 'elastic-apm-node';
 import { runBuildApiDocsCli } from './build_api_docs_cli';
 import {
@@ -19,56 +22,68 @@ import {
 } from './cli';
 import { runCheckPackageDocs } from './check_package_docs_cli';
 
-jest.mock('elastic-apm-node', () => {
+vi.mock('elastic-apm-node', () => {
   const tx = {
-    startSpan: jest.fn(),
-    end: jest.fn(),
-    setOutcome: jest.fn(),
+    startSpan: vi.fn(),
+    end: vi.fn(),
+    setOutcome: vi.fn(),
   };
   return {
-    startTransaction: jest.fn(() => tx),
-    isStarted: jest.fn(() => false),
-    flush: jest.fn(),
+    startTransaction: vi.fn(() => tx),
+    isStarted: vi.fn(() => false),
+    flush: vi.fn(),
     __tx: tx,
   };
 });
 
-jest.mock('@kbn/apm-config-loader', () => ({
-  initApm: jest.fn(),
-}));
+vi.mock('@kbn/apm-config-loader', () => {
+      const mocked = {
+      initApm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let registeredHandler: any;
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn((handler: any) => {
-    registeredHandler = handler;
-  }),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn((handler: any) => {
+        registeredHandler = handler;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./cli', () => ({
-  parseCliFlags: jest.fn(),
-  setupProject: jest.fn(),
-  buildApiMap: jest.fn(),
-  collectStats: jest.fn(),
-  reportMetrics: jest.fn(),
-  writeDocs: jest.fn(),
-}));
+vi.mock('./cli', () => {
+      const mocked = {
+      parseCliFlags: vi.fn(),
+      setupProject: vi.fn(),
+      buildApiMap: vi.fn(),
+      collectStats: vi.fn(),
+      reportMetrics: vi.fn(),
+      writeDocs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./check_package_docs_cli', () => ({
-  runCheckPackageDocs: jest.fn(),
-}));
+vi.mock('./check_package_docs_cli', () => {
+      const mocked = {
+      runCheckPackageDocs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTx = (apm as any).__tx;
 
 describe('build_api_docs_cli', () => {
-  const log = { info: jest.fn(), warning: jest.fn(), error: jest.fn() };
+  const log = { info: vi.fn(), warning: vi.fn(), error: vi.fn() };
 
   beforeEach(() => {
     registeredHandler = undefined;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('routes --stats to check CLI and skips build tasks', async () => {
-    (parseCliFlags as jest.Mock).mockReturnValue({ stats: ['any'], collectReferences: false });
+    (parseCliFlags as Mock).mockReturnValue({ stats: ['any'], collectReferences: false });
 
     runBuildApiDocsCli();
     expect(registeredHandler).toBeDefined();
@@ -97,10 +112,10 @@ describe('build_api_docs_cli', () => {
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
     };
-    (parseCliFlags as jest.Mock).mockReturnValue({ stats: undefined, collectReferences: false });
-    (setupProject as jest.Mock).mockResolvedValue(setupResult);
-    (buildApiMap as jest.Mock).mockReturnValue(apiMapResult);
-    (collectStats as jest.Mock).mockResolvedValue({});
+    (parseCliFlags as Mock).mockReturnValue({ stats: undefined, collectReferences: false });
+    (setupProject as Mock).mockResolvedValue(setupResult);
+    (buildApiMap as Mock).mockReturnValue(apiMapResult);
+    (collectStats as Mock).mockResolvedValue({});
 
     runBuildApiDocsCli();
     await registeredHandler({ log, flags: {} });

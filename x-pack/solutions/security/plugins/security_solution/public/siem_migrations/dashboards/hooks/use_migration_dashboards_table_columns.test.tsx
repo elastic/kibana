@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useMigrationDashboardsTableColumns } from './use_migration_dashboards_table_columns';
 import * as columns from '../components/dashboard_table_columns';
 
-jest.mock('../components/dashboard_table_columns', () => ({
-  createActionsColumn: jest.fn(),
-  createNameColumn: jest.fn(),
-  createStatusColumn: jest.fn(),
-  createTagsColumn: jest.fn(),
-  createUpdatedColumn: jest.fn(),
-}));
+vi.mock('../components/dashboard_table_columns', () => {
+      const mocked = {
+      createActionsColumn: vi.fn(),
+      createNameColumn: vi.fn(),
+      createStatusColumn: vi.fn(),
+      createTagsColumn: vi.fn(),
+      createUpdatedColumn: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useMigrationDashboardsTableColumns', () => {
-  const installDashboard = jest.fn();
-  const openDashboardDetailsFlyout = jest.fn();
+  const installDashboard = vi.fn();
+  const openDashboardDetailsFlyout = vi.fn();
 
   it('should return the correct columns', () => {
     const { result } = renderHook(() =>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   otelDatasetFilter,
   SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
@@ -21,13 +24,16 @@ import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';
 import { createMetricsClientMock } from '../test_helpers';
 
-jest.mock('../shared', () => ({
-  ...jest.requireActual('../shared'),
-  useInfrastructureNodeMetrics: jest.fn(),
-}));
+vi.mock('../shared', async () => {
+      const mocked = {
+      ...(await vi.importActual('../shared')),
+      useInfrastructureNodeMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useHostMetricsTable hook', () => {
-  const useInfrastructureNodeMetricsMock = useInfrastructureNodeMetrics as jest.MockedFunction<
+  const useInfrastructureNodeMetricsMock = useInfrastructureNodeMetrics as MockedFunction<
     typeof useInfrastructureNodeMetrics
   >;
 

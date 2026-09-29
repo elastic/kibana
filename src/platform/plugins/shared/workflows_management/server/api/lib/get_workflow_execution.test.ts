@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
@@ -26,8 +29,8 @@ import {
 } from '../../../common';
 
 describe('getWorkflowExecution', () => {
-  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
-  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
+  let mockWorkflowDataClient: Mocked<WorkflowExecutionsDataClient>;
+  let mockStepDataClient: Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   const baseParams = {
@@ -55,7 +58,7 @@ describe('getWorkflowExecution', () => {
     mockWorkflowDataClient = createMockWorkflowDataClient();
     mockStepDataClient = createMockStepDataClient();
     mockLogger = loggerMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('source excludes with mget (stepExecutionIds present)', () => {

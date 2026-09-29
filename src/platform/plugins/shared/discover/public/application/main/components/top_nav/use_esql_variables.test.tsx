@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
@@ -26,14 +29,14 @@ class MockControlGroupRendererApi {
     initialChildControlState: ControlPanelsState<OptionsListESQLControlState>;
   } | null>;
   esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
-  addNewPanel: jest.Mock;
+  addNewPanel: Mock;
 
   constructor() {
     this.inputSubject = new BehaviorSubject<{
       initialChildControlState: ControlPanelsState<OptionsListESQLControlState>;
     } | null>(null);
     this.esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-    this.addNewPanel = jest.fn();
+    this.addNewPanel = vi.fn();
   }
 
   getInput() {
@@ -56,7 +59,7 @@ class MockControlGroupRendererApi {
     this.esqlVariables$.next(variables);
   }
 
-  updateInput = jest.fn().mockImplementation(() => {
+  updateInput = vi.fn().mockImplementation(() => {
     throw new Error('Should not be called');
   });
 }
@@ -79,7 +82,7 @@ describe('useESQLVariables', () => {
     isEsqlMode = true,
     controlGroupApi = mockControlGroupAPI as unknown as ControlGroupRendererApi,
     currentEsqlVariables = [],
-    onUpdateESQLQuery = jest.fn(),
+    onUpdateESQLQuery = vi.fn(),
   }: {
     toolkit?: InternalStateMockToolkit;
     isEsqlMode?: boolean;
@@ -110,7 +113,7 @@ describe('useESQLVariables', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockControlGroupAPI = new MockControlGroupRendererApi();
   });
 
@@ -126,7 +129,7 @@ describe('useESQLVariables', () => {
       const { hook, toolkit } = await renderUseESQLVariables({
         isEsqlMode: false,
       });
-      const dispatchSpy = jest.spyOn(toolkit.internalState, 'dispatch');
+      const dispatchSpy = vi.spyOn(toolkit.internalState, 'dispatch');
 
       // Try to simulate input, it should not trigger any dispatch
       act(() => {
@@ -150,7 +153,7 @@ describe('useESQLVariables', () => {
         isEsqlMode: true,
       });
       const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
-      const fetchSpy = jest.spyOn(dataStateContainer, 'fetch');
+      const fetchSpy = vi.spyOn(dataStateContainer, 'fetch');
       const tabId = toolkit.getCurrentTab().id;
 
       // Simulate initial input from controlGroupAPI
@@ -180,10 +183,10 @@ describe('useESQLVariables', () => {
     });
 
     it('should unsubscribe on unmount', async () => {
-      const mockUnsubscribeInput = jest.fn();
+      const mockUnsubscribeInput = vi.fn();
 
       // Mock the getInput$ observable
-      jest.spyOn(mockControlGroupAPI.inputSubject, 'asObservable').mockReturnValue(
+      vi.spyOn(mockControlGroupAPI.inputSubject, 'asObservable').mockReturnValue(
         new Observable(() => {
           return () => mockUnsubscribeInput();
         })
@@ -206,9 +209,9 @@ describe('useESQLVariables', () => {
 
     it('keeps input subscription stable when currentEsqlVariables changes', async () => {
       const { toolkit } = await setup();
-      const getInputSpy = jest.spyOn(mockControlGroupAPI, 'getInput$');
+      const getInputSpy = vi.spyOn(mockControlGroupAPI, 'getInput$');
       const tabId = toolkit.getCurrentTab().id;
-      const mockOnUpdateESQLQuery = jest.fn();
+      const mockOnUpdateESQLQuery = vi.fn();
 
       const hook = renderHook(
         ({ currentEsqlVariables }: { currentEsqlVariables: ESQLControlVariable[] }) =>
@@ -269,8 +272,8 @@ describe('useESQLVariables', () => {
       const { toolkit } = await setup();
 
       // Create a mock control group API with a mock updateInput method
-      const mockUpdateInput = jest.fn();
-      jest.spyOn(mockControlGroupAPI, 'updateInput').mockImplementation(mockUpdateInput);
+      const mockUpdateInput = vi.fn();
+      vi.spyOn(mockControlGroupAPI, 'updateInput').mockImplementation(mockUpdateInput);
 
       // Render the hook
       await renderUseESQLVariables({
@@ -302,7 +305,7 @@ describe('useESQLVariables', () => {
 
   describe('onSaveControl', () => {
     it('should call addNewPanel and onUpdateESQLQuery', async () => {
-      const mockOnTextLangQueryChange = jest.fn();
+      const mockOnTextLangQueryChange = vi.fn();
       const mockUpdatedQuery = 'new query text';
 
       const { hook } = await renderUseESQLVariables({
@@ -336,7 +339,7 @@ describe('useESQLVariables', () => {
     });
 
     it('should not call onUpdateESQLQuery if updatedQuery is empty', async () => {
-      const mockOnTextLangQueryChange = jest.fn();
+      const mockOnTextLangQueryChange = vi.fn();
 
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,

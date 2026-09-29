@@ -7,34 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getSignatureHelp } from '.';
 
-jest.mock('../shared/columns_retrieval_helpers', () => ({
-  getColumnsByTypeRetriever: jest.fn(),
-}));
+vi.mock('../shared/columns_retrieval_helpers', () => {
+      const mocked = {
+      getColumnsByTypeRetriever: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 
-const mockGetColumnsByTypeRetriever = getColumnsByTypeRetriever as jest.MockedFunction<
+const mockGetColumnsByTypeRetriever = getColumnsByTypeRetriever as MockedFunction<
   typeof getColumnsByTypeRetriever
 >;
 
 describe('getSignatureHelp', () => {
   const mockCallbacks: ESQLCallbacks = {
-    getSources: jest.fn(),
-    getColumnsFor: jest.fn(),
-    getEditorExtensions: jest.fn(),
-    getHistoryStarredItems: jest.fn(),
+    getSources: vi.fn(),
+    getColumnsFor: vi.fn(),
+    getEditorExtensions: vi.fn(),
+    getHistoryStarredItems: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock the column retrieval to return an empty map by default
     mockGetColumnsByTypeRetriever.mockReturnValue({
-      getColumnsByType: jest.fn().mockResolvedValue(new Map()),
-      getColumnMap: jest.fn().mockResolvedValue(new Map()),
+      getColumnsByType: vi.fn().mockResolvedValue(new Map()),
+      getColumnMap: vi.fn().mockResolvedValue(new Map()),
     });
   });
 
@@ -155,8 +161,8 @@ describe('getSignatureHelp', () => {
       const columnsMap = new Map([['field1', { type: 'integer' }]]);
 
       mockGetColumnsByTypeRetriever.mockReturnValue({
-        getColumnsByType: jest.fn().mockResolvedValue(new Map()),
-        getColumnMap: jest.fn().mockResolvedValue(columnsMap),
+        getColumnsByType: vi.fn().mockResolvedValue(new Map()),
+        getColumnMap: vi.fn().mockResolvedValue(columnsMap),
       });
 
       const query = 'FROM logs | EVAL result = COUNT(field1';

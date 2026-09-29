@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { buildStateSubscribe } from './build_state_subscribe';
 import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
@@ -37,9 +40,9 @@ describe('buildStateSubscribe', () => {
     });
     dataState = result.dataStateContainer;
 
-    dataState.refetch$.next = jest.fn();
-    dataState.reset = jest.fn();
-    jest.spyOn(internalStateActions, 'assignNextDataView');
+    dataState.refetch$.next = vi.fn();
+    dataState.reset = vi.fn();
+    vi.spyOn(internalStateActions, 'assignNextDataView');
   };
 
   const getSubscribeFn = () => {
@@ -54,7 +57,7 @@ describe('buildStateSubscribe', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     await setup();
   });
 
@@ -76,7 +79,7 @@ describe('buildStateSubscribe', () => {
       })
     );
 
-    expect(internalStateActions.assignNextDataView as jest.Mock).toHaveBeenCalledWith({
+    expect(internalStateActions.assignNextDataView as Mock).toHaveBeenCalledWith({
       tabId: toolkit.getCurrentTab().id,
       dataView: dataViewComplexMock,
     });
@@ -196,7 +199,7 @@ describe('buildStateSubscribe', () => {
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
-    dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
+    dataState.getInitialFetchStatus = vi.fn(() => FetchStatus.UNINITIALIZED);
     await stateSubscribeFn(
       getNextState({
         appState: {

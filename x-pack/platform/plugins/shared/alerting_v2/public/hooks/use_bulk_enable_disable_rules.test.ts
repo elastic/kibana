@@ -5,40 +5,45 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useBulkEnableRules, useBulkDisableRules } from './use_bulk_enable_disable_rules';
 
-const mockBulkEnableRules = jest.fn();
-const mockBulkDisableRules = jest.fn();
-const mockEnableRulesByQuery = jest.fn();
-const mockDisableRulesByQuery = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddWarning = jest.fn();
-const mockAddDanger = jest.fn();
+const mockBulkEnableRules = vi.fn();
+const mockBulkDisableRules = vi.fn();
+const mockEnableRulesByQuery = vi.fn();
+const mockDisableRulesByQuery = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddWarning = vi.fn();
+const mockAddDanger = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'notifications') {
-      return {
-        toasts: {
-          addSuccess: mockAddSuccess,
-          addWarning: mockAddWarning,
-          addDanger: mockAddDanger,
-        },
-      };
-    }
-    // RulesApi
-    return {
-      bulkEnableRules: mockBulkEnableRules,
-      bulkDisableRules: mockBulkDisableRules,
-      enableRulesByQuery: mockEnableRulesByQuery,
-      disableRulesByQuery: mockDisableRulesByQuery,
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'notifications') {
+          return {
+            toasts: {
+              addSuccess: mockAddSuccess,
+              addWarning: mockAddWarning,
+              addDanger: mockAddDanger,
+            },
+          };
+        }
+        // RulesApi
+        return {
+          bulkEnableRules: mockBulkEnableRules,
+          bulkDisableRules: mockBulkDisableRules,
+          enableRulesByQuery: mockEnableRulesByQuery,
+          disableRulesByQuery: mockDisableRulesByQuery,
+        };
+      },
+      CoreStart: (key: string) => key,
     };
-  },
-  CoreStart: (key: string) => key,
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -51,7 +56,7 @@ const createWrapper = () => {
 
 describe('useBulkEnableRules', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the by-ID endpoint with the provided ids', async () => {
@@ -152,7 +157,7 @@ describe('useBulkEnableRules', () => {
   it('invalidates rule list queries on success', async () => {
     mockBulkEnableRules.mockResolvedValueOnce({ affected_count: 1, errors: [] });
     const { Wrapper, queryClient } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
@@ -166,7 +171,7 @@ describe('useBulkEnableRules', () => {
 
 describe('useBulkDisableRules', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the by-ID endpoint with the provided ids', async () => {
@@ -273,7 +278,7 @@ describe('useBulkDisableRules', () => {
   it('invalidates rule list queries on success', async () => {
     mockBulkDisableRules.mockResolvedValueOnce({ affected_count: 1, errors: [] });
     const { Wrapper, queryClient } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 

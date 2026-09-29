@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { HasDataContextValue } from '../../../../context/has_data_context/has_data_context';
@@ -12,10 +14,10 @@ import { ObservabilityStatusProgress } from './observability_status_progress';
 import { I18nProvider } from '@kbn/i18n-react';
 
 describe('ObservabilityStatusProgress', () => {
-  const onViewDetailsClickFn = jest.fn();
+  const onViewDetailsClickFn = vi.fn();
 
   beforeEach(() => {
-    jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
+    vi.spyOn(hasDataHook, 'useHasData').mockReturnValue({
       hasDataMap: {
         apm: { hasData: true, status: 'success' },
         synthetics: { hasData: true, status: 'success' },

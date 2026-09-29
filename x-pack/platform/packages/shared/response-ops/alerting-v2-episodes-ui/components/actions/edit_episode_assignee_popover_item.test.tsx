@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { EditEpisodeAssigneePopoverItem } from './edit_episode_assignee_popover_item';
 
-const mockOnApply = jest.fn();
-const mockCloseMenu = jest.fn();
+const mockOnApply = vi.fn();
+const mockCloseMenu = vi.fn();
 
-jest.mock('./episode_assignee_panel', () => ({
-  EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
-  EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
-    <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
-      {'Apply'}
-    </button>
-  ),
-}));
+vi.mock('./episode_assignee_panel', () => {
+      const mocked = {
+      EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
+      EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
+        <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
+          {'Apply'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderItem = () =>
   render(
@@ -34,7 +39,7 @@ const renderItem = () =>
     />
   );
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('EditEpisodeAssigneePopoverItem', () => {
   it('keeps the picker closed until the menu item is clicked', async () => {

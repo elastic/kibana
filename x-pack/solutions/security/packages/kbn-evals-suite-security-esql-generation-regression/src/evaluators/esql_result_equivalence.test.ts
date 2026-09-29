@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createEsqlResultEquivalenceEvaluator,
@@ -29,7 +32,7 @@ interface MockQueryResult {
 const createEsClient = (responses: Record<string, MockQueryResult>): ElasticsearchClient =>
   ({
     esql: {
-      query: jest.fn(async ({ query }: { query: string }) => {
+      query: vi.fn(async ({ query }: { query: string }) => {
         const r = responses[query];
         if (r?.error) throw r.error;
         return { columns: r?.columns ?? [], values: r?.values ?? [] };
@@ -648,7 +651,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
       const executableGold = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | STATS c = COUNT(*)`;
       const executableCandidate = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | STATS total = COUNT(*)`;
 
-      const queryFn = jest.fn(async ({ query: _q }: { query: string }) => ({
+      const queryFn = vi.fn(async ({ query: _q }: { query: string }) => ({
         columns: [{ name: 'c', type: 'long' }],
         values: [[42]],
       }));
@@ -676,7 +679,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
       const candidateWithBinds = 'FROM logs-* | WHERE @timestamp < ?_tend';
       const esClient = {
         esql: {
-          query: jest.fn(async ({ query: _q }: { query: string }) => ({
+          query: vi.fn(async ({ query: _q }: { query: string }) => ({
             columns: twoColumns,
             values: [],
           })),
@@ -705,7 +708,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
       const candidate = 'FROM logs-* | LIMIT 1';
       const esClient = {
         esql: {
-          query: jest.fn(async ({ query }: { query: string }) => {
+          query: vi.fn(async ({ query }: { query: string }) => {
             if (query.includes('?_tstart')) {
               throw new Error(
                 'parsing_exception: Unknown query parameter [_tstart], did you forget to provide a params argument?'
@@ -724,7 +727,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
       const result = await evaluator.evaluate(params(candidate, goldWithBinds));
 
       // No call should have included the un-substituted form.
-      const queryFn = (esClient.esql as unknown as { query: jest.Mock }).query;
+      const queryFn = (esClient.esql as unknown as { query: Mock }).query;
       const queryStringsCalled = queryFn.mock.calls.map((c) => c[0].query);
       for (const sent of queryStringsCalled) {
         expect(sent).not.toMatch(/\?_tstart/);
@@ -743,7 +746,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
 
       const esClient = {
         esql: {
-          query: jest.fn(async ({ query }: { query: string }) => {
+          query: vi.fn(async ({ query }: { query: string }) => {
             inFlight.add(query);
             maxConcurrent = Math.max(maxConcurrent, inFlight.size);
             await new Promise((resolve) => setTimeout(resolve, 10));

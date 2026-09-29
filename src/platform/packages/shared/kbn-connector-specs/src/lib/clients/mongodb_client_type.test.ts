@@ -7,21 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // jest.mock is hoisted before variable declarations, so the factory can only
 // reference jest globals (jest.fn()) — not outer const/let. We define
 // MongoServerError inline so instanceof checks in the implementation resolve
 // against the same class reference that the test uses.
-jest.mock('mongodb', () => ({
-  MongoClient: jest.fn(),
-  MongoServerError: class MongoServerError extends Error {
-    code: number | undefined;
-    constructor(message: string, options?: { code?: number }) {
-      super(message);
-      this.name = 'MongoServerError';
-      this.code = options?.code;
-    }
-  },
-}));
+vi.mock('mongodb', () => {
+      const mocked = {
+      MongoClient: vi.fn(),
+      MongoServerError: class MongoServerError extends Error {
+        code: number | undefined;
+        constructor(message: string, options?: { code?: number }) {
+          super(message);
+          this.name = 'MongoServerError';
+          this.code = options?.code;
+        }
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { MongoClient, MongoServerError } from 'mongodb';
 import { getNodeSSLOptions } from '@kbn/actions-utils';
@@ -30,36 +36,36 @@ import { mongodbClientType } from './mongodb_client_type';
 import { clientTypes } from '.';
 import type { BuildContext } from './client_type_spec';
 
-const MockMongoClient = MongoClient as unknown as jest.Mock;
+const MockMongoClient = MongoClient as unknown as Mock;
 
 const fakeLogger = {
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
-let mockConnect: jest.Mock;
-let mockClose: jest.Mock;
-let mockClientInstance: { connect: jest.Mock; close: jest.Mock };
-let mockResolveSrvHosts: jest.Mock;
+let mockConnect: Mock;
+let mockClose: Mock;
+let mockClientInstance: { connect: Mock; close: Mock };
+let mockResolveSrvHosts: Mock;
 
 const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext => ({
   logger: fakeLogger,
   config: { uri: 'mongodb://mongo.example.com:27017/mydb' },
   networkSettings: {
-    ensureUriAllowed: jest.fn(),
-    ensureHostnameAllowed: jest.fn(),
-    getSslSettings: jest.fn().mockReturnValue({}),
-    getProxySettings: jest.fn().mockReturnValue(undefined),
-    getCustomHostSettings: jest.fn().mockReturnValue(undefined),
-    getResponseSettings: jest.fn(),
+    ensureUriAllowed: vi.fn(),
+    ensureHostnameAllowed: vi.fn(),
+    getSslSettings: vi.fn().mockReturnValue({}),
+    getProxySettings: vi.fn().mockReturnValue(undefined),
+    getCustomHostSettings: vi.fn().mockReturnValue(undefined),
+    getResponseSettings: vi.fn(),
   },
   platform: {
     resolveSrvHosts: mockResolveSrvHosts,
-    buildTlsOptions: jest.fn((targets, logger) => getNodeSSLOptions(logger, undefined, {})),
+    buildTlsOptions: vi.fn((targets, logger) => getNodeSSLOptions(logger, undefined, {})),
   },
   credential: {
-    getAuthHeaders: jest.fn().mockResolvedValue({
+    getAuthHeaders: vi.fn().mockResolvedValue({
       Authorization: `Basic ${Buffer.from('alice:secret').toString('base64')}`,
     }),
   },
@@ -78,12 +84,12 @@ describe('clientTypes registry', () => {
 
 describe('mongodbClientType', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockConnect = jest.fn().mockResolvedValue(undefined);
-    mockClose = jest.fn().mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    mockConnect = vi.fn().mockResolvedValue(undefined);
+    mockClose = vi.fn().mockResolvedValue(undefined);
     mockClientInstance = { connect: mockConnect, close: mockClose };
     MockMongoClient.mockImplementation(() => mockClientInstance);
-    mockResolveSrvHosts = jest.fn().mockResolvedValue([
+    mockResolveSrvHosts = vi.fn().mockResolvedValue([
       { name: 'shard1.example.com', port: 27017 },
       { name: 'shard2.example.com', port: 27017 },
     ]);
@@ -150,7 +156,7 @@ describe('mongodbClientType', () => {
     it('spreads the result of platform.buildTlsOptions into the MongoClient options', async () => {
       const ctx = makeBuildContext();
       const tlsResult = { rejectUnauthorized: true, ca: Buffer.from('test-ca') };
-      (ctx.platform.buildTlsOptions as jest.Mock).mockReturnValue(tlsResult);
+      (ctx.platform.buildTlsOptions as Mock).mockReturnValue(tlsResult);
       await mongodbClientType.build(ctx);
 
       expect(MockMongoClient).toHaveBeenCalledWith(
@@ -175,7 +181,7 @@ describe('mongodbClientType', () => {
 
     it('propagates a buildTlsOptions error out of build()', async () => {
       const ctx = makeBuildContext();
-      (ctx.platform.buildTlsOptions as jest.Mock).mockImplementation(() => {
+      (ctx.platform.buildTlsOptions as Mock).mockImplementation(() => {
         throw new Error('conflicting customHostSettings TLS config');
       });
 
@@ -187,7 +193,7 @@ describe('mongodbClientType', () => {
 
     it('throws instead of silently connecting when a configured proxy would apply to the host', async () => {
       const ctx = makeBuildContext();
-      (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
+      (ctx.networkSettings.getProxySettings as Mock).mockReturnValue({
         proxyUrl: 'http://proxy.example.com:8080',
         proxyBypassHosts: undefined,
         proxyOnlyHosts: undefined,
@@ -202,7 +208,7 @@ describe('mongodbClientType', () => {
 
     it('connects directly when the host is in proxyBypassHosts', async () => {
       const ctx = makeBuildContext();
-      (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
+      (ctx.networkSettings.getProxySettings as Mock).mockReturnValue({
         proxyUrl: 'http://proxy.example.com:8080',
         proxyBypassHosts: new Set(['mongo.example.com']),
         proxyOnlyHosts: undefined,
@@ -215,7 +221,7 @@ describe('mongodbClientType', () => {
 
     it('connects directly when proxyOnlyHosts is set and does not include the connector host', async () => {
       const ctx = makeBuildContext();
-      (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
+      (ctx.networkSettings.getProxySettings as Mock).mockReturnValue({
         proxyUrl: 'http://proxy.example.com:8080',
         proxyBypassHosts: undefined,
         proxyOnlyHosts: new Set(['other.example.com']),
@@ -228,7 +234,7 @@ describe('mongodbClientType', () => {
 
     it('throws when proxyOnlyHosts is set and does include the connector host', async () => {
       const ctx = makeBuildContext();
-      (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
+      (ctx.networkSettings.getProxySettings as Mock).mockReturnValue({
         proxyUrl: 'http://proxy.example.com:8080',
         proxyBypassHosts: undefined,
         proxyOnlyHosts: new Set(['mongo.example.com']),
@@ -265,7 +271,7 @@ describe('mongodbClientType', () => {
 
     it('rejects before creating a client when an SRV-resolved host is denied', async () => {
       const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
-      (ctx.networkSettings.ensureHostnameAllowed as jest.Mock).mockImplementation(
+      (ctx.networkSettings.ensureHostnameAllowed as Mock).mockImplementation(
         (hostname: string) => {
           if (hostname === 'shard2.example.com') {
             throw new Error('host "shard2.example.com" is not in the allowedHosts list');
@@ -315,7 +321,7 @@ describe('mongodbClientType', () => {
       const ctx = makeBuildContext({
         config: { uri: 'mongodb://allowed.example.com:27017,denied.example.com:27017/mydb' },
       });
-      (ctx.networkSettings.ensureHostnameAllowed as jest.Mock).mockImplementation(
+      (ctx.networkSettings.ensureHostnameAllowed as Mock).mockImplementation(
         (hostname: string) => {
           if (hostname === 'denied.example.com') {
             throw new Error('host "denied.example.com" is not in the allowedHosts list');
@@ -352,7 +358,7 @@ describe('mongodbClientType', () => {
     it('correctly decodes credentials containing colons in the password', async () => {
       const ctx = makeBuildContext({
         credential: {
-          getAuthHeaders: jest.fn().mockResolvedValue({
+          getAuthHeaders: vi.fn().mockResolvedValue({
             Authorization: `Basic ${Buffer.from('user:p:a:s:s').toString('base64')}`,
           }),
         },
@@ -387,7 +393,7 @@ describe('mongodbClientType', () => {
 
     it('rejects before creating a client when the network guard denies the host', async () => {
       const ctx = makeBuildContext();
-      (ctx.networkSettings.ensureHostnameAllowed as jest.Mock).mockImplementation(() => {
+      (ctx.networkSettings.ensureHostnameAllowed as Mock).mockImplementation(() => {
         throw new Error('host "mongo.example.com" is not in the allowedHosts list');
       });
 
@@ -418,7 +424,7 @@ describe('mongodbClientType', () => {
     it('throws if auth headers contain no recognisable Basic credential', async () => {
       const ctx = makeBuildContext({
         credential: {
-          getAuthHeaders: jest.fn().mockResolvedValue({ Authorization: 'Bearer some-token' }),
+          getAuthHeaders: vi.fn().mockResolvedValue({ Authorization: 'Bearer some-token' }),
         },
       });
       await expect(mongodbClientType.build(ctx)).rejects.toThrow(
@@ -429,7 +435,7 @@ describe('mongodbClientType', () => {
 
     it('throws if Authorization header is absent', async () => {
       const ctx = makeBuildContext({
-        credential: { getAuthHeaders: jest.fn().mockResolvedValue({}) },
+        credential: { getAuthHeaders: vi.fn().mockResolvedValue({}) },
       });
       await expect(mongodbClientType.build(ctx)).rejects.toThrow(
         'basic auth credentials (username and password) are required'
@@ -440,7 +446,7 @@ describe('mongodbClientType', () => {
     it('throws if the decoded username is empty', async () => {
       const ctx = makeBuildContext({
         credential: {
-          getAuthHeaders: jest.fn().mockResolvedValue({
+          getAuthHeaders: vi.fn().mockResolvedValue({
             Authorization: `Basic ${Buffer.from(':secret').toString('base64')}`,
           }),
         },
@@ -454,7 +460,7 @@ describe('mongodbClientType', () => {
     it('throws if the decoded password is empty', async () => {
       const ctx = makeBuildContext({
         credential: {
-          getAuthHeaders: jest.fn().mockResolvedValue({
+          getAuthHeaders: vi.fn().mockResolvedValue({
             Authorization: `Basic ${Buffer.from('alice:').toString('base64')}`,
           }),
         },

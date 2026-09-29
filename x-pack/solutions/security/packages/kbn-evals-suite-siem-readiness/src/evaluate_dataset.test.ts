@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator } from '@kbn/evals';
 import type { SiemReadinessEvalChatClient } from './chat_client';
 import { createEvaluateSiemReadinessDataset } from './evaluate_dataset';
@@ -13,14 +15,14 @@ const buildEvaluator = (name: string): Evaluator => ({
   name,
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: jest.fn().mockResolvedValue({ score: 0 }),
+  evaluate: vi.fn().mockResolvedValue({ score: 0 }),
 });
 
 const buildDeps = () => {
-  const runExperiment = jest.fn().mockResolvedValue(undefined);
+  const runExperiment = vi.fn().mockResolvedValue(undefined);
   const executorClient = { runExperiment } as unknown as EvalsExecutorClient;
   const chatClient = {
-    converse: jest.fn().mockResolvedValue({
+    converse: vi.fn().mockResolvedValue({
       messages: [],
       steps: [],
       errors: [],
@@ -28,7 +30,7 @@ const buildDeps = () => {
     }),
   } as unknown as SiemReadinessEvalChatClient;
   const evaluators = {
-    criteria: jest.fn().mockReturnValue(buildEvaluator('Criteria')),
+    criteria: vi.fn().mockReturnValue(buildEvaluator('Criteria')),
     traceBasedEvaluators: {
       inputTokens: buildEvaluator('Input tokens'),
       outputTokens: buildEvaluator('Output tokens'),

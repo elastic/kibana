@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { open } from 'fs/promises';
 import { validatePath, validateUrl, validateMimeType, validateFileSignature } from './validators';
 
-jest.mock('fs/promises', () => ({
-  open: jest.fn(),
-}));
+vi.mock('fs/promises', () => {
+      const mocked = {
+      open: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('validators', () => {
   describe('validatePath', () => {
@@ -77,13 +83,13 @@ describe('validators', () => {
 
   describe('validateFileSignature', () => {
     const mockFileHandle = {
-      read: jest.fn(),
-      close: jest.fn(),
+      read: vi.fn(),
+      close: vi.fn(),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      (open as jest.Mock).mockResolvedValue(mockFileHandle);
+      vi.clearAllMocks();
+      (open as Mock).mockResolvedValue(mockFileHandle);
       mockFileHandle.close.mockResolvedValue(undefined);
     });
 

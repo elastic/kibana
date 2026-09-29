@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getValueListsMetrics } from './get_metrics';
 import { getListsOverview } from './queries/get_lists_overview';
 import { getListItemsOverview } from './queries/get_list_items_overview';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { METRICS_ITEMS_DEFAULT_STATE, METRICS_LISTS_DEFAULT_STATE } from './utils';
 
-jest.mock('./queries/get_lists_overview', () => ({
-  getListsOverview: jest.fn(),
-}));
+vi.mock('./queries/get_lists_overview', () => {
+      const mocked = {
+      getListsOverview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./queries/get_list_items_overview', () => ({
-  getListItemsOverview: jest.fn(),
-}));
+vi.mock('./queries/get_list_items_overview', () => {
+      const mocked = {
+      getListItemsOverview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getValueListsMetrics', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -26,8 +35,8 @@ describe('getValueListsMetrics', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
-    jest.clearAllMocks();
-    jest.resetAllMocks();
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns combined metrics from getListsOverview and getListItemsOverview', async () => {
@@ -45,8 +54,8 @@ describe('getValueListsMetrics', () => {
       average_items_per_list: 7.5,
     };
 
-    (getListsOverview as jest.Mock).mockResolvedValueOnce(mockListsOverview);
-    (getListItemsOverview as jest.Mock).mockResolvedValueOnce(mockItemsOverview);
+    (getListsOverview as Mock).mockResolvedValueOnce(mockListsOverview);
+    (getListItemsOverview as Mock).mockResolvedValueOnce(mockItemsOverview);
 
     const result = await getValueListsMetrics({ esClient, logger });
 
@@ -64,8 +73,8 @@ describe('getValueListsMetrics', () => {
       average_items_per_list: 7.5,
     };
 
-    (getListsOverview as jest.Mock).mockRejectedValueOnce(new Error('Lists overview failed'));
-    (getListItemsOverview as jest.Mock).mockResolvedValueOnce(mockItemsOverview);
+    (getListsOverview as Mock).mockRejectedValueOnce(new Error('Lists overview failed'));
+    (getListItemsOverview as Mock).mockResolvedValueOnce(mockItemsOverview);
 
     const result = await getValueListsMetrics({ esClient, logger });
 
@@ -83,8 +92,8 @@ describe('getValueListsMetrics', () => {
       total: 6,
     };
 
-    (getListsOverview as jest.Mock).mockResolvedValueOnce(mockListsOverview);
-    (getListItemsOverview as jest.Mock).mockRejectedValueOnce(new Error('Items overview failed'));
+    (getListsOverview as Mock).mockResolvedValueOnce(mockListsOverview);
+    (getListItemsOverview as Mock).mockRejectedValueOnce(new Error('Items overview failed'));
 
     const result = await getValueListsMetrics({ esClient, logger });
 
@@ -95,8 +104,8 @@ describe('getValueListsMetrics', () => {
   });
 
   it('handles errors gracefully when both functions fail', async () => {
-    (getListsOverview as jest.Mock).mockRejectedValueOnce(new Error('Lists overview failed'));
-    (getListItemsOverview as jest.Mock).mockRejectedValueOnce(new Error('Items overview failed'));
+    (getListsOverview as Mock).mockRejectedValueOnce(new Error('Lists overview failed'));
+    (getListItemsOverview as Mock).mockRejectedValueOnce(new Error('Items overview failed'));
 
     const result = await getValueListsMetrics({ esClient, logger });
 

@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { registerAttachmentUiDefinitions, registerImpactAttachment } from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
-  const mockAddAttachmentType = jest.fn();
+  const mockAddAttachmentType = vi.fn();
   const mockAttachments: AttachmentServiceStartContract = {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
 
-  const resolveSecurityCanvasContext = jest.fn();
-  const getSpaceId = jest.fn().mockResolvedValue('default');
-  const mockData = { search: { search: jest.fn() } };
+  const resolveSecurityCanvasContext = vi.fn();
+  const getSpaceId = vi.fn().mockResolvedValue('default');
+  const mockData = { search: { search: vi.fn() } };
 
   const register = () =>
     registerAttachmentUiDefinitions({
@@ -28,7 +30,7 @@ describe('registerAttachmentUiDefinitions', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns attachmentLabel when provided in alert attachment data', () => {
@@ -94,7 +96,7 @@ describe('registerAttachmentUiDefinitions', () => {
 
 describe('registerImpactAttachment', () => {
   it('registers the security.impact attachment type synchronously', () => {
-    const addAttachmentType = jest.fn();
+    const addAttachmentType = vi.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
     registerImpactAttachment({ attachments });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { AppHeader } from '@kbn/app-header';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
@@ -15,19 +18,22 @@ import { usePermissions } from '../../../../hooks/use_permissions';
 import { render } from '../../../../utils/test_helper';
 import { useCreateSloPrimaryAction } from './create_slo_btn';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_permissions');
-jest.mock('../../../../hooks/use_fetch_slo_templates');
-jest.mock('../../../../hooks/use_fetch_slo_template_tags');
-jest.mock('../../../../hooks/use_composite_slo_enabled', () => ({
-  useCompositeSloEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_permissions');
+vi.mock('../../../../hooks/use_fetch_slo_templates');
+vi.mock('../../../../hooks/use_fetch_slo_template_tags');
+vi.mock('../../../../hooks/use_composite_slo_enabled', () => {
+      const mocked = {
+      useCompositeSloEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNavigateToUrl = jest.fn();
-const useKibanaMock = useKibana as jest.Mock;
-const usePermissionsMock = usePermissions as jest.Mock;
-const useFetchSloTemplatesMock = useFetchSloTemplates as jest.Mock;
-const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
+const mockNavigateToUrl = vi.fn();
+const useKibanaMock = useKibana as Mock;
+const usePermissionsMock = usePermissions as Mock;
+const useFetchSloTemplatesMock = useFetchSloTemplates as Mock;
+const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as Mock;
 
 function CreateSloPrimaryHarness() {
   const { primaryActionItem, templatesFlyout } = useCreateSloPrimaryAction();
@@ -41,7 +47,7 @@ function CreateSloPrimaryHarness() {
 
 describe('useCreateSloPrimaryAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         http: { basePath: { prepend: (path: string) => path } },

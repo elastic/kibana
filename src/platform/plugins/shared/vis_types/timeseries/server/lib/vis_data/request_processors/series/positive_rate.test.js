@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { positiveRate } from './positive_rate';
 describe('positiveRate(req, panel, series)', () => {
   let panel;
@@ -44,20 +46,20 @@ describe('positiveRate(req, panel, series)', () => {
     uiSettings = {
       get: async () => 50,
     };
-    buildSeriesMetaParams = jest.fn().mockResolvedValue({
+    buildSeriesMetaParams = vi.fn().mockResolvedValue({
       interval: 'auto',
     });
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     await positiveRate(
       req,
       panel,
       series,
       {},
       {},
-      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      { maxBucketsLimit: 2000, getValidTimeInterval: vi.fn(() => '1d') },
       uiSettings,
       buildSeriesMetaParams
     )(next)({});
@@ -73,7 +75,7 @@ describe('positiveRate(req, panel, series)', () => {
       series,
       {},
       {},
-      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      { maxBucketsLimit: 2000, getValidTimeInterval: vi.fn(() => '1d') },
       uiSettings,
       buildSeriesMetaParams
     )(next)({});

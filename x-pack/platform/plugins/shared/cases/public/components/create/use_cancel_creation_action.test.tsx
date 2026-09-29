@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { useCancelCreationAction } from './use_cancel_creation_action';
 import { TestProviders } from '../../common/mock';
 
 describe('UseConfirmationModal', () => {
-  const onConfirmationCallback = jest.fn();
+  const onConfirmationCallback = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('init', async () => {

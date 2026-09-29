@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { fetchRulesSearch } from './fetch_rules_search';
@@ -13,7 +15,7 @@ const mockHttp = httpServiceMock.createStartContract();
 
 describe('fetchRulesSearch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHttp.get.mockResolvedValue({
       items: [],
       total: 0,

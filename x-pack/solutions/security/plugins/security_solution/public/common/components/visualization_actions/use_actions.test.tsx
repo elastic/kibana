@@ -5,41 +5,46 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { mockAttributes } from './mocks';
 import { DEFAULT_ACTIONS, useActions, VISUALIZATION_CONTEXT_MENU_TRIGGER } from './use_actions';
 import { TestProviders } from '../../mock';
 
-jest.mock('./use_add_to_existing_case', () => {
+vi.mock('./use_add_to_existing_case', () => {
   return {
-    useAddToExistingCase: jest.fn().mockReturnValue({
+    useAddToExistingCase: vi.fn().mockReturnValue({
       disabled: false,
-      onAddToExistingCaseClicked: jest.fn(),
+      onAddToExistingCaseClicked: vi.fn(),
     }),
   };
 });
-jest.mock('./use_redirect_to_dashboard_from_lens', () => ({
-  useRedirectToDashboardFromLens: jest.fn().mockReturnValue({
-    redirectTo: jest.fn(),
-    getEditOrCreateDashboardPath: jest.fn().mockReturnValue('mockDashboardPath'),
-  }),
-}));
+vi.mock('./use_redirect_to_dashboard_from_lens', () => {
+      const mocked = {
+      useRedirectToDashboardFromLens: vi.fn().mockReturnValue({
+        redirectTo: vi.fn(),
+        getEditOrCreateDashboardPath: vi.fn().mockReturnValue('mockDashboardPath'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/kibana/kibana_react', () => {
+vi.mock('../../lib/kibana/kibana_react', () => {
   return {
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: vi.fn().mockReturnValue({
       services: {
         lens: {
-          navigateToPrefilledEditor: jest.fn(),
-          canUseEditor: jest.fn().mockReturnValue(true),
-          SaveModalComponent: jest
+          navigateToPrefilledEditor: vi.fn(),
+          canUseEditor: vi.fn().mockReturnValue(true),
+          SaveModalComponent: vi
             .fn()
             .mockReturnValue(() => <div data-test-subj="saveModalComponent" />),
         },
         notifications: {
           toasts: {
-            addWarning: jest.fn(),
+            addWarning: vi.fn(),
           },
         },
         application: { capabilities: { visualize_v2: { save: true } } },
@@ -56,14 +61,14 @@ const props = {
     to: '2022-11-03T15:16:50.053Z',
   },
   inspectActionProps: {
-    handleInspectClick: jest.fn(),
+    handleInspectClick: vi.fn(),
     isInspectButtonDisabled: false,
   },
 };
 
 describe(`useActions`, () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render actions', () => {

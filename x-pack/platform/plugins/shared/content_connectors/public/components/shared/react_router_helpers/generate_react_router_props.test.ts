@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockHistory } from '../../../__mocks__/react_router';
 import { generateReactRouterProps } from '.';
 import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -13,7 +15,7 @@ describe('generateReactRouterProps', () => {
   const history = { ...scopedHistoryMock.create(), ...mockHistory };
   const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('generates React-Router-friendly href and onClick props', () => {
@@ -35,11 +37,11 @@ describe('generateReactRouterProps', () => {
 
   describe('onClick', () => {
     it('prevents default navigation and uses React Router history for internal links', () => {
-      const navigateToUrl = jest.fn();
+      const navigateToUrl = vi.fn();
       const mockEvent = {
         button: 0,
         target: { getAttribute: () => '_self' },
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as any;
 
       const { onClick } = generateReactRouterProps({ http, to: '/test', history, navigateToUrl });
@@ -56,9 +58,9 @@ describe('generateReactRouterProps', () => {
       const mockEvent = {
         button: 0,
         target: { getAttribute: () => '_self' },
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as any;
-      const navigateToUrl = jest.fn();
+      const navigateToUrl = vi.fn();
       const { onClick } = generateReactRouterProps({
         http,
         to: '/app/content_connectors/test',
@@ -76,9 +78,9 @@ describe('generateReactRouterProps', () => {
     });
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
-      const navigateToUrl = jest.fn();
+      const navigateToUrl = vi.fn();
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         shiftKey: true,
         target: { getAttribute: () => '_blank' },
       } as any;
@@ -90,8 +92,8 @@ describe('generateReactRouterProps', () => {
     });
 
     it('calls inherited onClick actions in addition to default navigation', () => {
-      const mockEvent = { preventDefault: jest.fn() } as any;
-      const customOnClick = jest.fn(); // Can be anything from telemetry to a state reset
+      const mockEvent = { preventDefault: vi.fn() } as any;
+      const customOnClick = vi.fn(); // Can be anything from telemetry to a state reset
 
       const { onClick } = generateReactRouterProps({
         http,

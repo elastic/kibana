@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -28,9 +30,9 @@ import {
   getTotalSizeInBytes,
 } from '../../hooks/use_results_rollup/utils/stats';
 
-const mockCopyToClipboard = jest.fn((value) => true);
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+const mockCopyToClipboard = vi.fn((value) => true);
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     copyToClipboard: (value: string) => mockCopyToClipboard(value),
@@ -67,7 +69,7 @@ const patternIndexNames: Record<string, string[]> = {
   ],
 };
 
-const addSuccessToast = jest.fn();
+const addSuccessToast = vi.fn();
 
 const lastChecked = '2023-03-28T23:27:28.159Z';
 
@@ -79,7 +81,7 @@ const totalSizeInBytes = getTotalSizeInBytes(patternRollups);
 
 describe('SummaryActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     render(
       <TestExternalProviders>

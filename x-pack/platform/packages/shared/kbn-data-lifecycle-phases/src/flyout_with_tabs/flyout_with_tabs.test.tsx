@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -21,7 +23,7 @@ const tabs: NonEmptyFlyoutTabs<TestTabId> = [
 const renderFlyout = ({
   initialTabId,
   onBack,
-  onClose = jest.fn(),
+  onClose = vi.fn(),
   showBackButton,
   titleAppend,
 }: {
@@ -65,8 +67,8 @@ describe('FlyoutWithTabs', () => {
   });
 
   it('calls onBack when the back button is clicked', () => {
-    const onBack = jest.fn();
-    const onClose = jest.fn();
+    const onBack = vi.fn();
+    const onClose = vi.fn();
 
     renderFlyout({ showBackButton: true, onBack, onClose });
 
@@ -77,7 +79,7 @@ describe('FlyoutWithTabs', () => {
   });
 
   it('falls back to onClose when the back button is clicked without onBack', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     renderFlyout({ showBackButton: true, onClose });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { UserBannerService } from './user_banner_service';
 import { overlayBannersServiceMock } from './banners_service.test.mocks';
@@ -65,7 +67,7 @@ describe('OverlayBannersService', () => {
   });
 
   it('dismisses banner after timeout', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
     startService('testing banner!');
     expect(banners.remove).not.toHaveBeenCalled();
 
@@ -73,7 +75,7 @@ describe('OverlayBannersService', () => {
     const mount = banners.replace.mock.calls[0][1];
     mount(document.createElement('div'));
     // Process all timers
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(banners.remove).toHaveBeenCalled();
   });
 

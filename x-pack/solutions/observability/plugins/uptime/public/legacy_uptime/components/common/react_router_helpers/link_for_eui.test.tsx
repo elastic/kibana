@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
@@ -15,7 +17,7 @@ import { mockHistory } from '../../../lib/__mocks__/ut_router_history.mock';
 
 describe('EUI & React Router Component Helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {
@@ -52,7 +54,7 @@ describe('EUI & React Router Component Helpers', () => {
 
       // Fire a simulated click
       // Spy on the real preventDefault method
-      const preventDefaultSpy = jest.spyOn(Event.prototype, 'preventDefault');
+      const preventDefaultSpy = vi.spyOn(Event.prototype, 'preventDefault');
 
       fireEvent.click(link);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -21,11 +23,11 @@ import { EpisodeDataSourceProvider } from '../context/episode_data_source_contex
 import { useSpaceId } from './use_space_id';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 
-jest.mock('../utils/execute_esql_query');
-jest.mock('./use_space_id');
+vi.mock('../utils/execute_esql_query');
+vi.mock('./use_space_id');
 
-const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
-const mockUseSpaceId = jest.mocked(useSpaceId);
+const mockExecuteEsqlQuery = vi.mocked(executeEsqlQuery);
+const mockUseSpaceId = vi.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
 
 const sourceWithHistogram = (fetchHistogram: () => Promise<EpisodeSourceHistogram>) =>
@@ -58,7 +60,7 @@ const createWrapper = (
 };
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseSpaceId.mockReturnValue('default'); // restore after clearAllMocks
 });
 
@@ -249,7 +251,7 @@ describe('useEpisodesHistogramQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false }))
+          sourceWithHistogram(vi.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false }))
         ),
       }
     );
@@ -286,7 +288,7 @@ describe('useEpisodesHistogramQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: sourceRows, isCapHit: false }))
+          sourceWithHistogram(vi.fn().mockResolvedValue({ rows: sourceRows, isCapHit: false }))
         ),
       }
     );
@@ -309,7 +311,7 @@ describe('useEpisodesHistogramQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [], isCapHit: true }))
+          sourceWithHistogram(vi.fn().mockResolvedValue({ rows: [], isCapHit: true }))
         ),
       }
     );
@@ -336,7 +338,7 @@ describe('useEpisodesHistogramQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false })),
+          sourceWithHistogram(vi.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false })),
           false
         ),
       }
@@ -368,7 +370,7 @@ describe('useEpisodesHistogramQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockRejectedValue(new Error('source fetch failed')))
+          sourceWithHistogram(vi.fn().mockRejectedValue(new Error('source fetch failed')))
         ),
       }
     );

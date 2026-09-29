@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DATA_STREAM_PHASES } from '../../common';
 import { PhaseCallbackHandler } from './phase_callback_handler';
 
 describe('PhaseCallbackHandler', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('maps task tool invocations to sub-agent phases', () => {
-    const handler = new PhaseCallbackHandler(jest.fn());
+    const handler = new PhaseCallbackHandler(vi.fn());
 
     expect(
       handler.resolvePhase('task', JSON.stringify({ subagent_name: 'log_and_ecs_analyzer' }))
@@ -32,7 +34,7 @@ describe('PhaseCallbackHandler', () => {
   });
 
   it('maps fixing pipeline after review has started', () => {
-    const handler = new PhaseCallbackHandler(jest.fn());
+    const handler = new PhaseCallbackHandler(vi.fn());
     handler.reportPhaseIfAdvanced(DATA_STREAM_PHASES.reviewing);
 
     expect(
@@ -42,7 +44,7 @@ describe('PhaseCallbackHandler', () => {
   });
 
   it('reports phases monotonically with debounce', async () => {
-    const reportPhase = jest.fn();
+    const reportPhase = vi.fn();
     const handler = new PhaseCallbackHandler(reportPhase);
 
     handler.reportPhaseIfAdvanced(DATA_STREAM_PHASES.mappingToEcs);
@@ -51,7 +53,7 @@ describe('PhaseCallbackHandler', () => {
 
     expect(reportPhase).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
     await Promise.resolve();
 
     expect(reportPhase).toHaveBeenCalledTimes(1);
@@ -59,7 +61,7 @@ describe('PhaseCallbackHandler', () => {
   });
 
   it('flushes pending phase immediately', async () => {
-    const reportPhase = jest.fn();
+    const reportPhase = vi.fn();
     const handler = new PhaseCallbackHandler(reportPhase);
 
     handler.reportPhaseIfAdvanced(DATA_STREAM_PHASES.analyzingLogs);

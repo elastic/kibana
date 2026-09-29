@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import * as api from '../apis/bulk_get_maintenance_windows';
@@ -17,10 +20,10 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '../utils/test';
 
-jest.mock('./use_license');
-jest.mock('../apis/bulk_get_maintenance_windows');
+vi.mock('./use_license');
+vi.mock('../apis/bulk_get_maintenance_windows');
 
-const useLicenseMock = useLicense as jest.Mock;
+const useLicenseMock = useLicense as Mock;
 
 const { http, notifications, application } = coreMock.createStart();
 const licensing = licensingMock.createStart();
@@ -79,11 +82,11 @@ const wrapper = ({ children }: PropsWithChildren) => {
 };
 
 describe('useBulkGetMaintenanceWindowsQuery', () => {
-  let addErrorMock: jest.Mock;
+  let addErrorMock: Mock;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-    addErrorMock = notifications.toasts.addError as jest.Mock;
+    vi.clearAllMocks();
+    addErrorMock = notifications.toasts.addError as Mock;
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
   });
 
@@ -95,7 +98,7 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
       },
     };
 
-    const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
+    const spy = vi.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
     const { result } = renderHook(
@@ -128,7 +131,7 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
       },
     };
 
-    const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
+    const spy = vi.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
     renderHook(
@@ -163,7 +166,7 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
 
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 
-    const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
+    const spy = vi.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
     renderHook(
@@ -191,7 +194,7 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
       },
     };
 
-    const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
+    const spy = vi.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
     renderHook(
@@ -212,7 +215,7 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
   });
 
   it('does not call the api if the maintenanceWindow capability is disabled', async () => {
-    const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
+    const spy = vi.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
     renderHook(
@@ -240,7 +243,7 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
       },
     };
 
-    const spy = jest
+    const spy = vi
       .spyOn(api, 'bulkGetMaintenanceWindows')
       .mockRejectedValue(new Error('An error'));
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment-timezone';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -12,34 +14,40 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 import { TimeseriesChart } from './timeseries_chart';
 
-jest.mock('../../../util/time_buckets_service', () => ({
-  timeBucketsServiceFactory: function () {
-    return { getTimeBuckets: jest.fn() };
-  },
-}));
-
-jest.mock('../../../util/time_series_explorer_service', () => ({
-  timeSeriesExplorerServiceFactory: function () {
-    return {
-      getAutoZoomDuration: jest.fn(),
-      calculateAggregationInterval: jest.fn(),
-      calculateInitialFocusRange: jest.fn(),
-      calculateDefaultFocusRange: jest.fn(),
-      processRecordScoreResults: jest.fn(),
-      processMetricPlotResults: jest.fn(),
-      processForecastResults: jest.fn(),
-      findChartPointForAnomalyTime: jest.fn(),
-      processDataForFocusAnomalies: jest.fn(),
-      findChartPointForScheduledEvent: jest.fn(),
-      processScheduledEventsForChart: jest.fn(),
-      getFocusData: jest.fn(),
+vi.mock('../../../util/time_buckets_service', () => {
+      const mocked = {
+      timeBucketsServiceFactory: function () {
+        return { getTimeBuckets: vi.fn() };
+      },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../util/time_series_explorer_service', () => {
+      const mocked = {
+      timeSeriesExplorerServiceFactory: function () {
+        return {
+          getAutoZoomDuration: vi.fn(),
+          calculateAggregationInterval: vi.fn(),
+          calculateInitialFocusRange: vi.fn(),
+          calculateDefaultFocusRange: vi.fn(),
+          processRecordScoreResults: vi.fn(),
+          processMetricPlotResults: vi.fn(),
+          processForecastResults: vi.fn(),
+          findChartPointForAnomalyTime: vi.fn(),
+          processDataForFocusAnomalies: vi.fn(),
+          findChartPointForScheduledEvent: vi.fn(),
+          processScheduledEventsForChart: vi.fn(),
+          getFocusData: vi.fn(),
+        };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function getTimeseriesChartPropsMock() {
   return {
-    contextChartSelected: jest.fn(),
+    contextChartSelected: vi.fn(),
     modelPlotEnabled: false,
     renderFocusChartOnly: false,
     showForecast: true,
@@ -56,7 +64,7 @@ const kibanaReactContextMock = createKibanaReactContext({
     mlApi: {},
     mlResultsService: {},
   },
-  notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+  notifications: { toasts: { addDanger: vi.fn(), addSuccess: vi.fn() } },
 });
 
 describe('TimeseriesChart', () => {

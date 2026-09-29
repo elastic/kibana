@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { PluginStatement } from './plugin_statement';
 import { shallow } from 'enzyme';
@@ -17,7 +19,7 @@ describe('PluginStatement component', () => {
   let processorStatement;
 
   beforeEach(() => {
-    onShowVertexDetails = jest.fn();
+    onShowVertexDetails = vi.fn();
     props = {
       statement: {
         hasExplicitId: true,
@@ -31,8 +33,8 @@ describe('PluginStatement component', () => {
       onShowVertexDetails,
     };
 
-    isSlow = jest.fn().mockImplementation(() => false);
-    isTimeConsuming = jest.fn().mockImplementation(() => false);
+    isSlow = vi.fn().mockImplementation(() => false);
+    isTimeConsuming = vi.fn().mockImplementation(() => false);
     processorStatement = {
       hasExplicitId: true,
       id: 'mutatePlugin',
@@ -69,13 +71,13 @@ describe('PluginStatement component', () => {
 
   it('adds warning highlight for cpu time', () => {
     props.statement = processorStatement;
-    props.statement.vertex.isTimeConsuming = jest.fn().mockImplementation(() => true);
+    props.statement.vertex.isTimeConsuming = vi.fn().mockImplementation(() => true);
     expect(render(props)).toMatchSnapshot();
   });
 
   it('adds warning highlight for event millis', () => {
     props.statement = processorStatement;
-    props.statement.vertex.isSlow = jest.fn().mockImplementation(() => true);
+    props.statement.vertex.isSlow = vi.fn().mockImplementation(() => true);
     expect(render(props)).toMatchSnapshot();
   });
 

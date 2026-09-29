@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { IpFormat } from './ip';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
@@ -14,7 +16,7 @@ describe('IP Address Format', () => {
   let ip: IpFormat;
 
   beforeEach(() => {
-    ip = new IpFormat({}, jest.fn());
+    ip = new IpFormat({}, vi.fn());
   });
 
   test('converts a value from a decimal to a string', () => {

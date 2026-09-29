@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { EuiComboBox } from '@elastic/eui';
 import React from 'react';
 
@@ -22,7 +25,7 @@ describe('RoleSelector', () => {
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;
   beforeEach(() => {
     rolesAPI = rolesAPIClientMock.create();
-    (rolesAPI as jest.Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
+    (rolesAPI as Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
       { name: 'foo_role' },
       { name: 'bar role' },
     ] as Role[]);
@@ -40,7 +43,7 @@ describe('RoleSelector', () => {
       } as RoleMapping,
       canUseStoredScripts: true,
       canUseInlineScripts: true,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'roles',
       rolesAPIClient: rolesAPI,
     } as RoleSelector['props'];
@@ -62,7 +65,7 @@ describe('RoleSelector', () => {
       } as RoleMapping,
       canUseStoredScripts: true,
       canUseInlineScripts: true,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'templates',
       rolesAPIClient: rolesAPI,
     } as RoleSelector['props'];
@@ -93,7 +96,7 @@ describe('RoleSelector', () => {
       } as RoleMapping,
       canUseStoredScripts: true,
       canUseInlineScripts: true,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'templates',
       rolesAPIClient: rolesAPI,
     } as RoleSelector['props'];
@@ -129,7 +132,7 @@ describe('RoleSelector', () => {
       } as RoleMapping,
       canUseStoredScripts: true,
       canUseInlineScripts: true,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'templates',
       rolesAPIClient: rolesAPI,
     } as RoleSelector['props'];
@@ -157,7 +160,7 @@ describe('RoleSelector', () => {
         } as RoleMapping,
         canUseStoredScripts: true,
         canUseInlineScripts: true,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         mode: 'roles',
         rolesAPIClient: rolesAPI,
         readOnly: true,
@@ -184,7 +187,7 @@ describe('RoleSelector', () => {
         } as RoleMapping,
         canUseStoredScripts: true,
         canUseInlineScripts: true,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         mode: 'templates',
         rolesAPIClient: rolesAPI,
         readOnly: true,

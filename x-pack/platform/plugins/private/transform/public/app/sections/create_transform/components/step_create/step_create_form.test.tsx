@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,7 +14,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { StepCreateFormProps } from './step_create_form';
 import { StepCreateForm } from './step_create_form';
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
 describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {

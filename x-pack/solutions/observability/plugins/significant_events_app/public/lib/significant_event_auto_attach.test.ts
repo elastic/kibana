@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -62,7 +65,7 @@ const createIdGenerator = (): IdGenerator => {
     get current() {
       return current;
     },
-    next: jest.fn(() => {
+    next: vi.fn(() => {
       current = current === 'draft-id-1' ? 'draft-id-2' : 'draft-id-3';
       return current;
     }),
@@ -73,17 +76,17 @@ describe('registerSignificantEventAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let focusedSignificantEventService: FocusedSignificantEventService;
-  let addAttachment: jest.Mock;
+  let addAttachment: Mock;
   let draftAttachmentId: IdGenerator;
   let cleanup: () => void;
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     focusedSignificantEventService = new FocusedSignificantEventService();
-    addAttachment = jest.fn();
+    addAttachment = vi.fn();
     draftAttachmentId = createIdGenerator();
     chatEventsByConversationId = new Map();
 
@@ -97,7 +100,7 @@ describe('registerSignificantEventAutoAttach', () => {
       addAttachment,
       events: {
         ui: { activeConversation$: activeConversation$.asObservable() },
-        getChatEvents$: jest.fn((conversationId: string) => {
+        getChatEvents$: vi.fn((conversationId: string) => {
           let chatEvents$ = chatEventsByConversationId.get(conversationId);
 
           if (!chatEvents$) {
@@ -120,13 +123,13 @@ describe('registerSignificantEventAutoAttach', () => {
 
   afterEach(() => {
     cleanup();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not attach when the Agent Builder sidebar is closed', () => {
     focusedSignificantEventService.setFocusedEvent(createEvent());
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -137,7 +140,7 @@ describe('registerSignificantEventAutoAttach', () => {
     focusedSignificantEventService.setFocusedEvent(event);
     currentAppId$.next(AGENT_BUILDER_APP_ID);
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
       id: 'draft-id-1',
@@ -151,7 +154,7 @@ describe('registerSignificantEventAutoAttach', () => {
     focusedSignificantEventService.setFocusedEvent(createEvent());
     currentAppId$.next(AGENT_BUILDER_APP_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -161,9 +164,9 @@ describe('registerSignificantEventAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedSignificantEventService.setFocusedEvent(createEvent({ event_id: 'first-event' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     focusedSignificantEventService.setFocusedEvent(createEvent({ event_id: 'second-event' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenNthCalledWith(
@@ -180,7 +183,7 @@ describe('registerSignificantEventAutoAttach', () => {
     focusedSignificantEventService.setFocusedEvent(createEvent());
     currentAppId$.next('agentBuilder');
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     chatEventsByConversationId.get('conversation-1')?.next(createRoundCompleteEvent('draft-id-1'));
@@ -188,7 +191,7 @@ describe('registerSignificantEventAutoAttach', () => {
     currentAppId$.next(null);
     currentAppId$.next('agentBuilder');
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'draft-id-3' }));
   });
@@ -199,7 +202,7 @@ describe('registerSignificantEventAutoAttach', () => {
     focusedSignificantEventService.setFocusedEvent(createEvent());
     currentAppId$.next('agentBuilder');
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });

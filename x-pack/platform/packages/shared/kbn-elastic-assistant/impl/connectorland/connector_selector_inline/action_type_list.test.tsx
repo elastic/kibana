@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ActionTypeList } from './action_type_list';
@@ -47,10 +49,10 @@ const disabledActionType = {
 
 const actionTypeRegistry = {
   ...actionTypeRegistryMock.create(),
-  get: jest.fn().mockReturnValue({ iconClass: 'icon-class' }),
+  get: vi.fn().mockReturnValue({ iconClass: 'icon-class' }),
 };
 
-const onSelect = jest.fn();
+const onSelect = vi.fn();
 
 const defaultProps = {
   actionTypes,
@@ -61,7 +63,7 @@ const defaultProps = {
 
 describe('ActionTypeList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render all action types', () => {

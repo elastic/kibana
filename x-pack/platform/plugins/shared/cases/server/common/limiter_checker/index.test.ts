@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import { AttachmentLimitChecker } from '.';
 import { createAttachmentServiceMock } from '../../services/mocks';
@@ -16,7 +18,7 @@ describe('AttachmentLimitChecker', () => {
   const checker = new AttachmentLimitChecker(mockAttachmentService, mockFileService, 'id');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockAttachmentService.executeCaseAggregations.mockImplementation(async () => {
       return {

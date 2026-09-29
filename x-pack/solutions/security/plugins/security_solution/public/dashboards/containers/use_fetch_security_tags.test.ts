@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { waitFor, renderHook } from '@testing-library/react';
 import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/constants';
@@ -14,15 +16,18 @@ import { DEFAULT_TAGS_RESPONSE } from '../../common/containers/tags/__mocks__/ap
 import type { ITagsClient } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../../common/utils/get_ramdom_color', () => ({
-  getRandomColor: jest.fn().mockReturnValue('#FFFFFF'),
-}));
+vi.mock('../../common/lib/kibana');
+vi.mock('../../../common/utils/get_ramdom_color', () => {
+      const mocked = {
+      getRandomColor: vi.fn().mockReturnValue('#FFFFFF'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGet = jest.fn();
+const mockGet = vi.fn();
 const mockAbortSignal = {} as unknown as AbortSignal;
-const mockCreateTag = jest.fn();
-const mockFindByName = jest.fn();
+const mockCreateTag = vi.fn();
+const mockFindByName = vi.fn();
 const renderUseCreateSecurityDashboardLink = () => renderHook(() => useFetchSecurityTags(), {});
 
 describe('useFetchSecurityTags', () => {
@@ -31,14 +36,14 @@ describe('useFetchSecurityTags', () => {
     useKibana().services.savedObjectsTagging = {
       client: { create: mockCreateTag, findByName: mockFindByName } as unknown as ITagsClient,
     } as unknown as SavedObjectsTaggingApi;
-    global.AbortController = jest.fn().mockReturnValue({
-      abort: jest.fn(),
+    global.AbortController = vi.fn().mockReturnValue({
+      abort: vi.fn(),
       signal: mockAbortSignal,
     });
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should fetch Security Solution tags', async () => {

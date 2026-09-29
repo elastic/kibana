@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -14,9 +17,9 @@ import { MAX_LENGTH_PER_TAG } from '../../../../../common/constants';
 import type { TagsFieldProps } from './tags_field';
 import { TagsField } from './tags_field';
 
-jest.mock('../../../../containers/use_get_tags');
+vi.mock('../../../../containers/use_get_tags');
 
-const onSubmit = jest.fn();
+const onSubmit = vi.fn();
 const defaultProps: TagsFieldProps = {
   isLoading: false,
   onSubmit,
@@ -29,23 +32,23 @@ describe('TagsField', () => {
   const sampleTags = ['coke', 'pepsi'];
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
     });
 
-    (useGetTags as jest.Mock).mockImplementation(() => ({
+    (useGetTags as Mock).mockImplementation(() => ({
       data: sampleTags,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }));
   });
 

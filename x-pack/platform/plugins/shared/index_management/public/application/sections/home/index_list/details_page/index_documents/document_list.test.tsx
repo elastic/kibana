@@ -5,28 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { SearchHit, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
 import { DocumentList } from './document_list';
 
-jest.mock('@kbn/search-index-documents', () => ({
-  Result: ({ metaData, compactCard }: { metaData: { id: string }; compactCard: boolean }) => (
-    <div data-test-subj={`result-${metaData.id}`} data-compact-card={String(compactCard)}>
-      Result {metaData.id}
-    </div>
-  ),
-  resultMetaData: jest.fn((doc: SearchHit) => ({
-    id: doc._id,
-    title: undefined,
-    score: undefined,
-  })),
-  resultToField: jest.fn(() => []),
-  reorderFieldsInImportance: jest.fn((fields: unknown[]) => fields),
-}));
+vi.mock('@kbn/search-index-documents', () => {
+      const mocked = {
+      Result: ({ metaData, compactCard }: { metaData: { id: string }; compactCard: boolean }) => (
+        <div data-test-subj={`result-${metaData.id}`} data-compact-card={String(compactCard)}>
+          Result {metaData.id}
+        </div>
+      ),
+      resultMetaData: vi.fn((doc: SearchHit) => ({
+        id: doc._id,
+        title: undefined,
+        score: undefined,
+      })),
+      resultToField: vi.fn(() => []),
+      reorderFieldsInImportance: vi.fn((fields: unknown[]) => fields),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { resultMetaData, resultToField } = jest.requireMock('@kbn/search-index-documents');
+const { resultMetaData, resultToField } = (await vi.importMock('@kbn/search-index-documents'));
 
 const mockDocs: SearchHit[] = [
   { _index: 'test-index', _id: 'doc-1', _source: { title: 'First' } },
@@ -41,7 +46,7 @@ const mockMappingProperties: Record<string, MappingProperty> = {
 
 describe('DocumentList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a Result component for each document', () => {

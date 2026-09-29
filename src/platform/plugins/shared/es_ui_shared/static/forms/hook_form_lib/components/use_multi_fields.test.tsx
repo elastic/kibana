@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,8 +18,8 @@ import { useForm } from '../hooks/use_form';
 import { Form } from './form';
 import { UseMultiFields } from './use_multi_fields';
 
-const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-const onFieldsMock = jest.fn();
+const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+const onFieldsMock = vi.fn();
 
 const fields = {
   foo: { path: 'foo' },
@@ -55,15 +57,15 @@ const TestComp = ({ onFields }: { onFields: (fields: { [x: string]: FieldHook })
 };
 
 beforeAll(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('<UseMultiFields />', () => {

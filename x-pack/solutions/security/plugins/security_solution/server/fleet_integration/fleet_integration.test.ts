@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
@@ -97,39 +100,40 @@ import type { ExperimentalFeatures } from '../../common';
 import type { IRequestContextFactory } from '../request_context_factory';
 import { installEndpointSecurityPrebuiltRule as _installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule';
 
-const installEndpointSecurityPrebuiltRuleMock = _installEndpointSecurityPrebuiltRule as jest.Mock;
+const installEndpointSecurityPrebuiltRuleMock = _installEndpointSecurityPrebuiltRule as Mock;
 
-jest.mock(
+vi.mock(
   '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule',
-  () => {
-    const actualModule = jest.requireActual(
-      '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule'
-    );
+  async () => {
+    const actualModule = (await vi.importActual('../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule'));
 
     return {
       ...actualModule,
-      installEndpointSecurityPrebuiltRule: jest.fn(
+      installEndpointSecurityPrebuiltRule: vi.fn(
         actualModule.installEndpointSecurityPrebuiltRule
       ),
     };
   }
 );
 
-jest.mock('uuid', () => ({
-  v4: (): string => 'NEW_UUID',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: (): string => 'NEW_UUID',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./handlers/create_policy_datastreams', () => {
-  const actualModule = jest.requireActual('./handlers/create_policy_datastreams');
+vi.mock('./handlers/create_policy_datastreams', async () => {
+  const actualModule = (await vi.importActual('./handlers/create_policy_datastreams'));
 
   return {
     ...actualModule,
-    createPolicyDataStreamsIfNeeded: jest.fn(async () => {}),
+    createPolicyDataStreamsIfNeeded: vi.fn(async () => {}),
   };
 });
 
 const createPolicyDataStreamsIfNeededMock =
-  _createPolicyDataStreamsIfNeeded as unknown as jest.Mock;
+  _createPolicyDataStreamsIfNeeded as unknown as Mock;
 
 describe('Fleet integrations', () => {
   let endpointAppContextStartContract: EndpointAppContextServiceStartContract;
@@ -173,7 +177,7 @@ describe('Fleet integrations', () => {
     logger = metadataMocks.logger;
     endpointMetadataService = metadataMocks.endpointMetadataService;
 
-    jest
+    vi
       .spyOn(endpointMetadataService, 'getFleetEndpointPackagePolicy')
       .mockResolvedValue(createMockPolicyData());
   });
@@ -181,13 +185,13 @@ describe('Fleet integrations', () => {
   afterEach(() => {
     licenseService.stop();
     licenseEmitter.complete();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('package policy create callback', () => {
     let soClient: ReturnType<typeof savedObjectsClientMock.create>;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let securitySolutionRequestContextFactory: jest.Mocked<IRequestContextFactory>;
+    let securitySolutionRequestContextFactory: Mocked<IRequestContextFactory>;
     let endpointServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
 
     const invokeCallback = async (manifestManager: ManifestManager): Promise<NewPackagePolicy> => {
@@ -221,7 +225,7 @@ describe('Fleet integrations', () => {
         ctx as unknown as RequestHandlerContext,
         req
       );
-      (reqContextMock.getEndpointService as jest.Mock).mockReturnValue(endpointServicesMock);
+      (reqContextMock.getEndpointService as Mock).mockReturnValue(endpointServicesMock);
       securitySolutionRequestContextFactory.create.mockReturnValue(Promise.resolve(reqContextMock));
     });
 
@@ -233,7 +237,7 @@ describe('Fleet integrations', () => {
       });
 
       it('should not call utility to install SIEM prebuilt rule when server config setting is enabled', async () => {
-        (endpointServicesMock.getServerConfigValue as jest.Mock).mockReturnValue(true);
+        (endpointServicesMock.getServerConfigValue as Mock).mockReturnValue(true);
         await invokeCallback(buildManifestManagerMock());
 
         expect(installEndpointSecurityPrebuiltRuleMock).not.toHaveBeenCalled();
@@ -297,8 +301,8 @@ describe('Fleet integrations', () => {
 
       test('default manifest is taken when there is none and there are errors building new one', async () => {
         const manifestManager = buildManifestManagerMock();
-        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
-        manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error());
+        manifestManager.getLastComputedManifest = vi.fn().mockResolvedValue(null);
+        manifestManager.buildNewManifest = vi.fn().mockRejectedValue(new Error());
 
         expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
           createNewEndpointPolicyInput({
@@ -318,9 +322,9 @@ describe('Fleet integrations', () => {
         newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
         const manifestManager = buildManifestManagerMock();
-        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
-        manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-        manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error()]);
+        manifestManager.getLastComputedManifest = vi.fn().mockResolvedValue(null);
+        manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+        manifestManager.pushArtifacts = vi.fn().mockResolvedValue([new Error()]);
 
         expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
           createNewEndpointPolicyInput({
@@ -343,10 +347,10 @@ describe('Fleet integrations', () => {
         newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
         const manifestManager = buildManifestManagerMock();
-        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
-        manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-        manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-        manifestManager.commit = jest.fn().mockRejectedValue(new Error());
+        manifestManager.getLastComputedManifest = vi.fn().mockResolvedValue(null);
+        manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+        manifestManager.pushArtifacts = vi.fn().mockResolvedValue([]);
+        manifestManager.commit = vi.fn().mockRejectedValue(new Error());
 
         expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
           createNewEndpointPolicyInput({
@@ -370,10 +374,10 @@ describe('Fleet integrations', () => {
         newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
         const manifestManager = buildManifestManagerMock();
-        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
-        manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-        manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-        manifestManager.commit = jest.fn().mockResolvedValue(null);
+        manifestManager.getLastComputedManifest = vi.fn().mockResolvedValue(null);
+        manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+        manifestManager.pushArtifacts = vi.fn().mockResolvedValue([]);
+        manifestManager.commit = vi.fn().mockResolvedValue(null);
 
         expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
           createNewEndpointPolicyInput({
@@ -402,7 +406,7 @@ describe('Fleet integrations', () => {
         manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
 
         const manifestManager = buildManifestManagerMock();
-        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(manifest);
+        manifestManager.getLastComputedManifest = vi.fn().mockResolvedValue(manifest);
 
         expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
           createNewEndpointPolicyInput({
@@ -421,7 +425,7 @@ describe('Fleet integrations', () => {
       });
 
       it('should correctly set meta.billable', async () => {
-        const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+        const isBillablePolicySpy = vi.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
         isBillablePolicySpy.mockReturnValue(false);
         const manifestManager = buildManifestManagerMock();
 
@@ -474,14 +478,14 @@ describe('Fleet integrations', () => {
       soClient = savedObjectsClientMock.create();
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       endpointAppContextServiceMock = createMockEndpointAppContextService();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       callback = getPackagePolicyPostCreateCallback(endpointAppContextServiceMock);
       policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
       // By default, simulate that the event filter list does not exist
-      (exceptionListClient.getExceptionList as jest.Mock).mockResolvedValue(null);
-      (exceptionListClient.createExceptionList as jest.Mock).mockResolvedValue({});
-      (exceptionListClient.createExceptionListItem as jest.Mock).mockResolvedValue({});
+      (exceptionListClient.getExceptionList as Mock).mockResolvedValue(null);
+      (exceptionListClient.createExceptionList as Mock).mockResolvedValue({});
+      (exceptionListClient.createExceptionListItem as Mock).mockResolvedValue({});
     });
 
     it('should create the Endpoint Event Filters List and add the correct Event Filters List Item attached to the policy given nonInteractiveSession parameter on integration config eventFilters', async () => {
@@ -546,7 +550,7 @@ describe('Fleet integrations', () => {
       };
 
       // Mock getExceptionList to return a non-null value (list already exists)
-      (exceptionListClient.getExceptionList as jest.Mock).mockResolvedValue({
+      (exceptionListClient.getExceptionList as Mock).mockResolvedValue({
         id: 'existing-list-id',
         listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       });
@@ -721,7 +725,7 @@ describe('Fleet integrations', () => {
       endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       endpointAppContextServiceMock.getLicenseService.mockReturnValue(licenseService);
       (
-        endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
+        endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as Mock
       ).mockResolvedValue(createMockPolicyData());
     });
 
@@ -1153,7 +1157,7 @@ describe('Fleet integrations', () => {
           mockPolicy.windows.device_control.usb_storage = 'deny_all';
         }
 
-        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+        const removeDeviceControlSpy = vi.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
 
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
@@ -1189,7 +1193,7 @@ describe('Fleet integrations', () => {
           mockPolicy.windows.device_control.usb_storage = 'deny_all';
         }
 
-        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+        const removeDeviceControlSpy = vi.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
 
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
@@ -1227,7 +1231,7 @@ describe('Fleet integrations', () => {
           mockPolicy.windows.device_control.usb_storage = 'deny_all';
         }
 
-        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+        const removeDeviceControlSpy = vi.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
 
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
@@ -1553,7 +1557,7 @@ describe('Fleet integrations', () => {
     });
 
     it('should correctly set meta.billable', async () => {
-      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+      const isBillablePolicySpy = vi.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
 
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1712,10 +1716,10 @@ describe('Fleet integrations', () => {
         tags: [`policy:${policyId}`],
       };
 
-      exceptionListClient.findExceptionListsItem = jest
+      exceptionListClient.findExceptionListsItem = vi
         .fn()
         .mockResolvedValueOnce({ data: [fakeArtifact], total: 1 });
-      exceptionListClient.updateExceptionListItem = jest
+      exceptionListClient.updateExceptionListItem = vi
         .fn()
         .mockResolvedValueOnce({ ...fakeArtifact, tags: [] });
     });
@@ -1723,7 +1727,7 @@ describe('Fleet integrations', () => {
     it('removes policy from artifact', async () => {
       const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
 
-      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+      (soClientMock.find as Mock).mockResolvedValueOnce({
         total: 1,
         saved_objects: [
           {
@@ -1773,7 +1777,7 @@ describe('Fleet integrations', () => {
     it('searches for notes across all spaces and both package policy reference types', async () => {
       const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
 
-      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+      (soClientMock.find as Mock).mockResolvedValueOnce({
         total: 0,
         saved_objects: [],
         page: 1,
@@ -1798,7 +1802,7 @@ describe('Fleet integrations', () => {
     it('deletes a legacy note using a client scoped to the note namespace', async () => {
       const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
 
-      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+      (soClientMock.find as Mock).mockResolvedValueOnce({
         total: 1,
         saved_objects: [
           {
@@ -1836,7 +1840,7 @@ describe('Fleet integrations', () => {
     describe('and with space awareness feature enabled', () => {
       beforeEach(() => {
         (
-          endpointServicesMock.getInternalFleetServices().isEndpointPackageInstalled as jest.Mock
+          endpointServicesMock.getInternalFleetServices().isEndpointPackageInstalled as Mock
         ).mockResolvedValue(true);
 
         const packagePolicyGenerator = new FleetPackagePolicyGenerator('seed');

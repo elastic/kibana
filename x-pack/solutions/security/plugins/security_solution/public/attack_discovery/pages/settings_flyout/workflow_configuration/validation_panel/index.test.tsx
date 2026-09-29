@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -17,9 +20,9 @@ import { useListWorkflows } from '../hooks/use_list_workflows';
 import type { WorkflowItem } from '../types';
 import * as i18n from '../translations';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../use_workflow_editor_link');
-jest.mock('../hooks/use_list_workflows');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../use_workflow_editor_link');
+vi.mock('../hooks/use_list_workflows');
 
 const MOCK_WORKFLOWS_APP_URL = '/app/workflows';
 
@@ -85,13 +88,13 @@ const mockWorkflowsWithAllPredefined: WorkflowItem[] = [
 ];
 
 const defaultProps = {
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   value: 'default',
 };
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseListWorkflows = useListWorkflows as MockedFunction<typeof useListWorkflows>;
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
 const mockSuccessResult = (data: WorkflowItem[]): ReturnType<typeof useListWorkflows> =>
   ({
@@ -118,8 +121,8 @@ const mockSuccessResult = (data: WorkflowItem[]): ReturnType<typeof useListWorkf
     isRefetching: false,
     isStale: false,
     isSuccess: true,
-    refetch: jest.fn(),
-    remove: jest.fn(),
+    refetch: vi.fn(),
+    remove: vi.fn(),
     status: 'success' as const,
   } as ReturnType<typeof useListWorkflows>);
 
@@ -148,21 +151,21 @@ const mockLoadingResult = (): ReturnType<typeof useListWorkflows> =>
     isRefetching: false,
     isStale: false,
     isSuccess: false,
-    refetch: jest.fn(),
-    remove: jest.fn(),
+    refetch: vi.fn(),
+    remove: vi.fn(),
     status: 'loading' as const,
   } as ReturnType<typeof useListWorkflows>);
 
 describe('ValidationPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
         application: {
-          getUrlForApp: jest.fn().mockReturnValue(MOCK_WORKFLOWS_APP_URL),
+          getUrlForApp: vi.fn().mockReturnValue(MOCK_WORKFLOWS_APP_URL),
         },
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -172,14 +175,14 @@ describe('ValidationPanel', () => {
       if (workflowId === CUSTOM_VALIDATION_EXAMPLE_ALIAS) {
         return {
           editorUrl: MOCK_CUSTOM_VALIDATION_EXAMPLE_URL,
-          navigateToEditor: jest.fn(),
+          navigateToEditor: vi.fn(),
           resolvedWorkflowId: 'workflow-custom-validation-example',
         };
       }
 
       return {
         editorUrl: null,
-        navigateToEditor: jest.fn(),
+        navigateToEditor: vi.fn(),
         resolvedWorkflowId: REAL_VALIDATION_WORKFLOW_ID,
       };
     });
@@ -207,7 +210,7 @@ describe('ValidationPanel', () => {
   });
 
   it('calls onChange when validation workflow is selected', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <TestProviders>
         <ValidationPanel {...defaultProps} onChange={onChange} value="" />
@@ -312,7 +315,7 @@ describe('ValidationPanel', () => {
     beforeEach(() => {
       mockUseWorkflowEditorLink.mockReturnValue({
         editorUrl: null,
-        navigateToEditor: jest.fn(),
+        navigateToEditor: vi.fn(),
         resolvedWorkflowId: null,
       });
 
@@ -398,7 +401,7 @@ describe('ValidationPanel', () => {
   it('shows the no-workflows empty state when no custom workflows are available', () => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
 
@@ -416,7 +419,7 @@ describe('ValidationPanel', () => {
   it('still renders the picker with the default workflow when no custom workflows are available', () => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
 
@@ -444,7 +447,7 @@ describe('ValidationPanel', () => {
   it('shows the no-workflows empty state when only non-selectable workflows are returned', () => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
 
@@ -475,7 +478,7 @@ describe('ValidationPanel', () => {
   it('passes the agent builder URL to the NoWorkflowsAvailable component', () => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
 
@@ -492,14 +495,14 @@ describe('ValidationPanel', () => {
   });
 
   it('calls getUrlForApp with the workflows app ID', () => {
-    const mockGetUrlForApp = jest.fn().mockReturnValue(MOCK_WORKFLOWS_APP_URL);
+    const mockGetUrlForApp = vi.fn().mockReturnValue(MOCK_WORKFLOWS_APP_URL);
 
     mockUseKibana.mockReturnValue({
       services: {
         application: {
           getUrlForApp: mockGetUrlForApp,
         },
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -562,7 +565,7 @@ describe('ValidationPanel', () => {
   it('does NOT render the View example link when the example workflow is not available', () => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
 
@@ -579,11 +582,11 @@ describe('ValidationPanel', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
-          getUrlForApp: jest.fn().mockImplementation(() => {
+          getUrlForApp: vi.fn().mockImplementation(() => {
             throw new Error('App not found');
           }),
         },
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -600,17 +603,17 @@ describe('ValidationPanel', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
-          getUrlForApp: jest.fn().mockImplementation(() => {
+          getUrlForApp: vi.fn().mockImplementation(() => {
             throw new Error('App not found');
           }),
         },
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
 

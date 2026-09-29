@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject, skip } from 'rxjs';
 import { fetch$ } from './fetch';
 
-const searchSessionRequestCompleteCallback = jest.fn();
+const searchSessionRequestCompleteCallback = vi.fn();
 const waitForSearchSession = async () => {
   await waitFor(() => {
     expect(searchSessionRequestCompleteCallback).toHaveBeenCalled();
@@ -21,7 +23,7 @@ const waitForSearchSession = async () => {
 };
 
 describe('onFetchContextChanged', () => {
-  const onFetchMock = jest.fn();
+  const onFetchMock = vi.fn();
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   const parentApi = {
     filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
@@ -30,7 +32,7 @@ describe('onFetchContextChanged', () => {
     searchSessionId$,
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
     timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
-    requestSearchSessionId: jest.fn().mockImplementation(async () => {
+    requestSearchSessionId: vi.fn().mockImplementation(async () => {
       const sessionId = await new Promise<string | undefined>((resolve) => {
         setTimeout(() => {
           resolve(searchSessionId$.getValue());

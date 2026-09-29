@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -20,14 +22,14 @@ const stubTraceEvaluator = (name: string): Evaluator => ({
   name,
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: jest.fn(),
+  evaluate: vi.fn(),
 });
 
 const buildDefaultEvaluatorsStub = (): DefaultEvaluators =>
   ({
-    criteria: jest.fn(),
-    correctnessAnalysis: jest.fn(),
-    groundednessAnalysis: jest.fn(),
+    criteria: vi.fn(),
+    correctnessAnalysis: vi.fn(),
+    groundednessAnalysis: vi.fn(),
     traceBasedEvaluators: {
       inputTokens: stubTraceEvaluator('Input Tokens'),
       outputTokens: stubTraceEvaluator('Output Tokens'),
@@ -39,12 +41,12 @@ const buildDefaultEvaluatorsStub = (): DefaultEvaluators =>
 
 const buildBuildArgs = () => ({
   evaluators: buildDefaultEvaluatorsStub(),
-  traceEsClient: { esql: { query: jest.fn() } } as unknown as EsClient,
+  traceEsClient: { esql: { query: vi.fn() } } as unknown as EsClient,
   log: {
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   } as unknown as ToolingLog,
 });
 

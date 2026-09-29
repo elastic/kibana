@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { findRuleTemplates } from './find_rule_templates';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -42,10 +44,10 @@ const buildRuleTypeFilter = (...ruleTypeIds: string[]) =>
   );
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
     filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
-    ensureRuleTypeIsAuthorized: jest.fn(),
+    ensureRuleTypeIsAuthorized: vi.fn(),
   });
 });
 
@@ -330,7 +332,7 @@ describe('findRuleTemplates', () => {
     test('filters templates to only authorized rule types', async () => {
       authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type'),
-        ensureRuleTypeIsAuthorized: jest.fn(),
+        ensureRuleTypeIsAuthorized: vi.fn(),
       });
 
       unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate1));
@@ -347,7 +349,7 @@ describe('findRuleTemplates', () => {
     });
 
     test('throws 403 if unauthorized template slips through filter', async () => {
-      const ensureRuleTypeIsAuthorized = jest
+      const ensureRuleTypeIsAuthorized = vi
         .fn()
         .mockImplementation((ruleTypeId: string, _authType: string) => {
           if (ruleTypeId === 'another.rule.type') {
@@ -378,7 +380,7 @@ describe('findRuleTemplates', () => {
     test('applies authorization filter combined with user filters', async () => {
       authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type'),
-        ensureRuleTypeIsAuthorized: jest.fn(),
+        ensureRuleTypeIsAuthorized: vi.fn(),
       });
 
       unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate1));
@@ -394,7 +396,7 @@ describe('findRuleTemplates', () => {
     });
 
     test('verifies all returned templates are authorized', async () => {
-      const ensureRuleTypeIsAuthorized = jest.fn();
+      const ensureRuleTypeIsAuthorized = vi.fn();
       authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
         ensureRuleTypeIsAuthorized,
@@ -419,7 +421,7 @@ describe('findRuleTemplates', () => {
 
   describe('audit logging', () => {
     test('logs audit event for each found template', async () => {
-      const ensureRuleTypeIsAuthorized = jest.fn();
+      const ensureRuleTypeIsAuthorized = vi.fn();
       authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
         ensureRuleTypeIsAuthorized,
@@ -483,7 +485,7 @@ describe('findRuleTemplates', () => {
     });
 
     test('logs audit event when unauthorized template slips through filter', async () => {
-      const ensureRuleTypeIsAuthorized = jest
+      const ensureRuleTypeIsAuthorized = vi
         .fn()
         .mockImplementation((ruleTypeId: string, _authType: string) => {
           if (ruleTypeId === 'another.rule.type') {

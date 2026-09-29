@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
@@ -34,21 +37,21 @@ import { generateConfigSchema } from '../../../../lib/single_file_connectors/gen
 import { securityServiceMock } from '@kbn/core/server/mocks';
 import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+    connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
       actual.connectorTypeIsDual(actionTypeId)
     ),
   };
 });
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -62,26 +65,26 @@ const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient()
 const authorization = actionsAuthorizationMock.create();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const preSaveHook = jest.fn();
-const postSaveHook = jest.fn();
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
+const preSaveHook = vi.fn();
+const postSaveHook = vi.fn();
 const actionExecutor = actionExecutorMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const bulkExecutionEnqueuer = jest.fn();
-const getEventLogClient = jest.fn();
-const getAxiosInstanceWithAuth = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
+const getEventLogClient = vi.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 
 const actionTypeRegistry: ActionTypeRegistry = {
-  get: jest.fn(),
-  isSystemActionType: jest.fn().mockReturnValue(false),
-  ensureActionTypeEnabled: jest.fn(),
-  isDeprecated: jest.fn().mockReturnValue(false),
-  getUtils: jest.fn().mockReturnValue({
-    isHostnameAllowed: jest.fn().mockReturnValue(true),
-    isUriAllowed: jest.fn().mockReturnValue(true),
-    getMicrosoftGraphApiUrl: jest.fn(),
-    getProxySettings: jest.fn(),
+  get: vi.fn(),
+  isSystemActionType: vi.fn().mockReturnValue(false),
+  ensureActionTypeEnabled: vi.fn(),
+  isDeprecated: vi.fn().mockReturnValue(false),
+  getUtils: vi.fn().mockReturnValue({
+    isHostnameAllowed: vi.fn().mockReturnValue(true),
+    isUriAllowed: vi.fn().mockReturnValue(true),
+    getMicrosoftGraphApiUrl: vi.fn(),
+    getProxySettings: vi.fn(),
   }),
 } as unknown as ActionTypeRegistry;
 
@@ -108,10 +111,10 @@ const mockContext: ActionsClientContext = {
 
 describe('create()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     unsecuredSavedObjectsClient.create.mockReset();
     // Set up default action type with schemas that accept any properties
-    (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+    (actionTypeRegistry.get as Mock).mockReturnValue(
       getConnectorType({
         id: 'my-connector-type',
         validate: {
@@ -121,8 +124,8 @@ describe('create()', () => {
         },
       })
     );
-    (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(false);
-    (actionTypeRegistry.isSystemActionType as jest.Mock).mockReturnValue(false);
+    (actionTypeRegistry.isDeprecated as Mock).mockReturnValue(false);
+    (actionTypeRegistry.isSystemActionType as Mock).mockReturnValue(false);
     authorization.ensureAuthorized.mockResolvedValue(undefined);
   });
 
@@ -274,7 +277,7 @@ describe('create()', () => {
 
   describe('system actions', () => {
     test('throws an error when creating a system action', async () => {
-      (actionTypeRegistry.isSystemActionType as jest.Mock).mockReturnValue(true);
+      (actionTypeRegistry.isSystemActionType as Mock).mockReturnValue(true);
 
       await expect(
         create({
@@ -542,7 +545,7 @@ describe('create()', () => {
         },
       });
 
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await create({
         context: mockContext,
@@ -595,7 +598,7 @@ describe('create()', () => {
   describe('authMode', () => {
     test('creates an action with authMode "shared"', async () => {
       // Mock authTypeRegistry to return an auth type with authMode 'shared'
-      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+      (authTypeRegistry.get as Mock).mockReturnValue({
         id: 'basic',
       });
 
@@ -660,7 +663,7 @@ describe('create()', () => {
 
     test('creates an action with authMode "per-user"', async () => {
       // Mock authTypeRegistry to return an auth type with authMode 'per-user'
-      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+      (authTypeRegistry.get as Mock).mockReturnValue({
         id: 'oauth2',
         authMode: 'per-user',
       });
@@ -773,7 +776,7 @@ describe('create()', () => {
 
   describe('spec connector config.authType', () => {
     test('persists config.authType from secrets when config is empty (spec source)', async () => {
-      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+      (authTypeRegistry.get as Mock).mockReturnValue({
         id: 'bearer',
         authMode: 'shared',
       });
@@ -786,7 +789,7 @@ describe('create()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       const savedObjectCreateResult = {
         id: '1',
@@ -824,7 +827,7 @@ describe('create()', () => {
     });
 
     test('does not inject config.authType for stack source when secrets include authType', async () => {
-      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+      (authTypeRegistry.get as Mock).mockReturnValue({
         id: 'bearer',
         authMode: 'shared',
       });
@@ -837,7 +840,7 @@ describe('create()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       const savedObjectCreateResult = {
         id: '1',
@@ -895,7 +898,7 @@ describe('create()', () => {
         preSaveHook,
       });
 
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await create({
         context: mockContext,
@@ -924,7 +927,7 @@ describe('create()', () => {
         preSaveHook,
       });
 
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
       preSaveHook.mockRejectedValueOnce(new Error('preSaveHook failed'));
 
       await expect(
@@ -970,7 +973,7 @@ describe('create()', () => {
         postSaveHook,
       });
 
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await create({
         context: mockContext,
@@ -1002,7 +1005,7 @@ describe('create()', () => {
         postSaveHook,
       });
 
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         create({
@@ -1047,7 +1050,7 @@ describe('create()', () => {
         postSaveHook,
       });
 
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
       postSaveHook.mockRejectedValueOnce(new Error('postSaveHook failed'));
 
       const result = await create({
@@ -1090,7 +1093,7 @@ describe('create()', () => {
     });
 
     test('throws when action type does not exist', async () => {
-      (actionTypeRegistry.get as jest.Mock).mockImplementation(() => {
+      (actionTypeRegistry.get as Mock).mockImplementation(() => {
         throw new Error('Action type not found');
       });
 
@@ -1119,7 +1122,7 @@ describe('create()', () => {
         },
       });
 
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         create({
@@ -1145,7 +1148,7 @@ describe('create()', () => {
         },
       });
 
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         create({
@@ -1168,7 +1171,7 @@ describe('create()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         create({
@@ -1191,7 +1194,7 @@ describe('create()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         create({
@@ -1214,7 +1217,7 @@ describe('create()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         create({
@@ -1237,7 +1240,7 @@ describe('create()', () => {
           params: { schema: z.object({}) },
         },
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      (actionTypeRegistry.get as Mock).mockReturnValue(actionType);
 
       await expect(
         create({
@@ -1267,7 +1270,7 @@ describe('create()', () => {
         references: [],
       };
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
-      (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(true);
+      (actionTypeRegistry.isDeprecated as Mock).mockReturnValue(true);
 
       const result = await create({
         context: mockContext,
@@ -1334,7 +1337,7 @@ describe('create()', () => {
         name: 'Actions: connector event identity mock-saved-object-id',
         api_key: 'es-secret',
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      (actionTypeRegistry.get as Mock).mockReturnValue(
         getConnectorType({
           id: '.inboundWebhook',
           source: ACTION_TYPE_SOURCES.spec,
@@ -1478,10 +1481,10 @@ describe('create()', () => {
     };
 
     beforeEach(() => {
-      (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (connectorTypeIsDual as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
-      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (connectorTypeHasInboundEvents as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.inboundWebhook'
       );
       (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
@@ -1490,7 +1493,7 @@ describe('create()', () => {
         name: 'Actions: connector event identity mock-saved-object-id',
         api_key: 'es-secret',
       });
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      (actionTypeRegistry.get as Mock).mockReturnValue(
         getConnectorType({
           id: '.dual',
           source: ACTION_TYPE_SOURCES.spec,
@@ -1558,7 +1561,7 @@ describe('create()', () => {
     });
 
     test('rejects the flag on a non-dual type', async () => {
-      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      (actionTypeRegistry.get as Mock).mockReturnValue(
         getConnectorType({
           id: '.slack',
           preSaveHook,

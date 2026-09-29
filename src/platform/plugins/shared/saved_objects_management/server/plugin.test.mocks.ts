@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const registerRoutesMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./routes', () => ({
+export const registerRoutesMock = vi.fn();
+
+vi.doMock('./routes', () => ({
   registerRoutes: registerRoutesMock,
 }));

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import type { AttackDiscoveryExecutorOptions } from '@kbn/attack-discovery-schedules-common';
 
@@ -16,46 +18,70 @@ import {
 import { DiscoveriesPlugin } from './plugin';
 import type { DiscoveriesPluginSetupDeps, DiscoveriesPluginStartDeps } from './types';
 
-jest.mock('@kbn/discoveries/impl/attack_discovery/alert_fields', () => ({
-  ATTACK_DISCOVERY_ALERTS_CONTEXT: 'security.attack.discovery',
-  attackDiscoveryAlertFieldMap: {},
-}));
+vi.mock('@kbn/discoveries/impl/attack_discovery/alert_fields', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_ALERTS_CONTEXT: 'security.attack.discovery',
+      attackDiscoveryAlertFieldMap: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./lib/schedules/workflow_executor', () => ({
-  workflowExecutor: jest.fn().mockResolvedValue({ state: {} }),
-}));
+vi.mock('./lib/schedules/workflow_executor', () => {
+      const mocked = {
+      workflowExecutor: vi.fn().mockResolvedValue({ state: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Default the feature flag to ON so the scheduled factory proceeds; individual
 // tests override with `mockResolvedValueOnce(false)` to exercise the kill-switch.
-const mockIsWorkflowsEnabled = jest.fn().mockResolvedValue(true);
-jest.mock('@kbn/discoveries/impl/lib/helpers/is_workflows_enabled', () => ({
-  isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
-}));
+const mockIsWorkflowsEnabled = vi.fn().mockResolvedValue(true);
+vi.mock('@kbn/discoveries/impl/lib/helpers/is_workflows_enabled', () => {
+      const mocked = {
+      isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./routes', () => ({
-  registerRoutes: jest.fn(),
-}));
+vi.mock('./routes', () => {
+      const mocked = {
+      registerRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_builder/skills/register_skills', () => ({
-  registerSkills: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./agent_builder/skills/register_skills', () => {
+      const mocked = {
+      registerSkills: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflows/register_workflow_steps', () => ({
-  registerWorkflowSteps: jest.fn().mockReturnValue({ failedSteps: [], registeredSteps: [] }),
-}));
+vi.mock('./workflows/register_workflow_steps', () => {
+      const mocked = {
+      registerWorkflowSteps: vi.fn().mockReturnValue({ failedSteps: [], registeredSteps: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-plugin/common', () => ({
-  mappingFromFieldMap: jest.fn().mockReturnValue({}),
-}));
+vi.mock('@kbn/alerting-plugin/common', () => {
+      const mocked = {
+      mappingFromFieldMap: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./managed_workflows/install_static', () => ({
-  AD_WORKFLOW_IDS: ['system-mock-1', 'system-mock-2'],
-  installStatic: jest.fn().mockResolvedValue({ failedIds: [] }),
-}));
+vi.mock('./managed_workflows/install_static', () => {
+      const mocked = {
+      AD_WORKFLOW_IDS: ['system-mock-1', 'system-mock-2'],
+      installStatic: vi.fn().mockResolvedValue({ failedIds: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { workflowExecutor } = jest.requireMock('./lib/schedules/workflow_executor');
-const { installStatic } = jest.requireMock('./managed_workflows/install_static');
-const { registerSkills } = jest.requireMock('./agent_builder/skills/register_skills');
+const { workflowExecutor } = (await vi.importMock('./lib/schedules/workflow_executor'));
+const { installStatic } = (await vi.importMock('./managed_workflows/install_static'));
+const { registerSkills } = (await vi.importMock('./agent_builder/skills/register_skills'));
 
 /** Drains the microtask + macrotask queues so deferred `getStartServices().then()` work runs. */
 const flushPromises = async () => {
@@ -64,44 +90,44 @@ const flushPromises = async () => {
 };
 
 const createMockAgentBuilder = () => ({
-  attachments: { registerType: jest.fn() },
-  skills: { register: jest.fn().mockResolvedValue(undefined) },
+  attachments: { registerType: vi.fn() },
+  skills: { register: vi.fn().mockResolvedValue(undefined) },
 });
 
 const createMockRuleRegistry = () => ({
   ruleDataService: {
-    initializeIndex: jest.fn().mockReturnValue({
-      getReader: jest.fn(),
-      getWriter: jest.fn(),
+    initializeIndex: vi.fn().mockReturnValue({
+      getReader: vi.fn(),
+      getWriter: vi.fn(),
     }),
   },
 });
 
 const createMockEventLog = () => ({
-  getIndexPattern: jest.fn().mockReturnValue('.kibana-event-log-*'),
-  getLogger: jest.fn().mockReturnValue({ logEvent: jest.fn() }),
-  registerProviderActions: jest.fn(),
-  registerSavedObjectProvider: jest.fn(),
-  isLoggingEntries: jest.fn().mockReturnValue(true),
-  isIndexingEntries: jest.fn().mockReturnValue(true),
+  getIndexPattern: vi.fn().mockReturnValue('.kibana-event-log-*'),
+  getLogger: vi.fn().mockReturnValue({ logEvent: vi.fn() }),
+  registerProviderActions: vi.fn(),
+  registerSavedObjectProvider: vi.fn(),
+  isLoggingEntries: vi.fn().mockReturnValue(true),
+  isIndexingEntries: vi.fn().mockReturnValue(true),
 });
 
 const createMockWorkflowsExtensions = () => ({
-  registerManagedWorkflowOwner: jest.fn(),
-  registerStepType: jest.fn(),
+  registerManagedWorkflowOwner: vi.fn(),
+  registerStepType: vi.fn(),
 });
 
 const createMockElasticAssistant = () => ({
   actions: {} as never,
-  registerAttackDiscoveryWorkflowExecutor: jest.fn(),
+  registerAttackDiscoveryWorkflowExecutor: vi.fn(),
 });
 
 const createMockActions = () => ({
-  registerType: jest.fn(),
+  registerType: vi.fn(),
 });
 
 const createMockAlerting = () => ({
-  registerConnectorAdapter: jest.fn(),
+  registerConnectorAdapter: vi.fn(),
 });
 
 const createPluginSetupDeps = (
@@ -117,11 +143,11 @@ const createPluginSetupDeps = (
 });
 
 const createMockWorkflowsExtensionsStart = () => ({
-  initManagedWorkflowsClient: jest.fn().mockResolvedValue({
-    execute: jest.fn().mockResolvedValue('mock-execution-id'),
-    install: jest.fn().mockResolvedValue(undefined),
-    ready: jest.fn().mockResolvedValue(undefined),
-    uninstall: jest.fn().mockResolvedValue(undefined),
+  initManagedWorkflowsClient: vi.fn().mockResolvedValue({
+    execute: vi.fn().mockResolvedValue('mock-execution-id'),
+    install: vi.fn().mockResolvedValue(undefined),
+    ready: vi.fn().mockResolvedValue(undefined),
+    uninstall: vi.fn().mockResolvedValue(undefined),
   }),
 });
 
@@ -144,7 +170,7 @@ describe('DiscoveriesPlugin', () => {
   describe('setup', () => {
     describe('managed workflow owner registration', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('registers discoveries as managed workflow owner exactly once when the plugin is enabled', () => {
@@ -185,7 +211,7 @@ describe('DiscoveriesPlugin', () => {
 
     describe('workflow executor registration', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('registers the workflow executor when elasticAssistant is available', () => {
@@ -441,7 +467,7 @@ describe('DiscoveriesPlugin', () => {
       let mockAgentBuilder: ReturnType<typeof createMockAgentBuilder>;
 
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockAgentBuilder = createMockAgentBuilder();
       });
 
@@ -505,7 +531,7 @@ describe('DiscoveriesPlugin', () => {
   describe('start', () => {
     describe('managed workflow installation', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('installs the managed workflows when the plugin is enabled and the feature flag is ON', async () => {

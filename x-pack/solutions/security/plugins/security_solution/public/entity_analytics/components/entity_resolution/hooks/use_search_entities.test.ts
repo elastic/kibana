@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { useSearchEntities } from './use_search_entities';
 import { useEntitiesListQuery } from '../../entity_store/hooks/use_entities_list_query';
 
-jest.mock('../../entity_store/hooks/use_entities_list_query');
+vi.mock('../../entity_store/hooks/use_entities_list_query');
 
-const mockUseEntitiesListQuery = useEntitiesListQuery as jest.Mock;
+const mockUseEntitiesListQuery = useEntitiesListQuery as Mock;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -33,7 +36,7 @@ const defaultParams = {
 
 describe('useSearchEntities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEntitiesListQuery.mockReturnValue({ data: null, isLoading: false });
   });
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -27,7 +30,7 @@ import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 
 describe('initialize - versioning logic', () => {
   let logger: Logger;
-  let elasticsearchClient: jest.Mocked<ElasticsearchClient>;
+  let elasticsearchClient: Mocked<ElasticsearchClient>;
 
   const testMappings = {
     properties: {
@@ -50,7 +53,7 @@ describe('initialize - versioning logic', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when version is incremented', () => {
@@ -59,7 +62,7 @@ describe('initialize - versioning logic', () => {
       const updatedDataStream = createTestDataStream(2);
 
       // Mock: Initial state - no index template exists
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.reject(
           new EsErrors.ResponseError({
             statusCode: 404,
@@ -72,7 +75,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: Initial state - no data stream exists
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.reject(
           new EsErrors.ResponseError({
             statusCode: 404,
@@ -85,12 +88,12 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: putIndexTemplate for initial creation
-      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
       // Mock: createDataStream for initial creation
-      (elasticsearchClient.indices.createDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.createDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
@@ -103,7 +106,7 @@ describe('initialize - versioning logic', () => {
       });
 
       // Mock: Index template exists with version 1
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           index_templates: [
             {
@@ -123,7 +126,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: Data stream exists
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           data_streams: [
             {
@@ -140,7 +143,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: simulateIndexTemplate for mapping application
-      (elasticsearchClient.indices.simulateIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.simulateIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           template: {
             mappings: updatedDataStream.template.mappings,
@@ -149,12 +152,12 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: putMapping for write index
-      (elasticsearchClient.indices.putMapping as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putMapping as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
       // Mock: putIndexTemplate for version update
-      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
@@ -168,7 +171,7 @@ describe('initialize - versioning logic', () => {
 
       // Verify index template was updated with new version
       expect(elasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
-      const updateCall = (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mock
+      const updateCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock
         .calls[1][0];
       expect(updateCall?._meta?.version).toBe(2);
       expect(updateCall?._meta?.previousVersions).toEqual([1]);
@@ -202,7 +205,7 @@ describe('initialize - versioning logic', () => {
       };
 
       // Mock: Index template exists with version 1
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           index_templates: [
             {
@@ -222,7 +225,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: Data stream exists with write index
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           data_streams: [
             {
@@ -239,7 +242,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: simulateIndexTemplate returns new mappings
-      (elasticsearchClient.indices.simulateIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.simulateIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           template: {
             mappings: newMappings,
@@ -248,12 +251,12 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: putMapping for write index
-      (elasticsearchClient.indices.putMapping as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putMapping as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
       // Mock: putIndexTemplate for version update
-      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
@@ -281,7 +284,7 @@ describe('initialize - versioning logic', () => {
       const v3DataStream = createTestDataStream(3);
 
       // Mock: Index template exists with version 2 (after first update)
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           index_templates: [
             {
@@ -301,7 +304,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: Data stream exists
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           data_streams: [
             {
@@ -318,7 +321,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: simulateIndexTemplate
-      (elasticsearchClient.indices.simulateIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.simulateIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           template: {
             mappings: v3DataStream.template.mappings,
@@ -327,12 +330,12 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: putMapping
-      (elasticsearchClient.indices.putMapping as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putMapping as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
       // Mock: putIndexTemplate
-      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
@@ -344,7 +347,7 @@ describe('initialize - versioning logic', () => {
       });
 
       // Verify previous versions include both 1 and 2
-      const updateCall = (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mock
+      const updateCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock
         .calls[0][0];
       expect(updateCall?._meta?.version).toBe(3);
       expect(updateCall?._meta?.previousVersions).toEqual([2, 1]);
@@ -356,7 +359,7 @@ describe('initialize - versioning logic', () => {
       const dataStream = createTestDataStream(1);
 
       // Mock: Index template exists with version 1
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           index_templates: [
             {
@@ -376,7 +379,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: Data stream exists
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           data_streams: [
             {
@@ -425,7 +428,7 @@ describe('initialize - versioning logic', () => {
       };
 
       // Mock: Index template exists with version 1
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           index_templates: [
             {
@@ -445,7 +448,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: Data stream exists
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           data_streams: [
             {
@@ -480,7 +483,7 @@ describe('initialize - versioning logic', () => {
       const dataStream = createTestDataStream(1);
 
       // Mock: Index template exists with version 2 (greater than requested version 1)
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           index_templates: [
             {
@@ -500,7 +503,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: Data stream exists
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           data_streams: [
             {
@@ -537,7 +540,7 @@ describe('initialize - versioning logic', () => {
       const dataStream = createTestDataStream(1);
 
       // Mock: No index template exists
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.reject(
           new EsErrors.ResponseError({
             statusCode: 404,
@@ -550,7 +553,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: No data stream exists
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.reject(
           new EsErrors.ResponseError({
             statusCode: 404,
@@ -563,12 +566,12 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: putIndexTemplate for creation
-      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
       // Mock: createDataStream for creation
-      (elasticsearchClient.indices.createDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.createDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
@@ -581,7 +584,7 @@ describe('initialize - versioning logic', () => {
 
       // Verify index template was created
       expect(elasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
-      const createCall = (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mock
+      const createCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock
         .calls[0][0];
       expect(createCall?._meta?.version).toBe(1);
       expect(createCall?._meta?.previousVersions).toEqual([]);
@@ -605,7 +608,7 @@ describe('initialize - versioning logic', () => {
       };
 
       // Mock: No index template exists
-      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.reject(
           new EsErrors.ResponseError({
             statusCode: 404,
@@ -618,7 +621,7 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: No data stream exists
-      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.getDataStream as Mock).mockImplementationOnce(() =>
         Promise.reject(
           new EsErrors.ResponseError({
             statusCode: 404,
@@ -631,12 +634,12 @@ describe('initialize - versioning logic', () => {
       );
 
       // Mock: putIndexTemplate for creation
-      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.putIndexTemplate as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
       // Mock: createDataStream for creation
-      (elasticsearchClient.indices.createDataStream as jest.Mock).mockImplementationOnce(() =>
+      (elasticsearchClient.indices.createDataStream as Mock).mockImplementationOnce(() =>
         Promise.resolve({ acknowledged: true })
       );
 
@@ -647,7 +650,7 @@ describe('initialize - versioning logic', () => {
         lazyCreation: false,
       });
 
-      const createCall = (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mock
+      const createCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock
         .calls[0][0];
       expect(createCall?.template?.lifecycle).toEqual({
         data_retention: '30d',

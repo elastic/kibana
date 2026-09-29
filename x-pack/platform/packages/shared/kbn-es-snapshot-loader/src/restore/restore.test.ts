@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -31,7 +34,7 @@ const createMockEsClient = ({
 } = {}): Client =>
   ({
     snapshot: {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         snapshots: [
           {
             snapshot: 'test-snapshot',
@@ -42,11 +45,11 @@ const createMockEsClient = ({
           },
         ],
       }),
-      restore: jest.fn().mockResolvedValue({ snapshot: { indices: restoredIndices } }),
-      deleteRepository: jest.fn().mockResolvedValue({}),
+      restore: vi.fn().mockResolvedValue({ snapshot: { indices: restoredIndices } }),
+      deleteRepository: vi.fn().mockResolvedValue({}),
     },
     cluster: {
-      health: jest.fn().mockResolvedValue(healthResponse),
+      health: vi.fn().mockResolvedValue(healthResponse),
     },
   } as unknown as Client);
 
@@ -214,8 +217,8 @@ describe('restoreIndices', () => {
 describe('restoreSnapshot', () => {
   const repository = {
     type: 'url' as const,
-    validate: jest.fn(),
-    register: jest.fn().mockResolvedValue(undefined),
+    validate: vi.fn(),
+    register: vi.fn().mockResolvedValue(undefined),
   };
 
   it('waits for restored indices when index settings are provided', async () => {
@@ -229,9 +232,9 @@ describe('restoreSnapshot', () => {
       indexSettings: { 'index.auto_expand_replicas': '0-1' },
     });
 
-    const restoreOrder = (esClient.snapshot.restore as unknown as jest.Mock).mock
+    const restoreOrder = (esClient.snapshot.restore as unknown as Mock).mock
       .invocationCallOrder[0];
-    const healthOrder = (esClient.cluster.health as unknown as jest.Mock).mock
+    const healthOrder = (esClient.cluster.health as unknown as Mock).mock
       .invocationCallOrder[0];
     expect(restoreOrder).toBeLessThan(healthOrder);
     expect(result.success).toBe(true);

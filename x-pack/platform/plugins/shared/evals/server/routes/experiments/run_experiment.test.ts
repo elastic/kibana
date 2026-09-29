@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -15,17 +18,23 @@ import type { RouteDependencies } from '../register_routes';
 import { generateExperimentRun } from '../../workflow_generator';
 import { findUnauthorizedTargetSpaces } from '../shared/authorize_target_spaces';
 
-jest.mock('../../workflow_generator', () => ({
-  experimentRequestToParams: jest.fn((body) => body),
-  generateExperimentRun: jest.fn(),
-}));
+vi.mock('../../workflow_generator', () => {
+      const mocked = {
+      experimentRequestToParams: vi.fn((body) => body),
+      generateExperimentRun: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared/authorize_target_spaces', () => ({
-  findUnauthorizedTargetSpaces: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../shared/authorize_target_spaces', () => {
+      const mocked = {
+      findUnauthorizedTargetSpaces: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const generateExperimentRunMock = generateExperimentRun as jest.Mock;
-const findUnauthorizedTargetSpacesMock = findUnauthorizedTargetSpaces as jest.Mock;
+const generateExperimentRunMock = generateExperimentRun as Mock;
+const findUnauthorizedTargetSpacesMock = findUnauthorizedTargetSpaces as Mock;
 
 interface Execution {
   executionId: string;
@@ -45,15 +54,15 @@ describe('POST /internal/evals/experiments/_run', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const executeWorkflow = jest.fn();
-    const cancelWorkflowExecution = jest.fn().mockResolvedValue({ cancelled: true });
+    const executeWorkflow = vi.fn();
+    const cancelWorkflowExecution = vi.fn().mockResolvedValue({ cancelled: true });
 
     registerRunExperimentRoute({
       router,
       logger,
       workflowsManagement: { management: { executeWorkflow, cancelWorkflowExecution } },
       getSpaceId: async () => 'default',
-      checkManageEvalsPrivileges: jest.fn().mockResolvedValue(true),
+      checkManageEvalsPrivileges: vi.fn().mockResolvedValue(true),
     } as unknown as RouteDependencies);
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -77,7 +86,7 @@ describe('POST /internal/evals/experiments/_run', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     findUnauthorizedTargetSpacesMock.mockResolvedValue([]);
   });
 

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { KibanaServices } from '../../kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { fetchPendingActionsByAgentId } from './endpoint_pending_actions';
 import { pendingActionsHttpMock, pendingActionsResponseMock } from './mocks';
 import { ACTION_STATUS_ROUTE } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../kibana');
+vi.mock('../../kibana');
 
 describe('when using endpoint pending actions api service', () => {
   let coreHttp: ReturnType<typeof coreMock.createStart>['http'];
@@ -20,7 +23,7 @@ describe('when using endpoint pending actions api service', () => {
     const coreStartMock = coreMock.createStart();
     coreHttp = coreStartMock.http;
     pendingActionsHttpMock(coreHttp);
-    (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
+    (KibanaServices.get as Mock).mockReturnValue(coreStartMock);
   });
 
   it('should call the endpont pending action status API', async () => {

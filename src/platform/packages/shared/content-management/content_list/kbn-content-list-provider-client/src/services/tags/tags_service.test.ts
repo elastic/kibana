@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Tag } from '@kbn/content-management-tags';
 import { createTagsService } from './tags_service';
 
@@ -17,7 +19,7 @@ describe('createTagsService', () => {
   ];
 
   it('returns a service whose `getTagList` proxies to the supplied tagging API', () => {
-    const getTagList = jest.fn().mockReturnValue(tags);
+    const getTagList = vi.fn().mockReturnValue(tags);
 
     const service = createTagsService({ getTagList });
 

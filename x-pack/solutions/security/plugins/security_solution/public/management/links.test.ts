@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -27,23 +30,23 @@ import type { LicenseService } from '../../common/license';
 import { createLicenseServiceMock } from '../../common/license/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 
-jest.mock('../common/hooks/use_license');
+vi.mock('../common/hooks/use_license');
 
-jest.mock('../../common/endpoint/service/authz', () => {
-  const originalModule = jest.requireActual('../../common/endpoint/service/authz');
+vi.mock('../../common/endpoint/service/authz', async () => {
+  const originalModule = (await vi.importActual('../../common/endpoint/service/authz'));
   return {
     ...originalModule,
-    calculateEndpointAuthz: jest.fn(),
+    calculateEndpointAuthz: vi.fn(),
   };
 });
 
-jest.mock('../common/lib/kibana');
+vi.mock('../common/lib/kibana');
 
-const licenseServiceMock = _licenseService as jest.Mocked<LicenseService>;
+const licenseServiceMock = _licenseService as Mocked<LicenseService>;
 
 describe('links', () => {
   let coreMockStarted: ReturnType<typeof coreMock.createStart>;
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
 
   const getLinksWithout = (...excludedLinks: SecurityPageName[]) => ({
     ...links,
@@ -55,8 +58,8 @@ describe('links', () => {
       security: {
         authc: {
           getCurrentUser: noUserAuthz
-            ? jest.fn().mockReturnValue(undefined)
-            : jest.fn().mockReturnValue([]),
+            ? vi.fn().mockReturnValue(undefined)
+            : vi.fn().mockReturnValue([]),
         },
       },
       fleet: {
@@ -73,7 +76,7 @@ describe('links', () => {
 
   beforeEach(() => {
     coreMockStarted = coreMock.createStart();
-    fakeHttpServices = coreMockStarted.http as jest.Mocked<HttpSetup>;
+    fakeHttpServices = coreMockStarted.http as Mocked<HttpSetup>;
   });
 
   afterEach(() => {
@@ -235,7 +238,7 @@ describe('links', () => {
   });
 
   it('should return all links for user with all sub-feature privileges', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+    (calculateEndpointAuthz as Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
     const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
       ...allowedExperimentalValues,
@@ -263,7 +266,7 @@ describe('links', () => {
 
   describe('Action Logs', () => {
     it('should return all but response actions link when no actions log access', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      (calculateEndpointAuthz as Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadActionsLogManagement: false,
           canDeleteHostIsolationExceptions: false,
@@ -282,7 +285,7 @@ describe('links', () => {
 
   describe('Artifacts', () => {
     it('should hide Artifacts when user has no artifact privilege', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      (calculateEndpointAuthz as Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadEndpointExceptions: false,
           canReadTrustedApplications: false,
@@ -303,7 +306,7 @@ describe('links', () => {
     });
 
     it('should show Artifacts when user has at least one artifact privilege', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      (calculateEndpointAuthz as Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadEndpointExceptions: false,
           canReadTrustedApplications: false,
@@ -325,7 +328,7 @@ describe('links', () => {
     });
 
     it('should set Artifacts link path to first allowed artifact tab (event filters only)', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      (calculateEndpointAuthz as Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadEndpointExceptions: false,
           canReadTrustedApplications: false,
@@ -346,7 +349,7 @@ describe('links', () => {
     });
 
     it('should show Artifacts and set path to custom YARA signatures when that is the only privilege and FF is on', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      (calculateEndpointAuthz as Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadEndpointExceptions: false,
           canReadTrustedApplications: false,
@@ -372,7 +375,7 @@ describe('links', () => {
 
   describe('RBAC checks', () => {
     it('should NOT return policies if `canReadPolicyManagement` is `false`', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      (calculateEndpointAuthz as Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadPolicyManagement: false,
         })
@@ -390,7 +393,7 @@ describe('links', () => {
     });
 
     it('should hide `Script library` for user without `canReadScriptsLibrary` privilege', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      (calculateEndpointAuthz as Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadScriptsLibrary: false,
         })
@@ -406,7 +409,7 @@ describe('links', () => {
 
   describe('Endpoint List', () => {
     it('should return all but endpoints link when no Endpoint List READ access', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      (calculateEndpointAuthz as Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadEndpointList: false,
         })

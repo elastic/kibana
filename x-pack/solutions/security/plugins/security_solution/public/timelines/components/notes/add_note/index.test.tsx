@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -15,33 +18,33 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { AddNote } from '.';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../../common/lib/kibana/hooks');
+vi.mock('../../../../common/lib/kibana/hooks');
 
 describe('AddNote', () => {
   let authenticatedUser: AuthenticatedUser;
 
   beforeEach(() => {
-    (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
+    (useCurrentUser as Mock).mockReturnValue(authenticatedUser);
     authenticatedUser = securityMock.createMockAuthenticatedUser({
       roles: ['superuser'],
     });
   });
   const note = 'The contents of a new note';
   const props = {
-    associateNote: jest.fn(),
+    associateNote: vi.fn(),
     newNote: note,
-    onCancelAddNote: jest.fn(),
-    updateNewNote: jest.fn(),
-    setIsMarkdownInvalid: jest.fn(),
+    onCancelAddNote: vi.fn(),
+    updateNewNote: vi.fn(),
+    setIsMarkdownInvalid: vi.fn(),
   };
 
   test('renders correctly', () => {
@@ -64,7 +67,7 @@ describe('AddNote', () => {
   });
 
   test('it invokes onCancelAddNote when the Cancel button is clicked', () => {
-    const onCancelAddNote = jest.fn();
+    const onCancelAddNote = vi.fn();
     const testProps = {
       ...props,
       onCancelAddNote,
@@ -82,7 +85,7 @@ describe('AddNote', () => {
   });
 
   test('it does NOT invoke associateNote when the Cancel button is clicked', () => {
-    const associateNote = jest.fn();
+    const associateNote = vi.fn();
     const testProps = {
       ...props,
       associateNote,
@@ -126,7 +129,7 @@ describe('AddNote', () => {
   });
 
   test('it invokes associateNote when the Add Note button is clicked', () => {
-    const associateNote = jest.fn();
+    const associateNote = vi.fn();
     const testProps = {
       ...props,
       newNote: note,
@@ -158,7 +161,7 @@ describe('AddNote', () => {
   // });
 
   test('it invokes updateNewNote when the Add Note button is clicked', () => {
-    const updateNewNote = jest.fn();
+    const updateNewNote = vi.fn();
     const testProps = {
       ...props,
       updateNewNote,

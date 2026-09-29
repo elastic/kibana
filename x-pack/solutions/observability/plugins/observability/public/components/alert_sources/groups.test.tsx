@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import {
   SERVICE_ENVIRONMENT,
@@ -17,14 +20,14 @@ import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { ALERT_SOURCES_ELEMENT, Groups } from './groups';
 
-jest.mock('../../utils/kibana_react');
+vi.mock('../../utils/kibana_react');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 const APM_RULE_TYPE_ID = 'apm.transaction_duration';
 const TIME_RANGE = { from: 'now-15m', to: 'now' };
 
-const mockApmGetRedirectUrl = jest.fn().mockReturnValue('http://test-apm-url');
+const mockApmGetRedirectUrl = vi.fn().mockReturnValue('http://test-apm-url');
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -48,7 +51,7 @@ const mockKibana = () => {
 
 describe('Groups', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
   });
 

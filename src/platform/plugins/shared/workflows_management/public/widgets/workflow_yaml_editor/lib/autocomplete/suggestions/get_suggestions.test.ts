@@ -7,55 +7,99 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { parseDocument, Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { getSuggestions, isInsideLoopBody } from './get_suggestions';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
-jest.mock('./connector_id/get_connector_id_suggestions', () => ({
-  getConnectorIdSuggestions: jest.fn(() => [{ label: 'connector-id-1' }]),
-}));
-jest.mock('./connector_type/get_connector_type_suggestions', () => ({
-  getConnectorTypeSuggestions: jest.fn(() => [{ label: 'type-1' }]),
-}));
-jest.mock('./step_property/get_step_property_suggestions', () => ({
-  getStepPropertySuggestions: jest.fn(() => []),
-}));
-jest.mock('./json_schema/get_json_schema_suggestions', () => ({
-  getJsonSchemaSuggestions: jest.fn(() => []),
-}));
-jest.mock('./liquid/liquid_completions', () => ({
-  createLiquidBlockKeywordCompletions: jest.fn(() => [{ label: 'assign' }]),
-  createLiquidFilterCompletions: jest.fn(() => [{ label: 'upcase' }]),
-  createLiquidSyntaxCompletions: jest.fn(() => [{ label: '{% if %}' }]),
-}));
-jest.mock('./rrule/get_rrule_scheduling_suggestions', () => ({
-  getRRuleSchedulingSuggestions: jest.fn(() => [{ label: 'rrule' }]),
-}));
-jest.mock('./timezone/get_timezone_suggestions', () => ({
-  getTimezoneSuggestions: jest.fn(() => [{ label: 'UTC' }]),
-}));
-jest.mock('./trigger_type/get_trigger_type_suggestions', () => ({
-  getTriggerTypeSuggestions: jest.fn(() => [{ label: 'scheduled' }]),
-}));
-jest.mock('./variable/get_variable_suggestions', () => ({
-  getVariableSuggestions: jest.fn(() => [{ label: '{{context.var}}' }]),
-}));
-jest.mock('./workflow/get_workflow_inputs_suggestions', () => ({
-  getWorkflowInputsSuggestions: jest.fn(() => []),
-}));
-jest.mock('./workflow/get_workflow_outputs_suggestions', () => ({
-  getWorkflowOutputsSuggestions: jest.fn(() => []),
-}));
-jest.mock('./workflow/get_workflow_suggestions', () => ({
-  getWorkflowSuggestions: jest.fn(() => [{ label: 'wf-1' }]),
-}));
-jest.mock('../../../../../../common/schema', () => ({
-  getPropertyHandler: jest.fn(),
-}));
-jest.mock('./esql_query/get_esql_query_suggestions', () => ({
-  getEsqlQuerySuggestions: jest.fn(),
-}));
+vi.mock('./connector_id/get_connector_id_suggestions', () => {
+      const mocked = {
+      getConnectorIdSuggestions: vi.fn(() => [{ label: 'connector-id-1' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector_type/get_connector_type_suggestions', () => {
+      const mocked = {
+      getConnectorTypeSuggestions: vi.fn(() => [{ label: 'type-1' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./step_property/get_step_property_suggestions', () => {
+      const mocked = {
+      getStepPropertySuggestions: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./json_schema/get_json_schema_suggestions', () => {
+      const mocked = {
+      getJsonSchemaSuggestions: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./liquid/liquid_completions', () => {
+      const mocked = {
+      createLiquidBlockKeywordCompletions: vi.fn(() => [{ label: 'assign' }]),
+      createLiquidFilterCompletions: vi.fn(() => [{ label: 'upcase' }]),
+      createLiquidSyntaxCompletions: vi.fn(() => [{ label: '{% if %}' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./rrule/get_rrule_scheduling_suggestions', () => {
+      const mocked = {
+      getRRuleSchedulingSuggestions: vi.fn(() => [{ label: 'rrule' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./timezone/get_timezone_suggestions', () => {
+      const mocked = {
+      getTimezoneSuggestions: vi.fn(() => [{ label: 'UTC' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./trigger_type/get_trigger_type_suggestions', () => {
+      const mocked = {
+      getTriggerTypeSuggestions: vi.fn(() => [{ label: 'scheduled' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./variable/get_variable_suggestions', () => {
+      const mocked = {
+      getVariableSuggestions: vi.fn(() => [{ label: '{{context.var}}' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflow/get_workflow_inputs_suggestions', () => {
+      const mocked = {
+      getWorkflowInputsSuggestions: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflow/get_workflow_outputs_suggestions', () => {
+      const mocked = {
+      getWorkflowOutputsSuggestions: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflow/get_workflow_suggestions', () => {
+      const mocked = {
+      getWorkflowSuggestions: vi.fn(() => [{ label: 'wf-1' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../../common/schema', () => {
+      const mocked = {
+      getPropertyHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./esql_query/get_esql_query_suggestions', () => {
+      const mocked = {
+      getEsqlQuerySuggestions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createMockContext(
   overrides: Partial<ExtendedAutocompleteContext> = {}
@@ -403,9 +447,7 @@ describe('getSuggestions', () => {
   });
 
   it('should try workflow inputs suggestions when isInWorkflowInputsContext is true', async () => {
-    const { getWorkflowInputsSuggestions } = jest.requireMock(
-      './workflow/get_workflow_inputs_suggestions'
-    );
+    const { getWorkflowInputsSuggestions } = (await vi.importMock('./workflow/get_workflow_inputs_suggestions'));
     getWorkflowInputsSuggestions.mockResolvedValueOnce([{ label: 'input-key' }]);
 
     const ctx = createMockContext({
@@ -417,9 +459,7 @@ describe('getSuggestions', () => {
   });
 
   it('should return workflow inputs suggestions for workflow-inputs match type', async () => {
-    const { getWorkflowInputsSuggestions } = jest.requireMock(
-      './workflow/get_workflow_inputs_suggestions'
-    );
+    const { getWorkflowInputsSuggestions } = (await vi.importMock('./workflow/get_workflow_inputs_suggestions'));
     getWorkflowInputsSuggestions.mockResolvedValueOnce([{ label: 'input-scaffold' }]);
 
     const ctx = createMockContext({
@@ -434,20 +474,16 @@ describe('getSuggestions', () => {
   });
 
   describe('ES|QL query field ownership', () => {
-    beforeEach(() => {
-      const { getEsqlQuerySuggestions } = jest.requireMock(
-        './esql_query/get_esql_query_suggestions'
-      );
-      const { createLiquidFilterCompletions } = jest.requireMock('./liquid/liquid_completions');
+    beforeEach(async () => {
+      const { getEsqlQuerySuggestions } = (await vi.importMock('./esql_query/get_esql_query_suggestions'));
+      const { createLiquidFilterCompletions } = (await vi.importMock('./liquid/liquid_completions'));
       getEsqlQuerySuggestions.mockReset();
       createLiquidFilterCompletions.mockClear();
     });
 
     it('returns ES|QL suggestions without falling through to Liquid when ES|QL owns the popup', async () => {
-      const { getEsqlQuerySuggestions } = jest.requireMock(
-        './esql_query/get_esql_query_suggestions'
-      );
-      const { createLiquidFilterCompletions } = jest.requireMock('./liquid/liquid_completions');
+      const { getEsqlQuerySuggestions } = (await vi.importMock('./esql_query/get_esql_query_suggestions'));
+      const { createLiquidFilterCompletions } = (await vi.importMock('./liquid/liquid_completions'));
       getEsqlQuerySuggestions.mockResolvedValueOnce([{ label: 'WHERE' }]);
 
       const ctx = createMockContext({
@@ -476,10 +512,8 @@ describe('getSuggestions', () => {
     });
 
     it('returns [] from ES|QL path without Liquid filter fallthrough when suggest has nothing', async () => {
-      const { getEsqlQuerySuggestions } = jest.requireMock(
-        './esql_query/get_esql_query_suggestions'
-      );
-      const { createLiquidFilterCompletions } = jest.requireMock('./liquid/liquid_completions');
+      const { getEsqlQuerySuggestions } = (await vi.importMock('./esql_query/get_esql_query_suggestions'));
+      const { createLiquidFilterCompletions } = (await vi.importMock('./liquid/liquid_completions'));
       getEsqlQuerySuggestions.mockResolvedValueOnce([]);
 
       const ctx = createMockContext({

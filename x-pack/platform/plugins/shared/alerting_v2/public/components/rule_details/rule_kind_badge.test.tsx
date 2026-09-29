@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,8 +18,8 @@ const wrap = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider
 
 describe('RuleKindBadge', () => {
   // Fake timers keep the EuiToolTip display delay off the wall clock, so the hover assertion can't tip the test past its budget under CI load.
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
 
   it.each<RuleKind>(['alert', 'signal'])('renders the %s kind badge', async (kind) => {
     wrap(<RuleKindBadge kind={kind} />);

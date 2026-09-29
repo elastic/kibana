@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { screen, cleanup, act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -32,11 +35,11 @@ import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../../common/hooks/use_license', () => {
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/containers/source');
+vi.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
+    isPlatinumPlus: vi.fn(),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -50,7 +53,7 @@ describe('Trusted apps form', () => {
   const formPrefix = 'trustedApps-form';
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
-  let formProps: jest.Mocked<ArtifactFormComponentProps>;
+  let formProps: Mocked<ArtifactFormComponentProps>;
   let mockedContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let latestUpdatedItem: ArtifactFormComponentProps['item'];
@@ -189,11 +192,11 @@ describe('Trusted apps form', () => {
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+    (licenseService.isPlatinumPlus as Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     mockedContext.setExperimentalFlag({ trustedAppsAdvancedMode: true });
     latestUpdatedItem = createItem();
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as Mock).mockImplementation(() => [
       false,
       {
         indexPatterns: stubIndexPattern,
@@ -205,7 +208,7 @@ describe('Trusted apps form', () => {
       mode: 'create',
       disabled: false,
       error: undefined,
-      onChange: jest.fn((updates) => {
+      onChange: vi.fn((updates) => {
         latestUpdatedItem = updates.item;
       }),
     };
@@ -414,7 +417,7 @@ describe('Trusted apps form', () => {
         const andButton = getConditionBuilderAndButton();
         await userEvent.click(andButton);
         // re-render with updated `newTrustedApp`
-        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+        formProps.item = (formProps.onChange as Mock).mock.calls.at(-2)[0].item;
         rerender();
       });
 
@@ -457,7 +460,7 @@ describe('Trusted apps form', () => {
         expect(formProps.onChange).toHaveBeenCalledWith(expected);
 
         // update TA to show toggle change
-        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+        formProps.item = (formProps.onChange as Mock).mock.calls.at(-2)[0].item;
         rerender();
         expect(
           getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
@@ -482,7 +485,7 @@ describe('Trusted apps form', () => {
           mode: 'edit',
           disabled: false,
           error: undefined,
-          onChange: jest.fn((updates) => {
+          onChange: vi.fn((updates) => {
             latestUpdatedItem = updates.item;
           }),
         };
@@ -720,7 +723,7 @@ describe('Trusted apps form', () => {
 
     it('should validate invalid Hash value', () => {
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
-      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      formProps.item = (formProps.onChange as Mock).mock.calls.at(-2)[0].item;
       rerender();
       expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0)));
     });
@@ -733,7 +736,7 @@ describe('Trusted apps form', () => {
     it('should validate all condition values (when multiples exist) have non empty space value', async () => {
       const andButton = getConditionBuilderAndButton();
       await userEvent.click(andButton);
-      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      formProps.item = (formProps.onChange as Mock).mock.calls.at(-2)[0].item;
       rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
@@ -745,7 +748,7 @@ describe('Trusted apps form', () => {
     it('should validate duplicated conditions', async () => {
       const andButton = getConditionBuilderAndButton();
       await userEvent.click(andButton);
-      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      formProps.item = (formProps.onChange as Mock).mock.calls.at(-2)[0].item;
       rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), '');
@@ -758,7 +761,7 @@ describe('Trusted apps form', () => {
       const andButton = getConditionBuilderAndButton();
 
       await userEvent.click(andButton);
-      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      formProps.item = (formProps.onChange as Mock).mock.calls.at(-2)[0].item;
       rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');

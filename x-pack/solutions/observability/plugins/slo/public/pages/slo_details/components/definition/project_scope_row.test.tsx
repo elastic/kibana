@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EuiDescriptionList } from '@elastic/eui';
 import type { CPSProject } from '@kbn/cps-utils';
 import { useFetchProjects } from '@kbn/cps-utils';
@@ -18,22 +21,22 @@ import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { pluginContextDefaultValue, render } from '../../../../utils/test_helper';
 import { ProjectScopeRow } from './project_scope_row';
 
-jest.mock('../../../../hooks/use_plugin_context');
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('@kbn/cps-utils', () => {
-  const actual = jest.requireActual('@kbn/cps-utils');
-  const mockReact = jest.requireActual('react');
+vi.mock('../../../../hooks/use_plugin_context');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('@kbn/cps-utils', async () => {
+  const actual = (await vi.importActual('@kbn/cps-utils'));
+  const mockReact = require('react');
   return {
     ...actual,
-    useFetchProjects: jest.fn(),
+    useFetchProjects: vi.fn(),
     ProjectPickerContent: () =>
       mockReact.createElement('div', { 'data-test-subj': 'mockProjectPickerContent' }),
   };
 });
 
-const usePluginContextMock = usePluginContext as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchProjectsMock = useFetchProjects as jest.Mock;
+const usePluginContextMock = usePluginContext as Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchProjectsMock = useFetchProjects as Mock;
 
 const ORIGIN_PROJECT: CPSProject = {
   _id: 'origin-1',
@@ -68,8 +71,8 @@ function mockGate(options?: {
           options?.hasManager === false
             ? undefined
             : {
-                fetchProjects: jest.fn().mockResolvedValue(null),
-                getTotalProjectCount: jest.fn().mockReturnValue(options?.totalProjectCount ?? 2),
+                fetchProjects: vi.fn().mockResolvedValue(null),
+                getTotalProjectCount: vi.fn().mockReturnValue(options?.totalProjectCount ?? 2),
               },
       },
     },
@@ -105,7 +108,7 @@ function renderRow(settings?: Partial<SLOWithSummaryResponse['settings']>) {
 
 describe('ProjectScopeRow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGate();
     mockFetchProjects();
   });

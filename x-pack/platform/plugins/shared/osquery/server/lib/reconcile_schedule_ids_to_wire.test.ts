@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   SavedObjectModelDataBackfillFn,
   SavedObjectsModelDataBackfillChange,
@@ -17,15 +20,15 @@ import { packSavedObjectModelVersion4 } from './saved_query/saved_object_model_v
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const createMockLogger = () => ({
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  trace: jest.fn(),
-  fatal: jest.fn(),
-  log: jest.fn(),
-  get: jest.fn(),
-  isLevelEnabled: jest.fn().mockReturnValue(true),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  trace: vi.fn(),
+  fatal: vi.fn(),
+  log: vi.fn(),
+  get: vi.fn(),
+  isLevelEnabled: vi.fn().mockReturnValue(true),
 });
 
 /**
@@ -63,7 +66,7 @@ const buildPackSOFindResult = (id: string, name: string, attrs: Record<string, u
 const createMockScopedClient = (
   packSOsByName: Record<string, { id: string; attrs: Record<string, unknown> }> = {}
 ) => ({
-  find: jest.fn().mockImplementation(({ filter }: { filter: string }) => {
+  find: vi.fn().mockImplementation(({ filter }: { filter: string }) => {
     // Extract pack name from filter `osquery-pack.attributes.name: "packName"`.
     const match = filter.match(/"([^"]+)"/);
     const packName = match?.[1];
@@ -74,24 +77,24 @@ const createMockScopedClient = (
 
     return Promise.resolve({ saved_objects: [], total: 0, page: 1, per_page: 1 });
   }),
-  update: jest.fn().mockResolvedValue({}),
-  bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+  update: vi.fn().mockResolvedValue({}),
+  bulkGet: vi.fn().mockResolvedValue({ saved_objects: [] }),
 });
 
 const createMockCoreStart = (scopedClient: ReturnType<typeof createMockScopedClient>) =>
   ({
     savedObjects: {
-      createInternalRepository: jest.fn().mockReturnValue({
+      createInternalRepository: vi.fn().mockReturnValue({
         // The new reconciler doesn't use PIT — but keep it to avoid errors
         // if something unexpected touches it.
-        createPointInTimeFinder: jest.fn().mockReturnValue({
-          close: jest.fn().mockResolvedValue(undefined),
+        createPointInTimeFinder: vi.fn().mockReturnValue({
+          close: vi.fn().mockResolvedValue(undefined),
           async *find() {
             yield { saved_objects: [] };
           },
         }),
       }),
-      getScopedClient: jest.fn().mockReturnValue(scopedClient),
+      getScopedClient: vi.fn().mockReturnValue(scopedClient),
     },
     http: {},
     elasticsearch: {
@@ -101,12 +104,12 @@ const createMockCoreStart = (scopedClient: ReturnType<typeof createMockScopedCli
 
 // Yields the drain as one batch (the common case for package-policy drain).
 const mockFetchAllItems = (items: unknown[]) =>
-  jest.fn().mockImplementation(async function* asyncGenerator() {
+  vi.fn().mockImplementation(async function* asyncGenerator() {
     yield items;
   });
 
 const mockFetchAllItemsBatches = (batches: unknown[][]) =>
-  jest.fn().mockImplementation(async function* asyncGenerator() {
+  vi.fn().mockImplementation(async function* asyncGenerator() {
     for (const batch of batches) {
       yield batch;
     }
@@ -114,10 +117,10 @@ const mockFetchAllItemsBatches = (batches: unknown[][]) =>
 
 const createMockOsqueryContext = (packagePolicyService?: unknown) =>
   ({
-    getPackagePolicyService: jest.fn().mockReturnValue(
+    getPackagePolicyService: vi.fn().mockReturnValue(
       packagePolicyService ?? {
         fetchAllItems: mockFetchAllItems([]),
-        update: jest.fn().mockResolvedValue({}),
+        update: vi.fn().mockResolvedValue({}),
       }
     ),
   } as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['osqueryContext']);
@@ -245,12 +248,12 @@ describe('reconcileScheduleIdsToWire', () => {
     };
 
     const scopedClient = {
-      find: jest.fn().mockResolvedValue(decoyFirst),
-      update: jest.fn().mockResolvedValue({}),
-      bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      find: vi.fn().mockResolvedValue(decoyFirst),
+      update: vi.fn().mockResolvedValue({}),
+      bulkGet: vi.fn().mockResolvedValue({ saved_objects: [] }),
     };
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const core = createMockCoreStart(scopedClient as never);
     const osqueryContext = createMockOsqueryContext({
       fetchAllItems: mockFetchAllItems([buildPackagePolicy()]),
@@ -300,7 +303,7 @@ describe('reconcileScheduleIdsToWire', () => {
     };
 
     const scopedClient = {
-      find: jest.fn().mockImplementation(({ page = 1 }: { page?: number }) => {
+      find: vi.fn().mockImplementation(({ page = 1 }: { page?: number }) => {
         if (page === 1) {
           return Promise.resolve({
             saved_objects: Array.from({ length: 100 }, (_, n) => decoy(n)),
@@ -312,11 +315,11 @@ describe('reconcileScheduleIdsToWire', () => {
 
         return Promise.resolve({ saved_objects: [exactSO], total: 101, page, per_page: 100 });
       }),
-      update: jest.fn().mockResolvedValue({}),
-      bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      update: vi.fn().mockResolvedValue({}),
+      bulkGet: vi.fn().mockResolvedValue({ saved_objects: [] }),
     };
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const core = createMockCoreStart(scopedClient as never);
     const osqueryContext = createMockOsqueryContext({
       fetchAllItems: mockFetchAllItems([buildPackagePolicy()]),
@@ -352,7 +355,7 @@ describe('reconcileScheduleIdsToWire', () => {
       coreStart: createMockCoreStart(scopedClient),
       osqueryContext: createMockOsqueryContext({
         fetchAllItems: packagePolicyList,
-        update: jest.fn().mockResolvedValue({}),
+        update: vi.fn().mockResolvedValue({}),
       }),
       logger: createMockLogger() as unknown as Parameters<
         typeof reconcileScheduleIdsToWire
@@ -381,7 +384,7 @@ describe('reconcileScheduleIdsToWire', () => {
     const scopedClient = createMockScopedClient({
       'reconcile-pack': { id: 'pack-1', attrs: noCreatedAtAttrs },
     });
-    const packagePolicyUpdate = jest
+    const packagePolicyUpdate = vi
       .fn()
       .mockImplementation(async (_sc, _es, id, updated) => ({ ...updated, id }));
 
@@ -417,7 +420,7 @@ describe('reconcileScheduleIdsToWire', () => {
     // the suite green, since the only start_date assertion was in the fixture
     // that HAS no created_at (expecting the sentinel either way).
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
     await reconcileScheduleIdsToWire({
       coreStart: createMockCoreStart(scopedClient),
@@ -464,10 +467,10 @@ describe('reconcileScheduleIdsToWire', () => {
         },
       },
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
@@ -496,15 +499,15 @@ describe('reconcileScheduleIdsToWire', () => {
     // elsewhere 404s BEFORE the write and re-arms this one-shot forever.
     const policy = { ...buildPackagePolicy(), spaceIds: ['space-b'] };
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
         fetchAllItems: mockFetchAllItems([policy]),
-        update: jest.fn().mockResolvedValue({}),
+        update: vi.fn().mockResolvedValue({}),
       }),
       logger: createMockLogger() as unknown as Parameters<
         typeof reconcileScheduleIdsToWire
@@ -522,11 +525,11 @@ describe('reconcileScheduleIdsToWire', () => {
     // A throwing lookup is a blip (503/timeout); reporting success would record
     // completed:true and make it permanent non-repair.
     const scopedClient = {
-      find: jest.fn().mockRejectedValue(new Error('es_rejected_execution_exception')),
-      update: jest.fn().mockResolvedValue({}),
-      bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      find: vi.fn().mockRejectedValue(new Error('es_rejected_execution_exception')),
+      update: vi.fn().mockResolvedValue({}),
+      bulkGet: vi.fn().mockResolvedValue({ saved_objects: [] }),
     };
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
     const result = await reconcileScheduleIdsToWire({
       coreStart: createMockCoreStart(scopedClient),
@@ -555,7 +558,7 @@ describe('reconcileScheduleIdsToWire', () => {
         },
       },
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
     const result = await reconcileScheduleIdsToWire({
       coreStart: createMockCoreStart(scopedClient),
@@ -606,7 +609,7 @@ describe('reconcileScheduleIdsToWire', () => {
         },
       },
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
     const result = await reconcileScheduleIdsToWire({
       coreStart: createMockCoreStart(scopedClient),
@@ -642,7 +645,7 @@ describe('reconcileScheduleIdsToWire', () => {
         attrs: { ...DEFAULT_PACK_ENTRY.attrs, enabled: false },
       },
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
     await reconcileScheduleIdsToWire({
       coreStart: createMockCoreStart(scopedClient),
@@ -664,7 +667,7 @@ describe('reconcileScheduleIdsToWire', () => {
   test('does not send spaceIds in the Fleet update payload', async () => {
     // Fleet's `update` doesn't strip `spaceIds` — only its callback chain does.
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
     await reconcileScheduleIdsToWire({
       coreStart: createMockCoreStart(scopedClient),
@@ -725,11 +728,11 @@ describe('reconcileScheduleIdsToWire', () => {
     };
 
     const core = createMockCoreStart(clientsBySpace['space-a']);
-    (core.savedObjects.getScopedClient as jest.Mock) = jest
+    (core.savedObjects.getScopedClient as Mock) = vi
       .fn()
       .mockImplementation((req: { spaceId?: unknown }) => clientsBySpace[String(req.spaceId)]);
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -767,11 +770,11 @@ describe('reconcileScheduleIdsToWire', () => {
       spaceIds: undefined,
     } as Record<string, unknown>;
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -800,11 +803,11 @@ describe('reconcileScheduleIdsToWire', () => {
       spaceIds: ['space-a', 'space-b'],
     };
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -835,13 +838,13 @@ describe('reconcileScheduleIdsToWire', () => {
     const policy = { ...buildPackagePolicy(), spaceIds: ['space-a'] };
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
     // Only the default-space client knows this pack; space-a's find returns none.
-    scopedClient.find = jest.fn().mockResolvedValue({
+    scopedClient.find = vi.fn().mockResolvedValue({
       saved_objects: [],
       total: 0,
       page: 1,
       per_page: 1,
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const logger = createMockLogger();
 
     const result = await reconcileScheduleIdsToWire({
@@ -880,11 +883,11 @@ describe('reconcileScheduleIdsToWire', () => {
     ).pack_name = 'mypack';
 
     const scopedClient = createMockScopedClient({ mypack: MYPACK_ENTRY });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -924,11 +927,11 @@ describe('reconcileScheduleIdsToWire', () => {
     const scopedClient = createMockScopedClient({
       mypack: { id: 'pack-DEFAULT-SPACE-COPY', attrs: { ...MYPACK_ENTRY.attrs } },
     });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -957,11 +960,11 @@ describe('reconcileScheduleIdsToWire', () => {
     } as Record<string, unknown>;
 
     const scopedClient = createMockScopedClient({ mypack: MYPACK_ENTRY });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -1007,11 +1010,11 @@ describe('reconcileScheduleIdsToWire', () => {
     ).pack_name = 'mypack';
 
     const scopedClient = createMockScopedClient({ mypack: MYPACK_ENTRY });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -1058,11 +1061,11 @@ describe('reconcileScheduleIdsToWire', () => {
         },
       },
     });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -1106,11 +1109,11 @@ describe('reconcileScheduleIdsToWire', () => {
         },
       },
     });
-    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const getScopedClient = vi.fn().mockReturnValue(scopedClient);
     const core = createMockCoreStart(scopedClient);
-    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+    (core.savedObjects.getScopedClient as Mock) = getScopedClient;
 
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
       osqueryContext: createMockOsqueryContext({
@@ -1142,11 +1145,11 @@ describe('reconcileScheduleIdsToWire', () => {
     } as Record<string, unknown>;
 
     const scopedClient = {
-      find: jest.fn().mockRejectedValue(new Error('es_rejected_execution_exception')),
-      update: jest.fn().mockResolvedValue({}),
-      bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      find: vi.fn().mockRejectedValue(new Error('es_rejected_execution_exception')),
+      update: vi.fn().mockResolvedValue({}),
+      bulkGet: vi.fn().mockResolvedValue({ saved_objects: [] }),
     };
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const logger = createMockLogger();
 
     const result = await reconcileScheduleIdsToWire({
@@ -1182,7 +1185,7 @@ describe('reconcileScheduleIdsToWire', () => {
         },
       },
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
     const result = await reconcileScheduleIdsToWire({
       coreStart: createMockCoreStart(scopedClient),
@@ -1206,7 +1209,7 @@ describe('reconcileScheduleIdsToWire', () => {
 
   test('mints nothing on the Saved Object (no SO update call)', async () => {
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1231,7 +1234,7 @@ describe('reconcileScheduleIdsToWire', () => {
 
   test('projects the SO schedule_id onto the Fleet wire', async () => {
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1268,7 +1271,7 @@ describe('reconcileScheduleIdsToWire', () => {
     const scopedClient = createMockScopedClient({
       'reconcile-pack': { id: 'pack-1', attrs: recordShapedAttrs },
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1303,7 +1306,7 @@ describe('reconcileScheduleIdsToWire', () => {
     const core = createMockCoreStart(scopedClient);
     const osqueryContext = createMockOsqueryContext({
       fetchAllItems: packagePolicyList,
-      update: jest.fn(),
+      update: vi.fn(),
     });
     const logger = createMockLogger();
 
@@ -1332,7 +1335,7 @@ describe('reconcileScheduleIdsToWire', () => {
     const core = createMockCoreStart(scopedClient);
     const osqueryContext = createMockOsqueryContext({
       fetchAllItems: packagePolicyList,
-      update: jest.fn(),
+      update: vi.fn(),
     });
     const logger = createMockLogger();
 
@@ -1357,7 +1360,7 @@ describe('reconcileScheduleIdsToWire', () => {
     const scopedClient = createMockScopedClient({
       'reconcile-pack': { id: 'pack-1', attrs: noRefAttrs },
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1389,7 +1392,7 @@ describe('reconcileScheduleIdsToWire', () => {
     const scopedClient = createMockScopedClient({
       'reconcile-pack': { id: 'pack-1', attrs: disabledAttrs },
     });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1418,7 +1421,7 @@ describe('reconcileScheduleIdsToWire', () => {
   test('skips an orphan wire block (no matching pack SO) and logs a warning', async () => {
     // scopedClient returns no SO for any name lookup (empty find).
     const scopedClient = createMockScopedClient({});
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1445,7 +1448,7 @@ describe('reconcileScheduleIdsToWire', () => {
   // Diff-before-write: if the wire already matches the intended block, no write.
   test('skips the package-policy write when the wire block already matches the SO (no revision churn)', async () => {
     // First pass: build the in-sync policy from a real reconcile run.
-    const firstUpdate = jest
+    const firstUpdate = vi
       .fn()
       .mockImplementation(async (_sc, _es, id, updated) => ({ ...updated, id }));
     const firstList = mockFetchAllItems([buildPackagePolicy()]);
@@ -1467,7 +1470,7 @@ describe('reconcileScheduleIdsToWire', () => {
     ).toBe(100);
 
     // Second pass: reconcile against the already-written policy — no write expected.
-    const secondUpdate = jest.fn().mockResolvedValue({});
+    const secondUpdate = vi.fn().mockResolvedValue({});
     const secondList = mockFetchAllItems([reconciledPolicy]);
     const logger = createMockLogger();
 
@@ -1492,7 +1495,7 @@ describe('reconcileScheduleIdsToWire', () => {
     stalePolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'].shard = 42;
 
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const packagePolicyList = mockFetchAllItems([stalePolicy]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1520,7 +1523,7 @@ describe('reconcileScheduleIdsToWire', () => {
     legacyPolicy.inputs[0].config.osquery.value.packs['reconcile-pack'].shard = 7;
 
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyUpdate = vi.fn().mockResolvedValue({});
     const packagePolicyList = mockFetchAllItems([legacyPolicy]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1546,7 +1549,7 @@ describe('reconcileScheduleIdsToWire', () => {
 
   test('is idempotent — a second run changes no schedule_id', async () => {
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest
+    const packagePolicyUpdate = vi
       .fn()
       .mockImplementation(async (_sc, _es, id, updated) => ({ ...updated, id }));
 
@@ -1582,7 +1585,7 @@ describe('reconcileScheduleIdsToWire', () => {
 
   test('flags hadFailures on version conflict (409) so the one-shot task re-arms', async () => {
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest
+    const packagePolicyUpdate = vi
       .fn()
       .mockRejectedValueOnce(Object.assign(new Error('Conflict'), { statusCode: 409 }));
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
@@ -1607,7 +1610,7 @@ describe('reconcileScheduleIdsToWire', () => {
   test('classifies a Boom-shaped 409 (output.statusCode, no top-level statusCode) as a conflict', async () => {
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
     const boomConflict = Object.assign(new Error('Conflict'), { output: { statusCode: 409 } });
-    const packagePolicyUpdate = jest.fn().mockRejectedValueOnce(boomConflict);
+    const packagePolicyUpdate = vi.fn().mockRejectedValueOnce(boomConflict);
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1664,7 +1667,7 @@ describe('reconcileScheduleIdsToWire', () => {
     });
 
     // update echoes the written draft back with its id, mirroring Fleet's real return.
-    const packagePolicyUpdate = jest
+    const packagePolicyUpdate = vi
       .fn()
       .mockImplementation(async (_sc, _es, id, updated) => ({ ...updated, id }));
     const packagePolicyList = mockFetchAllItems([sharedPolicy]);
@@ -1692,7 +1695,7 @@ describe('reconcileScheduleIdsToWire', () => {
 
   test('logs and flags hadFailures on non-conflict errors', async () => {
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-    const packagePolicyUpdate = jest.fn().mockRejectedValueOnce(new Error('something went wrong'));
+    const packagePolicyUpdate = vi.fn().mockRejectedValueOnce(new Error('something went wrong'));
     const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const core = createMockCoreStart(scopedClient);
@@ -1723,10 +1726,10 @@ describe('reconcileScheduleIdsToWire', () => {
 
     const coreStart = createMockCoreStart(scopedClient);
     const osqueryContext = createMockOsqueryContext({
-      fetchAllItems: jest.fn().mockImplementation(() => {
+      fetchAllItems: vi.fn().mockImplementation(() => {
         throw new Error('policy fetch failed');
       }),
-      update: jest.fn(),
+      update: vi.fn(),
     });
 
     const resultPromise = reconcileScheduleIdsToWire({
@@ -1744,7 +1747,7 @@ describe('reconcileScheduleIdsToWire', () => {
   describe('pagination — multi-batch policy drain', () => {
     test('reconciles a pack whose target policy arrives on the SECOND fetchAllItems batch', async () => {
       const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
       // The matching policy is only on batch 2.
       const unrelatedPolicy = buildPackagePolicy('default--unrelated', 'pack-x');
@@ -1789,7 +1792,7 @@ describe('reconcileScheduleIdsToWire', () => {
         'reconcile-pack': DEFAULT_PACK_ENTRY,
         'second-pack': { id: 'pack-2', attrs: secondPackAttrs },
       });
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
 
       const packagePolicyList = mockFetchAllItemsBatches([
         [buildPackagePolicy()],
@@ -1857,7 +1860,7 @@ describe('reconcileScheduleIdsToWire', () => {
       });
 
       const abortController = new AbortController();
-      const packagePolicyUpdate = jest.fn().mockImplementation(async () => {
+      const packagePolicyUpdate = vi.fn().mockImplementation(async () => {
         abortController.abort();
 
         return {};
@@ -1903,7 +1906,7 @@ describe('reconcileScheduleIdsToWire', () => {
       const scopedClient = createMockScopedClient({
         'rrule-pack': { id: 'pack-rrule', attrs: RRULE_PACK_ATTRS },
       });
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const packagePolicyList = mockFetchAllItems([
         buildPackagePolicy('default--rrule-pack', 'pack-rrule'),
       ]);
@@ -1938,7 +1941,7 @@ describe('reconcileScheduleIdsToWire', () => {
       const scopedClient = createMockScopedClient({
         'rrule-pack': { id: 'pack-rrule', attrs: RRULE_PACK_ATTRS },
       });
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const packagePolicyList = mockFetchAllItems([
         buildPackagePolicy('default--rrule-pack', 'pack-rrule'),
       ]);
@@ -1981,7 +1984,7 @@ describe('reconcileScheduleIdsToWire', () => {
       const scopedClient = createMockScopedClient({
         'legacy-pack': { id: 'pack-legacy', attrs: legacyAttrs },
       });
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const packagePolicyList = mockFetchAllItems([
         buildPackagePolicy('default--legacy-pack', 'pack-legacy'),
       ]);
@@ -2051,7 +2054,7 @@ describe('reconcileScheduleIdsToWire', () => {
       const scopedClient = createMockScopedClient({
         'legacy-pack': { id: 'pack-legacy', attrs: legacyAttrs },
       });
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const packagePolicyList = mockFetchAllItems([
         buildPackagePolicy('default--legacy-pack', 'pack-legacy'),
       ]);

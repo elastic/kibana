@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { SignalsByCategory } from './signals_by_category';
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
   return {
     ...originalModule,
-    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
+    useLocation: vi.fn().mockReturnValue({ pathname: '' }),
   };
 });
 
-const mockUseFiltersForSignals = jest.fn(() => []);
-jest.mock('./use_filters_for_signals_by_category', () => ({
-  useFiltersForSignalsByCategory: () => mockUseFiltersForSignals(),
-}));
+const mockUseFiltersForSignals = vi.fn(() => []);
+vi.mock('./use_filters_for_signals_by_category', () => {
+      const mocked = {
+      useFiltersForSignalsByCategory: () => mockUseFiltersForSignals(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const props = {
   query: {

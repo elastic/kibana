@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { resolveSelectedConnectorId } from './resolve_selected_connector_id';
 import {
   type InferenceConnector,
@@ -32,8 +35,8 @@ const createSearchInferenceEndpointsMock = (
     features: {} as any,
     endpoints: {
       getForFeature: overrides.error
-        ? jest.fn().mockRejectedValue(overrides.error)
-        : jest.fn().mockResolvedValue({
+        ? vi.fn().mockRejectedValue(overrides.error)
+        : vi.fn().mockResolvedValue({
             endpoints: overrides.endpoints ?? [],
             warnings: [],
             soEntryFound: overrides.soEntryFound ?? false,
@@ -51,7 +54,7 @@ const setupCoreMocks = (values: Record<string, any>) => {
   const soClient = {} as any;
   savedObjects.getScopedClient.mockReturnValue(soClient);
 
-  const get = jest.fn(async (key: string) => values[key]);
+  const get = vi.fn(async (key: string) => values[key]);
   uiSettings.asScopedToClient.mockReturnValue({ get } as any);
 
   return { savedObjects, uiSettings, request };
@@ -157,7 +160,7 @@ describe('resolveSelectedConnectorId', () => {
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-      (inference.getConnectorById as jest.Mock).mockResolvedValue({
+      (inference.getConnectorById as Mock).mockResolvedValue({
         connectorId: 'default-id',
       } as InferenceConnector);
 
@@ -186,7 +189,7 @@ describe('resolveSelectedConnectorId', () => {
         endpoints: [{ connectorId: kibanaDefault } as InferenceConnector],
       });
 
-      (inference.getConnectorById as jest.Mock).mockRejectedValue(
+      (inference.getConnectorById as Mock).mockRejectedValue(
         new Error("No connector or inference endpoint found for ID 'stale-connector-id'")
       );
 
@@ -212,8 +215,8 @@ describe('resolveSelectedConnectorId', () => {
       const kibanaDefault = defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION;
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-      (inference.getConnectorById as jest.Mock).mockRejectedValue(new Error('network error'));
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+      (inference.getConnectorById as Mock).mockRejectedValue(new Error('network error'));
+      (inference.getConnectorList as Mock).mockResolvedValue([
         { connectorId: kibanaDefault } as InferenceConnector,
       ]);
 
@@ -280,7 +283,7 @@ describe('resolveSelectedConnectorId', () => {
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
       const kibanaDefault = defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION;
 
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+      (inference.getConnectorList as Mock).mockResolvedValue([
         { connectorId: 'other-id' } as InferenceConnector,
         { connectorId: kibanaDefault } as InferenceConnector,
       ]);
@@ -301,7 +304,7 @@ describe('resolveSelectedConnectorId', () => {
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+      (inference.getConnectorList as Mock).mockResolvedValue([
         { connectorId: 'openai-id', type: InferenceConnectorType.OpenAI } as InferenceConnector,
         {
           connectorId: 'inference-id',
@@ -326,7 +329,7 @@ describe('resolveSelectedConnectorId', () => {
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+      (inference.getConnectorList as Mock).mockResolvedValue([
         { connectorId: 'gemini-id', type: InferenceConnectorType.Gemini } as InferenceConnector,
         { connectorId: 'openai-id', type: InferenceConnectorType.OpenAI } as InferenceConnector,
       ]);
@@ -347,7 +350,7 @@ describe('resolveSelectedConnectorId', () => {
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+      (inference.getConnectorList as Mock).mockResolvedValue([
         { connectorId: 'gemini-id', type: InferenceConnectorType.Gemini } as InferenceConnector,
         { connectorId: 'bedrock-id', type: InferenceConnectorType.Bedrock } as InferenceConnector,
       ]);
@@ -368,7 +371,7 @@ describe('resolveSelectedConnectorId', () => {
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([]);
+      (inference.getConnectorList as Mock).mockResolvedValue([]);
 
       const result = await resolveSelectedConnectorId({
         uiSettings,
@@ -389,7 +392,7 @@ describe('resolveSelectedConnectorId', () => {
       });
       const kibanaDefault = defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION;
 
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+      (inference.getConnectorList as Mock).mockResolvedValue([
         { connectorId: kibanaDefault } as InferenceConnector,
       ]);
 

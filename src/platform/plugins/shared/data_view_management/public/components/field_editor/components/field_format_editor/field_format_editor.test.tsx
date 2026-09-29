@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public/service';
 import { FieldFormatEditor } from './field_format_editor';
@@ -20,10 +22,10 @@ class TestEditor extends PureComponent {
 const numberFormatEditorFactory = () => Promise.resolve(TestEditor);
 
 const formatEditors: FormatEditorServiceStart['fieldFormatEditors'] = {
-  getById: jest.fn((id: string) =>
+  getById: vi.fn((id: string) =>
     id === 'number' ? numberFormatEditorFactory : undefined
   ) as unknown as FormatEditorServiceStart['fieldFormatEditors']['getById'],
-  getAll: jest.fn(() => []),
+  getAll: vi.fn(() => []),
 };
 
 describe('FieldFormatEditor', () => {

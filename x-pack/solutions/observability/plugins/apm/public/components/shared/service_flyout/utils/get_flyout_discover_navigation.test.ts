@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import { getFlyoutDiscoverNavigation } from './get_flyout_discover_navigation';
 
-const mockGetESQLQuery = jest.fn();
-jest.mock('../../links/discover_links/get_esql_query', () => ({
-  getESQLQuery: (...args: unknown[]) => mockGetESQLQuery(...args),
-}));
+const mockGetESQLQuery = vi.fn();
+vi.mock('../../links/discover_links/get_esql_query', () => {
+      const mocked = {
+      getESQLQuery: (...args: unknown[]) => mockGetESQLQuery(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRedirectUrl = jest.fn(() => '/app/discover?mock-url');
+const mockGetRedirectUrl = vi.fn(() => '/app/discover?mock-url');
 const mockLocator = { getRedirectUrl: mockGetRedirectUrl };
 const mockShare = {
-  url: { locators: { get: jest.fn(() => mockLocator) } },
+  url: { locators: { get: vi.fn(() => mockLocator) } },
 } as unknown as Parameters<typeof getFlyoutDiscoverNavigation>[0]['share'];
 
 const mockIndices: APMIndices = {
@@ -43,7 +48,7 @@ const baseParams = {
 
 describe('getFlyoutDiscoverNavigation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetESQLQuery.mockReturnValue('FROM traces-apm* | WHERE service.name == "opbeans-java"');
   });
 

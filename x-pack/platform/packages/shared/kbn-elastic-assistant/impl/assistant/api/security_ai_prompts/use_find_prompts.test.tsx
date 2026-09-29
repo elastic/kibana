@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import type { UseFindPromptsParams } from './use_find_prompts';
 import { useFindPrompts } from './use_find_prompts';
@@ -15,10 +17,10 @@ import {
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import type { IToasts } from '@kbn/core-notifications-browser';
 
-const mockHttpFetch = jest.fn();
+const mockHttpFetch = vi.fn();
 const mockToasts = {
-  addSuccess: jest.fn(),
-  addError: jest.fn(),
+  addSuccess: vi.fn(),
+  addError: vi.fn(),
 } as unknown as IToasts;
 
 describe('useFindPrompts', () => {
@@ -37,7 +39,7 @@ describe('useFindPrompts', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns initial and placeholder data when loading', async () => {

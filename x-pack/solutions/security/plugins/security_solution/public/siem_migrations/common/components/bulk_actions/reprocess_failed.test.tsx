@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ReprocessFailedItemsButton } from './reprocess_failed';
 import { getRuleMigrationRuleMock } from '../../../../../common/siem_migrations/model/__mocks__';
 
 describe('ReprocessFailedItemsButton', () => {
-  const mockOnClick = jest.fn();
+  const mockOnClick = vi.fn();
 
   const defaultProps = {
     isAuthorized: true,

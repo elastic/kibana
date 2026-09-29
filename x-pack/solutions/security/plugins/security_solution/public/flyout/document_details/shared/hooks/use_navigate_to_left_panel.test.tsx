@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useNavigateToLeftPanel } from './use_navigate_to_left_panel';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { renderHook } from '@testing-library/react';
@@ -14,13 +17,13 @@ import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../co
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const mockedUseKibana = mockUseKibana();
-(useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
+(useKibana as Mock).mockReturnValue(mockedUseKibana);
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../context');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../context');
 
 const eventId = 'eventId';
 const indexName = 'indexName';
@@ -28,12 +31,12 @@ const scopeId = 'scopeId';
 
 describe('useNavigateToLeftPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('should enable navigation if isPreviewMode is false', () => {
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
+    (useDocumentDetailsContext as Mock).mockReturnValue({
       eventId,
       indexName,
       scopeId,
@@ -59,7 +62,7 @@ describe('useNavigateToLeftPanel', () => {
   });
 
   it('should open new flyout if isPreviewMode is true', () => {
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
+    (useDocumentDetailsContext as Mock).mockReturnValue({
       eventId,
       indexName,
       scopeId,

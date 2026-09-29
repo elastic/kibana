@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
@@ -12,8 +14,8 @@ import { render, makeSyntheticsPermissionsCore } from '../../../utils/testing/rt
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { useCanManageClusterSettings } from './use_can_manage_cluster_settings';
 
-jest.mock('./use_can_manage_cluster_settings');
-const mockUseCanManageClusterSettings = jest.mocked(useCanManageClusterSettings);
+vi.mock('./use_can_manage_cluster_settings');
+const mockUseCanManageClusterSettings = vi.mocked(useCanManageClusterSettings);
 
 const loadedSettingsState = {
   dynamicSettings: {

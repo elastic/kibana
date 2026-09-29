@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Socket } from 'net';
 import type { Agent, ClientRequest } from 'http';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 import { getHttpAgentMock, getHttpsAgentMock } from './get_agents_sockets_stats.test.mocks';
 
-jest.mock('net');
+vi.mock('net');
 
 const mockSocket = new Socket();
 const mockClientRequest = {} as unknown as ClientRequest;

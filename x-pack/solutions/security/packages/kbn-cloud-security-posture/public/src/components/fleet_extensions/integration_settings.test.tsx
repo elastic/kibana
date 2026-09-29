@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -31,11 +33,11 @@ describe('<IntegrationSettings />', () => {
       inputs: [],
     },
     validationResults: undefined,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Rendering Tests', () => {
@@ -51,7 +53,7 @@ describe('<IntegrationSettings />', () => {
 
   describe('Interaction Tests', () => {
     it('calls onChange when name field is modified', async () => {
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       const props = { ...defaultProps, onChange: mockOnChange };
       const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...props} />);
 
@@ -66,7 +68,7 @@ describe('<IntegrationSettings />', () => {
     });
 
     it('calls onChange when description field is modified', async () => {
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       const props = { ...defaultProps, onChange: mockOnChange };
       const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...props} />);
 
@@ -81,7 +83,7 @@ describe('<IntegrationSettings />', () => {
     });
 
     it('handles clear input correctly', async () => {
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       const props = { ...defaultProps, onChange: mockOnChange };
       const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...props} />);
 
@@ -92,7 +94,7 @@ describe('<IntegrationSettings />', () => {
     });
 
     it('handles special characters in input', async () => {
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       const props = { ...defaultProps, onChange: mockOnChange };
       const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...props} />);
 

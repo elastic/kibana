@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
@@ -33,7 +35,7 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('describes custom AI Indices through the resolver', async () => {
-    const resolver = jest
+    const resolver = vi
       .fn()
       .mockResolvedValue([
         { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
@@ -47,7 +49,7 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('resolves default ids through the resolver, so the prompt agrees with the list', async () => {
-    const resolver = jest.fn().mockResolvedValue([
+    const resolver = vi.fn().mockResolvedValue([
       {
         id: agentBuilderDefaultAiIndexId,
         esqlTarget: smlIndexName,
@@ -67,7 +69,7 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('renders a default the resolver omits bare, dropping it from the prompt', async () => {
-    const resolver = jest.fn().mockResolvedValue([]);
+    const resolver = vi.fn().mockResolvedValue([]);
 
     const catalog = await resolveAiIndexCatalog({
       aiIndices: [agentBuilderDefaultAiIndexId],
@@ -79,7 +81,7 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('calls the resolver once, with every id and the request', async () => {
-    const resolver = jest.fn().mockResolvedValue([]);
+    const resolver = vi.fn().mockResolvedValue([]);
 
     await resolveAiIndexCatalog({
       aiIndices: [agentBuilderDefaultAiIndexId, 'custom-a', 'custom-b'],
@@ -95,14 +97,14 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('does not call the resolver for an agent with no AI Indices', async () => {
-    const resolver = jest.fn();
+    const resolver = vi.fn();
 
     expect(await resolveAiIndexCatalog({ aiIndices: [], request, resolver })).toEqual([]);
     expect(resolver).not.toHaveBeenCalled();
   });
 
   it('degrades ids the resolver does not know to entries with no ES|QL target', async () => {
-    const resolver = jest.fn().mockResolvedValue([]);
+    const resolver = vi.fn().mockResolvedValue([]);
 
     const catalog = await resolveAiIndexCatalog({
       aiIndices: ['deleted-index'],
@@ -126,7 +128,7 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('does not treat inherited object members as default AI Indices', async () => {
-    const resolver = jest.fn().mockResolvedValue([]);
+    const resolver = vi.fn().mockResolvedValue([]);
 
     const catalog = await resolveAiIndexCatalog({
       aiIndices: ['toString', 'constructor'],
@@ -139,7 +141,7 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('preserves config order and dedupes repeated ids', async () => {
-    const resolver = jest.fn().mockResolvedValue([
+    const resolver = vi.fn().mockResolvedValue([
       { id: 'custom-b', esqlTarget: 'idx-b' },
       { id: 'custom-a', esqlTarget: 'idx-a' },
     ]);
@@ -158,8 +160,8 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('falls back to the static default and bare ids when the resolver fails', async () => {
-    const resolver = jest.fn().mockRejectedValue(new Error('boom'));
-    const logger = { warn: jest.fn() } as unknown as Logger;
+    const resolver = vi.fn().mockRejectedValue(new Error('boom'));
+    const logger = { warn: vi.fn() } as unknown as Logger;
 
     const catalog = await resolveAiIndexCatalog({
       aiIndices: [agentBuilderDefaultAiIndexId, 'my-custom'],
@@ -176,8 +178,8 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('swallows non-Error resolver failures without logging undefined', async () => {
-    const resolver = jest.fn().mockRejectedValue('string failure');
-    const logger = { warn: jest.fn() } as unknown as Logger;
+    const resolver = vi.fn().mockRejectedValue('string failure');
+    const logger = { warn: vi.fn() } as unknown as Logger;
 
     const catalog = await resolveAiIndexCatalog({
       aiIndices: ['my-custom'],

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import React from 'react';
@@ -16,26 +18,29 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, within } from '@testing-library/react';
 import { ScriptedFieldsTable } from '.';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      docLinks: {
-        links: {
-          indexPatterns: {
-            runtimeFields: '#',
-          },
-          query: {
-            queryESQL: '#',
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          docLinks: {
+            links: {
+              indexPatterns: {
+                runtimeFields: '#',
+              },
+              query: {
+                queryESQL: '#',
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const helpers = {
-  getRouteHref: jest.fn(),
-  redirectToRoute: jest.fn(),
+  getRouteHref: vi.fn(),
+  redirectToRoute: vi.fn(),
 };
 
 const createDataViewWithScriptedFields = (scriptedFields: FieldSpec[]) =>
@@ -77,11 +82,11 @@ describe('ScriptedFieldsTable', () => {
       createScriptedField({ name: 'ScriptedField', script: 'x++' }),
       createScriptedField({ name: 'JustATest', script: 'z++' }),
     ]);
-    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
+    vi.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should render normally', () => {
@@ -190,9 +195,9 @@ describe('ScriptedFieldsTable', () => {
   it('should delete a field', async () => {
     const user = userEvent.setup();
 
-    const removeScriptedFieldSpy = jest.fn();
-    const saveIndexPatternSpy = jest.fn();
-    jest.spyOn(indexPattern, 'removeScriptedField').mockImplementation(removeScriptedFieldSpy);
+    const removeScriptedFieldSpy = vi.fn();
+    const saveIndexPatternSpy = vi.fn();
+    vi.spyOn(indexPattern, 'removeScriptedField').mockImplementation(removeScriptedFieldSpy);
 
     renderWithI18n(
       <ScriptedFieldsTable

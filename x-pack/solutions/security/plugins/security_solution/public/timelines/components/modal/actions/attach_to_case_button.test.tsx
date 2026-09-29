@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,27 +22,27 @@ import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { AttachToCaseButton } from './attach_to_case_button';
 import { SecurityPageName } from '../../../../../common/constants';
 
-jest.mock('../../../../common/components/link_to', () => {
-  const original = jest.requireActual('../../../../common/components/link_to');
+vi.mock('../../../../common/components/link_to', async () => {
+  const original = (await vi.importActual('../../../../common/components/link_to'));
   return {
     ...original,
-    useFormatUrl: jest.fn().mockReturnValue({
-      formatUrl: jest.fn(),
+    useFormatUrl: vi.fn().mockReturnValue({
+      formatUrl: vi.fn(),
       search: '',
     }),
   };
 });
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => vi.fn(),
     useSelector: () => mockTimelineModel,
   };
 });
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const renderAttachToCaseButton = () =>
   render(
@@ -49,10 +52,10 @@ const renderAttachToCaseButton = () =>
   );
 
 describe('AttachToCaseButton', () => {
-  const navigateToApp = jest.fn();
+  const navigateToApp = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock().services.application.navigateToApp = navigateToApp;
     useKibanaMock().services.cases.config = {
       ...useKibanaMock().services.cases.config,
@@ -83,7 +86,7 @@ describe('AttachToCaseButton', () => {
 
   describe('legacy flow (attachments framework disabled)', () => {
     it('navigates to the create case page when clicking on attach to new case', async () => {
-      useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
+      useKibanaMock().services.cases.ui.getAllCasesSelectorModal = vi
         .fn()
         .mockImplementation(({ onRowClick }) => {
           onRowClick();
@@ -103,7 +106,7 @@ describe('AttachToCaseButton', () => {
     });
 
     it('opens modal and navigates to the case page when clicking on attach to existing case', async () => {
-      useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
+      useKibanaMock().services.cases.ui.getAllCasesSelectorModal = vi
         .fn()
         .mockImplementation(({ onRowClick }) => {
           onRowClick({ id: 'case-id' });
@@ -182,7 +185,7 @@ describe('AttachToCaseButton', () => {
     });
 
     it('does not render the legacy cases selector modal', async () => {
-      const legacyModal = jest.fn().mockImplementation(() => <div data-test-subj="legacy-modal" />);
+      const legacyModal = vi.fn().mockImplementation(() => <div data-test-subj="legacy-modal" />);
       useKibanaMock().services.cases.ui.getAllCasesSelectorModal = legacyModal;
 
       const { getByTestId, queryByTestId } = renderAttachToCaseButton();

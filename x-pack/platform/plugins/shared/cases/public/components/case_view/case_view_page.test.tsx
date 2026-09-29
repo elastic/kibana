@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
@@ -14,25 +17,34 @@ import { basicCase } from '../../containers/mock';
 import { useOnUpdateField } from './use_on_update_field';
 import type { CaseViewPageComponentProps } from './case_view_page';
 
-jest.mock('./use_on_update_field');
-jest.mock('./use_on_refresh_case_view_page');
-jest.mock('../use_breadcrumbs');
+vi.mock('./use_on_update_field');
+vi.mock('./use_on_refresh_case_view_page');
+vi.mock('../use_breadcrumbs');
 
-jest.mock('./components/case_details_header', () => ({
-  CaseDetailsAppHeader: () => <div data-test-subj="case-details-app-header" />,
-}));
+vi.mock('./components/case_details_header', () => {
+      const mocked = {
+      CaseDetailsAppHeader: () => <div data-test-subj="case-details-app-header" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./metrics', () => ({
-  CaseViewMetrics: () => <div data-test-subj="case-view-metrics" />,
-}));
+vi.mock('./metrics', () => {
+      const mocked = {
+      CaseViewMetrics: () => <div data-test-subj="case-view-metrics" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/case_view_tab_content', () => ({
-  CaseViewTabContent: () => <div data-test-subj="case-view-tab-content" />,
-}));
+vi.mock('./components/case_view_tab_content', () => {
+      const mocked = {
+      CaseViewTabContent: () => <div data-test-subj="case-view-tab-content" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-(useOnUpdateField as jest.Mock).mockReturnValue({
+(useOnUpdateField as Mock).mockReturnValue({
   isLoading: false,
-  onUpdateField: jest.fn(),
+  onUpdateField: vi.fn(),
 });
 
 describe('CaseViewPage', () => {
@@ -42,10 +54,10 @@ describe('CaseViewPage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useOnUpdateField as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useOnUpdateField as Mock).mockReturnValue({
       isLoading: false,
-      onUpdateField: jest.fn(),
+      onUpdateField: vi.fn(),
     });
   });
 

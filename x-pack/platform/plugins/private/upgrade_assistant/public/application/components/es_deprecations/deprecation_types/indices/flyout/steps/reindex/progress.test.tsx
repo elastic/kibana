@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -35,7 +37,7 @@ describe('ReindexProgress', () => {
           reindexTaskPercComplete: null,
           errorMessage: null,
         }}
-        cancelReindex={jest.fn()}
+        cancelReindex={vi.fn()}
       />
     );
 
@@ -73,7 +75,7 @@ describe('ReindexProgress', () => {
           reindexTaskPercComplete: 1,
           errorMessage: `This is an error that happened on alias switch`,
         }}
-        cancelReindex={jest.fn()}
+        cancelReindex={vi.fn()}
       />
     );
 
@@ -108,7 +110,7 @@ describe('ReindexProgress', () => {
           status: ReindexStatus.inProgress,
           reindexTaskPercComplete: null,
         }}
-        cancelReindex={jest.fn()}
+        cancelReindex={vi.fn()}
       />
     );
 
@@ -135,7 +137,7 @@ describe('ReindexProgress', () => {
           status: ReindexStatus.inProgress,
           reindexTaskPercComplete: 0.25,
         }}
-        cancelReindex={jest.fn()}
+        cancelReindex={vi.fn()}
       />
     );
 
@@ -162,7 +164,7 @@ describe('ReindexProgress', () => {
           status: ReindexStatus.inProgress,
           reindexTaskPercComplete: 1,
         }}
-        cancelReindex={jest.fn()}
+        cancelReindex={vi.fn()}
       />
     );
 
@@ -189,7 +191,7 @@ describe('ReindexProgress', () => {
           status: ReindexStatus.completed,
           reindexTaskPercComplete: 1,
         }}
-        cancelReindex={jest.fn()}
+        cancelReindex={vi.fn()}
       />
     );
 

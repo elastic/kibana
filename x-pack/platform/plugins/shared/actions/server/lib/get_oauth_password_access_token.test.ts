@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -12,11 +15,14 @@ import { connectorTokenClientMock } from './connector_token_client.mock';
 import { getOAuthPasswordAccessToken } from './get_oauth_password_access_token';
 import { requestOAuthPasswordToken } from './request_oauth_password_token';
 
-jest.mock('./request_oauth_password_token', () => ({
-  requestOAuthPasswordToken: jest.fn(),
-}));
+vi.mock('./request_oauth_password_token', () => {
+      const mocked = {
+      requestOAuthPasswordToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 
@@ -40,8 +46,8 @@ describe('getOAuthPasswordAccessToken', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   test('uses stored access token if it exists and is not expired', async () => {
@@ -60,7 +66,7 @@ describe('getOAuthPasswordAccessToken', () => {
     const accessToken = await getOAuthPasswordAccessToken(opts);
 
     expect(accessToken).toEqual('testtokenvalue');
-    expect(requestOAuthPasswordToken as jest.Mock).not.toHaveBeenCalled();
+    expect(requestOAuthPasswordToken as Mock).not.toHaveBeenCalled();
   });
 
   test('requests a new token if stored token does not exist', async () => {
@@ -68,7 +74,7 @@ describe('getOAuthPasswordAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (requestOAuthPasswordToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthPasswordToken as Mock).mockResolvedValueOnce({
       tokenType: 'Bearer',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -77,7 +83,7 @@ describe('getOAuthPasswordAccessToken', () => {
     const accessToken = await getOAuthPasswordAccessToken(opts);
 
     expect(accessToken).toEqual('Bearer brandnewaccesstoken');
-    expect(requestOAuthPasswordToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthPasswordToken as Mock).toHaveBeenCalledWith(
       'https://example.com/oauth/token',
       logger,
       { username: 'my-user', password: 'my-password' },
@@ -105,7 +111,7 @@ describe('getOAuthPasswordAccessToken', () => {
         expiresAt: new Date('2021-01-01T09:00:00.000Z').toISOString(),
       },
     });
-    (requestOAuthPasswordToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthPasswordToken as Mock).mockResolvedValueOnce({
       tokenType: 'Bearer',
       accessToken: 'refreshedtoken',
       expiresIn: 1000,
@@ -114,7 +120,7 @@ describe('getOAuthPasswordAccessToken', () => {
     const accessToken = await getOAuthPasswordAccessToken(opts);
 
     expect(accessToken).toEqual('Bearer refreshedtoken');
-    expect(requestOAuthPasswordToken as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(requestOAuthPasswordToken as Mock).toHaveBeenCalledTimes(1);
   });
 
   test('returns null and logs a warning if username is missing', async () => {
@@ -124,7 +130,7 @@ describe('getOAuthPasswordAccessToken', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       'Missing required fields for requesting OAuth Password Grant access token'
     );
-    expect(requestOAuthPasswordToken as jest.Mock).not.toHaveBeenCalled();
+    expect(requestOAuthPasswordToken as Mock).not.toHaveBeenCalled();
   });
 
   test('returns null and logs a warning if password is missing', async () => {
@@ -134,7 +140,7 @@ describe('getOAuthPasswordAccessToken', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       'Missing required fields for requesting OAuth Password Grant access token'
     );
-    expect(requestOAuthPasswordToken as jest.Mock).not.toHaveBeenCalled();
+    expect(requestOAuthPasswordToken as Mock).not.toHaveBeenCalled();
   });
 
   test('throws if requestOAuthPasswordToken throws', async () => {
@@ -142,7 +148,7 @@ describe('getOAuthPasswordAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (requestOAuthPasswordToken as jest.Mock).mockRejectedValueOnce(
+    (requestOAuthPasswordToken as Mock).mockRejectedValueOnce(
       new Error('requestOAuthPasswordToken error!!')
     );
 
@@ -156,7 +162,7 @@ describe('getOAuthPasswordAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (requestOAuthPasswordToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthPasswordToken as Mock).mockResolvedValueOnce({
       tokenType: 'Bearer',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -172,7 +178,7 @@ describe('getOAuthPasswordAccessToken', () => {
   });
 
   test('gets a fresh access token if connectorId is not provided', async () => {
-    (requestOAuthPasswordToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthPasswordToken as Mock).mockResolvedValueOnce({
       tokenType: 'Bearer',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,

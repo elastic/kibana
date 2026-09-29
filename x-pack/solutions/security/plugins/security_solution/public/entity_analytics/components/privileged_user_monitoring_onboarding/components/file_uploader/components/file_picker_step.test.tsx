@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { PrivilegedUserMonitoringFilePickerStep } from './file_picker_step';
 import { TestProviders } from '../../../../../../common/mock';
 
 describe('PrivilegedUserMonitoringFilePickerStep', () => {
-  const mockOnFileChange = jest.fn();
+  const mockOnFileChange = vi.fn();
   const mockErrorMessage = 'Sample error message';
   const mockIsLoading = false;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render without errors', () => {

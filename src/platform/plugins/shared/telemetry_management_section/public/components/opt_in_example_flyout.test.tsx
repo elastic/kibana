@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
@@ -15,7 +17,7 @@ describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
     expect(
       shallowWithIntl(
-        <OptInExampleFlyout fetchExample={jest.fn(async () => [])} onClose={jest.fn()} />
+        <OptInExampleFlyout fetchExample={vi.fn(async () => [])} onClose={vi.fn()} />
       )
     ).toMatchSnapshot();
   });

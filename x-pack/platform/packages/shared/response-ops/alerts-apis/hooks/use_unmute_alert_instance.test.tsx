@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,7 +16,7 @@ import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { useUnmuteAlertInstance } from './use_unmute_alert_instance';
 import * as api from '../apis/unmute_alert_instance';
 
-jest.mock('../apis/unmute_alert_instance');
+vi.mock('../apis/unmute_alert_instance');
 
 const params = { ruleId: '', alertInstanceId: '' };
 
@@ -32,11 +34,11 @@ describe('useUnmuteAlertInstance', () => {
   const addErrorMock = notifications.toasts.addError;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const muteAlertInstanceSpy = jest.spyOn(api, 'unmuteAlertInstance');
+    const muteAlertInstanceSpy = vi.spyOn(api, 'unmuteAlertInstance');
 
     const { result } = renderHook(() => useUnmuteAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
@@ -54,7 +56,7 @@ describe('useUnmuteAlertInstance', () => {
   });
 
   it('shows a toast error when the api returns an error', async () => {
-    const spy = jest.spyOn(api, 'unmuteAlertInstance').mockRejectedValue(new Error('An error'));
+    const spy = vi.spyOn(api, 'unmuteAlertInstance').mockRejectedValue(new Error('An error'));
 
     const { result } = renderHook(() => useUnmuteAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
@@ -69,7 +71,7 @@ describe('useUnmuteAlertInstance', () => {
   });
 
   it('runs against the default context when skipAlertsQueryContext is true', async () => {
-    const spy = jest.spyOn(api, 'unmuteAlertInstance');
+    const spy = vi.spyOn(api, 'unmuteAlertInstance');
 
     const { result } = renderHook(
       () => useUnmuteAlertInstance({ http, notifications, skipAlertsQueryContext: true }),

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -27,8 +29,8 @@ describe('useChromeAppHeaderRegistration', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
 
-    const firstUnregister = jest.fn();
-    const secondUnregister = jest.fn();
+    const firstUnregister = vi.fn();
+    const secondUnregister = vi.fn();
     chrome.appHeader.set.mockReturnValueOnce(firstUnregister).mockReturnValueOnce(secondUnregister);
 
     const { rerender, unmount } = render(
@@ -56,7 +58,7 @@ describe('useChromeAppHeaderRegistration', () => {
   it('registers metadata updates from component props', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
-    chrome.appHeader.set.mockReturnValue(jest.fn());
+    chrome.appHeader.set.mockReturnValue(vi.fn());
 
     const { rerender } = render(
       <ChromeServiceProvider value={{ chrome }}>

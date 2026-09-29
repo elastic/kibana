@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -17,14 +20,14 @@ import type {
 import { InfraFormatterType } from '../../../../../common/inventory/types';
 import { NodeContextMenu } from './node_context_menu';
 
-const mockGetRedirectUrl = jest.fn((params: { query?: { language: string; query: string } }) => {
+const mockGetRedirectUrl = vi.fn((params: { query?: { language: string; query: string } }) => {
   if (params.query) {
     return `/app/logs/stream?logFilter=(query:(language:${params.query.language},query:'${params.query.query}'))`;
   }
   return '/app/uptime';
 });
 
-const mockGetAssetDetailUrl = jest.fn(
+const mockGetAssetDetailUrl = vi.fn(
   ({
     entityType,
     entityId,
@@ -38,47 +41,56 @@ const mockGetAssetDetailUrl = jest.fn(
   })
 );
 
-const mockUseLinkProps = jest.fn(
+const mockUseLinkProps = vi.fn(
   ({ app, hash, search }: { app: string; hash?: string; search?: { kuery?: string } }) => ({
     href: `/app/${app}/${hash ?? ''}?kuery=${encodeURIComponent(search?.kuery ?? '')}`,
   })
 );
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      application: {
-        capabilities: {
-          logs: { show: true },
-          apm: { show: true },
-          infrastructure: { save: true },
-        },
-      },
-      share: {
-        url: {
-          locators: {
-            get: (id: string) =>
-              id === 'LOGS_LOCATOR' ? { getRedirectUrl: mockGetRedirectUrl } : undefined,
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          application: {
+            capabilities: {
+              logs: { show: true },
+              apm: { show: true },
+              infrastructure: { save: true },
+            },
+          },
+          share: {
+            url: {
+              locators: {
+                get: (id: string) =>
+                  id === 'LOGS_LOCATOR' ? { getRedirectUrl: mockGetRedirectUrl } : undefined,
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_waffle_options');
-jest.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
-  useIsPodSchemaSelectorEnabled: jest.fn(() => true),
-}));
+vi.mock('../../hooks/use_waffle_options');
+vi.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => {
+      const mocked = {
+      useIsPodSchemaSelectorEnabled: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/metrics-data-access-plugin/public', () => ({
-  useAssetDetailsRedirect: () => ({
-    getAssetDetailUrl: mockGetAssetDetailUrl,
-  }),
-}));
+vi.mock('@kbn/metrics-data-access-plugin/public', () => {
+      const mocked = {
+      useAssetDetailsRedirect: () => ({
+        getAssetDetailUrl: mockGetAssetDetailUrl,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/observability-shared-plugin/public'));
   return {
     ...actual,
     useLinkProps: (descriptor: { app: string; hash?: string; search?: { kuery?: string } }) =>
@@ -86,17 +98,20 @@ jest.mock('@kbn/observability-shared-plugin/public', () => {
   };
 });
 
-jest.mock('../../../../../alerting/inventory/components/alert_flyout', () => ({
-  AlertFlyout: () => null,
-}));
+vi.mock('../../../../../alerting/inventory/components/alert_flyout', () => {
+      const mocked = {
+      AlertFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 
-const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.MockedFunction<
+const mockedUseWaffleOptionsContext = useWaffleOptionsContext as MockedFunction<
   typeof useWaffleOptionsContext
 >;
-const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as jest.MockedFunction<
+const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as MockedFunction<
   typeof useIsPodSchemaSelectorEnabled
 >;
 
@@ -151,7 +166,7 @@ const mockPreferredSchema = (preferredSchema: DataSchemaFormat) => {
 
 describe('NodeContextMenu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
   });
 

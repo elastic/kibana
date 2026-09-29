@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { estypes } from '@elastic/elasticsearch';
@@ -40,12 +42,12 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
 describe('findDocuments', () => {
   let loggerMock: Logger;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     loggerMock = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns a conversation as expected if the conversation is found', async () => {

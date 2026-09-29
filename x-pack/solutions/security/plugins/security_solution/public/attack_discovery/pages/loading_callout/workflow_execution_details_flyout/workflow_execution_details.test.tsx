@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -23,67 +26,82 @@ import type { AggregatedWorkflowExecution, StepExecutionWithLink } from '../type
 import type { TroubleshootWithAiProps } from './troubleshoot_with_ai';
 import { FailureSection } from './failure_section';
 
-jest.mock('../../hooks/use_pipeline_data');
-jest.mock('../../hooks/use_workflow_execution_details');
-jest.mock('../../hooks/use_get_attack_discovery_generation');
-jest.mock('../../hooks/use_has_workflows_privileges');
-jest.mock('./conversation_link', () => ({
-  ConversationLink: jest.fn(({ conversationId }: { conversationId: string }) => (
-    <div data-test-subj="conversationLink" data-conversation-id={conversationId} />
-  )),
-}));
-jest.mock('../workflow_pipeline_monitor', () => ({
-  WorkflowPipelineMonitor: jest.fn((props: Record<string, unknown>) => (
-    <div data-test-subj="workflowPipelineMonitor">
-      {'Mock WorkflowPipelineMonitor'}
-      {typeof props.onViewData === 'function' && (
-        <>
-          <button
-            data-test-subj="mockViewRetrieval"
-            onClick={() => (props.onViewData as Function)('retrieval')}
-            type="button"
-          />
-          <button
-            data-test-subj="mockViewGeneration"
-            onClick={() => (props.onViewData as Function)('generation')}
-            type="button"
-          />
-          <button
-            data-test-subj="mockViewValidation"
-            onClick={() => (props.onViewData as Function)('validation')}
-            type="button"
-          />
-        </>
-      )}
-    </div>
-  )),
-}));
-jest.mock('..', () => ({
-  LoadingCallout: jest.fn(({ hideActions }) => (
-    <div data-test-subj="loadingCallout" data-hide-actions={hideActions}>
-      {'Mock LoadingCallout'}
-    </div>
-  )),
-}));
-jest.mock('./troubleshoot_with_ai', () => ({
-  TroubleshootWithAi: jest.fn((props: TroubleshootWithAiProps) => (
-    <div data-test-subj="troubleshootWithAi" data-generation-status={props.generationStatus}>
-      {'Mock TroubleshootWithAi'}
-    </div>
-  )),
-}));
-jest.mock('./failure_section', () => ({
-  FailureSection: jest.fn(() => <div data-test-subj="failureSection" />),
-}));
+vi.mock('../../hooks/use_pipeline_data');
+vi.mock('../../hooks/use_workflow_execution_details');
+vi.mock('../../hooks/use_get_attack_discovery_generation');
+vi.mock('../../hooks/use_has_workflows_privileges');
+vi.mock('./conversation_link', () => {
+      const mocked = {
+      ConversationLink: vi.fn(({ conversationId }: { conversationId: string }) => (
+        <div data-test-subj="conversationLink" data-conversation-id={conversationId} />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../workflow_pipeline_monitor', () => {
+      const mocked = {
+      WorkflowPipelineMonitor: vi.fn((props: Record<string, unknown>) => (
+        <div data-test-subj="workflowPipelineMonitor">
+          {'Mock WorkflowPipelineMonitor'}
+          {typeof props.onViewData === 'function' && (
+            <>
+              <button
+                data-test-subj="mockViewRetrieval"
+                onClick={() => (props.onViewData as Function)('retrieval')}
+                type="button"
+              />
+              <button
+                data-test-subj="mockViewGeneration"
+                onClick={() => (props.onViewData as Function)('generation')}
+                type="button"
+              />
+              <button
+                data-test-subj="mockViewValidation"
+                onClick={() => (props.onViewData as Function)('validation')}
+                type="button"
+              />
+            </>
+          )}
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('..', () => {
+      const mocked = {
+      LoadingCallout: vi.fn(({ hideActions }) => (
+        <div data-test-subj="loadingCallout" data-hide-actions={hideActions}>
+          {'Mock LoadingCallout'}
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./troubleshoot_with_ai', () => {
+      const mocked = {
+      TroubleshootWithAi: vi.fn((props: TroubleshootWithAiProps) => (
+        <div data-test-subj="troubleshootWithAi" data-generation-status={props.generationStatus}>
+          {'Mock TroubleshootWithAi'}
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./failure_section', () => {
+      const mocked = {
+      FailureSection: vi.fn(() => <div data-test-subj="failureSection" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockWorkflowPipelineMonitor = WorkflowPipelineMonitor as unknown as jest.Mock;
-const mockUsePipelineData = usePipelineData as jest.Mock;
-const mockUseWorkflowExecutionDetails = useWorkflowExecutionDetails as jest.Mock;
-const mockUseGetAttackDiscoveryGeneration = useGetAttackDiscoveryGeneration as jest.Mock;
-const mockUseHasWorkflowsPrivileges = useHasWorkflowsPrivileges as jest.Mock;
+const MockWorkflowPipelineMonitor = WorkflowPipelineMonitor as unknown as Mock;
+const mockUsePipelineData = usePipelineData as Mock;
+const mockUseWorkflowExecutionDetails = useWorkflowExecutionDetails as Mock;
+const mockUseGetAttackDiscoveryGeneration = useGetAttackDiscoveryGeneration as Mock;
+const mockUseHasWorkflowsPrivileges = useHasWorkflowsPrivileges as Mock;
 
 const EMPTY_MISSING_PRIVILEGES = { featurePrivileges: [], indexPrivileges: [] };
-const MockFailureSection = FailureSection as jest.MockedFunction<typeof FailureSection>;
+const MockFailureSection = FailureSection as MockedFunction<typeof FailureSection>;
 
 const mockPipelineDataResponse: PipelineDataResponse = {
   alert_retrieval: [
@@ -120,7 +138,7 @@ const mockPipelineDataResponse: PipelineDataResponse = {
 };
 
 describe('WorkflowExecutionDetails', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
   const mockHttp = {} as HttpSetup;
 
   const mockStepExecutions: StepExecutionWithLink[] = [
@@ -160,7 +178,7 @@ describe('WorkflowExecutionDetails', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUsePipelineData.mockReturnValue({
       data: undefined,
       error: undefined,
@@ -477,7 +495,7 @@ describe('WorkflowExecutionDetails', () => {
   });
 
   describe('refresh button', () => {
-    const mockOnRefresh = jest.fn();
+    const mockOnRefresh = vi.fn();
 
     it('renders the Refresh button when generationStatus is succeeded and onRefresh is provided', () => {
       render(
@@ -1211,7 +1229,7 @@ describe('WorkflowExecutionDetails', () => {
     });
 
     it('stops polling after the max wait cap even if validation data never resolves', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       try {
         mockUsePipelineData.mockReturnValue({
@@ -1234,12 +1252,12 @@ describe('WorkflowExecutionDetails', () => {
         expect(getLastRefetchIntervalMs()).toBe(5000);
 
         act(() => {
-          jest.advanceTimersByTime(60_000);
+          vi.advanceTimersByTime(60_000);
         });
 
         expect(getLastRefetchIntervalMs()).toBe(0);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
   });

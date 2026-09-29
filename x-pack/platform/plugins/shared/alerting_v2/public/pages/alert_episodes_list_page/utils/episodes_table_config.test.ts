@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
@@ -20,10 +22,10 @@ import {
 } from './episodes_table_config';
 
 const createMockStorage = (initialValue: unknown = null) => ({
-  get: jest.fn().mockReturnValue(initialValue),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn().mockReturnValue(initialValue),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 });
 
 const createKbnTestUrlStorage = async (
@@ -121,12 +123,12 @@ describe('episodes_table_config', () => {
     it('round-trips config through storage', () => {
       let stored: unknown = null;
       const storage = {
-        get: jest.fn(() => stored),
-        set: jest.fn((_, v) => {
+        get: vi.fn(() => stored),
+        set: vi.fn((_, v) => {
           stored = v;
         }),
-        remove: jest.fn(),
-        clear: jest.fn(),
+        remove: vi.fn(),
+        clear: vi.fn(),
       };
       const config = {
         ...DEFAULT_EPISODES_TABLE_CONFIG,

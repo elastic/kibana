@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { render, waitFor } from '@testing-library/react';
@@ -19,8 +22,8 @@ const MOCKED_RESPONSE = {
   lastSeen: '2022-04-08T18:35:45.064Z',
 };
 
-jest.mock('../../containers/use_first_last_seen');
-const useFirstLastSeenMock = useFirstLastSeen as jest.Mock;
+vi.mock('../../containers/use_first_last_seen');
+const useFirstLastSeenMock = useFirstLastSeen as Mock;
 useFirstLastSeenMock.mockReturnValue([false, MOCKED_RESPONSE]);
 
 describe('FirstLastSeen Component', () => {

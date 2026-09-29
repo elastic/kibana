@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { extractWorkflowMetadata } from './extract_workflow_metadata';
 
-jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
-  getInputsFromDefinition: jest.fn(),
-}));
+vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+      getInputsFromDefinition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetInputsFromDefinition = getInputsFromDefinition as jest.MockedFunction<
+const mockGetInputsFromDefinition = getInputsFromDefinition as MockedFunction<
   typeof getInputsFromDefinition
 >;
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -71,22 +74,22 @@ const emptyEsql = () => ({ columns: [], values: [] });
 const createStorage = (document?: ProposalDocument) => {
   const hits = document ? [searchHit(document)] : [];
   return {
-    index: jest.fn().mockResolvedValue({ _id: 'proposal-1' }),
-    delete: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
-    search: jest.fn().mockResolvedValue({
+    index: vi.fn().mockResolvedValue({ _id: 'proposal-1' }),
+    delete: vi.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
+    search: vi.fn().mockResolvedValue({
       hits: { hits, total: { value: hits.length } },
     }),
-    esql: jest.fn().mockResolvedValue(emptyEsql()),
-  } as unknown as jest.Mocked<ProposalsStorageClient> & {
-    index: jest.Mock;
-    delete: jest.Mock;
-    search: jest.Mock;
-    esql: jest.Mock;
+    esql: vi.fn().mockResolvedValue(emptyEsql()),
+  } as unknown as Mocked<ProposalsStorageClient> & {
+    index: Mock;
+    delete: Mock;
+    search: Mock;
+    esql: Mock;
   };
 };
 
 const createWorkflowsApi = () => ({
-  getWorkflow: jest.fn().mockResolvedValue({
+  getWorkflow: vi.fn().mockResolvedValue({
     definition: {
       consts: {
         actionMetadata: {
@@ -99,7 +102,7 @@ const createWorkflowsApi = () => ({
       },
     },
   }),
-  getWorkflowExecution: jest.fn().mockResolvedValue({
+  getWorkflowExecution: vi.fn().mockResolvedValue({
     id: EXECUTION_ID,
     status: ExecutionStatus.WAITING_FOR_INPUT,
     finishedAt: undefined,
@@ -112,7 +115,7 @@ const createWorkflowsApi = () => ({
       },
     ],
   }),
-  resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'analyst' }),
+  resumeWorkflowExecution: vi.fn().mockResolvedValue({ resumedBy: 'analyst' }),
 });
 
 /** Pass `null` for `workflowsApi` to simulate the API being unavailable. */
@@ -122,11 +125,11 @@ const createService = (
 ) => {
   const logger = loggerMock.create();
   const attachmentsClient = {
-    create: jest.fn().mockResolvedValue({ id: 'attachment-1' }),
-    get: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    list: jest.fn(),
+    create: vi.fn().mockResolvedValue({ id: 'attachment-1' }),
+    get: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    list: vi.fn(),
   };
   return {
     service: new ProposalsService({
@@ -150,7 +153,7 @@ const releaseParams = (overrides: Partial<ReleaseGateParams> = {}): ReleaseGateP
 
 describe('ProposalsService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -1964,7 +1967,7 @@ describe('ProposalsService', () => {
       const doc = baseDocument({ actionWorkflowId: 'shared-action' });
       const storage = {
         ...createStorage(doc),
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           hits: {
             hits: [searchHit(doc, 'p1'), searchHit(doc, 'p2'), searchHit(doc, 'p3')],
             total: { value: 3 },
@@ -2039,11 +2042,11 @@ describe('ProposalsService', () => {
       Object.assign(new Error(reason), { meta: { body: { error: { type, reason } } } });
 
     beforeEach(() => {
-      jest.useFakeTimers({ now: new Date(NOW) });
+      vi.useFakeTimers({ now: new Date(NOW) });
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should seed a running sum from the anchor and move it with opens and closes', async () => {

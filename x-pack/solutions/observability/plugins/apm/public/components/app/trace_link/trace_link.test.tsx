@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -18,18 +20,24 @@ import * as hooks from '../../../hooks/use_fetcher';
 import * as useApmParamsHooks from '../../../hooks/use_apm_params';
 import { MemoryRouter } from 'react-router-dom';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  Redirect: jest.fn(({ to }) => (
-    <a href={to} data-test-subj="redirect-link">
-      Test link
-    </a>
-  )),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      Redirect: vi.fn(({ to }) => (
+        <a href={to} data-test-subj="redirect-link">
+          Test link
+        </a>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -40,7 +48,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
             ...mockApmPluginContextValue,
             core: {
               ...mockApmPluginContextValue.core,
-              http: { ...mockApmPluginContextValue.core.http, get: jest.fn() },
+              http: { ...mockApmPluginContextValue.core.http, get: vi.fn() },
             },
           } as unknown as ApmPluginContextValue
         }
@@ -53,11 +61,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('TraceLink', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders loading state while fetching trace', async () => {
-    jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+    vi.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
       path: { traceId: 'x' },
       query: {
         rangeFrom: 'now-24h',
@@ -72,13 +80,13 @@ describe('TraceLink', () => {
   });
 
   it('redirects to traces page when no transaction is found', () => {
-    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+    vi.spyOn(hooks, 'useFetcher').mockReturnValue({
       data: { transaction: undefined },
       status: hooks.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
-    jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+    vi.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
       path: { traceId: '123' },
       query: {
         rangeFrom: 'now-24h',
@@ -106,13 +114,13 @@ describe('TraceLink', () => {
       trace: { id: 123 },
     };
 
-    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+    vi.spyOn(hooks, 'useFetcher').mockReturnValue({
       data: { transaction },
       status: hooks.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
-    jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+    vi.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
       path: { traceId: '123' },
       query: {
         rangeFrom: 'now-24h',
@@ -138,13 +146,13 @@ describe('TraceLink', () => {
       trace: { id: 123 },
     };
 
-    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+    vi.spyOn(hooks, 'useFetcher').mockReturnValue({
       data: { transaction },
       status: hooks.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
-    jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+    vi.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
       path: { traceId: '123' },
       query: {},
     });

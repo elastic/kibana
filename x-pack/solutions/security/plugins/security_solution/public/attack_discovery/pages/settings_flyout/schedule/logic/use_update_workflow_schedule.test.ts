@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { act } from '@testing-library/react';
 import { useQueryClient } from '@kbn/react-query';
 import type {
@@ -20,34 +23,40 @@ import { useInvalidateFindWorkflowSchedules } from './use_find_workflow_schedule
 import { useInvalidateGetWorkflowSchedule } from './use_get_workflow_schedule';
 import { updateWorkflowSchedule } from '../api/internal';
 
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: jest.fn(),
-}));
-jest.mock('./use_find_workflow_schedules');
-jest.mock('./use_get_workflow_schedule');
-jest.mock('../api/internal', () => ({
-  ...jest.requireActual('../api/internal'),
-  updateWorkflowSchedule: jest.fn(),
-}));
-jest.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('@kbn/react-query', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-query')),
+      useQueryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_find_workflow_schedules');
+vi.mock('./use_get_workflow_schedule');
+vi.mock('../api/internal', async () => {
+      const mocked = {
+      ...(await vi.importActual('../api/internal')),
+      updateWorkflowSchedule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/hooks/use_app_toasts');
 
-const updateWorkflowScheduleMock = updateWorkflowSchedule as jest.MockedFunction<
+const updateWorkflowScheduleMock = updateWorkflowSchedule as MockedFunction<
   typeof updateWorkflowSchedule
 >;
 
-const setQueryDataMock = jest.fn();
-const useQueryClientMock = useQueryClient as jest.MockedFunction<typeof useQueryClient>;
+const setQueryDataMock = vi.fn();
+const useQueryClientMock = useQueryClient as MockedFunction<typeof useQueryClient>;
 
-const invalidateFindWorkflowSchedulesMock = jest.fn();
+const invalidateFindWorkflowSchedulesMock = vi.fn();
 const mockUseInvalidateFindWorkflowSchedules =
-  useInvalidateFindWorkflowSchedules as jest.MockedFunction<
+  useInvalidateFindWorkflowSchedules as MockedFunction<
     typeof useInvalidateFindWorkflowSchedules
   >;
 
-const invalidateGetWorkflowScheduleMock = jest.fn();
+const invalidateGetWorkflowScheduleMock = vi.fn();
 const mockUseInvalidateGetWorkflowSchedule =
-  useInvalidateGetWorkflowSchedule as jest.MockedFunction<typeof useInvalidateGetWorkflowSchedule>;
+  useInvalidateGetWorkflowSchedule as MockedFunction<typeof useInvalidateGetWorkflowSchedule>;
 
 const mockScheduleToUpdate: AttackDiscoveryScheduleUpdateProps = {
   name: 'Updated Workflow Schedule',
@@ -85,13 +94,13 @@ const mockUpdatedScheduleResponse: AttackDiscoverySchedule = {
 };
 
 describe('useUpdateWorkflowSchedule', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
 
     setQueryDataMock.mockReset();
     useQueryClientMock.mockReturnValue({
@@ -101,12 +110,12 @@ describe('useUpdateWorkflowSchedule', () => {
     updateWorkflowScheduleMock.mockResolvedValue(mockUpdatedScheduleResponse);
 
     mockUseInvalidateFindWorkflowSchedules.mockReturnValue(
-      invalidateFindWorkflowSchedulesMock as unknown as jest.Mocked<
+      invalidateFindWorkflowSchedulesMock as unknown as Mocked<
         ReturnType<typeof useInvalidateFindWorkflowSchedules>
       >
     );
     mockUseInvalidateGetWorkflowSchedule.mockReturnValue(
-      invalidateGetWorkflowScheduleMock as unknown as jest.Mocked<
+      invalidateGetWorkflowScheduleMock as unknown as Mocked<
         ReturnType<typeof useInvalidateGetWorkflowSchedule>
       >
     );

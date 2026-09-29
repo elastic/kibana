@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -27,9 +30,12 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from '.';
 
-jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: jest.fn(() => null),
-}));
+vi.mock('@kbn/dashboard-plugin/public', () => {
+      const mocked = {
+      DashboardRenderer: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockRoundCompleteEvent = (
   attachments: VersionedAttachment[],
@@ -108,16 +114,16 @@ const createMockDashboardApi = (
 ): DashboardApi & {
   setSavedObjectId: (id: string | undefined) => void;
   emitSave: (event: DashboardSaveEvent) => void;
-  setState: jest.Mock;
-  getSerializedState: jest.Mock;
+  setState: Mock;
+  getSerializedState: Mock;
 } => {
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const onSave$ = new Subject<DashboardSaveEvent>();
   const filters$ = new BehaviorSubject<undefined>(undefined);
   const query$ = new BehaviorSubject<undefined>(undefined);
   const timeRange$ = new BehaviorSubject<undefined>(undefined);
-  const setState = jest.fn();
-  const getSerializedState = jest.fn().mockReturnValue({ attributes: { title: '', panels: [] } });
+  const setState = vi.fn();
+  const getSerializedState = vi.fn().mockReturnValue({ attributes: { title: '', panels: [] } });
   return {
     anyStateChange$: of(),
     savedObjectId$,
@@ -132,8 +138,8 @@ const createMockDashboardApi = (
   } as unknown as DashboardApi & {
     setSavedObjectId: (id: string | undefined) => void;
     emitSave: (event: DashboardSaveEvent) => void;
-    setState: jest.Mock;
-    getSerializedState: jest.Mock;
+    setState: Mock;
+    getSerializedState: Mock;
   };
 };
 
@@ -189,23 +195,23 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       return chatEvents$;
     };
     const dashboardAppClientApi$ = new Subject<DashboardApi | undefined>();
-    const addAttachmentType = jest.fn();
-    const updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
-    const findDashboardsService = jest.fn().mockResolvedValue({
-      findById: jest.fn().mockResolvedValue({ status: 'success' }),
+    const addAttachmentType = vi.fn();
+    const updateAttachmentOrigin = vi.fn().mockResolvedValue(undefined);
+    const findDashboardsService = vi.fn().mockResolvedValue({
+      findById: vi.fn().mockResolvedValue({ status: 'success' }),
     });
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const emitConversationChange = (change: ActiveConversation) => {
       activeConversation$.next(change);
     };
 
-    const mockAddAttachment = jest.fn();
+    const mockAddAttachment = vi.fn();
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
       updateAttachmentOrigin,
       events: {
-        getChatEvents$: jest.fn((conversationId: string) =>
+        getChatEvents$: vi.fn((conversationId: string) =>
           getChatEvents(conversationId).asObservable()
         ),
         ui: { activeConversation$: activeConversation$.asObservable() },
@@ -226,7 +232,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const data = dataPluginMock.createStartContract();
 
     const unifiedSearch: UnifiedSearchPublicPluginStart = {
-      ui: { SearchBar: jest.fn() },
+      ui: { SearchBar: vi.fn() },
     } as unknown as UnifiedSearchPublicPluginStart;
 
     return {
@@ -265,7 +271,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       attachment,
       isSidebar: false,
       isCanvas: false,
-      openCanvas: jest.fn(),
+      openCanvas: vi.fn(),
       updateOrigin: (origin: string) =>
         deps.updateAttachmentOrigin(conversationId, attachment.id, origin),
     });
@@ -286,7 +292,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     deps = createMockDeps();
     unregister = registerDashboardAttachmentUiDefinition(deps);
     uiDefinition = deps.addAttachmentType.mock.calls[0][1];
@@ -312,18 +318,18 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const dashboardAppClientApi$ = new BehaviorSubject<DashboardApi | undefined>(
       createMockDashboardApi() as unknown as DashboardApi
     );
-    const addAttachmentType = jest.fn();
-    const findDashboardsService = jest.fn().mockResolvedValue({
-      findById: jest.fn().mockResolvedValue({ status: 'success' }),
+    const addAttachmentType = vi.fn();
+    const findDashboardsService = vi.fn().mockResolvedValue({
+      findById: vi.fn().mockResolvedValue({ status: 'success' }),
     });
 
     const syncDeps = {
       agentBuilder: {
         attachments: { addAttachmentType },
-        addAttachment: jest.fn(),
-        updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
+        addAttachment: vi.fn(),
+        updateAttachmentOrigin: vi.fn().mockResolvedValue(undefined),
         events: {
-          getChatEvents$: jest.fn(() => new Subject<ChatEvent>().asObservable()),
+          getChatEvents$: vi.fn(() => new Subject<ChatEvent>().asObservable()),
           ui: {
             activeConversation$: new BehaviorSubject<ActiveConversation | null>(
               null
@@ -344,7 +350,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       } as unknown as DashboardStart,
       data: dataPluginMock.createStartContract(),
       unifiedSearch: {
-        ui: { SearchBar: jest.fn() },
+        ui: { SearchBar: vi.fn() },
       } as unknown as UnifiedSearchPublicPluginStart,
       draftAttachmentId: createIdGenerator(),
     };
@@ -416,7 +422,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const mockApi = createMockDashboardApi('current-dashboard-id');
 
       deps.findDashboardsService.mockResolvedValue({
-        findById: jest.fn().mockResolvedValue({ status: 'error' }),
+        findById: vi.fn().mockResolvedValue({ status: 'error' }),
       });
       unregister();
       unregister = registerDashboardAttachmentUiDefinition(deps);
@@ -461,11 +467,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
   describe('dashboard app integration - activation lifecycle', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('does not attach the dashboard when navigating to a dashboard with an existing conversation already open', async () => {
@@ -477,7 +483,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
     });
@@ -488,7 +494,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.emitConversationChange({ id: undefined });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -507,7 +513,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         conversation: createMockConversation('conversation-1', []),
       });
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
     });
@@ -518,7 +524,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       deps.emitConversationChange({ id: undefined });
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -539,7 +545,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
       deps.currentAppId$.next('agentBuilder');
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -552,11 +558,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
   describe('dashboard app integration - live changes from Agent Builder events', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('updates dashboard state on roundComplete with updated/created attachment', async () => {
@@ -581,7 +587,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       expect(mockApi.setState).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'Updated Dashboard' })
       );
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       // Created operation also triggers
       mockApi.setState.mockClear();
@@ -776,7 +782,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
       expect(canvasButtons).toEqual([]);
 
@@ -784,7 +790,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
       expect(normalButtons).toHaveLength(1);
       expect(normalButtons[0]).toMatchObject({ label: 'Preview', icon: 'eye' });

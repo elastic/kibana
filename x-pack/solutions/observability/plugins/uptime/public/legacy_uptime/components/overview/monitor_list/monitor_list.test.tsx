@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import moment from 'moment';
@@ -129,8 +131,8 @@ describe('MonitorList component', () => {
 
   beforeEach(() => {
     localStorageMock = {
-      getItem: jest.fn().mockImplementation(() => '25'),
-      setItem: jest.fn(),
+      getItem: vi.fn().mockImplementation(() => '25'),
+      setItem: vi.fn(),
     };
 
     Object.defineProperty(global, 'localStorage', {
@@ -151,7 +153,7 @@ describe('MonitorList component', () => {
           loading: false,
         }}
         pageSize={10}
-        setPageSize={jest.fn()}
+        setPageSize={vi.fn()}
       />
     );
     expect(await findByText(NO_DATA_MESSAGE)).toBeInTheDocument();
@@ -165,7 +167,7 @@ describe('MonitorList component', () => {
           loading: false,
         }}
         pageSize={10}
-        setPageSize={jest.fn()}
+        setPageSize={vi.fn()}
       />
     );
 
@@ -185,7 +187,7 @@ describe('MonitorList component', () => {
           loading: false,
         }}
         pageSize={10}
-        setPageSize={jest.fn()}
+        setPageSize={vi.fn()}
       />
     );
 
@@ -221,7 +223,7 @@ describe('MonitorList component', () => {
             loading: false,
           }}
           pageSize={10}
-          setPageSize={jest.fn()}
+          setPageSize={vi.fn()}
         />
       );
 
@@ -249,7 +251,7 @@ describe('MonitorList component', () => {
               loading: false,
             }}
             pageSize={10}
-            setPageSize={jest.fn()}
+            setPageSize={vi.fn()}
           />
         );
 
@@ -278,7 +280,7 @@ describe('MonitorList component', () => {
               loading: false,
             }}
             pageSize={10}
-            setPageSize={jest.fn()}
+            setPageSize={vi.fn()}
           />
         );
 

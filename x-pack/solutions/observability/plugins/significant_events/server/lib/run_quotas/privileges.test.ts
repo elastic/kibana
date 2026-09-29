@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
@@ -13,13 +15,13 @@ import { assertCanManageRunQuotas, canManageRunQuotas } from './privileges';
 const request = {} as KibanaRequest;
 
 const createServer = (hasAllRequested: boolean) => {
-  const globally = jest.fn().mockResolvedValue({ hasAllRequested });
-  const get = jest.fn().mockImplementation((privilege: string) => privilege);
+  const globally = vi.fn().mockResolvedValue({ hasAllRequested });
+  const get = vi.fn().mockImplementation((privilege: string) => privilege);
   const server = {
     security: {
       authz: {
         actions: { api: { get } },
-        checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally }),
+        checkPrivilegesWithRequest: vi.fn().mockReturnValue({ globally }),
       },
     },
   } as unknown as SignificantEventsServer;

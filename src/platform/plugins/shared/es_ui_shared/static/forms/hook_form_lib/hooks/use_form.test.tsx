@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect, useState } from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -41,22 +43,22 @@ const onFormHook = (_form: FormHook<any>) => {
 };
 
 beforeAll(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   formHook = null;
 });
 
-const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
 describe('useForm() hook', () => {
-  const onFormData = jest.fn();
+  const onFormData = vi.fn();
 
   describe('form.submit() & config.onSubmit()', () => {
     test('should receive the form data and the validity of the form', async () => {
@@ -173,7 +175,7 @@ describe('useForm() hook', () => {
 
       await act(async () => {
         const submitPromise = formHook!.submit();
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         ({ data, isValid } = await submitPromise);
       });
 
@@ -186,7 +188,7 @@ describe('useForm() hook', () => {
 
       await act(async () => {
         const submitPromise = formHook!.submit();
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         ({ data, isValid } = await submitPromise);
       });
 
@@ -542,7 +544,7 @@ describe('useForm() hook', () => {
 
       await act(async () => {
         const validatePromise = formHook!.validate();
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         isValid = await validatePromise;
       });
 
@@ -587,13 +589,13 @@ describe('useForm() hook', () => {
       // This will then mark the form as invalid when calling formHook.validate() below
       await act(async () => {
         const validatePromise = fieldHook.validate({ validationType: VALIDATION_TYPES.ARRAY_ITEM });
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         await validatePromise;
       });
 
       await act(async () => {
         const validatePromise = formHook!.validate();
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         isValid = await validatePromise;
       });
 
@@ -639,7 +641,7 @@ describe('useForm() hook', () => {
 
       await act(async () => {
         const validatePromise = formHook!.validate();
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         isValid = await validatePromise;
       });
 
@@ -651,7 +653,7 @@ describe('useForm() hook', () => {
 
       await act(async () => {
         const validatePromise = formHook!.validate();
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         isValid = await validatePromise;
       });
 
@@ -706,7 +708,7 @@ describe('useForm() hook', () => {
 
       await act(async () => {
         const submitPromise = formHook!.submit();
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         await submitPromise;
       });
 
@@ -759,7 +761,7 @@ describe('useForm() hook', () => {
       });
 
       await act(async () => {
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
       });
 
       expect(formHook!.getFormData()).toEqual({
@@ -831,7 +833,7 @@ describe('useForm() hook', () => {
       });
 
       await act(async () => {
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
       });
 
       expect(formHook!.getFormData()).toEqual(newFormData);
@@ -864,7 +866,7 @@ describe('useForm() hook', () => {
       });
 
       await act(async () => {
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
       });
 
       expect(formHook!.getFormData()).toEqual(newFormData);
@@ -970,7 +972,7 @@ describe('useForm() hook', () => {
       });
 
       await act(async () => {
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
       });
 
       expect(formHook!.getFormData()).toEqual(newFormData);
@@ -1009,7 +1011,7 @@ describe('useForm() hook', () => {
         });
 
         await act(async () => {
-          await jest.runAllTimersAsync();
+          await vi.runAllTimersAsync();
         });
 
         expect(formHook!.getFormData()).toEqual({
@@ -1033,7 +1035,7 @@ describe('useForm() hook', () => {
         });
 
         await act(async () => {
-          await jest.runAllTimersAsync();
+          await vi.runAllTimersAsync();
         });
 
         expect(formHook!.getFormData()).toEqual({

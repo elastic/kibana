@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
@@ -32,19 +35,19 @@ import { createMockEndpointAppContextService } from '../../../../../../endpoint/
 import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
 import { duplicateExceptions as _duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 
-jest.mock('../../../../../machine_learning/authz');
-jest.mock('../../../logic/actions/duplicate_exceptions');
+vi.mock('../../../../../machine_learning/authz');
+vi.mock('../../../logic/actions/duplicate_exceptions');
 
-let bulkGetRulesMock: jest.Mock;
+let bulkGetRulesMock: Mock;
 
-const validateRuleResponseActionsMock = _validateRuleResponseActions as jest.Mock;
-const duplicateExceptionsMock = _duplicateExceptions as jest.Mock;
+const validateRuleResponseActionsMock = _validateRuleResponseActions as Mock;
+const duplicateExceptionsMock = _duplicateExceptions as Mock;
 
-jest.mock('../../../../../../endpoint/services', () => {
-  const actualModule = jest.requireActual('../../../../../../endpoint/services');
+vi.mock('../../../../../../endpoint/services', async () => {
+  const actualModule = (await vi.importActual('../../../../../../endpoint/services'));
   return {
     ...actualModule,
-    validateRuleResponseActions: jest.fn(actualModule.validateRuleResponseActions),
+    validateRuleResponseActions: vi.fn(actualModule.validateRuleResponseActions),
   };
 });
 
@@ -59,7 +62,7 @@ describe('Perform bulk action route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as jest.Mock;
+    bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as Mock;
 
     context.securitySolution.getEndpointService.mockReturnValue(
       createMockEndpointAppContextService()
@@ -77,8 +80,8 @@ describe('Perform bulk action route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -141,7 +144,7 @@ describe('Perform bulk action route', () => {
     });
 
     it('returns 403 if alert suppression license is not sufficient', async () => {
-      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      (context.licensing.license.hasAtLeast as Mock).mockReturnValue(false);
       const response = await server.inject(
         getBulkActionEditAlertSuppressionRequest(),
         requestContextMock.convertContext(context)
@@ -154,7 +157,7 @@ describe('Perform bulk action route', () => {
     });
 
     it('returns 403 for dry run mode if alert suppression license is not sufficient', async () => {
-      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      (context.licensing.license.hasAtLeast as Mock).mockReturnValue(false);
       const response = await server.inject(
         { ...getBulkActionEditAlertSuppressionRequest(), query: { dry_run: 'true' } },
         requestContextMock.convertContext(context)
@@ -215,8 +218,8 @@ describe('Perform bulk action route', () => {
     });
 
     it('returns error if machine learning rule validation fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
+      (buildMlAuthz as Mock).mockReturnValueOnce({
+        validateRuleType: vi
           .fn()
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
@@ -255,8 +258,8 @@ describe('Perform bulk action route', () => {
     });
 
     it('returns error if machine learning rule validation fails in dry run mode', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
+      (buildMlAuthz as Mock).mockReturnValueOnce({
+        validateRuleType: vi
           .fn()
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });

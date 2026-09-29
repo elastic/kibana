@@ -5,26 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { DocSearchResult } from '@kbn/product-doc-base-plugin/server/services/search';
 import { retrieveDocumentation } from './retrieve_documentation';
 
 import { truncate, count as countTokens } from '../../utils/tokens';
-jest.mock('../../utils/tokens');
-const truncateMock = truncate as jest.MockedFn<typeof truncate>;
-const countTokensMock = countTokens as jest.MockedFn<typeof countTokens>;
+vi.mock('../../utils/tokens');
+const truncateMock = truncate as MockedFunction<typeof truncate>;
+const countTokensMock = countTokens as MockedFunction<typeof countTokens>;
 
 import { summarizeDocument } from './summarize_document';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-jest.mock('./summarize_document');
-const summarizeDocumentMock = summarizeDocument as jest.MockedFn<typeof summarizeDocument>;
+vi.mock('./summarize_document');
+const summarizeDocumentMock = summarizeDocument as MockedFunction<typeof summarizeDocument>;
 
 describe('retrieveDocumentation', () => {
   let logger: MockedLogger;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
-  let outputAPI: jest.Mock;
-  let searchDocAPI: jest.Mock;
+  let outputAPI: Mock;
+  let searchDocAPI: Mock;
   let retrieve: ReturnType<typeof retrieveDocumentation>;
 
   const createResult = (
@@ -44,8 +47,8 @@ describe('retrieveDocumentation', () => {
   beforeEach(() => {
     logger = loggerMock.create();
     request = httpServerMock.createKibanaRequest();
-    outputAPI = jest.fn();
-    searchDocAPI = jest.fn();
+    outputAPI = vi.fn();
+    searchDocAPI = vi.fn();
     retrieve = retrieveDocumentation({ logger, searchDocAPI, outputAPI });
   });
 

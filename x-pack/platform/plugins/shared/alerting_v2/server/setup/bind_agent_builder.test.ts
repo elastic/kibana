@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { Container, ContainerModule } from 'inversify';
 import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
@@ -23,38 +26,56 @@ import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 import { bindAgentBuilder } from './bind_agent_builder';
 
-jest.mock('../agent_builder/attachments/rule_attachment_type', () => ({
-  createRuleAttachmentType: jest.fn(),
-}));
-jest.mock('../agent_builder/attachments/action_policy_attachment_type', () => ({
-  createActionPolicyAttachmentType: jest.fn(),
-}));
-jest.mock('../agent_builder/attachments/episode_attachment_type', () => ({
-  createEpisodeAttachmentType: jest.fn(),
-}));
-jest.mock('../agent_builder/sml/rule_sml_type', () => ({
-  createRuleSmlType: jest.fn(),
-}));
-jest.mock('../agent_builder/sml/action_policy_sml_type', () => ({
-  createActionPolicySmlType: jest.fn(),
-}));
-jest.mock('../agent_builder/skills/register_skills', () => ({
-  registerSkills: jest.fn(),
-}));
+vi.mock('../agent_builder/attachments/rule_attachment_type', () => {
+      const mocked = {
+      createRuleAttachmentType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../agent_builder/attachments/action_policy_attachment_type', () => {
+      const mocked = {
+      createActionPolicyAttachmentType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../agent_builder/attachments/episode_attachment_type', () => {
+      const mocked = {
+      createEpisodeAttachmentType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../agent_builder/sml/rule_sml_type', () => {
+      const mocked = {
+      createRuleSmlType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../agent_builder/sml/action_policy_sml_type', () => {
+      const mocked = {
+      createActionPolicySmlType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../agent_builder/skills/register_skills', () => {
+      const mocked = {
+      registerSkills: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createRuleAttachmentTypeMock = createRuleAttachmentType as jest.MockedFunction<
+const createRuleAttachmentTypeMock = createRuleAttachmentType as MockedFunction<
   typeof createRuleAttachmentType
 >;
 const createActionPolicyAttachmentTypeMock =
-  createActionPolicyAttachmentType as jest.MockedFunction<typeof createActionPolicyAttachmentType>;
-const createEpisodeAttachmentTypeMock = createEpisodeAttachmentType as jest.MockedFunction<
+  createActionPolicyAttachmentType as MockedFunction<typeof createActionPolicyAttachmentType>;
+const createEpisodeAttachmentTypeMock = createEpisodeAttachmentType as MockedFunction<
   typeof createEpisodeAttachmentType
 >;
-const createRuleSmlTypeMock = createRuleSmlType as jest.MockedFunction<typeof createRuleSmlType>;
-const createActionPolicySmlTypeMock = createActionPolicySmlType as jest.MockedFunction<
+const createRuleSmlTypeMock = createRuleSmlType as MockedFunction<typeof createRuleSmlType>;
+const createActionPolicySmlTypeMock = createActionPolicySmlType as MockedFunction<
   typeof createActionPolicySmlType
 >;
-const registerSkillsMock = registerSkills as jest.MockedFunction<typeof registerSkills>;
+const registerSkillsMock = registerSkills as MockedFunction<typeof registerSkills>;
 
 type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
 type AgentBuilderSmlSetup = NonNullable<AlertingServerSetupDependencies['agentBuilderSml']>;
@@ -74,12 +95,12 @@ const actionPolicySmlType = { id: 'action-policy-sml' };
 describe('bindAgentBuilder', () => {
   let container: Container;
   let agentBuilder: ReturnType<typeof agentBuilderMocks.createSetup>;
-  let agentBuilderSml: { registerType: jest.Mock };
-  let uiSettingsClient: { get: jest.Mock };
+  let agentBuilderSml: { registerType: Mock };
+  let uiSettingsClient: { get: Mock };
   let workflowsManagementApi: {
-    getClient: jest.Mock;
-    getWorkflow: jest.Mock;
-    getAvailableConnectors: jest.Mock;
+    getClient: Mock;
+    getWorkflow: Mock;
+    getAvailableConnectors: Mock;
   };
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
 
@@ -94,12 +115,12 @@ describe('bindAgentBuilder', () => {
   beforeEach(() => {
     container = new Container();
     agentBuilder = agentBuilderMocks.createSetup();
-    agentBuilderSml = { registerType: jest.fn() };
-    uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
+    agentBuilderSml = { registerType: vi.fn() };
+    uiSettingsClient = { get: vi.fn().mockResolvedValue(true) };
     workflowsManagementApi = {
-      getClient: jest.fn(() => ({ getWorkflow: workflowsManagementApi.getWorkflow })),
-      getWorkflow: jest.fn(),
-      getAvailableConnectors: jest.fn(),
+      getClient: vi.fn(() => ({ getWorkflow: workflowsManagementApi.getWorkflow })),
+      getWorkflow: vi.fn(),
+      getAvailableConnectors: vi.fn(),
     };
     ({ loggerService } = createLoggerService());
 

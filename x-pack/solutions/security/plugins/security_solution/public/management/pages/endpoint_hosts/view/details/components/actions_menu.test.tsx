@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { useKibana } from '../../../../../../common/lib/kibana';
@@ -19,23 +22,23 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/comp
 import type { HostInfo } from '../../../../../../../common/endpoint/types';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
-jest.mock('../../../../../../common/lib/kibana/kibana_react', () => {
-  const originalModule = jest.requireActual('../../../../../../common/lib/kibana/kibana_react');
+vi.mock('../../../../../../common/lib/kibana/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../../../../../../common/lib/kibana/kibana_react'));
   return {
     ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: vi.fn().mockReturnValue({
       services: {
         application: {
           getUrlForApp: (appId: string, options?: { path?: string }) =>
             `/app/${appId}${options?.path}`,
-          navigateToApp: jest.fn(),
+          navigateToApp: vi.fn(),
         },
       },
     }),
   };
 });
-jest.mock('../../../../../../common/hooks/use_license');
-jest.mock('../../../../../../common/components/user_privileges');
+vi.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/components/user_privileges');
 
 describe('When using the Endpoint Details Actions Menu', () => {
   let user: UserEvent;
@@ -62,25 +65,25 @@ describe('When using the Endpoint Details Actions Menu', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
-    (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
+    (useKibana as Mock).mockReturnValue({ services: mockedContext.startServices });
     coreStart = mockedContext.coreStart;
     // TODO middlewareSpy.waitForAction() times out after the upgrade to userEvent v14 https://github.com/elastic/kibana/pull/189949
     // middlewareSpy = mockedContext.middlewareSpy;
 
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
 
-    (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
+    (useUserPrivileges as Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
 
     act(() => {
       mockedContext.history.push(
@@ -99,7 +102,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
   });
 
   afterEach(() => {
-    (useUserPrivileges as jest.Mock).mockClear();
+    (useUserPrivileges as Mock).mockClear();
   });
 
   it('should not show the response actions history link', async () => {
@@ -162,7 +165,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
 
     describe('and user does not have unisolate privilege', () => {
       beforeEach(() => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
+        (useUserPrivileges as Mock).mockReturnValue({
           ...initialUserPrivilegesState(),
           endpointPrivileges: {
             ...initialUserPrivilegesState().endpointPrivileges,
@@ -180,7 +183,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
   });
 
   describe('and license is NOT PlatinumPlus', () => {
-    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+    const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
 
     beforeEach(() => licenseServiceMock.isPlatinumPlus.mockReturnValue(false));
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { UnifiedAttachmentTypeRegistry } from '../client/attachment_framework/unified_attachment_registry';
 import { registerCasesSteps } from '.';
@@ -28,7 +30,7 @@ describe('registerCasesSteps', () => {
     isCasesAttachmentsEnabled: boolean,
     { isTemplatesEnabled = true }: { isTemplatesEnabled?: boolean } = {}
   ) => {
-    const workflowsExtensions = { registerStepDefinition: jest.fn() };
+    const workflowsExtensions = { registerStepDefinition: vi.fn() };
 
     registerCasesSteps(
       workflowsExtensions as never,

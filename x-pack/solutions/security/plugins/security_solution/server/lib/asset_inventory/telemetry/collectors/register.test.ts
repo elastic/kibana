@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type {
   SecuritySolutionPluginStart,
@@ -49,75 +52,96 @@ const mockAssetInventoryInstallationStatsResult = [
   },
 ];
 
-jest.mock('./entities_stats_collector', () => ({
-  getEntityStats: jest.fn().mockResolvedValue({
-    doc_count: 1,
-    last_doc_timestamp: '2025-01-05T00:00:00Z',
-  }),
-}));
+vi.mock('./entities_stats_collector', () => {
+      const mocked = {
+      getEntityStats: vi.fn().mockResolvedValue({
+        doc_count: 1,
+        last_doc_timestamp: '2025-01-05T00:00:00Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./entities_type_stats_collector', () => ({
-  getEntitiesTypeStats: jest
-    .fn()
-    .mockResolvedValue([
-      { entity_type: 'host', doc_count: 5, last_doc_timestamp: '2025-01-01T00:00:00Z' },
-    ]),
-}));
+vi.mock('./entities_type_stats_collector', () => {
+      const mocked = {
+      getEntitiesTypeStats: vi
+        .fn()
+        .mockResolvedValue([
+          { entity_type: 'host', doc_count: 5, last_doc_timestamp: '2025-01-01T00:00:00Z' },
+        ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./entity_store_stats_collector', () => ({
-  getEntityStoreStats: jest
-    .fn()
-    .mockResolvedValue([
-      { entity_store: 'storeA', doc_count: 3, last_doc_timestamp: '2025-01-02T00:00:00Z' },
-    ]),
-}));
+vi.mock('./entity_store_stats_collector', () => {
+      const mocked = {
+      getEntityStoreStats: vi
+        .fn()
+        .mockResolvedValue([
+          { entity_store: 'storeA', doc_count: 3, last_doc_timestamp: '2025-01-02T00:00:00Z' },
+        ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./entity_source_stats_collector', () => ({
-  getEntitySourceStats: jest
-    .fn()
-    .mockResolvedValue([
-      { entity_source: 'sourceA', doc_count: 2, last_doc_timestamp: '2025-01-03T00:00:00Z' },
-    ]),
-}));
+vi.mock('./entity_source_stats_collector', () => {
+      const mocked = {
+      getEntitySourceStats: vi
+        .fn()
+        .mockResolvedValue([
+          { entity_source: 'sourceA', doc_count: 2, last_doc_timestamp: '2025-01-03T00:00:00Z' },
+        ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./asset_criticality_stats_collector', () => ({
-  getAssetCriticalityStats: jest
-    .fn()
-    .mockResolvedValue([
-      { criticality: 'high', doc_count: 7, last_doc_timestamp: '2025-01-04T00:00:00Z' },
-    ]),
-}));
+vi.mock('./asset_criticality_stats_collector', () => {
+      const mocked = {
+      getAssetCriticalityStats: vi
+        .fn()
+        .mockResolvedValue([
+          { criticality: 'high', doc_count: 7, last_doc_timestamp: '2025-01-04T00:00:00Z' },
+        ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./asset_inventory_cloud_connector_usage_stats_collector', () => ({
-  getAssetInventoryCloudConnectorUsageStats: jest.fn().mockResolvedValue([
-    {
-      id: 'connector-1',
-      created_at: '2025-01-01T00:00:00Z',
-      updated_at: '2025-01-02T00:00:00Z',
-      hasCredentials: true,
-      cloud_provider: 'aws',
-      packagePolicyIds: ['policy-1'],
-      packagePolicyCount: 1,
-    },
-  ]),
-}));
+vi.mock('./asset_inventory_cloud_connector_usage_stats_collector', () => {
+      const mocked = {
+      getAssetInventoryCloudConnectorUsageStats: vi.fn().mockResolvedValue([
+        {
+          id: 'connector-1',
+          created_at: '2025-01-01T00:00:00Z',
+          updated_at: '2025-01-02T00:00:00Z',
+          hasCredentials: true,
+          cloud_provider: 'aws',
+          packagePolicyIds: ['policy-1'],
+          packagePolicyCount: 1,
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./asset_inventory_installation_stats_collector', () => ({
-  getAssetInventoryInstallationStats: jest.fn().mockResolvedValue([
-    {
-      package_policy_id: 'policy-1',
-      package_name: 'cloud_security_posture',
-      package_version: '1.0.0',
-      package_title: 'Cloud Security Posture',
-      agent_policy_id: 'agent-policy-1',
-      created_at: '2025-01-01T00:00:00Z',
-      integration_type: 'cspm',
-    },
-  ]),
-}));
+vi.mock('./asset_inventory_installation_stats_collector', () => {
+      const mocked = {
+      getAssetInventoryInstallationStats: vi.fn().mockResolvedValue([
+        {
+          package_policy_id: 'policy-1',
+          package_name: 'cloud_security_posture',
+          package_version: '1.0.0',
+          package_title: 'Cloud Security Posture',
+          agent_policy_id: 'agent-policy-1',
+          created_at: '2025-01-01T00:00:00Z',
+          integration_type: 'cspm',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('registerAssetInventoryUsageCollector', () => {
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   const mockEsClient = {};
   const mockSoClient = {};
   const mockCollectorFetchContext = { esClient: mockEsClient, soClient: mockSoClient };
@@ -135,27 +159,27 @@ describe('registerAssetInventoryUsageCollector', () => {
   let mockCoreServices: Promise<typeof mockCoreServicesTuple>;
 
   let mockUsageCollection: UsageCollectionSetup & {
-    makeUsageCollector: jest.Mock;
-    registerCollector: jest.Mock;
+    makeUsageCollector: Mock;
+    registerCollector: Mock;
   };
 
   beforeEach(() => {
     mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
+      info: vi.fn(),
+      error: vi.fn(),
+    } as unknown as Mocked<Logger>;
 
     mockCoreServices = Promise.resolve(mockCoreServicesTuple);
 
     mockUsageCollection = {
-      makeUsageCollector: jest.fn().mockImplementation((config) => config),
-      registerCollector: jest.fn(),
+      makeUsageCollector: vi.fn().mockImplementation((config) => config),
+      registerCollector: vi.fn(),
     } as unknown as UsageCollectionSetup & {
-      makeUsageCollector: jest.Mock;
-      registerCollector: jest.Mock;
+      makeUsageCollector: Mock;
+      registerCollector: Mock;
     };
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     registerAssetInventoryUsageCollector(mockLogger, mockCoreServices, mockUsageCollection);
   });

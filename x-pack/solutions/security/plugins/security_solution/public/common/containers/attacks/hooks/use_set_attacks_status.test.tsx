@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,9 +17,9 @@ import { setAttacksStatus } from '../api';
 import { useInvalidateSearchAttacks } from './use_search_attacks';
 import { getUpdateByQueryResponseMock } from '../../unified_alerts/__mocks__/update_responses';
 
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('../api');
-jest.mock('./use_search_attacks');
+vi.mock('../../../hooks/use_app_toasts');
+vi.mock('../api');
+vi.mock('./use_search_attacks');
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -33,15 +36,15 @@ const createWrapper = () => {
 };
 
 describe('useSetAttacksStatus', () => {
-  const mockInvalidate = jest.fn();
+  const mockInvalidate = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
     });
-    (useInvalidateSearchAttacks as jest.Mock).mockReturnValue(mockInvalidate);
+    (useInvalidateSearchAttacks as Mock).mockReturnValue(mockInvalidate);
   });
 
   it('should call setAttacksStatus and show success toast', async () => {
@@ -51,7 +54,7 @@ describe('useSetAttacksStatus', () => {
       update_related_alerts: true,
     };
     const mockResponse = getUpdateByQueryResponseMock({ updated: 2 });
-    (setAttacksStatus as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (setAttacksStatus as Mock).mockResolvedValueOnce(mockResponse);
 
     const { addSuccess } = useAppToasts();
     const { result } = renderHook(() => useSetAttacksStatus(), {
@@ -75,7 +78,7 @@ describe('useSetAttacksStatus', () => {
       status: 'open' as const,
     };
     const error = new Error('Test error');
-    (setAttacksStatus as jest.Mock).mockRejectedValueOnce(error);
+    (setAttacksStatus as Mock).mockRejectedValueOnce(error);
 
     const { addError } = useAppToasts();
     const { result } = renderHook(() => useSetAttacksStatus(), {

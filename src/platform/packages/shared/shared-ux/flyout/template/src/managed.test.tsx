@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
@@ -41,7 +43,7 @@ const renderManaged = (value: FlyoutTemplateManaged, children: React.ReactNode) 
 
 describe('a managed FlyoutTemplate', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders zones a content component declares', () => {
@@ -52,7 +54,7 @@ describe('a managed FlyoutTemplate', () => {
   });
 
   it('takes root props from the opener rather than the element', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(noop);
 
     renderManaged(
       managed(),
@@ -67,7 +69,7 @@ describe('a managed FlyoutTemplate', () => {
   });
 
   it('does not warn when the element carries only children', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(noop);
 
     renderManaged(managed(), <Content />);
 
@@ -75,7 +77,7 @@ describe('a managed FlyoutTemplate', () => {
   });
 
   it('closes through useFlyoutClose from any depth', () => {
-    const close = jest.fn();
+    const close = vi.fn();
     const CloseButton = () => (
       <button type="button" onClick={useFlyoutClose()}>
         dismiss
@@ -99,7 +101,7 @@ describe('a managed FlyoutTemplate', () => {
   });
 
   it('tears down even when the element handler swallows the close', () => {
-    const close = jest.fn();
+    const close = vi.fn();
     renderManaged(managed({ close }), <Content onClose={() => {}} />);
 
     fireEvent.click(screen.getByLabelText('Close this dialog'));
@@ -109,7 +111,7 @@ describe('a managed FlyoutTemplate', () => {
 
   it('runs the element handler before tearing down, and tears down once', () => {
     const order: string[] = [];
-    const close = jest.fn(() => order.push('close'));
+    const close = vi.fn(() => order.push('close'));
     renderManaged(managed({ close }), <Content onClose={() => order.push('element')} />);
 
     fireEvent.click(screen.getByLabelText('Close this dialog'));
@@ -119,10 +121,10 @@ describe('a managed FlyoutTemplate', () => {
   });
 
   it('tears down even when the element handler throws', () => {
-    jest.spyOn(console, 'error').mockImplementation(noop);
+    vi.spyOn(console, 'error').mockImplementation(noop);
     const swallow = (event: ErrorEvent) => event.preventDefault();
     window.addEventListener('error', swallow);
-    const close = jest.fn();
+    const close = vi.fn();
     renderManaged(
       managed({ close }),
       <Content
@@ -139,7 +141,7 @@ describe('a managed FlyoutTemplate', () => {
   });
 
   it('throws from useFlyoutClose outside a managed flyout', () => {
-    const error = jest.spyOn(console, 'error').mockImplementation(noop);
+    const error = vi.spyOn(console, 'error').mockImplementation(noop);
     const Unmanaged = () => {
       useFlyoutClose();
       return null;

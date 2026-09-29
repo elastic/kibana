@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FtrProviderContext } from './ftr_provider_context';
 import { TestSubjects } from './test_subjects';
 
 describe('TestSubjects existence checks', () => {
-  const existsByCssSelector = jest.fn();
-  const existsByDisplayedByCssSelector = jest.fn();
-  const firstDisplayedIndexByCssSelector = jest.fn();
+  const existsByCssSelector = vi.fn();
+  const existsByDisplayedByCssSelector = vi.fn();
+  const firstDisplayedIndexByCssSelector = vi.fn();
 
   const getTestSubjects = () => {
     const config = {
-      get: jest.fn((key: string) => {
+      get: vi.fn((key: string) => {
         switch (key) {
           case 'timeouts.find':
             return 10000;
@@ -37,7 +39,7 @@ describe('TestSubjects existence checks', () => {
         existsByDisplayedByCssSelector,
         firstDisplayedIndexByCssSelector,
       },
-      log: { debug: jest.fn() },
+      log: { debug: vi.fn() },
       retry: {},
     };
     const ctx = {

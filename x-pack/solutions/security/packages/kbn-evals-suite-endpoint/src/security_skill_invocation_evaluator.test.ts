@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createSecuritySkillInvocationEvaluator } from './security_skill_invocation_evaluator';
@@ -17,27 +20,27 @@ const evaluateWith = (
 ) => evaluator.evaluate({ input: {}, output: { traceId }, expected: {}, metadata: {} });
 
 describe('createSecuritySkillInvocationEvaluator', () => {
-  let mockEsClient: jest.Mocked<EsClient>;
-  let mockLog: jest.Mocked<ToolingLog>;
+  let mockEsClient: Mocked<EsClient>;
+  let mockLog: Mocked<ToolingLog>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockEsClient = {
       esql: {
-        query: jest.fn(),
+        query: vi.fn(),
       },
-    } as unknown as jest.Mocked<EsClient>;
+    } as unknown as Mocked<EsClient>;
 
     mockLog = {
-      error: jest.fn(),
-      warning: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
-    } as unknown as jest.Mocked<ToolingLog>;
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+    } as unknown as Mocked<ToolingLog>;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('matches filestore.read and load_skill spans for the skill name', async () => {
@@ -47,7 +50,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
       skillName: 'endpoint-forensic-analysis',
     });
 
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [
         { name: 'total_spans', type: 'long' },
         { name: 'skill_invoked', type: 'long' },
@@ -57,7 +60,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
 
     await evaluateWith(evaluator, VALID_TRACE_ID);
 
-    const calledQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0].query;
+    const calledQuery = (mockEsClient.esql.query as Mock).mock.calls[0][0].query;
     expect(calledQuery).toContain(`trace.id == "${VALID_TRACE_ID}"`);
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
@@ -72,7 +75,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
       skillName: 'endpoint-forensic-analysis',
     });
 
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [
         { name: 'total_spans', type: 'long' },
         { name: 'skill_invoked', type: 'long' },
@@ -92,7 +95,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
       skillName: 'endpoint-forensic-analysis',
     });
 
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [
         { name: 'total_spans', type: 'long' },
         { name: 'skill_invoked', type: 'long' },
@@ -112,7 +115,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
       skillName: 'endpoint-forensic-analysis',
     });
 
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce({
         columns: [
           { name: 'total_spans', type: 'long' },
@@ -129,7 +132,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
       });
 
     const promise = evaluateWith(evaluator, VALID_TRACE_ID);
-    await jest.advanceTimersByTimeAsync(60_000);
+    await vi.advanceTimersByTimeAsync(60_000);
     const result = await promise;
 
     expect(result.score).toBe(1);
@@ -143,7 +146,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
       skillName: 'endpoint-forensic-analysis',
     });
 
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [
         { name: 'total_spans', type: 'long' },
         { name: 'skill_invoked', type: 'long' },

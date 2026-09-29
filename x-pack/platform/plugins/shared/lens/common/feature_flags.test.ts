@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/public';
 
@@ -15,7 +17,7 @@ describe('fetchLensFeatureFlags', () => {
     const firstEmission = !lensFeatureFlags.apiFormat.fallback;
     const apiFormatCalls: Array<{ fallback: boolean; value$: BehaviorSubject<boolean> }> = [];
 
-    const getBooleanValue$ = jest.fn((flagName: string, fallback: boolean) => {
+    const getBooleanValue$ = vi.fn((flagName: string, fallback: boolean) => {
       const value$ = new BehaviorSubject(
         flagName === lensFeatureFlags.apiFormat.id ? firstEmission : fallback
       );

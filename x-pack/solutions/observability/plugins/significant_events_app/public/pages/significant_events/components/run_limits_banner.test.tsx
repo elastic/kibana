@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,12 +15,15 @@ import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
 import { useRunQuotas } from '../../../hooks/use_significant_events_run_quotas';
 import { RunLimitsBanner } from './run_limits_banner';
 
-jest.mock('../../../hooks/use_significant_events_run_quotas');
-jest.mock('../../../hooks/use_significant_events_app_router', () => ({
-  useSignificantEventsAppRouter: () => ({ link: jest.fn().mockReturnValue('#settings') }),
-}));
+vi.mock('../../../hooks/use_significant_events_run_quotas');
+vi.mock('../../../hooks/use_significant_events_app_router', () => {
+      const mocked = {
+      useSignificantEventsAppRouter: () => ({ link: vi.fn().mockReturnValue('#settings') }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
+const mockUseRunQuotas = useRunQuotas as MockedFunction<typeof useRunQuotas>;
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
   enabled: true,

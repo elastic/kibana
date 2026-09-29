@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { postEvaluateRoute } from './post_evaluate';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
@@ -27,7 +29,7 @@ describe('Post Evaluate Route', () => {
   const server: ReturnType<typeof serverMock.create> = serverMock.create();
   clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (server as any).responseMock.notFound = jest.fn().mockReturnValue({
+  (server as any).responseMock.notFound = vi.fn().mockReturnValue({
     status: 404,
     payload: 'Not Found',
   });
@@ -41,7 +43,7 @@ describe('Post Evaluate Route', () => {
   } as AuthenticatedUser;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
 
     postEvaluateRoute(server.router);

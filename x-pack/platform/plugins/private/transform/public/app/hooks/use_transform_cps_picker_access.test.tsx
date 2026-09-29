@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { type ICPSManager, ProjectRoutingAccess } from '@kbn/cps-utils';
@@ -14,11 +17,14 @@ import {
   useTransformCpsPickerAccess,
 } from './use_transform_cps_picker_access';
 
-jest.mock('../app_dependencies', () => ({
-  useAppDependencies: jest.fn(),
-}));
+vi.mock('../app_dependencies', () => {
+      const mocked = {
+      useAppDependencies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAppDependencies = useAppDependencies as jest.Mock;
+const mockUseAppDependencies = useAppDependencies as Mock;
 
 describe('getTransformCpsPickerAccess', () => {
   it('returns readonly access for create transform routes', () => {
@@ -74,7 +80,7 @@ describe('getTransformCpsPickerAccess', () => {
 
 describe('useTransformCpsPickerAccess', () => {
   const currentAppId$ = new BehaviorSubject<string | undefined>('management');
-  const registerAppAccess = jest.fn();
+  const registerAppAccess = vi.fn();
   const cpsManager = { registerAppAccess } as unknown as ICPSManager;
 
   beforeEach(() => {

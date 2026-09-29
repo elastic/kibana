@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { UseQueryResult } from '@kbn/react-query';
 import { render } from '@testing-library/react';
 import React from 'react';
@@ -18,33 +21,36 @@ import { useIndicatorsTotalCount } from '../modules/indicators/hooks/use_total_c
 import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../utils/filter_integrations';
 import { EMPTY_PAGE_WRAPPER_TEST_ID, LOADING_LOGO_WRAPPER_TEST_ID } from './test_ids';
 
-jest.mock('../modules/indicators/hooks/use_total_count');
-jest.mock('../hooks/use_integrations_page_link');
-jest.mock('../hooks/use_documentation_link');
-jest.mock('../hooks/use_integrations');
-jest.mock('../../app/home/template_wrapper', () => ({
-  SecuritySolutionTemplateWrapper: ({
-    'data-test-subj': dataTestSubj,
-  }: {
-    'data-test-subj'?: string;
-  }) => <div data-test-subj={dataTestSubj} />,
-}));
+vi.mock('../modules/indicators/hooks/use_total_count');
+vi.mock('../hooks/use_integrations_page_link');
+vi.mock('../hooks/use_documentation_link');
+vi.mock('../hooks/use_integrations');
+vi.mock('../../app/home/template_wrapper', () => {
+      const mocked = {
+      SecuritySolutionTemplateWrapper: ({
+        'data-test-subj': dataTestSubj,
+      }: {
+        'data-test-subj'?: string;
+      }) => <div data-test-subj={dataTestSubj} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('IntegrationsGuard', () => {
   it('should render loading when indicator count and integrations are being loaded', async () => {
     (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
     ).mockReturnValue({
       count: 0,
       isLoading: true,
     });
     (
-      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
     ).mockReturnValue('');
-    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       ''
     );
-    (useIntegrations as jest.MockedFunction<typeof useIntegrations>).mockReturnValue({
+    (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: true,
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
@@ -61,18 +67,18 @@ describe('IntegrationsGuard', () => {
 
   it('should render loading when indicator only is loading', async () => {
     (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
     ).mockReturnValue({
       count: 0,
       isLoading: true,
     });
     (
-      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
     ).mockReturnValue('');
-    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       ''
     );
-    (useIntegrations as jest.MockedFunction<typeof useIntegrations>).mockReturnValue({
+    (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: false,
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
@@ -89,19 +95,19 @@ describe('IntegrationsGuard', () => {
 
   it('should render loading when integrations only are loading', async () => {
     (
-      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
     ).mockReturnValue('');
-    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       ''
     );
 
     (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
     ).mockReturnValue({
       count: 0,
       isLoading: true,
     });
-    (useIntegrations as jest.MockedFunction<typeof useIntegrations>).mockReturnValue({
+    (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: true,
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
@@ -118,18 +124,18 @@ describe('IntegrationsGuard', () => {
 
   it('should render empty page when no indicators are found and no ti integrations are installed', async () => {
     (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
     ).mockReturnValue({
       count: 0,
       isLoading: false,
     });
     (
-      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
     ).mockReturnValue('');
-    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       ''
     );
-    (useIntegrations as jest.MockedFunction<typeof useIntegrations>).mockReturnValue({
+    (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: false,
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
@@ -145,12 +151,12 @@ describe('IntegrationsGuard', () => {
 
   it('should render indicators table when we have some indicators', async () => {
     (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
     ).mockReturnValue({
       count: 7,
       isLoading: false,
     });
-    (useIntegrations as jest.MockedFunction<typeof useIntegrations>).mockReturnValue({
+    (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: false,
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
@@ -167,12 +173,12 @@ describe('IntegrationsGuard', () => {
 
   it('should render indicators page when we have some ti integrations installed', async () => {
     (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
     ).mockReturnValue({
       count: 0,
       isLoading: false,
     });
-    (useIntegrations as jest.MockedFunction<typeof useIntegrations>).mockReturnValue({
+    (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: false,
       data: [
         {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { aggregateRulesRoute } from './aggregate_rules_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -18,16 +21,22 @@ const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/track_legacy_terminology', () => ({
-  trackLegacyTerminology: jest.fn(),
-}));
+vi.mock('../../../lib/track_legacy_terminology', () => {
+      const mocked = {
+      trackLegacyTerminology: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const aggregateResult = {
@@ -305,7 +314,7 @@ describe('aggregateRulesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('OMG');
     });
 
@@ -347,7 +356,7 @@ describe('aggregateRulesRoute', () => {
     );
     await handler(context, req, res);
     expect(trackLegacyTerminology).toHaveBeenCalledTimes(1);
-    expect((trackLegacyTerminology as jest.Mock).mock.calls[0][0]).toStrictEqual([
+    expect((trackLegacyTerminology as Mock).mock.calls[0][0]).toStrictEqual([
       'alertTypeId:2',
       ['alertTypeId:1', 'message:foo'],
     ]);

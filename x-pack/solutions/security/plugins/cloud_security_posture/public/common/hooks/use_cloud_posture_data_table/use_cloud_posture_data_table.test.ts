@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useCloudPostureDataTable } from './use_cloud_posture_data_table';
 import { useUrlQuery } from '../use_url_query';
@@ -12,20 +15,20 @@ import { usePageSize } from '../use_page_size';
 import { usePersistedQuery } from './use_persisted_query';
 import { useBaseEsQuery } from './use_base_es_query';
 
-jest.mock('../use_url_query');
-jest.mock('../use_page_size');
-jest.mock('./use_persisted_query');
-jest.mock('./use_base_es_query');
+vi.mock('../use_url_query');
+vi.mock('../use_page_size');
+vi.mock('./use_persisted_query');
+vi.mock('./use_base_es_query');
 
-const mockUseUrlQuery = useUrlQuery as jest.MockedFunction<typeof useUrlQuery>;
-const mockUsePageSize = usePageSize as jest.MockedFunction<typeof usePageSize>;
-const mockUsePersistedQuery = usePersistedQuery as jest.MockedFunction<typeof usePersistedQuery>;
-const mockUseBaseEsQuery = useBaseEsQuery as jest.MockedFunction<typeof useBaseEsQuery>;
+const mockUseUrlQuery = useUrlQuery as MockedFunction<typeof useUrlQuery>;
+const mockUsePageSize = usePageSize as MockedFunction<typeof usePageSize>;
+const mockUsePersistedQuery = usePersistedQuery as MockedFunction<typeof usePersistedQuery>;
+const mockUseBaseEsQuery = useBaseEsQuery as MockedFunction<typeof useBaseEsQuery>;
 
 describe('useCloudPostureDataTable - onSort', () => {
-  const mockSetUrlQuery = jest.fn();
-  const mockSetPageSize = jest.fn();
-  const mockGetPersistedDefaultQuery = jest.fn(() => ({
+  const mockSetUrlQuery = vi.fn();
+  const mockSetPageSize = vi.fn();
+  const mockGetPersistedDefaultQuery = vi.fn(() => ({
     query: { query: '', language: 'kuery' },
     filters: [],
     sort: [['@timestamp', 'desc']],
@@ -33,7 +36,7 @@ describe('useCloudPostureDataTable - onSort', () => {
   }));
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUsePersistedQuery.mockReturnValue(mockGetPersistedDefaultQuery);
     mockUsePageSize.mockReturnValue({

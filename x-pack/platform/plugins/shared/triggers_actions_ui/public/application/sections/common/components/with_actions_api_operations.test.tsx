@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,14 +15,14 @@ import { withActionOperations } from './with_actions_api_operations';
 import * as actionApis from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-jest.mock('../../../../common/lib/kibana');
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../lib/action_connector_api');
+vi.mock('../../../lib/action_connector_api');
 
 describe('with_action_api_operations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('extends any component with Action Api methods', () => {

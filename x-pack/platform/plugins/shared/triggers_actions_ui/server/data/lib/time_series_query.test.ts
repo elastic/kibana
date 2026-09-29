@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
@@ -29,7 +32,7 @@ const DefaultQueryParams: TimeSeriesQuery = {
 
 describe('timeSeriesQuery', () => {
   const esClient = alertsMock.createRuleExecutorServices().scopedClusterClient.asCurrentUser;
-  const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const logger = loggingSystemMock.create().get() as Mocked<Logger>;
   const params = {
     logger,
     esClient,
@@ -37,7 +40,7 @@ describe('timeSeriesQuery', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fails as expected when the callCluster call fails', async () => {

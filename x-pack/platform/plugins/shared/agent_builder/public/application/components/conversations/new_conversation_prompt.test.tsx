@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -12,27 +14,39 @@ import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useKibana } from '../../hooks/use_kibana';
 
-jest.mock('../../context/conversation/conversation_context', () => ({
-  useConversationContext: jest.fn(),
-}));
+vi.mock('../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./conversation_input/conversation_input', () => ({
-  ConversationInput: () => <div data-test-subj="mockConversationInput" />,
-}));
+vi.mock('./conversation_input/conversation_input', () => {
+      const mocked = {
+      ConversationInput: () => <div data-test-subj="mockConversationInput" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_typewriter_loop', () => ({
-  useTypewriterLoop: ({ messages, enabled }: { messages: readonly string[]; enabled: boolean }) =>
-    enabled && messages.length > 0 ? messages[0] : '',
-}));
+vi.mock('./use_typewriter_loop', () => {
+      const mocked = {
+      useTypewriterLoop: ({ messages, enabled }: { messages: readonly string[]; enabled: boolean }) =>
+        enabled && messages.length > 0 ? messages[0] : '',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseConversationContext = jest.mocked(useConversationContext);
-const mockedUseKibana = jest.mocked(useKibana);
+const mockedUseConversationContext = vi.mocked(useConversationContext);
+const mockedUseKibana = vi.mocked(useKibana);
 
-const mockGetActiveSpace = jest.fn();
+const mockGetActiveSpace = vi.fn();
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiProvider>{children}</EuiProvider>
@@ -40,7 +54,7 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('NewConversationPrompt', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseConversationContext.mockReturnValue({
       isEmbeddedContext: false,
       conversationActions: {} as never,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
@@ -16,17 +18,23 @@ import type { ChangePointLensChartProps } from './change_point_lens_chart';
 
 // ---- module mocks ----
 
-jest.mock('../hooks/use_change_point_lens_props');
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRendererContext: {
-    Provider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-  },
-}));
-jest.mock('./change_point_badge', () => ({
-  ChangePointBadge: () => null,
-}));
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('../hooks/use_change_point_lens_props');
+vi.mock('@kbn/embeddable-plugin/public', () => {
+      const mocked = {
+      EmbeddableRendererContext: {
+        Provider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./change_point_badge', () => {
+      const mocked = {
+      ChangePointBadge: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -41,7 +49,7 @@ jest.mock('@elastic/eui', () => {
 
 // ---- helpers ----
 
-const { useChangePointLensProps } = jest.requireMock('../hooks/use_change_point_lens_props');
+const { useChangePointLensProps } = (await vi.importMock('../hooks/use_change_point_lens_props'));
 
 const stubCard = (overrides: Partial<ChangePointCardModel> = {}): ChangePointCardModel => ({
   id: 'card-1',
@@ -97,7 +105,7 @@ const baseProps: ChangePointLensChartProps = {
 
 describe('ChangePointLensChart', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a loading indicator while lensProps is not yet available', () => {
@@ -151,7 +159,7 @@ describe('ChangePointLensChart', () => {
         {...baseProps}
         services={{ lens: { EmbeddableComponent: EmbeddableSpy } } as never}
         card={stubCard({ annotationEvents: [] })}
-        actions={{ openInNewTab: jest.fn() }}
+        actions={{ openInNewTab: vi.fn() }}
       />
     );
 

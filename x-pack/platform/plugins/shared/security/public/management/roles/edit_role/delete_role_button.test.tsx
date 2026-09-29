@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
 import React from 'react';
 
@@ -13,7 +15,7 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { DeleteRoleButton } from './delete_role_button';
 
 test('it renders without crashing', () => {
-  const deleteHandler = jest.fn();
+  const deleteHandler = vi.fn();
   const wrapper = shallowWithIntl(
     <DeleteRoleButton canDelete={true} onDelete={deleteHandler} roleName="Test Role " />
   );
@@ -22,7 +24,7 @@ test('it renders without crashing', () => {
 });
 
 test('it shows a confirmation dialog when clicked', () => {
-  const deleteHandler = jest.fn();
+  const deleteHandler = vi.fn();
   const wrapper = mountWithIntl(
     <DeleteRoleButton canDelete={true} onDelete={deleteHandler} roleName="Test Role " />
   );
@@ -35,7 +37,7 @@ test('it shows a confirmation dialog when clicked', () => {
 });
 
 test('it renders nothing when canDelete is false', () => {
-  const deleteHandler = jest.fn();
+  const deleteHandler = vi.fn();
   const wrapper = shallowWithIntl(
     <DeleteRoleButton canDelete={false} onDelete={deleteHandler} roleName="Test Role " />
   );

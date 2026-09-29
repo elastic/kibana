@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
@@ -12,9 +14,12 @@ import moment from 'moment-timezone';
 import { getFormattedComments } from './ui.helpers';
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Exception helpers', () => {
   beforeEach(() => {

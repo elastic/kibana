@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { PromptTemplate } from '@langchain/core/prompts';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { loadEvaluator } from '@langchain/classic/evaluation';
@@ -16,17 +19,20 @@ import { getRunAttackDiscoveriesWithReplacements } from './get_run_attack_discov
 import { exampleWithReplacements } from '../../__mocks__/mock_examples';
 import { runWithReplacements } from '../../__mocks__/mock_runs';
 
-const mockLlm = jest.fn() as unknown as ActionsClientLlm;
+const mockLlm = vi.fn() as unknown as ActionsClientLlm;
 
-jest.mock('@langchain/classic/evaluation', () => ({
-  ...jest.requireActual('@langchain/classic/evaluation'),
-  loadEvaluator: jest.fn().mockResolvedValue({
-    evaluateStrings: jest.fn().mockResolvedValue({
-      key: 'correctness',
-      score: 0.9,
-    }),
-  }),
-}));
+vi.mock('@langchain/classic/evaluation', () => {
+      const mocked = {
+      ...require('@langchain/classic/evaluation'),
+      loadEvaluator: vi.fn().mockResolvedValue({
+        evaluateStrings: vi.fn().mockResolvedValue({
+          key: 'correctness',
+          score: 0.9,
+        }),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const options: GetCustomEvaluatorOptions = {
   criteria: 'correctness',
@@ -36,7 +42,7 @@ const options: GetCustomEvaluatorOptions = {
 };
 
 describe('getCustomEvaluator', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns an evaluator function', () => {
     const evaluator = getCustomEvaluator(options);
@@ -59,12 +65,12 @@ describe('getCustomEvaluator', () => {
   });
 
   it('calls evaluateStrings with the expected arguments', async () => {
-    const mockEvaluateStrings = jest.fn().mockResolvedValue({
+    const mockEvaluateStrings = vi.fn().mockResolvedValue({
       key: 'correctness',
       score: 0.9,
     });
 
-    (loadEvaluator as jest.Mock).mockResolvedValue({
+    (loadEvaluator as Mock).mockResolvedValue({
       evaluateStrings: mockEvaluateStrings,
     });
 

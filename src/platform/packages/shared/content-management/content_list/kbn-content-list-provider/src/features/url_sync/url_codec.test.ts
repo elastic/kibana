@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   decodeNewShape,
   encodeUrlState,
@@ -59,7 +61,7 @@ describe('url_codec', () => {
     });
 
     it('drops unknown sort fields and warns', () => {
-      const onUnknown = jest.fn();
+      const onUnknown = vi.fn();
 
       expect(
         sortCodec(validSortFields, initialSort, onUnknown).decode({ sort: 'foo:asc' })
@@ -68,7 +70,7 @@ describe('url_codec', () => {
     });
 
     it('drops malformed sort and warns', () => {
-      const onUnknown = jest.fn();
+      const onUnknown = vi.fn();
 
       expect(
         sortCodec(validSortFields, initialSort, onUnknown).decode({ sort: 'updatedAt' })

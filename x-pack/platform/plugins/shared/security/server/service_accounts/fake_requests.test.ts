@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -23,21 +26,21 @@ const REQUEST_LIFETIME_MS = 10 * 60 * 1000;
 
 describe('ServiceAccountFakeRequests', () => {
   let logger: Logger;
-  let mintToken: jest.Mock<Promise<string>, [string]>;
+  let mintToken: Mock<Promise<string>, [string]>;
   let fakeRequests: ServiceAccountFakeRequests;
 
   beforeEach(() => {
-    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
-    jest.setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
+    vi.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    vi.setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
 
     logger = loggingSystemMock.create().get('service-accounts');
     let counter = 0;
-    mintToken = jest.fn().mockImplementation(async () => `essu_token_${++counter}`);
+    mintToken = vi.fn().mockImplementation(async () => `essu_token_${++counter}`);
     fakeRequests = new ServiceAccountFakeRequests(logger, mintToken, REQUEST_LIFETIME_MS);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('#create', () => {
@@ -77,7 +80,7 @@ describe('ServiceAccountFakeRequests', () => {
         mintInterceptor: async (mint) => await mint(),
       });
 
-      jest.advanceTimersByTime(REQUEST_LIFETIME_MS * 10);
+      vi.advanceTimersByTime(REQUEST_LIFETIME_MS * 10);
       await expect(fakeRequests.ensureFreshToken(request, 0)).resolves.toBe('essu_token_2');
     });
 
@@ -125,7 +128,7 @@ describe('ServiceAccountFakeRequests', () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
       mintToken.mockClear();
 
-      jest.advanceTimersByTime(MAX_AGE_MS - 1);
+      vi.advanceTimersByTime(MAX_AGE_MS - 1);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).resolves.toBe(
         'essu_token_1'
       );
@@ -137,7 +140,7 @@ describe('ServiceAccountFakeRequests', () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
       mintToken.mockClear();
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).resolves.toBe(
         'essu_token_2'
       );
@@ -156,7 +159,7 @@ describe('ServiceAccountFakeRequests', () => {
         () => new Promise<string>((resolve) => (resolveMint = resolve))
       );
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       const first = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
       const second = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
 
@@ -174,7 +177,7 @@ describe('ServiceAccountFakeRequests', () => {
       const error = new ServiceAccountTokenExchangeError(new Error('exchange failed'), true);
       mintToken.mockRejectedValueOnce(error);
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toBe(error);
 
       // Within the backoff window, no mint attempt is made.
@@ -184,7 +187,7 @@ describe('ServiceAccountFakeRequests', () => {
       expect(mintToken).toHaveBeenCalledTimes(1);
 
       // Once the backoff elapses, minting resumes.
-      jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
+      vi.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).resolves.toBe(
         'essu_token_2'
       );
@@ -200,7 +203,7 @@ describe('ServiceAccountFakeRequests', () => {
         () => new Promise<string>((resolve, reject) => (rejectMint = reject))
       );
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       const first = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
       const second = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
 
@@ -217,7 +220,7 @@ describe('ServiceAccountFakeRequests', () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
       mintToken.mockClear();
 
-      jest.advanceTimersByTime(REQUEST_LIFETIME_MS + 1);
+      vi.advanceTimersByTime(REQUEST_LIFETIME_MS + 1);
 
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
         'The lease on this service account bound request has expired; refusing to mint a replacement credential.'
@@ -240,7 +243,7 @@ describe('ServiceAccountFakeRequests', () => {
       });
       mintToken.mockClear();
 
-      jest.advanceTimersByTime(1_001);
+      vi.advanceTimersByTime(1_001);
 
       await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toThrowError(
         'The lease on this service account bound request has expired; refusing to mint a replacement credential.'
@@ -254,7 +257,7 @@ describe('ServiceAccountFakeRequests', () => {
       });
       mintToken.mockClear();
 
-      jest.advanceTimersByTime(REQUEST_LIFETIME_MS - 1);
+      vi.advanceTimersByTime(REQUEST_LIFETIME_MS - 1);
 
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).resolves.toBe(
         'essu_token_2'
@@ -263,24 +266,24 @@ describe('ServiceAccountFakeRequests', () => {
     });
     it('rejects at the exact lifetime boundary even when the token is fresh', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
-      jest.advanceTimersByTime(REQUEST_LIFETIME_MS);
+      vi.advanceTimersByTime(REQUEST_LIFETIME_MS);
       await expect(fakeRequests.ensureFreshToken(request, Infinity)).rejects.toThrow('lease');
       expect(mintToken).toHaveBeenCalledTimes(1);
     });
 
     it('does not install a token when the lifetime expires during the exchange', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
-      let resolveMint: (token: string) => void = jest.fn();
+      let resolveMint: (token: string) => void = vi.fn();
       mintToken.mockImplementationOnce(
         () =>
           new Promise((resolve) => {
             resolveMint = resolve;
           })
       );
-      jest.advanceTimersByTime(REQUEST_LIFETIME_MS - 1);
+      vi.advanceTimersByTime(REQUEST_LIFETIME_MS - 1);
       const first = fakeRequests.ensureFreshToken(request, 0);
       const second = fakeRequests.ensureFreshToken(request, 0);
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       resolveMint('late-token');
       await expect(first).rejects.toThrow('lease');
       await expect(second).rejects.toThrow('lease');
@@ -297,7 +300,7 @@ describe('ServiceAccountFakeRequests', () => {
       mintToken.mockRejectedValueOnce(error);
       await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toBe(error);
       await expect(fakeRequests.ensureFreshToken(request, Infinity)).rejects.toBe(error);
-      jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
+      vi.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
       await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toBe(error);
       expect(mintToken).toHaveBeenCalledTimes(2);
       const otherRequest = await fakeRequests.create({ serviceAccountId: 'sa-id' });
@@ -311,12 +314,12 @@ describe('ServiceAccountFakeRequests', () => {
       const error = new ServiceAccountTokenExchangeError(new Error('throttled'), true, 20_000);
       mintToken.mockRejectedValueOnce(error);
       await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toBe(error);
-      jest.advanceTimersByTime(19_999);
+      vi.advanceTimersByTime(19_999);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrow(
         'refusing to retry yet'
       );
       expect(mintToken).toHaveBeenCalledTimes(2);
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       await expect(fakeRequests.ensureFreshToken(request, 0)).resolves.toBe('essu_token_2');
     });
 
@@ -328,8 +331,8 @@ describe('ServiceAccountFakeRequests', () => {
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('sa-id'));
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('sa-id'));
       for (const call of [
-        ...jest.mocked(logger.debug).mock.calls,
-        ...jest.mocked(logger.warn).mock.calls,
+        ...vi.mocked(logger.debug).mock.calls,
+        ...vi.mocked(logger.warn).mock.calls,
       ]) {
         expect(String(call[0])).not.toMatch(/essu_token|secret-token/);
       }
@@ -339,7 +342,7 @@ describe('ServiceAccountFakeRequests', () => {
   describe('mint interceptor', () => {
     it('wraps the initial mint, receiving the mint function and returning its result', async () => {
       const order: string[] = [];
-      const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
+      const mintInterceptor = vi.fn(async (mint: () => Promise<string>) => {
         order.push('verify');
         const token = await mint();
         order.push('minted');
@@ -354,7 +357,7 @@ describe('ServiceAccountFakeRequests', () => {
     });
 
     it('propagates an interceptor refusal from create without minting', async () => {
-      const mintInterceptor = jest.fn(async () => {
+      const mintInterceptor = vi.fn(async () => {
         throw new Error('binding no longer exists');
       });
 
@@ -366,7 +369,7 @@ describe('ServiceAccountFakeRequests', () => {
 
     it('wraps every refresh mint; an interceptor refusal is terminal', async () => {
       let refuse = false;
-      const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
+      const mintInterceptor = vi.fn(async (mint: () => Promise<string>) => {
         if (refuse) {
           throw Boom.notFound('binding no longer exists');
         }
@@ -377,7 +380,7 @@ describe('ServiceAccountFakeRequests', () => {
       mintToken.mockClear();
       refuse = true;
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
         'binding no longer exists'
       );
@@ -386,7 +389,7 @@ describe('ServiceAccountFakeRequests', () => {
       // A refusal is not a transient failure, so it is never backed off and retried: the
       // interceptor is not consulted again even once the workload would permit minting anew.
       refuse = false;
-      jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
+      vi.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
         'binding no longer exists'
       );
@@ -402,7 +405,7 @@ describe('ServiceAccountFakeRequests', () => {
       'backs off and retries when the interceptor fails with %s, keeping the current token',
       async (_name, createError) => {
         let fail = false;
-        const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
+        const mintInterceptor = vi.fn(async (mint: () => Promise<string>) => {
           if (fail) {
             throw createError();
           }
@@ -413,7 +416,7 @@ describe('ServiceAccountFakeRequests', () => {
         mintToken.mockClear();
         fail = true;
 
-        jest.advanceTimersByTime(MAX_AGE_MS);
+        vi.advanceTimersByTime(MAX_AGE_MS);
         await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
           'cluster unavailable'
         );
@@ -429,7 +432,7 @@ describe('ServiceAccountFakeRequests', () => {
 
         // Once the backoff lapses and the check succeeds, minting resumes.
         fail = false;
-        jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
+        vi.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
         await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).resolves.toBe(
           'essu_token_2'
         );
@@ -439,22 +442,22 @@ describe('ServiceAccountFakeRequests', () => {
     );
 
     it('leaves a failure of the exchange itself classified by the exchange, even through an interceptor', async () => {
-      const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
+      const mintInterceptor = vi.fn(async (mint: () => Promise<string>) => await mint());
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
       const error = new Error('unclassified failure');
       mintToken.mockRejectedValueOnce(error);
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toBe(error);
 
       // An unexpected exchange failure fails closed, exactly as it does without an interceptor.
-      jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
+      vi.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toBe(error);
       expect(mintToken).toHaveBeenCalledTimes(2);
     });
 
     it('deduplicates concurrent refreshes into a single interceptor invocation', async () => {
-      const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
+      const mintInterceptor = vi.fn(async (mint: () => Promise<string>) => await mint());
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
       mintToken.mockClear();
       mintInterceptor.mockClear();
@@ -464,7 +467,7 @@ describe('ServiceAccountFakeRequests', () => {
         () => new Promise<string>((resolve) => (resolveMint = resolve))
       );
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       const first = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
       const second = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
 
@@ -519,7 +522,7 @@ describe('ServiceAccountFakeRequests', () => {
         () => new Promise<string>((resolve) => (resolveMint = resolve))
       );
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       const inflight = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
 
       expect(fakeRequests.release(request)).toBe(true);
@@ -543,7 +546,7 @@ describe('ServiceAccountFakeRequests', () => {
         () => new Promise<string>((_resolve, reject) => (rejectMint = reject))
       );
 
-      jest.advanceTimersByTime(MAX_AGE_MS);
+      vi.advanceTimersByTime(MAX_AGE_MS);
       const inflight = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
 
       fakeRequests.release(request);

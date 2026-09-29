@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RuleAction } from '../../../types';
@@ -19,7 +21,7 @@ import {
 } from './rule_action_helper';
 
 const now = '2021-05-13T12:33:37.000Z';
-Date.now = jest.fn().mockReturnValue(new Date(now));
+Date.now = vi.fn().mockReturnValue(new Date(now));
 
 const mockOldAction: RuleAction = {
   id: '1',
@@ -168,20 +170,20 @@ describe('rule_action_helper', () => {
 
   describe('isSummaryActionThrottled', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     beforeEach(() => {
-      jest.setSystemTime(new Date('2020-01-01T23:00:00.000Z').getTime());
+      vi.setSystemTime(new Date('2020-01-01T23:00:00.000Z').getTime());
     });
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
-    const logger = { debug: jest.fn() } as unknown as Logger;
+    const logger = { debug: vi.fn() } as unknown as Logger;
     const throttledSummaryActions = { '111-111': { date: '2020-01-01T00:00:00.000Z' } };
 
     test('should return false if the action does not have throttle filed', () => {
@@ -236,7 +238,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is not being throttled', () => {
-      jest.advanceTimersByTime(3600000 * 2);
+      vi.advanceTimersByTime(3600000 * 2);
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
         throttledSummaryActions: { '123-456': { date: '2020-01-01T00:00:00.000Z' } },

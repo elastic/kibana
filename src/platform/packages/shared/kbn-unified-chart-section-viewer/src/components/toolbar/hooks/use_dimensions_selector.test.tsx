@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
@@ -54,7 +56,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name'), dim('service.name'), dim('cloud.region')],
         selectedDimensions: [],
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -72,7 +74,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name'), dim('service.name'), dim('cloud.region')],
         selectedDimensions: [dim('service.name')],
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -89,7 +91,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: all,
         selectedDimensions: selected,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -108,7 +110,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: all,
         selectedDimensions: selected,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -128,7 +130,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: selected,
         selectedDimensions: selected,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: true,
         isLoading: false,
       });
@@ -142,7 +144,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name')],
         selectedDimensions: [dim('zeta.orphan'), dim('alpha.orphan')],
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -165,7 +167,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name'), dim('service.name'), dim('cloud.region')],
         selectedDimensions: [dim('service.name')],
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
         metricItems,
@@ -183,7 +185,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name'), dim('service.name')],
         selectedDimensions: [dim('host.name'), dim('service.name')],
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -197,7 +199,7 @@ describe('useDimensionsSelector', () => {
       // All non-changing args share the same reference across renders so only
       // `selectedDimensions` can trigger the sync effect.
       const dimensions = [dim('host.name'), dim('service.name')];
-      const onChange = jest.fn();
+      const onChange = vi.fn();
 
       const { result, rerender } = renderHook(
         ({ selectedDimensions }: { selectedDimensions: Dimension[] }) =>
@@ -219,14 +221,14 @@ describe('useDimensionsSelector', () => {
   });
 
   describe('handleChange (multi-select)', () => {
-    beforeEach(() => jest.useFakeTimers());
+    beforeEach(() => vi.useFakeTimers());
     afterEach(() => {
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
+      vi.runOnlyPendingTimers();
+      vi.useRealTimers();
     });
 
     it('debounces onChange by DEBOUNCE_TIME ms', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name'), dim('service.name'), dim('cloud.region')],
         selectedDimensions: [],
@@ -249,7 +251,7 @@ describe('useDimensionsSelector', () => {
       expect(result.current.selectedValues).toEqual(['host.name']);
 
       act(() => {
-        jest.advanceTimersByTime(DEBOUNCE_TIME);
+        vi.advanceTimersByTime(DEBOUNCE_TIME);
       });
 
       expect(onChange).toHaveBeenCalledTimes(1);
@@ -257,7 +259,7 @@ describe('useDimensionsSelector', () => {
     });
 
     it('collapses rapid consecutive changes into a single onChange call', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name'), dim('service.name'), dim('cloud.region')],
         selectedDimensions: [],
@@ -278,7 +280,7 @@ describe('useDimensionsSelector', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(DEBOUNCE_TIME);
+        vi.advanceTimersByTime(DEBOUNCE_TIME);
       });
 
       expect(onChange).toHaveBeenCalledTimes(1);
@@ -286,7 +288,7 @@ describe('useDimensionsSelector', () => {
     });
 
     it('caps the emitted selection at MAX_DIMENSIONS_SELECTIONS', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const extras = Array.from({ length: MAX_DIMENSIONS_SELECTIONS + 2 }, (_, i) => dim(`d${i}`));
       const { result } = renderDimensionsHook({
         dimensions: extras,
@@ -305,7 +307,7 @@ describe('useDimensionsSelector', () => {
         result.current.handleChange(selections);
       });
       act(() => {
-        jest.advanceTimersByTime(DEBOUNCE_TIME);
+        vi.advanceTimersByTime(DEBOUNCE_TIME);
       });
 
       expect(onChange).toHaveBeenCalledTimes(1);
@@ -313,7 +315,7 @@ describe('useDimensionsSelector', () => {
     });
 
     it('coerces `undefined` into an empty-array selection', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name')],
         selectedDimensions: [],
@@ -326,7 +328,7 @@ describe('useDimensionsSelector', () => {
         result.current.handleChange(undefined);
       });
       act(() => {
-        jest.advanceTimersByTime(DEBOUNCE_TIME);
+        vi.advanceTimersByTime(DEBOUNCE_TIME);
       });
 
       expect(onChange).toHaveBeenCalledWith([]);
@@ -335,7 +337,7 @@ describe('useDimensionsSelector', () => {
 
   describe('handleChange (single-select)', () => {
     it('fires onChange synchronously without debouncing', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name'), dim('service.name')],
         selectedDimensions: [],
@@ -365,7 +367,7 @@ describe('useDimensionsSelector', () => {
       const { result: belowLimit } = renderDimensionsHook({
         dimensions: atLimit,
         selectedDimensions: atLimit.slice(0, 1),
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -374,7 +376,7 @@ describe('useDimensionsSelector', () => {
       const { result: atTheLimit } = renderDimensionsHook({
         dimensions: atLimit,
         selectedDimensions: atLimit,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -385,7 +387,7 @@ describe('useDimensionsSelector', () => {
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name')],
         selectedDimensions: [],
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         singleSelection: false,
         isLoading: false,
       });
@@ -398,7 +400,7 @@ describe('useDimensionsSelector', () => {
     it('gracefully drops options missing a `dimension` field (defensive guard)', () => {
       // Simulates a third-party shape that slipped through without a dimension.
       // `handleChange` must not crash; it should just produce an empty selection.
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const { result } = renderDimensionsHook({
         dimensions: [dim('host.name')],
         selectedDimensions: [],

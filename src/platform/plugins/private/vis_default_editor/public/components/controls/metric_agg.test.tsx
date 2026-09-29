@@ -7,23 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import type { IAggConfig } from '@kbn/data-plugin/public';
 import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
 
-jest.mock('./utils', () => ({
-  useAvailableOptions: jest.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
-    ...filteredMetrics.map(({ id, type }: { id: string; type: { name: string } }) => ({
-      text: type.name,
-      value: id,
-    })),
-    ...defaultOptions,
-  ]),
-  useFallbackMetric: jest.fn(),
-  useValidation: jest.fn(),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      useAvailableOptions: vi.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
+        ...filteredMetrics.map(({ id, type }: { id: string; type: { name: string } }) => ({
+          text: type.name,
+          value: id,
+        })),
+        ...defaultOptions,
+      ]),
+      useFallbackMetric: vi.fn(),
+      useValidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
 import type { AggParamEditorProps } from '../agg_param_props';
@@ -68,8 +73,8 @@ describe('MetricAggParamEditor', () => {
     defaultProps = {
       agg,
       showValidation: false,
-      setValue: jest.fn(),
-      setValidity: jest.fn(),
+      setValue: vi.fn(),
+      setValidity: vi.fn(),
     };
   });
 

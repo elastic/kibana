@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useUserPermissions } from './use_user_permissions';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
-jest.mock('../cases_context/use_cases_context');
-const mockUseCasesContext = useCasesContext as jest.Mock;
+vi.mock('../cases_context/use_cases_context');
+const mockUseCasesContext = useCasesContext as Mock;
 
 describe('useUserPermissions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('canUpdate permission', () => {

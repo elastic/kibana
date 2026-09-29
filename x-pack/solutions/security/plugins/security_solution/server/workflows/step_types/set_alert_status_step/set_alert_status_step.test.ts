@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { setAlertStatusStepDefinition } from './set_alert_status_step';
 import { ExecutionError } from '@kbn/workflows/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -17,17 +20,17 @@ const createMockContext = (input: Record<string, unknown>) => {
     config: {},
     rawInput: input,
     contextManager: {
-      getContext: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn(),
-      getFakeRequest: jest.fn(),
-      callKibanaApi: jest.fn(),
+      getContext: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn(),
+      getFakeRequest: vi.fn(),
+      callKibanaApi: vi.fn(),
     },
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
@@ -37,7 +40,7 @@ const createMockContext = (input: Record<string, unknown>) => {
 
 describe('setAlertStatusStepDefinition', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('handler', () => {
@@ -47,7 +50,7 @@ describe('setAlertStatusStepDefinition', () => {
         status: 'closed',
         close_reason: 'false_positive',
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+      (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
         status: 200,
         body: {},
       });
@@ -76,7 +79,7 @@ describe('setAlertStatusStepDefinition', () => {
         alert_ids: ['alert-1', 'alert-2'],
         status: 'acknowledged',
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+      (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
         status: 200,
         body: {},
       });
@@ -101,7 +104,7 @@ describe('setAlertStatusStepDefinition', () => {
 
     it('persists only status (not the raw body/headers) when callKibanaApi throws on a non-2xx', async () => {
       const mockContext = createMockContext({ alert_ids: 'alert-1', status: 'open' });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      (mockContext.contextManager.callKibanaApi as Mock).mockRejectedValue(
         new KibanaApiCallError({
           status: 500,
           headers: { 'x-leaky-header': 'header-value' },
@@ -125,7 +128,7 @@ describe('setAlertStatusStepDefinition', () => {
 
     it('should throw ExecutionError if API call throws a generic error', async () => {
       const mockContext = createMockContext({ alert_ids: 'alert-1', status: 'open' });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      (mockContext.contextManager.callKibanaApi as Mock).mockRejectedValue(
         new Error('Network error')
       );
 

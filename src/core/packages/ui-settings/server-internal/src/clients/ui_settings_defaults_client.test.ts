@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -18,7 +20,7 @@ const logger = loggingSystemMock.create().get();
 const chance = new Chance();
 
 describe('ui settings defaults', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('#getUserProvided()', () => {
     it('only returns overridden values', async () => {
@@ -86,7 +88,7 @@ describe('ui settings defaults', () => {
     });
 
     it('pass down the context object to the getValue() handler', async () => {
-      const getValue = jest.fn().mockResolvedValue('default foo');
+      const getValue = vi.fn().mockResolvedValue('default foo');
       const defaults = {
         foo: {
           schema: schema.string(),
@@ -150,7 +152,7 @@ describe('ui settings defaults', () => {
     });
 
     it('pass down the context object to the getValue() handler', async () => {
-      const getValue = jest.fn().mockResolvedValue('default foo');
+      const getValue = vi.fn().mockResolvedValue('default foo');
       const defaults = {
         foo: {
           schema: schema.string(),

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -14,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 import { FeedbackContainer } from './feedback_container';
 
 const mockProps = {
-  getQuestions: jest.fn().mockResolvedValue([
+  getQuestions: vi.fn().mockResolvedValue([
     {
       id: 'experience',
       type: 'experience',
@@ -23,18 +25,18 @@ const mockProps = {
     },
     { id: 'improvement', type: 'text', question: 'What can we improve?', order: 2 },
   ]),
-  getAppDetails: jest
+  getAppDetails: vi
     .fn()
     .mockReturnValue({ title: 'Test App', id: 'test-app', url: 'http://testapp.com' }),
-  getCurrentUserEmail: jest.fn().mockResolvedValue(undefined),
-  sendFeedback: jest.fn().mockResolvedValue(undefined),
-  showToast: jest.fn(),
-  hideFeedbackContainer: jest.fn(),
+  getCurrentUserEmail: vi.fn().mockResolvedValue(undefined),
+  sendFeedback: vi.fn().mockResolvedValue(undefined),
+  showToast: vi.fn(),
+  hideFeedbackContainer: vi.fn(),
 };
 
 describe('FeedbackContainer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render container', async () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { useIndicateRelatedPanelsSelector } from './use_indicate_related_panels_selector';
@@ -19,7 +21,7 @@ const createMockParentApi = ({
   const mock = {
     viewMode$: new BehaviorSubject<'view' | 'edit'>('edit'),
     relatedPanelsIndicatorId$: new BehaviorSubject<string | undefined>(relatedPanelsIndicatorId),
-    setRelatedPanelsIndicatorId: jest.fn((id?: string) => {
+    setRelatedPanelsIndicatorId: vi.fn((id?: string) => {
       mock.relatedPanelsIndicatorId$.next(id);
     }),
   };
@@ -50,12 +52,12 @@ const createMockApi = ({
 describe('useIndicateRelatedPanelsSelector', () => {
   beforeEach(() => {
     mockParentApi = createMockParentApi();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('when api does not publish related panels', () => {
     it('should not subscribe to parent relatedPanelsIndicatorId$', () => {
-      const subscribeSpy = jest.spyOn(mockParentApi.relatedPanelsIndicatorId$, 'subscribe');
+      const subscribeSpy = vi.spyOn(mockParentApi.relatedPanelsIndicatorId$, 'subscribe');
       const api = createMockApi({ publishesRelatedPanels: false });
 
       renderHook(() => useIndicateRelatedPanelsSelector(api));

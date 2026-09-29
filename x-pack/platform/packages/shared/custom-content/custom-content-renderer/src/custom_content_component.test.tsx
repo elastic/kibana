@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentComponent } from './custom_content_component';
 import type { CustomContentRendererServices } from './types';
 
-jest.mock('./use_custom_content_html', () => ({ useCustomContentHtml: jest.fn() }));
+vi.mock('./use_custom_content_html', () => {
+      const mocked = { useCustomContentHtml: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCustomContentHtml = useCustomContentHtml as jest.MockedFunction<
+const mockUseCustomContentHtml = useCustomContentHtml as MockedFunction<
   typeof useCustomContentHtml
 >;
 
@@ -30,11 +36,11 @@ const defaultProps = {
   filters: undefined,
   esqlVariables: undefined,
   previewHtml: null,
-  onLoadingChange: jest.fn(),
+  onLoadingChange: vi.fn(),
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseCustomContentHtml.mockReturnValue({
     html: '<p>hi</p>',
     isLoading: false,
@@ -52,7 +58,7 @@ describe('CustomContentComponent', () => {
   });
 
   it('reports loading state to the panel', () => {
-    const onLoadingChange = jest.fn();
+    const onLoadingChange = vi.fn();
     mockUseCustomContentHtml.mockReturnValue({
       html: '',
       isLoading: true,

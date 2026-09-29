@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getImportExceptionsListItemSchemaDecodedMock } from '../../../../../common/schemas/request/import_exceptions_schema.mock';
 import { getExceptionListSchemaMock } from '../../../../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../common/schemas/response/exception_list_item_schema.mock';
 
 import { sortExceptionItemsToUpdateOrCreate } from './sort_exception_items_to_create_update';
 
-jest.mock('uuid', () => ({
-  v4: (): string => 'NEW_UUID',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: (): string => 'NEW_UUID',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('sort_exception_lists_items_to_create_update', () => {
   beforeEach(() =>
-    jest.spyOn(Date.prototype, 'toISOString').mockReturnValue('2021-12-07T09:13:51.888Z')
+    vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('2021-12-07T09:13:51.888Z')
   );
-  afterAll(() => jest.restoreAllMocks());
+  afterAll(() => vi.restoreAllMocks());
 
   describe('sortExceptionItemsToUpdateOrCreate', () => {
     describe('overwrite is false', () => {

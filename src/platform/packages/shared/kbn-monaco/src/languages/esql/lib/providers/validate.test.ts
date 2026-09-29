@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '../../../../monaco_imports';
 import { createDisposedTextModel, createIndexSource, createTextModel } from './test_helpers';
 import { esqlValidate } from './validate';
@@ -15,7 +17,7 @@ describe('esqlValidate', () => {
   describe('happy path', () => {
     it('returns validations wrapped as monaco messages', async () => {
       const callbacks = {
-        getSources: jest.fn(async () => [createIndexSource('logs')]),
+        getSources: vi.fn(async () => [createIndexSource('logs')]),
       };
 
       const model = createTextModel({ value: 'FROM missing' });

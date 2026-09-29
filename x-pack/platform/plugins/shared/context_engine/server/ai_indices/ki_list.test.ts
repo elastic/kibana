@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKis } from './ki_list';
@@ -40,7 +42,7 @@ const bucketsResponse = (rows: Array<[number, string]>) => ({
 });
 
 describe('ki_list', () => {
-  const query = jest.fn();
+  const query = vi.fn();
   const esClient = { esql: { query } } as unknown as ElasticsearchClient;
 
   // Call 0 is the schema probe; the numbered calls below are the list queries after it.

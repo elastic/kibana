@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import type { SyntheticsUrlParams } from '../utils/url_params/get_supported_url_params';
@@ -26,12 +29,12 @@ describe('useMonitorsSortedByStatus', () => {
     isServiceManaged: true,
   };
 
-  let useGetUrlParamsSpy: jest.SpyInstance<SyntheticsUrlParams>;
+  let useGetUrlParamsSpy: MockInstance<SyntheticsUrlParams>;
 
   beforeEach(() => {
-    useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
+    useGetUrlParamsSpy = vi.spyOn(URL, 'useGetUrlParams');
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const WrapperWithState = ({

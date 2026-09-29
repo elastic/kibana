@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ExitConditionBranchNode, ExitIfNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitConditionBranchNodeImpl } from '../exit_condition_branch_node_impl';
@@ -26,12 +28,12 @@ describe('ExitConditionBranchNodeImpl', () => {
       startNodeId: 'startBranchNode',
     };
     wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
-    wfExecutionRuntimeManagerMock.navigateToNode = jest.fn();
+    wfExecutionRuntimeManagerMock.navigateToNode = vi.fn();
 
     workflowGraphMock = {} as unknown as WorkflowGraph;
     impl = new ExitConditionBranchNodeImpl(node, workflowGraphMock, wfExecutionRuntimeManagerMock);
 
-    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([
+    workflowGraphMock.getDirectSuccessors = vi.fn().mockReturnValue([
       {
         id: 'exitIfNode',
         type: 'exit-if',
@@ -40,7 +42,7 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if there are multiple successors', () => {
-    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([
+    workflowGraphMock.getDirectSuccessors = vi.fn().mockReturnValue([
       { id: 'exitIfNode1', type: 'exit-if' },
       { id: 'exitIfNode2', type: 'exit-if' },
     ]);
@@ -51,7 +53,7 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if no successors', () => {
-    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([]);
+    workflowGraphMock.getDirectSuccessors = vi.fn().mockReturnValue([]);
 
     expect(() => impl.run()).toThrow(
       `ExitConditionBranchNode with id ${node.id} must have exactly one successor, but found 0.`
@@ -59,7 +61,7 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if successor is not exit-if', () => {
-    workflowGraphMock.getDirectSuccessors = jest
+    workflowGraphMock.getDirectSuccessors = vi
       .fn()
       .mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
     expect(() => impl.run()).toThrow(

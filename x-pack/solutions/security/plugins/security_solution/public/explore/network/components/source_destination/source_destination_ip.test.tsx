@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { get } from 'lodash/fp';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -36,9 +38,9 @@ import {
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../../common/components/link_to');
+vi.mock('../../../../common/components/link_to');
 
 describe('SourceDestinationIp', () => {
   describe('#isIpFieldPopulated', () => {

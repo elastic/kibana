@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { ChatEventType } from '@kbn/agent-builder-common';
@@ -86,9 +88,9 @@ const createMockEditor = (initialValue: string) => {
 
 const createMockProposalManager = () => {
   const manager = {
-    hasPendingProposals: jest.fn(() => false),
-    applyAfterYaml: jest.fn(),
-    getDiffHunks: jest.fn(() => []),
+    hasPendingProposals: vi.fn(() => false),
+    applyAfterYaml: vi.fn(),
+    getDiffHunks: vi.fn(() => []),
   } as unknown as ProposalManager;
   return { manager };
 };
@@ -204,7 +206,7 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
     const tracker = new ProposalTracker();
     const { manager } = createMockProposalManager();
 
-    const onProposalReceived = jest.fn();
+    const onProposalReceived = vi.fn();
 
     const bridge = new AttachmentBridge();
     bridge.start(manager, editorRef, tracker, {
@@ -240,7 +242,7 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
     const tracker = new ProposalTracker();
     const { manager } = createMockProposalManager();
 
-    const onProposalReceived = jest.fn();
+    const onProposalReceived = vi.fn();
 
     const bridge = new AttachmentBridge();
     bridge.start(manager, editorRef, tracker, {

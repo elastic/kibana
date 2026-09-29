@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -65,11 +67,11 @@ const Wrapper: React.FC<{
 
 describe('BuilderRecoveryForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null when recovery config is not set and no valid alert conditions exist', () => {
-    const setBuilderState = jest.fn();
+    const setBuilderState = vi.fn();
     const builderState = makeBuilderState({
       alertConditions: [{ id: '1', metric: '', comparator: Comparator.GT, threshold: [] }],
       recovery: undefined,
@@ -96,7 +98,7 @@ describe('BuilderRecoveryForm', () => {
     });
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         {renderRecoveryForm()}
       </Wrapper>
     );
@@ -120,7 +122,7 @@ describe('BuilderRecoveryForm', () => {
     });
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         {renderRecoveryForm()}
       </Wrapper>
     );
@@ -139,7 +141,7 @@ describe('BuilderRecoveryForm', () => {
     });
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         {renderRecoveryForm()}
       </Wrapper>
     );
@@ -148,7 +150,7 @@ describe('BuilderRecoveryForm', () => {
   });
 
   it('calls setBuilderState when add condition button is clicked', () => {
-    const setBuilderState = jest.fn();
+    const setBuilderState = vi.fn();
     const builderState = makeBuilderState({
       recovery: {
         conditions: [{ id: '1', metric: 'count', comparator: Comparator.LTE, threshold: [100] }],
@@ -170,7 +172,7 @@ describe('BuilderRecoveryForm', () => {
   });
 
   it('calls setBuilderState when remove condition button is clicked', () => {
-    const setBuilderState = jest.fn();
+    const setBuilderState = vi.fn();
     const builderState = makeBuilderState({
       recovery: {
         conditions: [
@@ -195,7 +197,7 @@ describe('BuilderRecoveryForm', () => {
   });
 
   it('seeds a newly added recovery condition with a currently valid metric after a stat rename', () => {
-    const setBuilderState = jest.fn();
+    const setBuilderState = vi.fn();
     const builderState = makeBuilderState({
       stats: [{ id: 'stat-1', label: 'my_metric', aggregation: Aggregation.COUNT }],
       recovery: {
@@ -221,7 +223,7 @@ describe('BuilderRecoveryForm', () => {
   });
 
   it('derives recovery conditions from alert conditions on init', () => {
-    const setBuilderState = jest.fn();
+    const setBuilderState = vi.fn();
     const builderState = makeBuilderState({
       alertConditions: [{ id: '1', metric: 'count', comparator: Comparator.GT, threshold: [100] }],
       recovery: undefined,

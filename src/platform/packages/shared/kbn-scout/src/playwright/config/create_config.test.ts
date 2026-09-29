@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Project } from '@playwright/test';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import {
@@ -22,20 +25,23 @@ import { createPlaywrightConfig } from './create_config';
 // runtime `Project` interface used in expectations; cast to access it in assertions.
 type PlaywrightProject = Project & { teardown?: string };
 
-jest.mock('@kbn/scout-reporting', () => ({
-  ...jest.requireActual('@kbn/scout-reporting'),
-  generateTestRunId: jest.fn(),
-  scoutPlaywrightReporter: jest.fn(),
-  scoutFailedTestsReporter: jest.fn(),
-  scoutFailureSummaryReporter: jest.fn(),
-}));
+vi.mock('@kbn/scout-reporting', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/scout-reporting')),
+      generateTestRunId: vi.fn(),
+      scoutPlaywrightReporter: vi.fn(),
+      scoutFailedTestsReporter: vi.fn(),
+      scoutFailureSummaryReporter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createPlaywrightConfig', () => {
   const mockedRunId = 'mocked-run-id';
-  const mockGenerateTestRunId = generateTestRunId as jest.Mock;
-  const mockedScoutPlaywrightReporter = scoutPlaywrightReporter as jest.Mock;
-  const mockedScoutFailedTestsReporter = scoutFailedTestsReporter as jest.Mock;
-  const mockedScoutFailureSummaryReporter = scoutFailureSummaryReporter as jest.Mock;
+  const mockGenerateTestRunId = generateTestRunId as Mock;
+  const mockedScoutPlaywrightReporter = scoutPlaywrightReporter as Mock;
+  const mockedScoutFailedTestsReporter = scoutFailedTestsReporter as Mock;
+  const mockedScoutFailureSummaryReporter = scoutFailureSummaryReporter as Mock;
 
   const originalCI = process.env.CI;
   const originalRetries = process.env.SCOUT_TEST_RETRIES;
@@ -50,7 +56,7 @@ describe('createPlaywrightConfig', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delete process.env.TEST_RUN_ID;
     delete process.env.CI;
     delete process.env.SCOUT_TEST_RETRIES;

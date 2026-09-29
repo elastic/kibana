@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -135,7 +137,7 @@ describe('Test discover app state', () => {
 
     it('should call setProfileAppStateDefaultFieldsToReset correctly with initial columns', async () => {
       const stateStorage = createKbnUrlStateStorage();
-      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      const stateStorageGetSpy = vi.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
       const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
       expect(getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
@@ -151,7 +153,7 @@ describe('Test discover app state', () => {
 
     it('should call setProfileAppStateDefaultFieldsToReset correctly with initial rowHeight', async () => {
       const stateStorage = createKbnUrlStateStorage();
-      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      const stateStorageGetSpy = vi.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
       const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
       expect(getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
@@ -167,7 +169,7 @@ describe('Test discover app state', () => {
 
     it('should call setProfileAppStateDefaultFieldsToReset correctly with initial hide chart', async () => {
       const stateStorage = createKbnUrlStateStorage();
-      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      const stateStorageGetSpy = vi.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ hideChart: true });
       const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
       expect(getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
@@ -183,7 +185,7 @@ describe('Test discover app state', () => {
 
     it('should reset only hideSidebar for persisted Discover session state not set in the URL', async () => {
       const stateStorage = createKbnUrlStateStorage();
-      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      const stateStorageGetSpy = vi.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'], rowHeight: 5 });
       const { initializeSingleTab, getCurrentTab } = await setupNoTab({
         persistedDiscoverSession: getPersistedDiscoverSession({ services: discoverServiceMock }),
@@ -208,7 +210,7 @@ describe('Test discover app state', () => {
 
     it('should not reset hideSidebar for persisted Discover session state set in the URL', async () => {
       const stateStorage = createKbnUrlStateStorage();
-      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      const stateStorageGetSpy = vi.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ hideSidebar: true });
       const { initializeSingleTab, getCurrentTab } = await setupNoTab({
         persistedDiscoverSession: getPersistedDiscoverSession({ services: discoverServiceMock }),

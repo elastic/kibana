@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockDatasource } from '../../../mocks';
 import type { OperationDescriptor, DatasourcePublicAPI } from '@kbn/lens-common';
@@ -62,28 +64,28 @@ describe('hasNumericHistogramDimension', () => {
     first: createMockDatasource('test').publicAPIMock,
   };
   it('should return true if a numeric histogram is present', () => {
-    datasourceLayers.first.getOperationForColumnId = jest.fn(
+    datasourceLayers.first.getOperationForColumnId = vi.fn(
       () => ({ isBucketed: true, scale: 'interval', dataType: 'number' } as OperationDescriptor)
     );
     expect(hasNumericHistogramDimension(datasourceLayers.first, 'columnId')).toBeTruthy();
   });
 
   it('should return false if a date histogram is present', () => {
-    datasourceLayers.first.getOperationForColumnId = jest.fn(
+    datasourceLayers.first.getOperationForColumnId = vi.fn(
       () => ({ isBucketed: true, scale: 'interval', dataType: 'date' } as OperationDescriptor)
     );
     expect(hasNumericHistogramDimension(datasourceLayers.first, 'columnId')).toBeFalsy();
   });
 
   it('should return false for ordinal types', () => {
-    datasourceLayers.first.getOperationForColumnId = jest.fn(
+    datasourceLayers.first.getOperationForColumnId = vi.fn(
       () => ({ isBucketed: true, scale: 'ordinal', dataType: 'number' } as OperationDescriptor)
     );
     expect(hasNumericHistogramDimension(datasourceLayers.first, 'columnId')).toBeFalsy();
   });
 
   it('should return false for no dimension', () => {
-    datasourceLayers.first.getOperationForColumnId = jest.fn(
+    datasourceLayers.first.getOperationForColumnId = vi.fn(
       () => ({ isBucketed: true, scale: 'ordinal', dataType: 'number' } as OperationDescriptor)
     );
     expect(hasNumericHistogramDimension(datasourceLayers.first)).toBeFalsy();

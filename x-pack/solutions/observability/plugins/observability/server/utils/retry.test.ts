@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-jest.mock('timers/promises');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('timers/promises');
 import { setTimeout } from 'timers/promises';
 import { loggerMock } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { retryTransientEsErrors } from './retry';
 
-const setTimeoutMock = setTimeout as jest.Mock<
+const setTimeoutMock = setTimeout as Mock<
   ReturnType<typeof setTimeout>,
   Parameters<typeof setTimeout>
 >;
@@ -23,14 +26,14 @@ describe('retryTransientErrors', () => {
   });
 
   it("doesn't retry if operation is successful", async () => {
-    const esCallMock = jest.fn().mockResolvedValue('success');
+    const esCallMock = vi.fn().mockResolvedValue('success');
     expect(await retryTransientEsErrors(esCallMock)).toEqual('success');
     expect(esCallMock).toHaveBeenCalledTimes(1);
   });
 
   it('logs an warning message on retry', async () => {
     const logger = loggerMock.create();
-    const esCallMock = jest
+    const esCallMock = vi
       .fn()
       .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
       .mockResolvedValue('success');
@@ -44,7 +47,7 @@ describe('retryTransientErrors', () => {
 
   it('retries with an exponential backoff', async () => {
     let attempt = 0;
-    const esCallMock = jest.fn(async () => {
+    const esCallMock = vi.fn(async () => {
       attempt++;
       if (attempt < 5) {
         throw new EsErrors.ConnectionError('foo');
@@ -72,7 +75,7 @@ describe('retryTransientErrors', () => {
     ];
 
     for (const error of errors) {
-      const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
+      const esCallMock = vi.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
       expect(await retryTransientEsErrors(esCallMock)).toEqual('success');
       expect(esCallMock).toHaveBeenCalledTimes(2);
     }
@@ -80,7 +83,7 @@ describe('retryTransientErrors', () => {
 
   it('does not retry unsupported errors', async () => {
     const error = new Error('foo!');
-    const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
+    const esCallMock = vi.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
     await expect(retryTransientEsErrors(esCallMock)).rejects.toThrow(error);
     expect(esCallMock).toHaveBeenCalledTimes(1);
   });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import { childrenUnsavedChanges$, DEBOUNCE_TIME } from './children_unsaved_changes';
 import { waitFor } from '@testing-library/react';
@@ -21,7 +23,7 @@ describe('childrenUnsavedChanges$', () => {
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
   };
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
-  const onFireMock = jest.fn();
+  const onFireMock = vi.fn();
 
   beforeEach(() => {
     onFireMock.mockReset();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper, ComponentType } from 'enzyme';
 import { mount } from 'enzyme';
@@ -23,7 +25,7 @@ describe('ConnectorsDropdown', () => {
     disabled: false,
     connectors,
     isLoading: false,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     selectedConnector: 'none',
   };
 

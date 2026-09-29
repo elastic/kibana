@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -17,7 +19,7 @@ import {
 import { translations } from './install_knowledge_base.translations';
 
 describe('InstallKnowledgeBase', () => {
-  const onInstallKnowledgeBase = jest.fn();
+  const onInstallKnowledgeBase = vi.fn();
 
   const renderComponent = (props: InstallKnowledgeBaseProps) =>
     render(<InstallKnowledgeBase {...props} />, { wrapper: EuiThemeProvider });

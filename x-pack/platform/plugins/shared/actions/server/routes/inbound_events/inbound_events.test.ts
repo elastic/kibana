@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import {
@@ -18,12 +21,12 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { inboundEventsRoute } from './inbound_events';
 
 describe('inboundEventsRoute', () => {
-  const getSpaceId = jest.fn().mockReturnValue('default');
+  const getSpaceId = vi.fn().mockReturnValue('default');
 
   const registerRoute = (client: InboundEventsClient) => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.post as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     inboundEventsRoute({
       router,
@@ -36,7 +39,7 @@ describe('inboundEventsRoute', () => {
   };
 
   it('registers a public versioned POST route', () => {
-    const ingest = jest.fn();
+    const ingest = vi.fn();
     const { router, addVersionMock } = registerRoute({ ingest });
 
     expect(INBOUND_EVENTS_API_PATH).toBe('/api/actions/events/{connector_type_id}/{connector_id}');
@@ -78,7 +81,7 @@ describe('inboundEventsRoute', () => {
   });
 
   it('maps accepted ingest results to 202', async () => {
-    const ingest = jest.fn().mockResolvedValue({ status: 'accepted', body: { ok: true } });
+    const ingest = vi.fn().mockResolvedValue({ status: 'accepted', body: { ok: true } });
     const { addVersionMock } = registerRoute({ ingest });
     const handler = addVersionMock.mock.calls[0][1];
 
@@ -104,7 +107,7 @@ describe('inboundEventsRoute', () => {
   });
 
   it('maps forbidden ingest results to 403', async () => {
-    const ingest = jest
+    const ingest = vi
       .fn()
       .mockResolvedValue({ status: 'forbidden', body: INBOUND_EVENTS_DISABLED_MESSAGE });
     const { addVersionMock } = registerRoute({ ingest });
@@ -121,7 +124,7 @@ describe('inboundEventsRoute', () => {
   });
 
   it('maps not_found ingest results to 404', async () => {
-    const ingest = jest.fn().mockResolvedValue({ status: 'not_found' });
+    const ingest = vi.fn().mockResolvedValue({ status: 'not_found' });
     const { addVersionMock } = registerRoute({ ingest });
     const handler = addVersionMock.mock.calls[0][1];
 

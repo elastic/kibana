@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { isNotEmptyCondition } from '../../../common/domain/definitions/common_fields';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import {
@@ -16,12 +19,15 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import { BadCRUDRequestError } from '../errors';
 import { validateAndTransformDoc, validateDocIdentification } from './utils';
 
-jest.mock('../../../common/domain/definitions/registry', () => ({
-  ...jest.requireActual('../../../common/domain/definitions/registry'),
-  getEntityDefinition: jest.fn(),
-}));
+vi.mock('../../../common/domain/definitions/registry', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/domain/definitions/registry')),
+      getEntityDefinition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetEntityDefinition = getEntityDefinition as jest.MockedFunction<
+const mockGetEntityDefinition = getEntityDefinition as MockedFunction<
   typeof getEntityDefinition
 >;
 
@@ -49,7 +55,7 @@ const createDefinition = (type: EntityType, fields: EntityField[]): ManagedEntit
 
 describe('crud_client utils', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('validateDocIdentification', () => {

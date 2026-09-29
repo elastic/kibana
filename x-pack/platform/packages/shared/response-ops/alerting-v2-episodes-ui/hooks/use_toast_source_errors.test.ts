@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { EpisodeFetchErrorSurface } from '../types/episode_data_source';
 import { useToastSourceErrors } from './use_toast_source_errors';
@@ -14,7 +16,7 @@ const httpError = (status: number, message: string) =>
 
 describe('useToastSourceErrors', () => {
   it('names the v2 source in the list toast title', () => {
-    const addError = jest.fn();
+    const addError = vi.fn();
     const error = new Error('v2 failed');
 
     renderHook(() => useToastSourceErrors([{ sourceId: 'v2', error }], { addError }, 'list'));
@@ -26,7 +28,7 @@ describe('useToastSourceErrors', () => {
   });
 
   it('names the v1 source in the list toast title', () => {
-    const addError = jest.fn();
+    const addError = vi.fn();
     const error = new Error('classic failed');
 
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'list'));
@@ -37,7 +39,7 @@ describe('useToastSourceErrors', () => {
   });
 
   it('names each failing source on the KPIs surface', () => {
-    const addError = jest.fn();
+    const addError = vi.fn();
     const classicError = new Error('classic kpis failed');
     const v2Error = new Error('v2 kpis failed');
 
@@ -62,7 +64,7 @@ describe('useToastSourceErrors', () => {
   });
 
   it('names the failing source on the histogram surface', () => {
-    const addError = jest.fn();
+    const addError = vi.fn();
     const error = new Error('classic histogram failed');
 
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'histogram'));
@@ -77,7 +79,7 @@ describe('useToastSourceErrors', () => {
     ['kpis', 'Failed to fetch KPIs for custom alerts'],
     ['histogram', 'Failed to fetch histogram data for custom alerts'],
   ])('names a custom source on the %s surface', (surface, expectedTitle) => {
-    const addError = jest.fn();
+    const addError = vi.fn();
     const error = new Error(`custom ${surface} failed`);
 
     renderHook(() => useToastSourceErrors([{ sourceId: 'custom', error }], { addError }, surface));
@@ -86,7 +88,7 @@ describe('useToastSourceErrors', () => {
   });
 
   it('does not toast 403 or 503 errors', () => {
-    const addError = jest.fn();
+    const addError = vi.fn();
 
     renderHook(() =>
       useToastSourceErrors(
@@ -111,7 +113,7 @@ describe('useToastSourceErrors', () => {
   });
 
   it('toasts on every refetch while the error persists', () => {
-    const addError = jest.fn();
+    const addError = vi.fn();
     const { rerender } = renderHook(
       ({ errors }) => useToastSourceErrors(errors, { addError }, 'list'),
       { initialProps: { errors: [{ sourceId: 'v2', error: httpError(500, 'first') }] } }

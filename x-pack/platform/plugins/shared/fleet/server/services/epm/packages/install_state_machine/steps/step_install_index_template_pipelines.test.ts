@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -24,31 +27,34 @@ import { optimisticallyAddEsAssetReferences } from '../../es_assets_reference';
 import { deletePrerequisiteAssets, cleanupComponentTemplate } from '../../remove';
 import { generateESIndexPatterns } from '../../../elasticsearch/template/template';
 
-jest.mock('../../install_index_template_pipeline');
-jest.mock('../../es_assets_reference');
-jest.mock('../../remove', () => {
+vi.mock('../../install_index_template_pipeline');
+vi.mock('../../es_assets_reference');
+vi.mock('../../remove', async () => {
   return {
-    ...jest.requireActual('../../remove'),
-    deletePrerequisiteAssets: jest.fn(),
-    cleanupComponentTemplate: jest.fn(),
+    ...(await vi.importActual('../../remove')),
+    deletePrerequisiteAssets: vi.fn(),
+    cleanupComponentTemplate: vi.fn(),
   };
 });
-jest.mock('../../../elasticsearch/template/template', () => ({
-  generateESIndexPatterns: jest.fn((dataStreams) => {
-    const result: Record<string, string> = {};
-    for (const ds of dataStreams) {
-      result[ds.path] = `${ds.type}-${ds.path}-*`;
-    }
-    return result;
-  }),
-}));
-const mockCleanupComponentTemplate = cleanupComponentTemplate as jest.MockedFunction<
+vi.mock('../../../elasticsearch/template/template', () => {
+      const mocked = {
+      generateESIndexPatterns: vi.fn((dataStreams) => {
+        const result: Record<string, string> = {};
+        for (const ds of dataStreams) {
+          result[ds.path] = `${ds.type}-${ds.path}-*`;
+        }
+        return result;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockCleanupComponentTemplate = cleanupComponentTemplate as MockedFunction<
   typeof cleanupComponentTemplate
 >;
-const mockDeletePrerequisiteAssets = deletePrerequisiteAssets as jest.MockedFunction<
+const mockDeletePrerequisiteAssets = deletePrerequisiteAssets as MockedFunction<
   typeof deletePrerequisiteAssets
 >;
-const mockedGenerateESIndexPatterns = generateESIndexPatterns as jest.MockedFunction<
+const mockedGenerateESIndexPatterns = generateESIndexPatterns as MockedFunction<
   typeof generateESIndexPatterns
 >;
 
@@ -59,11 +65,11 @@ import {
   cleanupIndexTemplatePipelinesStep,
 } from './step_install_index_template_pipelines';
 const mockedInstallIndexTemplatesAndPipelines =
-  installIndexTemplatesAndPipelines as jest.MockedFunction<
+  installIndexTemplatesAndPipelines as MockedFunction<
     typeof installIndexTemplatesAndPipelines
   >;
-let soClient: jest.Mocked<SavedObjectsClientContract>;
-let esClient: jest.Mocked<ElasticsearchClient>;
+let soClient: Mocked<SavedObjectsClientContract>;
+let esClient: Mocked<ElasticsearchClient>;
 
 describe('stepInstallIndexTemplatePipelines', () => {
   const getMockInstalledPackageSo = (
@@ -93,8 +99,8 @@ describe('stepInstallIndexTemplatePipelines', () => {
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
-    jest.mocked(mockedInstallIndexTemplatesAndPipelines).mockReset();
-    jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
+    vi.mocked(mockedInstallIndexTemplatesAndPipelines).mockReset();
+    vi.mocked(optimisticallyAddEsAssetReferences).mockReset();
     mockedGenerateESIndexPatterns.mockClear();
   });
 
@@ -175,7 +181,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
     const res = await stepInstallIndexTemplatePipelines({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -339,7 +345,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
     const res = await stepInstallIndexTemplatePipelines({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -453,7 +459,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
     await stepInstallIndexTemplatePipelines({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -575,7 +581,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
     await stepInstallIndexTemplatePipelines({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -654,7 +660,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
     await stepInstallIndexTemplatePipelines({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -712,7 +718,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         esReferences: standardRefs,
       });
 
-      jest
+      vi
         .mocked(optimisticallyAddEsAssetReferences)
         .mockResolvedValue(updatedRefsWithCustom as any);
 
@@ -732,7 +738,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       const result = await stepInstallIndexTemplatePipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: makeIntegrationContext(dataStreams),
@@ -753,7 +759,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       expect(secondCall.customDataStreamOriginDataset).toBe('test-package.access');
       expect(secondCall.customDataStreamOriginType).toBe('logs');
 
-      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
+      expect(vi.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
         soClient,
         'test-package',
         [],
@@ -770,7 +776,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         installedTemplates: [],
         esReferences: [],
       });
-      jest.mocked(optimisticallyAddEsAssetReferences).mockResolvedValue([]);
+      vi.mocked(optimisticallyAddEsAssetReferences).mockResolvedValue([]);
 
       const mockInstalledPackageSo = getMockInstalledPackageSo([
         {
@@ -786,7 +792,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       await stepInstallIndexTemplatePipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext,
@@ -823,7 +829,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       await stepInstallIndexTemplatePipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: makeIntegrationContext(dataStreams),
@@ -857,7 +863,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       await stepInstallIndexTemplatePipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: makeIntegrationContext(dataStreams),
@@ -895,7 +901,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       const result = await stepInstallIndexTemplatePipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger,
         packageInstallContext: makeIntegrationContext(dataStreams),
@@ -923,7 +929,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       await stepInstallIndexTemplatePipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: makeIntegrationContext(dataStreams),
@@ -974,7 +980,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
     await stepInstallIndexTemplatePipelines({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -1084,7 +1090,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
     await cleanupIndexTemplatePipelinesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -1142,7 +1148,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
     await cleanupIndexTemplatePipelinesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -1170,7 +1176,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
     await cleanupIndexTemplatePipelinesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -1196,7 +1202,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
     await cleanupIndexTemplatePipelinesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -1223,7 +1229,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
     await cleanupIndexTemplatePipelinesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,

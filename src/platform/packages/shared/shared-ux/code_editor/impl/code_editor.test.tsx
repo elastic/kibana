@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -18,13 +21,13 @@ import { MockedMonacoEditor, mockedEditorInstance } from '@kbn/code-editor-mock/
 
 import { CodeEditor } from './code_editor';
 
-jest.mock('./react_monaco_editor', () => {
+vi.mock('./react_monaco_editor', () => {
   return { MonacoEditor: MockedMonacoEditor };
 });
 
 // Mock the htmlIdGenerator to generate predictable ids for snapshot tests
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -56,15 +59,15 @@ describe('<CodeEditor />', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: jest.fn().mockImplementation((query) => ({
+      value: vi.fn().mockImplementation((query) => ({
         matches: false,
         media: query,
         onchange: null,
-        addListener: jest.fn(), // deprecated
-        removeListener: jest.fn(), // deprecated
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
+        addListener: vi.fn(), // deprecated
+        removeListener: vi.fn(), // deprecated
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
       })),
     });
 
@@ -84,9 +87,9 @@ describe('<CodeEditor />', () => {
       }),
     };
 
-    const editorWillMount = jest.fn();
+    const editorWillMount = vi.fn();
 
-    monaco.languages.onLanguage = jest.fn((languageId, func) => {
+    monaco.languages.onLanguage = vi.fn((languageId, func) => {
       expect(languageId).toBe('loglang');
 
       // Call the function immediately so we can see our providers
@@ -94,11 +97,11 @@ describe('<CodeEditor />', () => {
       func();
     }) as any;
 
-    monaco.languages.registerCompletionItemProvider = jest.fn();
-    monaco.languages.registerSignatureHelpProvider = jest.fn();
-    monaco.languages.registerHoverProvider = jest.fn();
+    monaco.languages.registerCompletionItemProvider = vi.fn();
+    monaco.languages.registerSignatureHelpProvider = vi.fn();
+    monaco.languages.registerHoverProvider = vi.fn();
 
-    monaco.editor.defineTheme = jest.fn();
+    monaco.editor.defineTheme = vi.fn();
 
     renderWithI18n(
       <CodeEditor
@@ -118,11 +121,11 @@ describe('<CodeEditor />', () => {
     // expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(2)
 
     // Verify our language features have been registered
-    expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
-    expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(
+    expect((monaco.languages.onLanguage as Mock).mock.calls.length).toBe(1);
+    expect((monaco.languages.registerCompletionItemProvider as Mock).mock.calls.length).toBe(
       1
     );
-    expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
+    expect((monaco.languages.registerHoverProvider as Mock).mock.calls.length).toBe(1);
   });
 
   describe('hint element', () => {

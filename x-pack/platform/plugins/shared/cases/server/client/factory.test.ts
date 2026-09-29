@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -14,7 +17,7 @@ import { createCasesClient } from './client';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
-jest.mock('./client');
+vi.mock('./client');
 
 describe('CasesClientFactory', () => {
   const coreStart = coreMock.createStart();
@@ -25,7 +28,7 @@ describe('CasesClientFactory', () => {
   };
 
   const fakeRequest = kibanaRequestFactory(rawRequest);
-  const createCasesClientMocked = createCasesClient as jest.Mock;
+  const createCasesClientMocked = createCasesClient as Mock;
   const logger = loggingSystemMock.createLogger();
   const args = createCasesClientFactoryMockArgs();
   let casesClientFactory: CasesClientFactory;
@@ -35,7 +38,7 @@ describe('CasesClientFactory', () => {
   beforeEach(() => {
     casesClientFactory = new CasesClientFactory(logger);
     casesClientFactory.initialize(args);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('propagates the client source to the cases client', async () => {

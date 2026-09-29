@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -14,16 +17,16 @@ import { CustomFilterRenderer } from './custom_filter_renderer';
 import { defineContentListFilter } from './filters';
 import { useClientFilterCounts } from './use_client_filter_counts';
 
-jest.mock('./use_client_filter_counts');
+vi.mock('./use_client_filter_counts');
 
-const mockUseClientFilterCounts = useClientFilterCounts as jest.Mock;
+const mockUseClientFilterCounts = useClientFilterCounts as Mock;
 
 type TypedItem = UserContentCommonSchema & { typeTitle?: string };
 
 describe('CustomFilterRenderer', () => {
   const openPopover = () => fireEvent.click(screen.getByTestId('testFilter'));
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('derives options from live facet counts when the dimension has no static options', () => {
     const dimension = defineContentListFilter<TypedItem>({

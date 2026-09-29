@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EditableMarkdownRefObject } from '../markdown_editor';
 import { getDescriptionPreview, getDraftDescription, isCommentRef } from './utils';
 
@@ -74,7 +76,7 @@ describe('utils', () => {
     });
 
     it('returns true when setComment is defined', () => {
-      const ref: EditableMarkdownRefObject = { setComment: jest.fn() };
+      const ref: EditableMarkdownRefObject = { setComment: vi.fn() };
       expect(isCommentRef(ref)).toBe(true);
     });
   });

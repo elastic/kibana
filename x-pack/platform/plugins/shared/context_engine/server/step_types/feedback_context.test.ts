@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
@@ -14,9 +16,9 @@ import { InvalidSignalWindowError } from '../feedback_analysis/errors';
 import { getFeedbackContextStepDefinition } from './feedback_context';
 import { createMockStepContext, mockKiStepTelemetry } from './test_utils';
 
-jest.mock('../feedback_analysis/context');
+vi.mock('../feedback_analysis/context');
 
-const buildFeedbackContextMock = jest.mocked(buildFeedbackContext);
+const buildFeedbackContextMock = vi.mocked(buildFeedbackContext);
 
 const CONTEXT = {
   agent_id: 'analysis-agent',
@@ -48,7 +50,7 @@ const buildStep = ({
   });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   buildFeedbackContextMock.mockResolvedValue(CONTEXT);
 });
 
@@ -72,7 +74,7 @@ describe('getFeedbackContextStepDefinition', () => {
   });
 
   it('reads and writes as the workflow owner, not as Kibana', async () => {
-    const esClient = { search: jest.fn() };
+    const esClient = { search: vi.fn() };
     const context = createMockStepContext({ input: { ai_index_id: 'orders' }, esClient });
 
     await buildStep().handler(context);
@@ -138,14 +140,14 @@ describe('getFeedbackContextStepDefinition', () => {
   });
 
   it('uses the workflow space for the feature flag, improvements service, and feedback context', async () => {
-    const esClient = { search: jest.fn() };
+    const esClient = { search: vi.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'orders' },
       esClient,
       spaceId: 'marketing',
     });
-    const isContextEngineEnabled = jest.fn().mockResolvedValue(true);
-    const getImprovementsService = jest.fn().mockReturnValue(improvementsService);
+    const isContextEngineEnabled = vi.fn().mockResolvedValue(true);
+    const getImprovementsService = vi.fn().mockReturnValue(improvementsService);
 
     const { handler } = getFeedbackContextStepDefinition({
       getAiIndexService: () => aiIndexService,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { bindLocatorToHost, bindLocatorsToHost } from './bind_locators_to_host';
 import {
   createAlertingV2HostApp,
@@ -17,12 +19,12 @@ import type { LocatorPublic } from '@kbn/share-plugin/public';
 const createMockLocator = (): LocatorPublic<AlertingV2RulesLocatorParams> =>
   ({
     id: 'mock',
-    useUrl: jest.fn().mockReturnValue('/url'),
-    getUrl: jest.fn().mockResolvedValue('/url'),
-    getRedirectUrl: jest.fn().mockReturnValue('/url'),
-    navigate: jest.fn().mockResolvedValue(undefined),
-    navigateSync: jest.fn(),
-    getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
+    useUrl: vi.fn().mockReturnValue('/url'),
+    getUrl: vi.fn().mockResolvedValue('/url'),
+    getRedirectUrl: vi.fn().mockReturnValue('/url'),
+    navigate: vi.fn().mockResolvedValue(undefined),
+    navigateSync: vi.fn(),
+    getLocation: vi.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
   } as unknown as LocatorPublic<AlertingV2RulesLocatorParams>);
 
 const SEARCH_HOST = createAlertingV2HostApp('search', {

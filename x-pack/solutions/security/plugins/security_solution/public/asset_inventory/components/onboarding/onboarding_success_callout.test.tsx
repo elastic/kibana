@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { OnboardingSuccessCallout } from './onboarding_success_callout';
@@ -14,15 +17,15 @@ import { userEvent } from '@testing-library/user-event';
 import { mockUseOnboardingSuccessCallout } from './hooks/use_onboarding_success_callout.mock';
 import { useOnboardingSuccessCallout } from './hooks/use_onboarding_success_callout';
 
-jest.mock('./hooks/use_onboarding_success_callout');
+vi.mock('./hooks/use_onboarding_success_callout');
 
 describe('OnboardingSuccessCallout', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('does not render the callout when isCalloutVisible is false', () => {
-    (useOnboardingSuccessCallout as jest.Mock).mockReturnValue(mockUseOnboardingSuccessCallout());
+    (useOnboardingSuccessCallout as Mock).mockReturnValue(mockUseOnboardingSuccessCallout());
 
     renderWithTestProvider(<OnboardingSuccessCallout />);
 
@@ -30,7 +33,7 @@ describe('OnboardingSuccessCallout', () => {
   });
 
   it('renders the callout when isCalloutVisible is true', () => {
-    (useOnboardingSuccessCallout as jest.Mock).mockReturnValue(
+    (useOnboardingSuccessCallout as Mock).mockReturnValue(
       mockUseOnboardingSuccessCallout({ isOnboardingSuccessCalloutVisible: true })
     );
 
@@ -40,9 +43,9 @@ describe('OnboardingSuccessCallout', () => {
   });
 
   it('calls hideCallout when the callout is dismissed', async () => {
-    const mockHideCallout = jest.fn();
+    const mockHideCallout = vi.fn();
 
-    (useOnboardingSuccessCallout as jest.Mock).mockReturnValue(
+    (useOnboardingSuccessCallout as Mock).mockReturnValue(
       mockUseOnboardingSuccessCallout({
         hideOnboardingSuccessCallout: mockHideCallout,
         isOnboardingSuccessCalloutVisible: true,
@@ -59,9 +62,9 @@ describe('OnboardingSuccessCallout', () => {
   });
 
   it('should have an "Add integration" button that calls onAddIntegrationClick when clicked', async () => {
-    const mockAddIntegrationClick = jest.fn();
+    const mockAddIntegrationClick = vi.fn();
 
-    (useOnboardingSuccessCallout as jest.Mock).mockReturnValue(
+    (useOnboardingSuccessCallout as Mock).mockReturnValue(
       mockUseOnboardingSuccessCallout({
         isOnboardingSuccessCalloutVisible: true,
         onAddIntegrationClick: mockAddIntegrationClick,

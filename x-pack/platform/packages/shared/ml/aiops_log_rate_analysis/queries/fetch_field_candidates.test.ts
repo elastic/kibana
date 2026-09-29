@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { paramsSearchQueryMock } from './__mocks__/params_search_query';
@@ -16,7 +18,7 @@ import { fetchFieldCandidates } from './fetch_field_candidates';
 
 describe('fetchFieldCandidates', () => {
   it('returns field candidates for "my" fields', async () => {
-    const esClientFieldCapsMock = jest.fn(() => ({
+    const esClientFieldCapsMock = vi.fn(() => ({
       fields: {
         // Should end up as a field candidate
         myIpFieldName: { ip: { aggregatable: true } },
@@ -55,7 +57,7 @@ describe('fetchFieldCandidates', () => {
   });
 
   it('returns field candidates for pgBench mappings', async () => {
-    const esClientFieldCapsMock = jest.fn(() => fieldCapsPgBenchMock);
+    const esClientFieldCapsMock = vi.fn(() => fieldCapsPgBenchMock);
 
     const esClientMock = {
       fieldCaps: esClientFieldCapsMock,
@@ -276,7 +278,7 @@ describe('fetchFieldCandidates', () => {
   });
 
   it('returns field candidates for ecommerce mappings', async () => {
-    const esClientFieldCapsMock = jest.fn(() => fieldCapsEcommerceMock);
+    const esClientFieldCapsMock = vi.fn(() => fieldCapsEcommerceMock);
 
     const esClientMock = {
       fieldCaps: esClientFieldCapsMock,
@@ -328,7 +330,7 @@ describe('fetchFieldCandidates', () => {
   });
 
   it('returns field candidates and total hits for large-arrays mappings', async () => {
-    const esClientFieldCapsMock = jest.fn(() => fieldCapsLargeArraysMock);
+    const esClientFieldCapsMock = vi.fn(() => fieldCapsLargeArraysMock);
 
     const esClientMock = {
       fieldCaps: esClientFieldCapsMock,

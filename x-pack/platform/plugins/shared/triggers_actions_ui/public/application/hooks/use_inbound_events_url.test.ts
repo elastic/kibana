@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useInboundEventsUrl } from './use_inbound_events_url';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const mockBasePath = ({
   get = '/',
@@ -37,7 +40,7 @@ const mockBasePath = ({
 
 describe('useInboundEventsUrl', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('uses publicBaseUrl and omits the space prefix in the default space', () => {

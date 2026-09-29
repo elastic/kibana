@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import axios from 'axios';
 
 import type { QueueConfig, IAsyncTelemetryEventsSender } from './async_sender.types';
@@ -23,12 +25,12 @@ import {
 import { TelemetryEventsSender } from './sender';
 import type { ExperimentalFeatures } from '../../../common';
 
-jest.mock('axios');
-jest.mock('./receiver');
+vi.mock('axios');
+vi.mock('./receiver');
 
 describe('AsyncTelemetryEventsSender', () => {
-  const mockedAxiosPost = jest.spyOn(axios, 'post');
-  const mockedAxiosGet = jest.spyOn(axios, 'get');
+  const mockedAxiosPost = vi.spyOn(axios, 'post');
+  const mockedAxiosGet = vi.spyOn(axios, 'get');
   const telemetryPluginSetup = createMockTelemetryPluginSetup();
   const telemetryPluginStart = createMockTelemetryPluginStart();
   const receiver = createMockTelemetryReceiver();
@@ -56,7 +58,7 @@ describe('AsyncTelemetryEventsSender', () => {
 
   beforeEach(() => {
     service = new AsyncTelemetryEventsSender(loggingSystemMock.createLogger());
-    jest.useFakeTimers({ advanceTimers: true });
+    vi.useFakeTimers({ advanceTimers: true });
     mockedAxiosPost.mockClear();
     telemetryUsageCounter.incrementCounter.mockClear();
     mockedAxiosPost.mockResolvedValue({ status: 201 });
@@ -64,7 +66,7 @@ describe('AsyncTelemetryEventsSender', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('initialization', () => {
@@ -76,7 +78,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.start(telemetryPluginStart);
 
       service.send(ch1, events);
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
       expect(mockedAxiosPost).toHaveBeenCalledWith(
@@ -97,13 +99,13 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.send(ch1, events);
 
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
 
       service.start(telemetryPluginStart);
 
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
       expect(mockedAxiosPost).toHaveBeenCalledWith(
@@ -226,13 +228,13 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, events);
 
       // advance time by less than the buffer time span
-      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 0.2);
+      await vi.advanceTimersByTimeAsync(bufferTimeSpanMillis * 0.2);
 
       // check that no events are sent before the buffer time span
       expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
 
       // advance time by more than the buffer time span
-      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.2);
+      await vi.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.2);
 
       // check that the events are sent
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
@@ -266,7 +268,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, ['a']);
 
       // advance time by more than the retry delay for all the retries
-      await jest.advanceTimersByTimeAsync(
+      await vi.advanceTimersByTimeAsync(
         DEFAULT_RETRY_CONFIG.retryCount * DEFAULT_RETRY_CONFIG.retryDelayMillis
       );
 
@@ -295,7 +297,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, ['a']);
 
       // advance time by more than the retry delay for all the retries
-      await jest.advanceTimersByTimeAsync(
+      await vi.advanceTimersByTimeAsync(
         DEFAULT_RETRY_CONFIG.retryCount * DEFAULT_RETRY_CONFIG.retryDelayMillis
       );
 
@@ -320,7 +322,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, ['a']);
 
       // advance time by more than the buffer time span
-      await jest.advanceTimersByTimeAsync(
+      await vi.advanceTimersByTimeAsync(
         (DEFAULT_RETRY_CONFIG.retryCount + 1) * DEFAULT_RETRY_CONFIG.retryDelayMillis * 1.2
       );
 
@@ -347,7 +349,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, ['a']);
 
       // advance time by more than the buffer time span
-      await jest.advanceTimersByTimeAsync(
+      await vi.advanceTimersByTimeAsync(
         (DEFAULT_RETRY_CONFIG.retryCount + 1) * DEFAULT_RETRY_CONFIG.retryDelayMillis * 1.2
       );
 
@@ -381,7 +383,7 @@ describe('AsyncTelemetryEventsSender', () => {
       expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
 
       // advance time
-      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
+      await vi.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
 
       // check that only `inflightEventsThreshold` events were sent
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
@@ -419,7 +421,7 @@ describe('AsyncTelemetryEventsSender', () => {
         service.send(ch1, ['a', 'b', 'c']);
 
         // advance time
-        await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
+        await vi.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
       }
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(batches);
@@ -457,7 +459,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch3, ch3Events.slice(0, 2));
 
       // wait less than low priority latency
-      await jest.advanceTimersByTimeAsync(ch2Config.bufferTimeSpanMillis);
+      await vi.advanceTimersByTimeAsync(ch2Config.bufferTimeSpanMillis);
 
       // send more low-priority events
       service.send(ch3, ch3Events.slice(2, ch3Events.length));
@@ -469,7 +471,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, ch1Events);
 
       // wait a little bit, just the high priority queue latency
-      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis);
+      await vi.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis);
 
       // only high priority events should have been sent
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
@@ -481,7 +483,7 @@ describe('AsyncTelemetryEventsSender', () => {
       );
 
       // wait just the medium priority queue latency
-      await jest.advanceTimersByTimeAsync(ch2Config.bufferTimeSpanMillis);
+      await vi.advanceTimersByTimeAsync(ch2Config.bufferTimeSpanMillis);
 
       // only medium priority events should have been sent
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
@@ -493,7 +495,7 @@ describe('AsyncTelemetryEventsSender', () => {
       );
 
       // wait more time
-      await jest.advanceTimersByTimeAsync(ch3Config.bufferTimeSpanMillis);
+      await vi.advanceTimersByTimeAsync(ch3Config.bufferTimeSpanMillis);
 
       // all events should have been sent
       expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
@@ -528,11 +530,11 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch3, ch3Events);
       service.send(ch2, ch2Events);
 
-      await jest.advanceTimersByTimeAsync(ch2Config.bufferTimeSpanMillis * 1.2);
+      await vi.advanceTimersByTimeAsync(ch2Config.bufferTimeSpanMillis * 1.2);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
-      await jest.advanceTimersByTimeAsync(ch3Config.bufferTimeSpanMillis * 1.2);
+      await vi.advanceTimersByTimeAsync(ch3Config.bufferTimeSpanMillis * 1.2);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
 
@@ -596,7 +598,7 @@ describe('AsyncTelemetryEventsSender', () => {
         const testCase = cases[i];
 
         service.send(testCase.channel, testCase.events);
-        await jest.advanceTimersByTimeAsync(testCase.wait);
+        await vi.advanceTimersByTimeAsync(testCase.wait);
       }
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
@@ -641,11 +643,11 @@ describe('AsyncTelemetryEventsSender', () => {
 
       // send data and wait the initial time span
       service.send(ch1, events);
-      await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
+      await vi.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
 
       // wait the new timespan, now we should have data
-      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
       expect(mockedAxiosPost).toHaveBeenCalledWith(
         expect.anything(),
@@ -673,7 +675,7 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.send(channel, events);
 
-      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
       expect(mockedAxiosPost).toHaveBeenCalledWith(
@@ -688,11 +690,11 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.send(channel, events);
       // the old buffer time shouldn't trigger a new buffer (we increased it)
-      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
       // wait more time...
-      await jest.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis);
+      await vi.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
 
       expect(mockedAxiosPost).toHaveBeenCalledWith(
@@ -724,7 +726,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(channel, ['aaaaa', 'b', 'c']);
       let expectedBodies = ['"aaaaa"\n"b"', '"c"'];
 
-      await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
       expectedBodies.forEach((expectedBody) => {
@@ -740,7 +742,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(channel, ['aaaaa', 'b', 'c']);
       expectedBodies = ['"aaaaa"\n"b"\n"c"'];
 
-      await jest.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
       expectedBodies.forEach((expectedBody) => {
@@ -764,7 +766,7 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.send(ch1, events);
 
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
       expect(mockedAxiosPost).toHaveBeenCalledWith(
@@ -777,10 +779,10 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.send(ch1, events);
 
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
-      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
       expect(mockedAxiosPost).toHaveBeenCalledWith(
@@ -883,7 +885,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.start(telemetryPluginStart);
 
       service.send(ch1, ['a', 'b', 'c']);
-      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
       service.send(ch1, ['a', 'b']);
       await service.stop();
 
@@ -923,7 +925,7 @@ describe('AsyncTelemetryEventsSender', () => {
       expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
 
       // advance time
-      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
+      await vi.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
 
       // check that only `inflightEventsThreshold` events were sent
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
@@ -959,7 +961,7 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.send(ch1, ['a']);
 
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10);
+      await vi.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10);
       await service.stop();
 
       const foundFatal = telemetryUsageCounter.incrementCounter.mock.calls.some(
@@ -990,7 +992,7 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.send(ch1, ['a']);
 
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10);
+      await vi.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10);
       await service.stop();
 
       const foundFatal = telemetryUsageCounter.incrementCounter.mock.calls.some(
@@ -1022,7 +1024,7 @@ describe('AsyncTelemetryEventsSender', () => {
 
       serviceV1.sendAsync(ch1, events);
 
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
@@ -1056,11 +1058,11 @@ describe('AsyncTelemetryEventsSender', () => {
 
       // send data and wait the initial time span
       serviceV1.sendAsync(ch1, events);
-      await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
+      await vi.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
 
       // wait the new timespan, now we should have data
-      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
       expect(mockedAxiosPost).toHaveBeenCalledWith(
         expect.anything(),
@@ -1098,7 +1100,7 @@ describe('AsyncTelemetryEventsSender', () => {
       serviceV1.sendAsync(channel, ['a', 'b', 'c']);
       const expectedBodies = ['"a"\n"b"\n"c"'];
 
-      await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
       expectedBodies.forEach((expectedBody) => {
@@ -1115,11 +1117,11 @@ describe('AsyncTelemetryEventsSender', () => {
 
       serviceV1.sendAsync(channel, ['a', 'b', 'c']);
       // the old buffer time shouldn't trigger a new buffer (we increased it)
-      await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
+      await vi.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
       // wait more time...
-      await jest.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis);
+      await vi.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
 
       expectedBodies.forEach((expectedBody) => {
@@ -1138,7 +1140,7 @@ describe('AsyncTelemetryEventsSender', () => {
 
   describe('simulateSend', () => {
     it('should send events using the async service', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
       const events = ['a', 'b', 'c'];
       const expectedResult = events.map((e) => JSON.stringify(e));
 

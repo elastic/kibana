@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -111,7 +114,7 @@ describe('getFieldsFromFieldCaps', () => {
     };
 
     const esClient = {
-      fieldCaps: jest.fn().mockResolvedValue(mockFieldCapsResponse),
+      fieldCaps: vi.fn().mockResolvedValue(mockFieldCapsResponse),
     } as unknown as ElasticsearchClient;
 
     const fields = await getFieldsFromFieldCaps({
@@ -144,40 +147,43 @@ describe('getFieldsFromFieldCaps', () => {
   });
 });
 
-jest.mock('./mappings', () => ({
-  ...jest.requireActual('./mappings'),
-  getIndexMappings: jest.fn(),
-}));
+vi.mock('./mappings', async () => {
+      const mocked = {
+      ...(await vi.importActual('./mappings')),
+      getIndexMappings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getIndexMappingsMock = getIndexMappings as jest.MockedFunction<typeof getIndexMappings>;
+const getIndexMappingsMock = getIndexMappings as MockedFunction<typeof getIndexMappings>;
 
 describe('getIndexFields', () => {
   const createEsClient = (overrides?: {
     fieldCapsResponse?: unknown;
-    resolveIndex?: jest.Mock;
-    transport?: jest.Mock;
+    resolveIndex?: Mock;
+    transport?: Mock;
   }) =>
     ({
-      fieldCaps: jest
+      fieldCaps: vi
         .fn()
         .mockResolvedValue(overrides?.fieldCapsResponse ?? { indices: [], fields: {} }),
       indices: {
-        getMapping: jest.fn(),
+        getMapping: vi.fn(),
         resolveIndex:
           overrides?.resolveIndex ??
-          jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+          vi.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
       },
       transport: {
-        request: overrides?.transport ?? jest.fn(),
+        request: overrides?.transport ?? vi.fn(),
       },
     } as unknown as ElasticsearchClient);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns rawMapping for local indices via _mapping API', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue({
+    const resolveIndex = vi.fn().mockResolvedValue({
       indices: [{ name: 'my-index' }],
       aliases: [],
       data_streams: [],
@@ -220,7 +226,7 @@ describe('getIndexFields', () => {
   });
 
   it('uses _field_caps for a data-stream input, keyed by the user-supplied name', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue({
+    const resolveIndex = vi.fn().mockResolvedValue({
       indices: [],
       aliases: [],
       data_streams: [{ name: 'metrics-k8sclusterreceiver.otel-default' }],
@@ -303,7 +309,7 @@ describe('getIndexFields', () => {
       },
     });
 
-    const resolveIndex = jest.fn().mockResolvedValue({
+    const resolveIndex = vi.fn().mockResolvedValue({
       indices: [{ name: 'local-index' }],
       aliases: [],
       data_streams: [],
@@ -360,7 +366,7 @@ describe('getIndexFields', () => {
   });
 
   it('routes an alias input through _field_caps via the dedicated alias bucket', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue({
+    const resolveIndex = vi.fn().mockResolvedValue({
       indices: [],
       aliases: [{ name: 'my-alias', indices: ['backing-idx'] }],
       data_streams: [],
@@ -389,7 +395,7 @@ describe('getIndexFields', () => {
   });
 
   it('routes a wildcard resolving to multiple resources through the indexPattern bucket', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue({
+    const resolveIndex = vi.fn().mockResolvedValue({
       indices: [{ name: 'logs-2026.04.21' }, { name: 'logs-2026.04.22' }],
       aliases: [],
       data_streams: [],
@@ -418,7 +424,7 @@ describe('getIndexFields', () => {
   });
 
   it('returns an empty field list when the input does not resolve to anything', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue({
+    const resolveIndex = vi.fn().mockResolvedValue({
       indices: [],
       aliases: [],
       data_streams: [],
@@ -440,7 +446,7 @@ describe('getIndexFields', () => {
       'logs-k8seventsreceiver.otel-default',
       'logs-k8sobjectsreceiver.otel-default',
     ];
-    const resolveIndex = jest.fn().mockImplementation(({ name }: { name: string[] }) => {
+    const resolveIndex = vi.fn().mockImplementation(({ name }: { name: string[] }) => {
       expect(name).toHaveLength(1);
       return Promise.resolve({
         indices: [],
@@ -450,7 +456,7 @@ describe('getIndexFields', () => {
     });
     const esClient = createEsClient({ resolveIndex });
     // Per-input field_caps mock: each data stream returns its own dynamic field.
-    (esClient.fieldCaps as jest.Mock).mockImplementation(({ index }: { index: string }) =>
+    (esClient.fieldCaps as Mock).mockImplementation(({ index }: { index: string }) =>
       Promise.resolve({
         indices: [`.ds-${index}-001`],
         fields: {
@@ -477,7 +483,7 @@ describe('getIndexFields', () => {
   });
 
   it('returns view output columns when the name is an ES|QL view', async () => {
-    const resolveIndex = jest.fn().mockRejectedValue(
+    const resolveIndex = vi.fn().mockRejectedValue(
       new esErrors.ResponseError({
         statusCode: 404,
         body: { error: { type: 'index_not_found_exception' } },
@@ -489,10 +495,10 @@ describe('getIndexFields', () => {
     const esClient = {
       ...createEsClient({ resolveIndex }),
       esql: {
-        getView: jest.fn().mockResolvedValue({
+        getView: vi.fn().mockResolvedValue({
           views: [{ name: 'logs-proxy-parsed', query: 'FROM logs-* | KEEP status' }],
         }),
-        query: jest.fn().mockResolvedValue({
+        query: vi.fn().mockResolvedValue({
           columns: [{ name: 'status', type: 'integer' }],
           values: [],
         }),
@@ -513,16 +519,16 @@ describe('getIndexFields', () => {
   });
 
   it('treats a wildcard that matches one view as an index pattern', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue({
+    const resolveIndex = vi.fn().mockResolvedValue({
       indices: [],
       aliases: [],
       data_streams: [],
     });
-    const query = jest.fn();
+    const query = vi.fn();
     const esClient = {
       ...createEsClient({ resolveIndex }),
       esql: {
-        getView: jest.fn().mockResolvedValue({
+        getView: vi.fn().mockResolvedValue({
           views: [{ name: 'logs-parsed', query: 'FROM logs-* | KEEP status' }],
         }),
         query,
@@ -541,14 +547,14 @@ describe('getIndexFields', () => {
   });
 
   it('does not list views when every local name resolves to an index', async () => {
-    const resolveIndex = jest.fn().mockImplementation(({ name }: { name: string[] }) =>
+    const resolveIndex = vi.fn().mockImplementation(({ name }: { name: string[] }) =>
       Promise.resolve({
         indices: [{ name: name[0] }],
         aliases: [],
         data_streams: [],
       })
     );
-    const getView = jest.fn();
+    const getView = vi.fn();
     const esClient = {
       ...createEsClient({ resolveIndex }),
       esql: { getView },
@@ -570,7 +576,7 @@ describe('getIndexFields', () => {
   });
 
   it('lists views once for names that do not resolve to an index', async () => {
-    const resolveIndex = jest.fn().mockRejectedValue(
+    const resolveIndex = vi.fn().mockRejectedValue(
       new esErrors.ResponseError({
         statusCode: 404,
         body: { error: { type: 'index_not_found_exception' } },
@@ -579,7 +585,7 @@ describe('getIndexFields', () => {
         warnings: [],
       } as any)
     );
-    const getView = jest.fn().mockResolvedValue({
+    const getView = vi.fn().mockResolvedValue({
       views: [
         { name: 'logs-proxy-parsed', query: 'FROM logs-*' },
         { name: 'errors-only', query: 'FROM logs-* | WHERE status >= 400' },
@@ -589,7 +595,7 @@ describe('getIndexFields', () => {
       ...createEsClient({ resolveIndex }),
       esql: {
         getView,
-        query: jest.fn().mockResolvedValue({
+        query: vi.fn().mockResolvedValue({
           columns: [{ name: 'status', type: 'integer' }],
           values: [],
         }),
@@ -616,7 +622,7 @@ describe('getIndexFields', () => {
       meta: {} as any,
       warnings: [],
     } as any);
-    const resolveIndex = jest.fn().mockImplementation(({ name }: { name: string[] }) => {
+    const resolveIndex = vi.fn().mockImplementation(({ name }: { name: string[] }) => {
       if (name[0] === 'logs-hot') {
         return Promise.resolve({
           indices: [{ name: 'logs-hot' }],
@@ -629,13 +635,13 @@ describe('getIndexFields', () => {
     const esClient = {
       ...createEsClient({ resolveIndex }),
       esql: {
-        getView: jest.fn().mockResolvedValue({
+        getView: vi.fn().mockResolvedValue({
           views: [
             { name: 'logs-proxy-parsed', query: 'FROM missing | KEEP status' },
             { name: 'errors-only', query: 'FROM logs-* | KEEP status' },
           ],
         }),
-        query: jest.fn().mockImplementation(({ query }: { query: string }) => {
+        query: vi.fn().mockImplementation(({ query }: { query: string }) => {
           if (query.startsWith('FROM errors-only')) {
             return Promise.resolve({
               columns: [{ name: 'status', type: 'integer' }],
@@ -673,7 +679,7 @@ describe('getIndexFields', () => {
       meta: {} as any,
       warnings: [],
     } as any);
-    const resolveIndex = jest.fn().mockRejectedValue(notFound);
+    const resolveIndex = vi.fn().mockRejectedValue(notFound);
     const esClient = createEsClient({ resolveIndex });
 
     const result = await getIndexFields({ indices: ['missing'], esClient });
@@ -692,7 +698,7 @@ describe('getBatchedFieldsFromFieldCaps', () => {
     );
 
     const esClient = {
-      fieldCaps: jest.fn().mockImplementation((params: any) => {
+      fieldCaps: vi.fn().mockImplementation((params: any) => {
         const indexNames = (params.index as string).split(',');
         const fields: Record<string, Record<string, any>> = {};
         for (const name of indexNames) {
@@ -711,9 +717,9 @@ describe('getBatchedFieldsFromFieldCaps', () => {
 
     const result = await getBatchedFieldsFromFieldCaps({ resources, esClient });
 
-    expect((esClient.fieldCaps as jest.Mock).mock.calls.length).toBeGreaterThan(1);
+    expect((esClient.fieldCaps as Mock).mock.calls.length).toBeGreaterThan(1);
 
-    for (const call of (esClient.fieldCaps as jest.Mock).mock.calls) {
+    for (const call of (esClient.fieldCaps as Mock).mock.calls) {
       expect((call[0].index as string).length).toBeLessThanOrEqual(3000);
     }
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryConfigurationTaskConfig } from './configuration';
 import {
@@ -17,13 +20,16 @@ import { artifactService } from '../artifact';
 import type { TelemetryConfiguration, TelemetryQueryConfiguration } from '../types';
 
 // Mock the artifact service
-jest.mock('../artifact', () => ({
-  artifactService: {
-    getArtifact: jest.fn(),
-  },
-}));
+vi.mock('../artifact', () => {
+      const mocked = {
+      artifactService: {
+        getArtifact: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedArtifactService = artifactService as jest.Mocked<typeof artifactService>;
+const mockedArtifactService = artifactService as Mocked<typeof artifactService>;
 
 describe('telemetry configuration task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -31,7 +37,7 @@ describe('telemetry configuration task test', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     telemetryConfiguration.resetAllToDefault();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should handle successful artifact fetch without query config', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -63,9 +65,9 @@ describe('DimensionEditor', () => {
       frame: mockFrame,
       datasource: createMockDatasource().publicAPIMock,
       groupId: 'primaryGroups',
-      setState: jest.fn(),
-      addLayer: jest.fn(),
-      removeLayer: jest.fn(),
+      setState: vi.fn(),
+      addLayer: vi.fn(),
+      removeLayer: vi.fn(),
       panelRef: { current: null },
       palettes,
       isDarkMode: darkMode,

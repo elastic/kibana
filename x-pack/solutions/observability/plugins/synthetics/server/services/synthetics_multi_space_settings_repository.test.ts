@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -73,7 +75,7 @@ const buildMultiFindResponse = (
 });
 
 describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: Mocked<SavedObjectsClientContract>;
   let repository: DefaultSyntheticsMultiSpaceSettingsRepository;
 
   beforeEach(() => {

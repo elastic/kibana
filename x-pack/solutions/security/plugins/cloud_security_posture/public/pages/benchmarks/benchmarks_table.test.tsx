@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
@@ -17,7 +19,7 @@ describe('<BenchmarksTable />', () => {
     pageSize: 10,
     error: undefined,
     loading: false,
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
   };
 
   it('renders cis integration name', () => {

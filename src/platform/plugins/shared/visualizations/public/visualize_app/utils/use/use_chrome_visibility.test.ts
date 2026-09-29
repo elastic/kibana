@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { chromeServiceMock } from '@kbn/core/public/mocks';
@@ -36,7 +38,7 @@ describe('useChromeVisibility', () => {
     const { unmount } = renderHook(() => useChromeVisibility(chromeMock));
     const behaviorSubj = chromeMock.getIsVisible$.mock.results[0].value;
     const subscription = behaviorSubj.observers[0];
-    subscription.unsubscribe = jest.fn();
+    subscription.unsubscribe = vi.fn();
 
     unmount();
 

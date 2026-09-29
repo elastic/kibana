@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { getChartData, getTotalDays } from './views_stats';
 
 beforeEach(() => {
-  jest.useFakeTimers();
-  jest.setSystemTime(new Date('2024-07-15T14:00:00.00Z'));
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2024-07-15T14:00:00.00Z'));
   moment.updateLocale('en', {
     week: {
       dow: 1, // test with Monday is the first day of the week.
     },
   });
 });
-afterEach(() => jest.clearAllMocks());
-afterAll(() => jest.useRealTimers());
+afterEach(() => vi.clearAllMocks());
+afterAll(() => vi.useRealTimers());
 
 describe('getTotalDays', () => {
   test('should return the total days between the current date and the from date', () => {

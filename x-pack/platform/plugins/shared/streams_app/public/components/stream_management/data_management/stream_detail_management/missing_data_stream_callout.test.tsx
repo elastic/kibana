@@ -5,39 +5,44 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 
-const mockFetch = jest.fn();
-const mockNavigateToApp = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockOpenConfirm = jest.fn();
+const mockFetch = vi.fn();
+const mockNavigateToApp = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockOpenConfirm = vi.fn();
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      application: { navigateToApp: mockNavigateToApp },
-      notifications: { toasts: { addSuccess: mockAddSuccess } },
-      overlays: { openConfirm: mockOpenConfirm },
-    },
-    dependencies: {
-      start: {
-        streams: {
-          streamsRepositoryClient: {
-            fetch: mockFetch,
+vi.mock('../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {
+          application: { navigateToApp: mockNavigateToApp },
+          notifications: { toasts: { addSuccess: mockAddSuccess } },
+          overlays: { openConfirm: mockOpenConfirm },
+        },
+        dependencies: {
+          start: {
+            streams: {
+              streamsRepositoryClient: {
+                fetch: mockFetch,
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MissingDataStreamCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetch.mockResolvedValue({});
     mockOpenConfirm.mockResolvedValue(true);
   });
@@ -49,7 +54,7 @@ describe('MissingDataStreamCallout', () => {
           streamName="logs-test"
           canManage={false}
           canDelete={true}
-          refreshDefinition={jest.fn()}
+          refreshDefinition={vi.fn()}
         />
       </I18nProvider>
     );
@@ -59,7 +64,7 @@ describe('MissingDataStreamCallout', () => {
   });
 
   it('restores stream by recreating the backing data stream and refreshing definition', async () => {
-    const refreshDefinition = jest.fn();
+    const refreshDefinition = vi.fn();
     const user = userEvent.setup();
 
     render(
@@ -84,7 +89,7 @@ describe('MissingDataStreamCallout', () => {
   });
 
   it('deletes stream definition after confirmation and navigates away', async () => {
-    const refreshDefinition = jest.fn();
+    const refreshDefinition = vi.fn();
     const user = userEvent.setup();
 
     render(
@@ -119,7 +124,7 @@ describe('MissingDataStreamCallout', () => {
           streamName="logs-test"
           canManage={true}
           canDelete={true}
-          refreshDefinition={jest.fn()}
+          refreshDefinition={vi.fn()}
         />
       </I18nProvider>
     );
@@ -141,7 +146,7 @@ describe('MissingDataStreamCallout', () => {
             streamName="logs.otel"
             canManage={true}
             canDelete={false}
-            refreshDefinition={jest.fn()}
+            refreshDefinition={vi.fn()}
           />
         </I18nProvider>
       );
@@ -157,7 +162,7 @@ describe('MissingDataStreamCallout', () => {
             streamName="logs.otel.child"
             canManage={true}
             canDelete={true}
-            refreshDefinition={jest.fn()}
+            refreshDefinition={vi.fn()}
           />
         </I18nProvider>
       );
@@ -173,7 +178,7 @@ describe('MissingDataStreamCallout', () => {
             streamName="logs.otel"
             canManage={true}
             canDelete={false}
-            refreshDefinition={jest.fn()}
+            refreshDefinition={vi.fn()}
           />
         </I18nProvider>
       );
@@ -193,7 +198,7 @@ describe('MissingDataStreamCallout', () => {
             streamName="logs.otel.child"
             canManage={true}
             canDelete={true}
-            refreshDefinition={jest.fn()}
+            refreshDefinition={vi.fn()}
           />
         </I18nProvider>
       );

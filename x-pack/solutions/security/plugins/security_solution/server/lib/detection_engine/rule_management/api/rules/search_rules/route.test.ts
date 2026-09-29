@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-jest.mock('../../../../../../usage/constants', () => {
-  const actual = jest.requireActual('../../../../../../usage/constants');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('../../../../../../usage/constants', async () => {
+  const actual = (await vi.importActual('../../../../../../usage/constants'));
   return { ...actual, MAX_RESULTS_WINDOW: 2 };
 });
 
-jest.mock('../../../logic/search/get_gap_filtered_rule_ids');
+vi.mock('../../../logic/search/get_gap_filtered_rule_ids');
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -28,7 +31,7 @@ import type {
 } from '../../../../routes/__mocks__/request_context';
 import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
 
-const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as jest.MockedFunction<
+const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as MockedFunction<
   typeof getGapFilteredRuleIds
 >;
 
@@ -59,8 +62,8 @@ describe('search rules route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('search_after pagination', () => {

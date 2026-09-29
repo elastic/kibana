@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { buildProcessorFunction } from './build_processor_function';
 
 describe('buildProcessorFunction(chain, ...args)', () => {
@@ -15,16 +17,16 @@ describe('buildProcessorFunction(chain, ...args)', () => {
   const series = {};
 
   test('should call each processor', () => {
-    const first = jest.fn(() => (next: any) => (doc: any) => next(doc));
-    const second = jest.fn(() => (next: any) => (doc: any) => next(doc));
+    const first = vi.fn(() => (next: any) => (doc: any) => next(doc));
+    const second = vi.fn(() => (next: any) => (doc: any) => next(doc));
     buildProcessorFunction([first, second], { req, panel, series });
     expect(first.mock.calls.length).toEqual(1);
     expect(second.mock.calls.length).toEqual(1);
   });
 
   test('should chain each processor', () => {
-    const first = jest.fn(() => (next: any) => (doc: any) => next(doc));
-    const second = jest.fn(() => (next: any) => (doc: any) => next(doc));
+    const first = vi.fn(() => (next: any) => (doc: any) => next(doc));
+    const second = vi.fn(() => (next: any) => (doc: any) => next(doc));
 
     buildProcessorFunction([() => first, () => second], { req, panel, series });
 
@@ -33,8 +35,8 @@ describe('buildProcessorFunction(chain, ...args)', () => {
   });
 
   test('should next of each processor', () => {
-    const first = jest.fn();
-    const second = jest.fn();
+    const first = vi.fn();
+    const second = vi.fn();
     const fn = buildProcessorFunction(
       [
         () => (next: any) => (doc: any) => {

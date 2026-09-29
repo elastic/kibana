@@ -5,25 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getAttackDiscoveryPrompts } from '.';
 import { getPromptsByGroupId, promptDictionary } from '../../../../prompt';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 
-jest.mock('../../../../prompt', () => {
-  const original = jest.requireActual('../../../../prompt');
+vi.mock('../../../../prompt', async () => {
+  const original = (await vi.importActual('../../../../prompt'));
   return {
     ...original,
-    getPromptsByGroupId: jest.fn(),
+    getPromptsByGroupId: vi.fn(),
   };
 });
-const mockGetPromptsByGroupId = getPromptsByGroupId as jest.Mock;
+const mockGetPromptsByGroupId = getPromptsByGroupId as Mock;
 
 describe('getAttackDiscoveryPrompts', () => {
-  const savedObjectsClient = {} as jest.Mocked<SavedObjectsClientContract>;
+  const savedObjectsClient = {} as Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetPromptsByGroupId.mockResolvedValue([
       { promptId: promptDictionary.attackDiscoveryDefault, prompt: 'Default Prompt' },
       { promptId: promptDictionary.attackDiscoveryRefine, prompt: 'Refine Prompt' },

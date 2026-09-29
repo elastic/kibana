@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import { registerAgentBuilderSkills } from './register_skills';
 
 const mockAvailability: ToolAvailabilityConfig = {
   cacheMode: 'space',
-  handler: jest.fn().mockResolvedValue({ status: 'available' }),
+  handler: vi.fn().mockResolvedValue({ status: 'available' }),
 };
 
 describe('registerAgentBuilderSkills', () => {

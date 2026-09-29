@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -13,13 +16,19 @@ import { copyPackRoute } from './copy_pack_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn(),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/get_user_info', () => ({
-  getUserInfo: jest.fn(),
-}));
+vi.mock('../../lib/get_user_info', () => {
+      const mocked = {
+      getUserInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('copyPackRoute', () => {
   let routeHandler: RequestHandler;
@@ -55,13 +64,13 @@ describe('copyPackRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
+        get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
       security: {},
-      getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+      getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
       experimentalFeatures: { rruleScheduling: false },
     } as unknown as OsqueryAppContext;
   });
@@ -81,9 +90,9 @@ describe('copyPackRoute', () => {
 
   it('successfully copies a pack with queries but without policy assignments', async () => {
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(sourcePackSO),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(sourcePackSO),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockResolvedValue({
         id: 'new-pack-id',
         attributes: {
           name: 'my-pack_copy',
@@ -99,10 +108,10 @@ describe('copyPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -131,14 +140,14 @@ describe('copyPackRoute', () => {
 
   it('resolves name collision', async () => {
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(sourcePackSO),
-      find: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(sourcePackSO),
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           { attributes: { name: 'my-pack_copy' } },
           { attributes: { name: 'my-pack_copy_2' } },
         ],
       }),
-      create: jest.fn().mockResolvedValue({
+      create: vi.fn().mockResolvedValue({
         id: 'new-pack-id',
         attributes: {
           name: 'my-pack_copy_3',
@@ -153,10 +162,10 @@ describe('copyPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -173,10 +182,10 @@ describe('copyPackRoute', () => {
 
   it('returns 404 when source not found', async () => {
     const mockSavedObjectsClient = {
-      get: jest.fn().mockRejectedValue(new Error('Not found')),
+      get: vi.fn().mockRejectedValue(new Error('Not found')),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
 
@@ -201,9 +210,9 @@ describe('copyPackRoute', () => {
     };
 
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(enabledPackSO),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(enabledPackSO),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockResolvedValue({
         id: 'new-pack-id',
         attributes: {
           name: 'my-pack_copy',
@@ -216,10 +225,10 @@ describe('copyPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -244,9 +253,9 @@ describe('copyPackRoute', () => {
     };
 
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(prebuiltPackSOWithAssetRef),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(prebuiltPackSOWithAssetRef),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockResolvedValue({
         id: 'new-pack-id',
         attributes: {
           name: 'my-pack_copy',
@@ -260,10 +269,10 @@ describe('copyPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -286,9 +295,9 @@ describe('copyPackRoute', () => {
     };
 
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(prebuiltPackSO),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(prebuiltPackSO),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockResolvedValue({
         id: 'new-pack-id',
         attributes: {
           name: 'my-pack_copy',
@@ -301,10 +310,10 @@ describe('copyPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -343,9 +352,9 @@ describe('copyPackRoute', () => {
     };
 
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(rrulePackSO),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(rrulePackSO),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockResolvedValue({
         id: 'new-pack-id',
         attributes: {
           name: 'my-pack_copy',
@@ -358,10 +367,10 @@ describe('copyPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -419,9 +428,9 @@ describe('copyPackRoute', () => {
 
     let capturedCreateArgs: any;
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(sourceWithScheduleIds),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockImplementation((type: string, attrs: any) => {
+      get: vi.fn().mockResolvedValue(sourceWithScheduleIds),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockImplementation((type: string, attrs: any) => {
         capturedCreateArgs = attrs;
 
         return Promise.resolve({
@@ -439,10 +448,10 @@ describe('copyPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -484,9 +493,9 @@ describe('copyPackRoute', () => {
     };
 
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(rrulePackSO),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(rrulePackSO),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockResolvedValue({
         id: 'new-pack-id',
         attributes: {
           name: 'my-pack_copy',
@@ -501,10 +510,10 @@ describe('copyPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     mockOsqueryContext = {
       ...mockOsqueryContext,
@@ -539,9 +548,9 @@ describe('copyPackRoute', () => {
 
       let capturedCreateArgs: Record<string, unknown>;
       const mockSavedObjectsClient = {
-        get: jest.fn().mockResolvedValue(sourceWithDefaults),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        create: jest.fn().mockImplementation((_type: string, attrs: Record<string, unknown>) => {
+        get: vi.fn().mockResolvedValue(sourceWithDefaults),
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        create: vi.fn().mockImplementation((_type: string, attrs: Record<string, unknown>) => {
           capturedCreateArgs = attrs;
 
           return Promise.resolve({
@@ -559,10 +568,10 @@ describe('copyPackRoute', () => {
         }),
       };
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
         mockSavedObjectsClient
       );
-      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+      (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
       setupRoute();
 
@@ -589,9 +598,9 @@ describe('copyPackRoute', () => {
       };
 
       const mockSavedObjectsClient = {
-        get: jest.fn().mockResolvedValue(sourceWithDefaults),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        create: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue(sourceWithDefaults),
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        create: vi.fn().mockResolvedValue({
           id: 'new-pack-id',
           attributes: {
             name: 'my-pack_copy',
@@ -607,10 +616,10 @@ describe('copyPackRoute', () => {
         }),
       };
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
         mockSavedObjectsClient
       );
-      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+      (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
       setupRoute();
 
@@ -630,9 +639,9 @@ describe('copyPackRoute', () => {
 
     it('copy of a pack without execution defaults has neither field in response', async () => {
       const mockSavedObjectsClient = {
-        get: jest.fn().mockResolvedValue(sourcePackSO),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        create: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue(sourcePackSO),
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        create: vi.fn().mockResolvedValue({
           id: 'new-pack-id',
           attributes: {
             name: 'my-pack_copy',
@@ -645,10 +654,10 @@ describe('copyPackRoute', () => {
         }),
       };
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
         mockSavedObjectsClient
       );
-      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+      (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
       setupRoute();
 

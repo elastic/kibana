@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { setProjectAnnotations, composeStories } from '@storybook/react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
@@ -43,20 +46,23 @@ const { SingleActor, GroupedActor, GroupedTarget } = composeStories(stories);
 
 // Mock the useFetchGraphData hook, which is used by the GraphInvestigation component
 // Callbacks replaced with storybook actions, therefore we mock storybook's action function as well for testing
-jest.mock('../../hooks/use_fetch_graph_data', () => {
+vi.mock('../../hooks/use_fetch_graph_data', () => {
   return require('../mock/use_fetch_graph_data.mock');
 });
 
-const actionMocks: Record<string, jest.Mock> = {};
+const actionMocks: Record<string, Mock> = {};
 
-jest.mock('@storybook/addon-actions', () => ({
-  action: jest.fn((name) => {
-    if (!actionMocks[name]) {
-      actionMocks[name] = jest.fn(); // Create a new mock if not already present
-    }
-    return actionMocks[name]; // Return the mock for the given action name
-  }),
-}));
+vi.mock('@storybook/addon-actions', () => {
+      const mocked = {
+      action: vi.fn((name) => {
+        if (!actionMocks[name]) {
+          actionMocks[name] = vi.fn(); // Create a new mock if not already present
+        }
+        return actionMocks[name]; // Return the mock for the given action name
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
@@ -93,13 +99,16 @@ const renderGroupedTargetStory = (args: Partial<GraphInvestigationProps> = {}) =
 };
 
 // Turn off the optimization that hides elements that are not visible in the viewport
-jest.mock('../constants', () => ({
-  ...jest.requireActual('../constants'),
-  ONLY_RENDER_VISIBLE_ELEMENTS: false,
-}));
+vi.mock('../constants', async () => {
+      const mocked = {
+      ...(await vi.importActual('../constants')),
+      ONLY_RENDER_VISIBLE_ELEMENTS: false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // By default we toggle the search bar visibility
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn().mockReturnValue([true, jest.fn()]));
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn().mockReturnValue([true, vi.fn()]));
 
 const QUERY_PARAM_IDX = 0;
 const FILTERS_PARAM_IDX = 1;
@@ -377,10 +386,10 @@ describe('GraphInvestigation Component', () => {
 
     it('toggles searchBar on click', async () => {
       let searchBarToggled = false;
-      const setSearchBarToggled = jest.fn((value: boolean) => {
+      const setSearchBarToggled = vi.fn((value: boolean) => {
         searchBarToggled = value;
       });
-      (useSessionStorage as jest.Mock).mockImplementation(() => [
+      (useSessionStorage as Mock).mockImplementation(() => [
         searchBarToggled,
         setSearchBarToggled,
       ]);
@@ -399,10 +408,10 @@ describe('GraphInvestigation Component', () => {
 
     it('toggles searchBar off on click', async () => {
       let searchBarToggled = true;
-      const setSearchBarToggled = jest.fn((value: boolean) => {
+      const setSearchBarToggled = vi.fn((value: boolean) => {
         searchBarToggled = value;
       });
-      (useSessionStorage as jest.Mock).mockImplementation(() => [
+      (useSessionStorage as Mock).mockImplementation(() => [
         searchBarToggled,
         setSearchBarToggled,
       ]);
@@ -501,7 +510,7 @@ describe('GraphInvestigation Component', () => {
         `[data-test-subj="${GRAPH_INVESTIGATION_TEST_ID}"]`
       ) as HTMLElement;
 
-      const mouseupSpy = jest.fn();
+      const mouseupSpy = vi.fn();
       root.addEventListener('mouseup', mouseupSpy);
       try {
         fireEvent.pointerDown(pane, { button: 0, isPrimary: true });
@@ -525,7 +534,7 @@ describe('GraphInvestigation Component', () => {
         `[data-test-subj="${GRAPH_INVESTIGATION_TEST_ID}"]`
       ) as HTMLElement;
 
-      const mouseupSpy = jest.fn();
+      const mouseupSpy = vi.fn();
       root.addEventListener('mouseup', mouseupSpy);
       try {
         fireEvent.pointerDown(pane, { button: 0, isPrimary: true });
@@ -547,7 +556,7 @@ describe('GraphInvestigation Component', () => {
       ])(
         'includes the origin with query=$hasQuery and node filter=$hasNodeFilter',
         async ({ hasQuery, hasNodeFilter }) => {
-          const onInvestigateInTimeline = jest.fn<
+          const onInvestigateInTimeline = vi.fn<
             void,
             Parameters<NonNullable<GraphInvestigationProps['onInvestigateInTimeline']>>
           >();
@@ -613,7 +622,7 @@ describe('GraphInvestigation Component', () => {
       );
 
       it('includes all origin entities and excludes expanded entities', () => {
-        const onInvestigateInTimeline = jest.fn();
+        const onInvestigateInTimeline = vi.fn();
         const { getByTestId } = renderStory({
           onInvestigateInTimeline,
           showInvestigateInTimeline: true,
@@ -639,7 +648,7 @@ describe('GraphInvestigation Component', () => {
       });
 
       it('preserves disabled filters without adding their events to the origin search', async () => {
-        const onInvestigateInTimeline = jest.fn();
+        const onInvestigateInTimeline = vi.fn();
         const { getByTestId, container } = renderStory({
           onInvestigateInTimeline,
           showInvestigateInTimeline: true,
@@ -663,7 +672,7 @@ describe('GraphInvestigation Component', () => {
       });
 
       it('does not open an unfiltered Timeline when origin source fields are unavailable', () => {
-        const onInvestigateInTimeline = jest.fn();
+        const onInvestigateInTimeline = vi.fn();
         const { getByTestId } = renderStory({
           onInvestigateInTimeline,
           showInvestigateInTimeline: true,
@@ -681,7 +690,7 @@ describe('GraphInvestigation Component', () => {
     });
 
     it('has originEventIds, empty query and no filters - calls onInvestigateInTimeline action with event.id filter only', () => {
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { getByTestId } = renderStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -731,7 +740,7 @@ describe('GraphInvestigation Component', () => {
 
     it('has originEventIds, has a query and no filters - calls onInvestigateInTimeline action with event.id in the query but not in the filters', async () => {
       // Arrange
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { getByTestId } = renderStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -755,7 +764,7 @@ describe('GraphInvestigation Component', () => {
 
     it('has originEventIds, empty query and there are filters - calls onInvestigateInTimeline action with event.id filter only', async () => {
       // Arrange
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { getByTestId, container } = renderStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -849,7 +858,7 @@ describe('GraphInvestigation Component', () => {
 
     it('has originEventIds, has query and there are filters - calls onInvestigateInTimeline action with event.id filter and query', async () => {
       // Arrange
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { getByTestId, container } = renderStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -948,7 +957,7 @@ describe('GraphInvestigation Component', () => {
 
     it('empty originEventIds, empty query and no filters - calls onInvestigateInTimeline with empty query and no filters', () => {
       // Arrange
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { getByTestId } = renderStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -977,7 +986,7 @@ describe('GraphInvestigation Component', () => {
 
     it('empty originEventIds, has query and no filters - calls onInvestigateInTimeline with query only', async () => {
       // Arrange
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { getByTestId } = renderStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -1011,7 +1020,7 @@ describe('GraphInvestigation Component', () => {
 
     it('empty originEventIds, empty query and has filters - calls onInvestigateInTimeline with empty query and filters', async () => {
       // Arrange
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { getByTestId, container } = renderStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -1094,7 +1103,7 @@ describe('GraphInvestigation Component', () => {
 
     it('empty originEventIds, has query and has filters - calls onInvestigateInTimeline with query and filters', async () => {
       // Arrange
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { getByTestId, container } = renderStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -1191,7 +1200,7 @@ describe('GraphInvestigation Component', () => {
     });
 
     it('grouped actor node with mixed namespaces falls back to generic entity.id filter', async () => {
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { container } = renderGroupedActorStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,
@@ -1239,7 +1248,7 @@ describe('GraphInvestigation Component', () => {
     });
 
     it('single actor node uses sourceFields for filters', async () => {
-      const onInvestigateInTimeline = jest.fn();
+      const onInvestigateInTimeline = vi.fn();
       const { container, getByTestId } = renderGroupedTargetStory({
         onInvestigateInTimeline,
         showInvestigateInTimeline: true,

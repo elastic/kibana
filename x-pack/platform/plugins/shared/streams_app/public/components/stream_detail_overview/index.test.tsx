@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,38 +16,56 @@ import {
   createMockQueryStreamDefinition,
 } from '../stream_management/data_management/shared/mocks';
 
-const mockUseStreamDetail = jest.fn();
-const mockUseStreamsPrivileges = jest.fn();
+const mockUseStreamDetail = vi.fn();
+const mockUseStreamsPrivileges = vi.fn();
 
-jest.mock('../../hooks/use_stream_detail', () => ({
-  useStreamDetail: () => mockUseStreamDetail(),
-}));
+vi.mock('../../hooks/use_stream_detail', () => {
+      const mocked = {
+      useStreamDetail: () => mockUseStreamDetail(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: () => mockUseStreamsPrivileges(),
-}));
+vi.mock('../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: () => mockUseStreamsPrivileges(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./data_quality_card', () => ({
-  DataQualityCard: () => <div data-test-subj="mockDataQualityCard">Dataset quality</div>,
-}));
+vi.mock('./data_quality_card', () => {
+      const mocked = {
+      DataQualityCard: () => <div data-test-subj="mockDataQualityCard">Dataset quality</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./about_panel', () => ({
-  AboutPanel: () => <div data-test-subj="mockAboutPanel">About this stream</div>,
-}));
+vi.mock('./about_panel', () => {
+      const mocked = {
+      AboutPanel: () => <div data-test-subj="mockAboutPanel">About this stream</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./ingest_rate_chart', () => ({
-  IngestRateChart: () => <div data-test-subj="mockIngestRateChart">Ingest chart</div>,
-}));
+vi.mock('./ingest_rate_chart', () => {
+      const mocked = {
+      IngestRateChart: () => <div data-test-subj="mockIngestRateChart">Ingest chart</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./import_export_panel', () => ({
-  ImportExportPanel: () => <div data-test-subj="mockImportExportPanel">Import & export</div>,
-}));
+vi.mock('./import_export_panel', () => {
+      const mocked = {
+      ImportExportPanel: () => <div data-test-subj="mockImportExportPanel">Import & export</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('StreamOverview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseStreamsPrivileges.mockReturnValue({
       features: {
         contentPacks: { enabled: false },
@@ -81,7 +101,7 @@ describe('StreamOverview', () => {
     });
     mockUseStreamDetail.mockReturnValue({
       definition: createMockWiredStreamDefinition(),
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     });
 
     renderWithI18n(<StreamOverview />);
@@ -95,7 +115,7 @@ describe('StreamOverview', () => {
     });
     mockUseStreamDetail.mockReturnValue({
       definition: createMockQueryStreamDefinition(),
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     });
 
     renderWithI18n(<StreamOverview />);

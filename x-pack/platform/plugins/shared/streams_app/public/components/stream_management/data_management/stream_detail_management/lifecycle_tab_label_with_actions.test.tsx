@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { copyToClipboard } from '@elastic/eui';
@@ -15,38 +18,38 @@ import {
 import type { StatefulStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    copyToClipboard: jest.fn(() => true),
+    copyToClipboard: vi.fn(() => true),
   };
 });
 
-const mockCopyToClipboard = copyToClipboard as jest.Mock;
+const mockCopyToClipboard = copyToClipboard as Mock;
 
 const timeRange = { rangeFrom: 'now-15m', rangeTo: 'now' };
 
 const createRouter = () =>
   ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    link: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    link: vi.fn(),
   } as unknown as StatefulStreamsAppRouter);
 
 const createNotifications = () =>
   ({
-    toasts: { addSuccess: jest.fn() },
+    toasts: { addSuccess: vi.fn() },
   } as unknown as CoreStart['notifications']);
 
 const createShare = (
-  locatorGetUrl = jest.fn(async () => '/app/management/data/index_management'),
+  locatorGetUrl = vi.fn(async () => '/app/management/data/index_management'),
   hasLocator = true
 ) =>
   ({
     url: {
       locators: {
-        get: jest.fn(() => (hasLocator ? { getUrl: locatorGetUrl } : undefined)),
+        get: vi.fn(() => (hasLocator ? { getUrl: locatorGetUrl } : undefined)),
       },
     },
   } as unknown as SharePublicStart);
@@ -61,7 +64,7 @@ const createClassicStreamWithImportPrivileges = () =>
 
 describe('buildLifecycleTabActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('exposes the copy action with the expected test subject and aria label', () => {
@@ -114,7 +117,7 @@ describe('buildLifecycleTabActions', () => {
   });
 
   it('opens the import lifecycle flyout from the import action', () => {
-    const onImportFromStream = jest.fn();
+    const onImportFromStream = vi.fn();
     const actions = buildLifecycleTabActions({
       definition: createClassicStreamWithImportPrivileges(),
       notifications: createNotifications(),
@@ -144,14 +147,14 @@ describe('buildLifecycleTabActions', () => {
       share: createShare(),
       router: createRouter(),
       timeRange,
-      onImportFromStream: jest.fn(),
+      onImportFromStream: vi.fn(),
     });
 
     expect(actions.items.find((item) => item.id === 'importFromStream')).toBeUndefined();
   });
 
   it('disables the import lifecycle action while another lifecycle flyout is open', () => {
-    const onImportFromStream = jest.fn();
+    const onImportFromStream = vi.fn();
     const actions = buildLifecycleTabActions({
       definition: createClassicStreamWithImportPrivileges(),
       notifications: createNotifications(),
@@ -203,8 +206,8 @@ describe('buildLifecycleTabActions', () => {
     it('opens the index template edit page in a new tab via the index management locator', async () => {
       const editUrl =
         '/app/management/data/index_management/templates/edit/logs.classic-test@stream';
-      const locatorGetUrl = jest.fn(async () => editUrl);
-      const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+      const locatorGetUrl = vi.fn(async () => editUrl);
+      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
       const actions = buildLifecycleTabActions({
         definition: createMockClassicStreamDefinition({

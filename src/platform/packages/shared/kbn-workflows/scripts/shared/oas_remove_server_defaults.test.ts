@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import type { OpenAPIV3 } from 'openapi-types';
 import { createRemoveServerDefaults } from './oas_remove_server_defaults';
 
-jest.mock('fs');
+vi.mock('fs');
 
-const mockedReadFileSync = jest.mocked(fs.readFileSync);
+const mockedReadFileSync = vi.mocked(fs.readFileSync);
 
 const makeSpec = (schemas: Record<string, OpenAPIV3.SchemaObject> = {}): OpenAPIV3.Document => ({
   openapi: '3.0.0',
@@ -24,7 +26,7 @@ const makeSpec = (schemas: Record<string, OpenAPIV3.SchemaObject> = {}): OpenAPI
 
 describe('createRemoveServerDefaults', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should remove default from properties whose names match serverDefault fields', () => {

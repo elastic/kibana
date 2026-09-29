@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -13,48 +15,57 @@ import { OsqueryEditor } from '.';
 
 let mockEditorDidMountCallback: any = null;
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: (props: any) => {
-    // Capture the editorDidMount callback so we can simulate Monaco editor behavior
-    if (props.editorDidMount) {
-      mockEditorDidMountCallback = props.editorDidMount;
-    }
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: (props: any) => {
+        // Capture the editorDidMount callback so we can simulate Monaco editor behavior
+        if (props.editorDidMount) {
+          mockEditorDidMountCallback = props.editorDidMount;
+        }
 
-    return (
-      <div
-        data-test-subj="codeEditor"
-        data-height={props.height}
-        data-value={props.value}
-        data-language={props.languageId}
-      >
-        <textarea
-          data-test-subj="codeEditorInput"
-          value={props.value}
-          onChange={(e) => props.onChange(e.target.value)}
-        />
-      </div>
-    );
-  },
-}));
+        return (
+          <div
+            data-test-subj="codeEditor"
+            data-height={props.height}
+            data-value={props.value}
+            data-language={props.languageId}
+          >
+            <textarea
+              data-test-subj="codeEditorInput"
+              value={props.value}
+              onChange={(e) => props.onChange(e.target.value)}
+            />
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./osquery_highlight_rules', () => ({
-  initializeOsqueryEditor: jest.fn(() => ({ dispose: jest.fn() })),
-}));
+vi.mock('./osquery_highlight_rules', () => {
+      const mocked = {
+      initializeOsqueryEditor: vi.fn(() => ({ dispose: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./osquery_tables', () => ({
-  useOsqueryTables: jest.fn(() => ({ tableNames: [], tablesRecord: {} })),
-}));
+vi.mock('./osquery_tables', () => {
+      const mocked = {
+      useOsqueryTables: vi.fn(() => ({ tableNames: [], tablesRecord: {} })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderEditor = (props: Partial<React.ComponentProps<typeof OsqueryEditor>> = {}) =>
   render(
     <EuiProvider>
-      <OsqueryEditor defaultValue="" onChange={jest.fn()} {...props} />
+      <OsqueryEditor defaultValue="" onChange={vi.fn()} {...props} />
     </EuiProvider>
   );
 
 describe('OsqueryEditor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEditorDidMountCallback = null;
   });
 
@@ -86,11 +97,11 @@ describe('OsqueryEditor', () => {
 
       let contentSizeChangeHandler: () => void;
       const mockEditor = {
-        getContentHeight: jest.fn().mockReturnValue(250),
-        onDidContentSizeChange: jest.fn((handler) => {
+        getContentHeight: vi.fn().mockReturnValue(250),
+        onDidContentSizeChange: vi.fn((handler) => {
           contentSizeChangeHandler = handler;
         }),
-        addCommand: jest.fn(),
+        addCommand: vi.fn(),
       };
 
       act(() => {
@@ -109,11 +120,11 @@ describe('OsqueryEditor', () => {
 
       let contentSizeChangeHandler: () => void;
       const mockEditor = {
-        getContentHeight: jest.fn().mockReturnValue(50),
-        onDidContentSizeChange: jest.fn((handler) => {
+        getContentHeight: vi.fn().mockReturnValue(50),
+        onDidContentSizeChange: vi.fn((handler) => {
           contentSizeChangeHandler = handler;
         }),
-        addCommand: jest.fn(),
+        addCommand: vi.fn(),
       };
 
       act(() => {
@@ -132,11 +143,11 @@ describe('OsqueryEditor', () => {
 
       let contentSizeChangeHandler: () => void;
       const mockEditor = {
-        getContentHeight: jest.fn().mockReturnValue(2000),
-        onDidContentSizeChange: jest.fn((handler) => {
+        getContentHeight: vi.fn().mockReturnValue(2000),
+        onDidContentSizeChange: vi.fn((handler) => {
           contentSizeChangeHandler = handler;
         }),
-        addCommand: jest.fn(),
+        addCommand: vi.fn(),
       };
 
       act(() => {
@@ -153,13 +164,13 @@ describe('OsqueryEditor', () => {
 
   describe('commands', () => {
     it('should register submitOnCmdEnter command on mount', () => {
-      const execFn = jest.fn();
+      const execFn = vi.fn();
       renderEditor({ commands: [{ name: 'submitOnCmdEnter', exec: execFn }] });
 
       const mockEditor = {
-        getContentHeight: jest.fn().mockReturnValue(100),
-        onDidContentSizeChange: jest.fn(),
-        addCommand: jest.fn(),
+        getContentHeight: vi.fn().mockReturnValue(100),
+        onDidContentSizeChange: vi.fn(),
+        addCommand: vi.fn(),
       };
 
       act(() => {

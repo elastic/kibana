@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import { setBreadcrumbs } from './breadcrumbs';
@@ -14,7 +17,7 @@ import { setBreadcrumbs } from './breadcrumbs';
 describe('Breadcrumbs', () => {
   const discoverServiceMock = createDiscoverServicesMock();
   beforeEach(() => {
-    (discoverServiceMock.chrome.setBreadcrumbs as jest.Mock).mockClear();
+    (discoverServiceMock.chrome.setBreadcrumbs as Mock).mockClear();
   });
 
   test('should set breadcrumbs with default root', () => {
@@ -48,23 +51,23 @@ describe('Breadcrumbs', () => {
 
   describe('Embeddable Editor mode', () => {
     beforeEach(() => {
-      jest.spyOn(discoverServiceMock.embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
+      vi.spyOn(discoverServiceMock.embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
     });
 
     describe('By Value', () => {
       beforeEach(() => {
-        jest.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(true);
-        jest
+        vi.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(true);
+        vi
           .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
           .mockReturnValue({ label: 'Mock Label' } as DiscoverSessionTab);
       });
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('should set the breadcrumbs to reflect Dashboards connection when editting', () => {
-        jest
+        vi
           .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
           .mockReturnValue('mock-embeddable-id');
 
@@ -86,10 +89,10 @@ describe('Breadcrumbs', () => {
       });
 
       it('should set the breadcrumbs to reflect Discover when creating a new session', () => {
-        jest
+        vi
           .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
           .mockReturnValue(undefined);
-        jest
+        vi
           .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
           .mockReturnValue({ label: 'New Discover session' } as DiscoverSessionTab);
 
@@ -113,11 +116,11 @@ describe('Breadcrumbs', () => {
 
     describe('By Reference', () => {
       beforeEach(() => {
-        jest.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(false);
-        jest
+        vi.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(false);
+        vi
           .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
           .mockReturnValue(undefined);
-        jest
+        vi
           .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
           .mockReturnValue('mock-embeddable-id');
       });

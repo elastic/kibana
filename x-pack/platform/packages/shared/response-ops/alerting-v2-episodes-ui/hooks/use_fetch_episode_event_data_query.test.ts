@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { buildEpisodeEventDataQuery } from '../queries/episode_event_data_query';
@@ -13,9 +15,9 @@ import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeEventDataQuery } from './use_fetch_episode_event_data_query';
 
-jest.mock('../utils/run_esql_async_search');
+vi.mock('../utils/run_esql_async_search');
 
-const mockRunEsqlAsyncSearch = jest.mocked(runEsqlAsyncSearch);
+const mockRunEsqlAsyncSearch = vi.mocked(runEsqlAsyncSearch);
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
@@ -24,7 +26,7 @@ describe('useFetchEpisodeEventDataQuery', () => {
   const mockSpaces = createMockSpaces();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

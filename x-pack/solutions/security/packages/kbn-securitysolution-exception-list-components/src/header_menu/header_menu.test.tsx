@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createEvent, fireEvent, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
@@ -100,7 +102,7 @@ describe('HeaderMenu', () => {
   });
 
   it('should call onEdit if action has onClick', () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
     const customAction = [...actions];
     customAction[0].onClick = onEdit;
     const wrapper = render(<HeaderMenu disableActions={false} actions={actions} />);
@@ -129,7 +131,7 @@ describe('HeaderMenu', () => {
   });
 
   it('should stop propagation when clicking on the menu', () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
     const customAction = [...actions];
     customAction[0].onClick = onEdit;
     const wrapper = render(

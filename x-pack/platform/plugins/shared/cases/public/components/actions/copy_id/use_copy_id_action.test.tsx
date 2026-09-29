@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useCopyIDAction } from './use_copy_id_action';
 
@@ -13,17 +15,17 @@ import { TestProviders } from '../../../common/mock';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../../containers/api');
+vi.mock('../../../containers/api');
 
 describe('useCopyIDAction', () => {
-  const onActionSuccess = jest.fn();
+  const onActionSuccess = vi.fn();
   const originalClipboard = global.window.navigator.clipboard;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+        writeText: vi.fn().mockImplementation(() => Promise.resolve()),
       },
       writable: true,
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { requestMock } from '../../__mocks__/request';
@@ -20,7 +23,7 @@ describe('createAttackDiscoveryAlertsRoute', () => {
     createAttackDiscoveryAlertsRoute(server.router);
 
     const { context } = requestContextMock.createTools();
-    (context.elasticAssistant.getCurrentUser as unknown as jest.Mock).mockReturnValue({
+    (context.elasticAssistant.getCurrentUser as unknown as Mock).mockReturnValue({
       username: 'elastic',
       roles: ['superuser'],
     });
@@ -43,7 +46,7 @@ describe('createAttackDiscoveryAlertsRoute', () => {
     createAttackDiscoveryAlertsRoute(server.router);
 
     const { context } = requestContextMock.createTools();
-    (context.elasticAssistant.getCurrentUser as unknown as jest.Mock).mockReturnValue({
+    (context.elasticAssistant.getCurrentUser as unknown as Mock).mockReturnValue({
       username: 'elastic',
       roles: [],
       authentication_type: 'realm',
@@ -71,22 +74,22 @@ describe('createAttackDiscoveryAlertsRoute', () => {
     createAttackDiscoveryAlertsRoute(server.router);
 
     const { context } = requestContextMock.createTools();
-    (context.elasticAssistant.getCurrentUser as unknown as jest.Mock).mockReturnValue({
+    (context.elasticAssistant.getCurrentUser as unknown as Mock).mockReturnValue({
       username: 'elastic',
       roles: ['superuser'],
     });
-    (context.elasticAssistant.rulesClient.create as unknown as jest.Mock).mockResolvedValue({
+    (context.elasticAssistant.rulesClient.create as unknown as Mock).mockResolvedValue({
       id: 'rule-1',
     });
-    (context.elasticAssistant.rulesClient.runSoon as unknown as jest.Mock).mockResolvedValue('ok');
-    (context.elasticAssistant.rulesClient.delete as unknown as jest.Mock).mockResolvedValue({});
+    (context.elasticAssistant.rulesClient.runSoon as unknown as Mock).mockResolvedValue('ok');
+    (context.elasticAssistant.rulesClient.delete as unknown as Mock).mockResolvedValue({});
     (
       context.elasticAssistant.frameworkAlerts
-        .getContextInitializationPromise as unknown as jest.Mock
+        .getContextInitializationPromise as unknown as Mock
     ).mockResolvedValue({ result: true });
 
     (
-      context.core.elasticsearch.client.asCurrentUser.search as unknown as jest.Mock
+      context.core.elasticsearch.client.asCurrentUser.search as unknown as Mock
     ).mockResolvedValue({
       hits: {
         hits: [
@@ -104,12 +107,12 @@ describe('createAttackDiscoveryAlertsRoute', () => {
       },
     });
     (
-      context.core.elasticsearch.client.asCurrentUser.bulk as unknown as jest.Mock
+      context.core.elasticsearch.client.asCurrentUser.bulk as unknown as Mock
     ).mockResolvedValue({});
     (
-      context.elasticAssistant.getAttackDiscoveryDataClient as unknown as jest.Mock
+      context.elasticAssistant.getAttackDiscoveryDataClient as unknown as Mock
     ).mockResolvedValue({
-      findAttackDiscoveryAlerts: jest.fn().mockResolvedValue({ data: [] }),
+      findAttackDiscoveryAlerts: vi.fn().mockResolvedValue({ data: [] }),
     });
 
     const res = await server.inject(

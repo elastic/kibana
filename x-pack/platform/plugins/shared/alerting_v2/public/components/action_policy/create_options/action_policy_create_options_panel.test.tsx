@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,8 +16,8 @@ import {
   type ActionPolicyCreateOption,
 } from './action_policy_create_options_panel';
 
-const onCreatePolicy = jest.fn();
-const onCreateWithAgent = jest.fn();
+const onCreatePolicy = vi.fn();
+const onCreateWithAgent = vi.fn();
 
 const createPolicyOption = (
   overrides: Partial<ActionPolicyCreateOption> = {}
@@ -50,7 +52,7 @@ const renderPanel = (options: ActionPolicyCreateOption[]) =>
 
 describe('ActionPolicyCreateOptionsPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the empty state title', () => {
@@ -73,7 +75,7 @@ describe('ActionPolicyCreateOptionsPanel', () => {
         iconType: 'plus',
         title: 'Extra option',
         description: 'Configured by the caller.',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         'data-test-subj': 'extraCreateOptionCard',
       },
     ]);

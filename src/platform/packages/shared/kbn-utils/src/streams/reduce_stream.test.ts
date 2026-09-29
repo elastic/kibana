@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Transform } from 'stream';
 import { createReduceStream, createPromiseFromStreams, createListStream } from '.';
 
@@ -15,7 +17,7 @@ const promiseFromEvent = (name: string, emitter: Transform) =>
 
 describe('reduceStream', () => {
   test('calls the reducer for each item provided', async () => {
-    const stub = jest.fn();
+    const stub = vi.fn();
     await createPromiseFromStreams([
       createListStream([1, 2, 3]),
       createReduceStream((val, chunk, enc) => {
@@ -51,14 +53,14 @@ describe('reduceStream', () => {
   });
 
   test('stops calling the reducer if an iteration fails, emits no data', async () => {
-    const reducer = jest.fn((acc, i) => {
+    const reducer = vi.fn((acc, i) => {
       if (i < 100) return acc + i;
       else throw new Error(i);
     });
     const reduce$ = createReduceStream(reducer, 0);
 
-    const dataStub = jest.fn();
-    const errorStub = jest.fn();
+    const dataStub = vi.fn();
+    const errorStub = vi.fn();
     reduce$.on('data', dataStub);
     reduce$.on('error', errorStub);
     const closeEvent = promiseFromEvent('close', reduce$);

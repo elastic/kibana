@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,14 +17,14 @@ import { ContentListProvider } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import { useDeleteConfirmation } from './use_delete_confirmation';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
   })
 );
 
-const mockOnDelete = jest.fn(async () => {});
+const mockOnDelete = vi.fn(async () => {});
 
 const createWrapper =
   () =>
@@ -52,7 +54,7 @@ const TestHarness = ({ onClose }: { onClose?: () => void }) => {
 
 describe('useDeleteConfirmation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns `null` for `deleteModal` initially', () => {
@@ -82,7 +84,7 @@ describe('useDeleteConfirmation', () => {
   });
 
   it('calls the `onClose` callback when the modal closes', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(<TestHarness onClose={onClose} />, { wrapper: createWrapper() });
 
     await userEvent.click(screen.getByText('trigger'));
@@ -94,7 +96,7 @@ describe('useDeleteConfirmation', () => {
   });
 
   it('closes the modal after a successful delete', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(<TestHarness onClose={onClose} />, { wrapper: createWrapper() });
 
     await userEvent.click(screen.getByText('trigger'));

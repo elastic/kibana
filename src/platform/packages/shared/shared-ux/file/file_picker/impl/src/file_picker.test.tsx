@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
@@ -20,8 +23,8 @@ import { FilePicker } from './file_picker';
 describe('FilePicker', () => {
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
   let client: ReturnType<typeof createMockFilesClient>;
-  let onDone: jest.Mock;
-  let onClose: jest.Mock;
+  let onDone: Mock;
+  let onClose: Mock;
 
   async function initTestBed(props?: Partial<Props>) {
     const createTestBed = registerTestBed((p: Props) => (
@@ -83,15 +86,15 @@ describe('FilePicker', () => {
   }
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     client = createMockFilesClient();
     client.getFileKind.mockImplementation(() => ({
       id: 'test',
       maxSizeBytes: 10000,
       http: {},
     }));
-    onDone = jest.fn();
-    onClose = jest.fn();
+    onDone = vi.fn();
+    onClose = vi.fn();
   });
 
   it('intially shows a loadings spinner, then content', async () => {

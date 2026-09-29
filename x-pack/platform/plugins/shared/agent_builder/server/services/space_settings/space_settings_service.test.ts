@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -29,7 +31,7 @@ describe('createSpaceSettingsService', () => {
   describe('get', () => {
     it('returns the persisted default agent id for the request space', async () => {
       const { service, soClient, request } = setup();
-      (soClient.get as jest.Mock).mockResolvedValue({
+      (soClient.get as Mock).mockResolvedValue({
         attributes: { defaultAgentId: 'siemens-agent' },
       });
 
@@ -44,7 +46,7 @@ describe('createSpaceSettingsService', () => {
 
     it('returns null when the settings document does not exist', async () => {
       const { service, soClient, request } = setup();
-      (soClient.get as jest.Mock).mockRejectedValue(
+      (soClient.get as Mock).mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
           'x'
@@ -58,7 +60,7 @@ describe('createSpaceSettingsService', () => {
 
     it('propagates unexpected saved-object errors', async () => {
       const { service, soClient, request } = setup();
-      (soClient.get as jest.Mock).mockRejectedValue(new Error('boom'));
+      (soClient.get as Mock).mockRejectedValue(new Error('boom'));
 
       await expect(service.get(request)).rejects.toThrow('boom');
     });
@@ -67,7 +69,7 @@ describe('createSpaceSettingsService', () => {
   describe('set', () => {
     it('upserts the singleton with the requested default agent id', async () => {
       const { service, soClient, request } = setup();
-      (soClient.create as jest.Mock).mockResolvedValue({
+      (soClient.create as Mock).mockResolvedValue({
         attributes: { defaultAgentId: 'agent-a' },
       });
 
@@ -83,7 +85,7 @@ describe('createSpaceSettingsService', () => {
 
     it('stores an undefined defaultAgentId when clearing the assignment', async () => {
       const { service, soClient, request } = setup();
-      (soClient.create as jest.Mock).mockResolvedValue({ attributes: {} });
+      (soClient.create as Mock).mockResolvedValue({ attributes: {} });
 
       const result = await service.set(request, null);
 

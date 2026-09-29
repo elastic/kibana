@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useDefaultDataFormat } from './use_default_data_format';
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 function setup(services: Record<string, unknown>) {
   mockUseKibana.mockReturnValue({ services });
@@ -22,7 +28,7 @@ function setup(services: Record<string, unknown>) {
 
 describe('useDefaultDataFormat', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('serverless', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -46,24 +49,24 @@ describe('AttackDiscoveryScheduleDataClient', () => {
   let scheduleDataClientParams: AttackDiscoveryScheduleDataClientParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     scheduleDataClientParams = {
       actionsClient: actionsClientMock.create(),
       logger: loggerMock.create(),
       rulesClient: rulesClientMock.create(),
     };
 
-    (scheduleDataClientParams.rulesClient.find as jest.Mock).mockResolvedValue({
+    (scheduleDataClientParams.rulesClient.find as Mock).mockResolvedValue({
       total: 1,
       data: [mockInternalAttackDiscovery],
     });
-    (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(
+    (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(
       mockInternalAttackDiscovery
     );
-    (scheduleDataClientParams.rulesClient.create as jest.Mock).mockResolvedValue(
+    (scheduleDataClientParams.rulesClient.create as Mock).mockResolvedValue(
       mockInternalAttackDiscovery
     );
-    (scheduleDataClientParams.rulesClient.update as jest.Mock).mockResolvedValue(
+    (scheduleDataClientParams.rulesClient.update as Mock).mockResolvedValue(
       mockInternalAttackDiscovery
     );
   });
@@ -306,11 +309,11 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
       const callOrder: string[] = [];
 
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockImplementation(() => {
+      (scheduleDataClientParams.rulesClient.get as Mock).mockImplementation(() => {
         callOrder.push('get');
         return Promise.resolve(mockInternalAttackDiscovery);
       });
-      (scheduleDataClientParams.rulesClient.update as jest.Mock).mockImplementation(() => {
+      (scheduleDataClientParams.rulesClient.update as Mock).mockImplementation(() => {
         callOrder.push('update');
         return Promise.resolve(mockInternalAttackDiscovery);
       });
@@ -324,7 +327,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const scheduleId = 'schedule-5';
       const scheduleUpdateData = getAttackDiscoveryUpdateScheduleMock(scheduleId, {});
 
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(
+      (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(
         getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, { tags: ['pre-ff-tag'] })
       );
 
@@ -347,7 +350,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const scheduleId = 'schedule-5';
       const scheduleUpdateData = getAttackDiscoveryUpdateScheduleMock(scheduleId, {});
 
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(
+      (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(
         getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
           tags: ['attack-discovery-schedule'],
         })
@@ -372,7 +375,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const scheduleId = 'schedule-5';
       const scheduleUpdateData = getAttackDiscoveryUpdateScheduleMock(scheduleId, {});
 
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(
+      (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(
         getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
           tags: ['pre-ff-tag'],
         })
@@ -397,7 +400,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const scheduleId = 'schedule-5';
       const scheduleUpdateData = getAttackDiscoveryUpdateScheduleMock(scheduleId, {});
 
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(
+      (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(
         getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
           tags: ['pre-ff-tag'],
         })
@@ -422,7 +425,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const scheduleId = 'schedule-5';
       const scheduleUpdateData = getAttackDiscoveryUpdateScheduleMock(scheduleId, {});
 
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(
+      (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(
         getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
           tags: ['tag-a', 'tag-b'],
         })
@@ -447,7 +450,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const scheduleId = 'schedule-5';
       const scheduleUpdateData = getAttackDiscoveryUpdateScheduleMock(scheduleId, {});
 
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(
+      (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(
         getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
           tags: ['tag-a', 'tag-b', 'tag-c'],
         })
@@ -508,7 +511,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
 
   describe('bulk actions', () => {
     it('`bulkDeleteSchedules` delegates to `rulesClient.bulkDeleteRules` and transforms the result', async () => {
-      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as Mock).mockResolvedValue({
         errors: [],
         rules: [{ id: 'schedule-1' }, { id: 'schedule-2' }],
         total: 2,
@@ -528,7 +531,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
     });
 
     it('`bulkEnableSchedules` delegates to `rulesClient.bulkEnableRules` and transforms the result', async () => {
-      (scheduleDataClientParams.rulesClient.bulkEnableRules as jest.Mock).mockResolvedValue({
+      (scheduleDataClientParams.rulesClient.bulkEnableRules as Mock).mockResolvedValue({
         errors: [],
         rules: [{ id: 'schedule-1' }],
         total: 1,
@@ -544,7 +547,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
     });
 
     it('`bulkDisableSchedules` delegates to `rulesClient.bulkDisableRules` and transforms the result', async () => {
-      (scheduleDataClientParams.rulesClient.bulkDisableRules as jest.Mock).mockResolvedValue({
+      (scheduleDataClientParams.rulesClient.bulkDisableRules as Mock).mockResolvedValue({
         errors: [],
         rules: [{ id: 'schedule-1' }],
         total: 1,
@@ -561,7 +564,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
 
     it('passes through genuine per-rule errors from the `rulesClient`', async () => {
       const ruleErrors = [{ message: 'boom', rule: { id: 'schedule-2', name: 'schedule-2' } }];
-      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as Mock).mockResolvedValue({
         errors: ruleErrors,
         rules: [{ id: 'schedule-1' }],
         total: 1,
@@ -574,7 +577,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
     });
 
     it('does NOT pre-fetch for the unfiltered internal client (native bulk directly)', async () => {
-      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as Mock).mockResolvedValue({
         errors: [],
         rules: [{ id: 'schedule-1' }],
         total: 1,
@@ -597,12 +600,12 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const workflowTaggedRule = getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
         tags: ['attack-discovery-workflow'],
       });
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockImplementation(({ id }) => {
+      (scheduleDataClientParams.rulesClient.get as Mock).mockImplementation(({ id }) => {
         if (id === 'visible') return Promise.resolve(untaggedRule);
         if (id === 'hidden') return Promise.resolve(workflowTaggedRule);
         return Promise.reject(new Error(`Saved object [alert/${id}] not found`));
       });
-      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as Mock).mockResolvedValue({
         errors: [],
         rules: [{ id: 'visible' }],
         total: 1,
@@ -622,7 +625,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
     });
 
     it('returns an empty result without calling native bulk when nothing is visible (filtered client)', async () => {
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockRejectedValue(
+      (scheduleDataClientParams.rulesClient.get as Mock).mockRejectedValue(
         new Error('Saved object not found')
       );
       const client = new AttackDiscoveryScheduleDataClient({
@@ -640,7 +643,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       const workflowTaggedRule = getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
         tags: ['attack-discovery-workflow'],
       });
-      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(workflowTaggedRule);
+      (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(workflowTaggedRule);
       const client = new AttackDiscoveryScheduleDataClient({
         ...scheduleDataClientParams,
         filterTags: { excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'] },
@@ -669,7 +672,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
 
     describe('getSchedule', () => {
       it('throws a 404 when the public client reads a workflow-tagged schedule by id', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -681,7 +684,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('returns the schedule when the public client reads an untagged schedule by id', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(untaggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(untaggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -693,7 +696,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('returns a workflow-tagged schedule when the internal client (no filterTags) reads by id', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
 
         await expect(client.getSchedule('schedule-1')).resolves.toEqual(
@@ -702,7 +705,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('throws a 404 when an includeTags filter is not satisfied', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(untaggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(untaggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: { includeTags: ['attack-discovery-schedule'] },
@@ -716,7 +719,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
 
     describe('updateSchedule', () => {
       it('throws a 404 for a workflow-tagged schedule (public client)', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -728,7 +731,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('does not call `rulesClient.update` when the guard rejects', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -752,7 +755,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('throws a 404 for a workflow-tagged schedule (public client)', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -764,7 +767,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('does not call `rulesClient.delete` when the guard rejects', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -776,7 +779,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('deletes an untagged schedule (public client)', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(untaggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(untaggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -792,7 +795,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
 
     describe('enableSchedule / disableSchedule', () => {
       it('throws a 404 when enabling a workflow-tagged schedule (public client)', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -804,7 +807,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('does not call `rulesClient.enableRule` when the guard rejects', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -816,7 +819,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('throws a 404 when disabling a workflow-tagged schedule (public client)', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(taggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,
@@ -828,7 +831,7 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
 
       it('enables an untagged schedule (public client)', async () => {
-        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(untaggedRule);
+        (scheduleDataClientParams.rulesClient.get as Mock).mockResolvedValue(untaggedRule);
         const client = new AttackDiscoveryScheduleDataClient({
           ...scheduleDataClientParams,
           filterTags: publicFilterTags,

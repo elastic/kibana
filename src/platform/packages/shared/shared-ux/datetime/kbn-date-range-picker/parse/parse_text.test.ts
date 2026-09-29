@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import dateMath from '@elastic/datemath';
 import { textToTimeRange, matchPreset, getNamedRangeAlias } from './parse_text';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
@@ -259,12 +261,12 @@ describe('textToTimeRange', () => {
 
   describe('forgiving absolute dates', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2025-07-15T12:00:00.000Z'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2025-07-15T12:00:00.000Z'));
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it.each([
@@ -721,7 +723,7 @@ describe('textToTimeRange', () => {
 
 describe('"now" anchoring', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   // Regression test for https://github.com/elastic/kibana/issues/276537:
@@ -732,15 +734,15 @@ describe('"now" anchoring', () => {
   // that skew deterministically by advancing the faked clock between the
   // first ("now-15m") and second ("now") dateMath.parse call.
   it('resolves relative start/end bounds against the same instant, even if the real clock advances in between', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-07-15T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-07-15T12:00:00.000Z'));
 
     let callCount = 0;
     const realParse = dateMath.parse.bind(dateMath);
-    jest.spyOn(dateMath, 'parse').mockImplementation((text, options) => {
+    vi.spyOn(dateMath, 'parse').mockImplementation((text, options) => {
       callCount += 1;
       if (callCount === 2) {
-        jest.setSystemTime(new Date('2025-07-15T12:00:01.500Z'));
+        vi.setSystemTime(new Date('2025-07-15T12:00:01.500Z'));
       }
       return realParse(text, options);
     });

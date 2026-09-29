@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -18,9 +21,9 @@ import { TestProviders } from '../../mock';
 import { mockUserProfiles } from './mocks';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../user_profiles/use_get_current_user_profile');
-jest.mock('../user_profiles/use_bulk_get_user_profiles');
-jest.mock('../user_profiles/use_suggest_users');
+vi.mock('../user_profiles/use_get_current_user_profile');
+vi.mock('../user_profiles/use_bulk_get_user_profiles');
+vi.mock('../user_profiles/use_suggest_users');
 
 const renderAssigneesApplyPanel = (
   {
@@ -31,11 +34,11 @@ const renderAssigneesApplyPanel = (
     onApply: () => void;
   } = {
     assignedUserIds: [],
-    onApply: jest.fn(),
+    onApply: vi.fn(),
   }
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => assignedUserIds.includes(user.uid));
-  (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+  (useBulkGetUserProfiles as Mock).mockReturnValue({
     isLoading: false,
     data: assignedProfiles,
   });
@@ -48,12 +51,12 @@ const renderAssigneesApplyPanel = (
 
 describe('<AssigneesApplyPanel />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetCurrentUserProfile as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });
-    (useSuggestUsers as jest.Mock).mockReturnValue({
+    (useSuggestUsers as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });
@@ -68,7 +71,7 @@ describe('<AssigneesApplyPanel />', () => {
   });
 
   it('should call `onApply` callback on apply button click', async () => {
-    const mockedOnApply = jest.fn();
+    const mockedOnApply = vi.fn();
 
     const { getByText, getByTestId } = renderAssigneesApplyPanel({
       assignedUserIds: ['user-id-1'],

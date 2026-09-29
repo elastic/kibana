@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -16,60 +18,75 @@ import { fetchRulesSearch } from '@kbn/alerting-v2-episodes-ui/apis/fetch_rules_
 import { TestProviders } from '../../../test_utils/test_providers';
 import { EpisodesFilterBar } from './episodes_filter_bar';
 
-jest.mock('react-use/lib/useDebounce', () => jest.fn());
+vi.mock('react-use/lib/useDebounce', () => vi.fn());
 
-const mockUseEuiContainerQuery = jest.fn();
+const mockUseEuiContainerQuery = vi.fn();
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiContainerQuery: (condition: string) => ({
-    ref: { current: null },
-    matches: mockUseEuiContainerQuery(condition),
-  }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiContainerQuery: (condition: string) => ({
+        ref: { current: null },
+        matches: mockUseEuiContainerQuery(condition),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  AlertingDateRangePicker: ({
-    collapsed,
-    showTimeWindowButtons,
-    'data-test-subj': dataTestSubj,
-  }: {
-    collapsed?: boolean;
-    showTimeWindowButtons?: boolean;
-    'data-test-subj'?: string;
-  }) => (
-    <div
-      data-test-subj={dataTestSubj}
-      data-collapsed={collapsed}
-      data-show-time-window-buttons={showTimeWindowButtons}
-    />
-  ),
-}));
+vi.mock('@kbn/alerting-v2-browser-shared', () => {
+      const mocked = {
+      AlertingDateRangePicker: ({
+        collapsed,
+        showTimeWindowButtons,
+        'data-test-subj': dataTestSubj,
+      }: {
+        collapsed?: boolean;
+        showTimeWindowButtons?: boolean;
+        'data-test-subj'?: string;
+      }) => (
+        <div
+          data-test-subj={dataTestSubj}
+          data-collapsed={collapsed}
+          data-show-time-window-buttons={showTimeWindowButtons}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options', () => ({
-  useFetchEpisodeTagOptions: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options', () => {
+      const mocked = {
+      useFetchEpisodeTagOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_rules_search', () => ({
-  fetchRulesSearch: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_rules_search', () => {
+      const mocked = {
+      fetchRulesSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles', () => ({
-  useBulkGetProfiles: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles', () => {
+      const mocked = {
+      useBulkGetProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchEpisodeTagOptions = jest.mocked(useFetchEpisodeTagOptions);
-const mockFetchRulesSearch = jest.mocked(fetchRulesSearch);
-const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
+const mockUseFetchEpisodeTagOptions = vi.mocked(useFetchEpisodeTagOptions);
+const mockFetchRulesSearch = vi.mocked(fetchRulesSearch);
+const mockUseBulkGetProfiles = vi.mocked(useBulkGetProfiles);
 
 const mockEpisodeServices = createMockServices();
 const mockNotifications = notificationServiceMock.createStartContract();
 
 const defaultProps = {
   filterState: { status: ['active'] },
-  onFilterChange: jest.fn(),
+  onFilterChange: vi.fn(),
   timeRange: { from: 'now-24h', to: 'now' },
-  onTimeChange: jest.fn(),
+  onTimeChange: vi.fn(),
   ruleOptions: [],
   assigneeUids: [],
   services: {
@@ -93,7 +110,7 @@ const renderFilterBar = () =>
 
 describe('EpisodesFilterBar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEuiContainerQuery.mockReturnValue(false);
     mockUseFetchEpisodeTagOptions.mockReturnValue({
       data: [],

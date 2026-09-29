@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { UseTopAssetsOptions } from './types';
 import { useFetchChartData } from './use_fetch_chart_data';
@@ -14,13 +17,16 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import { createTestProviderWrapper } from '../../test/test_provider';
 import { useDataViewContext } from '../data_view_context';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../data_view_context');
-jest.mock('@kbn/cloud-security-posture', () => ({
-  showErrorToast: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../data_view_context');
+vi.mock('@kbn/cloud-security-posture', () => {
+      const mocked = {
+      showErrorToast: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
 const renderHookWithWrapper = (options: UseTopAssetsOptions) =>
   renderHook(() => useFetchChartData(options), {
@@ -34,7 +40,7 @@ const getMockKibanaServices = () => ({
     },
   },
   notifications: {
-    toasts: { addError: jest.fn() },
+    toasts: { addError: vi.fn() },
   },
 });
 
@@ -53,11 +59,11 @@ describe('useFetchChartData', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: getMockKibanaServices(),
     });
-    (useDataViewContext as jest.Mock).mockReturnValue({
+    (useDataViewContext as Mock).mockReturnValue({
       dataView: {
         getIndexPattern: () => 'assets-test-*',
       },
@@ -123,7 +129,7 @@ describe('useFetchChartData', () => {
 
   it('should throw if aggregations are missing', async () => {
     // suppress expected console error messages
-    jest.spyOn(console, 'error').mockReturnValue();
+    vi.spyOn(console, 'error').mockReturnValue();
 
     mockSearch.mockReturnValue(
       of({

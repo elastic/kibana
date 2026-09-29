@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,32 +17,41 @@ import { useExportResults } from '../../results/use_export_results';
 import { useExportFilters } from '../../results/export_filters_context';
 import { RowKebabMenu } from './row_kebab_menu';
 
-jest.mock('../../common/experimental_features_context');
-jest.mock('../../results/use_export_results');
-jest.mock('../../results/export_filters_context');
-jest.mock('../../cases/add_to_cases', () => ({
-  AddToCaseContextProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
-jest.mock('../../cases/add_to_cases_button', () => ({
-  AddToCaseButton: () => null,
-}));
-jest.mock('../../timelines/add_to_timeline_button', () => ({
-  AddToTimelineButton: () => null,
-}));
-jest.mock('../../shared_components/attachments/pack_queries_attachment_wrapper', () => {
-  const { createContext } = jest.requireActual<typeof import('react')>('react');
+vi.mock('../../common/experimental_features_context');
+vi.mock('../../results/use_export_results');
+vi.mock('../../results/export_filters_context');
+vi.mock('../../cases/add_to_cases', () => {
+      const mocked = {
+      AddToCaseContextProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../cases/add_to_cases_button', () => {
+      const mocked = {
+      AddToCaseButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../timelines/add_to_timeline_button', () => {
+      const mocked = {
+      AddToTimelineButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../shared_components/attachments/pack_queries_attachment_wrapper', () => {
+  const { createContext } = (require('react') as typeof import('react'));
 
   return { CasesAttachmentWrapperContext: createContext(false) };
 });
 
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.MockedFunction<
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as MockedFunction<
   typeof useIsExperimentalFeatureEnabled
 >;
-const useExportResultsMock = useExportResults as jest.MockedFunction<typeof useExportResults>;
-const useExportFiltersMock = useExportFilters as jest.MockedFunction<typeof useExportFilters>;
+const useExportResultsMock = useExportResults as MockedFunction<typeof useExportResults>;
+const useExportFiltersMock = useExportFilters as MockedFunction<typeof useExportFilters>;
 
 const defaultExportMock = {
-  exportResults: jest.fn().mockResolvedValue(undefined),
+  exportResults: vi.fn().mockResolvedValue(undefined),
   isExporting: false,
 };
 
@@ -56,7 +68,7 @@ const renderKebab = (props: Partial<React.ComponentProps<typeof RowKebabMenu>> =
 
 describe('RowKebabMenu — export branch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useExportResultsMock.mockReturnValue(defaultExportMock);
     useExportFiltersMock.mockReturnValue(undefined);
   });

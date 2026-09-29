@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { FilterStateStore } from '@kbn/es-query';
 import { useKibana } from '../../../common/lib/kibana';
@@ -14,29 +17,41 @@ import { useAnomalySingleMetricViewerUrl } from './use_anomaly_single_metric_vie
 import { useAnomalyTableRowActions } from './use_anomaly_table_row_actions';
 import type { TableRow } from '../../components/anomalies/table/types';
 
-jest.mock('../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: jest.fn(),
-}));
-jest.mock('../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: jest.fn(),
-}));
-jest.mock('./use_anomaly_single_metric_viewer_url', () => ({
-  useAnomalySingleMetricViewerUrl: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/utils/timeline/use_show_timeline', () => {
+      const mocked = {
+      useShowTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/hooks/timeline/use_investigate_in_timeline', () => {
+      const mocked = {
+      useInvestigateInTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_anomaly_single_metric_viewer_url', () => {
+      const mocked = {
+      useAnomalySingleMetricViewerUrl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseShowTimeline = useShowTimeline as jest.Mock;
-const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
-const mockUseAnomalySingleMetricViewerUrl = useAnomalySingleMetricViewerUrl as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseShowTimeline = useShowTimeline as Mock;
+const mockUseInvestigateInTimeline = useInvestigateInTimeline as Mock;
+const mockUseAnomalySingleMetricViewerUrl = useAnomalySingleMetricViewerUrl as Mock;
 
-const mockAnomalySearch = jest.fn();
-const mockJobsFn = jest.fn();
-const mockGetRedirectUrl = jest.fn();
-const mockDataViewsFind = jest.fn();
-const mockInvestigateInTimeline = jest.fn();
-const mockGetUrl = jest.fn();
-const mockClosePopover = jest.fn();
+const mockAnomalySearch = vi.fn();
+const mockJobsFn = vi.fn();
+const mockGetRedirectUrl = vi.fn();
+const mockDataViewsFind = vi.fn();
+const mockInvestigateInTimeline = vi.fn();
+const mockGetUrl = vi.fn();
+const mockClosePopover = vi.fn();
 
 const mockAnomalyRecord = {
   job_id: 'test-job',
@@ -98,7 +113,7 @@ const EXPECTED_TO = new Date(
 const renderActions = () => renderHook(() => useAnomalyTableRowActions(defaultArgs));
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   mockUseKibana.mockReturnValue({
     services: {
@@ -107,7 +122,7 @@ beforeEach(() => {
           results: { anomalySearch: mockAnomalySearch },
           jobs: { jobs: mockJobsFn },
         },
-        locator: { getUrl: jest.fn() },
+        locator: { getUrl: vi.fn() },
       },
       share: {
         url: {
@@ -137,7 +152,7 @@ beforeEach(() => {
   mockGetRedirectUrl.mockReturnValue('https://kibana/app/discover#/view');
   mockGetUrl.mockResolvedValue('https://kibana/app/ml#/timeseriesexplorer');
 
-  jest.spyOn(window, 'open').mockImplementation(() => null);
+  vi.spyOn(window, 'open').mockImplementation(() => null);
 });
 
 describe('useAnomalyTableRowActions', () => {

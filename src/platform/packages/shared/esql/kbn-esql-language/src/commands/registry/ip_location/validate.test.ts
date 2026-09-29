@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { expectErrors } from '../../../__tests__/commands/validation';
 import { validate } from './validate';
@@ -17,7 +19,7 @@ const ipLocationExpectErrors = (query: string, expectedErrors: string[], context
 
 describe('IP_LOCATION Validation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('expression type', () => {

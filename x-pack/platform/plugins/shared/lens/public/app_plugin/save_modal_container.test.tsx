@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SaveProps } from './app';
 import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container';
 import { defaultDoc, makeDefaultServices } from '../mocks';
@@ -16,17 +18,17 @@ describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
   const resetMocks = () =>
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
   function getDefaultArgs(
     servicesOverrides: Partial<SaveVisualizationProps> = {},
     { saveToLibrary, ...propsOverrides }: Partial<SaveProps & { saveToLibrary: boolean }> = {}
   ) {
-    const redirectToOrigin = jest.fn();
-    const redirectTo = jest.fn();
-    const onAppLeave = jest.fn();
-    const switchDatasource = jest.fn();
+    const redirectToOrigin = vi.fn();
+    const redirectTo = vi.fn();
+    const onAppLeave = vi.fn();
+    const switchDatasource = vi.fn();
     const props: SaveVisualizationProps = {
       ...makeDefaultServices(),
       // start with both the initial input and lastKnownDoc synced
@@ -353,7 +355,7 @@ describe('runSaveLensVisualization', () => {
     it('should throw if something goes wrong when saving', async () => {
       const attributeServiceMock = {
         ...makeAttributeService(defaultDoc),
-        saveToLibrary: jest.fn().mockImplementation(() => Promise.reject(Error('failed to save'))),
+        saveToLibrary: vi.fn().mockImplementation(() => Promise.reject(Error('failed to save'))),
       };
       const { props, saveProps, options, toasts } = getDefaultArgs(
         {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -26,9 +29,9 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../common/compone
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('RunscriptActionResult component', () => {
   let appTestContext: AppContextTestRender;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
@@ -86,7 +88,7 @@ describe('AttachmentSummaryList', () => {
     const Throw = () => {
       throw new Error('chunk failed to load');
     };
-    const warn = jest.spyOn(window.console, 'warn').mockImplementation(() => {});
+    const warn = vi.spyOn(window.console, 'warn').mockImplementation(() => {});
     try {
       const service = {
         getAttachmentUiDefinition: (type: string) => {
@@ -112,7 +114,7 @@ describe('AttachmentSummaryList', () => {
   });
 
   it('passes the current-version attachment data to the renderer', () => {
-    const renderer = jest.fn(() => <div />);
+    const renderer = vi.fn(() => <div />);
 
     render(
       <AttachmentSummaryList

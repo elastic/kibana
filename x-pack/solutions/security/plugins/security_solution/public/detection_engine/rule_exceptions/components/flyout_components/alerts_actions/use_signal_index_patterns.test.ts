@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
@@ -12,11 +15,11 @@ import { useSignalIndexPatterns } from './use_signal_index_patterns';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
-jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
+vi.mock('../../../../../common/containers/source');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 
-const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
-const mockUseFetchIndex = useFetchIndex as jest.Mock;
+const mockUseSignalIndex = useSignalIndex as Mock<Partial<ReturnType<typeof useSignalIndex>>>;
+const mockUseFetchIndex = useFetchIndex as Mock;
 
 describe('useSignalIndexPatterns', () => {
   beforeEach(() => {
@@ -31,7 +34,7 @@ describe('useSignalIndexPatterns', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('exposes the fetched signal index name and fields when both requests are done', () => {

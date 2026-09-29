@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -95,7 +97,7 @@ const defaultProps = {
   incompleteParams: {},
   dimensionGroups: [] as VisualizationDimensionGroupConfig[],
   groupId: 'any',
-  updateLayer: jest.fn(),
+  updateLayer: vi.fn(),
   operationDefinitionMap: {
     terms: termsOperation,
     average: averageOperation,
@@ -149,7 +151,7 @@ const getLabelElement = () =>
 
 describe('FieldInput', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should render a field select box', () => {
     renderFieldInput();
@@ -299,7 +301,7 @@ describe('FieldInput', () => {
   });
 
   it('should forward the onDeleteColumn function', () => {
-    const onDeleteColumn = jest.fn();
+    const onDeleteColumn = vi.fn();
     const layer = getLayer();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
     const instance = mount(

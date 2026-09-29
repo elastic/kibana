@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Write a test that verifies that the `AlertsTableEmbeddable` component renders the `AlertsTable` component with the correct props.
 
 import React from 'react';
@@ -21,14 +23,14 @@ import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_inte
 
 const core = coreMock.createStart();
 const mockPresentationContainer = getMockPresentationContainer();
-jest.mock('../components/embeddable_alerts_table');
-const mockEmbeddableAlertsTable = jest.mocked(EmbeddableAlertsTable).mockReturnValue(<div />);
-const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
-jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
+vi.mock('../components/embeddable_alerts_table');
+const mockEmbeddableAlertsTable = vi.mocked(EmbeddableAlertsTable).mockReturnValue(<div />);
+const mockGetInternalRuleTypes = vi.mocked(getInternalRuleTypes);
+vi.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
 mockGetInternalRuleTypes.mockResolvedValue([
   { solution: 'observability' } as unknown as InternalRuleType,
 ]);
-const mockRemoveLocalStorageItem = jest.fn();
+const mockRemoveLocalStorageItem = vi.fn();
 Object.defineProperty(window, 'localStorage', {
   value: {
     removeItem: mockRemoveLocalStorageItem,
@@ -45,7 +47,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
     {} as EmbeddableAlertsTablePublicStartDependencies
   );
   const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
-    initializeDrilldownsManager: jest.fn(),
+    initializeDrilldownsManager: vi.fn(),
     initialState: {
       time_range: {
         from: '2025-01-01T00:00:00.000Z',
@@ -145,7 +147,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
   it('should set `lastReloadRequestTime` when the dashboard triggers a reload', async () => {
     const reload$ = new Subject<void>();
     const parentApi = { ...getMockPresentationContainer(), reload$ };
-    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(987654321);
+    const dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(987654321);
 
     const { Component } = await factory.buildEmbeddable({
       ...embeddableParams,

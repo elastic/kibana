@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { GetSecuritySolutionUrl } from '../../link_to';
@@ -14,13 +17,16 @@ import { useBreadcrumbsNav } from './use_breadcrumbs_nav';
 import type { BreadcrumbsNav } from '../../../breadcrumbs';
 import * as kibanaLib from '../../../lib/kibana';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: () => mockDispatch,
-}));
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: () => mockDispatch,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const link1Id = 'link-1' as SecurityPageName;
 const link2Id = 'link-2' as SecurityPageName;
@@ -38,36 +44,51 @@ const parentsLinks = [link1, link2, link3];
 const trailingLinks = [link4, link5];
 const allLinks = [...parentsLinks, ...trailingLinks];
 
-const mockSecuritySolutionUrl: GetSecuritySolutionUrl = jest.fn(
+const mockSecuritySolutionUrl: GetSecuritySolutionUrl = vi.fn(
   ({ deepLinkId }: { deepLinkId: SecurityPageName }) =>
     allLinks.find((link) => link.id === deepLinkId)?.path ?? deepLinkId
 );
-jest.mock('../../link_to', () => ({
-  useGetSecuritySolutionUrl: () => mockSecuritySolutionUrl,
-}));
+vi.mock('../../link_to', () => {
+      const mocked = {
+      useGetSecuritySolutionUrl: () => mockSecuritySolutionUrl,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUpdateBreadcrumbsNav = jest.fn((_param: BreadcrumbsNav) => {});
-jest.mock('../../../breadcrumbs', () => ({
-  updateBreadcrumbsNav: (param: BreadcrumbsNav) => mockUpdateBreadcrumbsNav(param),
-}));
+const mockUpdateBreadcrumbsNav = vi.fn((_param: BreadcrumbsNav) => {});
+vi.mock('../../../breadcrumbs', () => {
+      const mocked = {
+      updateBreadcrumbsNav: (param: BreadcrumbsNav) => mockUpdateBreadcrumbsNav(param),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRouteSpy = jest.fn((): [{ pageName: string }] => [{ pageName: link1Id }]);
-jest.mock('../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: () => mockUseRouteSpy(),
-}));
+const mockUseRouteSpy = vi.fn((): [{ pageName: string }] => [{ pageName: link1Id }]);
+vi.mock('../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: () => mockUseRouteSpy(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetParentLinks = jest.fn((_id: unknown): LinkInfo[] => parentsLinks);
-jest.mock('../../../links/links_hooks', () => ({
-  ...jest.requireActual('../../../links/links_hooks'),
-  useParentLinks: (id: unknown) => mockGetParentLinks(id),
-}));
+const mockGetParentLinks = vi.fn((_id: unknown): LinkInfo[] => parentsLinks);
+vi.mock('../../../links/links_hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../links/links_hooks')),
+      useParentLinks: (id: unknown) => mockGetParentLinks(id),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetTrailingBreadcrumbs = jest.fn((): ChromeBreadcrumb[] =>
+const mockGetTrailingBreadcrumbs = vi.fn((): ChromeBreadcrumb[] =>
   trailingLinks.map(({ title: text, path: href }) => ({ text, href }))
 );
-jest.mock('./trailing_breadcrumbs', () => ({
-  getTrailingBreadcrumbs: () => mockGetTrailingBreadcrumbs(),
-}));
+vi.mock('./trailing_breadcrumbs', () => {
+      const mocked = {
+      getTrailingBreadcrumbs: () => mockGetTrailingBreadcrumbs(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const landingBreadcrumb = {
   href: 'launchpad',
@@ -77,7 +98,7 @@ const landingBreadcrumb = {
 
 describe('useBreadcrumbsNav', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should process breadcrumbs with current pageName', () => {
@@ -135,9 +156,9 @@ describe('useBreadcrumbsNav', () => {
   });
 
   it('should create breadcrumbs onClick handler', () => {
-    const reportEventMock = jest.fn();
+    const reportEventMock = vi.fn();
 
-    (kibanaLib.useKibana as jest.Mock).mockImplementation(() => ({
+    (kibanaLib.useKibana as Mock).mockImplementation(() => ({
       services: {
         telemetry: {
           reportEvent: reportEventMock,
@@ -146,7 +167,7 @@ describe('useBreadcrumbsNav', () => {
     }));
 
     renderHook(useBreadcrumbsNav);
-    const event = { preventDefault: jest.fn() } as unknown as React.MouseEvent<
+    const event = { preventDefault: vi.fn() } as unknown as React.MouseEvent<
       HTMLElement,
       MouseEvent
     >;
@@ -161,7 +182,7 @@ describe('useBreadcrumbsNav', () => {
   it('should use SecurityPageName.launchpad', () => {
     renderHook(useBreadcrumbsNav);
 
-    const calls = (mockSecuritySolutionUrl as jest.Mock).mock.calls;
+    const calls = (mockSecuritySolutionUrl as Mock).mock.calls;
     const launchpadBreadcrumbCall = calls.find(
       (call) => call[0].deepLinkId === SecurityPageName.launchpad
     );

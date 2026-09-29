@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { cloneDeep } from 'lodash';
@@ -13,39 +15,63 @@ import { CalendarsList } from './calendars_list';
 
 // Mocking the child components to just assert that they get the data
 // received via the async call using mlApi in the main component.
-jest.mock('../../../components/help_menu', () => ({
-  HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
-}));
-jest.mock('./header', () => ({
-  CalendarsListHeader: ({ totalCount }) => (
-    <div data-test-subj="mockCalendarsListHeader">{totalCount}</div>
-  ),
-}));
-jest.mock('./table', () => ({
-  CalendarsListTable: ({ calendarsList }) => (
-    <div
-      data-test-subj="mockCalendarsListTable"
-      data-calendar-list={JSON.stringify(calendarsList)}
-    />
-  ),
-}));
+vi.mock('../../../components/help_menu', () => {
+      const mocked = {
+      HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./header', () => {
+      const mocked = {
+      CalendarsListHeader: ({ totalCount }) => (
+        <div data-test-subj="mockCalendarsListHeader">{totalCount}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./table', () => {
+      const mocked = {
+      CalendarsListTable: ({ calendarsList }) => (
+        <div
+          data-test-subj="mockCalendarsListTable"
+          data-calendar-list={JSON.stringify(calendarsList)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../capabilities/check_capabilities', () => ({
-  checkPermission: () => true,
-}));
-jest.mock('../../../license', () => ({
-  hasLicenseExpired: () => false,
-  isFullLicense: () => false,
-}));
-jest.mock('../../../capabilities/get_capabilities', () => ({
-  getCapabilities: () => {},
-}));
-jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
-  mlNodesAvailable: () => true,
-}));
-jest.mock('../../../capabilities/check_capabilities', () => ({
-  usePermissionCheck: () => [true, true],
-}));
+vi.mock('../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      checkPermission: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../license', () => {
+      const mocked = {
+      hasLicenseExpired: () => false,
+      isFullLicense: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../capabilities/get_capabilities', () => {
+      const mocked = {
+      getCapabilities: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../ml_nodes_check/check_ml_nodes', () => {
+      const mocked = {
+      mlNodesAvailable: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      usePermissionCheck: () => [true, true],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCalendars = [
   {
@@ -78,7 +104,7 @@ const mockCalendars = [
   },
 ];
 // need to pass in a copy of mockCalendars because it will be mutated
-const mockCalendarsFn = jest.fn(() => Promise.resolve(cloneDeep(mockCalendars)));
+const mockCalendarsFn = vi.fn(() => Promise.resolve(cloneDeep(mockCalendars)));
 const mockKibanaProp = {
   services: {
     docLinks: { links: { ml: { calendars: 'https://calendars' } } },
@@ -87,32 +113,35 @@ const mockKibanaProp = {
       query: {
         timefilter: {
           timefilter: {
-            disableTimeRangeSelector: jest.fn(),
-            disableAutoRefreshSelector: jest.fn(),
+            disableTimeRangeSelector: vi.fn(),
+            disableAutoRefreshSelector: vi.fn(),
           },
         },
       },
     },
     notifications: {
       toasts: {
-        addDanger: jest.fn(),
+        addDanger: vi.fn(),
       },
     },
   },
 };
 
 const mockReact = React;
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (type) => {
-    const EnhancedType = (props) => {
-      return mockReact.createElement(type, {
-        ...props,
-        kibana: mockKibanaProp,
-      });
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      withKibana: (type) => {
+        const EnhancedType = (props) => {
+          return mockReact.createElement(type, {
+            ...props,
+            kibana: mockKibanaProp,
+          });
+        };
+        return EnhancedType;
+      },
     };
-    return EnhancedType;
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const props = {
   canCreateCalendar: true,

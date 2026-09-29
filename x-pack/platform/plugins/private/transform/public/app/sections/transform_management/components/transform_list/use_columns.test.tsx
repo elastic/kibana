@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act, screen, waitFor, renderHook } from '@testing-library/react';
@@ -18,7 +20,7 @@ import { useColumns } from './use_columns';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
 describe('Transform: Job List Columns', () => {
   const defaultAppDependencies = appDependencies.useAppDependencies();
@@ -31,7 +33,7 @@ describe('Transform: Job List Columns', () => {
   };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('useColumns()', async () => {
@@ -87,18 +89,18 @@ describe('Transform: Job List Columns', () => {
   test('adds project scope column when CPS manager is ready with linked projects', async () => {
     let isReady = false;
     const cpsManager = {
-      whenReady: jest.fn().mockImplementation(async () => {
+      whenReady: vi.fn().mockImplementation(async () => {
         isReady = true;
       }),
-      hasLinkedProjects: jest.fn(() => isReady),
-      fetchProjects: jest.fn().mockResolvedValue({
+      hasLinkedProjects: vi.fn(() => isReady),
+      fetchProjects: vi.fn().mockResolvedValue({
         origin: { _id: 'origin-project' },
         linkedProjects: [],
       }),
-      getTotalProjectCount: jest.fn(() => 2),
+      getTotalProjectCount: vi.fn(() => 2),
     } as unknown as ICPSManager;
 
-    jest.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
+    vi.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
       ...defaultAppDependencies,
       cps: { cpsManager, isTierEligible: true },
     });
@@ -118,12 +120,12 @@ describe('Transform: Job List Columns', () => {
 
   test('does not add project scope column when there are no linked projects', async () => {
     const cpsManager = {
-      whenReady: jest.fn().mockResolvedValue(undefined),
-      hasLinkedProjects: jest.fn(() => false),
-      getTotalProjectCount: jest.fn(() => 1),
+      whenReady: vi.fn().mockResolvedValue(undefined),
+      hasLinkedProjects: vi.fn(() => false),
+      getTotalProjectCount: vi.fn(() => 1),
     } as unknown as ICPSManager;
 
-    jest.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
+    vi.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
       ...defaultAppDependencies,
       cps: { cpsManager, isTierEligible: true },
     });
@@ -142,16 +144,16 @@ describe('Transform: Job List Columns', () => {
 
   test('normalizes project scope sort values', async () => {
     const cpsManager = {
-      whenReady: jest.fn().mockResolvedValue(undefined),
-      hasLinkedProjects: jest.fn(() => true),
-      fetchProjects: jest.fn().mockResolvedValue({
+      whenReady: vi.fn().mockResolvedValue(undefined),
+      hasLinkedProjects: vi.fn(() => true),
+      fetchProjects: vi.fn().mockResolvedValue({
         origin: { _id: 'origin-project' },
         linkedProjects: [],
       }),
-      getTotalProjectCount: jest.fn(() => 2),
+      getTotalProjectCount: vi.fn(() => 2),
     } as unknown as ICPSManager;
 
-    jest.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
+    vi.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
       ...defaultAppDependencies,
       cps: { cpsManager, isTierEligible: true },
     });

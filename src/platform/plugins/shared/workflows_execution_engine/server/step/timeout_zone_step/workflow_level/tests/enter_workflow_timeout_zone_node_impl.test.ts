@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 // Mock parseDuration function
-jest.mock('../../../../utils', () => ({
-  parseDuration: jest.fn(),
-}));
+vi.mock('../../../../utils', () => {
+      const mocked = {
+      parseDuration: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { parseDuration } from '../../../../utils';
@@ -19,7 +25,7 @@ import type { StepExecutionRuntimeFactory } from '../../../../workflow_context_m
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterWorkflowTimeoutZoneNodeImpl } from '../enter_workflow_timeout_zone_node_impl';
 
-const mockParseDuration = parseDuration as jest.MockedFunction<typeof parseDuration>;
+const mockParseDuration = parseDuration as MockedFunction<typeof parseDuration>;
 
 describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
   let node: EnterTimeoutZoneNode;
@@ -31,7 +37,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
   let mockDateNow: Date;
 
   beforeAll(() => {
-    jest.spyOn(global, 'Date').mockImplementation((...args) => {
+    vi.spyOn(global, 'Date').mockImplementation((...args) => {
       if (args.length) {
         return new originalDateCtor(...args);
       }
@@ -41,11 +47,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     node = {
       id: 'test-workflow-timeout-zone',
@@ -56,18 +62,18 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     };
 
     wfExecutionRuntimeManagerMock = {
-      getWorkflowExecution: jest.fn().mockReturnValue({
+      getWorkflowExecution: vi.fn().mockReturnValue({
         id: 'wf-exec-1',
         spaceId: 'default',
         startedAt: '2025-09-25T10:14:30.000Z',
       }),
-      setWorkflowError: jest.fn(),
-      navigateToNextNode: jest.fn(),
-      markWorkflowTimeouted: jest.fn(),
+      setWorkflowError: vi.fn(),
+      navigateToNextNode: vi.fn(),
+      markWorkflowTimeouted: vi.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
 
     stepExecutionRuntimeFactoryMock = {
-      createStepExecutionRuntime: jest.fn(),
+      createStepExecutionRuntime: vi.fn(),
     } as unknown as StepExecutionRuntimeFactory;
 
     impl = new EnterWorkflowTimeoutZoneNodeImpl(
@@ -95,13 +101,13 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       monitoredStepExecutionRuntimeMock = {
         stepExecutionId: 'monitored-step-123',
         abortController: {
-          abort: jest.fn(),
+          abort: vi.fn(),
         },
-        failStep: jest.fn(),
+        failStep: vi.fn(),
         scopeStack: {
-          isEmpty: jest.fn(),
-          getCurrentScope: jest.fn(),
-          exitScope: jest.fn(),
+          isEmpty: vi.fn(),
+          getCurrentScope: vi.fn(),
+          exitScope: vi.fn(),
           stackFrames: [],
         } as any,
       } as any as StepExecutionRuntime;
@@ -110,7 +116,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     it('should not abort or fail steps when within timeout limit', async () => {
       const startTime = new Date().getTime() - 30000; // 30 seconds ago (within 60s timeout)
       mockParseDuration.mockReturnValue(60000); // 60 seconds
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
@@ -124,12 +130,12 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     it('should abort and fail workflow when timeout exceeded', async () => {
       const startTime = new Date().getTime() - 90000; // 90 seconds ago (exceeds 60s timeout)
       mockParseDuration.mockReturnValue(60000); // 60 seconds
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
       // Mock empty scope stack (no nested scopes to fail)
-      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as Mock).mockReturnValue(true);
 
       impl.monitor(monitoredStepExecutionRuntimeMock);
 
@@ -142,7 +148,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       const startTime = new Date().getTime() - 90000; // 90 seconds ago (exceeds 60s timeout)
       mockParseDuration.mockReturnValue(60000); // 60 seconds
 
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
@@ -151,21 +157,21 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       const scope2 = { nodeId: 'nested-step-2' };
 
       const mockNestedStack1 = {
-        isEmpty: jest.fn().mockReturnValue(false),
-        getCurrentScope: jest.fn().mockReturnValue(scope1),
-        exitScope: jest.fn(),
+        isEmpty: vi.fn().mockReturnValue(false),
+        getCurrentScope: vi.fn().mockReturnValue(scope1),
+        exitScope: vi.fn(),
         stackFrames: [{ stepId: 'step1' }, { stepId: 'step2' }],
       };
 
       const mockNestedStack2 = {
-        isEmpty: jest.fn().mockReturnValue(false),
-        getCurrentScope: jest.fn().mockReturnValue(scope2),
-        exitScope: jest.fn(),
+        isEmpty: vi.fn().mockReturnValue(false),
+        getCurrentScope: vi.fn().mockReturnValue(scope2),
+        exitScope: vi.fn(),
         stackFrames: [{ stepId: 'step1' }],
       };
 
       const mockEmptyStack = {
-        isEmpty: jest.fn().mockReturnValue(true),
+        isEmpty: vi.fn().mockReturnValue(true),
         stackFrames: [],
       };
 
@@ -182,15 +188,15 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       // Mock created step execution runtime from factory
       const scopeStepExecutionRuntime1 = {
         stepExecution: { id: 'nested-step-1' },
-        failStep: jest.fn(),
+        failStep: vi.fn(),
       } as unknown as StepExecutionRuntime;
 
       const scopeStepExecutionRuntime2 = {
         stepExecution: { id: 'nested-step-2' },
-        failStep: jest.fn(),
+        failStep: vi.fn(),
       } as unknown as StepExecutionRuntime;
 
-      (stepExecutionRuntimeFactoryMock.createStepExecutionRuntime as jest.Mock)
+      (stepExecutionRuntimeFactoryMock.createStepExecutionRuntime as Mock)
         .mockReturnValueOnce(scopeStepExecutionRuntime1)
         .mockReturnValueOnce(scopeStepExecutionRuntime2);
 
@@ -210,12 +216,12 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       const startTime = new Date().getTime() - 90000; // 90 seconds ago (exceeds 60s timeout)
       mockParseDuration.mockReturnValue(60000); // 60 seconds
 
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
       // Mock empty scope stack (no nested scopes to fail)
-      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as Mock).mockReturnValue(true);
 
       impl.monitor(monitoredStepExecutionRuntimeMock);
 
@@ -226,7 +232,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       node.timeout = '2m'; // 2 minutes
       const startTime = new Date().getTime() - 60000; // 1 minute ago (within 2m limit)
       mockParseDuration.mockReturnValue(120000); // 2 minutes
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
@@ -242,7 +248,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       // Test seconds
       node.timeout = '30s';
       mockParseDuration.mockReturnValue(30000);
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(recentStartTime).toISOString(),
       });
       impl.monitor(monitoredStepExecutionRuntimeMock);
@@ -251,7 +257,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       // Test minutes
       node.timeout = '5m';
       mockParseDuration.mockReturnValue(300000);
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(recentStartTime).toISOString(),
       });
       impl.monitor(monitoredStepExecutionRuntimeMock);
@@ -260,7 +266,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       // Test hours
       node.timeout = '1h';
       mockParseDuration.mockReturnValue(3600000);
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(recentStartTime).toISOString(),
       });
       impl.monitor(monitoredStepExecutionRuntimeMock);
@@ -271,11 +277,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       const startTime = mockDateNow.getTime() - 90000; // 90 seconds ago (exceeds 60s timeout)
       mockParseDuration.mockReturnValue(60000); // 60 seconds
 
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
-      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as Mock).mockReturnValue(true);
 
       impl.monitor(monitoredStepExecutionRuntimeMock);
 
@@ -286,7 +292,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     it('should return resolved Promise in all cases', async () => {
       const startTime = new Date().getTime() - 30000;
 
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
@@ -298,7 +304,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       const startTime = new Date().getTime() - 60000; // exactly 60 seconds ago
       mockParseDuration.mockReturnValue(60000); // exactly 60 seconds timeout
 
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
@@ -312,11 +318,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       const startTime = new Date().getTime() - 60001; // 60001ms ago (just over 60s timeout)
       mockParseDuration.mockReturnValue(60000); // 60 seconds
 
-      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = vi.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
-      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as Mock).mockReturnValue(true);
 
       impl.monitor(monitoredStepExecutionRuntimeMock);
 

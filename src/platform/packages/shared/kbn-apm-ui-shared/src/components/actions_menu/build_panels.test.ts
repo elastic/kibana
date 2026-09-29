@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { EuiThemeComputed } from '@elastic/eui';
 import { buildPanels } from './build_panels';
 import type { ActionGroups } from './types';
@@ -18,10 +21,10 @@ const euiTheme = {
 } as unknown as EuiThemeComputed;
 
 describe('buildPanels', () => {
-  let closePopover: jest.Mock;
+  let closePopover: Mock;
 
   beforeEach(() => {
-    closePopover = jest.fn();
+    closePopover = vi.fn();
   });
 
   it('returns a single main panel with id 0 when actions are empty', () => {
@@ -48,7 +51,7 @@ describe('buildPanels', () => {
             {
               id: 'openInDiscover',
               name: 'Open in Discover',
-              onClick: jest.fn(),
+              onClick: vi.fn(),
               ebt: { action: 'openInDiscover', element: 'el' },
             },
           ],
@@ -73,7 +76,7 @@ describe('buildPanels', () => {
 
   describe('direct action items', () => {
     it('calls action onClick and closePopover when the item is clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const actions: ActionGroups = [
         {
           id: 'g1',
@@ -122,7 +125,7 @@ describe('buildPanels', () => {
             {
               id: 'a',
               name: 'A',
-              onClick: jest.fn(),
+              onClick: vi.fn(),
               ebt: { action: 'openInDiscover', element: 'tracesPage' },
             },
           ],
@@ -149,7 +152,7 @@ describe('buildPanels', () => {
                 {
                   id: 'child',
                   name: 'Child',
-                  onClick: jest.fn(),
+                  onClick: vi.fn(),
                   ebt: { action: 'b', element: 'e' },
                 },
               ],
@@ -164,7 +167,7 @@ describe('buildPanels', () => {
     });
 
     it('calls sub-item onClick and closePopover when a sub-item is clicked', () => {
-      const subItemClick = jest.fn();
+      const subItemClick = vi.fn();
       const actions: ActionGroups = [
         {
           id: 'g1',
@@ -232,7 +235,7 @@ describe('buildPanels', () => {
                 {
                   id: 'valid',
                   name: 'Valid',
-                  onClick: jest.fn(),
+                  onClick: vi.fn(),
                   ebt: { action: 'b', element: 'e' },
                 },
                 { id: 'invalid', name: 'Invalid', ebt: { action: 'c', element: 'e' } },
@@ -247,7 +250,7 @@ describe('buildPanels', () => {
     });
 
     it('falls back to a direct action when all sub-items are filtered out', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const actions: ActionGroups = [
         {
           id: 'g1',
@@ -279,7 +282,7 @@ describe('buildPanels', () => {
               name: 'First',
               ebt: { action: 'a', element: 'e' },
               items: [
-                { id: 'f1', name: 'F1', onClick: jest.fn(), ebt: { action: 'b', element: 'e' } },
+                { id: 'f1', name: 'F1', onClick: vi.fn(), ebt: { action: 'b', element: 'e' } },
               ],
             },
             {
@@ -287,7 +290,7 @@ describe('buildPanels', () => {
               name: 'Second',
               ebt: { action: 'c', element: 'e' },
               items: [
-                { id: 's1', name: 'S1', onClick: jest.fn(), ebt: { action: 'd', element: 'e' } },
+                { id: 's1', name: 'S1', onClick: vi.fn(), ebt: { action: 'd', element: 'e' } },
               ],
             },
           ],

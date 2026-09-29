@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 
@@ -54,7 +56,7 @@ describe('query builder', () => {
   });
 
   describe('buildUnitedIndexQuery', () => {
-    let soClient: jest.Mocked<SavedObjectsClientContract>;
+    let soClient: Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
       soClient = savedObjectsClientMock.create();

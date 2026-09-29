@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackageClient } from '@kbn/fleet-plugin/server';
 import type { KibanaAssetReference, KibanaSavedObjectType } from '@kbn/fleet-plugin/common';
@@ -19,7 +22,7 @@ import { savedQuerySavedObjectType } from '../../../common/types';
 
 describe('saved query utils', () => {
   const mockPackageService = {
-    getInstallation: jest.fn(),
+    getInstallation: vi.fn(),
   } as unknown as PackageClient;
 
   const mockSavedObjectsClient = {} as SavedObjectsClientContract;
@@ -35,12 +38,12 @@ describe('saved query utils', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getInstalledSavedQueriesMap', () => {
     it('should return empty object when no installation found', async () => {
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(null);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(null);
 
       const result = await getInstalledSavedQueriesMap(
         mockPackageService,
@@ -71,7 +74,7 @@ describe('saved query utils', () => {
         installed_kibana: [mockSavedQueryAsset, mockOtherAsset],
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await getInstalledSavedQueriesMap(
         mockPackageService,
@@ -89,7 +92,7 @@ describe('saved query utils', () => {
         installed_kibana: [mockSavedQueryAsset, mockOtherAsset],
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await getInstalledSavedQueriesMap(
         mockPackageService,
@@ -112,7 +115,7 @@ describe('saved query utils', () => {
         },
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await getInstalledSavedQueriesMap(
         mockPackageService,
@@ -135,7 +138,7 @@ describe('saved query utils', () => {
         },
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await getInstalledSavedQueriesMap(
         mockPackageService,
@@ -156,7 +159,7 @@ describe('saved query utils', () => {
         ],
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await getInstalledSavedQueriesMap(
         mockPackageService,
@@ -173,7 +176,7 @@ describe('saved query utils', () => {
 
   describe('getPrebuiltSavedQueryIds', () => {
     it('should return empty array when no installation found', async () => {
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(null);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(null);
 
       const result = await getPrebuiltSavedQueryIds(mockPackageService);
 
@@ -197,7 +200,7 @@ describe('saved query utils', () => {
         ],
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await getPrebuiltSavedQueryIds(mockPackageService);
 
@@ -213,7 +216,7 @@ describe('saved query utils', () => {
         ],
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await getPrebuiltSavedQueryIds(mockPackageService);
 
@@ -225,7 +228,7 @@ describe('saved query utils', () => {
     const savedQueryId = 'test-saved-query';
 
     it('should return false when no installation found', async () => {
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(null);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(null);
 
       const result = await isSavedQueryPrebuilt(
         mockPackageService,
@@ -258,7 +261,7 @@ describe('saved query utils', () => {
         installed_kibana: [{ id: savedQueryId, type: savedQuerySavedObjectType }, mockOtherAsset],
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await isSavedQueryPrebuilt(
         mockPackageService,
@@ -275,7 +278,7 @@ describe('saved query utils', () => {
         installed_kibana: [{ id: savedQueryId, type: savedQuerySavedObjectType }, mockOtherAsset],
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await isSavedQueryPrebuilt(
         mockPackageService,
@@ -297,7 +300,7 @@ describe('saved query utils', () => {
         },
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await isSavedQueryPrebuilt(
         mockPackageService,
@@ -319,7 +322,7 @@ describe('saved query utils', () => {
         },
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await isSavedQueryPrebuilt(
         mockPackageService,
@@ -337,7 +340,7 @@ describe('saved query utils', () => {
         installed_kibana: [{ id: savedQueryId, type: 'wrong-type' }, mockOtherAsset],
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await isSavedQueryPrebuilt(
         mockPackageService,
@@ -359,7 +362,7 @@ describe('saved query utils', () => {
         },
       };
 
-      (mockPackageService.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
+      (mockPackageService.getInstallation as Mock).mockResolvedValue(mockInstallation);
 
       const result = await isSavedQueryPrebuilt(
         mockPackageService,

@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import commander from 'commander';
 
 import './command';
 
 describe('Commander extensions', () => {
-  const mockExit = jest.fn((exitCode) => {
+  const mockExit = vi.fn((exitCode) => {
     // Prevent exiting from shell, let's throw something instead.
     throw new Error('Exit ' + exitCode);
   });

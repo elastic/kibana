@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 
 import { useStartServices } from '../../hooks';
@@ -14,37 +17,49 @@ import { getYamlFormatters } from '../../services/yaml_formatters';
 
 import { useFetchFullPolicy } from './hooks';
 
-jest.mock('../../hooks', () => ({
-  ...jest.requireActual('../../hooks'),
-  useStartServices: jest.fn(),
-}));
+vi.mock('../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks')),
+      useStartServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_request/agent_policy', () => ({
-  sendGetOneAgentPolicyFull: jest.fn(),
-}));
+vi.mock('../../hooks/use_request/agent_policy', () => {
+      const mocked = {
+      sendGetOneAgentPolicyFull: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_request', () => ({
-  ...jest.requireActual('../../hooks/use_request'),
-  sendCreateStandaloneAgentAPIKey: jest.fn(),
-}));
+vi.mock('../../hooks/use_request', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks/use_request')),
+      sendCreateStandaloneAgentAPIKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/yaml_formatters', () => ({
-  getYamlFormatters: jest.fn(),
-}));
+vi.mock('../../services/yaml_formatters', () => {
+      const mocked = {
+      getYamlFormatters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNotificationsToasts = { addError: jest.fn() };
+const mockNotificationsToasts = { addError: vi.fn() };
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (useStartServices as jest.Mock).mockReturnValue({
+  vi.clearAllMocks();
+  (useStartServices as Mock).mockReturnValue({
     notifications: { toasts: mockNotificationsToasts },
     http: { basePath: { prepend: (path: string) => path } },
   });
-  (sendCreateStandaloneAgentAPIKey as jest.Mock).mockResolvedValue({
+  (sendCreateStandaloneAgentAPIKey as Mock).mockResolvedValue({
     item: { id: 'key-id', api_key: 'key-value', encoded: 'encoded-key' },
   });
 });
@@ -53,9 +68,9 @@ const mockAgentPolicy = { id: 'policy-1' } as any;
 
 describe('useFetchFullPolicy — downloadYaml', () => {
   function mockAnchorElement() {
-    const mockLink = { href: '', download: '', click: jest.fn() };
+    const mockLink = { href: '', download: '', click: vi.fn() };
     const original = document.createElement.bind(document);
-    jest
+    vi
       .spyOn(document, 'createElement')
       .mockImplementation((tag, ...args) =>
         tag === 'a' ? (mockLink as any) : original(tag, ...args)
@@ -65,7 +80,7 @@ describe('useFetchFullPolicy — downloadYaml', () => {
 
   it('URL-encodes YAML content in the data URI so # characters are not truncated', async () => {
     const yamlWithComment = '# This is a comment\nkey: value\n';
-    (sendGetOneAgentPolicyFull as jest.Mock).mockResolvedValue({
+    (sendGetOneAgentPolicyFull as Mock).mockResolvedValue({
       data: { item: yamlWithComment },
     });
 
@@ -83,7 +98,7 @@ describe('useFetchFullPolicy — downloadYaml', () => {
 
   it('clipboard yaml and downloaded file content are identical after encoding/decoding', async () => {
     const yamlWithSpecialChars = '# comment\nkey: value & more\nurl: http://host?a=1\n';
-    (sendGetOneAgentPolicyFull as jest.Mock).mockResolvedValue({
+    (sendGetOneAgentPolicyFull as Mock).mockResolvedValue({
       data: { item: yamlWithSpecialChars },
     });
 
@@ -101,11 +116,11 @@ describe('useFetchFullPolicy — downloadYaml', () => {
     const policyObject = { outputs: { default: { type: 'elasticsearch' } } };
     const formattedYaml = '# auto-generated\noutputs:\n  default:\n    type: elasticsearch\n';
 
-    (sendGetOneAgentPolicyFull as jest.Mock).mockResolvedValue({
+    (sendGetOneAgentPolicyFull as Mock).mockResolvedValue({
       data: { item: policyObject },
     });
-    (getYamlFormatters as jest.Mock).mockResolvedValue({
-      fullAgentPolicyToYaml: jest.fn().mockReturnValue(formattedYaml),
+    (getYamlFormatters as Mock).mockResolvedValue({
+      fullAgentPolicyToYaml: vi.fn().mockReturnValue(formattedYaml),
     });
 
     const { result } = renderHook(() => useFetchFullPolicy(mockAgentPolicy, 'IS_NOT_KUBERNETES'));

@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const storeApplicationUsageMock = jest.fn();
-jest.doMock('./store_application_usage', () => ({
-  storeApplicationUsage: storeApplicationUsageMock,
-}));
+import { vi } from 'vitest';
+
+export const storeApplicationUsageMock = vi.fn();
+vi.doMock('./store_application_usage', () => {
+      const mocked = {
+      storeApplicationUsage: storeApplicationUsageMock,
+    };
+      return { ...mocked, default: mocked };
+    });

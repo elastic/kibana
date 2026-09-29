@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitFor, screen } from '@testing-library/react';
@@ -14,9 +17,9 @@ import { basicCase, tags } from '../../../containers/mock';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { EditTagsFlyout } from './edit_tags_flyout';
 
-jest.mock('../../../containers/use_get_tags');
+vi.mock('../../../containers/use_get_tags');
 
-const useGetTagsMock = useGetTags as jest.Mock;
+const useGetTagsMock = useGetTags as Mock;
 
 describe('EditTagsFlyout', () => {
   /**
@@ -26,14 +29,14 @@ describe('EditTagsFlyout', () => {
    */
   const props = {
     selectedCases: [basicCase],
-    onClose: jest.fn(),
-    onSaveTags: jest.fn(),
+    onClose: vi.fn(),
+    onSaveTags: vi.fn(),
   };
 
   useGetTagsMock.mockReturnValue({ isLoading: false, data: tags });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

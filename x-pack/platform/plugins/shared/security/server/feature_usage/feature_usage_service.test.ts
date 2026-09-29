@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SecurityFeatureUsageService } from './feature_usage_service';
 
 describe('#setup', () => {
   it('registers all known security features', () => {
-    const featureUsage = { register: jest.fn() };
+    const featureUsage = { register: vi.fn() };
     const securityFeatureUsage = new SecurityFeatureUsageService();
     securityFeatureUsage.setup({ featureUsage });
     expect(featureUsage.register).toHaveBeenCalledTimes(3);
@@ -25,7 +27,7 @@ describe('#setup', () => {
 
 describe('start contract', () => {
   it('notifies when sub-feature privileges are in use', () => {
-    const featureUsage = { notifyUsage: jest.fn(), getLastUsages: jest.fn() };
+    const featureUsage = { notifyUsage: vi.fn(), getLastUsages: vi.fn() };
     const securityFeatureUsage = new SecurityFeatureUsageService();
     const startContract = securityFeatureUsage.start({ featureUsage });
     startContract.recordSubFeaturePrivilegeUsage();
@@ -34,7 +36,7 @@ describe('start contract', () => {
   });
 
   it('notifies when pre-access agreement is used', () => {
-    const featureUsage = { notifyUsage: jest.fn(), getLastUsages: jest.fn() };
+    const featureUsage = { notifyUsage: vi.fn(), getLastUsages: vi.fn() };
     const securityFeatureUsage = new SecurityFeatureUsageService();
     const startContract = securityFeatureUsage.start({ featureUsage });
     startContract.recordPreAccessAgreementUsage();
@@ -43,7 +45,7 @@ describe('start contract', () => {
   });
 
   it('notifies when audit logging is used', () => {
-    const featureUsage = { notifyUsage: jest.fn(), getLastUsages: jest.fn() };
+    const featureUsage = { notifyUsage: vi.fn(), getLastUsages: vi.fn() };
     const securityFeatureUsage = new SecurityFeatureUsageService();
     const startContract = securityFeatureUsage.start({ featureUsage });
     startContract.recordAuditLoggingUsage();

@@ -5,40 +5,54 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useListAiIndices } from './use_list_ai_indices';
 
-const mockAddErrorToast = jest.fn();
+const mockAddErrorToast = vi.fn();
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        get: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('../use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {
+            get: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_toasts', () => ({
-  useToasts: () => ({
-    addErrorToast: mockAddErrorToast,
-  }),
-}));
+vi.mock('../use_toasts', () => {
+      const mocked = {
+      useToasts: () => ({
+        addErrorToast: mockAddErrorToast,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-browser', () => ({
-  formatAgentBuilderErrorMessage: (error: Error) => error.message,
-}));
+vi.mock('@kbn/agent-builder-browser', () => {
+      const mocked = {
+      formatAgentBuilderErrorMessage: (error: Error) => error.message,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useQuery } = jest.requireMock('@kbn/react-query');
+const { useQuery } = (await vi.importMock('@kbn/react-query'));
 
 describe('useListAiIndices', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows an error toast when the list request fails', async () => {

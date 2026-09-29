@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@kbn/code-editor-mock/jest_helper';
 import type { LocationDescriptorObject } from 'history';
@@ -20,26 +22,35 @@ import { Watch } from '../../models/watch';
 import { deleteWatches, useLoadWatches } from '../../lib/api';
 import { WatchListPage } from './watch_list_page';
 
-jest.mock('../../lib/api', () => ({
-  ...jest.requireActual('../../lib/api'),
-  useLoadWatches: jest.fn(),
-  deleteWatches: jest.fn(),
-}));
+vi.mock('../../lib/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../lib/api')),
+      useLoadWatches: vi.fn(),
+      deleteWatches: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/navigation', () => ({
-  ...jest.requireActual('../../lib/navigation'),
-  goToCreateThresholdAlert: jest.fn(),
-  goToCreateAdvancedWatch: jest.fn(),
-}));
+vi.mock('../../lib/navigation', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../lib/navigation')),
+      goToCreateThresholdAlert: vi.fn(),
+      goToCreateAdvancedWatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAppContext = jest.fn();
-jest.mock('../../app_context', () => ({
-  ...jest.requireActual('../../app_context'),
-  useAppContext: () => mockUseAppContext(),
-}));
+const mockUseAppContext = vi.fn();
+vi.mock('../../app_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../app_context')),
+      useAppContext: () => mockUseAppContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useLoadWatchesMock = jest.mocked(useLoadWatches);
-const deleteWatchesMock = jest.mocked(deleteWatches);
+const useLoadWatchesMock = vi.mocked(useLoadWatches);
+const deleteWatchesMock = vi.mocked(deleteWatches);
 
 const toWatchModels = (watches: Array<ReturnType<typeof getWatch>>) =>
   watches.map((watch) => Watch.fromUpstreamJson({ ...watch }));
@@ -56,7 +67,7 @@ const setLoadWatchesResponse = ({
     isLoading,
     error,
     data,
-    resendRequest: jest.fn(),
+    resendRequest: vi.fn(),
   });
 };
 
@@ -68,7 +79,7 @@ const createAppContextValue = () => {
   );
 
   return {
-    setBreadcrumbs: jest.fn(),
+    setBreadcrumbs: vi.fn(),
     history,
     toasts: notificationServiceMock.createSetupContract().toasts,
     links: { watcherGettingStartedUrl: 'https://example.invalid/watcher' },
@@ -112,7 +123,7 @@ const watches = [watch1, watch2, watch3];
 
 describe('<WatchListPage />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAppContext.mockReturnValue(createAppContextValue());
   });
 

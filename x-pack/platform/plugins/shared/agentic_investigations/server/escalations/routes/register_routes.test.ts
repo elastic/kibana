@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import {
@@ -52,19 +55,19 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
   // Unversioned posts (e.g. the suggest-users endpoint)
   const plainPosts: RegisteredRoute[] = [];
 
-  (router.versioned.get as jest.Mock).mockImplementation((config) => ({
+  (router.versioned.get as Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => gets.push({ config, handler }),
   }));
-  (router.versioned.post as jest.Mock).mockImplementation((config) => ({
+  (router.versioned.post as Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => posts.push({ config, handler }),
   }));
-  (router.versioned.patch as jest.Mock).mockImplementation((config) => ({
+  (router.versioned.patch as Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => patches.push({ config, handler }),
   }));
-  (router.versioned.put as jest.Mock).mockImplementation((config) => ({
+  (router.versioned.put as Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => puts.push({ config, handler }),
   }));
-  (router.post as jest.Mock).mockImplementation((config, handler: Handler) =>
+  (router.post as Mock).mockImplementation((config, handler: Handler) =>
     plainPosts.push({ config, handler })
   );
 
@@ -72,9 +75,9 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
     router,
     logger: loggingSystemMock.createLogger(),
     getEscalationsService: () => service as EscalationsService,
-    getAssignmentsService: jest.fn() as unknown as () => AssignmentsService,
+    getAssignmentsService: vi.fn() as unknown as () => AssignmentsService,
     getSpaceId: () => 'default',
-    getSecurity: jest.fn().mockResolvedValue(undefined),
+    getSecurity: vi.fn().mockResolvedValue(undefined),
   } as unknown as EscalationRouteDependencies);
 
   const byPath = (routes: RegisteredRoute[], path: string) =>
@@ -85,7 +88,7 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
 
 describe('escalation routes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('privilege wiring', () => {
@@ -164,7 +167,7 @@ describe('escalation routes', () => {
 
   describe('create escalation handler', () => {
     it('calls service.create and returns 200 with the escalation', async () => {
-      const create = jest.fn().mockResolvedValue(MOCK_ESCALATION);
+      const create = vi.fn().mockResolvedValue(MOCK_ESCALATION);
       const { byPath, posts } = registerAndCollect({ create });
       const response = httpServerMock.createResponseFactory();
 
@@ -185,7 +188,7 @@ describe('escalation routes', () => {
     });
 
     it('maps InvalidLinkedInvestigationError to 400', async () => {
-      const create = jest
+      const create = vi
         .fn()
         .mockRejectedValue(new InvalidLinkedInvestigationError('not-an-investigation'));
       const { byPath, posts } = registerAndCollect({ create });
@@ -203,7 +206,7 @@ describe('escalation routes', () => {
     });
 
     it('maps a conversationNotFound AgentBuilderError to 404', async () => {
-      const create = jest
+      const create = vi
         .fn()
         .mockRejectedValue(createConversationNotFoundError({ conversationId: 'inv-1' }));
       const { byPath, posts } = registerAndCollect({ create });
@@ -223,7 +226,7 @@ describe('escalation routes', () => {
     });
 
     it('maps an unknown error to 500', async () => {
-      const create = jest.fn().mockRejectedValue(new Error('unexpected'));
+      const create = vi.fn().mockRejectedValue(new Error('unexpected'));
       const { byPath, posts } = registerAndCollect({ create });
       const response = httpServerMock.createResponseFactory();
 
@@ -248,7 +251,7 @@ describe('escalation routes', () => {
     };
 
     it('calls service.list with request.query and returns 200', async () => {
-      const list = jest.fn().mockResolvedValue(MOCK_LIST_RESPONSE);
+      const list = vi.fn().mockResolvedValue(MOCK_LIST_RESPONSE);
       const { byPath, gets } = registerAndCollect({ list });
       const response = httpServerMock.createResponseFactory();
 
@@ -263,7 +266,7 @@ describe('escalation routes', () => {
     });
 
     it('maps an unknown error to 500', async () => {
-      const list = jest.fn().mockRejectedValue(new Error('unexpected'));
+      const list = vi.fn().mockRejectedValue(new Error('unexpected'));
       const { byPath, gets } = registerAndCollect({ list });
       const response = httpServerMock.createResponseFactory();
 
@@ -279,7 +282,7 @@ describe('escalation routes', () => {
     });
 
     it('maps a conversationNotFound AgentBuilderError to 404', async () => {
-      const list = jest
+      const list = vi
         .fn()
         .mockRejectedValue(createConversationNotFoundError({ conversationId: 'inv-1' }));
       const { byPath, gets } = registerAndCollect({ list });
@@ -306,7 +309,7 @@ describe('escalation routes', () => {
     };
 
     it('calls service.listLinkedInvestigations with the escalation id from params and returns 200', async () => {
-      const listLinkedInvestigations = jest.fn().mockResolvedValue(MOCK_LINKED_RESPONSE);
+      const listLinkedInvestigations = vi.fn().mockResolvedValue(MOCK_LINKED_RESPONSE);
       const { byPath, gets } = registerAndCollect({ listLinkedInvestigations });
       const response = httpServerMock.createResponseFactory();
 
@@ -324,7 +327,7 @@ describe('escalation routes', () => {
     });
 
     it('maps NotAnEscalationError to 404', async () => {
-      const listLinkedInvestigations = jest
+      const listLinkedInvestigations = vi
         .fn()
         .mockRejectedValue(new NotAnEscalationError('conv-1'));
       const { byPath, gets } = registerAndCollect({ listLinkedInvestigations });
@@ -342,7 +345,7 @@ describe('escalation routes', () => {
     });
 
     it('maps a conversationNotFound AgentBuilderError to 404 (inaccessible escalation)', async () => {
-      const listLinkedInvestigations = jest
+      const listLinkedInvestigations = vi
         .fn()
         .mockRejectedValue(createConversationNotFoundError({ conversationId: 'escalation-1' }));
       const { byPath, gets } = registerAndCollect({ listLinkedInvestigations });
@@ -360,7 +363,7 @@ describe('escalation routes', () => {
     });
 
     it('maps an unknown error to 500', async () => {
-      const listLinkedInvestigations = jest.fn().mockRejectedValue(new Error('unexpected'));
+      const listLinkedInvestigations = vi.fn().mockRejectedValue(new Error('unexpected'));
       const { byPath, gets } = registerAndCollect({ listLinkedInvestigations });
       const response = httpServerMock.createResponseFactory();
 
@@ -378,7 +381,7 @@ describe('escalation routes', () => {
 
   describe('update escalation handler', () => {
     it('reads the escalation id from request.params, never from request.body', async () => {
-      const update = jest.fn().mockResolvedValue(MOCK_ESCALATION);
+      const update = vi.fn().mockResolvedValue(MOCK_ESCALATION);
       const { byPath, patches } = registerAndCollect({ update });
       const response = httpServerMock.createResponseFactory();
 
@@ -401,7 +404,7 @@ describe('escalation routes', () => {
     });
 
     it('maps NotAnEscalationError to 404', async () => {
-      const update = jest.fn().mockRejectedValue(new NotAnEscalationError('conv-1'));
+      const update = vi.fn().mockRejectedValue(new NotAnEscalationError('conv-1'));
       const { byPath, patches } = registerAndCollect({ update });
       const response = httpServerMock.createResponseFactory();
 
@@ -420,7 +423,7 @@ describe('escalation routes', () => {
     });
 
     it('maps a conversationWriteConflict to 409', async () => {
-      const update = jest
+      const update = vi
         .fn()
         .mockRejectedValue(
           createConversationWriteConflictError({ conversationId: 'escalation-1' })

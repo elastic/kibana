@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, of, toArray } from 'rxjs';
 import {
   ChatEventType,
@@ -125,16 +127,16 @@ describe('addRoundCompleteEvent', () => {
   const createDeps = () => ({
     pendingTurn: undefined,
     tracker: defaultRun.tracker,
-    getConversationState: jest.fn(() => ({})),
+    getConversationState: vi.fn(() => ({})),
     modelProvider: {
-      getUsageStats: jest.fn(() => ({ calls: [] })),
+      getUsageStats: vi.fn(() => ({ calls: [] })),
     } as unknown as ModelProvider,
     mainConnectorId: 'default-connector',
     stateManager: {} as unknown as ConversationStateManager,
     attachmentStateManager: {
-      getAccessedRefs: jest.fn(() => []),
-      getAll: jest.fn(() => []),
-      drainChanges: jest.fn(() => []),
+      getAccessedRefs: vi.fn(() => []),
+      getAll: vi.fn(() => []),
+      drainChanges: vi.fn(() => []),
     } as unknown as AttachmentStateManager,
     chatInputChanges: [],
     agentId: 'agent-1',
@@ -347,7 +349,7 @@ describe('addRoundCompleteEvent', () => {
         addRoundCompleteEvent({
           ...createDeps(),
           modelProvider: {
-            getUsageStats: jest.fn(() => ({
+            getUsageStats: vi.fn(() => ({
               calls: [
                 {
                   connectorId: 'fast-connector',
@@ -1015,13 +1017,13 @@ describe('addRoundCompleteEvent', () => {
           pendingTurn,
           tracker: run.tracker,
           attachmentStateManager: {
-            getAccessedRefs: jest.fn(() => [{ attachment_id: 'a3', version: 1 }]),
-            getAll: jest.fn(() => []),
-            drainChanges: jest.fn(() => []),
-            getAttachmentRecord: jest.fn(() => undefined),
+            getAccessedRefs: vi.fn(() => [{ attachment_id: 'a3', version: 1 }]),
+            getAll: vi.fn(() => []),
+            drainChanges: vi.fn(() => []),
+            getAttachmentRecord: vi.fn(() => undefined),
           } as unknown as AttachmentStateManager,
           modelProvider: {
-            getUsageStats: jest.fn(() => ({
+            getUsageStats: vi.fn(() => ({
               calls: [{ connectorId: 'default-connector', tokens: { prompt: 40, completion: 20 } }],
             })),
           } as unknown as ModelProvider,

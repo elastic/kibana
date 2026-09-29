@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createAppContextStartContractMock } from '../../mocks';
 import { agentPolicyService } from '../agent_policy';
 import { getAgentsByKuery } from '../agents';
@@ -15,24 +18,24 @@ import { updateAgentPolicySpaces } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './helpers';
 import { validatePackagePoliciesUniqueNameAcrossSpaces } from './policy_namespaces';
 
-jest.mock('./policy_namespaces');
-jest.mock('./helpers');
-jest.mock('../agent_policy');
-jest.mock('../package_policy');
-jest.mock('../agents');
+vi.mock('./policy_namespaces');
+vi.mock('./helpers');
+vi.mock('../agent_policy');
+vi.mock('../package_policy');
+vi.mock('../agents');
 
 const mockValidatePackagePoliciesUniqueNameAcrossSpaces =
-  validatePackagePoliciesUniqueNameAcrossSpaces as jest.Mocked<
+  validatePackagePoliciesUniqueNameAcrossSpaces as Mocked<
     typeof validatePackagePoliciesUniqueNameAcrossSpaces
   >;
 describe('updateAgentPolicySpaces', () => {
   beforeEach(() => {
-    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
-    jest.mocked(agentPolicyService.get).mockResolvedValue({
+    vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+    vi.mocked(agentPolicyService.get).mockResolvedValue({
       id: 'policy1',
       space_ids: ['default'],
     } as any);
-    jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([
+    vi.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([
       {
         id: 'package-policy-1',
         policy_ids: ['policy1'],
@@ -44,11 +47,11 @@ describe('updateAgentPolicySpaces', () => {
     ] as any);
     appContextService.start(createAppContextStartContractMock());
 
-    jest
+    vi
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension())
       .updateObjectsSpaces.mockResolvedValue({ objects: [] });
 
-    jest
+    vi
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension())
       .find.mockResolvedValue({
         total: 1,
@@ -64,13 +67,13 @@ describe('updateAgentPolicySpaces', () => {
         ],
       });
 
-    jest.mocked(getAgentsByKuery).mockResolvedValue({
+    vi.mocked(getAgentsByKuery).mockResolvedValue({
       agents: [],
     } as any);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('does nothings if agent policy is already in correct space', async () => {
@@ -91,7 +94,7 @@ describe('updateAgentPolicySpaces', () => {
   });
 
   it('does nothing if feature flag is not enabled', async () => {
-    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     const agentPolicy = {
       id: 'policy1',
       name: 'Policy 1',
@@ -136,7 +139,7 @@ describe('updateAgentPolicySpaces', () => {
     );
 
     expect(
-      jest.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension()).bulkUpdate
+      vi.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension()).bulkUpdate
     ).toHaveBeenCalledWith([
       {
         id: 'token1',
@@ -149,7 +152,7 @@ describe('updateAgentPolicySpaces', () => {
   });
 
   it('throw when trying to change space to a policy with reusable package policies', async () => {
-    jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([
+    vi.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([
       {
         id: 'package-policy-1',
         policy_ids: ['policy1'],
@@ -178,12 +181,12 @@ describe('updateAgentPolicySpaces', () => {
   });
 
   it('throw when trying to change a managed policies space', async () => {
-    jest.mocked(agentPolicyService.get).mockResolvedValue({
+    vi.mocked(agentPolicyService.get).mockResolvedValue({
       id: 'policy1',
       space_ids: ['default'],
       is_managed: true,
     } as any);
-    jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([] as any);
+    vi.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([] as any);
 
     const agentPolicy = {
       id: 'policy1',
@@ -233,7 +236,7 @@ describe('updateAgentPolicySpaces', () => {
   });
 
   it('throw when policy name already exists on another space', async () => {
-    jest
+    vi
       .mocked(mockValidatePackagePoliciesUniqueNameAcrossSpaces)
       .mockRejectedValueOnce(new Error('Name already exists'));
 

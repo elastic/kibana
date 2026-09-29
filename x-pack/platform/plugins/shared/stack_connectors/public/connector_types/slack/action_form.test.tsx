@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ActionForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
@@ -18,40 +21,42 @@ import { getConnectorType as getSlackConnectorType } from './slack';
 import { getSlackApiConnectorType } from '../slack_api';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn(() => false),
-  useUiSetting$: jest.fn((value: string) => ['0,0']),
-}));
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors');
-jest.mock(
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
+      const mocked = {
+      useUiSetting: vi.fn(() => false),
+      useUiSetting$: vi.fn((value: string) => ['0,0']),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors');
+vi.mock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'
 );
-jest.mock(
+vi.mock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/execute',
-  () => ({
-    executeAction: async () => ({
-      status: 'ok',
-      data: {
-        ok: true,
-        channels: [
-          {
-            id: 'channel-id',
-            name: 'channel-name',
+  () => {
+      const mocked = {
+        executeAction: async () => ({
+          status: 'ok',
+          data: {
+            ok: true,
+            channels: [
+              {
+                id: 'channel-id',
+                name: 'channel-name',
+              },
+            ],
           },
-        ],
-      },
-      connector_id: '.slack_api',
-    }),
-  })
+          connector_id: '.slack_api',
+        }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-const { loadAllActions } = jest.requireMock(
-  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors'
-);
-const { loadActionTypes } = jest.requireMock(
-  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'
-);
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const { loadAllActions } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors'));
+const { loadActionTypes } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'));
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -111,20 +116,20 @@ const baseProps = {
   actionTypeRegistry,
   minimumThrottleInterval: [1, 'm'] as [number | undefined, string],
   producerId: 'infratstructure',
-  setActions: jest.fn(),
-  setActionIdByIndex: jest.fn(),
-  setActionParamsProperty: jest.fn(),
-  setActionFrequencyProperty: jest.fn(),
-  setActionAlertsFilterProperty: jest.fn(),
+  setActions: vi.fn(),
+  setActionIdByIndex: vi.fn(),
+  setActionParamsProperty: vi.fn(),
+  setActionFrequencyProperty: vi.fn(),
+  setActionAlertsFilterProperty: vi.fn(),
 };
 
 const mockToasts = {
-  danger: jest.fn(),
-  warning: jest.fn(),
+  danger: vi.fn(),
+  warning: vi.fn(),
 };
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
   return {
     ...original,
     useKibana: () => ({
@@ -137,9 +142,9 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 describe('ActionForm - Slack API Connector', () => {
   beforeAll(() => {
     useKibanaMock().services.notifications.toasts = {
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
-      addDanger: jest.fn(),
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
+      addDanger: vi.fn(),
     } as unknown as IToasts;
 
     useKibanaMock().services.application.capabilities = {

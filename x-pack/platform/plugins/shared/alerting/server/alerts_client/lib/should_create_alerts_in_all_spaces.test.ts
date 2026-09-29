@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { shouldCreateAlertsInAllSpaces } from './should_create_alerts_in_all_spaces';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -11,7 +13,7 @@ const logger = loggingSystemMock.createLogger();
 
 describe('shouldCreateAlertsInAllSpaces', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('returns false if alert definition is undefined', () => {
     expect(

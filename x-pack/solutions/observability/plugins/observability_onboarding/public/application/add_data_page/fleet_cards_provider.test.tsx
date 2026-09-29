@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
 import React, { useEffect } from 'react';
@@ -12,18 +14,21 @@ import { MemoryRouter } from 'react-router-dom';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { FleetCardsProvider, useFleetCards } from './fleet_cards_provider';
 
-const mockUseAvailablePackages = jest.fn();
-const mockAvailablePackagesHook = jest.fn();
-const mockUseGetSettingsQuery = jest.fn();
+const mockUseAvailablePackages = vi.fn();
+const mockAvailablePackagesHook = vi.fn();
+const mockUseGetSettingsQuery = vi.fn();
 
 // Both hooks are stubbed rather than pulled from the real module: requiring it
 // executes Fleet's whole public bundle, which costs more than Jest's timeout on a
 // cold cache. Nothing here searches, so the search index hook is never called.
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  LocalSearchHook: () => Promise.resolve({ useLocalSearch: jest.fn() }),
-  AvailablePackagesHook: () => mockAvailablePackagesHook(),
-  useGetSettingsQuery: (options: { enabled?: boolean }) => mockUseGetSettingsQuery(options),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      LocalSearchHook: () => Promise.resolve({ useLocalSearch: vi.fn() }),
+      AvailablePackagesHook: () => mockAvailablePackagesHook(),
+      useGetSettingsQuery: (options: { enabled?: boolean }) => mockUseGetSettingsQuery(options),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const redisCard = {
   id: 'epr:redis',
@@ -37,8 +42,8 @@ const redisCard = {
   integration: '',
 };
 
-const onMount = jest.fn();
-const onRender = jest.fn();
+const onMount = vi.fn();
+const onRender = vi.fn();
 
 const Consumer = () => {
   const { allCards } = useFleetCards();
@@ -77,7 +82,7 @@ const prereleaseFlagOf = (call: unknown[]) =>
   (call[0] as { prereleaseIntegrationsEnabled: boolean }).prereleaseIntegrationsEnabled;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockAvailablePackagesHook.mockResolvedValue({ useAvailablePackages: mockUseAvailablePackages });
   mockUseAvailablePackages.mockReturnValue({
     isLoading: false,

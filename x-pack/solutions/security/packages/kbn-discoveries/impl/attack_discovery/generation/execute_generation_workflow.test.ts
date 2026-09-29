@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -15,59 +18,89 @@ import { executeGenerationWorkflow } from './execute_generation_workflow';
 import { WorkflowExecutionAuthorizationError } from './assert_authorized_to_execute_workflows';
 import type { GetStartServices } from './types';
 
-const mockWriteAttackDiscoveryEvent = jest.fn();
-const mockFetchAnonymizationFields = jest.fn();
-const mockRefreshEventLogIndex = jest.fn().mockResolvedValue(undefined);
-const mockRunManualOrchestration = jest.fn();
+const mockWriteAttackDiscoveryEvent = vi.fn();
+const mockFetchAnonymizationFields = vi.fn();
+const mockRefreshEventLogIndex = vi.fn().mockResolvedValue(undefined);
+const mockRunManualOrchestration = vi.fn();
 
-jest.mock('./get_workflow_loading_message', () => ({
-  getWorkflowLoadingMessage: () => 'loading...',
-}));
+vi.mock('./get_workflow_loading_message', () => {
+      const mocked = {
+      getWorkflowLoadingMessage: () => 'loading...',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/persistence', () => ({
-  getDurationNanoseconds: () => '1000000',
-}));
+vi.mock('../../lib/persistence', () => {
+      const mocked = {
+      getDurationNanoseconds: () => '1000000',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetSpaceId = jest.fn();
-jest.mock('../../lib/helpers/get_space_id', () => ({
-  getSpaceId: (...args: unknown[]) => mockGetSpaceId(...args),
-}));
+const mockGetSpaceId = vi.fn();
+vi.mock('../../lib/helpers/get_space_id', () => {
+      const mocked = {
+      getSpaceId: (...args: unknown[]) => mockGetSpaceId(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBuildResolveConnector = jest.fn();
-jest.mock('./build_resolve_connector', () => ({
-  buildResolveConnector: (...args: unknown[]) => mockBuildResolveConnector(...args),
-}));
+const mockBuildResolveConnector = vi.fn();
+vi.mock('./build_resolve_connector', () => {
+      const mocked = {
+      buildResolveConnector: (...args: unknown[]) => mockBuildResolveConnector(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsWorkflowsEnabled = jest.fn();
-jest.mock('../../lib/helpers/is_workflows_enabled', () => ({
-  isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
-}));
+const mockIsWorkflowsEnabled = vi.fn();
+vi.mock('../../lib/helpers/is_workflows_enabled', () => {
+      const mocked = {
+      isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./fetch_anonymization_fields', () => ({
-  fetchAnonymizationFields: (...args: unknown[]) => mockFetchAnonymizationFields(...args),
-}));
+vi.mock('./fetch_anonymization_fields', () => {
+      const mocked = {
+      fetchAnonymizationFields: (...args: unknown[]) => mockFetchAnonymizationFields(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./refresh_event_log_index', () => ({
-  refreshEventLogIndex: (...args: unknown[]) => mockRefreshEventLogIndex(...args),
-}));
+vi.mock('./refresh_event_log_index', () => {
+      const mocked = {
+      refreshEventLogIndex: (...args: unknown[]) => mockRefreshEventLogIndex(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./run_manual_orchestration', () => ({
-  ...jest.requireActual('./run_manual_orchestration/helpers/pipeline_step_error'),
-  runManualOrchestration: (...args: unknown[]) => mockRunManualOrchestration(...args),
-}));
+vi.mock('./run_manual_orchestration', async () => {
+      const mocked = {
+      ...(await vi.importActual('./run_manual_orchestration/helpers/pipeline_step_error')),
+      runManualOrchestration: (...args: unknown[]) => mockRunManualOrchestration(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReportWorkflowSuccess = jest.fn();
-const mockReportWorkflowError = jest.fn();
-jest.mock('../../lib/telemetry/report_workflow_telemetry', () => ({
-  reportWorkflowError: (...args: unknown[]) => mockReportWorkflowError(...args),
-  reportWorkflowSuccess: (...args: unknown[]) => mockReportWorkflowSuccess(...args),
-}));
+const mockReportWorkflowSuccess = vi.fn();
+const mockReportWorkflowError = vi.fn();
+vi.mock('../../lib/telemetry/report_workflow_telemetry', () => {
+      const mocked = {
+      reportWorkflowError: (...args: unknown[]) => mockReportWorkflowError(...args),
+      reportWorkflowSuccess: (...args: unknown[]) => mockReportWorkflowSuccess(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAnonymizationFields = [
   {
@@ -112,19 +145,19 @@ const createUnauthorizedAuthzMock = () =>
 
 describe('executeGenerationWorkflow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockFetchAnonymizationFields.mockResolvedValue(mockAnonymizationFields);
     mockRunManualOrchestration.mockResolvedValue({ outcome: 'validation_succeeded' });
     mockIsWorkflowsEnabled.mockResolvedValue(true);
     mockGetSpaceId.mockReturnValue('default');
-    mockBuildResolveConnector.mockReturnValue(jest.fn().mockResolvedValue({}));
+    mockBuildResolveConnector.mockReturnValue(vi.fn().mockResolvedValue({}));
   });
 
   it('writes generation-started event without stub workflowRunId', async () => {
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
@@ -132,16 +165,16 @@ describe('executeGenerationWorkflow', () => {
           asScoped: () => ({
             asCurrentUser: {
               indices: {
-                refresh: jest.fn().mockResolvedValue(undefined),
+                refresh: vi.fn().mockResolvedValue(undefined),
               },
               security: {
-                authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+                authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }),
               },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const pluginsStartMock: Record<string, unknown> = {};
@@ -164,10 +197,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: mockGetStartServices,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -180,11 +213,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -200,9 +233,9 @@ describe('executeGenerationWorkflow', () => {
   });
 
   it('fetches anonymization fields and passes them to runManualOrchestration', async () => {
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
@@ -210,16 +243,16 @@ describe('executeGenerationWorkflow', () => {
           asScoped: () => ({
             asCurrentUser: {
               indices: {
-                refresh: jest.fn().mockResolvedValue(undefined),
+                refresh: vi.fn().mockResolvedValue(undefined),
               },
               security: {
-                authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+                authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }),
               },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const pluginsStartMock: Record<string, unknown> = {};
@@ -242,10 +275,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: mockGetStartServices,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -258,11 +291,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -297,9 +330,9 @@ describe('executeGenerationWorkflow', () => {
 
     mockRunManualOrchestration.mockResolvedValue(mockOutcome);
 
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
@@ -307,16 +340,16 @@ describe('executeGenerationWorkflow', () => {
           asScoped: () => ({
             asCurrentUser: {
               indices: {
-                refresh: jest.fn().mockResolvedValue(undefined),
+                refresh: vi.fn().mockResolvedValue(undefined),
               },
               security: {
-                authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+                authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }),
               },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const pluginsStartMock: Record<string, unknown> = {};
@@ -339,10 +372,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: mockGetStartServices,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -355,11 +388,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -385,10 +418,10 @@ describe('executeGenerationWorkflow', () => {
 
     mockRunManualOrchestration.mockResolvedValue(mockOutcome);
 
-    const mockAnalytics = { reportEvent: jest.fn() };
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockAnalytics = { reportEvent: vi.fn() };
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
@@ -396,16 +429,16 @@ describe('executeGenerationWorkflow', () => {
           asScoped: () => ({
             asCurrentUser: {
               indices: {
-                refresh: jest.fn().mockResolvedValue(undefined),
+                refresh: vi.fn().mockResolvedValue(undefined),
               },
               security: {
-                authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+                authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }),
               },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const pluginsStartMock: Record<string, unknown> = {};
@@ -429,10 +462,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: mockGetStartServices,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -445,11 +478,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -481,23 +514,23 @@ describe('executeGenerationWorkflow', () => {
 
     mockRunManualOrchestration.mockResolvedValue(mockOutcome);
 
-    const mockAnalytics = { reportEvent: jest.fn() };
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockAnalytics = { reportEvent: vi.fn() };
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
         client: {
           asScoped: () => ({
             asCurrentUser: {
-              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+              security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const mockGetStartServices: GetStartServices = async () => ({
@@ -519,10 +552,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: mockGetStartServices,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -535,11 +568,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -571,23 +604,23 @@ describe('executeGenerationWorkflow', () => {
 
     mockRunManualOrchestration.mockResolvedValue(mockOutcome);
 
-    const mockAnalytics = { reportEvent: jest.fn() };
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockAnalytics = { reportEvent: vi.fn() };
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
         client: {
           asScoped: () => ({
             asCurrentUser: {
-              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+              security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const mockGetStartServices: GetStartServices = async () => ({
@@ -609,10 +642,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: mockGetStartServices,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -625,11 +658,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -660,23 +693,23 @@ describe('executeGenerationWorkflow', () => {
 
     mockRunManualOrchestration.mockResolvedValue(mockOutcome);
 
-    const mockAnalytics = { reportEvent: jest.fn() };
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockAnalytics = { reportEvent: vi.fn() };
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
         client: {
           asScoped: () => ({
             asCurrentUser: {
-              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+              security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const mockGetStartServices: GetStartServices = async () => ({
@@ -698,10 +731,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: mockGetStartServices,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -714,11 +747,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -729,22 +762,22 @@ describe('executeGenerationWorkflow', () => {
   });
 
   it('passes repaired workflow IDs (not original stale IDs) to runManualOrchestration', async () => {
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
         client: {
           asScoped: () => ({
             asCurrentUser: {
-              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+              security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     await executeGenerationWorkflow({
@@ -767,10 +800,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -783,11 +816,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -805,9 +838,9 @@ describe('executeGenerationWorkflow', () => {
     const anonymizationError = new Error('No anonymization fields found for space default');
     mockFetchAnonymizationFields.mockRejectedValue(anonymizationError);
 
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
@@ -815,16 +848,16 @@ describe('executeGenerationWorkflow', () => {
           asScoped: () => ({
             asCurrentUser: {
               indices: {
-                refresh: jest.fn().mockResolvedValue(undefined),
+                refresh: vi.fn().mockResolvedValue(undefined),
               },
               security: {
-                authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+                authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }),
               },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const pluginsStartMock: Record<string, unknown> = {};
@@ -848,10 +881,10 @@ describe('executeGenerationWorkflow', () => {
         getEventLogger: async () => mockEventLogger,
         getStartServices: mockGetStartServices,
         logger: {
-          debug: jest.fn(),
-          error: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
+          debug: vi.fn(),
+          error: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
         } as unknown as Logger,
         request: {} as unknown as KibanaRequest,
         type: 'attack_discovery',
@@ -864,11 +897,11 @@ describe('executeGenerationWorkflow', () => {
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
-          createWorkflow: jest.fn(),
-          getWorkflow: jest.fn(),
-          getWorkflowExecution: jest.fn(),
-          getWorkflows: jest.fn(),
-          runWorkflow: jest.fn(),
+          createWorkflow: vi.fn(),
+          getWorkflow: vi.fn(),
+          getWorkflowExecution: vi.fn(),
+          getWorkflows: vi.fn(),
+          runWorkflow: vi.fn(),
         } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
       })
     ).rejects.toThrow(anonymizationError);
@@ -885,9 +918,9 @@ describe('executeGenerationWorkflow', () => {
 
   describe('when shouldStopExecution() reports the rule was cancelled (timed out)', () => {
     const buildCancelledRunArgs = () => {
-      const mockEventLogger: jest.Mocked<IEventLogger> = {
-        logEvent: jest.fn(),
-      } as unknown as jest.Mocked<IEventLogger>;
+      const mockEventLogger: Mocked<IEventLogger> = {
+        logEvent: vi.fn(),
+      } as unknown as Mocked<IEventLogger>;
 
       const coreStartMock: CoreStart = {
         elasticsearch: {
@@ -895,16 +928,16 @@ describe('executeGenerationWorkflow', () => {
             asScoped: () => ({
               asCurrentUser: {
                 indices: {
-                  refresh: jest.fn().mockResolvedValue(undefined),
+                  refresh: vi.fn().mockResolvedValue(undefined),
                 },
                 security: {
-                  authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+                  authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }),
                 },
               },
             }),
           },
         },
-        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+        http: { basePath: { get: vi.fn().mockReturnValue('') } },
       } as unknown as CoreStart;
 
       const mockGetStartServices: GetStartServices = async () => ({
@@ -925,10 +958,10 @@ describe('executeGenerationWorkflow', () => {
         getEventLogger: async () => mockEventLogger,
         getStartServices: mockGetStartServices,
         logger: {
-          debug: jest.fn(),
-          error: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
+          debug: vi.fn(),
+          error: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
         } as unknown as Logger,
         request: {} as unknown as KibanaRequest,
         shouldStopExecution: () => true,
@@ -943,11 +976,11 @@ describe('executeGenerationWorkflow', () => {
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
-          createWorkflow: jest.fn(),
-          getWorkflow: jest.fn(),
-          getWorkflowExecution: jest.fn(),
-          getWorkflows: jest.fn(),
-          runWorkflow: jest.fn(),
+          createWorkflow: vi.fn(),
+          getWorkflow: vi.fn(),
+          getWorkflowExecution: vi.fn(),
+          getWorkflows: vi.fn(),
+          runWorkflow: vi.fn(),
         } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
       };
     };
@@ -987,23 +1020,23 @@ describe('executeGenerationWorkflow', () => {
 
     mockRunManualOrchestration.mockResolvedValue(mockOutcome);
 
-    const mockAnalytics = { reportEvent: jest.fn() };
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockAnalytics = { reportEvent: vi.fn() };
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
         client: {
           asScoped: () => ({
             asCurrentUser: {
-              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+              security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const scheduleInfo = { actions: ['action-type-1'], id: 'rule-id-1', interval: '1h' };
@@ -1022,10 +1055,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       scheduleInfo,
@@ -1039,11 +1072,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -1060,23 +1093,23 @@ describe('executeGenerationWorkflow', () => {
     const pipelineError = new Error('generation failed');
     mockRunManualOrchestration.mockRejectedValue(pipelineError);
 
-    const mockAnalytics = { reportEvent: jest.fn() };
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockAnalytics = { reportEvent: vi.fn() };
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
         client: {
           asScoped: () => ({
             asCurrentUser: {
-              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+              security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     const scheduleInfo = { actions: ['action-type-1'], id: 'rule-id-1', interval: '1h' };
@@ -1096,10 +1129,10 @@ describe('executeGenerationWorkflow', () => {
         getEventLogger: async () => mockEventLogger,
         getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
         logger: {
-          debug: jest.fn(),
-          error: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
+          debug: vi.fn(),
+          error: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
         } as unknown as Logger,
         request: {} as unknown as KibanaRequest,
         scheduleInfo,
@@ -1113,11 +1146,11 @@ describe('executeGenerationWorkflow', () => {
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
-          createWorkflow: jest.fn(),
-          getWorkflow: jest.fn(),
-          getWorkflowExecution: jest.fn(),
-          getWorkflows: jest.fn(),
-          runWorkflow: jest.fn(),
+          createWorkflow: vi.fn(),
+          getWorkflow: vi.fn(),
+          getWorkflowExecution: vi.fn(),
+          getWorkflows: vi.fn(),
+          runWorkflow: vi.fn(),
         } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
       })
     ).rejects.toThrow(pipelineError);
@@ -1149,23 +1182,23 @@ describe('executeGenerationWorkflow', () => {
 
     mockRunManualOrchestration.mockResolvedValue(mockOutcome);
 
-    const mockAnalytics = { reportEvent: jest.fn() };
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockAnalytics = { reportEvent: vi.fn() };
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
         client: {
           asScoped: () => ({
             asCurrentUser: {
-              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+              security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     await executeGenerationWorkflow({
@@ -1182,10 +1215,10 @@ describe('executeGenerationWorkflow', () => {
       getEventLogger: async () => mockEventLogger,
       getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
       } as unknown as Logger,
       request: {} as unknown as KibanaRequest,
       type: 'attack_discovery',
@@ -1198,11 +1231,11 @@ describe('executeGenerationWorkflow', () => {
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
+        createWorkflow: vi.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn(),
+        getWorkflows: vi.fn(),
+        runWorkflow: vi.fn(),
       } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
     });
 
@@ -1222,9 +1255,9 @@ describe('executeGenerationWorkflow', () => {
     );
     mockRunManualOrchestration.mockRejectedValue(pipelineError);
 
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
+    const mockEventLogger: Mocked<IEventLogger> = {
+      logEvent: vi.fn(),
+    } as unknown as Mocked<IEventLogger>;
 
     const coreStartMock: CoreStart = {
       elasticsearch: {
@@ -1232,16 +1265,16 @@ describe('executeGenerationWorkflow', () => {
           asScoped: () => ({
             asCurrentUser: {
               indices: {
-                refresh: jest.fn().mockResolvedValue(undefined),
+                refresh: vi.fn().mockResolvedValue(undefined),
               },
               security: {
-                authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+                authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }),
               },
             },
           }),
         },
       },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      http: { basePath: { get: vi.fn().mockReturnValue('') } },
     } as unknown as CoreStart;
 
     await expect(
@@ -1258,10 +1291,10 @@ describe('executeGenerationWorkflow', () => {
         getEventLogger: async () => mockEventLogger,
         getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
         logger: {
-          debug: jest.fn(),
-          error: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
+          debug: vi.fn(),
+          error: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
         } as unknown as Logger,
         request: {} as unknown as KibanaRequest,
         type: 'attack_discovery',
@@ -1274,11 +1307,11 @@ describe('executeGenerationWorkflow', () => {
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
-          createWorkflow: jest.fn(),
-          getWorkflow: jest.fn(),
-          getWorkflowExecution: jest.fn(),
-          getWorkflows: jest.fn(),
-          runWorkflow: jest.fn(),
+          createWorkflow: vi.fn(),
+          getWorkflow: vi.fn(),
+          getWorkflowExecution: vi.fn(),
+          getWorkflows: vi.fn(),
+          runWorkflow: vi.fn(),
         } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
       })
     ).rejects.toThrow(pipelineError);
@@ -1308,22 +1341,22 @@ describe('executeGenerationWorkflow', () => {
 
   describe('workflow-execution authorization guard', () => {
     const buildRunArgs = (authz: Parameters<typeof executeGenerationWorkflow>[0]['authz']) => {
-      const mockEventLogger: jest.Mocked<IEventLogger> = {
-        logEvent: jest.fn(),
-      } as unknown as jest.Mocked<IEventLogger>;
+      const mockEventLogger: Mocked<IEventLogger> = {
+        logEvent: vi.fn(),
+      } as unknown as Mocked<IEventLogger>;
 
       const coreStartMock: CoreStart = {
         elasticsearch: {
           client: {
             asScoped: () => ({
               asCurrentUser: {
-                indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-                security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+                indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+                security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
               },
             }),
           },
         },
-        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+        http: { basePath: { get: vi.fn().mockReturnValue('') } },
       } as unknown as CoreStart;
 
       return {
@@ -1339,10 +1372,10 @@ describe('executeGenerationWorkflow', () => {
         getEventLogger: async () => mockEventLogger,
         getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
         logger: {
-          debug: jest.fn(),
-          error: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
+          debug: vi.fn(),
+          error: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
         } as unknown as Logger,
         request: {} as unknown as KibanaRequest,
         type: 'attack_discovery',
@@ -1355,11 +1388,11 @@ describe('executeGenerationWorkflow', () => {
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
-          createWorkflow: jest.fn(),
-          getWorkflow: jest.fn(),
-          getWorkflowExecution: jest.fn(),
-          getWorkflows: jest.fn(),
-          runWorkflow: jest.fn(),
+          createWorkflow: vi.fn(),
+          getWorkflow: vi.fn(),
+          getWorkflowExecution: vi.fn(),
+          getWorkflows: vi.fn(),
+          runWorkflow: vi.fn(),
         } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
       };
     };
@@ -1394,11 +1427,11 @@ describe('executeGenerationWorkflow', () => {
   });
 
   describe('pipeline credential', () => {
-    const grantAsInternalUser = jest.fn();
-    const invalidateAsInternalUser = jest.fn();
-    const getCurrentUser = jest.fn();
-    const asScoped = jest.fn();
-    const checkPrivilegesWithRequest = jest.fn();
+    const grantAsInternalUser = vi.fn();
+    const invalidateAsInternalUser = vi.fn();
+    const getCurrentUser = vi.fn();
+    const asScoped = vi.fn();
+    const checkPrivilegesWithRequest = vi.fn();
 
     const grantedAuthorization = `ApiKey ${Buffer.from('granted-id:granted-secret').toString(
       'base64'
@@ -1423,13 +1456,13 @@ describe('executeGenerationWorkflow', () => {
       esClient?: unknown;
       request: KibanaRequest;
     }): Parameters<typeof executeGenerationWorkflow>[0] => {
-      const mockEventLogger: jest.Mocked<IEventLogger> = {
-        logEvent: jest.fn(),
-      } as unknown as jest.Mocked<IEventLogger>;
+      const mockEventLogger: Mocked<IEventLogger> = {
+        logEvent: vi.fn(),
+      } as unknown as Mocked<IEventLogger>;
 
       const coreStartMock: CoreStart = {
         elasticsearch: { client: { asScoped } },
-        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+        http: { basePath: { get: vi.fn().mockReturnValue('') } },
         security: {
           authc: { apiKeys: { grantAsInternalUser, invalidateAsInternalUser }, getCurrentUser },
         },
@@ -1457,10 +1490,10 @@ describe('executeGenerationWorkflow', () => {
           pluginsStart: {},
         })) as GetStartServices,
         logger: {
-          debug: jest.fn(),
-          error: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
+          debug: vi.fn(),
+          error: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
         } as unknown as Logger,
         request,
         type: 'attack_discovery' as const,
@@ -1473,11 +1506,11 @@ describe('executeGenerationWorkflow', () => {
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
-          createWorkflow: jest.fn(),
-          getWorkflow: jest.fn(),
-          getWorkflowExecution: jest.fn(),
-          getWorkflows: jest.fn(),
-          runWorkflow: jest.fn(),
+          createWorkflow: vi.fn(),
+          getWorkflow: vi.fn(),
+          getWorkflowExecution: vi.fn(),
+          getWorkflows: vi.fn(),
+          runWorkflow: vi.fn(),
         } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
       };
     };
@@ -1485,8 +1518,8 @@ describe('executeGenerationWorkflow', () => {
     beforeEach(() => {
       asScoped.mockReturnValue({
         asCurrentUser: {
-          indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-          security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+          indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+          security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
         },
       });
 
@@ -1643,8 +1676,8 @@ describe('executeGenerationWorkflow', () => {
 
     it('prefers a pre-authenticated Elasticsearch client over the granted credential', async () => {
       const preAuthenticatedEsClient = {
-        indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-        security: { authenticate: jest.fn().mockResolvedValue({ username: 'scheduled-user' }) },
+        indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+        security: { authenticate: vi.fn().mockResolvedValue({ username: 'scheduled-user' }) },
       };
 
       await executeGenerationWorkflow(
@@ -1670,12 +1703,12 @@ describe('executeGenerationWorkflow', () => {
   });
 
   describe('sub-workflow dispatch', () => {
-    const grantAsInternalUser = jest.fn();
-    const invalidateAsInternalUser = jest.fn();
-    const asScoped = jest.fn();
-    const checkPrivilegesWithRequest = jest.fn();
-    const runWorkflow = jest.fn();
-    const scheduleWorkflow = jest.fn();
+    const grantAsInternalUser = vi.fn();
+    const invalidateAsInternalUser = vi.fn();
+    const asScoped = vi.fn();
+    const checkPrivilegesWithRequest = vi.fn();
+    const runWorkflow = vi.fn();
+    const scheduleWorkflow = vi.fn();
 
     const createInteractiveRequest = (): KibanaRequest =>
       httpServerMock.createKibanaRequest({
@@ -1692,7 +1725,7 @@ describe('executeGenerationWorkflow', () => {
     const buildArgs = (request: KibanaRequest): Parameters<typeof executeGenerationWorkflow>[0] => {
       const coreStartMock: CoreStart = {
         elasticsearch: { client: { asScoped } },
-        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+        http: { basePath: { get: vi.fn().mockReturnValue('') } },
         security: {
           authc: { apiKeys: { grantAsInternalUser, invalidateAsInternalUser } },
         },
@@ -1712,16 +1745,16 @@ describe('executeGenerationWorkflow', () => {
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
         getEventLogger: async () =>
-          ({ logEvent: jest.fn() } as unknown as jest.Mocked<IEventLogger>),
+          ({ logEvent: vi.fn() } as unknown as Mocked<IEventLogger>),
         getStartServices: (async () => ({
           coreStart: coreStartMock,
           pluginsStart: {},
         })) as GetStartServices,
         logger: {
-          debug: jest.fn(),
-          error: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
+          debug: vi.fn(),
+          error: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
         } as unknown as Logger,
         request,
         type: 'attack_discovery' as const,
@@ -1734,10 +1767,10 @@ describe('executeGenerationWorkflow', () => {
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
-          createWorkflow: jest.fn(),
-          getWorkflow: jest.fn(),
-          getWorkflowExecution: jest.fn(),
-          getWorkflows: jest.fn(),
+          createWorkflow: vi.fn(),
+          getWorkflow: vi.fn(),
+          getWorkflowExecution: vi.fn(),
+          getWorkflows: vi.fn(),
           runWorkflow,
           scheduleWorkflow,
         } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
@@ -1762,8 +1795,8 @@ describe('executeGenerationWorkflow', () => {
     beforeEach(() => {
       asScoped.mockReturnValue({
         asCurrentUser: {
-          indices: { refresh: jest.fn().mockResolvedValue(undefined) },
-          security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+          indices: { refresh: vi.fn().mockResolvedValue(undefined) },
+          security: { authenticate: vi.fn().mockResolvedValue({ username: 'test-user' }) },
         },
       });
 

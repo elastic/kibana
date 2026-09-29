@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -12,17 +15,23 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 
 import { MlJobsDescription } from './ml_jobs_description';
 
-jest.mock('./admin/ml_admin_jobs_description', () => ({
-  MlAdminJobsDescription: () => <div data-test-subj="adminJobs" />,
-}));
-jest.mock('./user/ml_user_jobs_description', () => ({
-  MlUserJobsDescription: () => <div data-test-subj="userJobs" />,
-}));
-jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
-jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
-jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
+vi.mock('./admin/ml_admin_jobs_description', () => {
+      const mocked = {
+      MlAdminJobsDescription: () => <div data-test-subj="adminJobs" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./user/ml_user_jobs_description', () => {
+      const mocked = {
+      MlUserJobsDescription: () => <div data-test-subj="userJobs" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
+vi.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
+vi.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 
-const hasMlUserPermissionsMock = hasMlUserPermissions as jest.Mock;
+const hasMlUserPermissionsMock = hasMlUserPermissions as Mock;
 
 describe('MlUserJobDescription', () => {
   it('should render null if no ML permissions available', () => {
@@ -40,7 +49,7 @@ describe('MlUserJobDescription', () => {
   });
 
   it('should render admin jobs component if ML permissions is for admin', () => {
-    (hasMlAdminPermissions as jest.Mock).mockReturnValueOnce(true);
+    (hasMlAdminPermissions as Mock).mockReturnValueOnce(true);
     render(<MlJobsDescription jobIds={[]} />);
 
     expect(screen.getByTestId('adminJobs')).toBeInTheDocument();

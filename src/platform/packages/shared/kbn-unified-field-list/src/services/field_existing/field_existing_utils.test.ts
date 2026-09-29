@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { getExistingFields, buildFieldList, fetchFieldExistence } from './field_existing_utils';
@@ -96,20 +98,20 @@ describe('fetchFieldExistence', () => {
 
   const createMockDataView = (fields: Array<Partial<DataViewField>> = []) => {
     return {
-      getIndexPattern: jest.fn().mockReturnValue('test-pattern'),
-      getFieldByName: jest.fn((name) => fields.find((f) => f.name === name)),
+      getIndexPattern: vi.fn().mockReturnValue('test-pattern'),
+      getFieldByName: vi.fn((name) => fields.find((f) => f.name === name)),
       fields,
     } as unknown as DataView;
   };
 
   const createMockDataViewsService = (fields: Array<Partial<DataViewField>>) => {
     return {
-      getFieldsForIndexPattern: jest.fn().mockResolvedValue(fields),
-      refreshFields: jest.fn().mockResolvedValue(undefined),
+      getFieldsForIndexPattern: vi.fn().mockResolvedValue(fields),
+      refreshFields: vi.fn().mockResolvedValue(undefined),
     } as unknown as DataViewsContract;
   };
 
-  const mockSearch = jest.fn().mockResolvedValue({});
+  const mockSearch = vi.fn().mockResolvedValue({});
 
   it.each([
     {

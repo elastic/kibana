@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -20,22 +23,25 @@ import { getHeaderAlignment, HeaderSection } from '.';
 import { ModalInspectQuery } from '../inspect/modal';
 import { useEuiTheme } from '@elastic/eui';
 
-jest.mock('../inspect/modal', () => {
-  const actual = jest.requireActual('../inspect/modal');
+vi.mock('../inspect/modal', async () => {
+  const actual = (await vi.importActual('../inspect/modal'));
   return {
     ...actual,
-    ModalInspectQuery: jest.fn().mockReturnValue(null),
+    ModalInspectQuery: vi.fn().mockReturnValue(null),
   };
 });
 
-jest.mock('../inspect/use_inspect', () => ({
-  useInspect: () => ({
-    isShowingModal: true,
-    handleClick: jest.fn(),
-    request: 'fake request',
-    response: 'fake response',
-  }),
-}));
+vi.mock('../inspect/use_inspect', () => {
+      const mocked = {
+      useInspect: () => ({
+        isShowingModal: true,
+        handleClick: vi.fn(),
+        request: 'fake request',
+        response: 'fake response',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderHeaderSection = (props: HeaderSectionProps) =>
   render(
@@ -45,7 +51,7 @@ const renderHeaderSection = (props: HeaderSectionProps) =>
   );
 
 describe('HeaderSection', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   test('it renders', () => {
     renderHeaderSection({ title: 'Test title' });
@@ -183,7 +189,7 @@ describe('HeaderSection', () => {
       title,
       children: <p>{'Test children'}</p>,
     });
-    expect((ModalInspectQuery as jest.Mock).mock.calls[0][0].title).toEqual(title);
+    expect((ModalInspectQuery as Mock).mock.calls[0][0].title).toEqual(title);
   });
 
   test('it uses `inspectTitle` instead of `title` for the inspect modal when `inspectTitle` is provided', () => {
@@ -195,7 +201,7 @@ describe('HeaderSection', () => {
       title,
       children: <p>{'Test children'}</p>,
     });
-    expect((ModalInspectQuery as jest.Mock).mock.calls[0][0].title).toEqual(inspectTitle);
+    expect((ModalInspectQuery as Mock).mock.calls[0][0].title).toEqual(inspectTitle);
   });
 
   test('it does not render query-toggle-header when no arguments provided', () => {
@@ -211,7 +217,7 @@ describe('HeaderSection', () => {
     renderHeaderSection({
       id: 'an id',
       title: 'Test title',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       toggleStatus: true,
       children: <p>{'Test children'}</p>,
     });
@@ -223,7 +229,7 @@ describe('HeaderSection', () => {
       id: 'an id',
       stackHeader: true,
       title: 'Test title',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       children: <p>{'Test children'}</p>,
     });
     const flexGroup = screen.getByTestId('headerSectionOuterFlexGroup');
@@ -234,7 +240,7 @@ describe('HeaderSection', () => {
     renderHeaderSection({
       id: 'an id',
       title: 'Test title',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       children: <p>{'Test children'}</p>,
     });
     const flexGroup = screen.getByTestId('headerSectionOuterFlexGroup');
@@ -246,7 +252,7 @@ describe('HeaderSection', () => {
       id: 'an id',
       outerDirection: 'row',
       title: 'Test title',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       children: <p>{'Test children'}</p>,
     });
     const flexGroup = screen.getByTestId('headerSectionOuterFlexGroup');
@@ -257,7 +263,7 @@ describe('HeaderSection', () => {
     renderHeaderSection({
       id: 'an id',
       title: 'Test title',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       children: <p>{'Test children'}</p>,
     });
     const flexGroup = screen.getByTestId('headerSectionInnerFlexGroup');
@@ -269,7 +275,7 @@ describe('HeaderSection', () => {
       alignHeader: 'flexEnd',
       id: 'an id',
       title: 'Test title',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       children: <p>{'Test children'}</p>,
     });
     const flexGroup = screen.getByTestId('headerSectionInnerFlexGroup');
@@ -281,7 +287,7 @@ describe('HeaderSection', () => {
       id: 'an id',
       stackHeader: true,
       title: 'Test title',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       children: <p>{'Test children'}</p>,
     });
     const flexGroup = screen.getByTestId('headerSectionInnerFlexGroup');
@@ -294,7 +300,7 @@ describe('HeaderSection', () => {
       title: 'Test title',
       subtitle: 'subtitle',
       headerFilters: 'headerFilters',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       toggleStatus: true,
       children: <p>{'Test children'}</p>,
     });
@@ -313,7 +319,7 @@ describe('HeaderSection', () => {
       title: 'Test title',
       subtitle: 'subtitle',
       headerFilters: 'headerFilters',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       toggleStatus: true,
       children: <p>{'Test children'}</p>,
     });
@@ -327,7 +333,7 @@ describe('HeaderSection', () => {
       title: 'Test title',
       subtitle: 'subtitle',
       headerFilters: 'headerFilters',
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       toggleStatus: false,
       children: <p>{'Test children'}</p>,
     });
@@ -346,7 +352,7 @@ describe('HeaderSection', () => {
       title: 'T',
       subtitle: 'S',
       headerFilters: null,
-      toggleQuery: jest.fn(),
+      toggleQuery: vi.fn(),
       toggleStatus: false,
       toggleAriaLabel: 'Chart',
       children: null,
@@ -356,7 +362,7 @@ describe('HeaderSection', () => {
   });
 
   test('it toggles query when icon is clicked', async () => {
-    const mockToggle = jest.fn();
+    const mockToggle = vi.fn();
     renderHeaderSection({
       id: 'an id',
       title: 'Test title',

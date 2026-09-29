@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../shared_imports';
@@ -12,14 +14,17 @@ import type { MockRouter } from './__mocks__/routes.mock';
 import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  versionCheckHandlerWrapper: () => (a: any) => a,
-}));
+vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
+      const mocked = {
+      versionCheckHandlerWrapper: () => (a: any) => a,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Need to require to get mock on named export to work.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ESUpgradeStatusApis = require('../lib/es_deprecations_status');
-ESUpgradeStatusApis.getESUpgradeStatus = jest.fn();
+ESUpgradeStatusApis.getESUpgradeStatus = vi.fn();
 
 import { registerESDeprecationRoutes } from './es_deprecations';
 
@@ -44,15 +49,15 @@ describe('ES deprecations API', () => {
       },
       router: mockRouter,
       lib: { handleEsError },
-      log: { error: jest.fn() },
+      log: { error: vi.fn() },
       current: { major: 8 },
-      cleanupReindexOperations: jest.fn(),
+      cleanupReindexOperations: vi.fn(),
     };
     registerESDeprecationRoutes(routeDependencies);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('GET /api/upgrade_assistant/es_deprecations', () => {

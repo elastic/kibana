@@ -5,24 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiAvatar } from '@elastic/eui';
 import { UserAvatar, type UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserMessageAvatar } from './user_message_avatar';
 
-jest.mock('@kbn/user-profile-components', () => ({
-  UserAvatar: jest.fn(({ avatar }) => (
-    <div data-test-subj="agentBuilderUserAvatar">{avatar?.initials}</div>
-  )),
-}));
+vi.mock('@kbn/user-profile-components', () => {
+      const mocked = {
+      UserAvatar: vi.fn(({ avatar }) => (
+        <div data-test-subj="agentBuilderUserAvatar">{avatar?.initials}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  EuiAvatar: jest.fn(({ name }) => <div data-test-subj="agentBuilderFallbackAvatar">{name}</div>),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      EuiAvatar: vi.fn(({ name }) => <div data-test-subj="agentBuilderFallbackAvatar">{name}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUserAvatar = jest.mocked(UserAvatar);
-const mockEuiAvatar = jest.mocked(EuiAvatar);
+const mockUserAvatar = vi.mocked(UserAvatar);
+const mockEuiAvatar = vi.mocked(EuiAvatar);
 
 describe('UserMessageAvatar', () => {
   const profile: UserProfileWithAvatar = {
@@ -41,7 +49,7 @@ describe('UserMessageAvatar', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the user avatar when a profile is available', () => {

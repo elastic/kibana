@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CoreProviders } from '../../../apps/common_providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -16,15 +18,18 @@ import { PodMetricsTable } from './pod_metrics_table';
 import { ECS_POD_CPU_USAGE_LIMIT_PCT, MEMORY_LIMIT_UTILIZATION } from '../shared/constants';
 import { metricByField } from './use_pod_metrics_table';
 
-jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
-  useAssetDetailsRedirect: jest.fn(() => ({
-    getAssetDetailUrl: jest.fn(() => ({
-      app: 'metrics',
-      pathname: 'link-to/pod-detail/example-01',
-      search: { from: '1546340400000', to: '1546344000000' },
-    })),
-  })),
-}));
+vi.mock('../../../pages/link_to/use_asset_details_redirect', () => {
+      const mocked = {
+      useAssetDetailsRedirect: vi.fn(() => ({
+        getAssetDetailUrl: vi.fn(() => ({
+          app: 'metrics',
+          pathname: 'link-to/pod-detail/example-01',
+          search: { from: '1546340400000', to: '1546344000000' },
+        })),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PodMetricsTable', () => {
   const timerange = {
@@ -104,8 +109,8 @@ describe('PodMetricsTable', () => {
         <PodMetricsTable
           data={{ state: 'unknown' }}
           isLoading={true}
-          setCurrentPageIndex={jest.fn()}
-          setSortState={jest.fn()}
+          setCurrentPageIndex={vi.fn()}
+          setSortState={vi.fn()}
           sortState={{ field: 'id', direction: 'asc' }}
           timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
         />
@@ -123,8 +128,8 @@ describe('PodMetricsTable', () => {
         <PodMetricsTable
           data={{ state: 'no-indices' }}
           isLoading={false}
-          setCurrentPageIndex={jest.fn()}
-          setSortState={jest.fn()}
+          setCurrentPageIndex={vi.fn()}
+          setSortState={vi.fn()}
           sortState={{ field: 'id', direction: 'asc' }}
           timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
         />

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useAddToCase } from './use_add_to_case';
 import React, { useEffect } from 'react';
 import { render } from '../rtl_helpers';
@@ -15,9 +17,9 @@ import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 describe('useAddToCase', function () {
   function setupTestComponent() {
-    const setData = jest.fn();
+    const setData = vi.fn();
     function TestComponent() {
-      const getToastText = jest.fn();
+      const getToastText = vi.fn();
 
       const result = useAddToCase({
         lensAttributes: { title: 'Test lens attributes' } as any,

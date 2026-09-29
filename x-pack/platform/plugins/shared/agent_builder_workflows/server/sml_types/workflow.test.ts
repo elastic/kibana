@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -20,7 +23,7 @@ const indexPattern = `${workflowIndexName}-*`;
 
 const createMockEsClient = (hits: unknown[] = []) => {
   return {
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       hits: { hits },
     }),
   } as unknown as ElasticsearchClient;
@@ -28,12 +31,12 @@ const createMockEsClient = (hits: unknown[] = []) => {
 
 const createMockLogger = (): Logger =>
   ({
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 const createMockApi = (overrides: Partial<WorkflowsManagementApi> = {}) =>
   ({
-    getWorkflow: jest.fn().mockResolvedValue(null),
+    getWorkflow: vi.fn().mockResolvedValue(null),
     ...overrides,
   } as unknown as WorkflowsManagementApi);
 
@@ -147,7 +150,7 @@ describe('workflowSmlType', () => {
       ];
 
       const esClient = {
-        search: jest
+        search: vi
           .fn()
           .mockResolvedValueOnce({ hits: { hits: firstPageHits } })
           .mockResolvedValueOnce({ hits: { hits: secondPageHits } }),
@@ -165,7 +168,7 @@ describe('workflowSmlType', () => {
       }
 
       expect(esClient.search).toHaveBeenCalledTimes(2);
-      expect((esClient.search as jest.Mock).mock.calls[1][0]).toHaveProperty('search_after', [
+      expect((esClient.search as Mock).mock.calls[1][0]).toHaveProperty('search_after', [
         pageSize - 1,
       ]);
       expect(pages).toHaveLength(2);
@@ -192,7 +195,7 @@ describe('workflowSmlType', () => {
 
     it('handles ES errors gracefully and logs warning', async () => {
       const esClient = {
-        search: jest.fn().mockRejectedValue(new Error('index_not_found_exception')),
+        search: vi.fn().mockRejectedValue(new Error('index_not_found_exception')),
       } as unknown as ElasticsearchClient;
       const logger = createMockLogger();
 
@@ -394,7 +397,7 @@ describe('workflowSmlType', () => {
 
     it('returns undefined and logs warning on ES error', async () => {
       const esClient = {
-        search: jest.fn().mockRejectedValue(new Error('search_phase_execution_exception')),
+        search: vi.fn().mockRejectedValue(new Error('search_phase_execution_exception')),
       } as unknown as ElasticsearchClient;
       const logger = createMockLogger();
 
@@ -458,7 +461,7 @@ describe('workflowSmlType', () => {
   describe('toAttachment', () => {
     it('converts workflow to workflow.yaml attachment', async () => {
       const api = createMockApi({
-        getWorkflow: jest.fn().mockResolvedValue({
+        getWorkflow: vi.fn().mockResolvedValue({
           id: 'workflow-abc',
           name: 'Alert Triage',
           yaml: 'version: "1"\nname: Alert Triage\nsteps: []',
@@ -499,7 +502,7 @@ describe('workflowSmlType', () => {
 
     it('returns undefined when workflow is not found', async () => {
       const api = createMockApi({
-        getWorkflow: jest.fn().mockResolvedValue(null),
+        getWorkflow: vi.fn().mockResolvedValue(null),
       });
 
       const smlType = createWorkflowSmlType(api);

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
@@ -23,7 +25,7 @@ describe('ExecutionListFilters', () => {
 
   const defaultProps: ExecutionListFiltersProps = {
     filters: defaultFilters,
-    onFiltersChange: jest.fn(),
+    onFiltersChange: vi.fn(),
     availableExecutedByOptions: [],
     showExecutor: false,
   };
@@ -44,7 +46,7 @@ describe('ExecutionListFilters', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the icon-only filter button', () => {
@@ -77,7 +79,7 @@ describe('ExecutionListFilters', () => {
   });
 
   it('filters by production run type', async () => {
-    const onFiltersChange = jest.fn();
+    const onFiltersChange = vi.fn();
     renderComponent({ onFiltersChange });
     await openPopover();
 
@@ -106,7 +108,7 @@ describe('ExecutionListFilters', () => {
     ['Waiting for input', ExecutionStatus.WAITING_FOR_INPUT],
     ['Waiting for child workflow', ExecutionStatus.WAITING_FOR_CHILD],
   ])('applies %s filter as %s', async (label, status) => {
-    const onFiltersChange = jest.fn();
+    const onFiltersChange = vi.fn();
     renderComponent({ onFiltersChange });
     fireEvent.click(screen.getByLabelText('Filter executions'));
     fireEvent.click(await screen.findByText(label));
@@ -137,7 +139,7 @@ describe('ExecutionListFilters', () => {
   });
 
   it('filters by the profile UID behind a display label', async () => {
-    const onFiltersChange = jest.fn();
+    const onFiltersChange = vi.fn();
     renderComponent({
       showExecutor: true,
       onFiltersChange,
@@ -154,7 +156,7 @@ describe('ExecutionListFilters', () => {
   });
 
   it('allows filtering by an executor outside the loaded options', async () => {
-    const onFiltersChange = jest.fn();
+    const onFiltersChange = vi.fn();
     renderComponent({ showExecutor: true, onFiltersChange });
     await openPopover();
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -15,19 +18,22 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
-jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
-  getInputsFromDefinition: jest.fn(),
-}));
+vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+      getInputsFromDefinition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetInputsFromDefinition = getInputsFromDefinition as jest.MockedFunction<
+const mockGetInputsFromDefinition = getInputsFromDefinition as MockedFunction<
   typeof getInputsFromDefinition
 >;
 
 describe('validateWorkflowInputs', () => {
   const executionId = 'exec-123';
-  let mockRepository: jest.Mocked<Pick<WorkflowExecutionRepository, 'updateWorkflowExecution'>>;
-  let mockLogger: jest.Mocked<Pick<Logger, 'error'>>;
+  let mockRepository: Mocked<Pick<WorkflowExecutionRepository, 'updateWorkflowExecution'>>;
+  let mockLogger: Mocked<Pick<Logger, 'error'>>;
 
   // Format-shape coverage (legacy array vs JSON Schema, root-level vs trigger-level
   // inputs, multiple manual triggers) is owned by the `getInputsFromDefinition` unit
@@ -84,10 +90,10 @@ describe('validateWorkflowInputs', () => {
 
   beforeEach(() => {
     mockRepository = {
-      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      updateWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     };
     mockLogger = {
-      error: jest.fn(),
+      error: vi.fn(),
     };
     mockGetInputsFromDefinition.mockReset();
     mockGetInputsFromDefinition.mockReturnValue(undefined);

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { getQuality } from './get_quality';
 
 const esClient = {
-  search: jest.fn(),
+  search: vi.fn(),
 } as unknown as ElasticsearchClient;
-const logger = { error: jest.fn(), warn: jest.fn(), info: jest.fn() } as unknown as Logger;
+const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn() } as unknown as Logger;
 
 const makeSearchHit = (indexName: string, incompatibleFieldCount = 0) => ({
   _source: {
@@ -40,13 +43,13 @@ const makeSearchHit = (indexName: string, incompatibleFieldCount = 0) => ({
 });
 
 const mockSearchResponse = (hits: ReturnType<typeof makeSearchHit>[]) => {
-  (esClient.search as jest.Mock).mockResolvedValueOnce({
+  (esClient.search as Mock).mockResolvedValueOnce({
     hits: { hits },
   });
 };
 
 describe('getQuality', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('status', () => {
     it('returns noData when there are no quality results', async () => {
@@ -107,7 +110,7 @@ describe('getQuality', () => {
     });
 
     it('returns no findings when esClient throws (graceful degradation)', async () => {
-      (esClient.search as jest.Mock).mockRejectedValueOnce(new Error('ES unavailable'));
+      (esClient.search as Mock).mockRejectedValueOnce(new Error('ES unavailable'));
       const result = await getQuality({ esClient, logger });
       expect(result.status).toBe('noData');
       expect(result.actionableFindings).toHaveLength(0);

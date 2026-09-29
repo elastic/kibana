@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
@@ -13,14 +15,20 @@ import { getRuleMigrationRuleMock } from '../../../../../../../common/siem_migra
 import { MigrationTranslationResult } from '../../../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 
-jest.mock('./callout', () => ({
-  TranslationCallOut: () => <div data-test-subj="translationCallout" />,
-}));
+vi.mock('./callout', () => {
+      const mocked = {
+      TranslationCallOut: () => <div data-test-subj="translationCallout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./query_details', () => ({
-  OriginalRuleQuery: () => <div data-test-subj="originalRuleQuery" />,
-  TranslatedRuleQuery: () => <div data-test-subj="translatedRuleQuery" />,
-}));
+vi.mock('./query_details', () => {
+      const mocked = {
+      OriginalRuleQuery: () => <div data-test-subj="originalRuleQuery" />,
+      TranslatedRuleQuery: () => <div data-test-subj="translatedRuleQuery" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TranslationTab', () => {
   it('renders callout and query details when not installed', () => {

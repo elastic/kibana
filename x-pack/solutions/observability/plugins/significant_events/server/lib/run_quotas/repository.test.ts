@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RunQuotaSettingsAttributes } from './saved_objects';
 import {
@@ -24,12 +27,12 @@ const makeSavedObject = <T extends Record<string, unknown>>(
   version,
 });
 
-const makeRepository = (): jest.Mocked<RunQuotaSavedObjectsRepository> =>
+const makeRepository = (): Mocked<RunQuotaSavedObjectsRepository> =>
   ({
-    create: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  } as unknown as jest.Mocked<RunQuotaSavedObjectsRepository>);
+    create: vi.fn(),
+    get: vi.fn(),
+    update: vi.fn(),
+  } as unknown as Mocked<RunQuotaSavedObjectsRepository>);
 
 describe('run quota settings repository', () => {
   it('returns enabled enforcement and the default limits when settings do not exist', async () => {

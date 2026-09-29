@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { createMockEndpointAppContextService } from '../../../mocks';
 import type {
   ResponseAction,
@@ -94,7 +97,7 @@ describe('Rules Endpoint response actions validators', () => {
 
     it('should validate both .endpoint and .osquery response actions independently', async () => {
       endpointAuthz.canIsolateHost = false;
-      const mockOsqueryAuthz = jest.fn().mockResolvedValue(undefined);
+      const mockOsqueryAuthz = vi.fn().mockResolvedValue(undefined);
       rulePayload.response_actions = [
         { action_type_id: '.osquery', params: { query: 'SELECT 1' } },
         createRulePayloadResponseActionMock(),
@@ -288,13 +291,13 @@ describe('Rules Endpoint response actions validators', () => {
     });
 
     describe('and response action is runscript', () => {
-      let scriptsClientMock: jest.Mocked<ScriptsLibraryClientInterface>;
+      let scriptsClientMock: Mocked<ScriptsLibraryClientInterface>;
 
       beforeEach(() => {
         scriptsClientMock = endpointService.getScriptsLibraryClient(
           'default',
           'foo'
-        ) as jest.Mocked<ScriptsLibraryClientInterface>;
+        ) as Mocked<ScriptsLibraryClientInterface>;
       });
 
       it('should error if all OS script IDs are empty strings', async () => {
@@ -572,10 +575,10 @@ describe('Rules Endpoint response actions validators', () => {
 
   describe('osquery response actions validation', () => {
     let options: ValidateRuleResponseActionsOptions;
-    let mockOsqueryAuthz: jest.Mock;
+    let mockOsqueryAuthz: Mock;
 
     beforeEach(() => {
-      mockOsqueryAuthz = jest.fn().mockResolvedValue(undefined);
+      mockOsqueryAuthz = vi.fn().mockResolvedValue(undefined);
       options = {
         rulePayload: {
           response_actions: [

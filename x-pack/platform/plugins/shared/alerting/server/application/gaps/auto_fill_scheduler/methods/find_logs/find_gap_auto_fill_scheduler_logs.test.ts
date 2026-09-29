@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -38,12 +41,12 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
-const findEventsBySavedObjectIdsMock = jest.fn();
+const findEventsBySavedObjectIdsMock = vi.fn();
 const eventLogClientMock = {
   findEventsBySavedObjectIds: findEventsBySavedObjectIdsMock,
 };
 
-const getEventLogClient = jest.fn();
+const getEventLogClient = vi.fn();
 
 const mockLogs: Partial<IValidatedEventInternalDocInfo>[] = [
   {
@@ -96,7 +99,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     rulesClient = new RulesClient({
       request: httpServerMock.createKibanaRequest(),
@@ -107,25 +110,25 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
       spaceId: 'default',
       namespace: 'default',
-      getUserName: jest.fn(),
-      getProfileUid: jest.fn(),
-      createAPIKey: jest.fn(),
-      cloneAPIKey: jest.fn(),
+      getUserName: vi.fn(),
+      getProfileUid: vi.fn(),
+      createAPIKey: vi.fn(),
+      cloneAPIKey: vi.fn(),
       logger: loggingSystemMock.create().get(),
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
-      getActionsClient: jest.fn(),
+      getActionsClient: vi.fn(),
       getEventLogClient,
       kibanaVersion,
       auditLogger,
       maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
-      isAuthenticationTypeAPIKey: jest.fn(),
-      getAuthenticationAPIKey: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
+      isAuthenticationTypeAPIKey: vi.fn(),
+      getAuthenticationAPIKey: vi.fn(),
+      getAlertIndicesAlias: vi.fn(),
       alertsService: null,
       backfillClient: null as unknown as never,
-      isSystemAction: jest.fn(),
+      isSystemAction: vi.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       isServerless: false,
@@ -256,7 +259,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
     });
 
     test('should audit and throw when authorization fails', async () => {
-      (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
+      (authorization.bulkEnsureAuthorized as Mock).mockImplementationOnce(() => {
         throw new Error('Unauthorized');
       });
 

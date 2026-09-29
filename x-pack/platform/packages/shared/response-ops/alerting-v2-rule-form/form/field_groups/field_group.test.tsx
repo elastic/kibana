@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,11 +15,14 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useRuleFormMeta } from '../contexts';
 import { FieldGroup } from './field_group';
 
-jest.mock('../contexts', () => ({
-  useRuleFormMeta: jest.fn(),
-}));
+vi.mock('../contexts', () => {
+      const mocked = {
+      useRuleFormMeta: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRuleFormMeta = useRuleFormMeta as jest.MockedFunction<typeof useRuleFormMeta>;
+const mockUseRuleFormMeta = useRuleFormMeta as MockedFunction<typeof useRuleFormMeta>;
 
 const renderFieldGroup = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
@@ -84,7 +90,7 @@ describe('FieldGroup', () => {
 
   it('supports a controlled collapsible state', async () => {
     const user = userEvent.setup();
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
 
     renderFieldGroup(
       <FieldGroup title="Test Section" isOpen={false} onToggle={onToggle}>
@@ -169,7 +175,7 @@ describe('FieldGroup', () => {
 
     it('calls onToggle when accordion is toggled (controlled variant)', async () => {
       const user = userEvent.setup();
-      const onToggle = jest.fn();
+      const onToggle = vi.fn();
 
       renderFieldGroup(
         <FieldGroup title="Test Section" isOpen={true} onToggle={onToggle}>
@@ -183,7 +189,7 @@ describe('FieldGroup', () => {
 
     it('shows/hides content based on isOpen (controlled variant)', () => {
       const { rerender } = renderFieldGroup(
-        <FieldGroup title="Test Section" isOpen={true} onToggle={jest.fn()}>
+        <FieldGroup title="Test Section" isOpen={true} onToggle={vi.fn()}>
           <div>Child content</div>
         </FieldGroup>
       );
@@ -192,7 +198,7 @@ describe('FieldGroup', () => {
 
       rerender(
         <IntlProvider locale="en">
-          <FieldGroup title="Test Section" isOpen={false} onToggle={jest.fn()}>
+          <FieldGroup title="Test Section" isOpen={false} onToggle={vi.fn()}>
             <div>Child content</div>
           </FieldGroup>
         </IntlProvider>

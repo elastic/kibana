@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { z } from '@kbn/zod/v4';
@@ -24,8 +27,8 @@ import { createMockInMemoryConnector } from './application/connector/mocks';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
-let mockedLicenseState: jest.Mocked<ILicenseState>;
-let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
+let mockedLicenseState: Mocked<ILicenseState>;
+let mockedActionsConfig: Mocked<ActionsConfigurationUtilities>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 
 const fooActionType: ActionType = getConnectorType({
@@ -38,7 +41,7 @@ const fooActionType: ActionType = getConnectorType({
 
 describe('actionTypeRegistry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockedLicenseState = licenseStateMock.create();
     mockedActionsConfig = actionsConfigMock.create();
     actionTypeRegistryParams = {
@@ -196,7 +199,7 @@ describe('actionTypeRegistry', () => {
         actionTypeRegistry.register(
           getConnectorType({
             isSystemActionType: false,
-            getKibanaPrivileges: jest.fn(),
+            getKibanaPrivileges: vi.fn(),
           })
         )
       ).toThrowErrorMatchingInlineSnapshot(
@@ -910,7 +913,7 @@ describe('actionTypeRegistry', () => {
 
     it('should pass the params and source correctly', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
-      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
+      const getKibanaPrivileges = vi.fn().mockReturnValue(['test/create']);
 
       registry.register(
         getConnectorType({

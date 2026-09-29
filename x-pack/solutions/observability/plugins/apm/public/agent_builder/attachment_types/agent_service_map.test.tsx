@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ServiceMapAttachmentData } from '../../../common/agent_builder/attachments';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from '../../components/shared/service_map/test_helpers';
 import { AgentServiceMap, formatEdgeLabel } from './agent_service_map';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({
@@ -22,13 +24,19 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/apm-ui-shared', () => ({
-  getSpanIcon: jest.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
-}));
+vi.mock('@kbn/apm-ui-shared', () => {
+      const mocked = {
+      getSpanIcon: vi.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/shared/service_map/layout', () => ({
-  applyDagreLayout: (nodes: unknown[]) => nodes,
-}));
+vi.mock('../../components/shared/service_map/layout', () => {
+      const mocked = {
+      applyDagreLayout: (nodes: unknown[]) => nodes,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createConnections(
   overrides: Partial<ServiceMapAttachmentData['connections'][0]>[] = []

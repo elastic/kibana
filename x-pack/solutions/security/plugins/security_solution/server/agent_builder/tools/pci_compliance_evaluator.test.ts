@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { evaluateRequirement, runWithConcurrency } from './pci_compliance_evaluator';
 
-const mockExecuteEsql = executeEsql as jest.MockedFunction<typeof executeEsql>;
+const mockExecuteEsql = executeEsql as MockedFunction<typeof executeEsql>;
 
 const createEsClient = (overrides: Partial<ElasticsearchClient> = {}): ElasticsearchClient =>
   ({
-    fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+    fieldCaps: vi.fn().mockResolvedValue({ fields: {} }),
     ...overrides,
   } as unknown as ElasticsearchClient);
 
 describe('evaluateRequirement — ES|QL parameter binding', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('binds the user time range via ?_tstart / ?_tend without interpolating it into the query', async () => {
@@ -61,7 +67,7 @@ describe('evaluateRequirement — ES|QL parameter binding', () => {
 
     const esClient = createEsClient({
       // No fields exist -> preflight reports every non-@timestamp required field as missing.
-      fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+      fieldCaps: vi.fn().mockResolvedValue({ fields: {} }),
     } as unknown as Partial<ElasticsearchClient>);
 
     const result = await evaluateRequirement({

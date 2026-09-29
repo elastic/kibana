@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Evaluator } from '@kbn/evals';
 import type { WorkflowEditExample, WorkflowTaskOutput } from './types';
 import {
@@ -42,10 +45,10 @@ const mockOutput = (steps: ReturnType<typeof toolCall>[]): WorkflowTaskOutput =>
 });
 
 const createMockWorkflowEvaluator = (): {
-  evaluate: jest.Mock;
+  evaluate: Mock;
   evaluator: Evaluator<WorkflowEditExample, WorkflowTaskOutput>;
 } => {
-  const evaluate = jest.fn().mockResolvedValue({ score: 0.42 });
+  const evaluate = vi.fn().mockResolvedValue({ score: 0.42 });
   return {
     evaluate,
     evaluator: {
@@ -560,13 +563,13 @@ steps:
 });
 
 describe('Criteria evaluator', () => {
-  const mockCriteriaEvaluate = jest.fn().mockResolvedValue({ score: 0.9 });
+  const mockCriteriaEvaluate = vi.fn().mockResolvedValue({ score: 0.9 });
   const mockEvaluators = {
-    criteria: jest.fn().mockReturnValue({ evaluate: mockCriteriaEvaluate }),
+    criteria: vi.fn().mockReturnValue({ evaluate: mockCriteriaEvaluate }),
   } as any;
   const evaluator = createCriteriaEvaluator({ evaluators: mockEvaluators });
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('fails with score 0 when resultYaml is missing on a positive case', async () => {
     const result = await evaluator.evaluate({

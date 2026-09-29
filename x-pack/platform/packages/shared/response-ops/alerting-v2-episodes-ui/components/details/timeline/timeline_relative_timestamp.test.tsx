@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { formatTimestamp } from './entries';
 import { AlertEpisodeTimelineRelativeTimestamp } from './timeline_relative_timestamp';
 
-jest.mock('@kbn/i18n-react', () => {
-  const { i18n } = jest.requireActual('@kbn/i18n');
+vi.mock('@kbn/i18n-react', async () => {
+  const { i18n } = (await vi.importActual('@kbn/i18n'));
   i18n.init({ locale: 'en', messages: {} });
 
   return {
-    ...jest.requireActual('@kbn/i18n-react'),
+    ...(await vi.importActual('@kbn/i18n-react')),
     FormattedRelative: () => <>5 minutes ago</>,
   };
 });

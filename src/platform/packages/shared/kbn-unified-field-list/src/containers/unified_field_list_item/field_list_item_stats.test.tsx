@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -22,18 +24,24 @@ import { useQuerySubscriber, hasQuerySubscriberData } from '../../hooks/use_quer
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { Filter, Query } from '@kbn/es-query';
 
-jest.mock('../../hooks/use_query_subscriber', () => ({
-  useQuerySubscriber: jest.fn(),
-  hasQuerySubscriberData: jest.fn(),
-}));
+vi.mock('../../hooks/use_query_subscriber', () => {
+      const mocked = {
+      useQuerySubscriber: vi.fn(),
+      hasQuerySubscriberData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/field_stats', () => ({
-  FieldStats: jest.fn(() => <div data-testid="mock-field-stats" />),
-}));
+vi.mock('../../components/field_stats', () => {
+      const mocked = {
+      FieldStats: vi.fn(() => <div data-testid="mock-field-stats" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQuerySubscriber = jest.mocked(useQuerySubscriber);
-const mockHasQuerySubscriberData = jest.mocked(hasQuerySubscriberData);
-const mockFieldStats = jest.mocked(FieldStats);
+const mockUseQuerySubscriber = vi.mocked(useQuerySubscriber);
+const mockHasQuerySubscriberData = vi.mocked(hasQuerySubscriberData);
+const mockFieldStats = vi.mocked(FieldStats);
 
 const defaultQuerySubscriberResult = {
   query: { query: '', language: 'lucene' },
@@ -69,7 +77,7 @@ const renderComponent = (props: Partial<UnifiedFieldListItemStatsProps> = {}) =>
     field: aggrField,
     services: getServicesMock(),
     dataView: stubDataView,
-    onAddFilter: jest.fn(),
+    onAddFilter: vi.fn(),
     ...props,
   };
 
@@ -120,7 +128,7 @@ describe('getFieldForStats', () => {
 
 describe('<UnifiedFieldListItemStats />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQuerySubscriber.mockReturnValue(defaultQuerySubscriberResult);
     mockHasQuerySubscriberData.mockReturnValue(true);
   });
@@ -188,7 +196,7 @@ describe('<UnifiedFieldListItemStats />', () => {
   });
 
   it('forwards props to FieldStats', () => {
-    const onAddFilter = jest.fn();
+    const onAddFilter = vi.fn();
     const query: Query = { query: 'host: localhost', language: 'lucene' };
     mockUseQuerySubscriber.mockReturnValue({
       ...defaultQuerySubscriberResult,

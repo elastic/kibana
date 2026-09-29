@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getFilter } from './get_filter';
 import type { GetFilterArgs } from './get_filter';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
@@ -14,14 +17,17 @@ import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { getDataTierFilter } from './get_data_tier_filter';
 
-jest.mock('./get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
-const getDataTierFilterMock = getDataTierFilter as jest.Mock;
+vi.mock('./get_data_tier_filter', () => {
+      const mocked = { getDataTierFilter: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+const getDataTierFilterMock = getDataTierFilter as Mock;
 
 describe('get_filter', () => {
   let servicesMock: RuleExecutorServicesMock;
 
   beforeAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {
@@ -40,7 +46,7 @@ describe('get_filter', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('getFilter', () => {

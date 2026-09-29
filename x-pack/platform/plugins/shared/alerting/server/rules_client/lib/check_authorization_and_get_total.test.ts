@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -31,21 +33,21 @@ const context: RulesClientContext = {
   authorization: authorization as unknown as AlertingAuthorization,
   ruleTypeRegistry,
   spaceId: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
+  getUserName: vi.fn(),
+  createAPIKey: vi.fn(),
+  getActionsClient: vi.fn(),
+  getEventLogClient: vi.fn(),
   kibanaVersion: 'v8.0.0',
   auditLogger,
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 60000,
   fieldsToExcludeFromPublicApi: [],
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
+  isAuthenticationTypeAPIKey: vi.fn(),
+  getAuthenticationAPIKey: vi.fn(),
+  getAlertIndicesAlias: vi.fn(),
   alertsService: null,
-  isSystemAction: jest.fn(),
+  isSystemAction: vi.fn(),
 } as unknown as RulesClientContext;
 
 const defaultFindResponse = {
@@ -62,7 +64,7 @@ const defaultFindResponse = {
 
 describe('checkAuthorizationAndGetTotal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     unsecuredSavedObjectsClient.find.mockResolvedValue(defaultFindResponse);
     authorization.bulkEnsureAuthorized.mockResolvedValue(undefined);
   });

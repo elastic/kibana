@@ -6,32 +6,37 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InstructionProps } from './instruction';
 import { Instruction } from './instruction';
 
-jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
-    http: {
-      post: jest.fn().mockImplementation(async () => ({ count: 1 })),
-      basePath: { prepend: (path: string) => `/foo/${path}` },
-    },
-    getBasePath: jest.fn(() => 'path'),
-    theme: {
-      getTheme: () => ({ darkMode: false }),
-    },
-    tutorialService: {
-      getCustomComponent: (customComponentName: string) => {
-        if (customComponentName === 'customComponent') {
-          return () => Promise.resolve(() => <div>Custom Component</div>);
-        }
-        return () => Promise.resolve(() => <div>Component Not Found</div>);
-      },
-    },
-  }),
-}));
+vi.mock('../../kibana_services', () => {
+      const mocked = {
+      getServices: () => ({
+        http: {
+          post: vi.fn().mockImplementation(async () => ({ count: 1 })),
+          basePath: { prepend: (path: string) => `/foo/${path}` },
+        },
+        getBasePath: vi.fn(() => 'path'),
+        theme: {
+          getTheme: () => ({ darkMode: false }),
+        },
+        tutorialService: {
+          getCustomComponent: (customComponentName: string) => {
+            if (customComponentName === 'customComponent') {
+              return () => Promise.resolve(() => <div>Custom Component</div>);
+            }
+            return () => Promise.resolve(() => <div>Component Not Found</div>);
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const replaceTemplateStrings = (text: string) => text;
 const commonProps: InstructionProps = {

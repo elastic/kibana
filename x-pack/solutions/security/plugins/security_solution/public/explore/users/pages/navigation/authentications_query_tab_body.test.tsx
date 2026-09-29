@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -14,30 +17,33 @@ import { UsersType } from '../../store/model';
 import { useAuthentications } from '../../../containers/authentications';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 
-jest.mock('../../../containers/authentications');
-jest.mock('../../../../common/containers/query_toggle');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../containers/authentications');
+vi.mock('../../../../common/containers/query_toggle');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../../common/components/visualization_actions/actions');
-jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
-jest.mock('../../../../common/components/matrix_histogram', () => ({
-  MatrixHistogram: jest.fn(() => null),
-}));
+vi.mock('../../../../common/components/visualization_actions/actions');
+vi.mock('../../../../common/components/visualization_actions/lens_embeddable');
+vi.mock('../../../../common/components/matrix_histogram', () => {
+      const mocked = {
+      MatrixHistogram: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Authentications query tab body', () => {
-  const mockUseAuthentications = useAuthentications as jest.Mock;
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseAuthentications = useAuthentications as Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
   const defaultProps = {
     indexNames: [],
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
     skip: false,
     startDate: '2019-06-25T04:31:59.345Z',
     endDate: '2019-06-25T06:31:59.345Z',
     type: UsersType.page,
   };
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    vi.clearAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() });
     mockUseAuthentications.mockReturnValue([
       false,
       {
@@ -50,8 +56,8 @@ describe('Authentications query tab body', () => {
         isInspected: false,
         totalCount: 0,
         pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
-        loadPage: jest.fn(),
-        refetch: jest.fn(),
+        loadPage: vi.fn(),
+        refetch: vi.fn(),
       },
     ]);
   });
@@ -64,7 +70,7 @@ describe('Authentications query tab body', () => {
     expect(mockUseAuthentications.mock.calls[0][0].skip).toEqual(false);
   });
   it('toggleStatus=false, skip', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <AuthenticationsQueryTabBody {...defaultProps} />
@@ -74,7 +80,7 @@ describe('Authentications query tab body', () => {
   });
 
   describe('histogram filterQuery', () => {
-    const mockMatrixHistogram = MatrixHistogram as unknown as jest.Mock;
+    const mockMatrixHistogram = MatrixHistogram as unknown as Mock;
 
     const getHistogramFilterQuery = () =>
       mockMatrixHistogram.mock.calls[0][0].filterQuery as string;

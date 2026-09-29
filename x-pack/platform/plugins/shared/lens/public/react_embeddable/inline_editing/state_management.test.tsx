@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { getStateManagementForInlineEditing } from './state_management';
 import { mergeToNewDoc } from '../../state_management/shared_logic';
 
-jest.mock('../../state_management/shared_logic', () => ({
-  mergeToNewDoc: jest.fn(() => ({ state: {} })),
-}));
+vi.mock('../../state_management/shared_logic', () => {
+      const mocked = {
+      mergeToNewDoc: vi.fn(() => ({ state: {} })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getStateManagementForInlineEditing', () => {
   const attributes = {
@@ -27,10 +32,10 @@ describe('getStateManagementForInlineEditing', () => {
     const { updatePanelState } = getStateManagementForInlineEditing(
       'textBased',
       () => attributes,
-      jest.fn(),
+      vi.fn(),
       {},
       {},
-      jest.fn()
+      vi.fn()
     );
 
     updatePanelState('newDatasourceState', 'newVisState', 'testVis', 'textBased', {
@@ -54,10 +59,10 @@ describe('getStateManagementForInlineEditing', () => {
     const { updatePanelState } = getStateManagementForInlineEditing(
       'textBased',
       () => attributes,
-      jest.fn(),
+      vi.fn(),
       {},
       {},
-      jest.fn()
+      vi.fn()
     );
 
     updatePanelState('activeState', 'newVisState', 'testVis', 'textBased', {
@@ -65,7 +70,7 @@ describe('getStateManagementForInlineEditing', () => {
       textBased: { isLoading: false, state: 'activeState' },
     });
 
-    const [, , passedDatasourceStates] = jest.mocked(mergeToNewDoc).mock.lastCall!;
+    const [, , passedDatasourceStates] = vi.mocked(mergeToNewDoc).mock.lastCall!;
     expect(Object.keys(passedDatasourceStates)).toEqual(['textBased', 'formBased']);
   });
 
@@ -73,10 +78,10 @@ describe('getStateManagementForInlineEditing', () => {
     const { updatePanelState } = getStateManagementForInlineEditing(
       'textBased',
       () => attributes,
-      jest.fn(),
+      vi.fn(),
       {},
       {},
-      jest.fn()
+      vi.fn()
     );
 
     updatePanelState('activeState', 'newVisState', 'testVis', 'textBased');
@@ -97,10 +102,10 @@ describe('getStateManagementForInlineEditing', () => {
     const { updatePanelState } = getStateManagementForInlineEditing(
       'textBased',
       () => attributes,
-      jest.fn(),
+      vi.fn(),
       {},
       {},
-      jest.fn()
+      vi.fn()
     );
 
     updatePanelState('activeState', 'newVisState', 'testVis', 'textBased', {

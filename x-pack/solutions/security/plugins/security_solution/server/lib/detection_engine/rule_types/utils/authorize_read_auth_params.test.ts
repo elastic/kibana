@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
@@ -92,7 +94,7 @@ const FIELDS: FieldFixture[] = [
 describe('createSecurityRuleParamsAuthorizer read-auth editable params', () => {
   let endpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
   const request = httpServerMock.createKibanaRequest();
-  const getRulesAuthz = jest.fn<Promise<DetectionRulesAuthz>, [unknown]>();
+  const getRulesAuthz = vi.fn<Promise<DetectionRulesAuthz>, [unknown]>();
 
   const buildAuthorizer = () =>
     createSecurityRuleParamsAuthorizer({ endpointAppContextService, getRulesAuthz });

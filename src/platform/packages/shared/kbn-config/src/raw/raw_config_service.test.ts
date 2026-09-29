@@ -132,18 +132,22 @@ test('pushes new config when reloading and config at path has changed', async ()
   expect(Object.keys(valuesReceived[1])).toEqual(['key']);
 });
 
-test('completes config observables when stopped', (done) => {
-  expect.assertions(0);
+test('completes config observables when stopped', () =>
+    new Promise<void>((resolve, reject) => {
+    const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
+      expect.assertions(0);
 
-  const configService = new RawConfigService([configFile]);
+      mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
 
-  configService.loadConfig();
+      const configService = new RawConfigService([configFile]);
 
-  configService.getConfig$().subscribe({
-    complete: () => done(),
-  });
+      configService.loadConfig();
 
-  configService.stop();
-});
+      configService.getConfig$().subscribe({
+        complete: () => done(),
+      });
+
+      configService.stop();
+
+    }));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { KPIsSection } from './kpis_section';
@@ -13,13 +16,13 @@ import { TestProviders } from '../../../../common/mock';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../../../../common/hooks/use_data_table_filters');
+vi.mock('../../../../common/hooks/use_data_table_filters');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('<KPIsSection />', () => {
   it('should render correctly', () => {
-    (useDataTableFilters as jest.Mock).mockReturnValue({
+    (useDataTableFilters as Mock).mockReturnValue({
       showBuildingBlockAlerts: false,
       showOnlyThreatIndicatorAlerts: false,
     });

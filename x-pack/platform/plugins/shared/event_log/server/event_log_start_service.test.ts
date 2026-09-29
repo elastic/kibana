@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -12,13 +14,13 @@ import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
 import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
 
-jest.mock('./event_log_client');
+vi.mock('./event_log_client');
 
 describe('EventLogClientService', () => {
   const esContext = contextMock.create();
 
   describe('getClient', () => {
-    test('creates a client with a scoped SavedObjects client', () => {
+    test('creates a client with a scoped SavedObjects client', async () => {
       const savedObjectProviderRegistry = savedObjectProviderRegistryMock.create();
       const request = fakeRequest();
 
@@ -30,7 +32,7 @@ describe('EventLogClientService', () => {
       eventLogStartService.getClient(request);
 
       const savedObjectGetter = savedObjectProviderRegistry.getProvidersClient(request);
-      expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
+      expect((await vi.importMock('./event_log_client')).EventLogClient).toHaveBeenCalledWith({
         esContext,
         request,
         savedObjectGetter,

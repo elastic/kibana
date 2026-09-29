@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 
-jest.mock('@kbn/react-kibana-mount', () => {
-  const original = jest.requireActual('@kbn/react-kibana-mount');
+vi.mock('@kbn/react-kibana-mount', async () => {
+  const original = (await vi.importActual('@kbn/react-kibana-mount'));
 
   return {
     ...original,
@@ -50,8 +52,8 @@ describe('DataViewEditorPlugin', () => {
   });
 
   test('should call core.overlays.openFlyout when opening the editor', async () => {
-    const openFlyout = jest.fn();
-    const onSaveSpy = jest.fn();
+    const openFlyout = vi.fn();
+    const onSaveSpy = vi.fn();
 
     const coreStartMocked = {
       ...coreStart,

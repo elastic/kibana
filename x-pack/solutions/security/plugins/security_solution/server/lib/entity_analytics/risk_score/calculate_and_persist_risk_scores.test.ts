@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
@@ -18,7 +21,7 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { ExperimentalFeatures } from '../../../../common';
 import { EntityType } from '../../../../common/search_strategy';
 
-jest.mock('./calculate_esql_risk_scores');
+vi.mock('./calculate_esql_risk_scores');
 
 const calculateAndPersistRecentHostRiskScores = (
   esClient: ElasticsearchClient,
@@ -58,7 +61,7 @@ describe('calculateAndPersistRiskScores', () => {
 
   describe('with no risk scores to persist', () => {
     beforeEach(() => {
-      (calculateScoresWithESQL as jest.Mock).mockResolvedValueOnce(
+      (calculateScoresWithESQL as Mock).mockResolvedValueOnce(
         calculateScoresWithESQLMock.buildResponse({ scores: { host: [] } })
       );
     });
@@ -84,7 +87,7 @@ describe('calculateAndPersistRiskScores', () => {
 
   describe('with risk scores to persist', () => {
     beforeEach(() => {
-      (calculateScoresWithESQL as jest.Mock).mockResolvedValueOnce(
+      (calculateScoresWithESQL as Mock).mockResolvedValueOnce(
         calculateScoresWithESQLMock.buildResponseWithOneScore()
       );
     });

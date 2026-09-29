@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MatrixEvalsClient } from './matrix_evals_client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { queryMatrixScores } from './query_matrix_scores';
@@ -12,10 +14,10 @@ import { queryMatrixScores } from './query_matrix_scores';
 /** Guards that config `scoring:` flags survive the call site into the aggregator. */
 describe('queryMatrixScores — scoring policy passthrough', () => {
   const log = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
   } as unknown as SomeDevLog;
 
   const experiment = {
@@ -51,9 +53,9 @@ describe('queryMatrixScores — scoring policy passthrough', () => {
 
   const clientFor = (docs = scores) =>
     ({
-      listExperiments: jest.fn().mockResolvedValue([experiment]),
-      getExperimentStats: jest.fn().mockResolvedValue({ stats: [] }),
-      getExperimentScores: jest.fn().mockResolvedValue(docs),
+      listExperiments: vi.fn().mockResolvedValue([experiment]),
+      getExperimentStats: vi.fn().mockResolvedValue({ stats: [] }),
+      getExperimentScores: vi.fn().mockResolvedValue(docs),
     } as unknown as MatrixEvalsClient);
 
   const prefixMean = async (scoring?: Parameters<typeof queryMatrixScores>[2]['scoring']) => {

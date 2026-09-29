@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { setImmediate } from 'timers/promises';
 import { join } from 'path';
 
@@ -58,16 +61,16 @@ import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import type { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
 import * as SavedObjectsImportExportModule from '@kbn/core-saved-objects-import-export-server-internal';
 
-jest.mock('./object_types');
-jest.mock('./deprecations');
+vi.mock('./object_types');
+vi.mock('./deprecations');
 
 // Mock the importer and exporter constructors
-jest.mock('@kbn/core-saved-objects-import-export-server-internal', () => {
+vi.mock('@kbn/core-saved-objects-import-export-server-internal', () => {
   return {
-    SavedObjectsExporter: jest.fn().mockImplementation(() => {
+    SavedObjectsExporter: vi.fn().mockImplementation(() => {
       return {};
     }),
-    SavedObjectsImporter: jest.fn().mockImplementation(() => {
+    SavedObjectsImporter: vi.fn().mockImplementation(() => {
       return {};
     }),
   };
@@ -128,7 +131,7 @@ describe('SavedObjectsService', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#setup()', () => {
@@ -136,7 +139,7 @@ describe('SavedObjectsService', () => {
       const coreContext = createCoreContext();
       const soService = new SavedObjectsService(coreContext);
 
-      const mockedRegisterCoreObjectTypes = registerCoreObjectTypes as jest.Mock<any, any>;
+      const mockedRegisterCoreObjectTypes = registerCoreObjectTypes as Mock<any, any>;
       expect(mockedRegisterCoreObjectTypes).not.toHaveBeenCalled();
       await soService.setup(createSetupDeps());
       expect(mockedRegisterCoreObjectTypes).toHaveBeenCalledTimes(1);
@@ -151,7 +154,7 @@ describe('SavedObjectsService', () => {
 
       const deprecations = Symbol('deprecations');
       const mockedGetSavedObjectsDeprecationsProvider =
-        getSavedObjectsDeprecationsProvider as jest.Mock;
+        getSavedObjectsDeprecationsProvider as Mock;
       mockedGetSavedObjectsDeprecationsProvider.mockReturnValue(deprecations);
       await soService.setup(createSetupDeps());
 
@@ -215,7 +218,7 @@ describe('SavedObjectsService', () => {
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
-        const factory = jest.fn();
+        const factory = vi.fn();
         const factoryProvider: SavedObjectsClientFactoryProvider = () => factory;
 
         setup.setClientFactoryProvider(factoryProvider);
@@ -229,8 +232,8 @@ describe('SavedObjectsService', () => {
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
-        const firstFactory = () => jest.fn();
-        const secondFactory = () => jest.fn();
+        const firstFactory = () => vi.fn();
+        const secondFactory = () => vi.fn();
 
         setup.setClientFactoryProvider(firstFactory);
 
@@ -247,7 +250,7 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
-        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        const encryptionExtension: Mocked<SavedObjectsEncryptionExtensionFactory> = vi.fn();
         setup.setEncryptionExtension(encryptionExtension);
 
         await soService.start(createStartDeps());
@@ -266,7 +269,7 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
-        const securityExtension: jest.Mocked<SavedObjectsSecurityExtensionFactory> = jest.fn();
+        const securityExtension: Mocked<SavedObjectsSecurityExtensionFactory> = vi.fn();
         setup.setSecurityExtension(securityExtension);
 
         await soService.start(createStartDeps());
@@ -285,7 +288,7 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
-        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        const spacesExtension: Mocked<SavedObjectsSpacesExtensionFactory> = vi.fn();
         setup.setSpacesExtension(spacesExtension);
 
         await soService.start(createStartDeps());
@@ -304,8 +307,8 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
-        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
-        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        const encryptionExtension: Mocked<SavedObjectsEncryptionExtensionFactory> = vi.fn();
+        const spacesExtension: Mocked<SavedObjectsSpacesExtensionFactory> = vi.fn();
         setup.setEncryptionExtension(encryptionExtension);
         setup.setSpacesExtension(spacesExtension);
 
@@ -325,9 +328,9 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
-        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
-        const securityExtension: jest.Mocked<SavedObjectsSecurityExtensionFactory> = jest.fn();
-        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        const encryptionExtension: Mocked<SavedObjectsEncryptionExtensionFactory> = vi.fn();
+        const securityExtension: Mocked<SavedObjectsSecurityExtensionFactory> = vi.fn();
+        const spacesExtension: Mocked<SavedObjectsSpacesExtensionFactory> = vi.fn();
         setup.setEncryptionExtension(encryptionExtension);
         setup.setSecurityExtension(securityExtension);
         setup.setSpacesExtension(spacesExtension);
@@ -427,7 +430,7 @@ describe('SavedObjectsService', () => {
           const setup = await soService.setup(createSetupDeps());
 
           const accessControlTransforms: SavedObjectsAccessControlTransforms = {
-            createImportTransforms: jest.fn(),
+            createImportTransforms: vi.fn(),
           };
 
           setup.setAccessControlTransforms(accessControlTransforms);
@@ -450,7 +453,7 @@ describe('SavedObjectsService', () => {
 
           const accessControlTransforms: SavedObjectsAccessControlTransforms = {
             // exportTransform: jest.fn(),
-            createImportTransforms: jest.fn(),
+            createImportTransforms: vi.fn(),
           };
 
           setup.setAccessControlTransforms(accessControlTransforms);
@@ -642,7 +645,7 @@ describe('SavedObjectsService', () => {
         await soService.start(createStartDeps());
 
         expect(() => {
-          setup.setClientFactoryProvider(jest.fn());
+          setup.setClientFactoryProvider(vi.fn());
         }).toThrowErrorMatchingInlineSnapshot(
           `"cannot call \`setClientFactoryProvider\` after service startup."`
         );
@@ -700,7 +703,7 @@ describe('SavedObjectsService', () => {
           expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
 
           const [[, , , , , includedHiddenTypes]] = (
-            SavedObjectsRepository.createRepository as jest.Mocked<any>
+            SavedObjectsRepository.createRepository as Mocked<any>
           ).mock.calls;
 
           expect(includedHiddenTypes).toEqual([]);
@@ -718,7 +721,7 @@ describe('SavedObjectsService', () => {
           createScopedRepository(req, ['someHiddenType']);
 
           const [[, , , , , includedHiddenTypes]] = (
-            SavedObjectsRepository.createRepository as jest.Mocked<any>
+            SavedObjectsRepository.createRepository as Mocked<any>
           ).mock.calls;
 
           expect(includedHiddenTypes).toEqual(['someHiddenType']);
@@ -737,7 +740,7 @@ describe('SavedObjectsService', () => {
           createInternalRepository();
 
           const [[, , , client, , includedHiddenTypes]] = (
-            SavedObjectsRepository.createRepository as jest.Mocked<any>
+            SavedObjectsRepository.createRepository as Mocked<any>
           ).mock.calls;
 
           expect(coreStart.elasticsearch.client.asInternalUser).toBe(client);
@@ -754,7 +757,7 @@ describe('SavedObjectsService', () => {
           createInternalRepository(['someHiddenType']);
 
           const [[, , , , , includedHiddenTypes]] = (
-            SavedObjectsRepository.createRepository as jest.Mocked<any>
+            SavedObjectsRepository.createRepository as Mocked<any>
           ).mock.calls;
 
           expect(includedHiddenTypes).toEqual(['someHiddenType']);
@@ -901,7 +904,7 @@ describe('SavedObjectsService', () => {
           expect(client).toBeInstanceOf(SavedObjectsClient);
 
           // Verify that SavedObjectsRepository.createRepository was called with the correct includedHiddenTypes
-          const calls = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+          const calls = (SavedObjectsRepository.createRepository as Mocked<any>).mock.calls;
           const [, , , , , lastCallIncludedHiddenTypes] = calls[calls.length - 1];
           expect(lastCallIncludedHiddenTypes).toEqual(includedHiddenTypes);
         });
@@ -910,7 +913,7 @@ describe('SavedObjectsService', () => {
           const coreContext = createCoreContext();
           const soService = new SavedObjectsService(coreContext);
 
-          const getInternalExtensionsSpy = jest.spyOn(soService as any, 'getInternalExtensions');
+          const getInternalExtensionsSpy = vi.spyOn(soService as any, 'getInternalExtensions');
 
           await soService.setup(createSetupDeps());
           const { getUnsafeInternalClient } = await soService.start(createStartDeps());
@@ -927,13 +930,13 @@ describe('SavedObjectsService', () => {
           await soService.setup(createSetupDeps());
           const startContract = await soService.start(createStartDeps());
 
-          (SavedObjectsRepository.createRepository as jest.Mock).mockClear();
+          (SavedObjectsRepository.createRepository as Mock).mockClear();
 
           const client = startContract.getUnsafeInternalClient();
           expect(client).toBeInstanceOf(SavedObjectsClient);
 
           expect(SavedObjectsRepository.createRepository).toHaveBeenCalledTimes(1);
-          const [[, , , esClient]] = (SavedObjectsRepository.createRepository as jest.Mocked<any>)
+          const [[, , , esClient]] = (SavedObjectsRepository.createRepository as Mocked<any>)
             .mock.calls;
 
           expect(esClient).toBeDefined();
@@ -959,7 +962,7 @@ describe('SavedObjectsService', () => {
           const setup = await soService.setup(createSetupDeps());
 
           // Set up security extension factory
-          const securityFactory = jest.fn().mockReturnValue({});
+          const securityFactory = vi.fn().mockReturnValue({});
           setup.setSecurityExtension(securityFactory);
 
           await soService.start(createStartDeps());
@@ -975,7 +978,7 @@ describe('SavedObjectsService', () => {
           const soService = new SavedObjectsService(coreContext);
           const setup = await soService.setup(createSetupDeps());
 
-          const securityFactory = jest.fn().mockReturnValue({});
+          const securityFactory = vi.fn().mockReturnValue({});
           setup.setSecurityExtension(securityFactory);
 
           await soService.start(createStartDeps());
@@ -1000,7 +1003,7 @@ describe('SavedObjectsService', () => {
           const setup = await soService.setup(createSetupDeps());
 
           const mockEncryptionExtension = { id: 'encryption' };
-          const encryptionFactory = jest.fn().mockReturnValue(mockEncryptionExtension);
+          const encryptionFactory = vi.fn().mockReturnValue(mockEncryptionExtension);
           setup.setEncryptionExtension(encryptionFactory);
 
           await soService.start(createStartDeps());
@@ -1024,7 +1027,7 @@ describe('SavedObjectsService', () => {
           const setup = await soService.setup(createSetupDeps());
 
           const mockSpacesExtension = { id: 'spaces' };
-          const spacesFactory = jest.fn().mockReturnValue(mockSpacesExtension);
+          const spacesFactory = vi.fn().mockReturnValue(mockSpacesExtension);
           setup.setSpacesExtension(spacesFactory);
 
           await soService.start(createStartDeps());
@@ -1047,8 +1050,8 @@ describe('SavedObjectsService', () => {
           const soService = new SavedObjectsService(coreContext);
           const setup = await soService.setup(createSetupDeps());
 
-          const encryptionFactory = jest.fn().mockReturnValue({ id: 'encryption' });
-          const spacesFactory = jest.fn().mockReturnValue({ id: 'spaces' });
+          const encryptionFactory = vi.fn().mockReturnValue({ id: 'encryption' });
+          const spacesFactory = vi.fn().mockReturnValue({ id: 'spaces' });
           setup.setEncryptionExtension(encryptionFactory);
           setup.setSpacesExtension(spacesFactory);
 
@@ -1084,7 +1087,7 @@ describe('SavedObjectsService', () => {
           const soService = new SavedObjectsService(coreContext);
           const setup = await soService.setup(createSetupDeps());
 
-          const encryptionFactory = jest.fn().mockReturnValue({});
+          const encryptionFactory = vi.fn().mockReturnValue({});
           setup.setEncryptionExtension(encryptionFactory);
 
           await soService.start(createStartDeps());
@@ -1113,7 +1116,7 @@ describe('SavedObjectsService', () => {
           const soService = new SavedObjectsService(coreContext);
           const setup = await soService.setup(createSetupDeps());
 
-          const encryptionFactory = jest.fn().mockReturnValue({});
+          const encryptionFactory = vi.fn().mockReturnValue({});
           setup.setEncryptionExtension(encryptionFactory);
 
           await soService.start(createStartDeps());
@@ -1137,7 +1140,7 @@ describe('SavedObjectsService', () => {
           );
           let capturedExcludedExtensions: string[] = [];
 
-          jest
+          vi
             .spyOn(soService as any, 'getInternalExtensions')
             .mockImplementation((excludedExtensions = []) => {
               // Capture the excluded extensions for verification
@@ -1208,7 +1211,7 @@ describe('SavedObjectsService', () => {
 
           const accessControlTransforms: SavedObjectsAccessControlTransforms = {
             // exportTransform: jest.fn(),
-            createImportTransforms: jest.fn(),
+            createImportTransforms: vi.fn(),
           };
 
           setup.setAccessControlTransforms(accessControlTransforms);

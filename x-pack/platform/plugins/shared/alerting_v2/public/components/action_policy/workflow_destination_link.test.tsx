@@ -5,28 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { WorkflowDestinationLink } from './workflow_destination_link';
 
-const mockUseFetchWorkflow = jest.fn();
+const mockUseFetchWorkflow = vi.fn();
 
-jest.mock('../../hooks/use_fetch_workflow', () => ({
-  useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
-}));
+vi.mock('../../hooks/use_fetch_workflow', () => {
+      const mocked = {
+      useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetUrlForApp = jest.fn(
+const mockGetUrlForApp = vi.fn(
   (_appId: string, { path }: { path: string }) => `/app/workflows${path}`
 );
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({ getUrlForApp: mockGetUrlForApp }),
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: () => ({ getUrlForApp: mockGetUrlForApp }),
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowDestinationLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetUrlForApp.mockImplementation(
       (_appId: string, { path }: { path: string }) => `/app/workflows${path}`
     );

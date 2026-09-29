@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { createChatModel } from './create_chat_model';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
-jest.mock('./create_client');
+vi.mock('./create_client');
 import { createClient } from './create_client';
-const createClientMock = createClient as unknown as jest.MockedFn<typeof createClient>;
+const createClientMock = createClient as unknown as MockedFunction<typeof createClient>;
 
-jest.mock('../util/get_connector_by_id');
+vi.mock('../util/get_connector_by_id');
 import { getConnectorById } from '../util/get_connector_by_id';
-const getConnectorByIdMock = getConnectorById as unknown as jest.MockedFn<typeof getConnectorById>;
+const getConnectorByIdMock = getConnectorById as unknown as MockedFunction<typeof getConnectorById>;
 
-jest.mock('@kbn/inference-langchain');
+vi.mock('@kbn/inference-langchain');
 import { InferenceChatModel } from '@kbn/inference-langchain';
 import { createRegexWorkerServiceMock } from '../test_utils';
-const InferenceChatModelMock = InferenceChatModel as unknown as jest.Mock<
+const InferenceChatModelMock = InferenceChatModel as unknown as Mock<
   typeof InferenceChatModel
 >;
 
@@ -33,7 +36,7 @@ describe('createChatModel', () => {
   let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
   const mockEsClient = {
     ml: {
-      inferTrainedModel: jest.fn(),
+      inferTrainedModel: vi.fn(),
     },
   } as any;
 
@@ -44,7 +47,7 @@ describe('createChatModel', () => {
     regexWorker = createRegexWorkerServiceMock();
 
     createClientMock.mockReturnValue({
-      chatComplete: jest.fn(),
+      chatComplete: vi.fn(),
     } as any);
   });
 
@@ -108,7 +111,7 @@ describe('createChatModel', () => {
 
   it('creates a InferenceChatModel with the right constructor params', async () => {
     const inferenceClient = {
-      chatComplete: jest.fn(),
+      chatComplete: vi.fn(),
     } as any;
     createClientMock.mockReturnValue(inferenceClient);
 

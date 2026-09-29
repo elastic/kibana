@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -23,10 +26,10 @@ const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
 };
 
-let stageFilter: jest.Mock;
+let stageFilter: Mock;
 
 beforeEach(() => {
-  stageFilter = jest.fn();
+  stageFilter = vi.fn();
 });
 
 test('renders ListControl', () => {

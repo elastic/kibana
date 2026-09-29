@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
@@ -14,9 +17,9 @@ import {
 } from '@kbn/agent-builder-common';
 import { generateTitle } from './generate_title';
 
-const createChatModel = (invoke: jest.Mock): InferenceChatModel =>
+const createChatModel = (invoke: Mock): InferenceChatModel =>
   ({
-    withStructuredOutput: jest.fn().mockReturnValue({ invoke }),
+    withStructuredOutput: vi.fn().mockReturnValue({ invoke }),
   } as unknown as InferenceChatModel);
 
 const createConversation = (): Conversation =>
@@ -30,7 +33,7 @@ const nextInput: ConverseInput = { message: 'generate an ultra long title, ~1500
 
 describe('generateTitle', () => {
   it('returns a short generated title unchanged', async () => {
-    const invoke = jest.fn().mockResolvedValue({ title: 'Kibana Read-Only Role Configuration' });
+    const invoke = vi.fn().mockResolvedValue({ title: 'Kibana Read-Only Role Configuration' });
 
     const title = await firstValueFrom(
       generateTitle({
@@ -44,7 +47,7 @@ describe('generateTitle', () => {
   });
 
   it('truncates a generated title that exceeds the stored bound', async () => {
-    const invoke = jest.fn().mockResolvedValue({ title: 'a'.repeat(1500) });
+    const invoke = vi.fn().mockResolvedValue({ title: 'a'.repeat(1500) });
 
     const title = await firstValueFrom(
       generateTitle({
@@ -59,7 +62,7 @@ describe('generateTitle', () => {
   });
 
   it('trims whitespace left at the truncation boundary', async () => {
-    const invoke = jest
+    const invoke = vi
       .fn()
       .mockResolvedValue({ title: `${'a'.repeat(CONVERSATION_TITLE_MAX_LENGTH - 1)}   trailing` });
 
@@ -76,7 +79,7 @@ describe('generateTitle', () => {
   });
 
   it('falls back to the existing conversation title when generation fails', async () => {
-    const invoke = jest.fn().mockRejectedValue(new Error('llm unavailable'));
+    const invoke = vi.fn().mockRejectedValue(new Error('llm unavailable'));
 
     const title = await firstValueFrom(
       generateTitle({

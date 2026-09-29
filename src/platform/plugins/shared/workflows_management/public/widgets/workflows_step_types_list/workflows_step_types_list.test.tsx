@@ -7,36 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { calculateVisibleIconsCount, WorkflowsStepTypesList } from './workflows_step_types_list';
 
-jest.mock('@kbn/workflows', () => ({
-  collectAllSteps: (steps: Array<{ type: string }>) => steps,
-  getBuiltInStepDefinition: jest.fn(() => undefined),
-}));
+vi.mock('@kbn/workflows', () => {
+      const mocked = {
+      collectAllSteps: (steps: Array<{ type: string }>) => steps,
+      getBuiltInStepDefinition: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  getBaseConnectorType: jest.fn((type: string) => {
-    if (type.startsWith('elasticsearch.')) {
-      return 'elasticsearch';
-    }
-    if (type.startsWith('kibana.')) {
-      return 'kibana';
-    }
-    const normalized = type.startsWith('.') ? type.slice(1) : type;
-    if (normalized.includes('.')) {
-      return normalized.split('.')[0];
-    }
-    return normalized;
-  }),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      getBaseConnectorType: vi.fn((type: string) => {
+        if (type.startsWith('elasticsearch.')) {
+          return 'elasticsearch';
+        }
+        if (type.startsWith('kibana.')) {
+          return 'kibana';
+        }
+        const normalized = type.startsWith('.') ? type.slice(1) : type;
+        if (normalized.includes('.')) {
+          return normalized.split('.')[0];
+        }
+        return normalized;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/ui/step_icons/step_icon', () => ({
-  StepIcon: ({ stepType, title }: { stepType: string; title?: string }) => (
-    <span data-test-subj="step-icon" data-step-type={stepType} title={title} />
-  ),
-}));
+vi.mock('../../shared/ui/step_icons/step_icon', () => {
+      const mocked = {
+      StepIcon: ({ stepType, title }: { stepType: string; title?: string }) => (
+        <span data-test-subj="step-icon" data-step-type={stepType} title={title} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('calculateVisibleIconsCount', () => {
   it('returns 0 for zero icons', () => {

@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { runWithSpan } from '../../telemetry/traces';
 import { wrapMiddlewares, type Middleware } from '.';
 import type { EntityStoreRequestHandlerContext } from '../../types';
 
-jest.mock('../../telemetry/traces', () => ({
-  runWithSpan: jest.fn(),
-}));
+vi.mock('../../telemetry/traces', () => {
+      const mocked = {
+      runWithSpan: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('wrapMiddlewares', () => {
   let mockContext: EntityStoreRequestHandlerContext;
   let mockReq: KibanaRequest<unknown, unknown, unknown>;
   let mockRes: KibanaResponseFactory;
-  let mockIsEntityStoreV2Enabled: jest.Mock;
+  let mockIsEntityStoreV2Enabled: Mock;
 
   beforeEach(() => {
-    (runWithSpan as jest.Mock).mockImplementation(({ cb }) => cb());
-    mockIsEntityStoreV2Enabled = jest.fn().mockResolvedValue(true);
+    (runWithSpan as Mock).mockImplementation(({ cb }) => cb());
+    mockIsEntityStoreV2Enabled = vi.fn().mockResolvedValue(true);
     mockContext = {
       entityStore: Promise.resolve({
         namespace: 'default',
@@ -41,7 +47,7 @@ describe('wrapMiddlewares', () => {
       },
     } as unknown as KibanaRequest<unknown, unknown, unknown>;
     mockRes = {
-      customError: jest.fn(({ statusCode, body }) => ({
+      customError: vi.fn(({ statusCode, body }) => ({
         status: statusCode,
         payload: body,
       })),
@@ -49,10 +55,10 @@ describe('wrapMiddlewares', () => {
   });
 
   it('should stop execution if middleware returns IKibanaResponse', async () => {
-    const handler = jest.fn().mockResolvedValue({
+    const handler = vi.fn().mockResolvedValue({
       status: 200,
     } as unknown as IKibanaResponse);
-    const middleware: Middleware = jest.fn().mockResolvedValue({
+    const middleware: Middleware = vi.fn().mockResolvedValue({
       status: 501,
       payload: {
         message: 'stop now',
@@ -72,10 +78,10 @@ describe('wrapMiddlewares', () => {
   });
 
   it('should execute handler', async () => {
-    const handler = jest.fn().mockResolvedValue({
+    const handler = vi.fn().mockResolvedValue({
       status: 200,
     } as unknown as IKibanaResponse);
-    const middleware: Middleware = jest.fn().mockResolvedValue(undefined);
+    const middleware: Middleware = vi.fn().mockResolvedValue(undefined);
 
     const actualHandler = wrapMiddlewares(handler, [middleware]);
 
@@ -89,7 +95,7 @@ describe('wrapMiddlewares', () => {
 
   it('should run registered middlewares before custom middleware and handler', async () => {
     const callOrder: string[] = [];
-    (runWithSpan as jest.Mock).mockImplementation(async ({ cb }) => {
+    (runWithSpan as Mock).mockImplementation(async ({ cb }) => {
       callOrder.push('tracing');
       return cb();
     });
@@ -102,7 +108,7 @@ describe('wrapMiddlewares', () => {
       callOrder.push('customMiddleware');
       return undefined;
     };
-    const handler = jest.fn(async () => {
+    const handler = vi.fn(async () => {
       callOrder.push('handler');
       return { status: 200 } as IKibanaResponse;
     });
@@ -112,7 +118,7 @@ describe('wrapMiddlewares', () => {
   });
 
   it('should pass route data to tracing wrapper', async () => {
-    const handler = jest.fn().mockResolvedValue({
+    const handler = vi.fn().mockResolvedValue({
       status: 200,
     } as unknown as IKibanaResponse);
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
 
@@ -17,7 +19,7 @@ import type { Options } from './dev_server';
 import { DevServer } from './dev_server';
 import { TestLog } from './log';
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 class MockProc extends EventEmitter {
   public readonly signalsSent: string[] = [];
@@ -25,7 +27,7 @@ class MockProc extends EventEmitter {
   stdout = new PassThrough();
   stderr = new PassThrough();
 
-  kill = jest.fn((signal) => {
+  kill = vi.fn((signal) => {
     this.signalsSent.push(signal);
   });
 
@@ -41,8 +43,8 @@ class MockProc extends EventEmitter {
   }
 }
 
-jest.mock('execa');
-const execa = jest.requireMock('execa');
+vi.mock('execa');
+const execa = (await vi.importMock('execa'));
 
 let currentProc: MockProc | undefined;
 execa.node.mockImplementation(() => {
@@ -57,7 +59,7 @@ function isProc(proc: MockProc | undefined): asserts proc is MockProc {
 const restart$ = new Rx.Subject<void>();
 const mockWatcher = {
   enabled: true,
-  serverShouldRestart$: jest.fn(() => restart$),
+  serverShouldRestart$: vi.fn(() => restart$),
 };
 
 const processExit$ = new Rx.Subject<void>();
@@ -80,7 +82,7 @@ const defaultOptions: Options = {
 expect.addSnapshotSerializer(extendedEnvSerializer);
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   log.messages.length = 0;
   process.execArgv = ['--inheritted', '--exec', '--argv'];
   currentProc = undefined;
@@ -324,7 +326,7 @@ describe('#run$', () => {
     expect(currentProc.signalsSent).toEqual([]);
     sigint$.next();
     expect(currentProc.signalsSent).toEqual(['SIGINT']);
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     expect(currentProc.signalsSent).toEqual(['SIGINT', 'SIGKILL']);
   });
 });
@@ -362,9 +364,9 @@ describe('#getRestartTime$()', () => {
 
     isProc(currentProc);
     restart$.next();
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     restart$.next();
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     restart$.next();
     expect(phases).toMatchInlineSnapshot(`
       Array [
@@ -392,11 +394,11 @@ describe('#getRestartTime$()', () => {
     restart$.next();
     currentProc.mockExit(1);
     restart$.next();
-    jest.advanceTimersByTime(1234);
+    vi.advanceTimersByTime(1234);
     currentProc.mockListening();
     restart$.next();
     restart$.next();
-    jest.advanceTimersByTime(5678);
+    vi.advanceTimersByTime(5678);
     currentProc.mockListening();
 
     expect(phases).toMatchInlineSnapshot(`

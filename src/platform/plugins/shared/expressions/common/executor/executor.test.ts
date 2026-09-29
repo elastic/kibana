@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
@@ -125,9 +127,9 @@ describe('Executor', () => {
   describe('.inject', () => {
     const executor = new Executor();
 
-    const injectFn = jest.fn().mockImplementation((args, references) => args);
-    const extractFn = jest.fn().mockImplementation((state) => ({ state, references: [] }));
-    const migrateFn = jest.fn().mockImplementation((args) => args);
+    const injectFn = vi.fn().mockImplementation((args, references) => args);
+    const extractFn = vi.fn().mockImplementation((state) => ({ state, references: [] }));
+    const migrateFn = vi.fn().mockImplementation((args) => args);
 
     const fooFn = {
       name: 'foo',
@@ -154,7 +156,7 @@ describe('Executor', () => {
           }) as unknown as MigrateFunction,
         };
       },
-      fn: jest.fn(),
+      fn: vi.fn(),
     };
 
     const refFnRefName = 'ref.id';
@@ -201,7 +203,7 @@ describe('Executor', () => {
         }
         return state;
       },
-      fn: jest.fn(),
+      fn: vi.fn(),
     };
     executor.registerFunction(fooFn);
     executor.registerFunction(refFn);
@@ -260,7 +262,7 @@ describe('Executor', () => {
             help: 'test',
           },
         },
-        fn: jest.fn(),
+        fn: vi.fn(),
       };
 
       const fnMigrateFrom = {
@@ -280,7 +282,7 @@ describe('Executor', () => {
             return { type: 'expression', chain: [ast, ast] };
           }) as unknown as MigrateFunction,
         },
-        fn: jest.fn(),
+        fn: vi.fn(),
       };
       executor.registerFunction(fnMigrateFrom);
       executor.registerFunction(fnMigrateTo);

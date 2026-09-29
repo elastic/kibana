@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useValueReportData } from './use_value_report_data';
@@ -16,11 +19,11 @@ import {
 } from '../components/ai_value/sample_data';
 import type { ValueMetrics } from '../components/ai_value/metrics';
 
-jest.mock('../components/ai_value/hooks/use_value_metrics');
-jest.mock('../components/ai_value/hooks/use_has_ever_used_attack_discovery');
+vi.mock('../components/ai_value/hooks/use_value_metrics');
+vi.mock('../components/ai_value/hooks/use_has_ever_used_attack_discovery');
 
-const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
-const mockUseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as jest.MockedFunction<
+const mockUseValueMetrics = useValueMetrics as MockedFunction<typeof useValueMetrics>;
+const mockUseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as MockedFunction<
   typeof useHasEverUsedAttackDiscovery
 >;
 
@@ -84,7 +87,7 @@ const mockHistory = ({
 
 describe('useValueReportData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('sample vs live mode', () => {

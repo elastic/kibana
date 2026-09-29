@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../utils/kibana_react', () => ({
+vi.mock('../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
 describe('useFetchAlertData', () => {
@@ -36,7 +38,7 @@ describe('useFetchAlertData', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('initially is loading and does not have data', async () => {

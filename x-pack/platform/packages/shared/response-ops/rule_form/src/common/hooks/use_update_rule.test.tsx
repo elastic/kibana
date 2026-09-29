@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -64,19 +66,22 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-jest.mock('../apis/update_rule/update_rule', () => ({
-  updateRule: jest.fn(),
-}));
+vi.mock('../apis/update_rule/update_rule', () => {
+      const mocked = {
+      updateRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { updateRule } = jest.requireMock('../apis/update_rule/update_rule');
+const { updateRule } = (await vi.importMock('../apis/update_rule/update_rule'));
 
-const httpMock = jest.fn();
-const onSuccessMock = jest.fn();
-const onErrorMock = jest.fn();
+const httpMock = vi.fn();
+const onSuccessMock = vi.fn();
+const onErrorMock = vi.fn();
 
 describe('useUpdateRule', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call onSuccess if request succeeds', async () => {

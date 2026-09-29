@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -16,11 +18,14 @@ import type { MigrationStateContext } from './context';
 import { DataStreamReindexActionsCell } from './actions_table_cell';
 import { LoadingState } from '../../../types';
 
-const mockUseDataStreamMigrationContext = jest.fn<MigrationStateContext, []>();
+const mockUseDataStreamMigrationContext = vi.fn<MigrationStateContext, []>();
 
-jest.mock('./context', () => ({
-  useDataStreamMigrationContext: () => mockUseDataStreamMigrationContext(),
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      useDataStreamMigrationContext: () => mockUseDataStreamMigrationContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseCorrectiveAction: DataStreamsAction = {
   type: 'dataStream',
@@ -41,12 +46,12 @@ const createContext = ({
   status: DataStreamMigrationStatus;
   resolutionType?: 'reindex' | 'readonly';
 }): MigrationStateContext => ({
-  loadDataStreamMetadata: jest.fn<Promise<void>, []>(),
-  initMigration: jest.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
-  startReindex: jest.fn<Promise<void>, []>(),
-  cancelReindex: jest.fn<Promise<void>, []>(),
-  startReadonly: jest.fn<Promise<void>, []>(),
-  cancelReadonly: jest.fn<Promise<void>, []>(),
+  loadDataStreamMetadata: vi.fn<Promise<void>, []>(),
+  initMigration: vi.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
+  startReindex: vi.fn<Promise<void>, []>(),
+  cancelReindex: vi.fn<Promise<void>, []>(),
+  startReadonly: vi.fn<Promise<void>, []>(),
+  cancelReadonly: vi.fn<Promise<void>, []>(),
   migrationState: {
     loadingState: LoadingState.Success,
     status,
@@ -59,8 +64,8 @@ const createContext = ({
 });
 
 describe('DataStreamReindexActionsCell', () => {
-  const mockOpenFlyout = jest.fn<void, []>();
-  const mockOpenModal = jest.fn<void, []>();
+  const mockOpenFlyout = vi.fn<void, []>();
+  const mockOpenModal = vi.fn<void, []>();
 
   beforeEach(() => {
     mockUseDataStreamMigrationContext.mockReset();

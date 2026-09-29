@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { InstructionSet } from './instruction_set';
@@ -15,9 +18,12 @@ import { render } from '@testing-library/react';
 import { getServices } from '../../kibana_services';
 import type { InstructionVariantType } from '../../../services/tutorials/types';
 
-jest.mock('../../kibana_services', () => ({
-  getServices: jest.fn(),
-}));
+vi.mock('../../kibana_services', () => {
+      const mocked = {
+      getServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const instructions = [
   {
@@ -64,13 +70,13 @@ const defaultProps = {
 };
 
 beforeAll(() => {
-  (getServices as jest.Mock).mockImplementation(() => ({
+  (getServices as Mock).mockImplementation(() => ({
     tutorialService: {
-      getCustomComponent: jest.fn(),
+      getCustomComponent: vi.fn(),
     },
     theme: {
-      theme$: jest.fn(),
-      getTheme: jest.fn(() => ({
+      theme$: vi.fn(),
+      getTheme: vi.fn(() => ({
         darkMode: false,
       })),
     },

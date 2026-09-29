@@ -7,29 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BarDetails } from './bar_details';
 
-jest.mock('../../utils', () => ({
-  asDuration: (value: number) => `${value} ms`,
-  asInteger: (value: number) => value.toLocaleString('en-US'),
-}));
-jest.mock('./trace_waterfall_context', () => ({
-  useTraceWaterfallContext: jest.fn(),
-}));
+vi.mock('../../utils', () => {
+      const mocked = {
+      asDuration: (value: number) => `${value} ms`,
+      asInteger: (value: number) => value.toLocaleString('en-US'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./trace_waterfall_context', () => {
+      const mocked = {
+      useTraceWaterfallContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 describe('BarDetails', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
-    (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+    (useTraceWaterfallContext as Mock).mockReturnValue({
       getRelatedErrorsHref: undefined,
     });
   });
@@ -85,7 +94,7 @@ describe('BarDetails', () => {
 
     describe('and error click event', () => {
       beforeAll(() => {
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+        (useTraceWaterfallContext as Mock).mockReturnValue({
           onErrorClick: () => {},
         });
       });
@@ -103,11 +112,11 @@ describe('BarDetails', () => {
     // 'apm' and 'mixed' go to the Errors page. The click-handler tests inject errorSource
     // themselves, so this is the only coverage of how the badge classifies a row.
     describe('and the error badge classifies the row', () => {
-      const onErrorClick = jest.fn();
+      const onErrorClick = vi.fn();
 
       beforeEach(() => {
         onErrorClick.mockClear();
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({ onErrorClick });
+        (useTraceWaterfallContext as Mock).mockReturnValue({ onErrorClick });
       });
 
       const clickErrorBadge = async (errors: TraceWaterfallItem['errors']) => {
@@ -185,7 +194,7 @@ describe('BarDetails', () => {
 
     describe('and related errors href', () => {
       beforeAll(() => {
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+        (useTraceWaterfallContext as Mock).mockReturnValue({
           getRelatedErrorsHref: () => {},
         });
       });
@@ -354,9 +363,9 @@ describe('BarDetails', () => {
     describe('when onClick is provided in context', () => {
       it('calls onClick with item id and flyoutDetailTab when badge is clicked', async () => {
         const user = userEvent.setup();
-        const onClickMock = jest.fn();
+        const onClickMock = vi.fn();
 
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+        (useTraceWaterfallContext as Mock).mockReturnValue({
           onClick: onClickMock,
         });
 
@@ -376,7 +385,7 @@ describe('BarDetails', () => {
       });
 
       it('does not pass onClick to SpanLinksBadge when context onClick is undefined', () => {
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+        (useTraceWaterfallContext as Mock).mockReturnValue({
           onClick: undefined,
         });
 
@@ -683,7 +692,7 @@ describe('BarDetails', () => {
       } as unknown as TraceWaterfallItem;
 
       beforeEach(() => {
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+        (useTraceWaterfallContext as Mock).mockReturnValue({
           getServiceBadgeHref: (serviceName: string) => `/services/${serviceName}/overview`,
         });
       });
@@ -710,7 +719,7 @@ describe('BarDetails', () => {
 
     describe('when getServiceBadgeHref is not provided in context', () => {
       beforeEach(() => {
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+        (useTraceWaterfallContext as Mock).mockReturnValue({
           getServiceBadgeHref: undefined,
         });
       });

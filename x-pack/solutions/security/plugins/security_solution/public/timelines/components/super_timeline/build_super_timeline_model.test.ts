@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { isCombinedFilter, BooleanRelation } from '@kbn/es-query';
 import type { CombinedFilter } from '@kbn/es-query';
@@ -346,7 +348,7 @@ describe('buildSuperTimelineModel', () => {
     it('produces no filter clause when combineQueries returns non-plain-object JSON (internal edge case)', () => {
       // WHY: combineQueries may (theoretically) serialize to a JSON array or primitive in edge cases.
       // The timeline is still included (pins/notes/dateRange), but the malformed filter is dropped silently.
-      const spy = jest.spyOn(kuery, 'combineQueries').mockReturnValueOnce({
+      const spy = vi.spyOn(kuery, 'combineQueries').mockReturnValueOnce({
         filterQuery: JSON.stringify([1, 2, 3]),
         kqlError: undefined,
         baseKqlQuery: { query: '', language: 'kuery' },

@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import JSZip from 'jszip';
 import YAML from 'yaml';
 import { parseImportFile } from './parse_import_file';
 import { MAX_AGGREGATE_IMPORT_BYTES } from '../../../../common/lib/import';
 
-jest.mock('@kbn/workflows-yaml', () => ({
-  ...jest.requireActual('@kbn/workflows-yaml'),
-  parseYamlToJSONWithoutValidation: (yamlString: string) => {
-    try {
-      const json = jest.requireActual('yaml').parse(yamlString) as Record<string, unknown>;
-      return { success: true, json, document: {} };
-    } catch {
-      return { success: false, error: new Error('parse failed'), document: {} };
-    }
-  },
-}));
+vi.mock('@kbn/workflows-yaml', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-yaml')),
+      parseYamlToJSONWithoutValidation: (yamlString: string) => {
+        try {
+          const json = require('yaml').parse(yamlString) as Record<string, unknown>;
+          return { success: true, json, document: {} };
+        } catch {
+          return { success: false, error: new Error('parse failed'), document: {} };
+        }
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createFile(content: string | ArrayBuffer, name: string, type = ''): File {
   const blob = content instanceof ArrayBuffer ? new Blob([content]) : new Blob([content]);
@@ -605,7 +610,7 @@ describe('parseImportFile', () => {
 
       // Make every encode() call report MAX_AGGREGATE_IMPORT_BYTES bytes so the
       // aggregate limit is exceeded after the very first workflow entry is read.
-      const encodeSpy = jest
+      const encodeSpy = vi
         .spyOn(TextEncoder.prototype, 'encode')
         .mockReturnValue(new Uint8Array(MAX_AGGREGATE_IMPORT_BYTES + 1));
 

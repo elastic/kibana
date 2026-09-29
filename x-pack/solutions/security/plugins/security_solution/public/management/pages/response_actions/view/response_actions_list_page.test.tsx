@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -27,24 +30,22 @@ let mockUseGetEndpointActionList: {
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
-jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => {
-  const original = jest.requireActual(
-    '../../../hooks/response_actions/use_get_endpoint_action_list'
-  );
+vi.mock('../../../hooks/response_actions/use_get_endpoint_action_list', async () => {
+  const original = (await vi.importActual('../../../hooks/response_actions/use_get_endpoint_action_list'));
   return {
     ...original,
     useGetEndpointActionList: () => mockUseGetEndpointActionList,
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useKibana: () => ({
       services: {
         uiSettings: {
-          get: jest.fn().mockImplementation((key) => {
+          get: vi.fn().mockImplementation((key) => {
             const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
               const x = {
                 dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
@@ -111,8 +112,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
-const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
+vi.mock('../../../hooks/endpoint/use_get_endpoints_list');
+const mockUseGetEndpointsList = useGetEndpointsList as Mock;
 
 describe('Response actions history page', () => {
   const testPrefix = 'response-actions-list';
@@ -123,7 +124,7 @@ describe('Response actions history page', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
 
-  const refetchFunction = jest.fn();
+  const refetchFunction = vi.fn();
   const baseMockedActionList = {
     isFetched: true,
     isFetching: false,
@@ -132,17 +133,17 @@ describe('Response actions history page', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     mockedContext = createAppRootMockRenderer();
@@ -174,8 +175,8 @@ describe('Response actions history page', () => {
     mockUseGetEndpointActionList = {
       ...baseMockedActionList,
     };
-    jest.clearAllMocks();
-    jest.runOnlyPendingTimers();
+    vi.clearAllMocks();
+    vi.runOnlyPendingTimers();
   });
 
   describe('Hide/Show header', () => {

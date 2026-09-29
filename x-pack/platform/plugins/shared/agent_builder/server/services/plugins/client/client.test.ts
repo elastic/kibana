@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { isPluginNotFoundError, type UnmanagedPluginAssets } from '@kbn/agent-builder-common';
 import { createClient, type PluginClient } from './client';
@@ -42,36 +45,39 @@ const createMockPluginDoc = (overrides?: Partial<PluginProperties>) => ({
 });
 
 interface MockEsClient {
-  search: jest.Mock;
-  index: jest.Mock;
-  delete: jest.Mock;
+  search: Mock;
+  index: Mock;
+  delete: Mock;
 }
 
 const mockEsClient: MockEsClient = {
-  search: jest.fn(),
-  index: jest.fn(),
-  delete: jest.fn(),
+  search: vi.fn(),
+  index: vi.fn(),
+  delete: vi.fn(),
 };
 
-jest.mock('./storage', () => {
-  const actual = jest.requireActual('./storage');
+vi.mock('./storage', async () => {
+  const actual = (await vi.importActual('./storage'));
   return {
     ...actual,
-    createStorage: jest.fn(() => ({
-      getClient: jest.fn(() => mockEsClient),
+    createStorage: vi.fn(() => ({
+      getClient: vi.fn(() => mockEsClient),
     })),
   };
 });
 
-jest.mock('crypto', () => ({
-  randomUUID: jest.fn(() => 'generated-uuid'),
-}));
+vi.mock('crypto', () => {
+      const mocked = {
+      randomUUID: vi.fn(() => 'generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PluginClient', () => {
   let client: PluginClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     client = createClient({
       space: testSpace,

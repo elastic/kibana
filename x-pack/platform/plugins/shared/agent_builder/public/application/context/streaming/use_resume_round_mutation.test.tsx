@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -19,19 +21,25 @@ import { createExecutionTerminatedEvent } from '../../components/conversations/t
 import { queryKeys } from '../../query_keys';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 
-const mockResume = jest.fn();
-const mockAbort = jest.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
-const mockGet = jest.fn();
+const mockResume = vi.fn();
+const mockAbort = vi.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
+const mockGet = vi.fn();
 
-jest.mock('../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    chatService: { resume: mockResume, abort: mockAbort },
-    conversationsService: { get: mockGet },
-  }),
-}));
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: { plugins: {}, notifications: {} } }),
-}));
+vi.mock('../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        chatService: { resume: mockResume, abort: mockAbort },
+        conversationsService: { get: mockGet },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: { plugins: {}, notifications: {} } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const conversationId = 'conv-1';
 const vars = {
@@ -47,8 +55,8 @@ const setup = () => {
   const conversationStreamService = new ConversationStreamService(eventsService);
   const bindings = {
     conversationStreamService,
-    clearActiveStream: jest.fn(),
-    markStreamStarted: jest.fn(),
+    clearActiveStream: vi.fn(),
+    markStreamStarted: vi.fn(),
   };
   const source = new Subject<ChatEvent>();
   mockResume.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
@@ -71,7 +79,7 @@ const setup = () => {
 
 describe('useResumeRoundMutation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('releases the execution events once the refetch contains the saved execution, keeping the answer', async () => {

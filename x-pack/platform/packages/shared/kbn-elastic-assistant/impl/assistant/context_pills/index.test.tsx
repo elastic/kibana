@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -36,7 +38,7 @@ const defaultProps = {
 };
 
 describe('ContextPills', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the context pill descriptions', () => {
     render(
@@ -44,7 +46,7 @@ describe('ContextPills', () => {
         <ContextPills
           {...defaultProps}
           selectedPromptContexts={{}}
-          setSelectedPromptContexts={jest.fn()}
+          setSelectedPromptContexts={vi.fn()}
         />
       </TestProviders>
     );
@@ -70,7 +72,7 @@ describe('ContextPills', () => {
             },
           }}
           selectedPromptContexts={{}}
-          setSelectedPromptContexts={jest.fn()}
+          setSelectedPromptContexts={vi.fn()}
         />
       </TestProviders>
     );
@@ -80,7 +82,7 @@ describe('ContextPills', () => {
 
   it('invokes setSelectedPromptContexts() when the prompt is NOT already selected', async () => {
     const context = mockPromptContexts.context1;
-    const setSelectedPromptContexts = jest.fn();
+    const setSelectedPromptContexts = vi.fn();
 
     render(
       <TestProviders>
@@ -106,7 +108,7 @@ describe('ContextPills', () => {
       promptContextId: context.id,
       rawData: 'test-raw-data',
     };
-    const setSelectedPromptContexts = jest.fn();
+    const setSelectedPromptContexts = vi.fn();
 
     render(
       <TestProviders>
@@ -143,7 +145,7 @@ describe('ContextPills', () => {
           selectedPromptContexts={{
             [context.id]: mockSelectedPromptContext,
           }} // <-- the context is selected
-          setSelectedPromptContexts={jest.fn()}
+          setSelectedPromptContexts={vi.fn()}
         />
       </TestProviders>
     );
@@ -159,7 +161,7 @@ describe('ContextPills', () => {
         <ContextPills
           {...defaultProps}
           selectedPromptContexts={{}} // context1 is NOT selected
-          setSelectedPromptContexts={jest.fn()}
+          setSelectedPromptContexts={vi.fn()}
         />
       </TestProviders>
     );

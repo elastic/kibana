@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -107,7 +109,7 @@ describe('LabelNodeBadges', () => {
   });
 
   describe('Popover', () => {
-    const mockOnEventClick = jest.fn();
+    const mockOnEventClick = vi.fn();
 
     beforeEach(() => {
       mockOnEventClick.mockClear();

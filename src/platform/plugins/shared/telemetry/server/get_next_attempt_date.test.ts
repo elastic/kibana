@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import crypto from 'crypto';
 import { getNextAttemptDate } from './get_next_attempt_date';
 
 describe('getNextAttemptDate', () => {
   // The casting is needed because `randomInt` has multiple call signatures and typescript is taking the callback one.
-  const randomIntSpy = jest.spyOn(crypto, 'randomInt') as unknown as jest.SpyInstance<
+  const randomIntSpy = vi.spyOn(crypto, 'randomInt') as unknown as MockInstance<
     number,
     [min: number, max: number]
   >;

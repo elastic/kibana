@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,11 +18,11 @@ import { FileNameLink } from './file_name_link';
 describe('FileNameLink', () => {
   const defaultProps = {
     file: basicFileMock,
-    showPreview: jest.fn(),
+    showPreview: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders clickable name if file is image', async () => {

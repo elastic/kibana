@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { render } from '../rtl_helpers';
@@ -15,12 +17,12 @@ import { reportTypeKey } from '../hooks/use_series_storage';
 import { ReportTypes } from '../../../..';
 
 describe('ViewActions', () => {
-  const applyChanges = jest.fn();
+  const applyChanges = vi.fn();
 
-  const mockSeriesStorage = (allSeries: AllSeries, urlAllSeries: AllSeries) => {
-    jest.clearAllMocks();
-    jest.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
-      ...jest.requireActual('../hooks/use_series_storage'),
+  const mockSeriesStorage = async (allSeries: AllSeries, urlAllSeries: AllSeries) => {
+    vi.clearAllMocks();
+    vi.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
+      ...(await vi.importActual('../hooks/use_series_storage')),
       allSeries,
       applyChanges,
       storage: {

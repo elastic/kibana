@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('../../../../../kibana_services', () => {
+import { vi } from 'vitest';
+
+vi.mock('../../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;
@@ -13,7 +15,7 @@ jest.mock('../../../../../kibana_services', () => {
   };
 });
 
-jest.mock('../../symbol_utils', () => {
+vi.mock('../../symbol_utils', () => {
   return {
     SYMBOL_OPTIONS: [
       {

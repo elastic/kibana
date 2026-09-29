@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -44,10 +47,10 @@ import type { DatatableColumnFn, DatatableExpressionFunction } from '../../../co
 import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
-jest.mock('../../shared_components/coloring', () => {
+vi.mock('../../shared_components/coloring', async () => {
   return {
-    ...jest.requireActual('../../shared_components/coloring'),
-    getPaletteDisplayColors: jest.fn().mockReturnValue([]),
+    ...(await vi.importActual('../../shared_components/coloring')),
+    getPaletteDisplayColors: vi.fn().mockReturnValue([]),
   };
 });
 
@@ -72,7 +75,7 @@ const datatableVisualization = getDatatableVisualization(mockServices);
 
 describe('Datatable Visualization', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#initialize', () => {
@@ -457,7 +460,7 @@ describe('Datatable Visualization', () => {
       let params: VisualizationConfigProps<DatatableVisualizationState>;
 
       beforeEach(() => {
-        (getPaletteDisplayColors as jest.Mock).mockReturnValue(mockStops);
+        (getPaletteDisplayColors as Mock).mockReturnValue(mockStops);
       });
 
       describe('rows', () => {
@@ -502,7 +505,7 @@ describe('Datatable Visualization', () => {
         it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should not include palette if colorMode is %s but stops is empty',
           (colorMode) => {
-            (getPaletteDisplayColors as jest.Mock).mockReturnValue([]);
+            (getPaletteDisplayColors as Mock).mockReturnValue([]);
             params.state.columns[0].colorMode = colorMode;
             expect(datatableVisualization.getConfiguration(params).groups[0].accessors).toEqual([
               { columnId: 'b' },
@@ -551,7 +554,7 @@ describe('Datatable Visualization', () => {
         it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should not include palette if colorMode is %s but stops is empty',
           (colorMode) => {
-            (getPaletteDisplayColors as jest.Mock).mockReturnValue([]);
+            (getPaletteDisplayColors as Mock).mockReturnValue([]);
             params.state.columns[0].colorMode = colorMode;
             expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
               { columnId: 'b' },
@@ -600,7 +603,7 @@ describe('Datatable Visualization', () => {
 
     it('should compute the groups correctly for text based languages', () => {
       const datasource = createMockDatasource('textBased', {
-        isTextBasedLanguage: jest.fn(() => true),
+        isTextBasedLanguage: vi.fn(() => true),
       });
       datasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'c', fields: [] },
@@ -1383,13 +1386,13 @@ describe('Datatable Visualization', () => {
       });
 
       it('computes stops while preserving palette name for numeric column with valid palette with canDynamicColoring but no stops', () => {
-        const temperaturePalette: jest.Mocked<PaletteDefinition> = {
+        const temperaturePalette: Mocked<PaletteDefinition> = {
           id: 'temperature',
           title: 'Temperature',
           canDynamicColoring: true,
-          getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'orange'),
-          getCategoricalColors: jest.fn((_: number) => ['orange', 'red']),
-          toExpression: jest.fn(() => ({
+          getCategoricalColor: vi.fn((_: SeriesLayer[]) => 'orange'),
+          getCategoricalColors: vi.fn((_: number) => ['orange', 'red']),
+          toExpression: vi.fn(() => ({
             type: 'expression',
             chain: [
               {
@@ -1634,7 +1637,7 @@ describe('Datatable Visualization', () => {
 
       it('provides a fix action via setState that replaces incompatible color config with defaults', () => {
         mockOperation({ dataType: 'number', isBucketed: false, label: 'My Metric' });
-        const setState = jest.fn();
+        const setState = vi.fn();
         const state: DatatableVisualizationState = {
           ...baseState,
           columns: [

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -18,19 +21,22 @@ import { licenseService } from '../../../../common/hooks/use_license';
 import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE } from './api';
 import { AlertAnalysisWorkflowPage } from '.';
 
-jest.mock('../../../../common/containers/use_full_screen', () => ({
-  useGlobalFullScreen: () => ({
-    globalFullScreen: false,
-    setGlobalFullScreen: jest.fn(),
-  }),
-}));
+vi.mock('../../../../common/containers/use_full_screen', () => {
+      const mocked = {
+      useGlobalFullScreen: () => ({
+        globalFullScreen: false,
+        setGlobalFullScreen: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('@kbn/inference-connectors');
+vi.mock('../../../../common/hooks/use_license');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('@kbn/inference-connectors');
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useLoadConnectorsMock = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
+const useLoadConnectorsMock = useLoadConnectors as MockedFunction<typeof useLoadConnectors>;
 
 const builtInInferenceEndpoint = {
   id: '.anthropic-claude-sonnet-chat_completion',
@@ -70,7 +76,7 @@ const externalInferenceEndpoint = {
 describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
 
-  const listAgentsMock = jest.fn();
+  const listAgentsMock = vi.fn();
 
   const defaultSettings = {
     autoCloseEnabled: true,
@@ -95,9 +101,9 @@ describe('AlertAnalysisWorkflowPage', () => {
     canReadRules?: boolean;
     canSaveAdvancedSettings?: boolean;
     isEnterprise?: boolean;
-    settingsRequest?: jest.Mock;
+    settingsRequest?: Mock;
   } = {}) => {
-    (licenseService.isEnterprise as jest.Mock).mockReturnValue(isEnterprise);
+    (licenseService.isEnterprise as Mock).mockReturnValue(isEnterprise);
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       advancedSettings: { show: true, save: canSaveAdvancedSettings },
@@ -149,8 +155,8 @@ describe('AlertAnalysisWorkflowPage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (licenseService.isEnterprise as Mock).mockReturnValue(true);
     useLoadConnectorsMock.mockReturnValue({
       data: [builtInInferenceEndpoint, externalInferenceEndpoint],
       isLoading: false,
@@ -177,7 +183,7 @@ describe('AlertAnalysisWorkflowPage', () => {
   });
 
   it('shows an error prompt and retries a failed settings request', async () => {
-    const settingsRequest = jest
+    const settingsRequest = vi
       .fn()
       .mockRejectedValueOnce(new Error('Unable to load settings'))
       .mockResolvedValueOnce(settingsGetResponse());

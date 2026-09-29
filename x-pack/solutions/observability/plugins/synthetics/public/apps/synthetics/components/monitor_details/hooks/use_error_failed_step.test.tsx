@@ -5,29 +5,44 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useErrorFailedStep } from './use_error_failed_step';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUrlParams = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ monitorId: 'monitor-1' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => ({ monitorId: 'monitor-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useEsSearchMock = observabilitySharedPublic.useEsSearch as jest.Mock;
+const useEsSearchMock = observabilitySharedPublic.useEsSearch as Mock;
 
 describe('useErrorFailedStep', () => {
   beforeEach(() => {
@@ -35,7 +50,7 @@ describe('useErrorFailedStep', () => {
     useEsSearchMock.mockReturnValue({ data: undefined, loading: false });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('queries the local synthetics index pattern when no remoteName is provided', () => {
     renderHook(() => useErrorFailedStep(['check-group-1']));

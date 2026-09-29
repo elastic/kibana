@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -12,26 +14,35 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import { VisualizeCustomContent } from '.';
 import type { VisualizationServices } from '../services';
 
-jest.mock('@kbn/custom-content-renderer', () => ({
-  CustomContentComponent: () => <span data-test-subj="custom-content" />,
-}));
+vi.mock('@kbn/custom-content-renderer', () => {
+      const mocked = {
+      CustomContentComponent: () => <span data-test-subj="custom-content" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared/use_vis_preview_unified_search', () => ({
-  useVisPreviewUnifiedSearch: () => ({
-    searchBarProps: {},
-    effectiveTimeRange: { from: 'now-15m', to: 'now' },
-  }),
-}));
+vi.mock('../shared/use_vis_preview_unified_search', () => {
+      const mocked = {
+      useVisPreviewUnifiedSearch: () => ({
+        searchBarProps: {},
+        effectiveTimeRange: { from: 'now-15m', to: 'now' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedOnSave: ((args: Record<string, unknown>) => void) | undefined;
-jest.mock('@kbn/presentation-util-plugin/public', () => ({
-  SavedObjectSaveModalDashboard: (props: { onSave: (args: Record<string, unknown>) => void }) => {
-    capturedOnSave = props.onSave;
-    return <span data-test-subj="save-modal" />;
-  },
-}));
+vi.mock('@kbn/presentation-util-plugin/public', () => {
+      const mocked = {
+      SavedObjectSaveModalDashboard: (props: { onSave: (args: Record<string, unknown>) => void }) => {
+        capturedOnSave = props.onSave;
+        return <span data-test-subj="save-modal" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const navigateToWithEmbeddablePackages = jest.fn();
+const navigateToWithEmbeddablePackages = vi.fn();
 
 const createServices = (canWriteDashboards = true) =>
   ({
@@ -62,7 +73,7 @@ const renderComponent = (
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   capturedOnSave = undefined;
 });
 

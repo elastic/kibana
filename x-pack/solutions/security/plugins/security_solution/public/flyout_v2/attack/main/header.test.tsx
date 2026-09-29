@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -13,62 +16,83 @@ import { Header } from './header';
 import { HEADER_SHARE_BUTTON_TEST_ID, HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
 import { useGetAttackFlyoutLink } from '../../../flyout/attack_details/hooks/use_get_attack_flyout_link';
 
-jest.mock('./components/header_title', () => ({
-  HeaderTitle: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="mockHeaderTitle" data-hit-id={hit.id} />
-  ),
-}));
+vi.mock('./components/header_title', () => {
+      const mocked = {
+      HeaderTitle: ({ hit }: { hit: DataTableRecord }) => (
+        <div data-test-subj="mockHeaderTitle" data-hit-id={hit.id} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/status', () => ({
-  Status: ({ hit, onAttackUpdated }: { hit: DataTableRecord; onAttackUpdated: () => void }) => (
-    <div
-      data-test-subj="mockStatus"
-      data-hit-id={hit.id}
-      data-has-on-attack-updated={String(onAttackUpdated != null)}
-    />
-  ),
-}));
+vi.mock('./components/status', () => {
+      const mocked = {
+      Status: ({ hit, onAttackUpdated }: { hit: DataTableRecord; onAttackUpdated: () => void }) => (
+        <div
+          data-test-subj="mockStatus"
+          data-hit-id={hit.id}
+          data-has-on-attack-updated={String(onAttackUpdated != null)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/alerts_count', () => ({
-  AlertsCount: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="mockAlertsCount" data-hit-id={hit.id} />
-  ),
-}));
+vi.mock('./components/alerts_count', () => {
+      const mocked = {
+      AlertsCount: ({ hit }: { hit: DataTableRecord }) => (
+        <div data-test-subj="mockAlertsCount" data-hit-id={hit.id} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/assignees', () => ({
-  Assignees: ({ hit, onAttackUpdated }: { hit: DataTableRecord; onAttackUpdated: () => void }) => (
-    <div
-      data-test-subj="mockAssignees"
-      data-hit-id={hit.id}
-      data-has-on-attack-updated={String(onAttackUpdated != null)}
-    />
-  ),
-}));
+vi.mock('./components/assignees', () => {
+      const mocked = {
+      Assignees: ({ hit, onAttackUpdated }: { hit: DataTableRecord; onAttackUpdated: () => void }) => (
+        <div
+          data-test-subj="mockAssignees"
+          data-hit-id={hit.id}
+          data-has-on-attack-updated={String(onAttackUpdated != null)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/components/notes', () => ({
-  Notes: ({ documentId, onShowNotes }: { documentId: string; onShowNotes: () => void }) => (
-    <button
-      type="button"
-      data-test-subj="mockNotes"
-      data-document-id={documentId}
-      onClick={onShowNotes}
-    />
-  ),
-}));
+vi.mock('../../shared/components/notes', () => {
+      const mocked = {
+      Notes: ({ documentId, onShowNotes }: { documentId: string; onShowNotes: () => void }) => (
+        <button
+          type="button"
+          data-test-subj="mockNotes"
+          data-document-id={documentId}
+          onClick={onShowNotes}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/components/share_url_icon_button', () => ({
-  ShareUrlIconButton: ({
-    url,
-    dataTestSubj,
-  }: {
-    url: string | null | undefined;
-    dataTestSubj: string;
-  }) => (url ? <button type="button" data-test-subj={dataTestSubj} /> : null),
-}));
+vi.mock('../../shared/components/share_url_icon_button', () => {
+      const mocked = {
+      ShareUrlIconButton: ({
+        url,
+        dataTestSubj,
+      }: {
+        url: string | null | undefined;
+        dataTestSubj: string;
+      }) => (url ? <button type="button" data-test-subj={dataTestSubj} /> : null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../flyout/attack_details/hooks/use_get_attack_flyout_link', () => ({
-  useGetAttackFlyoutLink: jest.fn(),
-}));
+vi.mock('../../../flyout/attack_details/hooks/use_get_attack_flyout_link', () => {
+      const mocked = {
+      useGetAttackFlyoutLink: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecord =>
   ({
@@ -82,12 +106,12 @@ const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecor
     ...overrides,
   } as DataTableRecord);
 
-const mockUseGetAttackFlyoutLink = useGetAttackFlyoutLink as jest.Mock;
+const mockUseGetAttackFlyoutLink = useGetAttackFlyoutLink as Mock;
 
 describe('<Header />', () => {
   const mockHit = createMockHit();
-  const onAttackUpdated = jest.fn();
-  const onShowNotes = jest.fn();
+  const onAttackUpdated = vi.fn();
+  const onShowNotes = vi.fn();
 
   beforeEach(() => {
     mockUseGetAttackFlyoutLink.mockReturnValue(null);
@@ -163,7 +187,7 @@ describe('<Header />', () => {
   });
 
   it('calls onShowNotes when the notes button is clicked', () => {
-    const mockOnShowNotes = jest.fn();
+    const mockOnShowNotes = vi.fn();
     const { getByTestId } = renderHeader({ onShowNotes: mockOnShowNotes });
 
     getByTestId('mockNotes').click();

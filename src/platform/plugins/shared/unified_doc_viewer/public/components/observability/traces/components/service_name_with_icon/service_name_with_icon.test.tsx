@@ -6,21 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ServiceNameWithIcon } from '.';
 
-jest.mock('@kbn/custom-icons', () => ({
-  AgentIcon: ({ agentName, size }: any) => (
-    <span data-test-subj="agent-icon">
-      {agentName}-{size}
-    </span>
-  ),
-}));
+vi.mock('@kbn/custom-icons', () => {
+      const mocked = {
+      AgentIcon: ({ agentName, size }: any) => (
+        <span data-test-subj="agent-icon">
+          {agentName}-{size}
+        </span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ServiceNameWithIcon', () => {
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('renders service name as string', () => {

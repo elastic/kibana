@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { userEvent } from '@testing-library/user-event';
 
@@ -14,14 +16,20 @@ import { createFleetTestRendererMock } from '../../../../../mock';
 
 import { AgentPolicyActionMenu } from './actions_menu';
 
-jest.mock('../../../hooks', () => ({
-  ...jest.requireActual('../../../hooks'),
-  useAuthz: jest.fn(),
-}));
+vi.mock('../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../hooks')),
+      useAuthz: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_can_enable_auto_upgrades', () => ({
-  useCanEnableAutomaticAgentUpgrades: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_can_enable_auto_upgrades', () => {
+      const mocked = {
+      useCanEnableAutomaticAgentUpgrades: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AgentPolicyActionMenu', () => {
   const baseAgentPolicy: AgentPolicy = {
@@ -37,7 +45,7 @@ describe('AgentPolicyActionMenu', () => {
     updated_by: 'test',
   };
   beforeEach(() => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgentPolicies: true,
       },
@@ -46,7 +54,7 @@ describe('AgentPolicyActionMenu', () => {
       },
     } as any);
 
-    jest.mocked(useCanEnableAutomaticAgentUpgrades).mockReturnValue(true);
+    vi.mocked(useCanEnableAutomaticAgentUpgrades).mockReturnValue(true);
   });
 
   describe('delete action', () => {
@@ -174,7 +182,7 @@ describe('AgentPolicyActionMenu', () => {
       ],
     };
     it('is enabled if user is authorized', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: true,
         },
@@ -196,7 +204,7 @@ describe('AgentPolicyActionMenu', () => {
       expect(addButton).not.toHaveAttribute('disabled');
     });
     it('is disabled if user is not authorized', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: false,
         },
@@ -279,7 +287,7 @@ describe('AgentPolicyActionMenu', () => {
       ],
     };
     it('is enabled if user is authorized', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: true,
           addFleetServers: true,
@@ -301,7 +309,7 @@ describe('AgentPolicyActionMenu', () => {
     });
 
     it('is disabled if user is only authorized to add agents', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: true,
           addFleetServers: false,
@@ -322,7 +330,7 @@ describe('AgentPolicyActionMenu', () => {
       expect(addButton).toHaveAttribute('disabled');
     });
     it('is disabled if user is not authorized', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: false,
         },
@@ -350,7 +358,7 @@ describe('AgentPolicyActionMenu', () => {
     };
 
     beforeEach(() => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgentPolicies: true,
           allAgents: true,
@@ -426,7 +434,7 @@ describe('AgentPolicyActionMenu', () => {
       ],
     };
     it('is enabled if user is authorized', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgentPolicies: true,
           allAgents: true,
@@ -451,7 +459,7 @@ describe('AgentPolicyActionMenu', () => {
       expect(manageAutoUpgradesButton).not.toHaveAttribute('disabled');
     });
     it('is disabled if user is not authorized', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgentPolicies: true,
           allAgents: false,

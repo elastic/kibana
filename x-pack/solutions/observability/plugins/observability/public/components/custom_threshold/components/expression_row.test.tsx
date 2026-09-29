@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -177,7 +179,7 @@ describe('ExpressionRow', () => {
     });
 
     it('adds an empty warning threshold when the toggle is clicked', async () => {
-      const setRuleParams = jest.fn();
+      const setRuleParams = vi.fn();
       const { wrapper, update } = await setup(baseExpression, setRuleParams);
 
       wrapper

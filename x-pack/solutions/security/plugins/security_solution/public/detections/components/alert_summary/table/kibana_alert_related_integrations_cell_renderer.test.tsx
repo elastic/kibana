@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
@@ -20,14 +23,14 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 
-jest.mock('@kbn/fleet-plugin/public/hooks');
+vi.mock('@kbn/fleet-plugin/public/hooks');
 
 const LOADING_SKELETON_TEST_ID = `${TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID}-${INTEGRATION_LOADING_SKELETON_TEST_ID}`;
 const ICON_TEST_ID = `${TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID}-${INTEGRATION_ICON_TEST_ID}`;
 
 describe('KibanaAlertRelatedIntegrationsCellRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not render integration icon', () => {
@@ -62,7 +65,7 @@ describe('KibanaAlertRelatedIntegrationsCellRenderer', () => {
       },
     ];
 
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    (usePackageIconType as Mock).mockReturnValue('iconType');
 
     const { getByTestId, queryByTestId } = render(
       <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />

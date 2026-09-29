@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { collectMediaElements } from './collect_media_elements';
 
-jest.mock('../components/edit/library/eui_icon_cache', () => ({
-  identifyIconType: jest.fn().mockResolvedValue(''),
-}));
+vi.mock('../components/edit/library/eui_icon_cache', () => {
+      const mocked = {
+      identifyIconType: vi.fn().mockResolvedValue(''),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('collectMediaElements', () => {
   let root: HTMLDivElement;

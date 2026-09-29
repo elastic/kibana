@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -12,16 +14,22 @@ import { useCurrentUser } from './use_current_user';
 import { useUserProfiles } from './use_user_profiles';
 import { useUserMessageAuthor } from './use_user_message_author';
 
-jest.mock('./use_current_user', () => ({
-  useCurrentUser: jest.fn(),
-}));
+vi.mock('./use_current_user', () => {
+      const mocked = {
+      useCurrentUser: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_user_profiles', () => ({
-  useUserProfiles: jest.fn(),
-}));
+vi.mock('./use_user_profiles', () => {
+      const mocked = {
+      useUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCurrentUser = jest.mocked(useCurrentUser);
-const mockUseUserProfiles = jest.mocked(useUserProfiles);
+const mockUseCurrentUser = vi.mocked(useCurrentUser);
+const mockUseUserProfiles = vi.mocked(useUserProfiles);
 
 const currentUser = {
   uid: 'current-user',
@@ -59,7 +67,7 @@ const mockUserProfiles = (profiles: UserProfileWithAvatar[]) => {
 
 describe('useUserMessageAuthor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCurrentUser.mockReturnValue({ currentUser, isLoading: false } as ReturnType<
       typeof useCurrentUser
     >);

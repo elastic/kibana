@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { mockHistoricalResult } from '../../../../../mock/historical_results/mock_historical_results_response';
@@ -14,7 +16,7 @@ import { useHistoricalResults } from '.';
 
 describe('useHistoricalResults', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return initial historical results state and fetch historical results function', () => {
@@ -34,7 +36,7 @@ describe('useHistoricalResults', () => {
 
   describe('when fetchHistoricalResults is called', () => {
     it('should fetch historical results and update historical results state', async () => {
-      const fetchResultsSpy = jest
+      const fetchResultsSpy = vi
         .spyOn(fetchHistoricalResults, 'fetchHistoricalResults')
         .mockResolvedValue({
           results: [mockHistoricalResult],
@@ -81,7 +83,7 @@ describe('useHistoricalResults', () => {
 
   describe('when fetchHistoricalResults fails', () => {
     it('should update historical results state with error', async () => {
-      const fetchResultsSpy = jest
+      const fetchResultsSpy = vi
         .spyOn(fetchHistoricalResults, 'fetchHistoricalResults')
         .mockRejectedValue(new Error('An error occurred'));
 
@@ -125,7 +127,7 @@ describe('useHistoricalResults', () => {
 
   describe('during fetchHistoricalResults call', () => {
     it('should set isLoading to true', async () => {
-      jest.spyOn(fetchHistoricalResults, 'fetchHistoricalResults').mockImplementation(() => {
+      vi.spyOn(fetchHistoricalResults, 'fetchHistoricalResults').mockImplementation(() => {
         return new Promise(() => {});
       });
 

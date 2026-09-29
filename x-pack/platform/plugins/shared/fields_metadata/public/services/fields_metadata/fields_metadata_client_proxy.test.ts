@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { FieldsMetadataClient } from './fields_metadata_client';
 import type { HttpStart } from '@kbn/core/public';
 
 describe('FieldsMetadataClient - client-side proxy support', () => {
   let fieldsMetadataClient: FieldsMetadataClient;
-  let httpMock: jest.Mocked<HttpStart>;
+  let httpMock: Mocked<HttpStart>;
 
   beforeEach(() => {
     httpMock = {
-      get: jest.fn(),
-    } as unknown as jest.Mocked<HttpStart>;
+      get: vi.fn(),
+    } as unknown as Mocked<HttpStart>;
 
     fieldsMetadataClient = new FieldsMetadataClient(httpMock);
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
@@ -26,9 +29,9 @@ import {
   getMockedKibanaConfig,
 } from './test_utils';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const defaultPermissions = {
   osquery: {
@@ -68,7 +71,7 @@ const renderWithContext = (Element: React.ReactElement) =>
 describe('Osquery result', () => {
   beforeAll(() => {
     mockKibana();
-    jest
+    vi
       .spyOn(useLiveQueryDetails, 'useLiveQueryDetails')
       .mockImplementation(() => defaultLiveQueryDetails);
   });

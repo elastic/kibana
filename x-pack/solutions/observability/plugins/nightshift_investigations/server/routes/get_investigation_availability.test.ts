@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
 
 const { handler } =
   getInvestigationAvailabilityRoute['GET /internal/nightshift/investigations/availability'];
 
 it('returns the centralized investigation availability result', async () => {
-  const isAvailable = jest.fn().mockResolvedValue(true);
+  const isAvailable = vi.fn().mockResolvedValue(true);
   const request = {};
 
   await expect(

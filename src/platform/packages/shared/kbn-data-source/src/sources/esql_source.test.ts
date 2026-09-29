@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQLVariableType, SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
@@ -489,7 +492,7 @@ describe('EsqlSource', () => {
 
   describe('create with http', () => {
     const postedPaths = (http: HttpStart) =>
-      (http.post as jest.Mock).mock.calls.map((call) => call[0] as string);
+      (http.post as Mock).mock.calls.map((call) => call[0] as string);
 
     const createHttp = (overrides?: {
       sourceInfo?: { columns: Array<{ name: string; esType: string }> };
@@ -497,7 +500,7 @@ describe('EsqlSource', () => {
       sourceInfoError?: Error;
     }): HttpStart => {
       return {
-        post: jest.fn(async (path: string) => {
+        post: vi.fn(async (path: string) => {
           if (path === SOURCE_INFO_ROUTE) {
             if (overrides?.sourceInfoError) {
               throw overrides.sourceInfoError;

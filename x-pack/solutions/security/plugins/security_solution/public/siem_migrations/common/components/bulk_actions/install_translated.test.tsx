@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { InstallTranslatedButton } from './install_translated';
@@ -13,8 +15,8 @@ import { MigrationTranslationResult } from '../../../../../common/siem_migration
 import type { BulkActionsItem } from './types';
 
 describe('InstallTranslatedButton', () => {
-  const mockInstallTranslatedItems = jest.fn();
-  const mockInstallSelectedItem = jest.fn();
+  const mockInstallTranslatedItems = vi.fn();
+  const mockInstallSelectedItem = vi.fn();
 
   // By default treat any fully translated item as installable (mirrors the rules migration rule).
   const isInstallable = (item: BulkActionsItem) =>
@@ -45,7 +47,7 @@ describe('InstallTranslatedButton', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the button with correct text when no items are selected', () => {

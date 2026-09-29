@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -20,7 +22,7 @@ import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
 import { TestProvidersComponent } from '../../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('#getExtendedColumns', () => {
   let mockResults: OpenTimelineResult[];

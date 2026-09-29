@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import {
   hashContent,
@@ -49,9 +52,9 @@ const createDashboardClient = ({
   updatedAt = '2025-01-02T00:00:00.000Z',
 }: {
   updatedAt?: string;
-} = {}): jest.Mocked<DashboardPluginStart['client']> =>
+} = {}): Mocked<DashboardPluginStart['client']> =>
   ({
-    read: jest.fn().mockResolvedValue({
+    read: vi.fn().mockResolvedValue({
       id: 'dashboard-1',
       data: attachmentDataToDashboardState(dashboardAttachmentData),
       meta: {
@@ -60,12 +63,12 @@ const createDashboardClient = ({
         version: 'v1',
       },
     }),
-  } as jest.Mocked<DashboardPluginStart['client']>);
+  } as Mocked<DashboardPluginStart['client']>);
 
 const createLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 const createSavedObjectsClient = (): SavedObjectsClientContract =>
@@ -163,7 +166,7 @@ describe('createDashboardAttachmentType', () => {
 
   it('treats legacy wrapped Lens configs as equal when checking staleness', async () => {
     const dashboardClient = {
-      read: jest.fn().mockResolvedValue({
+      read: vi.fn().mockResolvedValue({
         id: 'dashboard-1',
         data: {
           title: 'System Overview',
@@ -186,7 +189,7 @@ describe('createDashboardAttachmentType', () => {
           version: 'v1',
         },
       }),
-    } as jest.Mocked<DashboardPluginStart['client']>;
+    } as Mocked<DashboardPluginStart['client']>;
     const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({
       logger: createLogger(),

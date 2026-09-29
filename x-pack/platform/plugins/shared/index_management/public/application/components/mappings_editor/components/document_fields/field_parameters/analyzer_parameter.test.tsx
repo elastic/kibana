@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,12 +17,12 @@ import { AnalyzerParameter } from './analyzer_parameter';
 import { AnalyzersParameter } from './analyzers_parameter';
 import type { NormalizedField } from '../../../types';
 
-jest.mock('../../../config_context', () => {
+vi.mock('../../../config_context', () => {
   let mockIndexSettings: Record<string, unknown> = {};
   return {
     useConfig: () => ({
       value: { indexSettings: mockIndexSettings },
-      update: jest.fn(),
+      update: vi.fn(),
     }),
     __setMockIndexSettings: (settings: Record<string, unknown>) => {
       mockIndexSettings = settings;
@@ -29,13 +31,16 @@ jest.mock('../../../config_context', () => {
 });
 
 // AnalyzersParameter uses documentationService.getAnalyzerLink() for a doc link
-jest.mock('../../../../../services/documentation', () => ({
-  documentationService: {
-    getAnalyzerLink: () => 'https://example.com/docs',
-  },
-}));
+vi.mock('../../../../../services/documentation', () => {
+      const mocked = {
+      documentationService: {
+        getAnalyzerLink: () => 'https://example.com/docs',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { __setMockIndexSettings } = jest.requireMock('../../../config_context');
+const { __setMockIndexSettings } = (await vi.importMock('../../../config_context'));
 
 const createMockField = (source: Record<string, unknown> = {}): NormalizedField => ({
   id: 'test-field',

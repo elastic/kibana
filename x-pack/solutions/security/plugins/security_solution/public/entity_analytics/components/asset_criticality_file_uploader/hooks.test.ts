@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -15,8 +17,8 @@ import { FileUploaderSteps } from './types';
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -36,8 +38,8 @@ describe('useFileValidation', () => {
   const extraLine = 'user,user-002@elastic.co,user-002,medium_impact';
 
   test('should call onError for invalid file type', () => {
-    const onErrorMock = jest.fn();
-    const onCompleteMock = jest.fn();
+    const onErrorMock = vi.fn();
+    const onCompleteMock = vi.fn();
 
     const { result } = renderHook(
       () =>
@@ -54,8 +56,8 @@ describe('useFileValidation', () => {
   });
 
   test('should call onComplete with all rows valid and no invalid lines', async () => {
-    const onErrorMock = jest.fn();
-    const onCompleteMock = jest.fn();
+    const onErrorMock = vi.fn();
+    const onCompleteMock = vi.fn();
     const fileName = 'test.csv';
     const csvContent = `${headerRow}\n${validLine}\n${extraLine}`;
 
@@ -87,14 +89,14 @@ describe('useFileValidation', () => {
   });
 
   test('should subtract 1 from count to exclude the header row', async () => {
-    const onCompleteMock = jest.fn();
+    const onCompleteMock = vi.fn();
     const fileName = 'test.csv';
     const csvContent = `${headerRow}\n${validLine}\n${extraLine}`;
 
     const { result } = renderHook(
       () =>
         useFileValidation({
-          onError: jest.fn(),
+          onError: vi.fn(),
           onComplete: onCompleteMock,
         }),
       { wrapper: TestProviders }
@@ -116,7 +118,7 @@ describe('useFileValidation', () => {
 });
 
 describe('useNavigationSteps', () => {
-  const goToFirstStep = jest.fn();
+  const goToFirstStep = vi.fn();
   const filePickerState = { step: FileUploaderSteps.FILE_PICKER as const, isLoading: false };
   const resultState = { step: FileUploaderSteps.RESULT as const, validLinesAsText: '' };
 

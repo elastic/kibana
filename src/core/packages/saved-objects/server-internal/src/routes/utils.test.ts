@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   createSavedObjectsStreamFromNdJson,
   validateTypes,
@@ -215,7 +217,7 @@ describe('catchAndReturnBoomErrors', () => {
   });
 
   it('should pass-though call parameters to the handler', async () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     const wrapped = catchAndReturnBoomErrors(handler);
     await wrapped(context, request, response);
     expect(handler).toHaveBeenCalledWith(context, request, response);
@@ -375,7 +377,7 @@ describe('logWarnOnExternalRequest', () => {
     logger = loggerMock.create();
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('logs on external requests to non-bulk apis', () => {

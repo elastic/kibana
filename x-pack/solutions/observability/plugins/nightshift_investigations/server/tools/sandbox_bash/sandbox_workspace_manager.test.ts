@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   actionsMock,
@@ -15,29 +18,35 @@ import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 import { createSandboxWorkspaceManager } from './sandbox_workspace_manager';
 
-jest.mock('./connector_manifest', () => ({
-  writeConnectorManifest: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('./elastic_manifest', () => ({
-  writeElasticManifest: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./connector_manifest', () => {
+      const mocked = {
+      writeConnectorManifest: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./elastic_manifest', () => {
+      const mocked = {
+      writeElasticManifest: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { writeConnectorManifest } from './connector_manifest';
 import { writeElasticManifest } from './elastic_manifest';
 
-const mockWriteConnectorManifest = writeConnectorManifest as jest.Mock;
-const mockWriteElasticManifest = writeElasticManifest as jest.Mock;
+const mockWriteConnectorManifest = writeConnectorManifest as Mock;
+const mockWriteElasticManifest = writeElasticManifest as Mock;
 
 const createSessionMock = (isReset: boolean): SandboxSession => {
   const session = {
     get isReset() {
       return isReset;
     },
-    runCommand: jest.fn(),
-    readFiles: jest.fn(),
-    writeFiles: jest.fn().mockResolvedValue([{ bytes_written: 0, success: true }]),
-    mkdirs: jest.fn(),
-    statFiles: jest.fn(),
+    runCommand: vi.fn(),
+    readFiles: vi.fn(),
+    writeFiles: vi.fn().mockResolvedValue([{ bytes_written: 0, success: true }]),
+    mkdirs: vi.fn(),
+    statFiles: vi.fn(),
   };
   return session as unknown as SandboxSession;
 };
@@ -51,11 +60,11 @@ const createMutableSessionMock = (): {
     get isReset() {
       return isReset;
     },
-    runCommand: jest.fn(),
-    readFiles: jest.fn(),
-    writeFiles: jest.fn().mockResolvedValue([{ bytes_written: 0, success: true }]),
-    mkdirs: jest.fn(),
-    statFiles: jest.fn(),
+    runCommand: vi.fn(),
+    readFiles: vi.fn(),
+    writeFiles: vi.fn().mockResolvedValue([{ bytes_written: 0, success: true }]),
+    mkdirs: vi.fn(),
+    statFiles: vi.fn(),
   };
   return {
     session: session as unknown as SandboxSession,
@@ -75,7 +84,7 @@ describe('createSandboxWorkspaceManager', () => {
   let manager: ReturnType<typeof createSandboxWorkspaceManager>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockWriteElasticManifest.mockResolvedValue(undefined);
     logger = loggingSystemMock.createLogger();
     manager = createSandboxWorkspaceManager({ getDeps: () => ({}), logger });
@@ -349,7 +358,7 @@ describe('createSandboxWorkspaceManager', () => {
     it('blocks workspace access and retries if clearing unauthorized hints fails', async () => {
       const session = createSessionMock(false);
       const callContext = createCallContext([]);
-      jest.mocked(session.writeFiles).mockResolvedValueOnce([{ bytes_written: 0, success: false }]);
+      vi.mocked(session.writeFiles).mockResolvedValueOnce([{ bytes_written: 0, success: false }]);
       await expect(
         managerWithTelemetry.ensureWorkspaceReady({ session, callContext })
       ).rejects.toThrow('Failed to clear');
@@ -377,10 +386,10 @@ describe('createSandboxWorkspaceManager', () => {
       const session = createSessionMock(false);
       const callContext = createCallContext(['elasticsearch-telemetry']);
       mockWriteElasticManifest.mockImplementation(
-        jest.requireActual<typeof import('./elastic_manifest')>('./elastic_manifest')
+        (await vi.importActual<typeof import('./elastic_manifest')>('./elastic_manifest'))
           .writeElasticManifest
       );
-      jest.mocked(session.writeFiles).mockResolvedValueOnce([{ bytes_written: 0, success: false }]);
+      vi.mocked(session.writeFiles).mockResolvedValueOnce([{ bytes_written: 0, success: false }]);
       await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
       await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
       expect(session.writeFiles).toHaveBeenCalledTimes(2);

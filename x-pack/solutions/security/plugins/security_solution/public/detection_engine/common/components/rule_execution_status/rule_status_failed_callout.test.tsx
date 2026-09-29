@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -16,7 +18,7 @@ import { chromeServiceMock } from '@kbn/core/public/mocks';
 import { of } from 'rxjs';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const TEST_ID = 'ruleStatusFailedCallOut';
 const DATE = '2022-01-27T15:03:31.176Z';

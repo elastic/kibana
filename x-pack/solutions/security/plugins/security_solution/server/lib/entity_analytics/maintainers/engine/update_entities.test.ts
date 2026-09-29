@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createHash } from 'crypto';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -20,7 +23,7 @@ import type { EntityRelationshipRecord } from './types';
 
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
   ({
-    bulkUpdateEntity: jest.fn().mockResolvedValue(errors),
+    bulkUpdateEntity: vi.fn().mockResolvedValue(errors),
   } as unknown as EntityUpdateClient);
 
 // Stub esClient for tests that don't enable validateTargetIds — never called.
@@ -118,7 +121,7 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records, stubEsClient, TEST_NAMESPACE);
-    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const [call] = (crudClient.bulkUpdateEntity as Mock).mock.calls;
     const { objects } = call[0];
     expect(objects).toHaveLength(1);
     const doc = objects[0].doc.entity.relationships;
@@ -141,7 +144,7 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records, stubEsClient, TEST_NAMESPACE);
-    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const [call] = (crudClient.bulkUpdateEntity as Mock).mock.calls;
     const { objects } = call[0];
     expect(objects).toHaveLength(1);
     expect(objects[0].doc.entity.relationships.communicates_with.ids.sort()).toEqual([
@@ -166,7 +169,7 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records, stubEsClient, TEST_NAMESPACE);
-    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const [call] = (crudClient.bulkUpdateEntity as Mock).mock.calls;
     const { ids } = call[0].objects[0].doc.entity.relationships.administers;
     expect(ids.sort()).toEqual(['host:server-01.corp.com', 'host:server-02.corp.com']);
     expect(ids).toHaveLength(2);
@@ -192,7 +195,7 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records, stubEsClient, TEST_NAMESPACE);
-    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const [call] = (crudClient.bulkUpdateEntity as Mock).mock.calls;
     const { objects } = call[0];
     expect(objects).toHaveLength(1);
     const { ids } = objects[0].doc.entity.relationships.administers;
@@ -302,7 +305,7 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records, stubEsClient, TEST_NAMESPACE);
-    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const [call] = (crudClient.bulkUpdateEntity as Mock).mock.calls;
     expect(call[0].force).toBe(true);
   });
 
@@ -354,7 +357,7 @@ describe('writeEntityIds', () => {
     it('excludes failed entities from relationshipTypeApplied counts', async () => {
       const aliceHash = hashEntityId('user:alice@corp');
       const crudClient = {
-        bulkUpdateEntity: jest
+        bulkUpdateEntity: vi
           .fn()
           .mockResolvedValue([
             { _id: aliceHash, status: 500, type: 'es_exception', reason: 'boom' },
@@ -402,7 +405,7 @@ describe('matchExistingTargetIds', () => {
   const makeSearchEsClient = (entityIds: string[]): ElasticsearchClient => {
     const hits = entityIds.map((id) => ({ fields: { 'entity.id': [id] } }));
     return {
-      search: jest.fn().mockResolvedValue({ hits: { hits } }),
+      search: vi.fn().mockResolvedValue({ hits: { hits } }),
     } as unknown as ElasticsearchClient;
   };
 
@@ -410,7 +413,7 @@ describe('matchExistingTargetIds', () => {
     const esClient = makeSearchEsClient([]);
     const result = await matchExistingTargetIds(esClient, 'default', new Set());
     expect(result.size).toBe(0);
-    expect(esClient.search as jest.Mock).not.toHaveBeenCalled();
+    expect(esClient.search as Mock).not.toHaveBeenCalled();
   });
 
   it('returns only the entity IDs present in the search response', async () => {
@@ -423,7 +426,7 @@ describe('matchExistingTargetIds', () => {
   it('queries the latest entity index pattern for the given namespace', async () => {
     const esClient = makeSearchEsClient([]);
     await matchExistingTargetIds(esClient, 'acme', new Set(['host:x']));
-    const call = (esClient.search as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as Mock).mock.calls[0][0];
     expect(call.index).toContain('acme');
     expect(call.query.terms['entity.id']).toEqual(['host:x']);
   });
@@ -438,7 +441,7 @@ describe('matchExistingTargetIds', () => {
     // Echoes back every requested ID, as if all of them exist.
     const makeEchoEsClient = (): ElasticsearchClient =>
       ({
-        search: jest.fn(async ({ query }) => ({
+        search: vi.fn(async ({ query }) => ({
           hits: {
             hits: (query.terms['entity.id'] as string[]).map((id) => ({
               fields: { 'entity.id': [id] },
@@ -451,7 +454,7 @@ describe('matchExistingTargetIds', () => {
       const esClient = makeEchoEsClient();
       await matchExistingTargetIds(esClient, 'default', candidates);
 
-      const calls = (esClient.search as jest.Mock).mock.calls;
+      const calls = (esClient.search as Mock).mock.calls;
       expect(calls).toHaveLength(3);
       for (const [request] of calls) {
         expect(request.size).toBeLessThanOrEqual(10_000);
@@ -463,7 +466,7 @@ describe('matchExistingTargetIds', () => {
       const esClient = makeEchoEsClient();
       const result = await matchExistingTargetIds(esClient, 'default', candidates);
 
-      const requested = (esClient.search as jest.Mock).mock.calls.flatMap(
+      const requested = (esClient.search as Mock).mock.calls.flatMap(
         ([request]) => request.query.terms['entity.id']
       );
       expect(requested).toHaveLength(candidateCount);
@@ -474,7 +477,7 @@ describe('matchExistingTargetIds', () => {
     it('logs which chunk failed, with the caller prefix, and rethrows', async () => {
       const logger = loggerMock.create();
       const esClient = makeEchoEsClient();
-      (esClient.search as jest.Mock)
+      (esClient.search as Mock)
         .mockResolvedValueOnce({ hits: { hits: [] } })
         .mockRejectedValueOnce(new Error('search_phase_execution_exception'));
 
@@ -495,7 +498,7 @@ describe('writeEntityIds — validateTargetIds', () => {
   const makeSearchEsClient = (existingIds: string[]): ElasticsearchClient => {
     const hits = existingIds.map((id) => ({ fields: { 'entity.id': [id] } }));
     return {
-      search: jest.fn().mockResolvedValue({ hits: { hits } }),
+      search: vi.fn().mockResolvedValue({ hits: { hits } }),
     } as unknown as ElasticsearchClient;
   };
 
@@ -523,7 +526,7 @@ describe('writeEntityIds — validateTargetIds', () => {
     );
 
     expect(result.targetIdsNotInStore).toBe(1);
-    const call = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
+    const call = (crudClient.bulkUpdateEntity as Mock).mock.calls[0][0];
     expect(call.objects[0].doc.entity.relationships.administers.ids).toEqual([
       'host:exists.corp.com',
     ]);
@@ -556,7 +559,7 @@ describe('writeEntityIds — validateTargetIds', () => {
 
   it('does not call esClient.search when validateTargetIds is false', async () => {
     const crudClient = makeCrudClient();
-    const esClient = { search: jest.fn() } as unknown as ElasticsearchClient;
+    const esClient = { search: vi.fn() } as unknown as ElasticsearchClient;
     const records: EntityRelationshipRecord[] = [
       {
         entityId: 'host:admin.corp.com',
@@ -582,7 +585,7 @@ describe('entityTypeFromEuid (via writeEntityIds)', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records, stubEsClient, TEST_NAMESPACE);
-    const call = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
+    const call = (crudClient.bulkUpdateEntity as Mock).mock.calls[0][0];
     expect(call.objects[0].type).toBe('host');
   });
 
@@ -596,7 +599,7 @@ describe('entityTypeFromEuid (via writeEntityIds)', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records, stubEsClient, TEST_NAMESPACE);
-    const call = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
+    const call = (crudClient.bulkUpdateEntity as Mock).mock.calls[0][0];
     expect(call.objects[0].type).toBe('user');
   });
 });

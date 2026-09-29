@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiCopy } from '@elastic/eui';
@@ -16,23 +19,32 @@ import { API_KEY_PLACEHOLDER, URL_PLACEHOLDER } from '../constants/console_snipp
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
 import type { OnboardingServices } from '../../services';
 
-jest.mock('../../hooks/use_onboarding_credentials', () => ({
-  useOnboardingCredentials: jest.fn(),
-}));
+vi.mock('../../hooks/use_onboarding_credentials', () => {
+      const mocked = {
+      useOnboardingCredentials: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/try-in-console', () => ({
-  TryInConsoleButton: jest.fn(() => null),
-}));
+vi.mock('@kbn/try-in-console', () => {
+      const mocked = {
+      TryInConsoleButton: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCopy = jest.fn();
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCopy: jest.fn(({ children }) => children(mockCopy)),
-}));
+const mockCopy = vi.fn();
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCopy: vi.fn(({ children }) => children(mockCopy)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseOnboardingCredentials = useOnboardingCredentials as jest.Mock;
-const mockTryInConsoleButton = TryInConsoleButton as unknown as jest.Mock;
-const mockEuiCopy = EuiCopy as unknown as jest.Mock;
+const mockUseOnboardingCredentials = useOnboardingCredentials as Mock;
+const mockTryInConsoleButton = TryInConsoleButton as unknown as Mock;
+const mockEuiCopy = EuiCopy as unknown as Mock;
 
 const makeSnippets = (prefix: string) =>
   Object.fromEntries(
@@ -53,7 +65,7 @@ const hybridTab: ApiStepTab = {
   consoleRequest: 'POST my-vectors/_search\n{ "hybrid": true }',
 };
 
-const isInTrial = jest.fn();
+const isInTrial = vi.fn();
 
 const makeServices = () =>
   ({
@@ -88,7 +100,7 @@ const getLastCopyText = (): string =>
 
 describe('ApiStep', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     mockUseOnboardingCredentials.mockReturnValue({
       elasticsearchUrl: null,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -58,15 +61,15 @@ describe('Consumption route', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
   let routeConfig: Record<string, any>;
   let versionConfig: Record<string, any>;
-  let mockEsSearch: jest.Mock;
+  let mockEsSearch: Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
     agentBuilder: Promise.resolve({
-      spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
     }),
   });
 
@@ -84,9 +87,9 @@ describe('Consumption route', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockEsSearch = jest.fn();
+    mockEsSearch = vi.fn();
 
     mockEsSearch.mockResolvedValue({
       hits: {
@@ -150,27 +153,27 @@ describe('Consumption route', () => {
     const versionConfigs: Record<string, any> = {};
 
     const createVersionedRoute = (method: string, path: string, config: any) => ({
-      addVersion: jest
+      addVersion: vi
         .fn()
         .mockImplementation(
           (verConfig: any, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
             routeConfigs[`${method}:${path}`] = config;
             versionConfigs[`${method}:${path}`] = verConfig;
             routeHandlers[`${method}:${path}`] = handler;
-            return { addVersion: jest.fn() };
+            return { addVersion: vi.fn() };
           }
         ),
     });
 
     const mockRouter = {
       versioned: {
-        post: jest
+        post: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('POST', config.path, config)
           ),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerConsumptionRoutes({
       router: mockRouter,

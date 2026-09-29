@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { sendUpdatePackage } from '../../../../hooks';
 
 import { applyIlmPolicyChange } from './apply_ilm_policy';
 
-jest.mock('../../../../hooks', () => ({
-  sendUpdatePackage: jest.fn(),
-}));
+vi.mock('../../../../hooks', () => {
+      const mocked = {
+      sendUpdatePackage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSendUpdatePackage = sendUpdatePackage as jest.Mock;
+const mockSendUpdatePackage = sendUpdatePackage as Mock;
 
 const buildNotifications = () => ({
   toasts: {
-    addSuccess: jest.fn(),
-    addError: jest.fn(),
+    addSuccess: vi.fn(),
+    addError: vi.fn(),
   },
 });
 
@@ -31,7 +37,7 @@ const buildPackageInfo = (ilmPolicy?: string) =>
 
 describe('applyIlmPolicyChange', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSendUpdatePackage.mockResolvedValue({ data: null, error: null });
   });
 

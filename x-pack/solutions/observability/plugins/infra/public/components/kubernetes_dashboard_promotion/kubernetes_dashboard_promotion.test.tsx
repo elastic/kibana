@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -20,18 +23,21 @@ import {
   KUBERNETES_SEMCONV_INTEGRATION_TAG,
 } from './constants';
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('./kubernetes_asset_image', () => ({
-  KubernetesAssetImage: ({ type }: { type: string }) => (
-    <div data-test-subj={`kubernetes-asset-image-${type}`}>Mock Image</div>
-  ),
-}));
+vi.mock('../../hooks/use_kibana');
+vi.mock('./kubernetes_asset_image', () => {
+      const mocked = {
+      KubernetesAssetImage: ({ type }: { type: string }) => (
+        <div data-test-subj={`kubernetes-asset-image-${type}`}>Mock Image</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
+const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
 
-const mockGetUrlForApp = jest.fn((app: string, options?: { path?: string }) => {
+const mockGetUrlForApp = vi.fn((app: string, options?: { path?: string }) => {
   return `/app/${app}${options?.path || ''}`;
 });
 
@@ -59,7 +65,7 @@ describe('KubernetesDashboardCard', () => {
 
   describe('ECS integration', () => {
     it('renders correctly when integration is installed', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="ecs"
@@ -75,7 +81,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('renders correctly when integration is not installed', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="ecs"
@@ -90,7 +96,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('calls onClose when hide button is clicked', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="ecs"
@@ -104,7 +110,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('generates correct dashboard URL when installed', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="ecs"
@@ -119,7 +125,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('generates correct integration URL when not installed', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="ecs"
@@ -134,7 +140,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('renders docs link with correct URL', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="ecs"
@@ -154,7 +160,7 @@ describe('KubernetesDashboardCard', () => {
 
   describe('Semconv integration', () => {
     it('renders correctly when integration is installed', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="semconv"
@@ -170,7 +176,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('renders correctly when integration is not installed', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="semconv"
@@ -187,7 +193,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('generates correct dashboard URL when installed', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="semconv"
@@ -202,7 +208,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('generates correct integration URL when not installed', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="semconv"
@@ -217,7 +223,7 @@ describe('KubernetesDashboardCard', () => {
     });
 
     it('renders docs link with correct URL', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(
         <KubernetesDashboardCard
           integrationType="semconv"

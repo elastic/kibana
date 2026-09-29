@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { RULE_TUNING_DEFAULT_EXTRAS } from '@kbn/alertzero-common';
 import {
@@ -29,16 +31,16 @@ const makeState = (spaceId: string) => ({
 
 const createDependencies = () => {
   const client = {
-    install: jest.fn(async (_id: string, _options: Record<string, unknown>) => undefined),
-    uninstall: jest.fn(async (_id: string, _options: Record<string, unknown>) => undefined),
-    ready: jest.fn(async () => undefined),
-    execute: jest.fn(),
-    getWorkflowStatus: jest.fn(),
-    getInstalledWorkflowState: jest.fn(),
-    listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
+    install: vi.fn(async (_id: string, _options: Record<string, unknown>) => undefined),
+    uninstall: vi.fn(async (_id: string, _options: Record<string, unknown>) => undefined),
+    ready: vi.fn(async () => undefined),
+    execute: vi.fn(),
+    getWorkflowStatus: vi.fn(),
+    getInstalledWorkflowState: vi.fn(),
+    listInstalledWorkflowStates: vi.fn().mockResolvedValue([]),
   };
   const workflowsExtensions = {
-    initManagedWorkflowsClient: jest.fn(async () => client),
+    initManagedWorkflowsClient: vi.fn(async () => client),
   } as unknown as WorkflowsExtensionsServerPluginStart;
   const logger = loggerMock.create();
   return { client, workflowsExtensions, logger };
@@ -87,7 +89,7 @@ describe('initializeManagedWorkflows', () => {
   describe('ensureAgentForSpace', () => {
     it('calls ensureAgentForSpace once per unique space from installed worker states', async () => {
       const { client, workflowsExtensions, logger } = createDependencies();
-      const ensureAgentForSpace = jest.fn(async () => undefined);
+      const ensureAgentForSpace = vi.fn(async () => undefined);
       client.listInstalledWorkflowStates.mockResolvedValue([
         makeState('space-a'),
         makeState('space-b'),
@@ -103,7 +105,7 @@ describe('initializeManagedWorkflows', () => {
 
     it('excludes the global workflow space', async () => {
       const { client, workflowsExtensions, logger } = createDependencies();
-      const ensureAgentForSpace = jest.fn(async () => undefined);
+      const ensureAgentForSpace = vi.fn(async () => undefined);
       client.listInstalledWorkflowStates.mockResolvedValue([
         makeState(GLOBAL_WORKFLOW_SPACE_ID),
         makeState('space-a'),
@@ -132,7 +134,7 @@ describe('initializeManagedWorkflows', () => {
 
     it('logs a warning when ensureAgentForSpace fails for a space', async () => {
       const { client, workflowsExtensions, logger } = createDependencies();
-      const ensureAgentForSpace = jest.fn().mockRejectedValueOnce(new Error('agent ensure failed'));
+      const ensureAgentForSpace = vi.fn().mockRejectedValueOnce(new Error('agent ensure failed'));
       client.listInstalledWorkflowStates.mockResolvedValue([makeState('space-a')]);
 
       await initializeManagedWorkflows({ workflowsExtensions, logger, ensureAgentForSpace });
@@ -250,7 +252,7 @@ describe('initializeManagedWorkflows', () => {
 
     it('logs a warning when listInstalledWorkflowStates throws', async () => {
       const { client, workflowsExtensions, logger } = createDependencies();
-      const ensureAgentForSpace = jest.fn(async () => undefined);
+      const ensureAgentForSpace = vi.fn(async () => undefined);
       client.listInstalledWorkflowStates.mockRejectedValue(new Error('storage unavailable'));
 
       await initializeManagedWorkflows({ workflowsExtensions, logger, ensureAgentForSpace });

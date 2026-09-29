@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
@@ -34,7 +37,7 @@ interface StreamMock {
   write: (data: string) => void;
   fail: () => void;
   end: () => void;
-  destroy: jest.Mock;
+  destroy: Mock;
   transform: Transform;
   on: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
   once: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
@@ -102,7 +105,7 @@ function createStreamMock({
     end: () => {
       transform.end();
     },
-    destroy: jest.fn(),
+    destroy: vi.fn(),
     on: (event: string, listener: (...args: unknown[]) => void) => {
       transform.on(event, listener);
       return mock;
@@ -120,13 +123,16 @@ function createStreamMock({
 }
 
 let mockStream = createStreamMock();
-const mockGetContentStream = jest.fn();
+const mockGetContentStream = vi.fn();
 const mockEventTracker = eventTrackerMock.create();
 
-jest.mock('../content_stream', () => ({
-  getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
-  finishedWithNoPendingCallbacks: () => Promise.resolve(),
-}));
+vi.mock('../content_stream', () => {
+      const mocked = {
+      getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
+      finishedWithNoPendingCallbacks: () => Promise.resolve(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const logger = loggingSystemMock.createLogger();
 const fakeRawRequest: FakeRawRequest = {
@@ -139,7 +145,7 @@ describe('Run Single Report Task', () => {
   let mockReporting: ReportingCore;
   let configType: ReportingConfigType;
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetContentStream.mockImplementation(() => mockStream);
     configType = createMockConfigSchema();
     mockReporting = await createMockReportingCore(configType);
@@ -168,8 +174,8 @@ describe('Run Single Report Task', () => {
   });
 
   it('create task runner', async () => {
-    logger.info = jest.fn();
-    logger.error = jest.fn();
+    logger.info = vi.fn();
+    logger.error = vi.fn();
 
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     const taskDef = task.getTaskDefinition();
@@ -207,7 +213,7 @@ describe('Run Single Report Task', () => {
   });
 
   it('schedules task with request if health indicates security and api keys are enabled', async () => {
-    jest.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
+    vi.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: true,
@@ -241,7 +247,7 @@ describe('Run Single Report Task', () => {
   });
 
   it('schedules task without request if health indicates security is disabled', async () => {
-    jest.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
+    vi.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
       isSufficientlySecure: false,
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: false,
@@ -272,7 +278,7 @@ describe('Run Single Report Task', () => {
   });
 
   it('schedules task without request if health indicates no permanent encryption key', async () => {
-    jest.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
+    vi.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: false,
       areNotificationsEnabled: true,
@@ -303,13 +309,13 @@ describe('Run Single Report Task', () => {
   });
 
   it('uses authorization headers from task manager fake request if defined', async () => {
-    const notifyUsage = jest.fn();
-    const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
+    const notifyUsage = vi.fn();
+    const runTaskFn = vi.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       shouldNotifyUsage: () => true,
@@ -320,11 +326,11 @@ describe('Run Single Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
@@ -353,13 +359,13 @@ describe('Run Single Report Task', () => {
       'cool-encryption-key-where-did-you-find-it',
       headers
     );
-    const notifyUsage = jest.fn();
-    const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
+    const notifyUsage = vi.fn();
+    const runTaskFn = vi.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test2',
       name: 'Test2',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       shouldNotifyUsage: () => true,
@@ -370,11 +376,11 @@ describe('Run Single Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test2', status: 'pending' } as never);
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test2', status: 'pending' } as never);
@@ -405,13 +411,13 @@ describe('Run Single Report Task', () => {
       'cool-encryption-key-where-did-you-find-it',
       headers
     );
-    const notifyUsage = jest.fn();
-    const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
+    const notifyUsage = vi.fn();
+    const runTaskFn = vi.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test3',
       name: 'Test3',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       shouldNotifyUsage: () => true,
@@ -422,11 +428,11 @@ describe('Run Single Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test3', status: 'pending' } as never);
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test3', status: 'pending' } as never);
@@ -457,24 +463,24 @@ describe('Run Single Report Task', () => {
   });
 
   it('sends telemetry event when job is claimed', async () => {
-    const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
+    const runTaskFn = vi.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test1 single export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
     } as unknown as ExportType);
     mockReporting.getStore = () =>
       Promise.resolve({
-        findReportFromTask: jest.fn().mockImplementation(
+        findReportFromTask: vi.fn().mockImplementation(
           (report) =>
             new Report({
               ...report,
@@ -485,11 +491,11 @@ describe('Run Single Report Task', () => {
               payload: { objectType: 'dashboard' },
             })
         ),
-        setReportClaimed: jest.fn().mockImplementation(() => ({ _seq_no: 1, _primary_term: 1 })),
+        setReportClaimed: vi.fn().mockImplementation(() => ({ _seq_no: 1, _primary_term: 1 })),
       } as unknown as ReportingStore);
-    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+    mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
@@ -518,19 +524,19 @@ describe('Run Single Report Task', () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'noop',
       name: 'Noop',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: () => new Promise(() => {}),
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: pdf single export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportFailed = jest.fn(() =>
+    store.setReportFailed = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'noop',
@@ -538,11 +544,11 @@ describe('Run Single Report Task', () => {
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'noop', status: 'pending' } as never);
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
       .spyOn(task, 'getEventTracker')
       // @ts-ignore
@@ -581,37 +587,37 @@ describe('Run Single Report Task', () => {
   it('updates report with error message if error occurs during task run', async () => {
     configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
     mockReporting = await createMockReportingCore(configType);
-    const runTaskFn = jest.fn().mockImplementation(() => {
+    const runTaskFn = vi.fn().mockImplementation(() => {
       throw new Error('failure generating report');
     });
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test1 single export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportError = jest.fn(() =>
+    store.setReportError = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'test1',
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    store.setReportFailed = jest.fn();
-    logger.info = jest.fn();
-    logger.error = jest.fn();
+    store.setReportFailed = vi.fn();
+    logger.info = vi.fn();
+    logger.error = vi.fn();
 
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
@@ -650,7 +656,7 @@ describe('Run Single Report Task', () => {
   });
 
   it('catches stream error during performJob and rejects the operation', async () => {
-    const runTaskFn = jest.fn().mockImplementation((opts: { stream: StreamMock }) => {
+    const runTaskFn = vi.fn().mockImplementation((opts: { stream: StreamMock }) => {
       const { stream } = opts;
       setImmediate(() => stream.fail());
       return new Promise(() => {}); // never resolve so the stream error throws
@@ -658,31 +664,31 @@ describe('Run Single Report Task', () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test1 single export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportError = jest.fn(() =>
+    store.setReportError = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'test1',
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    store.setReportFailed = jest.fn();
-    logger.error = jest.fn();
-    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+    store.setReportFailed = vi.fn();
+    logger.error = vi.fn();
+    mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
 
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({
@@ -691,7 +697,7 @@ describe('Run Single Report Task', () => {
         jobtype: 'test1',
         status: 'pending',
       } as never);
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
       .spyOn(task, 'getEventTracker')
       // @ts-ignore
@@ -742,7 +748,7 @@ describe('Run Single Report Task', () => {
       configType = createMockConfigSchema({ queue: { timeout: 1 } });
       mockReporting = await createMockReportingCore(configType);
 
-      const runTaskFn = jest.fn().mockImplementation(
+      const runTaskFn = vi.fn().mockImplementation(
         ({ cancellationToken }: { cancellationToken: CancellationToken }) =>
           new Promise<TaskRunResult>((resolve, reject) => {
             cancellationToken.on(() => {
@@ -759,35 +765,35 @@ describe('Run Single Report Task', () => {
       mockReporting.getExportTypesRegistry().register({
         id: 'test1',
         name: 'Test1',
-        setup: jest.fn(),
-        start: jest.fn(),
+        setup: vi.fn(),
+        start: vi.fn(),
         createJob: () => new Promise(() => {}),
         runTask: runTaskFn,
         shouldNotifyUsage: () => true,
         getFeatureUsageName: () => 'Reporting: test1 single export',
-        notifyUsage: jest.fn(),
+        notifyUsage: vi.fn(),
         jobContentEncoding: 'base64',
         jobType: 'test1',
         validLicenses: [],
       } as unknown as ExportType);
       const store = await mockReporting.getStore();
-      store.setReportError = jest.fn();
-      store.setReportFailed = jest.fn(() =>
+      store.setReportError = vi.fn();
+      store.setReportFailed = vi.fn(() =>
         Promise.resolve({
           _id: 'test1',
           jobtype: 'test1',
           status: 'failed',
         } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
       );
-      logger.error = jest.fn();
-      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      logger.error = vi.fn();
+      mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
 
       const task = new RunSingleReportTask({
         reporting: mockReporting,
         config: configType,
         logger,
       });
-      jest
+      vi
         // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
         .spyOn(task, 'claimJob')
         .mockResolvedValueOnce({
@@ -851,42 +857,42 @@ describe('Run Single Report Task', () => {
   });
 
   it('updates report with error message and failed status if error occurs during task run during last attempt', async () => {
-    const runTaskFn = jest.fn().mockImplementation(() => {
+    const runTaskFn = vi.fn().mockImplementation(() => {
       throw new Error('failure generating report');
     });
 
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test1 single export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportFailed = jest.fn(() =>
+    store.setReportFailed = vi.fn(() =>
       Promise.resolve({
         _id: 'test',
         jobtype: 'test1',
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    store.setReportError = jest.fn();
-    logger.info = jest.fn();
-    logger.error = jest.fn();
+    store.setReportError = vi.fn();
+    logger.info = vi.fn();
+    logger.error = vi.fn();
 
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
       .spyOn(task, 'getEventTracker')
       // @ts-ignore
@@ -941,19 +947,19 @@ describe('Run Single Report Task', () => {
     const freshSeqNo = 42;
     const freshPrimaryTerm = 21;
 
-    const runTaskFn = jest.fn().mockImplementation(() => {
+    const runTaskFn = vi.fn().mockImplementation(() => {
       throw new Error('failure generating report');
     });
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
-      setup: jest.fn(),
-      start: jest.fn(),
+      setup: vi.fn(),
+      start: vi.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test1 single export',
-      notifyUsage: jest.fn(),
+      notifyUsage: vi.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
@@ -964,7 +970,7 @@ describe('Run Single Report Task', () => {
 
     // refreshReportSeqNo re-fetches the doc; return the advanced values
     const { asInternalUser: esClient } = await mockReporting.getEsClient();
-    (esClient.get as unknown as jest.Mock).mockResolvedValue({
+    (esClient.get as unknown as Mock).mockResolvedValue({
       _id: 'test1',
       _index: 'cool-reporting-index',
       _seq_no: freshSeqNo,
@@ -974,17 +980,17 @@ describe('Run Single Report Task', () => {
     });
 
     const store = await mockReporting.getStore();
-    store.setReportFailed = jest.fn(() =>
+    store.setReportFailed = vi.fn(() =>
       Promise.resolve({
         _id: 'test1',
         jobtype: 'test1',
         status: 'failed',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    store.setReportError = jest.fn();
+    store.setReportError = vi.fn();
 
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({
@@ -995,7 +1001,7 @@ describe('Run Single Report Task', () => {
         jobtype: 'test1',
         status: 'processing',
       } as never);
-    jest
+    vi
       // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
       .spyOn(task, 'getEventTracker')
       // @ts-ignore

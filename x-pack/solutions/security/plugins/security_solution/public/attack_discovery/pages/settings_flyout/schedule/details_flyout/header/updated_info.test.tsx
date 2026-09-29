@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -45,7 +47,7 @@ const renderComponent = (
 
 describe('UpdatedBy', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render component', () => {

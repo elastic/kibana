@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { expectErrors } from '../../../__tests__/commands/validation';
 import { validate } from './validate';
@@ -28,7 +30,7 @@ const buildContextWithDenseVector = () => {
 
 describe('MMR Validation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('validates basic MMR query with required arguments', () => {

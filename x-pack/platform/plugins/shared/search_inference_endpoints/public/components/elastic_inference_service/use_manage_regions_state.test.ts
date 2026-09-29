@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useManageRegionsState } from './use_manage_regions_state';
 import { useRegionPolicy } from '../../hooks/use_region_policy';
@@ -13,35 +15,38 @@ import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import * as eisUtils from '../../utils/eis_utils';
 
-jest.mock('../../hooks/use_region_policy');
-jest.mock('../../hooks/use_save_region_policy');
-jest.mock('../../hooks/use_delete_region_policy');
-jest.mock('../../hooks/use_eis_models');
-jest.mock('../../utils/eis_utils', () => ({
-  ...jest.requireActual('../../utils/eis_utils'),
-  getAvailableRegions: jest.fn(),
-  getAvailableGeos: jest.fn(),
-}));
+vi.mock('../../hooks/use_region_policy');
+vi.mock('../../hooks/use_save_region_policy');
+vi.mock('../../hooks/use_delete_region_policy');
+vi.mock('../../hooks/use_eis_models');
+vi.mock('../../utils/eis_utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../utils/eis_utils')),
+      getAvailableRegions: vi.fn(),
+      getAvailableGeos: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRegionPolicy = jest.mocked(useRegionPolicy);
-const mockUseSaveRegionPolicy = jest.mocked(useSaveRegionPolicy);
-const mockUseDeleteRegionPolicy = jest.mocked(useDeleteRegionPolicy);
-const mockUseEisModels = jest.mocked(useEisModels);
-const mockGetAvailableRegions = jest.mocked(eisUtils.getAvailableRegions);
-const mockGetAvailableGeos = jest.mocked(eisUtils.getAvailableGeos);
+const mockUseRegionPolicy = vi.mocked(useRegionPolicy);
+const mockUseSaveRegionPolicy = vi.mocked(useSaveRegionPolicy);
+const mockUseDeleteRegionPolicy = vi.mocked(useDeleteRegionPolicy);
+const mockUseEisModels = vi.mocked(useEisModels);
+const mockGetAvailableRegions = vi.mocked(eisUtils.getAvailableRegions);
+const mockGetAvailableGeos = vi.mocked(eisUtils.getAvailableGeos);
 
-const mockSaveMutate = jest.fn();
-const mockDeleteMutate = jest.fn();
+const mockSaveMutate = vi.fn();
+const mockDeleteMutate = vi.fn();
 
 const usRegion = { csp: 'aws', region: 'us-east-1', geo: 'us' };
 const euRegion = { csp: 'gcp', region: 'europe-west1', geo: 'eu' };
 const twoRegions = [usRegion, euRegion];
 
 describe('useManageRegionsState', () => {
-  const onClose = jest.fn();
+  const onClose = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetAvailableRegions.mockReturnValue(twoRegions);
     mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
     mockUseSaveRegionPolicy.mockReturnValue({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import '@kbn/react-query/mock';
@@ -17,7 +19,7 @@ import { testQueryClient } from '../test_utils/test_query_client';
 const { QueryClientProvider, useQuery } = ReactQuery;
 
 const mockUserProfileService = {
-  getCurrent: jest.fn(),
+  getCurrent: vi.fn(),
 };
 
 const wrapper = ({ children }: PropsWithChildren) => (
@@ -27,7 +29,7 @@ const wrapper = ({ children }: PropsWithChildren) => (
 describe('useGetUserProfileQuery', () => {
   beforeEach(() => {
     testQueryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call userProfileService.getCurrent and returns the user profile', async () => {

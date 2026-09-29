@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,7 +14,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleStatusFilter } from './rule_status_filter';
 
-const onChangeMock = jest.fn();
+const onChangeMock = vi.fn();
 
 describe('RuleStatusFilter', () => {
   beforeEach(() => {

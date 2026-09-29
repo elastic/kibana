@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,15 +15,21 @@ import type { ConversationPermissions } from '../../../../../../../common/http_a
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { ConversationListItemRow } from './conversation_list_item_row';
 
-jest.mock('../../../../../hooks/use_conversation_list_mutations', () => ({
-  useConversationListMutations: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_conversation_list_mutations', () => {
+      const mocked = {
+      useConversationListMutations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_toasts', () => ({
-  useToasts: () => ({ addSuccessToast: jest.fn(), addErrorToast: jest.fn() }),
-}));
+vi.mock('../../../../../hooks/use_toasts', () => {
+      const mocked = {
+      useToasts: () => ({ addSuccessToast: vi.fn(), addErrorToast: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversationListMutations = jest.mocked(useConversationListMutations);
+const mockUseConversationListMutations = vi.mocked(useConversationListMutations);
 
 const conversationId = 'conversation-1';
 
@@ -52,13 +60,13 @@ const renderRow = (permissions: Partial<ConversationPermissions>) => {
 
 describe('ConversationListItemRow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseConversationListMutations.mockReturnValue({
-      deleteConversation: jest.fn(),
-      renameConversation: jest.fn(),
-      markAsRead: jest.fn(),
-      markAsUnread: jest.fn(),
+      deleteConversation: vi.fn(),
+      renameConversation: vi.fn(),
+      markAsRead: vi.fn(),
+      markAsUnread: vi.fn(),
     } as unknown as ReturnType<typeof useConversationListMutations>);
   });
 

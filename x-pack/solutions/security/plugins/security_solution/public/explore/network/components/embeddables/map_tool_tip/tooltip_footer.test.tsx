@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { ToolTipFooterComponent } from './tooltip_footer';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('ToolTipFilter', () => {
-  let nextFeature = jest.fn();
-  let previousFeature = jest.fn();
+  let nextFeature = vi.fn();
+  let previousFeature = vi.fn();
 
   beforeEach(() => {
-    nextFeature = jest.fn();
-    previousFeature = jest.fn();
+    nextFeature = vi.fn();
+    previousFeature = vi.fn();
   });
 
   test('renders correctly against snapshot', () => {

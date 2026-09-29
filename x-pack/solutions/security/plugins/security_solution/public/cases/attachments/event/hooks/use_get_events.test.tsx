@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -17,11 +19,11 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { searchEvents } from './search_events';
 import { useToasts } from '../../../../common/lib/kibana';
 
-jest.mock('./search_events');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('./search_events');
+vi.mock('../../../../common/lib/kibana');
 
 const mockDataView = {
-  getIndexPattern: jest.fn(() => 'test-index'),
+  getIndexPattern: vi.fn(() => 'test-index'),
 } as unknown as DataView;
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -31,12 +33,12 @@ const wrapper = ({ children }: PropsWithChildren) => (
 
 describe('useGetEvents', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call searchEvents with correct parameters and return data', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jest.mocked(searchEvents).mockResolvedValue({ isPartial: false, foo: 'bar' } as any);
+    vi.mocked(searchEvents).mockResolvedValue({ isPartial: false, foo: 'bar' } as any);
 
     const { result } = renderHook(
       () =>
@@ -61,7 +63,7 @@ describe('useGetEvents', () => {
   });
 
   it('should show toast on error (not AbortError)', async () => {
-    jest.mocked(searchEvents).mockRejectedValue(new Error('failure'));
+    vi.mocked(searchEvents).mockRejectedValue(new Error('failure'));
 
     renderHook(
       () =>
@@ -78,7 +80,7 @@ describe('useGetEvents', () => {
   });
 
   it('should not show toast on AbortError', async () => {
-    jest.mocked(searchEvents).mockRejectedValue(new AbortError());
+    vi.mocked(searchEvents).mockRejectedValue(new AbortError());
 
     const { rerender } = renderHook(
       (eventIds: string[] = []) =>
@@ -92,12 +94,12 @@ describe('useGetEvents', () => {
     );
 
     await waitFor(() => expect(searchEvents).toHaveBeenCalled());
-    expect(jest.mocked(useToasts().addError)).not.toHaveBeenCalled();
+    expect(vi.mocked(useToasts().addError)).not.toHaveBeenCalled();
 
     // NOTE: just to test if the call count is 1
-    jest.mocked(searchEvents).mockRejectedValue(new Error());
+    vi.mocked(searchEvents).mockRejectedValue(new Error());
     rerender(['mock-event-id']);
     await waitFor(() => expect(useToasts().addError).toHaveBeenCalled());
-    expect(jest.mocked(useToasts().addError)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(useToasts().addError)).toHaveBeenCalledTimes(1);
   });
 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   mockTimelines,
   mockNotes,
@@ -28,23 +31,23 @@ import type {
   SecuritySolutionRequestHandlerContextMock,
 } from '../../../../detection_engine/routes/__mocks__/request_context';
 
-jest.mock('../../../saved_object/timelines/convert_saved_object_to_savedtimeline', () => {
+vi.mock('../../../saved_object/timelines/convert_saved_object_to_savedtimeline', () => {
   return {
-    convertSavedObjectToSavedTimeline: jest.fn(),
+    convertSavedObjectToSavedTimeline: vi.fn(),
   };
 });
 
-jest.mock('../../../saved_object/notes/saved_object', () => {
+vi.mock('../../../saved_object/notes/saved_object', () => {
   return {
-    convertSavedObjectToSavedNote: jest.fn(),
-    getNotesByTimelineId: jest.fn().mockReturnValue([]),
+    convertSavedObjectToSavedNote: vi.fn(),
+    getNotesByTimelineId: vi.fn().mockReturnValue([]),
   };
 });
 
-jest.mock('../../../saved_object/pinned_events', () => {
+vi.mock('../../../saved_object/pinned_events', () => {
   return {
-    convertSavedObjectToSavedPinnedEvent: jest.fn(),
-    getAllPinnedEventsByTimelineId: jest.fn().mockReturnValue([]),
+    convertSavedObjectToSavedPinnedEvent: vi.fn(),
+    getAllPinnedEventsByTimelineId: vi.fn().mockReturnValue([]),
   };
 });
 describe('export timelines', () => {
@@ -63,16 +66,16 @@ describe('export timelines', () => {
     ({ clients, context } = requestContextMock.createTools());
     clients.savedObjectsClient.bulkGet.mockResolvedValue(mockTimelinesSavedObjects());
 
-    (convertSavedObjectToSavedTimeline as unknown as jest.Mock).mockReturnValue(mockTimelines());
-    (convertSavedObjectToSavedNote as unknown as jest.Mock).mockReturnValue(mockNotes());
-    (convertSavedObjectToSavedPinnedEvent as unknown as jest.Mock).mockReturnValue(
+    (convertSavedObjectToSavedTimeline as unknown as Mock).mockReturnValue(mockTimelines());
+    (convertSavedObjectToSavedNote as unknown as Mock).mockReturnValue(mockNotes());
+    (convertSavedObjectToSavedPinnedEvent as unknown as Mock).mockReturnValue(
       mockPinnedEvents()
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes', () => {

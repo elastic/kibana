@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
@@ -43,7 +45,7 @@ describe('buildAnomalyChartsThresholds', () => {
 });
 
 describe('createMlChartsTool', () => {
-  const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+  const resolveMlCapabilities = vi.fn().mockResolvedValue(getAdminCapabilities());
   const mlLicense = { isFullLicense: () => true } as any;
   const createMlChartsToolInstance = createMlChartsTool(
     resolveMlCapabilities,
@@ -51,11 +53,11 @@ describe('createMlChartsTool', () => {
     mlLicense
   );
 
-  const createContext = (attachmentsAdd = jest.fn(), getJobs = jest.fn()) =>
+  const createContext = (attachmentsAdd = vi.fn(), getJobs = vi.fn()) =>
     ({
       esClient: { asCurrentUser: { ml: { getJobs } } },
       request: {},
-      logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() },
+      logger: { debug: vi.fn(), warn: vi.fn(), error: vi.fn() },
       attachments: {
         add: attachmentsAdd.mockResolvedValue({ id: 'att-1', current_version: 1 }),
       },
@@ -67,7 +69,7 @@ describe('createMlChartsTool', () => {
   });
 
   it('stores anomaly_charts severity_threshold as an open-ended floor', async () => {
-    const attachmentsAdd = jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
+    const attachmentsAdd = vi.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
     const result = await createMlChartsToolInstance.handler(
       {
         chart_type: 'anomaly_charts',
@@ -91,7 +93,7 @@ describe('createMlChartsTool', () => {
   });
 
   it('looks up detector config as the current user, not the internal user', async () => {
-    const getJobs = jest.fn().mockResolvedValue({
+    const getJobs = vi.fn().mockResolvedValue({
       jobs: [
         {
           analysis_config: {
@@ -100,8 +102,8 @@ describe('createMlChartsTool', () => {
         },
       ],
     });
-    const asInternalUser = { ml: { getJobs: jest.fn() } };
-    const attachmentsAdd = jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
+    const asInternalUser = { ml: { getJobs: vi.fn() } };
+    const attachmentsAdd = vi.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
     const context = {
       ...createContext(attachmentsAdd, getJobs),
       esClient: {
@@ -128,11 +130,11 @@ describe('createMlChartsTool', () => {
 
   it('looks up detector config via mlClient when the factory is provided', async () => {
     const mlClient = {
-      getJobs: jest.fn().mockResolvedValue({
+      getJobs: vi.fn().mockResolvedValue({
         jobs: [{ analysis_config: { detectors: [{}] } }],
       }),
     };
-    const asCurrentUserGetJobs = jest.fn();
+    const asCurrentUserGetJobs = vi.fn();
     const tool = createMlChartsTool(
       resolveMlCapabilities,
       undefined,
@@ -140,7 +142,7 @@ describe('createMlChartsTool', () => {
       undefined,
       () => mlClient as any
     );
-    const attachmentsAdd = jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
+    const attachmentsAdd = vi.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
 
     await tool.handler(
       { chart_type: 'single_metric_viewer', job_ids: ['job-1'] },
@@ -154,10 +156,10 @@ describe('createMlChartsTool', () => {
   });
 
   it('returns an error when the requested job is missing', async () => {
-    const attachmentsAdd = jest.fn();
+    const attachmentsAdd = vi.fn();
     const result = await createMlChartsToolInstance.handler(
       { chart_type: 'single_metric_viewer', job_ids: ['missing-job'] },
-      createContext(attachmentsAdd, jest.fn().mockResolvedValue({ jobs: [] }))
+      createContext(attachmentsAdd, vi.fn().mockResolvedValue({ jobs: [] }))
     );
 
     expect(attachmentsAdd).not.toHaveBeenCalled();
@@ -171,8 +173,8 @@ describe('createMlChartsTool', () => {
   });
 
   it('returns an error when selected_detector_index is out of range', async () => {
-    const attachmentsAdd = jest.fn();
-    const getJobs = jest.fn().mockResolvedValue({
+    const attachmentsAdd = vi.fn();
+    const getJobs = vi.fn().mockResolvedValue({
       jobs: [
         {
           analysis_config: {

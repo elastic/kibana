@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_DATA_SOURCE_URL } from '../../../../../../../common/constants';
 import {
@@ -13,15 +16,13 @@ import {
   requestMock,
 } from '../../../../../detection_engine/routes/__mocks__';
 
-jest.mock('../../../entity_sources/infra/entity_source_client');
+vi.mock('../../../entity_sources/infra/entity_source_client');
 
-const { mockUpdateEntitySource } = jest.requireMock(
-  '../../../entity_sources/infra/entity_source_client'
-) as {
-  mockUpdateEntitySource: jest.Mock;
+const { mockUpdateEntitySource } = (await vi.importMock('../../../entity_sources/infra/entity_source_client')) as {
+  mockUpdateEntitySource: Mock;
 };
 
-const mockGetStartServices = jest.fn();
+const mockGetStartServices = vi.fn();
 
 import { updateEntitySourceRoute } from './update';
 
@@ -42,14 +43,14 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
 
     mockUpdateEntitySource.mockReset();
 
-    const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
+    const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: vi.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
 
     updateEntitySourceRoute(server.router, logger, mockGetStartServices, true);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (body: object, id = SOURCE_ID) =>

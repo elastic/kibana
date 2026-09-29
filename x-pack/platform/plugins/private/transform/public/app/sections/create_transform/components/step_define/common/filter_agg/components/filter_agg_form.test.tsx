@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,10 +17,13 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterTermForm } from './filter_term_form';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiIconTip: () => '',
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiIconTip: () => '',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FilterAggForm', () => {
   const runtimeMappings: RuntimeMappings = {
@@ -32,7 +37,7 @@ describe('FilterAggForm', () => {
 
   const dataView = {
     fields: {
-      getByName: jest.fn((fieldName: string) => {
+      getByName: vi.fn((fieldName: string) => {
         if (fieldName === 'test_text_field') {
           return {
             type: KBN_FIELD_TYPES.STRING,
@@ -48,7 +53,7 @@ describe('FilterAggForm', () => {
   } as unknown as DataView;
 
   test('should render only select dropdown on empty configuration', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const { getByLabelText, findByTestId, container } = render(
       <I18nProvider>
@@ -73,7 +78,7 @@ describe('FilterAggForm', () => {
   });
 
   test('should update "filterAgg" and "aggTypeConfig" on change', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const { findByTestId } = render(
       <I18nProvider>
@@ -101,7 +106,7 @@ describe('FilterAggForm', () => {
   });
 
   test('should reset config of field change', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const { rerender, findByTestId } = render(
       <I18nProvider>
@@ -133,9 +138,9 @@ describe('FilterAggForm', () => {
   });
 
   test('should render additional form if presented in the configuration', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     let childChange: Function;
-    const DummyComponent = jest.fn(({ config, onChange: onChangeCallback }) => {
+    const DummyComponent = vi.fn(({ config, onChange: onChangeCallback }) => {
       childChange = onChangeCallback;
       return <div />;
     });

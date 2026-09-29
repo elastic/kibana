@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { processLiveHistory } from './process_live_history';
 
-jest.mock('../../lib/get_result_counts_for_actions', () => ({
-  getResultCountsForActions: jest.fn(),
-}));
+vi.mock('../../lib/get_result_counts_for_actions', () => {
+      const mocked = {
+      getResultCountsForActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetResultCountsForActions = jest.requireMock('../../lib/get_result_counts_for_actions')
-  .getResultCountsForActions as jest.Mock;
+const mockGetResultCountsForActions = (await vi.importMock('../../lib/get_result_counts_for_actions'))
+  .getResultCountsForActions as Mock;
 
 const mockRequest = httpServerMock.createKibanaRequest();
 
 const createMockOsqueryContext = () => ({
-  getStartServices: jest.fn().mockResolvedValue([
+  getStartServices: vi.fn().mockResolvedValue([
     {
       elasticsearch: {
         client: {
           asInternalUser: {},
-          asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }),
+          asScoped: vi.fn().mockReturnValue({ asCurrentUser: {} }),
         },
       },
     },
@@ -50,7 +56,7 @@ const createLiveHit = (
 
 describe('processLiveHistory', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetResultCountsForActions.mockResolvedValue(new Map());
   });
 
@@ -236,12 +242,12 @@ describe('processLiveHistory', () => {
       liveHits: [createLiveHit()],
       cpsActive: true,
       osqueryContext: {
-        getStartServices: jest.fn().mockResolvedValue([
+        getStartServices: vi.fn().mockResolvedValue([
           {
             elasticsearch: {
               client: {
                 asInternalUser: mockInternalEsClient,
-                asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
+                asScoped: vi.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
               },
             },
           },

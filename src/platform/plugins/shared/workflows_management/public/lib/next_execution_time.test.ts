@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { calculateNextExecutionTime, getWorkflowNextExecutionTime } from './next_execution_time';
 import type { WorkflowTrigger } from '../../common/lib/trigger_types';
 
@@ -15,12 +17,12 @@ describe('next_execution_time', () => {
 
   beforeEach(() => {
     // Mock the current time for consistent testing
-    jest.useFakeTimers();
-    jest.setSystemTime(mockNow);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockNow);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('calculateNextExecutionTime', () => {

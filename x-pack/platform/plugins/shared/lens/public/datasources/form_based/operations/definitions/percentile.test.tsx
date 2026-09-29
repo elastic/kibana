@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -49,8 +51,8 @@ const defaultProps = {
   } as IndexPattern,
   operationDefinitionMap: {},
   isFullscreen: false,
-  toggleFullscreen: jest.fn(),
-  setIsCloseable: jest.fn(),
+  toggleFullscreen: vi.fn(),
+  setIsCloseable: vi.fn(),
   layerId: '1',
 };
 
@@ -58,10 +60,10 @@ describe('percentile', () => {
   let layer: FormBasedLayer;
   const InlineOptions = percentileOperation.paramEditor!;
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
@@ -574,7 +576,7 @@ describe('percentile', () => {
   describe('isTransferable', () => {
     it('should transfer from number to histogram', () => {
       const indexPattern = createMockedIndexPattern();
-      indexPattern.getFieldByName = jest.fn().mockReturnValue({
+      indexPattern.getFieldByName = vi.fn().mockReturnValue({
         name: 'response_time',
         displayName: 'response_time',
         type: 'histogram',
@@ -602,7 +604,7 @@ describe('percentile', () => {
 
   describe('param editor', () => {
     it('should render current percentile', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       render(
         <InlineOptions
           {...defaultProps}
@@ -619,8 +621,8 @@ describe('percentile', () => {
 
     it('should update state on change', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         <InlineOptions
           {...defaultProps}
@@ -633,7 +635,7 @@ describe('percentile', () => {
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
       await user.clear(input);
       await user.type(input, '27');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(input).toHaveValue(27);
       expect(updateLayerSpy).toHaveBeenCalledTimes(1);
       expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -647,8 +649,8 @@ describe('percentile', () => {
 
     it('should update on decimals input up to 2 digits', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         <InlineOptions
           {...defaultProps}
@@ -661,15 +663,15 @@ describe('percentile', () => {
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
       await user.clear(input);
       await user.type(input, '12.12');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(input).toHaveValue(12.12);
       expect(updateLayerSpy).toHaveBeenCalled();
     });
 
     it('should not update on invalid input, but show invalid value locally', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         <InlineOptions
           {...defaultProps}
@@ -682,7 +684,7 @@ describe('percentile', () => {
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
       await user.clear(input);
       await user.type(input, '12.1212312312312312');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(input).toHaveValue(12.1212312312312312);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(

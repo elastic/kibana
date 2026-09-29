@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -51,7 +54,7 @@ const getDeps = async (): Promise<CommonFetchParams> => {
 
 describe('test fetchDocuments', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('resolves with returned documents', async () => {
@@ -63,7 +66,7 @@ describe('test fetchDocuments', () => {
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
     const deps = await getDeps();
-    const resolveDocumentProfileSpy = jest.spyOn(
+    const resolveDocumentProfileSpy = vi.spyOn(
       deps.scopedProfilesManager,
       'resolveDocumentProfile'
     );
@@ -100,14 +103,14 @@ describe('test fetchDocuments', () => {
     searchSourceRegular.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
 
-    jest.spyOn(searchSourceRegular, 'fetch$');
+    vi.spyOn(searchSourceRegular, 'fetch$');
 
     expect(await fetchDocuments(searchSourceRegular, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
     });
 
-    expect(searchSourceRegular.fetch$ as jest.Mock).toHaveBeenCalledWith(
+    expect(searchSourceRegular.fetch$ as Mock).toHaveBeenCalledWith(
       expect.objectContaining({ sessionId: deps.searchSessionId })
     );
 
@@ -119,14 +122,14 @@ describe('test fetchDocuments', () => {
     searchSourceForLoadMore.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
 
-    jest.spyOn(searchSourceForLoadMore, 'fetch$');
+    vi.spyOn(searchSourceForLoadMore, 'fetch$');
 
     expect(await fetchDocuments(searchSourceForLoadMore, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
     });
 
-    expect(searchSourceForLoadMore.fetch$ as jest.Mock).toHaveBeenCalledWith(
+    expect(searchSourceForLoadMore.fetch$ as Mock).toHaveBeenCalledWith(
       expect.objectContaining({ sessionId: undefined })
     );
   });

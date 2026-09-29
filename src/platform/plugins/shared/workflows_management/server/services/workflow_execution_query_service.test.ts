@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -31,36 +34,36 @@ import {
 } from '../../common';
 
 describe('WorkflowExecutionQueryService', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
-  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
+  let mockWorkflowDataClient: Mocked<WorkflowExecutionsDataClient>;
+  let mockStepDataClient: Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let mockEventLoggerService: jest.Mocked<IWorkflowEventLoggerService>;
+  let mockEventLoggerService: Mocked<IWorkflowEventLoggerService>;
   let service: WorkflowExecutionQueryService;
 
   beforeEach(() => {
     mockEsClient = {
-      search: jest.fn(),
-      get: jest.fn(),
-      mget: jest.fn(),
-      update: jest.fn(),
+      search: vi.fn(),
+      get: vi.fn(),
+      mget: vi.fn(),
+      update: vi.fn(),
     } as any;
     mockWorkflowDataClient = {
       ...createMockWorkflowDataClient(),
-      search: jest.fn((request) =>
+      search: vi.fn((request) =>
         mockEsClient.search({ index: WORKFLOWS_EXECUTIONS_INDEX, ...request })
       ),
     };
     mockStepDataClient = {
       ...createMockStepDataClient(),
-      search: jest.fn((request) =>
+      search: vi.fn((request) =>
         mockEsClient.search({ index: WORKFLOWS_STEP_EXECUTIONS_INDEX, ...request })
       ),
     };
     mockLogger = loggerMock.create();
     mockEventLoggerService = {
-      getExecutionLogs: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-      getStepLogs: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      getExecutionLogs: vi.fn().mockResolvedValue({ results: [], total: 0 }),
+      getStepLogs: vi.fn().mockResolvedValue({ results: [], total: 0 }),
     } as any;
 
     service = new WorkflowExecutionQueryService({

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ConcurrencyManager } from './concurrency_manager';
@@ -16,21 +19,21 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
 describe('ConcurrencyManager', () => {
   let concurrencyManager: ConcurrencyManager;
   let mockContext: WorkflowContext;
-  let mockWorkflowTaskManager: jest.Mocked<WorkflowTaskManager>;
-  let mockWorkflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;
+  let mockWorkflowTaskManager: Mocked<WorkflowTaskManager>;
+  let mockWorkflowExecutionRepository: Mocked<WorkflowExecutionRepository>;
 
   beforeEach(() => {
     mockWorkflowTaskManager = {
-      forceRunIdleTasks: jest.fn().mockResolvedValue(undefined),
-      scheduleResumeTask: jest.fn(),
-    } as unknown as jest.Mocked<WorkflowTaskManager>;
+      forceRunIdleTasks: vi.fn().mockResolvedValue(undefined),
+      scheduleResumeTask: vi.fn(),
+    } as unknown as Mocked<WorkflowTaskManager>;
 
     mockWorkflowExecutionRepository = {
-      getRunningExecutionsByConcurrencyGroup: jest.fn(),
-      countExecutionsByConcurrencyGroupAndStatuses: jest.fn(),
-      bulkUpdateWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
-      updateWorkflowExecution: jest.fn(),
-    } as unknown as jest.Mocked<WorkflowExecutionRepository>;
+      getRunningExecutionsByConcurrencyGroup: vi.fn(),
+      countExecutionsByConcurrencyGroupAndStatuses: vi.fn(),
+      bulkUpdateWorkflowExecutions: vi.fn().mockResolvedValue(undefined),
+      updateWorkflowExecution: vi.fn(),
+    } as unknown as Mocked<WorkflowExecutionRepository>;
 
     concurrencyManager = new ConcurrencyManager(
       mockWorkflowTaskManager,

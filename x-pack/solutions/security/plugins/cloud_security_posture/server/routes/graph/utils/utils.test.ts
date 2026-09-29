@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
@@ -12,9 +15,12 @@ import { resolveLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
 import { resolveEntitiesIndexName } from './enrichment_utils';
 
-jest.mock('@kbn/entity-store/server', () => ({
-  resolveLatestEntitiesIndexName: jest.fn(),
-}));
+vi.mock('@kbn/entity-store/server', () => {
+      const mocked = {
+      resolveLatestEntitiesIndexName: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('utils', () => {
   describe('transformEntityTypeToIconAndShape', () => {
@@ -94,21 +100,21 @@ describe('utils', () => {
 
     beforeEach(() => {
       logger = {
-        trace: jest.fn(),
-        debug: jest.fn(),
-        info: jest.fn(),
-        error: jest.fn(),
+        trace: vi.fn(),
+        debug: vi.fn(),
+        info: vi.fn(),
+        error: vi.fn(),
       } as unknown as Logger;
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should return the resolved index name when the index exists', async () => {
       const indexName = getEntitiesLatestIndexName('default');
-      (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce(indexName);
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+      (resolveLatestEntitiesIndexName as Mock).mockResolvedValueOnce(indexName);
+      (esClient.asInternalUser.indices as Mocked<any>).exists = vi
         .fn()
         .mockResolvedValueOnce(true);
 
@@ -121,10 +127,10 @@ describe('utils', () => {
     // pass-through, existence check, and error handling around it.
 
     it('should return null when the index does not exist', async () => {
-      (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce(
+      (resolveLatestEntitiesIndexName as Mock).mockResolvedValueOnce(
         getEntitiesLatestIndexName('default')
       );
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+      (esClient.asInternalUser.indices as Mocked<any>).exists = vi
         .fn()
         .mockResolvedValueOnce(false);
 
@@ -133,7 +139,7 @@ describe('utils', () => {
     });
 
     it('should return null and log error on unexpected errors', async () => {
-      (resolveLatestEntitiesIndexName as jest.Mock).mockRejectedValueOnce(
+      (resolveLatestEntitiesIndexName as Mock).mockRejectedValueOnce(
         new Error('Network error')
       );
 

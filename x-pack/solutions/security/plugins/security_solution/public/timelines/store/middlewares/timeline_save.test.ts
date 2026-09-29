@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { type DataView } from '@kbn/data-plugin/common';
@@ -29,30 +32,33 @@ import {
 import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
 import { mockDataViewManagerState } from '../../../data_view_manager/redux/mock';
 
-jest.mock('../actions', () => {
-  const actual = jest.requireActual('../actions');
-  const endTLSaving = jest.fn((...args) => actual.endTimelineSaving(...args));
+vi.mock('../actions', async () => {
+  const actual = (await vi.importActual('../actions'));
+  const endTLSaving = vi.fn((...args) => actual.endTimelineSaving(...args));
   (endTLSaving as unknown as { match: Function }).match = () => false;
   return {
     ...actual,
-    showCallOutUnauthorizedMsg: jest
+    showCallOutUnauthorizedMsg: vi
       .fn()
       .mockImplementation((...args) => actual.showCallOutUnauthorizedMsg(...args)),
-    startTimelineSaving: jest
+    startTimelineSaving: vi
       .fn()
       .mockImplementation((...args) => actual.startTimelineSaving(...args)),
     endTimelineSaving: endTLSaving,
   };
 });
-jest.mock('../../containers/api');
-jest.mock('./helpers', () => ({
-  refreshTimelines: jest.fn(),
-  extractTimelineIdsAndVersions: jest.requireActual('./helpers').extractTimelineIdsAndVersions,
-}));
+vi.mock('../../containers/api');
+vi.mock('./helpers', async () => {
+      const mocked = {
+      refreshTimelines: vi.fn(),
+      extractTimelineIdsAndVersions: (await vi.importActual('./helpers')).extractTimelineIdsAndVersions,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
-const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
-const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as jest.Mock;
+const startTimelineSavingMock = startTimelineSaving as unknown as Mock;
+const endTimelineSavingMock = endTimelineSaving as unknown as Mock;
+const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as Mock;
 
 describe('Timeline save middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
@@ -62,18 +68,18 @@ describe('Timeline save middleware', () => {
     dataView = getMockDataViewWithMatchedIndices();
     dataView.version = 'is-persisted';
 
-    (kibanaMock.plugins.onStart as jest.Mock).mockReturnValue({
+    (kibanaMock.plugins.onStart as Mock).mockReturnValue({
       dataViews: {
         found: true,
         contract: { get: () => dataView },
       },
     });
     store = createMockStore(undefined, undefined, kibanaMock);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should persist a timeline', async () => {
-    (persistTimeline as jest.Mock).mockResolvedValue({
+    (persistTimeline as Mock).mockResolvedValue({
       savedObjectId: 'soid',
       version: 'newVersion',
     });
@@ -87,8 +93,8 @@ describe('Timeline save middleware', () => {
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
     expect(mockDataViewManagerState).toBeDefined();
     expect(startTimelineSavingMock).toHaveBeenCalled();
-    expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalled();
-    expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalledWith(
+    expect(persistTimeline as unknown as Mock).toHaveBeenCalled();
+    expect(persistTimeline as unknown as Mock).toHaveBeenCalledWith(
       expect.objectContaining({
         timeline: expect.objectContaining({
           dataViewId: mockDataViewManagerState.dataViewManager.timeline.dataViewId,
@@ -96,7 +102,7 @@ describe('Timeline save middleware', () => {
         }),
       })
     );
-    expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
+    expect(refreshTimelines as unknown as Mock).toHaveBeenCalled();
     expect(endTimelineSavingMock).toHaveBeenCalled();
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
       expect.objectContaining({
@@ -107,7 +113,7 @@ describe('Timeline save middleware', () => {
   });
 
   it('should copy a timeline', async () => {
-    (copyTimeline as jest.Mock).mockResolvedValue({
+    (copyTimeline as Mock).mockResolvedValue({
       savedObjectId: 'soid',
       version: 'newVersion',
     });
@@ -120,9 +126,9 @@ describe('Timeline save middleware', () => {
     );
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: true }));
 
-    expect(copyTimeline as unknown as jest.Mock).toHaveBeenCalled();
+    expect(copyTimeline as unknown as Mock).toHaveBeenCalled();
     expect(startTimelineSavingMock).toHaveBeenCalled();
-    expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
+    expect(refreshTimelines as unknown as Mock).toHaveBeenCalled();
     expect(endTimelineSavingMock).toHaveBeenCalled();
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
       expect.objectContaining({
@@ -133,14 +139,14 @@ describe('Timeline save middleware', () => {
   });
 
   it('should show an error message in case of a conflict', async () => {
-    const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
-    (copyTimeline as jest.Mock).mockResolvedValue({
+    const addDangerMock = vi.spyOn(kibanaMock.notifications.toasts, 'addDanger');
+    (copyTimeline as Mock).mockResolvedValue({
       status_code: 409,
       message: 'test conflict',
     });
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: true }));
 
-    expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(refreshTimelines as unknown as Mock).not.toHaveBeenCalled();
     expect(addDangerMock).toHaveBeenCalledWith({
       title: i18n.TIMELINE_VERSION_CONFLICT_TITLE,
       text: i18n.TIMELINE_VERSION_CONFLICT_DESCRIPTION,
@@ -148,14 +154,14 @@ describe('Timeline save middleware', () => {
   });
 
   it('should show the provided message in case of an error response', async () => {
-    const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
-    (persistTimeline as jest.Mock).mockResolvedValue({
+    const addDangerMock = vi.spyOn(kibanaMock.notifications.toasts, 'addDanger');
+    (persistTimeline as Mock).mockResolvedValue({
       status_code: 404,
       message: 'test error message',
     });
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
 
-    expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(refreshTimelines as unknown as Mock).not.toHaveBeenCalled();
     expect(addDangerMock).toHaveBeenCalledWith({
       title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
       text: 'test error message',
@@ -163,11 +169,11 @@ describe('Timeline save middleware', () => {
   });
 
   it('should show a generic error in case of an empty response', async () => {
-    const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
-    (persistTimeline as jest.Mock).mockResolvedValue(null);
+    const addDangerMock = vi.spyOn(kibanaMock.notifications.toasts, 'addDanger');
+    (persistTimeline as Mock).mockResolvedValue(null);
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
 
-    expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(refreshTimelines as unknown as Mock).not.toHaveBeenCalled();
     expect(addDangerMock).toHaveBeenCalledWith({
       title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
       text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
@@ -175,10 +181,10 @@ describe('Timeline save middleware', () => {
   });
 
   it('should show an error message when the call is unauthorized', async () => {
-    (persistTimeline as jest.Mock).mockResolvedValue({ status_code: 403 });
+    (persistTimeline as Mock).mockResolvedValue({ status_code: 403 });
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
 
-    expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(refreshTimelines as unknown as Mock).not.toHaveBeenCalled();
     expect(showCallOutUnauthorizedMsgMock).toHaveBeenCalled();
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { SavedObjectsSearchResponse } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -313,7 +315,7 @@ describe('getCasesTelemetryData', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('it returns the correct res', async () => {

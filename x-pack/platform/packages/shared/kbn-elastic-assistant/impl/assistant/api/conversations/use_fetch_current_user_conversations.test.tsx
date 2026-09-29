@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,7 +17,7 @@ import { useFetchCurrentUserConversations } from './use_fetch_current_user_conve
 import { welcomeConvo } from '../../../mock/conversation';
 
 const http = {
-  fetch: jest.fn().mockResolvedValue({ page: 1, perPage: 28, total: 0, data: [welcomeConvo] }),
+  fetch: vi.fn().mockResolvedValue({ page: 1, perPage: 28, total: 0, data: [welcomeConvo] }),
 };
 const defaultProps = {
   http,

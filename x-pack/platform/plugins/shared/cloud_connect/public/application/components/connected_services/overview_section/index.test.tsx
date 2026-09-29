@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { OverviewSection } from '.';
 
 // Mock the SubscriptionBadge component
-jest.mock('./subscription_badge', () => ({
-  SubscriptionBadge: ({ subscription }: { subscription: string }) => (
-    <span data-test-subj="subscription-badge-mock">{subscription}</span>
-  ),
-}));
+vi.mock('./subscription_badge', () => {
+      const mocked = {
+      SubscriptionBadge: ({ subscription }: { subscription: string }) => (
+        <span data-test-subj="subscription-badge-mock">{subscription}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(

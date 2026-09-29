@@ -7,28 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { coreServices, dataViewsService } from '../../services/kibana_services';
 import { getDataViewIdFromESQLQuery } from './get_data_view_id_from_esql_query';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn(),
+vi.mock('@kbn/esql-utils', async () => ({
+  ...(await vi.importActual('@kbn/esql-utils')),
+  getESQLAdHocDataview: vi.fn(),
 }));
 
-const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
+const mockGetESQLAdHocDataview = getESQLAdHocDataview as MockedFunction<
   typeof getESQLAdHocDataview
 >;
 
 describe('getDataViewIdFromESQLQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a matching parent-published data view id before checking saved data views', async () => {
-    dataViewsService.find = jest.fn();
+    dataViewsService.find = vi.fn();
     const parentApi = {
       dataViews$: new BehaviorSubject<DataView[] | undefined>([
         { id: 'published-data-view', getIndexPattern: () => 'logs-*' },
@@ -46,7 +49,7 @@ describe('getDataViewIdFromESQLQuery', () => {
   });
 
   it('returns the matching saved data view id', async () => {
-    dataViewsService.find = jest.fn().mockResolvedValue([{ id: 'saved-data-view' }]);
+    dataViewsService.find = vi.fn().mockResolvedValue([{ id: 'saved-data-view' }]);
 
     await expect(getDataViewIdFromESQLQuery('FROM logs-* | STATS BY service.name')).resolves.toBe(
       'saved-data-view'
@@ -57,7 +60,7 @@ describe('getDataViewIdFromESQLQuery', () => {
   });
 
   it('creates an ad hoc data view when no saved data view matches', async () => {
-    dataViewsService.find = jest.fn().mockResolvedValue([]);
+    dataViewsService.find = vi.fn().mockResolvedValue([]);
     mockGetESQLAdHocDataview.mockResolvedValue({
       id: 'ad-hoc-data-view',
     } as Awaited<ReturnType<typeof getESQLAdHocDataview>>);

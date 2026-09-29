@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, waitFor, renderHook, act } from '@testing-library/react';
 import { of } from 'rxjs';
 import { TestProviders } from '../../../../common/mock';
@@ -21,11 +24,11 @@ import { getTimelineTemplate } from '../../../../timelines/containers/api';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../timelines/containers/api');
-jest.mock('../../../../common/lib/apm/use_start_transaction');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../timelines/containers/api');
+vi.mock('../../../../common/lib/apm/use_start_transaction');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/components/user_privileges');
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -107,10 +110,10 @@ const getNonEcsDataWithRuleTypeAndTimelineTemplate = (
   ];
 };
 
-const mockSendAlertToTimeline = jest.spyOn(actions, 'sendAlertToTimelineAction');
+const mockSendAlertToTimeline = vi.spyOn(actions, 'sendAlertToTimelineAction');
 
-(useAppToasts as jest.Mock).mockReturnValue({
-  addError: jest.fn(),
+(useAppToasts as Mock).mockReturnValue({
+  addError: vi.fn(),
 });
 
 const mockTimelineTemplateResponse = {
@@ -222,10 +225,10 @@ const mockTimelineTemplateResponse = {
 
 const props = {
   ecsRowData,
-  onInvestigateInTimelineAlertClick: jest.fn(),
+  onInvestigateInTimelineAlertClick: vi.fn(),
 };
 
-const addTimelineSpy = jest.spyOn(timelineActions, 'addTimeline');
+const addTimelineSpy = vi.spyOn(timelineActions, 'addTimeline');
 
 const RULE_TYPES_TO_BE_TESTED = [
   'query',
@@ -310,27 +313,27 @@ describe('detectionExceptionList', () => {
 
 describe('useInvestigateInTimeline', () => {
   let mockSearchStrategyClient = {
-    search: jest
+    search: vi
       .fn()
       .mockReturnValue(of({ data: getNonEcsDataWithRuleTypeAndTimelineTemplate('query') })),
   };
   beforeEach(() => {
-    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineTemplateResponse);
+    (getTimelineTemplate as Mock).mockResolvedValue(mockTimelineTemplateResponse);
     // by default we return data for query rule type
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         data: {
           search: mockSearchStrategyClient,
-          query: jest.fn(),
+          query: vi.fn(),
         },
       },
     });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { read: true },
     });
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('creates a component and click handler', () => {
     const { result } = renderHook(() => useInvestigateInTimeline(props), {
@@ -359,7 +362,7 @@ describe('useInvestigateInTimeline', () => {
     describe.each(RULE_TYPES_TO_BE_TESTED)('Rule type : %s', (ruleType: string) => {
       test('should copy columns over from template', async () => {
         mockSearchStrategyClient = {
-          search: jest
+          search: vi
             .fn()
             .mockReturnValue(of({ data: getNonEcsDataWithRuleTypeAndTimelineTemplate(ruleType) })),
         };
@@ -406,7 +409,7 @@ describe('useInvestigateInTimeline', () => {
       });
       test('should copy dataProviders over from template', async () => {
         mockSearchStrategyClient = {
-          search: jest
+          search: vi
             .fn()
             .mockReturnValue(of({ data: getNonEcsDataWithRuleTypeAndTimelineTemplate(ruleType) })),
         };
@@ -454,7 +457,7 @@ describe('useInvestigateInTimeline', () => {
 
   describe('privileges', () => {
     test('should not return a timeline action when the user does not have sufficient privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         timelinePrivileges: { read: false },
       });
 

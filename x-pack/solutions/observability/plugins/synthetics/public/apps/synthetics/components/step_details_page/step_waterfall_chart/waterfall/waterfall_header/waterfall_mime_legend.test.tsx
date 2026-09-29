@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { fireEvent } from '@testing-library/react';
 import 'jest-canvas-mock';
@@ -13,10 +15,10 @@ import { WaterfallMimeLegend } from './waterfall_mime_legend';
 import { render } from '../../../../../utils/testing';
 
 describe('WaterfallMimeLegend', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   const activeFilters = [MimeType.XHR];
-  const setActiveFilters = jest.fn();
-  const setShowCustomMarks = jest.fn();
+  const setActiveFilters = vi.fn();
+  const setShowCustomMarks = vi.fn();
   const defaultProps = {
     activeFilters,
     setActiveFilters,
@@ -25,11 +27,11 @@ describe('WaterfallMimeLegend', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { CoveragePayload } from '@kbn/siem-readiness';
@@ -17,14 +20,20 @@ import { getCoverageTool } from './get_coverage_tool';
 import { getCoverage } from '../../../lib/siem_readiness/dimensions';
 import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
-jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getCoverage: jest.fn() }));
-jest.mock('../../../lib/siem_readiness/fetchers', () => ({
-  getSiemReadinessSharedContext: jest.fn(),
-  fetchSiemReadinessSharedContext: jest.fn(),
-}));
+vi.mock('../../../lib/siem_readiness/dimensions', () => {
+      const mocked = { getCoverage: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/siem_readiness/fetchers', () => {
+      const mocked = {
+      getSiemReadinessSharedContext: vi.fn(),
+      fetchSiemReadinessSharedContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetCoverage = getCoverage as jest.Mock;
-const mockGetSharedContext = getSiemReadinessSharedContext as jest.Mock;
+const mockGetCoverage = getCoverage as Mock;
+const mockGetSharedContext = getSiemReadinessSharedContext as Mock;
 
 const mockSharedContext = {
   reverseMapResult: {
@@ -51,7 +60,7 @@ describe('getCoverageTool', () => {
   const tool = getCoverageTool(mockCore, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetSharedContext.mockResolvedValue(mockSharedContext);
   });

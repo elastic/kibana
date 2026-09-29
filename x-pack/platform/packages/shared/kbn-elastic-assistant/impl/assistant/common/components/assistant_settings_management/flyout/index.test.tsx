@@ -5,35 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EuiFlyout } from '@elastic/eui';
 import { Flyout } from '.';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,
-    EuiFlyout: jest.fn(({ children }: { children: React.ReactNode }) => <div>{children}</div>),
+    EuiFlyout: vi.fn(({ children }: { children: React.ReactNode }) => <div>{children}</div>),
   };
 });
 
 describe('Assistant settings flyout', () => {
   const requiredProps = {
     flyoutVisible: true,
-    onClose: jest.fn(),
-    onSaveCancelled: jest.fn(),
-    onSaveConfirmed: jest.fn(),
+    onClose: vi.fn(),
+    onSaveCancelled: vi.fn(),
+    onSaveConfirmed: vi.fn(),
   };
 
   beforeEach(() => {
-    (EuiFlyout as unknown as jest.Mock).mockClear();
+    (EuiFlyout as unknown as Mock).mockClear();
   });
 
   it('passes aria-label from the title to EuiFlyout', () => {
     const title = 'Edit system prompt';
-    const mockedEuiFlyout = EuiFlyout as unknown as jest.Mock;
+    const mockedEuiFlyout = EuiFlyout as unknown as Mock;
     render(
       <Flyout {...requiredProps} title={title}>
         <div>{'Body'}</div>
@@ -45,7 +48,7 @@ describe('Assistant settings flyout', () => {
   });
 
   it('does not pass aria-label when the title is missing', () => {
-    const mockedEuiFlyout = EuiFlyout as unknown as jest.Mock;
+    const mockedEuiFlyout = EuiFlyout as unknown as Mock;
     render(
       <Flyout {...requiredProps}>
         <div>{'Body'}</div>

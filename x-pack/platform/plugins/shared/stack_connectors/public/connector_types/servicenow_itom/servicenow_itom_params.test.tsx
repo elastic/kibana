@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,10 +17,10 @@ import { useChoices } from '../lib/servicenow/use_choices';
 import ServiceNowITOMParamsFields from './servicenow_itom_params';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('../lib/servicenow/use_choices');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('../lib/servicenow/use_choices');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const useChoicesMock = useChoices as jest.Mock;
+const useChoicesMock = useChoices as Mock;
 
 const actionParams = {
   subAction: 'addEvent',
@@ -42,7 +45,7 @@ const connector: ActionConnector = createMockActionConnector({
   name: 'Test',
 });
 
-const editAction = jest.fn();
+const editAction = vi.fn();
 const defaultProps = {
   actionConnector: connector,
   actionParams,
@@ -74,7 +77,7 @@ const choicesResponse = {
 
 describe('ServiceNowITOMParamsFields renders', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useChoicesMock.mockImplementation(() => {
       return choicesResponse;
     });

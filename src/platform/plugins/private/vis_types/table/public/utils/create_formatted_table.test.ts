@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockDeserialize = jest.fn(() => ({}));
+import { vi } from 'vitest';
 
-jest.mock('../services', () => ({
-  getFormatService: jest.fn(() => ({
-    deserialize: mockDeserialize,
-  })),
-}));
+const mockDeserialize = vi.fn(() => ({}));
+
+vi.mock('../services', () => {
+      const mocked = {
+      getFormatService: vi.fn(() => ({
+        deserialize: mockDeserialize,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { AggTypes } from '../../common';
@@ -76,7 +81,7 @@ describe('createFormattedTable', () => {
   it('should add total sum to numeric columns', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convertToText: jest.fn((number) => number),
+      convertToText: vi.fn((number) => number),
     }));
     const output = createFormattedTable(table, visConfig);
 
@@ -103,7 +108,7 @@ describe('createFormattedTable', () => {
   it('should add total average to numeric columns', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convertToText: jest.fn((number) => number),
+      convertToText: vi.fn((number) => number),
     }));
     const output = createFormattedTable(table, { ...visConfig, totalFunc: AggTypes.AVG });
 
@@ -130,7 +135,7 @@ describe('createFormattedTable', () => {
   it('should find min value as total', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convertToText: jest.fn((number) => number),
+      convertToText: vi.fn((number) => number),
     }));
     const output = createFormattedTable(table, { ...visConfig, totalFunc: AggTypes.MIN });
 
@@ -157,7 +162,7 @@ describe('createFormattedTable', () => {
   it('should find max value as total', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convertToText: jest.fn((number) => number),
+      convertToText: vi.fn((number) => number),
     }));
     const output = createFormattedTable(table, { ...visConfig, totalFunc: AggTypes.MAX });
 
@@ -184,7 +189,7 @@ describe('createFormattedTable', () => {
   it('should add rows count as total', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convertToText: jest.fn((number) => number),
+      convertToText: vi.fn((number) => number),
     }));
     const output = createFormattedTable(table, { ...visConfig, totalFunc: AggTypes.COUNT });
 

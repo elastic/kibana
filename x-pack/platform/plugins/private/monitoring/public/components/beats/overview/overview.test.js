@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
-jest.mock('../stats', () => ({
-  Stats: () => 'Stats',
-}));
-jest.mock('../../chart', () => ({
-  MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
-}));
+vi.mock('../stats', () => {
+      const mocked = {
+      Stats: () => 'Stats',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../chart', () => {
+      const mocked = {
+      MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { BeatsOverview } from './overview';
 

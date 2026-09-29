@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,14 +35,14 @@ const selected = [
 const defaultProps = {
   appliesTo: 'multipleRows' as const,
   disabled: false,
-  onListUpdated: jest.fn(),
+  onListUpdated: vi.fn(),
   onlyDefaults: false,
   selectedFields: selected.map((item) => item.field),
-  handleRowChecked: jest.fn(),
+  handleRowChecked: vi.fn(),
 };
 
 describe('BulkActions', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('calls onListUpdated with the expected updates when Allow is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);

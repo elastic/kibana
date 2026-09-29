@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
 import { TARGET_TYPE_INDEX, TARGET_TYPE_INDEX_PATTERN } from '../../common/target_types';
 import { usePreviewDocumentLoader } from './use_preview_document_loader';
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createQueryResult = (overrides: Record<string, unknown> = {}) =>
   ({
@@ -25,13 +30,13 @@ const createQueryResult = (overrides: Record<string, unknown> = {}) =>
 
 describe('usePreviewDocumentLoader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('falls back to local sample when preview fetch is disabled', () => {
-    jest.mocked(useQuery).mockReturnValue(createQueryResult() as never);
+    vi.mocked(useQuery).mockReturnValue(createQueryResult() as never);
 
-    const onPreviewDocumentLoaded = jest.fn();
+    const onPreviewDocumentLoaded = vi.fn();
     const { result } = renderHook(() =>
       usePreviewDocumentLoader({
         targetType: TARGET_TYPE_INDEX,
@@ -53,19 +58,19 @@ describe('usePreviewDocumentLoader', () => {
   });
 
   it('uses target source and emits loaded document on success', () => {
-    jest.mocked(useQuery).mockReturnValue(
+    vi.mocked(useQuery).mockReturnValue(
       createQueryResult({
         isSuccess: true,
         data: { message: 'hello' },
       }) as never
     );
 
-    const onPreviewDocumentLoaded = jest.fn();
+    const onPreviewDocumentLoaded = vi.fn();
     const { result } = renderHook(() =>
       usePreviewDocumentLoader({
         targetType: TARGET_TYPE_INDEX,
         targetId: ' logs-* ',
-        fetchPreviewDocument: jest.fn(),
+        fetchPreviewDocument: vi.fn(),
         onPreviewDocumentLoaded,
       })
     );
@@ -78,7 +83,7 @@ describe('usePreviewDocumentLoader', () => {
         enabled: true,
       })
     );
-    const queryOptions = jest.mocked(useQuery).mock.calls[0][0] as {
+    const queryOptions = vi.mocked(useQuery).mock.calls[0][0] as {
       onSuccess?: (document: Record<string, unknown> | null | undefined) => void;
     };
     queryOptions.onSuccess?.({ message: 'hello' });
@@ -86,7 +91,7 @@ describe('usePreviewDocumentLoader', () => {
   });
 
   it('shows no-document fallback message when fetch returns empty payload', () => {
-    jest.mocked(useQuery).mockReturnValue(
+    vi.mocked(useQuery).mockReturnValue(
       createQueryResult({
         isSuccess: true,
         data: undefined,
@@ -97,8 +102,8 @@ describe('usePreviewDocumentLoader', () => {
       usePreviewDocumentLoader({
         targetType: TARGET_TYPE_INDEX,
         targetId: 'logs-*',
-        fetchPreviewDocument: jest.fn(),
-        onPreviewDocumentLoaded: jest.fn(),
+        fetchPreviewDocument: vi.fn(),
+        onPreviewDocumentLoaded: vi.fn(),
       })
     );
 
@@ -109,7 +114,7 @@ describe('usePreviewDocumentLoader', () => {
   });
 
   it('shows load failure message when query errors', () => {
-    jest.mocked(useQuery).mockReturnValue(
+    vi.mocked(useQuery).mockReturnValue(
       createQueryResult({
         isError: true,
       }) as never
@@ -119,8 +124,8 @@ describe('usePreviewDocumentLoader', () => {
       usePreviewDocumentLoader({
         targetType: TARGET_TYPE_INDEX_PATTERN,
         targetId: 'logs-*',
-        fetchPreviewDocument: jest.fn(),
-        onPreviewDocumentLoaded: jest.fn(),
+        fetchPreviewDocument: vi.fn(),
+        onPreviewDocumentLoaded: vi.fn(),
       })
     );
 

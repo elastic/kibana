@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   ALERT_CLOSING_REASON_PANEL_ID,
@@ -17,17 +20,17 @@ import { useBulkAttackWorkflowStatusItems } from './use_bulk_attack_workflow_sta
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_workflow_status';
 
-jest.mock('../use_attacks_privileges');
-jest.mock('../apply_actions/use_apply_attack_workflow_status');
-jest.mock('@kbn/response-ops-detections-close-reason');
+vi.mock('../use_attacks_privileges');
+vi.mock('../apply_actions/use_apply_attack_workflow_status');
+vi.mock('@kbn/response-ops-detections-close-reason');
 
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
-const mockUseApplyAttackWorkflowStatus = useApplyAttackWorkflowStatus as jest.MockedFunction<
+const mockUseApplyAttackWorkflowStatus = useApplyAttackWorkflowStatus as MockedFunction<
   typeof useApplyAttackWorkflowStatus
 >;
-const mockUseBulkClosingReasonItems = useBulkClosingReasonItems as jest.MockedFunction<
+const mockUseBulkClosingReasonItems = useBulkClosingReasonItems as MockedFunction<
   typeof useBulkClosingReasonItems
 >;
 
@@ -38,10 +41,10 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useBulkAttackWorkflowStatusItems', () => {
-  const mockApplyWorkflowStatus = jest.fn();
+  const mockApplyWorkflowStatus = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
 
     mockUseBulkClosingReasonItems.mockReturnValue({
@@ -58,7 +61,7 @@ describe('useBulkAttackWorkflowStatusItems', () => {
           renderContent: () => React.createElement('div'),
         },
       ],
-      getPanels: jest.fn().mockReturnValue([]),
+      getPanels: vi.fn().mockReturnValue([]),
     });
 
     mockUseAttacksPrivileges.mockReturnValue({
@@ -140,9 +143,9 @@ describe('useBulkAttackWorkflowStatusItems', () => {
         await openItem.onClick(
           [{ _id: '1', data: [], ecs: { _id: '1' } }],
           false,
-          jest.fn(),
-          jest.fn(),
-          jest.fn()
+          vi.fn(),
+          vi.fn(),
+          vi.fn()
         );
       }
 
@@ -169,9 +172,9 @@ describe('useBulkAttackWorkflowStatusItems', () => {
         await ackItem.onClick(
           [{ _id: '1', data: [], ecs: { _id: '1' } }],
           false,
-          jest.fn(),
-          jest.fn(),
-          jest.fn()
+          vi.fn(),
+          vi.fn(),
+          vi.fn()
         );
       }
 
@@ -199,8 +202,8 @@ describe('useBulkAttackWorkflowStatusItems', () => {
         await onSubmitCloseReason({
           alertItems: [{ _id: '1', data: [], ecs: { _id: '1' } }],
           reason: 'other',
-          setIsBulkActionsLoading: jest.fn(),
-          closePopoverMenu: jest.fn(),
+          setIsBulkActionsLoading: vi.fn(),
+          closePopoverMenu: vi.fn(),
         });
       }
 
@@ -224,7 +227,7 @@ describe('useBulkAttackWorkflowStatusItems', () => {
 
       const onSubmitCloseReason =
         mockUseBulkClosingReasonItems.mock.calls[0][0]?.onSubmitCloseReason;
-      const closePopoverMenu = jest.fn();
+      const closePopoverMenu = vi.fn();
       const callOrder: string[] = [];
       closePopoverMenu.mockImplementation(() => callOrder.push('closePopoverMenu'));
       mockApplyWorkflowStatus.mockImplementation(async () => {
@@ -235,7 +238,7 @@ describe('useBulkAttackWorkflowStatusItems', () => {
         await onSubmitCloseReason({
           alertItems: [{ _id: '1', data: [], ecs: { _id: '1' } }],
           reason: 'other',
-          setIsBulkActionsLoading: jest.fn(),
+          setIsBulkActionsLoading: vi.fn(),
           closePopoverMenu,
         });
       }

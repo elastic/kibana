@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isDateRangeValid } from './utils';
 
 describe('isDateRangeValid', () => {
@@ -12,11 +14,11 @@ describe('isDateRangeValid', () => {
   // instant; otherwise second-granularity comparisons race at second boundaries (e.g. `now+2s` vs
   // `now+1s`).
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('Valid ranges', () => {

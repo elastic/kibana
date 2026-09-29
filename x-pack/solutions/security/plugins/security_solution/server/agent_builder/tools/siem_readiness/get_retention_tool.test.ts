@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { RetentionPayload, CategoriesResponse } from '@kbn/siem-readiness';
@@ -18,14 +21,20 @@ import { getRetentionTool } from './get_retention_tool';
 import { getRetention } from '../../../lib/siem_readiness/dimensions';
 import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
-jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getRetention: jest.fn() }));
-jest.mock('../../../lib/siem_readiness/fetchers', () => ({
-  getSiemReadinessSharedContext: jest.fn(),
-  fetchSiemReadinessSharedContext: jest.fn(),
-}));
+vi.mock('../../../lib/siem_readiness/dimensions', () => {
+      const mocked = { getRetention: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/siem_readiness/fetchers', () => {
+      const mocked = {
+      getSiemReadinessSharedContext: vi.fn(),
+      fetchSiemReadinessSharedContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRetention = getRetention as jest.Mock;
-const mockGetSharedContext = getSiemReadinessSharedContext as jest.Mock;
+const mockGetRetention = getRetention as Mock;
+const mockGetSharedContext = getSiemReadinessSharedContext as Mock;
 
 // Retention items carry data stream names; category map has backing index names.
 // The contains-match is: backing_index.includes(data_stream_name).
@@ -77,7 +86,7 @@ describe('getRetentionTool', () => {
   const tool = getRetentionTool(mockCore, mockLogger, false);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetSharedContext.mockResolvedValue(mockSharedContext);
   });

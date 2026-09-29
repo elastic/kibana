@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,26 +18,32 @@ import { AppContextProvider } from '../../../../app_context';
 import type { AppDependencies } from '../../../../app_context';
 import { NotificationService } from '../../../../services/notification';
 
-const mockCreateIndex = jest.fn();
-jest.mock('../../../../services', () => ({
-  createIndex: (...args: unknown[]) => mockCreateIndex(...args),
-}));
+const mockCreateIndex = vi.fn();
+vi.mock('../../../../services', () => {
+      const mocked = {
+      createIndex: (...args: unknown[]) => mockCreateIndex(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let notificationService: NotificationService;
-let showSuccessToastSpy: jest.SpyInstance;
+let showSuccessToastSpy: MockInstance;
 
-jest.mock('./utils', () => ({
-  generateRandomIndexName: () => 'search-abcd',
-  isValidIndexName: (name: string) => {
-    if (!name || name !== name.toLowerCase() || name.length === 0) return false;
-    return true;
-  },
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      generateRandomIndexName: () => 'search-abcd',
+      isValidIndexName: (name: string) => {
+        if (!name || name !== name.toLowerCase() || name.length === 0) return false;
+        return true;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderModal = (props: Partial<React.ComponentProps<typeof CreateIndexModal>> = {}) => {
   const defaultProps = {
-    closeModal: jest.fn(),
-    loadIndices: jest.fn(),
+    closeModal: vi.fn(),
+    loadIndices: vi.fn(),
   };
 
   const ctx = {
@@ -59,10 +68,10 @@ const renderModal = (props: Partial<React.ComponentProps<typeof CreateIndexModal
 
 describe('CreateIndexModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    const toasts = { add: jest.fn() } as any;
+    vi.clearAllMocks();
+    const toasts = { add: vi.fn() } as any;
     notificationService = new NotificationService(toasts);
-    showSuccessToastSpy = jest.spyOn(notificationService, 'showSuccessToast');
+    showSuccessToastSpy = vi.spyOn(notificationService, 'showSuccessToast');
   });
 
   it('renders the modal with title and description', () => {
@@ -108,7 +117,7 @@ describe('CreateIndexModal', () => {
   });
 
   it('calls closeModal when cancel button is clicked', () => {
-    const closeModal = jest.fn();
+    const closeModal = vi.fn();
     renderModal({ closeModal });
     fireEvent.click(screen.getByTestId('createIndexCancelButton'));
     expect(closeModal).toHaveBeenCalled();
@@ -134,8 +143,8 @@ describe('CreateIndexModal', () => {
   });
 
   it('creates the index on submit with valid name', async () => {
-    const closeModal = jest.fn();
-    const loadIndices = jest.fn();
+    const closeModal = vi.fn();
+    const loadIndices = vi.fn();
     mockCreateIndex.mockResolvedValue({ error: undefined });
 
     renderModal({ closeModal, loadIndices });
@@ -153,8 +162,8 @@ describe('CreateIndexModal', () => {
   });
 
   it('creates the index when pressing Enter in the index name input', async () => {
-    const closeModal = jest.fn();
-    const loadIndices = jest.fn();
+    const closeModal = vi.fn();
+    const loadIndices = vi.fn();
     mockCreateIndex.mockResolvedValue({ error: undefined });
 
     renderModal({ closeModal, loadIndices });

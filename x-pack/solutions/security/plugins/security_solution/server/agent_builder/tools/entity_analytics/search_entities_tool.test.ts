@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   ToolResultType,
   type ErrorResult,
@@ -32,24 +35,30 @@ import {
 import { fetchRiskScoreGrounding } from './risk_score_grounding';
 import { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 
-jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
-}));
+vi.mock('../../utils/get_agent_builder_resource_availability', () => {
+      const mocked = {
+      getAgentBuilderResourceAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./risk_score_grounding', () => {
-  const actual = jest.requireActual('./risk_score_grounding');
+vi.mock('./risk_score_grounding', async () => {
+  const actual = (await vi.importActual('./risk_score_grounding'));
   return {
     ...actual,
-    fetchRiskScoreGrounding: jest.fn().mockResolvedValue(undefined),
+    fetchRiskScoreGrounding: vi.fn().mockResolvedValue(undefined),
   };
 });
 
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-const mockFetchRiskScoreGrounding = fetchRiskScoreGrounding as jest.Mock;
+const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
+const mockFetchRiskScoreGrounding = fetchRiskScoreGrounding as Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsEntityStoreV2: true,
@@ -61,7 +70,7 @@ const EXPECTED_KEEP_CLAUSE =
 const EXPECTED_SORT_CLAUSE = 'SORT entity.risk.calculated_score_norm DESC';
 
 const mockSingleEntityResponse = () =>
-  (executeEsql as jest.Mock).mockResolvedValueOnce({
+  (executeEsql as Mock).mockResolvedValueOnce({
     columns: [{ name: 'entity.id', type: 'keyword' }],
     values: [['host:server1']],
   });
@@ -72,7 +81,7 @@ describe('searchEntitiesTool', () => {
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
@@ -314,7 +323,7 @@ describe('searchEntitiesTool', () => {
 
   describe('handler', () => {
     it('builds query with no filters, includes KEEP clause, and returns one result per entity', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.EngineMetadata.Type', type: 'keyword' },
@@ -331,7 +340,7 @@ describe('searchEntitiesTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(1);
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('FROM entities-latest-default');
       expect(query).toContain(EXPECTED_KEEP_CLAUSE);
       expect(query).toContain(EXPECTED_SORT_CLAUSE);
@@ -357,7 +366,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.EngineMetadata.Type IN ("host", "user")');
     });
 
@@ -369,7 +378,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.risk.calculated_score_norm >= 70');
       expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 95');
     });
@@ -382,7 +391,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.risk.calculated_score_norm >=');
     });
 
@@ -394,7 +403,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.risk.calculated_score_norm >= 1');
     });
 
@@ -406,7 +415,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.risk.calculated_score_norm >=');
     });
 
@@ -418,7 +427,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 0');
     });
 
@@ -430,7 +439,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.risk.calculated_score_norm <=');
     });
 
@@ -442,7 +451,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 99');
     });
 
@@ -457,7 +466,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.lifecycle.first_seen >=');
       expect(query).not.toContain('entity.lifecycle.first_seen <=');
     });
@@ -473,7 +482,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.lifecycle.last_activity >=');
       expect(query).not.toContain('entity.lifecycle.last_activity <=');
     });
@@ -489,7 +498,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.lifecycle.first_seen >= "2024-01-01T00:00:00Z"');
       expect(query).toContain('WHERE entity.lifecycle.first_seen <= "2024-12-31T23:59:59Z"');
     });
@@ -502,7 +511,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.lifecycle.first_seen >=');
     });
 
@@ -514,7 +523,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.lifecycle.first_seen >=');
     });
 
@@ -526,7 +535,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.lifecycle.first_seen >= "2000-01-02T00:00:00Z"');
     });
 
@@ -538,7 +547,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.lifecycle.first_seen <=');
     });
 
@@ -550,7 +559,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.lifecycle.first_seen <=');
     });
 
@@ -562,7 +571,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.lifecycle.first_seen <= "2020-01-01T00:00:00Z"');
     });
 
@@ -577,7 +586,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.lifecycle.last_activity >=');
       expect(query).not.toContain('entity.lifecycle.last_activity <=');
     });
@@ -593,7 +602,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.lifecycle.first_seen >= "2024-01-01T00:00:00Z"');
       expect(query).not.toContain('entity.lifecycle.first_seen <=');
     });
@@ -606,7 +615,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.risk.calculated_level IN ("High", "Critical")');
     });
 
@@ -618,7 +627,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE asset.criticality IN ("high_impact", "extreme_impact")');
     });
 
@@ -638,7 +647,7 @@ describe('searchEntitiesTool', () => {
 
         await tool.handler({}, createToolHandlerContext(mockRequest, mockEsClient, mockLogger));
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain(EXPECTED_SORT_CLAUSE);
         expect(query).not.toContain('criticality_rank');
       });
@@ -651,7 +660,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain(EXPECTED_SORT_CLAUSE);
         expect(query).not.toContain('criticality_rank');
       });
@@ -664,7 +673,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
         expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
         // Plain risk-score SORT should not be present when ordering by criticality.
@@ -679,7 +688,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         const evalIdx = query.indexOf(EXPECTED_CRITICALITY_RANK_EVAL);
         const sortIdx = query.indexOf(EXPECTED_CRITICALITY_SORT_CLAUSE);
         expect(evalIdx).toBeGreaterThan(-1);
@@ -694,7 +703,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain(EXPECTED_KEEP_CLAUSE);
         // The KEEP list is an exact field enumeration, so criticality_rank
         // is dropped from the projected columns after the SORT consumes it.
@@ -712,7 +721,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain('WHERE asset.criticality IN ("extreme_impact", "high_impact")');
         expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
         expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
@@ -727,7 +736,7 @@ describe('searchEntitiesTool', () => {
         );
 
         expect(executeEsql).toHaveBeenCalledTimes(1);
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
         expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
         expect(query).not.toContain('risk_score_change');
@@ -743,7 +752,7 @@ describe('searchEntitiesTool', () => {
         );
 
         expect(executeEsql).toHaveBeenCalledTimes(1);
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain(EXPECTED_SORT_CLAUSE);
         expect(query).not.toContain('risk_score_change');
         expect(query).not.toContain('STATS');
@@ -777,7 +786,7 @@ describe('searchEntitiesTool', () => {
         );
 
         expect(executeEsql).toHaveBeenCalledTimes(1);
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
         expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
         expect(query).not.toContain('risk_score_change');
@@ -799,7 +808,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         // ES|QL sorts NULL FIRST in DESC, so the default risk-score sort is
         // paired with an IS NOT NULL guard so that LIMIT N doesn't get filled
         // with unscored rows at the top of a "top N riskiest" ranking.
@@ -815,7 +824,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         expect(query).toContain('WHERE entity.risk.calculated_score_norm IS NOT NULL');
         expect(query).toContain(EXPECTED_SORT_CLAUSE);
       });
@@ -828,7 +837,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         // The criticality branch deliberately keeps unscored entities in the
         // result set; they land at the bottom because criticality_rank defaults
         // to 0 for rows without an asset.criticality match.
@@ -845,7 +854,7 @@ describe('searchEntitiesTool', () => {
           createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
         );
 
-        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const { query } = (executeEsql as Mock).mock.calls[0][0];
         // The two branches are mutually exclusive via `else if`, so the
         // riskScoreChangeInterval path should emit exactly one IS NOT NULL
         // clause — not one from its own branch plus another from the default
@@ -864,7 +873,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('MV_CONTAINS(entity.attributes.watchlists, "vip")');
       expect(query).toContain('MV_CONTAINS(entity.attributes.watchlists, "threat-actors")');
     });
@@ -877,7 +886,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain(
         'WHERE (MV_CONTAINS(entity.source, "crowdstrike") OR entity.source LIKE "crowdstrike.*") OR (MV_CONTAINS(entity.source, "island_browser") OR entity.source LIKE "island_browser.*")'
       );
@@ -891,7 +900,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain(
         'WHERE (MV_CONTAINS(entity.source, "aws") OR entity.source LIKE "aws.*")'
       );
@@ -905,7 +914,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('MV_CONTAINS(entity.source');
       expect(query).not.toContain('entity.source LIKE');
     });
@@ -918,7 +927,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.namespace IN ("okta", "entra_id")');
     });
 
@@ -930,7 +939,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain(
         'WHERE (MV_CONTAINS(entity.source, "aws") OR entity.source LIKE "aws.*")'
       );
@@ -945,7 +954,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('entity.namespace');
     });
 
@@ -957,7 +966,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.attributes.managed == true');
     });
 
@@ -969,7 +978,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).not.toContain('WHERE entity.attributes.managed');
     });
 
@@ -981,7 +990,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.attributes.mfa_enabled == true');
     });
 
@@ -993,7 +1002,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.attributes.asset == true');
     });
 
@@ -1010,7 +1019,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.lifecycle.first_seen >= "2024-01-01T00:00:00Z"');
       expect(query).toContain('WHERE entity.lifecycle.first_seen <= "2024-06-30T23:59:59Z"');
       expect(query).toContain('WHERE entity.lifecycle.last_activity >= "2024-03-01T00:00:00Z"');
@@ -1025,7 +1034,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('LIMIT 25');
     });
 
@@ -1034,7 +1043,7 @@ describe('searchEntitiesTool', () => {
 
       await tool.handler({}, createToolHandlerContext(mockRequest, mockEsClient, mockLogger));
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       const keepIdx = query.indexOf('KEEP');
       const limitIdx = query.indexOf('LIMIT');
       expect(keepIdx).toBeGreaterThan(-1);
@@ -1042,7 +1051,7 @@ describe('searchEntitiesTool', () => {
     });
 
     it('returns one esqlResults result per entity row', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.risk.calculated_score_norm', type: 'double' },
@@ -1072,7 +1081,7 @@ describe('searchEntitiesTool', () => {
     });
 
     it('returns error result when no entities are found', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [{ name: 'entity.id', type: 'keyword' }],
         values: [],
       });
@@ -1089,7 +1098,7 @@ describe('searchEntitiesTool', () => {
     });
 
     it('returns error result when ES|QL query fails', async () => {
-      (executeEsql as jest.Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
+      (executeEsql as Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
 
       const result = (await tool.handler(
         {},
@@ -1106,7 +1115,7 @@ describe('searchEntitiesTool', () => {
 
     describe('telemetry', () => {
       it('reports success=true and resultCount=N when entities are found', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce({
+        (executeEsql as Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [['host:server1'], ['user:alice'], ['host:server2']],
         });
@@ -1132,7 +1141,7 @@ describe('searchEntitiesTool', () => {
       });
 
       it('reports success=true and resultCount=0 when no entities are found', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce({
+        (executeEsql as Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [],
         });
@@ -1158,7 +1167,7 @@ describe('searchEntitiesTool', () => {
       });
 
       it('reports success=false and errorMessage when the query throws', async () => {
-        (executeEsql as jest.Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
+        (executeEsql as Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
 
         await tool.handler(
           { entityTypes: ['user'] },
@@ -1200,7 +1209,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
 
       // FROM includes both entity index and snapshot index
       expect(query).toContain('entities-latest-default');
@@ -1238,7 +1247,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('FROM entities-latest-default');
       expect(query).not.toContain('.entities.v2.history.default');
     });
@@ -1251,7 +1260,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('WHERE @timestamp >= DATE_TRUNC(1 day, NOW() - 1 day)');
     });
 
@@ -1275,7 +1284,7 @@ describe('searchEntitiesTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      const { query } = (executeEsql as Mock).mock.calls[0][0];
       expect(query).toContain('FROM entities-latest-default');
       expect(query).toContain('WHERE entity.EngineMetadata.Type IN ("host")');
       expect(query).toContain('WHERE entity.risk.calculated_score_norm >= 80');
@@ -1319,7 +1328,7 @@ describe('searchEntitiesTool', () => {
 
     it('still appends grounding when the entity search returns no rows so the agent can explain why', async () => {
       mockFetchRiskScoreGrounding.mockResolvedValueOnce(groundingOtherResult);
-      (executeEsql as jest.Mock).mockResolvedValueOnce({ columns: [], values: [] });
+      (executeEsql as Mock).mockResolvedValueOnce({ columns: [], values: [] });
 
       const result = (await tool.handler(
         {},
@@ -1379,11 +1388,11 @@ describe('searchEntitiesTool', () => {
     const expectedSingleAttachmentId = buildSingleEntityAttachmentId('host', 'server1');
 
     it('creates a list attachment when 3 rows are returned and appends an other result', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce(multiRowResponse);
+      (executeEsql as Mock).mockResolvedValueOnce(multiRowResponse);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedListAttachmentId,
         current_version: 1,
       });
@@ -1425,11 +1434,11 @@ describe('searchEntitiesTool', () => {
     });
 
     it('creates a single-entity attachment (via add) when exactly 1 row is returned', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce(singleRowResponse);
+      (executeEsql as Mock).mockResolvedValueOnce(singleRowResponse);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedSingleAttachmentId,
         current_version: 1,
       });
@@ -1469,14 +1478,14 @@ describe('searchEntitiesTool', () => {
     });
 
     it('updates the existing single-entity attachment (bumping version) when it already exists', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce(singleRowResponse);
+      (executeEsql as Mock).mockResolvedValueOnce(singleRowResponse);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce({
         id: expectedSingleAttachmentId,
         current_version: 1,
       });
-      (context.attachments.update as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.update as Mock).mockResolvedValueOnce({
         id: expectedSingleAttachmentId,
         current_version: 2,
       });
@@ -1512,7 +1521,7 @@ describe('searchEntitiesTool', () => {
     });
 
     it('filters out rows with an invalid entity.EngineMetadata.Type but still creates the attachment for the valid ones', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.name', type: 'keyword' },
@@ -1540,8 +1549,8 @@ describe('searchEntitiesTool', () => {
       const filteredAttachmentId = buildListEntityAttachmentId(filteredEntities);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: filteredAttachmentId,
         current_version: 1,
       });
@@ -1580,7 +1589,7 @@ describe('searchEntitiesTool', () => {
     });
 
     it('does not create an attachment when every row has an invalid entity.EngineMetadata.Type', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.name', type: 'keyword' },
@@ -1609,7 +1618,7 @@ describe('searchEntitiesTool', () => {
       // Rows without an entity.id still produce a usable attachment via
       // entity.name, but the payload should not carry a synthetic entity
       // store id — the client falls back to per-type identity filtering.
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.name', type: 'keyword' },
           { name: 'entity.EngineMetadata.Type', type: 'keyword' },
@@ -1618,8 +1627,8 @@ describe('searchEntitiesTool', () => {
       });
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedSingleAttachmentId,
         current_version: 1,
       });
@@ -1627,7 +1636,7 @@ describe('searchEntitiesTool', () => {
       await tool.handler({}, context);
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
-      const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+      const addCall = (context.attachments.add as Mock).mock.calls[0][0];
       expect(addCall.data).toEqual({
         identifierType: 'host',
         identifier: 'server1',
@@ -1639,7 +1648,7 @@ describe('searchEntitiesTool', () => {
     it('does not create an attachment when riskScoreChangeInterval is set (STATS branch limitation)', async () => {
       // The STATS projection drops the identity columns, so descriptors
       // cannot be derived reliably — we skip the attachment side-effect.
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'risk_score_change', type: 'double' },
@@ -1666,7 +1675,7 @@ describe('searchEntitiesTool', () => {
     });
 
     it('does not create an attachment when zero rows are returned (returns the existing error result)', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [{ name: 'entity.id', type: 'keyword' }],
         values: [],
       });

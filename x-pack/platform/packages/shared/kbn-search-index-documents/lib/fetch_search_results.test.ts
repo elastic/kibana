@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DEFAULT_DOCS_PER_PAGE } from '../types';
 
@@ -13,7 +15,7 @@ import { fetchSearchResults } from './fetch_search_results';
 const DEFAULT_FROM_VALUE = 0;
 describe('fetchSearchResults lib function', () => {
   const mockClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   };
 
   const indexName = 'search-regular-index';
@@ -71,7 +73,7 @@ describe('fetchSearchResults lib function', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return search results with hits', async () => {

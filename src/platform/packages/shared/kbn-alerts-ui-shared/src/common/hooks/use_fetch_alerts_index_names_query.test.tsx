@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,7 +18,7 @@ import { useFetchAlertsIndexNamesQuery } from './use_fetch_alerts_index_names_qu
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
-jest.mock('../apis/fetch_alerts_index_names');
+vi.mock('../apis/fetch_alerts_index_names');
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -25,7 +27,7 @@ const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) =
 );
 
 const mockHttpClient = httpServiceMock.createStartContract();
-const mockFetchAlertsIndexNames = jest.mocked(fetchAlertsIndexNames);
+const mockFetchAlertsIndexNames = vi.mocked(fetchAlertsIndexNames);
 
 describe('useFetchAlertsIndexNamesQuery', () => {
   beforeEach(() => {
@@ -33,7 +35,7 @@ describe('useFetchAlertsIndexNamesQuery', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -52,22 +54,25 @@ const defaultProps = {
   indexPattern: createMockedIndexPattern(),
   operationDefinitionMap: {},
   isFullscreen: false,
-  toggleFullscreen: jest.fn(),
-  setIsCloseable: jest.fn(),
+  toggleFullscreen: vi.fn(),
+  setIsCloseable: vi.fn(),
   layerId: '1',
 };
 
 // @ts-expect-error
 window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
-jest.mock('@kbn/kql/public', () => ({
-  QueryStringInput: () => {
-    return 'QueryStringInput';
-  },
-}));
+vi.mock('@kbn/kql/public', () => {
+      const mocked = {
+      QueryStringInput: () => {
+        return 'QueryStringInput';
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -313,10 +318,10 @@ describe('filters', () => {
 
   describe('popover param editor', () => {
     it('should update state when changing a filter', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         wrapInProviders(
           <InlineOptions
@@ -333,7 +338,7 @@ describe('filters', () => {
       fireEvent.change(screen.getByTestId('indexPattern-filters-label'), {
         target: { value: 'Dest5' },
       });
-      act(() => jest.advanceTimersByTime(256));
+      act(() => vi.advanceTimersByTime(256));
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -360,7 +365,7 @@ describe('filters', () => {
 
     describe('Modify filters', () => {
       it('should correctly show existing filters ', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
         render(
           wrapInProviders(
             <InlineOptions
@@ -380,9 +385,9 @@ describe('filters', () => {
 
       it('should remove filter', async () => {
         // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-        jest.useFakeTimers();
-        const updateLayerSpy = jest.fn();
+        const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+        vi.useFakeTimers();
+        const updateLayerSpy = vi.fn();
         render(
           wrapInProviders(
             <InlineOptions
@@ -397,7 +402,7 @@ describe('filters', () => {
 
         await user.click(screen.getByTestId('lns-customBucketContainer-remove-1'));
 
-        act(() => jest.advanceTimersByTime(256));
+        act(() => vi.advanceTimersByTime(256));
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,

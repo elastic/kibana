@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -21,7 +24,7 @@ describe('When using PageOverlay component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let reRender: () => ReturnType<AppContextTestRender['render']>;
-  let renderProps: jest.Mocked<PageOverlayProps>;
+  let renderProps: Mocked<PageOverlayProps>;
   let historyMock: AppContextTestRender['history'];
 
   beforeEach(() => {
@@ -31,7 +34,7 @@ describe('When using PageOverlay component', () => {
 
     renderProps = {
       children: <div data-test-subj="test-body">{'page content here'}</div>,
-      onHide: jest.fn(),
+      onHide: vi.fn(),
       'data-test-subj': 'test',
     };
 
@@ -149,7 +152,7 @@ describe('When using PageOverlay component', () => {
   it('should call `onHide` on Escape and stop it from reaching underlying window-level handlers', () => {
     // Mirrors an underlying layer (e.g. EuiFlyout) that closes itself via a window-level keydown
     // listener. While the overlay is visible, its Escape must not reach that handler.
-    const underlyingWindowHandler = jest.fn();
+    const underlyingWindowHandler = vi.fn();
     window.addEventListener('keydown', underlyingWindowHandler);
 
     try {
@@ -165,7 +168,7 @@ describe('When using PageOverlay component', () => {
   });
 
   it('should let Escape reach underlying window-level handlers (and not call `onHide`) when hidden', () => {
-    const underlyingWindowHandler = jest.fn();
+    const underlyingWindowHandler = vi.fn();
     window.addEventListener('keydown', underlyingWindowHandler);
 
     try {

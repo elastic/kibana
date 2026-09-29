@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { z } from '.';
 import { lazySchema, setLazySchemaDisabled } from './lazy_schema';
 
@@ -214,7 +216,7 @@ describe('lazySchema', () => {
     afterEach(() => setLazySchemaDisabled(false));
 
     it('defers factory invocation by default (enabled)', () => {
-      const factory = jest.fn(() => z.object({ id: z.string() }));
+      const factory = vi.fn(() => z.object({ id: z.string() }));
       const Schema = lazySchema(factory);
 
       expect(factory).not.toHaveBeenCalled();
@@ -226,7 +228,7 @@ describe('lazySchema', () => {
     it('calls the factory eagerly when disabled', () => {
       setLazySchemaDisabled(true);
 
-      const factory = jest.fn(() => z.object({ id: z.string() }));
+      const factory = vi.fn(() => z.object({ id: z.string() }));
       lazySchema(factory);
 
       // No Proxy in this mode — the schema is constructed at wrap time.

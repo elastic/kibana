@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
@@ -21,12 +23,12 @@ describe('BackToInvestigatedAlert component', () => {
 
   describe('When BackToInvestigatedAlert is mounted', () => {
     it('should render basic back button', async () => {
-      renderResult = mockedContext.render(<BackToInvestigatedAlert onClick={jest.fn} />);
+      renderResult = mockedContext.render(<BackToInvestigatedAlert onClick={vi.fn} />);
 
       expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeTruthy();
     });
     it('should call onClick function by clicking the badge', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       renderResult = mockedContext.render(<BackToInvestigatedAlert onClick={onClick} />);
 
       const badgeButton = renderResult.queryByTestId(BUTTON_TEST_ID);

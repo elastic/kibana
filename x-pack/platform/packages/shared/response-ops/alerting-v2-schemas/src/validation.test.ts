@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Parser } from '@elastic/esql';
 import {
   parseDurationToMs,
@@ -17,7 +19,7 @@ import {
 } from './validation';
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('parseDurationToMs', () => {
@@ -142,7 +144,7 @@ describe('validateEsqlQuery', () => {
   });
 
   it('reports a parser crash as an invalid query instead of throwing', () => {
-    jest.spyOn(Parser, 'parseErrors').mockImplementationOnce(() => {
+    vi.spyOn(Parser, 'parseErrors').mockImplementationOnce(() => {
       throw new Error('boom');
     });
 
@@ -160,7 +162,7 @@ describe('validateComposedEsqlQuery', () => {
   });
 
   it('reports a compose crash as an invalid query instead of throwing', () => {
-    jest.spyOn(Parser, 'parse').mockImplementationOnce(() => {
+    vi.spyOn(Parser, 'parse').mockImplementationOnce(() => {
       throw new Error('boom');
     });
 

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockCopyToClipboard = jest.fn((_value: string) => true);
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+import { vi } from 'vitest';
+
+const mockCopyToClipboard = vi.fn((_value: string) => true);
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     copyToClipboard: (value: string) => mockCopyToClipboard(value),
@@ -27,15 +29,15 @@ import {
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
-const mockRunWorkflow = jest.fn();
-const mockTestWorkflow = jest.fn();
-const mockGetExecution = jest.fn();
-const mockUseWorkflowsCapabilities = jest.fn(() => ({
+const mockRunWorkflow = vi.fn();
+const mockTestWorkflow = vi.fn();
+const mockGetExecution = vi.fn();
+const mockUseWorkflowsCapabilities = vi.fn(() => ({
   canExecuteWorkflow: true,
 }));
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
     useRunWorkflow: () => ({ mutateAsync: mockRunWorkflow }),
@@ -63,11 +65,11 @@ const createExecution = (
 });
 
 describe('useWorkflowExecutionsBulkActions', () => {
-  const onRefresh = jest.fn();
-  const onAction = jest.fn();
+  const onRefresh = vi.fn();
+  const onAction = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow: true });
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
     mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
@@ -208,7 +210,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
 
   it('re-runs selected executions and refreshes the list without navigating', async () => {
     const services = createStartServicesMock();
-    const mockNavigateToApp = jest.fn();
+    const mockNavigateToApp = vi.fn();
     services.application.navigateToApp = mockNavigateToApp;
 
     const executions = [createExecution('exec-1', 'wf-1'), createExecution('exec-2', 'wf-2')];
@@ -255,10 +257,10 @@ describe('useWorkflowExecutionsBulkActions', () => {
 });
 
 describe('useWorkflowExecutionRerun', () => {
-  const mockSetSelectedExecution = jest.fn();
+  const mockSetSelectedExecution = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
     mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
     mockGetExecution.mockResolvedValue({ context: {} });

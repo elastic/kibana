@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 import { defaultDoc } from '../mocks/services_mock';
 import {
@@ -96,7 +98,7 @@ describe('Embeddable helpers', () => {
 
     it('should fallback to an empty Lens doc if the saved object is not found', async () => {
       const services = getServices();
-      services.attributeService.loadFromLibrary = jest
+      services.attributeService.loadFromLibrary = vi
         .fn()
         .mockRejectedValueOnce(new Error('not found'));
       const runtimeState = await deserializeState(services, {
@@ -156,7 +158,7 @@ describe('Embeddable helpers', () => {
 
   describe('saveUpdatedLinkedAnnotationsToLibrary', () => {
     const mockEventAnnotationService = {
-      updateAnnotationGroup: jest.fn(() => Promise.resolve()),
+      updateAnnotationGroup: vi.fn(() => Promise.resolve()),
     } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType;
 
     const baseAnnotation = {
@@ -200,7 +202,7 @@ describe('Embeddable helpers', () => {
     }
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should handle frozen (immutable) visualization state without throwing', async () => {
@@ -274,7 +276,7 @@ describe('Embeddable helpers', () => {
 
     it('should propagate errors from updateAnnotationGroup (e.g. deleted group)', async () => {
       const failingService = {
-        updateAnnotationGroup: jest.fn(() => Promise.reject(new Error('Not Found'))),
+        updateAnnotationGroup: vi.fn(() => Promise.reject(new Error('Not Found'))),
       } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType;
 
       const byRefLayer = makeByRefLayer();

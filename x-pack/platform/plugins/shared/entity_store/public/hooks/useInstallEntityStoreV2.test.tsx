@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useInstallEntityStoreV2, type Services } from './useInstallEntityStoreV2';
 import type { EntityStoreStatus } from '../../common';
@@ -12,17 +15,17 @@ import { EntityStoreStatus as EntityStoreStatusEnum } from '../../common';
 import { ENTITY_STORE_ROUTES } from '../../common';
 
 interface MockServices {
-  http: { get: jest.Mock; post: jest.Mock; fetch: jest.Mock };
-  uiSettings: { get: jest.Mock };
-  logger: { error: jest.Mock };
-  spaces: { getActiveSpace: jest.Mock };
+  http: { get: Mock; post: Mock; fetch: Mock };
+  uiSettings: { get: Mock };
+  logger: { error: Mock };
+  spaces: { getActiveSpace: Mock };
 }
 
 const createMockServices = (): MockServices => ({
-  http: { get: jest.fn(), post: jest.fn(), fetch: jest.fn() },
-  uiSettings: { get: jest.fn() },
-  logger: { error: jest.fn() },
-  spaces: { getActiveSpace: jest.fn() },
+  http: { get: vi.fn(), post: vi.fn(), fetch: vi.fn() },
+  uiSettings: { get: vi.fn() },
+  logger: { error: vi.fn() },
+  spaces: { getActiveSpace: vi.fn() },
 });
 
 const asServices = (mock: MockServices): Services => mock as unknown as Services;
@@ -50,7 +53,7 @@ const mockHttpGet = (
 
 describe('useInstallEntityStoreV2', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not auto-install in non-default space when v1 was never installed', async () => {

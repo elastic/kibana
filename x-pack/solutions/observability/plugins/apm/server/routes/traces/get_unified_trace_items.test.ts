@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 import { getErrorsByDocId, getUnifiedTraceItems } from './get_unified_trace_items';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
-jest.mock('./get_unified_trace_errors');
-jest.mock('../span_links/get_linked_children');
+vi.mock('./get_unified_trace_errors');
+vi.mock('../span_links/get_linked_children');
 
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
@@ -141,7 +144,7 @@ describe('getErrorsByDocId', () => {
 
 describe('getUnifiedTraceItems', () => {
   const mockApmEventClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   } as unknown as APMEventClient;
 
   const mockLogsClient = {} as LogsClient;
@@ -172,9 +175,9 @@ describe('getUnifiedTraceItems', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getUnifiedTraceErrors as jest.Mock).mockResolvedValue(mockUnifiedTraceErrors);
-    (getSpanLinksCountById as jest.Mock).mockResolvedValue({});
+    vi.clearAllMocks();
+    (getUnifiedTraceErrors as Mock).mockResolvedValue(mockUnifiedTraceErrors);
+    (getSpanLinksCountById as Mock).mockResolvedValue({});
   });
 
   describe('basic functionality', () => {
@@ -197,7 +200,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -264,7 +267,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -323,7 +326,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -367,7 +370,7 @@ describe('getUnifiedTraceItems', () => {
         hits: { hits: [] },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       await getUnifiedTraceItems(defaultParams);
 
@@ -405,7 +408,7 @@ describe('getUnifiedTraceItems', () => {
         hits: { hits: [] },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       await getUnifiedTraceItems({
         ...defaultParams,
@@ -426,7 +429,7 @@ describe('getUnifiedTraceItems', () => {
         hits: { hits: [] },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       await getUnifiedTraceItems({
         ...defaultParams,
@@ -477,7 +480,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -512,7 +515,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -536,7 +539,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -560,7 +563,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -583,7 +586,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -608,7 +611,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -636,7 +639,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -660,7 +663,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -685,7 +688,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -707,7 +710,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -730,7 +733,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -755,7 +758,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -778,7 +781,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -802,7 +805,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -825,7 +828,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -849,7 +852,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -881,7 +884,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -905,7 +908,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -928,7 +931,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -952,7 +955,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -976,7 +979,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -999,7 +1002,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1024,7 +1027,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1048,7 +1051,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1075,7 +1078,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1105,7 +1108,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1134,7 +1137,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1159,7 +1162,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1184,7 +1187,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1210,7 +1213,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1233,7 +1236,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1258,8 +1261,8 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
-      (getSpanLinksCountById as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
+      (getSpanLinksCountById as Mock).mockResolvedValue({
         'span-1': 3,
       });
 
@@ -1288,7 +1291,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1315,7 +1318,7 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1342,8 +1345,8 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
-      (getSpanLinksCountById as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
+      (getSpanLinksCountById as Mock).mockResolvedValue({
         'span-1': 5,
       });
 
@@ -1358,7 +1361,7 @@ describe('getUnifiedTraceItems', () => {
 
   describe('traceDocsTotal and maxTraceItems', () => {
     it('returns traceDocsTotal as raw ES total', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {
@@ -1380,7 +1383,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('returns traceDocsTotal as 0 when hits.total is undefined', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue({
         hits: { hits: [] },
       });
 
@@ -1390,7 +1393,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('does not include maxTraceItems in the return value', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue({
         hits: { hits: [] },
       });
 
@@ -1400,7 +1403,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('does not include exceedMax in the return value', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue({
         hits: { hits: [], total: { value: 2000, relation: 'eq' } },
       });
 
@@ -1444,8 +1447,8 @@ describe('getUnifiedTraceItems', () => {
         totalErrors: 3,
       } as unknown as UnifiedTraceErrors;
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
-      (getUnifiedTraceErrors as jest.Mock).mockResolvedValue(mockUnifiedTraceErrorsWithMultiple);
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
+      (getUnifiedTraceErrors as Mock).mockResolvedValue(mockUnifiedTraceErrorsWithMultiple);
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1472,8 +1475,8 @@ describe('getUnifiedTraceItems', () => {
         },
       };
 
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
-      (getUnifiedTraceErrors as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue(mockSearchResponse);
+      (getUnifiedTraceErrors as Mock).mockResolvedValue({
         apmErrors: [],
         unprocessedOtelErrors: [],
         totalErrors: 0,
@@ -1487,7 +1490,7 @@ describe('getUnifiedTraceItems', () => {
 
   describe('documents with missing required fields', () => {
     it('skips a document missing service.name and keeps the valid ones', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {
@@ -1527,7 +1530,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('skips a document missing @timestamp instead of throwing', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {
@@ -1588,7 +1591,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('sets missingDestination on an OTel exit span whose child is a transaction and destination is absent', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(
+      (mockApmEventClient.search as Mock).mockResolvedValue(
         otelSpanAndChildTransaction(false)
       );
 
@@ -1599,7 +1602,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('does not set missingDestination when the OTel span has a destination', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(otelSpanAndChildTransaction(true));
+      (mockApmEventClient.search as Mock).mockResolvedValue(otelSpanAndChildTransaction(true));
 
       const result = await getUnifiedTraceItems(defaultParams);
 
@@ -1608,7 +1611,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('does not set missingDestination on a non-OTel APM span even without a destination', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {
@@ -1643,7 +1646,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('does not set missingDestination when the child is a span, not a transaction', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+      (mockApmEventClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {

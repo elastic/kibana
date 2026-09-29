@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -15,8 +17,8 @@ import type { ForcedGcHeapStats, ProcStatSample } from './types';
 import { requestForcedGcHeapStats, startMonitoring } from './start_monitoring';
 
 const log = {
-  debug: jest.fn(),
-  warning: jest.fn(),
+  debug: vi.fn(),
+  warning: vi.fn(),
 } as unknown as ToolingLog;
 
 const makeSample = (pid: number): ProcStatSample => ({
@@ -89,12 +91,12 @@ describe('forced-GC monitor control', () => {
 
   beforeEach(async () => {
     tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'kbn-bench-monitor-'));
-    jest.spyOn(process, 'kill').mockImplementation(() => true);
+    vi.spyOn(process, 'kill').mockImplementation(() => true);
   });
 
   afterEach(async () => {
     await fs.promises.rm(tempDir, { recursive: true, force: true });
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('matches one structured result to its request and PID', async () => {
@@ -219,7 +221,7 @@ describe('forced-GC monitor control', () => {
       `${JSON.stringify(makeSample(pid))}\n`,
       'utf8'
     );
-    jest.spyOn(fs.promises, 'rename').mockRejectedValueOnce(new Error('rename failed'));
+    vi.spyOn(fs.promises, 'rename').mockRejectedValueOnce(new Error('rename failed'));
 
     const result = await stopMonitoring({ collectForcedGcHeapStats: true });
 
@@ -232,7 +234,7 @@ describe('forced-GC monitor control', () => {
   });
 
   it('excludes monitored processes that exited before forced-GC collection', async () => {
-    jest.spyOn(process, 'kill').mockImplementation(() => {
+    vi.spyOn(process, 'kill').mockImplementation(() => {
       throw Object.assign(new Error('process exited'), { code: 'ESRCH' });
     });
     const stopMonitoring = await startMonitoring({ dir: tempDir, log });

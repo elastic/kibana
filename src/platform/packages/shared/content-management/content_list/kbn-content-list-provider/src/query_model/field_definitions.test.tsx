@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
@@ -21,7 +23,7 @@ import { useFieldDefinitions } from './field_definitions';
 // Shared mocks
 // ---------------------------------------------------------------------------
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({ items: [], total: 0 })
 );
 
@@ -120,7 +122,7 @@ const useFieldDefinitionsWithCache = () => {
 
 describe('useFieldDefinitions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fieldNames', () => {

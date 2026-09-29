@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EncryptionConfig } from './encryption_config';
 import { generate } from './generate';
 
@@ -18,17 +20,17 @@ import crypto from 'crypto';
 describe('encryption key generation interactive', () => {
   const encryptionConfig = new EncryptionConfig();
   beforeEach(() => {
-    Logger.prototype.log = jest.fn();
+    Logger.prototype.log = vi.fn();
   });
 
   it('should prompt the user to write keys if the interactive flag is set', async () => {
-    jest
+    vi
       .spyOn(prompt, 'confirm')
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(false);
-    jest.spyOn(prompt, 'question');
+    vi.spyOn(prompt, 'question');
 
     await generate(encryptionConfig, { interactive: true });
     expect(prompt.confirm.mock.calls).toEqual([
@@ -41,20 +43,20 @@ describe('encryption key generation interactive', () => {
   });
 
   it('should write to disk partial keys', async () => {
-    jest
+    vi
       .spyOn(prompt, 'confirm')
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(true);
-    jest.spyOn(prompt, 'question').mockResolvedValue('/foo/bar');
-    jest.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
-    const writeFileSyncSpy = jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+    vi.spyOn(prompt, 'question').mockResolvedValue('/foo/bar');
+    vi.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
+    const writeFileSyncSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
     await generate(encryptionConfig, { interactive: true });
     expect(writeFileSyncSpy.mock.calls).toMatchSnapshot();
     writeFileSyncSpy.mockRestore();
   });
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 });

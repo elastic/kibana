@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
@@ -13,20 +16,20 @@ import { useGetIssueTypes } from './use_get_issue_types';
 import * as api from './api';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('./api');
+vi.mock('../../../common/lib/kibana');
+vi.mock('./api');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('useGetIssueTypes', () => {
   const { http } = useKibanaMock().services;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'getIssueTypes');
+    const spy = vi.spyOn(api, 'getIssueTypes');
     const { result } = renderHook(
       () =>
         useGetIssueTypes({
@@ -46,7 +49,7 @@ describe('useGetIssueTypes', () => {
   });
 
   it('does not call the api when the connector is missing', async () => {
-    const spy = jest.spyOn(api, 'getIssueTypes');
+    const spy = vi.spyOn(api, 'getIssueTypes');
     renderHook(
       () =>
         useGetIssueTypes({
@@ -59,13 +62,13 @@ describe('useGetIssueTypes', () => {
   });
 
   it('calls addError when the getIssueTypes api throws an error', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getIssueTypes');
+    const spyOnGetCases = vi.spyOn(api, 'getIssueTypes');
     spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess: vi.fn(), addError });
 
     renderHook(
       () =>
@@ -82,15 +85,15 @@ describe('useGetIssueTypes', () => {
   });
 
   it('calls addError when the getIssueTypes api returns successfully but contains an error', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getIssueTypes');
+    const spyOnGetCases = vi.spyOn(api, 'getIssueTypes');
     spyOnGetCases.mockResolvedValue({
       status: 'error',
       message: 'Error message',
       actionId: 'test',
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess: vi.fn(), addError });
 
     renderHook(
       () =>

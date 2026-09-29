@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useFetchSloDefinitionsWithRemote } from './use_fetch_slo_definitions_with_remote';
 import { useHasSlos } from './use_has_slos';
 
-jest.mock('./use_fetch_slo_definitions_with_remote');
+vi.mock('./use_fetch_slo_definitions_with_remote');
 
-const useFetchSloDefinitionsWithRemoteMock = useFetchSloDefinitionsWithRemote as jest.Mock;
+const useFetchSloDefinitionsWithRemoteMock = useFetchSloDefinitionsWithRemote as Mock;
 
 describe('useHasSlos', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns hasSlos: false and isLoading: true while the request is in flight', () => {

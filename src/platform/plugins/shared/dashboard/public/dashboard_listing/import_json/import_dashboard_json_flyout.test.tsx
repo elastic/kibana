@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,22 +16,28 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { ImportDashboardJsonFlyout } from './import_dashboard_json_flyout';
 
-const mockSanitizeDashboard = jest.fn();
-jest.mock('../../dashboard_app/top_nav/share/export_json/sanitize_dashboard', () => ({
-  sanitizeDashboard: (...args: unknown[]) => mockSanitizeDashboard(...args),
-}));
+const mockSanitizeDashboard = vi.fn();
+vi.mock('../../dashboard_app/top_nav/share/export_json/sanitize_dashboard', () => {
+      const mocked = {
+      sanitizeDashboard: (...args: unknown[]) => mockSanitizeDashboard(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddDanger = jest.fn();
-const mockHttpPost = jest.fn();
-jest.mock('../../services/kibana_services', () => ({
-  coreServices: {
-    http: { post: (...args: unknown[]) => mockHttpPost(...args) },
-    notifications: { toasts: { addDanger: (...args: unknown[]) => mockAddDanger(...args) } },
-    application: {
-      getUrlForApp: () => '/app/management/kibana/objects',
-    },
-  },
-}));
+const mockAddDanger = vi.fn();
+const mockHttpPost = vi.fn();
+vi.mock('../../services/kibana_services', () => {
+      const mocked = {
+      coreServices: {
+        http: { post: (...args: unknown[]) => mockHttpPost(...args) },
+        notifications: { toasts: { addDanger: (...args: unknown[]) => mockAddDanger(...args) } },
+        application: {
+          getUrlForApp: () => '/app/management/kibana/objects',
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SANITIZED_STATE = { title: 'My Dashboard', panels: [], description: '' };
 const UNSANITIZED_STATE = { ...SANITIZED_STATE, property_removed_by_sanitizer: 'remove me' };
@@ -37,7 +45,7 @@ const VALID_FILE = new File([JSON.stringify(UNSANITIZED_STATE)], 'dashboard.json
   type: 'application/json',
 });
 
-const renderFlyout = (onImportSuccess = jest.fn(), closeFlyout = jest.fn()) =>
+const renderFlyout = (onImportSuccess = vi.fn(), closeFlyout = vi.fn()) =>
   render(
     <I18nProvider>
       <ImportDashboardJsonFlyout
@@ -57,15 +65,15 @@ const pickFile = async (file: File) => {
 
 describe('ImportDashboardJsonFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSanitizeDashboard.mockResolvedValue({ data: SANITIZED_STATE, warnings: [] });
     mockHttpPost.mockResolvedValue({ id: 'new-id', data: SANITIZED_STATE });
   });
 
   it('adapts dashboard sanitization, creation, and success behavior', async () => {
     const user = userEvent.setup();
-    const onImportSuccess = jest.fn();
-    const closeFlyout = jest.fn();
+    const onImportSuccess = vi.fn();
+    const closeFlyout = vi.fn();
     renderFlyout(onImportSuccess, closeFlyout);
     await pickFile(VALID_FILE);
     await waitFor(() =>

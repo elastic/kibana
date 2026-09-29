@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   applicationLinksUpdater,
   type ApplicationLinksUpdateParams,
@@ -16,13 +19,16 @@ import type { ExperimentalFeatures, SecurityPageName } from '../../../common';
 import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 
-jest.mock('../../common/lib/capabilities', () => ({
-  hasCapabilities: jest.fn(),
-  existCapabilities: jest.fn(),
-}));
+vi.mock('../../common/lib/capabilities', () => {
+      const mocked = {
+      hasCapabilities: vi.fn(),
+      existCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHasCapabilities = hasCapabilities as jest.Mock;
-const mockExistCapabilities = existCapabilities as jest.Mock;
+const mockHasCapabilities = hasCapabilities as Mock;
+const mockExistCapabilities = existCapabilities as Mock;
 
 // Allow access to private method just for testing
 const appLinks = applicationLinksUpdater as unknown as {
@@ -42,19 +48,19 @@ describe('ApplicationLinksUpdater', () => {
     capabilities: {} as Capabilities,
     experimentalFeatures: {} as ExperimentalFeatures,
     uiSettingsClient: {
-      get: jest.fn().mockReturnValue(true),
+      get: vi.fn().mockReturnValue(true),
     } as unknown as IUiSettingsClient,
     license: {
-      hasAtLeast: jest.fn().mockReturnValue(true),
+      hasAtLeast: vi.fn().mockReturnValue(true),
     } as unknown as ILicense,
     upselling: {
-      isPageUpsellable: jest.fn().mockReturnValue(false),
+      isPageUpsellable: vi.fn().mockReturnValue(false),
     } as unknown as UpsellingService,
     ...overrides,
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockHasCapabilities.mockReturnValue(true);
     mockExistCapabilities.mockReturnValue(true);
@@ -85,7 +91,7 @@ describe('ApplicationLinksUpdater', () => {
       const links: AppLinkItems = [{ ...link, capabilities: ['advanced_access'] }];
 
       const params = createMockParams({
-        upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
+        upselling: { isPageUpsellable: vi.fn(() => true) } as unknown as UpsellingService,
       });
 
       const result = appLinks.processAppLinks(links, params);
@@ -99,8 +105,8 @@ describe('ApplicationLinksUpdater', () => {
       ];
 
       const params = createMockParams({
-        license: { hasAtLeast: jest.fn(() => false) } as unknown as ILicense,
-        upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
+        license: { hasAtLeast: vi.fn(() => false) } as unknown as ILicense,
+        upselling: { isPageUpsellable: vi.fn(() => true) } as unknown as UpsellingService,
       });
 
       const result = appLinks.processAppLinks(links, params);
@@ -115,7 +121,7 @@ describe('ApplicationLinksUpdater', () => {
       const links: AppLinkItems = [{ ...link, capabilities: ['advanced_access'] }];
 
       const params = createMockParams({
-        upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
+        upselling: { isPageUpsellable: vi.fn(() => true) } as unknown as UpsellingService,
       });
 
       const result = appLinks.processAppLinks(links, params);
@@ -127,7 +133,7 @@ describe('ApplicationLinksUpdater', () => {
       const links: AppLinkItems = [{ ...link, uiSettingRequired: 'showBeta' }];
 
       const params = createMockParams({
-        uiSettingsClient: { get: jest.fn(() => false) } as unknown as IUiSettingsClient,
+        uiSettingsClient: { get: vi.fn(() => false) } as unknown as IUiSettingsClient,
       });
 
       const result = appLinks.processAppLinks(links, params);
@@ -178,7 +184,7 @@ describe('ApplicationLinksUpdater', () => {
       ];
 
       const params = createMockParams({
-        upselling: { isPageUpsellable: jest.fn(() => false) } as unknown as UpsellingService,
+        upselling: { isPageUpsellable: vi.fn(() => false) } as unknown as UpsellingService,
       });
 
       const result = appLinks.processAppLinks(links, params);

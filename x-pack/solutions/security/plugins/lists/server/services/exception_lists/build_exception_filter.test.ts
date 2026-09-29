@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type {
   EntryList,
   EntryMatchAny,
@@ -77,14 +79,14 @@ const generateDashIpRanges = (count: number): ListItemSchema[] =>
 
 const createIpRangeListClientMock = (dashCount: number): ListClient => {
   const freshListClient = getListClientMock();
-  (freshListClient.findAllListItems as jest.Mock).mockResolvedValue({
+  (freshListClient.findAllListItems as Mock).mockResolvedValue({
     data: generateDashIpRanges(dashCount),
     total: dashCount,
   });
   // This total stays below MAXIMUM_SMALL_VALUE_LIST_SIZE. So the item passes
   // filterOutUnprocessableValueLists. buildListClause then rejects the item with the
   // dash-size gate. This forces the item to the createOrClauses path (unprocessableExceptionItems).
-  (freshListClient.findListItem as jest.Mock).mockResolvedValue({
+  (freshListClient.findListItem as Mock).mockResolvedValue({
     ...getFoundListItemSchemaMock(),
     total: 1,
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, screen } from '@testing-library/react';
@@ -20,19 +23,25 @@ import type { AppDependencies, SearchConnectorsPluginStartDependencies } from '.
 import type { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
 import { ConnectorStats } from './connector_stats';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    createHref: ({ pathname }: { pathname: string }) => pathname,
-  }),
-}));
-jest.mock('./connector_detail', () => ({
-  ConnectorDetailTabId: {
-    CONFIGURATION: 'configuration',
-    DOCUMENTS: 'documents',
-  },
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({
+        createHref: ({ pathname }: { pathname: string }) => pathname,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector_detail', () => {
+      const mocked = {
+      ConnectorDetailTabId: {
+        CONFIGURATION: 'configuration',
+        DOCUMENTS: 'documents',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const CONNECTOR_ID = '65b72bc6-823e-4278-8f21-9864c8a93046';
 const AGENT_ID = 'b03f48ce-7150-11f1-b0f6-56955dd08213';
@@ -50,10 +59,10 @@ const agentlessOverview = {
   policy: { id: 'policy-id', name: 'policy-name' },
 } as unknown as GetConnectorAgentlessPolicyApiResponse;
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 describe('ConnectorStats', () => {
-  const navigate = jest.fn();
+  const navigate = vi.fn();
 
   const appContext = {
     connectorTypes: [],
@@ -67,7 +76,7 @@ describe('ConnectorStats', () => {
   } as AppDependencies;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: { http: httpServiceMock.createSetupContract() },
     } as unknown as ReturnType<typeof useKibana>);

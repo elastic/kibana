@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import type {
@@ -70,7 +72,7 @@ describe('metric dimension editor', () => {
         rows: [{ foo: 5 }],
       },
     };
-    setState = jest.fn();
+    setState = vi.fn();
     props = {
       accessor: 'foo',
       frame,
@@ -80,8 +82,8 @@ describe('metric dimension editor', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
-      addLayer: jest.fn(),
-      removeLayer: jest.fn(),
+      addLayer: vi.fn(),
+      removeLayer: vi.fn(),
       datasource: {} as DatasourcePublicAPI,
     };
     // add a div to the ref

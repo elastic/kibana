@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 import { ServiceMapGraph } from './graph';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
@@ -20,28 +22,34 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      telemetry: {
-        reportServiceMapDagreLayoutFallback: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          telemetry: {
+            reportServiceMapDagreLayoutFallback: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {},
-    share: {},
-    lens: {},
-    dataViews: {},
-    plugins: {},
-  }),
-}));
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {},
+        share: {},
+        lens: {},
+        dataViews: {},
+        plugins: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@xyflow/react', () => {
-  const original = jest.requireActual('@xyflow/react');
+vi.mock('@xyflow/react', () => {
+  const original = require('@xyflow/react');
   return {
     ...original,
     ReactFlow: ({
@@ -77,72 +85,99 @@ jest.mock('@xyflow/react', () => {
     ),
     Background: () => null,
     Panel: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-    useNodesState: jest.fn((initialNodes: ServiceMapNode[]) => [
+    useNodesState: vi.fn((initialNodes: ServiceMapNode[]) => [
       initialNodes,
-      jest.fn(),
-      jest.fn(),
+      vi.fn(),
+      vi.fn(),
     ]),
-    useEdgesState: jest.fn((initialEdges: unknown[]) => [initialEdges, jest.fn(), jest.fn()]),
-    useReactFlow: jest.fn(() => ({
-      fitView: jest.fn(),
-      zoomIn: jest.fn(),
-      zoomOut: jest.fn(),
+    useEdgesState: vi.fn((initialEdges: unknown[]) => [initialEdges, vi.fn(), vi.fn()]),
+    useReactFlow: vi.fn(() => ({
+      fitView: vi.fn(),
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
     })),
   };
 });
 
-jest.mock('../../shared/service_map/layout', () => ({
-  applyDagreLayout: jest.fn((nodes: ServiceMapNode[]) => nodes),
-  applyServiceMapLayout: jest.fn((nodes: unknown) => nodes),
-}));
+vi.mock('../../shared/service_map/layout', () => {
+      const mocked = {
+      applyDagreLayout: vi.fn((nodes: ServiceMapNode[]) => nodes),
+      applyServiceMapLayout: vi.fn((nodes: unknown) => nodes),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_edge_highlighting', () => ({
-  useEdgeHighlighting: () => ({
-    applyEdgeHighlighting: jest.fn((edges: unknown) => edges),
-  }),
-}));
+vi.mock('./use_edge_highlighting', () => {
+      const mocked = {
+      useEdgeHighlighting: () => ({
+        applyEdgeHighlighting: vi.fn((edges: unknown) => edges),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_reduced_motion', () => ({
-  useReducedMotion: () => ({
-    getAnimationDuration: jest.fn((duration: number) => duration),
-  }),
-}));
+vi.mock('./use_reduced_motion', () => {
+      const mocked = {
+      useReducedMotion: () => ({
+        getAnimationDuration: vi.fn((duration: number) => duration),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_keyboard_navigation', () => ({
-  useKeyboardNavigation: () => ({
-    screenReaderAnnouncement: '',
-  }),
-}));
+vi.mock('./use_keyboard_navigation', () => {
+      const mocked = {
+      useKeyboardNavigation: () => ({
+        screenReaderAnnouncement: '',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_map_minimap', () => ({
-  ServiceMapMinimap: () => null,
-}));
+vi.mock('./service_map_minimap', () => {
+      const mocked = {
+      ServiceMapMinimap: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_map_legend', () => ({
-  ServiceMapLegend: () => null,
-}));
+vi.mock('./service_map_legend', () => {
+      const mocked = {
+      ServiceMapLegend: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_map_options_panel', () => ({
-  ServiceMapOptionsPanel: () => null,
-  ServiceMapOptionsPanelToggle: () => null,
-}));
+vi.mock('./service_map_options_panel', () => {
+      const mocked = {
+      ServiceMapOptionsPanel: () => null,
+      ServiceMapOptionsPanelToggle: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_service_map_alerts_tab_href', () =>
-  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+vi.mock('./use_service_map_alerts_tab_href', async () =>
+  (await vi.importActual('./use_service_map_alerts_tab_href.test_mock'))
 );
 
-jest.mock('./popover', () => ({
-  MapPopover: ({ selectedNode }: { selectedNode: ServiceMapNode | null }) =>
-    selectedNode ? (
-      <div data-test-subj="serviceMapPopoverMock">{selectedNode.data.label}</div>
-    ) : null,
-}));
+vi.mock('./popover', () => {
+      const mocked = {
+      MapPopover: ({ selectedNode }: { selectedNode: ServiceMapNode | null }) =>
+        selectedNode ? (
+          <div data-test-subj="serviceMapPopoverMock">{selectedNode.data.label}</div>
+        ) : null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/service_flyout', () => ({
-  ServiceFlyout: ({ service }: { service: { name: string } }) => (
-    <div data-test-subj="serviceFlyoutMock">{service.name}</div>
-  ),
-}));
+vi.mock('../../shared/service_flyout', () => {
+      const mocked = {
+      ServiceFlyout: ({ service }: { service: { name: string } }) => (
+        <div data-test-subj="serviceFlyoutMock">{service.name}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const serviceNode: ServiceMapNode = {
   id: 'opbeans-java',

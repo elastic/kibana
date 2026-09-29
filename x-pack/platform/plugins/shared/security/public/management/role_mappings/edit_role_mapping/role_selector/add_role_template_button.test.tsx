@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -15,7 +17,7 @@ describe('AddRoleTemplateButton', () => {
   it('renders a warning instead of a button if all script types are disabled', () => {
     const wrapper = shallowWithIntl(
       <AddRoleTemplateButton
-        onClick={jest.fn()}
+        onClick={vi.fn()}
         canUseInlineScripts={false}
         canUseStoredScripts={false}
       />
@@ -44,7 +46,7 @@ describe('AddRoleTemplateButton', () => {
   });
 
   it(`asks for an inline template to be created if both script types are enabled`, () => {
-    const onClickHandler = jest.fn();
+    const onClickHandler = vi.fn();
     const wrapper = mountWithIntl(
       <AddRoleTemplateButton
         onClick={onClickHandler}
@@ -58,7 +60,7 @@ describe('AddRoleTemplateButton', () => {
   });
 
   it(`asks for a stored template to be created if inline scripts are disabled`, () => {
-    const onClickHandler = jest.fn();
+    const onClickHandler = vi.fn();
     const wrapper = mountWithIntl(
       <AddRoleTemplateButton
         onClick={onClickHandler}

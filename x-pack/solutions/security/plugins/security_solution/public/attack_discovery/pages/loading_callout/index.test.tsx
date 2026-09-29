@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -14,25 +17,34 @@ import { LoadingCallout } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { WorkflowExecutionDetailsFlyout } from './workflow_execution_details_flyout';
 
-jest.mock('@kbn/react-kibana-context-theme', () => ({
-  useKibanaIsDarkMode: jest.fn(() => false),
-}));
+vi.mock('@kbn/react-kibana-context-theme', () => {
+      const mocked = {
+      useKibanaIsDarkMode: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_dismiss_attack_discovery_generations', () => ({
-  useDismissAttackDiscoveryGeneration: jest.fn(() => ({
-    mutateAsync: jest.fn(),
-  })),
-}));
+vi.mock('../use_dismiss_attack_discovery_generations', () => {
+      const mocked = {
+      useDismissAttackDiscoveryGeneration: vi.fn(() => ({
+        mutateAsync: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_execution_details_flyout', () => ({
-  WorkflowExecutionDetailsFlyout: jest.fn(() => (
-    <div data-test-subj="workflowExecutionDetailsFlyout" />
-  )),
-}));
+vi.mock('./workflow_execution_details_flyout', () => {
+      const mocked = {
+      WorkflowExecutionDetailsFlyout: vi.fn(() => (
+        <div data-test-subj="workflowExecutionDetailsFlyout" />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-const MockWorkflowExecutionDetailsFlyout = WorkflowExecutionDetailsFlyout as jest.MockedFunction<
+const MockWorkflowExecutionDetailsFlyout = WorkflowExecutionDetailsFlyout as MockedFunction<
   typeof WorkflowExecutionDetailsFlyout
 >;
 
@@ -43,10 +55,10 @@ describe('LoadingCallout', () => {
     localStorageAttackDiscoveryMaxAlerts: '50',
   };
 
-  const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+  const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock useKibana with featureFlags
     mockUseKibana.mockReturnValue({
       services: {
@@ -58,13 +70,13 @@ describe('LoadingCallout', () => {
           },
         },
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(false),
+          useBooleanValue: vi.fn().mockReturnValue(false),
         },
         uiSettings: {
-          get: jest.fn().mockReturnValue(false),
+          get: vi.fn().mockReturnValue(false),
         },
         http: {},
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });
@@ -143,13 +155,13 @@ describe('LoadingCallout', () => {
           },
         },
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(true),
+          useBooleanValue: vi.fn().mockReturnValue(true),
         },
         uiSettings: {
-          get: jest.fn().mockReturnValue(true),
+          get: vi.fn().mockReturnValue(true),
         },
         http: {},
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -212,13 +224,13 @@ describe('LoadingCallout', () => {
           },
         },
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(true),
+          useBooleanValue: vi.fn().mockReturnValue(true),
         },
         uiSettings: {
-          get: jest.fn().mockReturnValue(true),
+          get: vi.fn().mockReturnValue(true),
         },
         http: {},
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -289,10 +301,10 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
           http: {},
         },
@@ -332,13 +344,13 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: vi.fn().mockReturnValue(false),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
           http: {},
-          telemetry: { reportEvent: jest.fn() },
+          telemetry: { reportEvent: vi.fn() },
         },
       } as unknown as ReturnType<typeof useKibana>);
 
@@ -365,13 +377,13 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: vi.fn().mockReturnValue(false),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
           http: {},
-          telemetry: { reportEvent: jest.fn() },
+          telemetry: { reportEvent: vi.fn() },
         },
       } as unknown as ReturnType<typeof useKibana>);
 
@@ -404,13 +416,13 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
           http: {},
-          telemetry: { reportEvent: jest.fn() },
+          telemetry: { reportEvent: vi.fn() },
         },
       } as unknown as ReturnType<typeof useKibana>);
 
@@ -428,7 +440,7 @@ describe('LoadingCallout', () => {
     });
 
     it('reads the feature flag with a true default (ON by default)', async () => {
-      const useBooleanValue = jest.fn().mockReturnValue(true);
+      const useBooleanValue = vi.fn().mockReturnValue(true);
       mockUseKibana.mockReturnValue({
         services: {
           application: {
@@ -442,10 +454,10 @@ describe('LoadingCallout', () => {
             useBooleanValue,
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
           http: {},
-          telemetry: { reportEvent: jest.fn() },
+          telemetry: { reportEvent: vi.fn() },
         },
       } as unknown as ReturnType<typeof useKibana>);
 
@@ -474,13 +486,13 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: vi.fn().mockReturnValue(false),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
           http: {},
-          telemetry: { reportEvent: jest.fn() },
+          telemetry: { reportEvent: vi.fn() },
         },
       } as unknown as ReturnType<typeof useKibana>);
 
@@ -508,10 +520,10 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
           http: {},
         },
@@ -540,10 +552,10 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
           http: {},
         },
@@ -572,13 +584,13 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
           http: {},
-          telemetry: { reportEvent: jest.fn() },
+          telemetry: { reportEvent: vi.fn() },
         },
       } as unknown as ReturnType<typeof useKibana>);
 
@@ -608,12 +620,12 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           http: {},
-          telemetry: { reportEvent: jest.fn() },
+          telemetry: { reportEvent: vi.fn() },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
         },
       } as unknown as ReturnType<typeof useKibana>);
@@ -621,7 +633,7 @@ describe('LoadingCallout', () => {
 
     it('calls onViewDetails with the executionUuid when the Details button is clicked', async () => {
       enableWorkflows();
-      const onViewDetails = jest.fn();
+      const onViewDetails = vi.fn();
 
       render(
         <TestProviders>
@@ -643,7 +655,7 @@ describe('LoadingCallout', () => {
 
     it('does NOT render the nested flyout when onViewDetails is provided', async () => {
       enableWorkflows();
-      const onViewDetails = jest.fn();
+      const onViewDetails = vi.fn();
 
       render(
         <TestProviders>
@@ -683,12 +695,12 @@ describe('LoadingCallout', () => {
               },
             },
           },
-          featureFlags: { useBooleanValue: jest.fn().mockReturnValue(true) },
+          featureFlags: { useBooleanValue: vi.fn().mockReturnValue(true) },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
           http: {},
-          telemetry: { reportEvent: jest.fn() },
+          telemetry: { reportEvent: vi.fn() },
         },
       } as unknown as ReturnType<typeof useKibana>);
     };

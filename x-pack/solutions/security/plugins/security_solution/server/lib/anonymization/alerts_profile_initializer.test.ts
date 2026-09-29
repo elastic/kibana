@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ALERTS_DATA_VIEW_TARGET_TYPE,
@@ -15,10 +17,10 @@ import { getDefaultAlertFieldRules } from './default_field_rules';
 
 describe('securityAlertsProfileInitializer', () => {
   const logger = loggingSystemMock.createLogger();
-  const findProfileByTarget = jest.fn();
-  const createProfile = jest.fn();
-  const ensureSalt = jest.fn().mockResolvedValue('salt-value');
-  const checkDataViewExists = jest.fn().mockResolvedValue(true);
+  const findProfileByTarget = vi.fn();
+  const createProfile = vi.fn();
+  const ensureSalt = vi.fn().mockResolvedValue('salt-value');
+  const checkDataViewExists = vi.fn().mockResolvedValue(true);
 
   const createContext = (namespace = 'default') => ({
     namespace,
@@ -34,7 +36,7 @@ describe('securityAlertsProfileInitializer', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     checkDataViewExists.mockResolvedValue(true);
   });
 

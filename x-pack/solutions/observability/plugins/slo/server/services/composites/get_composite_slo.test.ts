@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CompositeSLOMemberWithSummary, CompositeSLOSummary } from '@kbn/slo-schema';
 import { createSLO, createAPMTransactionErrorRateIndicator } from '../fixtures/slo';
@@ -77,15 +80,15 @@ function mockPersistedCompositeSummary(
   summary: CompositeSLOSummary,
   members?: CompositeSLOMemberWithSummary[]
 ) {
-  return jest
+  return vi
     .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
     .mockResolvedValue(new Map([[compositeId, { summary, members }]]));
 }
 
 describe('GetCompositeSLO', () => {
-  let mockCompositeRepo: jest.Mocked<CompositeSLORepository>;
-  let mockSloRepo: jest.Mocked<SLODefinitionRepository>;
-  let mockSummaryClient: jest.Mocked<SummaryClient>;
+  let mockCompositeRepo: Mocked<CompositeSLORepository>;
+  let mockSloRepo: Mocked<SLODefinitionRepository>;
+  let mockSummaryClient: Mocked<SummaryClient>;
   let getCompositeSLO: GetCompositeSLO;
 
   beforeEach(() => {
@@ -125,7 +128,7 @@ describe('GetCompositeSLO', () => {
           burnRateWindows: DEFAULT_BURN_RATE_WINDOWS,
         },
       ]);
-      jest
+      vi
         .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
         .mockResolvedValue(new Map());
 

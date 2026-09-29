@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { RISK_SCORE_PREVIEW_URL } from '../../../../../common/constants';
@@ -23,8 +26,8 @@ import type {
   SecuritySolutionRequestHandlerContextMock,
 } from '../../../detection_engine/routes/__mocks__/request_context';
 
-jest.mock('../risk_score_service');
-jest.mock('../get_risk_inputs_index');
+vi.mock('../risk_score_service');
+vi.mock('../get_risk_inputs_index');
 
 describe('POST risk_engine/preview route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -38,7 +41,7 @@ describe('POST risk_engine/preview route', () => {
     logger = loggerMock.create();
     ({ clients, context } = requestContextMock.createTools());
     mockRiskScoreService = riskScoreServiceMock.create();
-    (getRiskInputsIndex as jest.Mock).mockImplementationOnce(
+    (getRiskInputsIndex as Mock).mockImplementationOnce(
       async ({ dataViewId }: { dataViewId: string }) => ({
         index: dataViewId,
         runtimeMappings: {},
@@ -46,14 +49,14 @@ describe('POST risk_engine/preview route', () => {
     );
 
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
-    (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
+    (riskScoreServiceFactory as Mock).mockReturnValue(mockRiskScoreService);
 
     riskScorePreviewRoute(server.router, logger);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   const buildRequest = (body: object = {}) =>
@@ -90,7 +93,7 @@ describe('POST risk_engine/preview route', () => {
 
       it('uses an unknown dataview as index pattern', async () => {
         const request = buildRequest({ data_view_id: 'unknown-dataview' });
-        (getRiskInputsIndex as jest.Mock).mockResolvedValue({
+        (getRiskInputsIndex as Mock).mockResolvedValue({
           index: 'unknown-dataview',
           runtimeMappings: {},
         });

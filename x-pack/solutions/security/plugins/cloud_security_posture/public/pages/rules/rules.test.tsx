@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import Chance from 'chance';
 import { Rules } from '.';
@@ -22,16 +25,22 @@ import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_i
 import * as TEST_SUBJECTS from './test_subjects';
 import { SECURITY_FEATURE_ID } from '../../test/constants';
 
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: () => null,
-}));
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_is_subscription_status_valid');
-jest.mock('../../common/navigation/use_csp_integration_link');
-jest.mock('../benchmarks/use_csp_benchmark_integrations', () => ({
-  useCspBenchmarkIntegrationsV2: jest.fn(),
-}));
+vi.mock('@kbn/app-header', () => {
+      const mocked = {
+      AppHeader: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
+vi.mock('../../common/api/use_license_management_locator_api');
+vi.mock('../../common/hooks/use_is_subscription_status_valid');
+vi.mock('../../common/navigation/use_csp_integration_link');
+vi.mock('../benchmarks/use_csp_benchmark_integrations', () => {
+      const mocked = {
+      useCspBenchmarkIntegrationsV2: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const chance = new Chance();
 
@@ -69,8 +78,8 @@ const getTestComponent =
 describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    vi.clearAllMocks();
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -87,14 +96,14 @@ describe('<Rules />', () => {
       })
     );
 
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+    (useLicenseManagementLocatorApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
       })
     );
 
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as Mock).mockImplementation(() => chance.url());
   });
 
   it('calls Benchmark API', async () => {
@@ -104,7 +113,7 @@ describe('<Rules />', () => {
       status: 'loading',
     });
 
-    (useCspBenchmarkIntegrationsV2 as jest.Mock).mockReturnValue(result);
+    (useCspBenchmarkIntegrationsV2 as Mock).mockReturnValue(result);
 
     render(<Component />);
 
@@ -134,7 +143,7 @@ describe('<Rules />', () => {
       },
     });
 
-    (useCspBenchmarkIntegrationsV2 as jest.Mock).mockReturnValue(result);
+    (useCspBenchmarkIntegrationsV2 as Mock).mockReturnValue(result);
 
     render(<Component />);
 

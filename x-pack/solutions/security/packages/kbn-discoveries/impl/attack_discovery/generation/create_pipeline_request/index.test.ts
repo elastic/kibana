@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart, FakeRawRequest, KibanaRequest, Logger } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -13,7 +15,7 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 import { createPipelineRequest, PIPELINE_API_KEY_EXPIRATION } from '.';
 import { DEFAULT_PIPELINE_TIMEOUT_MS } from '../run_manual_orchestration';
 
-const grantAsInternalUser = jest.fn();
+const grantAsInternalUser = vi.fn();
 
 const createCoreStart = (): CoreStart =>
   ({
@@ -28,10 +30,10 @@ const createCoreStart = (): CoreStart =>
 
 const createLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 const createInteractiveRequest = (): KibanaRequest =>
@@ -78,7 +80,7 @@ describe('createPipelineRequest', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     grantAsInternalUser.mockResolvedValue({
       api_key: 'granted-secret',

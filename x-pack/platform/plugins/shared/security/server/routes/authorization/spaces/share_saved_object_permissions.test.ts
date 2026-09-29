@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -17,18 +20,18 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../../typ
 import { routeDefinitionParamsMock } from '../../index.mock';
 
 describe('Share Saved Object Permissions', () => {
-  let router: jest.Mocked<SecurityRouter>;
+  let router: Mocked<SecurityRouter>;
   let routeParamsMock: DeeplyMockedKeys<RouteDefinitionParams>;
 
   const mockContext = {
     licensing: {
-      license: { check: jest.fn().mockReturnValue({ state: 'valid' }) },
+      license: { check: vi.fn().mockReturnValue({ state: 'valid' }) },
     },
   } as unknown as SecurityRequestHandlerContext;
 
   beforeEach(() => {
     routeParamsMock = routeDefinitionParamsMock.create();
-    router = routeParamsMock.router as jest.Mocked<SecurityRouter>;
+    router = routeParamsMock.router as Mocked<SecurityRouter>;
 
     defineShareSavedObjectPermissionRoutes(routeParamsMock);
   });
@@ -52,7 +55,7 @@ describe('Share Saved Object Permissions', () => {
     });
 
     it('returns `not found` when security is diabled', async () => {
-      routeParamsMock.license.isEnabled = jest.fn().mockReturnValue(false);
+      routeParamsMock.license.isEnabled = vi.fn().mockReturnValue(false);
 
       const request = httpServerMock.createKibanaRequest({
         query: {
@@ -70,7 +73,7 @@ describe('Share Saved Object Permissions', () => {
     });
 
     it('returns `true` when the user is authorized globally', async () => {
-      const checkPrivilegesWithRequest = jest.fn().mockResolvedValue({ hasAllRequested: true });
+      const checkPrivilegesWithRequest = vi.fn().mockResolvedValue({ hasAllRequested: true });
 
       routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue({
         globally: checkPrivilegesWithRequest,
@@ -100,7 +103,7 @@ describe('Share Saved Object Permissions', () => {
     });
 
     it('returns `false` when the user is not authorized globally', async () => {
-      const checkPrivilegesWithRequest = jest.fn().mockResolvedValue({ hasAllRequested: false });
+      const checkPrivilegesWithRequest = vi.fn().mockResolvedValue({ hasAllRequested: false });
 
       routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue({
         globally: checkPrivilegesWithRequest,

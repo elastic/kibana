@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,13 +20,16 @@ const defaultProps: ControlsProps = {
   showFitView: true,
 };
 
-jest.mock('@xyflow/react', () => ({
-  useStore: jest.fn(),
-  useReactFlow: jest.fn(),
-}));
+vi.mock('@xyflow/react', () => {
+      const mocked = {
+      useStore: vi.fn(),
+      useReactFlow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useReactFlowMock = useReactFlow as jest.Mock;
-const useStoreMock = useStore as jest.Mock;
+const useReactFlowMock = useReactFlow as Mock;
+const useStoreMock = useStore as Mock;
 
 const renderWithProviders = (props: ControlsProps = defaultProps) => {
   return render(
@@ -36,16 +42,16 @@ const renderWithProviders = (props: ControlsProps = defaultProps) => {
 describe('Controls', () => {
   beforeEach(() => {
     useReactFlowMock.mockReturnValue({
-      zoomIn: jest.fn(),
-      zoomOut: jest.fn(),
-      fitView: jest.fn(),
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
+      fitView: vi.fn(),
     });
 
     useStoreMock.mockReturnValue({ minZoomReached: false, maxZoomReached: false });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('container', () => {
@@ -74,7 +80,7 @@ describe('Controls', () => {
     });
 
     it('calls onZoomIn when zoom in button is clicked', () => {
-      const onZoomIn = jest.fn();
+      const onZoomIn = vi.fn();
       const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomIn });
 
       fireEvent.click(getByLabelText('Zoom in'));
@@ -84,7 +90,7 @@ describe('Controls', () => {
     });
 
     it('calls onZoomOut when zoom out button is clicked', () => {
-      const onZoomOut = jest.fn();
+      const onZoomOut = vi.fn();
       const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomOut });
 
       fireEvent.click(getByLabelText('Zoom out'));
@@ -124,7 +130,7 @@ describe('Controls', () => {
     });
 
     it('calls onFitView when fit view button is clicked', () => {
-      const onFitView = jest.fn();
+      const onFitView = vi.fn();
       const fitViewOptions = { duration: 200 };
       const { getByLabelText } = renderWithProviders({
         ...defaultProps,
@@ -199,7 +205,7 @@ describe('Controls', () => {
     });
 
     it('calls onCenter and centers graph on selected node IDs when center button is clicked', () => {
-      const onCenter = jest.fn();
+      const onCenter = vi.fn();
       const fitViewOptions = { duration: 200 };
       const { getByLabelText } = renderWithProviders({
         ...defaultProps,
@@ -218,7 +224,7 @@ describe('Controls', () => {
     });
 
     it('calls onCenter and centers graph on selected, non-empty node IDs when center button is clicked', () => {
-      const onCenter = jest.fn();
+      const onCenter = vi.fn();
       const fitViewOptions = { duration: 200 };
       const { getByLabelText } = renderWithProviders({
         ...defaultProps,

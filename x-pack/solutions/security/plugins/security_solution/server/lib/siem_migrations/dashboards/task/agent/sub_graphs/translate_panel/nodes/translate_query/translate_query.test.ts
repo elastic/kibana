@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getTranslateQueryNode } from './translate_query';
 import { formatResourceWithSampledValues } from '@kbn/agent-builder-genai-utils';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
@@ -15,17 +18,23 @@ import {
   type GetTranslateSplToEsqlParams,
 } from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
 
-jest.mock('../../../../../../../common/task/agent/helpers/translate_spl_to_esql', () => ({
-  getTranslateSplToEsql: jest.fn(),
-  TASK_DESCRIPTION: { migrate_dashboard: 'Migrate Splunk dashboard panel to Elastic' },
-}));
+vi.mock('../../../../../../../common/task/agent/helpers/translate_spl_to_esql', () => {
+      const mocked = {
+      getTranslateSplToEsql: vi.fn(),
+      TASK_DESCRIPTION: { migrate_dashboard: 'Migrate Splunk dashboard panel to Elastic' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  formatResourceWithSampledValues: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      formatResourceWithSampledValues: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetTranslateSplToEsql = jest.mocked(getTranslateSplToEsql);
-const mockFormatResourceWithSampledValues = jest.mocked(formatResourceWithSampledValues);
+const mockGetTranslateSplToEsql = vi.mocked(getTranslateSplToEsql);
+const mockFormatResourceWithSampledValues = vi.mocked(formatResourceWithSampledValues);
 
 const buildMockEsqlQuery = (indexPattern: string) =>
   `FROM ${indexPattern}\n| WHERE event.category == "process"\n| STATS count = COUNT(*) BY process.name\n| SORT count DESC`;
@@ -35,7 +44,7 @@ const buildMockSummary = (indexPattern: string) =>
 
 const mockParams = {
   esqlKnowledgeBase: {},
-  logger: { warn: jest.fn() },
+  logger: { warn: vi.fn() },
 } as unknown as GetTranslateSplToEsqlParams;
 
 const baseState = {
@@ -46,12 +55,12 @@ const baseState = {
 } as TranslateDashboardPanelState;
 
 describe('getTranslateQueryNode', () => {
-  let mockTranslateFn: jest.Mock;
+  let mockTranslateFn: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockTranslateFn = jest.fn().mockResolvedValue({
+    mockTranslateFn = vi.fn().mockResolvedValue({
       esqlQuery: buildMockEsqlQuery(TRANSLATION_INDEX_PATTERN),
       comments: [
         {

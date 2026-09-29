@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
@@ -63,8 +65,8 @@ describe('FilterPopover', () => {
   const defaultProps = {
     title: 'Sort by',
     isOpen: false,
-    onToggle: jest.fn(),
-    onClose: jest.fn(),
+    onToggle: vi.fn(),
+    onClose: vi.fn(),
     children: <div>Popover content</div>,
   };
 
@@ -101,7 +103,7 @@ describe('FilterPopover', () => {
   });
 
   it('calls `onToggle` when the button is clicked', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     render(<FilterPopover {...defaultProps} onToggle={onToggle} />);
 
     fireEvent.click(screen.getByRole('button', { name: /sort by/i }));

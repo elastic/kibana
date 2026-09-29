@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationMap,
@@ -18,7 +20,7 @@ import { mergeSavedObjectMigrations, mergeSavedObjectMigrationMaps } from './mer
 describe('mergeSavedObjectMigrations', () => {
   test('merges migration parameters with a migration function', () => {
     // @ts-expect-error
-    expect(mergeSavedObjectMigrations({ deferred: true, transform: jest.fn() }, jest.fn())).toEqual(
+    expect(mergeSavedObjectMigrations({ deferred: true, transform: vi.fn() }, vi.fn())).toEqual(
       {
         deferred: false,
         transform: expect.any(Function),
@@ -27,15 +29,15 @@ describe('mergeSavedObjectMigrations', () => {
   });
 
   test('returns a function on merging two functions', () => {
-    expect(mergeSavedObjectMigrations(jest.fn(), jest.fn())).toBeInstanceOf(Function);
+    expect(mergeSavedObjectMigrations(vi.fn(), vi.fn())).toBeInstanceOf(Function);
   });
 
   test('merges two deferred migrations', () => {
     expect(
       mergeSavedObjectMigrations(
         // @ts-expect-error
-        { deferred: true, transform: jest.fn() },
-        { deferred: true, transform: jest.fn() }
+        { deferred: true, transform: vi.fn() },
+        { deferred: true, transform: vi.fn() }
       )
     ).toEqual({
       deferred: true,
@@ -46,8 +48,8 @@ describe('mergeSavedObjectMigrations', () => {
   test('merges two non-deferred migrations', () => {
     expect(
       mergeSavedObjectMigrations(
-        { deferred: false, transform: jest.fn() },
-        { deferred: false, transform: jest.fn() }
+        { deferred: false, transform: vi.fn() },
+        { deferred: false, transform: vi.fn() }
       )
     ).toEqual({
       deferred: false,
@@ -59,8 +61,8 @@ describe('mergeSavedObjectMigrations', () => {
     expect(
       mergeSavedObjectMigrations(
         // @ts-expect-error
-        { deferred: true, transform: jest.fn() },
-        { deferred: false, transform: jest.fn() }
+        { deferred: true, transform: vi.fn() },
+        { deferred: false, transform: vi.fn() }
       )
     ).toEqual({
       deferred: false,
@@ -104,7 +106,7 @@ describe('mergeSavedObjectMigrationMaps', () => {
         };
       },
     };
-    const context = { log: { info: jest.fn() } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { info: vi.fn() } } as unknown as SavedObjectMigrationContext;
 
     const result = mergeSavedObjectMigrationMaps(obj1, obj2);
     expect(

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { processJUnitReports } from './process_junit_reports';
@@ -14,23 +16,44 @@ import type { ProcessReportsParams } from './process_reports_types';
 import type { TestFailure } from './get_failures';
 import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
 
-jest.mock('./test_report', () => ({ readTestReport: jest.fn(), getRootMetadata: jest.fn() }));
-jest.mock('./get_failures', () => ({ getFailures: jest.fn() }));
-jest.mock('./report_metadata', () => ({ getReportMessageIter: jest.fn() }));
-jest.mock('./report_failure', () => ({
-  createFailureIssue: jest.fn(),
-  updateFailureIssue: jest.fn(),
-}));
-jest.mock('./report_failures_to_es', () => ({ reportFailuresToEs: jest.fn() }));
-jest.mock('./report_failures_to_file', () => ({ reportFailuresToFile: jest.fn() }));
-jest.mock('./add_messages_to_report', () => ({ addMessagesToReport: jest.fn() }));
+vi.mock('./test_report', () => {
+      const mocked = { readTestReport: vi.fn(), getRootMetadata: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_failures', () => {
+      const mocked = { getFailures: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./report_metadata', () => {
+      const mocked = { getReportMessageIter: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./report_failure', () => {
+      const mocked = {
+      createFailureIssue: vi.fn(),
+      updateFailureIssue: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./report_failures_to_es', () => {
+      const mocked = { reportFailuresToEs: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./report_failures_to_file', () => {
+      const mocked = { reportFailuresToFile: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./add_messages_to_report', () => {
+      const mocked = { addMessagesToReport: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const { readTestReport, getRootMetadata } = jest.requireMock('./test_report');
-const { getFailures } = jest.requireMock('./get_failures');
-const { getReportMessageIter } = jest.requireMock('./report_metadata');
-const { createFailureIssue, updateFailureIssue } = jest.requireMock('./report_failure');
-const { reportFailuresToEs } = jest.requireMock('./report_failures_to_es');
-const { reportFailuresToFile } = jest.requireMock('./report_failures_to_file');
+const { readTestReport, getRootMetadata } = (await vi.importMock('./test_report'));
+const { getFailures } = (await vi.importMock('./get_failures'));
+const { getReportMessageIter } = (await vi.importMock('./report_metadata'));
+const { createFailureIssue, updateFailureIssue } = (await vi.importMock('./report_failure'));
+const { reportFailuresToEs } = (await vi.importMock('./report_failures_to_es'));
+const { reportFailuresToFile } = (await vi.importMock('./report_failures_to_file'));
 
 const makeFailure = (i: number): TestFailure => ({
   classname: `suite ${i}`,
@@ -54,13 +77,13 @@ const createExistingIssue = (failure: TestFailure): ExistingFailedTestIssue => (
 const createParams = (initialExistingIssues: ExistingFailedTestIssue[] = []) => {
   const trackedIssues = [...initialExistingIssues];
   const existingIssues = {
-    loadForFailures: jest.fn(),
-    getForFailure: jest.fn((failure: TestFailure) =>
+    loadForFailures: vi.fn(),
+    getForFailure: vi.fn((failure: TestFailure) =>
       trackedIssues.find(
         (issue) => issue.classname === failure.classname && issue.name === failure.name
       )
     ),
-    addNewlyCreated: jest.fn((failure: TestFailure) => {
+    addNewlyCreated: vi.fn((failure: TestFailure) => {
       trackedIssues.push(createExistingIssue(failure));
     }),
   };
@@ -83,7 +106,7 @@ const createParams = (initialExistingIssues: ExistingFailedTestIssue[] = []) => 
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   readTestReport.mockResolvedValue({});
   getRootMetadata.mockReturnValue({});
   getReportMessageIter.mockReturnValue([]);

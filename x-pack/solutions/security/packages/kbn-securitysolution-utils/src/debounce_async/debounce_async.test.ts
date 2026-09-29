@@ -5,48 +5,50 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { debounceAsync } from './debounce_async';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 describe('debounceAsync', () => {
   it('resolves with the underlying invocation result', async () => {
-    const fn = jest.fn().mockResolvedValueOnce('first');
+    const fn = vi.fn().mockResolvedValueOnce('first');
 
     const debounced = debounceAsync(fn, 0);
     const promise = debounced();
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(await promise).toEqual('first');
   });
 
   it('resolves intermediate calls when the next invocation resolves', async () => {
-    const fn = jest.fn().mockResolvedValueOnce('first');
+    const fn = vi.fn().mockResolvedValueOnce('first');
 
     const debounced = debounceAsync(fn, 200);
     fn.mockResolvedValueOnce('second');
 
     const promise = debounced();
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     expect(await promise).toEqual('first');
 
     const promises = [debounced(), debounced()];
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(await Promise.all(promises)).toEqual(['second', 'second']);
   });
 
   it('debounces the function', async () => {
-    const fn = jest.fn().mockResolvedValueOnce('first');
+    const fn = vi.fn().mockResolvedValueOnce('first');
 
     const debounced = debounceAsync(fn, 200);
 
     debounced();
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     debounced();
     debounced();
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(fn).toHaveBeenCalledTimes(2);
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -12,15 +14,21 @@ import type { Capabilities } from '@kbn/core/public';
 import type { GraphDependencies } from './application';
 import { renderApp } from './application';
 
-jest.mock('react-dom', () => ({
-  render: jest.fn(),
-  unmountComponentAtNode: jest.fn(),
-}));
+vi.mock('react-dom', () => {
+      const mocked = {
+      render: vi.fn(),
+      unmountComponentAtNode: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Skip the licensing redirect branch — it is not what this test exercises.
-jest.mock('../common/check_license', () => ({
-  checkLicense: () => ({ showAppLink: true, enableAppLink: true }),
-}));
+vi.mock('../common/check_license', () => {
+      const mocked = {
+      checkLicense: () => ({ showAppLink: true, enableAppLink: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildDeps = ({ canSave }: { canSave: boolean }): GraphDependencies => {
   const core = coreMock.createStart();

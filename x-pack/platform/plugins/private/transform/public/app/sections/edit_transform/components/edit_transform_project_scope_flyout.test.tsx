@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,13 +21,13 @@ import { useFormField } from '../state_management/selectors/form_field';
 
 import { EditTransformProjectScopeFlyout } from './edit_transform_project_scope_flyout';
 
-jest.mock('../../../app_dependencies');
+vi.mock('../../../app_dependencies');
 
 class MockIntersectionObserver {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-  takeRecords = jest.fn(() => []);
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  takeRecords = vi.fn(() => []);
 }
 
 const originProject = {
@@ -52,7 +54,7 @@ const ProjectRoutingProbe = () => {
 };
 
 const renderFlyout = (projectRouting: string) => {
-  const onClose = jest.fn();
+  const onClose = vi.fn();
   const config = {
     ...getTransformConfigMock(),
     source: {
@@ -83,11 +85,11 @@ describe('EditTransformProjectScopeFlyout', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        fetchProjects: jest.fn().mockResolvedValue({
+        fetchProjects: vi.fn().mockResolvedValue({
           origin: originProject,
           linkedProjects: [linkedProject],
         }),
-        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+        getDefaultProjectRouting: vi.fn(() => PROJECT_ROUTING.ALL),
       },
     } as any;
   });
@@ -143,7 +145,7 @@ describe('EditTransformProjectScopeFlyout', () => {
 
   it('reverts to the default project routing verbatim', async () => {
     const appDeps = appDependencies.useAppDependencies();
-    appDeps.cps!.cpsManager!.getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ORIGIN);
+    appDeps.cps!.cpsManager!.getDefaultProjectRouting = vi.fn(() => PROJECT_ROUTING.ORIGIN);
     renderFlyout('_id:p2');
 
     await waitFor(() => {

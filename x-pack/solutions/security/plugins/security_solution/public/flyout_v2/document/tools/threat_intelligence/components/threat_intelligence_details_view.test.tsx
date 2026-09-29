@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -20,7 +22,7 @@ import { ThreatIntelligenceDetailsView } from './threat_intelligence_details_vie
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
 import { buildEventEnrichmentMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 
-jest.mock('../hooks/use_threat_intelligence_details');
+vi.mock('../hooks/use_threat_intelligence_details');
 
 const mockHit: DataTableRecord = {
   id: '1',
@@ -48,7 +50,7 @@ const renderView = () =>
 
 describe('<ThreatIntelligenceDetailsView />', () => {
   it('renders loading spinner when event data is loading', () => {
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue({
       ...defaultHookReturn,
       isEventDataLoading: true,
     });
@@ -60,7 +62,7 @@ describe('<ThreatIntelligenceDetailsView />', () => {
   });
 
   it('renders indicator match enrichments section', () => {
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue({
       ...defaultHookReturn,
       enrichments: [buildEventEnrichmentMock({ 'matched.type': ['indicator_match_rule'] })],
     });
@@ -71,7 +73,7 @@ describe('<ThreatIntelligenceDetailsView />', () => {
   });
 
   it('renders investigation time enrichments section when eventFields is non-empty', () => {
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue({
       ...defaultHookReturn,
       enrichments: [buildEventEnrichmentMock()],
       eventFields: { 'source.ip': '1.2.3.4' },
@@ -83,7 +85,7 @@ describe('<ThreatIntelligenceDetailsView />', () => {
   });
 
   it('does not render investigation time enrichments section when eventFields is empty', () => {
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue({
       ...defaultHookReturn,
       enrichments: [buildEventEnrichmentMock()],
       eventFields: {},
@@ -98,7 +100,7 @@ describe('<ThreatIntelligenceDetailsView />', () => {
     // Omit 'matched.type' entirely so groupBy places it in the undefined bucket
     // without leaving an explicit undefined value that downstream iteration would crash on.
     const { 'matched.type': _removed, ...enrichmentWithNoType } = buildEventEnrichmentMock();
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue({
       ...defaultHookReturn,
       enrichments: [enrichmentWithNoType as ReturnType<typeof buildEventEnrichmentMock>],
     });
@@ -109,7 +111,7 @@ describe('<ThreatIntelligenceDetailsView />', () => {
   });
 
   it('renders without crashing when there are no enrichments', () => {
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue(defaultHookReturn);
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue(defaultHookReturn);
 
     const { getByTestId } = renderView();
 

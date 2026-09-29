@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { of, Observable, Subject } from 'rxjs';
 import { useStreamingAiInsight, type InsightStreamEvent } from './use_streaming_ai_insight';
 
 describe('useStreamingAiInsight', () => {
   it('builds summary and context from stream events', async () => {
-    const createStream = jest.fn(() =>
+    const createStream = vi.fn(() =>
       of(
         { type: 'context', context: 'ctx' } as InsightStreamEvent,
         { type: 'chatCompletionChunk', content: 'Hello ' } as InsightStreamEvent,
@@ -35,7 +37,7 @@ describe('useStreamingAiInsight', () => {
   });
 
   it('uses the final chat completion message as summary', async () => {
-    const createStream = jest.fn(() =>
+    const createStream = vi.fn(() =>
       of<InsightStreamEvent>({ type: 'chatCompletionMessage', content: 'Final message' })
     );
 
@@ -54,7 +56,7 @@ describe('useStreamingAiInsight', () => {
   });
 
   it('captures stream errors', async () => {
-    const createStream = jest.fn(
+    const createStream = vi.fn(
       () =>
         new Observable<InsightStreamEvent>((subscriber) => {
           subscriber.error(new Error('Boom'));
@@ -77,7 +79,7 @@ describe('useStreamingAiInsight', () => {
     const subject = new Subject<InsightStreamEvent>();
     let capturedSignal: AbortSignal | undefined;
 
-    const createStream = jest.fn((signal: AbortSignal) => {
+    const createStream = vi.fn((signal: AbortSignal) => {
       capturedSignal = signal;
       return subject.asObservable();
     });

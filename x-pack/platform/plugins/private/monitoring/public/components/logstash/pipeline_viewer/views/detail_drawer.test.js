@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { DetailDrawer } from './detail_drawer';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../sparkline', () => ({
-  Sparkline: () => 'Sparkline',
-}));
+vi.mock('../../../sparkline', () => {
+      const mocked = {
+      Sparkline: () => 'Sparkline',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DetailDrawer component', () => {
   let onHide;
   let timeseriesTooltipXValueFormatter;
 
   beforeEach(() => {
-    onHide = jest.fn();
-    timeseriesTooltipXValueFormatter = jest.fn();
+    onHide = vi.fn();
+    timeseriesTooltipXValueFormatter = vi.fn();
   });
 
   test('shows vertex title', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Streams } from '@kbn/streams-schema';
 import type {
   GeneratedSignificantEventQuery,
@@ -15,7 +18,10 @@ import { persistQueries } from './persist_queries';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 
-jest.mock('uuid', () => ({ v4: () => 'generated-uuid' }));
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'generated-uuid' };
+      return { ...mocked, default: mocked };
+    });
 
 const definition = { name: 'logs.test' } as Streams.all.Definition;
 
@@ -58,11 +64,11 @@ const MOCK_DEFAULT_EXPIRES_AT = '2099-01-01T00:00:00.000Z';
 
 const createMocks = (existingLinks: QueryLink[] = []) => {
   const kiClient = {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': existingLinks }),
-    getDefaultExpiresAt: jest.fn().mockReturnValue(MOCK_DEFAULT_EXPIRES_AT),
-    bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
-    syncQueries: jest.fn().mockResolvedValue(undefined),
-    replaceStreamQueries: jest.fn(
+    getStreamToQueryLinksMap: vi.fn().mockResolvedValue({ 'logs.test': existingLinks }),
+    getDefaultExpiresAt: vi.fn().mockReturnValue(MOCK_DEFAULT_EXPIRES_AT),
+    bulk: vi.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+    syncQueries: vi.fn().mockResolvedValue(undefined),
+    replaceStreamQueries: vi.fn(
       async (
         def: Streams.all.Definition,
         getNextQueries: (links: QueryLink[]) => StreamQuery[]
@@ -70,18 +76,18 @@ const createMocks = (existingLinks: QueryLink[] = []) => {
         await kiClient.syncQueries(def, getNextQueries(existingLinks));
       }
     ),
-  } as unknown as jest.Mocked<KnowledgeIndicatorClient>;
+  } as unknown as Mocked<KnowledgeIndicatorClient>;
 
   const streamsClient = {
-    getStream: jest.fn().mockResolvedValue(definition),
-  } as unknown as jest.Mocked<StreamsClient>;
+    getStream: vi.fn().mockResolvedValue(definition),
+  } as unknown as Mocked<StreamsClient>;
 
   return { kiClient, streamsClient };
 };
 
 const persistDeps = (
-  kiClient: jest.Mocked<KnowledgeIndicatorClient>,
-  streamsClient: jest.Mocked<StreamsClient>
+  kiClient: Mocked<KnowledgeIndicatorClient>,
+  streamsClient: Mocked<StreamsClient>
 ) => ({
   kiClient,
   streamsClient,
@@ -143,7 +149,7 @@ describe('persistQueries', () => {
     await persistQueries('logs.test', [q1, q2], persistDeps(kiClient, streamsClient));
 
     expect(kiClient.bulk).toHaveBeenCalledTimes(1);
-    const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+    const ops = (kiClient.bulk as Mock).mock.calls[0][1];
     expect(ops).toHaveLength(1);
     expect(ops[0].index.query.title).toBe('First');
   });
@@ -222,7 +228,7 @@ describe('persistQueries', () => {
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
-    const [defArg, queriesArg] = (kiClient.syncQueries as jest.Mock).mock.calls[0];
+    const [defArg, queriesArg] = (kiClient.syncQueries as Mock).mock.calls[0];
     expect(defArg).toBe(definition);
     expect(queriesArg).toHaveLength(1);
     expect(queriesArg[0].id).toBe('q1');
@@ -239,7 +245,7 @@ describe('persistQueries', () => {
     await persistQueries('logs.test', [query], persistDeps(kiClient, streamsClient));
 
     expect(kiClient.bulk).toHaveBeenCalledTimes(1);
-    const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+    const ops = (kiClient.bulk as Mock).mock.calls[0][1];
     expect(ops[0].index.query.id).toBe('generated-uuid');
   });
 
@@ -268,7 +274,7 @@ describe('persistQueries', () => {
 
       await persistQueries('logs.test', [query], { kiClient, streamsClient });
 
-      const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+      const ops = (kiClient.bulk as Mock).mock.calls[0][1];
       expect(ops[0].index.query.expires_at).toBe(MOCK_DEFAULT_EXPIRES_AT);
     });
 
@@ -288,7 +294,7 @@ describe('persistQueries', () => {
 
       await persistQueries('logs.test', [replacement], { kiClient, streamsClient });
 
-      const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+      const ops = (kiClient.bulk as Mock).mock.calls[0][1];
       expect(ops[0].index.query.expires_at).toBe(MOCK_DEFAULT_EXPIRES_AT);
     });
 
@@ -304,7 +310,7 @@ describe('persistQueries', () => {
 
       await persistQueries('logs.test', [replacement], { kiClient, streamsClient });
 
-      const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+      const ops = (kiClient.bulk as Mock).mock.calls[0][1];
       expect(ops[0].index.query.expires_at).toBeUndefined();
     });
   });
@@ -318,7 +324,7 @@ describe('persistQueries', () => {
 
       expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
       expect(kiClient.bulk).not.toHaveBeenCalled();
-      const queriesArg = (kiClient.syncQueries as jest.Mock).mock.calls[0][1];
+      const queriesArg = (kiClient.syncQueries as Mock).mock.calls[0][1];
       expect(queriesArg).toHaveLength(1);
       expect(queriesArg[0].id).toBe('generated-uuid');
     });
@@ -331,7 +337,7 @@ describe('persistQueries', () => {
 
       expect(kiClient.bulk).toHaveBeenCalledTimes(1);
       expect(kiClient.syncQueries).not.toHaveBeenCalled();
-      const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+      const ops = (kiClient.bulk as Mock).mock.calls[0][1];
       expect(ops[0].index.query.id).toBe('generated-uuid');
     });
 
@@ -375,11 +381,11 @@ describe('persistQueries', () => {
       );
 
       expect(kiClient.bulk).toHaveBeenCalledTimes(1);
-      const bulkOps = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+      const bulkOps = (kiClient.bulk as Mock).mock.calls[0][1];
       expect(bulkOps).toHaveLength(1);
 
       expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
-      const syncQueries = (kiClient.syncQueries as jest.Mock).mock.calls[0][1];
+      const syncQueries = (kiClient.syncQueries as Mock).mock.calls[0][1];
       expect(syncQueries).toHaveLength(2);
     });
 
@@ -402,7 +408,7 @@ describe('persistQueries', () => {
 
       expect(kiClient.bulk).not.toHaveBeenCalled();
       expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
-      const syncQueries = (kiClient.syncQueries as jest.Mock).mock.calls[0][1];
+      const syncQueries = (kiClient.syncQueries as Mock).mock.calls[0][1];
       expect(syncQueries).toHaveLength(2);
       expect(syncQueries.map((q: StreamQuery) => q.id).sort()).toEqual([
         'generated-uuid',

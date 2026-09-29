@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { useUpdateMaintenanceWindow } from './use_update_maintenance_window';
 
-const mockAddDanger = jest.fn();
-const mockAddSuccess = jest.fn();
+const mockAddDanger = vi.fn();
+const mockAddSuccess = vi.fn();
 
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -29,11 +31,14 @@ jest.mock('../utils/kibana_react', () => {
     },
   };
 });
-jest.mock('../services/update', () => ({
-  updateMaintenanceWindow: jest.fn(),
-}));
+vi.mock('../services/update', () => {
+      const mocked = {
+      updateMaintenanceWindow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { updateMaintenanceWindow } = jest.requireMock('../services/update');
+const { updateMaintenanceWindow } = (await vi.importMock('../services/update'));
 
 const updateParams = {
   title: 'updated',
@@ -48,7 +53,7 @@ let appMockRenderer: AppMockRenderer;
 
 describe('useUpdateMaintenanceWindow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appMockRenderer = createAppMockRenderer();
     updateMaintenanceWindow.mockResolvedValue(updateParams);

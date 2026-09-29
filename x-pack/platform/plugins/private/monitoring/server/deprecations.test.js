@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { noop } from 'lodash';
 import { deprecations as deprecationsModule } from './deprecations';
 
 describe('monitoring plugin deprecations', function () {
   let transformDeprecations;
-  const deprecate = jest.fn(() => jest.fn());
-  const rename = jest.fn(() => jest.fn());
-  const renameFromRoot = jest.fn(() => jest.fn());
-  const unused = jest.fn(() => jest.fn());
+  const deprecate = vi.fn(() => vi.fn());
+  const rename = vi.fn(() => vi.fn());
+  const renameFromRoot = vi.fn(() => vi.fn());
+  const unused = vi.fn(() => vi.fn());
   const fromPath = 'monitoring';
 
   beforeAll(function () {
@@ -33,7 +35,7 @@ describe('monitoring plugin deprecations', function () {
         },
       };
 
-      const addDeprecation = jest.fn();
+      const addDeprecation = vi.fn();
       transformDeprecations(settings, fromPath, addDeprecation);
       expect(addDeprecation).not.toHaveBeenCalled();
     });
@@ -48,7 +50,7 @@ describe('monitoring plugin deprecations', function () {
         },
       };
 
-      const addDeprecation = jest.fn();
+      const addDeprecation = vi.fn();
       transformDeprecations(settings, fromPath, addDeprecation);
       expect(addDeprecation).not.toHaveBeenCalled();
     });
@@ -62,7 +64,7 @@ describe('monitoring plugin deprecations', function () {
         },
       };
 
-      const addDeprecation = jest.fn();
+      const addDeprecation = vi.fn();
       transformDeprecations(settings, fromPath, addDeprecation);
       expect(addDeprecation).toHaveBeenCalled();
     });
@@ -71,7 +73,7 @@ describe('monitoring plugin deprecations', function () {
   describe('xpack_api_polling_frequency_millis', () => {
     it('should call rename for this renamed config key', () => {
       const settings = { xpack_api_polling_frequency_millis: 30000 };
-      const addDeprecation = jest.fn();
+      const addDeprecation = vi.fn();
       transformDeprecations(settings, fromPath, addDeprecation);
       expect(rename).toHaveBeenCalled();
     });

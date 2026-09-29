@@ -5,30 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { createActionHandler } from './create_action_handler';
 import { createDynamicQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-jest.mock('./create_queries', () => {
-  const actual = jest.requireActual('./create_queries');
+vi.mock('./create_queries', async () => {
+  const actual = (await vi.importActual('./create_queries'));
 
   return {
     ...actual,
-    createDynamicQueries: jest.fn(),
+    createDynamicQueries: vi.fn(),
   };
 });
-jest.mock('../../lib/parse_agent_groups');
-jest.mock('../../utils/get_internal_saved_object_client');
+vi.mock('../../lib/parse_agent_groups');
+vi.mock('../../utils/get_internal_saved_object_client');
 
-const mockedCreateDynamicQueries = createDynamicQueries as jest.MockedFunction<
+const mockedCreateDynamicQueries = createDynamicQueries as MockedFunction<
   typeof createDynamicQueries
 >;
-const mockedParseAgentSelection = parseAgentSelection as jest.MockedFunction<
+const mockedParseAgentSelection = parseAgentSelection as MockedFunction<
   typeof parseAgentSelection
 >;
-const mockedGetInternalSOClient = getInternalSavedObjectsClientForSpaceId as jest.MockedFunction<
+const mockedGetInternalSOClient = getInternalSavedObjectsClientForSpaceId as MockedFunction<
   typeof getInternalSavedObjectsClientForSpaceId
 >;
 
@@ -36,15 +39,15 @@ const TEST_AGENT = 'a1';
 const QUERY_ACTION_ID = 'query-action-uuid';
 
 const buildOsqueryContext = ({
-  bulkCreate = jest.fn().mockResolvedValue(undefined),
-  indicesExists = jest.fn().mockResolvedValue(true),
-  bulk = jest.fn().mockResolvedValue(undefined),
-  reportEvent = jest.fn(),
+  bulkCreate = vi.fn().mockResolvedValue(undefined),
+  indicesExists = vi.fn().mockResolvedValue(true),
+  bulk = vi.fn().mockResolvedValue(undefined),
+  reportEvent = vi.fn(),
 }: {
-  bulkCreate?: jest.Mock;
-  indicesExists?: jest.Mock;
-  bulk?: jest.Mock;
-  reportEvent?: jest.Mock;
+  bulkCreate?: Mock;
+  indicesExists?: Mock;
+  bulk?: Mock;
+  reportEvent?: Mock;
 } = {}) => {
   const esClient = {
     indices: { exists: indicesExists },
@@ -52,7 +55,7 @@ const buildOsqueryContext = ({
   };
 
   const context = {
-    getStartServices: jest.fn().mockResolvedValue([
+    getStartServices: vi.fn().mockResolvedValue([
       {
         elasticsearch: { client: { asInternalUser: esClient } },
       },
@@ -68,7 +71,7 @@ const buildOsqueryContext = ({
 
 describe('createActionHandler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedGetInternalSOClient.mockReturnValue({} as ReturnType<typeof mockedGetInternalSOClient>);
     mockedParseAgentSelection.mockResolvedValue([TEST_AGENT]);
     mockedCreateDynamicQueries.mockResolvedValue([
@@ -206,7 +209,7 @@ describe('createActionHandler', () => {
 
   it('skips the osquery action bulk write when the actions index template is missing', async () => {
     const { context, bulkCreate, bulk } = buildOsqueryContext({
-      indicesExists: jest.fn().mockResolvedValue(false),
+      indicesExists: vi.fn().mockResolvedValue(false),
     });
 
     await createActionHandler(
@@ -228,7 +231,7 @@ describe('createActionHandler', () => {
       result_type?: string | null;
     }) => {
       mockedGetInternalSOClient.mockReturnValue({
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           attributes: { name: 'test-pack', ...attributes },
           references: [],
         }),

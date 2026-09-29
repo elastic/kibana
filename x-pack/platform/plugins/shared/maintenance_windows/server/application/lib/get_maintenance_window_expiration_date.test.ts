@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getMaintenanceWindowExpirationDate } from './get_maintenance_window_expiration_date';
 
 describe('getMaintenanceWindowExpirationDate', () => {
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
   });
 
   afterAll(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('should return +1 year expiration date', () => {

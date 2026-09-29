@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertProcessingDonut } from './alert_processing_donut_lens';
@@ -16,32 +19,44 @@ import { PageScope } from '../../../data_view_manager/constants';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DonutChartWrapper } from '../../../common/components/charts/donutchart';
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-}));
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
+      const mocked = {
+      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/charts/donutchart', () => ({
-  DonutChartWrapper: jest.fn(({ children }) => (
-    <div data-test-subj="mock-donut-chart-wrapper">{children}</div>
-  )),
-}));
+vi.mock('../../../common/components/charts/donutchart', () => {
+      const mocked = {
+      DonutChartWrapper: vi.fn(({ children }) => (
+        <div data-test-subj="mock-donut-chart-wrapper">{children}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut',
-  () => ({
-    getAlertProcessingDonutAttributes: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        getAlertProcessingDonutAttributes: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockGetAlertProcessingDonutAttributes =
-  getAlertProcessingDonutAttributes as jest.MockedFunction<
+  getAlertProcessingDonutAttributes as MockedFunction<
     typeof getAlertProcessingDonutAttributes
   >;
-const mockUseSpaceId = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
+const mockUseSpaceId = useSpaceId as MockedFunction<typeof useSpaceId>;
 
 const defaultProps = {
   isSample: false as const,
@@ -52,7 +67,7 @@ const defaultProps = {
 
 describe('AlertProcessingDonut', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSpaceId.mockReturnValue('test-space-id');
   });
 
@@ -91,7 +106,7 @@ describe('AlertProcessingDonut', () => {
       {}
     );
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     expect(callArgs.getLensAttributes).toBeDefined();
     expect(callArgs.getLensAttributes).toEqual(expect.any(Function));
   });
@@ -99,7 +114,7 @@ describe('AlertProcessingDonut', () => {
   it('calls getLensAttributes with correct parameters', () => {
     render(<AlertProcessingDonut {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -118,7 +133,7 @@ describe('AlertProcessingDonut', () => {
     mockUseSpaceId.mockReturnValue(undefined);
     render(<AlertProcessingDonut {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -137,7 +152,7 @@ describe('AlertProcessingDonut', () => {
     const propsWithEmptyIds = { ...defaultProps, attackAlertIds: [] };
     render(<AlertProcessingDonut {...propsWithEmptyIds} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -158,8 +173,8 @@ describe('AlertProcessingDonut', () => {
       </>
     );
 
-    const firstCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-    const secondCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[1][0];
+    const firstCallArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
+    const secondCallArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[1][0];
 
     expect(firstCallArgs.id).not.toEqual(secondCallArgs.id);
   });

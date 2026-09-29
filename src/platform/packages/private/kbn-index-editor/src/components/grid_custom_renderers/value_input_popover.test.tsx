@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import type { EuiDataGridRefProps } from '@elastic/eui';
 import { analyticsServiceMock } from '@kbn/core/public/mocks';
@@ -22,7 +24,7 @@ import { getValueInputPopover } from './value_input_popover';
 describe('getValueInputPopover', () => {
   it('saves an edited cell value when the popover closes', async () => {
     const user = userEvent.setup();
-    const onValueChange = jest.fn();
+    const onValueChange = vi.fn();
     const rows: DataTableRecord[] = [
       {
         id: 'document-1',
@@ -39,10 +41,10 @@ describe('getValueInputPopover', () => {
     ];
     const dataTableRef: React.RefObject<EuiDataGridRefProps> = {
       current: {
-        setIsFullScreen: jest.fn(),
-        openCellPopover: jest.fn(),
-        closeCellPopover: jest.fn(),
-        setFocusedCell: jest.fn(),
+        setIsFullScreen: vi.fn(),
+        openCellPopover: vi.fn(),
+        closeCellPopover: vi.fn(),
+        setFocusedCell: vi.fn(),
       },
     };
     const telemetryService = new IndexEditorTelemetryService(
@@ -67,7 +69,7 @@ describe('getValueInputPopover', () => {
         cellContentsElement={document.createElement('div')}
         cellActions={[]}
         DefaultCellPopover={() => null}
-        setCellPopoverProps={jest.fn()}
+        setCellPopoverProps={vi.fn()}
       >
         Elyssa
       </ValueInputPopover>

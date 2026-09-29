@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -48,33 +51,33 @@ import {
 
 const mockPackagePolicySavedObjectType = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
-jest.mock('../registry');
-jest.mock('../../settings');
-jest.mock('../../audit_logging');
-jest.mock('../../data_streams');
-jest.mock('./knowledge_base_index');
-jest.mock('../archive/storage', () => {
+vi.mock('../registry');
+vi.mock('../../settings');
+vi.mock('../../audit_logging');
+vi.mock('../../data_streams');
+vi.mock('./knowledge_base_index');
+vi.mock('../archive/storage', async () => {
   return {
-    ...jest.requireActual('../archive/storage'),
-    getEsPackage: jest
+    ...(await vi.importActual('../archive/storage')),
+    getEsPackage: vi
       .fn()
-      .mockImplementation((...args) =>
-        jest.requireActual('../archive/storage').getEsPackage(...args)
+      .mockImplementation(async (...args) =>
+        (await vi.importActual('../archive/storage')).getEsPackage(...args)
       ),
   };
 });
-jest.mock('../../package_policy', () => {
+vi.mock('../../package_policy', () => {
   return {
     getPackagePolicySavedObjectType: () => mockPackagePolicySavedObjectType,
   };
 });
 
-const MockRegistry = jest.mocked(Registry);
-const mockKnowledgeBaseIndex = jest.mocked(knowledgeBaseIndex);
+const MockRegistry = vi.mocked(Registry);
+const mockKnowledgeBaseIndex = vi.mocked(knowledgeBaseIndex);
 
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
-const mockGetSettings = getSettings as jest.Mock;
+const mockGetSettings = getSettings as Mock;
 mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
@@ -85,11 +88,11 @@ describe('When using EPM `get` services', () => {
 
   afterEach(() => {
     appContextService.stop();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('and invoking getPackageUsageStats()', () => {
-    let soClient: jest.Mocked<SavedObjectsClientContract>;
+    let soClient: Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
       soClient = savedObjectsClientMock.create();
@@ -482,8 +485,8 @@ test: invalid manifest
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
 
-      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledWith(
+      expect(vi.mocked(appContextService.getLogger().warn)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(appContextService.getLogger().warn)).toHaveBeenCalledWith(
         'Installed package invalidpackage 0.0.1 is not a valid package anymore'
       );
     });
@@ -972,7 +975,7 @@ owner: elastic`,
     it('filter non active datastreams if flag is true', async () => {
       const soClient = savedObjectsClientMock.create();
 
-      jest.mocked(dataStreamService.getAllFleetDataStreams).mockResolvedValue([
+      vi.mocked(dataStreamService.getAllFleetDataStreams).mockResolvedValue([
         {
           name: `logs-elastic_agent.apm_server-production`,
         },
@@ -1053,7 +1056,7 @@ owner: elastic`,
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
       appContextService.start(mockContract);
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
         name: 'my-package',
         version: '1.0.0',
@@ -1521,7 +1524,7 @@ owner: elastic`,
         });
 
         // Use the real groupPathsByService function instead of mocking it
-        const realRegistry = jest.requireActual('../registry');
+        const realRegistry = (await vi.importActual('../registry'));
         MockRegistry.groupPathsByService.mockImplementation(realRegistry.groupPathsByService);
 
         const result = await getPackageInfo({
@@ -1588,7 +1591,7 @@ owner: elastic`,
         });
 
         // Use the real groupPathsByService function instead of mocking it
-        const realRegistry = jest.requireActual('../registry');
+        const realRegistry = (await vi.importActual('../registry'));
         MockRegistry.groupPathsByService.mockImplementation(realRegistry.groupPathsByService);
 
         const result = await getPackageInfo({
@@ -1784,7 +1787,7 @@ owner: elastic`,
 
     it('should work installed package', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
-      jest.mocked(getEsPackage).mockResolvedValueOnce({
+      vi.mocked(getEsPackage).mockResolvedValueOnce({
         assets_path: [...assetsMap.keys()].map((path) => ({ id: path, path, type: 'test' })),
       } as any);
 
@@ -1825,7 +1828,7 @@ owner: elastic`,
 
     beforeEach(() => {
       esClient = elasticsearchServiceMock.createInternalClient();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should return knowledge base content when found', async () => {
@@ -1931,9 +1934,9 @@ owner: elastic`,
       mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockRejectedValue(error);
 
       const mockLogger = {
-        warn: jest.fn(),
+        warn: vi.fn(),
       };
-      jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger as any);
+      vi.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger as any);
 
       const result = await getPackageKnowledgeBase({
         esClient,
@@ -1980,7 +1983,7 @@ owner: elastic`,
     const soClient = savedObjectsClientMock.create();
 
     beforeEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     const bundledResult = {
@@ -1998,7 +2001,7 @@ owner: elastic`,
         package_assets: [{ id: 'asset-1', type: 'epm-packages-assets' }],
       } as any;
 
-      jest.mocked(getEsPackage).mockResolvedValueOnce(undefined);
+      vi.mocked(getEsPackage).mockResolvedValueOnce(undefined);
       MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
 
       const result = await getPackageFromSource({
@@ -2013,7 +2016,7 @@ owner: elastic`,
     });
 
     it('falls back to bundled archive when EPR returns 404 for a package not in the registry', async () => {
-      const { RegistryResponseError } = jest.requireActual('../../../errors');
+      const { RegistryResponseError } = (await vi.importActual('../../../errors'));
       MockRegistry.getPackage.mockRejectedValue(new RegistryResponseError('not found', 404));
       MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
 

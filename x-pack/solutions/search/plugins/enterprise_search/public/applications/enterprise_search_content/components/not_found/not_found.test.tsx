@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -15,21 +17,24 @@ import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 // EnterpriseSearchContentPageTemplate is mocked to capture the pageChrome prop —
 // breadcrumbs are set via kea side-effects and don't appear in the DOM directly.
-jest.mock('../layout', () => ({
-  EnterpriseSearchContentPageTemplate: jest.fn(({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  )),
-}));
+vi.mock('../layout', () => {
+      const mocked = {
+      EnterpriseSearchContentPageTemplate: vi.fn(({ children }: { children: React.ReactNode }) => (
+        <div>{children}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
 import { NotFound } from '.';
 
-const MockedPageTemplate = jest.mocked(EnterpriseSearchContentPageTemplate);
+const MockedPageTemplate = vi.mocked(EnterpriseSearchContentPageTemplate);
 
 describe('NotFound', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the shared not found prompt', () => {

@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import type { IntegrationCardItem } from '..';
 
-const mockGetBooleanValue = jest.fn();
-const mockGetUrlForApp = jest.fn().mockReturnValue('/app/onboarding/aws');
-const mockNavigateToApp = jest.fn();
+const mockGetBooleanValue = vi.fn();
+const mockGetUrlForApp = vi.fn().mockReturnValue('/app/onboarding/aws');
+const mockNavigateToApp = vi.fn();
 
-jest.mock('../../../../../hooks', () => ({
-  useStartServices: () => ({
-    featureFlags: { useBooleanValue: mockGetBooleanValue },
-    application: {
-      navigateToApp: mockNavigateToApp,
-      getUrlForApp: mockGetUrlForApp,
-    },
-  }),
-}));
+vi.mock('../../../../../hooks', () => {
+      const mocked = {
+      useStartServices: () => ({
+        featureFlags: { useBooleanValue: mockGetBooleanValue },
+        application: {
+          navigateToApp: mockNavigateToApp,
+          getUrlForApp: mockGetUrlForApp,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useOnboardingOverride } from './use_onboarding_override';
 

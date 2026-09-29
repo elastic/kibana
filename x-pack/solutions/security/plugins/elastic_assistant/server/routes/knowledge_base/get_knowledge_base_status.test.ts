@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getKnowledgeBaseStatusRoute } from './get_knowledge_base_status';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
@@ -30,7 +32,7 @@ describe('Get Knowledge Base Status Route', () => {
     ({ context } = requestContextMock.createTools());
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     const kbDataClient = knowledgeBaseDataClientMock.create();
-    context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest
+    context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = vi
       .fn()
       .mockResolvedValue(kbDataClient);
 

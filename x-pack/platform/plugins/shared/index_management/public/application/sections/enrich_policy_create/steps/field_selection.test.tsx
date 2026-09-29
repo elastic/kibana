@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { SetStateAction } from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -16,19 +18,25 @@ import { CreatePolicyContext } from '../create_policy_context';
 import { FieldSelectionStep } from './field_selection';
 import { getLastSetStateValue, selectComboBoxOption } from './test_utils';
 
-jest.mock('@kbn/code-editor', () => ({
-  // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
-  CodeEditor: ({ value }: { value?: string }) => (
-    <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
-  ),
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
+      CodeEditor: ({ value }: { value?: string }) => (
+        <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../services/api', () => ({
-  ...jest.requireActual('../../../services/api'),
-  getFieldsFromIndices: jest.fn(),
-}));
+vi.mock('../../../services/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../services/api')),
+      getFieldsFromIndices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getFieldsFromIndicesMock = jest.mocked(getFieldsFromIndices);
+const getFieldsFromIndicesMock = vi.mocked(getFieldsFromIndices);
 
 const configuredDraft: DraftPolicy = {
   name: 'test_policy',
@@ -50,10 +58,10 @@ const fieldsFromIndices = {
 
 const renderFieldSelectionStep = async (draft: DraftPolicy = configuredDraft) => {
   const completionState: CompletionState = { configurationStep: true, fieldsSelectionStep: false };
-  const onNext = jest.fn();
-  const onBack = jest.fn();
-  const updateDraft = jest.fn<void, [SetStateAction<DraftPolicy>]>();
-  const updateCompletionState = jest.fn<void, [SetStateAction<CompletionState>]>();
+  const onNext = vi.fn();
+  const onBack = vi.fn();
+  const updateDraft = vi.fn<void, [SetStateAction<DraftPolicy>]>();
+  const updateCompletionState = vi.fn<void, [SetStateAction<CompletionState>]>();
 
   render(
     <I18nProvider>
@@ -79,7 +87,7 @@ const clickNext = () => fireEvent.click(screen.getByTestId('nextButton'));
 
 describe('<FieldSelectionStep />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getFieldsFromIndicesMock.mockResolvedValue({ data: fieldsFromIndices, error: null });
   });
 

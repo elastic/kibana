@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ReactElement, MouseEvent } from 'react';
 import React from 'react';
 import {
@@ -30,7 +33,7 @@ describe('field_manager', () => {
   let store: GraphStore;
   let instance: ShallowWrapper;
   let getInstance: () => ShallowWrapper;
-  let dispatchSpy: jest.Mock;
+  let dispatchSpy: Mock;
 
   beforeEach(() => {
     store = createMockGraphStore({}).store;
@@ -76,7 +79,7 @@ describe('field_manager', () => {
       ])
     );
 
-    dispatchSpy = jest.fn(store.dispatch);
+    dispatchSpy = vi.fn(store.dispatch);
     store.dispatch = dispatchSpy;
 
     instance = shallow(

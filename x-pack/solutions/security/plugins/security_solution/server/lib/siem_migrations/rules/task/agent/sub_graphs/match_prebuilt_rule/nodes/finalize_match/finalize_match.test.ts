@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { getFinalizeMatchNode } from './finalize_match';
 import {
@@ -18,12 +20,12 @@ import {
 } from '../__mocks__/mocks';
 
 describe('getFinalizeMatchNode', () => {
-  const mockReportPrebuiltRulesMatch = jest.fn();
+  const mockReportPrebuiltRulesMatch = vi.fn();
   const telemetryClient = { reportPrebuiltRulesMatch: mockReportPrebuiltRulesMatch } as never;
   const node = getFinalizeMatchNode({ telemetryClient });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('resolves the match from search ToolMessage artifacts', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
@@ -64,7 +66,7 @@ describe('<PipelinesCreate />', () => {
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should render the correct page header', async () => {
@@ -203,7 +205,7 @@ describe('<PipelinesCreate /> field access pattern', () => {
   const { httpSetup } = setupEnvironment();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should toggle the field access pattern', async () => {

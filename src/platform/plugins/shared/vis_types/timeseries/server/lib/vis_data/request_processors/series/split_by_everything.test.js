@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { splitByEverything } from './split_by_everything';
 
 describe('splitByEverything(req, panel, series)', () => {
@@ -25,7 +27,7 @@ describe('splitByEverything(req, panel, series)', () => {
   });
 
   it('calls next when finished', () => {
-    const next = jest.fn();
+    const next = vi.fn();
     splitByEverything(req, panel, series)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
@@ -47,7 +49,7 @@ describe('splitByEverything(req, panel, series)', () => {
   it('calls next and does not add a filter', () => {
     series.split_mode = 'terms';
     series.terms_field = 'host';
-    const next = jest.fn((doc) => doc);
+    const next = vi.fn((doc) => doc);
     const doc = splitByEverything(req, panel, series)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});

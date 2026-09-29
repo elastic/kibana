@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { describeAiIndex } from './describe';
@@ -12,11 +14,11 @@ import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries } from './example_queries';
 
-jest.mock('./describe_fields');
-jest.mock('./describe_aggregations');
+vi.mock('./describe_fields');
+vi.mock('./describe_aggregations');
 
-const describeAiIndexFieldsMock = jest.mocked(describeAiIndexFields);
-const describeAiIndexAggregationsMock = jest.mocked(describeAiIndexAggregations);
+const describeAiIndexFieldsMock = vi.mocked(describeAiIndexFields);
+const describeAiIndexAggregationsMock = vi.mocked(describeAiIndexAggregations);
 
 const aiIndex: AiIndexHttpItem = {
   id: 'support',

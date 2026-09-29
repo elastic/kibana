@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { getAttackDiscoveryMarkdown } from '@kbn/elastic-assistant-common';
@@ -17,50 +20,50 @@ import { useAttackViewInAiAssistantContextMenuItems } from './use_attack_view_in
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
-jest.mock('@kbn/elastic-assistant');
-jest.mock('@kbn/elastic-assistant-common', () => {
-  const actual = jest.requireActual('@kbn/elastic-assistant-common');
+vi.mock('@kbn/elastic-assistant');
+vi.mock('@kbn/elastic-assistant-common', async () => {
+  const actual = (await vi.importActual('@kbn/elastic-assistant-common'));
 
   return {
     ...actual,
-    getAttackDiscoveryMarkdown: jest.fn(),
+    getAttackDiscoveryMarkdown: vi.fn(),
   };
 });
-jest.mock('../../../../../attack_discovery/pages/results/use_attack_discovery_attachment');
-jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability');
-jest.mock('../../../../../agent_builder/hooks/use_report_add_to_chat');
-jest.mock('../../../../../assistant/use_assistant_availability');
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../attack_discovery/pages/results/use_attack_discovery_attachment');
+vi.mock('../../../../../agent_builder/hooks/use_agent_builder_availability');
+vi.mock('../../../../../agent_builder/hooks/use_report_add_to_chat');
+vi.mock('../../../../../assistant/use_assistant_availability');
+vi.mock('../../../../../common/lib/kibana');
 
-const mockUseAttackDiscoveryAttachment = useAttackDiscoveryAttachment as jest.MockedFunction<
+const mockUseAttackDiscoveryAttachment = useAttackDiscoveryAttachment as MockedFunction<
   typeof useAttackDiscoveryAttachment
 >;
-const mockUseAgentBuilderAvailability = useAgentBuilderAvailability as jest.MockedFunction<
+const mockUseAgentBuilderAvailability = useAgentBuilderAvailability as MockedFunction<
   typeof useAgentBuilderAvailability
 >;
-const mockUseReportAddToChat = useReportAddToChat as jest.MockedFunction<typeof useReportAddToChat>;
-const mockUseAssistantAvailability = useAssistantAvailability as jest.MockedFunction<
+const mockUseReportAddToChat = useReportAddToChat as MockedFunction<typeof useReportAddToChat>;
+const mockUseAssistantAvailability = useAssistantAvailability as MockedFunction<
   typeof useAssistantAvailability
 >;
-const mockUseAssistantContext = useAssistantContext as jest.MockedFunction<
+const mockUseAssistantContext = useAssistantContext as MockedFunction<
   typeof useAssistantContext
 >;
-const mockGetAttackDiscoveryMarkdown = getAttackDiscoveryMarkdown as jest.MockedFunction<
+const mockGetAttackDiscoveryMarkdown = getAttackDiscoveryMarkdown as MockedFunction<
   typeof getAttackDiscoveryMarkdown
 >;
 
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
-const mockRegisterPromptContext = jest.fn();
-const mockUnRegisterPromptContext = jest.fn();
-const mockShowAssistantOverlay = jest.fn();
-const reportEventMock = jest.fn();
+const mockRegisterPromptContext = vi.fn();
+const mockUnRegisterPromptContext = vi.fn();
+const mockShowAssistantOverlay = vi.fn();
+const reportEventMock = vi.fn();
 
 describe('useAttackViewInAiAssistantContextMenuItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     reportEventMock.mockClear();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent: reportEventMock,
@@ -68,14 +71,14 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
       },
     });
 
-    mockUseAttackDiscoveryAttachment.mockReturnValue(jest.fn());
+    mockUseAttackDiscoveryAttachment.mockReturnValue(vi.fn());
     mockUseAgentBuilderAvailability.mockReturnValue({
       hasAgentBuilderPrivilege: false,
       isAgentChatExperienceEnabled: false,
       hasValidAgentBuilderLicense: true,
       isAgentBuilderEnabled: false,
     });
-    mockUseReportAddToChat.mockReturnValue(jest.fn());
+    mockUseReportAddToChat.mockReturnValue(vi.fn());
     mockUseAssistantAvailability.mockReturnValue({
       hasAssistantPrivilege: true,
       hasConnectorsAllPrivilege: true,
@@ -107,7 +110,7 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
   });
 
   it('should call closePopover and showAssistantOverlay on "View in AI Assistant" click', () => {
-    const closePopover = jest.fn();
+    const closePopover = vi.fn();
 
     const { result } = renderHook(() =>
       useAttackViewInAiAssistantContextMenuItems({
@@ -214,9 +217,9 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
   });
 
   it('should call closePopover, reportAddToChat and openAgentBuilderFlyout on "Add to chat" click', () => {
-    const closePopover = jest.fn();
-    const openAgentBuilderFlyout = jest.fn();
-    const reportAddToChatClick = jest.fn();
+    const closePopover = vi.fn();
+    const openAgentBuilderFlyout = vi.fn();
+    const reportAddToChatClick = vi.fn();
 
     mockUseAttackDiscoveryAttachment.mockReturnValue(openAgentBuilderFlyout);
     mockUseReportAddToChat.mockReturnValue(reportAddToChatClick);
@@ -248,7 +251,7 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
   });
 
   it('should not report AIAssistantOpened event on "Add to chat" click', () => {
-    const reportAddToChatClick = jest.fn();
+    const reportAddToChatClick = vi.fn();
     mockUseReportAddToChat.mockReturnValue(reportAddToChatClick);
     mockUseAgentBuilderAvailability.mockReturnValue({
       hasAgentBuilderPrivilege: true,

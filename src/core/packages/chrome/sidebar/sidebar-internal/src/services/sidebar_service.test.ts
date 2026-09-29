@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import type { SidebarAppConfig, SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { createSidebarStore } from '@kbn/core-chrome-sidebar';
@@ -336,7 +338,7 @@ describe('SidebarService (integration)', () => {
       );
 
       const start = service.start();
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
       expect(start.getApp<TestState, TestActions>(APP_ID_A).getState()).toEqual({
         count: 0,

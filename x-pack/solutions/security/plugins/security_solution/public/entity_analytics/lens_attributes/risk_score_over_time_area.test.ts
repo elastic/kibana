@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { XYVisualizationState } from '@kbn/lens-plugin/public';
 
@@ -12,19 +14,25 @@ import { getRiskScoreOverTimeAreaAttributes } from './risk_score_over_time_area'
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 import { wrapper } from '../../common/components/visualization_actions/mocks';
 
-jest.mock('../../common/utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockHost',
-      pageName: 'hosts',
-      tabName: 'hostRisk',
-    },
-  ]),
-}));
+vi.mock('../../common/utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          detailName: 'mockHost',
+          pageName: 'hosts',
+          tabName: 'hostRisk',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getRiskScoreOverTimeAreaAttributes', () => {
   it('should render', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import { AD2_ALERTS_INDEX, AD2_SCENARIO_ALL_INDICES, AD2_SCENARIO_SEED_LABEL } from './constants';
@@ -51,7 +54,7 @@ const buildBulkResponse = (
  */
 const buildBulk = (rejectedCall: 1 | 2 | undefined) => {
   let call = 0;
-  return jest.fn().mockImplementation(({ operations }: { operations: unknown[] }) => {
+  return vi.fn().mockImplementation(({ operations }: { operations: unknown[] }) => {
     call += 1;
     const count = operations.length / 2;
     return Promise.resolve(
@@ -62,8 +65,8 @@ const buildBulk = (rejectedCall: 1 | 2 | undefined) => {
   });
 };
 
-const buildEsClient = (bulk: jest.Mock): EsClient => ({ bulk } as unknown as EsClient);
-const buildFetch = (): HttpHandler => jest.fn().mockResolvedValue({}) as unknown as HttpHandler;
+const buildEsClient = (bulk: Mock): EsClient => ({ bulk } as unknown as EsClient);
+const buildFetch = (): HttpHandler => vi.fn().mockResolvedValue({}) as unknown as HttpHandler;
 const DENSE_MARKER = createAd2RunMarker('dense-run');
 
 describe('seedAd2ScenarioProfile', () => {
@@ -159,7 +162,7 @@ const buildStoreClient = () => {
     ).length;
 
   const esClient = {
-    bulk: jest.fn(async ({ operations }: { operations: unknown[] }) => {
+    bulk: vi.fn(async ({ operations }: { operations: unknown[] }) => {
       const items = [];
       for (let position = 0; position < operations.length; position += 2) {
         const action = operations[position] as { index: { _index: string; _id: string } };
@@ -173,7 +176,7 @@ const buildStoreClient = () => {
       }
       return { errors: false, items, took: 1 };
     }),
-    deleteByQuery: jest.fn(async ({ index, query }: { index: string; query: unknown }) => {
+    deleteByQuery: vi.fn(async ({ index, query }: { index: string; query: unknown }) => {
       for (const [documentKey, document] of documents) {
         if (document.index === index && matchesQuery(document.source, query)) {
           documents.delete(documentKey);
@@ -181,7 +184,7 @@ const buildStoreClient = () => {
       }
       return { deleted: 1 };
     }),
-    count: jest.fn(async ({ index, query }: { index: string; query: unknown }) => ({
+    count: vi.fn(async ({ index, query }: { index: string; query: unknown }) => ({
       count: countMatching(index, query),
     })),
   };

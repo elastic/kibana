@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { PushButton } from './push_button';
 import { renderWithTestingProviders } from '../../common/mock';
 
-const pushToService = jest.fn();
+const pushToService = vi.fn();
 
 const defaultProps = {
   disabled: false,
@@ -26,7 +28,7 @@ const defaultProps = {
 
 describe('PushButton ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the button without tooltip', async () => {

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import * as i18n from '../../translations';
 import { EditModal } from '.';
 
-const onSave = jest.fn();
-const onCancel = jest.fn();
+const onSave = vi.fn();
+const onCancel = vi.fn();
 
 describe('EditModal', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
   it('should render the title and description from listDetails', () => {
     const wrapper = render(
       <EditModal

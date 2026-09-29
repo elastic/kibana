@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 import { TestProviders } from '../../mock';
@@ -29,7 +31,7 @@ describe('callout', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders the callout data-test-subj from the given id', () => {
@@ -69,7 +71,7 @@ describe('callout', () => {
   });
 
   test('onDismiss callback operates when dismiss button is clicked', () => {
-    const onDismiss = jest.fn();
+    const onDismiss = vi.fn();
     const wrapper = mount(
       <TestProviders>
         <CallOut message={message} onDismiss={onDismiss} />

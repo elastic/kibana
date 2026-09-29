@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -13,9 +15,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { useAlertingRuleSourceDataViews } from './use_alerting_rule_source_data_views';
 
-jest.mock('@kbn/discover-utils');
+vi.mock('@kbn/discover-utils');
 
-const mockGetEsqlDataView = jest.mocked(getEsqlDataView);
+const mockGetEsqlDataView = vi.mocked(getEsqlDataView);
 
 const http = httpServiceMock.createStartContract();
 const { dataViews } = dataPluginMock.createStartContract();
@@ -26,7 +28,7 @@ const buildRule = (query: string): Rule => ({ query: { base: query } } as unknow
 
 describe('useAlertingRuleSourceDataViews', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetEsqlDataView.mockImplementation(
       async ({ esql }) => ({ id: esql } as unknown as DataView)
     );

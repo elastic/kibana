@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
@@ -16,21 +19,27 @@ import {
   requestMock,
 } from '../../../../detection_engine/routes/__mocks__';
 
-const mockValidateIndexPermissions = jest.fn();
+const mockValidateIndexPermissions = vi.fn();
 
-jest.mock('../../../watchlists/entity_sources/entity_source_api_key', () => ({
-  validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
-}));
+vi.mock('../../../watchlists/entity_sources/entity_source_api_key', () => {
+      const mocked = {
+      validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockScheduleNow = jest.fn();
-const mockGetEngineStatus = jest.fn();
+const mockScheduleNow = vi.fn();
+const mockGetEngineStatus = vi.fn();
 
-jest.mock('../../engine/status_service', () => ({
-  createEngineStatusService: () => ({
-    get: mockGetEngineStatus,
-    scheduleNow: mockScheduleNow,
-  }),
-}));
+vi.mock('../../engine/status_service', () => {
+      const mocked = {
+      createEngineStatusService: () => ({
+        get: mockGetEngineStatus,
+        scheduleNow: mockScheduleNow,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Import after mocks are set up
 import { createMonitoringEntitySourceRoute } from './create';
@@ -41,7 +50,7 @@ describe('POST /api/entity_analytics/monitoring/entity_source - createMonitoring
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
 
-  const mockCreate = jest.fn();
+  const mockCreate = vi.fn();
 
   beforeEach(() => {
     server = serverMock.create();
@@ -54,11 +63,11 @@ describe('POST /api/entity_analytics/monitoring/entity_source - createMonitoring
     // Engine not running: happy path skips the scheduler.
     mockGetEngineStatus.mockReset().mockResolvedValue({ status: 'stopped' });
 
-    (ctx.securitySolution.getMonitoringEntitySourceDataClient as jest.Mock).mockReturnValue({
+    (ctx.securitySolution.getMonitoringEntitySourceDataClient as Mock).mockReturnValue({
       create: mockCreate,
     });
-    (ctx.securitySolution.getPrivilegeMonitoringDataClient as jest.Mock).mockReturnValue({
-      getScopedSoClient: jest.fn(),
+    (ctx.securitySolution.getPrivilegeMonitoringDataClient as Mock).mockReturnValue({
+      getScopedSoClient: vi.fn(),
     });
 
     context = requestContextMock.convertContext(ctx);
@@ -72,7 +81,7 @@ describe('POST /api/entity_analytics/monitoring/entity_source - createMonitoring
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (body: object) =>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ArtifactService } from './artifact';
@@ -16,12 +19,12 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CdnConfig } from '../constants';
 import { createMockTelemetryConfigProvider } from '../__mocks__';
 
-jest.mock('./artifact');
+vi.mock('./artifact');
 
 describe('ConfigurationService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let configurationService: ConfigurationService;
-  let artifactService: jest.Mocked<ArtifactService>;
+  let artifactService: Mocked<ArtifactService>;
   const telemetryConfigProvider = createMockTelemetryConfigProvider();
 
   const defaultConfiguration = DEFAULT_OTEL_TELEMETRY_CONFIGURATION;
@@ -50,8 +53,8 @@ describe('ConfigurationService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     logger = loggingSystemMock.createLogger();
     configurationService = new ConfigurationService(logger);
@@ -59,12 +62,12 @@ describe('ConfigurationService', () => {
       logger,
       fakeClusterInfo,
       fakeCdnConfig
-    ) as jest.Mocked<ArtifactService>;
+    ) as Mocked<ArtifactService>;
   });
 
   afterEach(() => {
     configurationService.stop();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('initialization', () => {
@@ -93,7 +96,7 @@ describe('ConfigurationService', () => {
         max_elements_per_event: 2000,
       };
 
-      jest.spyOn(artifactService, 'getArtifact').mockResolvedValueOnce({
+      vi.spyOn(artifactService, 'getArtifact').mockResolvedValueOnce({
         data: artifactConfig,
         modified: true,
       });
@@ -107,12 +110,12 @@ describe('ConfigurationService', () => {
 
       expect(config).toEqual(defaultConfiguration);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
       expect(config).toEqual(artifactConfig);
     });
 
     it('should keep defaults when artifact has not been modified', async () => {
-      jest.spyOn(artifactService, 'getArtifact').mockResolvedValueOnce({
+      vi.spyOn(artifactService, 'getArtifact').mockResolvedValueOnce({
         data: defaultConfiguration,
         modified: false,
       });
@@ -126,7 +129,7 @@ describe('ConfigurationService', () => {
 
       expect(config).toEqual(defaultConfiguration);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
       expect(config).toEqual(defaultConfiguration);
     });
 
@@ -140,7 +143,7 @@ describe('ConfigurationService', () => {
         composite_page_size: 2000,
       };
 
-      jest
+      vi
         .spyOn(artifactService, 'getArtifact')
         .mockResolvedValueOnce({ data: defaultConfiguration, modified: false })
         .mockResolvedValueOnce({ data: firstUpdate, modified: true })
@@ -155,10 +158,10 @@ describe('ConfigurationService', () => {
 
       expect(config).toEqual(defaultConfiguration);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
       expect(config).toEqual(firstUpdate);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
       expect(config).toEqual(secondUpdate);
     });
   });
@@ -167,7 +170,7 @@ describe('ConfigurationService', () => {
     it('should skip CDN fetch and keep defaults when telemetry is opted out', async () => {
       const optedOutProvider = createMockTelemetryConfigProvider(false);
 
-      jest.spyOn(artifactService, 'getArtifact').mockResolvedValue({
+      vi.spyOn(artifactService, 'getArtifact').mockResolvedValue({
         data: { ...defaultConfiguration, max_elements_per_event: 200 },
         modified: true,
       });
@@ -181,7 +184,7 @@ describe('ConfigurationService', () => {
 
       expect(config).toEqual(defaultConfiguration);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
 
       expect(config).toEqual(defaultConfiguration);
       expect(artifactService.getArtifact).not.toHaveBeenCalled();
@@ -223,7 +226,7 @@ describe('ConfigurationService', () => {
           max_elements_per_event: 3000,
         };
 
-        jest
+        vi
           .spyOn(artifactService, 'getArtifact')
           .mockResolvedValueOnce({ data: artifactConfig, modified: true })
           .mockRejectedValue(createError());
@@ -237,10 +240,10 @@ describe('ConfigurationService', () => {
 
         expect(config).toEqual(defaultConfiguration);
 
-        await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+        await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
         expect(config).toEqual(artifactConfig);
 
-        await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+        await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
         expect(config).toEqual(artifactConfig);
       }
     );
@@ -248,7 +251,7 @@ describe('ConfigurationService', () => {
     it.each(errorCases)(
       'should fall back to defaults when $name occurs before any successful fetch',
       async ({ createError }) => {
-        jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(createError());
+        vi.spyOn(artifactService, 'getArtifact').mockRejectedValue(createError());
 
         configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
 
@@ -259,7 +262,7 @@ describe('ConfigurationService', () => {
 
         expect(config).toEqual(defaultConfiguration);
 
-        await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+        await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
         expect(config).toEqual(defaultConfiguration);
       }
     );

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -14,21 +17,36 @@ import { StreamsPlugin } from './plugin';
 import type { StreamsConfig } from '../common/config';
 import type { StreamsPluginSetupDependencies } from './types';
 
-jest.mock('./agent_builder/register', () => ({
-  registerStreamsAgentBuilder: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('./lib/saved_objects/register_saved_objects', () => ({
-  registerStreamsSavedObjects: jest.fn(),
-}));
-jest.mock('./register_fields_metadata_extractors', () => ({
-  registerFieldsMetadataExtractors: jest.fn(),
-}));
-jest.mock('./register_suggestions_inference_features', () => ({
-  registerSuggestionsInferenceFeatures: jest.fn(),
-}));
-jest.mock('./feature_flags', () => ({ registerFeatureFlags: jest.fn() }));
+vi.mock('./agent_builder/register', () => {
+      const mocked = {
+      registerStreamsAgentBuilder: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lib/saved_objects/register_saved_objects', () => {
+      const mocked = {
+      registerStreamsSavedObjects: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./register_fields_metadata_extractors', () => {
+      const mocked = {
+      registerFieldsMetadataExtractors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./register_suggestions_inference_features', () => {
+      const mocked = {
+      registerSuggestionsInferenceFeatures: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./feature_flags', () => {
+      const mocked = { registerFeatureFlags: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const { registerStreamsAgentBuilder } = jest.requireMock('./agent_builder/register');
+const { registerStreamsAgentBuilder } = (await vi.importMock('./agent_builder/register'));
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -51,29 +69,29 @@ function getConfig(overrides: Partial<StreamsConfig> = {}): StreamsConfig {
   } as StreamsConfig;
 }
 
-function createPluginsSetup(): jest.Mocked<StreamsPluginSetupDependencies> {
+function createPluginsSetup(): Mocked<StreamsPluginSetupDependencies> {
   return {
     encryptedSavedObjects: {
       canEncrypt: false,
-      registerType: jest.fn(),
+      registerType: vi.fn(),
     } as unknown as StreamsPluginSetupDependencies['encryptedSavedObjects'],
     alerting: alertsMock.createSetup(),
     ruleRegistry: {
-      registerType: jest.fn(),
+      registerType: vi.fn(),
     } as unknown as StreamsPluginSetupDependencies['ruleRegistry'],
     features: featuresPluginMock.createSetup(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     fieldsMetadata: {
-      registerIntegrationFieldsExtractor: jest.fn(),
+      registerIntegrationFieldsExtractor: vi.fn(),
     } as unknown as StreamsPluginSetupDependencies['fieldsMetadata'],
-  } as unknown as jest.Mocked<StreamsPluginSetupDependencies>;
+  } as unknown as Mocked<StreamsPluginSetupDependencies>;
 }
 
 describe('StreamsPlugin agent builder registration gating', () => {
   let context: PluginInitializerContext<StreamsConfig>;
   let plugin: StreamsPlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
-  let pluginsSetup: jest.Mocked<StreamsPluginSetupDependencies>;
+  let pluginsSetup: Mocked<StreamsPluginSetupDependencies>;
 
   const createServerlessContext = () => {
     const ctx = coreMock.createPluginInitializerContext<StreamsConfig>(getConfig());
@@ -93,7 +111,7 @@ describe('StreamsPlugin agent builder registration gating', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context = coreMock.createPluginInitializerContext<StreamsConfig>(getConfig());
     plugin = new StreamsPlugin(context);
     coreSetup = coreMock.createSetup();

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -33,7 +36,7 @@ import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_it
 // Uses createMockMonacoEditor (which includes getVisibleRanges, onDid* listeners,
 // revealLineInCenter, etc.) instead of a hand-rolled inline mock, so the minimap's
 // viewport-tracking code path is exercised without needing the real Monaco environment.
-jest.mock('../../../shared/ui/yaml_editor', () => {
+vi.mock('../../../shared/ui/yaml_editor', () => {
   // require() is mandatory here: jest.mock factories run before ES-import transforms.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
@@ -51,7 +54,7 @@ jest.mock('../../../shared/ui/yaml_editor', () => {
               // registration (the `if (!model) return` guard). This keeps the
               // YamlEditor mock minimal — provider registration is separately mocked.
               editorDidMount?.(
-                createMockMonacoEditor(value ?? '', { getModel: jest.fn() } as any).editor
+                createMockMonacoEditor(value ?? '', { getModel: vi.fn() } as any).editor
               );
             }
           },
@@ -66,218 +69,293 @@ jest.mock('../../../shared/ui/yaml_editor', () => {
 });
 
 // Mock the validation hook
-jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
-  useYamlValidation: () => ({
-    error: null,
-    isLoading: false,
-    validationResults: [],
-  }),
-}));
+vi.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => {
+      const mocked = {
+      useYamlValidation: () => ({
+        error: null,
+        isLoading: false,
+        validationResults: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the UnsavedChangesPrompt
-jest.mock('../../../shared/ui/unsaved_changes_prompt', () => ({
-  UnsavedChangesPrompt: () => null,
-}));
+vi.mock('../../../shared/ui/unsaved_changes_prompt', () => {
+      const mocked = {
+      UnsavedChangesPrompt: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the validation errors component
-jest.mock('./workflow_yaml_validation_accordion', () => ({
-  WorkflowYamlValidationAccordion: () => null,
-}));
+vi.mock('./workflow_yaml_validation_accordion', () => {
+      const mocked = {
+      WorkflowYamlValidationAccordion: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the useAvailableConnectors hook
-jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
-  useAvailableConnectors: jest.fn().mockReturnValue({
-    connectorTypes: {},
-    totalConnectors: 0,
-  }),
-}));
+vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
+      const mocked = {
+      useAvailableConnectors: vi.fn().mockReturnValue({
+        connectorTypes: {},
+        totalConnectors: 0,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSaveYaml = jest.fn();
-const mockUseSaveYaml = useSaveYaml as jest.MockedFunction<typeof useSaveYaml>;
-const mockUseParams = jest.fn();
+const mockSaveYaml = vi.fn();
+const mockUseSaveYaml = useSaveYaml as MockedFunction<typeof useSaveYaml>;
+const mockUseParams = vi.fn();
 
 // Mock the useSaveYaml hook - now returns just the function, not an array
-jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
-  useSaveYaml: jest.fn(),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => mockUseParams(),
-}));
+vi.mock('../../../entities/workflows/model/use_save_yaml', () => {
+      const mocked = {
+      useSaveYaml: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => mockUseParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockKqlStart = kqlPluginMock.createStartContract();
 const mockFieldFormatsStart = fieldFormatsServiceMock.createStartContract();
 
 // Mock the useKibana hook
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      http: {},
-      notifications: {
-        toasts: {
-          addSuccess: jest.fn(),
-          addError: jest.fn(),
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({
+        services: {
+          http: {},
+          notifications: {
+            toasts: {
+              addSuccess: vi.fn(),
+              addError: vi.fn(),
+            },
+          },
+          kql: mockKqlStart,
+          fieldFormats: mockFieldFormatsStart,
         },
-      },
-      kql: mockKqlStart,
-      fieldFormats: mockFieldFormatsStart,
-    },
-  })),
-}));
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRegisterKeyboardCommands = jest.fn();
-const mockUnregisterKeyboardCommands = jest.fn();
+const mockRegisterKeyboardCommands = vi.fn();
+const mockUnregisterKeyboardCommands = vi.fn();
 let capturedKeyboardHandlers: {
   save?: () => void;
   run?: () => void;
   saveAndRun?: () => void;
 } = {};
 
-jest.mock('../lib/use_register_keyboard_commands', () => ({
-  useRegisterKeyboardCommands: jest.fn(() => ({
-    registerKeyboardCommands: (params: any) => {
-      capturedKeyboardHandlers = {
-        save: params.save,
-        run: params.run,
-        saveAndRun: params.saveAndRun,
-      };
-      mockRegisterKeyboardCommands(params);
-    },
-    unregisterKeyboardCommands: mockUnregisterKeyboardCommands,
-  })),
-}));
+vi.mock('../lib/use_register_keyboard_commands', () => {
+      const mocked = {
+      useRegisterKeyboardCommands: vi.fn(() => ({
+        registerKeyboardCommands: (params: any) => {
+          capturedKeyboardHandlers = {
+            save: params.save,
+            run: params.run,
+            saveAndRun: params.saveAndRun,
+          };
+          mockRegisterKeyboardCommands(params);
+        },
+        unregisterKeyboardCommands: mockUnregisterKeyboardCommands,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRegisterHoverCommands = jest.fn();
-const mockUnregisterHoverCommands = jest.fn();
-jest.mock('../lib/use_register_hover_commands', () => ({
-  useRegisterHoverCommands: jest.fn(() => ({
-    registerHoverCommands: (params: any) => {
-      mockRegisterHoverCommands(params);
-    },
-    unregisterHoverCommands: mockUnregisterHoverCommands,
-  })),
-}));
+const mockRegisterHoverCommands = vi.fn();
+const mockUnregisterHoverCommands = vi.fn();
+vi.mock('../lib/use_register_hover_commands', () => {
+      const mocked = {
+      useRegisterHoverCommands: vi.fn(() => ({
+        registerHoverCommands: (params: any) => {
+          mockRegisterHoverCommands(params);
+        },
+        unregisterHoverCommands: mockUnregisterHoverCommands,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./step_actions', () => ({
-  StepActions: () => null,
-}));
+vi.mock('./step_actions', () => {
+      const mocked = {
+      StepActions: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./actions_menu_button', () => ({
-  ActionsMenuButton: () => null,
-}));
+vi.mock('./actions_menu_button', () => {
+      const mocked = {
+      ActionsMenuButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./decorations', () => ({
-  useAlertTriggerDecorations: jest.fn(),
-  useConnectorTypeDecorations: jest.fn(),
-  useFocusedStepDecoration: jest.fn(),
-  useLineDifferencesDecorations: jest.fn(),
-  useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
-  useTriggerTypeDecorations: jest.fn(),
-  useWorkflowEventsOnDecorations: jest.fn(),
-  useWorkflowIdDecorations: jest.fn(),
-}));
+vi.mock('./decorations', () => {
+      const mocked = {
+      useAlertTriggerDecorations: vi.fn(),
+      useConnectorTypeDecorations: vi.fn(),
+      useFocusedStepDecoration: vi.fn(),
+      useLineDifferencesDecorations: vi.fn(),
+      useStepDecorationsInExecution: vi.fn(() => ({ styles: {} })),
+      useTriggerTypeDecorations: vi.fn(),
+      useWorkflowEventsOnDecorations: vi.fn(),
+      useWorkflowIdDecorations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../styles/use_workflow_editor_styles', () => ({
-  useWorkflowEditorStyles: jest.fn(() => ({})),
-}));
+vi.mock('../styles/use_workflow_editor_styles', () => {
+      const mocked = {
+      useWorkflowEditorStyles: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-  useWorkflowsMonacoTheme: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+      useWorkflowsMonacoTheme: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
-jest.mock('../styles/use_dynamic_type_icons', () => ({
-  useDynamicTypeIcons: jest.fn(),
-}));
+vi.mock('../styles/use_dynamic_type_icons', () => {
+      const mocked = {
+      useDynamicTypeIcons: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../styles/global_workflow_editor_styles', () => ({
-  GlobalWorkflowEditorStyles: () => null,
-}));
+vi.mock('../styles/global_workflow_editor_styles', () => {
+      const mocked = {
+      GlobalWorkflowEditorStyles: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockCloseActionsPopover: (() => void) | undefined;
-jest.mock('../../../features/actions_menu_popover', () => ({
-  ActionsMenuPopover: ({ closePopover }: { closePopover: () => void }) => {
-    mockCloseActionsPopover = closePopover;
-    return null;
-  },
-}));
+vi.mock('../../../features/actions_menu_popover', () => {
+      const mocked = {
+      ActionsMenuPopover: ({ closePopover }: { closePopover: () => void }) => {
+        mockCloseActionsPopover = closePopover;
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/utils', () => ({
-  navigateToErrorPosition: jest.fn(),
-}));
+vi.mock('../lib/utils', () => {
+      const mocked = {
+      navigateToErrorPosition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../features/validate_workflow_yaml/model/use_workflow_json_schema', () => ({
-  useWorkflowJsonSchema: jest.fn(() => ({
-    jsonSchema: null,
-    uri: null,
-  })),
-}));
+vi.mock('../../../features/validate_workflow_yaml/model/use_workflow_json_schema', () => {
+      const mocked = {
+      useWorkflowJsonSchema: vi.fn(() => ({
+        jsonSchema: null,
+        uri: null,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor',
-  () => ({
-    useMonacoMarkersChangedInterceptor: jest.fn(() => ({
-      validationErrors: [],
-      transformMonacoMarkers: jest.fn(),
-      handleMarkersChanged: jest.fn(),
-    })),
-  })
+  () => {
+      const mocked = {
+        useMonacoMarkersChangedInterceptor: vi.fn(() => ({
+          validationErrors: [],
+          transformMonacoMarkers: vi.fn(),
+          handleMarkersChanged: vi.fn(),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const mockCompletionProvider = {
   triggerCharacters: ['@', '.', ' ', '|', '{'],
-  provideCompletionItems: jest.fn(),
+  provideCompletionItems: vi.fn(),
 };
 
-jest.mock('../lib/esql_validation/use_workflow_esql_callbacks', () => ({
-  useWorkflowEsqlCallbacks: () => ({}),
-}));
+vi.mock('../lib/esql_validation/use_workflow_esql_callbacks', () => {
+      const mocked = {
+      useWorkflowEsqlCallbacks: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/autocomplete/get_completion_item_provider', () => ({
-  getCompletionItemProvider: jest.fn(() => mockCompletionProvider),
-}));
+vi.mock('../lib/autocomplete/get_completion_item_provider', () => {
+      const mocked = {
+      getCompletionItemProvider: vi.fn(() => mockCompletionProvider),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock interceptMonacoYamlProvider to be a no-op so the original mock remains
-jest.mock('../lib/autocomplete/intercept_monaco_yaml_provider', () => ({
-  interceptMonacoYamlProvider: jest.fn(),
-}));
+vi.mock('../lib/autocomplete/intercept_monaco_yaml_provider', () => {
+      const mocked = {
+      interceptMonacoYamlProvider: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_agent_builder_integration', () => ({
-  useAgentBuilderIntegration: jest.fn(() => ({
-    openAgentChat: jest.fn(),
-    isAgentBuilderAvailable: false,
-    proposalManager: null,
-  })),
-}));
+vi.mock('./hooks/use_agent_builder_integration', () => {
+      const mocked = {
+      useAgentBuilderIntegration: vi.fn(() => ({
+        openAgentChat: vi.fn(),
+        isAgentBuilderAvailable: false,
+        proposalManager: null,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    editor: {
-      setModelMarkers: jest.fn(),
-      registerCommand: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
-    },
-    languages: {
-      registerCompletionItemProvider: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
-      registerCodeActionProvider: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
-    },
-  },
-  YAML_LANG_ID: 'yaml',
-}));
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      monaco: {
+        editor: {
+          setModelMarkers: vi.fn(),
+          registerCommand: vi.fn().mockReturnValue({
+            dispose: vi.fn(),
+          }),
+        },
+        languages: {
+          registerCompletionItemProvider: vi.fn().mockReturnValue({
+            dispose: vi.fn(),
+          }),
+          registerCodeActionProvider: vi.fn().mockReturnValue({
+            dispose: vi.fn(),
+          }),
+        },
+      },
+      YAML_LANG_ID: 'yaml',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
-    onStepRun: jest.fn(),
+    onStepRun: vi.fn(),
     editorRef: { current: null },
   };
   const mockWorkflow = {
@@ -302,7 +380,7 @@ describe('WorkflowYAMLEditor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedKeyboardHandlers = {};
     mockCloseActionsPopover = undefined;
     defaultProps.editorRef.current = null;
@@ -329,7 +407,7 @@ describe('WorkflowYAMLEditor', () => {
       expect(defaultProps.editorRef.current).not.toBeNull();
     });
 
-    const requestAnimationFrame = jest
+    const requestAnimationFrame = vi
       .spyOn(window, 'requestAnimationFrame')
       .mockImplementation((callback) => {
         callback(0);
@@ -337,7 +415,7 @@ describe('WorkflowYAMLEditor', () => {
       });
 
     try {
-      const focus = defaultProps.editorRef.current?.focus as jest.Mock;
+      const focus = defaultProps.editorRef.current?.focus as Mock;
       focus.mockClear();
 
       act(() => mockCloseActionsPopover?.());
@@ -576,7 +654,7 @@ steps:
       expect(getCompletionItemProvider).toHaveBeenCalled();
 
       // Get the second argument passed to registerCompletionItemProvider
-      const registeredProvider = (monaco.languages.registerCompletionItemProvider as jest.Mock).mock
+      const registeredProvider = (monaco.languages.registerCompletionItemProvider as Mock).mock
         .calls[0][1];
 
       // Verify it's the same object returned by our mock
@@ -591,8 +669,8 @@ steps:
       store.dispatch(setYamlString(yamlContent));
       store.dispatch(setActiveTab('workflow'));
 
-      const mockDispose = jest.fn();
-      (monaco.languages.registerCompletionItemProvider as jest.Mock).mockReturnValue({
+      const mockDispose = vi.fn();
+      (monaco.languages.registerCompletionItemProvider as Mock).mockReturnValue({
         dispose: mockDispose,
       });
 
@@ -616,7 +694,7 @@ steps:
       store.dispatch(setActiveTab('workflow'));
 
       const originalSetModelMarkers = monaco.editor.setModelMarkers;
-      const setModelMarkersSpy = jest.fn();
+      const setModelMarkersSpy = vi.fn();
       monaco.editor.setModelMarkers = setModelMarkersSpy;
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);

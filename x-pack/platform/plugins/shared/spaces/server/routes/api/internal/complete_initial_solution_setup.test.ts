@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -23,11 +25,11 @@ describe('POST /internal/spaces/_complete_initial_solution_setup', () => {
     const router = httpServiceMock.createRouter();
     const spacesClient = spacesClientMock.create();
     spacesClient.completeInitialSolutionSetup.mockResolvedValue(undefined);
-    const getSpacesService = jest.fn().mockReturnValue({
-      createSpacesClient: jest.fn().mockReturnValue(spacesClient),
+    const getSpacesService = vi.fn().mockReturnValue({
+      createSpacesClient: vi.fn().mockReturnValue(spacesClient),
     });
     const initialSolutionSetup = new InitialSolutionSetupService(options.eligible ?? true);
-    jest.spyOn(initialSolutionSetup, 'markComplete');
+    vi.spyOn(initialSolutionSetup, 'markComplete');
 
     initCompleteInitialSolutionSetupApi({
       router,

@@ -7,26 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import type { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
-export const MockClusterClient = jest.fn();
-export const MockAgentManager: jest.MockedClass<typeof AgentManager> = jest.fn().mockReturnValue({
-  getAgentsStats: jest.fn(),
-  getAgentFactory: jest.fn(),
+export const MockClusterClient = vi.fn();
+export const MockAgentManager: MockedClass<typeof AgentManager> = vi.fn().mockReturnValue({
+  getAgentsStats: vi.fn(),
+  getAgentFactory: vi.fn(),
 });
 
-jest.mock('@kbn/core-elasticsearch-client-server-internal', () => ({
-  ClusterClient: MockClusterClient,
-  AgentManager: MockAgentManager,
-  getRequestHandlerFactory: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('@kbn/core-elasticsearch-client-server-internal', () => {
+      const mocked = {
+      ClusterClient: MockClusterClient,
+      AgentManager: MockAgentManager,
+      getRequestHandlerFactory: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const isScriptingEnabledMock = jest.fn();
-jest.doMock('./is_scripting_enabled', () => ({
-  isInlineScriptingEnabled: isScriptingEnabledMock,
-}));
+export const isScriptingEnabledMock = vi.fn();
+vi.doMock('./is_scripting_enabled', () => {
+      const mocked = {
+      isInlineScriptingEnabled: isScriptingEnabledMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const getClusterInfoMock = jest.fn();
-jest.doMock('./get_cluster_info', () => ({
-  getClusterInfo$: getClusterInfoMock,
-}));
+export const getClusterInfoMock = vi.fn();
+vi.doMock('./get_cluster_info', () => {
+      const mocked = {
+      getClusterInfo$: getClusterInfoMock,
+    };
+      return { ...mocked, default: mocked };
+    });

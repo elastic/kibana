@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
@@ -36,7 +39,7 @@ const createErrorResponseWithBody = (status: number, body: unknown): Response =>
 };
 
 describe('Cloud stack versions API', () => {
-  const log = { error: jest.fn() };
+  const log = { error: vi.fn() };
   const cloudStackVersionsApiBaseUrl = 'https://cloud.example.test/api/stack/versions';
   let originalFetchDescriptor: PropertyDescriptor | undefined;
   let originalAbortSignalTimeout: ((timeoutMs: number) => AbortSignal) | undefined;
@@ -51,9 +54,9 @@ describe('Cloud stack versions API', () => {
   });
 
   beforeEach(() => {
-    Object.defineProperty(globalThis, 'fetch', { value: jest.fn(), writable: true });
+    Object.defineProperty(globalThis, 'fetch', { value: vi.fn(), writable: true });
 
-    (AbortSignal as unknown as { timeout: (timeoutMs: number) => AbortSignal }).timeout = jest.fn(
+    (AbortSignal as unknown as { timeout: (timeoutMs: number) => AbortSignal }).timeout = vi.fn(
       (timeoutMs: number) => {
         const signal = new AbortController().signal as AbortSignal & { __timeoutMs?: number };
         signal.__timeoutMs = timeoutMs;
@@ -76,7 +79,7 @@ describe('Cloud stack versions API', () => {
       delete (AbortSignal as unknown as { timeout?: unknown }).timeout;
     }
 
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns latest available version, first hop min version, and direct upgrade range', async () => {
@@ -88,7 +91,7 @@ describe('Cloud stack versions API', () => {
     };
     registerCloudStackVersionsRoute(routeDependencies);
 
-    const fetchMock = global.fetch as unknown as jest.Mock;
+    const fetchMock = global.fetch as unknown as Mock;
     fetchMock
       .mockResolvedValueOnce(
         createOkResponse({
@@ -130,7 +133,7 @@ describe('Cloud stack versions API', () => {
       signal: expect.any(Object),
     });
 
-    const abortSignalTimeoutMock = AbortSignal.timeout as unknown as jest.Mock;
+    const abortSignalTimeoutMock = AbortSignal.timeout as unknown as Mock;
     const timeoutMsCalls = abortSignalTimeoutMock.mock.calls.map(([ms]) => ms);
     expect(timeoutMsCalls.filter((ms) => ms === 30_000)).toHaveLength(1);
     expect(timeoutMsCalls.filter((ms) => ms === 5_000)).toHaveLength(fetchMock.mock.calls.length);
@@ -147,7 +150,7 @@ describe('Cloud stack versions API', () => {
       };
       registerCloudStackVersionsRoute(routeDependencies);
 
-      const fetchMock = global.fetch as unknown as jest.Mock;
+      const fetchMock = global.fetch as unknown as Mock;
       fetchMock
         .mockResolvedValueOnce(
           createErrorResponseWithBody(status, {
@@ -200,7 +203,7 @@ describe('Cloud stack versions API', () => {
     };
     registerCloudStackVersionsRoute(routeDependencies);
 
-    const fetchMock = global.fetch as unknown as jest.Mock;
+    const fetchMock = global.fetch as unknown as Mock;
     fetchMock.mockResolvedValueOnce(createOkResponse({ upgradable_to: [] }));
 
     await routeDependencies.router.getHandler({
@@ -224,7 +227,7 @@ describe('Cloud stack versions API', () => {
     };
     registerCloudStackVersionsRoute(routeDependencies);
 
-    const fetchMock = global.fetch as unknown as jest.Mock;
+    const fetchMock = global.fetch as unknown as Mock;
     fetchMock.mockResolvedValueOnce(createErrorResponse(503));
 
     const resp = await routeDependencies.router.getHandler({

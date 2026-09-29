@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { render } from '@testing-library/react';
@@ -12,7 +14,7 @@ import React from 'react';
 import { LogAIAssistant } from './log_ai_assistant';
 
 const observabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
-jest
+vi
   .spyOn(observabilityAIAssistant, 'getContextualInsightMessages')
   .mockReturnValue([{ message: { content: 'hello' } } as Message]);
 

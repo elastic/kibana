@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import {
@@ -14,9 +17,9 @@ import {
 } from './granular_facet_aggregations';
 import { findRules } from './find_rules';
 
-jest.mock('./find_rules');
+vi.mock('./find_rules');
 
-const findRulesMock = findRules as jest.MockedFunction<typeof findRules>;
+const findRulesMock = findRules as MockedFunction<typeof findRules>;
 
 const aggregationsResponse = (
   raw: Record<string, { buckets: Array<{ key: string; doc_count: number }> }>

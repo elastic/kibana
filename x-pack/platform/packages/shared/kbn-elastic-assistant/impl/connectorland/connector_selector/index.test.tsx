@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ConnectorSelector } from '.';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -14,8 +16,8 @@ import * as i18n from '../translations';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { createMockUseLoadConnectorsResult } from '../../mock/test_helpers';
 
-const onConnectorSelectionChange = jest.fn();
-const setIsOpen = jest.fn();
+const onConnectorSelectionChange = vi.fn();
+const setIsOpen = vi.fn();
 const defaultProps = {
   isDisabled: false,
   onConnectorSelectionChange,
@@ -25,19 +27,25 @@ const defaultProps = {
 
 const connectorTwo = mockConnectors[1];
 
-const mockRefetchConnectors = jest.fn();
+const mockRefetchConnectors = vi.fn();
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(),
-}));
-
-jest.mock('../use_load_action_types', () => ({
-  useLoadActionTypes: jest.fn(() => {
-    return {
-      data: mockActionTypes,
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../use_load_action_types', () => {
+      const mocked = {
+      useLoadActionTypes: vi.fn(() => {
+        return {
+          data: mockActionTypes,
+        };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
 
@@ -59,23 +67,26 @@ afterAll(() => {
   global.MutationObserver = OriginalMutationObserver;
 });
 
-jest.mock('../add_connector_modal', () => ({
-  // @ts-ignore
-  AddConnectorModal: ({ onSaveConnector }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="modal-mock"
-        onClick={() => onSaveConnector(newConnector)}
-      />
-    </>
-  ),
-}));
+vi.mock('../add_connector_modal', () => {
+      const mocked = {
+      // @ts-ignore
+      AddConnectorModal: ({ onSaveConnector }) => (
+        <>
+          <button
+            type="button"
+            data-test-subj="modal-mock"
+            onClick={() => onSaveConnector(newConnector)}
+          />
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Connector selector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useLoadConnectors).mockReturnValue(
+    vi.clearAllMocks();
+    vi.mocked(useLoadConnectors).mockReturnValue(
       createMockUseLoadConnectorsResult({
         data: mockConnectors,
         error: null,
@@ -88,7 +99,7 @@ describe('Connector selector', () => {
   });
 
   it('enables add connector button when user can create connectors and none exist', () => {
-    jest.mocked(useLoadConnectors).mockReturnValue(
+    vi.mocked(useLoadConnectors).mockReturnValue(
       createMockUseLoadConnectorsResult({
         data: [],
         error: null,
@@ -111,7 +122,7 @@ describe('Connector selector', () => {
   });
 
   it('disables add connector button when user cannot create connectors', () => {
-    jest.mocked(useLoadConnectors).mockReturnValue(
+    vi.mocked(useLoadConnectors).mockReturnValue(
       createMockUseLoadConnectorsResult({
         data: [],
         error: null,
@@ -140,7 +151,7 @@ describe('Connector selector', () => {
   });
 
   it('shows tooltip with missing privileges message when hovering disabled add connector button', async () => {
-    jest.mocked(useLoadConnectors).mockReturnValue(
+    vi.mocked(useLoadConnectors).mockReturnValue(
       createMockUseLoadConnectorsResult({
         data: [],
         error: null,

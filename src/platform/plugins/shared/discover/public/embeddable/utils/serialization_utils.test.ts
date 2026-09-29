@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
@@ -175,7 +178,7 @@ describe('Serialization utils', () => {
         }),
         true
       );
-      const byValueCall = discoverServiceMock.savedSearch.byValueToSavedSearch as jest.Mock;
+      const byValueCall = discoverServiceMock.savedSearch.byValueToSavedSearch as Mock;
       const [firstArg] = byValueCall.mock.calls[0];
       expect(firstArg.attributes.references).toBeDefined();
       expect(Array.isArray(firstArg.attributes.references)).toBe(true);
@@ -185,7 +188,7 @@ describe('Serialization utils', () => {
     });
 
     test('by value restores Metrics profile state from the saved search', async () => {
-      jest.mocked(discoverServiceMock.savedSearch.byValueToSavedSearch).mockResolvedValueOnce({
+      vi.mocked(discoverServiceMock.savedSearch.byValueToSavedSearch).mockResolvedValueOnce({
         title: 'Metrics panel',
         serializedSearchSource: { query: { esql: 'TS metrics-*' } },
         tabTypeState: metricsTabTypeState,
@@ -211,7 +214,7 @@ describe('Serialization utils', () => {
           sort: [['timestamp', 'asc']],
         }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = vi
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
@@ -236,7 +239,7 @@ describe('Serialization utils', () => {
 
     test('by reference with panel overwrites', async () => {
       const sessionTabs = [mockTab('tab-1', 'Tab 1')];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = vi
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
@@ -274,7 +277,7 @@ describe('Serialization utils', () => {
           tabTypeState: metricsTabTypeState,
         },
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = vi
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
@@ -305,7 +308,7 @@ describe('Serialization utils', () => {
           sort: [['fallback_field', 'desc']],
         }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = vi
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
@@ -337,7 +340,7 @@ describe('Serialization utils', () => {
           sort: [['timestamp', 'asc']],
         }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = vi
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
@@ -361,7 +364,7 @@ describe('Serialization utils', () => {
       const sessionTabs = [
         mockTab('tab-1', 'Tab 1', { jsonModeSettings: { hideNulls: true, wrapLines: true } }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = vi
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
@@ -388,7 +391,7 @@ describe('Serialization utils', () => {
           grid: { columns: { A: { width: 100 }, B: { width: 200 } } },
         }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = vi
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
@@ -437,9 +440,9 @@ describe('Serialization utils', () => {
           serializedSearchSource: {},
         },
         savedSearch,
-        serializeTitles: jest.fn().mockReturnValue({ title: 'test1', description: 'description' }),
-        serializeTimeRange: jest.fn(),
-        serializeDynamicActions: jest.fn(),
+        serializeTitles: vi.fn().mockReturnValue({ title: 'test1', description: 'description' }),
+        serializeTimeRange: vi.fn(),
+        serializeDynamicActions: vi.fn(),
       });
 
       expect(serializedState).toMatchObject({
@@ -518,9 +521,9 @@ describe('Serialization utils', () => {
             managed: false,
             searchSource,
           },
-          serializeTitles: jest.fn().mockReturnValue({ title: 'Test panel' }),
-          serializeTimeRange: jest.fn(),
-          serializeDynamicActions: jest.fn(),
+          serializeTitles: vi.fn().mockReturnValue({ title: 'Test panel' }),
+          serializeTimeRange: vi.fn(),
+          serializeDynamicActions: vi.fn(),
           selectedTabId,
         });
 
@@ -555,9 +558,9 @@ describe('Serialization utils', () => {
             tabs: [mockTab('tab-1', 'Tab 1')],
           },
           savedSearch: savedSearch as Parameters<typeof serializeState>[0]['savedSearch'],
-          serializeTitles: jest.fn(),
-          serializeTimeRange: jest.fn(),
-          serializeDynamicActions: jest.fn(),
+          serializeTitles: vi.fn(),
+          serializeTimeRange: vi.fn(),
+          serializeDynamicActions: vi.fn(),
           savedObjectId: 'test-id',
         });
 
@@ -580,9 +583,9 @@ describe('Serialization utils', () => {
             sampleSize: 500,
             sort: sortOverride,
           } as Parameters<typeof serializeState>[0]['savedSearch'],
-          serializeTitles: jest.fn(),
-          serializeTimeRange: jest.fn(),
-          serializeDynamicActions: jest.fn(),
+          serializeTitles: vi.fn(),
+          serializeTimeRange: vi.fn(),
+          serializeDynamicActions: vi.fn(),
           savedObjectId: 'test-id',
           selectedTabId: 'tab-1',
         });
@@ -606,9 +609,9 @@ describe('Serialization utils', () => {
             tabs: [mockTab('tab-1', 'Tab 1'), mockTab('tab-2', 'Tab 2')],
           },
           savedSearch: savedSearch as Parameters<typeof serializeState>[0]['savedSearch'],
-          serializeTitles: jest.fn(),
-          serializeTimeRange: jest.fn(),
-          serializeDynamicActions: jest.fn(),
+          serializeTitles: vi.fn(),
+          serializeTimeRange: vi.fn(),
+          serializeDynamicActions: vi.fn(),
           savedObjectId: 'test-id',
           selectedTabId: 'tab-2',
         });
@@ -626,9 +629,9 @@ describe('Serialization utils', () => {
             tabs: [mockTab('tab-1', 'Tab 1')],
           },
           savedSearch: savedSearch as Parameters<typeof serializeState>[0]['savedSearch'],
-          serializeTitles: jest.fn(),
-          serializeTimeRange: jest.fn(),
-          serializeDynamicActions: jest.fn(),
+          serializeTitles: vi.fn(),
+          serializeTimeRange: vi.fn(),
+          serializeDynamicActions: vi.fn(),
           savedObjectId: 'test-id',
           selectedTabId: undefined,
         });
@@ -643,7 +646,7 @@ describe('Serialization utils', () => {
   describe('legacy panel state (BWC)', () => {
     test('deserialize by-ref uses savedObjectId', async () => {
       const sessionTabs = [mockTab('tab-1', 'Tab 1')];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = vi
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 

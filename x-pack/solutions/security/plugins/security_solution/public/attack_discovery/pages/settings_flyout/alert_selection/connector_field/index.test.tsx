@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -13,20 +16,23 @@ import { TestProviders } from '../../../../../common/mock';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { CONNECTOR, CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from '../translations';
 
-jest.mock('../../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('../../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSpaceId = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
+const mockUseSpaceId = useSpaceId as MockedFunction<typeof useSpaceId>;
 
 const defaultProps = {
   connectorId: 'test-connector-id',
-  onConnectorIdSelected: jest.fn(),
+  onConnectorIdSelected: vi.fn(),
 };
 
 describe('ConnectorField', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSpaceId.mockReturnValue('default');
   });
 

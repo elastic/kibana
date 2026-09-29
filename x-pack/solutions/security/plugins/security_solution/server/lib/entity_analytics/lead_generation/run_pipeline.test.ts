@@ -5,49 +5,69 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
-const mockListEntities = jest.fn();
+const mockListEntities = vi.fn();
 
-const mockPrepareLeadCandidates = jest.fn();
-const mockSynthesizeLeads = jest.fn();
-jest.mock('./engine/lead_generation_engine', () => ({
-  createLeadGenerationEngine: () => ({
-    prepareLeadCandidates: mockPrepareLeadCandidates,
-    synthesizeLeads: mockSynthesizeLeads,
-  }),
-}));
+const mockPrepareLeadCandidates = vi.fn();
+const mockSynthesizeLeads = vi.fn();
+vi.mock('./engine/lead_generation_engine', () => {
+      const mocked = {
+      createLeadGenerationEngine: () => ({
+        prepareLeadCandidates: mockPrepareLeadCandidates,
+        synthesizeLeads: mockSynthesizeLeads,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRegisterObservationModules = jest.fn();
-jest.mock('./observation_modules/register_modules', () => ({
-  registerObservationModules: (...args: unknown[]) => mockRegisterObservationModules(...args),
-}));
+const mockRegisterObservationModules = vi.fn();
+vi.mock('./observation_modules/register_modules', () => {
+      const mocked = {
+      registerObservationModules: (...args: unknown[]) => mockRegisterObservationModules(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBuildEntityLookupMap = jest.fn();
-jest.mock('./entities_relationships', () => ({
-  buildEntityLookupMap: (...args: unknown[]) => mockBuildEntityLookupMap(...args),
-}));
+const mockBuildEntityLookupMap = vi.fn();
+vi.mock('./entities_relationships', () => {
+      const mocked = {
+      buildEntityLookupMap: (...args: unknown[]) => mockBuildEntityLookupMap(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAttachRelatedEntities = jest.fn();
-jest.mock('./attach_related_entities', () => ({
-  attachRelatedEntities: (...args: unknown[]) => mockAttachRelatedEntities(...args),
-}));
+const mockAttachRelatedEntities = vi.fn();
+vi.mock('./attach_related_entities', () => {
+      const mocked = {
+      attachRelatedEntities: (...args: unknown[]) => mockAttachRelatedEntities(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockClassifyLeadCandidates = jest.fn();
-const mockPersistLeads = jest.fn();
-jest.mock('./lead_data_client', () => ({
-  createLeadDataClient: () => ({
-    classifyLeadCandidates: mockClassifyLeadCandidates,
-    persistLeads: mockPersistLeads,
-  }),
-}));
+const mockClassifyLeadCandidates = vi.fn();
+const mockPersistLeads = vi.fn();
+vi.mock('./lead_data_client', () => {
+      const mocked = {
+      createLeadDataClient: () => ({
+        classifyLeadCandidates: mockClassifyLeadCandidates,
+        persistLeads: mockPersistLeads,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBuildExploratoryLeads = jest.fn();
-jest.mock('./exploratory_leads', () => ({
-  buildExploratoryLeads: (...args: unknown[]) => mockBuildExploratoryLeads(...args),
-}));
+const mockBuildExploratoryLeads = vi.fn();
+vi.mock('./exploratory_leads', () => {
+      const mocked = {
+      buildExploratoryLeads: (...args: unknown[]) => mockBuildExploratoryLeads(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
 import { runLeadGenerationPipeline } from './run_pipeline';
@@ -56,8 +76,8 @@ describe('runLeadGenerationPipeline', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const riskScoreDataClient = riskScoreDataClientMock.create();
-  const fakeChatModel = { invoke: jest.fn() } as unknown as InferenceChatModel;
-  const relationshipsClient = { getEarliestObservationByTarget: jest.fn() };
+  const fakeChatModel = { invoke: vi.fn() } as unknown as InferenceChatModel;
+  const relationshipsClient = { getEarliestObservationByTarget: vi.fn() };
 
   const pipelineParams = {
     listEntities: mockListEntities,
@@ -70,7 +90,7 @@ describe('runLeadGenerationPipeline', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeEach(() => {
@@ -485,7 +505,7 @@ describe('runLeadGenerationPipeline', () => {
       },
     ]);
 
-    const analytics = { reportEvent: jest.fn() };
+    const analytics = { reportEvent: vi.fn() };
 
     await runLeadGenerationPipeline({
       ...pipelineParams,

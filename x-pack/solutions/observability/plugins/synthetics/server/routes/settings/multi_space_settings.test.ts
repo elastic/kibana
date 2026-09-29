@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SyntheticsMultiSpaceSettingsWithSpaces } from '../../../common/runtime_types';
 import { DefaultSyntheticsMultiSpaceSettingsRepository } from '../../services/synthetics_multi_space_settings_repository';
@@ -19,19 +22,19 @@ const NOT_FOUND_SENTINEL = { status: 404 };
 
 const buildServer = ({
   isElasticsearchServerless = false,
-  invalidateCache = jest.fn(),
+  invalidateCache = vi.fn(),
 }: {
   isElasticsearchServerless?: boolean;
-  invalidateCache?: jest.Mock;
+  invalidateCache?: Mock;
 } = {}) =>
   ({
     isElasticsearchServerless,
-    syntheticsIndicesCache: { invalidate: invalidateCache, get: jest.fn() },
+    syntheticsIndicesCache: { invalidate: invalidateCache, get: vi.fn() },
   } as unknown as RouteContext['server']);
 
 const buildResponse = () =>
   ({
-    notFound: jest.fn().mockReturnValue(NOT_FOUND_SENTINEL),
+    notFound: vi.fn().mockReturnValue(NOT_FOUND_SENTINEL),
   } as unknown as RouteContext['response']);
 
 const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext =>
@@ -44,7 +47,7 @@ const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext 
 
 describe('multi space settings routes', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('SyntheticsMultiSpaceSettingsSchema', () => {
@@ -75,7 +78,7 @@ describe('multi space settings routes', () => {
         selectedRemoteClusters: ['cluster-a'],
         spaces: ['default'],
       };
-      const getSpy = jest
+      const getSpy = vi
         .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get')
         .mockResolvedValue(expected);
 
@@ -87,7 +90,7 @@ describe('multi space settings routes', () => {
     });
 
     it('returns 404 when running on serverless', async () => {
-      const getSpy = jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get');
+      const getSpy = vi.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get');
       const response = buildResponse();
 
       const route = createGetMultiSpaceSettingsRoute();
@@ -111,7 +114,7 @@ describe('multi space settings routes', () => {
         selectedRemoteClusters: ['cluster-a'],
         spaces: ['default'],
       };
-      const saveSpy = jest
+      const saveSpy = vi
         .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
         .mockResolvedValue(expected);
 
@@ -131,7 +134,7 @@ describe('multi space settings routes', () => {
         selectedRemoteClusters: ['cluster-a'],
         spaces: ['default', 'marketing'],
       };
-      const saveSpy = jest
+      const saveSpy = vi
         .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
         .mockResolvedValue(expected);
 
@@ -153,7 +156,7 @@ describe('multi space settings routes', () => {
     });
 
     it('returns 404 on serverless without persisting anything', async () => {
-      const saveSpy = jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
+      const saveSpy = vi.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
       const response = buildResponse();
 
       const route = createPutMultiSpaceSettingsRoute();
@@ -171,7 +174,7 @@ describe('multi space settings routes', () => {
     });
 
     it('invalidates the synthetics indices cache after a successful save', async () => {
-      jest
+      vi
         .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
         .mockResolvedValue({
           useAllRemoteClusters: true,
@@ -179,7 +182,7 @@ describe('multi space settings routes', () => {
           spaces: ['default'],
         });
 
-      const invalidateCache = jest.fn();
+      const invalidateCache = vi.fn();
       const route = createPutMultiSpaceSettingsRoute();
       await route.handler(
         buildRouteContext({
@@ -195,8 +198,8 @@ describe('multi space settings routes', () => {
     });
 
     it('does not invalidate the cache when the route short-circuits on serverless', async () => {
-      jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
-      const invalidateCache = jest.fn();
+      vi.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
+      const invalidateCache = vi.fn();
 
       const route = createPutMultiSpaceSettingsRoute();
       await route.handler(
@@ -210,11 +213,11 @@ describe('multi space settings routes', () => {
     });
 
     it('invalidates the cache even when save throws after a partial update', async () => {
-      jest
+      vi
         .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
         .mockRejectedValue(new Error('updateObjectsSpaces failed'));
 
-      const invalidateCache = jest.fn();
+      const invalidateCache = vi.fn();
       const route = createPutMultiSpaceSettingsRoute();
 
       await expect(

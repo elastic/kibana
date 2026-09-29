@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createNumberHandler } from './create_number_handler';
 
 describe('createNumberHandler()', () => {
-  let handleChange: jest.Mock;
+  let handleChange: Mock;
   let changeHandler: ReturnType<typeof createNumberHandler>;
   let event: React.ChangeEvent<HTMLInputElement>;
 
   beforeEach(() => {
-    handleChange = jest.fn();
+    handleChange = vi.fn();
     changeHandler = createNumberHandler(handleChange);
     event = {
-      preventDefault: jest.fn(),
+      preventDefault: vi.fn(),
       target: { value: '1' },
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     const fn = changeHandler('unit');

@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  useGetEnrollmentAPIKeysQuery: jest.fn(),
-  useGetAgentStatusQuery: jest.fn(),
-  useBulkGetAgentPoliciesQuery: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      useGetEnrollmentAPIKeysQuery: vi.fn(),
+      useGetAgentStatusQuery: vi.fn(),
+      useBulkGetAgentPoliciesQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
@@ -23,10 +29,10 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { useAgentPolicySummary } from './use_agent_policy_summary';
 
-const mockUseSessionStorage = useSessionStorage as jest.Mock;
-const mockUseGetEnrollmentAPIKeysQuery = useGetEnrollmentAPIKeysQuery as jest.Mock;
-const mockUseGetAgentStatusQuery = useGetAgentStatusQuery as jest.Mock;
-const mockUseBulkGetAgentPoliciesQuery = useBulkGetAgentPoliciesQuery as jest.Mock;
+const mockUseSessionStorage = useSessionStorage as Mock;
+const mockUseGetEnrollmentAPIKeysQuery = useGetEnrollmentAPIKeysQuery as Mock;
+const mockUseGetAgentStatusQuery = useGetAgentStatusQuery as Mock;
+const mockUseBulkGetAgentPoliciesQuery = useBulkGetAgentPoliciesQuery as Mock;
 
 const POLICY_ID = 'policy-abc-123';
 const POLICY_NAME = 'AWS Agent Policy 1';
@@ -48,7 +54,7 @@ function setupMocks({
 }) {
   mockUseSessionStorage.mockReturnValue([
     { agentPolicyId, agentPolicyName, selectedAgentPolicyIds },
-    jest.fn(),
+    vi.fn(),
   ]);
   mockUseGetEnrollmentAPIKeysQuery.mockReturnValue({ data: { items: enrollmentKeyItems } });
   mockUseGetAgentStatusQuery.mockReturnValue({ data: { results: agentStatusResults } });
@@ -57,7 +63,7 @@ function setupMocks({
 
 describe('useAgentPolicySummary', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when agentPolicyId is absent', () => {

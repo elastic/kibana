@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { AuthTypeRegistry } from './auth_type_registry';
 import type { NormalizedAuthType } from '@kbn/connector-specs';
@@ -21,7 +23,7 @@ const getAuthType = (overrides = {}): NormalizedAuthType => {
 
 describe('AuthTypeRegistry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('register()', () => {

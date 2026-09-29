@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -28,17 +30,17 @@ const fakeRequest = {
       url: '/',
     },
   },
-  getSavedObjectsClient: jest.fn(),
+  getSavedObjectsClient: vi.fn(),
 } as unknown as KibanaRequest;
 
 const auditService = securityServiceMock.createStart().audit;
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const eventLogger = eventLoggerMock.create();
-const getAlertIndicesAliasMock = jest.fn();
+const getAlertIndicesAliasMock = vi.fn();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const securityServiceStart = securityServiceMock.createStart();
-const getSpaceId = jest.fn();
+const getSpaceId = vi.fn();
 const spacesService = { getSpaceId } as unknown as SpacesServiceStart;
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
@@ -47,7 +49,7 @@ describe('scheduleTask', () => {
   let alertDeletionClient: AlertDeletionClient;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger.get.mockImplementation(() => logger);
     getAlertIndicesAliasMock.mockReturnValue(['index1', 'index2']);
     // @ts-ignore - incomplete return type
@@ -68,7 +70,7 @@ describe('scheduleTask', () => {
 
   test('should schedule ad hoc task with given settings and space IDs', async () => {
     const auditLog = auditService.withoutRequest;
-    auditService.asScoped = jest.fn(() => auditLog);
+    auditService.asScoped = vi.fn(() => auditLog);
     taskManagerStart.fetch.mockResolvedValueOnce({
       docs: [],
       versionMap: new Map(),
@@ -114,7 +116,7 @@ describe('scheduleTask', () => {
 
   test('should skip scheduling task and return message if task is already running for spaceID', async () => {
     const auditLog = auditService.withoutRequest;
-    auditService.asScoped = jest.fn(() => auditLog);
+    auditService.asScoped = vi.fn(() => auditLog);
     taskManagerStart.fetch.mockResolvedValueOnce({
       docs: [
         {
@@ -168,7 +170,7 @@ describe('scheduleTask', () => {
 
   test('should log and re-throw error if error scheduling task', async () => {
     const auditLog = auditService.withoutRequest;
-    auditService.asScoped = jest.fn(() => auditLog);
+    auditService.asScoped = vi.fn(() => auditLog);
     taskManagerStart.schedule.mockRejectedValueOnce(new Error('Failed to schedule task'));
     taskManagerStart.fetch.mockResolvedValueOnce({
       docs: [],

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { ConversationRound, ConverseInput, TimelineEvent } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -57,15 +60,18 @@ const prepareConversation = async ({
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 
-jest.mock('@kbn/agent-builder-server/tools', () => ({
-  getToolResultId: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-server/tools', () => {
+      const mocked = {
+      getToolResultId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetToolResultId = getToolResultId as jest.MockedFunction<typeof getToolResultId>;
+const mockGetToolResultId = getToolResultId as MockedFunction<typeof getToolResultId>;
 
 describe('prepareConversation', () => {
   let mockContext: AgentHandlerContextMock;
-  let mockAttachmentsService: jest.Mocked<AttachmentsService>;
+  let mockAttachmentsService: Mocked<AttachmentsService>;
 
   const attachmentDefinition = ({
     id = 'text',
@@ -80,8 +86,8 @@ describe('prepareConversation', () => {
   }): AttachmentTypeDefinition => {
     return {
       id,
-      validate: jest.fn(),
-      format: jest.fn().mockImplementation(() => {
+      validate: vi.fn(),
+      format: vi.fn().mockImplementation(() => {
         return {
           getRepresentation: () => repr,
           getBoundedTools: () => boundedTools,
@@ -190,8 +196,8 @@ describe('prepareConversation', () => {
       // We only need getTypeDefinition for attachmentTypes; it won't be used for formatting since we strip.
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'desc',
       });
 
@@ -234,8 +240,8 @@ describe('prepareConversation', () => {
       });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'A text attachment type',
       });
 
@@ -285,8 +291,8 @@ describe('prepareConversation', () => {
       });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'desc',
       });
 
@@ -343,8 +349,8 @@ describe('prepareConversation', () => {
       });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'desc',
       });
 
@@ -405,8 +411,8 @@ describe('prepareConversation', () => {
       });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'desc',
       });
 
@@ -460,8 +466,8 @@ describe('prepareConversation', () => {
       });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'desc',
       });
 
@@ -841,8 +847,8 @@ describe('prepareConversation', () => {
       ]);
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'A text attachment type',
       });
 
@@ -906,8 +912,8 @@ describe('prepareConversation', () => {
       ]);
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'A text attachment type',
       });
 
@@ -963,8 +969,8 @@ describe('prepareConversation', () => {
       ]);
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'A text attachment type',
       });
 
@@ -1030,8 +1036,8 @@ describe('prepareConversation', () => {
       ]);
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => 'A text attachment type',
       });
 
@@ -1098,8 +1104,8 @@ describe('prepareConversation', () => {
       ]);
       mockAttachmentsService.getTypeDefinition.mockImplementation((type) => ({
         id: type,
-        validate: jest.fn(),
-        format: jest.fn(),
+        validate: vi.fn(),
+        format: vi.fn(),
         getAgentDescription: () => `A ${type} attachment`,
       }));
 
@@ -1355,7 +1361,7 @@ describe('prepareConversation', () => {
     ];
 
     it('resolves the representation through the registered definition and keeps timeline order', async () => {
-      const format = jest.fn(({ data }: { data: any }) => ({
+      const format = vi.fn(({ data }: { data: any }) => ({
         type: 'text' as const,
         value: `${data.title}\n${data.text}`,
       }));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -17,32 +20,38 @@ import { getInstallationObject } from '.';
 
 // Mutable fns closed over by the mock factory so individual tests can override them.
 const mockFns = {
-  useRbacForRequest: jest.fn().mockReturnValue(true),
-  atSpaces: jest.fn().mockResolvedValue({ hasAllRequested: true }),
+  useRbacForRequest: vi.fn().mockReturnValue(true),
+  atSpaces: vi.fn().mockResolvedValue({ hasAllRequested: true }),
 };
 
-jest.mock('../..', () => ({
-  appContextService: {
-    getSecurity: jest.fn(),
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn().mockReturnValue({}),
-    getExperimentalFeatures: jest.fn().mockReturnValue({ enableResolveDependencies: false }),
-  },
-  packagePolicyService: {
-    list: jest.fn(),
-  },
-}));
+vi.mock('../..', () => {
+      const mocked = {
+      appContextService: {
+        getSecurity: vi.fn(),
+        getInternalUserSOClientWithoutSpaceExtension: vi.fn().mockReturnValue({}),
+        getExperimentalFeatures: vi.fn().mockReturnValue({ enableResolveDependencies: false }),
+      },
+      packagePolicyService: {
+        list: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock getInstallationObject so the dependency walker in collectSpacesForUninstallClosure
 // finds no dependencies (returns undefined for any dep lookup).
-jest.mock('.', () => ({
-  getInstallationObject: jest.fn().mockResolvedValue(undefined),
-  kibanaSavedObjectTypes: [],
-  getPackageInfo: jest.fn(),
-}));
+vi.mock('.', () => {
+      const mocked = {
+      getInstallationObject: vi.fn().mockResolvedValue(undefined),
+      kibanaSavedObjectTypes: [],
+      getPackageInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetSecurity = appContextService.getSecurity as jest.Mock;
-const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
-const mockGetInstallationObject = getInstallationObject as jest.MockedFunction<
+const mockGetSecurity = appContextService.getSecurity as Mock;
+const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as Mock;
+const mockGetInstallationObject = getInstallationObject as MockedFunction<
   typeof getInstallationObject
 >;
 
@@ -56,7 +65,7 @@ function makeSecurityStub() {
       actions: {
         api: { get: (name: string) => `api:${name}` },
       },
-      checkPrivilegesWithRequest: jest.fn().mockReturnValue({
+      checkPrivilegesWithRequest: vi.fn().mockReturnValue({
         atSpaces: (...args: any[]) => mockFns.atSpaces(...args),
       }),
     },
@@ -80,12 +89,12 @@ function makeInstallation(overrides: object = {}) {
   } as any;
 }
 
-const mockPackagePolicyList = packagePolicyService.list as jest.MockedFunction<
+const mockPackagePolicyList = packagePolicyService.list as MockedFunction<
   typeof packagePolicyService.list
 >;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockFns.useRbacForRequest.mockReturnValue(true);
   mockFns.atSpaces.mockResolvedValue({ hasAllRequested: true });
   mockGetSecurity.mockReturnValue(makeSecurityStub());

@@ -5,24 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useEntityRiskScores } from './use_entity_risk_scores';
 import { useRiskScore } from './use_risk_score';
 import { useResolutionGroup } from '../../components/entity_resolution/hooks/use_resolution_group';
 import { EntityType } from '../../../../common/entity_analytics/types';
 
-jest.mock('./use_risk_score', () => ({
-  useRiskScore: jest.fn(),
-}));
-jest.mock('../../components/entity_resolution/hooks/use_resolution_group', () => ({
-  useResolutionGroup: jest.fn(),
-}));
-jest.mock('../../components/entity_resolution/helpers', () => ({
-  getEntityId: jest.fn().mockReturnValue('target-user'),
-}));
+vi.mock('./use_risk_score', () => {
+      const mocked = {
+      useRiskScore: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/entity_resolution/hooks/use_resolution_group', () => {
+      const mocked = {
+      useResolutionGroup: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/entity_resolution/helpers', () => {
+      const mocked = {
+      getEntityId: vi.fn().mockReturnValue('target-user'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRiskScore = useRiskScore as jest.Mock;
-const mockUseResolutionGroup = useResolutionGroup as jest.Mock;
+const mockUseRiskScore = useRiskScore as Mock;
+const mockUseResolutionGroup = useResolutionGroup as Mock;
 
 const stubRiskScoreState = {
   data: undefined,
@@ -33,7 +45,7 @@ const stubRiskScoreState = {
   hasEngineBeenInstalled: true,
   loading: false,
   totalCount: 0,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 };
 
 const executionContext = {
@@ -45,7 +57,7 @@ const executionContext = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseRiskScore.mockReturnValue(stubRiskScoreState);
   // group_size > 1 activates the resolution branch so both useRiskScore calls fire
   mockUseResolutionGroup.mockReturnValue({

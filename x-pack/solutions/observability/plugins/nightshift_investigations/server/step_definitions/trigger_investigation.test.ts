@@ -5,28 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { MAX_ARRAY_LENGTH, MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { InvestigationQuotaDeniedError } from '../client/errors';
 import type { GetInvestigationsClient } from '../routes/types';
 import { triggerInvestigationStepDefinition } from './trigger_investigation';
 
-jest.mock('@kbn/workflows-extensions/server', () => ({
-  createServerStepDefinition: jest.fn((definition) => definition),
-}));
+vi.mock('@kbn/workflows-extensions/server', () => {
+      const mocked = {
+      createServerStepDefinition: vi.fn((definition) => definition),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const request = {} as KibanaRequest;
 const createContext = (input: Record<string, unknown>) =>
   ({
     input,
     contextManager: {
-      getFakeRequest: jest.fn().mockReturnValue(request),
-      getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'test-space' } }),
+      getFakeRequest: vi.fn().mockReturnValue(request),
+      getContext: vi.fn().mockReturnValue({ workflow: { spaceId: 'test-space' } }),
     },
   } as never);
 
-const createDefinition = (start: jest.Mock) => {
-  const getInvestigationsClient = jest
+const createDefinition = (start: Mock) => {
+  const getInvestigationsClient = vi
     .fn()
     .mockReturnValue({ start }) as unknown as GetInvestigationsClient;
   return {
@@ -37,7 +43,7 @@ const createDefinition = (start: jest.Mock) => {
 
 describe('triggerInvestigationStepDefinition', () => {
   it('defaults an omitted trigger type to automatic', async () => {
-    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const start = vi.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
 
     await definition.handler(
@@ -56,7 +62,7 @@ describe('triggerInvestigationStepDefinition', () => {
   });
 
   it('preserves an explicit manual trigger type', async () => {
-    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const start = vi.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
 
     await definition.handler(
@@ -76,7 +82,7 @@ describe('triggerInvestigationStepDefinition', () => {
   });
 
   it('forwards an explicit prompt and stream names unchanged', async () => {
-    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const start = vi.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
 
     await definition.handler(
@@ -98,7 +104,7 @@ describe('triggerInvestigationStepDefinition', () => {
   });
 
   it('rejects invalid prompt and stream inputs before starting', async () => {
-    const start = jest.fn();
+    const start = vi.fn();
     const { definition } = createDefinition(start);
 
     await expect(
@@ -138,7 +144,7 @@ describe('triggerInvestigationStepDefinition', () => {
 
   it('propagates a denied start without retrying', async () => {
     const error = new InvestigationQuotaDeniedError();
-    const start = jest.fn().mockRejectedValue(error);
+    const start = vi.fn().mockRejectedValue(error);
     const { definition } = createDefinition(start);
 
     await expect(

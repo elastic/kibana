@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { getAgentUpgradeRollbacks } from './agent_upgrade_rollbacks';
@@ -17,7 +19,7 @@ describe('getAgentUpgradeRollbacks', () => {
 
   it('counts only hits where data.rollback is true', async () => {
     const esClientMock = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: [
             { _source: { data: { rollback: true } } },
@@ -36,7 +38,7 @@ describe('getAgentUpgradeRollbacks', () => {
 
   it('returns 0 when there are no UPGRADE actions', async () => {
     const esClientMock = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: { hits: [] },
       }),
     } as unknown as ElasticsearchClient;
@@ -47,7 +49,7 @@ describe('getAgentUpgradeRollbacks', () => {
 
   it('returns 0 when .fleet-actions index does not exist (404 ignored)', async () => {
     const esClientMock = {
-      search: jest.fn().mockResolvedValue(undefined),
+      search: vi.fn().mockResolvedValue(undefined),
     } as unknown as ElasticsearchClient;
 
     const result = await getAgentUpgradeRollbacks(esClientMock);
@@ -55,7 +57,7 @@ describe('getAgentUpgradeRollbacks', () => {
   });
 
   it('queries .fleet-actions with type:UPGRADE and 1h time range', async () => {
-    const searchMock = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    const searchMock = vi.fn().mockResolvedValue({ hits: { hits: [] } });
     const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;
 
     await getAgentUpgradeRollbacks(esClientMock);

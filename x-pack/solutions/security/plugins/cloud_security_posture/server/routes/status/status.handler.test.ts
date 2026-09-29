@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 /**
  * Jest with Kibana mocks (L2): orchestration tests for `getCspStatus` —
  * exercises the real dep fan-out (ES + Fleet + SO + agent service) with
@@ -153,18 +156,18 @@ const agentPolicyFor = (id: string): AgentPolicy =>
   } as unknown as AgentPolicy);
 
 interface OrchestrationDeps {
-  esClient: jest.Mocked<ElasticsearchClient>;
-  soClient: jest.Mocked<SavedObjectsClientContract>;
+  esClient: Mocked<ElasticsearchClient>;
+  soClient: Mocked<SavedObjectsClientContract>;
   agentPolicyService: ReturnType<typeof createMockAgentPolicyService>;
   agentService: ReturnType<typeof createMockAgentService>;
-  packagePolicyService: jest.Mocked<PackagePolicyClient>;
+  packagePolicyService: Mocked<PackagePolicyClient>;
   packageService: PackageService;
   packageServiceMocks: {
-    getInstallation: jest.Mock;
-    fetchFindLatestPackage: jest.Mock;
+    getInstallation: Mock;
+    fetchFindLatestPackage: Mock;
   };
   logger: ReturnType<typeof loggerMock.create>;
-  isPluginInitialized: jest.Mock<boolean, []>;
+  isPluginInitialized: Mock<boolean, []>;
 }
 
 const createOrchestrationDeps = (): OrchestrationDeps => {
@@ -173,10 +176,10 @@ const createOrchestrationDeps = (): OrchestrationDeps => {
   const agentPolicyService = createMockAgentPolicyService();
   const agentService = createMockAgentService();
   const packagePolicyService = {
-    list: jest.fn(),
-  } as unknown as jest.Mocked<PackagePolicyClient>;
-  const getInstallation = jest.fn();
-  const fetchFindLatestPackage = jest.fn().mockResolvedValue({ version: '1.9.0' });
+    list: vi.fn(),
+  } as unknown as Mocked<PackagePolicyClient>;
+  const getInstallation = vi.fn();
+  const fetchFindLatestPackage = vi.fn().mockResolvedValue({ version: '1.9.0' });
   const packageService = {
     asInternalUser: {
       getInstallation,
@@ -184,7 +187,7 @@ const createOrchestrationDeps = (): OrchestrationDeps => {
     },
   } as unknown as PackageService;
   const logger = loggerMock.create();
-  const isPluginInitialized = jest.fn<boolean, []>(() => true);
+  const isPluginInitialized = vi.fn<boolean, []>(() => true);
 
   return {
     esClient,
@@ -199,7 +202,7 @@ const createOrchestrationDeps = (): OrchestrationDeps => {
   };
 };
 
-const setupEsSearch = (esClient: jest.Mocked<ElasticsearchClient>, scenario: EsSearchScenario) => {
+const setupEsSearch = (esClient: Mocked<ElasticsearchClient>, scenario: EsSearchScenario) => {
   esClient.search.mockImplementation((req) => {
     const request = req as { index: string; size?: number; query?: any };
     const index = request.index;
@@ -272,7 +275,7 @@ const setupEsSearch = (esClient: jest.Mocked<ElasticsearchClient>, scenario: EsS
 };
 
 const setupPackagePolicies = (
-  packagePolicyService: jest.Mocked<PackagePolicyClient>,
+  packagePolicyService: Mocked<PackagePolicyClient>,
   installedPackagePolicies: PackagePolicy[]
 ) => {
   packagePolicyService.list.mockImplementation((async (
@@ -294,7 +297,7 @@ const setupAgents = (
   agentPolicyService.getByIds.mockImplementation(async (_so, ids: unknown) => {
     return (ids as string[]).map(agentPolicyFor);
   });
-  (agentService.asInternalUser.getAgentStatusForAgentPolicy as jest.Mock).mockImplementation(
+  (agentService.asInternalUser.getAgentStatusForAgentPolicy as Mock).mockImplementation(
     async (agentPolicyId?: string) => ({
       online: agentPolicyId ? healthyAgentsByPolicyId[agentPolicyId] ?? 0 : 0,
       updating: 0,
@@ -351,12 +354,12 @@ describe('CSP status route', () => {
     let deps: OrchestrationDeps;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       deps = createOrchestrationDeps();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     describe('STATUS = INDEXED', () => {
@@ -503,8 +506,8 @@ describe('CSP status route', () => {
       const NOW = new Date('2026-01-01T00:00:00Z');
 
       beforeEach(() => {
-        jest.useFakeTimers();
-        jest.setSystemTime(NOW);
+        vi.useFakeTimers();
+        vi.setSystemTime(NOW);
       });
 
       it(`Should return index-timeout when installed kspm and it has been more than ${INDEX_TIMEOUT_IN_MINUTES} minutes since installation`, async () => {
@@ -615,8 +618,8 @@ describe('CSP status route', () => {
       const NOW = new Date('2026-01-01T00:00:00Z');
 
       beforeEach(() => {
-        jest.useFakeTimers();
-        jest.setSystemTime(NOW);
+        vi.useFakeTimers();
+        vi.setSystemTime(NOW);
       });
 
       it(`Should return waiting_for_results when installed kspm and it has been less than ${INDEX_TIMEOUT_IN_MINUTES} minutes since installation`, async () => {

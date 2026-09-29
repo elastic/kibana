@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
   CLOUD_SNAPSHOT_REPOSITORY,
@@ -149,7 +151,7 @@ describe('Overview - Backup Step', () => {
 
     describe('poll for new status', () => {
       beforeEach(async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
 
         // First request will succeed.
         httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
@@ -162,10 +164,10 @@ describe('Overview - Backup Step', () => {
 
       afterEach(async () => {
         await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
+          await vi.runOnlyPendingTimersAsync();
         });
-        jest.clearAllTimers();
-        jest.useRealTimers();
+        vi.clearAllTimers();
+        vi.useRealTimers();
       });
 
       test('renders step as incomplete when a success state is followed by an error state', async () => {

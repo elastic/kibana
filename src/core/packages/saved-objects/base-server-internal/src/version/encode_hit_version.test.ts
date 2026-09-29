@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./encode_version', () => ({
-  encodeVersion: jest.fn().mockReturnValue('foo'),
-}));
+import { vi } from 'vitest';
+
+vi.mock('./encode_version', () => {
+      const mocked = {
+      encodeVersion: vi.fn().mockReturnValue('foo'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { encodeHitVersion } from './encode_hit_version';
 import { encodeVersion } from './encode_version';

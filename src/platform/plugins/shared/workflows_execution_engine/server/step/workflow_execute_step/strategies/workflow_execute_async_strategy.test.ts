@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import { WorkflowExecuteAsyncStrategy } from './workflow_execute_async_strategy';
@@ -28,19 +31,19 @@ const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
 
 describe('WorkflowExecuteAsyncStrategy', () => {
   let strategy: WorkflowExecuteAsyncStrategy;
-  let mockEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
-  let mockExecRepo: jest.Mocked<WorkflowExecutionRepository>;
-  let mockStepRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockLogger: jest.Mocked<IWorkflowEventLogger>;
+  let mockEngine: Mocked<WorkflowsExecutionEnginePluginStart>;
+  let mockExecRepo: Mocked<WorkflowExecutionRepository>;
+  let mockStepRuntime: Mocked<StepExecutionRuntime>;
+  let mockLogger: Mocked<IWorkflowEventLogger>;
   let mockRequest: KibanaRequest;
 
   beforeEach(() => {
     mockEngine = {
-      executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'async-exec-1' }),
+      executeWorkflow: vi.fn().mockResolvedValue({ workflowExecutionId: 'async-exec-1' }),
     } as any;
 
     mockExecRepo = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'async-exec-1',
         startedAt: '2024-01-01T00:00:00Z',
       }),
@@ -56,9 +59,9 @@ describe('WorkflowExecuteAsyncStrategy', () => {
     } as any;
 
     mockLogger = {
-      logInfo: jest.fn(),
-      logDebug: jest.fn(),
-      logError: jest.fn(),
+      logInfo: vi.fn(),
+      logDebug: vi.fn(),
+      logError: vi.fn(),
     } as any;
 
     mockRequest = {} as KibanaRequest;

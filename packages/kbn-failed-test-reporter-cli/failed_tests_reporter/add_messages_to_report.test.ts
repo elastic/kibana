@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -19,8 +21,8 @@ expect.addSnapshotSerializer({
   serialize: (v) => v.replace(/</g, '‹').replace(/>/g, '›').replace(/^\s+$/gm, ''),
 });
 
-jest.mock('fs', () => {
-  const realFs = jest.requireActual('fs');
+vi.mock('fs', () => {
+  const realFs = require('fs');
   return {
     ...realFs,
     writeFile: (...args: any[]) => {
@@ -34,7 +36,7 @@ import { parseTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const log = new ToolingLog();

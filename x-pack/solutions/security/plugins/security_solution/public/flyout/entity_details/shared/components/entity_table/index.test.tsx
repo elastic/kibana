@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -14,9 +16,12 @@ import type { BasicEntityData, EntityTableRow } from './types';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from '../../../../shared/components/test_ids';
 import { mockFlyoutApi } from '../../../../document_details/shared/mocks/mock_flyout_context';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderedFieldValue = 'testValue1';
 
@@ -43,8 +48,8 @@ const mockProps = {
 
 describe('EntityTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('renders correctly', () => {

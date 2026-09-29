@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 
@@ -22,7 +24,7 @@ import { AgentPolicyCustomFields } from './agent_policy_custom_fields';
 describe('AgentPolicyCustomFields', () => {
   let testRenderer: TestRenderer;
   let renderResult: RenderResult;
-  const mockUpdateAgentPolicy = jest.fn();
+  const mockUpdateAgentPolicy = vi.fn();
 
   const renderComponent = (agentPolicy: Partial<AgentPolicy | NewAgentPolicy>) => {
     renderResult = testRenderer.render(
@@ -35,7 +37,7 @@ describe('AgentPolicyCustomFields', () => {
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render without crashing', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { lastValueFrom, toArray, filter, noop, of } from 'rxjs';
@@ -55,9 +58,9 @@ const anthropicChunkBase = {
 
 describe('inferenceEndpointAdapter', () => {
   const executorMock: InferenceEndpointExecutor & {
-    invoke: jest.MockedFn<InferenceEndpointExecutor['invoke']>;
+    invoke: MockedFunction<InferenceEndpointExecutor['invoke']>;
   } = {
-    invoke: jest.fn(),
+    invoke: vi.fn(),
   };
 
   const logger = loggerMock.create();

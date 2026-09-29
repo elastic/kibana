@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { getOutdatedDocumentsQuery } from './outdated_documents_query';
 import { createType } from '../test_helpers/saved_object_type';
@@ -15,7 +17,7 @@ const dummyModelVersion: SavedObjectsModelVersion = {
   changes: [],
 };
 
-const dummyMigration = jest.fn();
+const dummyMigration = vi.fn();
 
 describe('getOutdatedDocumentsQuery', () => {
   it('generates the correct query for types using model versions', () => {

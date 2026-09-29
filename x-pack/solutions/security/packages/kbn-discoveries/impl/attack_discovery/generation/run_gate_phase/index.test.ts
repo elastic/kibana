@@ -5,28 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import { runGatePhase } from '.';
 import { AttackDiscoveryError } from '../../../lib/errors/attack_discovery_error';
 import type { AlertRetrievalResult } from '../invoke_alert_retrieval_workflow';
 
-const mockInvokeGateWorkflow = jest.fn();
-const mockRetrieveAnonymizedAlertsByIds = jest.fn();
+const mockInvokeGateWorkflow = vi.fn();
+const mockRetrieveAnonymizedAlertsByIds = vi.fn();
 
-jest.mock('../invoke_gate_workflow', () => ({
-  invokeGateWorkflow: (...args: unknown[]) => mockInvokeGateWorkflow(...args),
-}));
+vi.mock('../invoke_gate_workflow', () => {
+      const mocked = {
+      invokeGateWorkflow: (...args: unknown[]) => mockInvokeGateWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../retrieve_anonymized_alerts_by_ids', () => ({
-  retrieveAnonymizedAlertsByIds: (...args: unknown[]) => mockRetrieveAnonymizedAlertsByIds(...args),
-}));
+vi.mock('../retrieve_anonymized_alerts_by_ids', () => {
+      const mocked = {
+      retrieveAnonymizedAlertsByIds: (...args: unknown[]) => mockRetrieveAnonymizedAlertsByIds(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const logger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const apiConfig = {
@@ -70,7 +79,7 @@ const baseParams = {
 
 describe('runGatePhase', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockInvokeGateWorkflow.mockResolvedValue({
       decision: { addedAlertIds: [], removeAlertIds: [] },
       workflowExecution: { workflowId: 'gate', workflowRunId: 'gate-run' },
@@ -357,7 +366,7 @@ describe('runGatePhase', () => {
       },
     });
 
-    expect((logger.error as jest.Mock).mock.calls[0][0]).toContain('_id contract violation');
+    expect((logger.error as Mock).mock.calls[0][0]).toContain('_id contract violation');
   });
 
   it('fails closed when the gate workflow throws', async () => {
@@ -420,7 +429,7 @@ describe('runGatePhase', () => {
     await runGatePhase({ ...baseParams, skillEnabled: true });
 
     expect(
-      (logger.warn as jest.Mock).mock.calls.some(([message]) =>
+      (logger.warn as Mock).mock.calls.some(([message]) =>
         String(message).includes('none resolved on re-fetch')
       )
     ).toBe(true);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { bulkUpdateAlertTags } from './bulk_update_alert_tags';
 
@@ -12,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('bulkUpdateAlertTags', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call tags API with add and remove', async () => {

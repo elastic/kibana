@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, within } from '@testing-library/react';
 import { HeaderButtons } from '.';
@@ -12,7 +14,7 @@ import { getMigrationsStatsMock } from '../__mocks__';
 import { TestProviders } from '../../../../common/mock';
 
 describe('HeaderButtons', () => {
-  const onMigrationIdChange = jest.fn();
+  const onMigrationIdChange = vi.fn();
 
   it('renders the component', () => {
     const { getByTestId } = render(

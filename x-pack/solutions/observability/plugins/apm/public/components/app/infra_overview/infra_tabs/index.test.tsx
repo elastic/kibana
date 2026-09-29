@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -13,21 +16,27 @@ import { InfraTabs } from '.';
 import { useInfrastructureAttributes } from '../use_infrastructure_attributes';
 import { useTabs } from './use_tabs';
 
-jest.mock('../use_infrastructure_attributes', () => ({
-  useInfrastructureAttributes: jest.fn(),
-}));
+vi.mock('../use_infrastructure_attributes', () => {
+      const mocked = {
+      useInfrastructureAttributes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_tabs', () => ({
-  InfraTab: {
-    containers: 'containers',
-    pods: 'pods',
-    hosts: 'hosts',
-  },
-  useTabs: jest.fn(),
-}));
+vi.mock('./use_tabs', () => {
+      const mocked = {
+      InfraTab: {
+        containers: 'containers',
+        pods: 'pods',
+        hosts: 'hosts',
+      },
+      useTabs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseInfrastructureAttributes = useInfrastructureAttributes as jest.Mock;
-const mockUseTabs = useTabs as jest.Mock;
+const mockUseInfrastructureAttributes = useInfrastructureAttributes as Mock;
+const mockUseTabs = useTabs as Mock;
 const defaultHookValue = {
   agentName: 'nodejs',
   data: {
@@ -54,7 +63,7 @@ describe('InfraTabs', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows infrastructure tab content when data exists', () => {

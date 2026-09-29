@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 
@@ -33,7 +35,7 @@ describe('useVisualizationResponse', () => {
             loading: mockedOkResponse.loading,
             selectedInspectIndex: 0,
             searchSessionId: mockedOkResponse.searchSessionId,
-            refetch: jest.fn(),
+            refetch: vi.fn(),
             tables: mockedOkResponse.tables,
           },
         ],
@@ -44,7 +46,7 @@ describe('useVisualizationResponse', () => {
   const mockStore = createMockStore(mockState);
   const visualizationId = 'testId';
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should get result by visualization id', () => {
     const { result } = renderHook(() => useVisualizationResponse({ visualizationId }), {

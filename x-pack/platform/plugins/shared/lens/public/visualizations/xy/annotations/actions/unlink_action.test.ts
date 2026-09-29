@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
@@ -54,7 +56,7 @@ describe('annotation group unlink actions', () => {
   it('should unlink layer from library annotation group', () => {
     const toasts = toastsServiceMock.createStartContract();
 
-    const setState = jest.fn();
+    const setState = vi.fn();
     const action = getUnlinkLayerAction({
       state,
       layer: byRefLayer,

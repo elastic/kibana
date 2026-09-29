@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,32 +20,41 @@ import { ServicesContextProvider } from '../../../../contexts';
 import type { ContextValue } from '../../../../contexts/services_context';
 import { copyTextToClipboard } from '../../../../lib/copy_text_to_clipboard';
 
-jest.mock('./language_selector_modal', () => ({
-  LanguageSelectorModal: () => <div>Language Selector Modal</div>,
-}));
+vi.mock('./language_selector_modal', () => {
+      const mocked = {
+      LanguageSelectorModal: () => <div>Language Selector Modal</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../services', () => ({
-  convertRequestToLanguage: jest.fn(() =>
-    Promise.resolve({ data: 'mocked request code', error: null })
-  ),
-  StorageKeys: {
-    DEFAULT_LANGUAGE: 'default_language',
-  },
-}));
+vi.mock('../../../../../services', () => {
+      const mocked = {
+      convertRequestToLanguage: vi.fn(() =>
+        Promise.resolve({ data: 'mocked request code', error: null })
+      ),
+      StorageKeys: {
+        DEFAULT_LANGUAGE: 'default_language',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/copy_text_to_clipboard', () => ({
-  copyTextToClipboard: jest.fn(),
-}));
+vi.mock('../../../../lib/copy_text_to_clipboard', () => {
+      const mocked = {
+      copyTextToClipboard: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCopyTextToClipboard = copyTextToClipboard as jest.MockedFunction<
+const mockCopyTextToClipboard = copyTextToClipboard as MockedFunction<
   typeof copyTextToClipboard
 >;
 
 const mockNotifications: Pick<NotificationsStart, 'toasts'> = {
   toasts: {
-    addSuccess: jest.fn(),
-    addDanger: jest.fn(),
-    addWarning: jest.fn(),
+    addSuccess: vi.fn(),
+    addDanger: vi.fn(),
+    addWarning: vi.fn(),
   } as any,
 };
 
@@ -50,18 +62,18 @@ const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue =
   return {
     services: {
       storage: {
-        get: jest.fn(() => 'curl'),
-        set: jest.fn(),
+        get: vi.fn(() => 'curl'),
+        set: vi.fn(),
       } as any,
       esHostService: {
-        getHost: jest.fn(() => 'http://localhost:9200'),
-        init: jest.fn(),
+        getHost: vi.fn(() => 'http://localhost:9200'),
+        init: vi.fn(),
       } as any,
       history: {} as any,
       settings: {} as any,
       notifications: mockNotifications as any,
       objectStorageClient: {} as any,
-      trackUiMetric: jest.fn() as any,
+      trackUiMetric: vi.fn() as any,
       http: {} as any,
       autocompleteInfo: {} as any,
       data: {} as any,
@@ -76,27 +88,27 @@ const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue =
     },
     // Required properties from ConsoleStartServices
     analytics: {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     },
     i18n: {} as any,
     theme: {
-      theme$: jest.fn(),
+      theme$: vi.fn(),
     } as any,
     userProfile: {} as any,
   };
 };
 
 const defaultProps = {
-  getRequests: jest.fn(() => Promise.resolve([{ method: 'GET', url: '/', data: [] }])),
-  getDocumentation: jest.fn(() => Promise.resolve('https://elastic.co/docs')),
-  autoIndent: jest.fn(),
+  getRequests: vi.fn(() => Promise.resolve([{ method: 'GET', url: '/', data: [] }])),
+  getDocumentation: vi.fn(() => Promise.resolve('https://elastic.co/docs')),
+  autoIndent: vi.fn(),
   notifications: mockNotifications,
-  getIsKbnRequestSelected: jest.fn(() => Promise.resolve(false)),
+  getIsKbnRequestSelected: vi.fn(() => Promise.resolve(false)),
 };
 
 describe('ContextMenu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCopyTextToClipboard.mockResolvedValue(true);
   });
 

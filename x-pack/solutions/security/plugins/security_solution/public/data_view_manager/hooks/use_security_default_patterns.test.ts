@@ -4,18 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux-v7';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { useSecurityDefaultPatterns } from './use_security_default_patterns';
 
-jest.mock('react-redux-v7', () => ({
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useSecurityDefaultPatterns', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the default data view', () => {
@@ -32,7 +38,7 @@ describe('useSecurityDefaultPatterns', () => {
       },
     ];
 
-    (useSelector as jest.Mock).mockReturnValue({
+    (useSelector as Mock).mockReturnValue({
       dataViews: mockDataViews,
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
     });
@@ -45,7 +51,7 @@ describe('useSecurityDefaultPatterns', () => {
   });
 
   it('should return empty id and index patterns if no default data view is found', () => {
-    (useSelector as jest.Mock).mockReturnValue({
+    (useSelector as Mock).mockReturnValue({
       dataViews: [],
       defaultDataViewId: null,
     });

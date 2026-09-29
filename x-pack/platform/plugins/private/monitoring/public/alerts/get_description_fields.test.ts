@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
@@ -12,13 +14,13 @@ import { getDescriptionFields } from './get_description_fields';
 import type { EsVersionMismatchParams } from '@kbn/response-ops-rule-params/es_version_mismatch';
 
 describe('synthetics getDescriptionFields', () => {
-  const mockPrebuildField = jest.fn();
+  const mockPrebuildField = vi.fn();
   const mockPrebuildFields = {
     [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: mockPrebuildField,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty array when rule is not provided', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -15,14 +17,14 @@ import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { GenerateSearchApplicationApiKeyModal } from './generate_search_application_api_key_modal';
 
-const mockActions = { makeRequest: jest.fn(), setKeyName: jest.fn() };
+const mockActions = { makeRequest: vi.fn(), setKeyName: vi.fn() };
 
 const mockValues = { apiKey: '', isLoading: false, isSuccess: false, keyName: '' };
 
-const onCloseMock = jest.fn();
+const onCloseMock = vi.fn();
 describe('GenerateSearchApplicationApiKeyModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(mockValues);
     setMockActions(mockActions);
   });

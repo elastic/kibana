@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { rollUsageCountersIndices } from './rollups';
@@ -25,12 +27,12 @@ describe('rollUsageCountersIndices', () => {
     getRegisteredUsageCounters = () => [
       {
         domainId: 'testDomain',
-        incrementCounter: jest.fn(),
+        incrementCounter: vi.fn(),
       },
       {
         domainId: 'retention_3',
         retentionPeriodDays: 3,
-        incrementCounter: jest.fn(),
+        incrementCounter: vi.fn(),
       },
     ];
   });

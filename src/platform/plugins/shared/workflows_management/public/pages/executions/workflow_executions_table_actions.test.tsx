@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
@@ -17,15 +19,15 @@ import {
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
-const mockNavigateToApp = jest.fn();
-const mockUseWorkflowsCapabilities = jest.fn(() => ({
+const mockNavigateToApp = vi.fn();
+const mockUseWorkflowsCapabilities = vi.fn(() => ({
   canExecuteWorkflow: true,
   canReadWorkflowExecution: true,
   canUpdateWorkflow: true,
 }));
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
     useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
@@ -81,7 +83,7 @@ const ActionsCellHarness = ({
 
 describe('workflow executions actions column', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: true,
       canReadWorkflowExecution: true,
@@ -95,7 +97,7 @@ describe('workflow executions actions column', () => {
 
     render(
       <ActionsCellHarness
-        onViewAllExecutionsForWorkflow={jest.fn()}
+        onViewAllExecutionsForWorkflow={vi.fn()}
         execution={createExecution({
           id: 'exec-1',
           workflowId: 'wf-1',
@@ -134,7 +136,7 @@ describe('workflow executions actions column', () => {
   });
 
   it('applies workflowId filter for view all executions', () => {
-    const onViewAllExecutionsForWorkflow = jest.fn();
+    const onViewAllExecutionsForWorkflow = vi.fn();
     const services = createStartServicesMock();
     services.application.navigateToApp = mockNavigateToApp;
 
@@ -158,7 +160,7 @@ describe('workflow executions actions column', () => {
   });
 
   it('re-runs execution in place when onReRunExecution is provided', () => {
-    const onReRunExecution = jest.fn();
+    const onReRunExecution = vi.fn();
     const services = createStartServicesMock();
     services.application.navigateToApp = mockNavigateToApp;
 
@@ -194,8 +196,8 @@ describe('workflow executions actions column', () => {
     render(
       <WorkflowExecutionActionsMenu
         actionContext={{ executionId: 'exec-1', workflowId: 'wf-1' }}
-        onReRunExecution={jest.fn()}
-        onViewAllExecutionsForWorkflow={jest.fn()}
+        onReRunExecution={vi.fn()}
+        onViewAllExecutionsForWorkflow={vi.fn()}
         variant="takeAction"
       />,
       { wrapper: getTestProvider({ services }) }
@@ -214,7 +216,7 @@ describe('workflow executions actions column', () => {
 
     render(
       <ActionsCellHarness
-        onViewAllExecutionsForWorkflow={jest.fn()}
+        onViewAllExecutionsForWorkflow={vi.fn()}
         execution={createExecution({
           id: 'exec-1',
           workflowId: 'wf-1',

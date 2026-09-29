@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -28,16 +31,22 @@ import {
   VERSION,
 } from './auto_install_content_packages_task';
 
-jest.mock('../services');
-jest.mock('../services/epm/registry');
-jest.mock('../services/epm/packages', () => ({
-  getInstalledPackages: jest.fn(),
-}));
-jest.mock('../services/epm/packages/get_prerelease_setting', () => ({
-  getPrereleaseFromSettings: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../services');
+vi.mock('../services/epm/registry');
+vi.mock('../services/epm/packages', () => {
+      const mocked = {
+      getInstalledPackages: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../services/epm/packages/get_prerelease_setting', () => {
+      const mocked = {
+      getPrereleaseFromSettings: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockRegistry = jest.mocked(Registry);
+const MockRegistry = vi.mocked(Registry);
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -53,7 +62,7 @@ const MOCK_TASK_INSTANCE = {
   taskType: TYPE,
 };
 
-const mockGetInstalledPackages = getInstalledPackages as jest.Mock;
+const mockGetInstalledPackages = getInstalledPackages as Mock;
 
 describe('AutoInstallContentPackagesTask', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -62,8 +71,8 @@ describe('AutoInstallContentPackagesTask', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: AutoInstallContentPackagesTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  let packageClientMock: jest.Mocked<PackageClient>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
+  let packageClientMock: Mocked<PackageClient>;
 
   beforeEach(async () => {
     mockContract = createAppContextStartContractMock();
@@ -88,7 +97,7 @@ describe('AutoInstallContentPackagesTask', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Task lifecycle', () => {
@@ -121,12 +130,12 @@ describe('AutoInstallContentPackagesTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+      (dataStreamService.getAllFleetDataStreamNames as Mock).mockResolvedValue([
         'logs-system.cpu-default',
         'logs-system.memory-default',
         'logs-system.test-default',
       ]);
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutoInstallContentPackages: true } as any);
       MockRegistry.fetchList.mockResolvedValue([
@@ -148,7 +157,7 @@ describe('AutoInstallContentPackagesTask', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('Should not run if task is outdated', async () => {
@@ -325,7 +334,7 @@ describe('AutoInstallContentPackagesTask', () => {
 
     describe('getDatasetsWithData', () => {
       it('should deduplicate datasets when multiple data streams share the same dataset but have different namespaces', async () => {
-        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        (dataStreamService.getAllFleetDataStreamNames as Mock).mockResolvedValue([
           'logs-system.cpu-default',
           'logs-system.cpu-production',
         ]);
@@ -336,7 +345,7 @@ describe('AutoInstallContentPackagesTask', () => {
       });
 
       it('should deduplicate datasets when multiple data streams share the same dataset but have different types', async () => {
-        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        (dataStreamService.getAllFleetDataStreamNames as Mock).mockResolvedValue([
           'logs-system.cpu-default',
           'metrics-system.cpu-default',
         ]);
@@ -347,7 +356,7 @@ describe('AutoInstallContentPackagesTask', () => {
       });
 
       it('should log at INFO level on the first run', async () => {
-        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        (dataStreamService.getAllFleetDataStreamNames as Mock).mockResolvedValue([
           'logs-system.cpu-default',
         ]);
 
@@ -362,12 +371,12 @@ describe('AutoInstallContentPackagesTask', () => {
       });
 
       it('should log at DEBUG level on subsequent runs when dataset count is unchanged', async () => {
-        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        (dataStreamService.getAllFleetDataStreamNames as Mock).mockResolvedValue([
           'logs-system.cpu-default',
         ]);
 
         await (mockTask as any).getDatasetsWithData(esClient, []);
-        jest.clearAllMocks();
+        vi.clearAllMocks();
 
         await (mockTask as any).getDatasetsWithData(esClient, []);
 
@@ -380,14 +389,14 @@ describe('AutoInstallContentPackagesTask', () => {
       });
 
       it('should log at INFO level on subsequent runs when dataset count changes', async () => {
-        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        (dataStreamService.getAllFleetDataStreamNames as Mock).mockResolvedValue([
           'logs-system.cpu-default',
         ]);
 
         await (mockTask as any).getDatasetsWithData(esClient, []);
-        jest.clearAllMocks();
+        vi.clearAllMocks();
 
-        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        (dataStreamService.getAllFleetDataStreamNames as Mock).mockResolvedValue([
           'logs-system.cpu-default',
           'logs-system.memory-default',
         ]);

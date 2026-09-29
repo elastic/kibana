@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -28,7 +30,7 @@ import {
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
 
-const mockDocumentHeader = jest.fn((props: unknown) => {
+const mockDocumentHeader = vi.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
 
   return (
@@ -37,66 +39,96 @@ const mockDocumentHeader = jest.fn((props: unknown) => {
     </button>
   );
 });
-const mockReportEvent = jest.fn();
+const mockReportEvent = vi.fn();
 
-jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
-  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
+      const mocked = {
+      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/document/main/header', () => ({
-  Header: (props: unknown) => mockDocumentHeader(props),
-}));
+vi.mock('../../flyout_v2/document/main/header', () => {
+      const mocked = {
+      Header: (props: unknown) => mockDocumentHeader(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/shared/tools/notes', () => ({
-  NotesDetails: () => <div>{'MockNotesDetails'}</div>,
-}));
+vi.mock('../../flyout_v2/shared/tools/notes', () => {
+      const mocked = {
+      NotesDetails: () => <div>{'MockNotesDetails'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
-  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
+      const mocked = {
+      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/discover_in_timeline/provider', () => ({
-  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
+vi.mock('../../common/components/discover_in_timeline/provider', () => {
+      const mocked = {
+      DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cases/components/provider/provider', () => ({
-  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../cases/components/provider/provider', () => {
+      const mocked = {
+      CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../assistant/provider', () => ({
-  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => ({
-  MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(),
-}));
+vi.mock('../../assistant/provider', () => {
+      const mocked = {
+      AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => {
+      const mocked = {
+      MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // EntityStoreEuidApiProvider uses a dynamic import('./euid_browser') in a useEffect.
 // That async import causes react-test-renderer's act() to wait indefinitely when
 // the component tree is inspected via TestRenderer. Mock it out to avoid the hang.
-jest.mock('@kbn/entity-store/public', () => ({
-  EntityStoreEuidApiProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      EntityStoreEuidApiProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertFlyoutHeader', () => {
-  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
+  const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseIsInSecurityApp.mockReturnValue(false);
   });
 
   const servicesMock = {
     overlays: {
-      openSystemFlyout: jest.fn(() => ({ onClose: new Promise<void>(() => {}) })),
+      openSystemFlyout: vi.fn(() => ({ onClose: new Promise<void>(() => {}) })),
     },
     telemetry: { reportEvent: mockReportEvent },
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([]),
     },
     application: {
       capabilities: {
@@ -108,7 +140,7 @@ describe('AlertFlyoutHeader', () => {
       query: {
         timefilter: {
           timefilter: {
-            getAbsoluteTime: jest.fn().mockReturnValue({
+            getAbsoluteTime: vi.fn().mockReturnValue({
               from: '2023-01-01T00:00:00.000Z',
               to: '2023-12-31T23:59:59.999Z',
             }),
@@ -117,7 +149,7 @@ describe('AlertFlyoutHeader', () => {
       },
     },
     notifications: {
-      toasts: { addError: jest.fn(), addDanger: jest.fn(), addSuccess: jest.fn() },
+      toasts: { addError: vi.fn(), addDanger: vi.fn(), addSuccess: vi.fn() },
     },
   } as unknown as StartServices;
 
@@ -140,7 +172,7 @@ describe('AlertFlyoutHeader', () => {
             hit={hit}
             servicesPromise={servicesPromise}
             storePromise={storePromise}
-            onAlertUpdated={jest.fn()}
+            onAlertUpdated={vi.fn()}
           />
         </Router>
       );
@@ -175,7 +207,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -200,7 +232,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -227,11 +259,11 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
           columns={['host.name']}
-          filter={jest.fn()}
-          onAddColumn={jest.fn()}
-          onRemoveColumn={jest.fn()}
+          filter={vi.fn()}
+          onAddColumn={vi.fn()}
+          onRemoveColumn={vi.fn()}
         />
       </Router>
     );
@@ -267,7 +299,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -306,7 +338,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -349,7 +381,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -378,7 +410,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={new Promise(() => {})}
           storePromise={new Promise(() => {})}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -397,7 +429,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -426,7 +458,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -459,7 +491,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(serverlessServicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );
@@ -488,7 +520,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAlertUpdated={jest.fn()}
+          onAlertUpdated={vi.fn()}
         />
       </Router>
     );

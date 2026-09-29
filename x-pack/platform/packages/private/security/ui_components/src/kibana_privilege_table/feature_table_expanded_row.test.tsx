@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 import React from 'react';
 
@@ -49,7 +51,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeIndex={0}
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['minimal_read']}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         licenseAllowsSubFeatPrivCustomization={false}
         allSpacesSelected={false}
       />
@@ -87,7 +89,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeIndex={0}
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['none']}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         licenseAllowsSubFeatPrivCustomization={true}
         allSpacesSelected={false}
       />
@@ -120,7 +122,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeIndex={0}
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['minimal_read']}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         licenseAllowsSubFeatPrivCustomization={true}
         allSpacesSelected={false}
       />
@@ -156,7 +158,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeIndex={0}
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['read']}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         licenseAllowsSubFeatPrivCustomization={true}
         allSpacesSelected={false}
       />
@@ -190,7 +192,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeIndex={0}
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['read']}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         licenseAllowsSubFeatPrivCustomization={true}
         allSpacesSelected={false}
       />
@@ -220,7 +222,7 @@ describe('FeatureTableExpandedRow', () => {
 
     const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <FeatureTableExpandedRow
@@ -261,7 +263,7 @@ describe('FeatureTableExpandedRow', () => {
 
     const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <FeatureTableExpandedRow
@@ -296,7 +298,7 @@ describe('FeatureTableExpandedRow', () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
     const feature = kibanaPrivileges.getSecuredFeature('with_require_all_spaces_sub_features');
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <FeatureTableExpandedRow
@@ -332,7 +334,7 @@ describe('FeatureTableExpandedRow', () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
     const feature = kibanaPrivileges.getSecuredFeature('with_require_all_spaces_sub_features');
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const wrapper = mountWithIntl(
       <FeatureTableExpandedRow
@@ -373,7 +375,7 @@ describe('FeatureTableExpandedRow', () => {
     );
 
     // Make sure we update `selectedFeaturePrivileges` when `onChange` is called.
-    const onChange = jest.fn((_, selectedFeaturePrivileges) => {
+    const onChange = vi.fn((_, selectedFeaturePrivileges) => {
       wrapper.setProps({ selectedFeaturePrivileges });
     });
 

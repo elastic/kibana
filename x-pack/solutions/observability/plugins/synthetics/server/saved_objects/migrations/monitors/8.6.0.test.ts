@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SyntheticsUnsanitizedDoc860 } from './8.6.0';
 import { migration860 } from './8.6.0';
@@ -123,7 +125,7 @@ const monitor850Project = {
 
 describe('Case migrations v8.5.0 -> v8.6.0', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
   });
 

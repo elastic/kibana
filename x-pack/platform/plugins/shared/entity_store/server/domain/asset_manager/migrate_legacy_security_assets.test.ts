@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   ensureLegacyCompatibilityAliases,
   hasCollidingNeutralNamespaceAssets,
@@ -26,29 +29,29 @@ import {
   getLegacySecurityLatestEntitiesIndexName,
 } from '../../../common/domain/entity_index';
 
-jest.mock('../../infra/elasticsearch', () => {
-  const { assertReindexSucceeded } = jest.requireActual('../../infra/elasticsearch/reindex');
+vi.mock('../../infra/elasticsearch', async () => {
+  const { assertReindexSucceeded } = (await vi.importActual('../../infra/elasticsearch/reindex'));
   return {
     assertReindexSucceeded,
-    createDataStream: jest.fn(),
-    createIndex: jest.fn(),
-    deleteComponentTemplate: jest.fn(),
-    deleteDataStream: jest.fn(),
-    deleteIndex: jest.fn(),
-    deleteIndexTemplate: jest.fn(),
-    reindex: jest.fn(),
+    createDataStream: vi.fn(),
+    createIndex: vi.fn(),
+    deleteComponentTemplate: vi.fn(),
+    deleteDataStream: vi.fn(),
+    deleteIndex: vi.fn(),
+    deleteIndexTemplate: vi.fn(),
+    reindex: vi.fn(),
   };
 });
 
-const mockCreateDataStream = createDataStream as jest.MockedFunction<typeof createDataStream>;
-const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
-const mockDeleteDataStream = deleteDataStream as jest.MockedFunction<typeof deleteDataStream>;
-const mockDeleteIndex = deleteIndex as jest.MockedFunction<typeof deleteIndex>;
-const mockReindex = reindex as jest.MockedFunction<typeof reindex>;
-const mockDeleteComponentTemplate = deleteComponentTemplate as jest.MockedFunction<
+const mockCreateDataStream = createDataStream as MockedFunction<typeof createDataStream>;
+const mockCreateIndex = createIndex as MockedFunction<typeof createIndex>;
+const mockDeleteDataStream = deleteDataStream as MockedFunction<typeof deleteDataStream>;
+const mockDeleteIndex = deleteIndex as MockedFunction<typeof deleteIndex>;
+const mockReindex = reindex as MockedFunction<typeof reindex>;
+const mockDeleteComponentTemplate = deleteComponentTemplate as MockedFunction<
   typeof deleteComponentTemplate
 >;
-const mockDeleteIndexTemplate = deleteIndexTemplate as jest.MockedFunction<
+const mockDeleteIndexTemplate = deleteIndexTemplate as MockedFunction<
   typeof deleteIndexTemplate
 >;
 
@@ -56,23 +59,23 @@ describe('migrateLegacySecurityAssets', () => {
   const namespace = 'default';
   const logger = {
     get: () => logger,
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as any;
 
   const esClient = {
     indices: {
-      exists: jest.fn(),
-      get: jest.fn(),
-      getDataStream: jest.fn(),
-      getAlias: jest.fn(),
-      updateAliases: jest.fn(),
-      resolveIndex: jest.fn(),
+      exists: vi.fn(),
+      get: vi.fn(),
+      getDataStream: vi.fn(),
+      getAlias: vi.fn(),
+      updateAliases: vi.fn(),
+      resolveIndex: vi.fn(),
     },
     ingest: {
-      deletePipeline: jest.fn(),
+      deletePipeline: vi.fn(),
     },
   } as any;
 
@@ -99,7 +102,7 @@ describe('migrateLegacySecurityAssets', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCreateIndex.mockResolvedValue(undefined as any);
     mockCreateDataStream.mockResolvedValue(undefined as any);
     mockDeleteIndex.mockResolvedValue(undefined as any);

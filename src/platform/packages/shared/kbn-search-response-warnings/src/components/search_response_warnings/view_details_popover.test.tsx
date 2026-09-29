@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ViewDetailsPopover } from './view_details_popover';
@@ -14,7 +16,7 @@ import type { SearchResponseWarning } from '../../types';
 
 describe('ViewDetailsPopover', () => {
   describe('single warning', () => {
-    const mockOpenInInspector = jest.fn();
+    const mockOpenInInspector = vi.fn();
     const warnings = [
       {
         type: 'incomplete',
@@ -50,8 +52,8 @@ describe('ViewDetailsPopover', () => {
   });
 
   describe('multiple warnings', () => {
-    const request1MockOpenInInspector = jest.fn();
-    const request2MockOpenInInspector = jest.fn();
+    const request1MockOpenInInspector = vi.fn();
+    const request2MockOpenInInspector = vi.fn();
     const warnings = [
       {
         type: 'incomplete',

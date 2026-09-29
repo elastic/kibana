@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
@@ -13,20 +16,20 @@ import type { Config, Secrets } from '@kbn/connector-schemas/gemini';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { DEFAULT_MODEL } from '@kbn/connector-schemas/gemini';
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
+    request: vi.fn(),
+    patch: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
+axios.create = vi.fn(() => axios);
 
 let connectorType: SubActionConnectorType<Config, Secrets>;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 
 describe('Gemini Connector', () => {
   beforeEach(() => {

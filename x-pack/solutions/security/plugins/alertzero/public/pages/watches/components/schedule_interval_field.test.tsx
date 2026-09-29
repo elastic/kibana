@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ScheduleIntervalField } from './schedule_interval_field';
 
 describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   beforeEach(() => {
     onChange.mockClear();
@@ -91,7 +93,7 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
   });
 
   it('keeps an invalid amount on screen through blur and reports validity to the page', () => {
-    const onValidityChange = jest.fn();
+    const onValidityChange = vi.fn();
     render(
       <ScheduleIntervalField
         workerId={WORKER_ID}
@@ -116,7 +118,7 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
   });
 
   it('clears the flagged draft when the page bumps resetKey on Discard', () => {
-    const onValidityChange = jest.fn();
+    const onValidityChange = vi.fn();
     const { rerender } = render(
       <ScheduleIntervalField
         workerId={WORKER_ID}
@@ -152,8 +154,8 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
       <ScheduleIntervalField
         workerId={WORKER_ID}
         current="1h"
-        onChange={jest.fn()}
-        onValidityChange={jest.fn()}
+        onChange={vi.fn()}
+        onValidityChange={vi.fn()}
         resetKey={0}
       />
     );
@@ -171,8 +173,8 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
       <ScheduleIntervalField
         workerId={WORKER_ID}
         current="2h"
-        onChange={jest.fn()}
-        onValidityChange={jest.fn()}
+        onChange={vi.fn()}
+        onValidityChange={vi.fn()}
         resetKey={0}
       />
     );

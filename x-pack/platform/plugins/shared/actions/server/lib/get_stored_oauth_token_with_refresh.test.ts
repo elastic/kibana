@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -14,7 +17,7 @@ import { getStoredTokenWithRefresh } from './get_stored_oauth_token_with_refresh
 
 const NOW = new Date('2024-01-15T12:00:00.000Z');
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const connectorTokenClient = connectorTokenClientMock.create();
 
 // Access token expires 1h from now, refresh token expires in 7 days
@@ -64,7 +67,7 @@ const refreshResponse = {
   refreshTokenExpiresIn: 604800,
 };
 
-const refreshFn = jest.fn();
+const refreshFn = vi.fn();
 
 const baseOpts = {
   connectorId: 'connector-1',
@@ -82,7 +85,7 @@ describe('getStoredTokenWithRefresh', () => {
   });
   beforeEach(() => {
     clock.reset();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   afterAll(() => clock.restore());
 
@@ -376,7 +379,7 @@ describe('getStoredTokenWithRefresh', () => {
     ])(
       'removes the lock entry after all queued calls complete to prevent memory leaks ($label)',
       async ({ extraOpts, connectorToken, expectedLockKey }) => {
-        const deleteSpy = jest.spyOn(Map.prototype, 'delete');
+        const deleteSpy = vi.spyOn(Map.prototype, 'delete');
         const connectorId = 'connector-cleanup-test';
 
         connectorTokenClient.get.mockResolvedValueOnce({
@@ -392,7 +395,7 @@ describe('getStoredTokenWithRefresh', () => {
     );
 
     it('removes the lock entry even when the callback throws', async () => {
-      const deleteSpy = jest.spyOn(Map.prototype, 'delete');
+      const deleteSpy = vi.spyOn(Map.prototype, 'delete');
       const connectorId = 'connector-cleanup-on-throw';
 
       connectorTokenClient.get.mockResolvedValueOnce({

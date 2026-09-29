@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import type { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
 import { createFileHashTransform } from '../../..';
 import type { File as IFile } from '../../../../common';
@@ -52,9 +54,9 @@ describe('When using the FileHashTransform', () => {
     );
     const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
 
-    (soClient.create as jest.Mock).mockResolvedValue(fileSO);
-    (soClient.update as jest.Mock).mockResolvedValue(fileSO);
-    (soClient.get as jest.Mock).mockResolvedValue({
+    (soClient.create as Mock).mockResolvedValue(fileSO);
+    (soClient.update as Mock).mockResolvedValue(fileSO);
+    (soClient.get as Mock).mockResolvedValue({
       attributes: {
         created: '2023-04-27T19:57:19.640Z',
         Updated: '2023-04-27T19:57:19.640Z',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-shared';
 
@@ -12,11 +15,14 @@ import type { IlmPolicyForFlyout } from '../edit_data_lifecycle_flyout/types';
 import { getIlmPolicySummaryStats } from '../edit_data_lifecycle_flyout/ilm_policy_summary_stats';
 import { useRetentionWarning } from './flyout_footer_with_retention_warning';
 
-jest.mock('../edit_data_lifecycle_flyout/ilm_policy_summary_stats', () => ({
-  getIlmPolicySummaryStats: jest.fn(),
-}));
+vi.mock('../edit_data_lifecycle_flyout/ilm_policy_summary_stats', () => {
+      const mocked = {
+      getIlmPolicySummaryStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetIlmPolicySummaryStats = getIlmPolicySummaryStats as jest.MockedFunction<
+const mockGetIlmPolicySummaryStats = getIlmPolicySummaryStats as MockedFunction<
   typeof getIlmPolicySummaryStats
 >;
 
@@ -32,7 +38,7 @@ const ilmPolicies: IlmPolicyForFlyout[] = [{ name: POLICY.name, phases: POLICY.p
 
 describe('useRetentionWarning', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns false when inheriting lifecycle', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 
@@ -18,23 +21,26 @@ import { serviceNowCommonFields, serviceNowChoices } from '../lib/servicenow/moc
 import { snExternalServiceConfig } from '../lib/servicenow/config';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ServiceNowITSMIncident } from '@kbn/connector-schemas/servicenow_itsm';
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
-jest.mock('axios', () => ({
-  create: jest.fn(),
-  AxiosError: jest.requireActual('axios').AxiosError,
-}));
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios', () => {
+      const mocked = {
+      create: vi.fn(),
+      AxiosError: require('axios').AxiosError,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
+    request: vi.fn(),
+    patch: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
+axios.create = vi.fn(() => axios);
+const requestMock = utils.request as Mock;
 const configurationUtilities = actionsConfigMock.create();
 
 const getImportSetAPIResponse = (update = false) => ({
@@ -157,7 +163,7 @@ describe('ServiceNow service', () => {
   let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',

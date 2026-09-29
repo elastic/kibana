@@ -5,32 +5,46 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { GettingStartedRedirectGate } from './getting_started_redirect_gate';
 import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 
-jest.mock('@kbn/search-shared-ui', () => ({
-  GETTING_STARTED_SESSIONSTORAGE_KEY: 'gettingStartedVisited',
-}));
+vi.mock('@kbn/search-shared-ui', () => {
+      const mocked = {
+      GETTING_STARTED_SESSIONSTORAGE_KEY: 'gettingStartedVisited',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+const mockUseKibana = vi.fn();
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetLicenseInfo = jest.fn();
-jest.mock('../hooks/use_get_license_info', () => ({
-  useGetLicenseInfo: () => mockUseGetLicenseInfo(),
-}));
+const mockUseGetLicenseInfo = vi.fn();
+vi.mock('../hooks/use_get_license_info', () => {
+      const mocked = {
+      useGetLicenseInfo: () => mockUseGetLicenseInfo(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseStats = jest.fn();
-jest.mock('../hooks/api/use_stats', () => ({
-  useStats: () => mockUseStats(),
-}));
+const mockUseStats = vi.fn();
+vi.mock('../hooks/api/use_stats', () => {
+      const mocked = {
+      useStats: () => mockUseStats(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GettingStartedRedirectGate', () => {
-  const navigateToApp = jest.fn();
+  const navigateToApp = vi.fn();
   const coreStartMock = {
     application: {
       navigateToApp,
@@ -38,7 +52,7 @@ describe('GettingStartedRedirectGate', () => {
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sessionStorage.clear();
     mockUseStats.mockReturnValue({
       data: { hasNoDocuments: false, size: 0 },

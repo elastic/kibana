@@ -7,35 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ElementRegistry } from '../../../edit_engine/element_registry';
 import { exportState, importState } from './session_io';
 import { createScrollContainer, makeMinimalExport } from '../../tests/helpers';
 import '../../tests/mocks';
 
 // Stub heavy dependencies that aren't relevant for scroll-offset tests.
-jest.mock('../../../components/edit/library/insert_element', () => ({
-  renderEuiComponentLive: jest.fn(),
-}));
-jest.mock('../../../components/edit/library/library_entries', () => ({
-  EUI_LIBRARY: [],
-}));
-jest.mock('../../../components/edit/library/serializable_state', () => ({
-  readStateAttributes: () => ({}),
-}));
-jest.mock('../../../components/edit/library/eui_icon_cache', () => ({
-  replaceIconContent: jest.fn(),
-  applySourceAttribute: jest.fn(),
-}));
-jest.mock('../../dom/get_page_color_mode', () => ({
-  getPageColorScheme: () => ({ colorMode: 'light', forcedColors: false }),
-}));
-jest.mock('../../dom/color_token_lookup', () => ({
-  resolveColorTokensDeep: jest.fn(),
-}));
-jest.mock('../../../edit_engine/remap_emotion_classes', () => ({
-  buildEmotionClassMap: () => new Map(),
-  remapEmotionClasses: jest.fn(),
-}));
+vi.mock('../../../components/edit/library/insert_element', () => {
+      const mocked = {
+      renderEuiComponentLive: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../components/edit/library/library_entries', () => {
+      const mocked = {
+      EUI_LIBRARY: [],
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../components/edit/library/serializable_state', () => {
+      const mocked = {
+      readStateAttributes: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../components/edit/library/eui_icon_cache', () => {
+      const mocked = {
+      replaceIconContent: vi.fn(),
+      applySourceAttribute: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../dom/get_page_color_mode', () => {
+      const mocked = {
+      getPageColorScheme: () => ({ colorMode: 'light', forcedColors: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../dom/color_token_lookup', () => {
+      const mocked = {
+      resolveColorTokensDeep: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../edit_engine/remap_emotion_classes', () => {
+      const mocked = {
+      buildEmotionClassMap: () => new Map(),
+      remapEmotionClasses: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('session_io scroll offset', () => {
   afterEach(() => {

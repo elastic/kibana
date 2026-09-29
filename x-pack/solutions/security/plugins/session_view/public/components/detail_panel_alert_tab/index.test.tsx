@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import type { AppContextTestRender } from '../../test';
@@ -26,8 +29,8 @@ import {
 import { useDateFormat } from '../../hooks';
 import { formatDate } from '@elastic/eui';
 
-jest.mock('../../hooks/use_date_format');
-const mockUseDateFormat = useDateFormat as jest.Mock;
+vi.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as Mock;
 
 const ACCORDION_BUTTON_CLASS = '.euiAccordion__button';
 const VIEW_MODE_GROUP = 'groupView';
@@ -40,11 +43,11 @@ describe('DetailPanelAlertTab component', () => {
 
   const props = {
     alerts: mockAlerts,
-    onJumpToEvent: jest.fn((process) => process),
-    onShowAlertDetails: jest.fn((alertId) => alertId),
+    onJumpToEvent: vi.fn((process) => process),
+    onShowAlertDetails: vi.fn((alertId) => alertId),
     isFetchingAlerts: false,
     hasNextPageAlerts: false,
-    fetchNextPageAlerts: jest.fn(() => true),
+    fetchNextPageAlerts: vi.fn(() => true),
   };
 
   beforeEach(() => {

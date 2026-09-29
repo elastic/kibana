@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { ElasticsearchAssetType } from '../../../types';
@@ -17,7 +19,7 @@ function makeRef(type: ElasticsearchAssetType, id: string): EsAssetReference {
 }
 
 function makeLogger() {
-  return { warn: jest.fn() };
+  return { warn: vi.fn() };
 }
 
 describe('verifyEsAssetsExist', () => {

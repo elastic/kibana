@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./pit_params');
-jest.mock('./query_params');
-jest.mock('./sorting_params');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('./pit_params');
+vi.mock('./query_params');
+vi.mock('./sorting_params');
 
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import * as pitParamsNS from './pit_params';
@@ -17,9 +20,9 @@ import * as queryParamsNS from './query_params';
 import { getSearchDsl } from './search_dsl';
 import * as sortParamsNS from './sorting_params';
 
-const getPitParams = pitParamsNS.getPitParams as jest.Mock;
-const getQueryParams = queryParamsNS.getQueryParams as jest.Mock;
-const getSortingParams = sortParamsNS.getSortingParams as jest.Mock;
+const getPitParams = pitParamsNS.getPitParams as Mock;
+const getQueryParams = queryParamsNS.getQueryParams as Mock;
+const getSortingParams = sortParamsNS.getSortingParams as Mock;
 
 const registry = typeRegistryMock.create();
 const mappings = { properties: {} };

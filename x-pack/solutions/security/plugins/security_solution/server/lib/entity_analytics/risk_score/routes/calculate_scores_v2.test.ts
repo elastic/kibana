@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../common/entity_analytics/types';
@@ -13,26 +16,26 @@ import { fetchEntitiesByIds } from '../maintainer/utils/fetch_entities_by_ids';
 import { applyScoreModifiersFromEntities } from '../modifiers/apply_modifiers_from_entities';
 import { fetchWatchlistConfigs } from '../maintainer/utils/fetch_watchlist_configs';
 
-jest.mock('../maintainer/utils/fetch_entities_by_ids');
-jest.mock('../modifiers/apply_modifiers_from_entities');
-jest.mock('../maintainer/utils/fetch_watchlist_configs');
+vi.mock('../maintainer/utils/fetch_entities_by_ids');
+vi.mock('../modifiers/apply_modifiers_from_entities');
+vi.mock('../maintainer/utils/fetch_watchlist_configs');
 
 describe('calculateScoresWithESQLV2', () => {
   const esClient = {
-    search: jest.fn(),
+    search: vi.fn(),
     esql: {
-      query: jest.fn(),
+      query: vi.fn(),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+  } as unknown as Mocked<ElasticsearchClient>;
   const logger = {} as Logger;
   const crudClient = {} as EntityUpdateClient;
   const soClient = {} as SavedObjectsClientContract;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
-    (fetchWatchlistConfigs as jest.Mock).mockResolvedValue(new Map());
-    (esClient.search as jest.Mock).mockResolvedValue({
+    (fetchWatchlistConfigs as Mock).mockResolvedValue(new Map());
+    (esClient.search as Mock).mockResolvedValue({
       aggregations: {
         by_entity_id: {
           buckets: [{ key: { entity_id: 'host:known' } }, { key: { entity_id: 'host:missing' } }],
@@ -40,7 +43,7 @@ describe('calculateScoresWithESQLV2', () => {
         },
       },
     });
-    (esClient.esql.query as jest.Mock).mockResolvedValue({
+    (esClient.esql.query as Mock).mockResolvedValue({
       values: [
         [
           1,
@@ -70,7 +73,7 @@ describe('calculateScoresWithESQLV2', () => {
         ],
       ],
     });
-    (fetchEntitiesByIds as jest.Mock).mockResolvedValue(
+    (fetchEntitiesByIds as Mock).mockResolvedValue(
       new Map([
         [
           'host:known',
@@ -82,7 +85,7 @@ describe('calculateScoresWithESQLV2', () => {
         ],
       ])
     );
-    (applyScoreModifiersFromEntities as jest.Mock).mockImplementation(({ page }) =>
+    (applyScoreModifiersFromEntities as Mock).mockImplementation(({ page }) =>
       page.scores.map((score: { entity_id: string }) => ({
         id_field: 'entity.id',
         id_value: score.entity_id,

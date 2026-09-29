@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockReactDomUnmount } from '../overlay.test.mocks';
 import { SystemFlyoutRef } from './system_flyout_ref';
 
@@ -50,7 +52,7 @@ describe('SystemFlyoutRef', () => {
 
     it('resolves the onClose Promise', async () => {
       const ref = new SystemFlyoutRef(container);
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref.onClose.then(onCloseComplete);
 
       await ref.close();
@@ -80,7 +82,7 @@ describe('SystemFlyoutRef', () => {
 
     it('only completes the onClose promise once', async () => {
       const ref = new SystemFlyoutRef(container);
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref.onClose.then(onCloseComplete);
 
       await ref.close();

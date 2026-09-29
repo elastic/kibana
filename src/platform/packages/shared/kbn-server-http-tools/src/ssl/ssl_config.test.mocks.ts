@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockReadFileSync = jest.fn();
-jest.mock('fs', () => {
+import { vi } from 'vitest';
+
+export const mockReadFileSync = vi.fn();
+vi.mock('fs', () => {
   return { readFileSync: mockReadFileSync };
 });
 
-export const mockReadPkcs12Keystore = jest.fn();
-export const mockReadPkcs12Truststore = jest.fn();
-jest.mock('@kbn/crypto', () => ({
-  readPkcs12Keystore: mockReadPkcs12Keystore,
-  readPkcs12Truststore: mockReadPkcs12Truststore,
-}));
+export const mockReadPkcs12Keystore = vi.fn();
+export const mockReadPkcs12Truststore = vi.fn();
+vi.mock('@kbn/crypto', () => {
+      const mocked = {
+      readPkcs12Keystore: mockReadPkcs12Keystore,
+      readPkcs12Truststore: mockReadPkcs12Truststore,
+    };
+      return { ...mocked, default: mocked };
+    });

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { registerServiceAccountDecorations } from './use_service_account_decorations';
 import type {
   ServiceAccountDirectory,
@@ -27,13 +30,13 @@ const account: WorkflowServiceAccount = {
 const yaml = 'settings:\n  run_as: account-a\nsteps: []';
 const setup = (value = yaml) => {
   const mocks = createMockMonacoEditor(value, {
-    onDidChangeModel: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChangeModel: vi.fn(() => ({ dispose: vi.fn() })),
   });
-  mocks.model.getVersionId = jest.fn(() => 1);
-  const directory: jest.Mocked<ServiceAccountDirectory> = {
-    isEnabled: jest.fn(() => true),
-    get: jest.fn().mockResolvedValue(account),
-    list: jest.fn(),
+  mocks.model.getVersionId = vi.fn(() => 1);
+  const directory: Mocked<ServiceAccountDirectory> = {
+    isEnabled: vi.fn(() => true),
+    get: vi.fn().mockResolvedValue(account),
+    list: vi.fn(),
   };
   return { ...mocks, directory };
 };
@@ -108,7 +111,7 @@ describe('service account editor badge', () => {
       })
     );
     const registration = registerServiceAccountDecorations(editor, directory);
-    jest
+    vi
       .mocked(editor.getModel)
       .mockReturnValue(createMockMonacoModel('settings:\n  run_as: account-b'));
     resolveAccount(account);
@@ -131,8 +134,8 @@ describe('service account editor badge', () => {
     await Promise.resolve();
     expect(decorationsCollection.set).not.toHaveBeenCalled();
     expect(
-      jest.mocked(editor.onDidChangeModelContent).mock.results[0].value.dispose
+      vi.mocked(editor.onDidChangeModelContent).mock.results[0].value.dispose
     ).toHaveBeenCalled();
-    expect(jest.mocked(editor.onDidChangeModel).mock.results[0].value.dispose).toHaveBeenCalled();
+    expect(vi.mocked(editor.onDidChangeModel).mock.results[0].value.dispose).toHaveBeenCalled();
   });
 });

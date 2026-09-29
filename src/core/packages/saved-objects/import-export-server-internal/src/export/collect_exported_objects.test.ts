@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type {
@@ -108,7 +110,7 @@ describe('collectExportedObjects', () => {
         id: '2',
       });
 
-      const fooTransform: SavedObjectsExportTransform = jest.fn();
+      const fooTransform: SavedObjectsExportTransform = vi.fn();
       registerType('foo', { onExport: fooTransform });
 
       await collectExportedObjects({
@@ -142,10 +144,10 @@ describe('collectExportedObjects', () => {
         id: '3',
       });
 
-      const fooExportable: SavedObjectsExportablePredicate = jest.fn().mockReturnValue(true);
+      const fooExportable: SavedObjectsExportablePredicate = vi.fn().mockReturnValue(true);
       registerType('foo', { isExportable: fooExportable });
 
-      const barExportable: SavedObjectsExportablePredicate = jest.fn().mockReturnValue(true);
+      const barExportable: SavedObjectsExportablePredicate = vi.fn().mockReturnValue(true);
       registerType('bar', { isExportable: barExportable });
 
       await collectExportedObjects({

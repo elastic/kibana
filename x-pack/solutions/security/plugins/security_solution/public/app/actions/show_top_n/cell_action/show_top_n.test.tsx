@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 
 import { createShowTopNCellActionFactory } from './show_top_n';
@@ -12,11 +14,11 @@ import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_re
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { StartServices } from '../../../../types';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const mockServices = {
   ...createStartServicesMock(),
-  topValuesPopover: { showPopover: jest.fn() },
+  topValuesPopover: { showPopover: vi.fn() },
 } as unknown as StartServices;
 
 const element = document.createElement('div');
@@ -48,7 +50,7 @@ describe('createShowTopNCellActionFactory', () => {
   } as CellActionExecutionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

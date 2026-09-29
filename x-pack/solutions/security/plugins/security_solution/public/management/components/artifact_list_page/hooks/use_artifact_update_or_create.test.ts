@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
@@ -37,7 +39,7 @@ const createEntry = (field: string, value: string): EntriesArray => [
 ];
 
 describe('useCreateOrUpdateArtifact', () => {
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let apiClient: ExceptionsListApiClient;
 
   beforeEach(() => {

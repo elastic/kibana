@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
@@ -19,10 +22,8 @@ import * as useServiceMapHook from '../../components/app/service_map/use_service
 import * as urlParamHelpers from '../../context/url_params_context/helpers';
 import { LicenseContext } from '../../context/license/license_context';
 
-jest.mock('../../context/time_range_metadata/time_range_metadata_context', () => {
-  const actual = jest.requireActual(
-    '../../context/time_range_metadata/time_range_metadata_context'
-  );
+vi.mock('../../context/time_range_metadata/time_range_metadata_context', async () => {
+  const actual = (await vi.importActual('../../context/time_range_metadata/time_range_metadata_context'));
   return {
     ...actual,
     TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
@@ -31,25 +32,34 @@ jest.mock('../../context/time_range_metadata/time_range_metadata_context', () =>
   };
 });
 
-jest.mock('../../context/apm_index_settings/apm_index_settings_context', () => ({
-  ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../context/apm_index_settings/apm_index_settings_context', () => {
+      const mocked = {
+      ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The embeddable builds an es-query from dashboard filters via this hook; mock it so the test
 // doesn't hit the real `/internal/apm/data_view/index_pattern` API (which returns undefined here).
-jest.mock('../../hooks/use_adhoc_apm_data_view', () => ({
-  useAdHocApmDataView: () => ({
-    dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
-    apmIndices: undefined,
-  }),
-}));
+vi.mock('../../hooks/use_adhoc_apm_data_view', () => {
+      const mocked = {
+      useAdHocApmDataView: () => ({
+        dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
+        apmIndices: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/app/service_map/use_service_map_badges', () => ({
-  useServiceMapBadges: ({ nodes, nodesStatus }: { nodes: unknown; nodesStatus: string }) => ({
-    nodes,
-    status: nodesStatus,
-  }),
-}));
+vi.mock('../../components/app/service_map/use_service_map_badges', () => {
+      const mocked = {
+      useServiceMapBadges: ({ nodes, nodesStatus }: { nodes: unknown; nodesStatus: string }) => ({
+        nodes,
+        status: nodesStatus,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext
@@ -111,13 +121,13 @@ function renderEmbeddable(
 }
 
 describe('ServiceMapEmbeddable', () => {
-  const mockUseServiceMap = jest.spyOn(useServiceMapHook, 'useServiceMap');
-  const mockGetDateRange = jest.spyOn(urlParamHelpers, 'getDateRange');
+  const mockUseServiceMap = vi.spyOn(useServiceMapHook, 'useServiceMap');
+  const mockGetDateRange = vi.spyOn(urlParamHelpers, 'getDateRange');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetDateRange.mockReturnValue({ start: 'resolved-start', end: 'resolved-end' });
-    (mockCore.application.getUrlForApp as jest.Mock)?.mockImplementation(
+    (mockCore.application.getUrlForApp as Mock)?.mockImplementation(
       (appId: string, options?: { path?: string }) => `/basepath/app/${appId}${options?.path ?? ''}`
     );
     mockUseServiceMap.mockReturnValue({
@@ -133,7 +143,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   it('clears blocking error when license and config are valid', () => {
-    const onBlockingError = jest.fn();
+    const onBlockingError = vi.fn();
     mockUseServiceMap.mockReturnValue({
       data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
       status: FETCH_STATUS.LOADING,
@@ -200,7 +210,7 @@ describe('ServiceMapEmbeddable', () => {
           uid: '1',
         },
       });
-      const onBlockingError = jest.fn();
+      const onBlockingError = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -240,7 +250,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('calls onBlockingError with disabled error', () => {
-      const onBlockingError = jest.fn();
+      const onBlockingError = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -356,7 +366,7 @@ describe('ServiceMapEmbeddable', () => {
 
   describe('onEmptyStateChange callback', () => {
     it('does not fire while the topology query is loading', () => {
-      const onEmptyStateChange = jest.fn();
+      const onEmptyStateChange = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.LOADING,
@@ -366,7 +376,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('does not fire on FAILURE — error state carries no signal about emptiness', () => {
-      const onEmptyStateChange = jest.fn();
+      const onEmptyStateChange = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.FAILURE,
@@ -376,7 +386,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('fires with `true` on SUCCESS + zero nodes', () => {
-      const onEmptyStateChange = jest.fn();
+      const onEmptyStateChange = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -386,7 +396,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('fires with `false` on SUCCESS + non-zero nodes', () => {
-      const onEmptyStateChange = jest.fn();
+      const onEmptyStateChange = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: {
           nodes: [
@@ -412,7 +422,7 @@ describe('ServiceMapEmbeddable', () => {
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
       });
-      const { container } = renderEmbeddable({ onEmptyStateChange: jest.fn() });
+      const { container } = renderEmbeddable({ onEmptyStateChange: vi.fn() });
       expect(screen.queryByText(/No services available/)).not.toBeInTheDocument();
       expect(container.firstChild).toBeNull();
     });
@@ -420,7 +430,7 @@ describe('ServiceMapEmbeddable', () => {
 
   describe('onRendered callback', () => {
     it('reports not rendered while topology is loading', () => {
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.LOADING,
@@ -431,7 +441,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('reports not rendered while waiting for a license', () => {
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       renderEmbeddable({ onRendered }, { license: undefined });
       expect(onRendered).toHaveBeenCalledWith(false);
       expect(onRendered).not.toHaveBeenCalledWith(true);
@@ -448,7 +458,7 @@ describe('ServiceMapEmbeddable', () => {
           uid: '1',
         },
       });
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -464,7 +474,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('reports rendered when the disabled prompt is shown', () => {
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -485,7 +495,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('reports rendered for the empty state', () => {
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -495,7 +505,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('reports rendered for fetch errors so reporting does not wait forever', () => {
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.FAILURE,
@@ -505,7 +515,7 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('reports rendered when the map has data', () => {
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       mockUseServiceMap.mockReturnValue({
         data: {
           nodes: [

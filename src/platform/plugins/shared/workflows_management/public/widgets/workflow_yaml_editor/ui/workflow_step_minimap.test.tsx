@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { createRef } from 'react';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
@@ -84,12 +87,12 @@ describe('WorkflowStepMinimap', () => {
   });
 
   it('retains the last-known-good step list when the YAML becomes unparseable', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const { store } = renderMinimap(TWO_STEP_YAML);
 
     // Verify pills are showing before breaking the YAML.
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(screen.getByTitle('step-a')).toBeInTheDocument();
 
@@ -100,24 +103,24 @@ describe('WorkflowStepMinimap', () => {
 
     // Advance past the debounce — workflowLookup collapses to nothing.
     await act(async () => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     // The minimap should still show the previous step list (lastNonEmptyRef guard).
     expect(screen.getByTitle('step-a')).toBeInTheDocument();
     expect(screen.getByTitle('step-b')).toBeInTheDocument();
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('shows the viewport indicator when not all steps are visible', async () => {
     // getVisibleRanges returns only a partial range — step-b's lines are outside.
     const { editor } = renderMinimap(TWO_STEP_YAML, {
-      getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: 2 }]),
+      getVisibleRanges: vi.fn(() => [{ startLineNumber: 1, endLineNumber: 2 }]),
     } as any);
 
     // Trigger the scroll listener so visibleLineRange state is updated.
-    const scrollHandler = (editor.onDidScrollChange as jest.Mock).mock.calls[0]?.[0];
+    const scrollHandler = (editor.onDidScrollChange as Mock).mock.calls[0]?.[0];
     if (scrollHandler) {
       act(() => scrollHandler());
     }
@@ -132,7 +135,7 @@ describe('WorkflowStepMinimap', () => {
 
   it('clicking a pill reveals the line in the editor and keeps focus on the pill', async () => {
     const { editor } = renderMinimap(TWO_STEP_YAML, {
-      getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
+      getVisibleRanges: vi.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
     } as any);
 
     await waitFor(() => {
@@ -142,7 +145,7 @@ describe('WorkflowStepMinimap', () => {
     const pill = screen.getByTitle('step-a');
 
     // Simulate a keyboard click (detail === 0 — Enter/Space). Focus must survive.
-    Object.defineProperty(pill, 'blur', { value: jest.fn(), writable: true });
+    Object.defineProperty(pill, 'blur', { value: vi.fn(), writable: true });
     fireEvent.click(pill, { detail: 0 });
 
     // revealLineInCenter and focus should be called (editor navigation).
@@ -154,7 +157,7 @@ describe('WorkflowStepMinimap', () => {
 
   it('pointer-clicking a pill blurs the button (so it loses the focus ring)', async () => {
     renderMinimap(TWO_STEP_YAML, {
-      getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
+      getVisibleRanges: vi.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
     } as any);
 
     await waitFor(() => {
@@ -162,7 +165,7 @@ describe('WorkflowStepMinimap', () => {
     });
 
     const pill = screen.getByTitle('step-a');
-    const blurSpy = jest.spyOn(pill, 'blur');
+    const blurSpy = vi.spyOn(pill, 'blur');
 
     // Simulate a mouse click (detail === 1).
     fireEvent.click(pill, { detail: 1 });
@@ -175,7 +178,7 @@ describe('WorkflowStepMinimap', () => {
     store.dispatch(setYamlString(TWO_STEP_YAML));
 
     const { editor: editorInstance } = createMockMonacoEditor(TWO_STEP_YAML, {
-      getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
+      getVisibleRanges: vi.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
     } as any);
 
     // Explicitly set up a scrollContainer that is tall enough to contain the band.
@@ -203,7 +206,7 @@ describe('WorkflowStepMinimap', () => {
     const scrollTopBefore = containerEl ? (containerEl as HTMLDivElement).scrollTop : -1;
 
     // Fire a scroll update — the band should already be visible, so scrollTop stays.
-    const scrollHandler = (editorInstance.onDidScrollChange as jest.Mock).mock.calls[0]?.[0];
+    const scrollHandler = (editorInstance.onDidScrollChange as Mock).mock.calls[0]?.[0];
     if (scrollHandler) {
       act(() => scrollHandler());
     }

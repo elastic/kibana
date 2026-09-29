@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Note: this import must be before other relative imports for the mocks to work as intended.
 import {
   mockAuthorizationModeFactory,
@@ -66,9 +68,9 @@ it(`#setup returns exposed services`, () => {
   mockClusterClient.asInternalUser.xpack.usage.mockResolvedValue(
     mockEsSecurityResponse as Awaited<ReturnType<Client['xpack']['usage']>>
   );
-  const mockGetSpacesService = jest
+  const mockGetSpacesService = vi
     .fn()
-    .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() });
+    .mockReturnValue({ getSpaceId: vi.fn(), namespaceToSpaceId: vi.fn() });
   const mockFeaturesSetup = featuresPluginMock.createSetup();
   const mockLicense = licenseMock.create();
   const mockCoreSetup = coreMock.createSetup();
@@ -85,7 +87,7 @@ it(`#setup returns exposed services`, () => {
     packageVersion: 'some-version',
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
-    getCurrentUser: jest.fn(),
+    getCurrentUser: vi.fn(),
     customBranding: mockCoreSetup.customBranding,
   });
 
@@ -148,10 +150,10 @@ describe('#start', () => {
       kibanaIndexName,
       packageVersion: 'some-version',
       features: featuresPluginMock.createSetup(),
-      getSpacesService: jest
+      getSpacesService: vi
         .fn()
-        .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
-      getCurrentUser: jest.fn(),
+        .mockReturnValue({ getSpaceId: vi.fn(), namespaceToSpaceId: vi.fn() }),
+      getCurrentUser: vi.fn(),
       customBranding: mockCoreSetup.customBranding,
     });
 
@@ -166,7 +168,7 @@ describe('#start', () => {
   });
 
   it('registers cluster privileges', async () => {
-    const retryScheduler = jest.fn();
+    const retryScheduler = vi.fn();
     statusSubject.next({ scheduleRetry: retryScheduler });
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
 
@@ -179,7 +181,7 @@ describe('#start', () => {
   it('schedules retries if fails to register cluster privileges', async () => {
     mockRegisterPrivilegesWithCluster.mockRejectedValue(new Error('Some error'));
 
-    const retryScheduler = jest.fn();
+    const retryScheduler = vi.fn();
     statusSubject.next({ scheduleRetry: retryScheduler });
     await nextTick();
 
@@ -220,10 +222,10 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     kibanaIndexName,
     packageVersion: 'some-version',
     features: featuresPluginMock.createSetup(),
-    getSpacesService: jest
+    getSpacesService: vi
       .fn()
-      .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
-    getCurrentUser: jest.fn(),
+      .mockReturnValue({ getSpaceId: vi.fn(), namespaceToSpaceId: vi.fn() }),
+    getCurrentUser: vi.fn(),
     customBranding: mockCoreSetup.customBranding,
   });
 
@@ -236,7 +238,7 @@ it('#stop unsubscribes from license and ES updates.', async () => {
   authorizationService.stop();
 
   // After stop we don't register privileges even if status changes.
-  const retryScheduler = jest.fn();
+  const retryScheduler = vi.fn();
   statusSubject.next({ scheduleRetry: retryScheduler });
   await nextTick();
 

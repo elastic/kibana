@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DatasetQualityLocatorDefinition } from './dataset_quality_locator';
 import type { DataQualityLocatorDependencies } from './types';
 
 const createMockLocator = (id: string, section: string) => ({
   id,
-  navigate: jest.fn(),
-  getRedirectUrl: jest.fn(),
-  getLocation: jest.fn().mockReturnValue({ app: id, path: `/${section}`, state: {} }),
-  getUrl: jest.fn(),
-  navigateSync: jest.fn(),
-  useUrl: jest.fn(),
-  telemetry: jest.fn(),
-  inject: jest.fn(),
-  extract: jest.fn(),
-  migrations: jest.fn(),
+  navigate: vi.fn(),
+  getRedirectUrl: vi.fn(),
+  getLocation: vi.fn().mockReturnValue({ app: id, path: `/${section}`, state: {} }),
+  getUrl: vi.fn(),
+  navigateSync: vi.fn(),
+  useUrl: vi.fn(),
+  telemetry: vi.fn(),
+  inject: vi.fn(),
+  extract: vi.fn(),
+  migrations: vi.fn(),
 });
 
 const setup = async () => {

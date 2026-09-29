@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
@@ -16,7 +18,7 @@ describe('DELETE role mappings', () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     const mockCoreContext = coreMock.createRequestHandlerContext();
     const mockLicensingContext = {
-      license: { check: jest.fn().mockReturnValue({ state: 'valid' }) },
+      license: { check: vi.fn().mockReturnValue({ state: 'valid' }) },
     } as any;
     const mockContext = coreMock.createCustomRequestHandlerContext({
       core: mockCoreContext,
@@ -55,7 +57,7 @@ describe('DELETE role mappings', () => {
       const mockCoreContext = coreMock.createRequestHandlerContext();
       const mockLicensingContext = {
         license: {
-          check: jest.fn().mockReturnValue({
+          check: vi.fn().mockReturnValue({
             state: 'invalid',
             message: 'test forbidden message',
           }),

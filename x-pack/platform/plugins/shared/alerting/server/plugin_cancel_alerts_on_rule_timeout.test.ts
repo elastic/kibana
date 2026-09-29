@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AlertingServerSetup } from './plugin';
 import { AlertingPlugin } from './plugin';
 import {
@@ -27,9 +29,12 @@ import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 
 const mockAlertService = alertsServiceMock.create();
-jest.mock('./alerts_service/alerts_service', () => ({
-  AlertsService: jest.fn().mockImplementation(() => mockAlertService),
-}));
+vi.mock('./alerts_service/alerts_service', () => {
+      const mocked = {
+      AlertsService: vi.fn().mockImplementation(() => mockAlertService),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { generateAlertingConfig } from './test_utils';
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {
@@ -80,7 +85,7 @@ describe('Alerting Plugin - cancelAlertsOnRuleTimeout', () => {
       await waitForSetupComplete(setupMocks);
     }
 
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => vi.clearAllMocks());
 
     for (const cancelAlertsOnRuleTimeoutInConfig of [true, false]) {
       describe(`xpack.alerting.cancelAlertsOnRuleTimeout=${cancelAlertsOnRuleTimeoutInConfig}`, () => {

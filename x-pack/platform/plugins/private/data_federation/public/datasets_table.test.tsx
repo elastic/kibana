@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render } from '@testing-library/react';
@@ -46,7 +48,7 @@ const createDataSetRow = ({
   } as DataSetWithName);
 
 describe('DatasetsTable', () => {
-  const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
+  const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
     const [first] = args;
     if (typeof first === 'string' && first.includes('Detected not recommended unit')) {
       return;
@@ -58,7 +60,7 @@ describe('DatasetsTable', () => {
   });
 
   it('disables create when isCreateDisabled is true', async () => {
-    const onCreate = jest.fn();
+    const onCreate = vi.fn();
 
     const { getByTestId } = render(
       <EuiProvider>
@@ -68,11 +70,11 @@ describe('DatasetsTable', () => {
             selectedItems={[]}
             dataSourceNames={['ds1']}
             isCreateDisabled={true}
-            onSelectionChange={jest.fn()}
+            onSelectionChange={vi.fn()}
             onCreate={onCreate}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
+            onEdit={vi.fn()}
+            onDelete={vi.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </KibanaContextProvider>
       </EuiProvider>
@@ -86,7 +88,7 @@ describe('DatasetsTable', () => {
   });
 
   it('calls onCreate when create is enabled and clicked', async () => {
-    const onCreate = jest.fn();
+    const onCreate = vi.fn();
 
     const { getByTestId } = render(
       <EuiProvider>
@@ -96,11 +98,11 @@ describe('DatasetsTable', () => {
             selectedItems={[]}
             dataSourceNames={['ds1']}
             isCreateDisabled={false}
-            onSelectionChange={jest.fn()}
+            onSelectionChange={vi.fn()}
             onCreate={onCreate}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
+            onEdit={vi.fn()}
+            onDelete={vi.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </KibanaContextProvider>
       </EuiProvider>
@@ -123,11 +125,11 @@ describe('DatasetsTable', () => {
             selectedItems={[]}
             dataSourceNames={['ds1', 'ds10', 'ds2']}
             isCreateDisabled={false}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
+            onSelectionChange={vi.fn()}
+            onCreate={vi.fn()}
+            onEdit={vi.fn()}
+            onDelete={vi.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </KibanaContextProvider>
       </EuiProvider>
@@ -156,7 +158,7 @@ describe('DatasetsTable', () => {
   });
 
   it('clears the selection when the data source filter changes', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
 
     const { getByRole, findByRole } = render(
@@ -168,10 +170,10 @@ describe('DatasetsTable', () => {
             dataSourceNames={['ds1', 'ds2']}
             isCreateDisabled={false}
             onSelectionChange={onSelectionChange}
-            onCreate={jest.fn()}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
+            onCreate={vi.fn()}
+            onEdit={vi.fn()}
+            onDelete={vi.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </KibanaContextProvider>
       </EuiProvider>
@@ -189,8 +191,8 @@ describe('DatasetsTable', () => {
   });
 
   it('calls onEdit and onDelete for row actions', async () => {
-    const onEdit = jest.fn();
-    const onDelete = jest.fn();
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
 
     const { getAllByTestId } = render(
       <EuiProvider>
@@ -203,11 +205,11 @@ describe('DatasetsTable', () => {
             selectedItems={[]}
             dataSourceNames={['ds1']}
             isCreateDisabled={false}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
+            onSelectionChange={vi.fn()}
+            onCreate={vi.fn()}
             onEdit={onEdit}
             onDelete={onDelete}
-            onDeleteSelected={jest.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </KibanaContextProvider>
       </EuiProvider>
@@ -228,7 +230,7 @@ describe('DatasetsTable', () => {
   });
 
   it('shows bulk delete when selection is non-empty and calls onDeleteSelected', async () => {
-    const onDeleteSelected = jest.fn();
+    const onDeleteSelected = vi.fn();
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
 
     const { getByTestId } = render(
@@ -239,10 +241,10 @@ describe('DatasetsTable', () => {
             selectedItems={selectedItems}
             dataSourceNames={['ds1']}
             isCreateDisabled={false}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
+            onSelectionChange={vi.fn()}
+            onCreate={vi.fn()}
+            onEdit={vi.fn()}
+            onDelete={vi.fn()}
             onDeleteSelected={onDeleteSelected}
           />
         </KibanaContextProvider>

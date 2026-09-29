@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
 
 import {
@@ -346,10 +348,10 @@ describe('reads files', () => {
 });
 
 describe('throws when config is invalid', () => {
-  beforeAll(() => {
-    const realFs = jest.requireActual('fs');
+  beforeAll(async () => {
+    const realFs = require('fs');
     mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
-    const crypto = jest.requireActual('@kbn/crypto');
+    const crypto = (await vi.importActual('@kbn/crypto'));
     mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
       crypto.readPkcs12Keystore(path, password)
     );

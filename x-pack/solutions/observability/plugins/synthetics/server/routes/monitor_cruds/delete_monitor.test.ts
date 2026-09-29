@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { deleteSyntheticsMonitorRoute } from './delete_monitor';
 
-jest.mock('./services/delete_monitor_api', () => ({
-  DeleteMonitorAPI: jest.fn(),
-}));
+vi.mock('./services/delete_monitor_api', () => {
+      const mocked = {
+      DeleteMonitorAPI: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const installExecuteResult = (executeResult: any, result: unknown = []) => {
-  const { DeleteMonitorAPI } = jest.requireMock('./services/delete_monitor_api');
-  const execute = jest.fn().mockResolvedValue(executeResult);
+const installExecuteResult = async (executeResult: any, result: unknown = []) => {
+  const { DeleteMonitorAPI } = (await vi.importMock('./services/delete_monitor_api'));
+  const execute = vi.fn().mockResolvedValue(executeResult);
   DeleteMonitorAPI.mockImplementation(() => ({ execute, result }));
   return { execute };
 };
@@ -22,8 +27,8 @@ const mockRouteContext = () =>
   ({
     request: { body: { ids: ['mon-1'] }, params: {} } as any,
     response: {
-      ok: jest.fn((opts: any) => ({ status: 200, ...opts })),
-      badRequest: jest.fn((opts: any) => ({ status: 400, ...opts })),
+      ok: vi.fn((opts: any) => ({ status: 200, ...opts })),
+      badRequest: vi.fn((opts: any) => ({ status: 400, ...opts })),
     } as any,
   } as any);
 
@@ -31,7 +36,7 @@ describe('deleteSyntheticsMonitorRoute', () => {
   const route = deleteSyntheticsMonitorRoute();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the forbidden response from execute instead of a 200', async () => {

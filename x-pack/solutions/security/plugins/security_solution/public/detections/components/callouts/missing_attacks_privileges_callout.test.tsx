@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MissingAttacksPrivilegesCallOut } from './missing_attacks_privileges_callout';
@@ -12,13 +15,13 @@ import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileg
 import { useGetMissingIndexPrivileges } from '../../../attack_discovery/pages/use_get_missing_index_privileges';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../../../common/hooks/use_missing_privileges');
-jest.mock('../../../attack_discovery/pages/use_get_missing_index_privileges');
-jest.mock('../../../common/components/callouts', () => {
-  const original = jest.requireActual('../../../common/components/callouts');
+vi.mock('../../../common/hooks/use_missing_privileges');
+vi.mock('../../../attack_discovery/pages/use_get_missing_index_privileges');
+vi.mock('../../../common/components/callouts', async () => {
+  const original = (await vi.importActual('../../../common/components/callouts'));
   return {
     ...original,
-    CallOutSwitcher: jest.fn(({ message }) => (
+    CallOutSwitcher: vi.fn(({ message }) => (
       <div>
         <h1>{message.title}</h1>
         <div>{message.description}</div>
@@ -29,16 +32,16 @@ jest.mock('../../../common/components/callouts', () => {
 
 describe('MissingPrivilegesCallOut', () => {
   beforeEach(() => {
-    (useMissingPrivileges as jest.Mock).mockClear();
-    (useGetMissingIndexPrivileges as jest.Mock).mockClear();
+    (useMissingPrivileges as Mock).mockClear();
+    (useGetMissingIndexPrivileges as Mock).mockClear();
   });
 
   it('renders nothing when there are no missing privileges', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [],
       indexPrivileges: [],
     });
-    (useGetMissingIndexPrivileges as jest.Mock).mockReturnValue({
+    (useGetMissingIndexPrivileges as Mock).mockReturnValue({
       data: [],
     });
 
@@ -52,11 +55,11 @@ describe('MissingPrivilegesCallOut', () => {
   });
 
   it('renders a callout when there are missing feature privileges', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [['test-feature', ['read']]],
       indexPrivileges: [],
     });
-    (useGetMissingIndexPrivileges as jest.Mock).mockReturnValue({
+    (useGetMissingIndexPrivileges as Mock).mockReturnValue({
       data: [],
     });
 
@@ -70,11 +73,11 @@ describe('MissingPrivilegesCallOut', () => {
   });
 
   it('renders a callout when there are missing index privileges from useMissingPrivileges', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [],
       indexPrivileges: [['.alerts-security.alerts-default', ['read']]],
     });
-    (useGetMissingIndexPrivileges as jest.Mock).mockReturnValue({
+    (useGetMissingIndexPrivileges as Mock).mockReturnValue({
       data: [],
     });
 
@@ -88,11 +91,11 @@ describe('MissingPrivilegesCallOut', () => {
   });
 
   it('renders a callout when there are missing index privileges from useGetMissingIndexPrivileges', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [],
       indexPrivileges: [],
     });
-    (useGetMissingIndexPrivileges as jest.Mock).mockReturnValue({
+    (useGetMissingIndexPrivileges as Mock).mockReturnValue({
       data: [{ index_name: 'test-index', privileges: ['read'] }],
     });
 
@@ -106,11 +109,11 @@ describe('MissingPrivilegesCallOut', () => {
   });
 
   it('renders a callout when there are missing index privileges from both hooks', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [],
       indexPrivileges: [['.alerts-security.alerts-default', ['read']]],
     });
-    (useGetMissingIndexPrivileges as jest.Mock).mockReturnValue({
+    (useGetMissingIndexPrivileges as Mock).mockReturnValue({
       data: [{ index_name: 'test-index', privileges: ['read'] }],
     });
 

@@ -7,39 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const bootstrapRendererMock = jest.fn();
-export const registerBootstrapRouteMock = jest.fn();
-export const bootstrapRendererFactoryMock = jest.fn(() => bootstrapRendererMock);
+import { vi } from 'vitest';
 
-jest.doMock('./bootstrap', () => ({
-  registerBootstrapRoute: registerBootstrapRouteMock,
-  bootstrapRendererFactory: bootstrapRendererFactoryMock,
-}));
+export const bootstrapRendererMock = vi.fn();
+export const registerBootstrapRouteMock = vi.fn();
+export const bootstrapRendererFactoryMock = vi.fn(() => bootstrapRendererMock);
 
-export const getSettingValueMock = jest.fn();
-export const getCommonStylesheetPathsMock = jest.fn();
-export const getThemeStylesheetPathsMock = jest.fn();
-export const getBrowserLoggingConfigMock = jest.fn();
+vi.doMock('./bootstrap', () => {
+      const mocked = {
+      registerBootstrapRoute: registerBootstrapRouteMock,
+      bootstrapRendererFactory: bootstrapRendererFactoryMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const getBundlesHrefMock = jest.fn((baseHref: string) => `${baseHref}/bundles`);
+export const getSettingValueMock = vi.fn();
+export const getCommonStylesheetPathsMock = vi.fn();
+export const getThemeStylesheetPathsMock = vi.fn();
+export const getBrowserLoggingConfigMock = vi.fn();
 
-jest.doMock('./render_utils', () => ({
-  getSettingValue: getSettingValueMock,
-  getBundlesHref: getBundlesHrefMock,
-  getCommonStylesheetPaths: getCommonStylesheetPathsMock,
-  getThemeStylesheetPaths: getThemeStylesheetPathsMock,
-  getBrowserLoggingConfig: getBrowserLoggingConfigMock,
-}));
+export const getBundlesHrefMock = vi.fn((baseHref: string) => `${baseHref}/bundles`);
 
-export const getApmConfigMock = jest.fn();
-jest.doMock('./get_apm_config', () => {
+vi.doMock('./render_utils', () => {
+      const mocked = {
+      getSettingValue: getSettingValueMock,
+      getBundlesHref: getBundlesHrefMock,
+      getCommonStylesheetPaths: getCommonStylesheetPathsMock,
+      getThemeStylesheetPaths: getThemeStylesheetPathsMock,
+      getBrowserLoggingConfig: getBrowserLoggingConfigMock,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const getApmConfigMock = vi.fn();
+vi.doMock('./get_apm_config', () => {
   return {
     getApmConfig: getApmConfigMock,
   };
 });
 
-export const getIsThemeBundledMock = jest.fn();
-jest.doMock('./theme', () => {
+export const getIsThemeBundledMock = vi.fn();
+vi.doMock('./theme', () => {
   return {
     isThemeBundled: getIsThemeBundledMock,
   };

@@ -7,50 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getPathsByPackage } from './get_paths_by_package';
 import { getKibanaPlatformPlugin } from './integration_tests/kibana_platform_plugin_mock';
 import type { PluginOrPackage } from './types';
 
 // Mock getRepoFiles to return predictable test data
 // Note: Inlining paths directly in the mock factory to avoid jest.mock restrictions
-jest.mock('@kbn/get-repo-files', () => ({
-  getRepoFiles: jest.fn(() =>
-    Promise.resolve([
-      {
-        abs: __dirname + '/integration_tests/__fixtures__/src/plugin_a/public/index.ts',
-        repoRel:
-          'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts',
-        isFixture: jest.fn(() => false),
-        isJavaScript: jest.fn(() => false),
-        isTypeScript: jest.fn(() => true),
-      },
-      {
-        abs: __dirname + '/integration_tests/__fixtures__/src/plugin_a/public/fns.ts',
-        repoRel:
-          'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts',
-        isFixture: jest.fn(() => false),
-        isJavaScript: jest.fn(() => false),
-        isTypeScript: jest.fn(() => true),
-      },
-      {
-        abs: __dirname + '/integration_tests/__fixtures__/src/plugin_b/public/index.ts',
-        repoRel:
-          'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_b/public/index.ts',
-        isFixture: jest.fn(() => false),
-        isJavaScript: jest.fn(() => false),
-        isTypeScript: jest.fn(() => true),
-      },
-      {
-        abs: __dirname + '/integration_tests/__fixtures__/src/plugin_a/test.fixture.ts',
-        repoRel:
-          'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/test.fixture.ts',
-        isFixture: jest.fn(() => true),
-        isJavaScript: jest.fn(() => false),
-        isTypeScript: jest.fn(() => true),
-      },
-    ])
-  ),
-}));
+vi.mock('@kbn/get-repo-files', () => {
+      const mocked = {
+      getRepoFiles: vi.fn(() =>
+        Promise.resolve([
+          {
+            abs: __dirname + '/integration_tests/__fixtures__/src/plugin_a/public/index.ts',
+            repoRel:
+              'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts',
+            isFixture: vi.fn(() => false),
+            isJavaScript: vi.fn(() => false),
+            isTypeScript: vi.fn(() => true),
+          },
+          {
+            abs: __dirname + '/integration_tests/__fixtures__/src/plugin_a/public/fns.ts',
+            repoRel:
+              'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts',
+            isFixture: vi.fn(() => false),
+            isJavaScript: vi.fn(() => false),
+            isTypeScript: vi.fn(() => true),
+          },
+          {
+            abs: __dirname + '/integration_tests/__fixtures__/src/plugin_b/public/index.ts',
+            repoRel:
+              'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_b/public/index.ts',
+            isFixture: vi.fn(() => false),
+            isJavaScript: vi.fn(() => false),
+            isTypeScript: vi.fn(() => true),
+          },
+          {
+            abs: __dirname + '/integration_tests/__fixtures__/src/plugin_a/test.fixture.ts',
+            repoRel:
+              'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/test.fixture.ts',
+            isFixture: vi.fn(() => true),
+            isJavaScript: vi.fn(() => false),
+            isTypeScript: vi.fn(() => true),
+          },
+        ])
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getPathsByPackage', () => {
   it('groups file paths by package', async () => {

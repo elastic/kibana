@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { UserActionActions } from '../../../../common/types/domain';
 import type { UserActionParameters } from '../types';
 import { CommentUserActionBuilder } from './comment';
@@ -25,8 +27,8 @@ describe('CommentUserActionBuilder', () => {
   let builder: CommentUserActionBuilder;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
   beforeEach(() => {
@@ -34,7 +36,7 @@ describe('CommentUserActionBuilder', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('persists a plain user comment unchanged', () => {

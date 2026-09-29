@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -17,8 +19,8 @@ import { testQueryClientConfig } from '../test_utils';
 
 const mockRuleTypes = [{ id: 'a' }, { id: 'b' }, { id: 'c' }] as unknown as RuleType[];
 
-jest.mock('../apis/get_rule_types');
-const mockGetRuleTypes = jest.mocked(getRuleTypes);
+vi.mock('../apis/get_rule_types');
+const mockGetRuleTypes = vi.mocked(getRuleTypes);
 
 const http = httpServiceMock.createStartContract();
 
@@ -35,7 +37,7 @@ describe('useGetRuleTypesQuery', () => {
 
   afterEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the getRuleTypes API', async () => {

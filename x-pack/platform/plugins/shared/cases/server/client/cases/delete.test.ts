@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { MAX_DELETE_IDS_LENGTH, MAX_FILES_PER_CASE } from '../../../common/constants';
 import type { FindFileArgs } from '@kbn/files-plugin/server';
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
@@ -35,7 +37,7 @@ describe('delete', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('only provides 50 case ids in a single call to the find api', async () => {
@@ -82,7 +84,7 @@ describe('delete', () => {
     clientArgs.services.userActionService.getUserActionIdsForCases.mockResolvedValue([]);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('alerts', () => {

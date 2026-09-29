@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -25,22 +28,28 @@ import { extractTimelineCapabilities } from '../../../../common/utils/timeline_c
 const TEST_ID = 'test';
 const TIMELINE_TEST_ID = 'test-add-to-timeline';
 
-jest.mock('../../../../common/utils/timeline_capabilities');
-jest.mock('../hooks/use_add_to_timeline', () => ({
-  useAddToTimeline: jest.fn(() => ({ addToTimelineProps: {} })),
-}));
-jest.mock('../hooks/use_add_to_timeline_button', () => ({ useAddToTimelineButton: jest.fn() }));
+vi.mock('../../../../common/utils/timeline_capabilities');
+vi.mock('../hooks/use_add_to_timeline', () => {
+      const mocked = {
+      useAddToTimeline: vi.fn(() => ({ addToTimelineProps: {} })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_add_to_timeline_button', () => {
+      const mocked = { useAddToTimelineButton: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
   beforeEach(() => {
-    jest
+    vi
       .mocked(useAddToTimelineButton)
       .mockReturnValue(() => <div data-test-subj={TIMELINE_TEST_ID} />);
 
-    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: true });
+    (extractTimelineCapabilities as Mock).mockReturnValue({ read: true });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('should render timeline button when Indicator data', () => {
     const mockField: string = 'threat.indicator.ip';
@@ -124,7 +133,7 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
     const mockField: string = 'abc';
     const mockData: Indicator = generateMockIndicator();
 
-    jest.mocked(useAddToTimeline).mockReturnValue({ addToTimelineProps: undefined });
+    vi.mocked(useAddToTimeline).mockReturnValue({ addToTimelineProps: undefined });
 
     const { container } = render(
       <TestProvidersComponent>
@@ -139,7 +148,7 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
     const mockData: Indicator = generateMockIndicator();
     mockData.fields['threat.indicator.type'] = ['abc'];
 
-    jest.mocked(useAddToTimeline).mockReturnValue({ addToTimelineProps: undefined });
+    vi.mocked(useAddToTimeline).mockReturnValue({ addToTimelineProps: undefined });
 
     const { container } = render(
       <TestProvidersComponent>
@@ -154,7 +163,7 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
     const mockData: Indicator = generateMockIndicator();
     mockData.fields['threat.indicator.first_seen'] = [''];
 
-    jest.mocked(useAddToTimeline).mockReturnValue({ addToTimelineProps: undefined });
+    vi.mocked(useAddToTimeline).mockReturnValue({ addToTimelineProps: undefined });
 
     const { container } = render(
       <TestProvidersComponent>
@@ -168,7 +177,7 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
     const mockField: string = 'threat.indicator.ip';
     const mockData = EMPTY_VALUE;
 
-    jest.mocked(useAddToTimeline).mockReturnValue({ addToTimelineProps: undefined });
+    vi.mocked(useAddToTimeline).mockReturnValue({ addToTimelineProps: undefined });
 
     const { container } = render(
       <TestProvidersComponent>
@@ -179,7 +188,7 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
   });
 
   it('should render empty when the user does not have access to timeline', () => {
-    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: false });
+    (extractTimelineCapabilities as Mock).mockReturnValue({ read: false });
 
     const mockField: string = 'threat.indicator.ip';
     const mockData: Indicator = generateMockIndicator();

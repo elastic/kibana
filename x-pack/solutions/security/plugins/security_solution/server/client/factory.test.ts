@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import { AppClientFactory } from './factory';
 import { AppClient } from './client';
 
-jest.mock('./client');
-const mockClient = AppClient as jest.Mock;
+vi.mock('./client');
+const mockClient = AppClient as Mock;
 
 describe('AppClientFactory', () => {
   describe('#create', () => {

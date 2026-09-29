@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { FlowControlMonacoStepHandler } from './flow_control_monaco_step_handler';
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
-jest.mock('@kbn/workflows', () => {
-  const actual = jest.requireActual('@kbn/workflows');
+vi.mock('@kbn/workflows', async () => {
+  const actual = (await vi.importActual('@kbn/workflows'));
   return {
     ...actual,
-    getBuiltInStepStability: jest.fn().mockReturnValue(undefined),
+    getBuiltInStepStability: vi.fn().mockReturnValue(undefined),
   };
 });
 
@@ -23,7 +25,7 @@ describe('FlowControlMonacoStepHandler', () => {
   let handler: FlowControlMonacoStepHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockStabilityBadgeThemeForTests();
     handler = new FlowControlMonacoStepHandler();
   });

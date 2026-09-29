@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { cloneDeep, omit } from 'lodash/fp';
 import { renderHook, waitFor } from '@testing-library/react';
 
@@ -34,45 +37,45 @@ import {
 import { resolveTimeline } from '../../containers/api';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 
-jest.mock('../../../common/hooks/use_experimental_features');
+vi.mock('../../../common/hooks/use_experimental_features');
 
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => vi.fn(),
   };
 });
-jest.mock('../../../common/store/inputs/actions');
-jest.mock('../../../common/utils/normalize_time_range');
-jest.mock('../../store/actions');
-jest.mock('../../../common/store/app/actions');
-jest.mock(
+vi.mock('../../../common/store/inputs/actions');
+vi.mock('../../../common/utils/normalize_time_range');
+vi.mock('../../store/actions');
+vi.mock('../../../common/store/app/actions');
+vi.mock(
   '../../../common/components/discover_in_timeline/use_discover_in_timeline_context',
   () => {
     return {
-      useDiscoverInTimelineContext: jest.fn().mockReturnValue({ resetDiscoverAppState: jest.fn() }),
+      useDiscoverInTimelineContext: vi.fn().mockReturnValue({ resetDiscoverAppState: vi.fn() }),
     };
   }
 );
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuidv1()'),
-    v4: jest.fn(() => 'uuidv4()'),
+    v1: vi.fn(() => 'uuidv1()'),
+    v4: vi.fn(() => 'uuidv4()'),
   };
 });
 
-const mockUpdateTimeline = jest.fn();
-jest.mock('./use_update_timeline', () => {
-  const actual = jest.requireActual('./use_update_timeline');
+const mockUpdateTimeline = vi.fn();
+vi.mock('./use_update_timeline', async () => {
+  const actual = (await vi.importActual('./use_update_timeline'));
   return {
     ...actual,
     useUpdateTimeline: () => mockUpdateTimeline,
   };
 });
 
-jest.mock('../../../common/utils/default_date_settings', () => {
-  const actual = jest.requireActual('../../../common/utils/default_date_settings');
+vi.mock('../../../common/utils/default_date_settings', async () => {
+  const actual = (await vi.importActual('../../../common/utils/default_date_settings'));
   return {
     ...actual,
     DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),
@@ -80,7 +83,7 @@ jest.mock('../../../common/utils/default_date_settings', () => {
   };
 });
 
-jest.mock('../../containers/api');
+vi.mock('../../containers/api');
 
 const columns = [
   {
@@ -588,7 +591,7 @@ describe('helpers', () => {
 
   describe('queryTimelineById', () => {
     describe('encounters failure when retrieving a timeline', () => {
-      const onError = jest.fn();
+      const onError = vi.fn();
       const mockError = new Error('failed');
 
       const args: QueryTimelineById = {
@@ -597,7 +600,7 @@ describe('helpers', () => {
       };
 
       beforeAll(() => {
-        (resolveTimeline as jest.Mock).mockRejectedValue(mockError);
+        (resolveTimeline as Mock).mockRejectedValue(mockError);
         renderHook(() => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(args);
@@ -605,7 +608,7 @@ describe('helpers', () => {
       });
 
       afterAll(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       test('calls onError with the error', () => {
@@ -618,8 +621,8 @@ describe('helpers', () => {
         ...mockSelectedTimeline,
       };
 
-      const onOpenTimeline = jest.fn();
-      const onError = jest.fn();
+      const onOpenTimeline = vi.fn();
+      const onError = vi.fn();
 
       const args: QueryTimelineById = {
         duplicate: false,
@@ -631,7 +634,7 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+        (resolveTimeline as Mock).mockResolvedValue(selectedTimeline);
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(args);
@@ -639,7 +642,7 @@ describe('helpers', () => {
       });
 
       afterAll(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       test('get timeline by Id', () => {
@@ -665,7 +668,7 @@ describe('helpers', () => {
     describe('update a timeline', () => {
       const selectedTimeline = { ...mockSelectedTimeline };
       const untitledTimeline = { timeline: { ...mockSelectedTimeline.timeline, title: '' } };
-      const onOpenTimeline = jest.fn();
+      const onOpenTimeline = vi.fn();
       const args: QueryTimelineById = {
         duplicate: false,
         timelineId: '',
@@ -674,11 +677,11 @@ describe('helpers', () => {
       };
 
       beforeEach(async () => {
-        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+        (resolveTimeline as Mock).mockResolvedValue(selectedTimeline);
       });
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
       test('should get timeline by Id with correct statuses', async () => {
         renderHook(async () => {
@@ -718,7 +721,7 @@ describe('helpers', () => {
       });
 
       test('should update timeline correctly when timeline is untitled', async () => {
-        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+        (resolveTimeline as Mock).mockResolvedValue(selectedTimeline);
         const newArgs: QueryTimelineById = {
           duplicate: false,
           timelineId: undefined,
@@ -730,7 +733,7 @@ describe('helpers', () => {
             expression: 'foo: bar',
           },
         };
-        (resolveTimeline as jest.Mock).mockResolvedValue(untitledTimeline);
+        (resolveTimeline as Mock).mockResolvedValue(untitledTimeline);
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(newArgs);
@@ -754,7 +757,7 @@ describe('helpers', () => {
       });
 
       test('should update timeline correctly when timeline is already saved and onOpenTimeline is not provided', async () => {
-        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+        (resolveTimeline as Mock).mockResolvedValue(selectedTimeline);
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(args);
@@ -778,7 +781,7 @@ describe('helpers', () => {
       });
 
       test('should update timeline correctly when timeline is already saved and onOpenTimeline IS provided', async () => {
-        (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+        (resolveTimeline as Mock).mockResolvedValue(mockSelectedTimeline);
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(args);
@@ -801,7 +804,7 @@ describe('helpers', () => {
 
     describe('open an immutable template', () => {
       const template = { ...mockSelectedTemplate };
-      const onOpenTimeline = jest.fn();
+      const onOpenTimeline = vi.fn();
       const args = {
         duplicate: false,
         timelineId: '',
@@ -811,7 +814,7 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (resolveTimeline as jest.Mock).mockResolvedValue(template);
+        (resolveTimeline as Mock).mockResolvedValue(template);
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(args);
@@ -819,8 +822,8 @@ describe('helpers', () => {
       });
 
       afterAll(() => {
-        (resolveTimeline as jest.Mock).mockReset();
-        jest.clearAllMocks();
+        (resolveTimeline as Mock).mockReset();
+        vi.clearAllMocks();
       });
 
       test('get timeline by Id', () => {

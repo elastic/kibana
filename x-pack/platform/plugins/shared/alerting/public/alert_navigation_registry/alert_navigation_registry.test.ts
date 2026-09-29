@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import type { RuleType, SanitizedRule } from '../../common';
 import { RecoveredActionGroup } from '../../common';
 import { v4 as uuidv4 } from 'uuid';
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 const mockRuleType = (id: string): RuleType => ({
   id,

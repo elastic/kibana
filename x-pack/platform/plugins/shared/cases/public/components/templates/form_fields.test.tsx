@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,12 +22,12 @@ import { TEMPLATE_FIELDS, CASE_FIELDS, CONNECTOR_FIELDS, CASE_SETTINGS } from '.
 import { FormFields } from './form_fields';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-jest.mock('../connectors/servicenow/use_get_choices');
+vi.mock('../connectors/servicenow/use_get_choices');
 
-const useGetChoicesMock = useGetChoices as jest.Mock;
+const useGetChoicesMock = useGetChoices as Mock;
 
 describe('form fields', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const formDefaultValue = { tags: [], templateTags: [] };
   const defaultProps = {
     connectors: connectorsMock,
@@ -48,7 +51,7 @@ describe('form fields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
   });

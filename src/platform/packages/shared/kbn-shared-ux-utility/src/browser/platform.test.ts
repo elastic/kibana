@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 describe('Browser platform', () => {
   afterEach(() => {
-    jest.resetModules();
+    vi.resetModules();
   });
 
   describe('macOS detection', () => {

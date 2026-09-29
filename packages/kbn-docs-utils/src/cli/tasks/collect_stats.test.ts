@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { collectStats } from './collect_stats';
 import type { CliOptions, SetupProjectResult, BuildApiMapResult } from '../types';
 
 // Mock dependencies
-jest.mock('../../stats');
-jest.mock('../../count_eslint_disable');
-jest.mock('../../count_enzyme_imports');
+vi.mock('../../stats');
+vi.mock('../../count_eslint_disable');
+vi.mock('../../count_enzyme_imports');
 
-const { collectApiStatsForPlugin } = jest.requireMock('../../stats');
-const { countEslintDisableLines } = jest.requireMock('../../count_eslint_disable');
-const { countEnzymeImports } = jest.requireMock('../../count_enzyme_imports');
+const { collectApiStatsForPlugin } = (await vi.importMock('../../stats'));
+const { countEslintDisableLines } = (await vi.importMock('../../count_eslint_disable'));
+const { countEnzymeImports } = (await vi.importMock('../../count_enzyme_imports'));
 
 describe('collectStats', () => {
   let log: ToolingLog;
@@ -33,8 +36,8 @@ describe('collectStats', () => {
     });
 
     transaction = {
-      startSpan: jest.fn(() => ({
-        end: jest.fn(),
+      startSpan: vi.fn(() => ({
+        end: vi.fn(),
       })),
     };
 
@@ -74,7 +77,7 @@ describe('collectStats', () => {
       unnamedExports: {},
     };
 
-    (collectApiStatsForPlugin as jest.Mock).mockReturnValue({
+    (collectApiStatsForPlugin as Mock).mockReturnValue({
       apiCount: 0,
       missingComments: [],
       isAnyType: [],
@@ -91,12 +94,12 @@ describe('collectStats', () => {
       unnamedExports: [],
     });
 
-    (countEslintDisableLines as jest.Mock).mockResolvedValue({
+    (countEslintDisableLines as Mock).mockResolvedValue({
       eslintDisableLineCount: 0,
       eslintDisableFileCount: 0,
     });
 
-    (countEnzymeImports as jest.Mock).mockResolvedValue({
+    (countEnzymeImports as Mock).mockResolvedValue({
       enzymeImportCount: 0,
     });
   });

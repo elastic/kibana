@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -13,15 +16,15 @@ import { buildOnlineEvalWorkflowYaml, type OnlineEvalWorkflowConfig } from '../.
 import { queryKeys } from '../query_keys';
 import { useOnlineEvalWorkflows, useUpdateOnlineEvalWorkflow } from './use_online_eval_workflows';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
 const mockHttp = {
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
 };
 
-const mockedUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockedUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useUpdateOnlineEvalWorkflow', () => {
   let queryClient: QueryClient;
@@ -75,7 +78,7 @@ describe('useUpdateOnlineEvalWorkflow', () => {
       yaml: 'version: "1"',
     };
     const expectedYaml = buildOnlineEvalWorkflowYaml(config);
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     mockHttp.get.mockResolvedValue(workflowDetail);
     mockHttp.put.mockResolvedValue({ id: workflowId });

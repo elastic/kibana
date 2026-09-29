@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -19,7 +21,7 @@ const renderToggle = () =>
       <SortDirectionToggle
         direction={METRICS_SORT_DIRECTION.asc}
         isDisabled={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
       />
     </IntlProvider>
   );

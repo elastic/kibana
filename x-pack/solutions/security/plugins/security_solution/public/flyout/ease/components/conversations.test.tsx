@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import {
@@ -16,17 +19,20 @@ import {
 import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant'; // Mock the custom hooks
 
 // Mock the custom hooks
-jest.mock('@kbn/elastic-assistant', () => ({
-  useFetchCurrentUserConversations: jest.fn(),
-  useAssistantContext: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useFetchCurrentUserConversations: vi.fn(),
+      useAssistantContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Conversations', () => {
-  const mockShowAssistantOverlay = jest.fn();
+  const mockShowAssistantOverlay = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockReturnValue({
       euiTheme: { colors: { textPrimary: '#000' } },
       http: {},
       assistantAvailability: { isAssistantEnabled: true, isAssistantVisible: true },
@@ -35,7 +41,7 @@ describe('Conversations', () => {
   });
 
   it('renders loading state when conversations are not loaded', () => {
-    (useFetchCurrentUserConversations as jest.Mock).mockReturnValue({
+    (useFetchCurrentUserConversations as Mock).mockReturnValue({
       data: {},
       isFetched: false,
     });
@@ -46,7 +52,7 @@ describe('Conversations', () => {
   });
 
   it('renders conversations when loaded', () => {
-    (useFetchCurrentUserConversations as jest.Mock).mockReturnValue({
+    (useFetchCurrentUserConversations as Mock).mockReturnValue({
       data: {
         conversation1: { id: 'conversation1', title: 'Conversation 1' },
         conversation2: { id: 'conversation2', title: 'Conversation 2' },
@@ -60,7 +66,7 @@ describe('Conversations', () => {
   });
 
   it('opens and closes the popover when the view button is clicked', () => {
-    (useFetchCurrentUserConversations as jest.Mock).mockReturnValue({
+    (useFetchCurrentUserConversations as Mock).mockReturnValue({
       data: {
         conversation1: { id: 'conversation1', title: 'Conversation 1' },
       },
@@ -78,7 +84,7 @@ describe('Conversations', () => {
   });
 
   it('calls showAssistantOverlay when a conversation is selected', () => {
-    (useFetchCurrentUserConversations as jest.Mock).mockReturnValue({
+    (useFetchCurrentUserConversations as Mock).mockReturnValue({
       data: {
         conversation1: { id: 'conversation1', title: 'Conversation 1' },
       },

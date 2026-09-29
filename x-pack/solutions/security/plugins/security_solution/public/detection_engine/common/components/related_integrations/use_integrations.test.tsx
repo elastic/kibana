@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cleanup, renderHook, waitFor } from '@testing-library/react';
 
 import { useIntegrations } from './use_integrations';
@@ -13,12 +15,12 @@ import { fleetIntegrationsApi } from '../../../fleet_integrations/api';
 import { useToasts } from '../../../../common/lib/kibana';
 import { createReactQueryWrapper } from '../../../../common/mock';
 
-jest.mock('../../../fleet_integrations/api');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../fleet_integrations/api');
+vi.mock('../../../../common/lib/kibana');
 
 describe('useIntegrations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -37,7 +39,7 @@ describe('useIntegrations', () => {
     );
 
   it('calls the API via fetchAllIntegrations', async () => {
-    const fetchAllIntegrations = jest.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations');
+    const fetchAllIntegrations = vi.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations');
 
     render();
 
@@ -45,7 +47,7 @@ describe('useIntegrations', () => {
   });
 
   it('does not call the API when skip is true', async () => {
-    const fetchAllIntegrations = jest.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations');
+    const fetchAllIntegrations = vi.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations');
 
     render({ skip: true });
 
@@ -100,7 +102,7 @@ describe('useIntegrations', () => {
   // Skipping until we re-enable errors
   it.skip('handles exceptions from the API', async () => {
     const exception = new Error('Boom!');
-    jest.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations').mockRejectedValue(exception);
+    vi.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations').mockRejectedValue(exception);
 
     const { result } = render();
 

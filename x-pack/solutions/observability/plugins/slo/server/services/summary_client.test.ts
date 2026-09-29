@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
@@ -36,7 +38,7 @@ const createEsResponse = (good: number = 90, total: number = 100) => ({
 
 describe('SummaryClient', () => {
   let esClientMock: ElasticsearchClientMock;
-  let burnRatesClientMock: jest.Mocked<BurnRatesClient>;
+  let burnRatesClientMock: Mocked<BurnRatesClient>;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();

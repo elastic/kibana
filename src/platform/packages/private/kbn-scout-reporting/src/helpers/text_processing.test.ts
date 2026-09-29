@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import stripANSI from 'strip-ansi';
 import { parseStdout } from './text_processing';
 
-jest.mock('strip-ansi', () => jest.fn((input) => input.replace(/\x1b\[[0-9;]*m/g, '')));
+vi.mock('strip-ansi', () => vi.fn((input) => input.replace(/\x1b\[[0-9;]*m/g, '')));
 
 describe('text_processing', () => {
   describe('parseStdout', () => {

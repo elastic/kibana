@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { NEVER, lastValueFrom } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { getESQLSearchProvider } from './search_provider';
@@ -24,15 +26,15 @@ describe('ES|QL search provider', () => {
       { dataViews: createDiscoverDataViewsMock() } as unknown as DiscoverStartPlugins,
     ]);
   const locator = {
-    useUrl: jest.fn(() => ''),
-    navigate: jest.fn(),
-    getLocation: jest.fn(() =>
+    useUrl: vi.fn(() => ''),
+    navigate: vi.fn(),
+    getLocation: vi.fn(() =>
       Promise.resolve({
         app: 'discover',
         path: '/test',
       })
     ),
-    getRedirectUrl: jest.fn(() => ''),
+    getRedirectUrl: vi.fn(() => ''),
   } as unknown as DiscoverAppLocator;
   test('returns score 100 if term is esql', async () => {
     const esqlSearchProvider = getESQLSearchProvider({
@@ -119,7 +121,7 @@ describe('ES|QL search provider', () => {
         const [core, start] = await getServices();
         start.dataViews = {
           ...dataViewMock,
-          getDefaultDataView: jest.fn(() => undefined),
+          getDefaultDataView: vi.fn(() => undefined),
         } as unknown as DataViewsServicePublic;
         return [core, start];
       },

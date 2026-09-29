@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 
@@ -16,18 +19,21 @@ import type { AssetCriticalityRecord } from '../../../../../common/api/entity_an
 import { applyCriticalityModifier } from './asset_criticality';
 import * as helpers from '../../asset_criticality/helpers';
 
-jest.mock('../../asset_criticality/helpers', () => ({
-  ...jest.requireActual('../../asset_criticality/helpers'),
-  getCriticalityModifier: jest.fn(),
-}));
+vi.mock('../../asset_criticality/helpers', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../asset_criticality/helpers')),
+      getCriticalityModifier: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetCriticalityModifier = helpers.getCriticalityModifier as jest.MockedFunction<
+const mockGetCriticalityModifier = helpers.getCriticalityModifier as MockedFunction<
   typeof helpers.getCriticalityModifier
 >;
 
 describe('applyCriticalityModifier', () => {
   let logger: Logger;
-  let assetCriticalityService: jest.Mocked<AssetCriticalityService>;
+  let assetCriticalityService: Mocked<AssetCriticalityService>;
 
   const mockBucket: RiskScoreBucket = {
     key: { 'host.name': 'test-host' },
@@ -73,7 +79,7 @@ describe('applyCriticalityModifier', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     assetCriticalityService = assetCriticalityServiceMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('with empty buckets', () => {

@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import { GcpServiceAccountAuth } from './gcp_service_account';
 import { parseServiceAccountKey, getGcpAccessToken } from './gcp_jwt_helpers';
 
-jest.mock('./gcp_jwt_helpers', () => {
-  const actual = jest.requireActual('./gcp_jwt_helpers');
+vi.mock('./gcp_jwt_helpers', async () => {
+  const actual = (await vi.importActual('./gcp_jwt_helpers'));
   return {
     ...actual,
-    getGcpAccessToken: jest.fn(),
+    getGcpAccessToken: vi.fn(),
   };
 });
 
-const mockGetGcpAccessToken = getGcpAccessToken as jest.MockedFunction<typeof getGcpAccessToken>;
+const mockGetGcpAccessToken = getGcpAccessToken as MockedFunction<typeof getGcpAccessToken>;
 
 const VALID_SERVICE_ACCOUNT_JSON = JSON.stringify({
   type: 'service_account',
@@ -48,7 +51,7 @@ describe('GcpServiceAccountAuth', () => {
 
   describe('configure', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should set Bearer token on the axios instance', async () => {

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -17,56 +20,74 @@ import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_
 import { getPackageKnowledgeBase } from '../../get';
 
 // Mock the app context service
-jest.mock('../../../../app_context', () => ({
-  appContextService: {
-    getLogger: jest.fn().mockReturnValue({
-      error: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
-    }),
-  },
-}));
+vi.mock('../../../../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: vi.fn().mockReturnValue({
+          error: vi.fn(),
+          warn: vi.fn(),
+          info: vi.fn(),
+          debug: vi.fn(),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the knowledge base index module
-jest.mock('../../knowledge_base_index');
+vi.mock('../../knowledge_base_index');
 
 // Mock the es assets reference module
-jest.mock('../../es_assets_reference', () => ({
-  optimisticallyAddEsAssetReferences: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../../es_assets_reference', () => {
+      const mocked = {
+      optimisticallyAddEsAssetReferences: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the utils module
-jest.mock('../../utils', () => ({
-  withPackageSpan: jest.fn().mockImplementation((description, fn) => fn()),
-}));
+vi.mock('../../utils', () => {
+      const mocked = {
+      withPackageSpan: vi.fn().mockImplementation((description, fn) => fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the license service
-jest.mock('../../../../license', () => ({
-  licenseService: {
-    isEnterprise: jest.fn().mockReturnValue(true),
-  },
-}));
+vi.mock('../../../../license', () => {
+      const mocked = {
+      licenseService: {
+        isEnterprise: vi.fn().mockReturnValue(true),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../get_integration_knowledge_setting', () => ({
-  getIntegrationKnowledgeSetting: jest.fn().mockResolvedValue(true),
-}));
+vi.mock('../../get_integration_knowledge_setting', () => {
+      const mocked = {
+      getIntegrationKnowledgeSetting: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../get', () => ({
-  getPackageKnowledgeBase: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../get', () => {
+      const mocked = {
+      getPackageKnowledgeBase: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-let esClient: jest.Mocked<ElasticsearchClient>;
-let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+let esClient: Mocked<ElasticsearchClient>;
+let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
 describe('stepSaveKnowledgeBase', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     savedObjectsClient = savedObjectsClientMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock saveKnowledgeBaseContentToIndex to return expected document IDs
-    const mockSaveKnowledgeBase = saveKnowledgeBaseContentToIndex as jest.MockedFunction<
+    const mockSaveKnowledgeBase = saveKnowledgeBaseContentToIndex as MockedFunction<
       typeof saveKnowledgeBaseContentToIndex
     >;
     mockSaveKnowledgeBase.mockResolvedValue([
@@ -76,14 +97,14 @@ describe('stepSaveKnowledgeBase', () => {
   });
 
   const createMockArchiveIterator = (entries: ArchiveEntry[]): ArchiveIterator => ({
-    traverseEntries: jest.fn().mockImplementation(async (onEntry, filterFn) => {
+    traverseEntries: vi.fn().mockImplementation(async (onEntry, filterFn) => {
       for (const entry of entries) {
         if (!filterFn || filterFn(entry.path)) {
           await onEntry(entry);
         }
       }
     }),
-    getPaths: jest.fn().mockResolvedValue(entries.map((e) => e.path)),
+    getPaths: vi.fn().mockResolvedValue(entries.map((e) => e.path)),
   });
 
   const createMockContext = (
@@ -109,10 +130,10 @@ describe('stepSaveKnowledgeBase', () => {
       installSource: 'registry',
       spaceId: 'default',
       logger: {
-        error: jest.fn(),
-        warn: jest.fn(),
-        info: jest.fn(),
-        debug: jest.fn(),
+        error: vi.fn(),
+        warn: vi.fn(),
+        info: vi.fn(),
+        debug: vi.fn(),
       } as any,
     } as InstallContext);
 
@@ -392,7 +413,7 @@ describe('stepSaveKnowledgeBase', () => {
     });
 
     it('should skip saveKnowledgeBaseContentToIndex but still ensure es references when knowledge base already indexed for same version', async () => {
-      (getPackageKnowledgeBase as jest.Mock).mockResolvedValueOnce({
+      (getPackageKnowledgeBase as Mock).mockResolvedValueOnce({
         package: { name: 'test-package' },
         items: [{ fileName: 'guide.md', content: '# Guide', version: '1.0.0' }],
       });
@@ -412,7 +433,7 @@ describe('stepSaveKnowledgeBase', () => {
       expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
       // The es asset references must still be ensured so installed_es stays consistent even when
       // the indexed content survived a saved-object reset (e.g. an install rollback).
-      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      const { optimisticallyAddEsAssetReferences } = (await vi.importMock('../../es_assets_reference'));
       expect(optimisticallyAddEsAssetReferences).toHaveBeenCalledWith(
         savedObjectsClient,
         'test-package',
@@ -421,7 +442,7 @@ describe('stepSaveKnowledgeBase', () => {
     });
 
     it('should re-index when knowledge base exists but is at an older version', async () => {
-      (getPackageKnowledgeBase as jest.Mock).mockResolvedValueOnce({
+      (getPackageKnowledgeBase as Mock).mockResolvedValueOnce({
         package: { name: 'test-package' },
         items: [{ fileName: 'guide.md', content: '# Guide', version: '0.9.0' }],
       });
@@ -450,7 +471,7 @@ describe('stepSaveKnowledgeBase', () => {
   describe('Error Handling', () => {
     it('should throw FleetError when saveKnowledgeBaseContentToIndex fails', async () => {
       const mockError = new Error('Elasticsearch connection failed');
-      const mockSaveKnowledgeBase = saveKnowledgeBaseContentToIndex as jest.MockedFunction<
+      const mockSaveKnowledgeBase = saveKnowledgeBaseContentToIndex as MockedFunction<
         typeof saveKnowledgeBaseContentToIndex
       >;
       mockSaveKnowledgeBase.mockRejectedValueOnce(mockError);
@@ -472,7 +493,7 @@ describe('stepSaveKnowledgeBase', () => {
 
     it('should throw FleetError when saveKnowledgeBaseContentToIndex fails during upgrade', async () => {
       const mockError = new Error('Save operation failed');
-      (saveKnowledgeBaseContentToIndex as jest.Mock).mockRejectedValueOnce(mockError);
+      (saveKnowledgeBaseContentToIndex as Mock).mockRejectedValueOnce(mockError);
 
       const entries: ArchiveEntry[] = [
         {
@@ -499,8 +520,8 @@ describe('stepSaveKnowledgeBase', () => {
 
     it('should handle archive traversal errors gracefully', async () => {
       const mockArchiveIterator = {
-        traverseEntries: jest.fn().mockRejectedValue(new Error('Archive corruption')),
-        getPaths: jest.fn().mockResolvedValue([]),
+        traverseEntries: vi.fn().mockRejectedValue(new Error('Archive corruption')),
+        getPaths: vi.fn().mockResolvedValue([]),
       };
 
       const context = createMockContext(mockArchiveIterator as any);
@@ -511,7 +532,7 @@ describe('stepSaveKnowledgeBase', () => {
 
   describe('ES Asset References', () => {
     it('should update ES asset references with knowledge base assets', async () => {
-      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      const { optimisticallyAddEsAssetReferences } = (await vi.importMock('../../es_assets_reference'));
       optimisticallyAddEsAssetReferences.mockResolvedValueOnce([
         { id: 'test-package-guide.md', type: 'knowledge_base' },
         { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
@@ -550,7 +571,7 @@ describe('stepSaveKnowledgeBase', () => {
     });
 
     it('should not update ES asset references when no knowledge base files exist', async () => {
-      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      const { optimisticallyAddEsAssetReferences } = (await vi.importMock('../../es_assets_reference'));
 
       const entries: ArchiveEntry[] = [
         {
@@ -572,10 +593,10 @@ describe('stepSaveKnowledgeBase', () => {
     it('should handle empty knowledge base content array', async () => {
       // Mock extractKnowledgeBaseFromArchive to return empty array
       const mockArchiveIterator = {
-        traverseEntries: jest.fn().mockImplementation(async (onEntry, filterFn) => {
+        traverseEntries: vi.fn().mockImplementation(async (onEntry, filterFn) => {
           // Simulate no matching files
         }),
-        getPaths: jest.fn().mockResolvedValue([]),
+        getPaths: vi.fn().mockResolvedValue([]),
       };
 
       const context = createMockContext(mockArchiveIterator as any);
@@ -666,7 +687,7 @@ describe('stepSaveKnowledgeBase', () => {
   describe('Gating Validation', () => {
     it('should skip knowledge base processing when Enterprise license is not available', async () => {
       // Mock license service to return false for Enterprise license
-      const { licenseService } = jest.requireMock('../../../../license');
+      const { licenseService } = (await vi.importMock('../../../../license'));
       licenseService.isEnterprise.mockReturnValue(false);
 
       const entries: ArchiveEntry[] = [
@@ -685,7 +706,7 @@ describe('stepSaveKnowledgeBase', () => {
       expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
 
       // Verify that optimisticallyAddEsAssetReferences was NOT called
-      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      const { optimisticallyAddEsAssetReferences } = (await vi.importMock('../../es_assets_reference'));
       expect(optimisticallyAddEsAssetReferences).not.toHaveBeenCalled();
 
       // Reset the mock back to true for other tests
@@ -694,7 +715,7 @@ describe('stepSaveKnowledgeBase', () => {
 
     it('should process knowledge base when Enterprise license is available', async () => {
       // Ensure license service returns true for Enterprise license
-      const { licenseService } = jest.requireMock('../../../../license');
+      const { licenseService } = (await vi.importMock('../../../../license'));
       licenseService.isEnterprise.mockReturnValue(true);
 
       const entries: ArchiveEntry[] = [
@@ -723,12 +744,12 @@ describe('stepSaveKnowledgeBase', () => {
       });
 
       // Verify that optimisticallyAddEsAssetReferences WAS called
-      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      const { optimisticallyAddEsAssetReferences } = (await vi.importMock('../../es_assets_reference'));
       expect(optimisticallyAddEsAssetReferences).toHaveBeenCalled();
     });
 
     it('should skip knowledge base processing when installIntegrationsKnowledge feature flag is disabled', async () => {
-      (getIntegrationKnowledgeSetting as jest.Mock).mockResolvedValueOnce(false);
+      (getIntegrationKnowledgeSetting as Mock).mockResolvedValueOnce(false);
 
       const entries: ArchiveEntry[] = [
         {
@@ -746,7 +767,7 @@ describe('stepSaveKnowledgeBase', () => {
       expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
 
       // Verify that optimisticallyAddEsAssetReferences was NOT called
-      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      const { optimisticallyAddEsAssetReferences } = (await vi.importMock('../../es_assets_reference'));
       expect(optimisticallyAddEsAssetReferences).not.toHaveBeenCalled();
     });
 
@@ -777,7 +798,7 @@ describe('stepSaveKnowledgeBase', () => {
       });
 
       // Verify that optimisticallyAddEsAssetReferences WAS called
-      const { optimisticallyAddEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      const { optimisticallyAddEsAssetReferences } = (await vi.importMock('../../es_assets_reference'));
       expect(optimisticallyAddEsAssetReferences).toHaveBeenCalled();
     });
   });
@@ -787,7 +808,7 @@ describe('cleanupKnowledgeBaseStep', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     savedObjectsClient = savedObjectsClientMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createCleanupContext = (
@@ -813,15 +834,15 @@ describe('cleanupKnowledgeBaseStep', () => {
       force,
       initialState,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        warn: jest.fn(),
-        info: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
+        warn: vi.fn(),
+        info: vi.fn(),
       } as any,
     } as InstallContext);
 
   it('should delete knowledge base content during retry from SAVE_KNOWLEDGE_BASE state', async () => {
-    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const { deletePackageKnowledgeBase } = (await vi.importMock('../../knowledge_base_index'));
     const context = createCleanupContext(true, false, 'save_knowledge_base');
 
     await cleanupKnowledgeBaseStep(context);
@@ -833,7 +854,7 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when force is true', async () => {
-    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const { deletePackageKnowledgeBase } = (await vi.importMock('../../knowledge_base_index'));
     const context = createCleanupContext(true, true, 'save_knowledge_base');
 
     await cleanupKnowledgeBaseStep(context);
@@ -842,7 +863,7 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when not retrying from last state', async () => {
-    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const { deletePackageKnowledgeBase } = (await vi.importMock('../../knowledge_base_index'));
     const context = createCleanupContext(false, false, 'save_knowledge_base');
 
     await cleanupKnowledgeBaseStep(context);
@@ -851,7 +872,7 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when initial state is not SAVE_KNOWLEDGE_BASE', async () => {
-    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const { deletePackageKnowledgeBase } = (await vi.importMock('../../knowledge_base_index'));
     const context = createCleanupContext(true, false, 'install_kibana_assets');
 
     await cleanupKnowledgeBaseStep(context);
@@ -860,7 +881,7 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when esClient is missing', async () => {
-    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const { deletePackageKnowledgeBase } = (await vi.importMock('../../knowledge_base_index'));
     const context = createCleanupContext(true, false, 'save_knowledge_base');
     context.esClient = undefined as any;
 
@@ -870,7 +891,7 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when installedPkg is missing', async () => {
-    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const { deletePackageKnowledgeBase } = (await vi.importMock('../../knowledge_base_index'));
     const context = createCleanupContext(true, false, 'save_knowledge_base');
     context.installedPkg = undefined;
 

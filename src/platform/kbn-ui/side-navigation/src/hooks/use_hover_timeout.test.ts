@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 
 import { useHoverTimeout } from './use_hover_timeout';
 
 describe('useHoverTimeout', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllTimers();
+    vi.useRealTimers();
+    vi.clearAllTimers();
   });
 
   it('runs the callback after the specified delay', () => {
     const { result } = renderHook(() => useHoverTimeout());
 
-    const callback = jest.fn();
+    const callback = vi.fn();
 
     act(() => {
       result.current.setHoverTimeout(callback, 200);
@@ -32,7 +34,7 @@ describe('useHoverTimeout', () => {
 
     expect(callback).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(callback).toHaveBeenCalledTimes(1);
   });
@@ -40,14 +42,14 @@ describe('useHoverTimeout', () => {
   it('clears pending timeouts on demand and during cleanup', () => {
     const { result, unmount } = renderHook(() => useHoverTimeout());
 
-    const callback = jest.fn();
+    const callback = vi.fn();
 
     act(() => {
       result.current.setHoverTimeout(callback, 200);
       result.current.clearHoverTimeout();
     });
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(callback).not.toHaveBeenCalled();
 
@@ -57,6 +59,6 @@ describe('useHoverTimeout', () => {
 
     unmount();
 
-    expect(jest.getTimerCount()).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

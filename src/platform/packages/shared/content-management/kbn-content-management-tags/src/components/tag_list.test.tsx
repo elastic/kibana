@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -42,7 +44,7 @@ describe('TagList', () => {
 
   const mockTagIds = ['tag-1', 'tag-2'];
 
-  const getTagList = jest.fn(() => mockTags);
+  const getTagList = vi.fn(() => mockTags);
 
   const createWrapper = () => {
     return ({ children }: { children: React.ReactNode }) => (
@@ -55,7 +57,7 @@ describe('TagList', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders tags from tag IDs', () => {
@@ -95,7 +97,7 @@ describe('TagList', () => {
     const tagsWithoutId = [
       { name: 'No ID', description: 'Test', color: '#000000', managed: false },
     ];
-    const customGetTagList = jest.fn(() => tagsWithoutId);
+    const customGetTagList = vi.fn(() => tagsWithoutId);
 
     const CustomWrapper = ({ children }: { children: React.ReactNode }) => (
       <EuiProvider>
@@ -114,7 +116,7 @@ describe('TagList', () => {
 
   describe('with onClick handler', () => {
     it('passes onClick to TagBadge components', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
 
       render(<TagList tagIds={mockTagIds} onClick={onClick} />, {
@@ -129,7 +131,7 @@ describe('TagList', () => {
     });
 
     it('supports modifier key clicks', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
 
       render(<TagList tagIds={mockTagIds} onClick={onClick} />, {
@@ -184,7 +186,7 @@ describe('TagList', () => {
     });
 
     it('handles empty tag list from provider', () => {
-      const emptyTagListProvider = jest.fn(() => []);
+      const emptyTagListProvider = vi.fn(() => []);
       const CustomWrapper = ({ children }: { children: React.ReactNode }) => (
         <EuiProvider>
           <ContentManagementTagsProvider {...{ getTagList: emptyTagListProvider }}>
@@ -265,7 +267,7 @@ describe('TagList', () => {
     });
 
     it('passes through onClick to make badges interactive with proper ARIA', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<TagList tagIds={mockTagIds} onClick={onClick} />, {
         wrapper: createWrapper(),
       });
@@ -317,7 +319,7 @@ describe('TagList', () => {
       }));
 
       const manyTagIds = manyTags.map((t) => t.id!);
-      const customGetTagList = jest.fn(() => manyTags);
+      const customGetTagList = vi.fn(() => manyTags);
 
       const ManyTagsWrapper = ({ children }: { children: React.ReactNode }) => (
         <EuiProvider>

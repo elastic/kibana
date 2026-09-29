@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorActionErrorMeta, getEstimatedBase64OutputBytes } from '../../connector_utils';
 import { getConnectorSpec } from '../../..';
@@ -31,21 +33,21 @@ const CAMERA_ID = '66d025b301ebc903e80003ea';
 
 describe('UniFi', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
     config: { consoleUrl: CONSOLE_URL },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockClient.get.mockResolvedValue({ data: {} });
     mockClient.post.mockResolvedValue({ data: {} });
   });

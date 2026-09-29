@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 
@@ -18,22 +21,22 @@ import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_pa
 import { CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 import type { CaseConnector } from '../../../common/types/domain';
 
-jest.mock('../../containers/use_get_action_license', () => {
+vi.mock('../../containers/use_get_action_license', () => {
   return {
-    useGetActionLicense: jest.fn(),
+    useGetActionLicense: vi.fn(),
   };
 });
-jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../../containers/configure/api');
-jest.mock('../../common/navigation/hooks');
-jest.mock('../case_view/use_on_refresh_case_view_page');
+vi.mock('../../containers/use_post_push_to_service');
+vi.mock('../../containers/configure/api');
+vi.mock('../../common/navigation/hooks');
+vi.mock('../case_view/use_on_refresh_case_view_page');
 
-const useFetchActionLicenseMock = useGetActionLicense as jest.Mock;
-const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useFetchActionLicenseMock = useGetActionLicense as Mock;
+const usePostPushToServiceMock = usePostPushToService as Mock;
 
 describe('usePushToService', () => {
   const caseId = '12345';
-  const pushCaseToExternalService = jest.fn().mockReturnValue({});
+  const pushCaseToExternalService = vi.fn().mockReturnValue({});
   const mockPostPush = {
     isLoading: false,
     mutateAsync: pushCaseToExternalService,
@@ -57,7 +60,7 @@ describe('usePushToService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     usePostPushToServiceMock.mockReturnValue(mockPostPush);
     useFetchActionLicenseMock.mockReturnValue({
       isLoading: false,

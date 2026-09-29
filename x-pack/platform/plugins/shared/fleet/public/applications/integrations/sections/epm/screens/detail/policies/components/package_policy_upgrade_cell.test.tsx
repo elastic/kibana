@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,19 +16,22 @@ import { allowedExperimentalValues } from '../../../../../../../../../common/exp
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 
-jest.mock('../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../hooks'),
-  useLink: jest.fn().mockReturnValue({ getHref: jest.fn().mockReturnValue('/mock/upgrade') }),
-  useAuthz: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: { addSuccess: jest.fn(), addWarning: jest.fn(), addError: jest.fn() },
-    },
-  }),
-  // Stubbed so opening the confirm modal never risks a real request; the actual upgrade call +
-  // refresh are covered end-to-end by the shared hook via `package_policy_actions_menu.test.tsx`.
-  sendBulkUpgradeAgentlessPolicies: jest.fn(),
-}));
+vi.mock('../../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../hooks')),
+      useLink: vi.fn().mockReturnValue({ getHref: vi.fn().mockReturnValue('/mock/upgrade') }),
+      useAuthz: vi.fn().mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: { addSuccess: vi.fn(), addWarning: vi.fn(), addError: vi.fn() },
+        },
+      }),
+      // Stubbed so opening the confirm modal never risks a real request; the actual upgrade call +
+      // refresh are covered end-to-end by the shared hook via `package_policy_actions_menu.test.tsx`.
+      sendBulkUpgradeAgentlessPolicies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const agentPolicies = [
   { id: 'agentless-1', name: 'Agentless', supports_agentless: true },
@@ -60,8 +65,8 @@ describe('PackagePolicyUpgradeCell', () => {
   });
 
   afterEach(() => {
-    if (jest.isMockFunction(ExperimentalFeaturesService.get)) {
-      jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+    if (vi.isMockFunction(ExperimentalFeaturesService.get)) {
+      vi.mocked(ExperimentalFeaturesService.get).mockRestore();
     }
   });
 
@@ -72,7 +77,7 @@ describe('PackagePolicyUpgradeCell', () => {
   });
 
   it('links to the legacy upgrade route for an agentless policy while disableAgentlessLegacyAPI is off', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       disableAgentlessLegacyAPI: false,
     });
@@ -85,7 +90,7 @@ describe('PackagePolicyUpgradeCell', () => {
   describe('with disableAgentlessLegacyAPI enabled', () => {
     beforeEach(() => {
       // disableAgentlessLegacyAPI is on by default via allowedExperimentalValues.
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
         ...allowedExperimentalValues,
       });
     });

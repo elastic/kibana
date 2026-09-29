@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,11 +17,14 @@ import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { IntegrationCountBadge } from './integration_count_badge';
 
 // Mock the useCloudConnectorUsage hook
-jest.mock('../hooks/use_cloud_connector_usage', () => ({
-  useCloudConnectorUsage: jest.fn(),
-}));
+vi.mock('../hooks/use_cloud_connector_usage', () => {
+      const mocked = {
+      useCloudConnectorUsage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction<
+const mockUseCloudConnectorUsage = useCloudConnectorUsage as MockedFunction<
   typeof useCloudConnectorUsage
 >;
 
@@ -32,7 +38,7 @@ describe('IntegrationCountBadge', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudConnectorUsage.mockReturnValue({
       data: undefined,
       isLoading: false,

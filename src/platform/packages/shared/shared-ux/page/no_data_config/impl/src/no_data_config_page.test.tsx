@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -21,7 +23,7 @@ describe('NoDataConfigPage', () => {
     action: {
       kibana: {
         buttonText: 'Click me',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         description: 'Page with no data',
       },
     },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
@@ -28,7 +30,7 @@ const prompt2 = {
   promptType: PromptTypeEnum.system,
 };
 const toasts = {
-  addError: jest.fn(),
+  addError: vi.fn(),
 };
 describe('bulkUpdatePrompts', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -36,7 +38,7 @@ describe('bulkUpdatePrompts', () => {
   beforeEach(() => {
     httpMock = httpServiceMock.createSetupContract();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should send a POST request with the correct parameters and receive a successful response', async () => {
     const promptsActions = {

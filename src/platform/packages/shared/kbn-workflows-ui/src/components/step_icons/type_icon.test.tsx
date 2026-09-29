@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -20,12 +22,15 @@ import { TypeIcon } from './type_icon';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 import { useWorkflowsUiServices } from '../../context/workflows_ui_services';
 
-jest.mock('@kbn/connector-specs/icons', () => ({
-  ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
-}));
-jest.mock('../../context/workflows_ui_services');
+vi.mock('@kbn/connector-specs/icons', () => {
+      const mocked = {
+      ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../context/workflows_ui_services');
 
-const mockUseWorkflowsUiServices = jest.mocked(useWorkflowsUiServices);
+const mockUseWorkflowsUiServices = vi.mocked(useWorkflowsUiServices);
 
 beforeEach(() => {
   mockUseWorkflowsUiServices.mockReturnValue(createMockWorkflowsUiServices());
@@ -58,7 +63,7 @@ describe('TypeIcon', () => {
 
     it('resolves a custom trigger icon from the workflows extensions registry', () => {
       const services = createMockWorkflowsUiServices();
-      jest
+      vi
         .mocked(services.workflowsExtensions.getTriggerDefinition)
         .mockReturnValue({ icon: 'cloudSunny' } as unknown as PublicTriggerDefinition);
       mockUseWorkflowsUiServices.mockReturnValue(services);
@@ -90,7 +95,7 @@ describe('TypeIcon', () => {
   describe('kind="step"', () => {
     it('prefers a workflows extensions step definition icon', () => {
       const services = createMockWorkflowsUiServices();
-      jest.mocked(services.workflowsExtensions.getStepDefinition).mockReturnValue({
+      vi.mocked(services.workflowsExtensions.getStepDefinition).mockReturnValue({
         id: 'cases.createCase',
         icon: 'casesApp',
       } as unknown as PublicStepDefinition);

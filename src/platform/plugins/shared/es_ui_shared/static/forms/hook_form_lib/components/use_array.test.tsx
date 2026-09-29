@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,16 +19,16 @@ import { Form } from './form';
 import { UseField } from './use_field';
 import { UseArray } from './use_array';
 
-const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
 describe('<UseArray />', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('it should render by default 1 array item', () => {
@@ -60,7 +62,7 @@ describe('<UseArray />', () => {
   });
 
   test('it should allow to listen to array item field value change', async () => {
-    const onFormData = jest.fn();
+    const onFormData = vi.fn();
 
     const TestComp = ({ onData }: { onData: (data: any) => void }) => {
       const { form } = useForm();

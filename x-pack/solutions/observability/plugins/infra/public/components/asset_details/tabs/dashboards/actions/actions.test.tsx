@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditDashboard, UnlinkDashboard, LinkDashboard } from '.';
@@ -21,10 +24,10 @@ const TEST_CURRENT_DASHBOARD = {
   dashboardFilterAssetIdEnabled: true,
 } as const;
 
-jest.mock('../../../hooks/use_tab_switcher');
-jest.mock('../../../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_tab_switcher');
+vi.mock('../../../../../hooks/use_kibana');
 
-const tabSwitcherContextHookMock = useTabSwitcherContext as jest.MockedFunction<
+const tabSwitcherContextHookMock = useTabSwitcherContext as MockedFunction<
   typeof useTabSwitcherContext
 >;
 
@@ -32,19 +35,19 @@ describe('Custom Dashboards Actions', () => {
   const mockUseSearchSession = () => {
     tabSwitcherContextHookMock.mockReturnValue({
       ...tabSwitcherContextHookMock(),
-      isActiveTab: jest.fn(() => true),
+      isActiveTab: vi.fn(() => true),
     });
   };
 
   beforeAll(() => {
     mockUseSearchSession();
 
-    (useKibanaContextForPlugin as jest.Mock).mockReturnValue({
+    (useKibanaContextForPlugin as Mock).mockReturnValue({
       services: {
         notifications: {
           toasts: {
-            addSuccess: jest.fn(),
-            addError: jest.fn(),
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
           },
         },
       },
@@ -52,11 +55,11 @@ describe('Custom Dashboards Actions', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the edit dashboard action when the user can edit', () => {
-    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+    vi.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
       canDelete: true,
     }));
@@ -73,7 +76,7 @@ describe('Custom Dashboards Actions', () => {
     );
   });
   it('should render the edit dashboard action when the user cannot edit', () => {
-    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+    vi.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: false,
       canDelete: true,
     }));
@@ -91,7 +94,7 @@ describe('Custom Dashboards Actions', () => {
     );
   });
   it('should render the link dashboard action when the user can link a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+    vi.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
       canDelete: true,
     }));
@@ -101,7 +104,7 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraAddDashboard')).toHaveTextContent('Link dashboard');
   });
   it('should render the link dashboard action when the user cannot link a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+    vi.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: false,
       canDelete: true,
     }));
@@ -111,7 +114,7 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraAddDashboard')).toHaveTextContent('Link dashboard');
   });
   it('should render the link new dashboard action when the user can link a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+    vi.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
       canDelete: true,
     }));
@@ -120,7 +123,7 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraLinkDashboardMenu')).toHaveTextContent('Link new dashboard');
   });
   it('should render the link new dashboard action when the user cannot link a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+    vi.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: false,
       canDelete: true,
     }));
@@ -130,7 +133,7 @@ describe('Custom Dashboards Actions', () => {
   });
 
   describe('UnlinkDashboard', () => {
-    const fetchCustomDashboardsSpy = jest.spyOn(fetchCustomDashboards, 'useFetchCustomDashboards');
+    const fetchCustomDashboardsSpy = vi.spyOn(fetchCustomDashboards, 'useFetchCustomDashboards');
 
     beforeEach(() => {
       // provide mock for invocation to fetch custom dashboards
@@ -146,7 +149,7 @@ describe('Custom Dashboards Actions', () => {
         loading: false,
         error: null,
         // @ts-expect-error we provide a mock function as we don't need to test the actual implementation
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
     });
 
@@ -155,7 +158,7 @@ describe('Custom Dashboards Actions', () => {
     });
 
     it('should render the unlink dashboard action when the user can unlink a dashboard', () => {
-      jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+      vi.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
         canSave: true,
         canDelete: true,
       }));
@@ -170,7 +173,7 @@ describe('Custom Dashboards Actions', () => {
       expect(screen.getByTestId('infraUnLinkDashboardMenu')).toHaveTextContent('Unlink dashboard');
     });
     it('should render the unlink dashboard action when the user cannot unlink a dashboard', () => {
-      jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
+      vi.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
         canSave: true,
         canDelete: false,
       }));

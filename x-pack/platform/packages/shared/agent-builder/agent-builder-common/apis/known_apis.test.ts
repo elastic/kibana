@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
-  esManifest: [
-    { id: 'indices.create' },
-    { id: 'indices.delete' },
-    { id: 'async-search.delete' },
-    { id: 'bulk' },
-  ],
-}));
+import { vi } from 'vitest';
 
-jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
-  kibanaManifest: [{ id: 'cases.create' }],
-}));
+vi.mock('@elastic/schemas/es/tools/manifest.js', () => {
+      const mocked = {
+      esManifest: [
+        { id: 'indices.create' },
+        { id: 'indices.delete' },
+        { id: 'async-search.delete' },
+        { id: 'bulk' },
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@elastic/schemas/kibana/tools/manifest.js', () => {
+      const mocked = {
+      kibanaManifest: [{ id: 'cases.create' }],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   elasticsearchApiSelectors,

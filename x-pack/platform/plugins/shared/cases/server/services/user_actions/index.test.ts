@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { omit, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -64,12 +66,12 @@ import {
 
 describe('CaseUserActionService', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('methods', () => {
@@ -102,7 +104,7 @@ describe('CaseUserActionService', () => {
     const soSerializerMock = serializerMock.create();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       service = new CaseUserActionService({
         unsecuredSavedObjectsClient,
         log: mockLogger,
@@ -1745,7 +1747,7 @@ describe('CaseUserActionService', () => {
       });
 
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('returns an empty array if the response is not valid', async () => {

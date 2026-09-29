@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import { SUB_ACTION } from '@kbn/connector-schemas/jira-service-management/const
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('JiraServiceManagementParamFields', () => {
-  const editAction = jest.fn();
+  const editAction = vi.fn();
   const createAlertActionParams: JiraServiceManagementActionParams = {
     subAction: SUB_ACTION.CreateAlert,
     subActionParams: { message: 'hello', alias: '123' },
@@ -60,7 +62,7 @@ describe('JiraServiceManagementParamFields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the create alert component', async () => {

@@ -7,37 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 
 export const mockPersistedLog = {
-  add: jest.fn(),
-  get: jest.fn(() => ['response:200']),
+  add: vi.fn(),
+  get: vi.fn(() => ['response:200']),
 };
 
-export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedLog>, any>(() => {
+export const mockPersistedLogFactory = vi.fn<Mocked<typeof mockPersistedLog>, any>(() => {
   return mockPersistedLog;
 });
 
-export const mockFetchIndexPatterns = jest
+export const mockFetchIndexPatterns = vi
   .fn()
   .mockReturnValue(Promise.resolve([stubIndexPattern]));
 
-jest.mock('@kbn/data-plugin/public/query/persisted_log', () => ({
-  PersistedLog: mockPersistedLogFactory,
-}));
+vi.mock('@kbn/data-plugin/public/query/persisted_log', () => {
+      const mocked = {
+      PersistedLog: mockPersistedLogFactory,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./fetch_index_patterns', () => ({
-  fetchIndexPatterns: mockFetchIndexPatterns,
-}));
+vi.mock('./fetch_index_patterns', () => {
+      const mocked = {
+      fetchIndexPatterns: mockFetchIndexPatterns,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import _ from 'lodash';
 // Using doMock to avoid hoisting so that I can override only the debounce method in lodash
-jest.doMock('lodash', () => ({
-  ..._,
-  debounce: (func: any) => {
-    const debounced: any = func;
-    debounced.flush = jest.fn();
-    debounced.cancel = jest.fn();
-    return debounced;
-  },
-}));
+vi.doMock('lodash', () => {
+      const mocked = {
+      ..._,
+      debounce: (func: any) => {
+        const debounced: any = func;
+        debounced.flush = vi.fn();
+        debounced.cancel = vi.fn();
+        return debounced;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });

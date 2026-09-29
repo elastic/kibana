@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { createEventKindFilter } from './event_kind_filters';
 import * as securityModules from '../entity/utils/security_modules';
 
-jest.mock('../entity/utils/security_modules');
+vi.mock('../entity/utils/security_modules');
 
 /**
  * Type interface for the expected structure of the event kind filter result
@@ -37,13 +40,13 @@ const createEventKindFilterForTest = (): EventKindFilterResult => {
   return createEventKindFilter() as unknown as EventKindFilterResult;
 };
 
-const mockGetAllSecurityModules = securityModules.getAllSecurityModules as jest.MockedFunction<
+const mockGetAllSecurityModules = securityModules.getAllSecurityModules as MockedFunction<
   typeof securityModules.getAllSecurityModules
 >;
 
 describe('event_kind_filters', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createEventKindFilter', () => {

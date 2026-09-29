@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -46,12 +48,12 @@ const createMockKnowledgeBase = (
   isInstalling: false,
   isWarmingUpModel: false,
   isPolling: false,
-  install: jest.fn().mockResolvedValue(undefined),
-  warmupModel: jest.fn().mockResolvedValue(undefined),
+  install: vi.fn().mockResolvedValue(undefined),
+  warmupModel: vi.fn().mockResolvedValue(undefined),
   isProductDocInstalling: false,
   isProductDocUninstalling: false,
-  installProductDoc: jest.fn().mockResolvedValue(undefined),
-  uninstallProductDoc: jest.fn().mockResolvedValue(undefined),
+  installProductDoc: vi.fn().mockResolvedValue(undefined),
+  uninstallProductDoc: vi.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
@@ -148,7 +150,7 @@ describe('ProductDocSetting', () => {
   });
 
   it('shows Retry link and warning callout on backend error and retries install', async () => {
-    const installProductDoc = jest.fn().mockResolvedValue(undefined);
+    const installProductDoc = vi.fn().mockResolvedValue(undefined);
 
     const mockKnowledgeBase = createMockKnowledgeBase({
       installProductDoc,
@@ -186,7 +188,7 @@ describe('ProductDocSetting', () => {
   });
 
   it('does not call install when not eligible (no inference id)', async () => {
-    const installProductDoc = jest.fn().mockResolvedValue(undefined);
+    const installProductDoc = vi.fn().mockResolvedValue(undefined);
     const mockKnowledgeBase = createMockKnowledgeBase({
       installProductDoc,
       status: createMockStatus({ productDocStatus: 'uninstalled' }),

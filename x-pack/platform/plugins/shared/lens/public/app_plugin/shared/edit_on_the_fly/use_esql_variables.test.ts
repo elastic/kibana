@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
@@ -30,11 +33,11 @@ const getAttributes = (): TypedLensSerializedState['attributes'] =>
     },
   } as unknown as TypedLensSerializedState['attributes']);
 
-const getParentApi = (panel: { updateAttributes: jest.Mock; onEdit: jest.Mock }) => ({
-  addNewPanel: jest.fn().mockResolvedValue(undefined),
-  removePanel: jest.fn(),
-  replacePanel: jest.fn(),
-  getPanelCount: jest.fn(),
+const getParentApi = (panel: { updateAttributes: Mock; onEdit: Mock }) => ({
+  addNewPanel: vi.fn().mockResolvedValue(undefined),
+  removePanel: vi.fn(),
+  replacePanel: vi.fn(),
+  getPanelCount: vi.fn(),
   children$: new BehaviorSubject<Record<string, unknown>>({ panel1: panel }),
   esqlVariables$: new BehaviorSubject([]),
 });
@@ -42,8 +45,8 @@ const getParentApi = (panel: { updateAttributes: jest.Mock; onEdit: jest.Mock })
 describe('useESQLVariables', () => {
   const setup = (layerId: string) => {
     const panel = {
-      updateAttributes: jest.fn(),
-      onEdit: jest.fn().mockResolvedValue(undefined),
+      updateAttributes: vi.fn(),
+      onEdit: vi.fn().mockResolvedValue(undefined),
     };
     const parentApi = getParentApi(panel);
     const { result } = renderHook(() =>
@@ -52,7 +55,7 @@ describe('useESQLVariables', () => {
         attributes: getAttributes(),
         panelId: 'panel1',
         layerId,
-        closeFlyout: jest.fn(),
+        closeFlyout: vi.fn(),
       })
     );
     return { result, panel, parentApi };

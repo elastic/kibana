@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../../detection_engine/routes/__mocks__';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
@@ -13,8 +15,8 @@ import { checkAndInitAssetCriticalityResources } from './check_and_init_asset_cr
 describe('checkAndInitAssetCriticalityResources', () => {
   const logger = loggingSystemMock.createLogger();
   const { context } = requestContextMock.createTools();
-  const doesIndexExist = jest.spyOn(AssetCriticalityDataClient.prototype, 'doesIndexExist');
-  const initAssetCriticality = jest.spyOn(AssetCriticalityDataClient.prototype, 'init');
+  const doesIndexExist = vi.spyOn(AssetCriticalityDataClient.prototype, 'doesIndexExist');
+  const initAssetCriticality = vi.spyOn(AssetCriticalityDataClient.prototype, 'init');
 
   beforeEach(() => {
     doesIndexExist.mockImplementation(() => Promise.resolve(false));

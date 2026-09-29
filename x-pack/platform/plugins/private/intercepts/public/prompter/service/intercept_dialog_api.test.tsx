@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { InterceptDialogApi } from './intercept_dialog_api';
@@ -38,7 +40,7 @@ describe('InterceptDialogApi', () => {
         },
         { id: 'completion' as const, title: 'Goodbye', content: () => <>{'Goodbye sir'}</> },
       ],
-      onFinish: jest.fn(),
+      onFinish: vi.fn(),
     };
 
     beforeEach(() => {
@@ -54,7 +56,7 @@ describe('InterceptDialogApi', () => {
     });
 
     it('invoking the add method adds an intercept', () => {
-      const nextHandlerFn = jest.fn();
+      const nextHandlerFn = vi.fn();
 
       const sub = interceptApi.get$().subscribe(nextHandlerFn);
 
@@ -67,7 +69,7 @@ describe('InterceptDialogApi', () => {
     });
 
     it('invoking the add method multiple times with an intercept matching the same id is idempotent', () => {
-      const nextHandlerFn = jest.fn();
+      const nextHandlerFn = vi.fn();
 
       const sub = interceptApi.get$().subscribe(nextHandlerFn);
 
@@ -82,7 +84,7 @@ describe('InterceptDialogApi', () => {
     });
 
     it('invoking the ack method with the id of an existing intercept removes said intercept', () => {
-      const nextHandlerFn = jest.fn();
+      const nextHandlerFn = vi.fn();
 
       const sub = interceptApi.get$().subscribe(nextHandlerFn);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { internalTools, ToolOrigin, ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore, isInternalTool } from '@kbn/agent-builder-common/tools';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
@@ -31,8 +33,8 @@ const createMockSkill = (
   content: 'skill content body',
   readonly: true,
   basePath: 'skills/platform',
-  getRegistryTools: jest.fn().mockReturnValue([]),
-  getInlineTools: jest.fn().mockReturnValue([]),
+  getRegistryTools: vi.fn().mockReturnValue([]),
+  getInlineTools: vi.fn().mockReturnValue([]),
   referencedContentCount: 0,
   experimental: false,
   ...overrides,
@@ -107,8 +109,8 @@ describe('load_skill tool', () => {
     const registryTool = { id: 'registry-1' } as any;
 
     const skill = createMockSkill({
-      getInlineTools: jest.fn().mockReturnValue([inlineTool]),
-      getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
+      getInlineTools: vi.fn().mockReturnValue([inlineTool]),
+      getRegistryTools: vi.fn().mockReturnValue(['registry-1']),
     });
 
     ctx.skills.list.mockResolvedValue([skill]);
@@ -157,7 +159,7 @@ describe('load_skill tool', () => {
   it('returns an error result when the helper exceeds the 25-tool registry limit', async () => {
     const tooMany = Array.from({ length: 26 }, (_, i) => `t-${i}`);
     const skill = createMockSkill({
-      getRegistryTools: jest.fn().mockReturnValue(tooMany),
+      getRegistryTools: vi.fn().mockReturnValue(tooMany),
     });
     ctx.skills.list.mockResolvedValue([skill]);
 
@@ -178,8 +180,8 @@ describe('load_skill tool', () => {
       stack: [{ type: 'agent', agentId: 'a1', conversationId: 'c1', executionId: 'e1' }],
     } as any;
 
-    const analyticsService = { reportSkillInvoked: jest.fn() };
-    const trackingService = { trackSkillInvocation: jest.fn() };
+    const analyticsService = { reportSkillInvoked: vi.fn() };
+    const trackingService = { trackSkillInvocation: vi.fn() };
 
     const tool = createLoadSkillTool({ analyticsService, trackingService });
     await callHandler(tool, { skill: 'my-skill' }, ctx);

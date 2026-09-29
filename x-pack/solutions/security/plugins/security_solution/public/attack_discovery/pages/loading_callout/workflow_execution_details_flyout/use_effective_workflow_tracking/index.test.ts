@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 
 import { useWorkflowTracking } from '../../../hooks/use_workflow_tracking';
 import { useEffectiveWorkflowTracking } from '.';
 
-jest.mock('../../../hooks/use_workflow_tracking');
+vi.mock('../../../hooks/use_workflow_tracking');
 
-const mockUseWorkflowTracking = useWorkflowTracking as jest.Mock;
+const mockUseWorkflowTracking = useWorkflowTracking as Mock;
 
 const mockHttp = {} as HttpSetup;
 
@@ -34,7 +37,7 @@ const baseProps = {
 
 describe('useEffectiveWorkflowTracking', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowTracking.mockReturnValue({ data: undefined });
   });
 

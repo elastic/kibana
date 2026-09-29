@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent, waitFor } from '@testing-library/react';
@@ -20,32 +23,38 @@ import {
 
 import { AgentReassignAgentPolicyModal } from '.';
 
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  sendPostAgentReassign: jest.fn(),
-  sendPostBulkAgentReassign: jest.fn(),
-  useGetAgentPolicies: jest.fn(),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addSuccess: jest.fn(),
-        addError: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      sendPostAgentReassign: vi.fn(),
+      sendPostBulkAgentReassign: vi.fn(),
+      useGetAgentPolicies: vi.fn(),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../components', () => ({
-  AgentPolicyPackageBadges: () => null,
-}));
+vi.mock('../../../../components', () => {
+      const mocked = {
+      AgentPolicyPackageBadges: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSendPostAgentReassign = sendPostAgentReassign as jest.Mock;
-const mockSendPostBulkAgentReassign = sendPostBulkAgentReassign as jest.Mock;
-const mockUseGetAgentPolicies = useGetAgentPolicies as jest.Mock;
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockSendPostAgentReassign = sendPostAgentReassign as Mock;
+const mockSendPostBulkAgentReassign = sendPostBulkAgentReassign as Mock;
+const mockUseGetAgentPolicies = useGetAgentPolicies as Mock;
+const mockUseStartServices = useStartServices as Mock;
 
 const POLICY_A = { id: 'policy-a', name: 'Policy A', is_managed: false };
 const POLICY_B = { id: 'policy-b', name: 'Policy B', is_managed: false };
@@ -59,7 +68,7 @@ function mockPolicies(policies = [POLICY_A, POLICY_B]) {
 
 function render(props: { agents: any; agentCount?: number; onClose?: () => void }) {
   const renderer = createFleetTestRendererMock();
-  const onClose = props.onClose ?? jest.fn();
+  const onClose = props.onClose ?? vi.fn();
   const utils = renderer.render(
     <AgentReassignAgentPolicyModal
       onClose={onClose}
@@ -72,7 +81,7 @@ function render(props: { agents: any; agentCount?: number; onClose?: () => void 
 
 describe('AgentReassignAgentPolicyModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPolicies();
     mockUseStartServices.mockReturnValue({
       notifications: {

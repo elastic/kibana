@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -19,17 +21,17 @@ describe('registerGetWorkflowTool', () => {
   let registeredTool: BuiltinToolDefinition;
 
   const mockApi = {
-    getWorkflow: jest.fn(),
+    getWorkflow: vi.fn(),
   } as any;
 
   const mockSecurity = {
     authz: {
       actions: {
         api: {
-          get: jest.fn((action: string) => action),
+          get: vi.fn((action: string) => action),
         },
       },
-      checkPrivilegesWithRequest: jest.fn(),
+      checkPrivilegesWithRequest: vi.fn(),
     },
   } as any;
 
@@ -44,16 +46,16 @@ describe('registerGetWorkflowTool', () => {
   };
 
   const createAttachmentsMock = () => ({
-    getAttachmentRecord: jest.fn().mockReturnValue(undefined),
-    add: jest.fn().mockResolvedValue({ id: 'wf-support-cases', current_version: 1 }),
-    updateOrigin: jest.fn().mockResolvedValue(true),
+    getAttachmentRecord: vi.fn().mockReturnValue(undefined),
+    add: vi.fn().mockResolvedValue({ id: 'wf-support-cases', current_version: 1 }),
+    updateOrigin: vi.fn().mockResolvedValue(true),
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockSecurity.authz.checkPrivilegesWithRequest.mockReturnValue({
-      atSpace: jest.fn().mockReturnValue({
+      atSpace: vi.fn().mockReturnValue({
         hasAllRequested: true,
       }),
     });
@@ -62,7 +64,7 @@ describe('registerGetWorkflowTool', () => {
 
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltinToolDefinition) => {
+        register: vi.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },
@@ -240,7 +242,7 @@ describe('registerGetWorkflowTool', () => {
 
   it('returns an error when the caller lacks read privilege', async () => {
     mockSecurity.authz.checkPrivilegesWithRequest.mockReturnValue({
-      atSpace: jest.fn().mockReturnValue({
+      atSpace: vi.fn().mockReturnValue({
         hasAllRequested: false,
       }),
     });
@@ -269,9 +271,9 @@ describe('attachSavedWorkflowToConversation', () => {
 
   it('adds a new workflow attachment with origin', async () => {
     const attachments = {
-      getAttachmentRecord: jest.fn().mockReturnValue(undefined),
-      add: jest.fn().mockResolvedValue({ id: 'wf-support-cases' }),
-      updateOrigin: jest.fn(),
+      getAttachmentRecord: vi.fn().mockReturnValue(undefined),
+      add: vi.fn().mockResolvedValue({ id: 'wf-support-cases' }),
+      updateOrigin: vi.fn(),
     } as any;
 
     const result = await attachSavedWorkflowToConversation({

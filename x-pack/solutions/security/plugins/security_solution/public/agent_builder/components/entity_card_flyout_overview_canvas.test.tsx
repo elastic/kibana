@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -25,15 +28,21 @@ import { EntityCardFlyoutOverviewCanvas } from './entity_card_flyout_overview_ca
  * own test suite. This file focuses on the dispatch-level branches: loading and `generic → null`.
  */
 
-jest.mock('../attachment_types/entity_attachment/use_entity_for_attachment', () => ({
-  useEntityForAttachment: jest.fn(),
-}));
+vi.mock('../attachment_types/entity_attachment/use_entity_for_attachment', () => {
+      const mocked = {
+      useEntityForAttachment: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/shared/components/flyout_loading', () => ({
-  FlyoutLoading: () => <div data-test-subj="flyoutLoadingMock" />,
-}));
+vi.mock('../../flyout_v2/shared/components/flyout_loading', () => {
+      const mocked = {
+      FlyoutLoading: () => <div data-test-subj="flyoutLoadingMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseEntityForAttachment = useEntityForAttachment as jest.Mock;
+const mockedUseEntityForAttachment = useEntityForAttachment as Mock;
 
 const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.host,
@@ -60,7 +69,7 @@ const renderCanvas = (identifier: {
 
 describe('EntityCardFlyoutOverviewCanvas', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows FlyoutLoading while useEntityForAttachment is loading and has no data yet', () => {
@@ -68,7 +77,7 @@ describe('EntityCardFlyoutOverviewCanvas', () => {
       data: null,
       isLoading: true,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderCanvas({ identifierType: 'host', identifier: 'host-1' });
@@ -80,7 +89,7 @@ describe('EntityCardFlyoutOverviewCanvas', () => {
       data: baseEntityData({ entityType: EntityType.generic }),
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { container } = renderCanvas({

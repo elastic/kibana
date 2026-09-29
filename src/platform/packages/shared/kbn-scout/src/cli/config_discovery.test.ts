@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ScoutTestableModuleWithConfigs } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -26,11 +29,11 @@ export const mockTestableModules: { modules: ScoutTestableModuleWithConfigs[] } 
 };
 
 // Mock fs before any imports that might use it
-jest.mock('fs', () => {
-  const actualFs = jest.requireActual('fs');
+vi.mock('fs', () => {
+  const actualFs = require('fs');
   return {
     ...actualFs,
-    readFileSync: jest.fn((path: string, encoding?: string) => {
+    readFileSync: vi.fn((path: string, encoding?: string) => {
       // Return valid JSON for package.json files (used by @kbn/repo-info during initialization)
       if (typeof path === 'string' && path.endsWith('package.json')) {
         return JSON.stringify({ name: 'kibana', version: '1.0.0' });
@@ -38,36 +41,48 @@ jest.mock('fs', () => {
       // For other files, return empty string by default
       return '';
     }),
-    existsSync: jest.fn(() => false),
-    mkdirSync: jest.fn(),
-    writeFileSync: jest.fn(),
+    existsSync: vi.fn(() => false),
+    mkdirSync: vi.fn(),
+    writeFileSync: vi.fn(),
   };
 });
 
-jest.mock('@kbn/repo-packages', () => ({
-  findPackageForPath: jest.fn(),
-}));
+vi.mock('@kbn/repo-packages', () => {
+      const mocked = {
+      findPackageForPath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo/root',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/scout-info', () => ({
-  ...jest.requireActual('@kbn/scout-info'),
-  SCOUT_PLAYWRIGHT_CONFIGS_PATH: '/path/to/scout_playwright_configs.json',
-}));
+vi.mock('@kbn/scout-info', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/scout-info')),
+      SCOUT_PLAYWRIGHT_CONFIGS_PATH: '/path/to/scout_playwright_configs.json',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../tests_discovery/search_configs', () => ({
-  filterModulesByScoutCiConfig: jest.fn(),
-  getScoutCiExcludedConfigs: jest.fn(),
-}));
+vi.mock('../tests_discovery/search_configs', () => {
+      const mocked = {
+      filterModulesByScoutCiConfig: vi.fn(),
+      getScoutCiExcludedConfigs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/scout-reporting/src/registry', () => {
+vi.mock('@kbn/scout-reporting/src/registry', async () => {
   // Access the module-level store
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const testModule = require('./config_discovery.test');
   return {
-    ...jest.requireActual('@kbn/scout-reporting/src/registry'),
+    ...(await vi.importActual('@kbn/scout-reporting/src/registry')),
     testableModules: {
       get allIncludingConfigs() {
         return testModule.mockTestableModules.modules;
@@ -76,13 +91,16 @@ jest.mock('@kbn/scout-reporting/src/registry', () => {
   };
 });
 
-jest.mock('../servers/configs', () => ({
-  getScoutPlaywrightConfigs: jest.fn(),
-}));
+vi.mock('../servers/configs', () => {
+      const mocked = {
+      getScoutPlaywrightConfigs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('runDiscoverPlaywrightConfigs', () => {
-  let flagsReader: jest.Mocked<FlagsReader>;
-  let log: jest.Mocked<ToolingLog>;
+  let flagsReader: Mocked<FlagsReader>;
+  let log: Mocked<ToolingLog>;
 
   const mockFilteredModules: ModuleDiscoveryInfo[] = [
     {
@@ -110,25 +128,25 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
   beforeAll(() => {
     flagsReader = {
-      enum: jest.fn(),
-      arrayOfStrings: jest.fn(),
-      boolean: jest.fn(),
-      string: jest.fn(),
+      enum: vi.fn(),
+      arrayOfStrings: vi.fn(),
+      boolean: vi.fn(),
+      string: vi.fn(),
     } as any;
 
     log = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      warning: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      warning: vi.fn(),
     } as any;
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Re-setup fs mocks after clearing
-    (fs.readFileSync as jest.Mock).mockImplementation((path: string) => {
+    (fs.readFileSync as Mock).mockImplementation((path: string) => {
       if (typeof path === 'string' && path.endsWith('package.json')) {
         return JSON.stringify({ name: 'kibana', version: '1.0.0' });
       }
@@ -138,19 +156,19 @@ describe('runDiscoverPlaywrightConfigs', () => {
       }
       return '';
     });
-    (fs.existsSync as jest.Mock).mockReturnValue(false);
-    (fs.mkdirSync as jest.Mock).mockImplementation(jest.fn());
-    (fs.writeFileSync as jest.Mock).mockImplementation(jest.fn());
+    (fs.existsSync as Mock).mockReturnValue(false);
+    (fs.mkdirSync as Mock).mockImplementation(vi.fn());
+    (fs.writeFileSync as Mock).mockImplementation(vi.fn());
 
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
     flagsReader.arrayOfStrings.mockReturnValue([]);
     flagsReader.string.mockImplementation(() => '');
 
-    (findPackageForPath as jest.Mock).mockReset();
+    (findPackageForPath as Mock).mockReset();
 
-    (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(mockFilteredModules);
-    (getScoutCiExcludedConfigs as jest.Mock).mockReturnValue([]);
+    (filterModulesByScoutCiConfig as Mock).mockReturnValue(mockFilteredModules);
+    (getScoutCiExcludedConfigs as Mock).mockReturnValue([]);
 
     // Default mock modules
     mockTestableModules.modules = [
@@ -305,7 +323,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     expect(filterModulesByScoutCiConfig).toHaveBeenCalled();
-    const callArgs = (filterModulesByScoutCiConfig as jest.Mock).mock.calls[0];
+    const callArgs = (filterModulesByScoutCiConfig as Mock).mock.calls[0];
     expect(callArgs[0]).toBe(log);
     expect(Array.isArray(callArgs[1])).toBe(true);
   });
@@ -327,7 +345,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       expect(filterModulesByScoutCiConfig).not.toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalled();
 
-      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const writeCall = (fs.writeFileSync as Mock).mock.calls[0];
       const savedData = JSON.parse(writeCall[1]);
       const savedPaths = savedData.flatMap((m: any) => m.configs.map((c: any) => c.path));
       expect(savedPaths).toEqual([requestedPath]);
@@ -349,7 +367,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
 
-      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const writeCall = (fs.writeFileSync as Mock).mock.calls[0];
       const savedData = JSON.parse(writeCall[1]);
       const savedPaths = savedData.flatMap((m: any) => m.configs.map((c: any) => c.path));
       expect(savedPaths).toEqual([requestedPath]);
@@ -412,7 +430,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
 
-      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const writeCall = (fs.writeFileSync as Mock).mock.calls[0];
       const savedData = JSON.parse(writeCall[1]);
       const savedPaths = savedData.flatMap((m: any) => m.configs.map((c: any) => c.path));
       expect(savedPaths).toEqual([customPath]);
@@ -663,7 +681,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     const excludedConfigPath =
       'x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts';
 
-    (getScoutCiExcludedConfigs as jest.Mock).mockReturnValue([excludedConfigPath]);
+    (getScoutCiExcludedConfigs as Mock).mockReturnValue([excludedConfigPath]);
 
     mockTestableModules.modules = [
       {
@@ -836,7 +854,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(fs.mkdirSync).toHaveBeenCalledWith('/path/to', { recursive: true });
     expect(fs.writeFileSync).toHaveBeenCalled();
 
-    const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+    const writeCall = (fs.writeFileSync as Mock).mock.calls[0];
     expect(writeCall[0]).toBe('/path/to/scout_playwright_configs.json');
     const savedData = JSON.parse(writeCall[1]);
     expect(Array.isArray(savedData)).toBe(true);
@@ -854,7 +872,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       return false;
     });
 
-    (filterModulesByScoutCiConfig as jest.Mock).mockImplementation((_log, modules) => modules);
+    (filterModulesByScoutCiConfig as Mock).mockImplementation((_log, modules) => modules);
 
     mockTestableModules.modules = [
       {
@@ -894,7 +912,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+    const writeCall = (fs.writeFileSync as Mock).mock.calls[0];
     const savedData = JSON.parse(writeCall[1]);
 
     expect(savedData).toHaveLength(1);
@@ -1323,7 +1341,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
         return flag === 'save';
       });
 
-      (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
+      (filterModulesByScoutCiConfig as Mock).mockReturnValue(
         mockTestableModules.modules.map((m) => ({
           name: m.name,
           group: m.group,
@@ -1347,7 +1365,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       expect(filterModulesByScoutCiConfig).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalled();
 
-      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const writeCall = (fs.writeFileSync as Mock).mock.calls[0];
       expect(writeCall[0]).toBe('/path/to/scout_playwright_configs.json');
       const savedData = JSON.parse(writeCall[1]);
 
@@ -1383,7 +1401,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
         return flag === 'save';
       });
 
-      (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
+      (filterModulesByScoutCiConfig as Mock).mockReturnValue(
         mockTestableModules.modules.map((m) => ({
           name: m.name,
           group: m.group,
@@ -1404,7 +1422,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
 
-      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const writeCall = (fs.writeFileSync as Mock).mock.calls[0];
       const savedData = JSON.parse(writeCall[1]);
 
       const statefulScoutCmd =
@@ -1520,7 +1538,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
         },
       ];
 
-      (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue([
+      (filterModulesByScoutCiConfig as Mock).mockReturnValue([
         {
           name: 'pluginMultiMode',
           group: 'platform',
@@ -1548,7 +1566,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
 
-      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const writeCall = (fs.writeFileSync as Mock).mock.calls[0];
       const savedData = JSON.parse(writeCall[1]);
 
       const statefulScoutCmd =
@@ -1601,7 +1619,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     const TESTING_SCOPE_PATH = '/mock/testing_scope.json';
 
     const setupTestingScope = (scope: Record<string, unknown>) => {
-      (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
+      (fs.readFileSync as Mock).mockImplementation((readPath: string) => {
         if (readPath === TESTING_SCOPE_PATH) {
           return JSON.stringify(scope);
         }
@@ -1616,7 +1634,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     };
 
     beforeEach(() => {
-      (findPackageForPath as jest.Mock).mockImplementation((_root: string, absPath: string) => {
+      (findPackageForPath as Mock).mockImplementation((_root: string, absPath: string) => {
         if (absPath.includes('/pluginA/')) return { id: '@kbn/pluginA' };
         if (absPath.includes('/pluginB/')) return { id: '@kbn/pluginB' };
         if (absPath.includes('/packageA/')) return { id: '@kbn/packageA' };

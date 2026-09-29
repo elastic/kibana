@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
@@ -75,8 +77,8 @@ describe('get_workflow_change_history', () => {
     workflowResult?: typeof workflow | null;
   } = {}) => {
     const changeHistoryService = {
-      isInitialized: jest.fn().mockReturnValue(initialized),
-      getHistory: jest.fn().mockResolvedValue(historyResult),
+      isInitialized: vi.fn().mockReturnValue(initialized),
+      getHistory: vi.fn().mockResolvedValue(historyResult),
     } as unknown as IWorkflowChangeHistoryService;
 
     const userProfileService = userProfileServiceMock.createStart();
@@ -86,7 +88,7 @@ describe('get_workflow_change_history', () => {
       deps: {
         changeHistoryService,
         userProfileService,
-        getWorkflowSource: jest.fn().mockResolvedValue(workflowResult),
+        getWorkflowSource: vi.fn().mockResolvedValue(workflowResult),
       },
       changeHistoryService,
       userProfileService,

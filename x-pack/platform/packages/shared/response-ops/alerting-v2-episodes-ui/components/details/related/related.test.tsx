@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -23,13 +25,19 @@ const loadedRuleState = {
   rule: mockRule,
 } as const;
 
-jest.mock('./group_subsection', () => ({
-  RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,
-}));
+vi.mock('./group_subsection', () => {
+      const mocked = {
+      RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_subsection', () => ({
-  RelatedEpisodesRuleSubsection: () => <div data-test-subj="mockRuleSubsection" />,
-}));
+vi.mock('./rule_subsection', () => {
+      const mocked = {
+      RelatedEpisodesRuleSubsection: () => <div data-test-subj="mockRuleSubsection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertEpisodesRelated', () => {
   it('renders the section heading', () => {

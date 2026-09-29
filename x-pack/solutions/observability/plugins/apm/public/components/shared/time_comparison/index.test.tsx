@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -97,7 +99,7 @@ const expectNoExpectedBoundsOption = (component: ReturnType<typeof render>) => {
 
 describe('TimeComparison component', () => {
   const mockMLJobs = () => {
-    jest
+    vi
       .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
       .mockReturnValue(
         // @ts-ignore mocking only partial data
@@ -108,7 +110,7 @@ describe('TimeComparison component', () => {
         }
       );
 
-    jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValue({
+    vi.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValue({
       preferredEnvironment: 'prod',
       environment: 'prod',
       environments: [],
@@ -120,11 +122,11 @@ describe('TimeComparison component', () => {
   });
   afterAll(() => moment.tz.setDefault(''));
 
-  const spy = jest.spyOn(urlHelpers, 'replace');
+  const spy = vi.spyOn(urlHelpers, 'replace');
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockMLJobs();
-    jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
+    vi.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
   });
 
   describe('ML expected model bounds', () => {
@@ -135,11 +137,11 @@ describe('TimeComparison component', () => {
     }) as unknown as ApmPluginContextValue;
 
     beforeEach(() => {
-      jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(true);
+      vi.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(true);
     });
 
     it('shows disabled option for expected bounds when there are ML jobs available with sufficient permission', () => {
-      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce(
+      vi.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce(
         // @ts-ignore mocking only partial data
         {
           preferredEnvironment: ENVIRONMENT_ALL.value,
@@ -168,7 +170,7 @@ describe('TimeComparison component', () => {
     });
 
     it('preserves expected bounds deeplink while anomaly detection setup is loading', () => {
-      jest
+      vi
         .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
         .mockReturnValue(
           // @ts-ignore mocking only partial data
@@ -179,7 +181,7 @@ describe('TimeComparison component', () => {
           }
         );
 
-      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+      vi.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
         preferredEnvironment: 'prod',
         environment: 'prod',
         environments: [],
@@ -205,8 +207,8 @@ describe('TimeComparison component', () => {
       // Unauthorized users get a permanent `Unknown` setup state and a fetch that
       // never initiates, so the deeplink must fall through to the replace guard rather
       // than being treated as pending (which would hide the selector forever).
-      jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
-      jest
+      vi.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
+      vi
         .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
         .mockReturnValue(
           // @ts-ignore mocking only partial data
@@ -217,7 +219,7 @@ describe('TimeComparison component', () => {
           }
         );
 
-      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+      vi.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
         preferredEnvironment: 'prod',
         environment: 'prod',
         environments: [],
@@ -242,7 +244,7 @@ describe('TimeComparison component', () => {
     });
 
     it('shows enabled option for expected bounds when there are ML jobs available matching the preferred environment', () => {
-      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+      vi.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
         preferredEnvironment: 'prod',
         environment: 'prod',
         environments: [],
@@ -270,7 +272,7 @@ describe('TimeComparison component', () => {
     });
 
     it('does not render expected bounds option when shouldShowAnomalyUi is false', () => {
-      jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
+      vi.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
 
       const Wrapper = getWrapper({
         url: '/services/frontend/transactions',
@@ -285,7 +287,7 @@ describe('TimeComparison component', () => {
     });
 
     it('shows disabled option for expected bounds when no ML jobs match the current environment', () => {
-      jest
+      vi
         .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
         .mockReturnValue(
           // @ts-ignore mocking only partial data

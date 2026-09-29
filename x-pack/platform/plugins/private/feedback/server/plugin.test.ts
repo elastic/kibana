@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { FeedbackPlugin } from './plugin';
 import { feedbackSubmittedEventType } from './src';
 import { registerSendFeedbackRoute } from './routes';
 
-jest.mock('./routes', () => ({
-  registerSendFeedbackRoute: jest.fn(),
-}));
+vi.mock('./routes', () => {
+      const mocked = {
+      registerSendFeedbackRoute: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const coreSetup = coreMock.createSetup();
 const plugin = new FeedbackPlugin();
 
-const registerSendFeedbackRouteMock = registerSendFeedbackRoute as jest.MockedFunction<
+const registerSendFeedbackRouteMock = registerSendFeedbackRoute as MockedFunction<
   typeof registerSendFeedbackRoute
 >;
 
 describe('FeedbackPlugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setup', () => {

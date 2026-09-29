@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useStartMigration } from './use_start_migration';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -12,12 +15,12 @@ import type { RuleMigrationStats } from '../types';
 import { MigrationSource } from '../../common/types';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 
-jest.mock('../../../common/lib/kibana/kibana_react');
+vi.mock('../../../common/lib/kibana/kibana_react');
 
 describe('useStartMigration', () => {
-  const mockStartRuleMigration = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
+  const mockStartRuleMigration = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddError = vi.fn();
   const migrationStats: RuleMigrationStats = {
     id: 'test-migration-1',
     name: 'test-migration',
@@ -29,7 +32,7 @@ describe('useStartMigration', () => {
   };
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         siemMigrations: {
           rules: {
@@ -47,12 +50,12 @@ describe('useStartMigration', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('starts a migration successfully', async () => {
     mockStartRuleMigration.mockResolvedValue({ started: true });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = renderHook(() => useStartMigration(onSuccess));
 
     act(() => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -13,12 +16,15 @@ import { InvestigationGuide } from '.';
 import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
-jest.mock('../../../shared/components/document_tools_flyout_header', () => ({
-  DocumentToolsFlyoutHeader: ({ title }: { title: string }) => (
-    <div data-test-subj="mockDocumentToolsFlyoutHeader">{title}</div>
-  ),
-}));
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+vi.mock('../../../shared/components/document_tools_flyout_header', () => {
+      const mocked = {
+      DocumentToolsFlyoutHeader: ({ title }: { title: string }) => (
+        <div data-test-subj="mockDocumentToolsFlyoutHeader">{title}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderInvestigationGuide = ({
   hit = buildDataTableRecord(mockContextValue.searchHit as EsHitRecord),
@@ -33,11 +39,11 @@ const renderInvestigationGuide = ({
 
 describe('<InvestigationGuide />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render loading skeleton when rule is loading', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: true,
       error: false,
       rule: null,
@@ -50,7 +56,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should render full investigation guide when rule note exists', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: 'test note' },
@@ -63,7 +69,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it("should render a no data message when there's no rule id in the document", () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: 'test note' },
@@ -81,7 +87,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should render a no data message when rule note is missing', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: undefined },
@@ -94,7 +100,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should request the signal rule id when the document is not an alert', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: undefined },

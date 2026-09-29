@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -14,26 +16,35 @@ import { createFleetTestRendererMock } from '../../../mock';
 import type { UseErrorPatternsResult } from './use_error_patterns';
 import { ErrorPatternPanel } from './error_pattern_panel';
 
-const mockUseErrorPatterns = jest.fn<UseErrorPatternsResult, any>();
-jest.mock('./use_error_patterns', () => ({
-  useErrorPatterns: (...args: any[]) => mockUseErrorPatterns(...args),
-  TIME_RANGE_TO_MS: {
-    '5m': 5 * 60 * 1000,
-    '1h': 60 * 60 * 1000,
-    '1d': 24 * 60 * 60 * 1000,
-    '1w': 7 * 24 * 60 * 60 * 1000,
-  },
-}));
+const mockUseErrorPatterns = vi.fn<UseErrorPatternsResult, any>();
+vi.mock('./use_error_patterns', () => {
+      const mocked = {
+      useErrorPatterns: (...args: any[]) => mockUseErrorPatterns(...args),
+      TIME_RANGE_TO_MS: {
+        '5m': 5 * 60 * 1000,
+        '1h': 60 * 60 * 1000,
+        '1d': 24 * 60 * 60 * 1000,
+        '1w': 7 * 24 * 60 * 60 * 1000,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCollectorContext = jest.fn().mockReturnValue({ serviceInstanceId: 'collector-001' });
-jest.mock('./collector_context', () => ({
-  useCollectorContext: (...args: any[]) => mockUseCollectorContext(...args),
-}));
+const mockUseCollectorContext = vi.fn().mockReturnValue({ serviceInstanceId: 'collector-001' });
+vi.mock('./collector_context', () => {
+      const mocked = {
+      useCollectorContext: (...args: any[]) => mockUseCollectorContext(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRedirectUrl = jest.fn().mockReturnValue('http://discover-link');
-jest.mock('../../../hooks/use_locator', () => ({
-  useDiscoverLocator: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-}));
+const mockGetRedirectUrl = vi.fn().mockReturnValue('http://discover-link');
+vi.mock('../../../hooks/use_locator', () => {
+      const mocked = {
+      useDiscoverLocator: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makePattern = (overrides?: Partial<UseErrorPatternsResult>): UseErrorPatternsResult => ({
   errorPatterns: [

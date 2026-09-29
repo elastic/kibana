@@ -5,27 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RulesListNotifyBadge } from './notify_badge';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 describe('RulesListNotifyBadge', () => {
-  const onRuleChanged = jest.fn();
-  const snoozeRule = jest.fn();
-  const unsnoozeRule = jest.fn();
-  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+  const onRuleChanged = vi.fn();
+  const snoozeRule = vi.fn();
+  const unsnoozeRule = vi.fn();
+  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('1990-01-01T05:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('1990-01-01T05:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('renders an unsnoozed badge', () => {

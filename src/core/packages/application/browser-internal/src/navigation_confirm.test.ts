@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import type { ConfirmHandler } from './navigation_confirm';
@@ -19,7 +22,7 @@ describe('getUserConfirmationHandler', () => {
   let overlayPromise: Promise<OverlayStart>;
   let resolvePromise: Function;
   let rejectPromise: Function;
-  let fallbackHandler: jest.MockedFunction<ConfirmHandler>;
+  let fallbackHandler: MockedFunction<ConfirmHandler>;
   let handler: ConfirmHandler;
 
   beforeEach(() => {
@@ -28,7 +31,7 @@ describe('getUserConfirmationHandler', () => {
       resolvePromise = () => resolve(overlayStart);
       rejectPromise = () => reject('some error');
     });
-    fallbackHandler = jest.fn().mockImplementation((message, callback) => {
+    fallbackHandler = vi.fn().mockImplementation((message, callback) => {
       callback(true);
     });
 
@@ -39,7 +42,7 @@ describe('getUserConfirmationHandler', () => {
   });
 
   it('uses the fallback handler if the promise is not resolved yet', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     handler('foo', callback);
 
     expect(fallbackHandler).toHaveBeenCalledTimes(1);
@@ -47,7 +50,7 @@ describe('getUserConfirmationHandler', () => {
   });
 
   it('calls the callback with the value returned by the fallback handler', async () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     handler('foo', callback);
 
     expect(fallbackHandler).toHaveBeenCalledTimes(1);
@@ -61,7 +64,7 @@ describe('getUserConfirmationHandler', () => {
     resolvePromise();
     await nextTick();
 
-    const callback = jest.fn();
+    const callback = vi.fn();
     handler('foo', callback);
 
     expect(fallbackHandler).not.toHaveBeenCalled();
@@ -76,7 +79,7 @@ describe('getUserConfirmationHandler', () => {
     resolvePromise();
     await nextTick();
 
-    const callback = jest.fn();
+    const callback = vi.fn();
     handler('foo', callback);
 
     await nextTick();
@@ -89,7 +92,7 @@ describe('getUserConfirmationHandler', () => {
     rejectPromise();
     await nextTick();
 
-    const callback = jest.fn();
+    const callback = vi.fn();
     handler('foo', callback);
 
     expect(fallbackHandler).toHaveBeenCalledTimes(1);

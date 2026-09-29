@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -39,7 +41,7 @@ describe('HeaderExtension', () => {
   });
 
   describe('MountPoint extension', () => {
-    const createMountSpy = () => jest.fn((_el: HTMLDivElement) => jest.fn() as () => void);
+    const createMountSpy = () => vi.fn((_el: HTMLDivElement) => vi.fn() as () => void);
 
     it('calls the MountPoint function with a DOM element', () => {
       const mountSpy = createMountSpy();
@@ -58,7 +60,7 @@ describe('HeaderExtension', () => {
     });
 
     it('calls the unmount callback when the component unmounts', () => {
-      const unmountSpy = jest.fn();
+      const unmountSpy = vi.fn();
       const mount = () => unmountSpy;
       const { unmount } = render(<HeaderExtension extension={mount} />);
       unmount();

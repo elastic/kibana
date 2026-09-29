@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
@@ -43,8 +45,8 @@ const defaultProps = {
   }),
   operationDefinitionMap: {},
   isFullscreen: false,
-  toggleFullscreen: jest.fn(),
-  setIsCloseable: jest.fn(),
+  toggleFullscreen: vi.fn(),
+  setIsCloseable: vi.fn(),
   layerId: '1',
 };
 
@@ -764,7 +766,7 @@ describe('last_value', () => {
     }
 
     it('should render current sortField', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -781,7 +783,7 @@ describe('last_value', () => {
     });
 
     it('should update state when changing sortField', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -805,7 +807,7 @@ describe('last_value', () => {
 
     describe('toggling using top-hit agg', () => {
       it('should toggle param when switch clicked', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = shallow(
           <InlineOptions
@@ -845,7 +847,7 @@ describe('last_value', () => {
 
       it('should not warn user when top-values not in use', () => {
         // todo: move to dimension editor
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
         const localLayer = {
           ...layer,
           columns: {
@@ -887,7 +889,7 @@ describe('last_value', () => {
       it('should set showArrayValues and disable switch when scripted field', () => {
         (layer.columns.col2 as LastValueIndexPatternColumn).sourceField = 'scripted';
 
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
         const instance = shallow(
           <InlineOptions
             {...defaultProps}
@@ -902,7 +904,7 @@ describe('last_value', () => {
       });
 
       it('should not display an array for the last value if the column is referenced', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
         const instance = shallow(
           <InlineOptions
             {...defaultProps}
@@ -923,7 +925,7 @@ describe('last_value', () => {
             {...defaultProps}
             isReferenced={true}
             layer={layer}
-            paramEditorUpdater={jest.fn()}
+            paramEditorUpdater={vi.fn()}
             columnId="col2"
             currentColumn={
               {
@@ -945,7 +947,7 @@ describe('last_value', () => {
             {...defaultProps}
             isReferenced={true}
             layer={layer}
-            paramEditorUpdater={jest.fn()}
+            paramEditorUpdater={vi.fn()}
             columnId="col2"
             currentColumn={
               {
@@ -967,7 +969,7 @@ describe('last_value', () => {
             {...defaultProps}
             isReferenced={true}
             layer={layer}
-            paramEditorUpdater={jest.fn()}
+            paramEditorUpdater={vi.fn()}
             columnId="col2"
             currentColumn={
               {

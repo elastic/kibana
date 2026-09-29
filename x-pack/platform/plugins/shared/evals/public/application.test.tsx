@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import type { ScopedHistory } from '@kbn/core/public';
 import { EvalsApp } from './application';
 
-jest.mock('./pages/online_evals_list', () => ({
-  OnlineEvalsListPage: () => <div>Online evals list</div>,
-}));
+vi.mock('./pages/online_evals_list', () => {
+      const mocked = {
+      OnlineEvalsListPage: () => <div>Online evals list</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EvalsApp', () => {
   it('keeps the online evaluations route available without showing a navigation tab', () => {
@@ -24,7 +29,7 @@ describe('EvalsApp', () => {
     render(
       <EvalsApp
         history={history}
-        setBreadcrumbs={jest.fn()}
+        setBreadcrumbs={vi.fn()}
         getHref={(path) => path}
         breadcrumbPrefix={[]}
       />

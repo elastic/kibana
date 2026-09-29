@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-jest.mock('./action_column', () => ({
-  ActionColumn: jest.fn(() => null),
-}));
-jest.mock('./editing_column', () => ({
-  EditingColumn: jest.fn(() => null),
-}));
+vi.mock('./action_column', () => {
+      const mocked = {
+      ActionColumn: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./editing_column', () => {
+      const mocked = {
+      EditingColumn: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { render } from '@testing-library/react';
 
@@ -36,25 +44,25 @@ describe('getUpdatedColumns', () => {
   const uneditableItems: Foo[] = [];
   const item = { id: 1 };
 
-  const MockActionColumn = jest.mocked(ActionColumn);
-  const MockEditingColumn = jest.mocked(EditingColumn);
+  const MockActionColumn = vi.mocked(ActionColumn);
+  const MockEditingColumn = vi.mocked(EditingColumn);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('it takes an array of InlineEditableTableColumn columns and turns them into ReorderableTable Columns', () => {
     const columns: Array<InlineEditableTableColumn<Foo>> = [
       {
         name: 'Foo',
-        editingRender: jest.fn(),
-        render: jest.fn(),
+        editingRender: vi.fn(),
+        render: vi.fn(),
         field: 'foo',
       },
       {
         name: 'Bar',
-        editingRender: jest.fn(),
-        render: jest.fn(),
+        editingRender: vi.fn(),
+        render: vi.fn(),
         field: 'bar',
       },
     ];
@@ -107,8 +115,8 @@ describe('getUpdatedColumns', () => {
     const columns: Array<InlineEditableTableColumn<Foo>> = [
       {
         name: 'Foo',
-        editingRender: jest.fn(),
-        render: jest.fn(),
+        editingRender: vi.fn(),
+        render: vi.fn(),
         field: 'foo',
       },
     ];

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import '@kbn/code-editor-mock/jest_helper';
 import React from 'react';
@@ -21,19 +23,25 @@ import { screen } from '@testing-library/react';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { useEsDocSearch } from '../../hooks/use_es_doc_search';
 
-jest.mock('../../hooks/use_es_doc_search', () => ({
-  useEsDocSearch: jest.fn(),
-}));
+vi.mock('../../hooks/use_es_doc_search', () => {
+      const mocked = {
+      useEsDocSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../json_code_editor', () => ({
-  JSONCodeEditorCommonMemoized: jest.fn(() => <div>JSON code editor</div>),
-}));
+vi.mock('../json_code_editor', () => {
+      const mocked = {
+      JSONCodeEditorCommonMemoized: vi.fn(() => <div>JSON code editor</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
-const mockUseEsDocSearch = jest.mocked(useEsDocSearch);
+const mockUseEsDocSearch = vi.mocked(useEsDocSearch);
 
-const mockJSONCodeEditorCommonMemoized = jest.mocked(JSONCodeEditorCommonMemoized);
+const mockJSONCodeEditorCommonMemoized = vi.mocked(JSONCodeEditorCommonMemoized);
 
 const getJsonCodeEditorProps = () => mockJSONCodeEditorCommonMemoized.mock.calls[0][0];
 

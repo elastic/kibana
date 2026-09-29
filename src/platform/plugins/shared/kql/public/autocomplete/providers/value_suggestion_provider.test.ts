@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IUiSettingsClient, CoreSetup } from '@kbn/core/public';
 import { stubIndexPattern, stubFields } from '@kbn/data-plugin/public/stubs';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
@@ -22,13 +25,13 @@ describe('FieldSuggestions', () => {
   const uiSettings = {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
-  let getTimeMock: jest.Mock;
-  let createFilterMock: jest.Mock;
+  let getTimeMock: Mock;
+  let createFilterMock: Mock;
 
   beforeEach(() => {
-    getTimeMock = jest.fn().mockReturnValue({ to: 'now', from: 'now-15m' });
-    createFilterMock = jest.fn().mockReturnValue({ time: 'fake' });
-    http = { fetch: jest.fn().mockResolvedValue([]) };
+    getTimeMock = vi.fn().mockReturnValue({ to: 'now', from: 'now-15m' });
+    createFilterMock = vi.fn().mockReturnValue({ time: 'fake' });
+    http = { fetch: vi.fn().mockResolvedValue([]) };
 
     getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup, {
       timefilter: {
@@ -156,11 +159,11 @@ describe('FieldSuggestions', () => {
       };
 
       const { now } = Date;
-      Date.now = jest.fn(() => 0);
+      Date.now = vi.fn(() => 0);
 
       await getValueSuggestions(args);
 
-      Date.now = jest.fn(() => 60 * 1000);
+      Date.now = vi.fn(() => 60 * 1000);
       await getValueSuggestions(args);
       Date.now = now;
 

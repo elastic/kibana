@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 import { useBulkAttackCaseItems } from './use_bulk_attack_case_items';
@@ -14,19 +17,23 @@ import {
 } from '../constants';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../../../../attack_discovery/pages/results/take_action/use_add_to_case', () => ({
-  useAddToCase: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../attack_discovery/pages/results/take_action/use_add_to_case', () => {
+      const mocked = {
+      useAddToCase: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useKibana } = jest.requireMock('../../../../../common/lib/kibana') as {
-  useKibana: jest.Mock;
+const { useKibana } = (await vi.importMock('../../../../../common/lib/kibana')) as {
+  useKibana: Mock;
 };
-const { useAddToCase } = jest.requireMock(
-  '../../../../../attack_discovery/pages/results/take_action/use_add_to_case'
-) as { useAddToCase: jest.Mock };
+const { useAddToCase } = (await vi.importMock('../../../../../attack_discovery/pages/results/take_action/use_add_to_case')) as { useAddToCase: Mock };
 
 const alertItems: TimelineItem[] = [
   {
@@ -48,18 +55,18 @@ const alertItems: TimelineItem[] = [
 ];
 
 describe('useBulkAttackCaseItems', () => {
-  const onAddToCase = jest.fn();
-  const reportEvent = jest.fn();
+  const onAddToCase = vi.fn();
+  const reportEvent = vi.fn();
   const title = 'Attack title';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibana.mockReturnValue({
       services: {
         telemetry: { reportEvent },
         cases: {
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               createComment: true,
               read: true,
             }),
@@ -99,7 +106,7 @@ describe('useBulkAttackCaseItems', () => {
         telemetry: { reportEvent },
         cases: {
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               createComment: false,
               read: true,
             }),
@@ -114,11 +121,11 @@ describe('useBulkAttackCaseItems', () => {
   });
 
   it('opens the selector with unique alert ids and markdown comments', async () => {
-    const closePopover = jest.fn();
+    const closePopover = vi.fn();
     const { result } = renderHook(() => useBulkAttackCaseItems({ closePopover, title }));
 
     await act(async () => {
-      await result.current.items[0].onClick?.(alertItems, false, jest.fn(), jest.fn(), jest.fn());
+      await result.current.items[0].onClick?.(alertItems, false, vi.fn(), vi.fn(), vi.fn());
     });
 
     expect(onAddToCase).toHaveBeenCalledWith({
@@ -142,7 +149,7 @@ describe('useBulkAttackCaseItems', () => {
       );
 
       await act(async () => {
-        await result.current.items[0].onClick?.(alertItems, false, jest.fn(), jest.fn(), jest.fn());
+        await result.current.items[0].onClick?.(alertItems, false, vi.fn(), vi.fn(), vi.fn());
       });
       expect(reportEvent).not.toHaveBeenCalled();
 

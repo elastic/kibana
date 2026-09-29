@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -23,23 +26,26 @@ import moment from 'moment';
 import * as i18n from '../translations';
 import { transformScheduledReport } from '../utils';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('@kbn/reporting-public', () => ({
-  useKibana: jest.fn(),
-  ReportingAPIClient: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/reporting-public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      ReportingAPIClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_get_user_profile_query');
-jest.mock('../apis/get_reporting_health');
+vi.mock('../hooks/use_get_user_profile_query');
+vi.mock('../apis/get_reporting_health');
 
-const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
-const mockReportingHealth = jest.mocked(getReportingHealth);
-const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
-const mockedUseUiSetting = jest.mocked(useUiSetting);
+const mockValidateEmailAddresses = vi.fn().mockReturnValue([]);
+const mockReportingHealth = vi.mocked(getReportingHealth);
+const mockGetUserProfileQuery = vi.mocked(useGetUserProfileQuery);
+const mockedUseUiSetting = vi.mocked(useUiSetting);
 
 describe('ScheduledReportForm', () => {
-  const onSubmitForm = jest.fn();
-  const onClose = jest.fn();
+  const onSubmitForm = vi.fn();
+  const onClose = vi.fn();
   const application = applicationServiceMock.createStartContract();
   const http = httpServiceMock.createSetupContract();
   const mockKibanaServices = {
@@ -87,8 +93,8 @@ describe('ScheduledReportForm', () => {
 
   beforeAll(() => {
     moment.tz.setDefault('UTC');
-    window.scrollTo = jest.fn();
-    window.HTMLElement.prototype.scrollIntoView = jest.fn();
+    window.scrollTo = vi.fn();
+    window.HTMLElement.prototype.scrollIntoView = vi.fn();
   });
 
   beforeEach(() => {
@@ -96,7 +102,7 @@ describe('ScheduledReportForm', () => {
       'dateFormat:tz': 'UTC',
       dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS zz',
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: mockKibanaServices,
     });
     mockReportingHealth.mockResolvedValue({
@@ -115,12 +121,12 @@ describe('ScheduledReportForm', () => {
       },
       isLoading: false,
     } as any);
-    jest.spyOn(Date, 'now').mockReturnValue(today.getTime());
+    vi.spyOn(Date, 'now').mockReturnValue(today.getTime());
   });
 
   afterEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
@@ -236,7 +242,7 @@ describe('ScheduledReportForm', () => {
   describe('when user is not reporting manager', () => {
     it('should disable the email to field, autofill it with user email and hide cc and bcc fields', async () => {
       user = userEvent.setup({ delay: null });
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           ...mockKibanaServices,
           application: {

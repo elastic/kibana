@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import { createScenarioCriteriaLlmEvaluator } from './evaluators';
 
 const criteria: EvaluationCriterion[] = [{ id: 'c1', text: 'Should do the thing', score: 1 }];
 
 const createJudge = () => {
-  const evaluate = jest.fn(async () => ({ score: 0.5, explanation: 'judged' }));
-  const criteriaFn = jest.fn(
+  const evaluate = vi.fn(async () => ({ score: 0.5, explanation: 'judged' }));
+  const criteriaFn = vi.fn(
     () =>
       ({
         name: 'criteria',

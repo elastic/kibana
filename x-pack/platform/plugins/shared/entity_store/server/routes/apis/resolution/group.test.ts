@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
 import { EntitiesNotFoundError, ResolutionSearchTruncatedError } from '../../../domain/errors';
@@ -20,7 +23,7 @@ import { handleResolutionGroup } from './group';
 const NAMESPACE = 'default';
 
 function createMockAnalytics(): TelemetryReporter {
-  return { reportEvent: jest.fn() };
+  return { reportEvent: vi.fn() };
 }
 
 function createMockContext(
@@ -39,20 +42,20 @@ function createMockContext(
 
 function createMockResponse() {
   return {
-    ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-    customError: jest.fn(({ statusCode, body }) => ({ status: statusCode, payload: body })),
-    badRequest: jest.fn(({ body }) => ({ status: 400, payload: body })),
-    notFound: jest.fn(({ body }) => ({ status: 404, payload: body })),
+    ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+    customError: vi.fn(({ statusCode, body }) => ({ status: statusCode, payload: body })),
+    badRequest: vi.fn(({ body }) => ({ status: 400, payload: body })),
+    notFound: vi.fn(({ body }) => ({ status: 404, payload: body })),
   } as unknown as KibanaResponseFactory;
 }
 
 describe('handleResolutionGroup', () => {
   let analytics: TelemetryReporter;
-  let mockGetResolutionGroup: jest.Mock;
+  let mockGetResolutionGroup: Mock;
 
   beforeEach(() => {
     analytics = createMockAnalytics();
-    mockGetResolutionGroup = jest.fn();
+    mockGetResolutionGroup = vi.fn();
   });
 
   it('reports group view telemetry on success', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -15,14 +17,14 @@ describe('delete analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
       searchApplication: {
-        deleteBehavioralAnalytics: jest.fn(),
+        deleteBehavioralAnalytics: vi.fn(),
       },
     },
     asInternalUser: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('deleting analytics collections', () => {

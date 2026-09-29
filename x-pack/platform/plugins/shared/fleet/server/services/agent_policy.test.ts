@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked, MockedFunction } from 'vitest';
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
@@ -59,7 +62,7 @@ import { unenrollForAgentPolicyId } from './agents';
 import { getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 
-jest.mock('./spaces/helpers');
+vi.mock('./spaces/helpers');
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = createSavedObjectClientMock();
@@ -129,45 +132,45 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
   return mock;
 }
 
-jest.mock('./output');
-jest.mock('./download_source');
-jest.mock('./agent_policy_update');
-jest.mock('./agents');
-jest.mock('./package_policy');
-jest.mock('./app_context');
-jest.mock('./audit_logging');
-jest.mock('./agent_policies/full_agent_policy');
-jest.mock('./agent_policies/outputs_helpers');
-jest.mock('./agent_policies/deploy_agent_policies_task');
-jest.mock('./agent_policies/bump_agent_policies_by_id_task');
-jest.mock('./agent_policy_create');
-jest.mock('./epm/packages/install');
-jest.mock('./epm/packages');
-jest.mock('./utils/version_specific_policies', () => {
-  const actual = jest.requireActual('./utils/version_specific_policies');
+vi.mock('./output');
+vi.mock('./download_source');
+vi.mock('./agent_policy_update');
+vi.mock('./agents');
+vi.mock('./package_policy');
+vi.mock('./app_context');
+vi.mock('./audit_logging');
+vi.mock('./agent_policies/full_agent_policy');
+vi.mock('./agent_policies/outputs_helpers');
+vi.mock('./agent_policies/deploy_agent_policies_task');
+vi.mock('./agent_policies/bump_agent_policies_by_id_task');
+vi.mock('./agent_policy_create');
+vi.mock('./epm/packages/install');
+vi.mock('./epm/packages');
+vi.mock('./utils/version_specific_policies', async () => {
+  const actual = (await vi.importActual('./utils/version_specific_policies'));
   return {
     ...actual,
-    reassignAgentsFromVersionSpecificPolicies: jest.fn(),
+    reassignAgentsFromVersionSpecificPolicies: vi.fn(),
   };
 });
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
-const mockOutputsHelpers = outputsHelpers as jest.Mocked<typeof outputsHelpers>;
-const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
-const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
+const mockOutputsHelpers = outputsHelpers as Mocked<typeof outputsHelpers>;
+const mockedOutputService = outputService as Mocked<typeof outputService>;
+const mockedDownloadSourceService = downloadSourceService as Mocked<
   typeof downloadSourceService
 >;
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 
-const mockedGetFullAgentPolicy = getFullAgentPolicy as jest.Mock<
+const mockedGetFullAgentPolicy = getFullAgentPolicy as Mock<
   ReturnType<typeof getFullAgentPolicy>
 >;
-const mockedCreateAgentPolicyWithPackages = createAgentPolicyWithPackages as jest.MockedFunction<
+const mockedCreateAgentPolicyWithPackages = createAgentPolicyWithPackages as MockedFunction<
   typeof createAgentPolicyWithPackages
 >;
 
@@ -183,7 +186,7 @@ function getAgentPolicyCreateMock() {
   });
   return soClient;
 }
-let mockedLogger: jest.Mocked<Logger>;
+let mockedLogger: Mocked<Logger>;
 
 let otelExporter: tracing.InMemorySpanExporter;
 let otelProvider: tracing.BasicTracerProvider;
@@ -206,23 +209,23 @@ describe('Agent policy', () => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
-    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
-    jest
+    vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+    vi
       .mocked(getPackagePolicySavedObjectType)
       .mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE);
-    jest.spyOn(apm, 'startTransaction').mockReturnValue({ end: jest.fn() } as any);
+    vi.spyOn(apm, 'startTransaction').mockReturnValue({ end: vi.fn() } as any);
     mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('create', () => {
     it('is_managed present and false by default', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       await expect(
@@ -238,7 +241,7 @@ describe('Agent policy', () => {
 
     it('should set is_managed property, if given', async () => {
       // ignore unrelated unique name constraint
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       await expect(
@@ -294,7 +297,7 @@ describe('Agent policy', () => {
     });
 
     it('should write to the correct saved object-type if user opt-in for space awerness', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
@@ -337,7 +340,7 @@ describe('Agent policy', () => {
     });
 
     it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -352,7 +355,7 @@ describe('Agent policy', () => {
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -368,7 +371,7 @@ describe('Agent policy', () => {
     });
 
     it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful without agentless enabled', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -389,7 +392,7 @@ describe('Agent policy', () => {
     });
 
     it('should throw AgentPolicyInvalidError if agentless is disabled in serverless', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);
 
@@ -410,10 +413,10 @@ describe('Agent policy', () => {
     });
 
     it('should create an agentless policy when agentless config is set and in serverless env', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getConfig')
         .mockReturnValue({ agentless: { enabled: true } } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);
 
@@ -451,8 +454,8 @@ describe('Agent policy', () => {
     });
 
     it('should create a policy if agentless feature flag is set and in cloud env', async () => {
-      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
 
@@ -490,10 +493,10 @@ describe('Agent policy', () => {
     });
 
     it('should create an agentless policy with a fallback fleet_server_host_id if not provided', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getConfig')
         .mockReturnValue({ agentless: { enabled: true } } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);
 
@@ -531,11 +534,11 @@ describe('Agent policy', () => {
     });
 
     it('should throw error when attempting to create policy with supports_agentless true on cloud environment that does not support the agentless feature', async () => {
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: false },
       } as any);
 
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
 
@@ -570,11 +573,11 @@ describe('Agent policy', () => {
     });
 
     it('should throw error when attempting to create policy with supports_agentless true on serverless environment that does not support the agentless feature', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ agentless: false } as any);
 
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
 
@@ -595,16 +598,16 @@ describe('Agent policy', () => {
     });
 
     it('should not generate uninstall token for agentless policies', async () => {
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
 
-      const generateTokenForPolicyId = jest.fn().mockResolvedValue(undefined);
+      const generateTokenForPolicyId = vi.fn().mockResolvedValue(undefined);
       mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
-        scoped: jest.fn().mockReturnValue({ generateTokenForPolicyId }),
+        scoped: vi.fn().mockReturnValue({ generateTokenForPolicyId }),
       } as unknown as UninstallTokenServiceInterface);
 
       const soClient = getAgentPolicyCreateMock();
@@ -620,9 +623,9 @@ describe('Agent policy', () => {
     });
 
     it('should generate uninstall token for non-agentless policies', async () => {
-      const generateTokenForPolicyId = jest.fn().mockResolvedValue(undefined);
+      const generateTokenForPolicyId = vi.fn().mockResolvedValue(undefined);
       mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
-        scoped: jest.fn().mockReturnValue({ generateTokenForPolicyId }),
+        scoped: vi.fn().mockReturnValue({ generateTokenForPolicyId }),
       } as unknown as UninstallTokenServiceInterface);
 
       const soClient = getAgentPolicyCreateMock();
@@ -640,7 +643,7 @@ describe('Agent policy', () => {
   describe('createWithPackagePolicies', () => {
     let deleteSpy: any;
     beforeEach(() => {
-      deleteSpy = jest.spyOn(agentPolicyService, 'delete');
+      deleteSpy = vi.spyOn(agentPolicyService, 'delete');
     });
 
     afterEach(() => {
@@ -1019,7 +1022,7 @@ describe('Agent policy', () => {
       // try to redeploy them so fleet-server can continue delivering the policy.
       esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 2 });
       soClient.delete.mockRejectedValueOnce(new Error('SO delete failed'));
-      const deploySpy = jest
+      const deploySpy = vi
         .spyOn(agentPolicyService, 'deployPolicy')
         .mockResolvedValue(undefined as any);
 
@@ -1081,14 +1084,14 @@ describe('Agent policy', () => {
       });
       // agentless policies are allowed to have active agents; the count check is bypassed
       esClient.count.mockResolvedValue({ count: 1 } as any);
-      const deleteAgentlessAgentSpy = jest
+      const deleteAgentlessAgentSpy = vi
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValue(undefined as any);
 
       try {
         await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
 
-        expect(jest.mocked(unenrollForAgentPolicyId)).toHaveBeenCalledWith(
+        expect(vi.mocked(unenrollForAgentPolicyId)).toHaveBeenCalledWith(
           agentlessSoClient,
           esClient,
           'mocked',
@@ -1109,10 +1112,10 @@ describe('Agent policy', () => {
       esClient.count.mockResolvedValue({ count: 1 } as any);
       const callOrder: string[] = [];
 
-      jest.mocked(unenrollForAgentPolicyId).mockImplementationOnce(async () => {
+      vi.mocked(unenrollForAgentPolicyId).mockImplementationOnce(async () => {
         callOrder.push('unenrollForAgentPolicyId');
       });
-      const deleteAgentlessAgentSpy = jest
+      const deleteAgentlessAgentSpy = vi
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockImplementationOnce(async () => {
           callOrder.push('deleteAgentlessAgent');
@@ -1241,7 +1244,7 @@ describe('Agent policy', () => {
     });
 
     it('should include policies inheriting default data output when isDefault is true', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1293,7 +1296,7 @@ describe('Agent policy', () => {
     });
 
     it('should include policies inheriting default monitoring output when isDefaultMonitoring is true', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1339,7 +1342,7 @@ describe('Agent policy', () => {
     });
 
     it('should only match explicit references when no default flags are set', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1373,7 +1376,7 @@ describe('Agent policy', () => {
     });
 
     it('should handle package policies using output when space awareness is not enabled', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1460,7 +1463,7 @@ describe('Agent policy', () => {
     });
 
     it('should offload the bump to a background task when above the async threshold', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1497,7 +1500,7 @@ describe('Agent policy', () => {
       expect(scheduleDeployAgentPoliciesTask).not.toHaveBeenCalled();
       // ...it is offloaded to the background task instead.
       expect(scheduleBumpAgentPoliciesByIdTask).toHaveBeenCalledTimes(1);
-      const scheduledPolicies = jest.mocked(scheduleBumpAgentPoliciesByIdTask).mock.calls[0][1];
+      const scheduledPolicies = vi.mocked(scheduleBumpAgentPoliciesByIdTask).mock.calls[0][1];
       expect(scheduledPolicies).toHaveLength(101);
       expect(scheduledPolicies).toEqual(
         expect.arrayContaining([expect.objectContaining({ id: 'policy-0' })])
@@ -1505,7 +1508,7 @@ describe('Agent policy', () => {
     });
 
     it('should bump inline when at or below the async threshold', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1547,11 +1550,11 @@ describe('Agent policy', () => {
   });
 
   describe('removeOutputFromAll', () => {
-    let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
+    let mockedAgentPolicyServiceUpdate: MockInstance<
       ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
-      mockedAgentPolicyServiceUpdate = jest
+      mockedAgentPolicyServiceUpdate = vi
         .spyOn(agentPolicyService, 'update')
         .mockResolvedValue({} as any);
     });
@@ -1635,11 +1638,11 @@ describe('Agent policy', () => {
   });
 
   describe('removeDefaultSourceFromAll', () => {
-    let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
+    let mockedAgentPolicyServiceUpdate: MockInstance<
       ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
-      mockedAgentPolicyServiceUpdate = jest
+      mockedAgentPolicyServiceUpdate = vi
         .spyOn(agentPolicyService, 'update')
         .mockResolvedValue({} as any);
     });
@@ -1741,7 +1744,7 @@ describe('Agent policy', () => {
     });
 
     it('should include policies inheriting default when isDefault is true', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1773,7 +1776,7 @@ describe('Agent policy', () => {
     });
 
     it('should only match explicit references when no default flag is set', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1801,7 +1804,7 @@ describe('Agent policy', () => {
 
   describe('bumpAllAgentPoliciesForFleetServerHosts', () => {
     it('should include policies inheriting default when isDefault is true', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1834,7 +1837,7 @@ describe('Agent policy', () => {
     });
 
     it('should only match explicit references when no default flag is set', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
 
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1864,7 +1867,7 @@ describe('Agent policy', () => {
   describe('update', () => {
     it('should update is_managed property, if given', async () => {
       // ignore unrelated unique name constraint
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -1898,7 +1901,7 @@ describe('Agent policy', () => {
     });
 
     it('should throw a HostedAgentRestrictionRelated error if user enables "is_protected" for a managed policy', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -2003,7 +2006,7 @@ describe('Agent policy', () => {
     });
 
     it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -2029,7 +2032,7 @@ describe('Agent policy', () => {
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -2056,10 +2059,10 @@ describe('Agent policy', () => {
     });
 
     it('should throw Error if is_protected=true with invalid uninstall token', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
 
       mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
-        checkTokenValidityForPolicy: jest
+        checkTokenValidityForPolicy: vi
           .fn()
           .mockResolvedValueOnce({ error: new Error('reason') }),
       } as unknown as UninstallTokenServiceInterface);
@@ -2088,10 +2091,10 @@ describe('Agent policy', () => {
     });
 
     it('should not throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
 
@@ -2118,10 +2121,10 @@ describe('Agent policy', () => {
     });
 
     it('should not throw AgentPolicyInvalidError if support_agentless is defined in serverless', async () => {
-      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true, isCloudEnabled: false } as any);
 
@@ -2148,10 +2151,10 @@ describe('Agent policy', () => {
     });
 
     it('should not throw in serverless if support_agentless and agentless config is set', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getConfig')
         .mockReturnValue({ agentless: { enabled: true } } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);
 
@@ -2182,7 +2185,7 @@ describe('Agent policy', () => {
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const postUpdateCallback = jest.fn(async (policy) => policy);
+      const postUpdateCallback = vi.fn(async (policy) => policy);
       mockedAppContextService.getExternalCallbacks.mockImplementation((type) => {
         if (type === 'agentPolicyPostUpdate') {
           return new Set([postUpdateCallback]);
@@ -2215,7 +2218,7 @@ describe('Agent policy', () => {
     });
 
     it('should compute and persist has_agent_version_conditions from existing package policies', async () => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -2244,7 +2247,7 @@ describe('Agent policy', () => {
     });
 
     it('should persist has_agent_version_conditions: false when no package policies have version conditions', async () => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -2266,7 +2269,7 @@ describe('Agent policy', () => {
     });
 
     it('reassigns agents back to the base policy when version conditions are removed', async () => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         enableVersionSpecificPolicies: true,
       } as any);
@@ -2298,11 +2301,11 @@ describe('Agent policy', () => {
     });
 
     it('does not fail the update when reassigning agents from version-specific policies throws', async () => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         enableVersionSpecificPolicies: true,
       } as any);
-      (reassignAgentsFromVersionSpecificPolicies as jest.Mock).mockRejectedValueOnce(
+      (reassignAgentsFromVersionSpecificPolicies as Mock).mockRejectedValueOnce(
         new Error('transient ES failure')
       );
       const soClient = getAgentPolicyCreateMock();
@@ -2330,7 +2333,7 @@ describe('Agent policy', () => {
     });
 
     it('does not reassign agents when version conditions were never present', async () => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         enableVersionSpecificPolicies: true,
       } as any);
@@ -2357,7 +2360,7 @@ describe('Agent policy', () => {
     });
 
     it('does not reassign agents when the feature is disabled', async () => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         enableVersionSpecificPolicies: false,
       } as any);
@@ -2414,7 +2417,7 @@ describe('Agent policy', () => {
     });
 
     it('should link shared package policies', async () => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       soClient = createSavedObjectClientMock();
       const mockPolicy = {
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -2510,7 +2513,7 @@ describe('Agent policy', () => {
     });
 
     it('should remove copied endpoint package policy input ids before bulk create', async () => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       soClient = createSavedObjectClientMock();
       const mockPolicy = {
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -2813,11 +2816,11 @@ describe('Agent policy', () => {
         },
       } as any);
 
-      jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
+      vi.spyOn(agentlessAgentService, 'createAgentlessAgent');
 
       await agentPolicyService.deployPolicy(soClient, 'test-agentless-policy');
       expect(esClient.bulk).toHaveBeenCalled();
-      expect(jest.mocked(agentlessAgentService.createAgentlessAgent)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentlessAgentService.createAgentlessAgent)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -2829,7 +2832,7 @@ describe('Agent policy', () => {
     it('should throw on error during agentless API calls for agentless policies', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest
+      vi
         .mocked(agentlessAgentService.createAgentlessAgent)
         .mockRejectedValueOnce(new Error('createAgentlessAgent error'));
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
@@ -2887,7 +2890,7 @@ describe('Agent policy', () => {
         },
       } as any);
 
-      jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
+      vi.spyOn(agentlessAgentService, 'createAgentlessAgent');
 
       await expect(
         agentPolicyService.deployPolicy(soClient, 'test-agentless-policy', undefined, {
@@ -2987,7 +2990,7 @@ describe('Agent policy', () => {
 
   describe('deployPolicies', () => {
     beforeEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
       mockedGetFullAgentPolicy.mockReset();
     });
 
@@ -3009,8 +3012,8 @@ describe('Agent policy', () => {
         ],
       });
 
-      const getByIdsSpy = jest.spyOn(agentPolicyService, 'getByIds');
-      const getFullAgentPolicySpy = jest.spyOn(agentPolicyService, 'getFullAgentPolicy');
+      const getByIdsSpy = vi.spyOn(agentPolicyService, 'getByIds');
+      const getFullAgentPolicySpy = vi.spyOn(agentPolicyService, 'getFullAgentPolicy');
 
       await agentPolicyService.deployPolicies(soClient, ['policy-1'], undefined, {
         spaceId: 'my-space',
@@ -3046,8 +3049,8 @@ describe('Agent policy', () => {
         ],
       });
 
-      const getByIdsSpy = jest.spyOn(agentPolicyService, 'getByIds');
-      const getFullAgentPolicySpy = jest.spyOn(agentPolicyService, 'getFullAgentPolicy');
+      const getByIdsSpy = vi.spyOn(agentPolicyService, 'getByIds');
+      const getFullAgentPolicySpy = vi.spyOn(agentPolicyService, 'getFullAgentPolicy');
 
       await agentPolicyService.deployPolicies(soClient, ['policy-1']);
 
@@ -3300,7 +3303,7 @@ describe('Agent policy', () => {
       });
 
       it('should use new saved object if user opt-in for space awareness', async () => {
-        jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+        vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
         for await (const ids of await agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
           expect(ids);
         }
@@ -3365,8 +3368,8 @@ describe('Agent policy', () => {
     });
 
     const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-      jest.fn().mockResolvedValue(
-        jest.fn(async function* () {
+      vi.fn().mockResolvedValue(
+        vi.fn(async function* () {
           yield items;
         })()
       );
@@ -3374,7 +3377,7 @@ describe('Agent policy', () => {
     it('should return if all policies are compliant', async () => {
       const mockSoClient = createSavedObjectClientMock();
 
-      jest.spyOn(agentPolicyService, 'fetchAllAgentPolicies').mockReturnValue([] as any);
+      vi.spyOn(agentPolicyService, 'fetchAllAgentPolicies').mockReturnValue([] as any);
 
       expect(await agentPolicyService.turnOffAgentTamperProtections(mockSoClient)).toEqual({
         failedPolicies: [],
@@ -3471,12 +3474,12 @@ describe('Agent policy', () => {
   });
 
   describe('requireUniqueName', () => {
-    const getAllSpacesSoClientSpy = jest.spyOn(
+    const getAllSpacesSoClientSpy = vi.spyOn(
       appContextService,
       'getInternalUserSOClientWithoutSpaceExtension'
     );
     beforeAll(() => {
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockRestore();
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockRestore();
     });
 
     const testAgentPolicy = {
@@ -3686,16 +3689,16 @@ describe('Agent policy', () => {
 
     beforeEach(() => {
       soClient = getAgentPolicyCreateMock();
-      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
-      jest.spyOn(agentPolicyService, 'deployPolicy').mockResolvedValue(undefined as any);
+      vi.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      vi.spyOn(agentPolicyService, 'deployPolicy').mockResolvedValue(undefined as any);
 
       mockedPackagePolicyService.create.mockResolvedValue({ id: 'pp-id' } as any);
 
-      jest.mocked(ensureInstalledPackage).mockResolvedValue({
+      vi.mocked(ensureInstalledPackage).mockResolvedValue({
         status: 'already_installed',
         package: { version: '0.0.0' },
       } as any);
-      jest.mocked(getPackageInfo).mockResolvedValue({
+      vi.mocked(getPackageInfo).mockResolvedValue({
         name: 'verifier_otel',
         title: 'Permission Verifier',
         version: '0.0.0',
@@ -3970,7 +3973,7 @@ describe('Agent policy', () => {
     });
 
     it('should call deployPolicy after successful package policy creation', async () => {
-      const deploySpy = jest.spyOn(agentPolicyService, 'deployPolicy');
+      const deploySpy = vi.spyOn(agentPolicyService, 'deployPolicy');
       await agentPolicyService.createVerifierPolicy(
         soClient,
         esClient,
@@ -3985,7 +3988,7 @@ describe('Agent policy', () => {
 
     it('should throw and not deploy if package policy creation fails', async () => {
       mockedPackagePolicyService.create.mockRejectedValueOnce(new Error('validation error'));
-      const deploySpy = jest.spyOn(agentPolicyService, 'deployPolicy');
+      const deploySpy = vi.spyOn(agentPolicyService, 'deployPolicy');
 
       await expect(
         agentPolicyService.createVerifierPolicy(
@@ -4000,10 +4003,10 @@ describe('Agent policy', () => {
     });
 
     it('should roll back the verifier policy and re-throw when deployPolicy fails', async () => {
-      const deploySpy = jest
+      const deploySpy = vi
         .spyOn(agentPolicyService, 'deployPolicy')
         .mockRejectedValueOnce(new Error('agentless provisioning limit'));
-      const deleteSpy = jest
+      const deleteSpy = vi
         .spyOn(agentPolicyService, 'deleteVerifierPolicy')
         .mockResolvedValue(undefined);
 
@@ -4141,7 +4144,7 @@ describe('Agent policy', () => {
     const soClient = createSavedObjectClientMock();
 
     it('should delegate to delete with force: true', async () => {
-      const deleteSpy = jest.spyOn(agentPolicyService, 'delete').mockResolvedValue({} as any);
+      const deleteSpy = vi.spyOn(agentPolicyService, 'delete').mockResolvedValue({} as any);
       try {
         await agentPolicyService.deleteVerifierPolicy(soClient, esClient, 'verifier-policy-1');
         expect(deleteSpy).toHaveBeenCalledWith(soClient, esClient, 'verifier-policy-1', {
@@ -4153,7 +4156,7 @@ describe('Agent policy', () => {
     });
 
     it('should catch and log errors without re-throwing', async () => {
-      const deleteSpy = jest
+      const deleteSpy = vi
         .spyOn(agentPolicyService, 'delete')
         .mockRejectedValue(new Error('delete failed'));
       try {

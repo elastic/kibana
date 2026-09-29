@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
 import type { SecurityAppStore } from '../../../../common/store/types';
@@ -15,9 +17,9 @@ import { usersActions } from '../../../../explore/users/store';
 const existingFieldName = 'existing.field';
 const fieldName = 'user.name';
 
-const mockToggleColumn = jest.fn();
-const mockDispatch = jest.fn();
-const mockGetState = jest.fn().mockReturnValue({
+const mockToggleColumn = vi.fn();
+const mockDispatch = vi.fn();
+const mockGetState = vi.fn().mockReturnValue({
   ...mockGlobalState,
   users: {
     ...mockGlobalState.users,
@@ -58,7 +60,7 @@ describe('createToggleUserAssetFieldCellActionFactory', () => {
   const toggleColumnAction = toggleColumnActionFactory({ id: 'testAction' });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

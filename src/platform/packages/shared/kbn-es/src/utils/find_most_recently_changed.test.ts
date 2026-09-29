@@ -7,35 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { findMostRecentlyChanged } from './find_most_recently_changed';
 
-jest.mock('fs', () => ({
-  statSync: jest.fn().mockImplementation((path) => {
-    if (path.includes('oldest')) {
-      return {
-        ctime: new Date(2018, 2, 1),
-      };
-    }
+vi.mock('fs', () => {
+      const mocked = {
+      statSync: vi.fn().mockImplementation((path) => {
+        if (path.includes('oldest')) {
+          return {
+            ctime: new Date(2018, 2, 1),
+          };
+        }
 
-    if (path.includes('newest')) {
-      return {
-        ctime: new Date(2018, 2, 3),
-      };
-    }
+        if (path.includes('newest')) {
+          return {
+            ctime: new Date(2018, 2, 3),
+          };
+        }
 
-    if (path.includes('middle')) {
-      return {
-        ctime: new Date(2018, 2, 2),
-      };
-    }
-  }),
-}));
+        if (path.includes('middle')) {
+          return {
+            ctime: new Date(2018, 2, 2),
+          };
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('fast-glob', () => ({
-  globSync: jest.fn().mockImplementation(() => {
-    return ['/data/oldest.yml', '/data/newest.yml', '/data/middle.yml'];
-  }),
-}));
+vi.mock('fast-glob', () => {
+      const mocked = {
+      globSync: vi.fn().mockImplementation(() => {
+        return ['/data/oldest.yml', '/data/newest.yml', '/data/middle.yml'];
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 test('returns newest file', () => {
   const file = findMostRecentlyChanged('/data/*.yml');
@@ -43,5 +51,5 @@ test('returns newest file', () => {
 });
 
 afterAll(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -14,16 +16,19 @@ import {
 } from '@kbn/workflows/common/constants';
 import { useWorkflowsExperimentalUiSetting } from './use_workflows_experimental_ui_setting';
 
-const mockUseUiSetting = jest.fn();
+const mockUseUiSetting = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: (settingId: string, defaultValue?: boolean) =>
-    mockUseUiSetting(settingId, defaultValue),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: (settingId: string, defaultValue?: boolean) =>
+        mockUseUiSetting(settingId, defaultValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useWorkflowsExperimentalUiSetting', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns false when experimental features are disabled', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -51,10 +53,10 @@ const mockMissingResources: SiemMigrationResourceBase[] = [
 
 const mockEmptyMissingResources: SiemMigrationResourceBase[] = [];
 
-const mockGetMissingResources = jest.fn();
-const mockStartMigration = jest.fn();
+const mockGetMissingResources = vi.fn();
+const mockStartMigration = vi.fn();
 
-const mockUseGetMissingResources = jest.spyOn(
+const mockUseGetMissingResources = vi.spyOn(
   useGetMissingResourcesModule,
   'useGetMissingResources'
 );
@@ -66,7 +68,7 @@ mockUseGetMissingResources.mockImplementation(() => {
   };
 });
 
-jest.spyOn(useStartMigrationModule, 'useStartMigration').mockReturnValue({
+vi.spyOn(useStartMigrationModule, 'useStartMigration').mockReturnValue({
   startMigration: mockStartMigration,
   isLoading: false,
   error: null,
@@ -75,8 +77,8 @@ jest.spyOn(useStartMigrationModule, 'useStartMigration').mockReturnValue({
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>
     <MigrationDataInputContextProvider
-      openFlyout={jest.fn()}
-      closeFlyout={jest.fn()}
+      openFlyout={vi.fn()}
+      closeFlyout={vi.fn()}
       isFlyoutOpen={false}
     >
       {children}
@@ -96,7 +98,7 @@ const renderTestComponent = (partialProps: Partial<MigrationReadyPanelProps> = {
 describe('MigrationReadyPanel', () => {
   beforeEach(() => {
     mockGetMissingResources.mockReturnValue([]);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render migration panel with ready description', () => {

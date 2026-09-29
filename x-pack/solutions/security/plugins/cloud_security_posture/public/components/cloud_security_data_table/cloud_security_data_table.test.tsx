@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { DataViewContext } from '../../common/contexts/data_view_context';
@@ -12,9 +15,12 @@ import type { CloudSecurityDataTableProps } from './cloud_security_data_table';
 import { CloudSecurityDataTable } from './cloud_security_data_table';
 import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
 
-jest.mock('../../common/hooks/use_expandable_flyout_csp', () => ({
-  useExpandableFlyoutCsp: jest.fn(),
-}));
+vi.mock('../../common/hooks/use_expandable_flyout_csp', () => {
+      const mocked = {
+      useExpandableFlyoutCsp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataView = {
   fields: {
@@ -34,23 +40,23 @@ const mockDataView = {
 const mockDefaultColumns = [{ id: 'field1' }, { id: 'field2' }];
 
 const mockCloudPostureDataTable = {
-  setUrlQuery: jest.fn(),
+  setUrlQuery: vi.fn(),
   columnsLocalStorageKey: 'test',
   filters: [],
-  onSort: jest.fn(),
+  onSort: vi.fn(),
   sort: [],
   query: {},
   queryError: undefined,
   pageIndex: 0,
   urlQuery: {},
-  setTableOptions: jest.fn(),
-  handleUpdateQuery: jest.fn(),
+  setTableOptions: vi.fn(),
+  handleUpdateQuery: vi.fn(),
   pageSize: 10,
-  setPageSize: jest.fn(),
-  onChangeItemsPerPage: jest.fn(),
-  onChangePage: jest.fn(),
-  onResetFilters: jest.fn(),
-  getRowsFromPages: jest.fn(),
+  setPageSize: vi.fn(),
+  onChangeItemsPerPage: vi.fn(),
+  onChangePage: vi.fn(),
+  onResetFilters: vi.fn(),
+  getRowsFromPages: vi.fn(),
 } as any;
 
 const mockRows = [
@@ -75,8 +81,8 @@ const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
     total: 0,
     onOpenFlyoutCallback: () => <></>,
     cloudPostureDataTable: mockCloudPostureDataTable,
-    loadMore: jest.fn(),
-    createRuleFn: jest.fn(),
+    loadMore: vi.fn(),
+    createRuleFn: vi.fn(),
     title: 'Test Table',
   };
 
@@ -92,8 +98,8 @@ const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
 };
 
 describe('CloudSecurityDataTable', () => {
-  (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
-    onExpandDocClick: jest.fn(),
+  (useExpandableFlyoutCsp as Mock).mockReturnValue({
+    onExpandDocClick: vi.fn(),
   });
   it('renders loading state', () => {
     const { getByTestId } = renderDataTable({ isLoading: true, rows: [] });

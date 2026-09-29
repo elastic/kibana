@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { GenAiTab } from './genai_tab';
 import type { GenAiFields } from './get_genai_fields';
 
-jest.mock('@kbn/shared-ux-markdown', () => ({
-  Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
-}));
+vi.mock('@kbn/shared-ux-markdown', () => {
+      const mocked = {
+      Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseFields: GenAiFields = {
   operationName: 'chat',

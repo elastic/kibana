@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { renderHook } from '@testing-library/react';
 import { usePageHeader } from './use_page_header';
@@ -17,7 +20,7 @@ import { ContentTabIds, type Tab } from '../types';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 interface MockHistory {
-  goBack: jest.Mock;
+  goBack: Mock;
   length: number;
 }
 
@@ -31,58 +34,67 @@ const mockOriginRouteState: RouteState = {
   originSearch: '?kuery=host.name:%20foo',
 };
 
-const mockUseHistory = jest.fn<MockHistory, []>(() => ({
-  goBack: jest.fn(),
+const mockUseHistory = vi.fn<MockHistory, []>(() => ({
+  goBack: vi.fn(),
   length: 0,
 }));
-const mockUseLocation = jest.fn<MockLocation, []>(() => ({
+const mockUseLocation = vi.fn<MockLocation, []>(() => ({
   state: null,
 }));
-const mockChromeStyle = jest.fn<'classic' | 'project', []>(() => 'classic');
+const mockChromeStyle = vi.fn<'classic' | 'project', []>(() => 'classic');
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => mockUseHistory(),
-  useLocation: () => mockUseLocation(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => mockUseHistory(),
+      useLocation: () => mockUseLocation(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: jest.fn(() => true),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-      },
-      chrome: {
-        getChromeStyle: () => mockChromeStyle(),
-      },
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          application: {
+            navigateToApp: vi.fn(),
+          },
+          chrome: {
+            getChromeStyle: () => mockChromeStyle(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_tab_switcher');
-jest.mock('../../../hooks/use_profiling_integration_setting');
-jest.mock('../../../containers/ml/infra_ml_capabilities');
-jest.mock('../../../containers/plugin_config_context');
-jest.mock('./use_asset_details_render_props');
+vi.mock('./use_tab_switcher');
+vi.mock('../../../hooks/use_profiling_integration_setting');
+vi.mock('../../../containers/ml/infra_ml_capabilities');
+vi.mock('../../../containers/plugin_config_context');
+vi.mock('./use_asset_details_render_props');
 
-const useTabSwitcherContextMock = useTabSwitcherContext as jest.MockedFunction<
+const useTabSwitcherContextMock = useTabSwitcherContext as MockedFunction<
   typeof useTabSwitcherContext
 >;
-const useProfilingPluginSettingMock = useProfilingPluginSetting as jest.MockedFunction<
+const useProfilingPluginSettingMock = useProfilingPluginSetting as MockedFunction<
   typeof useProfilingPluginSetting
 >;
-const useInfraMLCapabilitiesContextMock = useInfraMLCapabilitiesContext as jest.MockedFunction<
+const useInfraMLCapabilitiesContextMock = useInfraMLCapabilitiesContext as MockedFunction<
   typeof useInfraMLCapabilitiesContext
 >;
-const usePluginConfigMock = usePluginConfig as jest.MockedFunction<typeof usePluginConfig>;
+const usePluginConfigMock = usePluginConfig as MockedFunction<typeof usePluginConfig>;
 const useAssetDetailsRenderPropsContextMock =
-  useAssetDetailsRenderPropsContext as jest.MockedFunction<
+  useAssetDetailsRenderPropsContext as MockedFunction<
     typeof useAssetDetailsRenderPropsContext
   >;
-const mockUseUiSetting = useUiSetting as jest.MockedFunction<typeof useUiSetting>;
+const mockUseUiSetting = useUiSetting as MockedFunction<typeof useUiSetting>;
 
 const mockProfilingTab: Tab = {
   id: ContentTabIds.PROFILING,
@@ -101,10 +113,10 @@ const mockDashboardsTab: Tab = {
 
 describe('usePageHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseHistory.mockReturnValue({
-      goBack: jest.fn(),
+      goBack: vi.fn(),
       length: 0,
     });
     mockUseLocation.mockReturnValue({
@@ -114,7 +126,7 @@ describe('usePageHeader', () => {
     mockUseUiSetting.mockReturnValue(true);
 
     useTabSwitcherContextMock.mockReturnValue({
-      showTab: jest.fn(),
+      showTab: vi.fn(),
       activeTabId: ContentTabIds.OVERVIEW,
       renderedTabsSet: { current: new Set([ContentTabIds.OVERVIEW, ContentTabIds.PROFILING]) },
     } as unknown as ReturnType<typeof useTabSwitcherContext>);
@@ -184,7 +196,7 @@ describe('usePageHeader', () => {
     it('should mark profiling tab as selected when activeTabId is profiling', () => {
       useProfilingPluginSettingMock.mockReturnValue(true);
       useTabSwitcherContextMock.mockReturnValue({
-        showTab: jest.fn(),
+        showTab: vi.fn(),
         activeTabId: ContentTabIds.PROFILING,
         renderedTabsSet: { current: new Set([ContentTabIds.OVERVIEW, ContentTabIds.PROFILING]) },
       } as unknown as ReturnType<typeof useTabSwitcherContext>);
@@ -199,7 +211,7 @@ describe('usePageHeader', () => {
     });
 
     it('should expose AppHeader tabs with the same selection and click behavior', () => {
-      const showTabMock = jest.fn();
+      const showTabMock = vi.fn();
       useProfilingPluginSettingMock.mockReturnValue(true);
       useTabSwitcherContextMock.mockReturnValue({
         showTab: showTabMock,
@@ -231,7 +243,7 @@ describe('usePageHeader', () => {
     });
 
     it('should call showTab with profiling tab id when profiling tab is clicked', () => {
-      const showTabMock = jest.fn();
+      const showTabMock = vi.fn();
       useProfilingPluginSettingMock.mockReturnValue(true);
       useTabSwitcherContextMock.mockReturnValue({
         showTab: showTabMock,

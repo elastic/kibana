@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,21 +16,24 @@ import { useUpdateTags } from '../hooks';
 
 import { TagsAddRemove } from './tags_add_remove';
 
-jest.mock('../hooks', () => ({
-  useUpdateTags: jest.fn().mockReturnValue({
-    updateTags: jest.fn(),
-    bulkUpdateTags: jest.fn(),
-  }),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useUpdateTags: vi.fn().mockReturnValue({
+        updateTags: vi.fn(),
+        bulkUpdateTags: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TagsAddRemove', () => {
   let allTags: string[];
   let selectedTags: string[];
   const button = document.createElement('button');
-  const onTagsUpdated = jest.fn();
-  const mockUpdateTags = useUpdateTags().updateTags as jest.Mock;
-  const mockBulkUpdateTags = useUpdateTags().bulkUpdateTags as jest.Mock;
-  const onClosePopover = jest.fn();
+  const onTagsUpdated = vi.fn();
+  const mockUpdateTags = useUpdateTags().updateTags as Mock;
+  const mockBulkUpdateTags = useUpdateTags().bulkUpdateTags as Mock;
+  const onClosePopover = vi.fn();
 
   beforeEach(() => {
     onTagsUpdated.mockReset();

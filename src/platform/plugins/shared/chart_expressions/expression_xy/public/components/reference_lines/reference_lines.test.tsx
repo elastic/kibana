@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Chart, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
@@ -100,7 +102,7 @@ describe('ReferenceLines', () => {
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: vi.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {
@@ -168,8 +170,8 @@ describe('ReferenceLines', () => {
     });
 
     it('should prefer column formatter over x axis default one', () => {
-      const convertLeft = jest.fn((x) => `left-${x}`);
-      const convertRight = jest.fn((x) => `right-${x}`);
+      const convertLeft = vi.fn((x) => `left-${x}`);
+      const convertRight = vi.fn((x) => `right-${x}`);
       const wrapper = shallow(
         <ReferenceLines
           {...defaultProps}
@@ -549,7 +551,7 @@ describe('ReferenceLines', () => {
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: vi.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {

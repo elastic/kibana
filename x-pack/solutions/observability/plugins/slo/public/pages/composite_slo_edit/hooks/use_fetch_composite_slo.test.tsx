@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -13,14 +16,14 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchCompositeSlo } from './use_fetch_composite_slo';
 
-jest.mock('../../../hooks/use_plugin_context');
+vi.mock('../../../hooks/use_plugin_context');
 
 const GET_COMPOSITE_DEFINITION =
   'GET /api/observability/slo_composites/_definitions/{id} 2023-10-31';
 const GET_SLO = 'GET /api/observability/slos/{id} 2023-10-31';
 
-const mockFetch = jest.fn();
-const usePluginContextMock = usePluginContext as jest.Mock;
+const mockFetch = vi.fn();
+const usePluginContextMock = usePluginContext as Mock;
 
 const compositeSloResponse = {
   id: 'composite-id',
@@ -65,7 +68,7 @@ function createWrapper(): FC<PropsWithChildren<{}>> {
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   usePluginContextMock.mockReturnValue({ sloClient: { fetch: mockFetch } });
 });
 

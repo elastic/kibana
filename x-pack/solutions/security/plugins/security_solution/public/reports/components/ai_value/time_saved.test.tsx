@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeSaved } from './time_saved';
@@ -13,21 +16,30 @@ import { ComparePercentage } from './compare_percentage';
 import { getTimeRangeAsDays, formatThousands } from './metrics';
 
 // Mock dependencies
-jest.mock('./time_saved_metric', () => ({
-  TimeSavedMetric: jest.fn(() => <div data-test-subj="mock-time-saved-metric" />),
-}));
+vi.mock('./time_saved_metric', () => {
+      const mocked = {
+      TimeSavedMetric: vi.fn(() => <div data-test-subj="mock-time-saved-metric" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compare_percentage', () => ({
-  ComparePercentage: jest.fn(() => <div data-test-subj="mock-compare-percentage" />),
-}));
+vi.mock('./compare_percentage', () => {
+      const mocked = {
+      ComparePercentage: vi.fn(() => <div data-test-subj="mock-compare-percentage" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./metrics', () => ({
-  getTimeRangeAsDays: jest.fn(),
-  formatThousands: jest.fn(),
-}));
+vi.mock('./metrics', () => {
+      const mocked = {
+      getTimeRangeAsDays: vi.fn(),
+      formatThousands: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof getTimeRangeAsDays>;
-const mockFormatThousands = formatThousands as jest.MockedFunction<typeof formatThousands>;
+const mockGetTimeRangeAsDays = getTimeRangeAsDays as MockedFunction<typeof getTimeRangeAsDays>;
+const mockFormatThousands = formatThousands as MockedFunction<typeof formatThousands>;
 
 const defaultProps = {
   isSample: false as const,
@@ -40,7 +52,7 @@ const defaultProps = {
 
 describe('TimeSaved', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetTimeRangeAsDays.mockReturnValue(`30`);
     mockFormatThousands.mockReturnValue('100');
   });
@@ -113,7 +125,7 @@ describe('TimeSaved', () => {
 
   it('memoizes timerange calculation based on from and to props', () => {
     const { rerender } = render(<TimeSaved {...defaultProps} />);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rerender(<TimeSaved {...defaultProps} />);
     expect(mockGetTimeRangeAsDays).not.toHaveBeenCalled();
     rerender(

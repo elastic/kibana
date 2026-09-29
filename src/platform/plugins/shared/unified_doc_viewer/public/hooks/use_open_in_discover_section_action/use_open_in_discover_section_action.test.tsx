@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import {
@@ -90,7 +92,7 @@ describe('useOpenInDiscoverSectionAction', () => {
   });
 
   it('returns an action with onClick (no href) when openInNewTab is available and esql is provided', () => {
-    const openInNewTab = jest.fn();
+    const openInNewTab = vi.fn();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <DocViewerExtensionActionsProvider actions={{ openInNewTab }}>
         {children}
@@ -129,7 +131,7 @@ describe('useOpenInDiscoverSectionAction', () => {
   });
 
   it('returns an href action with onClick when href and openInNewTab+esql are provided', () => {
-    const openInNewTab = jest.fn();
+    const openInNewTab = vi.fn();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <DocViewerExtensionActionsProvider actions={{ openInNewTab }}>
         {children}

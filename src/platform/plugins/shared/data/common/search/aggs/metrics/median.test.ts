@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IAggConfigs } from '../agg_configs';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
@@ -44,7 +46,7 @@ describe('AggTypeMetricMedianProvider class', () => {
       {
         typesRegistry,
       },
-      jest.fn()
+      vi.fn()
     );
   });
 
@@ -136,7 +138,7 @@ describe('AggTypeMetricMedianProvider class', () => {
       {
         typesRegistry,
       },
-      jest.fn()
+      vi.fn()
     );
 
     expect(aggConfigs.toDsl()).toMatchSnapshot();

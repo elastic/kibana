@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKibana } from '../common/lib/kibana';
 import { useExportResults } from './use_export_results';
 import type { ExportFormat } from './use_export_results';
 
-jest.mock('../common/lib/kibana');
+vi.mock('../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createMockBlob = () => new Blob(['mock-content'], { type: 'application/ndjson' });
 
@@ -24,8 +27,8 @@ const createMockBody = () => {
   let emitted = false;
 
   return {
-    getReader: jest.fn().mockReturnValue({
-      read: jest.fn().mockImplementation(() => {
+    getReader: vi.fn().mockReturnValue({
+      read: vi.fn().mockImplementation(() => {
         if (emitted) {
           return Promise.resolve({ done: true, value: undefined });
         }
@@ -42,11 +45,11 @@ const createMockRawResponse = (
   contentDisposition: string | null = null,
   contentType: string | null = 'application/ndjson'
 ) => ({
-  blob: jest.fn().mockResolvedValue(createMockBlob()),
-  arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(4)),
+  blob: vi.fn().mockResolvedValue(createMockBlob()),
+  arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(4)),
   body: createMockBody(),
   headers: {
-    get: jest.fn().mockImplementation((name: string) => {
+    get: vi.fn().mockImplementation((name: string) => {
       if (name.toLowerCase() === 'content-disposition') return contentDisposition;
       if (name.toLowerCase() === 'content-type') return contentType;
 
@@ -61,12 +64,12 @@ const createMockRawResponse = (
  *      useKibanaMock.mockReturnValue(kibana as unknown as ReturnType<typeof useKibana>);
  */
 const createMockServices = () => {
-  const mockAddInfo = jest.fn().mockReturnValue({ id: 'loading-toast-id' });
-  const mockAddSuccess = jest.fn();
-  const mockAddDanger = jest.fn();
-  const mockRemoveToast = jest.fn();
+  const mockAddInfo = vi.fn().mockReturnValue({ id: 'loading-toast-id' });
+  const mockAddSuccess = vi.fn();
+  const mockAddDanger = vi.fn();
+  const mockRemoveToast = vi.fn();
   const mockRawResponse = createMockRawResponse();
-  const mockFetch = jest.fn().mockResolvedValue({ response: mockRawResponse });
+  const mockFetch = vi.fn().mockResolvedValue({ response: mockRawResponse });
 
   // useKibana() returns { services: { http, notifications } }
   const kibana = {
@@ -101,24 +104,24 @@ const createMockServices = () => {
 // We verify download behavior through anchor element interaction rather than URL API assertions.
 if (typeof URL.revokeObjectURL !== 'function') {
   // Property doesn't exist, so this assignment creates it as writable/configurable (ES default)
-  (URL as unknown as Record<string, unknown>).revokeObjectURL = jest.fn();
+  (URL as unknown as Record<string, unknown>).revokeObjectURL = vi.fn();
 }
 
 describe('useExportResults', () => {
-  let mockAnchorClick: jest.Mock;
+  let mockAnchorClick: Mock;
   let mockAnchorElement: Partial<HTMLAnchorElement>;
-  let mockAppendChild: jest.SpyInstance;
-  let mockRemoveChild: jest.SpyInstance;
+  let mockAppendChild: MockInstance;
+  let mockRemoveChild: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockAnchorClick = jest.fn();
+    mockAnchorClick = vi.fn();
     mockAnchorElement = { href: '', download: '', click: mockAnchorClick };
 
     // Intercept document.createElement only for <a> tags; pass through all others
     const originalCreateElement = document.createElement.bind(document);
-    jest
+    vi
       .spyOn(document, 'createElement')
       .mockImplementation((tag: string, options?: ElementCreationOptions) => {
         if (tag === 'a') return mockAnchorElement as HTMLAnchorElement;
@@ -126,12 +129,12 @@ describe('useExportResults', () => {
         return originalCreateElement(tag, options);
       });
 
-    mockAppendChild = jest.spyOn(document.body, 'appendChild').mockImplementation((node) => node);
-    mockRemoveChild = jest.spyOn(document.body, 'removeChild').mockImplementation((node) => node);
+    mockAppendChild = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => node);
+    mockRemoveChild = vi.spyOn(document.body, 'removeChild').mockImplementation((node) => node);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('endpoint selection', () => {

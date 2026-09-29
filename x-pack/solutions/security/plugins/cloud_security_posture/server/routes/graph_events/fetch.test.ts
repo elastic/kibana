@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
@@ -17,27 +20,27 @@ describe('fetchEvents', () => {
 
   beforeEach(() => {
     logger = {
-      trace: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      error: jest.fn(),
+      trace: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as Logger;
 
-    const toRecordsMock = jest.fn().mockResolvedValue([{ docId: 'doc-1' }]);
+    const toRecordsMock = vi.fn().mockResolvedValue([{ docId: 'doc-1' }]);
     esClient.asCurrentUser.helpers.esql.mockReturnValue({
       toRecords: toRecordsMock,
-      toArrowTable: jest.fn(),
-      toArrowReader: jest.fn(),
+      toArrowTable: vi.fn(),
+      toArrowReader: vi.fn(),
     });
 
     // Default: index does not exist (no enrichment)
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+    (esClient.asInternalUser.indices as Mocked<any>).exists = vi
       .fn()
       .mockResolvedValue(false);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('groups the query by document identity and forwards doc-id params', async () => {
@@ -72,7 +75,7 @@ describe('fetchEvents', () => {
     const indexName = getEntitiesLatestIndexName('default');
 
     // Mock index exists → enrichment via LOOKUP JOIN is enabled
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+    (esClient.asInternalUser.indices as Mocked<any>).exists = vi
       .fn()
       .mockResolvedValueOnce(true);
 
@@ -106,6 +109,6 @@ describe('fetchEvents', () => {
     expect(esqlCallArgs.query).toContain('| EVAL actorEntityName = TO_STRING(null)');
     expect(esqlCallArgs.query).toContain('| EVAL targetEntityName = TO_STRING(null)');
     expect(esqlCallArgs.query).not.toContain('ENRICH');
-    expect((esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy).not.toHaveBeenCalled();
+    expect((esClient.asInternalUser.enrich as Mocked<any>).getPolicy).not.toHaveBeenCalled();
   });
 });

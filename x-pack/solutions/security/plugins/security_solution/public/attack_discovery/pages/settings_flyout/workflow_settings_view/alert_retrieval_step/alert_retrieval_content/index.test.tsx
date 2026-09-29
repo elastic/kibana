@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -16,110 +18,128 @@ import type { UseFetchDefaultEsqlQueryResult } from '../../../workflow_configura
 
 const mockFilterManager = createFilterManagerMock();
 
-const mockUseMatchedAlertsCount = jest.fn().mockReturnValue({ count: 95, loading: false });
+const mockUseMatchedAlertsCount = vi.fn().mockReturnValue({ count: 95, loading: false });
 
-jest.mock('../../../alert_selection/hooks/use_matched_alerts_count', () => ({
-  useMatchedAlertsCount: (...args: unknown[]) => mockUseMatchedAlertsCount(...args),
-}));
+vi.mock('../../../alert_selection/hooks/use_matched_alerts_count', () => {
+      const mocked = {
+      useMatchedAlertsCount: (...args: unknown[]) => mockUseMatchedAlertsCount(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../alert_selection/alert_selection_fields', () => ({
-  AlertSelectionFields: ({ showConnectorSelector }: { showConnectorSelector: boolean }) => (
-    <div
-      data-test-subj="alertSelectionFields"
-      data-show-connector-selector={String(showConnectorSelector)}
-    />
-  ),
-}));
+vi.mock('../../../alert_selection/alert_selection_fields', () => {
+      const mocked = {
+      AlertSelectionFields: ({ showConnectorSelector }: { showConnectorSelector: boolean }) => (
+        <div
+          data-test-subj="alertSelectionFields"
+          data-show-connector-selector={String(showConnectorSelector)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../alert_selection/alert_preview_tabs', () => ({
-  AlertPreviewTabs: ({
-    alertsCount,
-    esqlQuery,
-    settings,
-  }: {
-    alertsCount?: number | null;
-    esqlQuery?: string;
-    settings: { end: string; start: string };
-  }) => (
-    <div
-      data-test-subj="alertPreviewTabs"
-      data-alerts-count={alertsCount != null ? String(alertsCount) : ''}
-      data-end={settings.end}
-      data-esql-query={esqlQuery ?? ''}
-      data-start={settings.start}
-    />
-  ),
-}));
+vi.mock('../../../alert_selection/alert_preview_tabs', () => {
+      const mocked = {
+      AlertPreviewTabs: ({
+        alertsCount,
+        esqlQuery,
+        settings,
+      }: {
+        alertsCount?: number | null;
+        esqlQuery?: string;
+        settings: { end: string; start: string };
+      }) => (
+        <div
+          data-test-subj="alertPreviewTabs"
+          data-alerts-count={alertsCount != null ? String(alertsCount) : ''}
+          data-end={settings.end}
+          data-esql-query={esqlQuery ?? ''}
+          data-start={settings.start}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOnModeChange = jest.fn();
+const mockOnModeChange = vi.fn();
 
-jest.mock('../../../workflow_configuration', () => ({
-  DefaultAlertRetrievalAccordion: ({
-    children,
-    isEnabled,
-    onToggle,
-  }: {
-    children: React.ReactNode;
-    isEnabled: boolean;
-    onToggle: (enabled: boolean) => void;
-  }) => (
-    <div data-test-subj="defaultAlertRetrievalAccordion" data-is-enabled={String(isEnabled)}>
-      <button
-        data-test-subj="defaultAlertRetrievalToggle"
-        onClick={() => onToggle(!isEnabled)}
-        type="button"
-      />
-      {isEnabled && children}
-    </div>
-  ),
-  QueryModeSelector: ({
-    mode,
-    onModeChange,
-  }: {
-    mode: string;
-    onModeChange: (mode: string) => void;
-  }) => {
-    mockOnModeChange.mockImplementation(onModeChange);
-    return <div data-test-subj="queryModeSelector" data-mode={mode} />;
-  },
-  WorkflowConfigurationPanel: () => <div data-test-subj="workflowConfigurationPanel" />,
-}));
+vi.mock('../../../workflow_configuration', () => {
+      const mocked = {
+      DefaultAlertRetrievalAccordion: ({
+        children,
+        isEnabled,
+        onToggle,
+      }: {
+        children: React.ReactNode;
+        isEnabled: boolean;
+        onToggle: (enabled: boolean) => void;
+      }) => (
+        <div data-test-subj="defaultAlertRetrievalAccordion" data-is-enabled={String(isEnabled)}>
+          <button
+            data-test-subj="defaultAlertRetrievalToggle"
+            onClick={() => onToggle(!isEnabled)}
+            type="button"
+          />
+          {isEnabled && children}
+        </div>
+      ),
+      QueryModeSelector: ({
+        mode,
+        onModeChange,
+      }: {
+        mode: string;
+        onModeChange: (mode: string) => void;
+      }) => {
+        mockOnModeChange.mockImplementation(onModeChange);
+        return <div data-test-subj="queryModeSelector" data-mode={mode} />;
+      },
+      WorkflowConfigurationPanel: () => <div data-test-subj="workflowConfigurationPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: ({
-    dataErrorsControl,
-    query,
-  }: {
-    dataErrorsControl?: { enabled: boolean; onChange: (enabled: boolean) => void };
-    query: { esql: string };
-  }) => (
-    <div
-      data-test-subj="esqlLangEditor"
-      data-data-errors-enabled={
-        dataErrorsControl != null ? String(dataErrorsControl.enabled) : undefined
-      }
-      data-has-data-errors-control={String(dataErrorsControl != null)}
-      data-query={query.esql}
-    />
-  ),
-}));
+vi.mock('@kbn/esql/public', () => {
+      const mocked = {
+      ESQLLangEditor: ({
+        dataErrorsControl,
+        query,
+      }: {
+        dataErrorsControl?: { enabled: boolean; onChange: (enabled: boolean) => void };
+        query: { esql: string };
+      }) => (
+        <div
+          data-test-subj="esqlLangEditor"
+          data-data-errors-enabled={
+            dataErrorsControl != null ? String(dataErrorsControl.enabled) : undefined
+          }
+          data-has-data-errors-control={String(dataErrorsControl != null)}
+          data-query={query.esql}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../workflow_configuration/edit_with_ai', () => ({
-  EditWithAi: ({
-    esqlQuery,
-    onEsqlQueryChange,
-  }: {
-    esqlQuery: string;
-    onEsqlQueryChange: (query: string) => void;
-  }) => (
-    <button
-      data-test-subj="editWithAi"
-      data-esql-query={esqlQuery}
-      onClick={() => onEsqlQueryChange('AI_UPDATED_QUERY')}
-      type="button"
-    />
-  ),
-}));
+vi.mock('../../../workflow_configuration/edit_with_ai', () => {
+      const mocked = {
+      EditWithAi: ({
+        esqlQuery,
+        onEsqlQueryChange,
+      }: {
+        esqlQuery: string;
+        onEsqlQueryChange: (query: string) => void;
+      }) => (
+        <button
+          data-test-subj="editWithAi"
+          data-esql-query={esqlQuery}
+          onClick={() => onEsqlQueryChange('AI_UPDATED_QUERY')}
+          type="button"
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalMode: 'custom_query',
@@ -137,10 +157,10 @@ const defaultRetrievalEnabledConfiguration: WorkflowConfiguration = {
 
 const defaultFetchDefaultEsqlQueryResult: UseFetchDefaultEsqlQueryResult = {
   defaultEsqlQuery: undefined,
-  fetchDefaultEsqlQuery: jest.fn().mockResolvedValue(undefined),
+  fetchDefaultEsqlQuery: vi.fn().mockResolvedValue(undefined),
   isError: false,
   isLoading: false,
-  resetCache: jest.fn(),
+  resetCache: vi.fn(),
 };
 
 const defaultProps = {
@@ -150,11 +170,11 @@ const defaultProps = {
   connectorId: 'test-connector',
   fetchDefaultEsqlQueryResult: defaultFetchDefaultEsqlQueryResult,
   filterManager: mockFilterManager,
-  onConnectorIdSelected: jest.fn(),
-  onSettingsChanged: jest.fn(),
-  onWorkflowConfigurationChange: jest.fn(),
-  setAlertsPreviewStackBy0: jest.fn(),
-  setAlertSummaryStackBy0: jest.fn(),
+  onConnectorIdSelected: vi.fn(),
+  onSettingsChanged: vi.fn(),
+  onWorkflowConfigurationChange: vi.fn(),
+  setAlertsPreviewStackBy0: vi.fn(),
+  setAlertSummaryStackBy0: vi.fn(),
   settings: {
     end: 'now',
     filters: [],
@@ -167,7 +187,7 @@ const defaultProps = {
 
 describe('AlertRetrievalContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('three composable toggles', () => {
@@ -227,7 +247,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('calls onWorkflowConfigurationChange with skillEnabled toggled off', () => {
-      const onWorkflowConfigurationChange = jest.fn();
+      const onWorkflowConfigurationChange = vi.fn();
 
       render(
         <TestProviders>
@@ -278,7 +298,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('calls onWorkflowConfigurationChange to enable default retrieval when toggled', () => {
-      const onWorkflowConfigurationChange = jest.fn();
+      const onWorkflowConfigurationChange = vi.fn();
 
       render(
         <TestProviders>
@@ -298,7 +318,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('calls onWorkflowConfigurationChange to disable default retrieval when toggled', () => {
-      const onWorkflowConfigurationChange = jest.fn();
+      const onWorkflowConfigurationChange = vi.fn();
 
       render(
         <TestProviders>
@@ -319,7 +339,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('fetches the default ES|QL query when enabling default retrieval in esql mode without an existing query', async () => {
-      const fetchDefaultEsqlQuery = jest
+      const fetchDefaultEsqlQuery = vi
         .fn()
         .mockResolvedValue('FROM .alerts-security.alerts-default | LIMIT 100');
       const esqlModeNoQueryConfiguration: WorkflowConfiguration = {
@@ -349,8 +369,8 @@ describe('AlertRetrievalContent', () => {
 
     it('enables default retrieval and populates the fetched default ES|QL query when enabling in esql mode without an existing query', async () => {
       const defaultQuery = 'FROM .alerts-security.alerts-default | LIMIT 100';
-      const fetchDefaultEsqlQuery = jest.fn().mockResolvedValue(defaultQuery);
-      const onWorkflowConfigurationChange = jest.fn();
+      const fetchDefaultEsqlQuery = vi.fn().mockResolvedValue(defaultQuery);
+      const onWorkflowConfigurationChange = vi.fn();
       const esqlModeNoQueryConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
         alertRetrievalMode: 'esql',
@@ -382,7 +402,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('does not fetch the default ES|QL query when enabling default retrieval in esql mode with an existing query', async () => {
-      const fetchDefaultEsqlQuery = jest.fn().mockResolvedValue(undefined);
+      const fetchDefaultEsqlQuery = vi.fn().mockResolvedValue(undefined);
       const esqlModeWithQueryConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
         alertRetrievalMode: 'esql',
@@ -410,7 +430,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('does not fetch the default ES|QL query when enabling default retrieval in custom_query mode', async () => {
-      const fetchDefaultEsqlQuery = jest.fn().mockResolvedValue(undefined);
+      const fetchDefaultEsqlQuery = vi.fn().mockResolvedValue(undefined);
 
       render(
         <TestProviders>
@@ -470,7 +490,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('calls onWorkflowConfigurationChange with alertRetrievalWorkflowsEnabled toggled on', () => {
-      const onWorkflowConfigurationChange = jest.fn();
+      const onWorkflowConfigurationChange = vi.fn();
 
       render(
         <TestProviders>
@@ -670,7 +690,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('calls onWorkflowConfigurationChange when EditWithAi updates the query', () => {
-      const onWorkflowConfigurationChange = jest.fn();
+      const onWorkflowConfigurationChange = vi.fn();
 
       render(
         <TestProviders>
@@ -692,11 +712,11 @@ describe('AlertRetrievalContent', () => {
 
   describe('debounced esqlQuery for AlertPreviewTabs', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     const initialQuery = 'FROM .alerts-security.alerts-default | LIMIT 100';
@@ -748,7 +768,7 @@ describe('AlertRetrievalContent', () => {
       );
 
       act(() => {
-        jest.advanceTimersByTime(DEBOUNCE_MS);
+        vi.advanceTimersByTime(DEBOUNCE_MS);
       });
 
       expect(screen.getByTestId('alertPreviewTabs')).toHaveAttribute(
@@ -760,10 +780,10 @@ describe('AlertRetrievalContent', () => {
 
   describe('query mode change', () => {
     it('fetches default ES|QL query when switching to esql and no esqlQuery exists', async () => {
-      const fetchDefaultEsqlQuery = jest
+      const fetchDefaultEsqlQuery = vi
         .fn()
         .mockResolvedValue('FROM .alerts-security.alerts-default | LIMIT 100');
-      const onWorkflowConfigurationChange = jest.fn();
+      const onWorkflowConfigurationChange = vi.fn();
 
       render(
         <TestProviders>
@@ -785,8 +805,8 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('does not fetch default ES|QL query when switching to esql and esqlQuery already exists', async () => {
-      const fetchDefaultEsqlQuery = jest.fn().mockResolvedValue(undefined);
-      const onWorkflowConfigurationChange = jest.fn();
+      const fetchDefaultEsqlQuery = vi.fn().mockResolvedValue(undefined);
+      const onWorkflowConfigurationChange = vi.fn();
       const workflowConfiguration: WorkflowConfiguration = {
         ...defaultRetrievalEnabledConfiguration,
         esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 50',
@@ -817,8 +837,8 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('switches to custom_query without fetching', async () => {
-      const fetchDefaultEsqlQuery = jest.fn().mockResolvedValue(undefined);
-      const onWorkflowConfigurationChange = jest.fn();
+      const fetchDefaultEsqlQuery = vi.fn().mockResolvedValue(undefined);
+      const onWorkflowConfigurationChange = vi.fn();
       const workflowConfiguration: WorkflowConfiguration = {
         ...defaultRetrievalEnabledConfiguration,
         alertRetrievalMode: 'esql',
@@ -850,7 +870,7 @@ describe('AlertRetrievalContent', () => {
     });
 
     it('preserves a mutated esqlQuery when switching from esql to custom_query', async () => {
-      const onWorkflowConfigurationChange = jest.fn();
+      const onWorkflowConfigurationChange = vi.fn();
       const mutatedQuery =
         'FROM .alerts-security.alerts-default METADATA _id, _index, _version, _ignored | LIMIT 200';
       const workflowConfiguration: WorkflowConfiguration = {

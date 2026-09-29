@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { deriveFieldDefinitionId } from './field_definitions';
@@ -28,14 +31,14 @@ describe('ensureLinkedFieldDefinition', () => {
   const conflictError = () =>
     SavedObjectsErrorHelpers.createConflictError('cases-field-definition', 'some-id');
 
-  let createDefinition: jest.Mock;
-  let fetchDefinitionById: jest.Mock;
+  let createDefinition: Mock;
+  let fetchDefinitionById: Mock;
 
   const deps = () => ({ spaceId, owner, createDefinition, fetchDefinitionById });
 
   beforeEach(() => {
-    createDefinition = jest.fn().mockResolvedValue(undefined);
-    fetchDefinitionById = jest.fn().mockResolvedValue(undefined);
+    createDefinition = vi.fn().mockResolvedValue(undefined);
+    fetchDefinitionById = vi.fn().mockResolvedValue(undefined);
   });
 
   it('reuses a resolved link and exposes the linkable for repair', async () => {

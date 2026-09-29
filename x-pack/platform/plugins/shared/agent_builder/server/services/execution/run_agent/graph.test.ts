@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
@@ -20,18 +23,21 @@ import { RunTracker, type ToolExecutionBuffer } from './run_tracker';
 import type { StateType } from './state';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
-jest.mock('@langchain/langgraph/prebuilt', () => ({
-  ToolNode: jest.fn().mockImplementation(() => ({
-    invoke: jest.fn().mockResolvedValue([]),
-  })),
-}));
+vi.mock('@langchain/langgraph/prebuilt', () => {
+      const mocked = {
+      ToolNode: vi.fn().mockImplementation(() => ({
+        invoke: vi.fn().mockResolvedValue([]),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const askName = internalTools.askUserQuestion.replace(/\./g, '_');
 
-const mockToolNodeOnce = (messages: ToolMessage[]) => {
-  const { ToolNode } = jest.requireMock('@langchain/langgraph/prebuilt');
+const mockToolNodeOnce = async (messages: ToolMessage[]) => {
+  const { ToolNode } = (await vi.importMock('@langchain/langgraph/prebuilt'));
   ToolNode.mockImplementationOnce(() => ({
-    invoke: jest.fn().mockResolvedValue(messages),
+    invoke: vi.fn().mockResolvedValue(messages),
   }));
 };
 
@@ -48,23 +54,23 @@ const createTestGraph = ({
   cacheControl?: ChatCompleteCacheControl;
   toolExecutionBuffer?: ToolExecutionBuffer;
 } = {}) => {
-  const researchInvoke = jest.fn();
-  const structuredInvoke = jest.fn();
-  const researchWithConfig = jest.fn((_config: Record<string, unknown>) => ({
+  const researchInvoke = vi.fn();
+  const structuredInvoke = vi.fn();
+  const researchWithConfig = vi.fn((_config: Record<string, unknown>) => ({
     invoke: researchInvoke,
   }));
   const chatModel = {
-    bindTools: jest.fn(() => ({
+    bindTools: vi.fn(() => ({
       withConfig: researchWithConfig,
     })),
-    withStructuredOutput: jest.fn(() => ({
-      withConfig: jest.fn(() => ({ invoke: structuredInvoke })),
+    withStructuredOutput: vi.fn(() => ({
+      withConfig: vi.fn(() => ({ invoke: structuredInvoke })),
     })),
   } as unknown as InferenceChatModel;
   const toolManager = {
-    list: jest.fn(() => []),
-    recordToolUse: jest.fn(),
-    getToolIdMapping: jest.fn(
+    list: vi.fn(() => []),
+    recordToolUse: vi.fn(),
+    getToolIdMapping: vi.fn(
       () =>
         new Map([
           ['my_tool', 'my_tool'],
@@ -72,19 +78,19 @@ const createTestGraph = ({
           [askName, internalTools.askUserQuestion],
         ])
     ),
-    getToolMeta: jest.fn(() => ({ origin: undefined, type: undefined })),
+    getToolMeta: vi.fn(() => ({ origin: undefined, type: undefined })),
   } as unknown as ToolManager;
   const promptFactory = {
-    getMainPrompt: jest.fn().mockResolvedValue([]),
-    getStructuredAnswerPrompt: jest.fn().mockResolvedValue([]),
-  } as jest.Mocked<PromptFactory>;
+    getMainPrompt: vi.fn().mockResolvedValue([]),
+    getStructuredAnswerPrompt: vi.fn().mockResolvedValue([]),
+  } as Mocked<PromptFactory>;
 
   const graph = createAgentGraph({
     chatModel,
     toolManager,
     configuration: { instructions: '', aiIndices: [] },
     logger: {} as Logger,
-    events: { emit: jest.fn() } as unknown as AgentEventEmitter,
+    events: { emit: vi.fn() } as unknown as AgentEventEmitter,
     structuredOutput,
     outputSchema,
     processedConversation: {} as ProcessedConversation,
@@ -480,9 +486,9 @@ describe('createAgentGraph', () => {
     mockToolNodeOnce([
       new ToolMessage({ tool_call_id: 'c1', content: 'r1', artifact: { results: [] } }),
     ]);
-    const { ToolNode } = jest.requireMock('@langchain/langgraph/prebuilt');
+    const { ToolNode } = (await vi.importMock('@langchain/langgraph/prebuilt'));
     ToolNode.mockImplementationOnce(() => ({
-      invoke: jest.fn().mockRejectedValue(new Error('boom')),
+      invoke: vi.fn().mockRejectedValue(new Error('boom')),
     }));
     tracker.seed({ steps: [] });
 

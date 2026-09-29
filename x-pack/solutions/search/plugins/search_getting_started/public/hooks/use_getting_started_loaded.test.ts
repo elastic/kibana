@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 import { useGettingStartedLoaded } from './use_getting_started_loaded';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../common';
 
-jest.mock('../contexts/usage_tracker_context', () => ({
-  useUsageTracker: jest.fn(),
-}));
+vi.mock('../contexts/usage_tracker_context', () => {
+      const mocked = {
+      useUsageTracker: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUsageTracker = useUsageTracker as jest.Mock;
+const mockUseUsageTracker = useUsageTracker as Mock;
 
 describe('useGettingStartedLoaded', () => {
-  const mockLoad = jest.fn();
+  const mockLoad = vi.fn();
 
   beforeEach(() => {
     sessionStorage.clear();
     mockLoad.mockReset();
-    mockUseUsageTracker.mockReturnValue({ load: mockLoad, click: jest.fn(), count: jest.fn() });
+    mockUseUsageTracker.mockReturnValue({ load: mockLoad, click: vi.fn(), count: vi.fn() });
   });
 
   it('fires gettingStartedLoaded by default', () => {

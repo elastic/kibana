@@ -7,55 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ExecutionStatus } from '@kbn/workflows';
 import { workflowExecutionLoop } from './workflow_execution_loop';
 import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
-jest.mock('elastic-apm-node', () => ({
+vi.mock('elastic-apm-node', () => ({
   __esModule: true,
   default: {
-    startSpan: jest.fn(() => ({ end: jest.fn() })),
+    startSpan: vi.fn(() => ({ end: vi.fn() })),
   },
 }));
 
-jest.mock('./execution_flow_loop', () => ({
-  executionFlowLoop: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./execution_flow_loop', () => {
+      const mocked = {
+      executionFlowLoop: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./persistence_loop', () => ({
-  persistenceLoop: jest.fn().mockResolvedValue(undefined),
-  flushState: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./persistence_loop', () => {
+      const mocked = {
+      persistenceLoop: vi.fn().mockResolvedValue(undefined),
+      flushState: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('workflowExecutionLoop', () => {
   const createParams = () => ({
     workflowExecutionCursor: createMockWorkflowExecutionCursor(),
     workflowRuntime: {
-      saveState: jest.fn().mockResolvedValue(undefined),
-      setWorkflowError: jest.fn(),
-      getWorkflowExecution: jest.fn().mockReturnValue({
+      saveState: vi.fn().mockResolvedValue(undefined),
+      setWorkflowError: vi.fn(),
+      getWorkflowExecution: vi.fn().mockReturnValue({
         id: 'exec-1',
         status: ExecutionStatus.RUNNING,
       }),
     },
     workflowExecutionState: {
-      updateWorkflowExecution: jest.fn(),
+      updateWorkflowExecution: vi.fn(),
     },
     stepIoService: {
-      flush: jest.fn().mockResolvedValue(undefined),
+      flush: vi.fn().mockResolvedValue(undefined),
       // Workflow-end safety release added with the deferred-release pattern.
-      releaseTransientlyRehydratedOutputs: jest.fn(),
+      releaseTransientlyRehydratedOutputs: vi.fn(),
     },
     workflowLogger: {
-      flushEvents: jest.fn().mockResolvedValue(undefined),
-      logWarn: jest.fn(),
+      flushEvents: vi.fn().mockResolvedValue(undefined),
+      logWarn: vi.fn(),
     },
     signal: new AbortController().signal,
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('runs execution and persistence loops and flushes state', async () => {
@@ -84,7 +93,7 @@ describe('workflowExecutionLoop', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { executionFlowLoop } = require('./execution_flow_loop');
-    (executionFlowLoop as jest.Mock).mockRejectedValueOnce(testError);
+    (executionFlowLoop as Mock).mockRejectedValueOnce(testError);
 
     await workflowExecutionLoop(params as any);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,7 +35,7 @@ describe('CustomContentEmptyPrompt', () => {
   });
 
   it('does not render the Generate with chat button when isAiAvailable is false', () => {
-    const onGenerateWithChat = jest.fn();
+    const onGenerateWithChat = vi.fn();
     render(
       <CustomContentEmptyPrompt isAiAvailable={false} onGenerateWithChat={onGenerateWithChat} />
     );
@@ -46,7 +48,7 @@ describe('CustomContentEmptyPrompt', () => {
   });
 
   it('renders the Generate with chat button when isAiAvailable is true and onGenerateWithChat is provided', () => {
-    const onGenerateWithChat = jest.fn();
+    const onGenerateWithChat = vi.fn();
     render(
       <CustomContentEmptyPrompt isAiAvailable={true} onGenerateWithChat={onGenerateWithChat} />
     );
@@ -54,7 +56,7 @@ describe('CustomContentEmptyPrompt', () => {
   });
 
   it('calls onGenerateWithChat when the button is clicked', async () => {
-    const onGenerateWithChat = jest.fn();
+    const onGenerateWithChat = vi.fn();
     render(
       <CustomContentEmptyPrompt isAiAvailable={true} onGenerateWithChat={onGenerateWithChat} />
     );

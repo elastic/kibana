@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { usePreferredTransactionDataSource } from './use_preferred_transaction_data_source';
@@ -26,7 +29,7 @@ function withSources(
 ) {
   return {
     http: {
-      get: jest.fn().mockResolvedValue({ sources: list }),
+      get: vi.fn().mockResolvedValue({ sources: list }),
     } as unknown as HttpStart,
     start,
     end,
@@ -184,14 +187,14 @@ describe('usePreferredTransactionDataSource', () => {
 
     await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
 
-    const options = (http.get as jest.Mock).mock.calls[0][1];
+    const options = (http.get as Mock).mock.calls[0][1];
     expect(options.headers).toBeUndefined();
   });
 
   it('returns undefined dataSource and exposes the error when the metadata call fails', async () => {
     const fetchError = new Error('network error');
     const http = {
-      get: jest.fn().mockRejectedValue(fetchError),
+      get: vi.fn().mockRejectedValue(fetchError),
     } as unknown as HttpStart;
 
     const { result } = renderHook(() =>
@@ -205,7 +208,7 @@ describe('usePreferredTransactionDataSource', () => {
 
   it('returns undefined dataSource with isLoading true before the response arrives', () => {
     const http = {
-      get: jest.fn(() => new Promise(() => {})),
+      get: vi.fn(() => new Promise(() => {})),
     } as unknown as HttpStart;
 
     const { result } = renderHook(() =>

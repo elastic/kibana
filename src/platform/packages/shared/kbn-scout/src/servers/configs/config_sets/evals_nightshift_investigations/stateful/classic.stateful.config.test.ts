@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -27,9 +29,9 @@ const SANDBOX_KIBANA_CONFIG = join(
 
 const loadConfig = (env: Record<string, string>) => {
   let loaded: typeof import('./classic.stateful.config') | undefined;
-  jest.isolateModules(() => {
+  jest.isolateModules(async () => {
     Object.assign(process.env, env);
-    loaded = jest.requireActual('./classic.stateful.config');
+    loaded = (await vi.importActual('./classic.stateful.config'));
   });
   if (!loaded) throw new Error('config failed to load');
   return loaded;
@@ -54,14 +56,12 @@ describe('evals_nightshift_investigations config set', () => {
   // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
   it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
     'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
-    (selection) => {
+    async (selection) => {
       const { servers } = loadConfig({
         SANDBOX_API_KEY: 'key',
         ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
       });
-      const { servers: tracing } = jest.requireActual(
-        '../../evals_tracing/stateful/classic.stateful.config'
-      );
+      const { servers: tracing } = (await vi.importActual('../../evals_tracing/stateful/classic.stateful.config'));
       expect(servers.kbnTestServer.serverArgs).toEqual([
         ...tracing.kbnTestServer.serverArgs.filter(
           (arg: string) => !arg.startsWith('--telemetry.tracing.exporters=')

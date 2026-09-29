@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 
 import type { Capabilities } from '@kbn/core/public';
@@ -46,8 +48,8 @@ describe('useSolutionViewSwitchAnnouncements', () => {
         activeSpace: baseSpace,
         capabilities,
         areAnnouncementsEnabled: true,
-        closeSpaceSelector: jest.fn(),
-        navigateToApp: jest.fn(),
+        closeSpaceSelector: vi.fn(),
+        navigateToApp: vi.fn(),
       })
     );
 
@@ -66,8 +68,8 @@ describe('useSolutionViewSwitchAnnouncements', () => {
         activeSpace: baseSpace,
         capabilities,
         areAnnouncementsEnabled: true,
-        closeSpaceSelector: jest.fn(),
-        navigateToApp: jest.fn(),
+        closeSpaceSelector: vi.fn(),
+        navigateToApp: vi.fn(),
       })
     );
 
@@ -89,8 +91,8 @@ describe('useSolutionViewSwitchAnnouncements', () => {
           spaces: { manage: false },
         },
         areAnnouncementsEnabled: true,
-        closeSpaceSelector: jest.fn(),
-        navigateToApp: jest.fn(),
+        closeSpaceSelector: vi.fn(),
+        navigateToApp: vi.fn(),
       })
     );
 
@@ -109,8 +111,8 @@ describe('useSolutionViewSwitchAnnouncements', () => {
         activeSpace: baseSpace,
         capabilities,
         areAnnouncementsEnabled: true,
-        closeSpaceSelector: jest.fn(),
-        navigateToApp: jest.fn(),
+        closeSpaceSelector: vi.fn(),
+        navigateToApp: vi.fn(),
       })
     );
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
@@ -19,22 +22,28 @@ import { DEFAULT_EVENTS_STACK_BY_VALUE } from './histogram_configurations';
 import { useUserPrivileges } from '../user_privileges';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../user_privileges');
+vi.mock('../user_privileges');
 
-const mockGetDefaultControlColumn = jest.fn();
-jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
-  getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
-}));
+const mockGetDefaultControlColumn = vi.fn();
+vi.mock('../../../timelines/components/timeline/body/control_columns', () => {
+      const mocked = {
+      getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
-  () => ({
-    useAddBulkToTimelineAction: jest.fn().mockReturnValue([]),
-  })
+  () => {
+      const mocked = {
+        useAddBulkToTimelineAction: vi.fn().mockReturnValue([]),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
+vi.mock('../../lib/kibana', async () => {
+  const original = (await vi.importActual('../../lib/kibana'));
 
   return {
     ...original,
@@ -43,7 +52,7 @@ jest.mock('../../lib/kibana', () => {
         ...original.useKibana().services,
         cases: {
           ui: {
-            getCasesContext: jest.fn(),
+            getCasesContext: vi.fn(),
           },
           helpers: {
             canUseCases: () => [],
@@ -58,14 +67,17 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 
-jest.mock('../visualization_actions/actions');
-jest.mock('../visualization_actions/lens_embeddable');
+vi.mock('../visualization_actions/actions');
+vi.mock('../visualization_actions/lens_embeddable');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => mockHistory,
-  useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => mockHistory,
+      useLocation: vi.fn().mockReturnValue({ pathname: '/test' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const FakeStatefulEventsViewer = ({
   topRightMenuOptions,
@@ -77,18 +89,24 @@ const FakeStatefulEventsViewer = ({
     {'MockedStatefulEventsViewer'}
   </div>
 );
-jest.mock('../events_viewer', () => ({ StatefulEventsViewer: FakeStatefulEventsViewer }));
+vi.mock('../events_viewer', () => {
+      const mocked = { StatefulEventsViewer: FakeStatefulEventsViewer };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../containers/use_full_screen', () => ({
-  useGlobalFullScreen: jest.fn().mockReturnValue({
-    globalFullScreen: false,
-  }),
-}));
+vi.mock('../../containers/use_full_screen', () => {
+      const mocked = {
+      useGlobalFullScreen: vi.fn().mockReturnValue({
+        globalFullScreen: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_license', () => {
+vi.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isEnterprise: jest.fn(() => false),
+    isPlatinumPlus: vi.fn(),
+    isEnterprise: vi.fn(() => false),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -109,7 +127,7 @@ describe('EventsQueryTabBody', () => {
   };
 
   beforeEach(() => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { read: true },
     });
   });
@@ -126,7 +144,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('renders the matrix histogram when globalFullScreen is false', () => {
-    (useGlobalFullScreen as jest.Mock).mockReturnValueOnce({
+    (useGlobalFullScreen as Mock).mockReturnValueOnce({
       globalFullScreen: false,
     });
 
@@ -140,7 +158,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it("doesn't render the matrix histogram when globalFullScreen is true", () => {
-    (useGlobalFullScreen as jest.Mock).mockReturnValueOnce({
+    (useGlobalFullScreen as Mock).mockReturnValueOnce({
       globalFullScreen: true,
     });
 
@@ -180,7 +198,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('deletes query when unmouting', () => {
-    const mockDeleteQuery = jest.fn();
+    const mockDeleteQuery = vi.fn();
     const { unmount } = render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} deleteQuery={mockDeleteQuery} />
@@ -192,7 +210,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('initializes t-grid', () => {
-    const spy = jest.spyOn(dataTableActions, 'initializeDataTableSettings');
+    const spy = vi.spyOn(dataTableActions, 'initializeDataTableSettings');
     render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} />
@@ -213,7 +231,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('should have 4 columns on Action bar for non-Enterprise user and if user does not have Notes privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({ notesPrivileges: { read: false } });
+    (useUserPrivileges as Mock).mockReturnValue({ notesPrivileges: { read: false } });
 
     render(
       <TestProviders>
@@ -225,7 +243,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('should have 6 columns on Action bar for Enterprise user', () => {
-    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+    const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
     licenseServiceMock.isEnterprise.mockReturnValue(true);
 
     render(
@@ -238,9 +256,9 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('should have 5 columns on Action bar for Enterprise user and if user does not have Notes privileges', () => {
-    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+    const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
     licenseServiceMock.isEnterprise.mockReturnValue(true);
-    (useUserPrivileges as jest.Mock).mockReturnValue({ notesPrivileges: { read: false } });
+    (useUserPrivileges as Mock).mockReturnValue({ notesPrivileges: { read: false } });
 
     render(
       <TestProviders>

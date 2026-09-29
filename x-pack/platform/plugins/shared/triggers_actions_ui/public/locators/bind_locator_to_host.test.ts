@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   STACK_MANAGEMENT_RULES_HOST,
   ruleDetailsLocatorID,
@@ -27,12 +29,12 @@ const SEARCH_HOST = {
 const createMockLocator = (): LocatorPublic<RulesLocatorParams> =>
   ({
     id: 'mock',
-    useUrl: jest.fn().mockReturnValue('/url'),
-    getUrl: jest.fn().mockResolvedValue('/url'),
-    getRedirectUrl: jest.fn().mockReturnValue('/url'),
-    navigate: jest.fn().mockResolvedValue(undefined),
-    navigateSync: jest.fn(),
-    getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
+    useUrl: vi.fn().mockReturnValue('/url'),
+    getUrl: vi.fn().mockResolvedValue('/url'),
+    getRedirectUrl: vi.fn().mockReturnValue('/url'),
+    navigate: vi.fn().mockResolvedValue(undefined),
+    navigateSync: vi.fn(),
+    getLocation: vi.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
   } as unknown as LocatorPublic<RulesLocatorParams>);
 
 describe('bindLocatorToHost', () => {
@@ -79,7 +81,7 @@ describe('getLocators', () => {
   const createShare = () => {
     const rules = createMockLocator();
     const ruleDetails = createMockLocator();
-    const get = jest.fn((id: string) => {
+    const get = vi.fn((id: string) => {
       if (id === rulesLocatorID) {
         return rules;
       }

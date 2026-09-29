@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
@@ -24,30 +26,42 @@ const mockProps = {
   contextID: 'test-user-panel',
 };
 
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
-const mockedUserRiskScore = jest.fn().mockReturnValue(mockUserRiskScoreState);
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedUserRiskScore(),
-}));
+const mockedUserRiskScore = vi.fn().mockReturnValue(mockUserRiskScoreState);
+vi.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => {
+      const mocked = {
+      useRiskScore: () => mockedUserRiskScore(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation', () => ({
-  useEntityRiskScoreRecalculation: () => ({
-    entityRiskScores: mockUserEntityRiskScores,
-    recalculatingScore: false,
-    calculateEntityRiskScore: jest.fn(),
-  }),
-}));
+vi.mock('../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation', () => {
+      const mocked = {
+      useEntityRiskScoreRecalculation: () => ({
+        entityRiskScores: mockUserEntityRiskScores,
+        recalculatingScore: false,
+        calculateEntityRiskScore: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseObservedUser = jest.fn().mockReturnValue(mockObservedUser);
-jest.mock('./hooks/use_observed_user', () => ({
-  useObservedUser: () => mockedUseObservedUser(),
-}));
+const mockedUseObservedUser = vi.fn().mockReturnValue(mockObservedUser);
+vi.mock('./hooks/use_observed_user', () => {
+      const mocked = {
+      useObservedUser: () => mockedUseObservedUser(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_managed_user', () => ({
-  useManagedUser: () => mockedUseManagedUser(),
-}));
+const mockedUseManagedUser = vi.fn().mockReturnValue(mockManagedUserData);
+vi.mock('../../../../flyout/entity_details/shared/hooks/use_managed_user', () => {
+      const mocked = {
+      useManagedUser: () => mockedUseManagedUser(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<User />', () => {
   beforeEach(() => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,28 +23,40 @@ import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { AutomationsPanel } from './automations_panel';
 
-jest.mock('../../hooks/use_automations_editor', () => ({
-  useAutomationsEditor: jest.fn(),
-}));
+vi.mock('../../hooks/use_automations_editor', () => {
+      const mocked = {
+      useAutomationsEditor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_suggest_automation', () => ({
-  useSuggestAutomation: jest.fn(),
-}));
+vi.mock('../../hooks/use_suggest_automation', () => {
+      const mocked = {
+      useSuggestAutomation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_workflow_summaries', () => ({
-  useWorkflowSummaries: jest.fn(),
-}));
+vi.mock('../../hooks/use_workflow_summaries', () => {
+      const mocked = {
+      useWorkflowSummaries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: () => ({
-    mgetWorkflows: jest.fn(),
-    createWorkflow: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: () => ({
+        mgetWorkflows: vi.fn(),
+        createWorkflow: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAutomationsEditor = jest.mocked(useAutomationsEditor);
-const mockUseSuggestAutomation = jest.mocked(useSuggestAutomation);
-const mockUseWorkflowSummaries = jest.mocked(useWorkflowSummaries);
+const mockUseAutomationsEditor = vi.mocked(useAutomationsEditor);
+const mockUseSuggestAutomation = vi.mocked(useSuggestAutomation);
+const mockUseWorkflowSummaries = vi.mocked(useWorkflowSummaries);
 
 const editorResult = (
   overrides: Partial<UseAutomationsEditorResult> = {}
@@ -53,11 +67,11 @@ const editorResult = (
   isSaving: false,
   isCreating: false,
   isBusy: false,
-  startEditing: jest.fn(),
-  stopEditing: jest.fn(),
-  removeAutomation: jest.fn(),
-  save: jest.fn().mockResolvedValue(undefined),
-  createAndAttach: jest.fn().mockResolvedValue(undefined),
+  startEditing: vi.fn(),
+  stopEditing: vi.fn(),
+  removeAutomation: vi.fn(),
+  save: vi.fn().mockResolvedValue(undefined),
+  createAndAttach: vi.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
@@ -65,7 +79,7 @@ const suggestResult = (
   overrides: Partial<UseSuggestAutomationResult> = {}
 ): UseSuggestAutomationResult => ({
   canSuggest: false,
-  suggestAutomation: jest.fn(),
+  suggestAutomation: vi.fn(),
   ...overrides,
 });
 
@@ -94,7 +108,7 @@ type PanelProps = React.ComponentProps<typeof AutomationsPanel>;
 
 /** Rerender re-wraps in the same providers so tests can flip the mocked hook and re-render in one call. */
 const renderPanel = (props: Partial<PanelProps> = {}) => {
-  const onSaved = jest.fn();
+  const onSaved = vi.fn();
   const services = coreMock.createStart();
   const wrap = (overrides: Partial<PanelProps> = {}) => (
     <I18nProvider>
@@ -130,7 +144,7 @@ describe('AutomationsPanel', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the loading skeleton and nothing else while the AI index loads', () => {
@@ -184,7 +198,7 @@ describe('AutomationsPanel', () => {
   });
 
   it('shows the suggest automation control when agent builder is available', () => {
-    const suggestAutomation = jest.fn();
+    const suggestAutomation = vi.fn();
     mockUseSuggestAutomation.mockReturnValue(
       suggestResult({ canSuggest: true, suggestAutomation })
     );
@@ -202,7 +216,7 @@ describe('AutomationsPanel', () => {
   });
 
   it('opens the created workflow in the Workflows app', async () => {
-    const createAndAttach = jest.fn().mockResolvedValue('wf-created');
+    const createAndAttach = vi.fn().mockResolvedValue('wf-created');
     mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
 
     const { services } = renderPanel();
@@ -216,7 +230,7 @@ describe('AutomationsPanel', () => {
   });
 
   it('stays on the page when the automation could not be created', async () => {
-    const createAndAttach = jest.fn().mockResolvedValue(undefined);
+    const createAndAttach = vi.fn().mockResolvedValue(undefined);
     mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
 
     const { services } = renderPanel();
@@ -316,9 +330,9 @@ describe('AutomationsPanel', () => {
   });
 
   it('delegates the header actions to the editor', () => {
-    const startEditing = jest.fn();
-    const stopEditing = jest.fn();
-    const save = jest.fn().mockResolvedValue(undefined);
+    const startEditing = vi.fn();
+    const stopEditing = vi.fn();
+    const save = vi.fn().mockResolvedValue(undefined);
     mockUseAutomationsEditor.mockReturnValue(editorResult({ startEditing, stopEditing, save }));
 
     const { rerender } = renderPanel();

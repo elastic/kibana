@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
@@ -149,10 +152,10 @@ describe('Create conversation route', () => {
       timestamp: '2019-12-13T16:40:33.400Z',
       user: { name: 'other', id: 'other-id' },
     };
-    let telemetryReportEventSpy: jest.SpyInstance;
+    let telemetryReportEventSpy: MockInstance;
 
     beforeEach(() => {
-      telemetryReportEventSpy = jest.spyOn(context.elasticAssistant.telemetry, 'reportEvent');
+      telemetryReportEventSpy = vi.spyOn(context.elasticAssistant.telemetry, 'reportEvent');
     });
 
     afterEach(() => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, Observable } from 'rxjs';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
@@ -32,7 +34,7 @@ type ObsCallback = (_entries: MockEntryList, _obs: object) => undefined;
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
   beforeEach(() => {
-    const mockObs = { observe: jest.fn, disconnect: jest.fn };
+    const mockObs = { observe: vi.fn, disconnect: vi.fn };
     const mockPerformanceObserver = function (callback: ObsCallback) {
       callback({ getEntries: () => [{}] }, mockObs);
       return mockObs;
@@ -40,7 +42,7 @@ describe('AnalyticsService', () => {
 
     (global.PerformanceObserver as unknown) = mockPerformanceObserver;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     analyticsService = new AnalyticsService(coreContextMock.create());
   });
   test('should register some context providers on creation', async () => {

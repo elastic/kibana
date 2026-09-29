@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   createMigrationTask,
   scheduleAssetCriticalityEcsCompliancyMigration,
@@ -16,17 +18,20 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { auditLoggerMock } from '@kbn/core-security-server-mocks';
 
-const mockIsEcsDataMigrationRequired = jest.fn().mockResolvedValue(false);
-const mockMigrateEcsData = jest.fn().mockResolvedValue({
+const mockIsEcsDataMigrationRequired = vi.fn().mockResolvedValue(false);
+const mockMigrateEcsData = vi.fn().mockResolvedValue({
   updated: 100,
   failures: [],
 });
-jest.mock('../asset_criticality_migration_client', () => ({
-  AssetCriticalityMigrationClient: jest.fn().mockImplementation(() => ({
-    isEcsDataMigrationRequired: mockIsEcsDataMigrationRequired,
-    migrateEcsData: mockMigrateEcsData,
-  })),
-}));
+vi.mock('../asset_criticality_migration_client', () => {
+      const mocked = {
+      AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
+        isEcsDataMigrationRequired: mockIsEcsDataMigrationRequired,
+        migrateEcsData: mockMigrateEcsData,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 const mockTaskManagerStart = taskManagerMock.createStart();
 const logger = loggerMock.create();
 const auditLogger = auditLoggerMock.create();
@@ -34,9 +39,9 @@ const auditLogger = auditLoggerMock.create();
 const TASK_TYPE = 'security-solution-ea-asset-criticality-ecs-migration';
 const TASK_ID = `${TASK_TYPE}-task-id`;
 
-const mockWithContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+const mockWithContext = vi.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
 
-const getStartServices = jest.fn().mockResolvedValue([
+const getStartServices = vi.fn().mockResolvedValue([
   {
     elasticsearch: {
       client: elasticsearchServiceMock.createClusterClient(),
@@ -46,15 +51,15 @@ const getStartServices = jest.fn().mockResolvedValue([
   { taskManager: mockTaskManagerStart },
 ]);
 const mockAbortController = {
-  abort: jest.fn(),
+  abort: vi.fn(),
   signal: new AbortController().signal,
 } satisfies AbortController;
 
-global.AbortController = jest.fn().mockImplementation(() => mockAbortController);
+global.AbortController = vi.fn().mockImplementation(() => mockAbortController);
 
 describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should register the task if taskManager is available', async () => {

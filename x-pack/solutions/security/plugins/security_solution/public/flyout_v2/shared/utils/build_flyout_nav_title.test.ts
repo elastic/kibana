@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { buildFlyoutNavTitle } from './build_flyout_nav_title';
 
-const mockGetState = jest.fn();
+const mockGetState = vi.fn();
 
-jest.mock('@elastic/eui', () => ({
-  getFlyoutManagerStore: () => ({ getState: mockGetState }),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      getFlyoutManagerStore: () => ({ getState: mockGetState }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const withSession = (session: Record<string, unknown>) => ({ sessions: [session] });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ComponentProps, useCallback, useMemo } from 'react';
 import { render, screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
@@ -113,12 +115,12 @@ describe('DataCascade', () => {
       renderESQLUseCaseComponent({
         query: 'FROM my_index | STATS count = UNIQUE() BY record.field1, record.field2',
         dataRecordCount: 1000,
-        onCascadeGroupingChange: jest.fn(),
-        onCascadeLeafNodeExpanded: jest.fn(),
-        onCascadeGroupNodeExpanded: jest.fn(),
-        rowHeaderTitleSlot: jest.fn(),
-        rowHeaderActions: jest.fn(),
-        rowHeaderMetaSlots: jest.fn(),
+        onCascadeGroupingChange: vi.fn(),
+        onCascadeLeafNodeExpanded: vi.fn(),
+        onCascadeGroupNodeExpanded: vi.fn(),
+        rowHeaderTitleSlot: vi.fn(),
+        rowHeaderActions: vi.fn(),
+        rowHeaderMetaSlots: vi.fn(),
       });
 
       expect(screen.getByTestId('data-cascade')).toBeInTheDocument();

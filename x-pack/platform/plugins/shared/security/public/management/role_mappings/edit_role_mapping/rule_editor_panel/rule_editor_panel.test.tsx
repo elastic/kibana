@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiErrorBoundary, EuiProvider } from '@elastic/eui';
 import React from 'react';
 
@@ -33,8 +35,8 @@ describe('RuleEditorPanel', () => {
   it('renders the visual editor when no rules are defined', () => {
     const props = {
       rawRules: {},
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
+      onChange: vi.fn(),
+      onValidityChange: vi.fn(),
       validateForm: false,
     };
     const wrapper = renderView(props);
@@ -53,8 +55,8 @@ describe('RuleEditorPanel', () => {
           },
         ],
       },
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
+      onChange: vi.fn(),
+      onValidityChange: vi.fn(),
       validateForm: false,
       docLinks: coreMock.createStart().docLinks,
     };
@@ -77,8 +79,8 @@ describe('RuleEditorPanel', () => {
       rawRules: {
         field: { username: '*' },
       },
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
+      onChange: vi.fn(),
+      onValidityChange: vi.fn(),
       validateForm: false,
     };
     const wrapper = renderView(props);
@@ -110,15 +112,15 @@ describe('RuleEditorPanel', () => {
   });
 
   it('catches errors thrown by child components', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(VisualRuleEditor.prototype, 'render').mockImplementationOnce(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(VisualRuleEditor.prototype, 'render').mockImplementationOnce(() => {
       throw new Error('Something awful happened here.');
     });
 
     const props = {
       rawRules: {},
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
+      onChange: vi.fn(),
+      onValidityChange: vi.fn(),
       validateForm: false,
     };
     const wrapper = renderView(props);
@@ -133,8 +135,8 @@ describe('RuleEditorPanel', () => {
         rawRules: {
           field: { username: '*' },
         },
-        onChange: jest.fn(),
-        onValidityChange: jest.fn(),
+        onChange: vi.fn(),
+        onValidityChange: vi.fn(),
         validateForm: false,
         readOnly: true,
       };
@@ -188,8 +190,8 @@ describe('RuleEditorPanel', () => {
             },
           ],
         },
-        onChange: jest.fn(),
-        onValidityChange: jest.fn(),
+        onChange: vi.fn(),
+        onValidityChange: vi.fn(),
         validateForm: false,
         readOnly: true,
       };

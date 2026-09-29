@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { RISK_ENGINE_CLEANUP_URL } from '../../../../../common/constants';
 import {
@@ -21,7 +24,7 @@ describe('risk engine cleanup route', () => {
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let mockRiskEngineDataClient: ReturnType<typeof riskEngineDataClientMock.create>;
-  let getStartServicesMock: jest.Mock;
+  let getStartServicesMock: Mock;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -45,7 +48,7 @@ describe('risk engine cleanup route', () => {
   };
   describe('invokes the risk engine cleanup route', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           taskManager: mockTaskManagerStart,
@@ -137,7 +140,7 @@ describe('risk engine cleanup route', () => {
   });
   describe('when task manager is unavailable', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
@@ -160,7 +163,7 @@ describe('risk engine cleanup route', () => {
 
   describe('when user does not have the required privileges', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           taskManager: mockTaskManagerStart,

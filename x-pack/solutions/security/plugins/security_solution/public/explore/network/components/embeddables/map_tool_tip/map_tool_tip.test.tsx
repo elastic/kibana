@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { TooltipFeature } from '@kbn/maps-plugin/common';
@@ -12,19 +14,25 @@ import { MapToolTipComponent } from './map_tool_tip';
 import * as i18n from '../translations';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('./line_tool_tip_content', () => ({
-  LineToolTipContent: jest.fn(() => <div data-test-subj="line-tool-tip-content" />),
-}));
+vi.mock('./line_tool_tip_content', () => {
+      const mocked = {
+      LineToolTipContent: vi.fn(() => <div data-test-subj="line-tool-tip-content" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./point_tool_tip_content', () => ({
-  PointToolTipContent: jest.fn(() => <div data-test-subj="point-tool-tip-content" />),
-}));
+vi.mock('./point_tool_tip_content', () => {
+      const mocked = {
+      PointToolTipContent: vi.fn(() => <div data-test-subj="point-tool-tip-content" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MapToolTipComponent', () => {
-  const mockCloseTooltip = jest.fn();
-  const mockGetLayerName = jest.fn();
-  const mockLoadFeatureProperties = jest.fn();
-  const mockLoadFeatureGeometry = jest.fn();
+  const mockCloseTooltip = vi.fn();
+  const mockGetLayerName = vi.fn();
+  const mockLoadFeatureProperties = vi.fn();
+  const mockLoadFeatureGeometry = vi.fn();
   const features = [
     { layerId: 'layer1', id: 'feature1', mbProperties: {} },
     { layerId: 'layer2', id: 'feature2', mbProperties: {} },
@@ -45,7 +53,7 @@ describe('MapToolTipComponent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetLayerName.mockResolvedValue('Layer Name');
     mockLoadFeatureProperties.mockResolvedValue([{ name: 'property1', value: 'value1' }]);
     mockLoadFeatureGeometry.mockResolvedValue({ type: 'Point' });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ThreatsDetected } from './threats_detected';
@@ -13,19 +16,28 @@ import { ComparePercentage } from './compare_percentage';
 import { getTimeRangeAsDays } from './metrics';
 
 // Mock dependencies
-jest.mock('./threats_detected_metric', () => ({
-  ThreatsDetectedMetric: jest.fn(() => <div data-test-subj="mock-threats-detected-metric" />),
-}));
+vi.mock('./threats_detected_metric', () => {
+      const mocked = {
+      ThreatsDetectedMetric: vi.fn(() => <div data-test-subj="mock-threats-detected-metric" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compare_percentage', () => ({
-  ComparePercentage: jest.fn(() => <div data-test-subj="mock-compare-percentage" />),
-}));
+vi.mock('./compare_percentage', () => {
+      const mocked = {
+      ComparePercentage: vi.fn(() => <div data-test-subj="mock-compare-percentage" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./metrics', () => ({
-  getTimeRangeAsDays: jest.fn(),
-}));
+vi.mock('./metrics', () => {
+      const mocked = {
+      getTimeRangeAsDays: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof getTimeRangeAsDays>;
+const mockGetTimeRangeAsDays = getTimeRangeAsDays as MockedFunction<typeof getTimeRangeAsDays>;
 
 const defaultProps = {
   isSample: false as const,
@@ -37,7 +49,7 @@ const defaultProps = {
 
 describe('ThreatsDetected', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetTimeRangeAsDays.mockReturnValue(`30`);
   });
 

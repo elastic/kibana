@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { getFlyoutManagerStore } from '@elastic/eui';
 import { useIsNewFlyoutEnabled } from './use_is_new_flyout_enabled';
@@ -12,30 +15,33 @@ import { useUnmanagedFlyoutZIndex } from './use_unmanaged_flyout_z_index';
 
 const TEST_ID = 'test-unmanaged-flyout';
 
-const mockAddUnmanagedFlyout = jest.fn();
-const mockCloseUnmanagedFlyout = jest.fn();
-const mockGetState = jest.fn(() => ({ currentZIndex: 0 }));
+const mockAddUnmanagedFlyout = vi.fn();
+const mockCloseUnmanagedFlyout = vi.fn();
+const mockGetState = vi.fn(() => ({ currentZIndex: 0 }));
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  getFlyoutManagerStore: jest.fn(() => ({
-    getState: mockGetState,
-    addUnmanagedFlyout: mockAddUnmanagedFlyout,
-    closeUnmanagedFlyout: mockCloseUnmanagedFlyout,
-  })),
-  useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      getFlyoutManagerStore: vi.fn(() => ({
+        getState: mockGetState,
+        addUnmanagedFlyout: mockAddUnmanagedFlyout,
+        closeUnmanagedFlyout: mockCloseUnmanagedFlyout,
+      })),
+      useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_is_new_flyout_enabled');
+vi.mock('./use_is_new_flyout_enabled');
 
 describe('useUnmanagedFlyoutZIndex', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetState.mockReturnValue({ currentZIndex: 0 });
   });
 
   it('returns undefined and does not register when the new flyout system is disabled', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(false);
 
     const { result } = renderHook(() => useUnmanagedFlyoutZIndex({ id: TEST_ID, active: true }));
 
@@ -44,7 +50,7 @@ describe('useUnmanagedFlyoutZIndex', () => {
   });
 
   it('returns undefined and does not register when not active, even if enabled', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
 
     const { result } = renderHook(() => useUnmanagedFlyoutZIndex({ id: TEST_ID, active: false }));
 
@@ -53,7 +59,7 @@ describe('useUnmanagedFlyoutZIndex', () => {
   });
 
   it('registers as an unmanaged flyout and returns flyoutLevel + currentZIndex when enabled and active', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
     mockGetState.mockReturnValue({ currentZIndex: 6 });
 
     const { result } = renderHook(() => useUnmanagedFlyoutZIndex({ id: TEST_ID, active: true }));
@@ -63,7 +69,7 @@ describe('useUnmanagedFlyoutZIndex', () => {
   });
 
   it('unregisters the unmanaged flyout on unmount', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
 
     const { unmount } = renderHook(() => useUnmanagedFlyoutZIndex({ id: TEST_ID, active: true }));
     unmount();
@@ -72,7 +78,7 @@ describe('useUnmanagedFlyoutZIndex', () => {
   });
 
   it('unregisters and resets the z-index when transitioning from active to inactive', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
 
     const { result, rerender } = renderHook(
       ({ active }) => useUnmanagedFlyoutZIndex({ id: TEST_ID, active }),

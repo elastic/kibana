@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup } from '@kbn/core/server';
 import { registerUsageMetricsRoute, UsageMetricsRequestSchema } from './usage_metrics';
@@ -88,13 +90,13 @@ describe('registerUsageMetricsRoute', () => {
   });
 
   it('should correctly transform response', async () => {
-    (await context.core).elasticsearch.client.asCurrentUser.indices.getDataStream = jest
+    (await context.core).elasticsearch.client.asCurrentUser.indices.getDataStream = vi
       .fn()
       .mockResolvedValue({
         data_streams: [{ name: '.ds-1' }, { name: '.ds-2' }],
       });
 
-    jest.spyOn(DataUsageService.prototype, 'getMetrics').mockResolvedValue({
+    vi.spyOn(DataUsageService.prototype, 'getMetrics').mockResolvedValue({
       ingest_rate: [
         {
           name: '.ds-1',
@@ -203,7 +205,7 @@ describe('registerUsageMetricsRoute', () => {
 
   describe('when metric type data is null or not present', () => {
     beforeEach(() => {
-      jest.spyOn(DataUsageService.prototype, 'getMetrics').mockResolvedValue({
+      vi.spyOn(DataUsageService.prototype, 'getMetrics').mockResolvedValue({
         ingest_rate: [
           {
             name: '.ds-1',
@@ -243,7 +245,7 @@ describe('registerUsageMetricsRoute', () => {
       });
     });
     it('should correctly transform response when metric type data is null', async () => {
-      (await context.core).elasticsearch.client.asCurrentUser.indices.getDataStream = jest
+      (await context.core).elasticsearch.client.asCurrentUser.indices.getDataStream = vi
         .fn()
         .mockResolvedValue({
           data_streams: [{ name: '.ds-1' }, { name: '.ds-2' }],
@@ -306,13 +308,13 @@ describe('registerUsageMetricsRoute', () => {
   });
 
   it('should throw error if error on requesting auto ops service', async () => {
-    (await context.core).elasticsearch.client.asCurrentUser.indices.getDataStream = jest
+    (await context.core).elasticsearch.client.asCurrentUser.indices.getDataStream = vi
       .fn()
       .mockResolvedValue({
         data_streams: [{ name: '.ds-1' }, { name: '.ds-2' }],
       });
 
-    jest
+    vi
       .spyOn(DataUsageService.prototype, 'getMetrics')
       .mockRejectedValue(new AutoOpsError('Uh oh, something went wrong!'));
 

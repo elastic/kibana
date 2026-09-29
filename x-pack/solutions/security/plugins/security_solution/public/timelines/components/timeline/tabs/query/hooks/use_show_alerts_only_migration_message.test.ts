@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useShouldShowAlertsOnlyMigrationMessage } from './use_show_alerts_only_migration_message';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 
-jest.mock('../../../../../../common/hooks/use_space_id');
+vi.mock('../../../../../../common/hooks/use_space_id');
 
 describe('useShouldShowAlertsOnlyMigrationMessage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return true', () => {
-    (useSpaceId as jest.Mock).mockReturnValue('default');
+    (useSpaceId as Mock).mockReturnValue('default');
 
     const { result } = renderHook(() =>
       useShouldShowAlertsOnlyMigrationMessage({
@@ -30,7 +33,7 @@ describe('useShouldShowAlertsOnlyMigrationMessage', () => {
   });
 
   it('should return false if not the correct dataview', () => {
-    (useSpaceId as jest.Mock).mockReturnValue('default');
+    (useSpaceId as Mock).mockReturnValue('default');
 
     const { result } = renderHook(() =>
       useShouldShowAlertsOnlyMigrationMessage({
@@ -43,7 +46,7 @@ describe('useShouldShowAlertsOnlyMigrationMessage', () => {
   });
 
   it('should return false if too many indices', () => {
-    (useSpaceId as jest.Mock).mockReturnValue('default');
+    (useSpaceId as Mock).mockReturnValue('default');
 
     const { result } = renderHook(() =>
       useShouldShowAlertsOnlyMigrationMessage({
@@ -56,7 +59,7 @@ describe('useShouldShowAlertsOnlyMigrationMessage', () => {
   });
 
   it('should return false if index does not match', () => {
-    (useSpaceId as jest.Mock).mockReturnValue('default');
+    (useSpaceId as Mock).mockReturnValue('default');
 
     const { result } = renderHook(() =>
       useShouldShowAlertsOnlyMigrationMessage({

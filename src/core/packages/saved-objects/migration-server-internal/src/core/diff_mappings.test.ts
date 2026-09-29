@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings } from './build_active_mappings';
 import { getUpdatedRootFields, getNewAndUpdatedTypes } from './compare_mappings';
 import { diffMappings } from './diff_mappings';
 
-jest.mock('./compare_mappings');
-const getUpdatedRootFieldsMock = getUpdatedRootFields as jest.MockedFn<typeof getUpdatedRootFields>;
-const getNewAndUpdatedTypesMock = getNewAndUpdatedTypes as jest.MockedFn<
+vi.mock('./compare_mappings');
+const getUpdatedRootFieldsMock = getUpdatedRootFields as MockedFunction<typeof getUpdatedRootFields>;
+const getNewAndUpdatedTypesMock = getNewAndUpdatedTypes as MockedFunction<
   typeof getNewAndUpdatedTypes
 >;
 

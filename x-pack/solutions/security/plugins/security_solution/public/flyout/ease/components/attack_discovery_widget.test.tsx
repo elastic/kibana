@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import {
@@ -16,14 +19,20 @@ import { TestProviders } from '../../../common/mock';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { AttackDiscoveryPanelProps } from './attack_discovery_panel';
 
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
-  useFindAttackDiscoveries: jest.fn(),
-}));
-jest.mock('./attack_discovery_panel', () => ({
-  AttackDiscoveryPanel: ({ attackDiscovery }: AttackDiscoveryPanelProps) => (
-    <h1>{attackDiscovery.title}</h1>
-  ),
-}));
+vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => {
+      const mocked = {
+      useFindAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./attack_discovery_panel', () => {
+      const mocked = {
+      AttackDiscoveryPanel: ({ attackDiscovery }: AttackDiscoveryPanelProps) => (
+        <h1>{attackDiscovery.title}</h1>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockData = {
   id: '123',
@@ -40,11 +49,11 @@ const mockData = {
 
 describe('AttackDiscoveryWidget', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render loading spinner when data is being fetched', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       isLoading: true,
       data: null,
     });
@@ -59,7 +68,7 @@ describe('AttackDiscoveryWidget', () => {
   });
 
   it('should render no results message when no data is available', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       isLoading: false,
       data: null,
     });
@@ -74,7 +83,7 @@ describe('AttackDiscoveryWidget', () => {
   });
 
   it('should render attack discovery details when data is available', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       isLoading: false,
       data: { data: [mockData] },
     });
@@ -91,7 +100,7 @@ describe('AttackDiscoveryWidget', () => {
 
   it('should render attack discovery accordion when multiple attack discoveries exist', () => {
     const additionalTitle = 'Another discovery';
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       isLoading: false,
       data: { data: [mockData, { ...mockData, title: additionalTitle }] },
     });

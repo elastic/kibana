@@ -7,31 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { MemoryMonitor, type MemoryInfo } from './memory_monitor';
 import { MemoryUsageIndicator } from './memory_usage_indicator';
 
-jest.mock('@elastic/eui', () => ({
-  EuiToolTip: ({ children, content }: React.PropsWithChildren<{ content: React.ReactNode }>) => (
-    <div>
-      {children}
-      <div role="tooltip">{content}</div>
-    </div>
-  ),
-  EuiBadge: ({
-    children,
-    color,
-    iconType,
-  }: React.PropsWithChildren<{ color: string; iconType?: string }>) => (
-    <span data-test-subj="memoryBadge" data-color={color} data-icon-type={iconType}>
-      {children}
-    </span>
-  ),
-  EuiTextColor: ({ children, color }: React.PropsWithChildren<{ color: string }>) => (
-    <span data-color={color}>{children}</span>
-  ),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      EuiToolTip: ({ children, content }: React.PropsWithChildren<{ content: React.ReactNode }>) => (
+        <div>
+          {children}
+          <div role="tooltip">{content}</div>
+        </div>
+      ),
+      EuiBadge: ({
+        children,
+        color,
+        iconType,
+      }: React.PropsWithChildren<{ color: string; iconType?: string }>) => (
+        <span data-test-subj="memoryBadge" data-color={color} data-icon-type={iconType}>
+          {children}
+        </span>
+      ),
+      EuiTextColor: ({ children, color }: React.PropsWithChildren<{ color: string }>) => (
+        <span data-color={color}>{children}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const memoryInfo = (
   memoryUsage: number,
@@ -50,15 +55,15 @@ describe('MemoryUsageIndicator', () => {
   let publish: Parameters<MemoryMonitor['subscribe']>[0];
 
   beforeEach(() => {
-    jest.spyOn(MemoryMonitor.prototype, 'subscribe').mockImplementation((callback) => {
+    vi.spyOn(MemoryMonitor.prototype, 'subscribe').mockImplementation((callback) => {
       publish = callback;
-      return jest.fn();
+      return vi.fn();
     });
-    jest.spyOn(MemoryMonitor.prototype, 'startMonitoring').mockImplementation();
-    jest.spyOn(MemoryMonitor.prototype, 'destroy').mockImplementation();
+    vi.spyOn(MemoryMonitor.prototype, 'startMonitoring').mockImplementation();
+    vi.spyOn(MemoryMonitor.prototype, 'destroy').mockImplementation();
   });
 
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   it('warns for heap pressure or growth, not absolute heap size', () => {
     render(<MemoryUsageIndicator />);

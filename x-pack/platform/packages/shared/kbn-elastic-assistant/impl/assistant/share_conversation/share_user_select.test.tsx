@@ -5,34 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ShareUserSelect } from './share_user_select';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { welcomeConvo } from '../../mock/conversation';
 import type { UserProfile } from '@kbn/core-user-profile-common';
-jest.mock('./user_profiles_search', () => ({
-  UserProfilesSearch: ({ onUsersSelect }: { onUsersSelect: (users: UserProfile[]) => void }) => (
-    <button
-      data-test-subj="UserProfilesSearch"
-      type="button"
-      onClick={() =>
-        onUsersSelect([{ uid: 'user1', user: { username: 'User One' }, enabled: true, data: {} }])
-      }
-    >
-      {'UserProfilesSearch'}
-    </button>
-  ),
-}));
+vi.mock('./user_profiles_search', () => {
+      const mocked = {
+      UserProfilesSearch: ({ onUsersSelect }: { onUsersSelect: (users: UserProfile[]) => void }) => (
+        <button
+          data-test-subj="UserProfilesSearch"
+          type="button"
+          onClick={() =>
+            onUsersSelect([{ uid: 'user1', user: { username: 'User One' }, enabled: true, data: {} }])
+          }
+        >
+          {'UserProfilesSearch'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('ShareUserSelect', () => {
-  const mockOnUsersUpdate = jest.fn();
+  const mockOnUsersUpdate = vi.fn();
   const testProps = {
     selectedConversation: welcomeConvo,
     onUsersUpdate: mockOnUsersUpdate,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders ShareUserSelect', () => {

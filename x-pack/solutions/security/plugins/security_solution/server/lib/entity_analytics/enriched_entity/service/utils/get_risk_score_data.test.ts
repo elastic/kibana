@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MgetResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Entity } from '@kbn/entity-store/common';
@@ -69,7 +71,7 @@ const baseOptions = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('getRiskScoreData', () => {
@@ -99,7 +101,7 @@ describe('getRiskScoreData', () => {
   describe('when getAlerts is false', () => {
     it('skips mget and returns empty alertDocuments', async () => {
       const riskScore = makeRiskScore({ inputs: [makeInput('alert-1')] });
-      jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
+      vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
 
       const result = await getRiskScoreData({
         ...baseOptions,
@@ -128,7 +130,7 @@ describe('getRiskScoreData', () => {
 
   describe('when there is no risk score for an entity', () => {
     it('returns undefined riskScore with empty alertDocuments', async () => {
-      jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(undefined));
+      vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(undefined));
 
       const result = await getRiskScoreData({
         ...baseOptions,
@@ -143,7 +145,7 @@ describe('getRiskScoreData', () => {
   describe('when the risk score has no inputs', () => {
     it('returns the risk score with empty alertDocuments without calling mget', async () => {
       const riskScore = makeRiskScore({ inputs: [] });
-      jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
+      vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
 
       const result = await getRiskScoreData({
         ...baseOptions,
@@ -159,8 +161,8 @@ describe('getRiskScoreData', () => {
     it('calls mget with the correct doc IDs and indices', async () => {
       const input = makeInput('alert-1', '.alerts-security.alerts-default');
       const riskScore = makeRiskScore({ inputs: [input] });
-      jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
-      jest
+      vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
+      vi
         .mocked(esClient.mget)
         .mockResolvedValue({ docs: [makeFoundDoc('alert-1')] } as MgetResponse);
 
@@ -179,8 +181,8 @@ describe('getRiskScoreData', () => {
       const input = makeInput('alert-1');
       const riskScore = makeRiskScore({ inputs: [input] });
       const alertSource = { kibana: { alert: { rule: { name: 'test' } } } };
-      jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
-      jest
+      vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
+      vi
         .mocked(esClient.mget)
         .mockResolvedValue({ docs: [makeFoundDoc('alert-1', alertSource)] } as MgetResponse);
 
@@ -201,8 +203,8 @@ describe('getRiskScoreData', () => {
       const riskScore = makeRiskScore({
         inputs: [makeInput('alert-found'), makeInput('alert-missing')],
       });
-      jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
-      jest.mocked(esClient.mget).mockResolvedValue({
+      vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
+      vi.mocked(esClient.mget).mockResolvedValue({
         docs: [makeFoundDoc('alert-found'), makeMissingDoc('alert-missing')],
       } as MgetResponse);
 
@@ -222,11 +224,11 @@ describe('getRiskScoreData', () => {
     it('fetches risk scores in parallel and issues a single mget for all inputs', async () => {
       const riskScoreA = makeRiskScore({ id_value: 'user:alice', inputs: [makeInput('alert-a')] });
       const riskScoreB = makeRiskScore({ id_value: 'user:bob', inputs: [makeInput('alert-b')] });
-      jest
+      vi
         .mocked(esClient.search)
         .mockResolvedValueOnce(makeSearchResponse(riskScoreA))
         .mockResolvedValueOnce(makeSearchResponse(riskScoreB));
-      jest.mocked(esClient.mget).mockResolvedValue({
+      vi.mocked(esClient.mget).mockResolvedValue({
         docs: [makeFoundDoc('alert-a'), makeFoundDoc('alert-b')],
       } as MgetResponse);
 
@@ -254,14 +256,14 @@ describe('getRiskScoreData', () => {
         id_value: 'user:bob',
         inputs: [makeInput('shared-id', '.alerts-security.alerts-space2')],
       });
-      jest
+      vi
         .mocked(esClient.search)
         .mockResolvedValueOnce(makeSearchResponse(riskScoreA))
         .mockResolvedValueOnce(makeSearchResponse(riskScoreB));
 
       const sourceA = { entity: 'alice-alert' };
       const sourceB = { entity: 'bob-alert' };
-      jest.mocked(esClient.mget).mockResolvedValue({
+      vi.mocked(esClient.mget).mockResolvedValue({
         docs: [
           makeFoundDoc('shared-id', sourceA, '.alerts-security.alerts-default'),
           makeFoundDoc('shared-id', sourceB, '.alerts-security.alerts-space2'),
@@ -280,14 +282,14 @@ describe('getRiskScoreData', () => {
     it('correctly assigns alert documents to each entity when inputs share the same index', async () => {
       const riskScoreA = makeRiskScore({ id_value: 'user:alice', inputs: [makeInput('alert-a')] });
       const riskScoreB = makeRiskScore({ id_value: 'user:bob', inputs: [makeInput('alert-b')] });
-      jest
+      vi
         .mocked(esClient.search)
         .mockResolvedValueOnce(makeSearchResponse(riskScoreA))
         .mockResolvedValueOnce(makeSearchResponse(riskScoreB));
 
       const sourceA = { entity: 'alice-alert' };
       const sourceB = { entity: 'bob-alert' };
-      jest.mocked(esClient.mget).mockResolvedValue({
+      vi.mocked(esClient.mget).mockResolvedValue({
         docs: [makeFoundDoc('alert-a', sourceA), makeFoundDoc('alert-b', sourceB)],
       } as MgetResponse);
 
@@ -303,7 +305,7 @@ describe('getRiskScoreData', () => {
 
   describe('error handling', () => {
     it('returns empty results when search throws', async () => {
-      jest.mocked(esClient.search).mockRejectedValue(new Error('search failed'));
+      vi.mocked(esClient.search).mockRejectedValue(new Error('search failed'));
 
       const result = await getRiskScoreData({
         ...baseOptions,
@@ -314,7 +316,7 @@ describe('getRiskScoreData', () => {
     });
 
     it('returns empty results for all entities when any search in a parallel batch throws', async () => {
-      jest
+      vi
         .mocked(esClient.search)
         .mockResolvedValueOnce(makeSearchResponse(makeRiskScore({ id_value: 'user:alice' })))
         .mockRejectedValueOnce(new Error('search failed for bob'));
@@ -332,8 +334,8 @@ describe('getRiskScoreData', () => {
 
     it('returns empty results when mget throws', async () => {
       const riskScore = makeRiskScore({ inputs: [makeInput('alert-1')] });
-      jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
-      jest.mocked(esClient.mget).mockRejectedValue(new Error('mget failed'));
+      vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
+      vi.mocked(esClient.mget).mockRejectedValue(new Error('mget failed'));
 
       const result = await getRiskScoreData({
         ...baseOptions,

@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import { renderHook } from '@testing-library/react';
 import { useGetServiceBadgeHrefFromCore } from './use_get_service_badge_href_from_core';
 
 describe('useGetServiceBadgeHrefFromCore', () => {
-  const mockGetUrlForApp = jest.fn();
+  const mockGetUrlForApp = vi.fn();
 
   const mockCore = {
     application: { getUrlForApp: mockGetUrlForApp },
   } as unknown as CoreStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetUrlForApp.mockImplementation(
       (_app: string, { path }: { path: string }) => `/app/apm${path}`
     );

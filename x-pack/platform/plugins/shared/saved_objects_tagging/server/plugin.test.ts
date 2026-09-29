@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.mocks';
 
 import { coreMock } from '@kbn/core/server/mocks';
@@ -25,7 +27,7 @@ describe('SavedObjectTaggingPlugin', () => {
     // `usageCollection` 'mocked' implementation use the real `CollectorSet` implementation
     // that throws when registering things that are not collectors.
     // We just want to assert that it was called here, so jest.fn is fine.
-    usageCollectionSetup.registerCollector = jest.fn();
+    usageCollectionSetup.registerCollector = vi.fn();
   });
 
   afterEach(() => {

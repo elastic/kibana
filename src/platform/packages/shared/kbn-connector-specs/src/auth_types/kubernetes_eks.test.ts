@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import { KubernetesEksAuth } from './kubernetes_eks_server';
 
 // The jest environment has no Web Crypto; fake the hash/signature primitives.
-jest.mock('./aws_crypto_helpers', () => ({
-  sha256Hash: jest.fn(async () => 'aa'.repeat(32)),
-  calculateAWSA4Signature: jest.fn(async () => 'bb'.repeat(32)),
-}));
+vi.mock('./aws_crypto_helpers', () => {
+      const mocked = {
+      sha256Hash: vi.fn(async () => 'aa'.repeat(32)),
+      calculateAWSA4Signature: vi.fn(async () => 'bb'.repeat(32)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SECRET = {
   accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
@@ -27,12 +32,12 @@ const SECRET = {
 const createMockAxiosInstance = () =>
   ({
     defaults: { headers: { common: {} } },
-    interceptors: { request: { clear: jest.fn(), use: jest.fn() } },
+    interceptors: { request: { clear: vi.fn(), use: vi.fn() } },
   } as unknown as AxiosInstance);
 
 const mockContext = {
-  getCustomHostSettings: jest.fn(),
-  logger: { debug: jest.fn(), warn: jest.fn() },
+  getCustomHostSettings: vi.fn(),
+  logger: { debug: vi.fn(), warn: vi.fn() },
   sslSettings: {},
 } as unknown as AuthContext;
 

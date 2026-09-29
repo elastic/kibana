@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -14,20 +17,23 @@ import { packagePolicyService } from '../../package_policy';
 
 import { removeOldAssets } from './cleanup';
 
-jest.mock('../..', () => ({
-  appContextService: {
-    getLogger: () => ({
-      debug: jest.fn(),
-    }),
-  },
-}));
+vi.mock('../..', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: () => ({
+          debug: vi.fn(),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../package_policy');
+vi.mock('../../package_policy');
 
 describe(' Cleanup old assets', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
-  let removeArchiveEntriesMock: jest.MockedFunction<typeof storage.removeArchiveEntries>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  const packagePolicyServiceMock = packagePolicyService as Mocked<PackagePolicyClient>;
+  let removeArchiveEntriesMock: MockedFunction<typeof storage.removeArchiveEntries>;
 
   function mockFindVersions(versions: string[]) {
     soClient.find.mockImplementation((options: any): Promise<any> => {
@@ -65,14 +71,14 @@ describe(' Cleanup old assets', () => {
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
     packagePolicyServiceMock.list.mockClear();
-    removeArchiveEntriesMock = jest.spyOn(storage, 'removeArchiveEntries') as any;
+    removeArchiveEntriesMock = vi.spyOn(storage, 'removeArchiveEntries') as any;
     removeArchiveEntriesMock.mockClear();
   });
   it('should remove old assets from 2 versions if none of the policies are using it', async () => {
     mockFindVersions(['0.3.3', '0.3.4']);
     packagePolicyServiceMock.list.mockResolvedValue({ total: 0, items: [], page: 0, perPage: 0 });
-    soClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
-      close: jest.fn(),
+    soClient.createPointInTimeFinder = vi.fn().mockResolvedValue({
+      close: vi.fn(),
       find: function* asyncGenerator() {
         yield { saved_objects: [{ id: '1' }, { id: '2' }] };
       },
@@ -102,8 +108,8 @@ describe(' Cleanup old assets', () => {
   it('should not remove asset referened by epm-packages', async () => {
     mockFindVersions(['0.3.3']);
     packagePolicyServiceMock.list.mockResolvedValue({ total: 0, items: [], page: 0, perPage: 0 });
-    soClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
-      close: jest.fn(),
+    soClient.createPointInTimeFinder = vi.fn().mockResolvedValue({
+      close: vi.fn(),
       find: function* asyncGenerator() {
         yield { saved_objects: [{ id: 'asset1' }, { id: '2' }] };
       },
@@ -120,8 +126,8 @@ describe(' Cleanup old assets', () => {
   it('should remove old assets from all pages', async () => {
     mockFindVersions(['0.3.3']);
     packagePolicyServiceMock.list.mockResolvedValue({ total: 0, items: [], page: 0, perPage: 0 });
-    soClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
-      close: jest.fn(),
+    soClient.createPointInTimeFinder = vi.fn().mockResolvedValue({
+      close: vi.fn(),
       find: function* asyncGenerator() {
         yield { saved_objects: [{ id: '1' }, { id: '2' }] };
         yield { saved_objects: [{ id: '3' }] };

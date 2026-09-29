@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import {
@@ -13,22 +15,28 @@ import {
   requestMock,
 } from '../../../../detection_engine/routes/__mocks__';
 
-const mockWatchlistDelete = jest.fn();
-const mockGetEntitySourceIds = jest.fn();
-jest.mock('../watchlist_config', () => ({
-  WatchlistConfigClient: jest.fn().mockImplementation(() => ({
-    delete: mockWatchlistDelete,
-    getEntitySourceIds: mockGetEntitySourceIds,
-  })),
-}));
+const mockWatchlistDelete = vi.fn();
+const mockGetEntitySourceIds = vi.fn();
+vi.mock('../watchlist_config', () => {
+      const mocked = {
+      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+        delete: mockWatchlistDelete,
+        getEntitySourceIds: mockGetEntitySourceIds,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity_sources/entity_sources_service', () => ({
-  createEntitySourcesService: jest.fn().mockImplementation(() => ({
-    deleteWatchlistEntities: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
+vi.mock('../../entity_sources/entity_sources_service', () => {
+      const mocked = {
+      createEntitySourcesService: vi.fn().mockImplementation(() => ({
+        deleteWatchlistEntities: vi.fn().mockResolvedValue(undefined),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetStartServices = jest.fn();
+const mockGetStartServices = vi.fn();
 
 import { deleteWatchlistRoute } from './delete';
 
@@ -48,14 +56,14 @@ describe('DELETE /api/entity_analytics/watchlists/{id} - deleteWatchlistRoute', 
     mockWatchlistDelete.mockReset().mockResolvedValue(undefined);
     mockGetEntitySourceIds.mockReset().mockResolvedValue([]);
 
-    const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
+    const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: vi.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
 
     deleteWatchlistRoute(server.router, logger, mockGetStartServices, true);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (id = WATCHLIST_ID) =>

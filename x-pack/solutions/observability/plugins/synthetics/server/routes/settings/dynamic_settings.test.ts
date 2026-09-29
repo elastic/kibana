@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -23,14 +26,14 @@ import {
 } from '../../tasks/rebalance_shards_enabled';
 
 const buildSecurity = (hasAllRequested = true) => {
-  const globally = jest.fn().mockResolvedValue({ hasAllRequested });
+  const globally = vi.fn().mockResolvedValue({ hasAllRequested });
   return {
     globally,
     security: {
       authz: {
-        mode: { useRbacForRequest: jest.fn().mockReturnValue(true) },
+        mode: { useRbacForRequest: vi.fn().mockReturnValue(true) },
         actions: { api: { get: (operation: string) => `api:${operation}` } },
-        checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally }),
+        checkPrivilegesWithRequest: vi.fn().mockReturnValue({ globally }),
       },
     },
   };
@@ -50,19 +53,19 @@ const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext 
     request: { body: {} },
     response: {},
     syntheticsMonitorClient: {
-      privateLocationAPI: { clearShardConditions: jest.fn().mockResolvedValue({ cleared: 0 }) },
+      privateLocationAPI: { clearShardConditions: vi.fn().mockResolvedValue({ cleared: 0 }) },
     },
     ...overrides,
   } as unknown as RouteContext);
 
 describe('dynamic settings routes', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('createGetDynamicSettingsRoute', () => {
     it('defaults rebalancePrivateLocationShardsEnabled to true when the task is unset', async () => {
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
 
@@ -73,11 +76,11 @@ describe('dynamic settings routes', () => {
     });
 
     it('returns false when the rebalance task is disabled', async () => {
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
       const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+      (server.pluginsStart.taskManager.get as Mock).mockResolvedValue({
         state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false },
       });
 
@@ -90,18 +93,18 @@ describe('dynamic settings routes', () => {
 
   describe('createPostDynamicSettingsRoute', () => {
     it('persists rebalancePrivateLocationShardsEnabled on the rebalance task, not the space settings SO', async () => {
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      const setSpy = jest
+      const setSpy = vi
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
       const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock)
+      (server.pluginsStart.taskManager.get as Mock)
         .mockResolvedValueOnce({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true } })
         .mockResolvedValue({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false } });
 
-      const clearShardConditions = jest.fn();
+      const clearShardConditions = vi.fn();
       const route = createPostDynamicSettingsRoute();
       const result = await route.handler(
         buildRouteContext({
@@ -127,17 +130,17 @@ describe('dynamic settings routes', () => {
     });
 
     it('does not clear pins when turning shard rebalance on', async () => {
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
       const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock)
+      (server.pluginsStart.taskManager.get as Mock)
         .mockResolvedValueOnce({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false } })
         .mockResolvedValue({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true } });
-      const clearShardConditions = jest.fn();
+      const clearShardConditions = vi.fn();
 
       const route = createPostDynamicSettingsRoute();
       await route.handler(
@@ -162,18 +165,18 @@ describe('dynamic settings routes', () => {
     });
 
     it('returns 409 when the rebalance flag does not persist on the task', async () => {
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
       const server = buildServer();
       // Live task state stays on after a requested off — the write did not stick.
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+      (server.pluginsStart.taskManager.get as Mock).mockResolvedValue({
         state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
       });
-      const conflict = jest.fn((opts: { body: { message: string } }) => ({
+      const conflict = vi.fn((opts: { body: { message: string } }) => ({
         status: 409,
         ...opts,
       }));
@@ -198,17 +201,17 @@ describe('dynamic settings routes', () => {
     });
 
     it('returns 409 when the sync interval does not persist on the task', async () => {
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
       const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+      (server.pluginsStart.taskManager.get as Mock).mockResolvedValue({
         schedule: { interval: '5m' },
       });
-      const conflict = jest.fn((opts: { body: { message: string } }) => ({
+      const conflict = vi.fn((opts: { body: { message: string } }) => ({
         status: 409,
         ...opts,
       }));
@@ -235,15 +238,15 @@ describe('dynamic settings routes', () => {
 
   describe('cluster-wide settings privilege', () => {
     const mockSettingsSO = () => {
-      jest
+      vi
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      return jest
+      return vi
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
     };
     const buildForbidden = () =>
-      jest.fn((opts: { body: { message: string } }) => ({ status: 403, ...opts }));
+      vi.fn((opts: { body: { message: string } }) => ({ status: 403, ...opts }));
 
     it.each([
       ['rebalancePrivateLocationShardsEnabled', { rebalancePrivateLocationShardsEnabled: false }],
@@ -254,7 +257,7 @@ describe('dynamic settings routes', () => {
         const setSpy = mockSettingsSO();
         const forbidden = buildForbidden();
         const server = buildServer(false);
-        (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+        (server.pluginsStart.taskManager.get as Mock).mockResolvedValue({
           schedule: { interval: '5m' },
           state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
         });
@@ -279,7 +282,7 @@ describe('dynamic settings routes', () => {
       const setSpy = mockSettingsSO();
       const forbidden = buildForbidden();
       const server = buildServer(false);
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+      (server.pluginsStart.taskManager.get as Mock).mockResolvedValue({
         schedule: { interval: '5m' },
         state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
       });
@@ -309,7 +312,7 @@ describe('dynamic settings routes', () => {
       mockSettingsSO();
       const { security, globally } = buildSecurity(true);
       const server = { ...buildServer(), security } as unknown as RouteContext['server'];
-      (server.pluginsStart.taskManager.get as jest.Mock)
+      (server.pluginsStart.taskManager.get as Mock)
         .mockResolvedValueOnce({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true } })
         .mockResolvedValue({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false } });
 

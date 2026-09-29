@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { ComponentProps } from 'react';
 import type { Alert } from '@kbn/alerting-types';
 import React from 'react';
@@ -40,23 +42,26 @@ import type {
 } from '@kbn/response-ops-alerts-table/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToReadRuleType: (_ruleTypeId: string, _consumer?: string): boolean => true,
   authorizedToReadRuleForAlert: (): boolean => true,
   authorizedToCreateAnyRules: false,
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
-  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const refresh = jest.fn();
+const refresh = vi.fn();
 const caseForCallback = { id: 'case-id' } as CaseUI;
 const caseHooksReturnedValue = {
   open: () => {
     refresh();
   },
-  close: jest.fn(),
+  close: vi.fn(),
 };
 
 const mockTelemetryClient = createTelemetryClientMock();
@@ -77,7 +82,7 @@ const mockLicensing = licensingMock.createStart();
 const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
-const prependMock = jest.fn().mockImplementation((args) => args);
+const prependMock = vi.fn().mockImplementation((args) => args);
 mockKibana.services.http.basePath.prepend = prependMock;
 mockKibana.services.application.getUrlForApp.mockImplementation(
   (appId: string, { path }: { path?: string } = {}) => `/app/${appId}${path ? `${path}` : ''}`
@@ -92,7 +97,7 @@ const config: ConfigSchema = {
   managedOtlpServiceUrl: '',
 };
 
-const getFormatterMock = jest.fn();
+const getFormatterMock = vi.fn();
 const createRuleTypeRegistryMock = () => ({
   getFormatter: getFormatterMock,
   registerFormatter: () => {},
@@ -103,7 +108,7 @@ export const createObservabilityRuleTypeRegistryMock = () =>
   createRuleTypeRegistryMock() as ObservabilityRuleTypeRegistry &
     ReturnType<typeof createRuleTypeRegistryMock>;
 
-jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
+vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
   core: {} as CoreStart,
   config,
@@ -112,7 +117,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   ObservabilityPageTemplate: KibanaPageTemplate,
   ObservabilityAIAssistantContextualInsight,
 }));
-jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
+vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
   core: {} as CoreStart,
   config,
@@ -124,8 +129,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 
 describe('ObservabilityActions component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    getFormatterMock.mockReturnValue(jest.fn().mockReturnValue('a reason'));
+    vi.clearAllMocks();
+    getFormatterMock.mockReturnValue(vi.fn().mockReturnValue('a reason'));
     mockTelemetryClient.reportAlertAddedToCase.mockClear();
     mockUseGetRuleTypesPermissions.mockReturnValue({
       authorizedToReadRuleType: () => true,
@@ -336,7 +341,7 @@ describe('ObservabilityActions component', () => {
 
   it('should show a valid url when clicking  "View in app"', async () => {
     getFormatterMock.mockReturnValue(
-      jest.fn().mockReturnValue({
+      vi.fn().mockReturnValue({
         reason: 'a reason',
         link: 'http://localhost:5620/app/o11y/log-explorer',
         hasBasePath: false,

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { TestProvidersWithPrivileges } from '../../../../common/mock';
 import { useSignalIndex } from './use_signal_index';
@@ -15,19 +18,19 @@ import {
   signalIndexOutdatedSelector,
 } from '../../../../data_view_manager/redux/selectors';
 
-jest.mock('./api');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
-jest.mock('../../../../timelines/components/timeline/tabs/esql');
-jest.mock('../../../../data_view_manager/redux/selectors');
+vi.mock('./api');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+vi.mock('../../../../timelines/components/timeline/tabs/esql');
+vi.mock('../../../../data_view_manager/redux/selectors');
 
 describe('useSignalIndex', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
   });
 
   test('init', async () => {
@@ -83,7 +86,7 @@ describe('useSignalIndex', () => {
   });
 
   test('make sure that createSignalIndex have been called when trying to create signal index', async () => {
-    const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
+    const spyOnCreateSignalIndex = vi.spyOn(api, 'createSignalIndex');
 
     const { result } = renderHook(() => useSignalIndex(), {
       wrapper: TestProvidersWithPrivileges,
@@ -98,7 +101,7 @@ describe('useSignalIndex', () => {
   });
 
   test('if there is an error during createSignalIndex, we should get back signalIndexExists === false && signalIndexName == null', async () => {
-    const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
+    const spyOnCreateSignalIndex = vi.spyOn(api, 'createSignalIndex');
     spyOnCreateSignalIndex.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
@@ -124,7 +127,7 @@ describe('useSignalIndex', () => {
   });
 
   test('if there is an error when fetching alerts info, signalIndexExists === false && signalIndexName == null', async () => {
-    const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex');
+    const spyOnGetSignalIndex = vi.spyOn(api, 'getSignalIndex');
     spyOnGetSignalIndex.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
@@ -150,9 +153,9 @@ describe('useSignalIndex', () => {
   });
 
   test('should not make API calls when signal index already stored in sourcerer', async () => {
-    const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex');
-    jest.mocked(signalIndexOutdatedSelector).mockReturnValue(false);
-    jest.mocked(signalIndexNameSelector).mockReturnValue('mock-signal-index-from-sourcerer');
+    const spyOnGetSignalIndex = vi.spyOn(api, 'getSignalIndex');
+    vi.mocked(signalIndexOutdatedSelector).mockReturnValue(false);
+    vi.mocked(signalIndexNameSelector).mockReturnValue('mock-signal-index-from-sourcerer');
 
     const { result } = renderHook(() => useSignalIndex(), {
       wrapper: TestProvidersWithPrivileges,

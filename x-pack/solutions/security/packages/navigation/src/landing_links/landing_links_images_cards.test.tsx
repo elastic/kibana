@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SecurityPageName } from '../constants';
 import { mockGetAppUrl } from '../../mocks/navigation';
 import { LandingLinksImageCards } from './landing_links_images_cards';
 
-jest.mock('../navigation');
+vi.mock('../navigation');
 
 mockGetAppUrl.mockImplementation(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -15,9 +18,9 @@ import type { UseDefaultModelSettingsReturn } from '../../hooks/use_default_mode
 import type { DefaultModelValidationResult } from '../../hooks/use_default_model_validation';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 
-jest.mock('../../hooks/use_connectors');
+vi.mock('../../hooks/use_connectors');
 
-const mockUseConnectors = useConnectors as jest.Mock;
+const mockUseConnectors = useConnectors as Mock;
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
@@ -35,17 +38,17 @@ const createMockSettings = (
 ): UseDefaultModelSettingsReturn => ({
   state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: true },
   isDirty: false,
-  setEnableAi: jest.fn(),
-  setDefaultModelId: jest.fn(),
-  setFeatureSpecificModels: jest.fn(),
-  save: jest.fn().mockResolvedValue(undefined),
-  reset: jest.fn(),
+  setEnableAi: vi.fn(),
+  setDefaultModelId: vi.fn(),
+  setFeatureSpecificModels: vi.fn(),
+  save: vi.fn().mockResolvedValue(undefined),
+  reset: vi.fn(),
   ...overrides,
 });
 
 describe('DefaultModelSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseConnectors.mockReturnValue({
       data: [
         { connectorId: 'pre-1', name: 'Elastic Model', isPreconfigured: true },
@@ -87,7 +90,7 @@ describe('DefaultModelSection', () => {
   });
 
   it('toggling Use AI features calls setEnableAi', () => {
-    const setEnableAi = jest.fn();
+    const setEnableAi = vi.fn();
     const settings = createMockSettings({
       state: { enableAi: false, defaultModelId: NO_DEFAULT_MODEL, featureSpecificModels: false },
       setEnableAi,
@@ -104,7 +107,7 @@ describe('DefaultModelSection', () => {
   });
 
   it('toggling Feature specific models calls setFeatureSpecificModels', () => {
-    const setFeatureSpecificModels = jest.fn();
+    const setFeatureSpecificModels = vi.fn();
     const settings = createMockSettings({ setFeatureSpecificModels });
 
     render(
@@ -180,7 +183,7 @@ describe('DefaultModelSection', () => {
     });
 
     it('does not call setEnableAi when the AI toggle is disabled', () => {
-      const setEnableAi = jest.fn();
+      const setEnableAi = vi.fn();
       render(
         <Wrapper>
           <DefaultModelSection
@@ -196,7 +199,7 @@ describe('DefaultModelSection', () => {
     });
 
     it('does not call setFeatureSpecificModels when the feature models toggle is disabled', () => {
-      const setFeatureSpecificModels = jest.fn();
+      const setFeatureSpecificModels = vi.fn();
       render(
         <Wrapper>
           <DefaultModelSection
@@ -212,7 +215,7 @@ describe('DefaultModelSection', () => {
     });
 
     it('does not call setDefaultModelId when the global model combobox is disabled', () => {
-      const setDefaultModelId = jest.fn();
+      const setDefaultModelId = vi.fn();
       render(
         <Wrapper>
           <DefaultModelSection

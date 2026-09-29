@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHighlightLinkedComment } from './use_highlight_linked_comment';
 import { useCaseViewParams } from '../../../common/navigation';
 
-jest.mock('../../../common/navigation');
+vi.mock('../../../common/navigation');
 
-const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
+const useCaseViewParamsMock = useCaseViewParams as Mock;
 
 describe('useHighlightLinkedComment', () => {
-  const handleOutlineComment = jest.fn();
+  const handleOutlineComment = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls handleOutlineComment when commentId is present', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { RulesFileUploadProps } from './rules_file_upload';
@@ -19,8 +21,8 @@ import { splunkTestRules } from './splunk_rules.test.data';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { MigrationSource } from '../../../../../../../common/types';
 
-const mockCreateMigration: CreateMigration = jest.fn();
-const mockOnRulesFileChanged = jest.fn();
+const mockCreateMigration: CreateMigration = vi.fn();
+const mockOnRulesFileChanged = vi.fn();
 const mockApiError = 'Some Mock API Error';
 const migrationName = 'test migration name';
 
@@ -61,7 +63,7 @@ const createRulesFileFromRulesData = (
 
 describe('RulesFileUpload', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the upload button', () => {

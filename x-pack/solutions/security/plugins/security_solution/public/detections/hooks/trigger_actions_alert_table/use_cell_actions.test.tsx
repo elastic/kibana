@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useCellActionsOptions } from './use_cell_actions';
@@ -26,10 +28,10 @@ const mockDataGridRef: {
   current: EuiDataGridRefProps;
 } = {
   current: {
-    closeCellPopover: jest.fn(),
-    setIsFullScreen: jest.fn(),
-    setFocusedCell: jest.fn(),
-    openCellPopover: jest.fn(),
+    closeCellPopover: vi.fn(),
+    setIsFullScreen: vi.fn(),
+    setFocusedCell: vi.fn(),
+    openCellPopover: vi.fn(),
   },
 };
 

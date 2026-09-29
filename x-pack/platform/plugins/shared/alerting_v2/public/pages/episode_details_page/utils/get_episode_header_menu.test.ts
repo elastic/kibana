@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { getEpisodeHeaderMenu } from './get_episode_header_menu';
@@ -29,7 +31,7 @@ const createAction = (
   displayName: overrides.id,
   iconType: 'star',
   isCompatible: () => true,
-  execute: jest.fn(async () => {}),
+  execute: vi.fn(async () => {}),
   ...overrides,
 });
 
@@ -40,7 +42,7 @@ describe('getEpisodeHeaderMenu', () => {
       createAction({ id: 'ALERTING_V2_EDIT_EPISODE_TAGS', order: 40 }),
       createAction({ id: 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER', order: 50 }),
     ];
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const menu = getEpisodeHeaderMenu({
       actions,
@@ -72,8 +74,8 @@ describe('getEpisodeHeaderMenu', () => {
   });
 
   it('invokes execute with the episode and onSuccess callback', async () => {
-    const execute = jest.fn(async () => {});
-    const onSuccess = jest.fn();
+    const execute = vi.fn(async () => {});
+    const onSuccess = vi.fn();
     const actions = [createAction({ id: 'ALERTING_V2_ACK_EPISODE', order: 10, execute })];
 
     const menu = getEpisodeHeaderMenu({
@@ -91,8 +93,8 @@ describe('getEpisodeHeaderMenu', () => {
   });
 
   it('passes an empty episodes array when episode is undefined', async () => {
-    const execute = jest.fn(async () => {});
-    const onSuccess = jest.fn();
+    const execute = vi.fn(async () => {});
+    const onSuccess = vi.fn();
     const actions = [createAction({ id: 'ALERTING_V2_ACK_EPISODE', order: 10, execute })];
 
     const menu = getEpisodeHeaderMenu({
@@ -115,7 +117,7 @@ describe('getEpisodeHeaderMenu', () => {
       createAction({ id: 'ALERTING_V2_RESOLVE_EPISODE', order: 20 }),
       createAction({ id: 'ALERTING_V2_UNRESOLVE_EPISODE', order: 21 }),
     ];
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const menu = getEpisodeHeaderMenu({
       actions,
@@ -139,8 +141,8 @@ describe('getEpisodeHeaderMenu', () => {
   });
 
   it('invokes execute for the primary action item', async () => {
-    const execute = jest.fn(async () => {});
-    const onSuccess = jest.fn();
+    const execute = vi.fn(async () => {});
+    const onSuccess = vi.fn();
     const actions = [
       createAction({ id: 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER', order: 50, execute }),
     ];

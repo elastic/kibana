@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -16,14 +19,14 @@ import { SEARCH_MODAL_SELECTOR_PREFIX } from './types';
 import { EventReporter } from '../telemetry';
 import { SearchModalInternal } from './search_modal_internal';
 
-jest.mock(
+vi.mock(
   'react-virtualized-auto-sizer',
   () =>
     ({ children }: any) =>
       children({ height: 600, width: 600 })
 );
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 describe('SearchModalInternal', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -37,11 +40,11 @@ describe('SearchModalInternal', () => {
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
 
-    (searchService.getSearchableTypes as jest.Mock).mockResolvedValue(['application']);
-    (searchService.find as jest.Mock).mockReturnValue(of({ results: [] }));
+    (searchService.getSearchableTypes as Mock).mockResolvedValue(['application']);
+    (searchService.find as Mock).mockReturnValue(of({ results: [] }));
 
     eventReporter = new EventReporter({ analytics: core.analytics, usageCollection });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the search input and footer', () => {
@@ -52,7 +55,7 @@ describe('SearchModalInternal', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           reportEvent={eventReporter}
-          onClose={jest.fn()}
+          onClose={vi.fn()}
         />
       </IntlProvider>
     );
@@ -62,8 +65,8 @@ describe('SearchModalInternal', () => {
   });
 
   it('reports searchFocus on mount and searchBlur on unmount', () => {
-    const focusSpy = jest.spyOn(eventReporter, 'searchFocus');
-    const blurSpy = jest.spyOn(eventReporter, 'searchBlur');
+    const focusSpy = vi.spyOn(eventReporter, 'searchFocus');
+    const blurSpy = vi.spyOn(eventReporter, 'searchBlur');
 
     const { unmount } = render(
       <IntlProvider locale="en">
@@ -72,7 +75,7 @@ describe('SearchModalInternal', () => {
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           reportEvent={eventReporter}
-          onClose={jest.fn()}
+          onClose={vi.fn()}
         />
       </IntlProvider>
     );

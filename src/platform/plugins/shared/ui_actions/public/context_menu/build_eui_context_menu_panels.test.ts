@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { buildContextMenuForActions } from './build_eui_context_menu_panels';
 import type { Action, ActionExecutionContext } from '../actions';
@@ -501,7 +503,7 @@ test('it creates disabled actions', async () => {
 });
 
 test('it calls execute with the right context when the target is a link', async () => {
-  const mockExecute = jest.fn();
+  const mockExecute = vi.fn();
   const mockMouseEvent = new MouseEvent('click') as unknown as React.MouseEvent;
   // We need to make sure that the current target is a HTMLAnchorElement
   Object.defineProperty(mockMouseEvent, 'currentTarget', {
@@ -533,7 +535,7 @@ test('it calls execute with the right context when the target is a link', async 
 });
 
 test('it calls execute with the right context when the target is not a link', async () => {
-  const mockExecute = jest.fn();
+  const mockExecute = vi.fn();
   const mockMouseEvent = new MouseEvent('click') as unknown as React.MouseEvent;
 
   const actions = [

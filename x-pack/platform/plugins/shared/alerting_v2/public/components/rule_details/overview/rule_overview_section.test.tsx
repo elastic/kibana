@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,27 +14,39 @@ import { RuleOverviewSection } from './rule_overview_section';
 import { RuleProvider } from '../rule_context';
 import type { RuleApiResponse } from '../../../services/rules_api';
 
-jest.mock('./alert_timeline/alert_timeline_section', () => ({
-  AlertTimelineSection: () => <div data-test-subj="alertTimelineSectionMock">timeline</div>,
-}));
+vi.mock('./alert_timeline/alert_timeline_section', () => {
+      const mocked = {
+      AlertTimelineSection: () => <div data-test-subj="alertTimelineSectionMock">timeline</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./signal_rule_overview', () => ({
-  SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>,
-}));
+vi.mock('./signal_rule_overview', () => {
+      const mocked = {
+      SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./artifacts', () => ({
-  ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
-  SignalArtifactsSection: () => (
-    <div data-test-subj="signalArtifactsSectionMock">signal artifacts</div>
-  ),
-}));
+vi.mock('./artifacts', () => {
+      const mocked = {
+      ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
+      SignalArtifactsSection: () => (
+        <div data-test-subj="signalArtifactsSectionMock">signal artifacts</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCanRead = jest.fn();
+const mockCanRead = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  CoreStart: (key: string) => key,
-  useService: () => ({ canRead: mockCanRead }),
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      CoreStart: (key: string) => key,
+      useService: () => ({ canRead: mockCanRead }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
@@ -59,7 +73,7 @@ const renderSection = (rule: RuleApiResponse) =>
 
 describe('RuleOverviewSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCanRead.mockReturnValue(true);
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Installation } from '@kbn/fleet-plugin/common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -12,13 +15,19 @@ import { upgradeIntegration } from './upgrade_integration';
 import { installPackage } from '@kbn/fleet-plugin/server/services/epm/packages';
 import { pkgToPkgKey } from '@kbn/fleet-plugin/server/services/epm/registry';
 
-jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => ({
-  installPackage: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
+      const mocked = {
+      installPackage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/fleet-plugin/server/services/epm/registry', () => ({
-  pkgToPkgKey: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/server/services/epm/registry', () => {
+      const mocked = {
+      pkgToPkgKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('upgradeIntegration', () => {
   const logger = loggingSystemMock.createLogger();
@@ -26,8 +35,8 @@ describe('upgradeIntegration', () => {
   const esClient = {} as unknown as Parameters<typeof upgradeIntegration>[0]['esClient'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (pkgToPkgKey as jest.Mock).mockReturnValue('osquery_manager-1.6.0');
+    vi.clearAllMocks();
+    (pkgToPkgKey as Mock).mockReturnValue('osquery_manager-1.6.0');
   });
 
   it('does nothing when packageInfo is missing', async () => {

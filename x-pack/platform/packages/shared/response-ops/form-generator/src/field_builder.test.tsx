@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { z } from '@kbn/zod/v4';
@@ -22,15 +25,15 @@ import { getWidgetComponent } from './widgets';
 
 const meta = { getMeta, setMeta };
 
-jest.mock('./widgets', () => {
-  const module = jest.requireActual('./widgets');
+vi.mock('./widgets', async () => {
+  const module = (await vi.importActual('./widgets'));
   return {
     ...module,
-    getWidgetComponent: jest.fn(module.getWidgetComponent),
+    getWidgetComponent: vi.fn(module.getWidgetComponent),
   };
 });
 
-const getWidgetComponentMock = getWidgetComponent as jest.Mock;
+const getWidgetComponentMock = getWidgetComponent as Mock;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -430,7 +433,7 @@ describe('Field Builder', () => {
 
 describe('mocked getWidgetComponent', () => {
   const formConfig: FormConfig = { isEdit: true };
-  const mockWidgetComponent = jest.fn((props) => {
+  const mockWidgetComponent = vi.fn((props) => {
     return <div data-testid="mock-widget" />;
   });
 
@@ -439,7 +442,7 @@ describe('mocked getWidgetComponent', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should pass correct props structure to WidgetComponent', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { getRiskScoreSummaryAttributes } from './risk_score_summary';
 import { RiskSeverity } from '../../../common/search_strategy';
@@ -14,9 +16,12 @@ import { useLensAttributes } from '../../common/components/visualization_actions
 import type { Query } from '@kbn/es-query';
 import { EntityType } from '../../../common/entity_analytics/types';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getRiskScoreSummaryAttributes', () => {
   it('should render', () => {

@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { buildCanonicalQueryString, parseAwsHost, signRequest } from './aws_credential_helpers';
 import { calculateAWSA4Signature, sha256Hash } from './aws_crypto_helpers';
 
-jest.mock('./aws_crypto_helpers', () => ({
-  sha256Hash: jest.fn(),
-  hmacSha256: jest.fn(),
-  calculateAWSA4Signature: jest.fn(),
-}));
+vi.mock('./aws_crypto_helpers', () => {
+      const mocked = {
+      sha256Hash: vi.fn(),
+      hmacSha256: vi.fn(),
+      calculateAWSA4Signature: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSha256Hash = jest.mocked(sha256Hash);
-const mockCalculateAWSA4Signature = jest.mocked(calculateAWSA4Signature);
+const mockSha256Hash = vi.mocked(sha256Hash);
+const mockCalculateAWSA4Signature = vi.mocked(calculateAWSA4Signature);
 
 describe('parseAwsHost()', () => {
   it('returns null for non-AWS hostnames', () => {
@@ -86,14 +91,14 @@ describe('buildCanonicalQueryString()', () => {
 
 describe('signRequest()', () => {
   beforeEach(async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-03-11T12:34:56.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-03-11T12:34:56.000Z'));
     mockSha256Hash.mockResolvedValue('b'.repeat(64));
     mockCalculateAWSA4Signature.mockResolvedValue('a'.repeat(64));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('returns signed headers for lambda requests', async () => {

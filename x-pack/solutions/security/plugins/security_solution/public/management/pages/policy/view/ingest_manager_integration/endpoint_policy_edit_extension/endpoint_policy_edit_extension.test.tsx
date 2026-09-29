@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
@@ -17,8 +20,8 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/comp
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
-jest.mock('../../../../../../common/components/user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+vi.mock('../../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 describe('When displaying the EndpointPolicyEditExtension fleet UI extension', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -49,7 +52,7 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
         <EndpointPolicyEditExtension
           policy={policy as PackagePolicy}
           newPolicy={newPolicy as NewPackagePolicy}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
   });

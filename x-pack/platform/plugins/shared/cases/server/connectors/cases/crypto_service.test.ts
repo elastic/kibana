@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createHash } from 'node:crypto';
 import { CryptoService } from './crypto_service';
 
@@ -12,7 +14,7 @@ describe('CryptoService', () => {
   let service: CryptoService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     service = new CryptoService();
   });
 

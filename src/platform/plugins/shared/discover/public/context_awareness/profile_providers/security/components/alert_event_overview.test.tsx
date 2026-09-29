@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AlertEventOverview } from './alert_event_overview';
@@ -16,18 +19,18 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { encode } from '@kbn/rison';
 import { URLSearchParams } from 'url';
 
-jest.mock('../../../../hooks/use_discover_services');
+vi.mock('../../../../hooks/use_discover_services');
 
 const TEST_TIMELINE_URL = 'test-timeline-url';
 
-const mockGetUrlForApp = jest.fn().mockReturnValue(TEST_TIMELINE_URL);
+const mockGetUrlForApp = vi.fn().mockReturnValue(TEST_TIMELINE_URL);
 
 const mockDiscoverServices = {
   application: {
     getUrlForApp: mockGetUrlForApp,
   },
   fieldsMetadata: {
-    useFieldsMetadata: jest.fn().mockReturnValue({
+    useFieldsMetadata: vi.fn().mockReturnValue({
       fieldsMetadata: {
         'event.category': {
           allowed_values: [
@@ -59,7 +62,7 @@ const mockDataView = dataViewMock;
 
 describe('AlertEventOverview', () => {
   beforeEach(() => {
-    (useDiscoverServices as jest.Mock).mockReturnValue(mockDiscoverServices);
+    (useDiscoverServices as Mock).mockReturnValue(mockDiscoverServices);
   });
   describe('expandable sections', () => {
     test('should return the expandable sections correctly', () => {
@@ -198,10 +201,10 @@ describe('AlertEventOverview', () => {
         expect(screen.getByTestId('about')).toHaveTextContent('Process events');
       });
       test('should give placeholder ECS description when fieldsMetadata is not available', () => {
-        (useDiscoverServices as jest.Mock).mockReturnValue({
+        (useDiscoverServices as Mock).mockReturnValue({
           ...mockDiscoverServices,
           fieldsMetadata: {
-            useFieldsMetadata: jest.fn().mockReturnValue({
+            useFieldsMetadata: vi.fn().mockReturnValue({
               fieldsMetadata: undefined,
               loading: false,
             }),
@@ -215,10 +218,10 @@ describe('AlertEventOverview', () => {
       });
 
       test('should give placeholder ECS description when event.category field is not present in fieldMetada', () => {
-        (useDiscoverServices as jest.Mock).mockReturnValue({
+        (useDiscoverServices as Mock).mockReturnValue({
           ...mockDiscoverServices,
           fieldsMetadata: {
-            useFieldsMetadata: jest.fn().mockReturnValue({
+            useFieldsMetadata: vi.fn().mockReturnValue({
               fieldsMetadata: {},
               loading: false,
             }),

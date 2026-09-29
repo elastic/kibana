@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { createContext } from 'react';
@@ -18,9 +20,12 @@ import { strings } from '../../../strings';
 // Create  a minimal mock context that can be used to render the button
 const MockProjectPickerContext = createContext<{ state: unknown } | null>(null);
 
-jest.mock('../../state', () => ({
-  createProjectPickerContext: () => MockProjectPickerContext,
-}));
+vi.mock('../../state', () => {
+      const mocked = {
+      createProjectPickerContext: () => MockProjectPickerContext,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createState = (
   filteredProjectsCount: number,
@@ -41,7 +46,7 @@ const createState = (
 });
 
 const defaultProps = {
-  onClick: jest.fn(),
+  onClick: vi.fn(),
   size: 's' as const,
 };
 
@@ -65,7 +70,7 @@ const renderButton = (
 
 describe('ProjectPickerButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the button with text showing the number of filtered projects and the total number of projects', () => {
@@ -91,7 +96,7 @@ describe('ProjectPickerButton', () => {
   });
 
   it('should call onClick when the button is clicked', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderButton({ onClick });
 
     await userEvent.click(screen.getByTestId('cps-project-picker-button'));

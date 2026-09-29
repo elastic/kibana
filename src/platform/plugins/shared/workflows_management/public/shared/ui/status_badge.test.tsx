@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,12 +23,12 @@ describe('StatusBadge', () => {
   describe('relative date display across year boundaries', () => {
     beforeEach(() => {
       // Mock the current date to be January 10, 2026
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2026-01-10T10:00:00Z'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-01-10T10:00:00Z'));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('displays relative time instead of "last year" for dates 2-3 weeks in the past crossing year boundary', () => {
@@ -82,12 +84,12 @@ describe('StatusBadge', () => {
 
   describe('responsive dual-render structure', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2026-03-30T10:00:00Z'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-03-30T10:00:00Z'));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('renders both long and narrow format spans when a date is provided', () => {

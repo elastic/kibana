@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 /* eslint-disable max-classes-per-file */
 
 import { McpConnector, listToolsCache } from './mcp';
@@ -30,7 +33,7 @@ const getPrivateMethods = (conn: McpConnector): McpConnectorPrivate => {
 };
 
 // Mock the MCP client
-jest.mock('@kbn/mcp-client', () => {
+vi.mock('@kbn/mcp-client', () => {
   class StreamableHTTPError extends Error {
     public code: number;
     constructor(code: number, message?: string) {
@@ -48,7 +51,7 @@ jest.mock('@kbn/mcp-client', () => {
   }
 
   return {
-    McpClient: jest.fn(),
+    McpClient: vi.fn(),
     StreamableHTTPError,
     UnauthorizedError,
   };
@@ -58,28 +61,37 @@ jest.mock('@kbn/mcp-client', () => {
 import { StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
 
 // Mock the auth helpers
-jest.mock('./auth_helpers', () => ({
-  buildHeadersFromSecrets: jest.fn().mockReturnValue({}),
-}));
+vi.mock('./auth_helpers', () => {
+      const mocked = {
+      buildHeadersFromSecrets: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the build_custom_fetch module
-jest.mock('./build_custom_fetch', () => ({
-  buildCustomFetch: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('./build_custom_fetch', () => {
+      const mocked = {
+      buildCustomFetch: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { buildCustomFetch } from './build_custom_fetch';
 
 // Mock the retry utils
-jest.mock('./retry_utils', () => ({
-  retryWithRecovery: jest.fn(async (fn) => {
-    return await fn();
-  }),
-}));
+vi.mock('./retry_utils', () => {
+      const mocked = {
+      retryWithRecovery: vi.fn(async (fn) => {
+        return await fn();
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('McpConnector', () => {
   const logger = loggingSystemMock.createLogger();
   let connector: McpConnector;
-  let mockMcpClient: jest.Mocked<McpClient>;
+  let mockMcpClient: Mocked<McpClient>;
   let services: ReturnType<typeof actionsMock.createServices>;
   let connectorUsageCollector: ConnectorUsageCollector;
 
@@ -91,7 +103,7 @@ describe('McpConnector', () => {
   const defaultSecrets = {};
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Clear the listTools cache before each test
     listToolsCache.clear();
@@ -104,12 +116,12 @@ describe('McpConnector', () => {
 
     // Create a mock McpClient instance
     mockMcpClient = {
-      connect: jest.fn(),
-      disconnect: jest.fn(),
-      isConnected: jest.fn().mockReturnValue(false),
-      listTools: jest.fn(),
-      callTool: jest.fn(),
-    } as unknown as jest.Mocked<McpClient>;
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+      isConnected: vi.fn().mockReturnValue(false),
+      listTools: vi.fn(),
+      callTool: vi.fn(),
+    } as unknown as Mocked<McpClient>;
 
     // Mock the McpClient constructor
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -139,7 +151,7 @@ describe('McpConnector', () => {
     });
 
     it('should build a custom fetch from configurationUtilities and pass it to McpClient', () => {
-      const mockBuildCustomFetch = buildCustomFetch as jest.Mock;
+      const mockBuildCustomFetch = buildCustomFetch as Mock;
       expect(mockBuildCustomFetch).toHaveBeenCalledWith(
         expect.anything(),
         logger,
@@ -755,11 +767,11 @@ describe('McpConnector', () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { McpClient } = require('@kbn/mcp-client');
       const mockMcpClient2 = {
-        connect: jest.fn().mockResolvedValue({ connected: true, capabilities: {} }),
-        disconnect: jest.fn().mockResolvedValue(undefined),
-        isConnected: jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
-        listTools: jest.fn().mockResolvedValue(mockToolsResult2),
-        callTool: jest.fn(),
+        connect: vi.fn().mockResolvedValue({ connected: true, capabilities: {} }),
+        disconnect: vi.fn().mockResolvedValue(undefined),
+        isConnected: vi.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
+        listTools: vi.fn().mockResolvedValue(mockToolsResult2),
+        callTool: vi.fn(),
       };
       McpClient.mockImplementationOnce(() => mockMcpClient2);
 
@@ -799,11 +811,11 @@ describe('McpConnector', () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { McpClient } = require('@kbn/mcp-client');
       const mockMcpClient2 = {
-        connect: jest.fn(),
-        disconnect: jest.fn().mockResolvedValue(undefined),
-        isConnected: jest.fn(),
-        listTools: jest.fn(),
-        callTool: jest.fn(),
+        connect: vi.fn(),
+        disconnect: vi.fn().mockResolvedValue(undefined),
+        isConnected: vi.fn(),
+        listTools: vi.fn(),
+        callTool: vi.fn(),
       };
       McpClient.mockImplementationOnce(() => mockMcpClient2);
 

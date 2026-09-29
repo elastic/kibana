@@ -15,54 +15,62 @@ import { BehaviorSubject } from 'rxjs';
 
 describe('image embeddable', () => {
   let embeddableApi: ImageEmbeddableApi;
-  beforeEach((done) => {
-    const parent = {};
-    const uuid = '1';
-    const finalizeApi = (api: any) => ({
-      ...api,
-      uuid,
-      parent,
-      type: IMAGE_EMBEDDABLE_TYPE,
-      phase$: new BehaviorSubject(undefined),
-    });
-    const { buildEmbeddable } = getImageEmbeddableFactory();
-    buildEmbeddable({
-      initializeDrilldownsManager,
-      initialState: {
-        image_config: {
-          src: {
-            type: 'file',
-            file_id: 'puppy.png',
+  beforeEach(() =>
+  new Promise<void>((resolve, reject) => {
+  const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+      const parent = {};
+      const uuid = '1';
+      const finalizeApi = (api: any) => ({
+        ...api,
+        uuid,
+        parent,
+        type: IMAGE_EMBEDDABLE_TYPE,
+        phase$: new BehaviorSubject(undefined),
+      });
+      const { buildEmbeddable } = getImageEmbeddableFactory();
+      buildEmbeddable({
+        initializeDrilldownsManager,
+        initialState: {
+          image_config: {
+            src: {
+              type: 'file',
+              file_id: 'puppy.png',
+            },
+            object_fit: 'fill',
           },
-          object_fit: 'fill',
         },
-      },
-      finalizeApi,
-      uuid: '1',
-      parentApi: {},
-    })
-      .then(({ api }) => {
-        embeddableApi = api;
-        done();
+        finalizeApi,
+        uuid: '1',
+        parentApi: {},
       })
-      .catch(done);
-  });
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
+    
+  }));
 
   describe('anyStateChange$', () => {
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      embeddableApi.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = embeddableApi.serializeState();
-          expect(title).toBe('cute puppies');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      embeddableApi.setTitle('cute puppies');
-    });
+    test('should not emit on subscribe and emit when any state changes', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              embeddableApi.anyStateChange$.subscribe(() => {
+                try {
+                  const { title } = embeddableApi.serializeState();
+                  expect(title).toBe('cute puppies');
+                } catch (error) {
+                  // title assertion fails when
+                  // anyStateChange$ emits on subscribe
+                  done(error);
+                  return;
+                }
+                done();
+              });
+              embeddableApi.setTitle('cute puppies');
+            
+        }));
   });
 });

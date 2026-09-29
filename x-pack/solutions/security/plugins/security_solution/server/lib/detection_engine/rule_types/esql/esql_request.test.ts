@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { performEsqlRequest } from './esql_request';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -47,15 +50,15 @@ const requestQueryParams = { drop_null_columns: true };
 
 describe('performEsqlRequest', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const asyncQueryMock = esClient.esql.asyncQuery as unknown as jest.Mock;
-  const asyncQueryGetMock = esClient.esql.asyncQueryGet as unknown as jest.Mock;
-  const asyncQueryDeleteMock = esClient.esql.asyncQueryDelete as unknown as jest.Mock;
-  const shouldStopExecution: jest.Mock = jest.fn();
+  const asyncQueryMock = esClient.esql.asyncQuery as unknown as Mock;
+  const asyncQueryGetMock = esClient.esql.asyncQueryGet as unknown as Mock;
+  const asyncQueryDeleteMock = esClient.esql.asyncQueryDelete as unknown as Mock;
+  const shouldStopExecution: Mock = vi.fn();
   shouldStopExecution.mockReturnValue(false);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   it('returns results immediately when the async query completed', async () => {
@@ -110,7 +113,7 @@ describe('performEsqlRequest', () => {
       shouldStopExecution,
     });
 
-    await jest.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(15000);
 
     const result = await waitForPerformEsql;
 
@@ -147,7 +150,7 @@ describe('performEsqlRequest', () => {
       expect(error.message).toBe('Rule execution cancelled due to timeout');
     });
 
-    await jest.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(15000);
     await waitForPerformEsql;
     expect.assertions(1);
   });
@@ -172,7 +175,7 @@ describe('performEsqlRequest', () => {
       expect(error.message).toBe('Test error');
     });
 
-    await jest.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(15000);
     await waitForPerformEsql;
 
     expect(asyncQueryDeleteMock).toHaveBeenCalledWith({ id: 'QUERY-ID' });

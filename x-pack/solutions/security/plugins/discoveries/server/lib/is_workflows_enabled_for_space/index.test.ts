@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
@@ -15,17 +17,17 @@ const UI_SETTING_KEY = 'securitySolution:enableAttackDiscoveryWorkflows';
 
 const buildFeatureFlags = (value: boolean): CoreStart['featureFlags'] =>
   ({
-    getBooleanValue: jest.fn().mockResolvedValue(value),
+    getBooleanValue: vi.fn().mockResolvedValue(value),
   } as unknown as CoreStart['featureFlags']);
 
 const buildUiSettingsClient = (value: boolean): IUiSettingsClient =>
   ({
-    get: jest.fn().mockResolvedValue(value),
+    get: vi.fn().mockResolvedValue(value),
   } as unknown as IUiSettingsClient);
 
 describe('isWorkflowsEnabledForSpace', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns false when FF is off and per-space setting is off', async () => {
@@ -97,7 +99,7 @@ describe('isWorkflowsEnabledForSpace', () => {
 
   it('returns false when uiSetting returns null', async () => {
     const uiSettingsClient = {
-      get: jest.fn().mockResolvedValue(null),
+      get: vi.fn().mockResolvedValue(null),
     } as unknown as IUiSettingsClient;
 
     const result = await isWorkflowsEnabledForSpace({

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
@@ -18,20 +20,20 @@ import { registerAddFromLibraryType } from './registry';
 import type { PresentationContainer, HasType } from '@kbn/presentation-publishing';
 
 import * as SavedObjectsFinderPlugin from '@kbn/saved-objects-finder-plugin/public';
-jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
+vi.mock('@kbn/saved-objects-finder-plugin/public', async () => {
   return {
     __esModule: true, // allows us to overwrite saved object finder via spyOn
-    ...jest.requireActual('@kbn/saved-objects-finder-plugin/public'),
+    ...(await vi.importActual('@kbn/saved-objects-finder-plugin/public')),
   };
 });
 
 describe('add from library flyout', () => {
   let container: PresentationContainer & HasType;
-  const onAdd = jest.fn();
+  const onAdd = vi.fn();
 
   beforeAll(() => {
     // Mock saved objects finder component so we can call the onChoose method.
-    jest.spyOn(SavedObjectsFinderPlugin, 'SavedObjectFinder').mockImplementation(({ onChoose }) => (
+    vi.spyOn(SavedObjectsFinderPlugin, 'SavedObjectFinder').mockImplementation(({ onChoose }) => (
       <>
         <button
           id="soFinderAddButton"

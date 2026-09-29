@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 
-const mockGetWatchlist = jest.fn();
-const mockListWatchlistEntitySources = jest.fn();
+const mockGetWatchlist = vi.fn();
+const mockListWatchlistEntitySources = vi.fn();
 
-jest.mock('../../../../entity_analytics/api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    getWatchlist: mockGetWatchlist,
-    listWatchlistEntitySources: mockListWatchlistEntitySources,
-  }),
-}));
+vi.mock('../../../../entity_analytics/api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        getWatchlist: mockGetWatchlist,
+        listWatchlistEntitySources: mockListWatchlistEntitySources,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -27,17 +32,17 @@ jest.mock('../../../../common/lib/kibana', () => {
       services: {
         ...original.useKibana().services,
         uiSettings: {
-          get: jest.fn().mockReturnValue(false),
+          get: vi.fn().mockReturnValue(false),
         },
-        http: { fetch: jest.fn() },
+        http: { fetch: vi.fn() },
       },
     }),
   };
 });
 
 // Wrap with QueryClientProvider
-const { QueryClient, QueryClientProvider } = jest.requireActual('@kbn/react-query');
-const React = jest.requireActual('react');
+const { QueryClient, QueryClientProvider } = (await vi.importActual('@kbn/react-query'));
+const React = require('react');
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -88,7 +93,7 @@ const indexSource = {
 
 describe('useGetWatchlistFormData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null initialWatchlist when watchlistId is not provided', () => {

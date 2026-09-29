@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
@@ -24,11 +27,14 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { DataViewContext, type DataViewContextValue } from '..';
 import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS } from '../constants';
 
-jest.mock('@kbn/esql-utils', () => ({ getESQLResults: jest.fn() }));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = { getESQLResults: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
 const createWrapper = (
   indexPattern = 'entities-latest-default'
@@ -299,22 +305,22 @@ const makeGroupCountEsqlResponse = (total: number) => ({
 });
 
 const setupKibanaMock = () => {
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       data: { search: { search: mockSearch } },
-      notifications: { toasts: { addError: jest.fn() } },
+      notifications: { toasts: { addError: vi.fn() } },
     },
   });
 };
 
 describe('useFetchUnfilteredResolutionGroupData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibanaMock();
   });
 
   it('returns target metadata from ES|QL rows without a separate metadata DSL query', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeUnfilteredResolutionEsqlResponse([
         {
           id: 'user:alice',
@@ -353,7 +359,7 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
   });
 
   it('sets doc_count to 1 plus the alias count from the terms agg', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeUnfilteredResolutionEsqlResponse([
         {
           id: 'user:alice',
@@ -405,7 +411,7 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
   });
 
   it('wraps each target entity id in an array as bucket.key with key_as_string and selectedGroup', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeUnfilteredResolutionEsqlResponse([
         {
           id: 'user:alice',
@@ -439,7 +445,7 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
   });
 
   it(`caps the ES|QL LIMIT at ${ESQL_LIMIT_CAP} when (pageIndex+1)*pageSize would exceed it`, async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
+    (getESQLResults as Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(
       of({
         rawResponse: {
@@ -453,9 +459,9 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+    await waitFor(() => expect(getESQLResults as Mock).toHaveBeenCalled());
 
-    const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
+    const { esqlQuery } = (getESQLResults as Mock).mock.calls[0][0];
     expect(esqlQuery).toMatch(new RegExp(`LIMIT ${ESQL_LIMIT_CAP}`));
     // Always-on inline entity-type filter and the target-only (unresolved) predicate
     expect(esqlQuery).toContain(`${ENTITY_FIELDS.ENTITY_TYPE} IN ("user","host","service")`);
@@ -463,7 +469,7 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
   });
 
   it('sorts by effective_risk DESC then entity.id ASC for stable pagination ties', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
+    (getESQLResults as Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(
       of({
         rawResponse: {
@@ -477,16 +483,16 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+    await waitFor(() => expect(getESQLResults as Mock).toHaveBeenCalled());
 
-    const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
+    const { esqlQuery } = (getESQLResults as Mock).mock.calls[0][0];
     expect(esqlQuery).toContain(
       `SORT effective_risk DESC NULLS LAST, ${ENTITY_FIELDS.ENTITY_ID} ASC`
     );
   });
 
   it('uses track_total_hits result as groupsCount', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
+    (getESQLResults as Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(
       of({
         rawResponse: {
@@ -507,7 +513,7 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
   });
 
   it('counts targets for groupsCount and all entities (targets + aliases) for unitsCount', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
+    (getESQLResults as Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
     mockSearch
       .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 3 } } } })) // group count (targets only)
       .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 8 } } } })) // unit count (all entities)
@@ -537,7 +543,7 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
       riskScore: 100 - n,
       resolutionRisk: 100 - n,
     });
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeUnfilteredResolutionEsqlResponse([mkTarget(0), mkTarget(1), mkTarget(2), mkTarget(3)])
     );
     mockSearch
@@ -567,7 +573,7 @@ describe('useFetchUnfilteredResolutionGroupData', () => {
 
 describe('useFetchFilteredResolutionGroupData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibanaMock();
   });
 
@@ -576,7 +582,7 @@ describe('useFetchFilteredResolutionGroupData', () => {
       bool: { filter: [{ term: { 'host.name': 'my-host' } }], must: [], should: [], must_not: [] },
     };
 
-    (getESQLResults as jest.Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
+    (getESQLResults as Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
 
     renderHook(
@@ -584,9 +590,9 @@ describe('useFetchFilteredResolutionGroupData', () => {
       { wrapper: createWrapper() }
     );
 
-    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+    await waitFor(() => expect(getESQLResults as Mock).toHaveBeenCalled());
 
-    expect((getESQLResults as jest.Mock).mock.calls[0][0].filter).toEqual(userFilter);
+    expect((getESQLResults as Mock).mock.calls[0][0].filter).toEqual(userFilter);
   });
 
   it('fetches target metadata without user filters in the fixup DSL query', async () => {
@@ -594,7 +600,7 @@ describe('useFetchFilteredResolutionGroupData', () => {
       bool: { filter: [{ term: { 'host.name': 'my-host' } }], must: [], should: [], must_not: [] },
     };
 
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeFilteredResolutionEsqlResponse([
         { group_key: 'user:alice', group_risk: 90, group_size: 1 },
       ])
@@ -631,7 +637,7 @@ describe('useFetchFilteredResolutionGroupData', () => {
     // Without the metadata fixup the target's name would be unknown; with it we get it.
     // group_risk (50) is deliberately different from the metadata riskScore (90) so the assertion
     // proves resolutionRiskScore came from the metadata branch, not the group_risk fallback.
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeFilteredResolutionEsqlResponse([
         { group_key: 'target-user-001', group_risk: 50, group_size: 1 },
       ])
@@ -678,7 +684,7 @@ describe('useFetchFilteredResolutionGroupData', () => {
   it('falls back to group_risk for resolutionRiskScore when no target metadata is found', async () => {
     // No metadata hit for the group_key (fixup returns nothing), so resolutionRiskScore must fall
     // back to the STATS join's group_risk rather than surfacing null.
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeFilteredResolutionEsqlResponse([
         { group_key: 'target-user-001', group_risk: 77, group_size: 1 },
       ])
@@ -700,7 +706,7 @@ describe('useFetchFilteredResolutionGroupData', () => {
   });
 
   it('sets resolutionRiskScore to null when neither metadata nor group_risk is present', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeFilteredResolutionEsqlResponse([
         { group_key: 'target-user-001', group_risk: null, group_size: 1 },
       ])
@@ -722,7 +728,7 @@ describe('useFetchFilteredResolutionGroupData', () => {
   });
 
   it('wraps each group_key in an array as bucket.key', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(
+    (getESQLResults as Mock).mockResolvedValue(
       makeFilteredResolutionEsqlResponse([
         { group_key: 'user:alice', group_risk: 85, group_size: 2 },
       ])
@@ -743,16 +749,16 @@ describe('useFetchFilteredResolutionGroupData', () => {
   });
 
   it(`caps the ES|QL LIMIT at ${ESQL_LIMIT_CAP} when (pageIndex+1)*pageSize would exceed it`, async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
+    (getESQLResults as Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
 
     renderHook(() => useFetchFilteredResolutionGroupData({ pageIndex: 999, pageSize: 100 }), {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+    await waitFor(() => expect(getESQLResults as Mock).toHaveBeenCalled());
 
-    const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
+    const { esqlQuery } = (getESQLResults as Mock).mock.calls[0][0];
     expect(esqlQuery).toMatch(new RegExp(`LIMIT ${ESQL_LIMIT_CAP}`));
     // Always-on inline entity-type filter and the COALESCE group key that lets a matching alias
     // surface its target's group
@@ -763,16 +769,16 @@ describe('useFetchFilteredResolutionGroupData', () => {
   });
 
   it('sorts by group_risk DESC, group_size DESC, then group_key ASC for stable pagination ties', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
+    (getESQLResults as Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
 
     renderHook(() => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }), {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+    await waitFor(() => expect(getESQLResults as Mock).toHaveBeenCalled());
 
-    const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
+    const { esqlQuery } = (getESQLResults as Mock).mock.calls[0][0];
     expect(esqlQuery).toContain('SORT group_risk DESC NULLS LAST, group_size DESC, group_key ASC');
   });
 
@@ -780,7 +786,7 @@ describe('useFetchFilteredResolutionGroupData', () => {
     // STATS join returns a single group for this page, but there are 137 groups in total.
     // groupsCount must be the total (137), not the page's bucket count (1) — otherwise the
     // grouping component collapses to a single page whenever a filter is active.
-    (getESQLResults as jest.Mock).mockImplementation(({ esqlQuery }: { esqlQuery: string }) =>
+    (getESQLResults as Mock).mockImplementation(({ esqlQuery }: { esqlQuery: string }) =>
       Promise.resolve(
         esqlQuery.includes('group_risk')
           ? makeFilteredResolutionEsqlResponse([
@@ -807,14 +813,14 @@ describe('useFetchFilteredResolutionGroupData', () => {
 });
 
 describe('useFetchGroupedData', () => {
-  const mockAddError = jest.fn();
+  const mockAddError = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         data: { search: { search: mockSearch } },
-        notifications: { toasts: { addError: mockAddError, addDanger: jest.fn() } },
+        notifications: { toasts: { addError: mockAddError, addDanger: vi.fn() } },
       },
     });
   });

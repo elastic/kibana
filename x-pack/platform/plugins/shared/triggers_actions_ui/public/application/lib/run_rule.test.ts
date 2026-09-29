@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { runRule } from './run_rule';
 
-jest.mock('./rule_api/run_soon', () => ({
-  runSoon: jest.fn(),
-}));
-const { runSoon: mockRunSoon } = jest.requireMock('./rule_api/run_soon');
+vi.mock('./rule_api/run_soon', () => {
+      const mocked = {
+      runSoon: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { runSoon: mockRunSoon } = (await vi.importMock('./rule_api/run_soon'));
 
 describe('runRule', () => {
   const mockCoreSetup = coreMock.createSetup();
@@ -19,7 +24,7 @@ describe('runRule', () => {
   const http = mockCoreSetup.http;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('displays warning toast when runSoon() returns a message', async () => {

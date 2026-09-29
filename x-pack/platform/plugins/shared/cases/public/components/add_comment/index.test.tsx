@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, act, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -27,13 +30,13 @@ import { timelineIntegrationMock } from '../__mock__/timeline';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { KibanaServices } from '../../common/lib/kibana';
 
-jest.mock('../../containers/use_create_attachments');
+vi.mock('../../containers/use_create_attachments');
 
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
 
-const createAttachmentsMock = jest.fn().mockImplementation(() => defaultResponse);
-const onCommentSaving = jest.fn();
-const onCommentPosted = jest.fn();
+const createAttachmentsMock = vi.fn().mockImplementation(() => defaultResponse);
+const onCommentSaving = vi.fn();
+const onCommentPosted = vi.fn();
 
 const addCommentProps: AddCommentProps = {
   id: 'newComment',
@@ -54,13 +57,13 @@ const sampleData = { comment: 'what a cool comment' };
 const appId = 'securitySolution';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
-const getConfigMock = jest.spyOn(KibanaServices, 'getConfig');
+const getConfigMock = vi.spyOn(KibanaServices, 'getConfig');
 const getCasesConfig = (attachmentsEnabled: boolean): ReturnType<typeof KibanaServices.getConfig> =>
   ({ attachments: { enabled: attachmentsEnabled } } as ReturnType<typeof KibanaServices.getConfig>);
 
 describe('AddComment ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getConfigMock.mockReturnValue(getCasesConfig(false));
 
     useCreateAttachmentsMock.mockReturnValue({
@@ -200,7 +203,7 @@ describe('AddComment ', () => {
   });
 
   it('it should insert a timeline', async () => {
-    const useInsertTimelineMock = jest.fn();
+    const useInsertTimelineMock = vi.fn();
     let attachTimeline = noop;
     useInsertTimelineMock.mockImplementation((comment, onTimelineAttached) => {
       attachTimeline = onTimelineAttached;
@@ -272,7 +275,7 @@ describe('AddComment ', () => {
 
 describe('draft comment ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getConfigMock.mockReturnValue(getCasesConfig(false));
     useCreateAttachmentsMock.mockReturnValue({
       isLoading: false,
@@ -281,15 +284,15 @@ describe('draft comment ', () => {
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should clear session storage on submit', async () => {
@@ -300,7 +303,7 @@ describe('draft comment ', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -361,15 +364,15 @@ describe('submit comment by key press', () => {
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it.each(['ctrlKey', 'metaKey'])(

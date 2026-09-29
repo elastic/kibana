@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useAgentBuilderAvailability } from './use_agent_builder_availability';
@@ -12,19 +15,19 @@ import { useKibana } from '../../common/lib/kibana';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useLicense } from '../../common/hooks/use_license';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('../../common/hooks/use_license');
+vi.mock('../../common/lib/kibana');
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('../../common/hooks/use_license');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
-const mockUseLicense = useLicense as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseUiSetting$ = useUiSetting$ as Mock;
+const mockUseLicense = useLicense as Mock;
 
 describe('useAgentBuilderAvailability', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => true),
+      isEnterprise: vi.fn(() => true),
     });
   });
 
@@ -39,7 +42,7 @@ describe('useAgentBuilderAvailability', () => {
           },
         },
         pricing: {
-          getActiveProduct: jest.fn(() => undefined),
+          getActiveProduct: vi.fn(() => undefined),
         },
       },
     });
@@ -63,7 +66,7 @@ describe('useAgentBuilderAvailability', () => {
           capabilities: {},
         },
         pricing: {
-          getActiveProduct: jest.fn(() => undefined),
+          getActiveProduct: vi.fn(() => undefined),
         },
       },
     });
@@ -91,7 +94,7 @@ describe('useAgentBuilderAvailability', () => {
           },
         },
         pricing: {
-          getActiveProduct: jest.fn(() => undefined),
+          getActiveProduct: vi.fn(() => undefined),
         },
       },
     });
@@ -119,7 +122,7 @@ describe('useAgentBuilderAvailability', () => {
           },
         },
         pricing: {
-          getActiveProduct: jest.fn(() => undefined),
+          getActiveProduct: vi.fn(() => undefined),
         },
       },
     });
@@ -145,7 +148,7 @@ describe('useAgentBuilderAvailability', () => {
           },
         },
         pricing: {
-          getActiveProduct: jest.fn(() => undefined),
+          getActiveProduct: vi.fn(() => undefined),
         },
       },
     });
@@ -171,7 +174,7 @@ describe('useAgentBuilderAvailability', () => {
           },
         },
         pricing: {
-          getActiveProduct: jest.fn(() => undefined),
+          getActiveProduct: vi.fn(() => undefined),
         },
       },
     });
@@ -199,14 +202,14 @@ describe('useAgentBuilderAvailability', () => {
           },
         },
         pricing: {
-          getActiveProduct: jest.fn(() => undefined),
+          getActiveProduct: vi.fn(() => undefined),
         },
       },
     });
 
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => false),
+      isEnterprise: vi.fn(() => false),
     });
 
     const { result } = renderHook(() => useAgentBuilderAvailability());

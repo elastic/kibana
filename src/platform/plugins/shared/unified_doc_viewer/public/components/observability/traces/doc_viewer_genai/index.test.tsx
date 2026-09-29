@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -15,18 +18,27 @@ import React from 'react';
 import { DocViewerObsTracesGenAi } from '.';
 import { useGenAiData } from './use_genai_data';
 
-jest.mock('./use_genai_data', () => ({
-  useGenAiData: jest.fn(),
-}));
+vi.mock('./use_genai_data', () => {
+      const mocked = {
+      useGenAiData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/apm-ui-shared', () => ({
-  GenAiTab: () => <div data-test-subj="mockGenAiTab" />,
-}));
+vi.mock('@kbn/apm-ui-shared', () => {
+      const mocked = {
+      GenAiTab: () => <div data-test-subj="mockGenAiTab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./genai_details_table', () => ({
-  GenAiDetailsTable: () => <div data-test-subj="mockGenAiDetailsTable" />,
-  hasGenAiDetailFields: () => false,
-}));
+vi.mock('./genai_details_table', () => {
+      const mocked = {
+      GenAiDetailsTable: () => <div data-test-subj="mockGenAiDetailsTable" />,
+      hasGenAiDetailFields: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const HINT = 'unifiedDocViewerObsTracesGenAiMetadataHint';
 const INDEX_PATTERN = 'traces-apm*,traces-*.otel-*';
@@ -64,7 +76,7 @@ function renderTab({
   unrecoverableLongFields?: boolean;
   dataView?: DataView;
 }) {
-  (useGenAiData as jest.Mock).mockReturnValue({
+  (useGenAiData as Mock).mockReturnValue({
     genAi,
     isGenAiSpan: true,
     loading: false,
@@ -83,7 +95,7 @@ function renderTab({
 
 describe('DocViewerObsTracesGenAi', () => {
   beforeEach(() => {
-    (useGenAiData as jest.Mock).mockReset();
+    (useGenAiData as Mock).mockReset();
   });
 
   it('passes isEsqlMode to the hook when textBasedHits is an array', () => {
@@ -127,7 +139,7 @@ describe('DocViewerObsTracesGenAi', () => {
   it('keeps the tab rendered while long messages are being recovered', () => {
     // Recovery only affects the conversation, so replacing the whole tab with a
     // skeleton would hide metadata that is already available.
-    (useGenAiData as jest.Mock).mockReturnValue({
+    (useGenAiData as Mock).mockReturnValue({
       genAi: emptyConversation,
       isGenAiSpan: true,
       loading: true,
@@ -148,7 +160,7 @@ describe('DocViewerObsTracesGenAi', () => {
   });
 
   it('renders nothing for a document without gen_ai data', () => {
-    (useGenAiData as jest.Mock).mockReturnValue({
+    (useGenAiData as Mock).mockReturnValue({
       genAi: undefined,
       isGenAiSpan: false,
       loading: false,

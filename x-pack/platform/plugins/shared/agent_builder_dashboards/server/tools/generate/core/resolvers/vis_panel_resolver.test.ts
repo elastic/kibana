@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
@@ -14,20 +16,23 @@ import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createVisPanelResolver } from './vis_panel_resolver';
 
-jest.mock('@kbn/agent-builder-visualizations-server', () => ({
-  buildLensConfig: jest.fn(),
-  buildVegaConfig: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-visualizations-server', () => {
+      const mocked = {
+      buildLensConfig: vi.fn(),
+      buildVegaConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedBuildLensConfig = jest.mocked(buildLensConfig);
-const mockedBuildVegaConfig = jest.mocked(buildVegaConfig);
+const mockedBuildLensConfig = vi.mocked(buildLensConfig);
+const mockedBuildVegaConfig = vi.mocked(buildVegaConfig);
 
 const createMockLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 describe('createVisPanelResolver', () => {

@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { safeExec } from './utils';
 import { readVaultConfigFromDevVault, resetDevVaultConfigCache } from './profiles';
 
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  safeExec: jest.fn(),
-}));
+vi.mock('./utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils')),
+      safeExec: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedSafeExec = jest.mocked(safeExec);
+const mockedSafeExec = vi.mocked(safeExec);
 
 const VALID_CONFIG = {
   openrouter: { baseUrl: 'https://openrouter.example', apiKey: 'or-key' },
@@ -24,12 +30,12 @@ const VALID_CONFIG = {
 const encode = (config: object) => Buffer.from(JSON.stringify(config)).toString('base64');
 
 describe('readVaultConfigFromDevVault', () => {
-  let stderr: jest.SpyInstance;
+  let stderr: MockInstance;
 
   beforeEach(() => {
     resetDevVaultConfigCache();
     mockedSafeExec.mockReset();
-    stderr = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
   });
 
   afterEach(() => {

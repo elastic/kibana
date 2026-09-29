@@ -7,20 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { WorkflowVisualEditorFlyoutTarget } from './workflow_visual_editor_flyout';
 import { WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
 
-jest.mock('../../hooks/use_workflows_monaco_theme', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
+vi.mock('../../hooks/use_workflows_monaco_theme', () => {
+      const mocked = {
+      useWorkflowsMonacoTheme: vi.fn(),
+      WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value }: any) => <div data-test-subj="editorValue">{value}</div>,
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({ value }: any) => <div data-test-subj="editorValue">{value}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderFlyout = (target: WorkflowVisualEditorFlyoutTarget) =>
   render(
@@ -30,7 +38,7 @@ const renderFlyout = (target: WorkflowVisualEditorFlyoutTarget) =>
         editorYaml=""
         canExecuteWorkflow={true}
         isYamlValid={true}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
         // Bypasses TypeIcon, which requires a WorkflowsUiServicesProvider not
         // needed to test the title's deslugify behavior.
         renderStepIcon={() => null}

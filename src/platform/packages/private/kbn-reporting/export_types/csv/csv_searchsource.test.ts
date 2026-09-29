@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/generate-csv', () => ({
-  CsvGenerator: class CsvGeneratorMock {
-    generateData() {
-      return {
-        size: 123,
-        content_type: 'text/csv',
-      };
-    }
-  },
-}));
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
+vi.mock('@kbn/generate-csv', () => {
+      const mocked = {
+      CsvGenerator: class CsvGeneratorMock {
+        generateData() {
+          return {
+            size: 123,
+            content_type: 'text/csv',
+          };
+        }
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -43,11 +49,11 @@ const encryptionKey = 'tetkey';
 const headers = { sid: 'cooltestheaders' };
 const taskInstanceFields = { startedAt: null, retryAt: null };
 let encryptedHeaders: string;
-let stream: jest.Mocked<Writable>;
+let stream: Mocked<Writable>;
 let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
 const esClient = elasticsearchServiceMock.createClusterClient();
 const data = dataPluginMock.createStartContract();
-const searchSourceAsScoped = jest.spyOn(data.search.searchSource, 'asScoped');
+const searchSourceAsScoped = vi.spyOn(data.search.searchSource, 'asScoped');
 
 beforeAll(async () => {
   // use fieldFormats plugin for csv formats
@@ -122,7 +128,7 @@ test('gets the csv content from job parameters', async () => {
 });
 
 test('uses the provided logger', async () => {
-  const logSpy = jest.spyOn(mockLogger, 'get');
+  const logSpy = vi.spyOn(mockLogger, 'get');
 
   await mockCsvSearchSourceExportType.runTask({
     jobId: 'cool-job-id',

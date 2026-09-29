@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createActionPolicyAttachmentDefinition } from './action_policy_attachment_definition';
 
-jest.mock('./action_policy_inline_content', () => ({
-  ActionPolicyInlineContent: () => <div data-test-subj="mockInlineContent" />,
-}));
+vi.mock('./action_policy_inline_content', () => {
+      const mocked = {
+      ActionPolicyInlineContent: () => <div data-test-subj="mockInlineContent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./action_policy_canvas_content', () => ({
-  ActionPolicyCanvasContent: () => <div data-test-subj="mockCanvasContent" />,
-}));
+vi.mock('./action_policy_canvas_content', () => {
+      const mocked = {
+      ActionPolicyCanvasContent: () => <div data-test-subj="mockCanvasContent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockServices = () => ({
   container: {} as any,
@@ -64,8 +72,8 @@ describe('createActionPolicyAttachmentDefinition', () => {
         attachment: createAttachment(),
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
-        openCanvas: jest.fn(),
+        updateOrigin: vi.fn(),
+        openCanvas: vi.fn(),
       });
       expect(buttons.find((b) => b.label === 'Preview')).toBeDefined();
     });
@@ -76,7 +84,7 @@ describe('createActionPolicyAttachmentDefinition', () => {
         attachment: createAttachment(),
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
       expect(buttons).toHaveLength(0);
     });
@@ -100,9 +108,9 @@ describe('createActionPolicyAttachmentDefinition', () => {
           {definition.renderCanvasContent!(
             { attachment: createAttachment(), isSidebar: false },
             {
-              registerActionButtons: jest.fn(),
-              updateOrigin: jest.fn(),
-              closeCanvas: jest.fn(),
+              registerActionButtons: vi.fn(),
+              updateOrigin: vi.fn(),
+              closeCanvas: vi.fn(),
             }
           )}
         </>

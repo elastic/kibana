@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { DashboardApi, DashboardInternalApi } from '@kbn/dashboard-plugin/public';
 
 import { useDashboardRenderer } from './use_dashboard_renderer';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
 const mockDashboardContainer = {} as DashboardApi;
 const mockDashboardInternalApi = {} as DashboardInternalApi;

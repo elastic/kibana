@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { saveSavedSearch } from './save_saved_searches';
@@ -77,7 +79,7 @@ describe('saveSavedSearch', () => {
   });
 
   test('should call savedObjectsClient.create for saving new search', async () => {
-    cmApi.search = jest.fn().mockReturnValue({
+    cmApi.search = vi.fn().mockReturnValue({
       hits: [
         {
           attributes: {
@@ -86,7 +88,7 @@ describe('saveSavedSearch', () => {
         },
       ],
     });
-    cmApi.create = jest.fn().mockReturnValue({
+    cmApi.create = vi.fn().mockReturnValue({
       item: {
         id: 'id',
       },
@@ -104,7 +106,7 @@ describe('saveSavedSearch', () => {
   });
 
   test('should call savedObjectsClient.update for saving existing search', async () => {
-    cmApi.update = jest.fn().mockReturnValue({
+    cmApi.update = vi.fn().mockReturnValue({
       item: {
         id: 'id',
       },
@@ -121,7 +123,7 @@ describe('saveSavedSearch', () => {
   });
 
   test('should call savedObjectsTagging.ui.updateTagsReferences', async () => {
-    cmApi.update = jest.fn().mockReturnValue({
+    cmApi.update = vi.fn().mockReturnValue({
       item: {
         id: 'id',
       },
@@ -129,7 +131,7 @@ describe('saveSavedSearch', () => {
 
     const savedObjectsTagging = {
       ui: {
-        updateTagsReferences: jest.fn((_, tags) => tags),
+        updateTagsReferences: vi.fn((_, tags) => tags),
       },
     } as unknown as SavedObjectsTaggingApi;
     await saveSavedSearch(

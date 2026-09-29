@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '../../../common/__mocks__';
 import '../__mocks__/kea_logic';
 
@@ -19,7 +21,7 @@ import { Analytics } from '.';
 
 describe('EnterpriseSearchAnalytics', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('always renders the overview', () => {

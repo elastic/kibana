@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { Storage } from './storage';
 import type { IStorage, IStorageWrapper } from './types';
@@ -15,10 +17,10 @@ const payload = { first: 'john', last: 'smith' };
 const createMockStore = (): MockedKeys<IStorage> => {
   let store: Record<string, any> = {};
   return {
-    getItem: jest.fn().mockImplementation((key) => store[key]),
-    setItem: jest.fn().mockImplementation((key, value) => (store[key] = value)),
-    removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
-    clear: jest.fn().mockImplementation(() => (store = {})),
+    getItem: vi.fn().mockImplementation((key) => store[key]),
+    setItem: vi.fn().mockImplementation((key, value) => (store[key] = value)),
+    removeItem: vi.fn().mockImplementation((key: string) => delete store[key]),
+    clear: vi.fn().mockImplementation(() => (store = {})),
   };
 };
 
@@ -27,7 +29,7 @@ describe('StorageService', () => {
   let mockStore: MockedKeys<IStorage>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockStore = createMockStore();
     storage = new Storage(mockStore);
   });
@@ -69,7 +71,7 @@ describe('StorageService', () => {
 
   describe('json data', () => {
     test('should parse JSON when reading from the store', () => {
-      mockStore.getItem = jest.fn().mockImplementationOnce(() => JSON.stringify(payload));
+      mockStore.getItem = vi.fn().mockImplementationOnce(() => JSON.stringify(payload));
 
       const data = storage.get('name');
       expect(data).toEqual(payload);
@@ -91,7 +93,7 @@ describe('StorageService', () => {
     });
 
     test('should return null when invalid JSON', () => {
-      mockStore.getItem = jest.fn().mockImplementationOnce(() => 'not: json');
+      mockStore.getItem = vi.fn().mockImplementationOnce(() => 'not: json');
 
       const data = storage.get('name');
       expect(data).toBe(null);

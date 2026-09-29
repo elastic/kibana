@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import type { z } from '@kbn/zod/v4';
 import { validateRecordKeysAllowed } from '../../common/utils';
 import { commonIncidentSchemaObjectProperties } from './v1';
@@ -13,7 +15,7 @@ import { commonIncidentSchemaObjectProperties } from './v1';
 describe('validateRecordKeysAllowed for ServiceNow additional_fields', () => {
   it('returns an error if the keys are not allowed', () => {
     const ctx = {
-      addIssue: jest.fn(),
+      addIssue: vi.fn(),
     } as unknown as z.RefinementCtx;
     validateRecordKeysAllowed({
       record: { short_description: 'test' },

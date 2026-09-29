@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -57,7 +59,7 @@ const getFilterRow = (filterValue: string) => {
 const renderSourceFiltersTable = ({
   filterFilter = '',
   indexPattern = createDataView(),
-  saveIndexPattern = jest.fn(async () => {}),
+  saveIndexPattern = vi.fn(async () => {}),
 }: Partial<React.ComponentProps<typeof SourceFiltersTable>> = {}) => {
   renderWithI18n(
     <SourceFiltersTable
@@ -73,11 +75,11 @@ const renderSourceFiltersTable = ({
 
 describe('SourceFiltersTable', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
+    vi.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should render normally', () => {
@@ -100,7 +102,7 @@ describe('SourceFiltersTable', () => {
 
   it('should show a loading indicator when saving', async () => {
     const user = userEvent.setup();
-    const saveIndexPattern = jest.fn(async () => {});
+    const saveIndexPattern = vi.fn(async () => {});
 
     renderSourceFiltersTable({
       indexPattern: createDataView([{ value: 'tim*' }]),
@@ -125,7 +127,7 @@ describe('SourceFiltersTable', () => {
 
   it('should remove a filter', async () => {
     const user = userEvent.setup();
-    const saveIndexPattern = jest.fn(async () => {});
+    const saveIndexPattern = vi.fn(async () => {});
 
     const { indexPattern } = renderSourceFiltersTable({
       indexPattern: createDataView([{ value: 'tim*' }, { value: 'na*' }]),
@@ -145,7 +147,7 @@ describe('SourceFiltersTable', () => {
 
   it('should add a filter', async () => {
     const user = userEvent.setup();
-    const saveIndexPattern = jest.fn(async () => {});
+    const saveIndexPattern = vi.fn(async () => {});
 
     const { indexPattern } = renderSourceFiltersTable({
       indexPattern: createDataView([{ value: 'tim*' }]),
@@ -163,7 +165,7 @@ describe('SourceFiltersTable', () => {
 
   it('should update a filter', async () => {
     const user = userEvent.setup();
-    const saveIndexPattern = jest.fn(async () => {});
+    const saveIndexPattern = vi.fn(async () => {});
 
     const { indexPattern } = renderSourceFiltersTable({
       indexPattern: createDataView([{ value: 'tim*' }]),

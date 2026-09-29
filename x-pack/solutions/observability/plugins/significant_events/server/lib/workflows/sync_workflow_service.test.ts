@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -13,25 +16,25 @@ import { createSyncWorkflowService } from './sync_workflow';
 
 const createLogger = (): Logger => {
   const logger = {
-    get: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
-    fatal: jest.fn(),
+    get: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    trace: vi.fn(),
+    fatal: vi.fn(),
   } as unknown as Logger;
-  (logger.get as jest.Mock).mockReturnValue(logger);
+  (logger.get as Mock).mockReturnValue(logger);
   return logger;
 };
 
 const createManagementApi = () => {
-  const getWorkflow = jest.fn();
+  const getWorkflow = vi.fn();
   return {
     getWorkflow,
-    getClient: jest.fn(() => ({ getWorkflow })),
-    updateWorkflow: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+    getClient: vi.fn(() => ({ getWorkflow })),
+    updateWorkflow: vi.fn(),
+  } as unknown as Mocked<WorkflowsServerPluginSetup['management']>;
 };
 
 const request = {} as KibanaRequest;
@@ -46,7 +49,7 @@ describe('SyncWorkflowService', () => {
   });
 
   it('enables the workflow when it is installed but disabled', async () => {
-    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
+    (managementApi.getWorkflow as Mock).mockResolvedValue({ enabled: false });
 
     const service = createSyncWorkflowService({ logger, managementApi });
     await service.ensureEnabled({ request });
@@ -64,7 +67,7 @@ describe('SyncWorkflowService', () => {
   });
 
   it('is a no-op when the workflow is already enabled', async () => {
-    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: true });
+    (managementApi.getWorkflow as Mock).mockResolvedValue({ enabled: true });
 
     const service = createSyncWorkflowService({ logger, managementApi });
     await service.ensureEnabled({ request });
@@ -73,7 +76,7 @@ describe('SyncWorkflowService', () => {
   });
 
   it('does not update when the workflow is not installed yet', async () => {
-    (managementApi.getWorkflow as jest.Mock).mockResolvedValue(undefined);
+    (managementApi.getWorkflow as Mock).mockResolvedValue(undefined);
 
     const service = createSyncWorkflowService({ logger, managementApi });
     await service.ensureEnabled({ request });

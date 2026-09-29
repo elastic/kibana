@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Footer } from './footer';
@@ -13,7 +16,7 @@ import { TestProviders } from '../../../common/mock';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { RULE_DETAILS_FOOTER_TEST_ID } from './test_ids';
 
-jest.mock('../../../agent_builder/hooks/use_agent_builder_availability');
+vi.mock('../../../agent_builder/hooks/use_agent_builder_availability');
 
 const renderFooter = () =>
   render(
@@ -24,7 +27,7 @@ const renderFooter = () =>
 
 describe('<Footer />', () => {
   beforeEach(() => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
       isAgentBuilderEnabled: false,
     });
@@ -37,7 +40,7 @@ describe('<Footer />', () => {
   });
 
   it('should render the footer when agent chat is enabled', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: true,
       isAgentBuilderEnabled: true,
     });

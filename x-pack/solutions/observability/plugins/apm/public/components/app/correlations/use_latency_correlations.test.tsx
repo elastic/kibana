@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { merge } from 'lodash';
@@ -26,7 +28,7 @@ import type { APIEndpoint } from '../../../../server';
 
 function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolean }>) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
-    jest.fn().mockImplementation(async (pathname) => {
+    vi.fn().mockImplementation(async (pathname) => {
       await delay(100);
       if (error) {
         throw new Error('Something went wrong');
@@ -62,8 +64,8 @@ function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolea
     });
 
   const history = createMemoryHistory();
-  jest.spyOn(history, 'push');
-  jest.spyOn(history, 'replace');
+  vi.spyOn(history, 'push');
+  vi.spyOn(history, 'replace');
 
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
@@ -90,11 +92,11 @@ function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolea
 describe('useLatencyCorrelations', () => {
   describe('when successfully loading results', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should automatically start fetching results', async () => {
@@ -121,7 +123,7 @@ describe('useLatencyCorrelations', () => {
       });
 
       try {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
 
         expect(result.current.progress).toEqual({
           isRunning: true,
@@ -139,7 +141,7 @@ describe('useLatencyCorrelations', () => {
       });
 
       try {
-        jest.advanceTimersByTime(150);
+        vi.advanceTimersByTime(150);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
 
         expect(result.current.progress).toEqual({
@@ -159,7 +161,7 @@ describe('useLatencyCorrelations', () => {
           percentileThresholdValue: 1.234,
         });
 
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
 
         // field candidates are an implementation detail and
@@ -170,7 +172,7 @@ describe('useLatencyCorrelations', () => {
           loaded: 0.1,
         });
 
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.4));
 
         // field value pairs are an implementation detail and
@@ -181,7 +183,7 @@ describe('useLatencyCorrelations', () => {
           loaded: 0.4,
         });
 
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(1));
 
         expect(result.current.progress).toEqual({
@@ -217,11 +219,11 @@ describe('useLatencyCorrelations', () => {
 
   describe('when throwing an error', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should automatically start fetching results', async () => {
@@ -245,7 +247,7 @@ describe('useLatencyCorrelations', () => {
       });
 
       try {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
 
         expect(result.current.progress).toEqual({
           isRunning: true,
@@ -264,7 +266,7 @@ describe('useLatencyCorrelations', () => {
 
       try {
         act(() => {
-          jest.advanceTimersByTime(150);
+          vi.advanceTimersByTime(150);
         });
         await waitFor(() =>
           expect(result.current.progress).toEqual({
@@ -281,11 +283,11 @@ describe('useLatencyCorrelations', () => {
 
   describe('when canceled', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should stop running', async () => {
@@ -294,7 +296,7 @@ describe('useLatencyCorrelations', () => {
       });
 
       try {
-        jest.advanceTimersByTime(150);
+        vi.advanceTimersByTime(150);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
 
         expect(result.current.progress.isRunning).toBe(true);

@@ -5,28 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 
 import { getListItemByValues } from './get_list_item_by_values';
 import { getListItemByValue } from './get_list_item_by_value';
 import { getListItemByValueOptionsMocks } from './get_list_item_by_value.mock';
 
-jest.mock('./get_list_item_by_values', () => ({
-  getListItemByValues: jest.fn(),
-}));
+vi.mock('./get_list_item_by_values', () => {
+      const mocked = {
+      getListItemByValues: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('get_list_by_value', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Calls get_list_item_by_values with its input', async () => {
     const listItemMock = getListItemResponseMock();
-    (getListItemByValues as unknown as jest.Mock).mockResolvedValueOnce([listItemMock]);
+    (getListItemByValues as unknown as Mock).mockResolvedValueOnce([listItemMock]);
     const options = getListItemByValueOptionsMocks();
     const listItem = await getListItemByValue(options);
     const expected = getListItemResponseMock();

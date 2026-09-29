@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -28,8 +30,8 @@ interface WrapperProps {
 
 const DESCRIPTION_ID = 'fieldListGrouped__ariaDescription';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
@@ -63,7 +65,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       scrollToTopResetCounter: 0,
       fieldsExistInIndex: true,
       screenReaderDescriptionId: 'testId',
-      renderFieldItem: jest.fn(({ field, itemIndex, groupIndex }) => (
+      renderFieldItem: vi.fn(({ field, itemIndex, groupIndex }) => (
         <EuiText
           data-test-subj="testFieldItem"
           data-name={`${field.name}-${groupIndex}-${itemIndex}`}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -13,16 +16,16 @@ import { AWS_IDENTITY_FEDERATION_ENABLED_FLAG } from '../../common/constants/clo
 import { useStartServices } from './use_core';
 import { useDisabledIdentityFederationProviders } from './use_disabled_identity_federation_providers';
 
-jest.mock('./use_core');
+vi.mock('./use_core');
 
-const mockUseStartServices = useStartServices as jest.MockedFunction<typeof useStartServices>;
+const mockUseStartServices = useStartServices as MockedFunction<typeof useStartServices>;
 
 describe('useDisabledIdentityFederationProviders', () => {
   let awsFlag$: BehaviorSubject<boolean>;
-  const getBooleanValue$ = jest.fn();
+  const getBooleanValue$ = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     awsFlag$ = new BehaviorSubject<boolean>(true);
     getBooleanValue$.mockReturnValue(awsFlag$.asObservable());
     mockUseStartServices.mockReturnValue({ featureFlags: { getBooleanValue$ } } as any);

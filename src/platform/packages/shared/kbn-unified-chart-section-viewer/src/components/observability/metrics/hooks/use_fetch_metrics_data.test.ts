@@ -7,67 +7,94 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 // Stable references for mock functions that must not change across renders
 // (otherwise useAsyncFn recreates executeFetch, causing infinite loops).
-const mockTrackRequest = jest.fn(
+const mockTrackRequest = vi.fn(
   async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
     const result = await fn();
     return result.data;
   }
 );
-const mockTrackMetricsInfo = jest.fn();
-const mockTrackEsqlQueryFailure = jest.fn();
+const mockTrackMetricsInfo = vi.fn();
+const mockTrackEsqlQueryFailure = vi.fn();
 
 // Mock ALL external heavy dependencies with factory functions to avoid loading
 // their transitive dependency trees (e.g., @kbn/data-plugin/public).
-jest.mock('../utils/execute_esql_query', () => ({
-  executeEsqlQuery: jest.fn(),
-}));
-jest.mock('../utils/parse_metrics_response_with_telemetry', () => ({
-  parseMetricsWithTelemetry: jest.fn(),
-}));
-jest.mock('../utils/get_esql_query', () => ({
-  getEsqlQuery: jest.fn((query: { esql?: string } | undefined) => query?.esql),
-}));
-jest.mock('@kbn/esql-utils', () => ({
-  buildMetricsInfoQuery: jest.fn((esql: string, dims?: string[], postFilter?: string) => {
-    if (!esql?.trim()) return '';
-    const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
-    const post = postFilter ? ` | WHERE ${postFilter}` : '';
-    return `${esql}${preFilter} | METRICS_INFO${post}`;
-  }),
-  escapeStringValue: jest.fn((val: string) => `"${val}"`),
-  buildJoinedFilter: jest.fn(
-    (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
-      fields?.map(clause).join(separator) ?? ''
-  ),
-  // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
-  // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
-  hasTransformationalCommand: jest.fn(() => false),
-  // Used by buildEsqlQueryFailureEvent for the `query_type` telemetry field.
-  getSourceCommandFromESQLQuery: jest.fn((esql?: string) => {
-    const sourceCommand = esql?.trim().match(/^(TS|FROM)\b/i);
-    return sourceCommand ? sourceCommand[1].toUpperCase() : '';
-  }),
-}));
-jest.mock('@kbn/field-utils', () => ({
-  getFieldIconType: jest.fn(() => 'number'),
-}));
-jest.mock('../../../../context/ebt_telemetry_context', () => ({
-  useTelemetry: () => ({
-    trackMetricsInfo: mockTrackMetricsInfo,
-    trackEsqlQueryFailure: mockTrackEsqlQueryFailure,
-  }),
-}));
-jest.mock('../../../../context/chart_section_inspector', () => ({
-  useChartSectionInspector: () => ({
-    trackRequest: mockTrackRequest,
-  }),
-}));
-const mockReportError = jest.fn();
-jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
-  useReportChartSectionError: jest.fn(() => mockReportError),
-}));
+vi.mock('../utils/execute_esql_query', () => {
+      const mocked = {
+      executeEsqlQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils/parse_metrics_response_with_telemetry', () => {
+      const mocked = {
+      parseMetricsWithTelemetry: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils/get_esql_query', () => {
+      const mocked = {
+      getEsqlQuery: vi.fn((query: { esql?: string } | undefined) => query?.esql),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      buildMetricsInfoQuery: vi.fn((esql: string, dims?: string[], postFilter?: string) => {
+        if (!esql?.trim()) return '';
+        const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
+        const post = postFilter ? ` | WHERE ${postFilter}` : '';
+        return `${esql}${preFilter} | METRICS_INFO${post}`;
+      }),
+      escapeStringValue: vi.fn((val: string) => `"${val}"`),
+      buildJoinedFilter: vi.fn(
+        (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
+          fields?.map(clause).join(separator) ?? ''
+      ),
+      // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
+      // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
+      hasTransformationalCommand: vi.fn(() => false),
+      // Used by buildEsqlQueryFailureEvent for the `query_type` telemetry field.
+      getSourceCommandFromESQLQuery: vi.fn((esql?: string) => {
+        const sourceCommand = esql?.trim().match(/^(TS|FROM)\b/i);
+        return sourceCommand ? sourceCommand[1].toUpperCase() : '';
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/field-utils', () => {
+      const mocked = {
+      getFieldIconType: vi.fn(() => 'number'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../context/ebt_telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        trackMetricsInfo: mockTrackMetricsInfo,
+        trackEsqlQueryFailure: mockTrackEsqlQueryFailure,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../context/chart_section_inspector', () => {
+      const mocked = {
+      useChartSectionInspector: () => ({
+        trackRequest: mockTrackRequest,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockReportError = vi.fn();
+vi.mock('../../../chart/hooks/use_report_chart_section_error', () => {
+      const mocked = {
+      useReportChartSectionError: vi.fn(() => mockReportError),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -84,8 +111,8 @@ import {
   METRICS_PROFILE_TELEMETRY_NAME,
 } from '../telemetry/constants';
 
-const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
-const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
+const mockExecuteEsqlQuery = executeEsqlQuery as MockedFunction<typeof executeEsqlQuery>;
+const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as MockedFunction<
   typeof parseMetricsWithTelemetry
 >;
 
@@ -128,7 +155,7 @@ type MockDataView = Pick<DataView, 'getFieldByName' | 'getIndexPattern'> & {
 // derivation in useFetchMetricsData (#264957) is a no-op for existing
 // tests. Tests that exercise the prune behavior override this per-test.
 const createMockDataView = (): MockDataView => ({
-  getFieldByName: jest.fn((name: string) => ({ name } as unknown as DataViewField)),
+  getFieldByName: vi.fn((name: string) => ({ name } as unknown as DataViewField)),
   getIndexPattern: () => 'metrics-*',
   isTimeBased: () => true,
 });
@@ -137,12 +164,12 @@ const createMockDataView = (): MockDataView => ({
 // and `uiSettings`. Declared as a partial so we don't have to mock the
 // entire UnifiedHistogramServices tree.
 interface MockServices {
-  data: { search: { search: jest.Mock } };
+  data: { search: { search: Mock } };
   uiSettings: Record<string, unknown>;
 }
 
 const createMockServices = (): MockServices => ({
-  data: { search: { search: jest.fn() } },
+  data: { search: { search: vi.fn() } },
   uiSettings: {},
 });
 
@@ -162,13 +189,13 @@ const createDefaultParams = (overrides?: Record<string, unknown>) => ({
 });
 
 describe('useFetchMetricsData', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
 
     // Restore mock implementations after clearAllMocks resets them.
     // Without these restorations, getEsqlQuery returns undefined (disabling shouldFetch),
     // trackRequest stops calling fn() (so the fetch never runs), etc.
-    const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
+    const { getEsqlQuery } = (await vi.importMock('../utils/get_esql_query'));
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
     const {
@@ -176,7 +203,7 @@ describe('useFetchMetricsData', () => {
       buildJoinedFilter,
       hasTransformationalCommand,
       getSourceCommandFromESQLQuery,
-    } = jest.requireMock('@kbn/esql-utils');
+    } = (await vi.importMock('@kbn/esql-utils'));
     buildMetricsInfoQuery.mockImplementation(
       (esql: string, dims?: string[], postFilter?: string) => {
         if (!esql?.trim()) return '';
@@ -301,7 +328,7 @@ describe('useFetchMetricsData', () => {
     });
 
     it('does not fetch when metricsInfoQuery is empty', async () => {
-      const { buildMetricsInfoQuery } = jest.requireMock('@kbn/esql-utils');
+      const { buildMetricsInfoQuery } = (await vi.importMock('@kbn/esql-utils'));
       buildMetricsInfoQuery.mockReturnValue('');
 
       const params = createDefaultParams();
@@ -770,16 +797,14 @@ describe('useFetchMetricsData', () => {
     });
   });
 
-  describe('appliedDimensions vs selectedDimensions (#264957)', () => {
-    const { buildMetricsInfoQuery: buildMetricsInfoQueryMock } = jest.requireMock(
-      '@kbn/esql-utils'
-    ) as { buildMetricsInfoQuery: jest.Mock };
+  describe('appliedDimensions vs selectedDimensions (#264957)', async () => {
+    const { buildMetricsInfoQuery: buildMetricsInfoQueryMock } = (await vi.importMock('@kbn/esql-utils')) as { buildMetricsInfoQuery: Mock };
 
     it('passes no dimensions to the query when none of the selected ones exist on the current data view', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension];
       // Stream B does not carry `host.name` — simulate the issue scenario.
-      (params.fetchParams.dataView as any).getFieldByName = jest.fn(() => undefined);
+      (params.fetchParams.dataView as any).getFieldByName = vi.fn(() => undefined);
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -797,7 +822,7 @@ describe('useFetchMetricsData', () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension, serviceDimension];
       // Only `host.name` exists on the current data view.
-      (params.fetchParams.dataView as any).getFieldByName = jest.fn((name: string) =>
+      (params.fetchParams.dataView as any).getFieldByName = vi.fn((name: string) =>
         name === 'host.name' ? { name } : undefined
       );
 
@@ -850,7 +875,7 @@ describe('useFetchMetricsData', () => {
 
     it('does not invoke getFieldByName when there are no selected dimensions', async () => {
       const params = createDefaultParams();
-      const getFieldByName = jest.fn((name: string) => ({ name }));
+      const getFieldByName = vi.fn((name: string) => ({ name }));
       (params.fetchParams.dataView as any).getFieldByName = getFieldByName;
 
       const { result } = renderHook(() => useFetchMetricsData(params));
@@ -886,7 +911,7 @@ describe('useFetchMetricsData', () => {
         fetchParams: {
           ...params.fetchParams,
           dataView: {
-            getFieldByName: jest.fn(() => undefined),
+            getFieldByName: vi.fn(() => undefined),
             getIndexPattern: () => 'metrics-*',
             isTimeBased: () => true,
           } as any,

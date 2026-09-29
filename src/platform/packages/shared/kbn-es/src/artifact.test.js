@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
@@ -14,12 +16,15 @@ import path from 'path';
 import { Readable } from 'stream';
 
 import { ToolingLog } from '@kbn/tooling-log';
-jest.mock('timers/promises', () => ({
-  setTimeout: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('node-fetch');
+vi.mock('timers/promises', () => {
+      const mocked = {
+      setTimeout: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('node-fetch');
 import fetch from 'node-fetch';
-const { Headers, Response } = jest.requireActual('node-fetch');
+const { Headers, Response } = require('node-fetch');
 
 import { Artifact } from './artifact';
 
@@ -112,7 +117,7 @@ afterAll(() => {
 });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 
   MOCKS = {
     valid: {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 
@@ -17,35 +20,47 @@ import { useScheduleView } from './use_schedule_view';
 import type { AlertsSelectionSettings } from '../types';
 import { SETTINGS_TAB_ID } from '../constants';
 
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-}));
-jest.mock('./use_settings_view', () => ({
-  useSettingsView: jest.fn(),
-}));
-jest.mock('./use_schedule_view', () => ({
-  useScheduleView: jest.fn(),
-}));
-jest.mock('../schedule/logic/use_find_schedules', () => ({
-  useFindAttackDiscoverySchedules: jest.fn(),
-}));
+vi.mock('react-router', () => {
+      const mocked = {
+      ...require('react-router'),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_settings_view', () => {
+      const mocked = {
+      useSettingsView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_schedule_view', () => {
+      const mocked = {
+      useScheduleView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../schedule/logic/use_find_schedules', () => {
+      const mocked = {
+      useFindAttackDiscoverySchedules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSettingsView = useSettingsView as jest.Mock;
-const mockUseScheduleView = useScheduleView as jest.Mock;
-const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
+const mockUseSettingsView = useSettingsView as Mock;
+const mockUseScheduleView = useScheduleView as Mock;
+const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as MockedFunction<
   typeof useFindAttackDiscoverySchedules
 >;
 
 const defaultProps = {
   connectorId: undefined,
-  onConnectorIdSelected: jest.fn(),
-  onGenerate: jest.fn(),
-  onSettingsChanged: jest.fn(),
-  onSettingsReset: jest.fn(),
-  onSettingsSave: jest.fn(),
+  onConnectorIdSelected: vi.fn(),
+  onGenerate: vi.fn(),
+  onSettingsChanged: vi.fn(),
+  onSettingsReset: vi.fn(),
+  onSettingsSave: vi.fn(),
   settings: {
     end: 'now-24h',
     filters: [],
@@ -58,7 +73,7 @@ const defaultProps = {
 
 describe('useTabsView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseSettingsView.mockReturnValue({
       settingsView: <div data-test-subj="mockSettingsView" />,
@@ -78,7 +93,7 @@ describe('useTabsView', () => {
     mockUseFindAttackDiscoverySchedules.mockReturnValue({
       data: { schedules: [], total: 0 },
       isLoading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
+    } as unknown as Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
   });
 
   it('renders the schedule view by default', () => {
@@ -148,7 +163,7 @@ describe('useTabsView', () => {
     mockUseFindAttackDiscoverySchedules.mockReturnValue({
       data: mockFindAttackDiscoverySchedules,
       isLoading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
+    } as unknown as Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
     const { result, rerender } = renderHook(() => useTabsView(defaultProps), {
       wrapper: TestProviders,

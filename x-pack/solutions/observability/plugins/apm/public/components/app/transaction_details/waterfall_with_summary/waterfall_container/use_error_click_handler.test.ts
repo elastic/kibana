@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useErrorClickHandler } from './use_error_click_handler';
 import * as useApmRouterModule from '../../../../../hooks/use_apm_router';
@@ -13,15 +16,15 @@ import * as useApmPluginContextModule from '../../../../../context/apm_plugin/us
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 
 describe('useErrorClickHandler', () => {
-  const mockNavigateToUrl = jest.fn();
-  const mockLink = jest.fn();
+  const mockNavigateToUrl = vi.fn();
+  const mockLink = vi.fn();
 
-  const mockUseApmRouter = jest.spyOn(useApmRouterModule, 'useApmRouter');
-  const mockUseAnyOfApmParams = jest.spyOn(useApmParamsModule, 'useAnyOfApmParams');
-  const mockUseApmPluginContext = jest.spyOn(
+  const mockUseApmRouter = vi.spyOn(useApmRouterModule, 'useApmRouter');
+  const mockUseAnyOfApmParams = vi.spyOn(useApmParamsModule, 'useAnyOfApmParams');
+  const mockUseApmPluginContext = vi.spyOn(
     useApmPluginContextModule,
     'useApmPluginContext'
-  ) as jest.SpyInstance;
+  ) as MockInstance;
 
   const defaultQuery = {
     rangeFrom: 'now-15m',
@@ -61,7 +64,7 @@ describe('useErrorClickHandler', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockLink.mockImplementation((path: string) => `/apm${path}`);
 

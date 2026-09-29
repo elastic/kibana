@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -68,36 +71,39 @@ import { getPosturePolicy, POLICY_TEMPLATE_FORM_DTS } from './utils';
 const AGENTLESS_OPTION_LABEL = /elastic managed integration/i;
 
 // mock useParams
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn().mockReturnValue({
-    integration: undefined,
-  }),
-}));
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-jest.mock('../../common/api/use_package_policy_list');
-jest.mock('../../common/hooks/use_is_subscription_status_valid');
-jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn().mockReturnValue({
+        integration: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
+vi.mock('../../common/api/use_package_policy_list');
+vi.mock('../../common/hooks/use_is_subscription_status_valid');
+vi.mock('../../common/api/use_license_management_locator_api');
+vi.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
-const onChange = jest.fn();
+const onChange = vi.fn();
 
 const createReactQueryResponseWithRefetch = (
   data: Parameters<typeof createReactQueryResponse>[0]
 ) => {
   return {
     ...createReactQueryResponse(data),
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   };
 };
 
 describe('<CspPolicyTemplateForm />', () => {
   beforeEach(() => {
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       integration: undefined,
     });
 
-    (usePackagePolicyList as jest.Mock).mockImplementation((packageName) =>
+    (usePackagePolicyList as Mock).mockImplementation((packageName) =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
@@ -108,14 +114,14 @@ describe('<CspPolicyTemplateForm />', () => {
 
     onChange.mockClear();
 
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: { status: 'indexed', installedPackageVersion: '1.2.13' },
       })
     );
 
-    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
@@ -136,7 +142,7 @@ describe('<CspPolicyTemplateForm />', () => {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
     packageInfo?: PackageInfo;
-    onChange?: jest.Mock<void, [NewPackagePolicy]>;
+    onChange?: Mock<void, [NewPackagePolicy]>;
     isAgentlessEnabled?: boolean;
     integrationToEnable?: string;
     defaultSetupTechnology?: SetupTechnology;
@@ -177,7 +183,7 @@ describe('<CspPolicyTemplateForm />', () => {
   };
 
   it('shows loader when useIsSubscriptionStatusValid is loading', () => {
-    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'loading',
         data: undefined,
@@ -191,7 +197,7 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('shows license block if subscription is not allowed', () => {
-    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: false,
@@ -206,13 +212,13 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('license block renders with license url locator', () => {
-    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: false,
       })
     );
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() => 'http://license-url');
+    (useLicenseManagementLocatorApi as Mock).mockImplementation(() => 'http://license-url');
 
     const policy = getMockPolicyK8s();
     const { rerender } = render(<WrappedComponent newPolicy={policy} />);
@@ -222,13 +228,13 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('license block renders without license url locator', () => {
-    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+    (useIsSubscriptionStatusValid as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: false,
       })
     );
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(undefined);
+    (useLicenseManagementLocatorApi as Mock).mockImplementation(undefined);
 
     const policy = getMockPolicyK8s();
     const { rerender } = render(<WrappedComponent newPolicy={policy} />);
@@ -383,11 +389,11 @@ describe('<CspPolicyTemplateForm />', () => {
     }));
     policy.name = 'cloud_security_posture-1';
 
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       integration: 'kspm',
     });
 
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
@@ -396,7 +402,7 @@ describe('<CspPolicyTemplateForm />', () => {
       })
     );
 
-    (usePackagePolicyList as jest.Mock).mockImplementation(() =>
+    (usePackagePolicyList as Mock).mockImplementation(() =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
@@ -464,10 +470,10 @@ describe('<CspPolicyTemplateForm />', () => {
     }));
     policy.name = 'cloud_security_posture-1';
 
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       integration: 'vuln_mgmt',
     });
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
@@ -475,7 +481,7 @@ describe('<CspPolicyTemplateForm />', () => {
         },
       })
     );
-    (usePackagePolicyList as jest.Mock).mockImplementation(() =>
+    (usePackagePolicyList as Mock).mockImplementation(() =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
@@ -543,11 +549,11 @@ describe('<CspPolicyTemplateForm />', () => {
     }));
     policy.name = 'cloud_security_posture-1';
 
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       integration: 'cspm',
     });
 
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
@@ -555,7 +561,7 @@ describe('<CspPolicyTemplateForm />', () => {
         },
       })
     );
-    (usePackagePolicyList as jest.Mock).mockImplementation(() =>
+    (usePackagePolicyList as Mock).mockImplementation(() =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
@@ -1538,7 +1544,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
   describe('Agentless', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
@@ -1603,7 +1609,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for AWS and allow to select cloud connectors in ess aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+      vi.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
             cloudId:
@@ -1656,7 +1662,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for AWS and showcloud connectors in ess gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+      vi.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
             cloudId:
@@ -1705,7 +1711,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for AWS and show cloud connectors in ess azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+      vi.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
             cloudId:
@@ -1754,7 +1760,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+      vi.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
             cloudId: undefined,
@@ -1806,7 +1812,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for AWS and should show cloud connectors in serverless gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+      vi.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
             cloudId: undefined,
@@ -1858,7 +1864,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for AWS and should show cloud connectors in serverless azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+      vi.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
             cloudId: undefined,

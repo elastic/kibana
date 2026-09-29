@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../mock';
@@ -16,8 +18,8 @@ import {
   useSpaceSettingsContext,
 } from './use_space_settings_context';
 
-jest.mock('./use_request');
-jest.mock('../services');
+vi.mock('./use_request');
+vi.mock('../services');
 
 describe('useSpaceSettingsContext', () => {
   function renderHook() {
@@ -29,10 +31,10 @@ describe('useSpaceSettingsContext', () => {
     );
   }
   beforeEach(() => {
-    jest.mocked(ExperimentalFeaturesService.get).mockReturnValue({
+    vi.mocked(ExperimentalFeaturesService.get).mockReturnValue({
       useSpaceAwareness: true,
     } as any);
-    jest.mocked(useGetSpaceSettings).mockReturnValue({} as any);
+    vi.mocked(useGetSpaceSettings).mockReturnValue({} as any);
   });
   it('should return default defaultNamespace if no restrictions', () => {
     const res = renderHook();
@@ -40,7 +42,7 @@ describe('useSpaceSettingsContext', () => {
   });
 
   it('should return restricted defaultNamespace if there is namespace prefix restrictions', () => {
-    jest.mocked(useGetSpaceSettings).mockReturnValue({
+    vi.mocked(useGetSpaceSettings).mockReturnValue({
       isInitialLoading: false,
       data: {
         item: {

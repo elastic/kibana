@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { hasAlertsInSuppressionWindow } from './use_alert_close_info_modal';
 import { fetchQueryAlerts } from '../containers/detection_engine/alerts/api';
 
-jest.mock('../containers/detection_engine/alerts/api', () => ({
-  fetchQueryAlerts: jest.fn(),
-}));
+vi.mock('../containers/detection_engine/alerts/api', () => {
+      const mocked = {
+      fetchQueryAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('hasAlertsInSuppressionWindow', () => {
-  const fetchQueryAlertsMock = fetchQueryAlerts as jest.Mock;
+  const fetchQueryAlertsMock = fetchQueryAlerts as Mock;
 
   const mockSuccessfulResponse = (matchingAlerts: number) => {
     fetchQueryAlertsMock.mockResolvedValueOnce({
@@ -26,7 +32,7 @@ describe('hasAlertsInSuppressionWindow', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   interface BuildDescribeBodyParams {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -18,17 +20,23 @@ import type { FormValues, RuleQuery } from '../../../form/types';
 import { AlertConditionStep } from './alert_condition_step';
 import { QueryFieldRules } from './query_field_rules';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getEsqlColumns: jest.fn(async () => []),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getEsqlColumns: vi.fn(async () => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_compose_discover_time_field', () => ({
-  useComposeDiscoverTimeField: () => ({
-    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-    isTimeFieldResolved: true,
-  }),
-}));
+vi.mock('../use_compose_discover_time_field', () => {
+      const mocked = {
+      useComposeDiscoverTimeField: () => ({
+        timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+        isTimeFieldResolved: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const BASE_QUERY = 'FROM logs-*';
 const ALERT_BLOCK = '| WHERE count > 100';
@@ -98,7 +106,7 @@ const renderStep = (
     queryCommitted: true,
     ...stateOverrides,
   });
-  const dispatch = jest.fn();
+  const dispatch = vi.fn();
   const services = createMockServices();
   const formRef: { current: UseFormReturn<FormValues> | null } = { current: null };
 

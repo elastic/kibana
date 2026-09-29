@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -14,9 +16,12 @@ import userEvent from '@testing-library/user-event';
 import { SuccessFormControlled } from './success_form_controlled';
 import type { ApiKey } from './types';
 
-jest.mock('../../components/manage_keys_link', () => ({
-  ManageKeysLink: () => <div data-test-subj="manageKeysLink" />,
-}));
+vi.mock('../../components/manage_keys_link', () => {
+      const mocked = {
+      ManageKeysLink: () => <div data-test-subj="manageKeysLink" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SuccessFormControlled', () => {
   const apiKey: ApiKey = {
@@ -28,7 +33,7 @@ describe('SuccessFormControlled', () => {
   const originalExecCommand = document.execCommand;
 
   beforeAll(() => {
-    document.execCommand = jest.fn().mockReturnValue(true);
+    document.execCommand = vi.fn().mockReturnValue(true);
   });
 
   afterAll(() => {
@@ -36,11 +41,11 @@ describe('SuccessFormControlled', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders screen reader announcement text', async () => {
-    render(<SuccessFormControlled apiKey={apiKey} format="encoded" onFormatChange={jest.fn()} />);
+    render(<SuccessFormControlled apiKey={apiKey} format="encoded" onFormatChange={vi.fn()} />);
 
     expect(
       await screen.findByText(
@@ -52,7 +57,7 @@ describe('SuccessFormControlled', () => {
   it('announces copy success with format label', async () => {
     const user = userEvent.setup();
 
-    render(<SuccessFormControlled apiKey={apiKey} format="beats" onFormatChange={jest.fn()} />);
+    render(<SuccessFormControlled apiKey={apiKey} format="beats" onFormatChange={vi.fn()} />);
 
     await user.click(screen.getByLabelText('Copy to clipboard'));
 

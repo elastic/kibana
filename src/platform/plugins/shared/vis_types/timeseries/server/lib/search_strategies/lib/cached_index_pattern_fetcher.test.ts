@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import type { CachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
 import { getCachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
 
-jest.mock('../../../../common/index_patterns_utils');
+vi.mock('../../../../common/index_patterns_utils');
 
 describe('CachedIndexPatternFetcher', () => {
   let mockedIndices: DataView[] | [];
@@ -22,12 +25,12 @@ describe('CachedIndexPatternFetcher', () => {
     mockedIndices = [];
 
     const indexPatternsService = {
-      getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
-      get: jest.fn(() => Promise.resolve(mockedIndices[0])),
-      find: jest.fn(() => Promise.resolve(mockedIndices || [])),
+      getDefault: vi.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
+      get: vi.fn(() => Promise.resolve(mockedIndices[0])),
+      find: vi.fn(() => Promise.resolve(mockedIndices || [])),
     } as unknown as DataViewsService;
 
-    (fetchIndexPattern as jest.Mock).mockClear();
+    (fetchIndexPattern as Mock).mockClear();
 
     cachedIndexPatternFetcher = getCachedIndexPatternFetcher(indexPatternsService);
   });
@@ -62,7 +65,7 @@ describe('CachedIndexPatternFetcher', () => {
       await cachedIndexPatternFetcher('indexTitle');
       await cachedIndexPatternFetcher('indexTitle');
 
-      expect(fetchIndexPattern as jest.Mock).toHaveBeenCalledTimes(1);
+      expect(fetchIndexPattern as Mock).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -111,7 +114,7 @@ describe('CachedIndexPatternFetcher', () => {
       await cachedIndexPatternFetcher({ id: 'indexId' });
       await cachedIndexPatternFetcher({ id: 'indexId' });
 
-      expect(fetchIndexPattern as jest.Mock).toHaveBeenCalledTimes(1);
+      expect(fetchIndexPattern as Mock).toHaveBeenCalledTimes(1);
     });
   });
 });

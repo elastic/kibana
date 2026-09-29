@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
@@ -14,7 +16,7 @@ import {
 describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('throws an error with the keys of customFields in request that have invalid types', () => {
       expect(() =>
@@ -78,7 +80,7 @@ describe('validators', () => {
 
   describe('validateTemplatesCustomFieldsInRequest', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('does not throw if all custom fields types in request match the configuration', () => {

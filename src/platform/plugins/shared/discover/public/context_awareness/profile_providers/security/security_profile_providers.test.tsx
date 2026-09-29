@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ALERT_RULE_TYPE_ID, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
@@ -31,15 +33,15 @@ const getDocViewerResult = (
 ) => {
   const providerServices = {} as ProfileProviderServices;
   const [enhancedProvider] = createSecurityDocumentProfileProviders(providerServices);
-  const prevRenderHeader = jest.fn();
-  const prevRenderFooter = jest.fn();
+  const prevRenderHeader = vi.fn();
+  const prevRenderFooter = vi.fn();
   const prevDocViewer = {
     title: 'test title' as string | undefined,
     renderHeader: prevRenderHeader,
     renderFooter: prevRenderFooter,
-    docViewsRegistry: jest.fn((r) => r),
+    docViewsRegistry: vi.fn((r) => r),
   };
-  const prev = jest.fn().mockReturnValue(prevDocViewer);
+  const prev = vi.fn().mockReturnValue(prevDocViewer);
   const getDocViewer = enhancedProvider.profile.getDocViewer!(prev, {
     context: { type: DocumentType.Default },
     toolkit: {
@@ -137,7 +139,7 @@ describe('createSecurityDocumentProfileProviders', () => {
 
     it('adds the overview tab to the registry for alert documents', () => {
       const { result } = getDocViewerResult(createRecord({ 'event.kind': 'signal' }));
-      const registry = { add: jest.fn() };
+      const registry = { add: vi.fn() };
       result.docViewsRegistry(registry as never);
 
       expect(registry.add).toHaveBeenCalledWith(
@@ -147,7 +149,7 @@ describe('createSecurityDocumentProfileProviders', () => {
 
     it('adds the overview tab to the registry for non-alert events', () => {
       const { result } = getDocViewerResult(createRecord({ 'event.kind': 'event' }));
-      const registry = { add: jest.fn() };
+      const registry = { add: vi.fn() };
       result.docViewsRegistry(registry as never);
 
       expect(registry.add).toHaveBeenCalledWith(
@@ -162,7 +164,7 @@ describe('createSecurityDocumentProfileProviders', () => {
           [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
         })
       );
-      const registry = { add: jest.fn() };
+      const registry = { add: vi.fn() };
       result.docViewsRegistry(registry as never);
 
       expect(registry.add).toHaveBeenCalledWith(
@@ -184,7 +186,7 @@ describe('createSecurityDocumentProfileProviders', () => {
 
     it('does not add the overview tab to the registry when event.kind is absent', () => {
       const { result } = getDocViewerResult(createRecord({}));
-      const registry = { add: jest.fn() };
+      const registry = { add: vi.fn() };
       result.docViewsRegistry(registry as never);
 
       expect(registry.add).not.toHaveBeenCalled();
@@ -245,7 +247,7 @@ describe('createSecurityDocumentProfileProviders', () => {
           _index: 'remote:.alerts-security.alerts-default',
         })
       );
-      const registry = { add: jest.fn() };
+      const registry = { add: vi.fn() };
       result.docViewsRegistry(registry as never);
 
       expect(registry.add).toHaveBeenCalledWith(
@@ -260,7 +262,7 @@ describe('createSecurityDocumentProfileProviders', () => {
           _index: 'remote:logs-system-default',
         })
       );
-      const registry = { add: jest.fn() };
+      const registry = { add: vi.fn() };
       result.docViewsRegistry(registry as never);
 
       expect(registry.add).toHaveBeenCalledWith(
@@ -269,7 +271,7 @@ describe('createSecurityDocumentProfileProviders', () => {
     });
 
     it('forwards refreshData action to enhanced flyout header', () => {
-      const refreshData = jest.fn();
+      const refreshData = vi.fn();
       const hit = createRecord({ 'event.kind': 'signal' });
       const { result } = getDocViewerResult(hit, { refreshData });
 
@@ -281,7 +283,7 @@ describe('createSecurityDocumentProfileProviders', () => {
     });
 
     it('forwards refreshData action to enhanced flyout footer', () => {
-      const refreshData = jest.fn();
+      const refreshData = vi.fn();
       const hit = createRecord({ 'event.kind': 'signal' });
       const { result } = getDocViewerResult(hit, { refreshData });
 
@@ -293,10 +295,10 @@ describe('createSecurityDocumentProfileProviders', () => {
     });
 
     it('forwards refreshData action to enhanced overview tab', () => {
-      const refreshData = jest.fn();
+      const refreshData = vi.fn();
       const hit = createRecord({ 'event.kind': 'signal' });
       const { result } = getDocViewerResult(hit, { refreshData });
-      const registry = { add: jest.fn() };
+      const registry = { add: vi.fn() };
 
       result.docViewsRegistry(registry as never);
       const addedOverviewTab = registry.add.mock.calls[0][0];
@@ -328,7 +330,7 @@ describe('createSecurityDocumentProfileProviders', () => {
 
     it('adds the overview tab to the registry for IOC documents', () => {
       const { result } = getDocViewerResult(createRecord({ 'event.type': 'indicator' }));
-      const registry = { add: jest.fn() };
+      const registry = { add: vi.fn() };
       result.docViewsRegistry(registry as never);
 
       expect(registry.add).toHaveBeenCalledWith(

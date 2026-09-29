@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import '@kbn/react-query/mock';
@@ -15,7 +17,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { TransformList } from './transform_list';
 
-const useQueryMock = jest.spyOn(ReactQuery, 'useQuery').mockImplementation((queryKey) => {
+const useQueryMock = vi.spyOn(ReactQuery, 'useQuery').mockImplementation((queryKey) => {
   switch (queryKey[0]) {
     case 'transform.data_view_exists':
       return { error: null, data: true } as UseQueryResult<unknown, unknown>;
@@ -26,10 +28,13 @@ const useQueryMock = jest.spyOn(ReactQuery, 'useQuery').mockImplementation((quer
 
 const queryClient = new QueryClient();
 
-jest.mock('../../../../app_dependencies');
-jest.mock('../../../../hooks/use_get_transform_cps_enabled', () => ({
-  useGetTransformCpsEnabled: () => ({ data: true }),
-}));
+vi.mock('../../../../app_dependencies');
+vi.mock('../../../../hooks/use_get_transform_cps_enabled', () => {
+      const mocked = {
+      useGetTransformCpsEnabled: () => ({ data: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', async () => {
@@ -38,13 +43,13 @@ describe('Transform: Transform List <TransformList />', () => {
         <QueryClientProvider client={queryClient}>
           <TransformList
             isLoading={false}
-            onCreateTransform={jest.fn()}
+            onCreateTransform={vi.fn()}
             transformNodes={1}
             transforms={[]}
             transformsLoading={false}
             transformsStatsLoading={false}
             pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
-            updatePageState={jest.fn()}
+            updatePageState={vi.fn()}
           />
         </QueryClientProvider>
       </IntlProvider>

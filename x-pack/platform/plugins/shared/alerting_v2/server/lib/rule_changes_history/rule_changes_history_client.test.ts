@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ChangeHistoryClient, ChangeHistoryDocument } from '@kbn/change-history';
 import {
   getRuleChangeHistoryEventParamsSchema,
@@ -54,11 +57,11 @@ const createDocument = (
     service: { type: 'kibana', version: '9.0.0' },
   } as ChangeHistoryDocument);
 
-const createChangeHistoryMock = (): jest.Mocked<
+const createChangeHistoryMock = (): Mocked<
   Pick<ChangeHistoryClient, 'isInitialized' | 'getHistory'>
 > => ({
-  isInitialized: jest.fn().mockReturnValue(true),
-  getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+  isInitialized: vi.fn().mockReturnValue(true),
+  getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
 });
 
 describe('RuleChangesHistoryClient', () => {

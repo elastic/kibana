@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentType } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -16,29 +18,35 @@ import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import type { DashboardPickerProps } from '@kbn/presentation-util-plugin/public/components/dashboard_picker/dashboard_picker';
 
-jest.mock('../utils/get_dashboard_capabilities', () => ({
-  getDashboardCapabilities: () => ({
-    createNew: true,
-    showWriteControls: true,
-  }),
-}));
+vi.mock('../utils/get_dashboard_capabilities', () => {
+      const mocked = {
+      getDashboardCapabilities: () => ({
+        createNew: true,
+        showWriteControls: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/presentation-util-plugin/public', () => ({
-  withSuspense: (Component: ComponentType) => Component,
-  LazyDashboardPicker: ({ idsToOmit, onChange }: DashboardPickerProps) => {
-    const label = idsToOmit?.length
-      ? `mockDashboardPicker idsToOmit:${idsToOmit.join(',')}`
-      : `mockDashboardPicker`;
-    return (
-      <button
-        id="mockDashboardPicker"
-        onClick={() => onChange({ name: 'Dashboard Two', id: 'dashboardTwo' })}
-      >
-        {label}
-      </button>
-    );
-  },
-}));
+vi.mock('@kbn/presentation-util-plugin/public', () => {
+      const mocked = {
+      withSuspense: (Component: ComponentType) => Component,
+      LazyDashboardPicker: ({ idsToOmit, onChange }: DashboardPickerProps) => {
+        const label = idsToOmit?.length
+          ? `mockDashboardPicker idsToOmit:${idsToOmit.join(',')}`
+          : `mockDashboardPicker`;
+        return (
+          <button
+            id="mockDashboardPicker"
+            onClick={() => onChange({ name: 'Dashboard Two', id: 'dashboardTwo' })}
+          >
+            {label}
+          </button>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CopyToDashboardModal', () => {
   const api: CopyToDashboardAPI = {
@@ -56,11 +64,11 @@ describe('CopyToDashboardModal', () => {
       }),
     },
   };
-  const closeModalMock = jest.fn();
-  const navigateToWithEmbeddablePackagesMock = jest.fn();
+  const closeModalMock = vi.fn();
+  const navigateToWithEmbeddablePackagesMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../services/kibana_services').embeddableService = {

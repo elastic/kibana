@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { getSecurityLabsDocsCount, loadSecurityLabs } from './security_labs_loader';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Document } from '@langchain/core/documents';
 
 const mockKbDataClient = {
-  addKnowledgeBaseDocuments: jest.fn().mockResolvedValue([{ foo: 'bar' }]),
+  addKnowledgeBaseDocuments: vi.fn().mockResolvedValue([{ foo: 'bar' }]),
 } as unknown as AIAssistantKnowledgeBaseDataClient;
 
 describe('security_labs_loader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('loadSecurityLabs loads decrypted documents', async () => {
@@ -25,7 +28,7 @@ describe('security_labs_loader', () => {
     expect(result).toBe(true);
     expect(mockKbDataClient.addKnowledgeBaseDocuments).toHaveBeenCalled();
 
-    const args = (mockKbDataClient.addKnowledgeBaseDocuments as jest.Mock).mock.calls as Array<
+    const args = (mockKbDataClient.addKnowledgeBaseDocuments as Mock).mock.calls as Array<
       Array<{
         documents: Document[];
       }>

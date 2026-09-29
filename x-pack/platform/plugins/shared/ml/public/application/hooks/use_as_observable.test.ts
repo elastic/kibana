@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useAsObservable } from './use_as_observable';
 
 describe('useAsObservable', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('provides and observable preserving a reference', () => {
@@ -19,7 +21,7 @@ describe('useAsObservable', () => {
     const initial = result.current;
 
     let observableValue;
-    const subscriptionMock = jest.fn((v) => (observableValue = v));
+    const subscriptionMock = vi.fn((v) => (observableValue = v));
 
     result.current.subscribe(subscriptionMock);
 
@@ -42,7 +44,7 @@ describe('useAsObservable', () => {
     });
 
     let observableValue;
-    const subscriptionMock = jest.fn((v) => {
+    const subscriptionMock = vi.fn((v) => {
       observableValue = v;
     });
     result.current.subscribe(subscriptionMock);

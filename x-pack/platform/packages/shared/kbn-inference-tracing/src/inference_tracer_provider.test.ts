@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { node, tracing, resources } from '@elastic/opentelemetry-node/sdk';
 import { trace } from '@opentelemetry/api';
 import {
@@ -14,18 +16,18 @@ import {
 } from './inference_tracer_provider';
 
 const mockNodeTracerProvider = {
-  getTracer: jest.fn().mockReturnValue({ startActiveSpan: jest.fn() }),
-  shutdown: jest.fn().mockResolvedValue(undefined),
+  getTracer: vi.fn().mockReturnValue({ startActiveSpan: vi.fn() }),
+  shutdown: vi.fn().mockResolvedValue(undefined),
 };
 
-jest
+vi
   .spyOn(node, 'NodeTracerProvider')
   .mockReturnValue(mockNodeTracerProvider as unknown as node.NodeTracerProvider);
 
 describe('inference_tracer_provider', () => {
   afterEach(async () => {
     await shutdownInferenceTracerProvider();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getInferenceTracer', () => {
@@ -36,10 +38,10 @@ describe('inference_tracer_provider', () => {
 
     it('returns the inference provider tracer after init', () => {
       const mockProcessor: tracing.SpanProcessor = {
-        onStart: jest.fn(),
-        onEnd: jest.fn(),
-        forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
-        shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        onStart: vi.fn(),
+        onEnd: vi.fn(),
+        forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
       };
 
       initInferenceTracerProvider({
@@ -56,10 +58,10 @@ describe('inference_tracer_provider', () => {
   describe('initInferenceTracerProvider', () => {
     it('creates a NodeTracerProvider with AlwaysOnSampler', () => {
       const mockProcessor: tracing.SpanProcessor = {
-        onStart: jest.fn(),
-        onEnd: jest.fn(),
-        forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
-        shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        onStart: vi.fn(),
+        onEnd: vi.fn(),
+        forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
       };
 
       const resource = resources.defaultResource();
@@ -82,10 +84,10 @@ describe('inference_tracer_provider', () => {
   describe('shutdownInferenceTracerProvider', () => {
     it('calls shutdown on the provider', async () => {
       const mockProcessor: tracing.SpanProcessor = {
-        onStart: jest.fn(),
-        onEnd: jest.fn(),
-        forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
-        shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        onStart: vi.fn(),
+        onEnd: vi.fn(),
+        forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
       };
 
       initInferenceTracerProvider({
@@ -100,10 +102,10 @@ describe('inference_tracer_provider', () => {
 
     it('falls back to global tracer after shutdown', async () => {
       const mockProcessor: tracing.SpanProcessor = {
-        onStart: jest.fn(),
-        onEnd: jest.fn(),
-        forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
-        shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        onStart: vi.fn(),
+        onEnd: vi.fn(),
+        forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
       };
 
       initInferenceTracerProvider({

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { EuiButton } from '@elastic/eui';
 import { EuiFlyout } from '@elastic/eui';
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
@@ -61,15 +64,15 @@ describe('group editor flyout', () => {
   const mockTaggingApi = taggingApiMock.create();
 
   let component: ShallowWrapper;
-  let onSave: jest.Mock;
-  let onClose: jest.Mock;
-  let updateGroup: jest.Mock;
-  const LensEmbeddableComponent: EmbeddableComponent = jest.fn();
+  let onSave: Mock;
+  let onClose: Mock;
+  let updateGroup: Mock;
+  const LensEmbeddableComponent: EmbeddableComponent = vi.fn();
 
   const mountComponent = (groupToUse: EventAnnotationGroupConfig) => {
-    onSave = jest.fn();
-    onClose = jest.fn();
-    updateGroup = jest.fn();
+    onSave = vi.fn();
+    onClose = vi.fn();
+    updateGroup = vi.fn();
     return shallow(
       <GroupEditorFlyout
         group={groupToUse}
@@ -83,11 +86,11 @@ describe('group editor flyout', () => {
           } as DataView,
         ]}
         savedObjectsTagging={mockTaggingApi}
-        createDataView={jest.fn()}
+        createDataView={vi.fn()}
         queryInputServices={{} as QueryInputServices}
         LensEmbeddableComponent={LensEmbeddableComponent}
         searchSessionId={'searchSessionId'}
-        refreshSearchSession={jest.fn()}
+        refreshSearchSession={vi.fn()}
         timePickerQuickRanges={[]}
       />
     );

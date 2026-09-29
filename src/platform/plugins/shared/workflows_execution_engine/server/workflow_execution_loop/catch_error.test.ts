@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -29,15 +31,15 @@ const createParams = (error?: Error) => {
   });
 
   const stepRuntime = {
-    stepExecutionExists: jest.fn(() => true),
+    stepExecutionExists: vi.fn(() => true),
     stepExecution: { status: 'running' },
     error: error ? ExecutionError.fromError(error) : undefined,
-    failStep: jest.fn(),
+    failStep: vi.fn(),
     abortController: new AbortController(),
   };
 
   const stepErrorCatcher = {
-    catchError: jest.fn(() => {
+    catchError: vi.fn(() => {
       workflowExecutionCursor.setMockError(undefined);
     }),
   };
@@ -45,30 +47,30 @@ const createParams = (error?: Error) => {
   const params = {
     workflowExecutionCursor,
     workflowRuntime: {
-      getWorkflowExecution: jest.fn(() => ({ status: ExecutionStatus.RUNNING })),
+      getWorkflowExecution: vi.fn(() => ({ status: ExecutionStatus.RUNNING })),
     },
     workflowExecutionState: {
-      getWorkflowExecution: jest.fn(),
-      updateWorkflowExecution: jest.fn(),
+      getWorkflowExecution: vi.fn(),
+      updateWorkflowExecution: vi.fn(),
     },
     stepExecutionRuntimeFactory: {
-      createStepExecutionRuntime: jest
+      createStepExecutionRuntime: vi
         .fn()
         .mockReturnValueOnce({
-          stepExecutionExists: jest.fn(() => true),
-          failStep: jest.fn(),
+          stepExecutionExists: vi.fn(() => true),
+          failStep: vi.fn(),
         })
         .mockReturnValueOnce({
-          stepExecutionExists: jest.fn(() => true),
-          failStep: jest.fn(),
+          stepExecutionExists: vi.fn(() => true),
+          failStep: vi.fn(),
           abortController: new AbortController(),
         }),
     },
     nodesFactory: {
-      create: jest.fn(() => stepErrorCatcher),
+      create: vi.fn(() => stepErrorCatcher),
     },
     workflowLogger: {
-      logError: jest.fn(),
+      logError: vi.fn(),
     },
   };
 
@@ -79,7 +81,7 @@ describe('catchError', () => {
   it('returns early when workflow is already TIMED_OUT', async () => {
     const initialError = new Error('timeout');
     const { params, stepRuntime, workflowExecutionCursor } = createParams(initialError);
-    params.workflowRuntime.getWorkflowExecution = jest.fn(() => ({
+    params.workflowRuntime.getWorkflowExecution = vi.fn(() => ({
       status: ExecutionStatus.TIMED_OUT,
     }));
 
@@ -125,36 +127,36 @@ describe('catchError', () => {
       currentNode: { id: 'current-node' } as GraphNodeUnion,
     });
     const stepRuntime = {
-      stepExecutionExists: jest.fn(() => true),
+      stepExecutionExists: vi.fn(() => true),
       stepExecution: { status: 'running' },
       error: ExecutionError.fromError(new Error('boom')),
-      failStep: jest.fn(),
+      failStep: vi.fn(),
       abortController: new AbortController(),
     };
-    const stepErrorCatcher = { catchError: jest.fn() };
-    const createStepExecutionRuntime = jest
+    const stepErrorCatcher = { catchError: vi.fn() };
+    const createStepExecutionRuntime = vi
       .fn()
       .mockReturnValueOnce({
-        stepExecutionExists: jest.fn(() => true),
-        failStep: jest.fn(),
+        stepExecutionExists: vi.fn(() => true),
+        failStep: vi.fn(),
       })
       .mockReturnValueOnce({
-        stepExecutionExists: jest.fn(() => true),
-        failStep: jest.fn(),
+        stepExecutionExists: vi.fn(() => true),
+        failStep: vi.fn(),
         abortController: new AbortController(),
       });
     const params = {
       workflowExecutionCursor,
       workflowRuntime: {
-        getWorkflowExecution: jest.fn(() => ({ status: ExecutionStatus.RUNNING })),
+        getWorkflowExecution: vi.fn(() => ({ status: ExecutionStatus.RUNNING })),
       },
       workflowExecutionState: {
-        getWorkflowExecution: jest.fn(),
-        updateWorkflowExecution: jest.fn(),
+        getWorkflowExecution: vi.fn(),
+        updateWorkflowExecution: vi.fn(),
       },
       stepExecutionRuntimeFactory: { createStepExecutionRuntime },
-      nodesFactory: { create: jest.fn(() => stepErrorCatcher) },
-      workflowLogger: { logError: jest.fn() },
+      nodesFactory: { create: vi.fn(() => stepErrorCatcher) },
+      workflowLogger: { logError: vi.fn() },
     };
 
     await catchError(params as any, stepRuntime as any);
@@ -217,8 +219,8 @@ describe('catchError', () => {
   it('stores workflow error on the driver and logs when catchError itself throws', async () => {
     const initialError = new Error('boom');
     const { params, stepRuntime, workflowExecutionCursor } = createParams(initialError);
-    params.nodesFactory.create = jest.fn(() => ({
-      catchError: jest.fn(() => {
+    params.nodesFactory.create = vi.fn(() => ({
+      catchError: vi.fn(() => {
         throw new Error('handler failed');
       }),
     }));

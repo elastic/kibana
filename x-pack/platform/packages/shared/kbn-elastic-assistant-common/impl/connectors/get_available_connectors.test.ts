@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -25,7 +27,7 @@ describe('getAvailableConnectors', () => {
     },
   ];
 
-  const settingsClientGet = jest.fn().mockImplementation((settingKey) => {
+  const settingsClientGet = vi.fn().mockImplementation((settingKey) => {
     if (settingKey === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
       return 'connectorId1';
     }

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { TelemetryCounter } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -16,12 +19,12 @@ describe('registerEbtCounters', () => {
   let core: ReturnType<typeof coreMock.createSetup>;
   let usageCollection: ReturnType<typeof createUsageCollectionSetupMock>;
   let internalListener: (counter: TelemetryCounter) => void;
-  let telemetryCounter$Spy: jest.SpyInstance;
+  let telemetryCounter$Spy: MockInstance;
 
   beforeEach(() => {
     core = coreMock.createSetup();
     usageCollection = createUsageCollectionSetupMock();
-    telemetryCounter$Spy = jest
+    telemetryCounter$Spy = vi
       .spyOn(core.analytics.telemetryCounter$, 'subscribe')
       .mockImplementation(((listener) => {
         internalListener = listener as (counter: TelemetryCounter) => void;
@@ -52,7 +55,7 @@ describe('registerEbtCounters', () => {
   });
 
   test('it reuses the usageCounter when it already exists', () => {
-    const incrementCounterMock = jest.fn();
+    const incrementCounterMock = vi.fn();
     usageCollection.getUsageCounterByDomainId.mockReturnValue({
       domainId: 'abc123',
       incrementCounter: incrementCounterMock,

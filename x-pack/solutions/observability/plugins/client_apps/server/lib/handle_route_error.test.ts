@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { handleRouteError } from './handle_route_error';
 
-function makeLogger(): jest.Mocked<Pick<Logger, 'error'>> {
-  return { error: jest.fn() };
+function makeLogger(): Mocked<Pick<Logger, 'error'>> {
+  return { error: vi.fn() };
 }
 
 function makeResponse() {
   return {
-    customError: jest.fn().mockReturnValue({ type: 'customError' }),
+    customError: vi.fn().mockReturnValue({ type: 'customError' }),
   };
 }
 

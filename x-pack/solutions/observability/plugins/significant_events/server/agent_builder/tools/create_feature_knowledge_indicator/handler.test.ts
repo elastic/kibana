@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BaseFeature } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
@@ -21,12 +23,12 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates and stores feature KI with server-managed fields', async () => {
     const kiClient = {
-      bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      bulk: vi.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     };
 
     const result = await createFeatureKnowledgeIndicatorToolHandler({
@@ -52,7 +54,7 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
 
   it('throws when feature storage fails', async () => {
     const kiClient = {
-      bulk: jest.fn().mockRejectedValue(new Error('bulk failed')),
+      bulk: vi.fn().mockRejectedValue(new Error('bulk failed')),
     };
 
     await expect(

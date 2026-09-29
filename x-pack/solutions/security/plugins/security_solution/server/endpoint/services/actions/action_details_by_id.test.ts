@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
@@ -40,13 +43,13 @@ describe('When using `getActionDetailsById()', () => {
 
     applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
     (
-      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as Mock
     ).mockResolvedValue(undefined);
   });
 
   it('should return expected output', async () => {
     (
-      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as Mock
     ).mockResolvedValue([
       new FleetAgentGenerator('seed').generate({
         id: 'agent-a',
@@ -97,10 +100,10 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should use expected filters when querying for Action Request', async () => {
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+    (endpointAppContextService.getEndpointMetadataService as Mock) = vi
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
       });
     await getActionDetailsById(endpointAppContextService, 'default', '123');
 
@@ -118,10 +121,10 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should throw an error if action id does not exist', async () => {
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+    (endpointAppContextService.getEndpointMetadataService as Mock) = vi
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
       });
     actionRequests.hits.hits = [];
     (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
@@ -133,10 +136,10 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should have `isExpired` of `true` if NOT complete and expiration is in the past', async () => {
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+    (endpointAppContextService.getEndpointMetadataService as Mock) = vi
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
       });
     (
       actionRequests.hits.hits[0]._source as LogsEndpointAction
@@ -154,10 +157,10 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should have `isExpired` of `false` if complete and expiration is in the past', async () => {
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+    (endpointAppContextService.getEndpointMetadataService as Mock) = vi
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
       });
     (
       actionRequests.hits.hits[0]._source as LogsEndpointAction
@@ -175,7 +178,7 @@ describe('When using `getActionDetailsById()', () => {
 
   it('should not validate against spaces when `bypassSpaceValidation` is `true`', async () => {
     (
-      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as Mock
     ).mockResolvedValue(undefined);
     await getActionDetailsById(endpointAppContextService, 'default', '123', {
       bypassSpaceValidation: true,

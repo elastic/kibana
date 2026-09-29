@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked, MockedFunction } from 'vitest';
+
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { isCoreKibanaRequest } from '@kbn/core-http-server-utils';
@@ -38,11 +41,11 @@ const savedObjects = savedObjectsServiceMock.createStartContract();
 const unsafeSavedObjectsClient = savedObjectsServiceMock
   .createStartContract()
   .getUnsafeInternalClient();
-const mockUnsafeSavedObjectsClientUpdate = jest.mocked(unsafeSavedObjectsClient.update);
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockUnsafeSavedObjectsClientUpdate = vi.mocked(unsafeSavedObjectsClient.update);
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
-jest.mock('../rules_client/lib/get_alert_from_raw');
-const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
+vi.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as MockedFunction<typeof getAlertFromRaw>;
 
 // assign default parameters/data
 const apiKey = mockedRawRuleSO.attributes.apiKey!;
@@ -76,7 +79,7 @@ describe('rule_loader', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
       mockGetDecrypted({
         ...mockedRawRuleSO.attributes,
@@ -108,7 +111,7 @@ describe('rule_loader', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('validateRuleAndCreateFakeRequest()', () => {
@@ -315,14 +318,14 @@ describe('rule_loader', () => {
   });
 
   describe('getFakeKibanaRequest()', () => {
-    let recordUiamApiKeyFallbackSpy: jest.SpyInstance;
-    let recordRuleRunSpy: jest.SpyInstance;
+    let recordUiamApiKeyFallbackSpy: MockInstance;
+    let recordRuleRunSpy: MockInstance;
 
     beforeEach(() => {
-      recordUiamApiKeyFallbackSpy = jest
+      recordUiamApiKeyFallbackSpy = vi
         .spyOn(alertingUiamTelemetry, 'recordUiamApiKeyFallback')
         .mockImplementation(() => {});
-      recordRuleRunSpy = jest
+      recordRuleRunSpy = vi
         .spyOn(alertingUiamTelemetry, 'recordRuleRun')
         .mockImplementation(() => {});
     });
@@ -604,7 +607,7 @@ function mockGetDecrypted(attributes: Pick<RawRule, 'enabled' | 'consumer'> & Pa
 // return enough of TaskRunnerContext that rule_loader needs
 function getTaskRunnerContext() {
   return {
-    spaceIdToNamespace: jest.fn(),
+    spaceIdToNamespace: vi.fn(),
     encryptedSavedObjectsClient: encryptedSavedObjects,
     savedObjects,
   };

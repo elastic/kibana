@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
@@ -137,7 +139,7 @@ describe('TabsStorageManager', () => {
   it('should push tab state to URL', async () => {
     const { tabsStorageManager, urlStateStorage } = create();
 
-    jest.spyOn(urlStateStorage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
 
     await tabsStorageManager.pushSelectedTabIdToUrl('my-tab-id');
 
@@ -168,7 +170,7 @@ describe('TabsStorageManager', () => {
   it('should call onChanged callback when tab state in URL changes', async () => {
     const { tabsStorageManager, urlStateStorage } = create();
 
-    const onChanged = jest.fn();
+    const onChanged = vi.fn();
     const stop = tabsStorageManager.startUrlSync({ onChanged });
 
     await urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: 'my-tab-id' });
@@ -181,7 +183,7 @@ describe('TabsStorageManager', () => {
   it('should not call onChanged callback when tab state in URL changes but sync is stopped', async () => {
     const { tabsStorageManager, urlStateStorage } = create();
 
-    const onChanged = jest.fn();
+    const onChanged = vi.fn();
     const stop = tabsStorageManager.startUrlSync({ onChanged });
 
     stop();
@@ -194,7 +196,7 @@ describe('TabsStorageManager', () => {
   it('should not call onChanged callback when tab state in URL changes via pushSelectedTabIdToUrl', async () => {
     const { tabsStorageManager } = create();
 
-    const onChanged = jest.fn();
+    const onChanged = vi.fn();
     const stop = tabsStorageManager.startUrlSync({ onChanged });
 
     await tabsStorageManager.pushSelectedTabIdToUrl('my-tab-id');
@@ -217,8 +219,8 @@ describe('TabsStorageManager', () => {
       defaultTabState: DEFAULT_TAB_STATE,
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const props: TabsInternalStatePayload = {
       allTabs: [mockTab1, mockTab2],
@@ -249,7 +251,7 @@ describe('TabsStorageManager', () => {
       defaultTabState: DEFAULT_TAB_STATE,
     });
 
-    jest.spyOn(storage, 'set');
+    vi.spyOn(storage, 'set');
 
     const tabWithProfileState: TabState = {
       ...mockTab1,
@@ -309,8 +311,8 @@ describe('TabsStorageManager', () => {
       urlStateStorage,
       services: { storage },
     } = create();
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
@@ -323,8 +325,8 @@ describe('TabsStorageManager', () => {
       tabId: 'tab2',
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -407,8 +409,8 @@ describe('TabsStorageManager', () => {
       urlStateStorage,
       services: { storage },
     } = create();
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     const storedSerializedSearchSource = { index: 'test-index' };
     const storedSearchSessionId = 'test-session-id';
@@ -437,8 +439,8 @@ describe('TabsStorageManager', () => {
       tabId: 'tab2',
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -525,11 +527,11 @@ describe('TabsStorageManager', () => {
       urlStateStorage,
       services: { storage },
     } = create();
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     const newClosedAt = Date.now() + 1000;
-    jest.spyOn(Date, 'now').mockReturnValue(newClosedAt);
+    vi.spyOn(Date, 'now').mockReturnValue(newClosedAt);
 
     storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
@@ -542,8 +544,8 @@ describe('TabsStorageManager', () => {
       tabId: 'tab2',
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -576,11 +578,11 @@ describe('TabsStorageManager', () => {
       urlStateStorage,
       services: { storage },
     } = create();
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     const newClosedAt = Date.now() + 1000;
-    jest.spyOn(Date, 'now').mockReturnValue(newClosedAt);
+    vi.spyOn(Date, 'now').mockReturnValue(newClosedAt);
 
     storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
@@ -597,8 +599,8 @@ describe('TabsStorageManager', () => {
       tabId: mockRecentlyClosedTab2.id,
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -632,8 +634,8 @@ describe('TabsStorageManager', () => {
       urlStateStorage,
       services: { storage },
     } = create();
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     const props: TabsInternalStatePayload = {
       allTabs: [mockTab1, mockTab2],
@@ -652,8 +654,8 @@ describe('TabsStorageManager', () => {
       tabId: props.selectedTabId,
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: 'different',
@@ -681,11 +683,11 @@ describe('TabsStorageManager', () => {
       urlStateStorage,
       services: { storage },
     } = create();
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     const newClosedAt = Date.now() + 1000;
-    jest.spyOn(Date, 'now').mockReturnValue(newClosedAt);
+    vi.spyOn(Date, 'now').mockReturnValue(newClosedAt);
 
     storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
@@ -696,8 +698,8 @@ describe('TabsStorageManager', () => {
 
     urlStateStorage.set(TAB_STATE_URL_KEY, null);
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -738,7 +740,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    jest.spyOn(storage, 'set');
+    vi.spyOn(storage, 'set');
 
     const updatedTabState = {
       internalState: {},
@@ -795,7 +797,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [],
     });
 
-    jest.spyOn(storage, 'set');
+    vi.spyOn(storage, 'set');
 
     tabsStorageManager.updateTabStateLocally(mockTab1.id, {
       internalState: mockTab1.initialInternalState,
@@ -854,7 +856,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [],
     });
 
-    jest.spyOn(storage, 'set');
+    vi.spyOn(storage, 'set');
 
     tabsStorageManager.updateTabStateLocally(mockTab1.id, {
       internalState: mockTab1.initialInternalState,
@@ -886,7 +888,7 @@ describe('TabsStorageManager', () => {
     const { tabsStorageManager } = create();
 
     const newClosedAt = 15;
-    jest.spyOn(Date, 'now').mockReturnValue(newClosedAt);
+    vi.spyOn(Date, 'now').mockReturnValue(newClosedAt);
 
     const testTabA = {
       ...mockTab1,
@@ -1148,8 +1150,8 @@ describe('TabsStorageManager', () => {
       urlStateStorage,
       services: { storage },
     } = create();
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
@@ -1163,8 +1165,8 @@ describe('TabsStorageManager', () => {
       tabLabel: 'New tab test',
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -1191,8 +1193,8 @@ describe('TabsStorageManager', () => {
   it('should load tabs state from local storage and append a new tab to a discover session', () => {
     const { tabsStorageManager, urlStateStorage, services } = create();
     const { storage } = services;
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     const persistedSessionId = 'persisted-session';
     const persistedTabId = 'persisted-tab';
@@ -1222,8 +1224,8 @@ describe('TabsStorageManager', () => {
       tabLabel: 'New tab test',
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -1253,8 +1255,8 @@ describe('TabsStorageManager', () => {
   it('should not append the shared tab to a discover session if it is one the existing persisted tabs', () => {
     const { tabsStorageManager, urlStateStorage, services } = create();
     const { storage } = services;
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     const persistedSessionId = 'persisted-session';
     const persistedTabId = 'persisted-tab';
@@ -1283,8 +1285,8 @@ describe('TabsStorageManager', () => {
       tabLabel: 'Shared tab',
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -1307,8 +1309,8 @@ describe('TabsStorageManager', () => {
   it('should append the shared tab to a discover session if it is not one the existing persisted tabs', () => {
     const { tabsStorageManager, urlStateStorage, services } = create();
     const { storage } = services;
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     const persistedSessionId = 'persisted-session';
     const persistedTabId = 'persisted-tab';
@@ -1338,8 +1340,8 @@ describe('TabsStorageManager', () => {
       tabLabel: 'Shared tab',
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
@@ -1366,8 +1368,8 @@ describe('TabsStorageManager', () => {
   it('should open the shared link and clear previous temporary tabs', () => {
     const { tabsStorageManager, urlStateStorage, services } = create();
     const { storage } = services;
-    jest.spyOn(urlStateStorage, 'get');
-    jest.spyOn(storage, 'get');
+    vi.spyOn(urlStateStorage, 'get');
+    vi.spyOn(storage, 'get');
 
     storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
@@ -1380,8 +1382,8 @@ describe('TabsStorageManager', () => {
       tabLabel: 'Shared tab',
     });
 
-    jest.spyOn(urlStateStorage, 'set');
-    jest.spyOn(storage, 'set');
+    vi.spyOn(urlStateStorage, 'set');
+    vi.spyOn(storage, 'set');
 
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,

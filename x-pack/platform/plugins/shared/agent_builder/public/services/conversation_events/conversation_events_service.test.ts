@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type {
   ConversationEventUIDefinition,
@@ -112,7 +114,7 @@ describe('ConversationEventsService', () => {
 // without running them; the @ts-expect-error directives fail CI if the guard is removed.
 describe('ConversationEventsServiceStartContract register', () => {
   it('rejects invalid type names at compile time', () => {
-    const register: ConversationEventsServiceStartContract['register'] = jest.fn();
+    const register: ConversationEventsServiceStartContract['register'] = vi.fn();
     const rejectedAtCompileTime = [
       // @ts-expect-error — built-in timeline types are rejected at compile time
       () => register({ type: 'user_message', render: () => null }),

@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { GcpCloudFunctionsConnector } from './gcp_cloud_functions';
 
-jest.mock('../../auth_types/gcp_jwt_helpers', () => {
-  const actual = jest.requireActual('../../auth_types/gcp_jwt_helpers');
+vi.mock('../../auth_types/gcp_jwt_helpers', async () => {
+  const actual = (await vi.importActual('../../auth_types/gcp_jwt_helpers'));
   return {
     ...actual,
-    getGcpIdToken: jest.fn().mockResolvedValue('mock-id-token'),
+    getGcpIdToken: vi.fn().mockResolvedValue('mock-id-token'),
   };
 });
 
 describe('GcpCloudFunctionsConnector', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   };
 
   const SERVICE_ACCOUNT_JSON = JSON.stringify({
@@ -48,7 +50,7 @@ describe('GcpCloudFunctionsConnector', () => {
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {

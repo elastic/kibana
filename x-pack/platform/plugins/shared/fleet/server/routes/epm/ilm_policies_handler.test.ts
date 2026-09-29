@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getIlmPoliciesHandler } from './ilm_policies_handler';
 
 describe('getIlmPoliciesHandler', () => {
-  const hasPrivileges = jest.fn();
-  const getLifecycle = jest.fn();
-  const okBody = jest.fn();
+  const hasPrivileges = vi.fn();
+  const getLifecycle = vi.fn();
+  const okBody = vi.fn();
   const response = { ok: okBody } as any;
   const context = {
     core: Promise.resolve({
@@ -26,7 +28,7 @@ describe('getIlmPoliciesHandler', () => {
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty list when the user lacks the manage_ilm privilege', async () => {

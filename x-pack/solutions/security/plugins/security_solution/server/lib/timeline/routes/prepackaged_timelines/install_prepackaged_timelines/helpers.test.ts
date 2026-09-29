@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import type { FrameworkRequest } from '../../../../framework';
@@ -21,11 +24,11 @@ import * as helpers from './helpers';
 import { importTimelines } from '../../timelines/import_timelines/helpers';
 import { buildFrameworkRequest } from '../../../utils/common';
 
-jest.mock('../../timelines/import_timelines/helpers');
+vi.mock('../../timelines/import_timelines/helpers');
 
 describe('installPrepackagedTimelines', () => {
   let frameworkRequest: FrameworkRequest;
-  const spyInstallPrepackagedTimelines = jest.spyOn(helpers, 'installPrepackagedTimelines');
+  const spyInstallPrepackagedTimelines = vi.spyOn(helpers, 'installPrepackagedTimelines');
 
   const { clients, context } = requestContextMock.createTools();
   const config = createMockConfig();
@@ -35,7 +38,7 @@ describe('installPrepackagedTimelines', () => {
   beforeEach(async () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-    jest.doMock('./helpers', () => {
+    vi.doMock('./helpers', () => {
       return {
         ...helpers,
         installPrepackagedTimelines: spyInstallPrepackagedTimelines,
@@ -50,11 +53,11 @@ describe('installPrepackagedTimelines', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.resetModules();
+    vi.resetModules();
   });
 
   test('should call importTimelines', async () => {
@@ -77,7 +80,7 @@ describe('installPrepackagedTimelines', () => {
       mockFilePath,
       mockFileName
     );
-    const args = await createPromiseFromStreams([(importTimelines as jest.Mock).mock.calls[0][0]]);
+    const args = await createPromiseFromStreams([(importTimelines as Mock).mock.calls[0][0]]);
     const expected = JSON.stringify({
       savedObjectId: 'mocked-timeline-id-1',
       version: 'WzExNzEyLDFd',
@@ -189,7 +192,7 @@ describe('installPrepackagedTimelines', () => {
       mockFileName
     );
 
-    expect((importTimelines as jest.Mock).mock.calls[0][1]).toEqual(
+    expect((importTimelines as Mock).mock.calls[0][1]).toEqual(
       config.maxTimelineImportExportSize
     );
   });
@@ -203,7 +206,7 @@ describe('installPrepackagedTimelines', () => {
       mockFileName
     );
 
-    expect(JSON.stringify((importTimelines as jest.Mock).mock.calls[0][2])).toEqual(
+    expect(JSON.stringify((importTimelines as Mock).mock.calls[0][2])).toEqual(
       JSON.stringify(frameworkRequest)
     );
   });
@@ -217,7 +220,7 @@ describe('installPrepackagedTimelines', () => {
       mockFileName
     );
 
-    expect((importTimelines as jest.Mock).mock.calls[0][3]).toEqual(true);
+    expect((importTimelines as Mock).mock.calls[0][3]).toEqual(true);
   });
 
   test('should handle errors from getReadables', async () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from './workflow_id_resolver';
 import { generateWorkflowId } from '../../common/lib/import';
@@ -67,7 +69,7 @@ describe('resolveUniqueWorkflowIds', () => {
   });
 
   it('should return baseId-1 when baseId is taken', async () => {
-    const checkExisting = jest.fn(() => Promise.resolve(new Set(['my-workflow'])));
+    const checkExisting = vi.fn(() => Promise.resolve(new Set(['my-workflow'])));
     const result = await resolveUniqueWorkflowIds(['my-workflow'], new Set(), checkExisting);
     expect(result).toEqual(['my-workflow-1']);
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type {
@@ -118,18 +121,24 @@ import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_servi
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
-jest.mock('uuid', () => ({
-  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/wrap_scoped_cluster_client', () => ({
-  createWrappedScopedClusterClientFactory: jest.fn(),
-}));
+vi.mock('../lib/wrap_scoped_cluster_client', () => {
+      const mocked = {
+      createWrappedScopedClusterClientFactory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/alerting_event_logger/alerting_event_logger');
+vi.mock('../lib/alerting_event_logger/alerting_event_logger');
 
-jest.mock('../rules_client/lib/get_alert_from_raw');
-const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
+vi.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as MockedFunction<typeof getAlertFromRaw>;
 
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const taskRunnerLogger = createTaskRunnerLogger({
@@ -149,7 +158,7 @@ const alertingEventLogger = alertingEventLoggerMock.create();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 
-const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleTypeWithAlerts: Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
   alerts: {
     context: 'test',
@@ -176,12 +185,12 @@ describe('Task Runner', () => {
     let mockedTaskInstance: ConcreteTaskInstance;
 
     beforeAll(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date(DATE_1970));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(DATE_1970));
       mockedTaskInstance = mockTaskInstance();
     });
 
-    afterAll(() => jest.useRealTimers());
+    afterAll(() => vi.useRealTimers());
 
     const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
     const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -196,10 +205,10 @@ describe('Task Runner', () => {
     const uiSettingsService = uiSettingsServiceMock.createStartContract();
     const inMemoryMetrics = inMemoryMetricsMock.create();
     const dataViewsMock = {
-      dataViewsServiceFactory: jest
+      dataViewsServiceFactory: vi
         .fn()
         .mockResolvedValue(dataViewPluginMocks.createStartContract()),
-      getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+      getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
     } as DataViewsServerPluginStart;
     const mockAlertsService = alertsServiceMock.create();
     const mockAlertsClient = alertsClientMock.create();
@@ -208,9 +217,9 @@ describe('Task Runner', () => {
     const connectorAdapterRegistry = new ConnectorAdapterRegistry();
     const elasticsearchAndSOAvailability$ = new Subject<boolean>();
 
-    type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
-      actionsPlugin: jest.Mocked<ActionsPluginStart>;
-      eventLogger: jest.Mocked<IEventLogger>;
+    type TaskRunnerFactoryInitializerParamsType = Mocked<TaskRunnerContext> & {
+      actionsPlugin: Mocked<ActionsPluginStart>;
+      eventLogger: Mocked<IEventLogger>;
       executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
     };
 
@@ -235,19 +244,18 @@ describe('Task Runner', () => {
       rulesSettingsService,
       savedObjects: savedObjectsService,
       share: {} as SharePluginStart,
-      spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+      spaceIdToNamespace: vi.fn().mockReturnValue(undefined),
       uiSettings: uiSettingsService,
       usageCounter: mockUsageCounter,
       isServerless: false,
-      getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+      getEventLogClient: vi.fn().mockReturnValue(eventLogClientMock.create()),
       apiKeyType: ApiKeyType.ES,
     };
 
     describe(`using ${label} for alert indices`, () => {
-      beforeEach(() => {
-        jest.clearAllMocks();
-        jest
-          .requireMock('../lib/wrap_scoped_cluster_client')
+      beforeEach(async () => {
+        vi.clearAllMocks();
+        (await vi.importMock('../lib/wrap_scoped_cluster_client'))
           .createWrappedScopedClusterClientFactory.mockReturnValue({
             client: () => services.scopedClusterClient,
             getMetrics: () => ({
@@ -276,7 +284,7 @@ describe('Task Runner', () => {
         mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;
 
         alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
-        (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
+        (AlertingEventLogger as Mock).mockImplementation(() => alertingEventLogger);
 
         maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
           maintenanceWindows: [
@@ -332,10 +340,10 @@ describe('Task Runner', () => {
         });
 
       test('should not use legacy alerts client if alerts client created', async () => {
-        const spy1 = jest
+        const spy1 = vi
           .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
           .mockImplementation(() => mockLegacyAlertsClient);
-        const spy2 = jest
+        const spy2 = vi
           .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
           .mockImplementation(() => ruleRunMetricsStore);
         mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
@@ -474,7 +482,7 @@ describe('Task Runner', () => {
         );
         expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
         expect(
-          jest.requireMock('../lib/wrap_scoped_cluster_client')
+          (await vi.importMock('../lib/wrap_scoped_cluster_client'))
             .createWrappedScopedClusterClientFactory
         ).toHaveBeenCalled();
         spy1.mockRestore();
@@ -493,7 +501,7 @@ describe('Task Runner', () => {
         });
         elasticsearchAndSOAvailability$.next(true);
 
-        const spy = jest
+        const spy = vi
           .spyOn(alertsService, 'getContextInitializationPromise')
           .mockResolvedValue({ result: true });
 
@@ -639,7 +647,7 @@ describe('Task Runner', () => {
         );
         expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
         expect(
-          jest.requireMock('../lib/wrap_scoped_cluster_client')
+          (await vi.importMock('../lib/wrap_scoped_cluster_client'))
             .createWrappedScopedClusterClientFactory
         ).toHaveBeenCalled();
         spy.mockRestore();
@@ -657,7 +665,7 @@ describe('Task Runner', () => {
         });
         elasticsearchAndSOAvailability$.next(true);
 
-        const spy = jest
+        const spy = vi
           .spyOn(alertsService, 'getContextInitializationPromise')
           .mockResolvedValue({ result: true });
 
@@ -752,10 +760,10 @@ describe('Task Runner', () => {
       });
 
       test('should default to legacy alerts client if error creating alerts client', async () => {
-        const spy1 = jest
+        const spy1 = vi
           .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
           .mockImplementation(() => mockLegacyAlertsClient);
-        const spy2 = jest
+        const spy2 = vi
           .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
           .mockImplementation(() => ruleRunMetricsStore);
         mockAlertsService.createAlertsClient.mockImplementation(() => {
@@ -853,7 +861,7 @@ describe('Task Runner', () => {
         );
         expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
         expect(
-          jest.requireMock('../lib/wrap_scoped_cluster_client')
+          (await vi.importMock('../lib/wrap_scoped_cluster_client'))
             .createWrappedScopedClusterClientFactory
         ).toHaveBeenCalled();
         spy1.mockRestore();
@@ -861,10 +869,10 @@ describe('Task Runner', () => {
       });
 
       test('should default to legacy alerts client if alert service is not defined', async () => {
-        const spy1 = jest
+        const spy1 = vi
           .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
           .mockImplementation(() => mockLegacyAlertsClient);
-        const spy2 = jest
+        const spy2 = vi
           .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
           .mockImplementation(() => ruleRunMetricsStore);
         mockLegacyAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
@@ -950,7 +958,7 @@ describe('Task Runner', () => {
         );
         expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
         expect(
-          jest.requireMock('../lib/wrap_scoped_cluster_client')
+          (await vi.importMock('../lib/wrap_scoped_cluster_client'))
             .createWrappedScopedClusterClientFactory
         ).toHaveBeenCalled();
         spy1.mockRestore();

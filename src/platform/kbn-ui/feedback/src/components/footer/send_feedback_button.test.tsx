@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -16,7 +18,7 @@ import { SendFeedbackButton } from './send_feedback_button';
 const mockProps = {
   isSendFeedbackButtonDisabled: false,
   isSubmitting: false,
-  submitFeedback: jest.fn(),
+  submitFeedback: vi.fn(),
 };
 
 describe('SendFeedbackButton', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getImportTimelinesRequest } from '../../../__mocks__/request_responses';
 import {
   serverMock,
@@ -41,49 +44,49 @@ describe('import timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
-  let mockGetTimeline: jest.Mock;
-  let mockGetTemplateTimeline: jest.Mock;
-  let mockPersistTimeline: jest.Mock;
-  let mockPersistPinnedEventOnTimeline: jest.Mock;
-  let mockPersistNote: jest.Mock;
-  let mockGetNote: jest.Mock;
-  let mockGetTupleDuplicateErrorsAndUniqueTimeline: jest.Mock;
+  let mockGetTimeline: Mock;
+  let mockGetTemplateTimeline: Mock;
+  let mockPersistTimeline: Mock;
+  let mockPersistPinnedEventOnTimeline: Mock;
+  let mockPersistNote: Mock;
+  let mockGetNote: Mock;
+  let mockGetTupleDuplicateErrorsAndUniqueTimeline: Mock;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
     securitySetup = {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+        getCurrentUser: vi.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    mockGetTimeline = jest.fn();
-    mockGetTemplateTimeline = jest.fn();
-    mockPersistTimeline = jest.fn();
-    mockPersistPinnedEventOnTimeline = jest.fn();
-    mockPersistNote = jest.fn();
-    mockGetNote = jest.fn();
-    mockGetTupleDuplicateErrorsAndUniqueTimeline = jest.fn();
+    mockGetTimeline = vi.fn();
+    mockGetTemplateTimeline = vi.fn();
+    mockPersistTimeline = vi.fn();
+    mockPersistPinnedEventOnTimeline = vi.fn();
+    mockPersistNote = vi.fn();
+    mockGetNote = vi.fn();
+    mockGetTupleDuplicateErrorsAndUniqueTimeline = vi.fn();
 
-    jest.doMock('./create_timelines_stream_from_ndjson', () => {
+    vi.doMock('./create_timelines_stream_from_ndjson', () => {
       return {
-        createTimelinesStreamFromNdJson: jest.fn().mockReturnValue(mockParsedObjects),
+        createTimelinesStreamFromNdJson: vi.fn().mockReturnValue(mockParsedObjects),
       };
     });
 
-    jest.doMock('@kbn/utils', () => {
+    vi.doMock('@kbn/utils', () => {
       return {
-        createPromiseFromStreams: jest.fn().mockReturnValue(mockParsedObjects),
+        createPromiseFromStreams: vi.fn().mockReturnValue(mockParsedObjects),
       };
     });
 
-    jest.doMock('./get_timelines_from_stream', () => {
+    vi.doMock('./get_timelines_from_stream', () => {
       return {
         getTupleDuplicateErrorsAndUniqueTimeline:
           mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
@@ -95,8 +98,8 @@ describe('import timelines', () => {
   });
 
   describe('Import a new timeline', () => {
-    beforeEach(() => {
-      jest.doMock('../../../saved_object/timelines', () => {
+    beforeEach(async () => {
+      vi.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -106,13 +109,13 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_events', () => {
+      vi.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../saved_object/notes/saved_object', () => {
+      vi.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
           getNote: mockGetNote
@@ -149,7 +152,7 @@ describe('import timelines', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
+      const importTimelinesRoute = (await vi.importActual('.')).importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
@@ -347,8 +350,8 @@ describe('import timelines', () => {
   });
 
   describe('Import a timeline already exist', () => {
-    beforeEach(() => {
-      jest.doMock('../../../saved_object/timelines', () => {
+    beforeEach(async () => {
+      vi.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -356,19 +359,19 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_events', () => {
+      vi.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../saved_object/notes/saved_object', () => {
+      vi.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
+      const importTimelinesRoute = (await vi.importActual('.')).importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
@@ -457,52 +460,52 @@ describe('import timeline templates', () => {
   let request: ReturnType<typeof requestMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
-  let mockGetTimeline: jest.Mock;
-  let mockGetTemplateTimeline: jest.Mock;
-  let mockPersistTimeline: jest.Mock;
-  let mockPersistPinnedEventOnTimeline: jest.Mock;
-  let mockPersistNote: jest.Mock;
-  let mockGetNote: jest.Mock;
+  let mockGetTimeline: Mock;
+  let mockGetTemplateTimeline: Mock;
+  let mockPersistTimeline: Mock;
+  let mockPersistPinnedEventOnTimeline: Mock;
+  let mockPersistNote: Mock;
+  let mockGetNote: Mock;
 
-  let mockGetTupleDuplicateErrorsAndUniqueTimeline: jest.Mock;
+  let mockGetTupleDuplicateErrorsAndUniqueTimeline: Mock;
   const mockNewTemplateTimelineId = 'new templateTimelineId';
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
     securitySetup = {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+        getCurrentUser: vi.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    mockGetTimeline = jest.fn();
-    mockGetTemplateTimeline = jest.fn();
-    mockPersistTimeline = jest.fn();
-    mockPersistPinnedEventOnTimeline = jest.fn();
-    mockPersistNote = jest.fn();
-    mockGetNote = jest.fn();
-    mockGetTupleDuplicateErrorsAndUniqueTimeline = jest.fn();
+    mockGetTimeline = vi.fn();
+    mockGetTemplateTimeline = vi.fn();
+    mockPersistTimeline = vi.fn();
+    mockPersistPinnedEventOnTimeline = vi.fn();
+    mockPersistNote = vi.fn();
+    mockGetNote = vi.fn();
+    mockGetTupleDuplicateErrorsAndUniqueTimeline = vi.fn();
 
-    jest.doMock('./create_timelines_stream_from_ndjson', () => {
+    vi.doMock('./create_timelines_stream_from_ndjson', () => {
       return {
-        createTimelinesStreamFromNdJson: jest
+        createTimelinesStreamFromNdJson: vi
           .fn()
           .mockReturnValue(mockParsedTemplateTimelineObjects),
       };
     });
 
-    jest.doMock('@kbn/utils', () => {
+    vi.doMock('@kbn/utils', () => {
       return {
-        createPromiseFromStreams: jest.fn().mockReturnValue(mockParsedTemplateTimelineObjects),
+        createPromiseFromStreams: vi.fn().mockReturnValue(mockParsedTemplateTimelineObjects),
       };
     });
 
-    jest.doMock('./get_timelines_from_stream', () => {
+    vi.doMock('./get_timelines_from_stream', () => {
       return {
         getTupleDuplicateErrorsAndUniqueTimeline:
           mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
@@ -512,14 +515,17 @@ describe('import timeline templates', () => {
       };
     });
 
-    jest.doMock('uuid', () => ({
-      v4: jest.fn().mockReturnValue(mockNewTemplateTimelineId),
-    }));
+    vi.doMock('uuid', () => {
+          const mocked = {
+              v4: vi.fn().mockReturnValue(mockNewTemplateTimelineId),
+            };
+          return { ...mocked, default: mocked };
+        });
   });
 
   describe('Import a new timeline template', () => {
-    beforeEach(() => {
-      jest.doMock('../../../saved_object/timelines', () => {
+    beforeEach(async () => {
+      vi.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -529,20 +535,20 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_events', () => {
+      vi.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../saved_object/notes/saved_object', () => {
+      vi.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
           getNote: mockGetNote.mockResolvedValueOnce(mockUniqueParsedObjects[0].globalNotes[0]),
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
+      const importTimelinesRoute = (await vi.importActual('.')).importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
@@ -664,8 +670,8 @@ describe('import timeline templates', () => {
   });
 
   describe('Import a timeline template already exist', () => {
-    beforeEach(() => {
-      jest.doMock('../../../saved_object/timelines', () => {
+    beforeEach(async () => {
+      vi.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
@@ -677,19 +683,19 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_events', () => {
+      vi.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../saved_object/notes/saved_object', () => {
+      vi.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
+      const importTimelinesRoute = (await vi.importActual('.')).importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
@@ -832,7 +838,7 @@ describe('import timeline templates', () => {
 
   describe('request validation', () => {
     beforeEach(() => {
-      jest.doMock('../../../saved_object/timelines', () => {
+      vi.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
           persistTimeline: mockPersistTimeline.mockReturnValue({
@@ -841,7 +847,7 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_events', () => {
+      vi.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline.mockReturnValue(
             new Error('Test error')
@@ -849,7 +855,7 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/notes/saved_object', () => {
+      vi.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
@@ -861,7 +867,7 @@ describe('import timeline templates', () => {
         path: TIMELINE_EXPORT_URL,
         body: { isImmutable: 1, file: {} },
       });
-      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
+      const importTimelinesRoute = (await vi.importActual('.')).importTimelinesRoute;
 
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
       const result = server.validate(request);

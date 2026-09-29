@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '../common/lib/kibana';
 import { useOsqueryDataView } from './use_osquery_data_view';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-jest.mock('../common/lib/kibana');
+vi.mock('../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -29,7 +32,7 @@ const mockDataView = { id: 'dv-1', title: 'logs-osquery_manager.result*' };
 
 describe('useOsqueryDataView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a found data view', async () => {
@@ -37,10 +40,10 @@ describe('useOsqueryDataView', () => {
       services: {
         data: {
           dataViews: {
-            find: jest.fn().mockResolvedValue([mockDataView]),
-            getCanSaveSync: jest.fn().mockReturnValue(false),
-            createAndSave: jest.fn(),
-            create: jest.fn(),
+            find: vi.fn().mockResolvedValue([mockDataView]),
+            getCanSaveSync: vi.fn().mockReturnValue(false),
+            createAndSave: vi.fn(),
+            create: vi.fn(),
           },
         },
       },
@@ -60,10 +63,10 @@ describe('useOsqueryDataView', () => {
       services: {
         data: {
           dataViews: {
-            find: jest.fn().mockResolvedValue([]),
-            getCanSaveSync: jest.fn().mockReturnValue(true),
-            createAndSave: jest.fn().mockResolvedValue(createdDv),
-            create: jest.fn(),
+            find: vi.fn().mockResolvedValue([]),
+            getCanSaveSync: vi.fn().mockReturnValue(true),
+            createAndSave: vi.fn().mockResolvedValue(createdDv),
+            create: vi.fn(),
           },
         },
       },
@@ -83,10 +86,10 @@ describe('useOsqueryDataView', () => {
       services: {
         data: {
           dataViews: {
-            find: jest.fn().mockResolvedValue([]),
-            getCanSaveSync: jest.fn().mockReturnValue(false),
-            createAndSave: jest.fn(),
-            create: jest.fn().mockResolvedValue(adhocDv),
+            find: vi.fn().mockResolvedValue([]),
+            getCanSaveSync: vi.fn().mockReturnValue(false),
+            createAndSave: vi.fn(),
+            create: vi.fn().mockResolvedValue(adhocDv),
           },
         },
       },
@@ -105,10 +108,10 @@ describe('useOsqueryDataView', () => {
       services: {
         data: {
           dataViews: {
-            find: jest.fn(),
-            getCanSaveSync: jest.fn().mockReturnValue(false),
-            createAndSave: jest.fn(),
-            create: jest.fn(),
+            find: vi.fn(),
+            getCanSaveSync: vi.fn().mockReturnValue(false),
+            createAndSave: vi.fn(),
+            create: vi.fn(),
           },
         },
       },

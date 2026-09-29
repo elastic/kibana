@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -21,25 +24,34 @@ import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { withMatchedIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../../common/components/empty_prompt');
+vi.mock('../../../common/components/empty_prompt');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../../common/components/search_bar', () => ({
-  SiemSearchBar: () => null,
-}));
-jest.mock('../../../common/components/query_bar', () => ({
-  QueryBar: () => null,
-}));
-jest.mock('../../../common/components/visualization_actions/actions');
-jest.mock('../../../common/components/visualization_actions/lens_embeddable');
+vi.mock('../../../common/components/search_bar', () => {
+      const mocked = {
+      SiemSearchBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/query_bar', () => {
+      const mocked = {
+      QueryBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/visualization_actions/actions');
+vi.mock('../../../common/components/visualization_actions/lens_embeddable');
 
-jest.mock('./navigation', () => ({
-  ...jest.requireActual('./navigation'),
-  NetworkRoutes: jest.fn(() => <div data-test-subj="network-routes-mock" />),
-}));
+vi.mock('./navigation', async () => {
+      const mocked = {
+      ...(await vi.importActual('./navigation')),
+      NetworkRoutes: vi.fn(() => <div data-test-subj="network-routes-mock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const NetworkRoutesMocked = NetworkRoutes as jest.MockedFunction<typeof NetworkRoutes>;
+const NetworkRoutesMocked = NetworkRoutes as MockedFunction<typeof NetworkRoutes>;
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -53,14 +65,14 @@ const mockHistory = {
   length: 2,
   location,
   action: pop,
-  push: jest.fn(),
-  replace: jest.fn(),
-  go: jest.fn(),
-  goBack: jest.fn(),
-  goForward: jest.fn(),
-  block: jest.fn(),
-  createHref: jest.fn(),
-  listen: jest.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
+  go: vi.fn(),
+  goBack: vi.fn(),
+  goForward: vi.fn(),
+  block: vi.fn(),
+  createHref: vi.fn(),
+  listen: vi.fn(),
 };
 
 const to = '2018-03-23T18:49:23.132Z';
@@ -71,18 +83,18 @@ const mockProps = {
   to,
   from,
   isInitializing: false,
-  setQuery: jest.fn(),
+  setQuery: vi.fn(),
   capabilitiesFetched: true,
   hasMlUserPermissions: true,
 };
 
-const mockMapVisibility = jest.fn();
-const mockNavigateToApp = jest.fn();
+const mockMapVisibility = vi.fn();
+const mockNavigateToApp = vi.fn();
 const mockSecurityCapabilities = {
   [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
 };
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -108,12 +120,12 @@ jest.mock('../../../common/lib/kibana', () => {
         },
       },
     }),
-    useToasts: jest.fn().mockReturnValue({
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      addInfo: jest.fn(),
-      remove: jest.fn(),
+    useToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
     }),
   };
 });
@@ -123,7 +135,7 @@ describe('Network page - rendering', () => {
     mockMapVisibility.mockReturnValue({ show: true });
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('it renders getting started page when no index is available', () => {
     render(
@@ -152,7 +164,7 @@ describe('Network page - rendering', () => {
 
   test('it renders the network map if user has permissions', () => {
     // When there are matched indices
-    jest.mocked(useDataView).mockImplementation(withMatchedIndices);
+    vi.mocked(useDataView).mockImplementation(withMatchedIndices);
 
     render(
       <TestProviders>
@@ -208,7 +220,7 @@ describe('Network page - rendering', () => {
         },
       },
     ];
-    jest.mocked(useDataView).mockImplementation(withMatchedIndices);
+    vi.mocked(useDataView).mockImplementation(withMatchedIndices);
 
     const myStore = createMockStore();
     render(

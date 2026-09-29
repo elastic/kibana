@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 
@@ -14,10 +17,10 @@ import { TestProviders } from '../../../../../common/mock';
 import { useGetCaseUsers } from '../../../../../containers/use_get_case_users';
 import type { CaseUI } from '../../../../../../common';
 
-jest.mock('../../../../../common/navigation/hooks');
-jest.mock('../../../../../containers/use_get_case_users');
+vi.mock('../../../../../common/navigation/hooks');
+vi.mock('../../../../../containers/use_get_case_users');
 
-const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
+const useGetCaseUsersMock = useGetCaseUsers as Mock;
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
@@ -26,7 +29,7 @@ const caseData: CaseUI = basicCase;
 
 describe('useCaseParticipantsData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: getCaseUsersMockResponse() });
   });
 

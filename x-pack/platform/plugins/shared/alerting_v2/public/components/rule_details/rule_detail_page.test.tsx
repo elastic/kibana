@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -24,12 +26,15 @@ const mockLocators = createMockLocators();
 
 let mockCanWriteRules = true;
 
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
-  useRuleAutoAttach: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-browser-shared', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerting-v2-browser-shared')),
+      useRuleAutoAttach: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => {
+vi.mock('@kbn/core-di-browser', () => {
   return {
     useService: (token: unknown) => {
       if (token === 'http') {
@@ -49,52 +54,73 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-const mockUseBreadcrumbs = jest.fn();
-jest.mock('../../hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: (...args: unknown[]) => mockUseBreadcrumbs(...args),
-}));
+const mockUseBreadcrumbs = vi.fn();
+vi.mock('../../hooks/use_breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbs: (...args: unknown[]) => mockUseBreadcrumbs(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDeleteRule = jest.fn();
-jest.mock('../../hooks/use_delete_rule', () => ({
-  useDeleteRule: () => ({ mutate: mockDeleteRule, isLoading: false }),
-}));
+const mockDeleteRule = vi.fn();
+vi.mock('../../hooks/use_delete_rule', () => {
+      const mocked = {
+      useDeleteRule: () => ({ mutate: mockDeleteRule, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockToggleRuleEnabled = jest.fn();
+const mockToggleRuleEnabled = vi.fn();
 let mockIsToggling = false;
-jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
-  useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
-}));
+vi.mock('../../hooks/use_toggle_rule_enabled', () => {
+      const mocked = {
+      useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUpdateRuleApiKey = jest.fn();
-jest.mock('../../hooks/use_bulk_update_rule_api_key', () => ({
-  useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateRuleApiKey, isLoading: false }),
-}));
+const mockUpdateRuleApiKey = vi.fn();
+vi.mock('../../hooks/use_bulk_update_rule_api_key', () => {
+      const mocked = {
+      useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateRuleApiKey, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRunRule = jest.fn();
-jest.mock('../../hooks/use_run_rule', () => ({
-  useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
-}));
+const mockRunRule = vi.fn();
+vi.mock('../../hooks/use_run_rule', () => {
+      const mocked = {
+      useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenEditFlyout = jest.fn();
-const mockOpenCloneFlyout = jest.fn();
-jest.mock('../../hooks/use_compose_discover_flyout', () => ({
-  useComposeDiscoverFlyout: () => ({
-    flyout: null,
-    confirmationModal: null,
-    openCreateFlyout: jest.fn(),
-    openEditFlyout: mockOpenEditFlyout,
-    openCloneFlyout: mockOpenCloneFlyout,
-  }),
-}));
+const mockOpenEditFlyout = vi.fn();
+const mockOpenCloneFlyout = vi.fn();
+vi.mock('../../hooks/use_compose_discover_flyout', () => {
+      const mocked = {
+      useComposeDiscoverFlyout: () => ({
+        flyout: null,
+        confirmationModal: null,
+        openCreateFlyout: vi.fn(),
+        openEditFlyout: mockOpenEditFlyout,
+        openCloneFlyout: mockOpenCloneFlyout,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRuleAuditMetadata = jest.fn();
-jest.mock('../../hooks/use_rule_audit_metadata', () => ({
-  useRuleAuditMetadata: () => mockUseRuleAuditMetadata(),
-}));
+const mockUseRuleAuditMetadata = vi.fn();
+vi.mock('../../hooks/use_rule_audit_metadata', () => {
+      const mocked = {
+      useRuleAuditMetadata: () => mockUseRuleAuditMetadata(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAppHeaderRender = jest.fn();
-jest.mock('@kbn/app-header', () => {
-  const actual = jest.requireActual('@kbn/app-header');
+const mockAppHeaderRender = vi.fn();
+vi.mock('@kbn/app-header', async () => {
+  const actual = (await vi.importActual('@kbn/app-header'));
   return {
     ...actual,
     AppHeader: (props: React.ComponentProps<typeof actual.AppHeader>) => {
@@ -104,9 +130,9 @@ jest.mock('@kbn/app-header', () => {
   };
 });
 
-const mockRuleKindBadgeRender = jest.fn();
-jest.mock('./rule_summary_header', () => {
-  const actual = jest.requireActual('./rule_summary_header');
+const mockRuleKindBadgeRender = vi.fn();
+vi.mock('./rule_summary_header', async () => {
+  const actual = (await vi.importActual('./rule_summary_header'));
   return {
     ...actual,
     RuleKindBadge: (props: { kind: string }) => {
@@ -116,17 +142,23 @@ jest.mock('./rule_summary_header', () => {
   };
 });
 
-jest.mock('./sidebar/rule_sidebar', () => ({
-  RuleSidebar: () => (
-    <div>
-      <div data-test-subj="ruleConditionsSection">conditions</div>
-    </div>
-  ),
-}));
+vi.mock('./sidebar/rule_sidebar', () => {
+      const mocked = {
+      RuleSidebar: () => (
+        <div>
+          <div data-test-subj="ruleConditionsSection">conditions</div>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./overview', () => ({
-  RuleOverviewSection: () => <div data-test-subj="ruleOverviewSectionMock">overview</div>,
-}));
+vi.mock('./overview', () => {
+      const mocked = {
+      RuleOverviewSection: () => <div data-test-subj="ruleOverviewSectionMock">overview</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
@@ -147,7 +179,7 @@ const baseRule: RuleApiResponse = {
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
-const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
+const mockUseRuleAutoAttach = vi.mocked(useRuleAutoAttach);
 
 const renderPage = (rule: RuleApiResponse) =>
   render(
@@ -166,7 +198,7 @@ const renderPage = (rule: RuleApiResponse) =>
 
 describe('RuleDetailPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsToggling = false;
     mockUseRuleAuditMetadata.mockReturnValue({
       createdByDisplay: 'Alice Example',
@@ -231,7 +263,7 @@ describe('RuleDetailPage', () => {
   it('back link params resolve to management rules list URL', async () => {
     renderPage(baseRule);
 
-    const [params] = jest.mocked(mockLocators.rulesLocators.useUrl).mock.calls[0];
+    const [params] = vi.mocked(mockLocators.rulesLocators.useUrl).mock.calls[0];
     const location = await AlertingV2RulesLocatorDefinition.getLocation(params);
     expect(location).toMatchObject({
       app: 'management',

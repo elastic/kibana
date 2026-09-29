@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type {
   Conversation,
   CurrentUser,
@@ -46,9 +49,9 @@ import {
   type Document as ConversationDocument,
 } from './converters';
 
-jest.mock('@kbn/agent-builder-server/tools/utils');
+vi.mock('@kbn/agent-builder-server/tools/utils');
 
-const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
+const getToolResultIdMock = getToolResultId as MockedFunction<typeof getToolResultId>;
 
 const createTestState = () => ({
   prompt: {
@@ -902,7 +905,7 @@ describe('conversation model converters', () => {
           read_only: false,
           events: [],
         },
-        resolveTemplate: jest.fn(),
+        resolveTemplate: vi.fn(),
       });
 
       expect(response).not.toHaveProperty('read_by');
@@ -967,7 +970,7 @@ describe('conversation model converters', () => {
           },
         },
         user: requestingUser,
-        resolveTemplate: jest.fn(),
+        resolveTemplate: vi.fn(),
       });
 
       expect(response).not.toHaveProperty('read_by');

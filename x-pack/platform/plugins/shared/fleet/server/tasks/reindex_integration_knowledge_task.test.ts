@@ -5,50 +5,65 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { appContextService } from '../services';
 import { getInstallations, getPackageKnowledgeBase } from '../services/epm/packages';
 import { indexKnowledgeBase } from '../services/epm/packages/install_state_machine/steps';
 
 import { reindexIntegrationKnowledgeForInstalledPackages } from './reindex_integration_knowledge_task';
 
-jest.mock('../services');
-jest.mock('../services/epm/packages');
-jest.mock('../services/epm/registry', () => ({
-  getPackage: jest.fn().mockResolvedValue({
-    archiveIterator: {},
-  }),
-}));
-jest.mock('../services/epm/packages/install_state_machine/steps', () => ({
-  indexKnowledgeBase: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('../services/epm/packages/bundled_packages', () => ({
-  getBundledPackageForInstallation: jest.fn().mockResolvedValue({
-    getBuffer: jest.fn().mockResolvedValue(Buffer.from('')),
-  }),
-}));
-jest.mock('../services/epm/archive', () => ({
-  unpackBufferToAssetsMap: jest.fn().mockResolvedValue({
-    archiveIterator: {},
-  }),
-}));
+vi.mock('../services');
+vi.mock('../services/epm/packages');
+vi.mock('../services/epm/registry', () => {
+      const mocked = {
+      getPackage: vi.fn().mockResolvedValue({
+        archiveIterator: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../services/epm/packages/install_state_machine/steps', () => {
+      const mocked = {
+      indexKnowledgeBase: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../services/epm/packages/bundled_packages', () => {
+      const mocked = {
+      getBundledPackageForInstallation: vi.fn().mockResolvedValue({
+        getBuffer: vi.fn().mockResolvedValue(Buffer.from('')),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../services/epm/archive', () => {
+      const mocked = {
+      unpackBufferToAssetsMap: vi.fn().mockResolvedValue({
+        archiveIterator: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ReindexIntegrationKnowledgeTask', () => {
   const { signal } = new AbortController();
   beforeEach(() => {
-    (appContextService.getLogger as jest.Mock).mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+    (appContextService.getLogger as Mock).mockReturnValue({
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not reindex knowledge base if already indexed for package version', async () => {
-    (getInstallations as jest.Mock).mockResolvedValue({
+    (getInstallations as Mock).mockResolvedValue({
       saved_objects: [
         {
           attributes: {
@@ -59,7 +74,7 @@ describe('ReindexIntegrationKnowledgeTask', () => {
         },
       ],
     });
-    (getPackageKnowledgeBase as jest.Mock).mockResolvedValue({
+    (getPackageKnowledgeBase as Mock).mockResolvedValue({
       items: [{ version: '1.0.0' }],
     });
 
@@ -69,7 +84,7 @@ describe('ReindexIntegrationKnowledgeTask', () => {
   });
 
   it('should reindex knowledge base if not indexed for package version', async () => {
-    (getInstallations as jest.Mock).mockResolvedValue({
+    (getInstallations as Mock).mockResolvedValue({
       saved_objects: [
         {
           attributes: {
@@ -101,7 +116,7 @@ describe('ReindexIntegrationKnowledgeTask', () => {
         },
       ],
     });
-    (getPackageKnowledgeBase as jest.Mock).mockResolvedValue({
+    (getPackageKnowledgeBase as Mock).mockResolvedValue({
       items: [{ version: '0.0.1' }],
     });
 

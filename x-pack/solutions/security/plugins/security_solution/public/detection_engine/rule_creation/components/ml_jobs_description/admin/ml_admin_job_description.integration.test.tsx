@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,10 +17,13 @@ import type { SecurityJob } from '../../../../../common/components/ml_popover/ty
 
 import { MlAdminJobDescription } from './ml_admin_job_description';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/components/ml_popover/hooks/use_enable_data_feed', () => ({
-  useEnableDataFeed: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/components/ml_popover/hooks/use_enable_data_feed', () => {
+      const mocked = {
+      useEnableDataFeed: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { mockSecurityJobs } from '../../../../../common/components/ml_popover/api.mock';
 
@@ -30,14 +36,14 @@ const securityJobNotStarted: SecurityJob = {
   },
 };
 
-const useEnableDataFeedMock = (useEnableDataFeed as jest.Mock).mockReturnValue({
+const useEnableDataFeedMock = (useEnableDataFeed as Mock).mockReturnValue({
   isLoading: false,
 });
 
 describe('MlAdminJobDescription', () => {
   it('should enable datafeed and call refreshJob when enabling job', async () => {
-    const refreshJobSpy = jest.fn();
-    const enableDatafeedSpy = jest.fn();
+    const refreshJobSpy = vi.fn();
+    const enableDatafeedSpy = vi.fn();
     useEnableDataFeedMock.mockReturnValueOnce({
       enableDatafeed: enableDatafeedSpy,
     });

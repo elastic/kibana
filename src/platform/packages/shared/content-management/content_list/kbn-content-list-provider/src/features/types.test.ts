@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isSortingConfig, isPaginationConfig, isSearchConfig, isFilterFacetConfig } from './types';
 
 describe('feature type guards', () => {
@@ -78,7 +80,7 @@ describe('feature type guards', () => {
 
   describe('isFilterFacetConfig', () => {
     it('returns `true` for a `FilterFacetConfig` object.', () => {
-      expect(isFilterFacetConfig({ getFacets: jest.fn() })).toBe(true);
+      expect(isFilterFacetConfig({ getFacets: vi.fn() })).toBe(true);
     });
 
     it('returns `false` for `true`.', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
@@ -15,7 +17,7 @@ describe('registerStepDefinitions', () => {
   it('registers the KI and feedback analysis step definitions', () => {
     const definitions: Array<{ id: string }> = [];
     const workflowsExtensions = {
-      registerStepDefinition: jest.fn((definition: { id: string }) => definitions.push(definition)),
+      registerStepDefinition: vi.fn((definition: { id: string }) => definitions.push(definition)),
     } as unknown as WorkflowsExtensionsServerPluginSetup;
     const telemetry = mockKiStepTelemetry();
 
@@ -25,7 +27,7 @@ describe('registerStepDefinitions', () => {
       isContextEngineEnabled: async () => true,
       checkWritePrivilege: async () => true,
       ...telemetry,
-      verifyKi: jest.fn(),
+      verifyKi: vi.fn(),
       feedbackAnalysis: {
         getAiIndexService: () => ({} as AiIndexService),
         getImprovementsService: () => ({} as ImprovementsServiceApi),

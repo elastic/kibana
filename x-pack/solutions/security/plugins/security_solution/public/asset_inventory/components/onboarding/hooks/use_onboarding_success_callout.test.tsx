@@ -5,30 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useOnboardingSuccessCallout } from './use_onboarding_success_callout';
 
-jest.mock('react-use/lib/useLocalStorage');
-const mockLocalStorage = [false, jest.fn()];
-const mockNavigateToApp = jest.fn();
+vi.mock('react-use/lib/useLocalStorage');
+const mockLocalStorage = [false, vi.fn()];
+const mockNavigateToApp = vi.fn();
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: mockNavigateToApp,
-      },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: mockNavigateToApp,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useOnboardingSuccessCallout', () => {
   beforeEach(() => {
-    (useLocalStorage as jest.Mock).mockReturnValue(mockLocalStorage);
+    (useLocalStorage as Mock).mockReturnValue(mockLocalStorage);
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should initialize with false default value from local storage', () => {

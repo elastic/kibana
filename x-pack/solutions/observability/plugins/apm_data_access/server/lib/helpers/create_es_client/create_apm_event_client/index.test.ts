@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
@@ -19,9 +22,9 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import * as cancelEsRequestOnAbortModule from '../cancel_es_request_on_abort';
 import * as unwrapEsResponseModule from '@kbn/observability-utils-server/es/unwrap_es_response';
 
-jest.mock('@kbn/observability-utils-server/es/unwrap_es_response', () => ({
+vi.mock('@kbn/observability-utils-server/es/unwrap_es_response', async () => ({
   __esModule: true,
-  ...jest.requireActual('@kbn/observability-utils-server/es/unwrap_es_response'),
+  ...(await vi.importActual('@kbn/observability-utils-server/es/unwrap_es_response')),
 }));
 
 describe('APMEventClient', () => {
@@ -109,10 +112,10 @@ describe('APMEventClient', () => {
   });
 
   describe('excludedDataTiers filter', () => {
-    let esClientMock: jest.Mocked<ElasticsearchClient>;
+    let esClientMock: Mocked<ElasticsearchClient>;
     let apmEventClient: APMEventClient;
-    let cancelEsRequestOnAbortSpy: jest.SpyInstance;
-    let unwrapEsResponseSpy: jest.SpyInstance;
+    let cancelEsRequestOnAbortSpy: MockInstance;
+    let unwrapEsResponseSpy: MockInstance;
 
     const esResponse: estypes.SearchResponse = {
       hits: {
@@ -126,25 +129,25 @@ describe('APMEventClient', () => {
     };
 
     beforeAll(() => {
-      jest.resetModules();
+      vi.resetModules();
     });
 
     beforeEach(() => {
-      cancelEsRequestOnAbortSpy = jest
+      cancelEsRequestOnAbortSpy = vi
         .spyOn(cancelEsRequestOnAbortModule, 'cancelEsRequestOnAbort')
-        .mockImplementation(jest.fn());
+        .mockImplementation(vi.fn());
 
-      unwrapEsResponseSpy = jest
+      unwrapEsResponseSpy = vi
         .spyOn(unwrapEsResponseModule, 'unwrapEsResponse')
-        .mockImplementation(jest.fn());
+        .mockImplementation(vi.fn());
 
       esClientMock = {
-        search: jest.fn(),
-        msearch: jest.fn(),
-        eql: { search: jest.fn() },
-        fieldCaps: jest.fn(),
-        termsEnum: jest.fn(),
-      } as unknown as jest.Mocked<ElasticsearchClient>;
+        search: vi.fn(),
+        msearch: vi.fn(),
+        eql: { search: vi.fn() },
+        fieldCaps: vi.fn(),
+        termsEnum: vi.fn(),
+      } as unknown as Mocked<ElasticsearchClient>;
 
       apmEventClient = new APMEventClient({
         esClient: esClientMock,

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 describe('getCommandLineSnippet', () => {
   const originalNavigator = window.navigator;
 
   afterEach(() => {
-    jest.resetModules();
+    vi.resetModules();
   });
 
   it('should format windows correctly', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,59 +16,74 @@ import type { PolicyExecutionHistoryItem } from '../../services/execution_histor
 import type { useFetchRuleExecutions } from '../../hooks/use_fetch_rule_executions';
 import { ExecutionHistoryPage } from './execution_history_page';
 
-const mockUseFetchExecutionHistory = jest.fn();
-const mockUseFetchRuleExecutions = jest.fn();
-const mockRefetch = jest.fn();
-const mockRuleRefetch = jest.fn();
+const mockUseFetchExecutionHistory = vi.fn();
+const mockUseFetchRuleExecutions = vi.fn();
+const mockRefetch = vi.fn();
+const mockRuleRefetch = vi.fn();
 
-jest.mock('../../application/breadcrumb_context', () => ({
-  useSetBreadcrumbs: () => jest.fn(),
-}));
+vi.mock('../../application/breadcrumb_context', () => {
+      const mocked = {
+      useSetBreadcrumbs: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCanReadRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'chrome') return { docTitle: { change: jest.fn() } };
-    if (token === 'application') {
-      return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
-    }
-    if (token === 'settings') {
-      return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
-    }
-    if (token === 'http') {
-      return {};
-    }
-    if (typeof token === 'function') {
-      return {
-        canRead: () => mockCanReadRules,
-        canWrite: () => mockCanReadRules,
-        can: () => mockCanReadRules,
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'chrome') return { docTitle: { change: vi.fn() } };
+        if (token === 'application') {
+          return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
+        }
+        if (token === 'settings') {
+          return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+        }
+        if (token === 'http') {
+          return {};
+        }
+        if (typeof token === 'function') {
+          return {
+            canRead: () => mockCanReadRules,
+            canWrite: () => mockCanReadRules,
+            can: () => mockCanReadRules,
+          };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_execution_history', () => ({
-  useFetchExecutionHistory: (...args: unknown[]) => mockUseFetchExecutionHistory(...args),
-}));
+vi.mock('../../hooks/use_fetch_execution_history', () => {
+      const mocked = {
+      useFetchExecutionHistory: (...args: unknown[]) => mockUseFetchExecutionHistory(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_rule_executions', () => ({
-  useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
-}));
+vi.mock('../../hooks/use_fetch_rule_executions', () => {
+      const mocked = {
+      useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => ({
-  useAlertingRulesCache: () => ({ rulesCache: {}, loading: false, error: undefined }),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => {
+      const mocked = {
+      useAlertingRulesCache: () => ({ rulesCache: {}, loading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/unified-data-table', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('@kbn/unified-data-table', () => {
+  const ReactActual = require('react');
   return {
     DataLoadingState: { loading: 'loading', loaded: 'loaded' },
     ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-    UnifiedDataTable: jest.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
+    UnifiedDataTable: vi.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
       ReactActual.createElement(
         'div',
         { 'data-test-subj': 'unifiedDataTable' },
@@ -91,77 +108,101 @@ jest.mock('@kbn/unified-data-table', () => {
   };
 });
 
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('@kbn/cell-actions', () => {
+      const mocked = {
+      CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./data_view', () => ({
-  ...jest.requireActual('./data_view'),
-  useRuleExecutionsDataView: () => ({ dataView: {}, error: undefined }),
-  usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
-}));
+vi.mock('./data_view', async () => {
+      const mocked = {
+      ...(await vi.importActual('./data_view')),
+      useRuleExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+      usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_unified_data_table_services', () => ({
-  useUnifiedDataTableServices: () => ({}),
-}));
+vi.mock('./hooks/use_unified_data_table_services', () => {
+      const mocked = {
+      useUnifiedDataTableServices: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCountNewActionPolicyExecutions = jest.fn();
-jest.mock('../../hooks/use_count_new_action_policy_executions', () => ({
-  useCountNewActionPolicyExecutions: (...args: unknown[]) =>
-    mockUseCountNewActionPolicyExecutions(...args),
-}));
+const mockUseCountNewActionPolicyExecutions = vi.fn();
+vi.mock('../../hooks/use_count_new_action_policy_executions', () => {
+      const mocked = {
+      useCountNewActionPolicyExecutions: (...args: unknown[]) =>
+        mockUseCountNewActionPolicyExecutions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchRules = jest.fn();
-jest.mock('../../hooks/use_fetch_rules', () => ({
-  useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
-}));
+const mockUseFetchRules = vi.fn();
+vi.mock('../../hooks/use_fetch_rules', () => {
+      const mocked = {
+      useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../components/action_policy/details_flyout/action_policy_details_flyout_container',
-  () => ({
-    ActionPolicyDetailsFlyoutContainer: ({
-      policyId,
-      onClose,
-    }: {
-      policyId: string;
-      onClose: () => void;
-    }) => (
-      <div data-test-subj={`mockFlyout-${policyId}`}>
-        <button data-test-subj="mockFlyoutClose" onClick={onClose} type="button">
-          close
-        </button>
-      </div>
-    ),
-  })
+  () => {
+      const mocked = {
+        ActionPolicyDetailsFlyoutContainer: ({
+          policyId,
+          onClose,
+        }: {
+          policyId: string;
+          onClose: () => void;
+        }) => (
+          <div data-test-subj={`mockFlyout-${policyId}`}>
+            <button data-test-subj="mockFlyoutClose" onClick={onClose} type="button">
+              close
+            </button>
+          </div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../hooks/use_compose_discover_flyout', () => ({
-  useComposeDiscoverFlyout: () => ({
-    flyout: null,
-    confirmationModal: null,
-    openCreateFlyout: jest.fn(),
-    openEditFlyout: jest.fn(),
-    openCloneFlyout: jest.fn(),
-  }),
-}));
+vi.mock('../../hooks/use_compose_discover_flyout', () => {
+      const mocked = {
+      useComposeDiscoverFlyout: () => ({
+        flyout: null,
+        confirmationModal: null,
+        openCreateFlyout: vi.fn(),
+        openEditFlyout: vi.fn(),
+        openCloneFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => ({
-  RuleSummaryFlyoutContainer: ({
-    ruleId,
-    onClose,
-  }: {
-    ruleId: string;
-    onClose: () => void;
-    onEdit: () => void;
-    onClone: () => void;
-  }) => (
-    <div data-test-subj={`mockRuleFlyout-${ruleId}`}>
-      <button data-test-subj="mockRuleFlyoutClose" onClick={onClose} type="button">
-        close
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => {
+      const mocked = {
+      RuleSummaryFlyoutContainer: ({
+        ruleId,
+        onClose,
+      }: {
+        ruleId: string;
+        onClose: () => void;
+        onEdit: () => void;
+        onClone: () => void;
+      }) => (
+        <div data-test-subj={`mockRuleFlyout-${ruleId}`}>
+          <button data-test-subj="mockRuleFlyoutClose" onClick={onClose} type="button">
+            close
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildItem = (
   overrides: Partial<PolicyExecutionHistoryItem> = {}
@@ -258,7 +299,7 @@ const switchToPoliciesTab = async () => {
 
 describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockNewEventsCount(0);
     mockRuleExecutionFetchResult();
   });

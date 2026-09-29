@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { userEvent } from '@testing-library/user-event';
 
@@ -23,7 +25,7 @@ describe.skip('TagsFilter', () => {
   it('should remove one tag on clicking selected tag', async () => {
     const tags = ['tag1', 'tag2', 'tag3'];
     const selectedTags = ['tag1', 'tag2', 'tag3'];
-    const onSelectedTagsChange = jest.fn();
+    const onSelectedTagsChange = vi.fn();
     const props = {
       tags,
       selectedTags,

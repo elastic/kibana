@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSelectTextPartsWithArrowKeys } from './use_select_text_parts_with_arrow_keys';
 
@@ -65,7 +67,7 @@ describe('useSelectTextPartsWithArrowKeys', () => {
     it('selects all text by default', () => {
       const input = createInput('Jan 1, 2026');
       const ref = { current: input };
-      const selectSpy = jest.spyOn(input, 'select');
+      const selectSpy = vi.spyOn(input, 'select');
 
       renderHook(() => useSelectTextPartsWithArrowKeys({ inputRef: ref, isActive: true }));
 
@@ -268,7 +270,7 @@ describe('useSelectTextPartsWithArrowKeys', () => {
     it('is called with correct args on ArrowUp', () => {
       const input = createInput('Jan 1, 2026');
       const ref = { current: input };
-      const onModifyPart = jest.fn().mockReturnValue(undefined);
+      const onModifyPart = vi.fn().mockReturnValue(undefined);
 
       renderHook(() =>
         useSelectTextPartsWithArrowKeys({
@@ -296,7 +298,7 @@ describe('useSelectTextPartsWithArrowKeys', () => {
     it('is called with correct args on ArrowDown', () => {
       const input = createInput('Jan 1, 2026');
       const ref = { current: input };
-      const onModifyPart = jest.fn().mockReturnValue(undefined);
+      const onModifyPart = vi.fn().mockReturnValue(undefined);
 
       renderHook(() =>
         useSelectTextPartsWithArrowKeys({
@@ -327,7 +329,7 @@ describe('useSelectTextPartsWithArrowKeys', () => {
     it('updates the input value when callback returns a new string', () => {
       const input = createInput('Jan 1, 2026');
       const ref = { current: input };
-      const onModifyPart = jest.fn().mockReturnValue('Jan 2, 2026');
+      const onModifyPart = vi.fn().mockReturnValue('Jan 2, 2026');
 
       renderHook(() =>
         useSelectTextPartsWithArrowKeys({
@@ -371,8 +373,8 @@ describe('useSelectTextPartsWithArrowKeys', () => {
     it('stops propagation when selected part modification returns undefined', () => {
       const input = createInput('Jan 1, 2026');
       const ref = { current: input };
-      const onModifyPart = jest.fn().mockReturnValue(undefined);
-      const propagated = jest.fn();
+      const onModifyPart = vi.fn().mockReturnValue(undefined);
+      const propagated = vi.fn();
       document.body.addEventListener('keydown', propagated);
       renderHook(() =>
         useSelectTextPartsWithArrowKeys({
@@ -394,8 +396,8 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       const input = createInput('Jan 1, 2026');
       input.setSelectionRange(5, 5);
       const ref = { current: input };
-      const onModifyPart = jest.fn();
-      const propagated = jest.fn();
+      const onModifyPart = vi.fn();
+      const propagated = vi.fn();
       document.body.addEventListener('keydown', propagated);
       renderHook(() =>
         useSelectTextPartsWithArrowKeys({

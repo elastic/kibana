@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, of, Subject, BehaviorSubject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,19 +22,22 @@ import type { TaskManagerConfig } from '../config';
 import { configSchema } from '../config';
 import { FillPoolResult } from '../lib/fill_pool';
 
-jest.mock('../monitoring', () => {
-  const monitoring = jest.requireActual('../monitoring');
+vi.mock('../monitoring', async () => {
+  const monitoring = (await vi.importActual('../monitoring'));
   return {
     ...monitoring,
-    summarizeMonitoringStats: jest.fn(),
+    summarizeMonitoringStats: vi.fn(),
   };
 });
 
-jest.mock('../lib/log_health_metrics', () => ({
-  logHealthMetrics: jest.fn(),
-}));
+vi.mock('../lib/log_health_metrics', () => {
+      const mocked = {
+      logHealthMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { summarizeMonitoringStats } = jest.requireMock('../monitoring');
+const { summarizeMonitoringStats } = (await vi.importMock('../monitoring'));
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -56,7 +61,7 @@ describe('healthRoute', () => {
   const logger = loggingSystemMock.create().get();
   const docLinks = docLinksServiceMock.create().setup();
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     summarizeMonitoringStats.mockReturnValue({
       last_update: timestamp,
@@ -213,7 +218,7 @@ describe('healthRoute', () => {
 
   it('logs the Task Manager stats at a fixed interval', async () => {
     const router = httpServiceMock.createRouter();
-    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
+    const { logHealthMetrics } = (await vi.importMock('../lib/log_health_metrics'));
 
     const mockStat = mockHealthStats();
     await sleep(10);
@@ -274,7 +279,7 @@ describe('healthRoute', () => {
 
   it(`logs at a warn level if the status is warning`, async () => {
     const router = httpServiceMock.createRouter();
-    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
+    const { logHealthMetrics } = (await vi.importMock('../lib/log_health_metrics'));
     const reason =
       'setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)';
     summarizeMonitoringStats.mockReturnValue({
@@ -366,7 +371,7 @@ describe('healthRoute', () => {
 
   it(`logs at an error level if the status is error`, async () => {
     const router = httpServiceMock.createRouter();
-    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
+    const { logHealthMetrics } = (await vi.importMock('../lib/log_health_metrics'));
     const reason =
       'setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)';
     summarizeMonitoringStats.mockReturnValue({

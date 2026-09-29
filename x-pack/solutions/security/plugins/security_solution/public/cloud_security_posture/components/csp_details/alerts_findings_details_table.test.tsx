@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
@@ -17,69 +19,96 @@ import {
   ENTITY_ANALYTICS_ALERTS_TO,
 } from '../../../entity_analytics/components/home/constants';
 
-jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
-  uiMetricService: { trackUiMetric: jest.fn() },
-  ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS: 'visit',
-}));
+vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
+      const mocked = {
+      uiMetricService: { trackUiMetric: vi.fn() },
+      ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS: 'visit',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/entity-store/public', () => ({
-  ...jest.requireActual('@kbn/entity-store/public'),
-  useEntityStoreEuidApi: jest.fn().mockReturnValue({ euid: null }),
-}));
+vi.mock('@kbn/entity-store/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/entity-store/public')),
+      useEntityStoreEuidApi: vi.fn().mockReturnValue({ euid: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useUiSetting: jest.fn().mockReturnValue(false),
-  useKibana: jest.fn().mockReturnValue({ services: {} }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useUiSetting: vi.fn().mockReturnValue(false),
+      useKibana: vi.fn().mockReturnValue({ services: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
-}));
+vi.mock('../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: jest.fn().mockReturnValue({
-    loading: false,
-    data: {
-      hits: {
-        hits: [
-          {
-            fields: {
-              _id: ['alert-1'],
-              _index: ['index-1'],
-              'kibana.alert.rule.name': ['Rule'],
-              'kibana.alert.severity': ['high'],
-              'kibana.alert.workflow_status': ['open'],
-            },
+vi.mock('../../../detections/containers/detection_engine/alerts/use_query', () => {
+      const mocked = {
+      useQueryAlerts: vi.fn().mockReturnValue({
+        loading: false,
+        data: {
+          hits: {
+            hits: [
+              {
+                fields: {
+                  _id: ['alert-1'],
+                  _index: ['index-1'],
+                  'kibana.alert.rule.name': ['Rule'],
+                  'kibana.alert.severity': ['high'],
+                  'kibana.alert.workflow_status': ['open'],
+                },
+              },
+            ],
           },
-        ],
-      },
-    },
-    setQuery: jest.fn(),
-    response: '',
-    request: '',
-    refetch: jest.fn(),
-  }),
-}));
+        },
+        setQuery: vi.fn(),
+        response: '',
+        request: '',
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
-  useSignalIndex: jest
-    .fn()
-    .mockReturnValue({ loading: false, signalIndexName: '.alerts-security' }),
-}));
+vi.mock('../../../detections/containers/detection_engine/alerts/use_signal_index', () => {
+      const mocked = {
+      useSignalIndex: vi
+        .fn()
+        .mockReturnValue({ loading: false, signalIndexName: '.alerts-security' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: jest.fn().mockReturnValue({ entityRecord: null, isLoading: false }),
-}));
+vi.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: vi.fn().mockReturnValue({ entityRecord: null, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_non_closed_alerts', () => ({
-  useNonClosedAlerts: jest
-    .fn()
-    .mockReturnValue({ hasNonClosedAlerts: false, filteredAlertsData: null }),
-}));
+vi.mock('../../hooks/use_non_closed_alerts', () => {
+      const mocked = {
+      useNonClosedAlerts: vi
+        .fn()
+        .mockReturnValue({ hasNonClosedAlerts: false, filteredAlertsData: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => ({
-  useNavigateToAlertsPageWithFilters: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
+      const mocked = {
+      useNavigateToAlertsPageWithFilters: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderTable = (
   onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void
@@ -102,11 +131,11 @@ const clickRowAction = () => {
 
 describe('AlertsDetailsTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('invokes onShowAlert with the row identifiers when a row action is clicked', () => {
-    const onShowAlert = jest.fn();
+    const onShowAlert = vi.fn();
     renderTable(onShowAlert);
 
     clickRowAction();
@@ -121,7 +150,7 @@ describe('AlertsDetailsTable', () => {
           <AlertsDetailsTable
             field={EntityIdentifierFields.hostName}
             value="my-host"
-            onShowAlert={jest.fn()}
+            onShowAlert={vi.fn()}
             scopeId={scopeId}
           />
         </TestProviders>

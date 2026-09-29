@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { usePreventLinkNavigation } from './use_prevent_link_navigation';
@@ -20,7 +22,7 @@ describe('usePreventLinkNavigation', () => {
     renderHook(() => usePreventLinkNavigation());
 
     const event = new MouseEvent('click', { bubbles: true, cancelable: true });
-    const preventDefault = jest.spyOn(event, 'preventDefault');
+    const preventDefault = vi.spyOn(event, 'preventDefault');
 
     anchor.dispatchEvent(event);
 
@@ -38,7 +40,7 @@ describe('usePreventLinkNavigation', () => {
     unmount();
 
     const event = new MouseEvent('click', { bubbles: true, cancelable: true });
-    const preventDefault = jest.spyOn(event, 'preventDefault');
+    const preventDefault = vi.spyOn(event, 'preventDefault');
 
     anchor.dispatchEvent(event);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import * as mappingsContext from '../../../public/application/components/mappings_editor/mappings_state_context';
 import type {
@@ -21,65 +23,68 @@ import {
   setErrorsInTrainedModelDeployment,
 } from './trained_models_deployment_modal.helpers';
 
-jest.mock('../../../public/application/app_context', () => ({
-  useAppContext: jest.fn().mockReturnValue({
-    url: undefined,
-    plugins: {
-      ml: {
-        mlApi: {
-          trainedModels: {
-            getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
-            getTrainedModels: jest.fn().mockResolvedValue([
-              {
-                model_id: '.elser_model_2',
-                model_type: 'pytorch',
-                model_package: {
-                  packaged_model_id: 'elser_model_2',
-                  model_repository: 'https://ml-models.elastic.co',
-                  minimum_version: '11.0.0',
-                  size: 438123914,
-                  sha256: '',
-                  metadata: {},
-                  tags: [],
-                  vocabulary_file: 'elser_model_2.vocab.json',
-                },
-                description: 'Elastic Learned Sparse EncodeR v2',
-                tags: ['elastic'],
-              },
-            ]),
-            getTrainedModelStats: jest.fn().mockResolvedValue({
-              count: 1,
-              trained_model_stats: [
-                {
-                  model_id: '.elser_model_2',
-
-                  deployment_stats: {
-                    deployment_id: 'elser_model_2',
+vi.mock('../../../public/application/app_context', () => {
+      const mocked = {
+      useAppContext: vi.fn().mockReturnValue({
+        url: undefined,
+        plugins: {
+          ml: {
+            mlApi: {
+              trainedModels: {
+                getModelsDownloadStatus: vi.fn().mockResolvedValue({}),
+                getTrainedModels: vi.fn().mockResolvedValue([
+                  {
                     model_id: '.elser_model_2',
-                    threads_per_allocation: 1,
-                    number_of_allocations: 1,
-                    queue_capacity: 1024,
-                    state: 'started',
+                    model_type: 'pytorch',
+                    model_package: {
+                      packaged_model_id: 'elser_model_2',
+                      model_repository: 'https://ml-models.elastic.co',
+                      minimum_version: '11.0.0',
+                      size: 438123914,
+                      sha256: '',
+                      metadata: {},
+                      tags: [],
+                      vocabulary_file: 'elser_model_2.vocab.json',
+                    },
+                    description: 'Elastic Learned Sparse EncodeR v2',
+                    tags: ['elastic'],
                   },
-                },
-              ],
-            }),
+                ]),
+                getTrainedModelStats: vi.fn().mockResolvedValue({
+                  count: 1,
+                  trained_model_stats: [
+                    {
+                      model_id: '.elser_model_2',
+
+                      deployment_stats: {
+                        deployment_id: 'elser_model_2',
+                        model_id: '.elser_model_2',
+                        threads_per_allocation: 1,
+                        number_of_allocations: 1,
+                        queue_capacity: 1024,
+                        state: 'started',
+                      },
+                    },
+                  ],
+                }),
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../public/application/components/mappings_editor/mappings_state_context');
+vi.mock('../../../public/application/components/mappings_editor/mappings_state_context');
 
-const mappingsContextMocked = jest.mocked(mappingsContext);
+const mappingsContextMocked = vi.mocked(mappingsContext);
 
 describe('When semantic_text is enabled', () => {
   const renderModal = renderTrainedModelsDeploymentModal;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('When there are no pending deployments and no errors in the model deployment', () => {

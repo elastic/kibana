@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AiAssistantButton } from './ai_assistant_button';
@@ -15,42 +17,51 @@ import { ENTITY_PROMPT } from '../../../agent_builder/components/prompts';
 
 // Hard code the generated anonymized value for easier testing
 const ANONYMIZED_VALUE = 'anonymized-value';
-jest.mock('@kbn/elastic-assistant-common', () => {
-  const actual = jest.requireActual('@kbn/elastic-assistant-common');
+vi.mock('@kbn/elastic-assistant-common', async () => {
+  const actual = (await vi.importActual('@kbn/elastic-assistant-common'));
   return {
     ...actual,
     getAnonymizedValue: () => ANONYMIZED_VALUE,
   };
 });
 
-const mockUseFetchAnonymizationFields = jest.fn();
-jest.mock(
+const mockUseFetchAnonymizationFields = vi.fn();
+vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
-  () => ({
-    useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
-  })
+  () => {
+      const mocked = {
+        useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseAskInAiAssistant = jest.fn();
-jest.mock('./use_ask_ai_assistant', () => {
-  const actual = jest.requireActual('./use_ask_ai_assistant');
+const mockUseAskInAiAssistant = vi.fn();
+vi.mock('./use_ask_ai_assistant', async () => {
+  const actual = (await vi.importActual('./use_ask_ai_assistant'));
   return {
     ...actual,
     useAskAiAssistant: (params: unknown) => mockUseAskInAiAssistant(params),
   };
 });
 
-const mockUseAgentBuilderAvailability = jest.fn();
-jest.mock('../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
-}));
+const mockUseAgentBuilderAvailability = vi.fn();
+vi.mock('../../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenAgentBuilderFlyout = jest.fn();
-jest.mock('../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
-  useAgentBuilderAttachment: () => ({
-    openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
-  }),
-}));
+const mockOpenAgentBuilderFlyout = vi.fn();
+vi.mock('../../../agent_builder/hooks/use_agent_builder_attachment', () => {
+      const mocked = {
+      useAgentBuilderAttachment: () => ({
+        openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AiAssistantButton', () => {
   const defaultProps: AiAssistantButtonProps<EntityType> = {
@@ -59,10 +70,10 @@ describe('AiAssistantButton', () => {
     telemetryPathway: 'entity_flyout',
   };
 
-  const mockShowAssistantOverlay = jest.fn();
+  const mockShowAssistantOverlay = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseFetchAnonymizationFields.mockReturnValue({
       data: {
         data: [{ field: 'user.name', allowed: true, anonymized: true }],

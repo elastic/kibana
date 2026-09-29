@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { UpdateIndexPatternForm } from './update_index_pattern_form';
@@ -32,7 +34,7 @@ describe('UpdateIndexPatternForm', () => {
   });
 
   it('calls onClose when the cancel button is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <UpdateIndexPatternForm onClose={onClose} onSubmit={() => {}} />
@@ -44,7 +46,7 @@ describe('UpdateIndexPatternForm', () => {
   });
 
   it('enables save and calls onSubmit when an index is selected and save is clicked', async () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <UpdateIndexPatternForm onClose={() => {}} onSubmit={onSubmit} />

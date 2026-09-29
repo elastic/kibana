@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment-timezone';
 
@@ -16,7 +19,7 @@ import { fetchAvailableIndices } from './fetch_available_indices';
 
 function getEsClientMock() {
   return {
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       aggregations: {
         index: {
           buckets: [],
@@ -24,13 +27,13 @@ function getEsClientMock() {
       },
     }),
     cat: {
-      indices: jest.fn().mockResolvedValue([]),
+      indices: vi.fn().mockResolvedValue([]),
     },
   } as unknown as ElasticsearchClient & {
     cat: {
-      indices: jest.Mock<Promise<FetchAvailableCatIndicesResponseRequired>>;
+      indices: Mock<Promise<FetchAvailableCatIndicesResponseRequired>>;
     };
-    search: jest.Mock<Promise<{ aggregations: IndexSearchAggregationResponse }>>;
+    search: Mock<Promise<{ aggregations: IndexSearchAggregationResponse }>>;
   };
 }
 
@@ -54,7 +57,7 @@ const endDateMillis: number = new Date(endDateString).getTime();
 
 describe('fetchAvailableIndices', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('aggregate search given index by startDate and endDate', async () => {
@@ -348,12 +351,12 @@ describe('fetchAvailableIndices', () => {
   describe('given keyword dates', () => {
     describe('given 7 days range', () => {
       beforeEach(() => {
-        jest.useFakeTimers();
-        jest.setSystemTime(new Date('2021-10-07T00:00:00Z').getTime());
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2021-10-07T00:00:00Z').getTime());
       });
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('finds indices created within the date range', async () => {
@@ -402,10 +405,10 @@ describe('fetchAvailableIndices', () => {
 
   describe('rejections', () => {
     beforeEach(() => {
-      jest.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
     });
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
     describe('when esClient.cat.indices rejects', () => {
       it('throws an error', async () => {

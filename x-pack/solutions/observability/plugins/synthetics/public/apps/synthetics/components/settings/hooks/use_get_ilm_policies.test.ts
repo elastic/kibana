@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetIlmPolicies } from './use_get_ilm_policies';
 import * as hookPolicyAPI from './api';
@@ -13,11 +15,11 @@ describe('useGetIlmPolicies', () => {
   beforeAll(() => {
     const { policiesData, indexSize } = getTestData();
 
-    jest
+    vi
       .spyOn(hookPolicyAPI, 'getIlmPolicies')
       .mockReturnValue(new Promise((resolve) => resolve(policiesData)));
 
-    jest
+    vi
       .spyOn(hookPolicyAPI, 'getIndicesData')
       .mockReturnValue(new Promise((resolve) => resolve(indexSize)));
   });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { FieldInputProps } from './field_input';
@@ -22,20 +24,23 @@ import type { CodeEditorProps } from './code_editor';
 
 const name = 'test';
 
-jest.mock('./code_editor', () => ({
-  CodeEditor: ({ value, onChange }: CodeEditorProps) => (
-    <input
-      data-test-subj={`management-settings-editField-test`}
-      type="text"
-      value={String(value)}
-      onChange={(e) => {
-        if (onChange) {
-          onChange(e.target.value, e as any);
-        }
-      }}
-    />
-  ),
-}));
+vi.mock('./code_editor', () => {
+      const mocked = {
+      CodeEditor: ({ value, onChange }: CodeEditorProps) => (
+        <input
+          data-test-subj={`management-settings-editField-test`}
+          type="text"
+          value={String(value)}
+          onChange={(e) => {
+            if (onChange) {
+              onChange(e.target.value, e as any);
+            }
+          }}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FieldInput', () => {
   const getDefaultProps = (type: SettingType): FieldInputProps<typeof type> => {
@@ -61,7 +66,7 @@ describe('FieldInput', () => {
         },
         options,
       } as FieldDefinition<typeof type>,
-      onInputChange: jest.fn(),
+      onInputChange: vi.fn(),
       isSavingEnabled: true,
     };
 
@@ -155,7 +160,7 @@ describe('FieldInput', () => {
   });
 
   it('throws an error if the field and unsavedChange types do not match', () => {
-    const consoleMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleMock = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     [
       'array',
@@ -195,7 +200,7 @@ describe('FieldInput', () => {
   });
 
   it('throws an error if type is unknown or incompatible', () => {
-    const consoleMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleMock = vi.spyOn(console, 'error').mockImplementation(() => {});
     const defaultProps = getDefaultProps('string');
     const props = {
       ...defaultProps,

@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('undici', () => ({
-  Agent: jest.fn().mockImplementation(() => ({ close: jest.fn().mockResolvedValue(undefined) })),
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('undici', () => ({
+  Agent: vi.fn().mockImplementation(function () {
+    return { close: vi.fn().mockResolvedValue(undefined) };
+  }),
 }));
 
 import { rootCertificates } from 'node:tls';
@@ -19,7 +24,7 @@ import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
 
 type VerificationMode = HttpConfig['selfHttp']['ssl']['verificationMode'];
 
-const AgentMock = Agent as unknown as jest.Mock;
+const AgentMock = Agent as unknown as Mock;
 
 const PUBLIC_BASE_URL = 'https://kibana.example.com';
 const HTTPS_URL = new URL('https://kibana.example.com/api/status');
@@ -37,7 +42,7 @@ const createProvider = ({
   target?: 'auto' | 'local';
   publicBaseUrl?: string;
 } = {}) => {
-  const getHttpConfig = jest.fn(
+  const getHttpConfig = vi.fn(
     () =>
       ({
         ssl: { enabled: true, requestCert: false, certificate: serverCertificate },
@@ -190,7 +195,7 @@ describe('SelfHttpDispatcherProvider', () => {
       let certificateAuthorities: string[] | undefined = ['public CA'];
       const provider = new SelfHttpDispatcherProvider({
         basePath: { publicBaseUrl: PUBLIC_BASE_URL } as IBasePath,
-        getHttpConfig: jest.fn(
+        getHttpConfig: vi.fn(
           () =>
             ({
               ssl: { enabled: true, requestCert: false },
@@ -214,7 +219,7 @@ describe('SelfHttpDispatcherProvider', () => {
       let verificationMode: VerificationMode = 'full';
       const provider = new SelfHttpDispatcherProvider({
         basePath: { publicBaseUrl: PUBLIC_BASE_URL } as IBasePath,
-        getHttpConfig: jest.fn(
+        getHttpConfig: vi.fn(
           () =>
             ({
               ssl: { enabled: true, requestCert: false },

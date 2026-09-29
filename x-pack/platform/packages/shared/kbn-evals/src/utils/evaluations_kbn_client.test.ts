@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/kbn-client';
 import {
@@ -13,20 +16,23 @@ import {
   withKbnClientApiKeyAuth,
 } from './evaluations_kbn_client';
 
-jest.mock('./kbn_client_with_retries', () => ({
-  wrapKbnClientWithRetries: jest.fn(({ kbnClient }) => kbnClient),
-}));
+vi.mock('./kbn_client_with_retries', () => {
+      const mocked = {
+      wrapKbnClientWithRetries: vi.fn(({ kbnClient }) => kbnClient),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createMockKbnClient = (): jest.Mocked<KbnClient> =>
+const createMockKbnClient = (): Mocked<KbnClient> =>
   ({
-    request: jest.fn().mockResolvedValue({}),
-  } as unknown as jest.Mocked<KbnClient>);
+    request: vi.fn().mockResolvedValue({}),
+  } as unknown as Mocked<KbnClient>);
 
 const log = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
 } as unknown as ToolingLog;
 
 describe('withKbnClientDefaultHeaders', () => {
@@ -81,7 +87,7 @@ describe('withKbnClientApiKeyAuth', () => {
 describe('getEvaluationsKbnClient', () => {
   it('returns default kbnClient when EVAL_KBN_URL is not set', () => {
     const defaultKbnClient = createMockKbnClient();
-    const createKbnClient = jest.fn();
+    const createKbnClient = vi.fn();
 
     const client = getEvaluationsKbnClient({
       kbnClient: defaultKbnClient,
@@ -97,7 +103,7 @@ describe('getEvaluationsKbnClient', () => {
   it('builds a separate client when EVAL_KBN_URL is set', async () => {
     const defaultKbnClient = createMockKbnClient();
     const evaluationsKbnClient = createMockKbnClient();
-    const createKbnClient = jest.fn().mockReturnValue(evaluationsKbnClient);
+    const createKbnClient = vi.fn().mockReturnValue(evaluationsKbnClient);
 
     const client = getEvaluationsKbnClient({
       kbnClient: defaultKbnClient,
@@ -122,7 +128,7 @@ describe('getEvaluationsKbnClient', () => {
   it('automatically includes elastic-api-version header', async () => {
     const defaultKbnClient = createMockKbnClient();
     const customKbnClient = createMockKbnClient();
-    const createKbnClient = jest.fn().mockReturnValue(customKbnClient);
+    const createKbnClient = vi.fn().mockReturnValue(customKbnClient);
 
     const client = getEvaluationsKbnClient({
       kbnClient: defaultKbnClient,
@@ -148,7 +154,7 @@ describe('getEvaluationsKbnClient', () => {
   it('includes both API key auth and elastic-api-version when both are set', async () => {
     const defaultKbnClient = createMockKbnClient();
     const customKbnClient = createMockKbnClient();
-    const createKbnClient = jest.fn().mockReturnValue(customKbnClient);
+    const createKbnClient = vi.fn().mockReturnValue(customKbnClient);
 
     const client = getEvaluationsKbnClient({
       kbnClient: defaultKbnClient,

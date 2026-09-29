@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ChangeImageLink, type ChangeImageLinkProps } from './change_image_link';
@@ -27,7 +29,7 @@ describe('ChangeImageLink', () => {
       savedValue: null,
     },
     unsavedChange: undefined,
-    onClear: jest.fn(),
+    onClear: vi.fn(),
   };
 
   it('does not render with no saved value and no unsaved change', () => {

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getApmTraceError } from './get_apm_trace_error';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 function createApmEventClientMock(): APMEventClient {
   return {
-    search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
   } as unknown as APMEventClient;
 }
 
@@ -25,7 +28,7 @@ async function getSearchFilter(docId?: string): Promise<Array<Record<string, unk
     end: 1,
   });
 
-  const [, searchParams] = (apmEventClient.search as jest.Mock).mock.calls[0];
+  const [, searchParams] = (apmEventClient.search as Mock).mock.calls[0];
 
   return searchParams.query.bool.filter;
 }

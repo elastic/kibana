@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,17 +14,20 @@ import HttpActionConnectorFields from './http_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { formSerializer, formDeserializer } from '../lib/http/form_serialization';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-jest.mock('../../common/auth/auth_config', () => ({
+vi.mock('../../common/auth/auth_config', () => ({
   __esModule: true,
   default: () => <div data-test-subj="authConfigMock">Auth</div>,
 }));
 
-const mockUseSecretQueryParams = jest.fn();
-jest.mock('../../common/auth/use_secret_query_params', () => ({
-  useSecretQueryParams: (...args: unknown[]) => mockUseSecretQueryParams(...args),
-}));
+const mockUseSecretQueryParams = vi.fn();
+vi.mock('../../common/auth/use_secret_query_params', () => {
+      const mocked = {
+      useSecretQueryParams: (...args: unknown[]) => mockUseSecretQueryParams(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const connectorWithExistingQueryParams = {
   id: 'existing-connector',
@@ -49,7 +54,7 @@ const connectorWithExistingQueryParams = {
 
 describe('HTTP connector query params bugs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Bug 1: Toggle does not work when editing an existing connector', () => {
@@ -69,7 +74,7 @@ describe('HTTP connector query params bugs', () => {
           <HttpActionConnectorFields
             readOnly={false}
             isEdit={true}
-            registerPreSubmitValidator={jest.fn()}
+            registerPreSubmitValidator={vi.fn()}
           />
         </ConnectorFormTestProvider>
       );
@@ -114,7 +119,7 @@ describe('HTTP connector query params bugs', () => {
           <HttpActionConnectorFields
             readOnly={false}
             isEdit={true}
-            registerPreSubmitValidator={jest.fn()}
+            registerPreSubmitValidator={vi.fn()}
           />
         </ConnectorFormTestProvider>
       );
@@ -154,7 +159,7 @@ describe('HTTP connector query params bugs', () => {
           <HttpActionConnectorFields
             readOnly={false}
             isEdit={true}
-            registerPreSubmitValidator={jest.fn()}
+            registerPreSubmitValidator={vi.fn()}
           />
         </ConnectorFormTestProvider>
       );

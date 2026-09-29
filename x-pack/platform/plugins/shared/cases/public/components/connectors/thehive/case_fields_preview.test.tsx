@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import FieldsPreview from './case_fields_preview';
@@ -19,7 +21,7 @@ describe('TheHive Fields: Preview', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {

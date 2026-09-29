@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -25,8 +27,8 @@ describe('<ComponentTemplateList />', () => {
   let coreStart: ReturnType<(typeof coreMock)['createStart']>;
 
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
@@ -34,7 +36,7 @@ describe('<ComponentTemplateList />', () => {
   });
 
   test('updates the breadcrumbs to component templates', async () => {
-    jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+    vi.spyOn(breadcrumbService, 'setBreadcrumbs');
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
     renderComponentTemplateList(httpSetup, coreStart);
     await screen.findByTestId('emptyList');

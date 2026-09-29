@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { ESQLVariableType, SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import {
@@ -22,7 +25,7 @@ describe('getESQLSourceInfo', () => {
 
   const createHttp = (impl?: (path: string, options: { body: string }) => unknown): HttpStart => {
     return {
-      post: jest.fn(async (path: string, options: { body: string }) => {
+      post: vi.fn(async (path: string, options: { body: string }) => {
         if (impl) {
           return impl(path, options);
         }
@@ -70,7 +73,7 @@ describe('getESQLSourceInfo', () => {
       esqlVariables: variables,
     });
 
-    const posted = JSON.parse((http.post as jest.Mock).mock.calls[0][1].body);
+    const posted = JSON.parse((http.post as Mock).mock.calls[0][1].body);
     expect(posted.esqlVariables).toEqual([
       { key: 'field', value: 'message', type: ESQLVariableType.FIELDS },
     ]);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,22 +25,22 @@ import { savedRuleMock } from '../../logic/mock';
 import { useDeprecatedRuleDetailsCallout } from './use_deprecated_rule_details_callout';
 import { createDefaultExternalRuleSource } from '../../../../../server/lib/detection_engine/rule_management/logic/detection_rules_client/mergers/rule_source/create_default_external_rule_source';
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../logic/bulk_actions/use_execute_bulk_action');
-jest.mock('../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review');
-jest.mock(
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../logic/bulk_actions/use_execute_bulk_action');
+vi.mock('../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review');
+vi.mock(
   '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation'
 );
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
-const mockUseExecuteBulkAction = useExecuteBulkAction as jest.Mock;
-const mockUsePrebuiltRulesDeprecationReview = usePrebuiltRulesDeprecationReview as jest.Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
+const mockUseExecuteBulkAction = useExecuteBulkAction as Mock;
+const mockUsePrebuiltRulesDeprecationReview = usePrebuiltRulesDeprecationReview as Mock;
 const mockUseBulkDuplicateExceptionsConfirmation =
-  useBulkDuplicateExceptionsConfirmation as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
+  useBulkDuplicateExceptionsConfirmation as Mock;
+const mockUseKibana = useKibana as Mock;
 
 const RULE_ID = savedRuleMock.id;
 const RULE_RULE_ID = savedRuleMock.rule_id;
@@ -48,12 +51,12 @@ const mockPrebuiltRule: RuleResponse = {
   rule_source: createDefaultExternalRuleSource(),
 };
 
-const mockExecuteBulkAction = jest.fn();
-const mockNavigateToApp = jest.fn();
-const mockConfirmDeletion = jest.fn();
-const mockShowBulkDuplicateConfirmation = jest.fn();
-const mockCancelRuleDuplication = jest.fn();
-const mockConfirmRuleDuplication = jest.fn();
+const mockExecuteBulkAction = vi.fn();
+const mockNavigateToApp = vi.fn();
+const mockConfirmDeletion = vi.fn();
+const mockShowBulkDuplicateConfirmation = vi.fn();
+const mockCancelRuleDuplication = vi.fn();
+const mockConfirmRuleDuplication = vi.fn();
 
 /**
  * Renders a wrapper component that calls the hook and renders the returned callout.
@@ -88,7 +91,7 @@ function TestComponent(
 
 describe('useDeprecatedRuleDetailsCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
 
@@ -124,7 +127,7 @@ describe('useDeprecatedRuleDetailsCallout', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: { navigateToApp: mockNavigateToApp },
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
         docLinks: {
           links: {
             securitySolution: {

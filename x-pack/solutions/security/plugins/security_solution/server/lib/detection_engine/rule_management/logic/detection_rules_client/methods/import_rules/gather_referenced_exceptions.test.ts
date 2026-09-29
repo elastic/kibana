@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { findExceptionList } from '@kbn/lists-plugin/server/services/exception_lists/find_exception_list';
@@ -15,16 +18,16 @@ import {
   parseReferencedExceptionsLists,
 } from './gather_referenced_exceptions';
 
-jest.mock('@kbn/lists-plugin/server/services/exception_lists/find_exception_list');
+vi.mock('@kbn/lists-plugin/server/services/exception_lists/find_exception_list');
 
 describe('get referenced exceptions', () => {
   describe('getReferencedExceptions', () => {
-    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
       savedObjectsClient = savedObjectsClientMock.create();
 
-      (findExceptionList as jest.Mock).mockResolvedValue({
+      (findExceptionList as Mock).mockResolvedValue({
         data: [
           {
             ...getExceptionListSchemaMock(),
@@ -38,7 +41,7 @@ describe('get referenced exceptions', () => {
         per_page: 20,
         total: 1,
       });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns empty object if no rules to search', async () => {
@@ -128,7 +131,7 @@ describe('get referenced exceptions', () => {
     });
 
     it('returns two found referenced exception lists when two rules reference different lists', async () => {
-      (findExceptionList as jest.Mock).mockResolvedValue({
+      (findExceptionList as Mock).mockResolvedValue({
         data: [
           {
             ...getExceptionListSchemaMock(),

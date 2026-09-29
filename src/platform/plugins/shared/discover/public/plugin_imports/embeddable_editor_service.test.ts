@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -44,7 +46,7 @@ describe('EmbeddableEditorService', () => {
   const createStateTransfer = (incomingState?: EmbeddableEditorState): EmbeddableStateTransfer => {
     const embeddableStateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
 
-    jest.mocked(embeddableStateTransfer.getIncomingEditorState).mockReturnValue(incomingState);
+    vi.mocked(embeddableStateTransfer.getIncomingEditorState).mockReturnValue(incomingState);
 
     return embeddableStateTransfer;
   };
@@ -88,7 +90,7 @@ describe('EmbeddableEditorService', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('allows saving to dashboard only when not embedded and dashboard capabilities are enabled', () => {

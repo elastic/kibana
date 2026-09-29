@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useConversationsUpdater } from './use_conversations_updater';
 import { useAssistantContext } from '../../../assistant_context';
@@ -13,11 +16,14 @@ import type { Conversation } from '../../../..';
 import { deleteAllConversations } from '../../api/conversations/delete_all_conversations';
 import { MOCK_CURRENT_USER } from '../../../mock/conversation';
 
-jest.mock('../../../assistant_context');
-jest.mock('../../api/conversations/bulk_update_actions_conversations');
-jest.mock('../../api/conversations/delete_all_conversations', () => ({
-  deleteAllConversations: jest.fn(),
-}));
+vi.mock('../../../assistant_context');
+vi.mock('../../api/conversations/bulk_update_actions_conversations');
+vi.mock('../../api/conversations/delete_all_conversations', () => {
+      const mocked = {
+      deleteAllConversations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockConversations: Record<string, Conversation> = {
   '03a2ef3c-3aec-4f13-8f18-bb31b47b2df1': {
@@ -56,22 +62,22 @@ const mockConversations: Record<string, Conversation> = {
 
 const mockAssistantContext = {
   assistantTelemetry: {
-    reportAssistantSettingToggled: jest.fn(),
+    reportAssistantSettingToggled: vi.fn(),
   },
   assistantStreamingEnabled: true,
   http: {
-    fetch: jest.fn(),
+    fetch: vi.fn(),
   },
-  setAssistantStreamingEnabled: jest.fn(),
+  setAssistantStreamingEnabled: vi.fn(),
   toasts: {
-    addSuccess: jest.fn(),
+    addSuccess: vi.fn(),
   },
 };
 
 describe('useConversationsUpdater', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockReturnValue(mockAssistantContext);
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockReturnValue(mockAssistantContext);
   });
 
   it('should initialize with provided conversations and context values', () => {
@@ -141,7 +147,7 @@ describe('useConversationsUpdater', () => {
   });
 
   it('should call bulkUpdateConversations and update state on saveConversationsSettings', async () => {
-    (bulkUpdateConversations as jest.Mock).mockResolvedValue({ success: true });
+    (bulkUpdateConversations as Mock).mockResolvedValue({ success: true });
 
     const { result } = renderHook(() => useConversationsUpdater(mockConversations, true));
 
@@ -225,7 +231,7 @@ describe('useConversationsUpdater', () => {
       });
     });
 
-    expect(deleteAllConversations as jest.Mock).toHaveBeenCalledWith({
+    expect(deleteAllConversations as Mock).toHaveBeenCalledWith({
       excludedIds: [],
       http: mockAssistantContext.http,
       toasts: mockAssistantContext.toasts,
@@ -242,7 +248,7 @@ describe('useConversationsUpdater', () => {
       });
     });
 
-    expect(deleteAllConversations as jest.Mock).toHaveBeenCalledWith({
+    expect(deleteAllConversations as Mock).toHaveBeenCalledWith({
       excludedIds: ['1'],
       http: mockAssistantContext.http,
       toasts: mockAssistantContext.toasts,

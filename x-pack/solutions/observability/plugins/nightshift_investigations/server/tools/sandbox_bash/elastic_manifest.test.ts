@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
@@ -43,7 +45,7 @@ describe('renderElasticManifest', () => {
 
 describe('writeElasticManifest', () => {
   it('writes the manifest to /workspace/elastic.md', async () => {
-    const writeFiles = jest.fn().mockResolvedValue([{ bytes_written: 100, success: true }]);
+    const writeFiles = vi.fn().mockResolvedValue([{ bytes_written: 100, success: true }]);
     const session = { writeFiles } as unknown as SandboxSession;
 
     await writeElasticManifest({
@@ -61,7 +63,7 @@ describe('writeElasticManifest', () => {
   it.each([{ results: [] }, { results: [{ bytes_written: 0, success: false }] }])(
     'rejects an unsuccessful per-file response %j',
     async ({ results }) => {
-      const writeFiles = jest.fn().mockResolvedValue(results);
+      const writeFiles = vi.fn().mockResolvedValue(results);
       const session = { writeFiles } as unknown as SandboxSession;
       await expect(
         writeElasticManifest({

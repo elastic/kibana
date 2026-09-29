@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import '@kbn/react-query/mock';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,7 +18,7 @@ import { useGetAttackDiscoveryGeneration } from '.';
 import type { AttackDiscoveryGeneration } from '@kbn/elastic-assistant-common';
 
 const mockHttp: HttpSetup = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 } as unknown as HttpSetup;
 
 let queryClient: QueryClient;
@@ -42,7 +45,7 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useGetAttackDiscoveryGeneration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     queryClient = new QueryClient({
       defaultOptions: {
@@ -55,7 +58,7 @@ describe('useGetAttackDiscoveryGeneration', () => {
 
   describe('when executionUuid is provided', () => {
     it('fetches from the correct single-generation endpoint', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce({ generation: mockGeneration });
+      (mockHttp.fetch as Mock).mockResolvedValueOnce({ generation: mockGeneration });
 
       renderHook(() => useGetAttackDiscoveryGeneration({ ...defaultProps }), { wrapper });
 
@@ -68,7 +71,7 @@ describe('useGetAttackDiscoveryGeneration', () => {
     });
 
     it('returns the generation from the response', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce({ generation: mockGeneration });
+      (mockHttp.fetch as Mock).mockResolvedValueOnce({ generation: mockGeneration });
 
       const { result } = renderHook(() => useGetAttackDiscoveryGeneration({ ...defaultProps }), {
         wrapper,
@@ -80,7 +83,7 @@ describe('useGetAttackDiscoveryGeneration', () => {
     });
 
     it('returns undefined generation before the first fetch completes', () => {
-      (mockHttp.fetch as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+      (mockHttp.fetch as Mock).mockReturnValueOnce(new Promise(() => {}));
 
       const { result } = renderHook(() => useGetAttackDiscoveryGeneration({ ...defaultProps }), {
         wrapper,
@@ -90,7 +93,7 @@ describe('useGetAttackDiscoveryGeneration', () => {
     });
 
     it('returns isLoading true while fetching', () => {
-      (mockHttp.fetch as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+      (mockHttp.fetch as Mock).mockReturnValueOnce(new Promise(() => {}));
 
       const { result } = renderHook(() => useGetAttackDiscoveryGeneration({ ...defaultProps }), {
         wrapper,
@@ -100,7 +103,7 @@ describe('useGetAttackDiscoveryGeneration', () => {
     });
 
     it('returns isLoading false after a successful fetch', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce({ generation: mockGeneration });
+      (mockHttp.fetch as Mock).mockResolvedValueOnce({ generation: mockGeneration });
 
       const { result } = renderHook(() => useGetAttackDiscoveryGeneration({ ...defaultProps }), {
         wrapper,

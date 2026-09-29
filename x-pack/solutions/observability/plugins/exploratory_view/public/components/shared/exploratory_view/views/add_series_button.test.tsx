@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { render } from '../rtl_helpers';
@@ -12,12 +14,12 @@ import { AddSeriesButton } from './add_series_button';
 import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
 import * as hooks from '../hooks/use_series_storage';
 
-const setSeries = jest.fn();
+const setSeries = vi.fn();
 
 describe('AddSeriesButton', () => {
-  beforeEach(() => {
-    jest.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
-      ...jest.requireActual('../hooks/use_series_storage'),
+  beforeEach(async () => {
+    vi.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
+      ...(await vi.importActual('../hooks/use_series_storage')),
       allSeries: [],
       setSeries,
       reportType: ReportTypes.KPI,
@@ -42,9 +44,9 @@ describe('AddSeriesButton', () => {
       expect(setSeries).toHaveBeenCalledWith(0, { name: 'new-series-1', time: DEFAULT_TIME });
     });
 
-    jest.clearAllMocks();
-    jest.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
-      ...jest.requireActual('../hooks/use_series_storage'),
+    vi.clearAllMocks();
+    vi.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
+      ...(await vi.importActual('../hooks/use_series_storage')),
       allSeries: new Array(1),
       setSeries,
       reportType: ReportTypes.KPI,
@@ -65,9 +67,9 @@ describe('AddSeriesButton', () => {
   it.each([ReportTypes.DEVICE_DISTRIBUTION, ReportTypes.CORE_WEB_VITAL])(
     'does not allow adding more than 1 series for core web vitals or device distribution',
     async (reportType) => {
-      jest.clearAllMocks();
-      jest.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
-        ...jest.requireActual('../hooks/use_series_storage'),
+      vi.clearAllMocks();
+      vi.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
+        ...(await vi.importActual('../hooks/use_series_storage')),
         allSeries: new Array(1), // mock array of length 1
         setSeries,
         reportType,
@@ -86,9 +88,9 @@ describe('AddSeriesButton', () => {
   );
 
   it('does not allow adding a series when the report type is undefined', async () => {
-    jest.clearAllMocks();
-    jest.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
-      ...jest.requireActual('../hooks/use_series_storage'),
+    vi.clearAllMocks();
+    vi.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
+      ...(await vi.importActual('../hooks/use_series_storage')),
       allSeries: [],
       setSeries,
     });

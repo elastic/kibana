@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { EuiPaginationTestHarness } from '@kbn/test-eui-helpers';
@@ -13,14 +15,14 @@ import { renderHome } from '../helpers/render_home';
 import { httpService } from '../../../public/application/services/http';
 import { createNonDataStreamIndex } from '../helpers/actions/data_stream_actions';
 
-jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+vi.mock('react-use/lib/useObservable', () => () => vi.fn());
 
 describe('Index table pagination', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const mockEnvironment = setupEnvironment();
     httpService.setup(httpServiceMock.createSetupContract());

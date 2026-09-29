@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -13,8 +16,8 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { AlertsService } from '../../../../alerts_service';
 
 const alertsService = {
-  muteAlertInstance: jest.fn(),
-  unmuteAlertInstance: jest.fn(),
+  muteAlertInstance: vi.fn(),
+  unmuteAlertInstance: vi.fn(),
 };
 const {
   rulesClientParams,
@@ -24,16 +27,16 @@ const {
   authorization,
   auditLogger,
 } = getRulesClientMockParams({
-  getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+  getAlertIndicesAlias: vi.fn().mockReturnValue(['.alerts-default']),
   alertsService: alertsService as unknown as AlertsService,
 });
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
   alertsService.muteAlertInstance.mockClear();
   alertsService.unmuteAlertInstance.mockClear();
-  (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue(['.alerts-default']);
+  (rulesClientParams.getAlertIndicesAlias as Mock).mockReturnValue(['.alerts-default']);
 });
 
 setGlobalDate();
@@ -272,7 +275,7 @@ describe('unmuteInstance()', () => {
 
   describe('elasticsearch operations', () => {
     test('does not call ES updateByQuery when no alert indices exist', async () => {
-      (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
+      (rulesClientParams.getAlertIndicesAlias as Mock).mockReturnValue([]);
       const rulesClient = new RulesClient(rulesClientParams);
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',

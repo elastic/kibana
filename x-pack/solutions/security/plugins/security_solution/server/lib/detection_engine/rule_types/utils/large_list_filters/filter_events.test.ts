@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { sampleDocWithSortId } from '../../__mocks__/es_results';
 
 import { listMock } from '@kbn/lists-plugin/server/mocks';
@@ -17,9 +19,9 @@ describe('partitionEvents', () => {
   let events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listClient = listMock.getListClient();
-    listClient.searchListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = vi.fn(({ value }) =>
       Promise.resolve(
         value.map((item) => ({
           ...getSearchListItemResponseMock(),
@@ -31,7 +33,7 @@ describe('partitionEvents', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it filters out the event if it is "included"', () => {

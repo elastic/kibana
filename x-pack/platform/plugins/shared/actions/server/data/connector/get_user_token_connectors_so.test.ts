@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { nodeBuilder } from '@kbn/es-query';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getUserTokenConnectorsSo } from './get_user_token_connectors_so';
@@ -13,7 +15,7 @@ import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../../constants/saved_ob
 const savedObjectsClient = savedObjectsClientMock.create();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('getUserTokenConnectorsSo', () => {

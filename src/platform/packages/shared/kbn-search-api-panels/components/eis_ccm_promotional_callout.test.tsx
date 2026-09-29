@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -23,15 +26,15 @@ import {
 } from './eis_ccm_promotional_callout';
 import { useKibana } from '../hooks/use_kibana';
 
-jest.mock('../hooks/use_show_eis_promotional_content');
-jest.mock('../hooks/use_kibana');
+vi.mock('../hooks/use_show_eis_promotional_content');
+vi.mock('../hooks/use_kibana');
 
-const mockUiSettingsGet = jest.fn();
-const mockNavigateToApp = jest.fn();
-const mockOnDismissPromo = jest.fn();
+const mockUiSettingsGet = vi.fn();
+const mockNavigateToApp = vi.fn();
+const mockOnDismissPromo = vi.fn();
 
 const mockUseKibana = (overrides?: Partial<any>) => {
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       uiSettings: {
         get: mockUiSettingsGet,
@@ -66,10 +69,10 @@ describe('EisCloudConnectPromoCallout', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUiSettingsGet.mockReturnValue(true);
     mockUseKibana();
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
       onDismissPromo: mockOnDismissPromo,
     });
@@ -111,7 +114,7 @@ describe('EisCloudConnectPromoCallout', () => {
   });
 
   it('does not render when promo is not visible', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: false,
       onDismissPromo: mockOnDismissPromo,
     });

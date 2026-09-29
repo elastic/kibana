@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { HttpStart } from '@kbn/core/public';
 import { waitFor, renderHook } from '@testing-library/react';
 import { DashboardContextProvider } from '../context/dashboard_context';
@@ -14,9 +17,9 @@ import { useKibana } from '../../common/lib/kibana';
 import { MOCK_TAG_ID } from '../../common/containers/tags/__mocks__/api';
 import { DEFAULT_DASHBOARDS_RESPONSE } from '../../common/containers/dashboards/__mocks__/api';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/containers/tags/api');
-jest.mock('../../common/containers/dashboards/api');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/containers/tags/api');
+vi.mock('../../common/containers/dashboards/api');
 
 const mockHttp = {};
 const mockAbortSignal = {} as unknown as AbortSignal;
@@ -30,14 +33,14 @@ describe('useFetchSecurityDashboards', () => {
   beforeAll(() => {
     useKibana().services.http = mockHttp as unknown as HttpStart;
 
-    global.AbortController = jest.fn().mockReturnValue({
-      abort: jest.fn(),
+    global.AbortController = vi.fn().mockReturnValue({
+      abort: vi.fn(),
       signal: mockAbortSignal,
     });
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should fetch Security Solution tags', async () => {
@@ -68,7 +71,7 @@ describe('useFetchSecurityDashboards', () => {
 
     await waitFor(() => {
       expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-      expect((getDashboardsByTagIds as jest.Mock).mock.calls[0][1]).toEqual(mockAbortSignal);
+      expect((getDashboardsByTagIds as Mock).mock.calls[0][1]).toEqual(mockAbortSignal);
     });
   });
 

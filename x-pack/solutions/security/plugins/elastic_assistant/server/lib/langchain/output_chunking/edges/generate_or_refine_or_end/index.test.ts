@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { AttackDiscoveryGraphState } from '../../../graphs';
@@ -50,7 +52,7 @@ const graphState: AttackDiscoveryGraphState = {
 };
 
 describe('getGenerateOrRefineOrEndEdge', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns "end" when there are zero alerts', () => {
     const withZeroAlerts: AttackDiscoveryGraphState = {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import './agent_enrollment_flyout.test.mocks';
 
 import React from 'react';
@@ -24,7 +27,7 @@ import { AgentEnrollmentFlyout } from '.';
 
 const render = (props?: Partial<FlyOutProps>) => {
   const renderer = createFleetTestRendererMock();
-  return renderer.render(<AgentEnrollmentFlyout onClose={jest.fn()} {...props} />);
+  return renderer.render(<AgentEnrollmentFlyout onClose={vi.fn()} {...props} />);
 };
 
 const testAgentPolicy: AgentPolicy = {
@@ -44,57 +47,57 @@ describe('<AgentEnrollmentFlyout />', () => {
   let results: RenderResult;
 
   beforeEach(() => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         readAgentPolicies: true,
       },
       integrations: {},
     } as any);
-    jest.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
+    vi.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
 
-    (useFleetServerUnhealthy as jest.Mock).mockReturnValue({
+    (useFleetServerUnhealthy as Mock).mockReturnValue({
       isLoading: false,
       isUnhealthy: false,
     });
 
-    (sendGetOneAgentPolicy as jest.Mock).mockResolvedValue({
+    (sendGetOneAgentPolicy as Mock).mockResolvedValue({
       data: { item: { package_policies: [] } },
     });
 
-    (useAdvancedForm as jest.Mock).mockReturnValue({
+    (useAdvancedForm as Mock).mockReturnValue({
       eligibleFleetServerPolicies: [{ name: 'test', id: 'test' }],
-      refreshEligibleFleetServerPolicies: jest.fn(),
+      refreshEligibleFleetServerPolicies: vi.fn(),
       fleetServerPolicyId: 'test',
-      setFleetServerPolicyId: jest.fn(),
+      setFleetServerPolicyId: vi.fn(),
       isFleetServerReady: true,
       serviceToken: 'test',
       isLoadingServiceToken: false,
-      generateServiceToken: jest.fn(),
+      generateServiceToken: vi.fn(),
       fleetServerHostForm: {
-        submitForm: jest.fn(),
+        submitForm: vi.fn(),
         fleetServerHost: 'https://test.server:8220',
-        setFleetServerHost: jest.fn(),
+        setFleetServerHost: vi.fn(),
         error: '',
-        validateFleetServerHost: jest.fn(),
+        validateFleetServerHost: vi.fn(),
       },
       deploymentMode: 'quickstart',
-      setDeploymentMode: jest.fn(),
+      setDeploymentMode: vi.fn(),
     });
 
-    (useAgentEnrollmentFlyoutData as jest.Mock).mockReturnValue?.({
+    (useAgentEnrollmentFlyoutData as Mock).mockReturnValue?.({
       agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
-      refreshAgentPolicies: jest.fn(),
+      refreshAgentPolicies: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should show loading when agent policies are loading', () => {
-    (useAgentEnrollmentFlyoutData as jest.Mock).mockReturnValue?.({
+    (useAgentEnrollmentFlyoutData as Mock).mockReturnValue?.({
       agentPolicies: [],
-      refreshAgentPolicies: jest.fn(),
+      refreshAgentPolicies: vi.fn(),
       isLoadingInitialAgentPolicies: true,
     });
 
@@ -132,7 +135,7 @@ describe('<AgentEnrollmentFlyout />', () => {
 
     describe('with a specific policy when no agentPolicies set', () => {
       beforeEach(async () => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         results = render({
           agentPolicy: testAgentPolicy,
         });
@@ -218,7 +221,7 @@ describe('<AgentEnrollmentFlyout />', () => {
     };
 
     beforeEach(async () => {
-      (sendGetOneAgentPolicy as jest.Mock).mockResolvedValue({
+      (sendGetOneAgentPolicy as Mock).mockResolvedValue({
         data: { item: fleetServerPolicy },
       });
       results = render({

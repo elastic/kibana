@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { DEFAULT_MORE_MAX_HEIGHT } from '.';
@@ -83,7 +85,7 @@ describe('MoreReputationLinksContainer', () => {
   });
 
   test('it should only invoke the optional render function, when provided, for the items after overflowIndexStart', () => {
-    const mockRender = jest.fn(() => <></>);
+    const mockRender = vi.fn(() => <></>);
 
     render(
       <MoreReputationLinksContainer

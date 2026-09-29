@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '@kbn/monaco';
 import type { ProviderConfig } from './provider_interfaces';
 import {
@@ -20,86 +23,122 @@ import type {
   StepExecutionData,
 } from '../execution_context/build_execution_context';
 
-jest.mock('../hover/get_intercepted_hover', () => ({
-  getInterceptedHover: jest.fn().mockResolvedValue(null),
-}));
+vi.mock('../hover/get_intercepted_hover', () => {
+      const mocked = {
+      getInterceptedHover: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockParseTemplateAtPosition = jest.fn().mockReturnValue(null);
-jest.mock('../template_expression/parse_template_at_position', () => ({
-  parseTemplateAtPosition: (...args: unknown[]) => mockParseTemplateAtPosition(...args),
-}));
+const mockParseTemplateAtPosition = vi.fn().mockReturnValue(null);
+vi.mock('../template_expression/parse_template_at_position', () => {
+      const mocked = {
+      parseTemplateAtPosition: (...args: unknown[]) => mockParseTemplateAtPosition(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../template_expression/evaluate_expression', () => ({
-  evaluateExpression: jest.fn(),
-}));
+vi.mock('../template_expression/evaluate_expression', () => {
+      const mocked = {
+      evaluateExpression: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../template_expression/resolve_path_value', () => ({
-  formatValueAsJson: jest.fn().mockReturnValue('null'),
-}));
+vi.mock('../template_expression/resolve_path_value', () => {
+      const mocked = {
+      formatValueAsJson: vi.fn().mockReturnValue('null'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetPathAtOffset = jest.fn().mockReturnValue([]);
-const mockGetTriggerNodes = jest.fn().mockReturnValue([]);
-jest.mock('../../../../../common/lib/yaml', () => ({
-  getPathAtOffset: (...args: unknown[]) => mockGetPathAtOffset(...args),
-  getTriggerNodes: (...args: unknown[]) => mockGetTriggerNodes(...args),
-}));
+const mockGetPathAtOffset = vi.fn().mockReturnValue([]);
+const mockGetTriggerNodes = vi.fn().mockReturnValue([]);
+vi.mock('../../../../../common/lib/yaml', () => {
+      const mocked = {
+      getPathAtOffset: (...args: unknown[]) => mockGetPathAtOffset(...args),
+      getTriggerNodes: (...args: unknown[]) => mockGetTriggerNodes(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPerformComputation = jest.fn().mockReturnValue({ workflowLookup: null });
-jest.mock('../../../../entities/workflows/store/workflow_detail/utils/computation', () => ({
-  performComputation: (...args: unknown[]) => mockPerformComputation(...args),
-}));
+const mockPerformComputation = vi.fn().mockReturnValue({ workflowLookup: null });
+vi.mock('../../../../entities/workflows/store/workflow_detail/utils/computation', () => {
+      const mocked = {
+      performComputation: (...args: unknown[]) => mockPerformComputation(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-yaml', () => ({
-  ...jest.requireActual('@kbn/workflows-yaml'),
-  isYamlValidationMarkerOwner: jest.fn().mockReturnValue(false),
-}));
+vi.mock('@kbn/workflows-yaml', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-yaml')),
+      isYamlValidationMarkerOwner: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetTriggerHoverContent = jest.fn().mockReturnValue(null);
-const mockGetTriggerTypeAtPath = jest.fn().mockReturnValue(null);
-jest.mock('../trigger_hover/get_trigger_hover_content', () => ({
-  getTriggerHoverContent: (...args: unknown[]) => mockGetTriggerHoverContent(...args),
-  getTriggerTypeAtPath: (...args: unknown[]) => mockGetTriggerTypeAtPath(...args),
-}));
+const mockGetTriggerHoverContent = vi.fn().mockReturnValue(null);
+const mockGetTriggerTypeAtPath = vi.fn().mockReturnValue(null);
+vi.mock('../trigger_hover/get_trigger_hover_content', () => {
+      const mocked = {
+      getTriggerHoverContent: (...args: unknown[]) => mockGetTriggerHoverContent(...args),
+      getTriggerTypeAtPath: (...args: unknown[]) => mockGetTriggerTypeAtPath(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetMonacoConnectorHandler = jest.fn().mockReturnValue(null);
-jest.mock('./provider_registry', () => ({
-  getMonacoConnectorHandler: (...args: unknown[]) => mockGetMonacoConnectorHandler(...args),
-}));
+const mockGetMonacoConnectorHandler = vi.fn().mockReturnValue(null);
+vi.mock('./provider_registry', () => {
+      const mocked = {
+      getMonacoConnectorHandler: (...args: unknown[]) => mockGetMonacoConnectorHandler(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows', () => ({
-  ...jest.requireActual('@kbn/workflows'),
-  resolveKibanaStepTypeAlias: (type: string) =>
-    type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
-}));
+vi.mock('@kbn/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows')),
+      resolveKibanaStepTypeAlias: (type: string) =>
+        type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getTriggerDefinition: jest.fn().mockReturnValue(null),
-  },
-}));
+vi.mock('../../../../trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: {
+        getTriggerDefinition: vi.fn().mockReturnValue(null),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetMonacoRangeFromYamlNode = jest.fn().mockReturnValue(null);
-jest.mock('../utils', () => ({
-  getMonacoRangeFromYamlNode: (...args: unknown[]) => mockGetMonacoRangeFromYamlNode(...args),
-}));
+const mockGetMonacoRangeFromYamlNode = vi.fn().mockReturnValue(null);
+vi.mock('../utils', () => {
+      const mocked = {
+      getMonacoRangeFromYamlNode: (...args: unknown[]) => mockGetMonacoRangeFromYamlNode(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { evaluateExpression } = jest.requireMock('../template_expression/evaluate_expression');
-const { getInterceptedHover } = jest.requireMock('../hover/get_intercepted_hover');
+const { evaluateExpression } = (await vi.importMock('../template_expression/evaluate_expression'));
+const { getInterceptedHover } = (await vi.importMock('../hover/get_intercepted_hover'));
 
 const createMockModel = (content: string = '  message: "{{ steps.search.output.hits }}"') =>
   ({
     uri: { toString: () => 'inmemory://test' },
-    getValue: jest.fn().mockReturnValue(content),
-    getOffsetAt: jest.fn().mockReturnValue(10),
-    getLineContent: jest.fn().mockReturnValue(content),
-    getLineDecorations: jest.fn().mockReturnValue([]),
+    getValue: vi.fn().mockReturnValue(content),
+    getOffsetAt: vi.fn().mockReturnValue(10),
+    getLineContent: vi.fn().mockReturnValue(content),
+    getLineDecorations: vi.fn().mockReturnValue([]),
   } as unknown as monaco.editor.ITextModel);
 
 const createMockPosition = (line = 1, column = 25) => new monaco.Position(line, column);
 
 describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
-  let fetchStepExecutionData: jest.Mock;
-  let getExecutionContext: jest.Mock;
+  let fetchStepExecutionData: Mock;
+  let getExecutionContext: Mock;
   let provider: UnifiedHoverProvider;
 
   const stepOutputValue = { hits: [{ _id: '1', title: 'result' }] };
@@ -131,10 +170,10 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    fetchStepExecutionData = jest.fn().mockResolvedValue(enrichedStepData);
-    getExecutionContext = jest.fn().mockReturnValue(baseExecutionContext);
+    fetchStepExecutionData = vi.fn().mockResolvedValue(enrichedStepData);
+    getExecutionContext = vi.fn().mockReturnValue(baseExecutionContext);
 
     // parseTemplateAtPosition returns our template info for every call
     mockParseTemplateAtPosition.mockReturnValue(templateInfo);
@@ -155,7 +194,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
     mockPerformComputation.mockReturnValue({ workflowLookup: null });
 
     // Suppress validation markers and line decorations
-    jest.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([]);
+    vi.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([]);
 
     const config: ProviderConfig = {
       getYamlDocument: () => null,
@@ -167,7 +206,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should fetch step data and return enriched hover on first hover', async () => {
@@ -305,7 +344,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
 
     beforeEach(() => {
       mockYamlDocument = {
-        getIn: jest.fn().mockReturnValue(null),
+        getIn: vi.fn().mockReturnValue(null),
       };
       mockParseTemplateAtPosition.mockReturnValue(null);
     });
@@ -326,7 +365,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       // The code falls back to triggerAtPosition.triggerType
 
       const mockModel = createMockModel('triggers:\n  - type: manual');
-      (mockModel.getOffsetAt as jest.Mock).mockReturnValue(15); // Inside trigger range
+      (mockModel.getOffsetAt as Mock).mockReturnValue(15); // Inside trigger range
 
       mockGetTriggerHoverContent.mockReturnValue({ value: '**manual** trigger' });
       mockGetMonacoRangeFromYamlNode.mockReturnValue(new monaco.Range(2, 12, 2, 18));
@@ -355,7 +394,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       mockGetTriggerNodes.mockReturnValue([triggerNode]);
 
       const mockModel = createMockModel('triggers:\n  - type: unknown_trigger');
-      (mockModel.getOffsetAt as jest.Mock).mockReturnValue(15);
+      (mockModel.getOffsetAt as Mock).mockReturnValue(15);
 
       mockGetTriggerHoverContent.mockReturnValue(null);
 
@@ -383,7 +422,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       mockGetTriggerTypeAtPath.mockReturnValue('alert');
 
       const mockModel = createMockModel('triggers:\n  - type: alert');
-      (mockModel.getOffsetAt as jest.Mock).mockReturnValue(12);
+      (mockModel.getOffsetAt as Mock).mockReturnValue(12);
 
       const expectedRange = new monaco.Range(2, 12, 2, 17);
       mockGetTriggerHoverContent.mockReturnValue({ value: '**alert** trigger' });
@@ -405,7 +444,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
 
     beforeEach(() => {
       mockYamlDocument = {
-        getIn: jest.fn().mockReturnValue(null),
+        getIn: vi.fn().mockReturnValue(null),
       };
       mockParseTemplateAtPosition.mockReturnValue(null);
     });
@@ -429,7 +468,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       });
 
       const mockHandler = {
-        generateHoverContent: jest.fn().mockResolvedValue({ value: 'noop hover' }),
+        generateHoverContent: vi.fn().mockResolvedValue({ value: 'noop hover' }),
       };
       mockGetMonacoConnectorHandler.mockReturnValue(mockHandler);
 
@@ -497,7 +536,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
 
   describe('deprecated step hover deduplication', () => {
     it('should let Monaco show the warning marker and only append rich connector info', async () => {
-      jest.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([
+      vi.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([
         {
           owner: 'custom-yaml-validation',
           source: 'deprecated-step-validation',
@@ -514,7 +553,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       });
 
       const mockHandler = {
-        generateHoverContent: jest.fn().mockResolvedValue({
+        generateHoverContent: vi.fn().mockResolvedValue({
           value: 'rich hover',
           isTrusted: true,
         }),
@@ -540,7 +579,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       const deprecatedHoverProvider = new UnifiedHoverProvider({
         getYamlDocument: () =>
           ({
-            getIn: jest.fn().mockReturnValue(null),
+            getIn: vi.fn().mockReturnValue(null),
           } as never),
       });
 
@@ -572,7 +611,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
 
   describe('provideHover cancellation', () => {
     it('should return null without querying markers when the request is already cancelled', async () => {
-      const getModelMarkersSpy = jest.spyOn(monaco.editor, 'getModelMarkers');
+      const getModelMarkersSpy = vi.spyOn(monaco.editor, 'getModelMarkers');
 
       const result = await provider.provideHover(
         createMockModel('type: kibana.createCaseDefaultSpace'),
@@ -599,9 +638,9 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
 
   describe('registerUnifiedHoverProvider', () => {
     it('should register with Monaco for yaml language', () => {
-      const registerSpy = jest
+      const registerSpy = vi
         .spyOn(monaco.languages, 'registerHoverProvider')
-        .mockReturnValue({ dispose: jest.fn() });
+        .mockReturnValue({ dispose: vi.fn() });
 
       const disposable = registerUnifiedHoverProvider({
         getYamlDocument: () => null,
@@ -620,7 +659,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
 
     beforeEach(() => {
       mockYamlDocument = {
-        getIn: jest.fn().mockReturnValue(null),
+        getIn: vi.fn().mockReturnValue(null),
       };
       mockParseTemplateAtPosition.mockReturnValue(null);
     });
@@ -636,8 +675,8 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       mockPerformComputation.mockReturnValue({ workflowLookup: null });
 
       const mockModel = createMockModel('    with:');
-      (mockModel.getLineContent as jest.Mock).mockReturnValue('    with:');
-      (mockModel.getOffsetAt as jest.Mock).mockReturnValue(0);
+      (mockModel.getLineContent as Mock).mockReturnValue('    with:');
+      (mockModel.getOffsetAt as Mock).mockReturnValue(0);
 
       const fallbackProvider = new UnifiedHoverProvider({
         getYamlDocument: () => mockYamlDocument as never,

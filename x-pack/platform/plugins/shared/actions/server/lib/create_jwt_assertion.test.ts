@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
+vi.mock('jsonwebtoken', () => {
+      const mocked = {
+      sign: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import jwt from 'jsonwebtoken';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createJWTAssertion } from './create_jwt_assertion';
 
-const jwtSign = jwt.sign as jest.Mock;
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const jwtSign = jwt.sign as Mock;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
-Date.now = jest.fn(() => 0);
+Date.now = vi.fn(() => 0);
 
 describe('createJWTAssertion', () => {
   test('creating a JWT token from provided claims with default values', () => {

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { findMaintenanceWindows } from './find';
 import { MaintenanceWindowStatus } from '../../common';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('findMaintenanceWindows', () => {
   test('should call find maintenance windows api', async () => {

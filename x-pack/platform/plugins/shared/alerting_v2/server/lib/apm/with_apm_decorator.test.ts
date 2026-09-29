@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { withSpan } from '@kbn/apm-utils';
 import { withApm as withApmDecorator } from './with_apm_decorator';
 
-jest.mock('@kbn/apm-utils', () => ({
-  withSpan: jest.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb() as Promise<T>),
-}));
+vi.mock('@kbn/apm-utils', () => {
+      const mocked = {
+      withSpan: vi.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb() as Promise<T>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
 const withApm = withApmDecorator('test_client');
 

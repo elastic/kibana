@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   groupTitleRenderers,
   INTEGRATION_GROUP_RENDERER_INTEGRATION_ICON_TEST_ID,
@@ -22,8 +25,8 @@ import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
 import { RELATED_INTEGRATION } from '../../../constants';
 
-jest.mock('./table_section_context');
-jest.mock('@kbn/fleet-plugin/public/hooks');
+vi.mock('./table_section_context');
+vi.mock('@kbn/fleet-plugin/public/hooks');
 
 const packages: PackageListItem[] = [
   {
@@ -38,12 +41,12 @@ const packages: PackageListItem[] = [
 
 describe('groupTitleRenderers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    vi.clearAllMocks();
+    (usePackageIconType as Mock).mockReturnValue('iconType');
   });
 
   it('should render correctly for relatedIntegration field', () => {
-    (useTableSectionContext as jest.Mock).mockReturnValue({
+    (useTableSectionContext as Mock).mockReturnValue({
       packages,
     });
 
@@ -137,12 +140,12 @@ describe('groupTitleRenderers', () => {
 
 describe('IntegrationNameGroupContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    vi.clearAllMocks();
+    (usePackageIconType as Mock).mockReturnValue('iconType');
   });
 
   it('should render the integration name and icon when a matching rule is found', () => {
-    (useTableSectionContext as jest.Mock).mockReturnValue({
+    (useTableSectionContext as Mock).mockReturnValue({
       packages,
     });
 
@@ -157,7 +160,7 @@ describe('IntegrationNameGroupContent', () => {
   });
 
   it('should render title when no matching integration is found', () => {
-    (useTableSectionContext as jest.Mock).mockReturnValue({
+    (useTableSectionContext as Mock).mockReturnValue({
       packages: [],
     });
 

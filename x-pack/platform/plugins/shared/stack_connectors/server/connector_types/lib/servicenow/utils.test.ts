@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import axios from 'axios';
 
 import type { Logger } from '@kbn/core/server';
@@ -28,25 +31,31 @@ import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
-jest.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => ({
-  getOAuthJwtAccessToken: jest.fn(),
-}));
+vi.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => {
+      const mocked = {
+      getOAuthJwtAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('axios', () => ({
-  create: jest.fn(),
-  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
-  AxiosError: jest.requireActual('axios').AxiosError,
-}));
-const createAxiosInstanceMock = axios.create as jest.Mock;
+vi.mock('axios', () => {
+      const mocked = {
+      create: vi.fn(),
+      AxiosHeaders: require('axios').AxiosHeaders,
+      AxiosError: require('axios').AxiosError,
+    };
+      return { ...mocked, default: mocked };
+    });
+const createAxiosInstanceMock = axios.create as Mock;
 const axiosInstanceMock = {
   interceptors: {
-    request: { eject: jest.fn(), use: jest.fn() },
-    response: { eject: jest.fn(), use: jest.fn() },
+    request: { eject: vi.fn(), use: vi.fn() },
+    response: { eject: vi.fn(), use: vi.fn() },
   },
 };
 
 const connectorTokenClient = connectorTokenClientMock.create();
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 /**
  * The purpose of this test is to
@@ -323,12 +332,12 @@ describe('utils', () => {
 
   describe('getPushedDate', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2021-10-04 11:15:06 GMT'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2021-10-04 11:15:06 GMT'));
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('it formats the date correctly if timestamp is provided', async () => {
@@ -383,7 +392,7 @@ describe('utils', () => {
 
   describe('getAxiosInstance', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
     });
 
@@ -449,15 +458,15 @@ describe('utils', () => {
       expect(createAxiosInstanceMock).toHaveBeenCalledWith();
       expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
 
-      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce('Bearer tokentokentoken');
+      (getOAuthJwtAccessToken as Mock).mockResolvedValueOnce('Bearer tokentokentoken');
 
-      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as Mock).mock
         .calls[0][0];
       expect(await mockRequestCallback({ headers: {} })).toEqual({
         headers: new axios.AxiosHeaders({ Authorization: 'Bearer tokentokentoken' }),
       });
 
-      expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+      expect(getOAuthJwtAccessToken as Mock).toHaveBeenCalledWith({
         connectorId: '123',
         logger,
         configurationUtilities,
@@ -507,9 +516,9 @@ describe('utils', () => {
       expect(createAxiosInstanceMock).toHaveBeenCalledWith();
       expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
 
-      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce(null);
+      (getOAuthJwtAccessToken as Mock).mockResolvedValueOnce(null);
 
-      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as Mock).mock
         .calls[0][0];
 
       await expect(() =>
@@ -518,7 +527,7 @@ describe('utils', () => {
         `"Unable to retrieve access token for connectorId: 123"`
       );
 
-      expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+      expect(getOAuthJwtAccessToken as Mock).toHaveBeenCalledWith({
         connectorId: '123',
         logger,
         configurationUtilities,
@@ -569,9 +578,9 @@ describe('utils', () => {
       expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
       expect(axiosInstanceMock.interceptors.response.use).toHaveBeenCalledTimes(1);
 
-      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce('Bearer tokentokentoken');
+      (getOAuthJwtAccessToken as Mock).mockResolvedValueOnce('Bearer tokentokentoken');
 
-      const mockResponseCallback = (axiosInstanceMock.interceptors.response.use as jest.Mock).mock
+      const mockResponseCallback = (axiosInstanceMock.interceptors.response.use as Mock).mock
         .calls[0][1];
 
       const errorResponse = {
@@ -625,9 +634,9 @@ describe('utils', () => {
       expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
       expect(axiosInstanceMock.interceptors.response.use).toHaveBeenCalledTimes(1);
 
-      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce('Bearer tokentokentoken');
+      (getOAuthJwtAccessToken as Mock).mockResolvedValueOnce('Bearer tokentokentoken');
 
-      const mockResponseCallback = (axiosInstanceMock.interceptors.response.use as jest.Mock).mock
+      const mockResponseCallback = (axiosInstanceMock.interceptors.response.use as Mock).mock
         .calls[0][1];
 
       const errorResponse = {

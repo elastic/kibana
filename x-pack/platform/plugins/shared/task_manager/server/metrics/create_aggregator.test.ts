@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
 import { take, bufferCount, skip } from 'rxjs';
@@ -94,7 +96,7 @@ const config: TaskManagerConfig = {
 
 describe('createAggregator', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('with TaskClaimMetricsAggregator', () => {
@@ -4272,7 +4274,7 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const eventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = vi.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
 
     const aggregator = createAggregator({
@@ -4306,7 +4308,7 @@ describe('createAggregator', () => {
   });
 
   test('should call metricAggregator to process events', () => {
-    const spy = jest
+    const spy = vi
       .spyOn(TaskClaimMetricsAggregatorModule, 'TaskClaimMetricsAggregator')
       .mockImplementation(() => mockMetricsAggregator);
 
@@ -4323,7 +4325,7 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const eventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = vi.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
 
     const aggregator = createAggregator({
@@ -4361,7 +4363,7 @@ describe('createAggregator', () => {
   });
 
   test('should call metricAggregator reset when resetMetric$ event is received', () => {
-    const spy = jest
+    const spy = vi
       .spyOn(TaskClaimMetricsAggregatorModule, 'TaskClaimMetricsAggregator')
       .mockImplementation(() => mockMetricsAggregator);
 
@@ -4379,7 +4381,7 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const eventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = vi.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
 
     const aggregator = createAggregator({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import SemVer from 'semver/classes/semver';
@@ -22,9 +24,9 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 const kibanaVersion = new SemVer('8.0.0');
 
-jest.mock('../../../../../../../app_context', () => {
-  const actual = jest.requireActual('../../../../../../../app_context');
-  const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
+vi.mock('../../../../../../../app_context', async () => {
+  const actual = (await vi.importActual('../../../../../../../app_context'));
+  const { docLinksServiceMock } = (await vi.importActual('@kbn/core-doc-links-browser-mocks'));
 
   return {
     ...actual,
@@ -35,7 +37,7 @@ jest.mock('../../../../../../../app_context', () => {
             docLinks: docLinksServiceMock.createStartContract(),
           },
           api: {
-            useLoadNodeDiskSpace: jest.fn(() => ({ data: [] })),
+            useLoadNodeDiskSpace: vi.fn(() => ({ data: [] })),
           },
         },
       };
@@ -56,8 +58,8 @@ describe('WarningFlyoutStep', () => {
   };
   const defaultProps = {
     warnings: [] as IndexWarning[],
-    closeFlyout: jest.fn(),
-    confirm: jest.fn(),
+    closeFlyout: vi.fn(),
+    confirm: vi.fn(),
     flow: 'reindex' as const,
     meta,
     reindexState: {

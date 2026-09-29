@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -43,12 +45,12 @@ const defaultProps: AddToExistingEscalationFormProps = {
   incidents: [freeIncident],
   isLoading: false,
   isError: false,
-  onRetry: jest.fn(),
+  onRetry: vi.fn(),
   searchQuery: '',
-  onSearchChange: jest.fn(),
-  onSubmit: jest.fn(),
+  onSearchChange: vi.fn(),
+  onSubmit: vi.fn(),
   isSubmitting: false,
-  onCancel: jest.fn(),
+  onCancel: vi.fn(),
 };
 
 const renderForm = (props: Partial<AddToExistingEscalationFormProps> = {}) =>
@@ -60,7 +62,7 @@ const renderForm = (props: Partial<AddToExistingEscalationFormProps> = {}) =>
     </I18nProvider>
   );
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
 describe('AddToExistingEscalationForm', () => {
   it('shows a loading spinner while escalations are loading', () => {
@@ -104,7 +106,7 @@ describe('AddToExistingEscalationForm', () => {
   });
 
   it('calls onSubmit with the selected escalation id', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     renderForm({ onSubmit });
 
     fireEvent.click(screen.getByTestId('escalationModalIncident-esc-1'));
@@ -122,7 +124,7 @@ describe('AddToExistingEscalationForm', () => {
   });
 
   it('calls onCancel when cancel is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     renderForm({ onCancel });
 
     fireEvent.click(screen.getByTestId('escalationModalCancel'));
@@ -131,7 +133,7 @@ describe('AddToExistingEscalationForm', () => {
   });
 
   it('calls onSearchChange when the search field changes', () => {
-    const onSearchChange = jest.fn();
+    const onSearchChange = vi.fn();
     renderForm({ onSearchChange });
 
     fireEvent.change(screen.getByTestId('escalationModalIncidentSearch'), {
@@ -155,7 +157,7 @@ describe('AddToExistingEscalationForm', () => {
   });
 
   it('shows an error callout with a retry button when isError is true', () => {
-    const onRetry = jest.fn();
+    const onRetry = vi.fn();
     renderForm({ isError: true, incidents: [], onRetry });
 
     expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();

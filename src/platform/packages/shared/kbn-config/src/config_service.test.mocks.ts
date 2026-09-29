@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DocLinks } from '@kbn/doc-links';
 
 export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 import type { applyDeprecations } from './deprecation/apply_deprecations';
 
-jest.mock('../../../../../../package.json', () => mockPackage);
+vi.mock('../../../../../../package.json', () => mockPackage);
 
 const changedPaths = {
   set: ['foo'],
@@ -21,20 +23,26 @@ const changedPaths = {
 
 export { changedPaths as mockedChangedPaths };
 
-export const mockApplyDeprecations = jest.fn<
+export const mockApplyDeprecations = vi.fn<
   ReturnType<typeof applyDeprecations>,
   Parameters<typeof applyDeprecations>
 >((config, deprecations, createAddDeprecation) => ({ config, changedPaths }));
 
-jest.mock('./deprecation/apply_deprecations', () => ({
-  applyDeprecations: mockApplyDeprecations,
-}));
+vi.mock('./deprecation/apply_deprecations', () => {
+      const mocked = {
+      applyDeprecations: mockApplyDeprecations,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const docLinksMock = {
   settings: 'settings',
 } as DocLinks;
-export const getDocLinksMock = jest.fn().mockReturnValue(docLinksMock);
+export const getDocLinksMock = vi.fn().mockReturnValue(docLinksMock);
 
-jest.doMock('@kbn/doc-links', () => ({
-  getDocLinks: getDocLinksMock,
-}));
+vi.doMock('@kbn/doc-links', () => {
+      const mocked = {
+      getDocLinks: getDocLinksMock,
+    };
+      return { ...mocked, default: mocked };
+    });

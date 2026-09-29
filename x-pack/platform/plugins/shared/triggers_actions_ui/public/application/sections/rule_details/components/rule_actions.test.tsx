@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import { RuleActions } from './rule_actions';
@@ -18,14 +20,14 @@ const actionType = {
   isSystemActionType: false,
 } as unknown as ActionTypeModel;
 
-const mockedUseFetchRuleActionConnectorsHook = jest.spyOn(
+const mockedUseFetchRuleActionConnectorsHook = vi.spyOn(
   useFetchRuleActionConnectorsHook,
   'useFetchRuleActionConnectors'
 );
 
 describe('Rule Actions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     actionTypeRegistry.get.mockReturnValue(actionType);
   });
 
@@ -61,7 +63,7 @@ describe('Rule Actions', () => {
         },
       ] as Array<ActionConnector<Record<string, unknown>>>,
       errorActionConnectors: undefined,
-      reloadRuleActionConnectors: jest.fn(),
+      reloadRuleActionConnectors: vi.fn(),
     });
 
     actionTypeRegistry.list.mockReturnValue([
@@ -146,7 +148,7 @@ describe('Rule Actions', () => {
         },
       ] as Array<ActionConnector<Record<string, unknown>>>,
       errorActionConnectors: undefined,
-      reloadRuleActionConnectors: jest.fn(),
+      reloadRuleActionConnectors: vi.fn(),
     });
 
     actionTypeRegistry.list.mockReturnValue([
@@ -193,7 +195,7 @@ describe('Rule Actions', () => {
         },
       ] as Array<ActionConnector<Record<string, unknown>>>,
       errorActionConnectors: undefined,
-      reloadRuleActionConnectors: jest.fn(),
+      reloadRuleActionConnectors: vi.fn(),
     });
 
     render(<RuleActions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />);

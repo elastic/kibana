@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { TemplateBody, TemplatesCatalog } from '@kbn/workflows-library';
 
 import { LibraryCache } from './library_cache';
@@ -48,11 +50,11 @@ const body: TemplateBody = {
 
 describe('LibraryCache', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-06-01T12:00:00Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-01T12:00:00Z'));
   });
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('starts empty: no catalog, not fresh, no health timestamps', () => {
@@ -69,7 +71,7 @@ describe('LibraryCache', () => {
     cache.setCatalog(catalogA);
     cache.markRefreshSuccess();
 
-    jest.advanceTimersByTime(TTL_MS - 1);
+    vi.advanceTimersByTime(TTL_MS - 1);
     expect(cache.isFresh()).toBe(true);
   });
 
@@ -78,7 +80,7 @@ describe('LibraryCache', () => {
     cache.setCatalog(catalogA);
     cache.markRefreshSuccess();
 
-    jest.advanceTimersByTime(TTL_MS + 1);
+    vi.advanceTimersByTime(TTL_MS + 1);
     expect(cache.isFresh()).toBe(false);
   });
 

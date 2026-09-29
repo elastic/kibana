@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { RequestArgs } from './send_request';
 import { sendRequest } from './send_request';
 import { send } from '../../../lib/es/es';
 
-jest.mock('../../../lib/es/es');
+vi.mock('../../../lib/es/es');
 
-const mockSend = send as jest.MockedFunction<typeof send>;
+const mockSend = send as MockedFunction<typeof send>;
 
 describe('sendRequest host parameter', () => {
-  let mockHttp: jest.Mocked<HttpSetup>;
+  let mockHttp: Mocked<HttpSetup>;
 
   beforeEach(() => {
-    mockHttp = {} as jest.Mocked<HttpSetup>;
-    jest.clearAllMocks();
+    mockHttp = {} as Mocked<HttpSetup>;
+    vi.clearAllMocks();
 
     mockSend.mockResolvedValue({
       response: {

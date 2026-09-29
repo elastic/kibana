@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import {
@@ -60,11 +63,11 @@ describe('CHANGE_POINT Autocomplete', () => {
   beforeEach(() => {
     // Reset mocks before each test to ensure isolation
     mockCallbacks = getMockCallbacks();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('suggests value columns of numeric types', async () => {
     const expectedNumericFields = getFieldNamesByType(ESQL_NUMBER_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedNumericFields.map((name) => ({ label: name, text: name }))
     );
     await changePointExpectSuggestions(

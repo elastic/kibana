@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type {
   BoundOptions,
   ChatCompleteAPI,
@@ -14,10 +17,10 @@ import { MessageRole } from '@kbn/inference-common';
 import { bindChatComplete } from './bind_chat_complete';
 
 describe('bindChatComplete', () => {
-  let chatComplete: ChatCompleteAPI & jest.MockedFn<ChatCompleteAPI>;
+  let chatComplete: ChatCompleteAPI & MockedFunction<ChatCompleteAPI>;
 
   beforeEach(() => {
-    chatComplete = jest.fn();
+    chatComplete = vi.fn();
   });
 
   it('calls chatComplete with both bound and unbound params', async () => {

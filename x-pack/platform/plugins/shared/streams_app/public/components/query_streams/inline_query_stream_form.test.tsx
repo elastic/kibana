@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
@@ -12,44 +14,53 @@ import { InlineQueryStreamForm } from './inline_query_stream_form';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 const mockRouter: StatefulStreamsAppRouter = {
-  link: jest.fn().mockReturnValue('/mock'),
-  push: jest.fn(),
-  replace: jest.fn(),
-  matchRoutes: jest.fn(),
-  getParams: jest.fn(),
-  getRoutePath: jest.fn(),
-  getRoutesToMatch: jest.fn(),
+  link: vi.fn().mockReturnValue('/mock'),
+  push: vi.fn(),
+  replace: vi.fn(),
+  matchRoutes: vi.fn(),
+  getParams: vi.fn(),
+  getRoutePath: vi.fn(),
+  getRoutesToMatch: vi.fn(),
 } as StatefulStreamsAppRouter;
 
-jest.mock('../../hooks/use_streams_app_router', () => ({
-  useStreamsAppRouter: () => mockRouter,
-}));
+vi.mock('../../hooks/use_streams_app_router', () => {
+      const mocked = {
+      useStreamsAppRouter: () => mockRouter,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRoutingContext = {
   definition: { stream: { name: 'logs' } },
   routing: [] as Array<{ destination: string; isNew?: boolean }>,
 };
 
-jest.mock(
+vi.mock(
   '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine',
-  () => ({
-    useStreamsRoutingSelector: <TSelected,>(
-      selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
-    ): TSelected => selector({ context: mockRoutingContext }),
-  })
+  () => {
+      const mocked = {
+        useStreamsRoutingSelector: <TSelected,>(
+          selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
+        ): TSelected => selector({ context: mockRoutingContext }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../esql_query_editor', () => ({
-  StreamsESQLEditor: ({ query }: { query: { esql: string } }) => (
-    <div data-test-subj="stubEsqlEditor">{query.esql}</div>
-  ),
-}));
+vi.mock('../esql_query_editor', () => {
+      const mocked = {
+      StreamsESQLEditor: ({ query }: { query: { esql: string } }) => (
+        <div data-test-subj="stubEsqlEditor">{query.esql}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('InlineQueryStreamForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRoutingContext.routing = [];
   });
 
@@ -58,8 +69,8 @@ describe('InlineQueryStreamForm', () => {
       <InlineQueryStreamForm
         initialName="My-Query"
         initialEsqlQuery="FROM $.logs"
-        onSave={jest.fn()}
-        onCancel={jest.fn()}
+        onSave={vi.fn()}
+        onCancel={vi.fn()}
       />
     );
 
@@ -75,8 +86,8 @@ describe('InlineQueryStreamForm', () => {
         initialName="my-query"
         initialEsqlQuery="FROM $.logs"
         nameReadOnly
-        onSave={jest.fn()}
-        onCancel={jest.fn()}
+        onSave={vi.fn()}
+        onCancel={vi.fn()}
       />
     );
 
@@ -92,8 +103,8 @@ describe('InlineQueryStreamForm', () => {
         initialName="my-query"
         initialEsqlQuery=""
         nameReadOnly
-        onSave={jest.fn()}
-        onCancel={jest.fn()}
+        onSave={vi.fn()}
+        onCancel={vi.fn()}
       />
     );
 
@@ -108,8 +119,8 @@ describe('InlineQueryStreamForm', () => {
       <InlineQueryStreamForm
         initialName="existing"
         initialEsqlQuery="FROM $.logs"
-        onSave={jest.fn()}
-        onCancel={jest.fn()}
+        onSave={vi.fn()}
+        onCancel={vi.fn()}
       />
     );
 
@@ -125,8 +136,8 @@ describe('InlineQueryStreamForm', () => {
         initialName="existing-query"
         initialEsqlQuery="FROM $.logs"
         existingSiblingNames={['logs.existing-query']}
-        onSave={jest.fn()}
-        onCancel={jest.fn()}
+        onSave={vi.fn()}
+        onCancel={vi.fn()}
       />
     );
 
@@ -142,8 +153,8 @@ describe('InlineQueryStreamForm', () => {
         initialName="my-query"
         initialEsqlQuery="FROM $.logs"
         nameReadOnly
-        onSave={jest.fn()}
-        onCancel={jest.fn()}
+        onSave={vi.fn()}
+        onCancel={vi.fn()}
       />
     );
 
@@ -158,8 +169,8 @@ describe('InlineQueryStreamForm', () => {
       <InlineQueryStreamForm
         initialName="new-query"
         initialEsqlQuery="FROM $.logs"
-        onSave={jest.fn()}
-        onCancel={jest.fn()}
+        onSave={vi.fn()}
+        onCancel={vi.fn()}
       />
     );
 

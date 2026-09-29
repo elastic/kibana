@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { renderParameterTemplates } from './render';
 import Mustache from 'mustache';
@@ -21,7 +23,7 @@ const logger = loggingSystemMock.createLogger();
 
 describe('Gemini - renderParameterTemplates', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   it('should not render body on test action', () => {
     const testParams = { subAction: 'test', subActionParams: { body: 'test_json' } };
@@ -41,7 +43,7 @@ describe('Gemini - renderParameterTemplates', () => {
 
   it('should render error body', () => {
     const errorMessage = 'test error';
-    jest.spyOn(Mustache, 'render').mockImplementation(() => {
+    vi.spyOn(Mustache, 'render').mockImplementation(() => {
       throw new Error(errorMessage);
     });
     const result = renderParameterTemplates(logger, params, variables);

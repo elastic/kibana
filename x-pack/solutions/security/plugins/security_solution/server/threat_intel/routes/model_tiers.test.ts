@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   coreMock,
   httpServerMock,
@@ -23,7 +25,7 @@ import { registerEnrichTaxonomyRoute } from './enrich_taxonomy';
 import { registerExtractDiamondRoute } from './extract_diamond';
 import { resolveScopedModel } from './lib/scoped_model';
 
-jest.mock('./lib/scoped_model');
+vi.mock('./lib/scoped_model');
 
 const routes = [
   [registerAssessRelevanceRoute, ASSESS_RELEVANCE_API_PATH, 'alertzero_fast'],
@@ -34,8 +36,8 @@ const routes = [
 
 describe('threat intel model tiers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(resolveScopedModel).mockResolvedValue({
+    vi.clearAllMocks();
+    vi.mocked(resolveScopedModel).mockResolvedValue({
       ok: false,
       reason: 'no_connector',
       message: 'No tier connector available',

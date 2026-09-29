@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { getESQLTimeField } from './get_time_field';
@@ -14,7 +16,7 @@ import { getESQLTimeField } from './get_time_field';
 describe('getESQLTimeField', () => {
   const createHttp = (timeField = '@timestamp'): HttpStart =>
     ({
-      post: jest.fn(async () => ({ timeField })),
+      post: vi.fn(async () => ({ timeField })),
     } as unknown as HttpStart);
 
   it('does not reuse the cache across SET project_routing values for the same FROM', async () => {

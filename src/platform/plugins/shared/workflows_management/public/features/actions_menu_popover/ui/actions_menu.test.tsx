@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionsMenu } from './actions_menu';
 import type { ActionGroup, ActionOption, ActionOptionData } from '../types';
 
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_kibana');
 
-jest.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => ({
-  useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
-}));
+vi.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => {
+      const mocked = {
+      useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLeafOption: ActionOption = {
   id: 'manual',
@@ -54,32 +60,38 @@ const mockFlowControlOption: ActionOption = {
 
 const mockOptions: ActionOptionData[] = [mockGroup, mockFlowControlOption];
 
-jest.mock('../lib/get_action_options', () => ({
-  getActionOptions: jest.fn(() => mockOptions),
-  getIconGlyphColor: jest.fn(() => undefined),
-  flattenOptions: jest.fn((options: ActionOptionData[]) => {
-    const flat: ActionOptionData[] = [];
-    const flatten = (items: ActionOptionData[]) => {
-      for (const item of items) {
-        flat.push(item);
-        if ('options' in item) {
-          flatten(item.options);
-        }
-      }
+vi.mock('../lib/get_action_options', () => {
+      const mocked = {
+      getActionOptions: vi.fn(() => mockOptions),
+      getIconGlyphColor: vi.fn(() => undefined),
+      flattenOptions: vi.fn((options: ActionOptionData[]) => {
+        const flat: ActionOptionData[] = [];
+        const flatten = (items: ActionOptionData[]) => {
+          for (const item of items) {
+            flat.push(item);
+            if ('options' in item) {
+              flatten(item.options);
+            }
+          }
+        };
+        flatten(options);
+        return flat;
+      }),
     };
-    flatten(options);
-    return flat;
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
-  StepIcon: () => <span data-test-subj="mocked-step-icon" />,
-}));
+vi.mock('../../../shared/ui/step_icons/step_icon', () => {
+      const mocked = {
+      StepIcon: () => <span data-test-subj="mocked-step-icon" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = (props = {}) =>
   render(
     <I18nProvider>
-      <ActionsMenu onActionSelected={jest.fn()} {...props} />
+      <ActionsMenu onActionSelected={vi.fn()} {...props} />
     </I18nProvider>
   );
 
@@ -102,7 +114,7 @@ describe('ActionsMenu', () => {
   });
 
   it('calls onActionSelected when a leaf option is clicked', () => {
-    const onActionSelected = jest.fn();
+    const onActionSelected = vi.fn();
     renderComponent({ onActionSelected });
 
     // EuiSelectable renders options with role="option"
@@ -153,7 +165,7 @@ describe('ActionsMenu', () => {
   });
 
   it('calls onActionSelected when a child leaf option is selected within a group', () => {
-    const onActionSelected = jest.fn();
+    const onActionSelected = vi.fn();
     renderComponent({ onActionSelected });
 
     // Navigate into "Triggers"
@@ -191,7 +203,7 @@ describe('ActionsMenu', () => {
 
   describe('keyboard navigation', () => {
     beforeEach(() => {
-      Element.prototype.scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = vi.fn();
     });
 
     const getKeyboardActiveLabel = () => {
@@ -218,7 +230,7 @@ describe('ActionsMenu', () => {
     it('scrolls each newly active option into view', () => {
       renderComponent();
       const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
-      const scrollIntoView = Element.prototype.scrollIntoView as jest.Mock;
+      const scrollIntoView = Element.prototype.scrollIntoView as Mock;
       const expectActiveOptionScrolled = () => {
         const activeOption = document.getElementById(
           searchInput.getAttribute('aria-activedescendant') ?? ''
@@ -294,7 +306,7 @@ describe('ActionsMenu', () => {
     });
 
     it('does nothing on ArrowRight for a leaf item', () => {
-      const onActionSelected = jest.fn();
+      const onActionSelected = vi.fn();
       renderComponent({ onActionSelected });
       const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
       searchInput.focus();
@@ -311,7 +323,7 @@ describe('ActionsMenu', () => {
     });
 
     it('adds a leaf on Enter', () => {
-      const onActionSelected = jest.fn();
+      const onActionSelected = vi.fn();
       renderComponent({ onActionSelected });
       const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
       searchInput.focus();
@@ -326,7 +338,7 @@ describe('ActionsMenu', () => {
     });
 
     it('activates the option hovered after keyboard navigation', () => {
-      const onActionSelected = jest.fn();
+      const onActionSelected = vi.fn();
       renderComponent({ onActionSelected });
       const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
       searchInput.focus();

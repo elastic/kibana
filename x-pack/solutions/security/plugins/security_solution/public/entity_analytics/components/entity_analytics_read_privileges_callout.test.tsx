@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
@@ -13,12 +15,15 @@ import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_r
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import { LEADS_INDEX_PATTERN } from '../../../common/entity_analytics/lead_generation/constants';
 
-jest.mock('../../common/components/callouts/use_callout_storage', () => ({
-  useCallOutStorage: () => ({
-    isVisible: () => true,
-    dismiss: jest.fn(),
-  }),
-}));
+vi.mock('../../common/components/callouts/use_callout_storage', () => {
+      const mocked = {
+      useCallOutStorage: () => ({
+        isVisible: () => true,
+        dismiss: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ALL_PRIVILEGES_GRANTED: RiskEngineMissingPrivilegesResponse = {
   isLoading: false,

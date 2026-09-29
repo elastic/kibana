@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AntivirusRegistrationCardProps } from './antivirus_registration_card';
@@ -30,7 +32,7 @@ describe('Policy Form Antivirus Registration Card', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': antivirusTestSubj.card,
     };

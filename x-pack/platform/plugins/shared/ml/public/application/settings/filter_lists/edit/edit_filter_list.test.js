@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,9 +15,12 @@ import { renderWithMlI18nContext } from '../../../test_utils/render_with_ml_cont
 
 import { EditFilterList } from './edit_filter_list';
 
-jest.mock('../../../components/help_menu', () => ({
-  HelpMenu: () => <div id="mockHelpMenu" />,
-}));
+vi.mock('../../../components/help_menu', () => {
+      const mocked = {
+      HelpMenu: () => <div id="mockHelpMenu" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the call for loading the list of filters.
 // The mock is hoisted to the top, so need to prefix the filter variable
@@ -29,15 +34,15 @@ const mockTestFilter = {
     jobs: ['dns_exfiltration'],
   },
 };
-const mockFilters = jest.fn().mockImplementation(() => Promise.resolve(mockTestFilter));
+const mockFilters = vi.fn().mockImplementation(() => Promise.resolve(mockTestFilter));
 const mockKibanaContext = {
   services: {
     application: {
-      navigateToApp: jest.fn(),
-      getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/filter_lists'),
+      navigateToApp: vi.fn(),
+      getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/filter_lists'),
     },
     docLinks: { links: { ml: { customRules: 'test' } } },
-    notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
+    notifications: { toasts: { addDanger: vi.fn(), addError: vi.fn() } },
     mlServices: {
       mlApi: {
         filters: {
@@ -49,7 +54,7 @@ const mockKibanaContext = {
 };
 
 const mockReact = React;
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+vi.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
   useKibana: () => mockKibanaContext,
   withKibana: (type) => {
@@ -63,10 +68,13 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   },
 }));
 
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => mockKibanaContext,
-  useNavigateToPath: () => jest.fn(),
-}));
+vi.mock('../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => mockKibanaContext,
+      useNavigateToPath: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const props = {
   canCreateFilter: true,
@@ -75,7 +83,7 @@ const props = {
 
 describe('EditFilterList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders the edit page for a new filter list and updates ID', async () => {

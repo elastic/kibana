@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
@@ -12,7 +14,7 @@ import { Pagination } from './pagination';
 
 describe('Pagination', () => {
   it('it invokes "onPaginationChange" when per page item is clicked', () => {
-    const mockOnPaginationChange = jest.fn();
+    const mockOnPaginationChange = vi.fn();
     const wrapper = render(
       <Pagination
         pagination={{
@@ -34,7 +36,7 @@ describe('Pagination', () => {
   });
 
   it('it invokes "onPaginationChange" when next clicked', () => {
-    const mockOnPaginationChange = jest.fn();
+    const mockOnPaginationChange = vi.fn();
     const wrapper = render(
       <Pagination
         pagination={{
@@ -55,7 +57,7 @@ describe('Pagination', () => {
   });
 
   it('it invokes "onPaginationChange" when page clicked', () => {
-    const mockOnPaginationChange = jest.fn();
+    const mockOnPaginationChange = vi.fn();
     const wrapper = render(
       <Pagination
         pagination={{

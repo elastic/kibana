@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
@@ -32,10 +35,10 @@ const manySkills = () => [
   skill({ id: 'a.delta', name: 'delta', description: 'Delta' }),
 ];
 
-const makeModelProvider = (invoke: jest.Mock) => {
-  const withStructuredOutput = jest.fn().mockReturnValue({ invoke });
+const makeModelProvider = (invoke: Mock) => {
+  const withStructuredOutput = vi.fn().mockReturnValue({ invoke });
   const chatModel = { withStructuredOutput } as unknown;
-  const selectModel = jest.fn().mockResolvedValue({ chatModel });
+  const selectModel = vi.fn().mockResolvedValue({ chatModel });
   return {
     modelProvider: { selectModel } as unknown as ModelProvider,
     selectModel,
@@ -46,10 +49,10 @@ const makeModelProvider = (invoke: jest.Mock) => {
 describe('selectRelevantSkills', () => {
   const logger = loggingSystemMock.createLogger();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('short-circuits with no model call when there are no skills', async () => {
-    const invoke = jest.fn();
+    const invoke = vi.fn();
     const { modelProvider, selectModel } = makeModelProvider(invoke);
 
     const result = await selectRelevantSkills({
@@ -65,7 +68,7 @@ describe('selectRelevantSkills', () => {
   });
 
   it('returns all skills without a model call when at/below the small threshold', async () => {
-    const invoke = jest.fn();
+    const invoke = vi.fn();
     const { modelProvider, selectModel } = makeModelProvider(invoke);
     const skills = [skill({ id: 'a.one', name: 'one' }), skill({ id: 'a.two', name: 'two' })];
 
@@ -87,7 +90,7 @@ describe('selectRelevantSkills', () => {
   });
 
   it('maps returned ids to full skills and attaches the relevance note', async () => {
-    const invoke = jest.fn().mockResolvedValue({
+    const invoke = vi.fn().mockResolvedValue({
       skills: [{ id: 'a.gamma', relevance_note: 'because gamma' }, { id: 'a.alpha' }],
     });
     const { modelProvider, selectModel } = makeModelProvider(invoke);
@@ -109,7 +112,7 @@ describe('selectRelevantSkills', () => {
     const skills = Array.from({ length: MAX_SELECTED_SKILLS + 5 }, (_, index) =>
       skill({ id: `catalog.skill-${index}`, name: `skill-${index}`, description: `d-${index}` })
     );
-    const invoke = jest.fn().mockResolvedValue({
+    const invoke = vi.fn().mockResolvedValue({
       skills: skills.map((s) => ({ id: s.id })),
     });
     const { modelProvider } = makeModelProvider(invoke);
@@ -128,7 +131,7 @@ describe('selectRelevantSkills', () => {
   });
 
   it('deduplicates repeated ids returned by the model', async () => {
-    const invoke = jest.fn().mockResolvedValue({
+    const invoke = vi.fn().mockResolvedValue({
       skills: [{ id: 'a.alpha' }, { id: 'a.alpha' }, { id: 'a.beta' }],
     });
     const { modelProvider } = makeModelProvider(invoke);
@@ -144,7 +147,7 @@ describe('selectRelevantSkills', () => {
   });
 
   it('drops hallucinated ids not present in the input set', async () => {
-    const invoke = jest.fn().mockResolvedValue({
+    const invoke = vi.fn().mockResolvedValue({
       skills: [{ id: 'a.alpha' }, { id: 'does.not.exist' }],
     });
     const { modelProvider } = makeModelProvider(invoke);
@@ -160,7 +163,7 @@ describe('selectRelevantSkills', () => {
   });
 
   it('falls back to an empty selection when the model call throws', async () => {
-    const invoke = jest.fn().mockRejectedValue(new Error('boom'));
+    const invoke = vi.fn().mockRejectedValue(new Error('boom'));
     const { modelProvider } = makeModelProvider(invoke);
 
     const result = await selectRelevantSkills({
@@ -174,7 +177,7 @@ describe('selectRelevantSkills', () => {
   });
 
   it('falls back to an empty selection (never hangs) when the call exceeds the timeout', async () => {
-    const invoke = jest.fn().mockReturnValue(new Promise(() => {})); // never resolves
+    const invoke = vi.fn().mockReturnValue(new Promise(() => {})); // never resolves
     const { modelProvider } = makeModelProvider(invoke);
     const testLogger = loggingSystemMock.createLogger();
 
@@ -195,7 +198,7 @@ describe('selectRelevantSkills', () => {
   });
 
   it('falls back to an empty selection when the external abort signal fires', async () => {
-    const invoke = jest.fn().mockReturnValue(new Promise(() => {})); // never resolves on its own
+    const invoke = vi.fn().mockReturnValue(new Promise(() => {})); // never resolves on its own
     const { modelProvider } = makeModelProvider(invoke);
     const testLogger = loggingSystemMock.createLogger();
     const controller = new AbortController();

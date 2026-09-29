@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, fireEvent, getByRole, render, screen } from '@testing-library/react';
 import React from 'react';
 import { SynonymRuleFlyout } from './synonym_rule_flyout';
@@ -12,11 +15,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { usePutSynonymsRule } from '../../hooks/use_put_synonyms_rule';
 
-jest.mock('../../hooks/use_put_synonyms_rule', () => ({
-  usePutSynonymsRule: jest.fn().mockReturnValue({
-    mutate: jest.fn(),
-  }),
-}));
+vi.mock('../../hooks/use_put_synonyms_rule', () => {
+      const mocked = {
+      usePutSynonymsRule: vi.fn().mockReturnValue({
+        mutate: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient();
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -72,11 +78,11 @@ describe('SynonymRuleFlyout', () => {
     },
   };
 
-  const onCloseMock = jest.fn();
-  const mutateMock = jest.fn();
+  const onCloseMock = vi.fn();
+  const mutateMock = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
-    (usePutSynonymsRule as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (usePutSynonymsRule as Mock).mockReturnValue({
       mutate: mutateMock,
     });
   });

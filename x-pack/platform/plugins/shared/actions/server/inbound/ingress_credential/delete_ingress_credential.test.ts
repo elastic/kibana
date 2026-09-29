@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -16,7 +18,7 @@ describe('deleteIngressCredentialForConnector', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns when no credentials exist', async () => {

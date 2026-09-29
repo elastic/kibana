@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -34,15 +37,15 @@ import { CommonFlyout } from './flyout';
 import type { TemplateFormProps } from '../templates/types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../../containers/user_profiles/api');
+vi.mock('../connectors/servicenow/use_get_choices');
+vi.mock('../../containers/user_profiles/api');
 
-const useGetChoicesMock = useGetChoices as jest.Mock;
+const useGetChoicesMock = useGetChoices as Mock;
 
 describe('CommonFlyout ', () => {
   const props = {
-    onCloseFlyout: jest.fn(),
-    onSaveField: jest.fn(),
+    onCloseFlyout: vi.fn(),
+    onSaveField: vi.fn(),
     isLoading: false,
     disabled: false,
     renderHeader: () => <div>{`Flyout header`}</div>,
@@ -53,7 +56,7 @@ describe('CommonFlyout ', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders flyout correctly', async () => {

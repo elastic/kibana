@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { validateHapiRequest, handle } from './route';
 import { createRouter } from './versioned_router/mocks';
@@ -26,7 +28,7 @@ describe('handle', () => {
   let router: Router;
   beforeEach(() => {
     router = createRouter();
-    handler = jest.fn(async () => kibanaResponseFactory.ok());
+    handler = vi.fn(async () => kibanaResponseFactory.ok());
     log = loggingSystemMock.createLogger();
   });
   describe('post validation events', () => {
@@ -216,7 +218,7 @@ describe('handle', () => {
   });
 
   it('awaits async request validation error mappers', async () => {
-    const onRequestValidationError = jest.fn(async (_error, _request, res) => {
+    const onRequestValidationError = vi.fn(async (_error, _request, res) => {
       await Promise.resolve();
       return res.custom({ statusCode: 422, body: { error: 'validation_failed' } });
     });
@@ -468,7 +470,7 @@ describe('handle', () => {
   });
 
   it('does not validate custom request validation error response bodies outside dev mode', async () => {
-    const body = jest.fn(() => schema.object({ message: schema.string() }));
+    const body = vi.fn(() => schema.object({ message: schema.string() }));
 
     const response = await handle(createRequest({ query: { foo: 'bar' } }), {
       router,

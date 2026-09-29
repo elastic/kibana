@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -15,44 +17,53 @@ import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attac
 
 import { RUN_ATTACK_DISCOVERY_TOOL_ID, getRunAttackDiscoveryTool } from '.';
 
-const mockExecuteGenerationWorkflow = jest.fn();
-const mockResolveConnectorDetails = jest.fn();
-const mockGetDefaultModel = jest.fn();
-const mockIsWorkflowsEnabledForSpace = jest.fn();
+const mockExecuteGenerationWorkflow = vi.fn();
+const mockResolveConnectorDetails = vi.fn();
+const mockGetDefaultModel = vi.fn();
+const mockIsWorkflowsEnabledForSpace = vi.fn();
 
-jest.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow', () => ({
-  executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
-}));
+vi.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow', () => {
+      const mocked = {
+      executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../workflows/helpers/resolve_connector_details', () => ({
-  resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
-}));
+vi.mock('../../../../workflows/helpers/resolve_connector_details', () => {
+      const mocked = {
+      resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/is_workflows_enabled_for_space', () => ({
-  isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
-}));
+vi.mock('../../../../lib/is_workflows_enabled_for_space', () => {
+      const mocked = {
+      isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const FAKE_REQUEST = httpServerMock.createKibanaRequest();
 const SOFT_DEADLINE_MS = 90_000;
 
 const buildToolDeps = () => ({
   analytics: undefined,
-  getEventLogIndex: jest.fn().mockResolvedValue('event-log-*'),
-  getEventLogger: jest.fn().mockResolvedValue({}),
-  getStartServices: jest.fn().mockResolvedValue({
+  getEventLogIndex: vi.fn().mockResolvedValue('event-log-*'),
+  getEventLogger: vi.fn().mockResolvedValue({}),
+  getStartServices: vi.fn().mockResolvedValue({
     coreStart: {
-      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       uiSettings: {
-        asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(true) }),
+        asScopedToClient: vi.fn().mockReturnValue({ get: vi.fn().mockResolvedValue(true) }),
       },
     } as unknown,
     pluginsStart: {
       actions: {
-        getActionsClientWithRequest: jest
+        getActionsClientWithRequest: vi
           .fn()
-          .mockResolvedValue({ get: jest.fn().mockResolvedValue({}) }),
+          .mockResolvedValue({ get: vi.fn().mockResolvedValue({}) }),
       },
-      inference: { getConnectorById: jest.fn() },
+      inference: { getConnectorById: vi.fn() },
       security: { authz: {} },
     } as unknown,
   }),
@@ -105,7 +116,7 @@ describe('RUN_ATTACK_DISCOVERY_TOOL_ID', () => {
 
 describe('getRunAttackDiscoveryTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockIsWorkflowsEnabledForSpace.mockResolvedValue(true);
 
@@ -196,22 +207,22 @@ describe('getRunAttackDiscoveryTool', () => {
   });
 
   it('forwards pluginsStart.security.authz to executeGenerationWorkflow so the authorization choke point is enforced', async () => {
-    const authz = { actions: { api: { get: jest.fn() } } };
+    const authz = { actions: { api: { get: vi.fn() } } };
     const deps = buildToolDeps();
-    deps.getStartServices = jest.fn().mockResolvedValue({
+    deps.getStartServices = vi.fn().mockResolvedValue({
       coreStart: {
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         uiSettings: {
-          asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(true) }),
+          asScopedToClient: vi.fn().mockReturnValue({ get: vi.fn().mockResolvedValue(true) }),
         },
       } as unknown,
       pluginsStart: {
         actions: {
-          getActionsClientWithRequest: jest
+          getActionsClientWithRequest: vi
             .fn()
-            .mockResolvedValue({ get: jest.fn().mockResolvedValue({}) }),
+            .mockResolvedValue({ get: vi.fn().mockResolvedValue({}) }),
         },
-        inference: { getConnectorById: jest.fn() },
+        inference: { getConnectorById: vi.fn() },
         security: { authz },
       } as unknown,
     });
@@ -258,14 +269,14 @@ describe('getRunAttackDiscoveryTool', () => {
   });
 
   it('returns execution_uuid only when the soft deadline elapses before the pipeline completes', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     mockExecuteGenerationWorkflow.mockImplementation(() => new Promise(() => {}));
 
     const tool = getRunAttackDiscoveryTool(buildToolDeps());
     const handlerPromise = tool.handler({} as never, buildContext());
 
-    await jest.advanceTimersByTimeAsync(SOFT_DEADLINE_MS + 1);
+    await vi.advanceTimersByTimeAsync(SOFT_DEADLINE_MS + 1);
 
     const result = await handlerPromise;
 
@@ -279,7 +290,7 @@ describe('getRunAttackDiscoveryTool', () => {
     });
     expect(result.results[0].data).not.toHaveProperty('attack_discoveries');
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns execution_uuid immediately in async mode without awaiting the pipeline', async () => {

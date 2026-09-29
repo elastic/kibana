@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
@@ -14,21 +17,21 @@ import { registerGetInvestigationsCountRoute } from './get_investigations_count'
 /** Context stub that satisfies `withAlertZeroEnabled` — setting returns `true` so the route proceeds. */
 const makeContext = () => ({
   core: Promise.resolve({
-    uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
+    uiSettings: { client: { get: vi.fn().mockResolvedValue(true) } },
   }),
 });
 
-const makeDeps = (listFn: jest.Mock) => {
-  const addVersion = jest.fn();
+const makeDeps = (listFn: Mock) => {
+  const addVersion = vi.fn();
   const router = {
     versioned: {
-      get: jest.fn().mockReturnValue({ addVersion }),
+      get: vi.fn().mockReturnValue({ addVersion }),
     },
   };
 
   const scopedClient = { search: listFn };
   const conversations = {
-    getScopedClient: jest.fn().mockResolvedValue(scopedClient),
+    getScopedClient: vi.fn().mockResolvedValue(scopedClient),
   };
   const logger = loggingSystemMock.createLogger();
 
@@ -50,12 +53,12 @@ const makeDeps = (listFn: jest.Mock) => {
 
 describe('registerGetInvestigationsCountRoute', () => {
   it('requires only ALERTZERO_API_PRIVILEGE_READ (no agent_builder privilege)', () => {
-    const { routeConfig } = makeDeps(jest.fn());
+    const { routeConfig } = makeDeps(vi.fn());
     expect(routeConfig.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
   });
 
   it('calls client.search with the investigation template_id filter and perPage 1', async () => {
-    const list = jest.fn().mockResolvedValue({ results: [], total: 0 });
+    const list = vi.fn().mockResolvedValue({ results: [], total: 0 });
     const { handler, conversations } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest();
@@ -70,7 +73,7 @@ describe('registerGetInvestigationsCountRoute', () => {
   });
 
   it('returns { total } from the list response', async () => {
-    const list = jest.fn().mockResolvedValue({ results: [], total: 7 });
+    const list = vi.fn().mockResolvedValue({ results: [], total: 7 });
     const { handler } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();
 
@@ -80,7 +83,7 @@ describe('registerGetInvestigationsCountRoute', () => {
   });
 
   it('logs the error and returns a generic 500 when the client throws', async () => {
-    const list = jest.fn().mockRejectedValue(new Error('ES unavailable'));
+    const list = vi.fn().mockRejectedValue(new Error('ES unavailable'));
     const { handler, logger } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();
 

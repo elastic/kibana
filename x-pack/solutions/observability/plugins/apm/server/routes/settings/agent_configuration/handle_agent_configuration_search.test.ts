@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AgentConfigSearchParams } from '@kbn/apm-api-shared';
 import type { Logger } from '@kbn/core/server';
 import type { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { handleAgentConfigurationSearch } from './handle_agent_configuration_search';
 import { searchConfigurations } from './search_configurations';
 
-jest.mock('./search_configurations', () => ({
-  searchConfigurations: jest.fn(),
-}));
+vi.mock('./search_configurations', () => {
+      const mocked = {
+      searchConfigurations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockInternalESClient = {
-  search: jest.fn(),
-  index: jest.fn(),
+  search: vi.fn(),
+  index: vi.fn(),
 } as unknown as APMInternalESClient;
 
 const mockLogger = {
-  debug: jest.fn(),
+  debug: vi.fn(),
 } as unknown as Logger;
 
 describe('handleAgentConfigurationSearch', () => {
@@ -33,15 +39,15 @@ describe('handleAgentConfigurationSearch', () => {
   } as AgentConfigSearchParams;
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null if no configuration is found', async () => {
-    (searchConfigurations as jest.Mock).mockResolvedValue(null);
+    (searchConfigurations as Mock).mockResolvedValue(null);
 
     const result = await handleAgentConfigurationSearch({
       params: baseParams,
@@ -57,7 +63,7 @@ describe('handleAgentConfigurationSearch', () => {
       _id: 'config-id',
       _source: { etag: '12345', applied_by_agent: false },
     };
-    (searchConfigurations as jest.Mock).mockResolvedValue(mockConfiguration);
+    (searchConfigurations as Mock).mockResolvedValue(mockConfiguration);
 
     const paramsWithError = { ...baseParams, error: 'BOOM!!' };
 
@@ -79,7 +85,7 @@ describe('handleAgentConfigurationSearch', () => {
       _id: 'config-id',
       _source: { etag: '12345', applied_by_agent: false, error: 'BOOM !!' },
     };
-    (searchConfigurations as jest.Mock).mockResolvedValue(mockConfiguration);
+    (searchConfigurations as Mock).mockResolvedValue(mockConfiguration);
 
     const paramsWithError = { ...baseParams, mark_as_applied_by_agent: true };
 
@@ -101,7 +107,7 @@ describe('handleAgentConfigurationSearch', () => {
       _id: 'config-id',
       _source: { etag: '67890', applied_by_agent: false },
     };
-    (searchConfigurations as jest.Mock).mockResolvedValue(mockConfiguration);
+    (searchConfigurations as Mock).mockResolvedValue(mockConfiguration);
 
     const result = await handleAgentConfigurationSearch({
       params: baseParams,
@@ -118,7 +124,7 @@ describe('handleAgentConfigurationSearch', () => {
       _id: 'config-id',
       _source: { etag: '12345', applied_by_agent: false },
     };
-    (searchConfigurations as jest.Mock).mockResolvedValue(mockConfiguration);
+    (searchConfigurations as Mock).mockResolvedValue(mockConfiguration);
 
     await handleAgentConfigurationSearch({
       params: baseParams,
@@ -138,7 +144,7 @@ describe('handleAgentConfigurationSearch', () => {
       _id: 'config-id',
       _source: { etag: '67890', applied_by_agent: false },
     };
-    (searchConfigurations as jest.Mock).mockResolvedValue(mockConfiguration);
+    (searchConfigurations as Mock).mockResolvedValue(mockConfiguration);
 
     const paramsWithMarkApplied = { ...baseParams, mark_as_applied_by_agent: true };
 
@@ -160,7 +166,7 @@ describe('handleAgentConfigurationSearch', () => {
       _id: 'config-id',
       _source: { etag: '12345', applied_by_agent: true },
     };
-    (searchConfigurations as jest.Mock).mockResolvedValue(mockConfiguration);
+    (searchConfigurations as Mock).mockResolvedValue(mockConfiguration);
 
     const result = await handleAgentConfigurationSearch({
       params: baseParams,

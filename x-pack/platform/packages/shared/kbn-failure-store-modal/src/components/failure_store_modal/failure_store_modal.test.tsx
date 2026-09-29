@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
@@ -12,8 +14,8 @@ import type { FailureStoreFormProps } from './failure_store_modal';
 import { FailureStoreModal } from './failure_store_modal';
 
 const defaultProps = {
-  onCloseModal: jest.fn(),
-  onSaveModal: jest.fn(),
+  onCloseModal: vi.fn(),
+  onSaveModal: vi.fn(),
   failureStoreProps: {
     failureStoreEnabled: false,
     defaultRetentionPeriod: '30d',
@@ -45,7 +47,7 @@ const renderModal = (
 
 describe('FailureStoreModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the modal with failure store toggle', () => {

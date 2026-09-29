@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useCheckEndpointPermissions } from './check_permissions';
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-const usePrivilegesMock = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
+const usePrivilegesMock = useUserPrivileges as MockedFunction<typeof useUserPrivileges>;
 
 const mockPrivileges = (config: Partial<EndpointPrivileges>) => {
   usePrivilegesMock.mockReturnValue({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,7 +25,7 @@ const ki: KiListItem = {
   title: 'Verify the order, check the SLA window, then issue store credit.',
 };
 
-const renderKiRow = (httpGet: jest.Mock = jest.fn()) => {
+const renderKiRow = (httpGet: Mock = vi.fn()) => {
   const services = coreMock.createStart();
   services.http.get = httpGet;
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -42,7 +45,7 @@ const renderKiRow = (httpGet: jest.Mock = jest.fn()) => {
 
 describe('KiRow', () => {
   it('renders the title and type without fetching', () => {
-    const httpGet = jest.fn();
+    const httpGet = vi.fn();
     renderKiRow(httpGet);
 
     expect(screen.getByTestId('contextKiRowTitle')).toHaveTextContent(
@@ -54,7 +57,7 @@ describe('KiRow', () => {
   });
 
   it('renders None when type or title is missing', () => {
-    const httpGet = jest.fn();
+    const httpGet = vi.fn();
     const services = coreMock.createStart();
     services.http.get = httpGet;
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -76,7 +79,7 @@ describe('KiRow', () => {
   });
 
   it('fetches and renders the KI JSON when expanded', async () => {
-    const httpGet = jest.fn().mockResolvedValue({
+    const httpGet = vi.fn().mockResolvedValue({
       id: 'ki-1',
       document: {
         type: 'playbook',
@@ -104,7 +107,7 @@ describe('KiRow', () => {
   });
 
   it('shows an error when the KI document cannot be loaded', async () => {
-    const httpGet = jest.fn().mockRejectedValue(new Error('boom'));
+    const httpGet = vi.fn().mockRejectedValue(new Error('boom'));
     renderKiRow(httpGet);
 
     fireEvent.click(screen.getByTestId('contextKiRowToggle'));

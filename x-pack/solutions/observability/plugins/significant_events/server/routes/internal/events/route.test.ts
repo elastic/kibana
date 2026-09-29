@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { internalEventsRoutes } from './route';
 
-const mockCleanupStaleEvents = jest.fn();
+const mockCleanupStaleEvents = vi.fn();
 
-jest.mock('../../../lib/significant_events/events/cleanup_stale_events', () => ({
-  cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
-}));
+vi.mock('../../../lib/significant_events/events/cleanup_stale_events', () => {
+      const mocked = {
+      cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const investigateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];
@@ -31,7 +39,7 @@ const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/eve
 type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
 
 const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
-  getState: jest.fn().mockResolvedValue(state),
+  getState: vi.fn().mockResolvedValue(state),
 });
 
 describe('POST /internal/significant_events/events/_cleanup', () => {
@@ -43,11 +51,11 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
     const result = await cleanupRoute.handler({
       params: { body: { candidateRuleIds: ['rule-1'] } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getEventClient: () => eventClient,
-        getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+        getAlertEventsClient: vi.fn().mockResolvedValue(undefined),
+        getSignificantEventsAlertingContext: vi.fn().mockResolvedValue({ rulesClient }),
       }),
       server: {},
     } as never);
@@ -64,16 +72,16 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
 
 describe('POST /internal/significant_events/events/{id}/investigate', () => {
   it('rejects with 409 while paused before loading the event', async () => {
-    const findLatestByEventId = jest.fn();
+    const findLatestByEventId = vi.fn();
     const handlerParams = {
       params: { path: { id: 'event-1' } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByEventId }),
       }),
       server: { nightshiftInvestigations: {} },
-      logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
+      logger: { warn: vi.fn(), get: vi.fn().mockReturnValue({ warn: vi.fn() }) },
       maintenanceService: makeMaintenanceService('paused'),
     } as unknown as HandlerParams;
 
@@ -98,7 +106,7 @@ describe('GET /internal/significant_events/events', () => {
       severity: '40-medium' as const,
       confidence: 0.8,
     };
-    const findLatestByCurrentStatePaginated = jest.fn().mockResolvedValue({
+    const findLatestByCurrentStatePaginated = vi.fn().mockResolvedValue({
       hits: [event],
       page: 1,
       perPage: 25,
@@ -108,7 +116,7 @@ describe('GET /internal/significant_events/events', () => {
     const response = await eventsSearchRoute.handler({
       params: { query: {} },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
@@ -124,7 +132,7 @@ describe('GET /internal/significant_events/events', () => {
   });
 
   it('maps event_id to eventIds and still forwards time range and other filters', async () => {
-    const findLatestByCurrentStatePaginated = jest.fn().mockResolvedValue({
+    const findLatestByCurrentStatePaginated = vi.fn().mockResolvedValue({
       hits: [],
       page: 1,
       perPage: 25,
@@ -146,7 +154,7 @@ describe('GET /internal/significant_events/events', () => {
         },
       },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
@@ -179,7 +187,7 @@ describe('GET /internal/significant_events/events', () => {
       severity: '40-medium' as const,
       confidence: 0.8,
     };
-    const findLatestByCurrentStatePaginated = jest.fn().mockResolvedValue({
+    const findLatestByCurrentStatePaginated = vi.fn().mockResolvedValue({
       hits: [event],
       page: 1,
       perPage: 25,
@@ -189,7 +197,7 @@ describe('GET /internal/significant_events/events', () => {
     const response = await eventsSearchRoute.handler({
       params: { query: {} },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
@@ -232,12 +240,12 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
     const response = await lifecycleRoute.handler({
       params: { path: { id: latestVersion.event_id } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
-          findByEventId: jest.fn().mockResolvedValue({ hits: [firstVersion, latestVersion] }),
+          findByEventId: vi.fn().mockResolvedValue({ hits: [firstVersion, latestVersion] }),
         }),
-        getDetectionClient: () => ({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
+        getDetectionClient: () => ({ findByIds: vi.fn().mockResolvedValue({ hits: [] }) }),
       }),
       server: {},
     } as never);
@@ -264,10 +272,10 @@ describe('GET /internal/significant_events/events/{id}', () => {
       eventsGetRoute.handler({
         params: { path: { id: 'missing' } },
         request: {},
-        getScopedClients: jest.fn().mockResolvedValue({
+        getScopedClients: vi.fn().mockResolvedValue({
           licensing: {},
           getEventSearchClient: () => ({
-            findLatestByEventId: jest.fn().mockResolvedValue(undefined),
+            findLatestByEventId: vi.fn().mockResolvedValue(undefined),
           }),
         }),
         server: {},
@@ -287,10 +295,10 @@ describe('GET /internal/significant_events/events/{id}', () => {
     const response = await eventsGetRoute.handler({
       params: { path: { id: older.event_id } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
-          findLatestByEventId: jest.fn().mockResolvedValue(latest),
+          findLatestByEventId: vi.fn().mockResolvedValue(latest),
         }),
       }),
       server: {},
@@ -319,10 +327,10 @@ describe('GET /internal/significant_events/events/{id}', () => {
     const response = await eventsGetRoute.handler({
       params: { path: { id: baseEvent.event_id } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
-          findLatestByEventId: jest.fn().mockResolvedValue(eventWithSignals),
+          findLatestByEventId: vi.fn().mockResolvedValue(eventWithSignals),
         }),
       }),
       server: {},

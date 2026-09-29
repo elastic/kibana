@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -12,11 +14,14 @@ import { GCPSetupInfoContent } from './gcp_setup_info';
 import { I18nProvider } from '@kbn/i18n-react';
 
 // Mock the useCloudSetup hook
-const mockUseCloudSetup = jest.fn();
+const mockUseCloudSetup = vi.fn();
 
-jest.mock('../hooks/use_cloud_setup_context', () => ({
-  useCloudSetup: () => mockUseCloudSetup(),
-}));
+vi.mock('../hooks/use_cloud_setup_context', () => {
+      const mocked = {
+      useCloudSetup: () => mockUseCloudSetup(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
@@ -24,7 +29,7 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('GCPSetupInfoContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudSetup.mockReturnValue({
       gcpOverviewPath: 'https://docs.elastic.co/gcp-overview',
     });

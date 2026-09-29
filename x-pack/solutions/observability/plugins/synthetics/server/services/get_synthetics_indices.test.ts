@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import { getSyntheticsIndices } from './get_synthetics_indices';
 
 const buildEsClientMock = (remoteInfo: Record<string, { connected: boolean }> = {}) => ({
   cluster: {
-    remoteInfo: jest.fn().mockResolvedValue(remoteInfo),
+    remoteInfo: vi.fn().mockResolvedValue(remoteInfo),
   },
 });
 

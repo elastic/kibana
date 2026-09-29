@@ -5,41 +5,52 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { SourceRuleSummaryFlyout } from './source_rule_summary_flyout';
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({
-    get: () => 'YYYY-MM-DD',
-  }),
-  CoreStart: (key: string) => `CoreStart(${key})`,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: () => ({
+        get: () => 'YYYY-MM-DD',
+      }),
+      CoreStart: (key: string) => `CoreStart(${key})`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_row', () => ({
-  getTagsOverflowLimits: () => ({ overflowSize: 3, maxVisible: 2 }),
-  TagsOverflowBadgeRow: ({ tags }: { tags: string[] }) => (
-    <span data-test-subj="mockTagsOverflow">{tags.join(', ')}</span>
-  ),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_row', () => {
+      const mocked = {
+      getTagsOverflowLimits: () => ({ overflowSize: 3, maxVisible: 2 }),
+      TagsOverflowBadgeRow: ({ tags }: { tags: string[] }) => (
+        <span data-test-subj="mockTagsOverflow">{tags.join(', ')}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../rule_details_table', () => ({
-  RuleDetailsTable: ({
-    items,
-  }: {
-    items: Array<{ title: string; description: string; 'data-test-subj'?: string }>;
-  }) => (
-    <div data-test-subj="mockRuleDetailsTable">
-      {items.map((item) => (
-        <div key={item.title} data-test-subj={item['data-test-subj']}>
-          <strong>{item.title}</strong>: {item.description}
+vi.mock('../rule_details_table', () => {
+      const mocked = {
+      RuleDetailsTable: ({
+        items,
+      }: {
+        items: Array<{ title: string; description: string; 'data-test-subj'?: string }>;
+      }) => (
+        <div data-test-subj="mockRuleDetailsTable">
+          {items.map((item) => (
+            <div key={item.title} data-test-subj={item['data-test-subj']}>
+              <strong>{item.title}</strong>: {item.description}
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
-  ),
-}));
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
   ({
@@ -59,7 +70,7 @@ const defaultProps: React.ComponentProps<typeof SourceRuleSummaryFlyout> = {
   rule: makeRule(),
   ruleCategory: 'Elasticsearch query',
   ruleDetailsHref: '/app/management/insightsAndAlerting/triggersActions/rule/rule-1',
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 const renderFlyout = (overrides: Partial<typeof defaultProps> = {}) =>
@@ -71,7 +82,7 @@ const renderFlyout = (overrides: Partial<typeof defaultProps> = {}) =>
 
 describe('SourceRuleSummaryFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the rule name in the title', () => {
@@ -142,7 +153,7 @@ describe('SourceRuleSummaryFlyout', () => {
   });
 
   it('calls onClose when the close icon is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderFlyout({ onClose });
 
     fireEvent.click(screen.getByTestId('sourceRuleSummaryFlyoutCloseButton'));
@@ -151,7 +162,7 @@ describe('SourceRuleSummaryFlyout', () => {
   });
 
   it('calls onClose when the footer close button is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderFlyout({ onClose });
 
     fireEvent.click(screen.getByTestId('sourceRuleSummaryFlyoutFooterCloseButton'));

@@ -5,40 +5,48 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useNavigateToAttackDetailsLeftPanel } from './use_navigate_to_attack_details_left_panel';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useAttackDetailsContext } from '../context';
 import { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from '../constants/panel_keys';
 
-const mockOpenLeftPanel = jest.fn();
-const mockOpenFlyout = jest.fn();
+const mockOpenLeftPanel = vi.fn();
+const mockOpenFlyout = vi.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../context', () => ({
-  useAttackDetailsContext: jest.fn(),
-}));
+vi.mock('../context', () => {
+      const mocked = {
+      useAttackDetailsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useNavigateToAttackDetailsLeftPanel', () => {
   const attackId = 'attack-1';
   const indexName = '.alerts-security.alerts-default';
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       openLeftPanel: mockOpenLeftPanel,
       openFlyout: mockOpenFlyout,
-      openRightPanel: jest.fn(),
-      openPreviewPanel: jest.fn(),
-      closeRightPanel: jest.fn(),
-      closePreviewPanel: jest.fn(),
-      closeFlyout: jest.fn(),
-      closeLeftPanel: jest.fn(),
+      openRightPanel: vi.fn(),
+      openPreviewPanel: vi.fn(),
+      closeRightPanel: vi.fn(),
+      closePreviewPanel: vi.fn(),
+      closeFlyout: vi.fn(),
+      closeLeftPanel: vi.fn(),
     } as unknown as ReturnType<typeof useExpandableFlyoutApi>);
-    jest.mocked(useAttackDetailsContext).mockReturnValue({
+    vi.mocked(useAttackDetailsContext).mockReturnValue({
       attackId,
       indexName,
       isPreviewMode: false,
@@ -83,7 +91,7 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
   });
 
   it('returns a callback that opens a full flyout when in preview mode', () => {
-    jest.mocked(useAttackDetailsContext).mockReturnValue({
+    vi.mocked(useAttackDetailsContext).mockReturnValue({
       attackId,
       indexName,
       isPreviewMode: true,

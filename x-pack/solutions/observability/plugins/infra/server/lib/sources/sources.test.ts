@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject } from '@kbn/core/server';
 import type { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
@@ -79,8 +81,8 @@ describe('the InfraSources lib', () => {
 
 const createMockMetricsDataClient = (metricAlias: string = 'metrics-*,metricbeat-*') =>
   ({
-    getMetricIndices: jest.fn().mockResolvedValue(metricAlias),
-    updateMetricIndices: jest.fn(),
+    getMetricIndices: vi.fn().mockResolvedValue(metricAlias),
+    updateMetricIndices: vi.fn(),
   } as unknown as MetricsDataClient);
 
 const createRequestContext = (savedObject?: SavedObject<unknown>) => {

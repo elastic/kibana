@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
@@ -13,23 +15,29 @@ import type { Unmount } from '@kbn/management-plugin/public/types';
 
 import { roleMappingsManagementApp } from './role_mappings_management_app';
 
-jest.mock('./role_mappings_grid', () => ({
-  RoleMappingsGridPage: (props: any) =>
-    // `docLinks` object is too big to include into test snapshot, so we just check its existence.
-    `Role Mappings Page: ${JSON.stringify({
-      ...props,
-      docLinks: props.docLinks ? {} : undefined,
+vi.mock('./role_mappings_grid', () => {
+      const mocked = {
+      RoleMappingsGridPage: (props: any) =>
+        // `docLinks` object is too big to include into test snapshot, so we just check its existence.
+        `Role Mappings Page: ${JSON.stringify({
+          ...props,
+          docLinks: props.docLinks ? {} : undefined,
     })}`,
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_role_mapping', () => ({
-  EditRoleMappingPage: (props: any) =>
-    // `docLinks` object is too big to include into test snapshot, so we just check its existence.
-    `Role Mapping Edit Page: ${JSON.stringify({
-      ...props,
-      docLinks: props.docLinks ? {} : undefined,
+vi.mock('./edit_role_mapping', () => {
+      const mocked = {
+      EditRoleMappingPage: (props: any) =>
+        // `docLinks` object is too big to include into test snapshot, so we just check its existence.
+        `Role Mapping Edit Page: ${JSON.stringify({
+          ...props,
+          docLinks: props.docLinks ? {} : undefined,
     })}`,
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 async function mountApp(
   basePath: string,
@@ -37,7 +45,7 @@ async function mountApp(
   roleMappingSaveCapability: boolean = true
 ) {
   const container = document.createElement('div');
-  const setBreadcrumbs = jest.fn();
+  const setBreadcrumbs = vi.fn();
 
   const startServices = await coreMock.createSetup().getStartServices();
   const [{ application, theme }] = startServices;

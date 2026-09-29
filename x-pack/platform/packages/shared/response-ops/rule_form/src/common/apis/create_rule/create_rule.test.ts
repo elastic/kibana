@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { RuleTypeParams } from '../../types';
 import { createRule } from './create_rule';
@@ -13,7 +15,7 @@ import type { CreateRuleBody } from './types';
 const http = httpServiceMock.createStartContract();
 
 describe('createRule', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('should call create alert API', async () => {
     const resolvedValue = {

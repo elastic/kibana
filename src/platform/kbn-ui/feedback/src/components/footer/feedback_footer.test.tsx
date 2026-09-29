@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { FeedbackFooter } from './feedback_footer';
@@ -16,7 +18,7 @@ import userEvent from '@testing-library/user-event';
 const mockProps = {
   isSendFeedbackButtonDisabled: false,
   isSubmitting: false,
-  submitFeedback: jest.fn(),
+  submitFeedback: vi.fn(),
 };
 
 describe('FeedbackFooter', () => {

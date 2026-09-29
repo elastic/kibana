@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Services } from '@kbn/actions-plugin/server/types';
@@ -24,11 +27,14 @@ import type { WebhookConnectorType, WebhookConnectorTypeExecutorOptions } from '
 import { getConnectorType } from '.';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 
-jest.mock('axios', () => ({
-  create: jest.fn(),
-  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
-  AxiosError: jest.requireActual('axios').AxiosError,
-}));
+vi.mock('axios', () => {
+      const mocked = {
+      create: vi.fn(),
+      AxiosHeaders: require('axios').AxiosHeaders,
+      AxiosError: require('axios').AxiosError,
+    };
+      return { ...mocked, default: mocked };
+    });
 import axios from 'axios';
 import { CRT_FILE, KEY_FILE, PFX_FILE } from '@kbn/connector-schemas/common/auth/mocks';
 import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
@@ -36,34 +42,37 @@ import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
 } from '@kbn/connector-schemas/webhook';
-const createAxiosInstanceMock = axios.create as jest.Mock;
+const createAxiosInstanceMock = axios.create as Mock;
 const axiosInstanceMock = {
   interceptors: {
-    request: { eject: jest.fn(), use: jest.fn() },
-    response: { eject: jest.fn(), use: jest.fn() },
+    request: { eject: vi.fn(), use: vi.fn() },
+    response: { eject: vi.fn(), use: vi.fn() },
   },
 };
 
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
+    request: vi.fn(),
+    patch: vi.fn(),
   };
 });
 
-jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
-  getOAuthClientCredentialsAccessToken: jest.fn(),
-}));
+vi.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => {
+      const mocked = {
+      getOAuthClientCredentialsAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const requestMock = utils.request as jest.Mock;
+const requestMock = utils.request as Mock;
 
 const services: Services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 let connectorType: WebhookConnectorType;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
@@ -73,7 +82,7 @@ beforeEach(() => {
     logger: mockedLogger,
     connectorId: 'test-connector-id',
   });
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('connectorType', () => {
@@ -334,7 +343,7 @@ describe('config validation', () => {
       certType: SSLCertType.PFX,
       hasAuth: true,
     };
-    configurationUtilities.getWebhookSettings = jest.fn(() => ({
+    configurationUtilities.getWebhookSettings = vi.fn(() => ({
       ssl: { pfx: { enabled: false } },
     }));
     expect(() => {
@@ -411,7 +420,7 @@ describe('config validation', () => {
     test('calls ensureUriAllowed for main url and accessTokenUrl when OAuth2 config is valid', () => {
       const configUtils = {
         ...actionsConfigMock.create(),
-        ensureUriAllowed: jest.fn(),
+        ensureUriAllowed: vi.fn(),
       };
       const mainUrl = 'https://webhook.example/webhook';
       const tokenUrl = 'https://token.example/oauth';
@@ -527,7 +536,7 @@ describe('execute()', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     requestMock.mockReset();
     requestMock.mockResolvedValue({
       status: 200,
@@ -1246,7 +1255,7 @@ describe('execute()', () => {
 
     it('should log an error if refreshing access token fails', async () => {
       const errorMessage = 'Invalid client or Invalid client credentials';
-      (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
+      (getOAuthClientCredentialsAccessToken as Mock).mockRejectedValueOnce(
         new Error(errorMessage)
       );
       createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
@@ -1288,7 +1297,7 @@ describe('execute()', () => {
 
   describe('oauth2 client credentials', () => {
     it('throws if refresh token fails', async () => {
-      (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(undefined);
+      (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValue(undefined);
 
       const execOptions: WebhookConnectorTypeExecutorOptions = {
         actionId: 'test-id',
@@ -1328,7 +1337,7 @@ describe('execute()', () => {
 
     it('adds access token to headers', async () => {
       const accessToken = 'Bearer my-access-token';
-      (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
+      (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValueOnce(accessToken);
       createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
 
       const execOptions: WebhookConnectorTypeExecutorOptions = {
@@ -1360,12 +1369,12 @@ describe('execute()', () => {
 
       await connectorType.executor(execOptions);
 
-      expect((utils.request as jest.Mock).mock.calls[0][0].headers.Authorization).toBe(accessToken);
+      expect((utils.request as Mock).mock.calls[0][0].headers.Authorization).toBe(accessToken);
     });
 
     it('merges custom headers with Authorization header', async () => {
       const accessToken = 'Bearer token123';
-      (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
+      (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValueOnce(accessToken);
       createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
 
       const execOptions: WebhookConnectorTypeExecutorOptions = {
@@ -1397,7 +1406,7 @@ describe('execute()', () => {
 
       await connectorType.executor(execOptions);
 
-      const headers = (utils.request as jest.Mock).mock.calls[0][0].headers;
+      const headers = (utils.request as Mock).mock.calls[0][0].headers;
       expect(headers.Authorization).toBe(accessToken);
       expect(headers['X-Custom']).toBe('value');
     });

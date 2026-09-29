@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
@@ -25,12 +28,12 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import type { DataPlugin } from '@kbn/data-plugin/public';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     __esModule: true,
     ...original,
-    copyToClipboard: jest.fn(() => true),
+    copyToClipboard: vi.fn(() => true),
   };
 });
 
@@ -38,7 +41,7 @@ const dataViewPluginMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 export const uiSettingsMock = {
-  get: jest.fn(),
+  get: vi.fn(),
 } as unknown as IUiSettingsClient;
 
 const defaultSearchSourceExpressionParams: EsQueryRuleParams<SearchType.searchSource> = {
@@ -140,12 +143,12 @@ const savedQueryMock = {
   },
 };
 
-(dataViewPluginMock.getIds as jest.Mock) = jest.fn().mockImplementation(() => Promise.resolve([]));
-dataViewPluginMock.getDefaultDataView = jest.fn(() => Promise.resolve(null));
-dataViewPluginMock.get = jest.fn();
+(dataViewPluginMock.getIds as Mock) = vi.fn().mockImplementation(() => Promise.resolve([]));
+dataViewPluginMock.getDefaultDataView = vi.fn(() => Promise.resolve(null));
+dataViewPluginMock.get = vi.fn();
 
 describe('SearchSourceAlertTypeExpression', () => {
-  let dataMock: jest.Mocked<ReturnType<DataPlugin['start']>>;
+  let dataMock: Mocked<ReturnType<DataPlugin['start']>>;
   let searchSourceMock: ISearchSource;
   let mockSearchResult: Subject<unknown>;
 
@@ -161,17 +164,17 @@ describe('SearchSourceAlertTypeExpression', () => {
       getField: (name: string) => {
         return (searchSourceFieldsMock as Record<string, object>)[name] || '';
       },
-      setField: jest.fn(),
-      createCopy: jest.fn(() => {
+      setField: vi.fn(),
+      createCopy: vi.fn(() => {
         return searchSourceMock;
       }),
-      setParent: jest.fn(() => {
+      setParent: vi.fn(() => {
         return searchSourceMock;
       }),
-      fetch$: jest.fn(() => {
+      fetch$: vi.fn(() => {
         return mockSearchResult;
       }),
-      getSearchRequestBody: jest.fn(() => ({
+      getSearchRequestBody: vi.fn(() => ({
         fields: [
           {
             field: '@timestamp',
@@ -236,13 +239,13 @@ describe('SearchSourceAlertTypeExpression', () => {
       })),
     } as unknown as ISearchSource;
     dataMock = dataPluginMock.createStartContract();
-    (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
+    (dataMock.search.searchSource.create as Mock).mockImplementation(() =>
       Promise.resolve(searchSourceMock)
     );
-    (dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
+    (dataMock.query.savedQueries.getSavedQuery as Mock).mockImplementation(() =>
       Promise.resolve(savedQueryMock)
     );
-    dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
+    dataMock.query.savedQueries.findSavedQueries = vi.fn(() =>
       Promise.resolve({ total: 0, queries: [] })
     );
   });
@@ -283,7 +286,7 @@ describe('SearchSourceAlertTypeExpression', () => {
           actionGroups={[]}
           charts={chartsStartMock}
           metadata={{ adHocDataViewList: [] }}
-          onChangeMetaData={jest.fn()}
+          onChangeMetaData={vi.fn()}
         />
       </KibanaContextProvider>,
       {
@@ -432,7 +435,7 @@ describe('SearchSourceAlertTypeExpression', () => {
   });
 
   test('should render error prompt', async () => {
-    (dataMock.search.searchSource.create as jest.Mock).mockImplementationOnce(() =>
+    (dataMock.search.searchSource.create as Mock).mockImplementationOnce(() =>
       Promise.reject(new Error('Cant find searchSource'))
     );
     const result = setup(defaultSearchSourceExpressionParams);

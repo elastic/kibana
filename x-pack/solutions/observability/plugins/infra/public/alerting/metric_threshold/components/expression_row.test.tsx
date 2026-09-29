@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ResolvedDataView } from '../../../utils/data_view';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -37,24 +40,27 @@ const mockDataView = {
   isPersisted: () => false,
   getName: () => 'mock-data-view',
   toSpec: () => ({}),
-} as jest.Mocked<DataView>;
+} as Mocked<DataView>;
 
-jest.mock('../../../containers/metrics_source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-  }),
-  useMetricsDataViewContext: () => ({
-    metricsView: {
-      indices: 'metricbeat-*',
-      timeFieldName: mockDataView.timeFieldName,
-      fields: mockDataView.fields,
-      dataViewReference: mockDataView,
-    } as ResolvedDataView,
-    loading: false,
-    error: undefined,
-  }),
-}));
+vi.mock('../../../containers/metrics_source', () => {
+      const mocked = {
+      withSourceProvider: () => vi.fn,
+      useSourceContext: () => ({
+        source: { id: 'default' },
+      }),
+      useMetricsDataViewContext: () => ({
+        metricsView: {
+          indices: 'metricbeat-*',
+          timeFieldName: mockDataView.timeFieldName,
+          fields: mockDataView.fields,
+          dataViewReference: mockDataView,
+        } as ResolvedDataView,
+        loading: false,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {

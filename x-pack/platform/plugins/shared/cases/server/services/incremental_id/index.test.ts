@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CasesIncrementalIdService } from '.';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -83,8 +85,8 @@ describe('CasesIncrementalIdService', () => {
     it('should return the incrementer SO when the incremental IDs match', async () => {
       const lastId = 100;
       const incIdSo = { attributes: { last_id: lastId } };
-      service.getLastAppliedIdForSpace = jest.fn().mockReturnValue(lastId);
-      service.getCaseIdIncrementerSo = jest.fn().mockReturnValue({
+      service.getLastAppliedIdForSpace = vi.fn().mockReturnValue(lastId);
+      service.getCaseIdIncrementerSo = vi.fn().mockReturnValue({
         total: 1,
         saved_objects: [incIdSo],
       });
@@ -95,8 +97,8 @@ describe('CasesIncrementalIdService', () => {
     it('should return the incrementer SO even if `last_id` is 0', async () => {
       const lastId = 0;
       const incIdSo = { attributes: { last_id: lastId } };
-      service.getLastAppliedIdForSpace = jest.fn().mockReturnValue(lastId);
-      service.getCaseIdIncrementerSo = jest.fn().mockReturnValue({
+      service.getLastAppliedIdForSpace = vi.fn().mockReturnValue(lastId);
+      service.getCaseIdIncrementerSo = vi.fn().mockReturnValue({
         total: 1,
         saved_objects: [incIdSo],
       });
@@ -108,12 +110,12 @@ describe('CasesIncrementalIdService', () => {
       const incIdLastId = 100;
       const lastAppliedId = 5610;
       const incIdSo = { attributes: { last_id: incIdLastId } };
-      service.getLastAppliedIdForSpace = jest.fn().mockReturnValue(lastAppliedId);
-      service.getCaseIdIncrementerSo = jest.fn().mockReturnValue({
+      service.getLastAppliedIdForSpace = vi.fn().mockReturnValue(lastAppliedId);
+      service.getCaseIdIncrementerSo = vi.fn().mockReturnValue({
         total: 1,
         saved_objects: [incIdSo],
       });
-      service.incrementCounterSO = jest.fn().mockImplementation(service.incrementCounterSO);
+      service.incrementCounterSO = vi.fn().mockImplementation(service.incrementCounterSO);
       const result = await service.getOrCreateCaseIdIncrementerSo('random');
       expect(result.attributes.last_id).toBe(lastAppliedId);
       expect(service.incrementCounterSO).toHaveBeenCalledWith(incIdSo, lastAppliedId, 'random');
@@ -123,12 +125,12 @@ describe('CasesIncrementalIdService', () => {
       const incIdLastId = 200;
       const lastAppliedId = 100;
       const incIdSo = { attributes: { last_id: incIdLastId } };
-      service.getLastAppliedIdForSpace = jest.fn().mockReturnValue(lastAppliedId);
-      service.getCaseIdIncrementerSo = jest.fn().mockReturnValue({
+      service.getLastAppliedIdForSpace = vi.fn().mockReturnValue(lastAppliedId);
+      service.getCaseIdIncrementerSo = vi.fn().mockReturnValue({
         total: 1,
         saved_objects: [incIdSo],
       });
-      service.incrementCounterSO = jest.fn().mockImplementation(service.incrementCounterSO);
+      service.incrementCounterSO = vi.fn().mockImplementation(service.incrementCounterSO);
       const result = await service.getOrCreateCaseIdIncrementerSo('random');
       expect(result.attributes.last_id).toBe(incIdLastId);
       expect(service.incrementCounterSO).not.toHaveBeenCalled();
@@ -137,12 +139,12 @@ describe('CasesIncrementalIdService', () => {
     it('should initiate the resolution of multiple inc ID SOs', async () => {
       const lastId = 100;
       const incIdSo = { attributes: { last_id: lastId } };
-      service.getLastAppliedIdForSpace = jest.fn().mockReturnValue(lastId);
-      service.getCaseIdIncrementerSo = jest.fn().mockReturnValue({
+      service.getLastAppliedIdForSpace = vi.fn().mockReturnValue(lastId);
+      service.getCaseIdIncrementerSo = vi.fn().mockReturnValue({
         total: 2,
         saved_objects: [incIdSo, incIdSo],
       });
-      service.resolveMultipleIncrementerSO = jest.fn();
+      service.resolveMultipleIncrementerSO = vi.fn();
       await service.getOrCreateCaseIdIncrementerSo('random');
       expect(service.resolveMultipleIncrementerSO).toHaveBeenCalled();
     });
@@ -181,7 +183,7 @@ describe('CasesIncrementalIdService', () => {
       const so3 = { attributes: { last_id: 1000 } };
       const incrementerSOs = [so3, so1, so2];
 
-      service.incrementCounterSO = jest.fn();
+      service.incrementCounterSO = vi.fn();
 
       // @ts-expect-error: SO client types are not correct
       await service.resolveMultipleIncrementerSO(incrementerSOs, 20000, 'default');
@@ -192,7 +194,7 @@ describe('CasesIncrementalIdService', () => {
     it('should create a new incrementer SO when no max could be found', async () => {
       const incrementerSOs: unknown = [];
 
-      service.createCaseIdIncrementerSo = jest.fn();
+      service.createCaseIdIncrementerSo = vi.fn();
 
       // @ts-expect-error: SO client types are not correct
       await service.resolveMultipleIncrementerSO(incrementerSOs, 20000, 'default');
@@ -219,7 +221,7 @@ describe('CasesIncrementalIdService', () => {
       defaultIncIdSo = { attributes: { last_id: 100 } };
       secondLifeIncIdSo = { attributes: { last_id: 10 } };
       cases = getTestCases();
-      service.getOrCreateCaseIdIncrementerSo = jest.fn().mockImplementation((namespace) => {
+      service.getOrCreateCaseIdIncrementerSo = vi.fn().mockImplementation((namespace) => {
         switch (namespace) {
           case 'default':
             return defaultIncIdSo;
@@ -228,8 +230,8 @@ describe('CasesIncrementalIdService', () => {
         }
       });
       // mock out persistence, their logic is tested individually
-      service.applyIncrementalIdToCaseSo = jest.fn().mockResolvedValue(null);
-      service.incrementCounterSO = jest.fn().mockResolvedValue(null);
+      service.applyIncrementalIdToCaseSo = vi.fn().mockResolvedValue(null);
+      service.incrementCounterSO = vi.fn().mockResolvedValue(null);
     });
 
     it('should increment the incremental case ids and inc id SOs correctly', async () => {
@@ -286,7 +288,7 @@ describe('CasesIncrementalIdService', () => {
       // Each `mockImplementationOnce` represents the processing step of one of the cases.
       // The first resolves, the second one is started, then the service is stopped and it resolves.
       // The third one is not reached.
-      service.applyIncrementalIdToCaseSo = jest
+      service.applyIncrementalIdToCaseSo = vi
         .fn()
         .mockImplementationOnce(() => Promise.resolve(null))
         .mockImplementationOnce(() => {
@@ -333,7 +335,7 @@ describe('CasesIncrementalIdService', () => {
     });
 
     it('should stop processing when it was not possible to get or create an incrementer SO', async () => {
-      service.getOrCreateCaseIdIncrementerSo = jest.fn().mockRejectedValue(null);
+      service.getOrCreateCaseIdIncrementerSo = vi.fn().mockRejectedValue(null);
 
       // @ts-expect-error: case SO types are not correct
       await service.incrementCaseIds(cases);
@@ -342,7 +344,7 @@ describe('CasesIncrementalIdService', () => {
     });
 
     it('should stop processing when it was not possible to increment a case id', async () => {
-      service.applyIncrementalIdToCaseSo = jest.fn().mockRejectedValue(null);
+      service.applyIncrementalIdToCaseSo = vi.fn().mockRejectedValue(null);
 
       // @ts-expect-error: case SO types are not correct
       await service.incrementCaseIds(cases);

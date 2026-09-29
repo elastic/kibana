@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,9 +21,9 @@ import {
 } from '../../hooks/test_utils';
 import { AlertEpisodeGroupingSection } from './grouping_section';
 
-jest.mock('../../utils/run_esql_async_search');
+vi.mock('../../utils/run_esql_async_search');
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
+const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
@@ -65,7 +67,7 @@ const renderSection = () =>
 
 describe('AlertEpisodeGroupingSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

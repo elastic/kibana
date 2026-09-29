@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,11 +35,11 @@ describe('TTYSearchBar component', () => {
 
     props = {
       lines,
-      seekToLine: jest.fn(),
-      xTermSearchFn: jest.fn(),
-      setIsPlaying: jest.fn(),
+      seekToLine: vi.fn(),
+      xTermSearchFn: vi.fn(),
+      setIsPlaying: vi.fn(),
       searchQuery: '',
-      setSearchQuery: jest.fn(),
+      setSearchQuery: vi.fn(),
     };
   });
 

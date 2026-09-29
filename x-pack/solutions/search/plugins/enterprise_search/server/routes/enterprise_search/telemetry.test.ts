@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { MockRouter, mockLogger, mockDependencies } from '../../__mocks__';
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 
-jest.mock('../../collectors/lib/telemetry', () => ({
-  incrementUICounter: jest.fn(),
-}));
+vi.mock('../../collectors/lib/telemetry', () => {
+      const mocked = {
+      incrementUICounter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { incrementUICounter } from '../../collectors/lib/telemetry';
 
 import { registerTelemetryRoute } from './telemetry';
@@ -26,7 +32,7 @@ describe('Enterprise Search Telemetry API', () => {
   const successResponse = { success: true };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRouter = new MockRouter({
       method: 'put',
       path: '/internal/enterprise_search/stats',
@@ -42,7 +48,7 @@ describe('Enterprise Search Telemetry API', () => {
 
   describe('PUT /internal/enterprise_search/stats', () => {
     it('increments the saved objects counter for Enterprise Search', async () => {
-      (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
+      (incrementUICounter as Mock).mockImplementation(vi.fn(() => successResponse));
 
       await mockRouter.callRoute({
         body: {
@@ -62,7 +68,7 @@ describe('Enterprise Search Telemetry API', () => {
     });
 
     it('throws an error when incrementing fails', async () => {
-      (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => Promise.reject('Failed')));
+      (incrementUICounter as Mock).mockImplementation(vi.fn(() => Promise.reject('Failed')));
 
       await expect(
         mockRouter.callRoute({
@@ -78,7 +84,7 @@ describe('Enterprise Search Telemetry API', () => {
     });
 
     it('throws an error if the Saved Objects service is unavailable', async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       registerTelemetryRoute({
         router: mockRouter.router,
         getSavedObjectsService: null,

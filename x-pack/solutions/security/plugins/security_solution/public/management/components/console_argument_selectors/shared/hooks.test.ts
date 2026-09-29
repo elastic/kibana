@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { usePendingActionsOptions } from './hooks';
@@ -18,9 +21,9 @@ const getOptionValue = (option: EuiSelectableOption): string => {
 };
 
 // Mock the date format and timezone hooks
-jest.mock('../../../../common/lib/kibana');
-const mockUseDateFormat = useDateFormat as jest.Mock;
-const mockUseTimeZone = useTimeZone as jest.Mock;
+vi.mock('../../../../common/lib/kibana');
+const mockUseDateFormat = useDateFormat as Mock;
+const mockUseTimeZone = useTimeZone as Mock;
 
 describe('usePendingActionsOptions hook', () => {
   const mockDateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
@@ -32,7 +35,7 @@ describe('usePendingActionsOptions hook', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createMockActionDetails = (overrides: Partial<ActionDetails> = {}): ActionDetails => ({
@@ -350,7 +353,7 @@ describe('usePendingActionsOptions hook', () => {
     it('should pass command to privilege checker correctly', () => {
       const mockAction = createMockActionDetails({ command: 'execute' });
       const mockResponse = createMockApiResponse([mockAction]);
-      const privilegeChecker = jest.fn().mockReturnValue({ canCancel: true });
+      const privilegeChecker = vi.fn().mockReturnValue({ canCancel: true });
 
       renderHook(() =>
         usePendingActionsOptions({
@@ -368,7 +371,7 @@ describe('usePendingActionsOptions hook', () => {
         createMockActionDetails({ id: 'action-2', command: 'execute' }),
       ];
       const mockResponse = createMockApiResponse(actions);
-      const privilegeChecker = jest.fn().mockImplementation((command: string) => ({
+      const privilegeChecker = vi.fn().mockImplementation((command: string) => ({
         canCancel: command === 'isolate',
         reason: command === 'execute' ? 'No execute permission' : undefined,
       }));

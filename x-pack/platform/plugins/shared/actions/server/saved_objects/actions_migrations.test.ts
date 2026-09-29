@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { getActionsMigrations } from './actions_migrations';
 import type { RawAction } from '../types';
@@ -18,7 +20,7 @@ const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
 describe('successful migrations', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
   });
 
@@ -300,7 +302,7 @@ describe('successful migrations', () => {
 
 describe('handles errors during migrations', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(() => () => {
       throw new Error(`Can't migrate!`);
     });

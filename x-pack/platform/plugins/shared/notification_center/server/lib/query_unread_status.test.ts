@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { queryUnreadStatus } from './query_unread_status';
 
 const setup = (documents: Array<{ notification_id: string; '@timestamp': string }>) => {
-  const search = jest.fn().mockResolvedValue({
+  const search = vi.fn().mockResolvedValue({
     hits: { hits: documents.map((source, index) => ({ _id: `doc-${index}`, _source: source })) },
   });
   const dataStreams = dataStreamServiceMock.createStartContract();

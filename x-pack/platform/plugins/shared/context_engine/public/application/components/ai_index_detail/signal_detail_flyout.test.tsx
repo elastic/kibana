@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,21 +17,24 @@ import type { Signal } from '../../../../common/http_api/signals';
 import { SignalDetailFlyout } from './signal_detail_flyout';
 import { buildSignal } from './signal_test_fixtures';
 
-jest.mock('@kbn/llm-trace-waterfall', () => ({
-  TraceWaterfall: () => <div data-test-subj="mockTraceWaterfall" />,
-  createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
-  useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
-}));
+vi.mock('@kbn/llm-trace-waterfall', () => {
+      const mocked = {
+      TraceWaterfall: () => <div data-test-subj="mockTraceWaterfall" />,
+      createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
+      useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const services = {
   ...coreMock.createStart(),
-  data: { search: { search: jest.fn() } },
+  data: { search: { search: vi.fn() } },
   spaces: undefined,
 };
 
 const renderFlyout = (signals: Signal[], index = 0, total = signals.length) => {
-  const onNavigate = jest.fn();
-  const onClose = jest.fn();
+  const onNavigate = vi.fn();
+  const onClose = vi.fn();
   const view = render(
     <I18nProvider>
       <EuiProvider>
@@ -90,8 +95,8 @@ describe('SignalDetailFlyout', () => {
               signals={signals}
               total={signals.length}
               index={0}
-              onNavigate={jest.fn()}
-              onClose={jest.fn()}
+              onNavigate={vi.fn()}
+              onClose={vi.fn()}
             />
           </KibanaContextProvider>
         </EuiProvider>

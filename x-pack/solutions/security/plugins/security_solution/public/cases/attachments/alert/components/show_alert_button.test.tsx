@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ShowAlertButton } from './show_alert_button';
@@ -23,26 +26,32 @@ const props = {
   index: 'alert-index',
 };
 
-const mockOpenFlyout = jest.fn();
-const mockReportEvent = jest.fn();
+const mockOpenFlyout = vi.fn();
+const mockReportEvent = vi.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('@kbn/cases-plugin/public', () => ({
-  useCaseViewNavigation: jest.fn(),
-  useCaseViewParams: jest.fn(),
-}));
+vi.mock('@kbn/cases-plugin/public', () => {
+      const mocked = {
+      useCaseViewNavigation: vi.fn(),
+      useCaseViewParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
-const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
-const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
+const useCaseViewParamsMock = useCaseViewParams as Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as Mock;
+const useKibanaMock = useKibana as Mock;
 
 const setKibanaServices = (ease: boolean) => {
   useKibanaMock.mockReturnValue({
@@ -58,16 +67,16 @@ const setKibanaServices = (ease: boolean) => {
 };
 
 describe('ShowAlertButton', () => {
-  const navigateToCaseView = jest.fn();
+  const navigateToCaseView = vi.fn();
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCaseViewParamsMock.mockReturnValue({ detailName: 'case-id' });
     useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     setKibanaServices(false);
   });
 
@@ -96,7 +105,7 @@ describe('ShowAlertButton', () => {
   });
 
   it('opens the new document flyout (from index) when the new flyout is enabled (non-EASE)', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(<ShowAlertButton {...props} />);
     fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
@@ -114,7 +123,7 @@ describe('ShowAlertButton', () => {
   });
 
   it('includes the rule name in the flyout history title when provided', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(<ShowAlertButton {...props} ruleName="My Detection Rule" />);
     fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
@@ -126,7 +135,7 @@ describe('ShowAlertButton', () => {
 
   it('opens the legacy EASE flyout when the EASE capability is on, regardless of the new flyout flag', () => {
     setKibanaServices(true);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(<ShowAlertButton {...props} />);
     fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));

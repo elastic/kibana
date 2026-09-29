@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
@@ -37,13 +40,13 @@ import { Gap } from '../gap';
 import type { AggregatedByRuleEntry } from './utils';
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
-jest.mock('../find_gaps');
-jest.mock('../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch');
-jest.mock('./gap_auto_fill_scheduler_event_log');
+vi.mock('../find_gaps');
+vi.mock('../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch');
+vi.mock('./gap_auto_fill_scheduler_event_log');
 
-const mockedFindGaps = jest.mocked(findGapsModule);
-const mockedProcessGapsBatch = jest.mocked(processGapsBatchModule);
-const mockedCreateGapAutoFillSchedulerEventLogger = jest.mocked(
+const mockedFindGaps = vi.mocked(findGapsModule);
+const mockedProcessGapsBatch = vi.mocked(processGapsBatchModule);
+const mockedCreateGapAutoFillSchedulerEventLogger = vi.mocked(
   createGapAutoFillSchedulerEventLogger
 );
 
@@ -89,7 +92,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
   let mockBackfillClient: ReturnType<typeof backfillClientMock.create>;
   let mockActionsClient: ReturnType<typeof actionsClientMock.create>;
   let mockEventLogClient: ReturnType<typeof eventLogClientMock.create>;
-  let logEventMock: jest.Mock;
+  let logEventMock: Mock;
   let rulesClientContextMock: RulesClientContext;
 
   const mockConfigId = 'test-config-id';
@@ -125,13 +128,13 @@ describe('Gap Auto Fill Scheduler Task', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     logger = loggingSystemMock.createLogger();
     taskManager = taskManagerMock.createSetup();
     eventLogger = eventLoggerMock.create();
     rulesClient = rulesClientMock.create();
-    rulesClient.getRuleIdsWithGaps = jest.fn().mockResolvedValue({ ruleIds: [] });
+    rulesClient.getRuleIdsWithGaps = vi.fn().mockResolvedValue({ ruleIds: [] });
     mockRequest = {
       headers: {},
       getBasePath: () => '',
@@ -145,25 +148,25 @@ describe('Gap Auto Fill Scheduler Task', () => {
           url: '/',
         },
       },
-      getSavedObjectsClient: jest.fn(),
+      getSavedObjectsClient: vi.fn(),
     } as unknown as KibanaRequest;
     mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
     mockBackfillClient = backfillClientMock.create();
     mockActionsClient = actionsClientMock.create();
     mockEventLogClient = eventLogClientMock.create();
-    logEventMock = jest.fn();
+    logEventMock = vi.fn();
     mockedCreateGapAutoFillSchedulerEventLogger.mockReturnValue(logEventMock);
 
     rulesClientContextMock = {
       unsecuredSavedObjectsClient: mockSavedObjectsRepository,
       internalSavedObjectsRepository: mockSavedObjectsRepository,
-      getEventLogClient: jest.fn().mockResolvedValue(mockEventLogClient),
-      getActionsClient: jest.fn().mockResolvedValue(mockActionsClient),
+      getEventLogClient: vi.fn().mockResolvedValue(mockEventLogClient),
+      getActionsClient: vi.fn().mockResolvedValue(mockActionsClient),
       backfillClient: mockBackfillClient,
       spaceId: 'default',
     } as unknown as RulesClientContext;
 
-    rulesClient.getContext = jest.fn().mockReturnValue(rulesClientContextMock);
+    rulesClient.getContext = vi.fn().mockReturnValue(rulesClientContextMock);
 
     // By default, no overlapping backfills so we actually process gaps
     mockBackfillClient.findOverlappingBackfills.mockResolvedValue([]);
@@ -230,7 +233,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
   describe('Task Registration', () => {
     it('should register the task with correct configuration', () => {
-      const getRulesClientWithRequest = jest.fn().mockResolvedValue(rulesClient);
+      const getRulesClientWithRequest = vi.fn().mockResolvedValue(rulesClient);
 
       registerGapAutoFillSchedulerTask({
         taskManager,
@@ -259,16 +262,16 @@ describe('Gap Auto Fill Scheduler Task', () => {
     ) => Promise<import('../../../types').RulesClientApi>;
 
     beforeAll(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     beforeEach(() => {
-      getRulesClientWithRequest = jest.fn().mockResolvedValue(rulesClient);
+      getRulesClientWithRequest = vi.fn().mockResolvedValue(rulesClient);
 
       registerGapAutoFillSchedulerTask({
         taskManager,
@@ -288,7 +291,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     const buildRule = (id: string) => ({
@@ -391,7 +394,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
     describe('Happy', () => {
       it('should successfully execute when no rules have gaps', async () => {
-        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: [] });
+        (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: [] });
 
         const result = await taskRunner.run();
 
@@ -429,7 +432,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           perPage: 1,
         });
 
-        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
+        (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: mockRuleIds });
         // Ensure both rules are selected in this batch
         rulesClient.find.mockResolvedValueOnce({
           data: [
@@ -579,7 +582,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           });
 
           if (setupGaps) {
-            (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({
+            (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({
               ruleIds: Array(150)
                 .fill('rule-')
                 .map((_, index) => `rule-${index + 1}`),
@@ -648,7 +651,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
       });
 
       it('should handle errors during execution', async () => {
-        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockRejectedValue(
+        (rulesClient.getRuleIdsWithGaps as Mock).mockRejectedValue(
           new Error('Failed to get rule IDs')
         );
 
@@ -686,7 +689,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           );
 
           rulesClient.findBackfill.mockResolvedValue({ data: [], total: 50, page: 1, perPage: 1 });
-          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
+          (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
 
           abortController.abort();
           if (taskRunnerWithAbort.cancel) {
@@ -710,7 +713,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         it('passes task id as initiatorId and SYSTEM initiator to processGapsBatch', async () => {
           rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
 
-          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
+          (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
 
           const gap: Gap = buildGap(
             'rule-1',
@@ -757,7 +760,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
 
         const mockRuleIds = ['rule-1', 'rule-2'];
-        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
+        (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: mockRuleIds });
         stubRulesFindOnce(mockRuleIds);
 
         const gapSuccess: Gap = buildGap(
@@ -810,7 +813,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           },
         ])('$name', async ({ overlaps, expectedProcessed }) => {
           rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
-          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-2'] });
+          (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: ['rule-2'] });
           stubRulesFindOnce(['rule-2']);
 
           const gaps: Gap[] = [
@@ -875,7 +878,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             perPage: 1,
           });
 
-          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
+          (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: mockRuleIds });
           mockedFindGaps.findGapsSearchAfter
             .mockResolvedValueOnce({
               total: mockGaps.length,
@@ -918,7 +921,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           mockBackfillClient.findOverlappingBackfills.mockReset();
           rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
 
-          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
+          (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
 
           const fullPage: Gap[] = Array.from({ length: DEFAULT_GAPS_PER_PAGE }, (_, i) => {
             const minute = String(i % 60).padStart(2, '0');
@@ -976,7 +979,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           perPage: 1,
         });
 
-        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: [] });
+        (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({ ruleIds: [] });
 
         const result = await taskRunner.run();
 
@@ -1026,7 +1029,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         });
 
         const mockRuleIds = ['rule-1'];
-        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({
+        (rulesClient.getRuleIdsWithGaps as Mock).mockResolvedValue({
           ruleIds: mockRuleIds,
         });
         stubRulesFindOnce(mockRuleIds);
@@ -1066,17 +1069,17 @@ describe('Gap Auto Fill Scheduler Task', () => {
     const endISO = '2024-01-02T00:00:00.000Z';
     const loggerMessage = (message: string) => `[test] ${message}`;
     let abortController: AbortController;
-    let logEvent: jest.Mock;
+    let logEvent: Mock;
 
     beforeEach(() => {
       abortController = new AbortController();
-      logEvent = jest.fn().mockResolvedValue(undefined);
+      logEvent = vi.fn().mockResolvedValue(undefined);
       mockedFindGaps.findGapsSearchAfter.mockReset();
       mockedProcessGapsBatch.processGapsBatch.mockReset();
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('processes rule ids batch by batch until completion', async () => {
@@ -1271,11 +1274,11 @@ describe('Gap Auto Fill Scheduler Task', () => {
     const endISO = '2024-01-02T00:00:00.000Z';
     const loggerMessage = (message: string) => `[test] ${message}`;
     let abortController: AbortController;
-    let logEvent: jest.Mock;
+    let logEvent: Mock;
 
     beforeEach(() => {
       abortController = new AbortController();
-      logEvent = jest.fn().mockResolvedValue(undefined);
+      logEvent = vi.fn().mockResolvedValue(undefined);
       mockedFindGaps.findGapsSearchAfter.mockReset();
       mockedProcessGapsBatch.processGapsBatch.mockReset();
     });

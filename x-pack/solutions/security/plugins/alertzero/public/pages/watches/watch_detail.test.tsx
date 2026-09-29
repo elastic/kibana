@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -34,87 +36,96 @@ import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 
-jest.mock('../../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
-jest.mock('../../hooks/use_can_write_alertzero', () => ({
-  useCanWriteAlertZero: jest.fn(() => true),
-}));
-jest.mock('../../hooks/use_watches_api');
-jest.mock('../../hooks/use_workers_api');
-jest.mock('./components/watches_section_layout', () => ({
-  WatchesSectionLayout: ({
-    children,
-    title,
-    badges,
-    headerPrimaryActionItem,
-    headerItems,
-  }: {
-    children: React.ReactNode;
-    title: string;
-    badges?: Array<{ label: string; 'data-test-subj'?: string }>;
-    headerPrimaryActionItem?: {
-      label: string;
-      testId?: string;
-      disableButton?: boolean | (() => boolean);
-      isLoading?: boolean;
-      tooltipContent?: string | (() => string | undefined);
-      run: () => void;
+vi.mock('../../hooks/use_alertzero_doc_title', () => {
+      const mocked = { useAlertZeroDocTitle: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_can_write_alertzero', () => {
+      const mocked = {
+      useCanWriteAlertZero: vi.fn(() => true),
     };
-    headerItems?: Array<{
-      label: string;
-      testId?: string;
-      disableButton?: boolean | (() => boolean);
-      tooltipContent?: string | (() => string | undefined);
-      run: () => void;
-    }>;
-  }) => {
-    const resolveDisabled = (disableButton?: boolean | (() => boolean)) =>
-      typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
-    // Real AppMenu buttons wrap in an EuiToolTip and expose its content via the button's
-    // accessible `title`. Reading `tooltipContent` here (rather than dropping it like the real
-    // header items list) is what makes the read-only tooltip contract observable in this test.
-    const resolveTooltip = (tooltipContent?: string | (() => string | undefined)) =>
-      typeof tooltipContent === 'function' ? tooltipContent() : tooltipContent;
-    return (
-      <div>
-        <h1>{title}</h1>
-        {badges?.map((badge) => (
-          <span key={badge.label} data-test-subj={badge['data-test-subj']}>
-            {badge.label}
-          </span>
-        ))}
-        {headerItems?.map((item) => (
-          <button
-            key={item.testId}
-            type="button"
-            data-test-subj={item.testId}
-            disabled={resolveDisabled(item.disableButton)}
-            title={resolveTooltip(item.tooltipContent)}
-            onClick={() => item.run()}
-          >
-            {item.label}
-          </button>
-        ))}
-        {headerPrimaryActionItem ? (
-          <button
-            type="button"
-            data-test-subj={headerPrimaryActionItem.testId}
-            disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
-            title={resolveTooltip(headerPrimaryActionItem.tooltipContent)}
-            onClick={() => headerPrimaryActionItem.run()}
-          >
-            {headerPrimaryActionItem.label}
-          </button>
-        ) : null}
-        {children}
-      </div>
-    );
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_watches_api');
+vi.mock('../../hooks/use_workers_api');
+vi.mock('./components/watches_section_layout', () => {
+      const mocked = {
+      WatchesSectionLayout: ({
+        children,
+        title,
+        badges,
+        headerPrimaryActionItem,
+        headerItems,
+      }: {
+        children: React.ReactNode;
+        title: string;
+        badges?: Array<{ label: string; 'data-test-subj'?: string }>;
+        headerPrimaryActionItem?: {
+          label: string;
+          testId?: string;
+          disableButton?: boolean | (() => boolean);
+          isLoading?: boolean;
+          tooltipContent?: string | (() => string | undefined);
+          run: () => void;
+        };
+        headerItems?: Array<{
+          label: string;
+          testId?: string;
+          disableButton?: boolean | (() => boolean);
+          tooltipContent?: string | (() => string | undefined);
+          run: () => void;
+        }>;
+      }) => {
+        const resolveDisabled = (disableButton?: boolean | (() => boolean)) =>
+          typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
+        // Real AppMenu buttons wrap in an EuiToolTip and expose its content via the button's
+        // accessible `title`. Reading `tooltipContent` here (rather than dropping it like the real
+        // header items list) is what makes the read-only tooltip contract observable in this test.
+        const resolveTooltip = (tooltipContent?: string | (() => string | undefined)) =>
+          typeof tooltipContent === 'function' ? tooltipContent() : tooltipContent;
+        return (
+          <div>
+            <h1>{title}</h1>
+            {badges?.map((badge) => (
+              <span key={badge.label} data-test-subj={badge['data-test-subj']}>
+                {badge.label}
+              </span>
+            ))}
+            {headerItems?.map((item) => (
+              <button
+                key={item.testId}
+                type="button"
+                data-test-subj={item.testId}
+                disabled={resolveDisabled(item.disableButton)}
+                title={resolveTooltip(item.tooltipContent)}
+                onClick={() => item.run()}
+              >
+                {item.label}
+              </button>
+            ))}
+            {headerPrimaryActionItem ? (
+              <button
+                type="button"
+                data-test-subj={headerPrimaryActionItem.testId}
+                disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
+                title={resolveTooltip(headerPrimaryActionItem.tooltipContent)}
+                onClick={() => headerPrimaryActionItem.run()}
+              >
+                {headerPrimaryActionItem.label}
+              </button>
+            ) : null}
+            {children}
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWatch = jest.mocked(useWatch);
-const mockUseWorkers = jest.mocked(useWorkers);
-const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
-const mockUseCanWriteAlertZero = jest.mocked(useCanWriteAlertZero);
+const mockUseWatch = vi.mocked(useWatch);
+const mockUseWorkers = vi.mocked(useWorkers);
+const mockUseUpdateWorker = vi.mocked(useUpdateWorker);
+const mockUseCanWriteAlertZero = vi.mocked(useCanWriteAlertZero);
 
 const createWorker = (
   overrides: Partial<Worker> & Pick<Worker, 'id' | 'name' | 'watchIds'>
@@ -189,16 +200,16 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     data: { watch: createCatalogWatchPlaceholder(watchId as CatalogWatchId) },
     isLoading: false,
     error: null,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   } as never);
   mockUseWorkers.mockReturnValue({
     data: { workers },
     isLoading: false,
     error: null,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   } as never);
-  const mutate = jest.fn();
-  const mutateAsync = jest.fn().mockResolvedValue({ worker: workers[0] });
+  const mutate = vi.fn();
+  const mutateAsync = vi.fn().mockResolvedValue({ worker: workers[0] });
   mockUseUpdateWorker.mockReturnValue({ mutate, mutateAsync } as never);
 
   render(
@@ -214,7 +225,7 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
 
 describe('WatchDetailPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCanWriteAlertZero.mockReturnValue(true);
   });
 
@@ -433,15 +444,15 @@ describe('WatchDetailPage', () => {
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     mockUseWorkers.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('workers unavailable'),
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: vi.fn(), mutateAsync: vi.fn() } as never);
 
     render(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
@@ -488,15 +499,15 @@ describe('WatchDetailPage', () => {
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     mockUseWorkers.mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: vi.fn(), mutateAsync: vi.fn() } as never);
 
     const { rerender } = render(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
@@ -512,7 +523,7 @@ describe('WatchDetailPage', () => {
       data: undefined,
       isLoading: false,
       error: new Error('workers unavailable'),
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     rerender(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
@@ -675,16 +686,16 @@ describe('WatchDetailPage', () => {
   it('blocks Save while the Worker reload has failed and allows the retry with the original revision', async () => {
     const installed = detectionWorkers.map((worker) => ({ ...worker, settingsRevision: 1 }));
     const workersQuery = (error: Error | null) =>
-      ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() } as never);
+      ({ data: { workers: installed }, isLoading: false, error, refetch: vi.fn() } as never);
     mockUseWatch.mockReturnValue({
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     mockUseWorkers.mockReturnValue(workersQuery(null));
-    const mutateAsync = jest.fn().mockResolvedValue({ worker: installed[0] });
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
+    const mutateAsync = vi.fn().mockResolvedValue({ worker: installed[0] });
+    mockUseUpdateWorker.mockReturnValue({ mutate: vi.fn(), mutateAsync } as never);
     // A fresh element each time, or React bails out of re-rendering an identical element.
     const tree = () => (
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`]}>
@@ -939,14 +950,14 @@ describe('WatchDetailPage', () => {
       data: { workers: sharedWorkers },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: vi.fn(), mutateAsync: vi.fn() } as never);
     mockUseWatch.mockReturnValue({
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
 
     const history = createMemoryHistory({
@@ -981,13 +992,13 @@ describe('WatchDetailPage', () => {
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     mockUseWorkers.mockReturnValue({
       data: { workers: workersOnHunt },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     act(() => {
       history.push(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
@@ -1016,14 +1027,14 @@ describe('WatchDetailPage', () => {
       data: { workers: onBothWatches },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: vi.fn(), mutateAsync: vi.fn() } as never);
     mockUseWatch.mockReturnValue({
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
 
     const history = createMemoryHistory({
@@ -1048,7 +1059,7 @@ describe('WatchDetailPage', () => {
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     act(() => {
       history.push(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
@@ -1081,14 +1092,14 @@ describe('WatchDetailPage', () => {
       data: { workers: onBothWatches },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: vi.fn(), mutateAsync: vi.fn() } as never);
     mockUseWatch.mockReturnValue({
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
 
     const history = createMemoryHistory({
@@ -1114,7 +1125,7 @@ describe('WatchDetailPage', () => {
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     act(() => {
       history.push(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
@@ -1136,16 +1147,16 @@ describe('WatchDetailPage', () => {
       data: { workers: floorWorkers },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
     mockUseWatch.mockReturnValue({
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as never);
-    const mutateAsync = jest.fn().mockRejectedValue(new Error('patch failed'));
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
+    const mutateAsync = vi.fn().mockRejectedValue(new Error('patch failed'));
+    mockUseUpdateWorker.mockReturnValue({ mutate: vi.fn(), mutateAsync } as never);
 
     render(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>

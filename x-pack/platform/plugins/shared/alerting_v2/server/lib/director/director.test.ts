@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
@@ -20,9 +22,12 @@ import { createExecutionContext } from '../execution_context';
 
 const testExecutionContext = createExecutionContext(new AbortController().signal);
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mocked-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'mocked-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The existing precondition-matrix tests default `last_lifecycle_action_type`
 // to `null` — no user has issued activate/deactivate on the group. Tests that
@@ -67,7 +72,7 @@ describe('DirectorService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const rule = createRuleResponse();

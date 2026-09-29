@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -22,57 +25,61 @@ import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/c
 import { getDashboardMigrationStatsMock } from '../../__mocks__';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 
-const mockCloseFlyout = jest.fn();
-const mockGetMissingResourcesDashboard = jest.fn();
-const mockAddError = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockStartMigration = jest.fn();
-const mockOnClose = jest.fn();
-const mockShowModal = jest.fn();
+const mockCloseFlyout = vi.fn();
+const mockGetMissingResourcesDashboard = vi.fn();
+const mockAddError = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockStartMigration = vi.fn();
+const mockOnClose = vi.fn();
+const mockShowModal = vi.fn();
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useGeneratedHtmlId: jest.fn(() => 'generated-id'),
+    useGeneratedHtmlId: vi.fn(() => 'generated-id'),
   };
 });
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      siemMigrations: {
-        dashboards: {
-          api: {
-            getDashboardMigrationMissingResources: mockGetMissingResourcesDashboard,
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          siemMigrations: {
+            dashboards: {
+              api: {
+                getDashboardMigrationMissingResources: mockGetMissingResourcesDashboard,
+              },
+            },
+          },
+          notifications: {
+            toasts: {
+              addError: mockAddError,
+              addSuccess: mockAddSuccess,
+            },
+          },
+          triggersActionsUi: {
+            actionTypeRegistry: {
+              get: vi.fn().mockReturnValue('Mock Action Type'),
+            },
           },
         },
-      },
-      notifications: {
-        toasts: {
-          addError: mockAddError,
-          addSuccess: mockAddSuccess,
-        },
-      },
-      triggersActionsUi: {
-        actionTypeRegistry: {
-          get: jest.fn().mockReturnValue('Mock Action Type'),
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile', () => ({
-  useGetCurrentUserProfile: () => ({
-    data: { user: { full_name: 'Test User', username: 'testuser' } },
-  }),
-}));
+vi.mock('../../../../common/components/user_profiles/use_get_current_user_profile', () => {
+      const mocked = {
+      useGetCurrentUserProfile: () => ({
+        data: { user: { full_name: 'Test User', username: 'testuser' } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/migration_data_input_flyout_context', () => {
-  const actual = jest.requireActual(
-    '../../../common/components/migration_data_input_flyout_context'
-  );
+vi.mock('../../../common/components/migration_data_input_flyout_context', async () => {
+  const actual = (await vi.importActual('../../../common/components/migration_data_input_flyout_context'));
   return {
     ...actual,
     useMigrationDataInputContext: () => ({
@@ -81,20 +88,20 @@ jest.mock('../../../common/components/migration_data_input_flyout_context', () =
   };
 });
 
-jest.mock('../../../common/hooks/use_get_missing_resources', () => {
-  const actual = jest.requireActual('../../../common/hooks/use_get_missing_resources');
+vi.mock('../../../common/hooks/use_get_missing_resources', async () => {
+  const actual = (await vi.importActual('../../../common/hooks/use_get_missing_resources'));
   return {
     ...actual,
     useGetMissingResources: () => ({
       isLoading: false,
       error: null,
-      getMissingResources: jest.fn(),
+      getMissingResources: vi.fn(),
     }),
   };
 });
 
-jest.mock('../../logic/use_start_migration', () => {
-  const actual = jest.requireActual('../../logic/use_start_migration');
+vi.mock('../../logic/use_start_migration', async () => {
+  const actual = (await vi.importActual('../../logic/use_start_migration'));
   return {
     ...actual,
     useStartMigration: () => ({
@@ -105,9 +112,9 @@ jest.mock('../../logic/use_start_migration', () => {
   };
 });
 
-jest.mock('../../hooks/use_start_dashboard_migration_modal');
+vi.mock('../../hooks/use_start_dashboard_migration_modal');
 const useStartDashboardsMigrationModalMock =
-  useStartDashboardsMigrationModal as jest.MockedFunction<typeof useStartDashboardsMigrationModal>;
+  useStartDashboardsMigrationModal as MockedFunction<typeof useStartDashboardsMigrationModal>;
 
 describe('DashboardMigrationDataInputFlyout', () => {
   beforeEach(() => {
@@ -128,7 +135,7 @@ describe('DashboardMigrationDataInputFlyout', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the data input flyout', () => {

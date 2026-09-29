@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
@@ -22,28 +24,31 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
-jest.mock('../../utils/create_default_data_view', () => ({
-  createDefaultDataView: jest.fn(),
-}));
+vi.mock('../../utils/create_default_data_view', () => {
+      const mocked = {
+      createDefaultDataView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataViewsService = {
-  get: jest.fn(),
-  create: jest.fn().mockResolvedValue({
+  get: vi.fn(),
+  create: vi.fn().mockResolvedValue({
     id: 'adhoc_test-*',
     isPersisted: () => false,
     toSpec: () => ({ id: 'adhoc_test-*', title: 'test-*' }),
   }),
-  getIdsWithTitle: jest.fn().mockReturnValue([]),
+  getIdsWithTitle: vi.fn().mockReturnValue([]),
 } as unknown as DataViewsServicePublic;
 
 const http = {} as unknown as CoreStart['http'];
 const application = {} as unknown as CoreStart['application'];
 const uiSettings = {} as unknown as CoreStart['uiSettings'];
 const spaces = { getActiveSpace: async () => ({ id: 'default' }) } as unknown as SpacesPluginStart;
-const mockToastsDanger = jest.fn();
+const mockToastsDanger = vi.fn();
 
-const mockDispatch = jest.fn();
-const mockGetState = jest.fn(() => {
+const mockDispatch = vi.fn();
+const mockGetState = vi.fn(() => {
   const state = structuredClone(mockDataViewManagerState);
 
   state.dataViewManager.default.dataViewId = null;
@@ -65,9 +70,9 @@ describe('createInitListener', () => {
   let listener: ReturnType<typeof createInitListener>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jest.mocked(createDefaultDataView).mockResolvedValue({
+    vi.mocked(createDefaultDataView).mockResolvedValue({
       defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: '' },
       alertDataView: { id: DEFAULT_ALERT_DATA_VIEW_ID, title: '' },
       attackDataView: { id: DEFAULT_ATTACK_DATA_VIEW_ID, title: '' },
@@ -86,16 +91,16 @@ describe('createInitListener', () => {
       } as unknown as CoreStart['notifications'],
       spaces,
       storage: {
-        get: jest.fn(),
-        set: jest.fn(),
-        remove: jest.fn(),
-        clear: jest.fn(),
+        get: vi.fn(),
+        set: vi.fn(),
+        remove: vi.fn(),
+        clear: vi.fn(),
       } as unknown as Storage,
     });
   });
 
   it('should load the data views from getIdsWithTitle and dispatch further actions', async () => {
-    jest.mocked(mockDataViewsService.getIdsWithTitle).mockResolvedValue([
+    vi.mocked(mockDataViewsService.getIdsWithTitle).mockResolvedValue([
       {
         id: 'logs-*',
         title: 'logs-*',
@@ -106,11 +111,11 @@ describe('createInitListener', () => {
 
     await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
-    expect(jest.mocked(createDefaultDataView)).toHaveBeenCalled();
+    expect(vi.mocked(createDefaultDataView)).toHaveBeenCalled();
 
-    expect(jest.mocked(mockDataViewsService.getIdsWithTitle)).toHaveBeenCalled();
+    expect(vi.mocked(mockDataViewsService.getIdsWithTitle)).toHaveBeenCalled();
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
+    expect(vi.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       sharedDataViewManagerSlice.actions.setDataViews([
         {
           id: 'logs-*',
@@ -123,38 +128,38 @@ describe('createInitListener', () => {
         },
       ])
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
+    expect(vi.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       sharedDataViewManagerSlice.actions.setDataViewId({
         defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
       })
     );
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
+    expect(vi.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.default,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
+    expect(vi.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.timeline,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
+    expect(vi.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.alerts,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
+    expect(vi.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_ATTACK_DATA_VIEW_ID,
         scope: PageScope.attacks,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
+    expect(vi.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.analyzer,
@@ -165,7 +170,7 @@ describe('createInitListener', () => {
 
   describe('when getIdsWithTitle fetch returns an error', () => {
     beforeEach(() => {
-      jest
+      vi
         .mocked(mockDataViewsService.getIdsWithTitle)
         .mockRejectedValue(new Error('some loading error'));
     });
@@ -173,7 +178,7 @@ describe('createInitListener', () => {
     it('should dispatch error correctly', async () => {
       await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
-      expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
+      expect(vi.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
         sharedDataViewManagerSlice.actions.error()
       );
       expect(mockToastsDanger).toHaveBeenCalledWith({

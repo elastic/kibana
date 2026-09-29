@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getCasesSystemActionData } from './case_system_action';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
@@ -17,7 +19,7 @@ describe('casesSystemAction', () => {
     const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       savedObjectsClient.find.mockResolvedValue({
         total: 1,
         saved_objects: [],

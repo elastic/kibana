@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react';
@@ -24,25 +27,28 @@ import {
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../rule_management/logic/use_find_rules');
-jest.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review');
-jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query');
-jest.mock('../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id');
-jest.mock('../../../../rule_gaps/context/gap_auto_fill_scheduler_context', () => ({
-  useGapAutoFillSchedulerContext: jest.fn().mockReturnValue({
-    canAccessGapAutoFill: false,
-    canEditGapAutoFill: false,
-    hasEnterpriseLicense: false,
-    scheduler: undefined,
-    isSchedulerLoading: false,
-    isSchedulerFetching: false,
-    hasErrors: false,
-    latestErrorTimestamp: undefined,
-    totalErrors: 0,
-  }),
-}));
-jest.mock('./use_rules_table_saved_state');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../rule_management/logic/use_find_rules');
+vi.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review');
+vi.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query');
+vi.mock('../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id');
+vi.mock('../../../../rule_gaps/context/gap_auto_fill_scheduler_context', () => {
+      const mocked = {
+      useGapAutoFillSchedulerContext: vi.fn().mockReturnValue({
+        canAccessGapAutoFill: false,
+        canEditGapAutoFill: false,
+        hasEnterpriseLicense: false,
+        scheduler: undefined,
+        isSchedulerLoading: false,
+        isSchedulerFetching: false,
+        hasErrors: false,
+        latestErrorTimestamp: undefined,
+        totalErrors: 0,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_rules_table_saved_state');
 
 function renderUseRulesTableContext({
   rules,
@@ -53,9 +59,9 @@ function renderUseRulesTableContext({
   rulesSnoozeSettings?: RulesSnoozeSettingsMap | Error;
   savedState?: ReturnType<typeof useRulesTableSavedState>;
 }): RulesTableState {
-  (useFindRules as jest.Mock).mockReturnValue({
+  (useFindRules as Mock).mockReturnValue({
     data: rules instanceof Error || !rules ? undefined : { rules, total: rules?.length },
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     dataUpdatedAt: 0,
     isFetched: !!rules,
     isFetching: !rules,
@@ -63,16 +69,16 @@ function renderUseRulesTableContext({
     isRefetching: false,
     isError: rules instanceof Error,
   });
-  (useFetchRulesSnoozeSettingsQuery as jest.Mock).mockReturnValue({
+  (useFetchRulesSnoozeSettingsQuery as Mock).mockReturnValue({
     data: rulesSnoozeSettings instanceof Error ? undefined : rulesSnoozeSettings,
     isError: rulesSnoozeSettings instanceof Error,
   });
-  (useGetGapsSummaryByRuleIds as jest.Mock).mockReturnValue({
+  (useGetGapsSummaryByRuleIds as Mock).mockReturnValue({
     data: [],
     isError: false,
   });
-  (useUiSetting$ as jest.Mock).mockReturnValue([{ on: false, value: 0, idleTimeout: 0 }]);
-  (useRulesTableSavedState as jest.Mock).mockReturnValue(
+  (useUiSetting$ as Mock).mockReturnValue([{ on: false, value: 0, idleTimeout: 0 }]);
+  (useRulesTableSavedState as Mock).mockReturnValue(
     savedState ?? {
       filter: {
         searchTerm: undefined,

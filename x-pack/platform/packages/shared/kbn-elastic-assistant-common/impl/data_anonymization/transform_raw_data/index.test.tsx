@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 import { transformRawData } from '.';
 
@@ -44,7 +46,7 @@ describe('transformRawData', () => {
       rawData: { field1: ['value1'] },
     };
 
-    const onNewReplacements = jest.fn();
+    const onNewReplacements = vi.fn();
 
     transformRawData({
       anonymizationFields: inputRawData.anonymizationFields.data,

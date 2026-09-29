@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -26,12 +29,15 @@ import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { securityTelemetry } from '../otel/instrumentation';
 
-jest.mock('../otel/instrumentation', () => ({
-  securityTelemetry: {
-    recordServiceAccountCreationAttempt: jest.fn(),
-    recordServiceAccountRollbackFailure: jest.fn(),
-  },
-}));
+vi.mock('../otel/instrumentation', () => {
+      const mocked = {
+      securityTelemetry: {
+        recordServiceAccountCreationAttempt: vi.fn(),
+        recordServiceAccountRollbackFailure: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ACCOUNT_PATH = '/_security/service/kibana/nightshift-relay';
 /** Kibana only ever manages user-managed accounts, so the GET asks for that type explicitly. */
@@ -82,13 +88,13 @@ describe('EsServiceAccounts', () => {
   let serviceAccounts: EsServiceAccounts;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   let clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-  let credentialStore: jest.Mocked<ServiceAccountCredentialStore>;
+  let credentialStore: Mocked<ServiceAccountCredentialStore>;
   let license: ReturnType<typeof licenseMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let request: KibanaRequest;
-  let getCurrentUser: jest.Mock;
-  let getCurrentUserProfileId: jest.Mock;
-  let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
+  let getCurrentUser: Mock;
+  let getCurrentUserProfileId: Mock;
+  let mockCheckPrivileges: Mocked<CheckPrivileges>;
 
   /** Queues the transport responses for the happy path: pre-flight miss, PUT, token. */
   const mockHappyPath = () => {
@@ -99,7 +105,7 @@ describe('EsServiceAccounts', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     license = licenseMock.create();
     license.isEnabled.mockReturnValue(true);
@@ -109,25 +115,25 @@ describe('EsServiceAccounts', () => {
     clusterClient.asScoped.mockReturnValue(esClient);
 
     credentialStore = {
-      set: jest.fn().mockResolvedValue(undefined),
-      delete: jest.fn().mockResolvedValue(true),
-      getDecrypted: jest.fn().mockResolvedValue(null),
-      findExisting: jest.fn().mockResolvedValue(new Set()),
-    } as unknown as jest.Mocked<ServiceAccountCredentialStore>;
+      set: vi.fn().mockResolvedValue(undefined),
+      delete: vi.fn().mockResolvedValue(true),
+      getDecrypted: vi.fn().mockResolvedValue(null),
+      findExisting: vi.fn().mockResolvedValue(new Set()),
+    } as unknown as Mocked<ServiceAccountCredentialStore>;
 
-    mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
+    mockCheckPrivileges = { globally: vi.fn() } as unknown as Mocked<CheckPrivileges>;
     mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(true));
 
     request = httpServerMock.createKibanaRequest();
-    getCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser({ roles: ['superuser'] }));
-    getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
+    getCurrentUser = vi.fn().mockReturnValue(mockAuthenticatedUser({ roles: ['superuser'] }));
+    getCurrentUserProfileId = vi.fn().mockResolvedValue(null);
 
     serviceAccounts = new EsServiceAccounts({
       requestLifetimeMs: 600_000,
       logger,
       license,
       clusterClient,
-      checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+      checkPrivilegesWithRequest: vi.fn().mockReturnValue(mockCheckPrivileges),
       credentialStore,
       canEncrypt: true,
       getCurrentUser,
@@ -376,11 +382,11 @@ describe('EsServiceAccounts', () => {
         logger,
         license,
         clusterClient,
-        checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+        checkPrivilegesWithRequest: vi.fn().mockReturnValue(mockCheckPrivileges),
         credentialStore,
         canEncrypt: false,
         getCurrentUser,
-        getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
+        getCurrentUserProfileId: vi.fn().mockResolvedValue(null),
       });
 
       await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import type { CoreSetup } from '@kbn/core/server';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
@@ -22,12 +24,12 @@ const content = {
 };
 
 const createCoreMock = ({ enabled = true }: { enabled?: boolean } = {}) => {
-  const create = jest.fn().mockResolvedValue({ errors: false, items: [{ create: {} }] });
+  const create = vi.fn().mockResolvedValue({ errors: false, items: [{ create: {} }] });
   const dataStreams = dataStreamServiceMock.createStartContract();
   dataStreams.initializeClient.mockResolvedValue({ create } as never);
-  const getBooleanValue$ = jest.fn().mockReturnValue(of(enabled));
+  const getBooleanValue$ = vi.fn().mockReturnValue(of(enabled));
   const core = {
-    getStartServices: jest
+    getStartServices: vi
       .fn()
       .mockResolvedValue([{ dataStreams, featureFlags: { getBooleanValue$ } }]),
   } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
@@ -92,10 +94,13 @@ describe('buildForType', () => {
     // Isolate a module graph where the type carries no flag, instead of mutating the
     // shared registry-derived flag map (which would leak across tests).
     await jest.isolateModulesAsync(async () => {
-      jest.doMock('../../common/feature_flags', () => ({
-        NOTIFICATION_TYPE_FLAGS: {},
-        NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
-      }));
+      vi.doMock('../../common/feature_flags', () => {
+            const mocked = {
+                  NOTIFICATION_TYPE_FLAGS: {},
+                  NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
+                };
+            return { ...mocked, default: mocked };
+          });
       const { buildForType: buildIsolated } = await import('./submit');
       const { core, create, getBooleanValue$ } = createCoreMock();
 

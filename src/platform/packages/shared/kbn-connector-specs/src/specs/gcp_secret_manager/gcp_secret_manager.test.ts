@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { GcpSecretManager } from './gcp_secret_manager';
 
@@ -21,15 +23,15 @@ const SECRET_VALUE_B64 = Buffer.from(SECRET_VALUE, 'utf8').toString('base64');
 
 describe('GcpSecretManager', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   };
   const mockContext = {
     client: mockClient,
     config: {},
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   const getAction = (name: string) => {
@@ -41,7 +43,7 @@ describe('GcpSecretManager', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {

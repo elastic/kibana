@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createMockEsClient } from '../../test_utils';
 import { MatcherSuggestionsService } from './matcher_suggestions_service';
@@ -41,7 +43,7 @@ describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     esClient = createMockEsClient();
     service = new MatcherSuggestionsService(esClient);
   });

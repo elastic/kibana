@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Request } from '@hapi/hapi';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
@@ -16,10 +19,10 @@ import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
 describe('createCookieSessionStorageFactory', () => {
   let mockServer: {
-    register: jest.Mock;
+    register: Mock;
     auth: {
-      strategy: jest.Mock;
-      test: jest.Mock;
+      strategy: Mock;
+      test: Mock;
     };
   };
   let mockLogger: ReturnType<typeof loggingSystemMock.create>;
@@ -27,16 +30,16 @@ describe('createCookieSessionStorageFactory', () => {
   const defaultCookieOptions: SessionStorageCookieOptions<any> = {
     name: 'test-cookie',
     encryptionKey: 'a'.repeat(32),
-    validate: jest.fn(() => ({ isValid: true })),
+    validate: vi.fn(() => ({ isValid: true })),
     isSecure: false,
   };
 
   beforeEach(() => {
     mockServer = {
-      register: jest.fn(),
+      register: vi.fn(),
       auth: {
-        strategy: jest.fn(),
-        test: jest.fn(),
+        strategy: vi.fn(),
+        test: vi.fn(),
       },
     } as any;
 
@@ -190,7 +193,7 @@ describe('createCookieSessionStorageFactory', () => {
 
   describe('validate callback', () => {
     it('should call user validate function and return result', async () => {
-      const validateFn = jest.fn(() => ({ isValid: true }));
+      const validateFn = vi.fn(() => ({ isValid: true }));
 
       await createCookieSessionStorageFactory(
         mockLogger.get(),
@@ -213,11 +216,11 @@ describe('createCookieSessionStorageFactory', () => {
     });
 
     it('should clear invalid cookie when validation fails', async () => {
-      const validateFn = jest.fn(() => ({ isValid: false, path: '/custom' }));
+      const validateFn = vi.fn(() => ({ isValid: false, path: '/custom' }));
       const mockRequest = {
         cookieAuth: {
           h: {
-            unstate: jest.fn(),
+            unstate: vi.fn(),
           },
         },
       } as any;
@@ -246,11 +249,11 @@ describe('createCookieSessionStorageFactory', () => {
     });
 
     it('should use basePath when clearing invalid cookie without path in validation result', async () => {
-      const validateFn = jest.fn(() => ({ isValid: false }));
+      const validateFn = vi.fn(() => ({ isValid: false }));
       const mockRequest = {
         cookieAuth: {
           h: {
-            unstate: jest.fn(),
+            unstate: vi.fn(),
           },
         },
       } as any;
@@ -299,7 +302,7 @@ describe('createCookieSessionStorageFactory', () => {
     describe('get()', () => {
       it('should return session value when auth test succeeds', async () => {
         const sessionData = { userId: '123' };
-        mockServer.auth.test = jest.fn().mockResolvedValue({
+        mockServer.auth.test = vi.fn().mockResolvedValue({
           credentials: sessionData,
         });
 
@@ -322,7 +325,7 @@ describe('createCookieSessionStorageFactory', () => {
 
       it('should return first session when credentials is array with one element', async () => {
         const sessionData = { userId: '123' };
-        mockServer.auth.test = jest.fn().mockResolvedValue({
+        mockServer.auth.test = vi.fn().mockResolvedValue({
           credentials: [sessionData],
         });
 
@@ -341,7 +344,7 @@ describe('createCookieSessionStorageFactory', () => {
 
       it('should return first session when multiple equal sessions are found', async () => {
         const sessionData = { userId: '123' };
-        mockServer.auth.test = jest.fn().mockResolvedValue({
+        mockServer.auth.test = vi.fn().mockResolvedValue({
           credentials: [sessionData, sessionData],
         });
 
@@ -367,7 +370,7 @@ describe('createCookieSessionStorageFactory', () => {
       it('should return null when multiple unequal sessions are found', async () => {
         const session1 = { userId: '123' };
         const session2 = { userId: '456' };
-        mockServer.auth.test = jest.fn().mockResolvedValue({
+        mockServer.auth.test = vi.fn().mockResolvedValue({
           credentials: [session1, session2],
         });
 
@@ -391,7 +394,7 @@ describe('createCookieSessionStorageFactory', () => {
       });
 
       it('should return null when auth test throws error', async () => {
-        mockServer.auth.test = jest.fn().mockRejectedValue(new Error('Auth failed'));
+        mockServer.auth.test = vi.fn().mockRejectedValue(new Error('Auth failed'));
 
         const factory = await createCookieSessionStorageFactory(
           mockLogger.get(),
@@ -419,7 +422,7 @@ describe('createCookieSessionStorageFactory', () => {
 
         const mockRequest = mockRouter.createKibanaRequest();
         const rawRequest = ensureRawRequest(mockRequest);
-        const mockSet = jest.fn();
+        const mockSet = vi.fn();
         (rawRequest as any).cookieAuth = { set: mockSet };
 
         const sessionData = { userId: '123' };
@@ -438,10 +441,10 @@ describe('createCookieSessionStorageFactory', () => {
 
         const mockRequest = mockRouter.createKibanaRequest();
         const rawRequest = ensureRawRequest(mockRequest);
-        const mockState = jest.fn();
+        const mockState = vi.fn();
         (rawRequest as any).cookieAuth = {
           h: { state: mockState },
-          set: jest.fn(),
+          set: vi.fn(),
         };
 
         const sessionData = { userId: '123' };
@@ -468,10 +471,10 @@ describe('createCookieSessionStorageFactory', () => {
 
         const mockRequest = mockRouter.createKibanaRequest();
         const rawRequest = ensureRawRequest(mockRequest);
-        const mockState = jest.fn();
+        const mockState = vi.fn();
         (rawRequest as any).cookieAuth = {
           h: { state: mockState },
-          set: jest.fn(),
+          set: vi.fn(),
         };
 
         const sessionData = { userId: '123' };
@@ -496,7 +499,7 @@ describe('createCookieSessionStorageFactory', () => {
 
         const mockRequest = mockRouter.createKibanaRequest();
         const rawRequest = ensureRawRequest(mockRequest);
-        const mockClear = jest.fn();
+        const mockClear = vi.fn();
         (rawRequest as any).cookieAuth = { clear: mockClear };
 
         factory.asScoped(mockRequest).clear();

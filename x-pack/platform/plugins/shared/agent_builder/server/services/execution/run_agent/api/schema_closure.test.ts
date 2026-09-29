@@ -5,23 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loadSchemaClosure } from './schema_closure';
 
 let mockFlakyAttempts = 0;
 
-jest.mock('@elastic/schemas/es/json/_types.json', () => ({
-  $defs: {
-    Duration: { type: 'string' },
-    Query: { $ref: './_types.query_dsl.json#/$defs/QueryContainer' },
-  },
-}));
+vi.mock('@elastic/schemas/es/json/_types.json', () => {
+      const mocked = {
+      $defs: {
+        Duration: { type: 'string' },
+        Query: { $ref: './_types.query_dsl.json#/$defs/QueryContainer' },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/schemas/es/json/_types.query_dsl.json', () => ({
-  $defs: { QueryContainer: { type: 'object' } },
-}));
+vi.mock('@elastic/schemas/es/json/_types.query_dsl.json', () => {
+      const mocked = {
+      $defs: { QueryContainer: { type: 'object' } },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Throws on its first load only, to prove a failed build is not memoized.
-jest.mock('@elastic/schemas/es/json/_spec_utils.json', () => {
+vi.mock('@elastic/schemas/es/json/_spec_utils.json', () => {
   mockFlakyAttempts += 1;
   if (mockFlakyAttempts === 1) {
     throw new Error('transient load failure');

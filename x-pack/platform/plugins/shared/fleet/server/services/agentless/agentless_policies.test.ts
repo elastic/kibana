@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -21,9 +23,9 @@ import { agentlessAgentService } from '../agents/agentless_agent';
 
 import { AgentlessPoliciesServiceImpl } from './agentless_policies';
 
-jest.mock('../epm/packages/get');
+vi.mock('../epm/packages/get');
 
-jest.mock('../agent_policy');
+vi.mock('../agent_policy');
 
 const buildAgentlessPackagePolicy = (overrides: Record<string, any> = {}): any => ({
   id: 'agentless-policy-id',
@@ -58,7 +60,7 @@ describe('AgentlessPoliciesService', () => {
         cloud: cloudSetup,
       });
 
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
       packagePolicyService.create.mockImplementation(async (_, __, policy, opts) => {
         return {
@@ -77,7 +79,7 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
+      vi.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
         return {
           id: opts?.id || 'new-agentless-policy-id',
           status: 'active',
@@ -91,9 +93,9 @@ describe('AgentlessPoliciesService', () => {
           updated_by: 'system',
         };
       });
-      jest.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({} as any));
+      vi.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({} as any));
 
-      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+      vi.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
         if (pkgName === 'agentless_integration') {
           return {
             name: 'agentless_integration',
@@ -134,8 +136,8 @@ describe('AgentlessPoliciesService', () => {
 
       expect(result).toBeDefined();
 
-      expect(jest.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(agentPolicyService.create)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.create)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -145,8 +147,8 @@ describe('AgentlessPoliciesService', () => {
         }),
         expect.objectContaining({})
       );
-      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledWith(
+      expect(vi.mocked(packagePolicyService.create)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(packagePolicyService.create)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -156,8 +158,8 @@ describe('AgentlessPoliciesService', () => {
         undefined,
         undefined
       );
-      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         undefined,
@@ -178,7 +180,7 @@ describe('AgentlessPoliciesService', () => {
         esClient,
         logger
       );
-      jest.mocked(packagePolicyService.create).mockImplementationOnce(async () => {
+      vi.mocked(packagePolicyService.create).mockImplementationOnce(async () => {
         throw new Error('Error creating package policy');
       });
 
@@ -195,10 +197,10 @@ describe('AgentlessPoliciesService', () => {
         })
       ).rejects.toThrow('Error creating package policy');
 
-      expect(jest.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
 
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test-agentless-policy-id',
@@ -219,7 +221,7 @@ describe('AgentlessPoliciesService', () => {
         esClient,
         logger
       );
-      jest.mocked(agentPolicyService.deployPolicy).mockImplementationOnce(async () => {
+      vi.mocked(agentPolicyService.deployPolicy).mockImplementationOnce(async () => {
         throw new Error('Error calling agentless API');
       });
 
@@ -236,11 +238,11 @@ describe('AgentlessPoliciesService', () => {
         })
       ).rejects.toThrow('Error calling agentless API');
 
-      expect(jest.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(packagePolicyService.create)).toHaveBeenCalledTimes(1);
 
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test-agentless-policy-id',
@@ -291,12 +293,12 @@ describe('AgentlessPoliciesService', () => {
         cloud: cloudSetup,
       });
 
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
 
       // Existing (stored) agentless package + agent policy.
       packagePolicyService.get.mockResolvedValue(buildAgentlessPackagePolicy());
-      jest.mocked(agentPolicyService.get).mockResolvedValue({
+      vi.mocked(agentPolicyService.get).mockResolvedValue({
         id: 'agentless-policy-id',
         name: 'Agentless policy for Test Agentless Policy',
         namespace: 'default',
@@ -323,10 +325,10 @@ describe('AgentlessPoliciesService', () => {
         updated_by: 'system',
       }));
 
-      jest.mocked(agentPolicyService.update).mockResolvedValue({} as any);
-      jest.mocked(agentPolicyService.deployPolicy).mockResolvedValue(undefined as any);
+      vi.mocked(agentPolicyService.update).mockResolvedValue({} as any);
+      vi.mocked(agentPolicyService.deployPolicy).mockResolvedValue(undefined as any);
 
-      jest.mocked(getPackageInfo).mockImplementation(
+      vi.mocked(getPackageInfo).mockImplementation(
         async ({ pkgName, pkgVersion }) =>
           ({
             name: pkgName,
@@ -365,8 +367,8 @@ describe('AgentlessPoliciesService', () => {
       // deployment-sync backstop compares against (`revision_idx < revision`) to self-heal a
       // diverged workload. (The package-policy update above is the one that opts out with
       // `bumpRevision: false`.)
-      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.update)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless-policy-id',
@@ -378,8 +380,8 @@ describe('AgentlessPoliciesService', () => {
       );
 
       // Live workload reconcile is the final step and surfaces agentless errors.
-      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
         expect.anything(),
         'agentless-policy-id',
         undefined,
@@ -398,7 +400,7 @@ describe('AgentlessPoliciesService', () => {
     it('should preserve the runtime cluster_id on the agent policy across the update', async () => {
       await createService().updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest());
 
-      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless-policy-id',
@@ -449,7 +451,7 @@ describe('AgentlessPoliciesService', () => {
       ).rejects.toThrow('Agentless policy missing-policy-id not found');
 
       expect(packagePolicyService.update).not.toHaveBeenCalled();
-      expect(jest.mocked(agentPolicyService.update)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.update)).not.toHaveBeenCalled();
     });
 
     it('should throw a not found error when the package policy is not agentless', async () => {
@@ -466,8 +468,8 @@ describe('AgentlessPoliciesService', () => {
     });
 
     it('should throw a not found error when the backing agent policy is not agentless', async () => {
-      jest.mocked(agentPolicyService.get).mockReset();
-      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.get).mockReset();
+      vi.mocked(agentPolicyService.get).mockResolvedValueOnce({
         id: 'agentless-policy-id',
         supports_agentless: false,
       } as any);
@@ -490,7 +492,7 @@ describe('AgentlessPoliciesService', () => {
       );
 
       expect(packagePolicyService.update).not.toHaveBeenCalled();
-      expect(jest.mocked(agentPolicyService.update)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.update)).not.toHaveBeenCalled();
     });
 
     it('should update a legacy policy whose agent policy ID differs from its package policy ID', async () => {
@@ -506,8 +508,8 @@ describe('AgentlessPoliciesService', () => {
           policy_ids: [legacyAgentPolicyId],
         })
       );
-      jest.mocked(agentPolicyService.get).mockReset();
-      jest.mocked(agentPolicyService.get).mockResolvedValue({
+      vi.mocked(agentPolicyService.get).mockReset();
+      vi.mocked(agentPolicyService.get).mockResolvedValue({
         id: legacyAgentPolicyId,
         name: 'Agentless policy for Test Agentless Policy',
         namespace: 'default',
@@ -527,14 +529,14 @@ describe('AgentlessPoliciesService', () => {
       );
 
       // Agent policy operations use the *agent* policy ID, not the package policy ID.
-      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         legacyAgentPolicyId,
         expect.anything(),
         expect.anything()
       );
-      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
         expect.anything(),
         legacyAgentPolicyId,
         undefined,
@@ -560,7 +562,7 @@ describe('AgentlessPoliciesService', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('has no policy_ids entry'));
       // Falls back to policyId — agent policy operations still use that ID.
-      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless-policy-id',
@@ -576,7 +578,7 @@ describe('AgentlessPoliciesService', () => {
       );
 
       // Package info must be loaded for the requested version, not the stored one.
-      expect(jest.mocked(getPackageInfo)).toHaveBeenCalledWith(
+      expect(vi.mocked(getPackageInfo)).toHaveBeenCalledWith(
         expect.objectContaining({ pkgName: 'test_agentless', pkgVersion: '2.0.0' })
       );
       expect(packagePolicyService.update).toHaveBeenCalledWith(
@@ -586,11 +588,11 @@ describe('AgentlessPoliciesService', () => {
         expect.objectContaining({ package: expect.objectContaining({ version: '2.0.0' }) }),
         expect.objectContaining({ bumpRevision: false })
       );
-      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledTimes(1);
     });
 
     it('should roll back the package and agent policy when the deploy fails', async () => {
-      jest
+      vi
         .mocked(agentPolicyService.deployPolicy)
         .mockRejectedValueOnce(new Error('Error calling agentless API'));
 
@@ -600,9 +602,9 @@ describe('AgentlessPoliciesService', () => {
 
       // Once for the update, once for the restore.
       expect(packagePolicyService.update).toHaveBeenCalledTimes(2);
-      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(agentPolicyService.update)).toHaveBeenCalledTimes(2);
       // The restore re-applies the prior agent policy state.
-      expect(jest.mocked(agentPolicyService.update)).toHaveBeenLastCalledWith(
+      expect(vi.mocked(agentPolicyService.update)).toHaveBeenLastCalledWith(
         expect.anything(),
         expect.anything(),
         'agentless-policy-id',
@@ -625,15 +627,15 @@ describe('AgentlessPoliciesService', () => {
           policy_ids: [legacyAgentPolicyId],
         })
       );
-      jest.mocked(agentPolicyService.get).mockReset();
-      jest.mocked(agentPolicyService.get).mockResolvedValue({
+      vi.mocked(agentPolicyService.get).mockReset();
+      vi.mocked(agentPolicyService.get).mockResolvedValue({
         id: legacyAgentPolicyId,
         name: 'Agentless policy for Test Agentless Policy',
         namespace: 'default',
         supports_agentless: true,
         agentless: { cluster_id: 'cluster-456' },
       } as any);
-      jest
+      vi
         .mocked(agentPolicyService.deployPolicy)
         .mockRejectedValueOnce(new Error('deploy failure'));
 
@@ -642,7 +644,7 @@ describe('AgentlessPoliciesService', () => {
       ).rejects.toThrow('deploy failure');
 
       // Rollback must target the agent policy ID, not the package policy ID.
-      expect(jest.mocked(agentPolicyService.update)).toHaveBeenLastCalledWith(
+      expect(vi.mocked(agentPolicyService.update)).toHaveBeenLastCalledWith(
         expect.anything(),
         expect.anything(),
         legacyAgentPolicyId,
@@ -658,8 +660,8 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValue(
         buildAgentlessPackagePolicy({ cloud_connector_id: 'old-connector-id' })
       );
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
-      const deleteSpy = jest.spyOn(cloudConnectorService, 'delete');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
+      const deleteSpy = vi.spyOn(cloudConnectorService, 'delete');
 
       const result = await createService().updateAgentlessPolicy(
         'agentless-policy-id',
@@ -695,8 +697,8 @@ describe('AgentlessPoliciesService', () => {
           cloud_connector_id: 'old-connector-id',
         })
       );
-      jest.mocked(getPackageInfo).mockReset();
-      jest.mocked(getPackageInfo).mockResolvedValue({
+      vi.mocked(getPackageInfo).mockReset();
+      vi.mocked(getPackageInfo).mockResolvedValue({
         name: 'cloud_security_posture',
         title: 'Cloud Security Posture',
         version: '3.1.1',
@@ -728,7 +730,7 @@ describe('AgentlessPoliciesService', () => {
         ],
       } as any);
 
-      const getByIdSpy = jest.spyOn(cloudConnectorService, 'getById');
+      const getByIdSpy = vi.spyOn(cloudConnectorService, 'getById');
       getByIdSpy.mockResolvedValue({
         id: 'new-connector-id',
         name: 'new-connector',
@@ -738,8 +740,8 @@ describe('AgentlessPoliciesService', () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as any);
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
-      const deleteSpy = jest.spyOn(cloudConnectorService, 'delete');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
+      const deleteSpy = vi.spyOn(cloudConnectorService, 'delete');
 
       const result = await createService().updateAgentlessPolicy(
         'agentless-policy-id',
@@ -786,8 +788,8 @@ describe('AgentlessPoliciesService', () => {
           },
         })
       );
-      jest.mocked(getPackageInfo).mockReset();
-      jest.mocked(getPackageInfo).mockResolvedValue({
+      vi.mocked(getPackageInfo).mockReset();
+      vi.mocked(getPackageInfo).mockResolvedValue({
         name: 'cloud_security_posture',
         title: 'Cloud Security Posture',
         version: '3.1.1',
@@ -822,7 +824,7 @@ describe('AgentlessPoliciesService', () => {
         ],
       } as any);
 
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
       createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'arn:aws:iam::123456789012:role/TestRole',
@@ -863,7 +865,7 @@ describe('AgentlessPoliciesService', () => {
         enabled: true,
         cloud_connector_id: 'aws-cloud-connector-123',
       });
-      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
         expect.anything(),
         'agentless-policy-id',
         undefined,
@@ -885,10 +887,10 @@ describe('AgentlessPoliciesService', () => {
         cloud: cloudSetup,
       });
 
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
 
-      jest.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({} as any));
+      vi.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({} as any));
     });
 
     it('should delete an existing agentless policy', async () => {
@@ -898,7 +900,7 @@ describe('AgentlessPoliciesService', () => {
           policy_ids: ['existing-agentless-policy-id'],
         })
       );
-      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.get).mockResolvedValueOnce({
         supports_agentless: true,
       } as any);
 
@@ -915,8 +917,8 @@ describe('AgentlessPoliciesService', () => {
 
       await agentlessPoliciesService.deleteAgentlessPolicy('existing-agentless-policy-id');
 
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'existing-agentless-policy-id',
@@ -934,11 +936,11 @@ describe('AgentlessPoliciesService', () => {
           policy_ids: [legacyAgentPolicyId],
         })
       );
-      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.get).mockResolvedValueOnce({
         id: legacyAgentPolicyId,
         supports_agentless: true,
       } as any);
-      jest.mocked(agentPolicyService.delete).mockResolvedValueOnce({} as any);
+      vi.mocked(agentPolicyService.delete).mockResolvedValueOnce({} as any);
 
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -954,7 +956,7 @@ describe('AgentlessPoliciesService', () => {
       await agentlessPoliciesService.deleteAgentlessPolicy(legacyPackagePolicyId);
 
       // Must delete the agent policy using the agent policy ID, not the package policy ID.
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         legacyAgentPolicyId,
@@ -966,11 +968,11 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: 'corrupt-policy-id', policy_ids: [] })
       );
-      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.get).mockResolvedValueOnce({
         id: 'corrupt-policy-id',
         supports_agentless: true,
       } as any);
-      jest.mocked(agentPolicyService.delete).mockResolvedValueOnce({} as any);
+      vi.mocked(agentPolicyService.delete).mockResolvedValueOnce({} as any);
 
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -988,7 +990,7 @@ describe('AgentlessPoliciesService', () => {
       // When policy_ids is empty the code falls back to policyId and warns.
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('has no policy_ids entry'));
       // The fallback ID (package policy ID) is still used to delete the agent policy.
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'corrupt-policy-id',
@@ -1016,7 +1018,7 @@ describe('AgentlessPoliciesService', () => {
         agentlessPoliciesService.deleteAgentlessPolicy('non-agentless-policy-id')
       ).rejects.toThrow('Agentless policy non-agentless-policy-id not found');
 
-      expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
     });
 
     it('should throw a not found error when the package policy does not exist', async () => {
@@ -1039,7 +1041,7 @@ describe('AgentlessPoliciesService', () => {
         agentlessPoliciesService.deleteAgentlessPolicy('missing-policy-id')
       ).rejects.toThrow('Agentless policy missing-policy-id not found');
 
-      expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
     });
 
     it('should rethrow non-404 errors from packagePolicyService.get', async () => {
@@ -1063,21 +1065,21 @@ describe('AgentlessPoliciesService', () => {
         agentlessPoliciesService.deleteAgentlessPolicy('some-policy-id')
       ).rejects.toThrow('transient ES failure');
 
-      expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
     });
 
     it('should clean up orphaned resources when agent policy is not found (404)', async () => {
       const packagePolicyId = 'orphaned-package-policy-id';
       const agentPolicyId = 'orphaned-agent-policy-id';
 
-      const deleteAgentlessAgentSpy = jest
+      const deleteAgentlessAgentSpy = vi
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValueOnce(undefined as any);
 
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      jest
+      vi
         .mocked(agentPolicyService.get)
         .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
@@ -1104,7 +1106,7 @@ describe('AgentlessPoliciesService', () => {
 
       await agentlessPoliciesService.deleteAgentlessPolicy(packagePolicyId);
 
-      expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
       // Orphan cleanup must use the agent policy ID (resolved from policy_ids[0]), not the
       // package policy ID — findAllForAgentPolicy and deleteAgentlessAgent both treat their
       // argument as an agent policy ID.
@@ -1133,14 +1135,14 @@ describe('AgentlessPoliciesService', () => {
       const packagePolicyId = 'orphaned-package-policy-id';
       const agentPolicyId = 'orphaned-agent-policy-id';
 
-      const deleteAgentlessAgentSpy = jest
+      const deleteAgentlessAgentSpy = vi
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValueOnce(undefined as any);
 
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      jest
+      vi
         .mocked(agentPolicyService.get)
         .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
@@ -1183,14 +1185,14 @@ describe('AgentlessPoliciesService', () => {
       const packagePolicyId = 'orphaned-package-policy-id';
       const agentPolicyId = 'orphaned-agent-policy-id';
 
-      const deleteAgentlessAgentSpy = jest
+      const deleteAgentlessAgentSpy = vi
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValueOnce(undefined as any);
 
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      jest
+      vi
         .mocked(agentPolicyService.get)
         .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
@@ -1232,7 +1234,7 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      jest
+      vi
         .mocked(agentPolicyService.get)
         .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
@@ -1262,14 +1264,14 @@ describe('AgentlessPoliciesService', () => {
       const packagePolicyId = 'orphaned-package-policy-id';
       const agentPolicyId = 'orphaned-agent-policy-id';
 
-      const deleteAgentlessAgentSpy = jest
+      const deleteAgentlessAgentSpy = vi
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValueOnce(undefined as any);
 
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      jest
+      vi
         .mocked(agentPolicyService.get)
         .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
@@ -1298,14 +1300,14 @@ describe('AgentlessPoliciesService', () => {
       const packagePolicyId = 'orphaned-package-policy-id';
       const agentPolicyId = 'orphaned-agent-policy-id';
 
-      const deleteAgentlessAgentSpy = jest
+      const deleteAgentlessAgentSpy = vi
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValueOnce(undefined as any);
 
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      jest
+      vi
         .mocked(agentPolicyService.get)
         .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
@@ -1342,7 +1344,7 @@ describe('AgentlessPoliciesService', () => {
       const legacyPackagePolicyId = 'f5ff1997-package-policy-id';
       const legacyAgentPolicyId = '0be3a541-agent-policy-id';
 
-      const deleteAgentlessAgentSpy = jest
+      const deleteAgentlessAgentSpy = vi
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValueOnce(undefined as any);
 
@@ -1352,7 +1354,7 @@ describe('AgentlessPoliciesService', () => {
           policy_ids: [legacyAgentPolicyId],
         })
       );
-      jest
+      vi
         .mocked(agentPolicyService.get)
         .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
@@ -1390,7 +1392,7 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: 'some-policy-id' })
       );
-      jest.mocked(agentPolicyService.get).mockRejectedValueOnce({
+      vi.mocked(agentPolicyService.get).mockRejectedValueOnce({
         output: { statusCode: 500 },
         message: 'Internal server error',
       });
@@ -1410,7 +1412,7 @@ describe('AgentlessPoliciesService', () => {
         agentlessPoliciesService.deleteAgentlessPolicy('some-policy-id')
       ).rejects.toEqual(expect.objectContaining({ output: { statusCode: 500 } }));
 
-      expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
     });
   });
 
@@ -1426,7 +1428,7 @@ describe('AgentlessPoliciesService', () => {
       );
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
     });
 
@@ -1502,7 +1504,7 @@ describe('AgentlessPoliciesService', () => {
       );
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
       packagePolicyService.list.mockResolvedValue({
         items: [buildAgentlessPackagePolicy()],
@@ -1578,7 +1580,7 @@ describe('AgentlessPoliciesService', () => {
       );
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
     });
 
@@ -1603,7 +1605,7 @@ describe('AgentlessPoliciesService', () => {
       );
       // The deploy is scheduled asynchronously by the engine (mirrors package-policy),
       // so this path does not deploy synchronously itself.
-      expect(jest.mocked(agentPolicyService.deployPolicy)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.deployPolicy)).not.toHaveBeenCalled();
       expect(result).toEqual([
         { id: 'a', name: 'A', success: true },
         { id: 'b', name: 'B', success: true },
@@ -1670,7 +1672,7 @@ describe('AgentlessPoliciesService', () => {
 
       // The engine owns the deploy; no synchronous deploy or SO rollback happens here
       // (matches package-policy bulk upgrade).
-      expect(jest.mocked(agentPolicyService.deployPolicy)).not.toHaveBeenCalled();
+      expect(vi.mocked(agentPolicyService.deployPolicy)).not.toHaveBeenCalled();
       expect(packagePolicyService.update).not.toHaveBeenCalled();
       expect(result).toEqual([
         { id: 'a', name: 'A', success: false, statusCode: 400, body: { message: 'ineligible' } },
@@ -1702,7 +1704,7 @@ describe('AgentlessPoliciesService', () => {
         }),
       ]);
       // Installed version matches the policy version, so there is nothing to upgrade.
-      jest.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
+      vi.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
 
       const result = await createService().bulkUpgradeAgentlessPolicies(['a']);
 
@@ -1725,7 +1727,7 @@ describe('AgentlessPoliciesService', () => {
           package: { name: 'pkg', version: '0.9.0' },
         }),
       ]);
-      jest.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
+      vi.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
       packagePolicyService.bulkUpgrade.mockResolvedValue([{ id: 'b', name: 'B', success: true }]);
 
       const result = await createService().bulkUpgradeAgentlessPolicies(['a', 'b', 'c']);
@@ -1758,7 +1760,7 @@ describe('AgentlessPoliciesService', () => {
         }),
       ]);
       // No installation resolved -> let the engine surface its "package not installed" error.
-      jest.mocked(getInstallation).mockResolvedValue(undefined as any);
+      vi.mocked(getInstallation).mockResolvedValue(undefined as any);
       packagePolicyService.bulkUpgrade.mockResolvedValue([{ id: 'a', name: 'A', success: true }]);
 
       await createService().bulkUpgradeAgentlessPolicies(['a']);
@@ -1780,7 +1782,7 @@ describe('AgentlessPoliciesService', () => {
         }),
       ]);
       // Installed is older than the policy -> engine returns its ineligible-for-upgrade error.
-      jest.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
+      vi.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
       packagePolicyService.bulkUpgrade.mockResolvedValue([
         { id: 'a', name: 'A', success: false, statusCode: 400, body: { message: 'ineligible' } },
       ]);
@@ -1811,7 +1813,7 @@ describe('AgentlessPoliciesService', () => {
       );
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
     });
 
@@ -2062,23 +2064,23 @@ describe('AgentlessPoliciesService', () => {
         cloud: cloudSetup,
       });
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // Reset getPackageInfo mock to allow mockResolvedValueOnce to work
-      jest.mocked(getPackageInfo).mockReset();
+      vi.mocked(getPackageInfo).mockReset();
 
       // Set up cloud connector service mocks - use mockReset to ensure clean state
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
       createSpy.mockReset();
 
-      const deleteSpy = jest.spyOn(cloudConnectorService, 'delete');
+      const deleteSpy = vi.spyOn(cloudConnectorService, 'delete');
       deleteSpy.mockReset();
       deleteSpy.mockResolvedValue(undefined as any);
 
-      const getByIdSpy = jest.spyOn(cloudConnectorService, 'getById');
+      const getByIdSpy = vi.spyOn(cloudConnectorService, 'getById');
       getByIdSpy.mockReset();
 
-      const updateSpy = jest.spyOn(cloudConnectorService, 'update');
+      const updateSpy = vi.spyOn(cloudConnectorService, 'update');
       updateSpy.mockReset();
 
       packagePolicyService = createPackagePolicyServiceMock();
@@ -2106,11 +2108,11 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(agentPolicyService.delete).mockImplementation(async () => ({} as any));
+      vi.mocked(agentPolicyService.delete).mockImplementation(async () => ({} as any));
     });
 
     it('should create agentless policy with AWS cloud connector', async () => {
-      jest.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
+      vi.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
         return {
           id: opts?.id || 'new-agentless-policy-id',
           status: 'active',
@@ -2131,14 +2133,14 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+      vi.mocked(getPackageInfo).mockResolvedValueOnce(
         createMockPackageInfo('cloudbeat/cis_aws', [
           { name: 'role_arn', type: 'text', default: '' },
           { name: 'external_id', type: 'text', default: '' },
         ])
       );
 
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
       createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'aws-cloud-connector: cspm-aws-policy',
@@ -2210,7 +2212,7 @@ describe('AgentlessPoliciesService', () => {
     });
 
     it('should create agentless policy with Azure cloud connector', async () => {
-      jest.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
+      vi.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
         return {
           id: opts?.id || 'new-agentless-policy-id',
           status: 'active',
@@ -2231,7 +2233,7 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+      vi.mocked(getPackageInfo).mockResolvedValueOnce(
         createMockPackageInfo('cloudbeat/cis_azure', [
           { name: 'tenant_id', type: 'text', default: '' },
           { name: 'client_id', type: 'text', default: '' },
@@ -2239,7 +2241,7 @@ describe('AgentlessPoliciesService', () => {
         ])
       );
 
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
       createSpy.mockResolvedValueOnce({
         id: 'azure-cloud-connector-123',
         name: 'azure-cloud-connector: cspm-azure-policy',
@@ -2320,7 +2322,7 @@ describe('AgentlessPoliciesService', () => {
     });
 
     it('should rollback cloud connector if package policy creation fails', async () => {
-      jest.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
+      vi.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
         return {
           id: opts?.id || 'new-agentless-policy-id',
           status: 'active',
@@ -2341,14 +2343,14 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+      vi.mocked(getPackageInfo).mockResolvedValueOnce(
         createMockPackageInfo('cloudbeat/cis_aws', [
           { name: 'role_arn', type: 'text', default: '' },
           { name: 'external_id', type: 'text', default: '' },
         ])
       );
 
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
       createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'aws-cloud-connector: cspm-aws-policy',
@@ -2362,7 +2364,7 @@ describe('AgentlessPoliciesService', () => {
         updated_at: new Date().toISOString(),
       } as any);
 
-      const deleteSpy = jest.spyOn(cloudConnectorService, 'delete');
+      const deleteSpy = vi.spyOn(cloudConnectorService, 'delete');
       deleteSpy.mockResolvedValueOnce({ id: 'aws-cloud-connector-123' } as any);
 
       packagePolicyService.create.mockImplementationOnce(async () => {
@@ -2419,7 +2421,7 @@ describe('AgentlessPoliciesService', () => {
       expect(deleteSpy).toHaveBeenCalledWith(soClient, esClient, 'aws-cloud-connector-123', true);
 
       // Verify rollback: agent policy should be deleted
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+      expect(vi.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test-agentless-policy-id',
@@ -2430,7 +2432,7 @@ describe('AgentlessPoliciesService', () => {
     });
 
     it('should create AWS cloud connector with custom name from API request', async () => {
-      jest.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
+      vi.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
         return {
           id: opts?.id || 'new-agentless-policy-id',
           status: 'active',
@@ -2451,14 +2453,14 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+      vi.mocked(getPackageInfo).mockResolvedValueOnce(
         createMockPackageInfo('cloudbeat/cis_aws', [
           { name: 'role_arn', type: 'text', default: '' },
           { name: 'external_id', type: 'text', default: '' },
         ])
       );
 
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
       createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'my-custom-connector-name',
@@ -2532,7 +2534,7 @@ describe('AgentlessPoliciesService', () => {
     });
 
     it('should fallback to auto-generated name when no custom name is provided', async () => {
-      jest.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
+      vi.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
         return {
           id: opts?.id || 'new-agentless-policy-id',
           status: 'active',
@@ -2553,14 +2555,14 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+      vi.mocked(getPackageInfo).mockResolvedValueOnce(
         createMockPackageInfo('cloudbeat/cis_aws', [
           { name: 'role_arn', type: 'text', default: '' },
           { name: 'external_id', type: 'text', default: '' },
         ])
       );
 
-      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      const createSpy = vi.spyOn(cloudConnectorService, 'create');
       createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'arn:aws:iam::123456789012:role/TestRole',

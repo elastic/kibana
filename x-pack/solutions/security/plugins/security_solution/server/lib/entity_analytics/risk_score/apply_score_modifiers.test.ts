@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 
@@ -22,25 +25,28 @@ import { applyPrivmonModifier } from './modifiers/privileged_users';
 import { allowedExperimentalValues } from '../../../../common';
 import type { Modifier } from './modifiers/types';
 
-jest.mock('./modifiers/asset_criticality', () => ({
-  ...jest.requireActual('./modifiers/asset_criticality'),
-  applyCriticalityModifier: jest.fn(),
-}));
-jest.mock('./modifiers/privileged_users');
+vi.mock('./modifiers/asset_criticality', async () => {
+      const mocked = {
+      ...(await vi.importActual('./modifiers/asset_criticality')),
+      applyCriticalityModifier: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./modifiers/privileged_users');
 
 const experimentalFeatures = { ...allowedExperimentalValues, enableRiskScorePrivmonModifier: true };
 
-const mockApplyCriticalityModifier = applyCriticalityModifier as jest.MockedFunction<
+const mockApplyCriticalityModifier = applyCriticalityModifier as MockedFunction<
   typeof applyCriticalityModifier
 >;
-const mockApplyPrivmonModifier = applyPrivmonModifier as jest.MockedFunction<
+const mockApplyPrivmonModifier = applyPrivmonModifier as MockedFunction<
   typeof applyPrivmonModifier
 >;
 
 describe('applyScoreModifiers', () => {
   let logger: Logger;
-  let assetCriticalityService: jest.Mocked<AssetCriticalityService>;
-  let privmonUserCrudService: jest.Mocked<PrivmonUserCrudService>;
+  let assetCriticalityService: Mocked<AssetCriticalityService>;
+  let privmonUserCrudService: Mocked<PrivmonUserCrudService>;
 
   const mockBucket: RiskScoreBucket = {
     key: { 'host.name': 'test-host' },
@@ -82,14 +88,14 @@ describe('applyScoreModifiers', () => {
     logger = loggingSystemMock.createLogger();
     assetCriticalityService = assetCriticalityServiceMock.create();
     privmonUserCrudService = {
-      create: jest.fn(),
-      get: jest.fn(),
-      update: jest.fn(),
-      list: jest.fn().mockResolvedValue([]),
-      delete: jest.fn(),
+      create: vi.fn(),
+      get: vi.fn(),
+      update: vi.fn(),
+      list: vi.fn().mockResolvedValue([]),
+      delete: vi.fn(),
     };
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when both modifiers apply', () => {

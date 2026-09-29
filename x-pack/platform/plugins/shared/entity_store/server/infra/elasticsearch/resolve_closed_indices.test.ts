@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { resolveClosedIndexAdjustments } from './resolve_closed_indices';
 
-const makeEsClient = (resolveIndexImpl: jest.Mock) =>
+const makeEsClient = (resolveIndexImpl: Mock) =>
   ({
     indices: { resolveIndex: resolveIndexImpl },
   } as unknown as ElasticsearchClient);
@@ -20,11 +23,11 @@ describe('resolveClosedIndexAdjustments', () => {
   const logger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty result when includePatterns is empty', async () => {
-    const resolveIndex = jest.fn();
+    const resolveIndex = vi.fn();
     const result = await resolveClosedIndexAdjustments(makeEsClient(resolveIndex), [], logger);
 
     expect(result).toEqual({ openBackingIndices: [], negations: [] });
@@ -32,7 +35,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('returns empty result when all patterns are negations', async () => {
-    const resolveIndex = jest.fn();
+    const resolveIndex = vi.fn();
     const result = await resolveClosedIndexAdjustments(
       makeEsClient(resolveIndex),
       ['-logs-proxy-*', '-metrics-debug'],
@@ -44,7 +47,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('filters out negations before calling resolveIndex', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue(emptyResolve);
+    const resolveIndex = vi.fn().mockResolvedValue(emptyResolve);
 
     await resolveClosedIndexAdjustments(
       makeEsClient(resolveIndex),
@@ -58,7 +61,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('returns negation for a closed standalone index', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue({
+    const resolveIndex = vi.fn().mockResolvedValue({
       indices: [
         { name: 'standalone-closed-index', attributes: ['closed'] },
         { name: 'standalone-open-index', attributes: ['open'] },
@@ -79,7 +82,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('negates the data stream name (not backing index) and adds open backing indices back', async () => {
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       // First call: pattern resolves to a data stream
       .mockResolvedValueOnce({
@@ -122,7 +125,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('does not add negation for data stream with no closed backing indices', async () => {
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       .mockResolvedValueOnce({
         indices: [],
@@ -154,7 +157,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('does not make a second resolveIndex call when data_streams is empty', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue(emptyResolve);
+    const resolveIndex = vi.fn().mockResolvedValue(emptyResolve);
 
     await resolveClosedIndexAdjustments(makeEsClient(resolveIndex), ['logs-*'], logger);
 
@@ -162,7 +165,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('batches backing index names into a single resolveIndex call when small enough to fit', async () => {
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       .mockResolvedValueOnce({
         indices: [],
@@ -194,7 +197,7 @@ describe('resolveClosedIndexAdjustments', () => {
       (_, i) => `.ds-logs-batch-${String(i).padStart(6, '0')}`
     );
 
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       .mockResolvedValueOnce({
         indices: [],
@@ -231,7 +234,7 @@ describe('resolveClosedIndexAdjustments', () => {
       allBackingIndices[allBackingIndices.length - 1],
     ]);
 
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       .mockResolvedValueOnce({
         indices: [],
@@ -270,7 +273,7 @@ describe('resolveClosedIndexAdjustments', () => {
 
   it('returns empty result and logs a warning if a batch resolveIndex call fails', async () => {
     const backingIndices = ['.ds-logs-foo-000001', '.ds-logs-foo-000002'];
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       .mockResolvedValueOnce({
         indices: [],
@@ -295,7 +298,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('calls resolveIndex with correct expand_wildcards and ignore options', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue(emptyResolve);
+    const resolveIndex = vi.fn().mockResolvedValue(emptyResolve);
 
     await resolveClosedIndexAdjustments(makeEsClient(resolveIndex), ['logs-*'], logger);
 
@@ -320,7 +323,7 @@ describe('resolveClosedIndexAdjustments', () => {
     let peakActiveCalls = 0;
     const pendingResolvers: Array<() => void> = [];
 
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       .mockResolvedValueOnce({
         indices: [],
@@ -370,7 +373,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('returns empty result and logs a warning on resolveIndex failure', async () => {
-    const resolveIndex = jest.fn().mockRejectedValue(new Error('connection refused'));
+    const resolveIndex = vi.fn().mockRejectedValue(new Error('connection refused'));
 
     const result = await resolveClosedIndexAdjustments(
       makeEsClient(resolveIndex),
@@ -386,7 +389,7 @@ describe('resolveClosedIndexAdjustments', () => {
   });
 
   it('logs a warning when closed indices are detected', async () => {
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       .mockResolvedValueOnce({
         indices: [],

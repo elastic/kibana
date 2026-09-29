@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator, EvaluationResult, TaskOutput } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
@@ -17,13 +20,13 @@ import {
   withLowScoreLogging,
 } from './evaluator_utils';
 
-const createLog = () => ({ warning: jest.fn() } as unknown as ToolingLog);
+const createLog = () => ({ warning: vi.fn() } as unknown as ToolingLog);
 
 const stubEvaluator = (result: EvaluationResult): Evaluator => ({
   name: 'Stub',
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: jest.fn(async () => result),
+  evaluate: vi.fn(async () => result),
 });
 
 const params = {
@@ -154,7 +157,7 @@ describe('withLowScoreLogging', () => {
 
     expect(result.score).toBe(0);
     expect(log.warning).toHaveBeenCalledTimes(1);
-    const message = (log.warning as jest.Mock).mock.calls[0][0] as string;
+    const message = (log.warning as Mock).mock.calls[0][0] as string;
     expect(message).toContain('LOW SCORE: Stub = 0');
     expect(message).toContain('did not disambiguate');
     expect(message).toContain('observability use case routes to rule-management');
@@ -171,7 +174,7 @@ describe('withLowScoreLogging', () => {
     await evaluator.evaluate(params);
 
     expect(log.warning).toHaveBeenCalledTimes(1);
-    expect((log.warning as jest.Mock).mock.calls[0][0]).toContain('LOW SCORE: Stub = 0.67');
+    expect((log.warning as Mock).mock.calls[0][0]).toContain('LOW SCORE: Stub = 0.67');
   });
 
   it('does not log when the score is exactly 1', async () => {

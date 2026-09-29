@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { firstValueFrom, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -16,8 +19,8 @@ import type { Space } from '@kbn/spaces-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import { NavigationPublicPlugin } from './plugin';
 
-jest.mock('rxjs', () => {
-  const original = jest.requireActual('rxjs');
+vi.mock('rxjs', () => {
+  const original = require('rxjs');
   return {
     ...original,
     debounceTime: () => (source: any) => source,
@@ -32,13 +35,13 @@ const setup = ({
   const initializerContext = coreMock.createPluginInitializerContext({}, { buildFlavor });
   const plugin = new NavigationPublicPlugin(initializerContext);
 
-  const setChromeStyle = jest.fn();
+  const setChromeStyle = vi.fn();
   const coreStart = coreMock.createStart();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const cloud = cloudMock.createStart();
   const spaces = spacesPluginMock.createStartContract();
 
-  const getGlobalSetting$ = jest.fn();
+  const getGlobalSetting$ = vi.fn();
   const settingsGlobalClient = {
     ...coreStart.settings.globalClient,
     get$: getGlobalSetting$,
@@ -60,7 +63,7 @@ describe('Navigation Plugin', () => {
   it('should init navigation when active space and definition are both available', async () => {
     const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
-    spaces.getActiveSpace$ = jest
+    spaces.getActiveSpace$ = vi
       .fn()
       .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
 
@@ -83,9 +86,9 @@ describe('Navigation Plugin', () => {
     coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
 
     const activeSpace$ = of({ solution: 'es' } as Pick<Space, 'solution'>);
-    activeSpace$.pipe = jest.fn().mockReturnValue(activeSpace$);
-    activeSpace$.subscribe = jest.fn().mockReturnValue(activeSpace$);
-    spaces.getActiveSpace$ = jest.fn().mockReturnValue(activeSpace$);
+    activeSpace$.pipe = vi.fn().mockReturnValue(activeSpace$);
+    activeSpace$.subscribe = vi.fn().mockReturnValue(activeSpace$);
+    spaces.getActiveSpace$ = vi.fn().mockReturnValue(activeSpace$);
 
     plugin.start(coreStart, { unifiedSearch, cloud, spaces });
     await new Promise((resolve) => setTimeout(resolve));
@@ -124,7 +127,7 @@ describe('Navigation Plugin', () => {
     it('should init navigation when definition arrives after active space', async () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
-      spaces.getActiveSpace$ = jest
+      spaces.getActiveSpace$ = vi
         .fn()
         .mockReturnValue(of({ solution: 'oblt' } as Pick<Space, 'solution'>));
 
@@ -150,7 +153,7 @@ describe('Navigation Plugin', () => {
     it('forwards to chrome.project.initNavigation', async () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockResolvedValue({
         username: 'test-user',
       });
 
@@ -165,11 +168,11 @@ describe('Navigation Plugin', () => {
     it('calls enableUi with the solution id when authenticated', async () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
-      (coreStart.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({
+      (coreStart.security.authc.getCurrentUser as Mock).mockResolvedValue({
         username: 'test-user',
       });
 
-      const enableUiSpy = jest.spyOn((plugin as any).customizationService, 'enableUi');
+      const enableUiSpy = vi.spyOn((plugin as any).customizationService, 'enableUi');
       const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
       // start() itself may call enableUi synchronously (e.g. registering the
       // chrome handler); clear those calls so the assertion below is scoped
@@ -186,7 +189,7 @@ describe('Navigation Plugin', () => {
 
       coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
 
-      const enableUiSpy = jest.spyOn((plugin as any).customizationService, 'enableUi');
+      const enableUiSpy = vi.spyOn((plugin as any).customizationService, 'enableUi');
       const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
       enableUiSpy.mockClear();
 
@@ -198,7 +201,7 @@ describe('Navigation Plugin', () => {
     it('ignores a different solution id after the active solution is claimed', async () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
-      spaces.getActiveSpace$ = jest
+      spaces.getActiveSpace$ = vi
         .fn()
         .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
       spaces.isSolutionViewEnabled = true;
@@ -217,9 +220,9 @@ describe('Navigation Plugin', () => {
         navigationTree$: esTree$,
       });
       expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('es', esTree$);
-      (coreStart.chrome.project.initNavigation as jest.Mock).mockClear();
+      (coreStart.chrome.project.initNavigation as Mock).mockClear();
 
-      const loggerError = jest.spyOn((plugin as any).initializerContext.logger.get(), 'error');
+      const loggerError = vi.spyOn((plugin as any).initializerContext.logger.get(), 'error');
       initNavigation('security', of({ body: [] }));
 
       expect(coreStart.chrome.project.initNavigation).not.toHaveBeenCalled();
@@ -242,14 +245,14 @@ describe('Navigation Plugin', () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
       // Spaces plugin is available but activeSpace is undefined
-      spaces.getActiveSpace$ = jest.fn().mockReturnValue(of(undefined));
+      spaces.getActiveSpace$ = vi.fn().mockReturnValue(of(undefined));
       plugin.start(coreStart, { unifiedSearch, cloud, spaces });
       await new Promise((resolve) => setTimeout(resolve));
       expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
 
       // Spaces plugin is available and activeSpace has solution "classic"
       coreStart.chrome.setChromeStyle.mockReset();
-      spaces.getActiveSpace$ = jest
+      spaces.getActiveSpace$ = vi
         .fn()
         .mockReturnValue(of({ solution: 'classic' } as Pick<Space, 'solution'>));
       plugin.start(coreStart, { unifiedSearch, cloud, spaces });
@@ -269,7 +272,7 @@ describe('Navigation Plugin', () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
       for (const solution of ['oblt', 'es', 'security']) {
-        spaces.getActiveSpace$ = jest
+        spaces.getActiveSpace$ = vi
           .fn()
           .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
         plugin.start(coreStart, { unifiedSearch, cloud, spaces });
@@ -278,7 +281,7 @@ describe('Navigation Plugin', () => {
         coreStart.chrome.setChromeStyle.mockReset();
       }
 
-      spaces.getActiveSpace$ = jest.fn().mockReturnValue(of({ solution: 'unknown' }));
+      spaces.getActiveSpace$ = vi.fn().mockReturnValue(of({ solution: 'unknown' }));
       plugin.start(coreStart, { unifiedSearch, cloud, spaces });
       await new Promise((resolve) => setTimeout(resolve));
       expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
@@ -300,7 +303,7 @@ describe('Navigation Plugin', () => {
 
     it('should be off if spaces plugin `isSolutionViewEnabled` = false', async () => {
       const { plugin, coreStart, unifiedSearch, spaces } = setup();
-      spaces.getActiveSpace$ = jest
+      spaces.getActiveSpace$ = vi
         .fn()
         .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
 
@@ -320,7 +323,7 @@ describe('Navigation Plugin', () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
       {
-        spaces.getActiveSpace$ = jest
+        spaces.getActiveSpace$ = vi
           .fn()
           .mockReturnValue(of({ solution: undefined } as Pick<Space, 'solution'>));
 
@@ -336,7 +339,7 @@ describe('Navigation Plugin', () => {
       }
 
       {
-        spaces.getActiveSpace$ = jest
+        spaces.getActiveSpace$ = vi
           .fn()
           .mockReturnValue(of({ solution: 'classic' } as Pick<Space, 'solution'>));
 
@@ -355,7 +358,7 @@ describe('Navigation Plugin', () => {
     it('should be on if space solution is set', async () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
-      spaces.getActiveSpace$ = jest
+      spaces.getActiveSpace$ = vi
         .fn()
         .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
 

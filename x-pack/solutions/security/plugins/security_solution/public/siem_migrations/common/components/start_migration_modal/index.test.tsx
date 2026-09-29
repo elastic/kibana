@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -16,16 +19,16 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-jest.mock('../../../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+vi.mock('../../../../common/lib/kibana');
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
-jest.mock('../../../../common/hooks/use_space_id');
-const useSpaceIdMock = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
+vi.mock('../../../../common/hooks/use_space_id');
+const useSpaceIdMock = useSpaceId as MockedFunction<typeof useSpaceId>;
 
-jest.mock('../../../../common/components/links/link_props');
+vi.mock('../../../../common/components/links/link_props');
 
-const startMigrationWithSettingsMock = jest.fn().mockResolvedValue(undefined);
-const onCloseMock = jest.fn();
+const startMigrationWithSettingsMock = vi.fn().mockResolvedValue(undefined);
+const onCloseMock = vi.fn();
 const availableConnectorsMock: AIConnector[] = [
   {
     id: 'connector-1',
@@ -43,8 +46,8 @@ const availableConnectorsMock: AIConnector[] = [
   },
 ] as unknown as AIConnector[];
 
-jest.mock('@kbn/inference-connectors');
-const useLoadConnectorsMock = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
+vi.mock('@kbn/inference-connectors');
+const useLoadConnectorsMock = useLoadConnectors as MockedFunction<typeof useLoadConnectors>;
 
 const renderTestComponent = (props: Partial<ComponentProps<typeof StartMigrationModal>> = {}) => {
   const finalProps = {
@@ -67,14 +70,14 @@ const renderTestComponent = (props: Partial<ComponentProps<typeof StartMigration
 const siemMigrationsServiceMock = {
   rules: {
     connectorIdStorage: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   },
 };
 
 const settingsServiceMock = {
   client: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
 } as unknown as SettingsStart;
 
@@ -92,7 +95,7 @@ describe('StartMigrationModal', () => {
         notifications: { toasts: {} },
         triggersActionsUi: {
           actionTypeRegistry: {
-            get: jest.fn().mockReturnValue('Mock Action Type'),
+            get: vi.fn().mockReturnValue('Mock Action Type'),
           },
         },
         siemMigrations: siemMigrationsServiceMock,
@@ -104,7 +107,7 @@ describe('StartMigrationModal', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render successfully', () => {

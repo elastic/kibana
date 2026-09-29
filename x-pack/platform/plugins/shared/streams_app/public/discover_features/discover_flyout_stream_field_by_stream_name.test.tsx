@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,10 +18,10 @@ const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I1
 
 describe('DiscoverFlyoutStreamFieldByStreamName', () => {
   it('renders the stream name as a link without hitting any endpoint when CPS is disabled', async () => {
-    const fetch = jest.fn();
+    const fetch = vi.fn();
     const streamsRepositoryClient = { fetch } as unknown as StreamsRepositoryClient;
     const locator = {
-      getRedirectUrl: jest.fn().mockReturnValue('/app/streams/details/logs-foo-default'),
+      getRedirectUrl: vi.fn().mockReturnValue('/app/streams/details/logs-foo-default'),
     } as unknown as StreamsAppLocator;
 
     renderWithI18n(
@@ -39,10 +41,10 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
   });
 
   it('probes for local existence and renders a link when the stream exists locally with CPS enabled', async () => {
-    const fetch = jest.fn().mockResolvedValue({});
+    const fetch = vi.fn().mockResolvedValue({});
     const streamsRepositoryClient = { fetch } as unknown as StreamsRepositoryClient;
     const locator = {
-      getRedirectUrl: jest.fn().mockReturnValue('/app/streams/details/logs-foo-default'),
+      getRedirectUrl: vi.fn().mockReturnValue('/app/streams/details/logs-foo-default'),
     } as unknown as StreamsAppLocator;
 
     renderWithI18n(
@@ -65,9 +67,9 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
   });
 
   it('renders text only when the stream is remote (CPS probe fails)', async () => {
-    const fetch = jest.fn().mockRejectedValue(new Error('not found'));
+    const fetch = vi.fn().mockRejectedValue(new Error('not found'));
     const streamsRepositoryClient = { fetch } as unknown as StreamsRepositoryClient;
-    const locator = { getRedirectUrl: jest.fn() } as unknown as StreamsAppLocator;
+    const locator = { getRedirectUrl: vi.fn() } as unknown as StreamsAppLocator;
 
     renderWithI18n(
       <DiscoverFlyoutStreamFieldByStreamName
@@ -86,9 +88,9 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
   });
 
   it('renders a CCS-qualified name as annotated non-clickable text without hitting any endpoint', async () => {
-    const fetch = jest.fn();
+    const fetch = vi.fn();
     const streamsRepositoryClient = { fetch } as unknown as StreamsRepositoryClient;
-    const locator = { getRedirectUrl: jest.fn() } as unknown as StreamsAppLocator;
+    const locator = { getRedirectUrl: vi.fn() } as unknown as StreamsAppLocator;
 
     renderWithI18n(
       <DiscoverFlyoutStreamFieldByStreamName

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   ToolHandlerContext,
@@ -20,12 +23,15 @@ import { createProposeConnectorTool } from './propose_connector';
 import { CONNECTOR_SETUP_ATTACHMENT_TYPE } from '../../../common/attachments';
 import { createConnectorSetupAttachmentType } from '../../attachment_types/connector_setup';
 
-jest.mock('@kbn/connector-specs', () => ({
-  connectorsSpecs: {},
-  getConnectorSpec: jest.fn(),
-}));
+vi.mock('@kbn/connector-specs', () => {
+      const mocked = {
+      connectorsSpecs: {},
+      getConnectorSpec: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
+const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 
 const githubSpec = {
   metadata: {
@@ -38,10 +44,10 @@ const githubSpec = {
   },
   auth: { types: ['bearer', { type: 'oauth_authorization_code' }] },
   actions: {
-    searchRepositories: { isTool: true, description: 'Search repos', handler: jest.fn() },
-    internalAction: { isTool: false, description: 'Internal', handler: jest.fn() },
+    searchRepositories: { isTool: true, description: 'Search repos', handler: vi.fn() },
+    internalAction: { isTool: false, description: 'Internal', handler: vi.fn() },
   },
-  test: { handler: jest.fn(), enabled: false },
+  test: { handler: vi.fn(), enabled: false },
 };
 
 const makeActionsStart = (
@@ -58,7 +64,7 @@ const makeActionsStart = (
   }>
 ): ActionsPluginStart =>
   ({
-    listTypes: jest.fn().mockReturnValue(
+    listTypes: vi.fn().mockReturnValue(
       types.map((t) => ({
         id: t.id,
         name: t.name,
@@ -95,7 +101,7 @@ const createTestContext = () => {
 
 describe('connector-authoring inline tools', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('list_connector_types', () => {
@@ -148,7 +154,7 @@ describe('connector-authoring inline tools', () => {
           supportedFeatureIds: ['agentBuilder'],
         },
         actions: {},
-        test: { handler: jest.fn(), enabled: false },
+        test: { handler: vi.fn(), enabled: false },
       } as never);
 
       const actionsStart = makeActionsStart([{ id: '.slack2', name: 'Slack' }]);

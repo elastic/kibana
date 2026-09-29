@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 // EuiStepsHorizontal uses complex DOM measurement. Capturing the steps prop lets us
 // verify step status and onClick behavior without relying on EUI internals.
 let capturedSteps: any[] | undefined;
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiStepsHorizontal: (props: any) => {
@@ -22,21 +24,33 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('./configure_pipeline', () => ({
-  ConfigurePipeline: () => <div data-test-subj="configurePipeline" />,
-}));
+vi.mock('./configure_pipeline', () => {
+      const mocked = {
+      ConfigurePipeline: () => <div data-test-subj="configurePipeline" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./configure_fields', () => ({
-  ConfigureFields: () => <div data-test-subj="configureFields" />,
-}));
+vi.mock('./configure_fields', () => {
+      const mocked = {
+      ConfigureFields: () => <div data-test-subj="configureFields" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./test_pipeline', () => ({
-  TestPipeline: () => <div data-test-subj="testPipeline" />,
-}));
+vi.mock('./test_pipeline', () => {
+      const mocked = {
+      TestPipeline: () => <div data-test-subj="testPipeline" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./review_pipeline', () => ({
-  ReviewPipeline: () => <div data-test-subj="reviewPipeline" />,
-}));
+vi.mock('./review_pipeline', () => {
+      const mocked = {
+      ReviewPipeline: () => <div data-test-subj="reviewPipeline" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 
@@ -83,21 +97,21 @@ const DEFAULT_VALUES = {
   isPipelineDataValid: true,
   supportedMLModels,
 };
-const onClose = jest.fn();
+const onClose = vi.fn();
 
 describe('AddInferencePipelineFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedSteps = undefined;
     setMockValues({ ...DEFAULT_VALUES });
     setMockActions({
-      attachPipeline: jest.fn(),
-      createPipeline: jest.fn(),
-      makeMappingRequest: jest.fn(),
-      makeMlInferencePipelinesRequest: jest.fn(),
-      onAddInferencePipelineStepChange: jest.fn(),
-      setIndexName: jest.fn(),
-      startPollingModels: jest.fn(),
+      attachPipeline: vi.fn(),
+      createPipeline: vi.fn(),
+      makeMappingRequest: vi.fn(),
+      makeMlInferencePipelinesRequest: vi.fn(),
+      onAddInferencePipelineStepChange: vi.fn(),
+      setIndexName: vi.fn(),
+      startPollingModels: vi.fn(),
     });
   });
   it('renders AddInferencePipelineContent', () => {
@@ -107,13 +121,13 @@ describe('AddInferencePipelineFlyout', () => {
   });
   describe('AddInferencePipelineContent', () => {
     const baseActions = {
-      attachPipeline: jest.fn(),
-      createPipeline: jest.fn(),
-      onAddInferencePipelineStepChange: jest.fn(),
+      attachPipeline: vi.fn(),
+      createPipeline: vi.fn(),
+      onAddInferencePipelineStepChange: vi.fn(),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       capturedSteps = undefined;
       setMockValues({ ...DEFAULT_VALUES });
       setMockActions(baseActions);
@@ -190,9 +204,9 @@ describe('AddInferencePipelineFlyout', () => {
     const FIELDS_STEP_INDEX = 1;
     const TEST_STEP_INDEX = 2;
     const REVIEW_STEP_INDEX = 3;
-    const onAddInferencePipelineStepChange = jest.fn();
+    const onAddInferencePipelineStepChange = vi.fn();
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       capturedSteps = undefined;
       setMockValues({ ...DEFAULT_VALUES });
       setMockActions({ onAddInferencePipelineStepChange });
@@ -311,12 +325,12 @@ describe('AddInferencePipelineFlyout', () => {
   describe('ModalFooter', () => {
     const ingestionMethod = 'crawler';
     const actions = {
-      attachPipeline: jest.fn(),
-      createPipeline: jest.fn(),
-      onAddInferencePipelineStepChange: jest.fn(),
+      attachPipeline: vi.fn(),
+      createPipeline: vi.fn(),
+      onAddInferencePipelineStepChange: vi.fn(),
     };
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       setMockValues({ ...DEFAULT_VALUES });
       setMockActions(actions);
     });

@@ -5,48 +5,60 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { Location } from 'history';
 import qs from 'query-string';
 import { useDateRangeRedirect } from './use_date_range_redirect';
 
-const mockReplace = jest.fn();
+const mockReplace = vi.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ replace: mockReplace }),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({ replace: mockReplace }),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsInactiveHistoryError = jest.fn();
+const mockIsInactiveHistoryError = vi.fn();
 
-jest.mock('../components/shared/links/url_helpers', () => ({
-  isInactiveHistoryError: (...args: unknown[]) => mockIsInactiveHistoryError(...args),
-}));
+vi.mock('../components/shared/links/url_helpers', () => {
+      const mocked = {
+      isInactiveHistoryError: (...args: unknown[]) => mockIsInactiveHistoryError(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {
-      uiSettings: {
-        get: () => ({ from: 'now-15m', to: 'now' }),
-      },
-    },
-    plugins: {
-      data: {
-        query: {
-          timefilter: {
-            timefilter: {
-              getTime: () => ({ from: 'now-15m', to: 'now' }),
+vi.mock('../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {
+          uiSettings: {
+            get: () => ({ from: 'now-15m', to: 'now' }),
+          },
+        },
+        plugins: {
+          data: {
+            query: {
+              timefilter: {
+                timefilter: {
+                  getTime: () => ({ from: 'now-15m', to: 'now' }),
+                },
+              },
             },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useLocation } = jest.requireMock('react-router-dom') as {
-  useLocation: jest.Mock;
+const { useLocation } = (await vi.importMock('react-router-dom')) as {
+  useLocation: Mock;
 };
 
 const setLocation = (search: string) => {
@@ -65,7 +77,7 @@ const getReplacedSearch = (): qs.ParsedQuery<string> => {
 
 describe('useDateRangeRedirect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsInactiveHistoryError.mockReturnValue(false);
   });
 

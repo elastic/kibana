@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
 import type { KibanaRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -26,23 +29,23 @@ import { getInstallation } from './get';
 // These are defined outside jest.mock to be mutated by tests.
 // Note: jest.mock is hoisted, so we use a module-level object that the factory closure can close over.
 const mockFns = {
-  checkPrivilegesAtSpaces: jest.fn().mockResolvedValue({ hasAllRequested: true }),
-  useRbacForRequest: jest.fn().mockReturnValue(true),
+  checkPrivilegesAtSpaces: vi.fn().mockResolvedValue({ hasAllRequested: true }),
+  useRbacForRequest: vi.fn().mockReturnValue(true),
 };
 
-jest.mock('../..', () => {
+vi.mock('../..', () => {
   return {
     appContextService: {
-      getLogger: jest.fn().mockReturnValue({
-        info: jest.fn(),
-        error: jest.fn(),
-        warn: jest.fn(),
+      getLogger: vi.fn().mockReturnValue({
+        info: vi.fn(),
+        error: vi.fn(),
+        warn: vi.fn(),
       }),
-      getInternalUserSOClientWithoutSpaceExtension: jest.fn().mockReturnValue({}),
-      getExperimentalFeatures: jest.fn().mockReturnValue({
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn().mockReturnValue({}),
+      getExperimentalFeatures: vi.fn().mockReturnValue({
         enableResolveDependencies: false,
       }),
-      getSecurity: jest.fn().mockReturnValue({
+      getSecurity: vi.fn().mockReturnValue({
         authz: {
           mode: {
             useRbacForRequest: (...args: any[]) => mockFns.useRbacForRequest(...args),
@@ -52,14 +55,14 @@ jest.mock('../..', () => {
               get: (name: string) => `api:${name}`,
             },
           },
-          checkPrivilegesWithRequest: jest.fn().mockReturnValue({
+          checkPrivilegesWithRequest: vi.fn().mockReturnValue({
             atSpaces: (...args: any[]) => mockFns.checkPrivilegesAtSpaces(...args),
           }),
         },
       }),
     },
     packagePolicyService: {
-      list: jest.fn().mockImplementation((soClient, params) => {
+      list: vi.fn().mockImplementation((soClient, params) => {
         if (params.kuery.includes('system'))
           return Promise.resolve({ total: 1, items: [{ id: 'system-1', agents: 1 }] });
         else
@@ -68,52 +71,67 @@ jest.mock('../..', () => {
             items: [{ id: 'elastic_agent-1' }, { id: 'elastic_agent-2' }],
           });
       }),
-      delete: jest.fn(),
+      delete: vi.fn(),
     },
   };
 });
-jest.mock('../../audit_logging');
+vi.mock('../../audit_logging');
 
-jest.mock('../../package_policies/populate_package_policy_assigned_agents_count');
+vi.mock('../../package_policies/populate_package_policy_assigned_agents_count');
 
-jest.mock('./knowledge_base_index', () => ({
-  deletePackageKnowledgeBase: jest.fn(),
-}));
-jest.mock('./get', () => ({
-  getPackageInfo: jest.fn().mockResolvedValue({
-    name: 'test-package',
-    version: '1.0.0',
-    conditions: { kibana: { version: '^8.0.0' } },
-  }),
-  getInstallation: jest.fn(),
-}));
-jest.mock('../kibana/index_pattern/install', () => ({
-  removeUnusedIndexPatterns: jest.fn(),
-}));
-jest.mock('../archive', () => ({
-  deletePackageCache: jest.fn(),
-}));
-jest.mock('../archive/storage', () => ({
-  removeArchiveEntries: jest.fn(),
-}));
+vi.mock('./knowledge_base_index', () => {
+      const mocked = {
+      deletePackageKnowledgeBase: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get', () => {
+      const mocked = {
+      getPackageInfo: vi.fn().mockResolvedValue({
+        name: 'test-package',
+        version: '1.0.0',
+        conditions: { kibana: { version: '^8.0.0' } },
+      }),
+      getInstallation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../kibana/index_pattern/install', () => {
+      const mocked = {
+      removeUnusedIndexPatterns: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../archive', () => {
+      const mocked = {
+      deletePackageCache: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../archive/storage', () => {
+      const mocked = {
+      removeArchiveEntries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
-const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-const mockDeletePackageKnowledgeBase = deletePackageKnowledgeBase as jest.MockedFunction<
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
+const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+const mockDeletePackageKnowledgeBase = deletePackageKnowledgeBase as MockedFunction<
   typeof deletePackageKnowledgeBase
 >;
-const mockGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
-const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
+const mockGetInstallation = getInstallation as MockedFunction<typeof getInstallation>;
+const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as Mock;
 
 describe('assertUninstallAuthorizedForAffectedSpaces', () => {
   const mockRequest = {} as KibanaRequest;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFns.useRbacForRequest.mockReturnValue(true);
     mockFns.checkPrivilegesAtSpaces.mockResolvedValue({ hasAllRequested: true });
     // Re-wire after clearAllMocks: checkPrivilegesWithRequest must return the closure again
-    (appContextService.getSecurity as jest.Mock).mockReturnValue({
+    (appContextService.getSecurity as Mock).mockReturnValue({
       authz: {
         mode: {
           useRbacForRequest: (...args: any[]) => mockFns.useRbacForRequest(...args),
@@ -123,7 +141,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
             get: (name: string) => `api:${name}`,
           },
         },
-        checkPrivilegesWithRequest: jest.fn().mockReturnValue({
+        checkPrivilegesWithRequest: vi.fn().mockReturnValue({
           atSpaces: (...args: any[]) => mockFns.checkPrivilegesAtSpaces(...args),
         }),
       },
@@ -131,7 +149,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
   });
 
   it('returns without error when security is unavailable', async () => {
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(undefined);
+    (appContextService.getSecurity as Mock).mockReturnValue(undefined);
 
     await expect(
       assertUninstallAuthorizedForAffectedSpaces({
@@ -239,11 +257,11 @@ describe('cleanupDependenciesStep', () => {
 
   beforeEach(() => {
     soClientMock = {
-      get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
-      update: jest.fn().mockResolvedValue({}),
-      delete: jest.fn(),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+      get: vi.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
+      update: vi.fn().mockResolvedValue({}),
+      delete: vi.fn(),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      bulkResolve: vi.fn().mockResolvedValue({ resolved_objects: [] }),
     } as any;
     mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: true });
     mockGetInstallation.mockReset();
@@ -439,11 +457,11 @@ describe('removeInstallation', () => {
   let soClientMock: any;
   const esClientMock = {} as any;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFns.useRbacForRequest.mockReturnValue(true);
     mockFns.checkPrivilegesAtSpaces.mockResolvedValue({ hasAllRequested: true });
     // Re-wire after clearAllMocks: checkPrivilegesWithRequest must return the closure again
-    (appContextService.getSecurity as jest.Mock).mockReturnValue({
+    (appContextService.getSecurity as Mock).mockReturnValue({
       authz: {
         mode: {
           useRbacForRequest: (...args: any[]) => mockFns.useRbacForRequest(...args),
@@ -453,17 +471,17 @@ describe('removeInstallation', () => {
             get: (name: string) => `api:${name}`,
           },
         },
-        checkPrivilegesWithRequest: jest.fn().mockReturnValue({
+        checkPrivilegesWithRequest: vi.fn().mockReturnValue({
           atSpaces: (...args: any[]) => mockFns.checkPrivilegesAtSpaces(...args),
         }),
       },
     });
     soClientMock = {
-      get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
-      update: jest.fn(),
-      delete: jest.fn(),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+      get: vi.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
+      update: vi.fn(),
+      delete: vi.fn(),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      bulkResolve: vi.fn().mockResolvedValue({ resolved_objects: [] }),
     } as any;
 
     mockGetInstallation.mockResolvedValue({
@@ -689,8 +707,8 @@ describe('cleanupAssets', () => {
   const esClientMock = {} as any;
   beforeEach(() => {
     soClientMock = {
-      get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
-      update: jest.fn().mockImplementation(async (type, id, data) => {
+      get: vi.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
+      update: vi.fn().mockImplementation(async (type, id, data) => {
         return {
           id,
           type,
@@ -698,9 +716,9 @@ describe('cleanupAssets', () => {
           references: [],
         };
       }),
-      delete: jest.fn(),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+      delete: vi.fn(),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      bulkResolve: vi.fn().mockResolvedValue({ resolved_objects: [] }),
     } as any;
   });
 

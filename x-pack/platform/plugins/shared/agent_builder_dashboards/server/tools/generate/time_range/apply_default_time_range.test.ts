@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
@@ -45,20 +48,20 @@ const markdownPanel = (id: string): AttachmentPanel => ({
 
 const createMockLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 const createEsClient = (overrides: {
-  search?: jest.Mock;
-  fieldCaps?: jest.Mock;
+  search?: Mock;
+  fieldCaps?: Mock;
 }): IScopedClusterClient =>
   ({
     asCurrentUser: {
-      search: overrides.search ?? jest.fn(),
-      fieldCaps: overrides.fieldCaps ?? jest.fn(),
+      search: overrides.search ?? vi.fn(),
+      fieldCaps: overrides.fieldCaps ?? vi.fn(),
     },
   } as unknown as IScopedClusterClient);
 
@@ -73,7 +76,7 @@ const dashboard = (
 
 describe('applyDefaultDashboardTimeRange', () => {
   it('leaves an explicitly set time range untouched and never probes', async () => {
-    const search = jest.fn();
+    const search = vi.fn();
     const dashboardData = dashboard([esqlPanel('p1', Q_TIME_BOUND)], {
       time_range: { from: 'now-7d', to: 'now' },
     });
@@ -90,7 +93,7 @@ describe('applyDefaultDashboardTimeRange', () => {
   });
 
   it('does nothing when no panel is time-bound', async () => {
-    const search = jest.fn();
+    const search = vi.fn();
     const result = await applyDefaultDashboardTimeRange({
       dashboardData: dashboard([markdownPanel('md')]),
       esClient: createEsClient({ search }),
@@ -103,8 +106,8 @@ describe('applyDefaultDashboardTimeRange', () => {
   });
 
   it('sets a 24h relative range from the probed min/max for live data', async () => {
-    const search = jest.fn().mockResolvedValue(minMaxResponse(NOW - 5 * DAY_MS, NOW));
-    const fieldCaps = jest.fn();
+    const search = vi.fn().mockResolvedValue(minMaxResponse(NOW - 5 * DAY_MS, NOW));
+    const fieldCaps = vi.fn();
 
     const result = await applyDefaultDashboardTimeRange({
       dashboardData: dashboard([esqlPanel('p1', Q_TIME_BOUND)]),
@@ -121,8 +124,8 @@ describe('applyDefaultDashboardTimeRange', () => {
   });
 
   it('discovers @timestamp via field_caps when the query has no time param', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue({ fields: { '@timestamp': { date: {} } } });
-    const search = jest.fn().mockResolvedValue(minMaxResponse(NOW - 3 * DAY_MS, NOW));
+    const fieldCaps = vi.fn().mockResolvedValue({ fields: { '@timestamp': { date: {} } } });
+    const search = vi.fn().mockResolvedValue(minMaxResponse(NOW - 3 * DAY_MS, NOW));
 
     const result = await applyDefaultDashboardTimeRange({
       dashboardData: dashboard([esqlPanel('p1', Q_NO_PARAM)]),
@@ -137,8 +140,8 @@ describe('applyDefaultDashboardTimeRange', () => {
   });
 
   it('skips a dataset that has neither a time param nor @timestamp', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue({ fields: {} });
-    const search = jest.fn();
+    const fieldCaps = vi.fn().mockResolvedValue({ fields: {} });
+    const search = vi.fn();
 
     const result = await applyDefaultDashboardTimeRange({
       dashboardData: dashboard([esqlPanel('p1', Q_NO_PARAM)]),
@@ -152,7 +155,7 @@ describe('applyDefaultDashboardTimeRange', () => {
   });
 
   it('keeps the default when no dataset holds data', async () => {
-    const search = jest.fn().mockResolvedValue(minMaxResponse(null, null));
+    const search = vi.fn().mockResolvedValue(minMaxResponse(null, null));
 
     const result = await applyDefaultDashboardTimeRange({
       dashboardData: dashboard([esqlPanel('p1', Q_TIME_BOUND)]),
@@ -167,7 +170,7 @@ describe('applyDefaultDashboardTimeRange', () => {
   it('isolates a failing dataset and still computes from the healthy ones', async () => {
     const Q_METRICS =
       'FROM metrics-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS count = COUNT(*)';
-    const search = jest
+    const search = vi
       .fn()
       .mockImplementation((params: { index: string }) =>
         params.index === 'logs-*'
@@ -188,7 +191,7 @@ describe('applyDefaultDashboardTimeRange', () => {
   });
 
   it('fails soft and keeps the default when the only dataset probe errors', async () => {
-    const search = jest.fn().mockRejectedValue(new Error('cluster_block_exception'));
+    const search = vi.fn().mockRejectedValue(new Error('cluster_block_exception'));
     const logger = createMockLogger();
 
     const result = await applyDefaultDashboardTimeRange({

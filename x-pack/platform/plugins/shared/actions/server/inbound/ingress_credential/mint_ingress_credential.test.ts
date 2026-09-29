@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -33,7 +35,7 @@ describe('mintIngressCredential', () => {
   const auditLogger = auditLoggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       saved_objects: [],
       total: 0,
@@ -92,7 +94,7 @@ describe('mintIngressCredential', () => {
   });
 
   it('creates the new credential before deleting previous ones and keeps the new id', async () => {
-    const generateIdSpy = jest.spyOn(SavedObjectsUtils, 'generateId').mockReturnValue('new-cred');
+    const generateIdSpy = vi.spyOn(SavedObjectsUtils, 'generateId').mockReturnValue('new-cred');
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       saved_objects: [
         previousCredential,

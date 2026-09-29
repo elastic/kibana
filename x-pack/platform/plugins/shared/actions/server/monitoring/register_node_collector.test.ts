@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { Mock } from 'vitest';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import type { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { registerNodeCollector } from './register_node_collector';
@@ -26,7 +28,7 @@ describe('registerNodeCollector()', () => {
     expect(metricTypes.length).toBe(1);
     expect(metricTypes[0]).toBe('node_actions');
 
-    (inMemoryMetrics.getInMemoryMetric as jest.Mock).mockImplementation((metric) => {
+    (inMemoryMetrics.getInMemoryMetric as Mock).mockImplementation((metric) => {
       switch (metric) {
         case IN_MEMORY_METRICS.ACTION_FAILURES:
           return 2;

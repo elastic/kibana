@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, renderHook, act } from '@testing-library/react';
 import { UIStateProvider, useUIState } from './ui_state_context';
@@ -13,7 +15,7 @@ describe('UIStateContext', () => {
   describe('useUIState', () => {
     it('should throw error when used outside UIStateProvider', () => {
       // Suppress console.error for this test since we expect it to throw
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       expect(() => {
         renderHook(() => useUIState());

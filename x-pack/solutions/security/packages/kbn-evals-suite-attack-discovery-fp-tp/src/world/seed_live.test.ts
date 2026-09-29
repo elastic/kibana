@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { AD2_ALERTS_INDEX } from '@kbn/evals-suite-attack-discovery-agent-builder';
 import {
@@ -71,7 +74,7 @@ describe('buildLiveSeedPlan', () => {
 
 describe('cleanupManualSeedLive', () => {
   it('returns a delete-by-id query for leftover data-stream events', async () => {
-    const deleteByQuery = jest.fn().mockResolvedValue({});
+    const deleteByQuery = vi.fn().mockResolvedValue({});
 
     await cleanupManualSeedLive({ deleteByQuery } as unknown as EsClient, [
       {
@@ -98,7 +101,7 @@ describe('ensureFpTpSeedPrerequisites', () => {
   it.each(['running', 'stopped'])(
     'returns after stopping extraction when the Entity Store is %s',
     async (status) => {
-      const kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: { status } });
+      const kbnRequest = vi.fn().mockResolvedValue({ statusCode: 200, body: { status } });
 
       await ensureFpTpSeedPrerequisites(kbnRequest);
 
@@ -107,7 +110,7 @@ describe('ensureFpTpSeedPrerequisites', () => {
   );
 
   it('throws when stopping extraction fails', async () => {
-    const kbnRequest = jest.fn(async ({ path }: { path: string }) =>
+    const kbnRequest = vi.fn(async ({ path }: { path: string }) =>
       path.endsWith('/stop')
         ? { statusCode: 500, body: { message: 'boom' } }
         : { statusCode: 200, body: { status: 'running' } }
@@ -125,7 +128,7 @@ describe('ensureFpTpSeedPrerequisites', () => {
     });
 
     it('returns after restarting extraction that was running', async () => {
-      const kbnRequest = jest
+      const kbnRequest = vi
         .fn()
         .mockResolvedValue({ statusCode: 200, body: { status: 'running' } });
       const restore = await ensureFpTpSeedPrerequisites(kbnRequest);
@@ -136,7 +139,7 @@ describe('ensureFpTpSeedPrerequisites', () => {
     });
 
     it('returns without starting extraction that was already stopped', async () => {
-      const kbnRequest = jest
+      const kbnRequest = vi
         .fn()
         .mockResolvedValue({ statusCode: 200, body: { status: 'stopped' } });
       const restore = await ensureFpTpSeedPrerequisites(kbnRequest);
@@ -151,23 +154,23 @@ describe('ensureFpTpSeedPrerequisites', () => {
 describe('seedFixture', () => {
   const world = twinToWorld(buildEncodedPowershellTwin('tp'));
   let esClient: {
-    bulk: jest.Mock;
-    index: jest.Mock;
-    deleteByQuery: jest.Mock;
-    search: jest.Mock;
-    updateByQuery: jest.Mock;
+    bulk: Mock;
+    index: Mock;
+    deleteByQuery: Mock;
+    search: Mock;
+    updateByQuery: Mock;
   };
-  let kbnRequest: jest.MockedFunction<FpTpLiveKbnRequest>;
+  let kbnRequest: MockedFunction<FpTpLiveKbnRequest>;
 
   beforeEach(() => {
     esClient = {
-      bulk: jest.fn().mockResolvedValue({ errors: false }),
-      index: jest.fn().mockResolvedValue({}),
-      deleteByQuery: jest.fn().mockResolvedValue({}),
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-      updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
+      bulk: vi.fn().mockResolvedValue({ errors: false }),
+      index: vi.fn().mockResolvedValue({}),
+      deleteByQuery: vi.fn().mockResolvedValue({}),
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
+      updateByQuery: vi.fn().mockResolvedValue({ updated: 1 }),
     };
-    kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
+    kbnRequest = vi.fn().mockResolvedValue({ statusCode: 200, body: {} });
   });
 
   it('returns a cleanup that deletes the seeded Attack Discovery by id', async () => {
@@ -269,7 +272,7 @@ describe('seedFixture', () => {
   it('returns the partial-seed cleanup to onCleanupFailure when that cleanup fails', async () => {
     esClient.index.mockRejectedValue(new Error('index failed'));
     esClient.deleteByQuery.mockRejectedValue(new Error('delete failed'));
-    const onCleanupFailure = jest.fn();
+    const onCleanupFailure = vi.fn();
 
     await seedFixture({
       esClient: esClient as unknown as EsClient,

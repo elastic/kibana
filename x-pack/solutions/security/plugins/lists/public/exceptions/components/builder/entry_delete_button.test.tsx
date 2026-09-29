@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -22,7 +24,7 @@ describe('BuilderEntryDeleteButtonComponent', () => {
         nestedParentIndex={null}
         isOnlyItem={false}
         entries={getExceptionListItemSchemaMock().entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -37,7 +39,7 @@ describe('BuilderEntryDeleteButtonComponent', () => {
         nestedParentIndex={null}
         isOnlyItem={false}
         entries={getExceptionListItemSchemaMock().entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -53,7 +55,7 @@ describe('BuilderEntryDeleteButtonComponent', () => {
         nestedParentIndex={null}
         isOnlyItem={false}
         entries={getExceptionListItemSchemaMock().entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -69,7 +71,7 @@ describe('BuilderEntryDeleteButtonComponent', () => {
         nestedParentIndex={0}
         isOnlyItem={false}
         entries={getExceptionListItemSchemaMock().entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -78,7 +80,7 @@ describe('BuilderEntryDeleteButtonComponent', () => {
   });
 
   test('it invokes "onDelete" when button is clicked', () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
 
     const wrapper = mount(
       <BuilderEntryDeleteButtonComponent
@@ -109,7 +111,7 @@ describe('BuilderEntryDeleteButtonComponent', () => {
         nestedParentIndex={0}
         isOnlyItem
         entries={exceptionItem.entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -126,7 +128,7 @@ describe('BuilderEntryDeleteButtonComponent', () => {
         nestedParentIndex={null}
         isOnlyItem
         entries={getExceptionListItemSchemaMock().entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 

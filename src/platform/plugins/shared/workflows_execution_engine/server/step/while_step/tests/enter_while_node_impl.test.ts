@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { WhileStep } from '@kbn/workflows';
 import type { EnterWhileNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
@@ -35,23 +38,23 @@ describe('EnterWhileNodeImpl', () => {
       } as WhileStep,
     };
     workflowExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowExecutionRuntimeManager.navigateToNextNode = jest.fn();
-    workflowExecutionRuntimeManager.navigateToNode = jest.fn();
-    workflowExecutionRuntimeManager.enterScope = jest.fn();
+    workflowExecutionRuntimeManager.navigateToNextNode = vi.fn();
+    workflowExecutionRuntimeManager.navigateToNode = vi.fn();
+    workflowExecutionRuntimeManager.enterScope = vi.fn();
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
-    stepExecutionRuntime.startStep = jest.fn();
-    stepExecutionRuntime.finishStep = jest.fn();
-    stepExecutionRuntime.getCurrentStepState = jest.fn();
-    stepExecutionRuntime.setCurrentStepState = jest.fn();
-    stepExecutionRuntime.setInput = jest.fn();
+    stepExecutionRuntime.startStep = vi.fn();
+    stepExecutionRuntime.finishStep = vi.fn();
+    stepExecutionRuntime.getCurrentStepState = vi.fn();
+    stepExecutionRuntime.setCurrentStepState = vi.fn();
+    stepExecutionRuntime.setInput = vi.fn();
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
-    workflowLogger.logDebug = jest.fn();
+    workflowLogger.logDebug = vi.fn();
 
     stepIoService = {
-      pinLoopSource: jest.fn(),
-      unpinLoopScope: jest.fn(),
+      pinLoopSource: vi.fn(),
+      unpinLoopScope: vi.fn(),
     } as unknown as StepIoService;
 
     underTest = new EnterWhileNodeImpl(
@@ -65,7 +68,7 @@ describe('EnterWhileNodeImpl', () => {
 
   describe('on the first enter', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue(undefined);
     });
 
     it('should start the step', () => {
@@ -124,7 +127,7 @@ describe('EnterWhileNodeImpl', () => {
 
   describe('on subsequent iterations', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 0,
       });
     });
@@ -163,7 +166,7 @@ describe('EnterWhileNodeImpl', () => {
     });
 
     it('should handle higher iteration counts', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 4,
       });
 

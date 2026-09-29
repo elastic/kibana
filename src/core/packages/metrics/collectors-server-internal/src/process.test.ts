@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { HeapInfo } from 'v8';
 import v8 from 'v8';
 import { mockEventLoopDelayMonitor, mockEventLoopUtilizationMonitor } from './process.test.mocks';
@@ -21,7 +23,7 @@ describe('ProcessMetricsCollector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#collect', () => {
@@ -51,7 +53,7 @@ describe('ProcessMetricsCollector', () => {
 
     it('collects uptime info from the process', () => {
       const uptime = 58986;
-      jest.spyOn(process, 'uptime').mockImplementation(() => uptime);
+      vi.spyOn(process, 'uptime').mockImplementation(() => uptime);
 
       const metrics = collector.collect();
 
@@ -67,7 +69,7 @@ describe('ProcessMetricsCollector', () => {
       const external = 9001;
       const arrayBuffers = 42;
 
-      jest.spyOn(process, 'memoryUsage').mockImplementation(() => ({
+      vi.spyOn(process, 'memoryUsage').mockImplementation(() => ({
         rss,
         heapTotal,
         heapUsed,
@@ -75,7 +77,7 @@ describe('ProcessMetricsCollector', () => {
         arrayBuffers,
       }));
 
-      jest.spyOn(v8, 'getHeapStatistics').mockImplementation(
+      vi.spyOn(v8, 'getHeapStatistics').mockImplementation(
         () =>
           ({
             heap_size_limit: heapSizeLimit,
@@ -108,7 +110,7 @@ describe('ProcessMetricsCollector', () => {
 
   describe('register metrics in apm', () => {
     it('calls registerMetric in the constructor', () => {
-      const apmSpy = jest.spyOn(apm, 'registerMetric');
+      const apmSpy = vi.spyOn(apm, 'registerMetric');
 
       collector.registerMetrics();
 

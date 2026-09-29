@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Store } from 'redux-v4';
 import createSagaMiddleware from 'redux-saga';
 import { createStore as createReduxStore, applyMiddleware } from 'redux-v4';
@@ -16,9 +19,12 @@ import { getJourneySteps } from '../actions/journey';
 
 import { fetchJourneySteps } from '../api/journey';
 
-jest.mock('../api/journey', () => ({
-  fetchJourneySteps: jest.fn(),
-}));
+vi.mock('../api/journey', () => {
+      const mocked = {
+      fetchJourneySteps: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTestStore = (): Store => {
   const sagaMW = createSagaMiddleware();
@@ -28,11 +34,11 @@ const createTestStore = (): Store => {
 };
 
 describe('journey effect', () => {
-  afterEach(() => jest.resetAllMocks());
-  afterAll(() => jest.restoreAllMocks());
+  afterEach(() => vi.resetAllMocks());
+  afterAll(() => vi.restoreAllMocks());
 
   it('fetches only once when dispatching multiple getJourneySteps for a particular ID', () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValue({
+    (fetchJourneySteps as Mock).mockResolvedValue({
       checkGroup: 'saga-test',
       details: {
         journey: {
@@ -53,7 +59,7 @@ describe('journey effect', () => {
   });
 
   it('fetches multiple times for different IDs', () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValue({
+    (fetchJourneySteps as Mock).mockResolvedValue({
       checkGroup: 'saga-test',
       details: {
         journey: {
@@ -77,7 +83,7 @@ describe('journey effect', () => {
   });
 
   it('can re-fetch after an ID is fetched', async () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValue({
+    (fetchJourneySteps as Mock).mockResolvedValue({
       checkGroup: 'saga-test',
       details: {
         journey: {

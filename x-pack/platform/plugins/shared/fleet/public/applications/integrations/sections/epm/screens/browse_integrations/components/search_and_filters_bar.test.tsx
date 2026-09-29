@@ -5,43 +5,57 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
-const mockUseUrlFilters = jest.fn();
-const mockUseAddUrlFilters = jest.fn();
-const mockUseUrlCategories = jest.fn();
-const mockUseSetUrlCategory = jest.fn();
-const mockUseUrlDefaultCategories = jest.fn();
+const mockUseUrlFilters = vi.fn();
+const mockUseAddUrlFilters = vi.fn();
+const mockUseUrlCategories = vi.fn();
+const mockUseSetUrlCategory = vi.fn();
+const mockUseUrlDefaultCategories = vi.fn();
 
-jest.mock('../hooks/url_filters', () => ({
-  useUrlFilters: () => mockUseUrlFilters(),
-  useAddUrlFilters: () => mockUseAddUrlFilters(),
-}));
+vi.mock('../hooks/url_filters', () => {
+      const mocked = {
+      useUrlFilters: () => mockUseUrlFilters(),
+      useAddUrlFilters: () => mockUseAddUrlFilters(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/url_categories', () => ({
-  useUrlCategories: () => mockUseUrlCategories(),
-  useSetUrlCategory: () => mockUseSetUrlCategory(),
-  useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
-}));
+vi.mock('../hooks/url_categories', () => {
+      const mocked = {
+      useUrlCategories: () => mockUseUrlCategories(),
+      useSetUrlCategory: () => mockUseSetUrlCategory(),
+      useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks', () => ({}));
+vi.mock('../../../../../hooks', () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAgentless = jest.fn();
-jest.mock(
+const mockUseAgentless = vi.fn();
+vi.mock(
   '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
-  () => ({ useAgentless: () => mockUseAgentless() })
+  () => {
+      const mocked = { useAgentless: () => mockUseAgentless() };
+      return { ...mocked, default: mocked };
+    }
 );
 
 import { SearchAndFiltersBar } from './search_and_filters_bar';
 
 describe('SearchAndFiltersBar', () => {
-  const mockAddUrlFilters = jest.fn();
+  const mockAddUrlFilters = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUrlFilters.mockReturnValue({
       q: undefined,
       sort: undefined,
@@ -52,7 +66,7 @@ describe('SearchAndFiltersBar', () => {
       category: '',
       subCategory: undefined,
     });
-    mockUseSetUrlCategory.mockReturnValue(jest.fn());
+    mockUseSetUrlCategory.mockReturnValue(vi.fn());
     mockUseUrlDefaultCategories.mockReturnValue([]);
     mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
   });

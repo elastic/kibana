@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as buildQuery from './query.top_n_flow_network.dsl';
 import { networkTopNFlow, networkTopNFlowCount } from '.';
 import {
@@ -18,7 +20,7 @@ import {
 
 describe('Network TopNFlow search strategy', () => {
   describe('networkTopNFlow', () => {
-    const buildTopNFlowQuery = jest.spyOn(buildQuery, 'buildTopNFlowQuery');
+    const buildTopNFlowQuery = vi.spyOn(buildQuery, 'buildTopNFlowQuery');
 
     afterEach(() => {
       buildTopNFlowQuery.mockClear();
@@ -40,7 +42,7 @@ describe('Network TopNFlow search strategy', () => {
   });
 
   describe('networkTopNFlowCount', () => {
-    const buildTopNFlowCountQuery = jest.spyOn(buildQuery, 'buildTopNFlowCountQuery');
+    const buildTopNFlowCountQuery = vi.spyOn(buildQuery, 'buildTopNFlowCountQuery');
 
     afterEach(() => {
       buildTopNFlowCountQuery.mockClear();

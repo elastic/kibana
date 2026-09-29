@@ -7,18 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
 import { getCachedInferenceConnectorInstances } from '../../../../common/schema';
 import { stepSchemas } from '../../../../common/step_schemas';
 
-jest.mock('../../../../common/schema', () => ({
-  ...jest.requireActual('../../../../common/schema'),
-  getCachedInferenceConnectorInstances: jest.fn(() => new Map()),
-}));
+vi.mock('../../../../common/schema', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/schema')),
+      getCachedInferenceConnectorInstances: vi.fn(() => new Map()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetCachedInferenceConnectorInstances = jest.mocked(getCachedInferenceConnectorInstances);
+const mockGetCachedInferenceConnectorInstances = vi.mocked(getCachedInferenceConnectorInstances);
 
 describe('validateConnectorIds', () => {
   const mockConnectorInstance = {
@@ -139,7 +144,7 @@ describe('validateConnectorIds', () => {
     });
 
     it('should link inference endpoints to Feature Settings', () => {
-      const getStepDefinitionSpy = jest.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
+      const getStepDefinitionSpy = vi.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
         editorHandlers: {
           config: {
             'connector-id': {
@@ -324,7 +329,7 @@ describe('validateConnectorIds', () => {
     });
 
     it('should link missing inference endpoints to Feature Settings', () => {
-      const getStepDefinitionSpy = jest.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
+      const getStepDefinitionSpy = vi.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
         editorHandlers: {
           config: {
             'connector-id': {

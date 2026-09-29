@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
   ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
@@ -42,10 +45,10 @@ describe('search for attacks', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let telemetrySenderMock: ITelemetryEventsSender;
-  let reportEBT: jest.Mock;
+  let reportEBT: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
@@ -56,7 +59,7 @@ describe('search for attacks', () => {
       getEmptySignalsResponse() as any
     );
 
-    reportEBT = jest.fn();
+    reportEBT = vi.fn();
     telemetrySenderMock = {
       ...createMockTelemetryEventsSender(),
       reportEBT,
@@ -66,8 +69,8 @@ describe('search for attacks', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('search and agg on attack indices only', () => {

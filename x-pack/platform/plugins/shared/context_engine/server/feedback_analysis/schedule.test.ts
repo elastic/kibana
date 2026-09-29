@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { createHash } from 'crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -24,12 +27,12 @@ const documentIdFor = (aiIndexId: string, spaceId: string) =>
 const WORKFLOW_DOCUMENT_ID = documentIdFor('orders', DEFAULT_SPACE);
 
 describe('createFeedbackAnalysisScheduleService', () => {
-  let client: jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall'>>;
-  let workflowsManagement: { updateWorkflow: jest.Mock };
+  let client: Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall'>>;
+  let workflowsManagement: { updateWorkflow: Mock };
   let request: KibanaRequest;
   let service: ReturnType<typeof createFeedbackAnalysisScheduleService>;
 
-  const createService = (management: { updateWorkflow: jest.Mock } | undefined) =>
+  const createService = (management: { updateWorkflow: Mock } | undefined) =>
     createFeedbackAnalysisScheduleService({
       logger: loggingSystemMock.createLogger(),
       getManagedWorkflowsClient: async () => client as unknown as PluginScopedManagedWorkflowsApi,
@@ -40,10 +43,10 @@ describe('createFeedbackAnalysisScheduleService', () => {
 
   beforeEach(() => {
     client = {
-      install: jest.fn().mockResolvedValue(undefined),
-      uninstall: jest.fn().mockResolvedValue(undefined),
+      install: vi.fn().mockResolvedValue(undefined),
+      uninstall: vi.fn().mockResolvedValue(undefined),
     };
-    workflowsManagement = { updateWorkflow: jest.fn().mockResolvedValue(undefined) };
+    workflowsManagement = { updateWorkflow: vi.fn().mockResolvedValue(undefined) };
     request = httpServerMock.createKibanaRequest();
     service = createService(workflowsManagement);
   });

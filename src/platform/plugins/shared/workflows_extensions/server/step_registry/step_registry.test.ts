@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
@@ -14,7 +16,7 @@ import { ServerStepRegistry } from './step_registry';
 import { isOneShotStepDefinition, type ServerHandlerStepDefinition } from './types';
 
 const stepId = 'custom.myStep';
-const handler = jest.fn();
+const handler = vi.fn();
 const defaultDefinition: ServerHandlerStepDefinition = {
   id: stepId,
   category: StepCategory.Kibana,

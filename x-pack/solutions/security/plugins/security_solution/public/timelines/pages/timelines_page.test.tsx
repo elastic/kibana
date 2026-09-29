@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 import React from 'react';
@@ -13,25 +16,25 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { withMatchedIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
 
   return {
     ...originalModule,
-    useParams: jest.fn().mockReturnValue({
+    useParams: vi.fn().mockReturnValue({
       tabName: 'default',
     }),
   };
 });
-jest.mock('../../overview/components/events_by_dataset');
-jest.mock('../../common/components/user_privileges');
-jest.mock('../../common/hooks/use_experimental_features');
+vi.mock('../../overview/components/events_by_dataset');
+vi.mock('../../common/components/user_privileges');
+vi.mock('../../common/hooks/use_experimental_features');
 
 describe('TimelinesPage', () => {
   let wrapper: ShallowWrapper;
 
   it('should render landing page if no indicesExist', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: {
         crud: true,
       },
@@ -45,9 +48,9 @@ describe('TimelinesPage', () => {
   });
 
   it('should show the correct elements if user has crud and indices exist', () => {
-    jest.mocked(useDataView).mockImplementation(withMatchedIndices);
+    vi.mocked(useDataView).mockImplementation(withMatchedIndices);
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: {
         crud: true,
       },
@@ -61,7 +64,7 @@ describe('TimelinesPage', () => {
   });
 
   it('should not show import button or modal if user does not have crud privileges but it should show the new timeline button', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: {
         crud: false,
         read: true,

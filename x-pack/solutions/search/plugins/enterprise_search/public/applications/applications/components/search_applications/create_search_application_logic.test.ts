@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import type { HttpError } from '../../../../../common/types/api';
@@ -38,8 +40,8 @@ describe('CreateSearchApplicationLogic', () => {
   const { mount } = new LogicMounter(CreateSearchApplicationLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     apiLogicMount();
     mount();
   });
@@ -50,7 +52,7 @@ describe('CreateSearchApplicationLogic', () => {
 
   describe('listeners', () => {
     it('createSearchApplication makes expected request action with VALID_SEARCH_APPLICATION_NAME', () => {
-      jest.spyOn(CreateSearchApplicationLogic.actions, 'createSearchApplicationRequest');
+      vi.spyOn(CreateSearchApplicationLogic.actions, 'createSearchApplicationRequest');
 
       CreateSearchApplicationLogic.actions.setName(VALID_SEARCH_APPLICATION_NAME);
       CreateSearchApplicationLogic.actions.setSelectedIndices(VALID_INDICES_DATA);
@@ -69,7 +71,7 @@ describe('CreateSearchApplicationLogic', () => {
     });
 
     it('createSearchApplication makes expected request action with INVALID_SEARCH_APPLICATION_NAME', () => {
-      jest.spyOn(CreateSearchApplicationLogic.actions, 'createSearchApplicationRequest');
+      vi.spyOn(CreateSearchApplicationLogic.actions, 'createSearchApplicationRequest');
 
       CreateSearchApplicationLogic.actions.setName(INVALID_SEARCH_APPLICATION_NAME);
       CreateSearchApplicationLogic.actions.setSelectedIndices(VALID_INDICES_DATA);
@@ -101,8 +103,8 @@ describe('CreateSearchApplicationLogic', () => {
     });
 
     it('searchApplicationCreated is handled and is navigated to Search application list page', () => {
-      jest.spyOn(CreateSearchApplicationLogic.actions, 'fetchSearchApplications');
-      jest
+      vi.spyOn(CreateSearchApplicationLogic.actions, 'fetchSearchApplications');
+      vi
         .spyOn(KibanaLogic.values, 'navigateToUrl')
         .mockImplementationOnce(() => Promise.resolve());
       CreateSearchApplicationApiLogic.actions.apiSuccess({

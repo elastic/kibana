@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Either from 'fp-ts/Either';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -15,11 +17,11 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 import { updateMappings } from './update_mappings';
 import { DEFAULT_TIMEOUT } from './constants';
 
-jest.mock('./catch_retryable_es_client_errors');
+vi.mock('./catch_retryable_es_client_errors');
 
 describe('updateMappings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createErrorClient = (response: Partial<TransportResult<Record<string, any>>>) => {

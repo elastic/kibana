@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from './migrations';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
@@ -16,7 +18,7 @@ const migrationContext = migrationMocks.createContext();
 
 describe('successful migrations', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   describe('7.4.0', () => {
     test('extend task instance with updated_at', () => {

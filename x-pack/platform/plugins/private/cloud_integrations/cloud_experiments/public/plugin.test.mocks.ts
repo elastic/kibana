@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export const LaunchDarklyClientProviderMocked = jest.fn();
-jest.doMock('@openfeature/launchdarkly-client-provider', () => {
+import { vi } from 'vitest';
+
+export const LaunchDarklyClientProviderMocked = vi.fn();
+vi.doMock('@openfeature/launchdarkly-client-provider', () => {
   return {
     LaunchDarklyClientProvider: LaunchDarklyClientProviderMocked,
   };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useLatestStats } from './use_latest_stats';
 import { BehaviorSubject } from 'rxjs';
@@ -12,16 +15,16 @@ import type { SiemMigrationsServiceBase } from '../migrations_service_base';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 
 describe('useLatestStats', () => {
-  let mockMigrationService: jest.Mocked<SiemMigrationsServiceBase<MigrationTaskStats>>;
+  let mockMigrationService: Mocked<SiemMigrationsServiceBase<MigrationTaskStats>>;
   let latestStats$: BehaviorSubject<MigrationTaskStats[] | null>;
 
   beforeEach(() => {
     latestStats$ = new BehaviorSubject<MigrationTaskStats[] | null>(null);
     mockMigrationService = {
-      startPolling: jest.fn(),
-      getMigrationsStats: jest.fn(),
-      getLatestStats$: jest.fn().mockReturnValue(latestStats$),
-    } as unknown as jest.Mocked<SiemMigrationsServiceBase<MigrationTaskStats>>;
+      startPolling: vi.fn(),
+      getMigrationsStats: vi.fn(),
+      getLatestStats$: vi.fn().mockReturnValue(latestStats$),
+    } as unknown as Mocked<SiemMigrationsServiceBase<MigrationTaskStats>>;
   });
 
   it('starts polling on mount', () => {

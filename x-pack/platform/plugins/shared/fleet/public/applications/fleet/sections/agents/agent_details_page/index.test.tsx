@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from '@testing-library/react';
 
@@ -12,51 +14,63 @@ import { createFleetTestRendererMock } from '../../../../../mock';
 import type { Agent } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../services';
 
-jest.mock('../../../../../services/experimental_features');
-jest.mock('../../../hooks', () => ({
-  ...jest.requireActual('../../../hooks'),
-  useGetOneAgent: jest.fn(),
-  useGetOneAgentPolicy: jest.fn().mockReturnValue({
-    isLoading: false,
-    data: undefined,
-    sendRequest: jest.fn(),
-  }),
-  useLink: jest.fn().mockReturnValue({
-    getHref: jest.fn().mockReturnValue('#'),
-    getPath: jest.fn().mockImplementation((page: string, values: any) => {
-      if (page === 'agent_details') return `/agents/${values.agentId}`;
-      return '#';
-    }),
-  }),
-  useBreadcrumbs: jest.fn(),
-  useStartServices: jest.fn().mockReturnValue({
-    application: { navigateToApp: jest.fn() },
-    notifications: { toasts: { addError: jest.fn() } },
-  }),
-  useIntraAppState: jest.fn(),
-  sendGetAgentTagsForRq: jest.fn().mockResolvedValue({ items: [] }),
-  useAgentlessResources: jest.fn().mockReturnValue({ showAgentless: true }),
-  useGetInfoOutputsForPolicy: jest.fn().mockReturnValue({ data: undefined }),
-}));
-jest.mock('./components', () => ({
-  AgentLogs: () => <div>{'AgentLogs'}</div>,
-  AgentDetailsActionMenu: () => <div>{'AgentDetailsActionMenu'}</div>,
-  AgentDetailsContent: () => <div>{'AgentDetailsContent'}</div>,
-  AgentDiagnosticsTab: () => <div>{'AgentDiagnosticsTab'}</div>,
-}));
-jest.mock('./components/agent_settings', () => ({
-  AgentSettings: () => <div>{'AgentSettings'}</div>,
-}));
-jest.mock('./components/collector_detail', () => ({
-  CollectorDetailsContent: () => <div>{'CollectorDetailsContent'}</div>,
-}));
+vi.mock('../../../../../services/experimental_features');
+vi.mock('../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../hooks')),
+      useGetOneAgent: vi.fn(),
+      useGetOneAgentPolicy: vi.fn().mockReturnValue({
+        isLoading: false,
+        data: undefined,
+        sendRequest: vi.fn(),
+      }),
+      useLink: vi.fn().mockReturnValue({
+        getHref: vi.fn().mockReturnValue('#'),
+        getPath: vi.fn().mockImplementation((page: string, values: any) => {
+          if (page === 'agent_details') return `/agents/${values.agentId}`;
+          return '#';
+        }),
+      }),
+      useBreadcrumbs: vi.fn(),
+      useStartServices: vi.fn().mockReturnValue({
+        application: { navigateToApp: vi.fn() },
+        notifications: { toasts: { addError: vi.fn() } },
+      }),
+      useIntraAppState: vi.fn(),
+      sendGetAgentTagsForRq: vi.fn().mockResolvedValue({ items: [] }),
+      useAgentlessResources: vi.fn().mockReturnValue({ showAgentless: true }),
+      useGetInfoOutputsForPolicy: vi.fn().mockReturnValue({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components', () => {
+      const mocked = {
+      AgentLogs: () => <div>{'AgentLogs'}</div>,
+      AgentDetailsActionMenu: () => <div>{'AgentDetailsActionMenu'}</div>,
+      AgentDetailsContent: () => <div>{'AgentDetailsContent'}</div>,
+      AgentDiagnosticsTab: () => <div>{'AgentDiagnosticsTab'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components/agent_settings', () => {
+      const mocked = {
+      AgentSettings: () => <div>{'AgentSettings'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components/collector_detail', () => {
+      const mocked = {
+      CollectorDetailsContent: () => <div>{'CollectorDetailsContent'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useGetOneAgent } from '../../../hooks';
 
 import { AgentDetailsPage } from '.';
 
-const mockedUseGetOneAgent = jest.mocked(useGetOneAgent);
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+const mockedUseGetOneAgent = vi.mocked(useGetOneAgent);
+const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);
 
 const mockAgent = (overrides: Partial<Agent> = {}): Agent =>
   ({
@@ -90,7 +104,7 @@ describe('AgentDetailsPage', () => {
       isInitialRequest: false,
       error: undefined,
       data: { item: agent },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
   };
 
@@ -105,7 +119,7 @@ describe('AgentDetailsPage', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render CollectorDetailsContent for OPAMP agent when enableOtelUI is true', async () => {

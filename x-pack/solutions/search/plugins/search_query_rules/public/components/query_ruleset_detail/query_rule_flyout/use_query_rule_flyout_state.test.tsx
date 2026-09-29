@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { act, render, renderHook, waitFor } from '@testing-library/react';
@@ -15,15 +18,18 @@ import { useQueryRuleFlyoutState } from './use_query_rule_flyout_state';
 import type { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../../common/types';
 import type { DropResult, ResponderProvided } from '@elastic/eui';
 
-jest.mock('../../../hooks/use_fetch_index_names', () => ({
-  useFetchIndexNames: jest.fn().mockReturnValue({
-    data: [],
-    isLoading: false,
-    isError: false,
-  }),
-}));
+vi.mock('../../../hooks/use_fetch_index_names', () => {
+      const mocked = {
+      useFetchIndexNames: vi.fn().mockReturnValue({
+        data: [],
+        isLoading: false,
+        isError: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchIndexNames = useFetchIndexNames as jest.Mock;
+const mockUseFetchIndexNames = useFetchIndexNames as Mock;
 let mockFlyoutState: ReturnType<typeof useQueryRuleFlyoutState>;
 
 const MockComponent = ({ initialState }: { initialState?: UseQueryRuleFlyoutStateProps }) => {
@@ -33,7 +39,7 @@ const MockComponent = ({ initialState }: { initialState?: UseQueryRuleFlyoutStat
       createMode: false,
       ruleId: '',
       rules: [],
-      onSave: jest.fn(),
+      onSave: vi.fn(),
     }
   );
   return <div>test</div>;
@@ -61,7 +67,7 @@ const MockFormProvider = ({
 
 describe('useQueryRuleFlyoutState hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseFetchIndexNames.mockReturnValue({
       data: [],
       isLoading: false,
@@ -76,7 +82,7 @@ describe('useQueryRuleFlyoutState hook', () => {
           createMode: false,
           ruleId: '',
           rules: [],
-          onSave: jest.fn(),
+          onSave: vi.fn(),
         }),
       {
         wrapper: MockFormProvider,
@@ -173,7 +179,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-2',
               rules,
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -246,7 +252,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules,
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -316,7 +322,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules,
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -353,7 +359,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules,
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -406,7 +412,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules,
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -470,7 +476,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules,
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -530,7 +536,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules,
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -565,7 +571,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules,
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -590,7 +596,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules: [],
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>
@@ -628,7 +634,7 @@ describe('useQueryRuleFlyoutState hook', () => {
               rulesetId: 'ruleset-1',
               ruleId: 'rule-1',
               rules: [],
-              onSave: jest.fn(),
+              onSave: vi.fn(),
             }}
           />
         </MockFormProvider>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, mockTelemetryActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -14,33 +16,39 @@ import { of } from 'rxjs';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-const mockUseEnterpriseSearchAnalyticsNav = jest.fn().mockReturnValue([]);
+const mockUseEnterpriseSearchAnalyticsNav = vi.fn().mockReturnValue([]);
 
-jest.mock('../../../shared/layout/nav', () => ({
-  useEnterpriseSearchAnalyticsNav: (...args: any[]) => mockUseEnterpriseSearchAnalyticsNav(...args),
-}));
+vi.mock('../../../shared/layout/nav', () => {
+      const mocked = {
+      useEnterpriseSearchAnalyticsNav: (...args: any[]) => mockUseEnterpriseSearchAnalyticsNav(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // SetAnalyticsChrome renders null — mock it so we can verify the page template passes the
 // correct trail prop. SendEnterpriseSearchTelemetry is verified via mockTelemetryActions
 // (the kea_logic mock overrides any factory placed here for that module).
-jest.mock('../../../shared/kibana_chrome', () => ({
-  SetAnalyticsChrome: jest.fn(() => null),
-}));
+vi.mock('../../../shared/kibana_chrome', () => {
+      const mocked = {
+      SetAnalyticsChrome: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from './page_template';
 
-const MockedSetAnalyticsChrome = jest.mocked(SetAnalyticsChrome);
+const MockedSetAnalyticsChrome = vi.mocked(SetAnalyticsChrome);
 
 const mockValues = {
   getChromeStyle$: () => of('classic'),
-  updateSideNavDefinition: jest.fn(),
+  updateSideNavDefinition: vi.fn(),
 };
 
 describe('EnterpriseSearchAnalyticsPageTemplate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {
@@ -56,7 +64,7 @@ describe('EnterpriseSearchAnalyticsPageTemplate', () => {
   });
 
   it('updates the side nav dynamic links', async () => {
-    const updateSideNavDefinition = jest.fn();
+    const updateSideNavDefinition = vi.fn();
     setMockValues({ ...mockValues, updateSideNavDefinition });
 
     const collectionsItems = [{ foo: 'bar' }];

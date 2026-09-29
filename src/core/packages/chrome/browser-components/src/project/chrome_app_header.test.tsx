@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
@@ -31,7 +33,7 @@ describe('useHasChromeAppHeaderContent', () => {
             order: 0,
             label: 'Share',
             iconType: 'share',
-            run: jest.fn(),
+            run: vi.fn(),
           },
         ],
       },
@@ -51,7 +53,7 @@ describe('useHasChromeAppHeaderContent', () => {
     chrome.appHeader.set({
       favorite: {
         status: 'unfavorited',
-        onToggle: jest.fn(),
+        onToggle: vi.fn(),
       },
     });
 
@@ -68,7 +70,7 @@ describe('useHasChromeAppHeaderContent', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.appHeader.set({
       share: {
-        onClick: jest.fn(),
+        onClick: vi.fn(),
       },
     });
 
@@ -85,7 +87,7 @@ describe('useHasChromeAppHeaderContent', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.appHeader.set({
       experimentalDashboardAiAction: {
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         tooltip: 'Enhance this dashboard',
       },
     });
@@ -206,7 +208,7 @@ describe('useHasChromeAppHeaderContent', () => {
             order: 0,
             label: 'Share',
             iconType: 'share',
-            run: jest.fn(),
+            run: vi.fn(),
           },
         ],
       })

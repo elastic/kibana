@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { DashboardsTable } from './dashboards_table';
 import { TestProviders } from '../../common/mock';
 
 // mock lodash debounce to speed up the test
-jest.mock('lodash', () => ({ ...jest.requireActual('lodash'), debounce: (fn: () => void) => fn }));
+vi.mock('lodash', () => {
+      const mocked = { ...require('lodash'), debounce: (fn: () => void) => fn };
+      return { ...mocked, default: mocked };
+    });
 
 const DASHBOARD_TABLE_ITEMS = [
   {
@@ -31,12 +36,12 @@ const DASHBOARD_TABLE_ITEMS = [
   },
 ];
 
-const mockUseSecurityDashboardsTableItems = jest.fn(() => ({
+const mockUseSecurityDashboardsTableItems = vi.fn(() => ({
   items: DASHBOARD_TABLE_ITEMS,
   isLoading: false,
 }));
-jest.mock('../hooks/use_security_dashboards_table', () => {
-  const actual = jest.requireActual('../hooks/use_security_dashboards_table');
+vi.mock('../hooks/use_security_dashboards_table', async () => {
+  const actual = (await vi.importActual('../hooks/use_security_dashboards_table'));
   return {
     ...actual,
     useSecurityDashboardsTableItems: () => mockUseSecurityDashboardsTableItems(),

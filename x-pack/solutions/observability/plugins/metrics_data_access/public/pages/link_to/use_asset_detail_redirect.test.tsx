@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -12,13 +14,16 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { useAssetDetailsRedirect } from './use_asset_details_redirect';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(() => ({
-    pathname: '',
-    search: '',
-  })),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(() => ({
+        pathname: '',
+        search: '',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MOCK_HREF = '/app/r?l=ASSET_DETAILS_LOCATOR&v=8.15.0&lz=MoCkLoCaToRvAlUe';
 const coreStartMock = coreMock.createStart();

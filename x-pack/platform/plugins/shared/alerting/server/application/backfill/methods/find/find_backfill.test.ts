@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
@@ -195,11 +198,11 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
 
 describe('findBackfill()', () => {
   let rulesClient: RulesClient;
-  let isSystemAction: jest.Mock;
+  let isSystemAction: Mock;
 
   beforeEach(async () => {
-    jest.resetAllMocks();
-    isSystemAction = jest.fn().mockReturnValue(false);
+    vi.resetAllMocks();
+    isSystemAction = vi.fn().mockReturnValue(false);
     mockActionsClient.isSystemAction.mockImplementation(isSystemAction);
 
     rulesClient = new RulesClient({
@@ -211,25 +214,25 @@ describe('findBackfill()', () => {
       actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
       spaceId: 'default',
       namespace: 'default',
-      getUserName: jest.fn(),
-      getProfileUid: jest.fn(),
-      createAPIKey: jest.fn(),
-      cloneAPIKey: jest.fn(),
+      getUserName: vi.fn(),
+      getProfileUid: vi.fn(),
+      createAPIKey: vi.fn(),
+      cloneAPIKey: vi.fn(),
       logger: loggingSystemMock.create().get(),
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
-      getActionsClient: jest.fn().mockResolvedValue(mockActionsClient),
-      getEventLogClient: jest.fn(),
+      getActionsClient: vi.fn().mockResolvedValue(mockActionsClient),
+      getEventLogClient: vi.fn(),
       kibanaVersion,
       auditLogger,
       maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
-      isAuthenticationTypeAPIKey: jest.fn(),
-      getAuthenticationAPIKey: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
+      isAuthenticationTypeAPIKey: vi.fn(),
+      getAuthenticationAPIKey: vi.fn(),
+      getAlertIndicesAlias: vi.fn(),
       alertsService: null,
       backfillClient,
-      isSystemAction: jest.fn(),
+      isSystemAction: vi.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       isServerless: false,

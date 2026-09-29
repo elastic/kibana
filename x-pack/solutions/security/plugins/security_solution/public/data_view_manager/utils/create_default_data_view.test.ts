@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   createDefaultDataView,
   type CreateDefaultDataViewDependencies,
@@ -18,8 +21,8 @@ import {
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../common/api/initialization';
 
-jest.mock('../../helpers_access');
-jest.mock('../../common/components/initialization/api');
+vi.mock('../../helpers_access');
+vi.mock('../../common/components/initialization/api');
 
 const mockHttp = {};
 
@@ -41,9 +44,9 @@ const mockPayload = {
 
 describe('createDefaultDataView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (helpersAccess.hasAccessToSecuritySolution as jest.Mock).mockReturnValue(true);
-    (initializationApi.initializeSecuritySolution as jest.Mock).mockResolvedValue({
+    vi.clearAllMocks();
+    (helpersAccess.hasAccessToSecuritySolution as Mock).mockReturnValue(true);
+    (initializationApi.initializeSecuritySolution as Mock).mockResolvedValue({
       flows: {
         [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]: {
           status: INITIALIZATION_FLOW_STATUS_READY,
@@ -82,7 +85,7 @@ describe('createDefaultDataView', () => {
 
   it('includes attackDataView in the result when the payload contains it', async () => {
     const attackDataView = { id: 'dv-attack', title: 'attack-title', patternList: ['.attack-*'] };
-    (initializationApi.initializeSecuritySolution as jest.Mock).mockResolvedValue({
+    (initializationApi.initializeSecuritySolution as Mock).mockResolvedValue({
       flows: {
         [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]: {
           status: INITIALIZATION_FLOW_STATUS_READY,
@@ -97,7 +100,7 @@ describe('createDefaultDataView', () => {
   });
 
   it('does not call the API when the user has no access to Security Solution', async () => {
-    (helpersAccess.hasAccessToSecuritySolution as jest.Mock).mockReturnValue(false);
+    (helpersAccess.hasAccessToSecuritySolution as Mock).mockReturnValue(false);
 
     const result = await createDefaultDataView(defaultDeps);
 
@@ -107,7 +110,7 @@ describe('createDefaultDataView', () => {
   });
 
   it('sets error on all data views when the flow returns status=error', async () => {
-    (initializationApi.initializeSecuritySolution as jest.Mock).mockResolvedValue({
+    (initializationApi.initializeSecuritySolution as Mock).mockResolvedValue({
       flows: {
         [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]: {
           status: INITIALIZATION_FLOW_STATUS_ERROR,
@@ -123,7 +126,7 @@ describe('createDefaultDataView', () => {
   });
 
   it('sets error on all data views when the API call throws', async () => {
-    (initializationApi.initializeSecuritySolution as jest.Mock).mockRejectedValue(
+    (initializationApi.initializeSecuritySolution as Mock).mockRejectedValue(
       new Error('network error')
     );
 

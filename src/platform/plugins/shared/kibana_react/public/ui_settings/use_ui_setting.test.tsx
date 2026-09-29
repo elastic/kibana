@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
@@ -17,8 +20,8 @@ import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import useObservable from 'react-use/lib/useObservable';
 
-jest.mock('react-use/lib/useObservable');
-const useObservableSpy = useObservable as any as jest.SpyInstance;
+vi.mock('react-use/lib/useObservable');
+const useObservableSpy = useObservable as any as MockInstance;
 useObservableSpy.mockImplementation((observable, def) => def);
 
 const mock = (): [KibanaServices, Subject<any>] => {

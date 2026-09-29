@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
@@ -12,7 +14,7 @@ import { ScheduleDetailsButton } from './schedule_details_button';
 
 describe('ScheduleDetailsButton', () => {
   it('renders the button and tooltip', () => {
-    const onClickMock = jest.fn();
+    const onClickMock = vi.fn();
     const { getByTestId, getByLabelText } = render(<ScheduleDetailsButton onClick={onClickMock} />);
 
     const button = getByTestId('scheduleButton');
@@ -21,7 +23,7 @@ describe('ScheduleDetailsButton', () => {
   });
 
   it('calls onClick when the button is clicked', () => {
-    const onClickMock = jest.fn();
+    const onClickMock = vi.fn();
     const { getByTestId } = render(<ScheduleDetailsButton onClick={onClickMock} />);
 
     const button = getByTestId('scheduleButton');

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAlertZeroDocumentationLink } from './use_alertzero_documentation_link';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.mocked(useKibana);
+const mockUseKibana = vi.mocked(useKibana);
 
 describe('useAlertZeroDocumentationLink', () => {
   it('returns the Security solution guide link', () => {

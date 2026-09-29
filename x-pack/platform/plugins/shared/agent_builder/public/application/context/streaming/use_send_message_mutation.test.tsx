@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -22,24 +24,30 @@ import { createUserMessageEvent } from '../../components/conversations/timeline/
 import { queryKeys } from '../../query_keys';
 import { useSendMessageMutation } from './use_send_message_mutation';
 
-const mockChat = jest.fn();
-const mockAbort = jest.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
-const mockGet = jest.fn();
+const mockChat = vi.fn();
+const mockAbort = vi.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
+const mockGet = vi.fn();
 
-jest.mock('../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    chatService: { chat: mockChat, abort: mockAbort },
-    conversationsService: { get: mockGet },
-  }),
-}));
+vi.mock('../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        chatService: { chat: mockChat, abort: mockAbort },
+        conversationsService: { get: mockGet },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 const mockServices = {
   application: { currentAppId$: of(undefined) },
   plugins: {},
   notifications: {},
 };
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: mockServices }),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: mockServices }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const conversationId = 'conv-1';
 const vars = { message: 'hello', conversationId, agentId: 'agent-1' };
@@ -66,10 +74,10 @@ const setup = () => {
   const conversationStreamService = new ConversationStreamService(eventsService);
   const bindings = {
     conversationStreamService,
-    setPendingMessage: jest.fn(),
-    clearPendingMessage: jest.fn(),
-    clearActiveStream: jest.fn(),
-    markStreamStarted: jest.fn(),
+    setPendingMessage: vi.fn(),
+    clearPendingMessage: vi.fn(),
+    clearActiveStream: vi.fn(),
+    markStreamStarted: vi.fn(),
   };
   const source = new Subject<ChatEvent>();
   mockChat.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
@@ -100,7 +108,7 @@ const streamToCompletion = (source: Subject<ChatEvent>) => {
 
 describe('useSendMessageMutation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('records the staged attachments with the pending message, not the screen context', async () => {

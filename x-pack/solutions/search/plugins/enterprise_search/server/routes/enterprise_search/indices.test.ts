@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import type {
@@ -18,66 +21,111 @@ import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-jest.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history', () => ({
-  fetchMlInferencePipelineHistory: jest.fn(),
-}));
-jest.mock(
+vi.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history', () => {
+      const mocked = {
+      fetchMlInferencePipelineHistory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors',
-  () => ({
-    fetchMlInferencePipelineProcessors: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        fetchMlInferencePipelineProcessors: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline',
-  () => ({
-    preparePipelineAndIndexForMlInference: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        preparePipelineAndIndexForMlInference: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline',
-  () => ({
-    attachMlInferencePipeline: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        attachMlInferencePipeline: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
-  () => ({
-    deleteMlInferencePipeline: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        deleteMlInferencePipeline: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline',
-  () => ({
-    detachMlInferencePipeline: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        detachMlInferencePipeline: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../../lib/indices/exists_index', () => ({
-  indexOrAliasExists: jest.fn(),
-}));
-jest.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_errors', () => ({
-  getMlInferenceErrors: jest.fn(),
-}));
-jest.mock('../../lib/pipelines/ml_inference/get_ml_inference_pipelines', () => ({
-  getMlInferencePipelines: jest.fn(),
-}));
-jest.mock('../../lib/ml/fetch_ml_models', () => ({
-  fetchMlModels: jest.fn(),
-}));
-jest.mock('../../lib/ml/get_ml_model_deployment_status', () => ({
-  getMlModelDeploymentStatus: jest.fn(),
-}));
-jest.mock('../../lib/ml/start_ml_model_deployment', () => ({
-  startMlModelDeployment: jest.fn(),
-}));
-jest.mock('../../lib/ml/start_ml_model_download', () => ({
-  startMlModelDownload: jest.fn(),
-}));
-jest.mock('@kbn/ml-plugin/server/saved_objects/service', () => ({
-  mlSavedObjectServiceFactory: jest.fn(),
-}));
-jest.mock('@kbn/ml-plugin/server/lib/ml_client/ml_client', () => ({
-  getMlClient: jest.fn(),
-}));
+vi.mock('../../lib/indices/exists_index', () => {
+      const mocked = {
+      indexOrAliasExists: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_errors', () => {
+      const mocked = {
+      getMlInferenceErrors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/pipelines/ml_inference/get_ml_inference_pipelines', () => {
+      const mocked = {
+      getMlInferencePipelines: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/ml/fetch_ml_models', () => {
+      const mocked = {
+      fetchMlModels: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/ml/get_ml_model_deployment_status', () => {
+      const mocked = {
+      getMlModelDeploymentStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/ml/start_ml_model_deployment', () => {
+      const mocked = {
+      startMlModelDeployment: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/ml/start_ml_model_download', () => {
+      const mocked = {
+      startMlModelDownload: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/ml-plugin/server/saved_objects/service', () => {
+      const mocked = {
+      mlSavedObjectServiceFactory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/ml-plugin/server/lib/ml_client/ml_client', () => {
+      const mocked = {
+      getMlClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
@@ -102,11 +150,11 @@ describe('Enterprise Search Managed Indices', () => {
   const mockClient = {
     asCurrentUser: {
       ingest: {
-        getPipeline: jest.fn(),
-        putPipeline: jest.fn(),
-        simulate: jest.fn(),
+        getPipeline: vi.fn(),
+        putPipeline: vi.fn(),
+        simulate: vi.fn(),
       },
-      search: jest.fn(),
+      search: vi.fn(),
     },
   };
   const mockCore = {
@@ -114,14 +162,14 @@ describe('Enterprise Search Managed Indices', () => {
     savedObjects: { client: {} },
   };
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/errors', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -156,7 +204,7 @@ describe('Enterprise Search Managed Indices', () => {
         },
       ];
 
-      (getMlInferenceErrors as jest.Mock).mockImplementationOnce(() => {
+      (getMlInferenceErrors as Mock).mockImplementationOnce(() => {
         return Promise.resolve(errorsResult);
       });
 
@@ -182,7 +230,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -220,7 +268,7 @@ describe('Enterprise Search Managed Indices', () => {
         },
       };
 
-      (fetchMlInferencePipelineProcessors as jest.Mock).mockImplementationOnce(() => {
+      (fetchMlInferencePipelineProcessors as Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockData);
       });
 
@@ -241,7 +289,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('returns a generic error if an error is thrown from the called service', async () => {
-      (fetchMlInferencePipelineProcessors as jest.Mock).mockImplementationOnce(() => {
+      (fetchMlInferencePipelineProcessors as Mock).mockImplementationOnce(() => {
         return Promise.reject(new Error('something went wrong'));
       });
 
@@ -262,11 +310,11 @@ describe('Enterprise Search Managed Indices', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -296,7 +344,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('creates an ML inference pipeline from pipeline definition', async () => {
-      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
+      (preparePipelineAndIndexForMlInference as Mock).mockImplementationOnce(() => {
         return Promise.resolve({
           added_to_parent_pipeline: true,
           created_pipeline: true,
@@ -338,7 +386,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('responds with 409 CONFLICT if the pipeline already exists', async () => {
-      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
+      (preparePipelineAndIndexForMlInference as Mock).mockImplementationOnce(() => {
         return Promise.reject(new Error(ErrorCode.PIPELINE_ALREADY_EXISTS));
       });
 
@@ -362,7 +410,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -393,7 +441,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('attaches an ML inference pipeline', async () => {
-      (attachMlInferencePipeline as jest.Mock).mockImplementationOnce(() =>
+      (attachMlInferencePipeline as Mock).mockImplementationOnce(() =>
         Promise.resolve({
           addedToParentPipeline: true,
           created: false,
@@ -423,7 +471,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -445,7 +493,7 @@ describe('Enterprise Search Managed Indices', () => {
     it('deletes pipeline', async () => {
       const mockResponse = { deleted: pipelineName };
 
-      (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+      (deleteMlInferencePipeline as Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockResponse);
       });
 
@@ -475,7 +523,7 @@ describe('Enterprise Search Managed Indices', () => {
           },
         },
       };
-      (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+      (deleteMlInferencePipeline as Mock).mockImplementationOnce(() => {
         return Promise.reject(mockError);
       });
 
@@ -492,7 +540,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('raises error if the pipeline is in use', async () => {
-      (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+      (deleteMlInferencePipeline as Mock).mockImplementationOnce(() => {
         return Promise.reject({
           message: ErrorCode.PIPELINE_IS_IN_USE,
           pipelineName: 'my-other-index@ml-inference',
@@ -539,7 +587,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -587,7 +635,7 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName },
       };
 
-      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(false));
+      (indexOrAliasExists as Mock).mockImplementationOnce(() => Promise.resolve(false));
 
       await mockRouter.callRoute(request);
 
@@ -607,7 +655,7 @@ describe('Enterprise Search Managed Indices', () => {
         simulateKey: 'simulate value',
       };
 
-      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      (indexOrAliasExists as Mock).mockImplementationOnce(() => Promise.resolve(true));
       mockClient.asCurrentUser.ingest.simulate.mockImplementationOnce(() =>
         Promise.resolve(simulateResponse)
       );
@@ -649,7 +697,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -693,7 +741,7 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName, pipelineName },
       };
 
-      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(false));
+      (indexOrAliasExists as Mock).mockImplementationOnce(() => Promise.resolve(false));
 
       await mockRouter.callRoute(request);
 
@@ -707,7 +755,7 @@ describe('Enterprise Search Managed Indices', () => {
         docs,
         params: { indexName, pipelineName },
       };
-      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      (indexOrAliasExists as Mock).mockImplementationOnce(() => Promise.resolve(true));
       mockClient.asCurrentUser.ingest.getPipeline.mockResolvedValue({});
 
       await mockRouter.callRoute(request);
@@ -730,7 +778,7 @@ describe('Enterprise Search Managed Indices', () => {
         simulateKey: 'simulate value',
       };
 
-      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      (indexOrAliasExists as Mock).mockImplementationOnce(() => Promise.resolve(true));
       mockClient.asCurrentUser.ingest.getPipeline.mockResolvedValue({
         [pipelineName]: pipelineBody,
       });
@@ -765,7 +813,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -809,7 +857,7 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName, pipelineName },
       };
 
-      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(false));
+      (indexOrAliasExists as Mock).mockImplementationOnce(() => Promise.resolve(false));
 
       await mockRouter.callRoute(request);
 
@@ -828,7 +876,7 @@ describe('Enterprise Search Managed Indices', () => {
         putKey: 'put value',
       };
 
-      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      (indexOrAliasExists as Mock).mockImplementationOnce(() => Promise.resolve(true));
       mockClient.asCurrentUser.ingest.putPipeline.mockImplementationOnce(() =>
         Promise.resolve(putResponse)
       );
@@ -846,7 +894,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -882,7 +930,7 @@ describe('Enterprise Search Managed Indices', () => {
         ],
       };
 
-      (fetchMlInferencePipelineHistory as jest.Mock).mockResolvedValueOnce(historyResult);
+      (fetchMlInferencePipelineHistory as Mock).mockResolvedValueOnce(historyResult);
 
       await mockRouter.callRoute({
         params: { indexName: 'unit-test-index' },
@@ -900,7 +948,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('fails if fetching history fails', async () => {
-      (fetchMlInferencePipelineHistory as jest.Mock).mockRejectedValueOnce(new Error('Oh No!!!'));
+      (fetchMlInferencePipelineHistory as Mock).mockRejectedValueOnce(new Error('Oh No!!!'));
 
       await mockRouter.callRoute({
         params: { indexName: 'unit-test-index' },
@@ -925,7 +973,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -947,7 +995,7 @@ describe('Enterprise Search Managed Indices', () => {
     it('detaches pipeline', async () => {
       const mockResponse = { updated: `${indexName}@ml-inference` };
 
-      (detachMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+      (detachMlInferencePipeline as Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockResponse);
       });
 
@@ -977,7 +1025,7 @@ describe('Enterprise Search Managed Indices', () => {
           },
         },
       };
-      (detachMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+      (detachMlInferencePipeline as Mock).mockImplementationOnce(() => {
         return Promise.reject(mockError);
       });
 
@@ -1001,7 +1049,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -1035,7 +1083,7 @@ describe('Enterprise Search Managed Indices', () => {
         },
       };
 
-      (getMlInferencePipelines as jest.Mock).mockResolvedValueOnce(pipelinesResult);
+      (getMlInferencePipelines as Mock).mockResolvedValueOnce(pipelinesResult);
 
       await mockRouter.callRoute({});
 
@@ -1058,7 +1106,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -1067,14 +1115,14 @@ describe('Enterprise Search Managed Indices', () => {
       });
 
       mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
-        putTrainedModel: jest.fn(),
+        getTrainedModels: vi.fn(),
+        getTrainedModelsStats: vi.fn(),
+        putTrainedModel: vi.fn(),
       } as unknown as MlTrainedModels;
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      } as unknown as Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1104,7 +1152,7 @@ describe('Enterprise Search Managed Indices', () => {
         targetAllocationCount: 0,
       };
 
-      (startMlModelDownload as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (startMlModelDownload as Mock).mockResolvedValueOnce(mockResponse);
 
       await mockRouter.callRoute(request);
 
@@ -1122,7 +1170,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -1131,14 +1179,14 @@ describe('Enterprise Search Managed Indices', () => {
       });
 
       mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
-        startTrainedModelDeployment: jest.fn(),
+        getTrainedModels: vi.fn(),
+        getTrainedModelsStats: vi.fn(),
+        startTrainedModelDeployment: vi.fn(),
       } as unknown as MlTrainedModels;
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      } as unknown as Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1168,7 +1216,7 @@ describe('Enterprise Search Managed Indices', () => {
         targetAllocationCount: 3,
       };
 
-      (startMlModelDeployment as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (startMlModelDeployment as Mock).mockResolvedValueOnce(mockResponse);
 
       await mockRouter.callRoute(request);
 
@@ -1186,7 +1234,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -1195,13 +1243,13 @@ describe('Enterprise Search Managed Indices', () => {
       });
 
       mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
+        getTrainedModels: vi.fn(),
+        getTrainedModelsStats: vi.fn(),
       } as unknown as MlTrainedModels;
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      } as unknown as Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1220,7 +1268,7 @@ describe('Enterprise Search Managed Indices', () => {
         },
       ];
 
-      (fetchMlModels as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (fetchMlModels as Mock).mockResolvedValueOnce(mockResponse);
 
       await mockRouter.callRoute(request);
 
@@ -1238,7 +1286,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -1247,13 +1295,13 @@ describe('Enterprise Search Managed Indices', () => {
       });
 
       mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
+        getTrainedModels: vi.fn(),
+        getTrainedModelsStats: vi.fn(),
       } as unknown as MlTrainedModels;
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      } as unknown as Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1283,7 +1331,7 @@ describe('Enterprise Search Managed Indices', () => {
         targetAllocationCount: 3,
       };
 
-      (getMlModelDeploymentStatus as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (getMlModelDeploymentStatus as Mock).mockResolvedValueOnce(mockResponse);
 
       await mockRouter.callRoute(request);
 
@@ -1311,7 +1359,7 @@ describe('Enterprise Search Managed Indices', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,

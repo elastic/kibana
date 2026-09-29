@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IEventLogConfig } from './types';
 import { EventLogService } from './event_log_service';
 import { contextMock } from './es/context.mock';
@@ -125,7 +127,7 @@ describe('EventLogService', () => {
         kibanaVersion: '1.0.1',
       };
       const service = new EventLogService(params);
-      const provider = jest.fn();
+      const provider = vi.fn();
       service.registerSavedObjectProvider('myType', provider);
       expect(savedObjectProviderRegistry.registerProvider).toHaveBeenCalledWith('myType', provider);
     });

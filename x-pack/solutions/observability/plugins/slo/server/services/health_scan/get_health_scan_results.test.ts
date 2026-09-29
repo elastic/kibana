@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { getHealthScanResults } from './get_health_scan_results';
@@ -100,7 +102,7 @@ describe('getHealthScanResults', () => {
     deps.scopedClusterClient = scopedClusterClient;
     deps.taskManager = taskManager;
     taskManager.get.mockRejectedValue(new Error('not found')); // no task = scan completed
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('pagination', () => {

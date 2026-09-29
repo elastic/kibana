@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ScreenshotRefImageData } from '../../../../common/runtime_types/ping/synthetics';
 import { composeScreenshotRef } from './compose_screenshot_images';
 
 describe('composeScreenshotRef', () => {
-  let getContextMock: jest.Mock;
-  let drawImageMock: jest.Mock;
+  let getContextMock: Mock;
+  let drawImageMock: Mock;
   let ref: ScreenshotRefImageData;
   let contextMock: unknown;
 
   beforeEach(() => {
-    drawImageMock = jest.fn();
+    drawImageMock = vi.fn();
     contextMock = {
       drawImage: drawImageMock,
     };
-    getContextMock = jest.fn().mockReturnValue(contextMock);
+    getContextMock = vi.fn().mockReturnValue(contextMock);
     ref = {
       stepName: 'step',
       maxSteps: 3,

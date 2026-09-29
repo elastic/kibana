@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import {
@@ -17,7 +19,7 @@ import {
 } from '@kbn/content-list-provider';
 import { ContentListFooter } from './content_list_footer';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: Array.from({ length: 50 }, (_, i) => ({
       id: `item-${i}`,
@@ -53,7 +55,7 @@ const createWrapper =
 
 describe('ContentListFooter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -88,7 +90,7 @@ describe('ContentListFooter', () => {
   });
 
   it('renders a skeleton during initial load', () => {
-    const findItems = jest.fn(() => new Promise<FindItemsResult>(() => undefined));
+    const findItems = vi.fn(() => new Promise<FindItemsResult>(() => undefined));
     const Wrapper = createWrapper({ findItems });
 
     render(
@@ -103,7 +105,7 @@ describe('ContentListFooter', () => {
   });
 
   it('returns null when a query has no matching results', async () => {
-    const findItems = jest.fn(async (): Promise<FindItemsResult> => ({ items: [], total: 0 }));
+    const findItems = vi.fn(async (): Promise<FindItemsResult> => ({ items: [], total: 0 }));
     const Wrapper = createWrapper({ findItems, initialSearch: 'no match' });
     const { container } = render(
       <Wrapper>

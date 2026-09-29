@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fanOutBulkScheduleAction } from './fan_out_bulk_schedule_action';
 
 describe('fanOutBulkScheduleAction', () => {
   it('calls the action once per id', async () => {
-    const action = jest.fn().mockResolvedValue(undefined);
+    const action = vi.fn().mockResolvedValue(undefined);
 
     await fanOutBulkScheduleAction({ action, ids: ['a', 'b', 'c'] });
 
@@ -20,7 +22,7 @@ describe('fanOutBulkScheduleAction', () => {
   });
 
   it('returns every id as succeeded when all actions resolve', async () => {
-    const action = jest.fn().mockResolvedValue(undefined);
+    const action = vi.fn().mockResolvedValue(undefined);
 
     const result = await fanOutBulkScheduleAction({ action, ids: ['a', 'b'] });
 
@@ -28,7 +30,7 @@ describe('fanOutBulkScheduleAction', () => {
   });
 
   it('excludes failed ids and reports them as per-id errors (partial success)', async () => {
-    const action = jest.fn((id: string) =>
+    const action = vi.fn((id: string) =>
       id === 'b' ? Promise.reject(new Error('nope')) : Promise.resolve(undefined)
     );
 
@@ -40,7 +42,7 @@ describe('fanOutBulkScheduleAction', () => {
   });
 
   it('does not throw when every action fails; returns all as errors', async () => {
-    const action = jest.fn().mockRejectedValue(new Error('all bad'));
+    const action = vi.fn().mockRejectedValue(new Error('all bad'));
 
     const result = await fanOutBulkScheduleAction({ action, ids: ['a', 'b'] });
 
@@ -53,7 +55,7 @@ describe('fanOutBulkScheduleAction', () => {
   });
 
   it('stringifies non-Error rejections', async () => {
-    const action = jest.fn().mockRejectedValue('boom');
+    const action = vi.fn().mockRejectedValue('boom');
 
     const result = await fanOutBulkScheduleAction({ action, ids: ['a'] });
 
@@ -62,7 +64,7 @@ describe('fanOutBulkScheduleAction', () => {
   });
 
   it('preserves input id order regardless of resolution order', async () => {
-    const action = jest.fn((id: string) =>
+    const action = vi.fn((id: string) =>
       id === 'a'
         ? new Promise<void>((resolve) => setTimeout(resolve, 10))
         : Promise.resolve(undefined)

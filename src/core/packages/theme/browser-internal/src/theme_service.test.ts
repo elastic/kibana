@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   browsersSupportsSystemThemeMock,
   onSystemThemeChangeMock,
@@ -37,7 +39,7 @@ describe('ThemeService', () => {
     browsersSupportsSystemThemeMock.mockReset().mockReturnValue(true);
     systemThemeIsDarkMock.mockReset().mockReturnValue(false);
     onSystemThemeChangeMock.mockReset();
-    createStyleSheetMock.mockReset().mockReturnValue({ remove: jest.fn() });
+    createStyleSheetMock.mockReset().mockReturnValue({ remove: vi.fn() });
     setDarkModeMock.mockReset();
   });
 

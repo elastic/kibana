@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
@@ -15,19 +18,22 @@ import { TestChromeProviders } from '../test_helpers';
 import { SearchButton } from './search_button';
 import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
-jest.mock('@kbn/shared-ux-utility', () => ({
-  ...jest.requireActual('@kbn/shared-ux-utility'),
-  isMac: true,
-  useKeyboardShortcut: jest.fn(),
-}));
+vi.mock('@kbn/shared-ux-utility', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/shared-ux-utility')),
+      isMac: true,
+      useKeyboardShortcut: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useKeyboardShortcut } = jest.mocked(
-  jest.requireMock('@kbn/shared-ux-utility') as typeof import('@kbn/shared-ux-utility')
+const { useKeyboardShortcut } = vi.mocked(
+  (await vi.importMock('@kbn/shared-ux-utility')) as typeof import('@kbn/shared-ux-utility')
 );
 
 const renderButton = (config?: { onClick: () => void }) => {
   const chrome = chromeServiceMock.createStartContract();
-  (chrome.controls.globalSearch.get$ as jest.Mock).mockReturnValue(new BehaviorSubject(config));
+  (chrome.controls.globalSearch.get$ as Mock).mockReturnValue(new BehaviorSubject(config));
   return render(
     <TestChromeProviders chrome={chrome}>
       <SearchButton />
@@ -36,7 +42,7 @@ const renderButton = (config?: { onClick: () => void }) => {
 };
 
 describe('SearchButton', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders nothing when no config is set', () => {
     const { container } = renderButton(undefined);
@@ -45,12 +51,12 @@ describe('SearchButton', () => {
   });
 
   it('renders the search button when config is provided', () => {
-    renderButton({ onClick: jest.fn() });
+    renderButton({ onClick: vi.fn() });
     expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.searchButton)).toBeInTheDocument();
   });
 
   it('calls onClick when clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderButton({ onClick });
 
     fireEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.searchButton));
@@ -58,7 +64,7 @@ describe('SearchButton', () => {
   });
 
   it('registers keyboard shortcut', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderButton({ onClick });
 
     expect(useKeyboardShortcut).toHaveBeenCalledWith({ key: '/', meta: true }, onClick);

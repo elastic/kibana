@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -19,8 +22,8 @@ import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../comm
 // making it by far the heaviest thing rendered in this suite. For the status field it only ever
 // renders a plain `EuiBadge`, so we mock it down to that badge (preserving the click handler and the
 // `chevronSingleDown` icon the popover-open assertions rely on) to keep each render within the 5s budget.
-jest.mock('../../../../timelines/components/timeline/body/renderers/formatted_field', () => {
-  const { EuiBadge } = jest.requireActual('@elastic/eui');
+vi.mock('../../../../timelines/components/timeline/body/renderers/formatted_field', async () => {
+  const { EuiBadge } = (await vi.importActual('@elastic/eui'));
   return {
     FormattedFieldValue: ({
       value,
@@ -46,10 +49,10 @@ jest.mock('../../../../timelines/components/timeline/body/renderers/formatted_fi
   };
 });
 
-const mockReportActionClicked = jest.fn();
-const mockReportHeaderItemClicked = jest.fn();
-jest.mock('../../../shared/hooks/use_flyout_telemetry');
-const mockUseFlyoutTelemetry = useFlyoutTelemetry as jest.Mock;
+const mockReportActionClicked = vi.fn();
+const mockReportHeaderItemClicked = vi.fn();
+vi.mock('../../../shared/hooks/use_flyout_telemetry');
+const mockUseFlyoutTelemetry = useFlyoutTelemetry as Mock;
 
 // `useAlertsActions` is mocked (rather than exercised for real) so these tests stay focused on
 // this component's own rendering/wrapping logic, without needing a redux store wired up for the
@@ -57,14 +60,14 @@ const mockUseFlyoutTelemetry = useFlyoutTelemetry as jest.Mock;
 // acknowledged item is a plain `onClick`, while the closed item is a pure panel-navigation item
 // (no `onClick`, just a `panel` id) — matching how `useBulkClosingReasonItems` builds it in
 // production, to exercise `wrapActionTelemetry`'s panel-navigation handling.
-jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
-const mockUseAlertsActions = useAlertsActions as jest.Mock;
+vi.mock('../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
+const mockUseAlertsActions = useAlertsActions as Mock;
 
 const acknowledgedItem = {
   key: 'acknowledge',
   'data-test-subj': 'acknowledged-alert-status',
   name: 'Mark as acknowledged',
-  onClick: jest.fn(),
+  onClick: vi.fn(),
 };
 const closedItem = {
   key: 'close-alert-with-reason',
@@ -108,7 +111,7 @@ const props = {
     },
   },
   scopeId: 'alerts-page',
-  handleOnEventClosed: jest.fn(),
+  handleOnEventClosed: vi.fn(),
   disabled: false,
 };
 
@@ -119,11 +122,11 @@ const readPriveleges: AlertsPriveleges = {
   hasAlertsRead: true,
 };
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 describe('StatusPopoverButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseFlyoutTelemetry.mockReturnValue({
       reportActionClicked: mockReportActionClicked,
       reportHeaderItemClicked: mockReportHeaderItemClicked,
@@ -134,7 +137,7 @@ describe('StatusPopoverButton', () => {
     });
   });
   test('it renders the correct status', () => {
-    (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
 
     const { getByText } = render(
       <TestProviders>
@@ -146,7 +149,7 @@ describe('StatusPopoverButton', () => {
   });
 
   test('decorates status items with coloured dot icons', async () => {
-    (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
     const { getByText, getByTestId } = render(
       <TestProviders>
         <StatusPopoverButton {...props} />
@@ -165,7 +168,7 @@ describe('StatusPopoverButton', () => {
   });
 
   test('it shows the correct options when clicked', async () => {
-    (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
     const { getByText, container } = render(
       <TestProviders>
         <StatusPopoverButton {...props} />
@@ -181,7 +184,7 @@ describe('StatusPopoverButton', () => {
   });
 
   test('does not open the popover when disabled, even with write privileges', () => {
-    (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
     const { getByText, queryByRole } = render(
       <TestProviders>
         <StatusPopoverButton {...props} disabled={true} />
@@ -194,7 +197,7 @@ describe('StatusPopoverButton', () => {
   });
 
   test('Status should be text when user does not have write priveleges', () => {
-    (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(readPriveleges);
+    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(readPriveleges);
     mockUseAlertsActions.mockReturnValue({ actionItems: [], panels: [] });
     const { getByText, container } = render(
       <TestProviders>
@@ -213,7 +216,7 @@ describe('StatusPopoverButton', () => {
 
   describe('action telemetry', () => {
     it('reports FlyoutHeaderItemClicked when the status badge is clicked to open the popover', async () => {
-      (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
       const { getByText } = render(
         <TestProviders>
           <StatusPopoverButton {...props} />
@@ -229,7 +232,7 @@ describe('StatusPopoverButton', () => {
     });
 
     it('reports FlyoutActionClicked when marking as acknowledged', async () => {
-      (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
       const { getByText } = render(
         <TestProviders>
           <StatusPopoverButton {...props} />
@@ -250,7 +253,7 @@ describe('StatusPopoverButton', () => {
     });
 
     it('reports FlyoutActionClicked when marking as closed, without breaking panel navigation', async () => {
-      (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
       const { getByText } = render(
         <TestProviders>
           <StatusPopoverButton {...props} />
@@ -275,14 +278,14 @@ describe('StatusPopoverButton', () => {
     });
 
     it('reports FlyoutActionClicked when marking as open', async () => {
-      (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
       mockUseAlertsActions.mockReturnValue({
         actionItems: [
           {
             key: 'open',
             'data-test-subj': 'open-alert-status',
             name: 'Mark as open',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
           },
         ],
         panels: [],
@@ -305,14 +308,14 @@ describe('StatusPopoverButton', () => {
     });
 
     it('does not report telemetry for an unmapped action item', async () => {
-      (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
       mockUseAlertsActions.mockReturnValue({
         actionItems: [
           {
             key: 'custom',
             'data-test-subj': 'custom-item',
             name: 'Custom item',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
           },
         ],
         panels: [],

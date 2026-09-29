@@ -4,10 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-jest.mock('axios', () => ({
-  create: jest.fn(),
-  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
-}));
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+vi.mock('axios', () => {
+      const mocked = {
+      create: vi.fn(),
+      AxiosHeaders: require('axios').AxiosHeaders,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
@@ -17,13 +23,13 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { sendEmailGraphApi, sendEmailWithAttachments } from './send_email_graph_api';
 import type { CustomHostSettings, ProxySettings } from '@kbn/actions-utils';
 
-const createAxiosInstanceMock = axios.create as jest.Mock;
-const axiosInstanceMock = jest.fn();
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const createAxiosInstanceMock = axios.create as Mock;
+const axiosInstanceMock = vi.fn();
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 describe('sendEmailGraphApi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
   });
   const configurationUtilities = actionsConfigMock.create();

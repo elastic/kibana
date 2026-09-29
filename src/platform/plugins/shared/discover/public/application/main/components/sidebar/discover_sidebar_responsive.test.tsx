@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen, within, waitFor, act } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
@@ -39,48 +42,54 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 // There are some flaky tests in this file because they render a big DOM tree, which can take some time to run the tests.
 const EXTENDED_TIMEOUT = 60_000;
-jest.setTimeout(EXTENDED_TIMEOUT);
+vi.setConfig({ testTimeout: EXTENDED_TIMEOUT });
 
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
-  CustomDataViewPicker: jest
+  CustomDataViewPicker: vi
     .fn(() => <div data-test-subj="custom-data-view-picker" />)
     .mockName('CustomDataViewPickerMock'),
 };
 
 let mockUseCustomizations = false;
 
-jest.mock('../../../../customizations', () => ({
-  ...jest.requireActual('../../../../customizations'),
-  useDiscoverCustomization: jest.fn((id: DiscoverCustomizationId) => {
-    if (!mockUseCustomizations) {
-      return undefined;
-    }
+vi.mock('../../../../customizations', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../customizations')),
+      useDiscoverCustomization: vi.fn((id: DiscoverCustomizationId) => {
+        if (!mockUseCustomizations) {
+          return undefined;
+        }
 
-    switch (id) {
-      case 'search_bar':
-        return mockSearchBarCustomization;
-      default:
-        throw new Error(`Unknown customization id: ${id}`);
-    }
-  }),
-}));
+        switch (id) {
+          case 'search_bar':
+            return mockSearchBarCustomization;
+          default:
+            throw new Error(`Unknown customization id: ${id}`);
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRecommendedFieldsAccessor = jest.fn();
+const mockGetRecommendedFieldsAccessor = vi.fn();
 
-jest.mock('../../../../context_awareness/hooks/use_profile_accessor', () => ({
-  useProfileAccessor: jest.fn((accessorId: string) => {
-    if (accessorId === 'getRecommendedFields') {
-      return mockGetRecommendedFieldsAccessor;
-    }
-    return jest.fn(() => ({}));
-  }),
-}));
+vi.mock('../../../../context_awareness/hooks/use_profile_accessor', () => {
+      const mocked = {
+      useProfileAccessor: vi.fn((accessorId: string) => {
+        if (accessorId === 'getRecommendedFields') {
+          return mockGetRecommendedFieldsAccessor;
+        }
+        return vi.fn(() => ({}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
@@ -88,41 +97,44 @@ jest.mock('lodash', () => {
   };
 });
 
-jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
-  loadFieldStats: jest.fn().mockResolvedValue({
-    totalDocuments: 1624,
-    sampledDocuments: 1624,
-    sampledValues: 3248,
-    topValues: {
-      buckets: [
-        {
-          count: 1349,
-          key: 'gif',
+vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {
+      const mocked = {
+      loadFieldStats: vi.fn().mockResolvedValue({
+        totalDocuments: 1624,
+        sampledDocuments: 1624,
+        sampledValues: 3248,
+        topValues: {
+          buckets: [
+            {
+              count: 1349,
+              key: 'gif',
+            },
+            {
+              count: 1206,
+              key: 'zip',
+            },
+            {
+              count: 329,
+              key: 'css',
+            },
+            {
+              count: 164,
+              key: 'js',
+            },
+            {
+              count: 111,
+              key: 'png',
+            },
+            {
+              count: 89,
+              key: 'jpg',
+            },
+          ],
         },
-        {
-          count: 1206,
-          key: 'zip',
-        },
-        {
-          count: 329,
-          key: 'css',
-        },
-        {
-          count: 164,
-          key: 'js',
-        },
-        {
-          count: 111,
-          key: 'png',
-        },
-        {
-          count: 89,
-          key: 'jpg',
-        },
-      ],
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createMockServices() {
   const mockServices = {
@@ -145,19 +157,22 @@ function createMockServices() {
 }
 
 const mockfieldCounts: Record<string, number> = {};
-const mockCalcFieldCounts = jest.fn(() => {
+const mockCalcFieldCounts = vi.fn(() => {
   return mockfieldCounts;
 });
 
-jest.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => ({
-  calcFieldCounts: () => mockCalcFieldCounts(),
-}));
+vi.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => {
+      const mocked = {
+      calcFieldCounts: () => mockCalcFieldCounts(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
+vi.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 
 function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps {
   const dataView = stubLogstashDataView;
-  dataView.toSpec = jest.fn(() => ({}));
+  dataView.toSpec = vi.fn(() => ({}));
 
   const hits = options?.hits ?? getDataTableRecords(dataView);
 
@@ -173,15 +188,15 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
       fetchStatus: FetchStatus.COMPLETE,
       result: hits,
     }) as DataDocuments$,
-    onChangeDataView: jest.fn(),
-    onAddBreakdownField: jest.fn(),
-    onAddFilter: jest.fn(),
-    onAddField: jest.fn(),
-    onRemoveField: jest.fn(),
+    onChangeDataView: vi.fn(),
+    onAddBreakdownField: vi.fn(),
+    onAddFilter: vi.fn(),
+    onAddField: vi.fn(),
+    onRemoveField: vi.fn(),
     selectedDataView: dataView,
-    trackUiMetric: jest.fn(),
-    onFieldEdited: jest.fn(),
-    onDataViewCreated: jest.fn(),
+    trackUiMetric: vi.fn(),
+    onFieldEdited: vi.fn(),
+    onDataViewCreated: vi.fn(),
     sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
       isCollapsed: false,
       toggle: () => {},
@@ -235,15 +250,15 @@ async function renderComponent(
   const mockedServices = services ?? createMockServices();
   const toolkit = await setupToolkit({ ...appStateParams, services: mockedServices });
 
-  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
+  mockedServices.data.dataViews.getIdsWithTitle = vi.fn(async () =>
     props.selectedDataView
       ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
       : []
   );
-  mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
+  mockedServices.data.dataViews.get = vi.fn().mockImplementation(async (id) => {
     return [props.selectedDataView].find((d) => d!.id === id);
   });
-  mockedServices.data.query.getState = jest
+  mockedServices.data.query.getState = vi
     .fn()
     .mockImplementation(() => toolkit.getCurrentTab().appState);
 
@@ -279,7 +294,7 @@ describe('discover responsive sidebar', function () {
   let props: TestWrapperProps;
 
   beforeEach(async () => {
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => ({
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(async () => ({
       indexPatternTitle: 'test',
       existingFieldNames: Object.keys(mockfieldCounts),
     }));
@@ -292,15 +307,15 @@ describe('discover responsive sidebar', function () {
 
   afterEach(() => {
     mockCalcFieldCounts.mockClear();
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockClear();
     mockGetRecommendedFieldsAccessor.mockClear();
     resetExistingFieldsCache();
   });
 
   it('should have loading indicators during fields existence loading', async function () {
     let resolveFunction: (arg: unknown) => void;
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockReset();
+    (ExistingFieldsServiceApi.loadFieldExisting as Mock).mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
@@ -615,7 +630,7 @@ describe('discover responsive sidebar', function () {
 
   it('should not show "Add a field" button in viewer mode', async () => {
     const services = createMockServices();
-    services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
+    services.dataViewFieldEditor.userPermissions.editIndexPattern = vi.fn(() => false);
     await renderComponent(props, {}, services);
     expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
     expect(screen.queryAllByTestId('dataView-add-field_btn')).toHaveLength(0);
@@ -662,7 +677,7 @@ describe('discover responsive sidebar', function () {
 
   it('should not render Add/Edit field buttons in viewer mode', async () => {
     const services = createMockServices();
-    services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
+    services.dataViewFieldEditor.userPermissions.editIndexPattern = vi.fn(() => false);
     const { user } = await renderComponent(props, {}, services);
     expect(screen.queryAllByTestId('dataView-add-field_btn')).toHaveLength(0);
     const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
@@ -699,8 +714,8 @@ describe('discover responsive sidebar', function () {
 
   it('should not render buttons in data view picker when in viewer mode', async () => {
     const services = createMockServices();
-    services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
-    services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
+    services.dataViewEditor.userPermissions.editDataView = vi.fn(() => false);
+    services.dataViewFieldEditor.userPermissions.editIndexPattern = vi.fn(() => false);
     const propsWithPicker: TestWrapperProps = {
       ...props,
       fieldListVariant: 'button-and-flyout-always',
@@ -817,7 +832,7 @@ describe('discover responsive sidebar', function () {
         { name: 'service.name', type: 'keyword' },
         { name: 'host.name', type: 'keyword' },
       ];
-      const mockAccessorFn = jest.fn(() => ({ recommendedFields: mockRecommendedFields }));
+      const mockAccessorFn = vi.fn(() => ({ recommendedFields: mockRecommendedFields }));
       mockGetRecommendedFieldsAccessor.mockImplementation(() => mockAccessorFn);
 
       await renderComponent({

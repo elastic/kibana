@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { LegendSizeSettings } from './legend_size_settings';
 import { LegendSize, DEFAULT_LEGEND_SIZE } from '@kbn/chart-expressions-common';
@@ -43,7 +45,7 @@ describe('legend size settings', () => {
   });
 
   it('allows user to select a new option', () => {
-    const onSizeChange = jest.fn();
+    const onSizeChange = vi.fn();
 
     const instance = shallow(
       <LegendSizeSettings

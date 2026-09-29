@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEuiTheme } from '@elastic/eui';
 import { SeverityHeatmapDetailPanel } from './severity_heatmap_detail_panel';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useEuiTheme: jest.fn(),
+    useEuiTheme: vi.fn(),
   };
 });
 
-const useEuiThemeMock = jest.mocked(useEuiTheme);
+const useEuiThemeMock = vi.mocked(useEuiTheme);
 
 describe('SeverityHeatmapDetailPanel', () => {
   beforeEach(() => {
@@ -31,7 +33,7 @@ describe('SeverityHeatmapDetailPanel', () => {
   });
 
   it('renders the detail table and calls onClose when dismissed', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const user = userEvent.setup();
 
     render(
@@ -60,7 +62,7 @@ describe('SeverityHeatmapDetailPanel', () => {
         timestamp="Jan 1, 2024, 12:00:00 AM"
         eventData={null}
         euiTheme={useEuiThemeMock().euiTheme}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 

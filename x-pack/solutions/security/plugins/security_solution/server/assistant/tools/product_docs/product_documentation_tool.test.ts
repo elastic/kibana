@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RetrievalQAChain } from '@langchain/classic/chains';
 import type { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -26,7 +29,7 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 
 describe('ProductDocumentationTool', () => {
   const chain = {} as RetrievalQAChain;
-  const inferenceGet = jest.fn();
+  const inferenceGet = vi.fn();
   const esClient = {
     inference: {
       get: inferenceGet,
@@ -34,8 +37,8 @@ describe('ProductDocumentationTool', () => {
   } as unknown as ElasticsearchClient;
   const request = {} as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   const logger = loggerMock.create();
-  const retrieveDocumentation = jest.fn();
-  const retrieveDocumentationAvailable = jest.fn();
+  const retrieveDocumentation = vi.fn();
+  const retrieveDocumentationAvailable = vi.fn();
   const llmTasks = {
     retrieveDocumentation,
     retrieveDocumentationAvailable,
@@ -53,7 +56,7 @@ describe('ProductDocumentationTool', () => {
     contentReferencesStore,
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     inferenceGet.mockResolvedValue({
       endpoints: [{ inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID }],
     });
@@ -144,7 +147,7 @@ describe('ProductDocumentationTool', () => {
     it('includes citations', async () => {
       const tool = (await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
-      (retrieveDocumentation as jest.Mock).mockResolvedValue({
+      (retrieveDocumentation as Mock).mockResolvedValue({
         documents: [
           {
             title: 'exampleTitle',
@@ -155,7 +158,7 @@ describe('ProductDocumentationTool', () => {
         ] as RetrieveDocumentationResultDoc[],
       });
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           const reference = creator({ id: 'exampleContentReferenceId' });
           expect(reference.type).toEqual('ProductDocumentation');

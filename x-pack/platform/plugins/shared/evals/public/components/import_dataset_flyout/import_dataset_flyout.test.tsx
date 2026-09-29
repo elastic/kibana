@@ -5,27 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
 import { useAddExamples, useCreateDataset, useDatasets } from '../../hooks/use_evals_api';
 import { ImportDatasetFlyout } from './import_dataset_flyout';
 
-jest.mock('../../hooks/use_evals_api');
+vi.mock('../../hooks/use_evals_api');
 
-const mockedUseDatasets = jest.mocked(useDatasets);
-const mockedUseCreateDataset = jest.mocked(useCreateDataset);
-const mockedUseAddExamples = jest.mocked(useAddExamples);
+const mockedUseDatasets = vi.mocked(useDatasets);
+const mockedUseCreateDataset = vi.mocked(useCreateDataset);
+const mockedUseAddExamples = vi.mocked(useAddExamples);
 
 const mutationResult = {
-  mutateAsync: jest.fn(),
+  mutateAsync: vi.fn(),
   isLoading: false,
 };
 
 const createFile = (name: string, contents: Promise<string> | string): File => {
   const file = new File(['file'], name);
   Object.defineProperty(file, 'text', {
-    value: jest.fn().mockReturnValue(Promise.resolve(contents)),
+    value: vi.fn().mockReturnValue(Promise.resolve(contents)),
   });
   return file;
 };
@@ -47,7 +49,7 @@ const renderFlyout = (examplesCount = 0) =>
   render(
     <ImportDatasetFlyout
       initialDataset={{ id: 'dataset-1', name: 'Dataset one', examplesCount }}
-      onClose={jest.fn()}
+      onClose={vi.fn()}
     />
   );
 

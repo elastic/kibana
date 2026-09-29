@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { editPrivateLocationRoute, EditPrivateLocationSchema } from './edit_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { updatePrivateLocationMonitors } from './helpers';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
-jest.mock('../../../synthetics_service/get_private_locations', () => ({
-  getPrivateLocations: jest.fn().mockResolvedValue([]),
-  getPrivateLocationsForNamespaces: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../../../synthetics_service/get_private_locations', () => {
+      const mocked = {
+      getPrivateLocations: vi.fn().mockResolvedValue([]),
+      getPrivateLocationsForNamespaces: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Privilege-check and label-sync wiring are under test here; the actual
 // monitor rewrite is exercised by helpers.test.ts.
-jest.mock('./helpers', () => {
-  const actual = jest.requireActual('./helpers');
+vi.mock('./helpers', async () => {
+  const actual = (await vi.importActual('./helpers'));
   return {
     ...actual,
-    updatePrivateLocationMonitors: jest.fn().mockResolvedValue(undefined),
+    updatePrivateLocationMonitors: vi.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -45,11 +51,11 @@ const makeRouteContext = (body: Record<string, unknown>) => {
     response,
     savedObjectsClient: {},
     monitorConfigRepository: {
-      findDecryptedMonitors: jest.fn().mockResolvedValue([]),
+      findDecryptedMonitors: vi.fn().mockResolvedValue([]),
     },
     server: {
       coreStart: {
-        savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
+        savedObjects: { createInternalRepository: vi.fn().mockReturnValue({}) },
       },
     },
   } as any;
@@ -58,15 +64,15 @@ const makeRouteContext = (body: Record<string, unknown>) => {
 
 describe('editPrivateLocationRoute', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   const stubRepo = (updatedAttributes = {}) => {
-    jest
+    vi
       .spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation')
       .mockResolvedValue(existingLocation as any);
-    return jest
+    return vi
       .spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation')
       .mockResolvedValue({
         ...existingLocation,
@@ -125,9 +131,9 @@ describe('editPrivateLocationRoute', () => {
     ]);
     routeContext.server.security = {
       authz: {
-        checkSavedObjectsPrivilegesWithRequest: jest
+        checkSavedObjectsPrivilegesWithRequest: vi
           .fn()
-          .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
+          .mockReturnValue(vi.fn().mockResolvedValue({ hasAllRequested: false })),
       },
     };
 
@@ -145,10 +151,10 @@ describe('editPrivateLocationRoute', () => {
       { namespaces: ['space-a'] },
       { namespaces: ['space-b', 'space-a'] },
     ]);
-    const checkSavedObjectsPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
+    const checkSavedObjectsPrivileges = vi.fn().mockResolvedValue({ hasAllRequested: true });
     routeContext.server.security = {
       authz: {
-        checkSavedObjectsPrivilegesWithRequest: jest
+        checkSavedObjectsPrivilegesWithRequest: vi
           .fn()
           .mockReturnValue(checkSavedObjectsPrivileges),
       },
@@ -172,14 +178,14 @@ describe('editPrivateLocationRoute', () => {
 
     expect(updatePrivateLocationMonitors).toHaveBeenCalled();
     expect(edit).toHaveBeenCalled();
-    expect((updatePrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+    expect((updatePrivateLocationMonitors as Mock).mock.invocationCallOrder[0]).toBeLessThan(
       edit.mock.invocationCallOrder[0]
     );
   });
 
   it('does not persist the label when monitor rewrite throws', async () => {
     const edit = stubRepo({ label: 'Barcelona' });
-    (updatePrivateLocationMonitors as jest.Mock).mockRejectedValueOnce(new Error('fleet down'));
+    (updatePrivateLocationMonitors as Mock).mockRejectedValueOnce(new Error('fleet down'));
     const { routeContext } = makeRouteContext({ label: 'Barcelona' });
 
     await expect(editPrivateLocationRoute().handler(routeContext)).rejects.toThrow('fleet down');
@@ -187,7 +193,7 @@ describe('editPrivateLocationRoute', () => {
   });
 
   it('passes the new label to monitor rewrite before the saved object is persisted', async () => {
-    (getPrivateLocations as jest.Mock).mockResolvedValue([
+    (getPrivateLocations as Mock).mockResolvedValue([
       { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
       { id: 'loc-2', label: 'Other', agentPolicyId: 'ap-2', isServiceManaged: false },
     ]);

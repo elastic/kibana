@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,17 +15,23 @@ import { ConnectorSetup } from './connector_setup';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { useKibana } from '../../../../../../common/lib/kibana';
-jest.mock('../../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/elastic-assistant/impl/connectorland/add_connector_modal', () => ({
-  AddConnectorModal: jest.fn(() => <div data-test-subj="addConnectorModal">{'Mock Modal'}</div>),
-}));
+vi.mock('@kbn/elastic-assistant/impl/connectorland/add_connector_modal', () => {
+      const mocked = {
+      AddConnectorModal: vi.fn(() => <div data-test-subj="addConnectorModal">{'Mock Modal'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ConnectorSetup', () => {
   const mockActionTypeRegistry = {
-    get: jest.fn(() => ({ iconClass: 'testIcon' })),
+    get: vi.fn(() => ({ iconClass: 'testIcon' })),
   };
 
   const mockActionTypes: ActionType[] = [
@@ -40,7 +49,7 @@ describe('ConnectorSetup', () => {
   ];
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry },
       },
@@ -48,7 +57,7 @@ describe('ConnectorSetup', () => {
   });
 
   it('renders correctly', () => {
-    render(<ConnectorSetup actionTypes={mockActionTypes} onConnectorSaved={jest.fn()} />);
+    render(<ConnectorSetup actionTypes={mockActionTypes} onConnectorSaved={vi.fn()} />);
 
     expect(mockActionTypeRegistry.get).toHaveBeenCalledWith('testType1');
     expect(mockActionTypeRegistry.get).toHaveBeenCalledWith('testType2');
@@ -57,7 +66,7 @@ describe('ConnectorSetup', () => {
   });
 
   it('opens the modal when the button is clicked', async () => {
-    render(<ConnectorSetup actionTypes={mockActionTypes} onConnectorSaved={jest.fn()} />);
+    render(<ConnectorSetup actionTypes={mockActionTypes} onConnectorSaved={vi.fn()} />);
 
     await userEvent.click(screen.getByTestId('createConnectorButton'));
 
@@ -65,7 +74,7 @@ describe('ConnectorSetup', () => {
   });
 
   it('calls onConnectorSaved when a connector is saved', async () => {
-    const mockOnConnectorSaved = jest.fn();
+    const mockOnConnectorSaved = vi.fn();
     render(
       <ConnectorSetup actionTypes={mockActionTypes} onConnectorSaved={mockOnConnectorSaved} />
     );

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   screen,
   fireEvent,
@@ -37,11 +39,11 @@ import {
 } from '../helpers/actions/data_stream_actions';
 import { closeViewFilterPopoverIfOpen } from '../helpers/actions/popover_cleanup';
 
-jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+vi.mock('react-use/lib/useObservable', () => () => vi.fn());
 
 const nonBreakingSpace = ' ';
 
-const getRedirectUrl = jest.fn(() => '/app/path');
+const getRedirectUrl = vi.fn(() => '/app/path');
 
 const urlServiceMock = {
   locators: {
@@ -64,13 +66,13 @@ describe('Data Streams tab', () => {
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
     httpService.setup(httpServiceMock.createSetupContract());
-    jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+    vi.spyOn(breadcrumbService, 'setBreadcrumbs');
   });
 
   afterEach(async () => {

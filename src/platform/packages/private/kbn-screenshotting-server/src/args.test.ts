@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import os from 'os';
 import { args } from './args';
 
 describe('headless webgl arm mac workaround', () => {
   const originalPlatform = process.platform;
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     Object.defineProperty(process, 'platform', {
       value: originalPlatform,
     });
@@ -21,7 +23,7 @@ describe('headless webgl arm mac workaround', () => {
 
   const simulateEnv = (platform: string, arch: ReturnType<typeof os.arch>) => {
     Object.defineProperty(process, 'platform', { value: platform });
-    jest.spyOn(os, 'arch').mockReturnValue(arch);
+    vi.spyOn(os, 'arch').mockReturnValue(arch);
   };
 
   test('disables gpu', () => {

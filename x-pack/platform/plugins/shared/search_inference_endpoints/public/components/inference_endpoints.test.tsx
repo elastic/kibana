@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 
 import React from 'react';
@@ -17,23 +20,29 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { InferenceEndpoints } from './inference_endpoints';
 
-const mockRefetch = jest.fn();
+const mockRefetch = vi.fn();
 
-jest.mock('../hooks/use_inference_endpoints', () => ({
-  useQueryInferenceEndpoints: jest.fn(),
-}));
+vi.mock('../hooks/use_inference_endpoints', () => {
+      const mocked = {
+      useQueryInferenceEndpoints: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_delete_endpoint', () => ({
-  useDeleteEndpoint: () => ({
-    mutate: jest.fn().mockImplementation(() => Promise.resolve()),
-  }),
-}));
+vi.mock('../hooks/use_delete_endpoint', () => {
+      const mocked = {
+      useDeleteEndpoint: () => ({
+        mutate: vi.fn().mockImplementation(() => Promise.resolve()),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...actual,
-    useKibana: jest.fn(() => ({
+    useKibana: vi.fn(() => ({
       services: {
         cloud: { isCloudEnabled: false },
         application: {
@@ -41,16 +50,16 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
             cloudConnect: { show: true, configure: true },
             searchInferenceEndpoints: { show: true, manage: true },
           },
-          navigateToApp: jest.fn(),
+          navigateToApp: vi.fn(),
         },
       },
     })),
   };
 });
 
-const mockUseKibana = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
+const mockUseKibana = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
 
-const { useQueryInferenceEndpoints } = jest.requireMock('../hooks/use_inference_endpoints');
+const { useQueryInferenceEndpoints } = (await vi.importMock('../hooks/use_inference_endpoints'));
 
 const mixedEndpoints: InferenceAPIConfigResponse[] = [
   {
@@ -112,7 +121,7 @@ const renderComponent = () => {
 
 describe('InferenceEndpoints', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows loading spinner while data is loading', () => {
@@ -258,7 +267,7 @@ describe('InferenceEndpoints', () => {
               cloudConnect: { show: true, configure: true },
               searchInferenceEndpoints: { show: true, manage: false },
             },
-            navigateToApp: jest.fn(),
+            navigateToApp: vi.fn(),
           },
         },
       });

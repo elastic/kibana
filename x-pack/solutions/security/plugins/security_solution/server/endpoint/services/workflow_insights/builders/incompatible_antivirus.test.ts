@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import moment from 'moment';
@@ -24,21 +27,21 @@ import { prefixIndexPatternsWithCcs } from '../../../utils/ccs_utils';
 import { groupEndpointIdsByOS } from '../helpers';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
-jest.mock('../helpers', () => {
-  const actualHelpers = jest.requireActual('../helpers');
+vi.mock('../helpers', async () => {
+  const actualHelpers = (await vi.importActual('../helpers'));
   return {
     ...actualHelpers,
-    groupEndpointIdsByOS: jest.fn(),
+    groupEndpointIdsByOS: vi.fn(),
   };
 });
 
 describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   const mockEndpointAppContextService = createMockEndpointAppContext().service;
-  mockEndpointAppContextService.getEndpointMetadataService = jest.fn().mockReturnValue({
-    getMetadataForEndpoints: jest.fn(),
+  mockEndpointAppContextService.getEndpointMetadataService = vi.fn().mockReturnValue({
+    getMetadataForEndpoints: vi.fn(),
   });
   const endpointMetadataService =
-    mockEndpointAppContextService.getEndpointMetadataService() as jest.Mocked<EndpointMetadataService>;
+    mockEndpointAppContextService.getEndpointMetadataService() as Mocked<EndpointMetadataService>;
 
   const DEFAULT_FILE_PATH =
     '/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity';
@@ -62,7 +65,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     ],
     endpointMetadataService,
     esClient: {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: [],
         },
@@ -148,7 +151,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     });
 
   it('should correctly build workflow insights', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
     const params = generateParams();
@@ -162,12 +165,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should correctly build workflow insights for Windows with signerId provided', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
     const params = generateParams('test.com');
 
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -205,12 +208,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should correctly build workflow insights for Windows with signerId provided as object', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
     const params = generateParams('test.com');
 
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -246,12 +249,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should fallback to createRemediation without signer field when no valid signatures exist for Windows', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
     const params = generateParams('test.com');
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -273,12 +276,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should skip Microsoft Windows Hardware Compatibility Publisher and use the next trusted signature for Windows', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
     const params = generateParams();
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -312,13 +315,13 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should correctly build workflow insights for MacOS with signerId provided', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
     const params = generateParams('test.com');
 
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -352,12 +355,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should fallback to createRemediation without signer field for macOS when no code_signature exists', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
     const params = generateParams();
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -375,13 +378,13 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should prefix file events index pattern when ccsEnabled is true', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
     const params = generateParams();
     params.ccsEnabled = true;
-    const searchMock = jest.fn().mockResolvedValue({
+    const searchMock = vi.fn().mockResolvedValue({
       hits: {
         hits: [],
       },
@@ -398,12 +401,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should derive the trusted app name from process.name when a code-signature hit exists', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
     const params = generateParams('test.com');
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -435,7 +438,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should fall back to the file path basename when no code-signature hit exists', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
@@ -449,12 +452,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should fall back to the file path basename when process.name is not a string', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
     const params = generateParams('test.com');
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -486,7 +489,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should derive the basename from windows paths with backslash and mixed separators', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
@@ -501,7 +504,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should derive the basename from non-windows paths with forward slash separators', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -516,7 +519,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should ignore trailing separators when deriving the basename', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
@@ -531,7 +534,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should clamp the derived name to MAX_NAME_LENGTH', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -552,7 +555,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should produce no insight for an empty file path', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
@@ -564,7 +567,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should produce no insight for a whitespace-only file path, for every OS group', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
       macos: ['endpoint-1'],
     });
@@ -578,7 +581,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should resolve with no insight for a non-string file path, for every OS group', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
       macos: ['endpoint-1'],
     });
@@ -589,7 +592,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should skip only the events with an unusable file path and keep the rest', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
@@ -614,7 +617,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should skip an event with a non-string file path and keep the remaining valid events', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
@@ -638,7 +641,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should derive the name from a separators-only forward-slash file path on windows and non-windows', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
@@ -649,7 +652,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
       buildExpectedInsight({ os: 'windows', expectedName: '/', filePath: '/' }),
     ]);
 
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -662,7 +665,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should derive the name from a separators-only backslash file path on windows and non-windows', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       windows: ['endpoint-1'],
     });
 
@@ -673,7 +676,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
       buildExpectedInsight({ os: 'windows', expectedName: '\\', filePath: '\\' }),
     ]);
 
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -686,12 +689,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should fall through to the file path basename when process.name is an empty string', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
     const params = generateParams('test.com');
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -723,7 +726,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should use the whole file path as the name when it has no separator', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -738,7 +741,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should preserve a backslash as part of the filename on non-windows file paths', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -753,12 +756,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should derive the name from process.name when the code-signature hit has no valid signature', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
     const params = generateParams('test.com');
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -791,7 +794,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should clamp the emitted name to MAX_NAME_LENGTH UTF-16 code units when the boundary splits a two-code-unit character', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -814,7 +817,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should clamp a name made entirely of astral characters to MAX_NAME_LENGTH UTF-16 code units', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -837,7 +840,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should keep a name of exactly MAX_NAME_LENGTH code units ending in a two-code-unit character', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       linux: ['endpoint-1'],
     });
 
@@ -859,12 +862,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should use a single unpaired high surrogate from process.name', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
     const params = generateParams('test.com');
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -897,12 +900,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   });
 
   it('should retain trailing unpaired high surrogates from process.name', async () => {
-    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+    (groupEndpointIdsByOS as Mock).mockResolvedValue({
       macos: ['endpoint-1'],
     });
 
     const params = generateParams('test.com');
-    params.esClient.search = jest.fn().mockResolvedValue({
+    params.esClient.search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {

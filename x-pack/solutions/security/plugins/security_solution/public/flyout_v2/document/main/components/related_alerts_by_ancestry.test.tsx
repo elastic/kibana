@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -20,12 +23,12 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../hooks/use_fetch_related_alerts_by_ancestry');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../hooks/use_fetch_related_alerts_by_ancestry');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('../../../../common/lib/kibana');
 
-const mockOnShowCorrelationsDetails = jest.fn();
+const mockOnShowCorrelationsDetails = vi.fn();
 
 const documentId = 'documentId';
 
@@ -48,10 +51,10 @@ const renderRelatedAlertsByAncestry = (documentIndex?: string) =>
 
 describe('<RelatedAlertsByAncestry />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({ indexPatterns: ['index'] });
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({ indexPatterns: ['index'] });
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: {
           get: () => undefined,
@@ -61,7 +64,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should render single related alert correctly', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 1,
@@ -73,7 +76,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should render multiple related alerts correctly', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 2,
@@ -85,7 +88,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should render loading skeleton', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: true,
     });
 
@@ -94,7 +97,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should render null if error', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: true,
     });
@@ -104,7 +107,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should open the expanded section to the correct tab when the number is clicked', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 1,
@@ -117,7 +120,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should use default interval values to fetch alerts by ancestry when nothing is persisted', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 0,
@@ -133,7 +136,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('passes the default patterns unchanged when no document index is provided', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 0,
@@ -147,7 +150,7 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('prepends the project-qualified document index to the ancestry search indices', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 0,
@@ -163,14 +166,14 @@ describe('<RelatedAlertsByAncestry />', () => {
   });
 
   it('should use the persisted time range from local storage to fetch alerts by ancestry', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: {
           get: () => ({ start: 'now-7d', end: 'now-3d' }),
         },
       },
     });
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 0,

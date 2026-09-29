@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { getHostRiskScoreColumns } from './columns';
@@ -13,8 +15,8 @@ import type { HostRiskScoreColumns } from '.';
 describe('getHostRiskScoreColumns', () => {
   test('should render host score rounded', () => {
     const columns: HostRiskScoreColumns = getHostRiskScoreColumns({
-      dispatchSeverityUpdate: jest.fn(),
-      openHostFlyout: jest.fn(),
+      dispatchSeverityUpdate: vi.fn(),
+      openHostFlyout: vi.fn(),
     });
 
     const riskScore = 10.11111111;

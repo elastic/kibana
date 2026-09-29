@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/dom';
 
@@ -18,12 +20,12 @@ describe('MigrateAgentFlyout', () => {
 
   beforeEach(() => {
     // Reset the mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     component = renderer.render(
       <AgentMigrateFlyout
-        onClose={jest.fn()}
-        onSave={jest.fn()}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
         agents={[
           {
             active: true,
@@ -73,8 +75,8 @@ describe('MigrateAgentFlyout', () => {
   it('replace token field should not be visible when there is more than one agent', () => {
     component.rerender(
       <AgentMigrateFlyout
-        onClose={jest.fn()}
-        onSave={jest.fn()}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
         agents={[
           {
             active: true,
@@ -105,8 +107,8 @@ describe('MigrateAgentFlyout', () => {
   it('alert panel should be visible and show protected and or fleet-server agents when there are any', () => {
     component.rerender(
       <AgentMigrateFlyout
-        onClose={jest.fn()}
-        onSave={jest.fn()}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
         agents={[
           {
             active: true,
@@ -154,8 +156,8 @@ describe('MigrateAgentFlyout', () => {
   it('should show containerized agents warning message', () => {
     component.rerender(
       <AgentMigrateFlyout
-        onClose={jest.fn()}
-        onSave={jest.fn()}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
         agents={[
           {
             active: true,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
 import { addEventsStepDefinition } from './add_events';
@@ -15,9 +17,9 @@ const createContext = (input: unknown) =>
 
 describe('addEventsStepDefinition', () => {
   it('adds events to a case', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -45,9 +47,9 @@ describe('addEventsStepDefinition', () => {
   });
 
   it('creates a single event attachment for multiple events with the same index', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -77,9 +79,9 @@ describe('addEventsStepDefinition', () => {
   });
 
   it('creates one event attachment per distinct index', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);

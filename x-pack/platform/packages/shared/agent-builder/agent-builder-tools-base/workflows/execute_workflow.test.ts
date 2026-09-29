@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -12,36 +15,42 @@ import { executeWorkflow } from './execute_workflow';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
-const mockSetAttribute = jest.fn();
-const mockUpdateName = jest.fn();
-const mockSpanFactory = jest.fn((_name: string, _opts: unknown, fn: (span?: unknown) => unknown) =>
+const mockSetAttribute = vi.fn();
+const mockUpdateName = vi.fn();
+const mockSpanFactory = vi.fn((_name: string, _opts: unknown, fn: (span?: unknown) => unknown) =>
   fn({ setAttribute: mockSetAttribute, updateName: mockUpdateName })
 );
 
-jest.mock('@kbn/inference-tracing', () => ({
-  withActiveInferenceSpan: (...args: unknown[]) =>
-    (mockSpanFactory as unknown as (...a: unknown[]) => unknown)(...args),
-  ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
-  GenAISemanticConventions: {
-    GenAIOperationName: 'gen_ai.operation.name',
-    GenAIWorkflowName: 'gen_ai.workflow.name',
-  },
-}));
+vi.mock('@kbn/inference-tracing', () => {
+      const mocked = {
+      withActiveInferenceSpan: (...args: unknown[]) =>
+        (mockSpanFactory as unknown as (...a: unknown[]) => unknown)(...args),
+      ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
+      GenAISemanticConventions: {
+        GenAIOperationName: 'gen_ai.operation.name',
+        GenAIWorkflowName: 'gen_ai.workflow.name',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_execution_state', () => ({
-  toWorkflowExecutionState: jest.fn((execution) => ({
-    execution_id: execution.id,
-    status: execution.status,
-    workflow_id: execution.workflowId,
-    started_at: execution.startedAt,
-    finished_at: execution.finishedAt,
-    workflow_name: execution.workflowDefinition.name,
-  })),
-}));
+vi.mock('./get_execution_state', () => {
+      const mocked = {
+      toWorkflowExecutionState: vi.fn((execution) => ({
+        execution_id: execution.id,
+        status: execution.status,
+        workflow_id: execution.workflowId,
+        started_at: execution.startedAt,
+        finished_at: execution.finishedAt,
+        workflow_name: execution.workflowDefinition.name,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('executeWorkflow', () => {
   const request = httpServerMock.createKibanaRequest();
-  let mockWorkflowApi: jest.Mocked<WorkflowApi>;
+  let mockWorkflowApi: Mocked<WorkflowApi>;
 
   const workflowExecution = {
     id: 'exec-1',
@@ -58,15 +67,15 @@ describe('executeWorkflow', () => {
 
   beforeEach(() => {
     mockWorkflowApi = {
-      executeWorkflow: jest.fn().mockResolvedValue({
+      executeWorkflow: vi.fn().mockResolvedValue({
         workflowExecutionId: 'exec-1',
         execution: workflowExecution,
       }),
-    } as unknown as jest.Mocked<WorkflowApi>;
+    } as unknown as Mocked<WorkflowApi>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('forwards metadata to executeWorkflow when provided (saved workflow)', async () => {

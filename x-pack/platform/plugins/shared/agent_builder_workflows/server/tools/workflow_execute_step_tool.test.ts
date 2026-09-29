@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type {
   ConfirmPromptDefinition,
@@ -136,12 +139,12 @@ interface MockContextOptions {
 }
 
 const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
-  const askForConfirmation = jest.fn(
+  const askForConfirmation = vi.fn(
     (def: ConfirmPromptDefinition): ToolHandlerPromptReturn => ({
       prompt: { type: AgentPromptType.confirmation, ...def },
     })
   );
-  const checkConfirmationStatus = jest.fn().mockReturnValue({
+  const checkConfirmationStatus = vi.fn().mockReturnValue({
     status: options.promptStatus ?? ConfirmationStatus.unprompted,
   });
 
@@ -162,7 +165,7 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
       askForConfirmation,
     },
     attachments: {
-      getActive: jest.fn().mockReturnValue(
+      getActive: vi.fn().mockReturnValue(
         yaml
           ? [
               {
@@ -179,22 +182,22 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
 
 describe('registerWorkflowExecuteStepTool', () => {
   let registeredTool: BuiltinToolDefinition;
-  const getSecurity = jest.fn<SecurityPluginStart | undefined, []>();
+  const getSecurity = vi.fn<SecurityPluginStart | undefined, []>();
 
   const mockApi = {
-    testStep: jest.fn(),
-    getWorkflowExecution: jest.fn(),
-    validateWorkflow: jest.fn(),
+    testStep: vi.fn(),
+    getWorkflowExecution: vi.fn(),
+    validateWorkflow: vi.fn(),
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getSecurity.mockReturnValue(undefined);
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltinToolDefinition) => {
+        register: vi.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },
@@ -204,7 +207,7 @@ describe('registerWorkflowExecuteStepTool', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('registers with correct id', () => {
@@ -214,7 +217,7 @@ describe('registerWorkflowExecuteStepTool', () => {
   it.each([true, false])(
     'does not execute a step without execute privilege (inline=%s)',
     async (inline) => {
-      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: false });
+      const atSpace = vi.fn().mockResolvedValue({ hasAllRequested: false });
       getSecurity.mockReturnValue({
         authz: {
           actions: { api: { get: (action: string) => `api:${action}` } },
@@ -265,7 +268,7 @@ describe('registerWorkflowExecuteStepTool', () => {
 
   describe('safe step execution', () => {
     it('executes a console step and returns result', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-123');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -304,7 +307,7 @@ describe('registerWorkflowExecuteStepTool', () => {
     });
 
     it('executes an elasticsearch.search step (safe)', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-456');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -323,7 +326,7 @@ describe('registerWorkflowExecuteStepTool', () => {
     });
 
     it('executes a cases.getCase step (safe)', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-cases-123');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -356,7 +359,7 @@ describe('registerWorkflowExecuteStepTool', () => {
       ['slack2.resolveChannelId', { name: 'general' }],
       ['slack2.searchMessages', { query: 'release' }],
     ])('executes a %s step without prompting', async (stepType, withParams) => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       const yaml = `version: '1'
 name: slack-read
@@ -388,7 +391,7 @@ steps:
     });
 
     it('passes contextOverride to testStep', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-789');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -418,7 +421,7 @@ steps:
     });
 
     it('returns failed status when step execution fails', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-fail');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -438,7 +441,7 @@ steps:
     });
 
     it('executes a nested safe step (inside if.steps)', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-nested');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -466,7 +469,7 @@ steps:
     });
 
     it('executes a nested safe step (inside if.else)', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-else');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -485,7 +488,7 @@ steps:
     });
 
     it('stubs unsafe children for a nested if step before execution', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-inner-if');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -507,7 +510,7 @@ steps:
     });
 
     it('returns error when testStep throws', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockRejectedValue(new Error('Workflow validation failed'));
 
@@ -520,7 +523,7 @@ steps:
     });
 
     it('preserves validationErrors when testStep throws WorkflowValidationError', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockRejectedValue(
         new WorkflowValidationError('Workflow validation failed', ['Step names must be unique'])
@@ -547,7 +550,7 @@ steps:
       const context = createMockContext(VALID_WORKFLOW_YAML);
       const resultPromise = invokeHandler(registeredTool, { stepName: 'log_step' }, context);
 
-      await jest.advanceTimersByTimeAsync(30_000);
+      await vi.advanceTimersByTimeAsync(30_000);
 
       const result = await resultPromise;
       const data = result.results[0].data as Record<string, unknown>;
@@ -626,7 +629,7 @@ steps:
     });
 
     it('stubs and executes an if step that contains an unsafe child', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-check-alerts');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -664,7 +667,7 @@ steps:
     });
 
     it('allows an if step where all children are safe', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-safe-if');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -684,7 +687,7 @@ steps:
     });
 
     it('stubs unsafe fallback children under on-failure', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-fallback');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -792,7 +795,7 @@ steps:
     });
 
     it('executes the step after the user accepts the prompt', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
       mockApi.testStep.mockResolvedValue('exec-slack-accepted');
       mockApi.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.COMPLETED,
@@ -862,8 +865,8 @@ steps:
         contextB
       );
 
-      const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
-      const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      const idA = (contextA.prompts.askForConfirmation as Mock).mock.calls[0][0].id;
+      const idB = (contextB.prompts.askForConfirmation as Mock).mock.calls[0][0].id;
       expect(idA).toBe(idB);
       expect(idA).toContain('tc_round_trip');
     });
@@ -889,8 +892,8 @@ steps:
         contextB
       );
 
-      const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
-      const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      const idA = (contextA.prompts.askForConfirmation as Mock).mock.calls[0][0].id;
+      const idB = (contextB.prompts.askForConfirmation as Mock).mock.calls[0][0].id;
       expect(idA).not.toBe(idB);
     });
 
@@ -934,7 +937,7 @@ steps:
     });
 
     it('keeps if/while-with-unsafe-children on the stub path (no prompt)', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
       mockApi.testStep.mockResolvedValue('exec-stub');
       mockApi.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.COMPLETED,
@@ -954,7 +957,7 @@ steps:
     });
 
     it('does not prompt for safe step types', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
       mockApi.testStep.mockResolvedValue('exec-safe');
       mockApi.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.COMPLETED,

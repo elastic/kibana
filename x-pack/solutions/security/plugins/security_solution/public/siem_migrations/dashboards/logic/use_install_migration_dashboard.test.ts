@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useInstallMigrationDashboard } from './use_install_migration_dashboard';
@@ -15,30 +18,42 @@ import { useInvalidateGetMigrationDashboards } from './use_get_migration_dashboa
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 
-jest.mock('../api');
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addSuccess: jest.fn(),
-    addError: jest.fn(),
-  }),
-}));
-jest.mock('./use_get_migration_dashboards', () => ({
-  useInvalidateGetMigrationDashboards: jest.fn(),
-}));
-jest.mock('./use_get_migration_translation_stats', () => ({
-  useInvalidateGetMigrationTranslationStats: jest.fn(),
-}));
-jest.mock('../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../api');
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addSuccess: vi.fn(),
+        addError: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_get_migration_dashboards', () => {
+      const mocked = {
+      useInvalidateGetMigrationDashboards: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_get_migration_translation_stats', () => {
+      const mocked = {
+      useInvalidateGetMigrationTranslationStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockResponse = { installed: 1 };
 const mockError = new Error('API error');
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const invalidateDashboards = jest.fn();
-const invalidateStats = jest.fn();
-const mockReportTranslatedItemInstall = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const invalidateDashboards = vi.fn();
+const invalidateStats = vi.fn();
+const mockReportTranslatedItemInstall = vi.fn();
 
 const mockDashboard: DashboardMigrationDashboard = {
   id: 'dash-1',
@@ -67,14 +82,14 @@ describe('useInstallMigrationDashboard', () => {
   const migrationId = 'mig-1';
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({
       addSuccess: mockAddSuccess,
       addError: mockAddError,
     });
-    (useInvalidateGetMigrationDashboards as jest.Mock).mockReturnValue(invalidateDashboards);
-    (useInvalidateGetMigrationTranslationStats as jest.Mock).mockReturnValue(invalidateStats);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useInvalidateGetMigrationDashboards as Mock).mockReturnValue(invalidateDashboards);
+    (useInvalidateGetMigrationTranslationStats as Mock).mockReturnValue(invalidateStats);
+    (useKibana as Mock).mockReturnValue({
       services: {
         siemMigrations: {
           dashboards: {
@@ -89,7 +104,7 @@ describe('useInstallMigrationDashboard', () => {
 
   describe('on success', () => {
     beforeEach(() => {
-      (installMigrationDashboards as jest.Mock).mockResolvedValue(mockResponse);
+      (installMigrationDashboards as Mock).mockResolvedValue(mockResponse);
       const { result } = renderHook(() => useInstallMigrationDashboard(migrationId), {
         wrapper: TestProviders,
       });
@@ -122,7 +137,7 @@ describe('useInstallMigrationDashboard', () => {
 
   describe('on error', () => {
     beforeEach(() => {
-      (installMigrationDashboards as jest.Mock).mockRejectedValue(mockError);
+      (installMigrationDashboards as Mock).mockRejectedValue(mockError);
       const { result } = renderHook(() => useInstallMigrationDashboard(migrationId), {
         wrapper: TestProviders,
       });

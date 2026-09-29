@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { createPromiseFromStreams } from './promise_from_streams';
@@ -16,7 +18,7 @@ import { createConcatStream } from './concat_stream';
 
 describe('createMapStream()', () => {
   test('calls the function with each item in the source stream', async () => {
-    const mapper = jest.fn();
+    const mapper = vi.fn();
 
     await createPromiseFromStreams([createListStream(['a', 'b', 'c']), createMapStream(mapper)]);
 

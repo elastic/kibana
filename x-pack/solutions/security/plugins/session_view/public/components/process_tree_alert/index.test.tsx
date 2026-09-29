@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import {
   mockAlerts,
@@ -30,9 +32,9 @@ describe('ProcessTreeAlerts component', () => {
     alert: mockAlert,
     isInvestigated: false,
     isSelected: false,
-    onClick: jest.fn(),
-    selectAlert: jest.fn(),
-    onShowAlertDetails: jest.fn(),
+    onClick: vi.fn(),
+    selectAlert: vi.fn(),
+    onShowAlertDetails: vi.fn(),
   };
 
   beforeEach(() => {
@@ -62,7 +64,7 @@ describe('ProcessTreeAlerts component', () => {
     });
 
     it('should execute onClick callback', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       renderResult = mockedContext.render(<ProcessTreeAlert {...props} onClick={onClick} />);
 
       const alertRow = renderResult.queryByTestId(TEST_ID);
@@ -72,7 +74,7 @@ describe('ProcessTreeAlerts component', () => {
     });
 
     it('should automatically call selectAlert when isInvestigated is true', async () => {
-      const selectAlert = jest.fn();
+      const selectAlert = vi.fn();
       renderResult = mockedContext.render(
         <ProcessTreeAlert {...props} selectAlert={selectAlert} isInvestigated />
       );
@@ -118,8 +120,8 @@ describe('ProcessTreeAlerts component', () => {
     });
 
     it('should execute onShowAlertDetails callback when clicking on expand button', async () => {
-      const onShowAlertDetails = jest.fn();
-      const onClick = jest.fn();
+      const onShowAlertDetails = vi.fn();
+      const onClick = vi.fn();
       renderResult = mockedContext.render(
         <ProcessTreeAlert
           {...props}

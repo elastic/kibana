@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -15,9 +18,9 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { AddModelPopover } from './add_model_popover';
 import { useConnectors } from '../../hooks/use_connectors';
 
-jest.mock('../../hooks/use_connectors');
+vi.mock('../../hooks/use_connectors');
 
-const mockUseConnectors = useConnectors as jest.Mock;
+const mockUseConnectors = useConnectors as Mock;
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const queryClient = new QueryClient();
@@ -93,10 +96,10 @@ const mockConnectors: InferenceConnector[] = [
 ];
 
 describe('AddModelPopover', () => {
-  const onAdd = jest.fn();
+  const onAdd = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseConnectors.mockReturnValue({ data: mockConnectors });
   });
 

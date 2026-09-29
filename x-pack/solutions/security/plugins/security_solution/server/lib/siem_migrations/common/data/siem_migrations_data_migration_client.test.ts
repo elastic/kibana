@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { SiemMigrationsDataMigrationClient } from './siem_migrations_data_migration_client';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -22,7 +25,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
     elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
 
   const logger = loggingSystemMock.createLogger();
-  const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-rule-migrations');
+  const indexNameProvider = vi.fn().mockReturnValue('.kibana-siem-rule-migrations');
   const currentUser = {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
@@ -40,7 +43,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -64,7 +67,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
     });
 
     test('should throw an error if an error occurs', async () => {
-      (esClient.asInternalUser.create as unknown as jest.MockedFn<IndexApi>).mockRejectedValueOnce(
+      (esClient.asInternalUser.create as unknown as MockedFunction<IndexApi>).mockRejectedValueOnce(
         new Error('Test error')
       );
 
@@ -89,7 +92,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         _id: id,
       };
 
-      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockResolvedValueOnce(
+      (esClient.asInternalUser.get as unknown as MockedFunction<GetApi>).mockResolvedValueOnce(
         response
       );
 
@@ -108,7 +111,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         found: false,
       };
 
-      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockRejectedValueOnce({
+      (esClient.asInternalUser.get as unknown as MockedFunction<GetApi>).mockRejectedValueOnce({
         message: JSON.stringify(response),
       });
 
@@ -119,7 +122,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
 
     test('should throw an error if an error occurs', async () => {
       const id = 'testId';
-      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockRejectedValueOnce(
+      (esClient.asInternalUser.get as unknown as MockedFunction<GetApi>).mockRejectedValueOnce(
         new Error('Test error')
       );
 
@@ -131,7 +134,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
   });
 
   describe('prepareDelete', () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => vi.clearAllMocks());
 
     it('should delete the migration and associated rules and resources', async () => {
       const migrationId = 'testId';
@@ -175,7 +178,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         },
       } as unknown as ReturnType<typeof esClient.asInternalUser.search>;
 
-      (esClient.asInternalUser.search as unknown as jest.MockedFn<SearchApi>).mockResolvedValueOnce(
+      (esClient.asInternalUser.search as unknown as MockedFunction<SearchApi>).mockResolvedValueOnce(
         response
       );
 
@@ -220,7 +223,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         const migrationId = 'testId';
         const mockStartedAt = new Date(Date.now() - 5000).toISOString();
 
-        esClient.asInternalUser.get = jest.fn().mockResolvedValue({
+        esClient.asInternalUser.get = vi.fn().mockResolvedValue({
           _index: '.kibana-siem-rule-migrations',
           found: true,
           _source: {
@@ -248,7 +251,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         });
 
         // Now, assert that total_execution_time_ms is greater than 5000
-        const callArgs = (esClient.asInternalUser.update as jest.Mock).mock.calls[0][0].doc
+        const callArgs = (esClient.asInternalUser.update as Mock).mock.calls[0][0].doc
           .last_execution;
         expect(callArgs.total_execution_time_ms).toBeGreaterThanOrEqual(5000);
       });
@@ -258,7 +261,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         const mockStartedAt = new Date(Date.now() - 5000).toISOString();
         const existingExecutionTime = 10000;
 
-        esClient.asInternalUser.get = jest.fn().mockResolvedValue({
+        esClient.asInternalUser.get = vi.fn().mockResolvedValue({
           _index: '.kibana-siem-rule-migrations',
           found: true,
           _source: {
@@ -287,7 +290,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         });
 
         // Now, assert that total_execution_time_ms is greater than existingExecutionTime
-        const callArgs = (esClient.asInternalUser.update as jest.Mock).mock.calls[0][0].doc
+        const callArgs = (esClient.asInternalUser.update as Mock).mock.calls[0][0].doc
           .last_execution;
         expect(callArgs.total_execution_time_ms).toBeGreaterThanOrEqual(15000);
       });
@@ -315,7 +318,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
       it('should update `error` params correctly when called saveAsFailed', async () => {
         const migrationId = 'testId';
 
-        esClient.asInternalUser.get = jest.fn().mockResolvedValue({
+        esClient.asInternalUser.get = vi.fn().mockResolvedValue({
           _index: '.kibana-siem-rule-migrations',
           found: true,
           _source: {

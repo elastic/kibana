@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { RuleExecutionTelemetryMiddleware } from './telemetry_middleware';
 import { createRuleExecutionMiddlewareContext } from './test_utils';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
@@ -13,11 +16,11 @@ import { QueryResponseSizeExceededError } from '../../errors/query_response_size
 import type { RuleExecutionTelemetryContract } from '../otel/rule_execution_telemetry';
 
 describe('RuleExecutionTelemetryMiddleware', () => {
-  let telemetry: jest.Mocked<RuleExecutionTelemetryContract>;
+  let telemetry: Mocked<RuleExecutionTelemetryContract>;
   let middleware: RuleExecutionTelemetryMiddleware;
 
   beforeEach(() => {
-    telemetry = { recordQueryResponseSizeExceeded: jest.fn() };
+    telemetry = { recordQueryResponseSizeExceeded: vi.fn() };
     middleware = new RuleExecutionTelemetryMiddleware(telemetry);
   });
 
@@ -28,7 +31,7 @@ describe('RuleExecutionTelemetryMiddleware', () => {
 
   it('passes results through untouched on success', async () => {
     const state = createRulePipelineState();
-    const next = jest.fn().mockImplementation((input) => input);
+    const next = vi.fn().mockImplementation((input) => input);
 
     const results = await collectStreamResults(
       middleware.execute(
@@ -46,7 +49,7 @@ describe('RuleExecutionTelemetryMiddleware', () => {
     const state = createRulePipelineState({ rule: createRuleResponse({ kind: 'signal' }) });
     const error = new QueryResponseSizeExceededError('breach', 10 * 1024 * 1024);
     // Consume the input (as a step would) before failing, so the rule kind is observed.
-    const next = jest.fn().mockImplementation((input) =>
+    const next = vi.fn().mockImplementation((input) =>
       (async function* () {
         for await (const _ of input) {
           throw error;
@@ -73,7 +76,7 @@ describe('RuleExecutionTelemetryMiddleware', () => {
 
   it('reports the rule kind as unknown when the step failed before any state flowed in', async () => {
     const error = new QueryResponseSizeExceededError('recovery');
-    const next = jest.fn().mockReturnValue(failingStream(error));
+    const next = vi.fn().mockReturnValue(failingStream(error));
 
     await expect(
       collectStreamResults(
@@ -89,7 +92,7 @@ describe('RuleExecutionTelemetryMiddleware', () => {
 
   it('ignores other errors and rethrows them', async () => {
     const error = new Error('boom');
-    const next = jest.fn().mockReturnValue(failingStream(error));
+    const next = vi.fn().mockReturnValue(failingStream(error));
 
     await expect(
       collectStreamResults(

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { DeleteSLOInstances } from './delete_slo_instances';
 
 describe('DeleteSLOInstances', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
   let deleteSLOInstances: DeleteSLOInstances;
 
   beforeEach(() => {

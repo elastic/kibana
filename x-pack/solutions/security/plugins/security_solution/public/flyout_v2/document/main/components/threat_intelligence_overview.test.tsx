@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -28,8 +31,8 @@ import {
 } from '../../../shared/components/test_ids';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../tools/threat_intelligence/hooks/use_fetch_threat_intelligence');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../tools/threat_intelligence/hooks/use_fetch_threat_intelligence');
+vi.mock('../../../../common/lib/kibana');
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
@@ -68,7 +71,7 @@ const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableR
     isAnchor: false,
   } as DataTableRecord);
 
-const mockOnShowThreatIntelligence = jest.fn();
+const mockOnShowThreatIntelligence = vi.fn();
 
 const renderThreatIntelligenceOverview = ({
   hit = createMockHit(),
@@ -91,11 +94,11 @@ const renderThreatIntelligenceOverview = ({
 
 describe('<ThreatIntelligenceOverview />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useFetchThreatIntelligence as Mock).mockReturnValue({
       loading: false,
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: {
           get: () => undefined,
@@ -120,7 +123,7 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should show custom time range badge', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: {
           get: () => ({ from: 'now-7d', to: 'now-3d' }),
@@ -140,7 +143,7 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should render 1 match detected and 1 field enriched', () => {
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+    (useFetchThreatIntelligence as Mock).mockReturnValue({
       loading: false,
       threatMatchesCount: 1,
       threatEnrichmentsCount: 1,
@@ -158,7 +161,7 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should render 2 matches detected and 2 fields enriched', () => {
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+    (useFetchThreatIntelligence as Mock).mockReturnValue({
       loading: false,
       threatMatchesCount: 2,
       threatEnrichmentsCount: 2,
@@ -176,7 +179,7 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should render loading', () => {
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+    (useFetchThreatIntelligence as Mock).mockReturnValue({
       loading: true,
     });
 
@@ -186,7 +189,7 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+    (useFetchThreatIntelligence as Mock).mockReturnValue({
       loading: false,
       threatMatchesCount: 1,
       threatEnrichmentsCount: 1,
@@ -198,7 +201,7 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should open the expanded section to the correct tab when the number is clicked', () => {
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+    (useFetchThreatIntelligence as Mock).mockReturnValue({
       loading: false,
       threatMatchesCount: 1,
       threatEnrichmentsCount: 1,

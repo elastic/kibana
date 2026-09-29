@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SCAN_FAILURES_POLL_INTERVAL_MS, useScanFailures } from './use_scan_failures';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -25,7 +31,7 @@ const createWrapper = () => {
 };
 
 describe('useScanFailures', () => {
-  const http = { get: jest.fn() };
+  const http = { get: vi.fn() };
 
   beforeEach(() => {
     http.get.mockReset();
@@ -36,17 +42,17 @@ describe('useScanFailures', () => {
   });
 
   it('polls so a failure that finishes while the page is open shows up', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const { result } = renderHook(() => useScanFailures(), { wrapper: createWrapper() });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      jest.advanceTimersByTime(SCAN_FAILURES_POLL_INTERVAL_MS);
+      vi.advanceTimersByTime(SCAN_FAILURES_POLL_INTERVAL_MS);
 
       await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 });

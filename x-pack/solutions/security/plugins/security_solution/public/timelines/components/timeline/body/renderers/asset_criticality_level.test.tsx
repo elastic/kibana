@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { TestProviders } from '../../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { AssetCriticalityLevel } from './asset_criticality_level';
 
-jest.mock('../../../../../common/components/draggables', () => ({
-  DefaultDraggable: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../../../common/components/draggables', () => {
+      const mocked = {
+      DefaultDraggable: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   contextId: 'testContext',

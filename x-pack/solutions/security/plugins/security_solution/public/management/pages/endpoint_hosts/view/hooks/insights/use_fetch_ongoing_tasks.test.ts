@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useFetchLatestScan } from './use_fetch_ongoing_tasks';
 import {
@@ -13,35 +15,41 @@ import {
   DefendInsightStatusEnum,
 } from '@kbn/elastic-assistant-common';
 
-const mockHttpGet = jest.fn();
-const mockAddDanger = jest.fn();
+const mockHttpGet = vi.fn();
+const mockAddDanger = vi.fn();
 
-jest.mock('../../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: { http: { get: mockHttpGet } },
-  }),
-  useToasts: () => ({
-    addDanger: mockAddDanger,
-  }),
-}));
+vi.mock('../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { http: { get: mockHttpGet } },
+      }),
+      useToasts: () => ({
+        addDanger: mockAddDanger,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQuery = jest.requireMock('@kbn/react-query').useQuery;
+const mockUseQuery = (await vi.importMock('@kbn/react-query')).useQuery;
 
 describe('useFetchLatestScan', () => {
-  const mockOnSuccess = jest.fn();
-  const mockOnInsightGenerationFailure = jest.fn();
+  const mockOnSuccess = vi.fn();
+  const mockOnInsightGenerationFailure = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQuery.mockImplementation((_queryKey: unknown, queryFn: unknown) => {
       if (typeof queryFn === 'function') {
         queryFn({ signal: new AbortController().signal }).catch(() => {});
       }
-      return { data: undefined, isLoading: false, error: null, refetch: jest.fn() };
+      return { data: undefined, isLoading: false, error: null, refetch: vi.fn() };
     });
   });
 

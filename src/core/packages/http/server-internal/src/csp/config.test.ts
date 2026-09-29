@@ -59,7 +59,7 @@ describe('config.validate()', () => {
           script_src: [`'self'`, `unsafe-inline`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+        `[Error: cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true]`
       );
 
       expect(() =>
@@ -69,7 +69,7 @@ describe('config.validate()', () => {
           script_src: [`'self'`, `'unsafe-inline'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+        `[Error: cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true]`
       );
     });
 
@@ -81,7 +81,7 @@ describe('config.validate()', () => {
           script_src: [`'self'`, `unsafe-inline`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.warnLegacyBrowsers\` is true"`
+        `[Error: cannot use \`unsafe-inline\` for \`script_src\` when \`csp.warnLegacyBrowsers\` is true]`
       );
 
       expect(() =>
@@ -91,7 +91,7 @@ describe('config.validate()', () => {
           script_src: [`'self'`, `'unsafe-inline'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.warnLegacyBrowsers\` is true"`
+        `[Error: cannot use \`unsafe-inline\` for \`script_src\` when \`csp.warnLegacyBrowsers\` is true]`
       );
     });
 
@@ -119,7 +119,7 @@ describe('config.validate()', () => {
           script_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[script_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [script_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -129,7 +129,7 @@ describe('config.validate()', () => {
           script_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[script_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [script_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -137,7 +137,7 @@ describe('config.validate()', () => {
           script_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[script_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [script_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -149,7 +149,7 @@ describe('config.validate()', () => {
           worker_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[worker_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [worker_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -159,7 +159,7 @@ describe('config.validate()', () => {
           worker_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[worker_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [worker_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -167,7 +167,7 @@ describe('config.validate()', () => {
           worker_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[worker_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [worker_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -179,7 +179,7 @@ describe('config.validate()', () => {
           style_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[style_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [style_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -189,7 +189,7 @@ describe('config.validate()', () => {
           style_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[style_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [style_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -197,7 +197,7 @@ describe('config.validate()', () => {
           style_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[style_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [style_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -209,7 +209,7 @@ describe('config.validate()', () => {
           connect_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[connect_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [connect_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -219,7 +219,7 @@ describe('config.validate()', () => {
           connect_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[connect_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [connect_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -227,7 +227,7 @@ describe('config.validate()', () => {
           connect_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[connect_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [connect_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -239,7 +239,7 @@ describe('config.validate()', () => {
           default_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[default_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [default_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -249,7 +249,7 @@ describe('config.validate()', () => {
           default_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[default_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [default_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -257,7 +257,7 @@ describe('config.validate()', () => {
           default_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[default_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [default_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -269,7 +269,7 @@ describe('config.validate()', () => {
           font_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[font_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [font_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -279,7 +279,7 @@ describe('config.validate()', () => {
           font_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[font_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [font_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -287,7 +287,7 @@ describe('config.validate()', () => {
           font_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[font_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [font_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -299,7 +299,7 @@ describe('config.validate()', () => {
           frame_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[frame_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [frame_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -309,7 +309,7 @@ describe('config.validate()', () => {
           frame_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[frame_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [frame_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -317,7 +317,7 @@ describe('config.validate()', () => {
           frame_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[frame_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [frame_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -329,7 +329,7 @@ describe('config.validate()', () => {
           img_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[img_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [img_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -339,7 +339,7 @@ describe('config.validate()', () => {
           img_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[img_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [img_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -347,7 +347,7 @@ describe('config.validate()', () => {
           img_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[img_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [img_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -359,7 +359,7 @@ describe('config.validate()', () => {
           object_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[object_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [object_src]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -369,7 +369,7 @@ describe('config.validate()', () => {
           object_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[object_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [object_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -377,7 +377,7 @@ describe('config.validate()', () => {
           object_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[object_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [object_src]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });
@@ -389,7 +389,7 @@ describe('config.validate()', () => {
           frame_ancestors: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[frame_ancestors]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+        `[Error: [frame_ancestors]: using "nonce-*" is considered insecure and is not allowed]`
       );
     });
 
@@ -399,7 +399,7 @@ describe('config.validate()', () => {
           frame_ancestors: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[frame_ancestors]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [frame_ancestors]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
 
       expect(() =>
@@ -407,7 +407,7 @@ describe('config.validate()', () => {
           frame_ancestors: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[frame_ancestors]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+        `[Error: [frame_ancestors]: using "none" would conflict with Kibana's default csp configuration and is not allowed]`
       );
     });
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { RelationshipsClient } from '@kbn/entity-store/server';
@@ -56,15 +59,15 @@ const indexNotFoundError = () =>
   });
 
 describe('preRunReset', () => {
-  let search: jest.Mock;
-  let clearRelationshipIds: jest.Mock;
+  let search: Mock;
+  let clearRelationshipIds: Mock;
   let esClient: ElasticsearchClient;
   let relationshipsClient: RelationshipsClient;
   let logger: MockedLogger;
 
   beforeEach(() => {
-    search = jest.fn().mockResolvedValue(presence({ value: 1, relation: 'eq' }));
-    clearRelationshipIds = jest.fn().mockResolvedValue({ updated: 2, total: 2 });
+    search = vi.fn().mockResolvedValue(presence({ value: 1, relation: 'eq' }));
+    clearRelationshipIds = vi.fn().mockResolvedValue({ updated: 2, total: 2 });
     esClient = { search } as unknown as ElasticsearchClient;
     relationshipsClient = { clearRelationshipIds } as unknown as RelationshipsClient;
     logger = loggerMock.create();

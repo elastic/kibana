@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../../common/types/api';
@@ -16,8 +18,8 @@ describe('analyticsEventsExistLogic', () => {
   const indexName = true;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     mount();
   });
 

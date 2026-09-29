@@ -5,52 +5,67 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, act } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { InstalledPackageUIPackageListItem } from '../types';
 
-jest.mock('../../../../../../../hooks', () => {
-  const originalModule = jest.requireActual('../../../../../../../hooks');
+vi.mock('../../../../../../../hooks', async () => {
+  const originalModule = (await vi.importActual('../../../../../../../hooks'));
   return {
     ...originalModule,
-    useAuthz: jest.fn(),
-    useLicense: jest.fn(),
-    useLink: jest.fn().mockReturnValue({
-      getHref: jest.fn().mockReturnValue('/app/integrations/detail/test-1.0.0/overview'),
+    useAuthz: vi.fn(),
+    useLicense: vi.fn(),
+    useLink: vi.fn().mockReturnValue({
+      getHref: vi.fn().mockReturnValue('/app/integrations/detail/test-1.0.0/overview'),
     }),
   };
 });
 
-jest.mock('../hooks/use_url_filters', () => ({
-  useViewPolicies: jest.fn().mockReturnValue({
-    addViewPolicies: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/use_url_filters', () => {
+      const mocked = {
+      useViewPolicies: vi.fn().mockReturnValue({
+        addViewPolicies: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_installed_integrations_actions', () => ({
-  useInstalledIntegrationsActions: jest.fn().mockReturnValue({
-    actions: {
-      bulkUninstallIntegrationsWithConfirmModal: jest.fn(),
-      bulkUpgradeIntegrationsWithConfirmModal: jest.fn(),
-      bulkRollbackIntegrationsWithConfirmModal: jest.fn(),
-    },
-    rollingbackIntegrations: [],
-  }),
-}));
+vi.mock('../hooks/use_installed_integrations_actions', () => {
+      const mocked = {
+      useInstalledIntegrationsActions: vi.fn().mockReturnValue({
+        actions: {
+          bulkUninstallIntegrationsWithConfirmModal: vi.fn(),
+          bulkUpgradeIntegrationsWithConfirmModal: vi.fn(),
+          bulkRollbackIntegrationsWithConfirmModal: vi.fn(),
+        },
+        rollingbackIntegrations: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_rollback_available', () => ({
-  useRollbackAvailablePackages: jest.fn(),
-  hasPreviousVersion: jest.fn((item) => !!item.installationInfo?.previous_version),
-  isRollbackTTLExpired: jest.fn((item) => item.installationInfo?.is_rollback_ttl_expired ?? false),
-}));
-jest.mock('../../../../../services', () => ({
-  ExperimentalFeaturesService: {
-    get: jest.fn().mockReturnValue({ enablePackageRollback: true }),
-  },
-  doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
-}));
+vi.mock('../hooks/use_rollback_available', () => {
+      const mocked = {
+      useRollbackAvailablePackages: vi.fn(),
+      hasPreviousVersion: vi.fn((item) => !!item.installationInfo?.previous_version),
+      isRollbackTTLExpired: vi.fn((item) => item.installationInfo?.is_rollback_ttl_expired ?? false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../services', () => {
+      const mocked = {
+      ExperimentalFeaturesService: {
+        get: vi.fn().mockReturnValue({ enablePackageRollback: true }),
+      },
+      doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useAuthz, useLicense } from '../../../../../../../hooks';
 import { useRollbackAvailablePackages } from '../hooks/use_rollback_available';
@@ -58,10 +73,10 @@ import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrat
 
 import { InstalledIntegrationsTable } from './installed_integrations_table';
 
-const mockUseAuthz = useAuthz as jest.Mock;
-const mockUseLicense = useLicense as jest.Mock;
-const mockUseRollbackAvailablePackages = useRollbackAvailablePackages as jest.Mock;
-const mockUseInstalledIntegrationsActions = useInstalledIntegrationsActions as jest.Mock;
+const mockUseAuthz = useAuthz as Mock;
+const mockUseLicense = useLicense as Mock;
+const mockUseRollbackAvailablePackages = useRollbackAvailablePackages as Mock;
+const mockUseInstalledIntegrationsActions = useInstalledIntegrationsActions as Mock;
 
 describe('InstalledIntegrationsTable', () => {
   const basePackage: InstalledPackageUIPackageListItem = {
@@ -90,16 +105,16 @@ describe('InstalledIntegrationsTable', () => {
       pageSize: 20,
     },
     pageSizeOptions: [10, 20, 50],
-    setPagination: jest.fn(),
+    setPagination: vi.fn(),
   };
 
   const defaultSelection = {
     selectedItems: [],
-    setSelectedItems: jest.fn(),
+    setSelectedItems: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseAuthz.mockReturnValue({
       fleet: {
@@ -113,7 +128,7 @@ describe('InstalledIntegrationsTable', () => {
     });
 
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn().mockReturnValue(true),
+      isEnterprise: vi.fn().mockReturnValue(true),
     });
 
     mockUseRollbackAvailablePackages.mockReturnValue({
@@ -122,9 +137,9 @@ describe('InstalledIntegrationsTable', () => {
 
     mockUseInstalledIntegrationsActions.mockReturnValue({
       actions: {
-        bulkUninstallIntegrationsWithConfirmModal: jest.fn(),
-        bulkUpgradeIntegrationsWithConfirmModal: jest.fn(),
-        bulkRollbackIntegrationsWithConfirmModal: jest.fn(),
+        bulkUninstallIntegrationsWithConfirmModal: vi.fn(),
+        bulkUpgradeIntegrationsWithConfirmModal: vi.fn(),
+        bulkRollbackIntegrationsWithConfirmModal: vi.fn(),
       },
       rollingbackIntegrations: [],
     });
@@ -140,9 +155,9 @@ describe('InstalledIntegrationsTable', () => {
     if (overrides?.rollingbackIntegrations !== undefined) {
       mockUseInstalledIntegrationsActions.mockReturnValue({
         actions: {
-          bulkUninstallIntegrationsWithConfirmModal: jest.fn(),
-          bulkUpgradeIntegrationsWithConfirmModal: jest.fn(),
-          bulkRollbackIntegrationsWithConfirmModal: jest.fn(),
+          bulkUninstallIntegrationsWithConfirmModal: vi.fn(),
+          bulkUpgradeIntegrationsWithConfirmModal: vi.fn(),
+          bulkRollbackIntegrationsWithConfirmModal: vi.fn(),
         },
         rollingbackIntegrations: overrides.rollingbackIntegrations,
       });

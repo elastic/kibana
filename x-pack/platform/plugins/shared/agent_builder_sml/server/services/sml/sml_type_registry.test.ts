@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SmlTypeDefinition } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 
@@ -12,9 +14,9 @@ const createMockSmlTypeDefinition = (
   overrides: Partial<SmlTypeDefinition> = {}
 ): SmlTypeDefinition => ({
   id: 'test-type',
-  list: jest.fn(),
-  getSmlEntry: jest.fn(),
-  toAttachment: jest.fn(),
+  list: vi.fn(),
+  getSmlEntry: vi.fn(),
+  toAttachment: vi.fn(),
   ...overrides,
 });
 

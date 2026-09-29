@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -41,7 +44,7 @@ describe('Telemetry config watcher', () => {
   const esStartMock = elasticsearchServiceMock.createStart();
 
   let mockedLogger: MockedLogger;
-  let packagePolicyServiceMock: jest.Mocked<PackagePolicyClient>;
+  let packagePolicyServiceMock: Mocked<PackagePolicyClient>;
   let telemetryWatcher: TelemetryConfigWatcher;
 
   const preparePackagePolicyMock = ({
@@ -71,7 +74,7 @@ describe('Telemetry config watcher', () => {
 
     mockedLogger = loggerMock.create();
     const endpointAppContextServiceMock = createMockEndpointAppContextService();
-    endpointAppContextServiceMock.createLogger = jest.fn().mockReturnValue(mockedLogger);
+    endpointAppContextServiceMock.createLogger = vi.fn().mockReturnValue(mockedLogger);
 
     telemetryWatcher = new TelemetryConfigWatcher(
       packagePolicyServiceMock,
@@ -86,7 +89,7 @@ describe('Telemetry config watcher', () => {
     const telemetryConfigProvider = new TelemetryConfigProvider();
 
     // spy on the watch() function
-    const mockWatch = jest.fn();
+    const mockWatch = vi.fn();
     telemetryWatcher.watch = mockWatch;
 
     telemetryConfigProvider.start(telemetryConfigEmitter);

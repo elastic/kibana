@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { InvalidEmailReason } from '@kbn/actions-plugin/common';
 import { getEmailsValidator } from './emails_validator';
 
-jest.mock('../translations', () => ({
-  getInvalidEmailAddress: (value: string) => `invalid: ${value}`,
-  getNotAllowedEmailAddress: (value: string) => `not allowed: ${value}`,
-}));
+vi.mock('../translations', () => {
+      const mocked = {
+      getInvalidEmailAddress: (value: string) => `invalid: ${value}`,
+      getNotAllowedEmailAddress: (value: string) => `not allowed: ${value}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getEmailsValidator', () => {
   it('returns undefined for all valid emails', () => {
-    const validateEmailAddresses = jest.fn().mockReturnValue([{ valid: true }, { valid: true }]);
+    const validateEmailAddresses = vi.fn().mockReturnValue([{ valid: true }, { valid: true }]);
 
     const validator = getEmailsValidator(validateEmailAddresses);
     expect(
@@ -25,7 +30,7 @@ describe('getEmailsValidator', () => {
   });
 
   it('returns not allowed message if one email is not allowed', () => {
-    const validateEmailAddresses = jest
+    const validateEmailAddresses = vi
       .fn()
       .mockReturnValue([{ valid: false, reason: InvalidEmailReason.notAllowed }]);
 
@@ -38,7 +43,7 @@ describe('getEmailsValidator', () => {
   });
 
   it('returns invalid message if one email is invalid', () => {
-    const validateEmailAddresses = jest
+    const validateEmailAddresses = vi
       .fn()
       .mockReturnValue([{ valid: false, reason: InvalidEmailReason.invalid }]);
 
@@ -51,7 +56,7 @@ describe('getEmailsValidator', () => {
   });
 
   it('validates a single string value as an array', () => {
-    const validateEmailAddresses = jest
+    const validateEmailAddresses = vi
       .fn()
       .mockReturnValue([{ valid: false, reason: InvalidEmailReason.invalid }]);
 

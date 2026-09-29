@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   MAX_ASSESSMENT_NOTE_LENGTH,
@@ -39,15 +41,15 @@ const createInvestigation = (
 
 const createEventClient = (hits: SignificantEvent[]) => {
   const okResponse = { errors: false, items: [] } as unknown as BulkResponse;
-  const dataStreamClient = { create: jest.fn().mockResolvedValue(okResponse) };
+  const dataStreamClient = { create: vi.fn().mockResolvedValue(okResponse) };
 
   const makeResult = (h: SignificantEvent[]) => ({
     columns: [{ name: '_source' }],
     values: h.map((event) => [{ ...event }]),
   });
 
-  const esClient = { esql: { query: jest.fn().mockResolvedValue(makeResult(hits)) } };
-  const triggerEmitter = jest.fn();
+  const esClient = { esql: { query: vi.fn().mockResolvedValue(makeResult(hits)) } };
+  const triggerEmitter = vi.fn();
   const client = new EventClient({
     dataStreamClient: dataStreamClient as never,
     esClient: esClient as never,

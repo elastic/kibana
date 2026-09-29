@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -16,19 +19,25 @@ import { useCasesColumnsConfiguration } from './use_cases_columns_configuration'
 import { useCasesConfig } from '../../../common/lib/kibana';
 import { useGlobalInlineFields } from './use_global_inline_fields';
 
-jest.mock('./use_cases_columns_configuration');
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useCasesConfig: jest.fn(),
-}));
-jest.mock('./use_global_inline_fields', () => ({
-  ...jest.requireActual('./use_global_inline_fields'),
-  useGlobalInlineFields: jest.fn(),
-}));
+vi.mock('./use_cases_columns_configuration');
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useCasesConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_global_inline_fields', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_global_inline_fields')),
+      useGlobalInlineFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as jest.Mock;
-const useCasesConfigMock = useCasesConfig as jest.Mock;
-const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
+const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as Mock;
+const useCasesConfigMock = useCasesConfig as Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as Mock;
 
 const localStorageKey = `securitySolution.${LOCAL_STORAGE_KEYS.casesListFields}`;
 
@@ -89,7 +98,7 @@ describe('useListFieldsSelection', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns fields with isChecked false by default', () => {
@@ -191,7 +200,7 @@ describe('useListFieldsSelection — global field sync (Bug 19099)', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reads global field checked state from the shared key', () => {

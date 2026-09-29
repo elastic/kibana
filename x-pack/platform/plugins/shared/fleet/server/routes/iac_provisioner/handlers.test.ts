@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import {
@@ -24,17 +26,20 @@ import {
 
 import { renderIacTemplateHandler } from './handlers';
 
-jest.mock('../../services/app_context');
-jest.mock('../../services', () => ({
-  iacProvisionerService: { renderTemplate: jest.fn() },
-}));
-jest.mock('../../services/epm/packages');
-jest.mock('../../services/utils/iac_provisioner');
-jest.mock('../../services/telemetry/iac_provisioner_telemetry');
+vi.mock('../../services/app_context');
+vi.mock('../../services', () => {
+      const mocked = {
+      iacProvisionerService: { renderTemplate: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../services/epm/packages');
+vi.mock('../../services/utils/iac_provisioner');
+vi.mock('../../services/telemetry/iac_provisioner_telemetry');
 
-const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
-const mockedGetPackageInfo = jest.mocked(getPackageInfo);
-const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
+const mockedRenderTemplate = vi.mocked(iacProvisionerService.renderTemplate);
+const mockedGetPackageInfo = vi.mocked(getPackageInfo);
+const mockedIsEnabled = vi.mocked(isIacProvisionerEnabled);
 
 const buildContext = () =>
   ({
@@ -94,12 +99,12 @@ describe('renderIacTemplateHandler', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     response = httpServerMock.createResponseFactory();
     mockedIsEnabled.mockResolvedValue(true);
-    const logger = { info: jest.fn(), error: jest.fn(), get: jest.fn() };
+    const logger = { info: vi.fn(), error: vi.fn(), get: vi.fn() };
     logger.get.mockReturnValue(logger);
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
   });
 
   it('returns 404 when the IaC Provisioner is not enabled', async () => {

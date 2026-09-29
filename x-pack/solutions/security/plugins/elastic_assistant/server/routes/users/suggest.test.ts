@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { getSuggestUsersRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_USERS_SUGGEST_URL } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
@@ -30,7 +32,7 @@ describe('Suggest users route', () => {
       },
     } as AuthenticatedUser;
 
-    (context.elasticAssistant.userProfile.suggest as jest.Mock).mockResolvedValue(
+    (context.elasticAssistant.userProfile.suggest as Mock).mockResolvedValue(
       Promise.resolve(getSuggestUsersResponseMock())
     );
     context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
@@ -56,7 +58,7 @@ describe('Suggest users route', () => {
     });
 
     test('catches error if search throws error', async () => {
-      (context.elasticAssistant.userProfile.suggest as jest.Mock).mockRejectedValueOnce(
+      (context.elasticAssistant.userProfile.suggest as Mock).mockRejectedValueOnce(
         new Error('Test error')
       );
       const response = await server.inject(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
@@ -15,9 +18,12 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getLiveQueryResultsRoute } from './get_live_query_results_route';
 import { getActionResponses } from './utils';
 
-jest.mock('./utils', () => ({
-  getActionResponses: jest.fn(),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      getActionResponses: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getLiveQueryResultsRoute', () => {
   let routeHandler: RequestHandler;
@@ -46,11 +52,11 @@ describe('getLiveQueryResultsRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      isCpsActive: vi.fn().mockResolvedValue(false),
       service: {},
-      logFactory: { get: jest.fn() },
+      logFactory: { get: vi.fn() },
     } as unknown as OsqueryAppContext;
   });
 
@@ -77,9 +83,9 @@ describe('getLiveQueryResultsRoute', () => {
   });
 
   it('runs the action-details and results searches against the osquery search strategy', async () => {
-    (getActionResponses as jest.Mock).mockReturnValue(of({}));
+    (getActionResponses as Mock).mockReturnValue(of({}));
 
-    const searchFn = jest
+    const searchFn = vi
       .fn()
       .mockReturnValueOnce(
         of({
@@ -118,9 +124,9 @@ describe('getLiveQueryResultsRoute', () => {
   });
 
   it('returns not found when the actionId does not belong to the parent action', async () => {
-    (getActionResponses as jest.Mock).mockReturnValue(of({}));
+    (getActionResponses as Mock).mockReturnValue(of({}));
 
-    const searchFn = jest.fn().mockReturnValueOnce(
+    const searchFn = vi.fn().mockReturnValueOnce(
       of({
         actionDetails: {
           _source: { queries: [{ action_id: 'query-1', agents: ['agent-1'] }] },
@@ -151,9 +157,9 @@ describe('getLiveQueryResultsRoute', () => {
 
   describe('when CPS is enabled', () => {
     it('uses the CPS-scoped search client for action details and results', async () => {
-      (getActionResponses as jest.Mock).mockReturnValue(of({}));
+      (getActionResponses as Mock).mockReturnValue(of({}));
 
-      const mockCpsSearchFn = jest
+      const mockCpsSearchFn = vi
         .fn()
         .mockReturnValueOnce(
           of({
@@ -163,14 +169,14 @@ describe('getLiveQueryResultsRoute', () => {
           })
         )
         .mockReturnValueOnce(of({ edges: [] }));
-      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
-      const contextSearchFn = jest.fn();
+      const mockCpsSearch = vi.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = vi.fn();
 
       mockOsqueryContext = {
-        isCpsActive: jest.fn().mockResolvedValue(true),
+        isCpsActive: vi.fn().mockResolvedValue(true),
         service: {},
-        logFactory: { get: jest.fn() },
-        getStartServices: jest
+        logFactory: { get: vi.fn() },
+        getStartServices: vi
           .fn()
           .mockResolvedValue([
             { elasticsearch: { client: { asInternalUser: {} } } },

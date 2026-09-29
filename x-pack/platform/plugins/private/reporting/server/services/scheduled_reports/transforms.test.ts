@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -196,7 +198,7 @@ const mockLogger = loggingSystemMock.createLogger();
 
 describe('transformListResponse', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should correctly transform the responses', () => {
@@ -391,8 +393,8 @@ describe('transformListResponse', () => {
   });
 
   it('should correctly transform a response with rrule.dtstart is in the future', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-05-06T21:10:17.137Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-05-06T21:10:17.137Z'));
 
     // current time is 2025-05-06T21:10:17.137Z which is a Tuesday
     // schedule is set to run every Friday at 17:00 UTC
@@ -462,7 +464,7 @@ describe('transformListResponse', () => {
       title: '[Logs] Web Traffic',
     });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('handles malformed payload', () => {

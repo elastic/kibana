@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
@@ -28,8 +31,8 @@ const mockAttrs: ActionPolicySavedObjectAttributes = {
 
 describe('ActionPolicySavedObjectService', () => {
   let service: ActionPolicySavedObjectService;
-  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockEncryptedSoClient: jest.Mocked<EncryptedSavedObjectsClient>;
+  let mockSoClient: Mocked<SavedObjectsClientContract>;
+  let mockEncryptedSoClient: Mocked<EncryptedSavedObjectsClient>;
 
   beforeEach(() => {
     const mocks = createActionPolicySavedObjectService();
@@ -39,7 +42,7 @@ describe('ActionPolicySavedObjectService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -466,10 +469,10 @@ describe('ActionPolicySavedObjectService', () => {
   });
 
   describe('findAllDecrypted', () => {
-    const mockClose = jest.fn();
+    const mockClose = vi.fn();
 
     beforeEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('does not pass a filter when called without params', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useRuleTemplate } from './use_rule_template';
@@ -13,9 +16,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 
 // Mocks
-jest.mock('../apis/create_rule_from_template', () => ({
-  loadRuleTemplate: jest.fn(),
-}));
+vi.mock('../apis/create_rule_from_template', () => {
+      const mocked = {
+      loadRuleTemplate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient({
   logger: {
@@ -36,7 +42,7 @@ describe('useRuleTemplate', () => {
   const mockHttp = {} as HttpStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 
@@ -59,7 +65,7 @@ describe('useRuleTemplate', () => {
   });
 
   it('should fetch and return data when enabled and templateId is provided', async () => {
-    (loadRuleTemplate as jest.Mock).mockResolvedValue({ id: 'test-id', name: 'Test Template' });
+    (loadRuleTemplate as Mock).mockResolvedValue({ id: 'test-id', name: 'Test Template' });
     const { result } = renderHook(
       () => useRuleTemplate({ http: mockHttp, templateId: 'test-id' }),
       { wrapper }
@@ -74,7 +80,7 @@ describe('useRuleTemplate', () => {
   });
 
   it('should handle API error', async () => {
-    jest.mocked(loadRuleTemplate).mockImplementation(async () => {
+    vi.mocked(loadRuleTemplate).mockImplementation(async () => {
       throw new Error('API Error');
     });
     const { result } = renderHook(
@@ -92,7 +98,7 @@ describe('useRuleTemplate', () => {
 
   it('should set isLoading while fetching', async () => {
     let resolveFn: (value: any) => void;
-    (loadRuleTemplate as jest.Mock).mockImplementation(
+    (loadRuleTemplate as Mock).mockImplementation(
       () =>
         new Promise((resolve) => {
           resolveFn = resolve;

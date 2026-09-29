@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../rules_client';
 import type { GetActionErrorLogByIdParams } from '../methods/get_action_error_log';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -28,7 +30,7 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();

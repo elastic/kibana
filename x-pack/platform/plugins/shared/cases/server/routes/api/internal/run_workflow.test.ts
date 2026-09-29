@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   WorkflowsManagementApiActions,
   WorkflowsManagementOperationPrivileges,
@@ -16,20 +19,20 @@ import { createRunWorkflowRoute, runCaseWorkflowParamsSchema } from './run_workf
 
 describe('run workflow route', () => {
   const casesClient = createCasesClientMock();
-  const workflowOperations: jest.Mocked<CasesWorkflowOperations> = {
-    ensureAuthorizedToRunWorkflow: jest.fn(),
-    preflightWorkflowExecution: jest.fn(),
-    recordWorkflowExecution: jest.fn(),
+  const workflowOperations: Mocked<CasesWorkflowOperations> = {
+    ensureAuthorizedToRunWorkflow: vi.fn(),
+    preflightWorkflowExecution: vi.fn(),
+    recordWorkflowExecution: vi.fn(),
   };
   const service = {
-    run: jest.fn(),
-  } as unknown as jest.Mocked<CasesWorkflowRunService>;
-  const getSpaceId = jest.fn().mockReturnValue('space-1');
-  const getWorkflowRunContext = jest.fn().mockResolvedValue({ casesClient, workflowOperations });
+    run: vi.fn(),
+  } as unknown as Mocked<CasesWorkflowRunService>;
+  const getSpaceId = vi.fn().mockReturnValue('space-1');
+  const getWorkflowRunContext = vi.fn().mockResolvedValue({ casesClient, workflowOperations });
   const route = createRunWorkflowRoute({ service, getSpaceId, getWorkflowRunContext });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service.run.mockResolvedValue({
       workflowExecutionId: 'execution-1',
       activityStatus: 'succeeded',
@@ -61,7 +64,7 @@ describe('run workflow route', () => {
         origin: { type: 'cases.case', caseId: 'case-1' },
       },
     };
-    const response = { ok: jest.fn() };
+    const response = { ok: vi.fn() };
     const context = {};
 
     await route.handler({

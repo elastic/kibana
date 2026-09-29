@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -41,8 +44,8 @@ const buildToAttachmentContext = () => ({
 });
 
 describe('createActionPolicySmlType', () => {
-  let getActionPolicy: jest.Mock;
-  let getIsAlertingV2Enabled: jest.Mock;
+  let getActionPolicy: Mock;
+  let getIsAlertingV2Enabled: Mock;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let actionPolicyClient: ActionPolicyClient;
 
@@ -53,7 +56,7 @@ describe('createActionPolicySmlType', () => {
   });
 
   const stubFinder = (find: () => AsyncGenerator<unknown>) => {
-    const close = jest.fn().mockResolvedValue(undefined);
+    const close = vi.fn().mockResolvedValue(undefined);
     soClient.createPointInTimeFinder.mockReturnValue({ find, close } as unknown as ReturnType<
       typeof soClient.createPointInTimeFinder
     >);
@@ -61,8 +64,8 @@ describe('createActionPolicySmlType', () => {
   };
 
   beforeEach(() => {
-    getActionPolicy = jest.fn();
-    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
+    getActionPolicy = vi.fn();
+    getIsAlertingV2Enabled = vi.fn().mockResolvedValue(true);
     soClient = savedObjectsClientMock.create();
     actionPolicyClient = { getActionPolicy } as unknown as ActionPolicyClient;
   });

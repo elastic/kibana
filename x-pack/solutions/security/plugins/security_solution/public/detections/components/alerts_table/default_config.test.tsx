@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ExistsFilter, Filter } from '@kbn/es-query';
 import { tableDefaults } from '@kbn/securitysolution-data-table';
 import { createLicenseServiceMock } from '../../../../common/license/mocks';
@@ -19,7 +21,7 @@ import {
   buildAlertsFilterByRuleIds,
 } from './default_config';
 
-jest.mock('./actions');
+vi.mock('./actions');
 
 const basicBaseColumns = [
   {

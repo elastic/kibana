@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { findRelatedAlerts } from './find_related_alerts';
 import { RELATED_ALERT_ENTITY_SOURCE_INCLUDES } from './utils/entity_utils';
 
 describe('findRelatedAlerts', () => {
   const esClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   } as unknown as ElasticsearchClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockSourceAlert = (source?: Record<string, unknown>) => {
-    (esClient.search as jest.Mock).mockResolvedValueOnce({
+    (esClient.search as Mock).mockResolvedValueOnce({
       hits: {
         hits: source ? [{ _source: source }] : [],
       },
@@ -61,7 +64,7 @@ describe('findRelatedAlerts', () => {
   });
 
   it('returns search_failed when loading the source alert fails', async () => {
-    (esClient.search as jest.Mock).mockRejectedValueOnce({
+    (esClient.search as Mock).mockRejectedValueOnce({
       meta: { statusCode: 403 },
       message: 'security_exception',
     });
@@ -82,7 +85,7 @@ describe('findRelatedAlerts', () => {
 
   it('extracts entities from nested ECS fields on the source alert', async () => {
     mockSourceAlert({ host: { name: 'host-from-alert' } });
-    (esClient.search as jest.Mock).mockResolvedValueOnce({
+    (esClient.search as Mock).mockResolvedValueOnce({
       hits: {
         total: { value: 0, relation: 'eq' },
         hits: [],
@@ -109,7 +112,7 @@ describe('findRelatedAlerts', () => {
   });
 
   it('continues with provided entities when loading the source alert fails', async () => {
-    (esClient.search as jest.Mock)
+    (esClient.search as Mock)
       .mockRejectedValueOnce({
         meta: { statusCode: 400 },
         message: 'source alert lookup failed',
@@ -140,7 +143,7 @@ describe('findRelatedAlerts', () => {
       'host.name': 'host-from-alert',
       'user.name': 'user-from-alert',
     });
-    (esClient.search as jest.Mock).mockResolvedValueOnce({
+    (esClient.search as Mock).mockResolvedValueOnce({
       hits: {
         total: { value: 0, relation: 'eq' },
         hits: [],
@@ -166,7 +169,7 @@ describe('findRelatedAlerts', () => {
       'host.name': 'host-a',
       'source.ip': '10.0.0.1',
     });
-    (esClient.search as jest.Mock).mockResolvedValueOnce({
+    (esClient.search as Mock).mockResolvedValueOnce({
       hits: {
         total: { value: 0, relation: 'eq' },
         hits: [],
@@ -200,7 +203,7 @@ describe('findRelatedAlerts', () => {
 
   it('uses token-budgeted defaults, emits truncation metadata, and includes a truncation hint in the message', async () => {
     mockSourceAlert({ 'host.name': 'host-a' });
-    (esClient.search as jest.Mock).mockResolvedValueOnce({
+    (esClient.search as Mock).mockResolvedValueOnce({
       hits: {
         total: { value: 99, relation: 'eq' },
         hits: [

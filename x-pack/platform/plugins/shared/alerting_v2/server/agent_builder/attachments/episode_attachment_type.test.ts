@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -74,23 +77,23 @@ const buildVersionedAttachment = (
 describe('createEpisodeAttachmentType', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
-  let getEpisode: jest.Mock;
-  let getRule: jest.Mock;
-  let canRead: jest.Mock;
+  let getEpisode: Mock;
+  let getRule: Mock;
+  let canRead: Mock;
   let definition: AttachmentTypeDefinition<typeof EPISODE_ATTACHMENT_TYPE, EpisodeAttachmentData>;
 
   const createPrivilegeCheckerMock = (canReadResult: boolean = true) => {
-    canRead = jest.fn().mockResolvedValue(canReadResult);
+    canRead = vi.fn().mockResolvedValue(canReadResult);
     return {
       canRead,
-      canWrite: jest.fn().mockResolvedValue(true),
+      canWrite: vi.fn().mockResolvedValue(true),
     } as unknown as PrivilegeChecker;
   };
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    getEpisode = jest.fn();
-    getRule = jest.fn();
+    getEpisode = vi.fn();
+    getRule = vi.fn();
     const episodesClient = { get: getEpisode } as unknown as EpisodesClient;
     const rulesClient = { getRule } as unknown as RulesClient;
     definition = createEpisodeAttachmentType({

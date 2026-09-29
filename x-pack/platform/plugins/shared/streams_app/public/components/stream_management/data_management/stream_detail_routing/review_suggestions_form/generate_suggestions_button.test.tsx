@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -19,29 +21,35 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 
 const MOCK_MODEL_SETTINGS_URL = '/app/management/modelManagement/model_settings';
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      http: {
-        basePath: {
-          prepend: (path: string) => `/test${path}`,
-        },
-      },
-      docLinks: {
-        links: {
-          observability: {
-            elasticManagedLlmUsageCost: 'https://example.com/cost',
-            elasticManagedLlm: 'https://example.com/learn-more',
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {
+          http: {
+            basePath: {
+              prepend: (path: string) => `/test${path}`,
+            },
+          },
+          docLinks: {
+            links: {
+              observability: {
+                elasticManagedLlmUsageCost: 'https://example.com/cost',
+                elasticManagedLlm: 'https://example.com/learn-more',
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_model_settings_url', () => ({
-  useModelSettingsUrl: () => MOCK_MODEL_SETTINGS_URL,
-}));
+vi.mock('../../../../../hooks/use_model_settings_url', () => {
+      const mocked = {
+      useModelSettingsUrl: () => MOCK_MODEL_SETTINGS_URL,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockConnector = (connectorId: string, name: string) => ({
   connectorId,
@@ -60,8 +68,8 @@ const createMockGenAiConnectors = (
   selectedConnector: 'connector-1',
   loading: false,
   error: undefined,
-  selectConnector: jest.fn(),
-  reloadConnectors: jest.fn(),
+  selectConnector: vi.fn(),
+  reloadConnectors: vi.fn(),
   isConnectorSelectionRestricted: false,
   ...overrides,
 });
@@ -73,18 +81,18 @@ const createMockAIFeatures = (overrides: Partial<AIFeatures> = {}): AIFeatures =
   genAiConnectors: createMockGenAiConnectors(),
   isManagedAIConnector: false,
   hasAcknowledgedAdditionalCharges: true,
-  acknowledgeAdditionalCharges: jest.fn(),
+  acknowledgeAdditionalCharges: vi.fn(),
   ...overrides,
 });
 
 describe('GenerateSuggestionButton', () => {
   const defaultProps: GenerateSuggestionButtonProps = {
-    onClick: jest.fn(),
+    onClick: vi.fn(),
     aiFeatures: createMockAIFeatures(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when AI features are disabled', () => {
@@ -123,7 +131,7 @@ describe('GenerateSuggestionButton', () => {
     });
 
     it('calls onClick with the selected connector id when button is clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const aiFeatures = createMockAIFeatures({
         genAiConnectors: createMockGenAiConnectors({
           selectedConnector: 'my-connector',
@@ -208,7 +216,7 @@ describe('GenerateSuggestionButton', () => {
     });
 
     it('calls selectConnector when a connector is selected from the popover', async () => {
-      const selectConnector = jest.fn();
+      const selectConnector = vi.fn();
       const aiFeatures = createMockAIFeatures({
         genAiConnectors: createMockGenAiConnectors({
           connectors: [
@@ -241,7 +249,7 @@ describe('AdditionalChargesCallout', () => {
   };
 
   it('renders the callout with dismiss functionality', () => {
-    const acknowledgeAdditionalCharges = jest.fn();
+    const acknowledgeAdditionalCharges = vi.fn();
     const aiFeatures = createMockAIFeatures({
       acknowledgeAdditionalCharges,
     });

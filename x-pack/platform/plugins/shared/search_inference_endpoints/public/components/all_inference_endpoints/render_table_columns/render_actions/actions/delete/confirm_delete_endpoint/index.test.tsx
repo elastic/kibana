@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, fireEvent, screen } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import React from 'react';
@@ -12,12 +15,12 @@ import { ConfirmDeleteEndpointModal } from '.';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
-jest.mock('../../../../../../../hooks/use_scan_usage');
-const mockUseScanUsage = useScanUsage as jest.Mock;
+vi.mock('../../../../../../../hooks/use_scan_usage');
+const mockUseScanUsage = useScanUsage as Mock;
 
 describe('ConfirmDeleteEndpointModal', () => {
-  const mockOnCancel = jest.fn();
-  const mockOnConfirm = jest.fn();
+  const mockOnCancel = vi.fn();
+  const mockOnConfirm = vi.fn();
 
   const mockProvider: InferenceInferenceEndpointInfo = {
     inference_id: 'my-hugging-face',
@@ -53,7 +56,7 @@ describe('ConfirmDeleteEndpointModal', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('renders the modal with correct elements', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import type { AutoCompleteEntitiesApiResponse } from '../lib/autocomplete_entities/types';
 import { AutocompleteInfo } from './autocomplete';
@@ -23,9 +25,9 @@ const entitiesResponse = {
 
 const createSettings = () =>
   ({
-    getPolling: jest.fn().mockReturnValue(true),
-    getPollInterval: jest.fn().mockReturnValue(60_000),
-    getAutocomplete: jest.fn().mockReturnValue({
+    getPolling: vi.fn().mockReturnValue(true),
+    getPollInterval: vi.fn().mockReturnValue(60_000),
+    getAutocomplete: vi.fn().mockReturnValue({
       fields: true,
       indices: true,
       templates: true,
@@ -67,7 +69,7 @@ class HandledRejection {
 
 describe('AutocompleteInfo', () => {
   it('increments the entities refresh generation after a successful retrieve', async () => {
-    const http = { get: jest.fn().mockResolvedValue(entitiesResponse) };
+    const http = { get: vi.fn().mockResolvedValue(entitiesResponse) };
     const autocompleteInfo = new AutocompleteInfo();
     autocompleteInfo.setup(http as unknown as HttpSetup);
     const settings = createSettings();
@@ -87,7 +89,7 @@ describe('AutocompleteInfo', () => {
 
   it('does not increment the entities refresh generation when retrieve fails', async () => {
     const http = {
-      get: jest
+      get: vi
         .fn()
         .mockImplementation(() => HandledRejection.withError(new Error('entities request failed'))),
     };

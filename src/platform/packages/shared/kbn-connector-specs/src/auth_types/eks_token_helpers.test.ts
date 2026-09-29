@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { buildEksBearerToken } from './eks_token_helpers';
 
 // The jest environment has no Web Crypto; fake the hash/signature primitives
 // deterministically and input-sensitively so structural assertions still hold.
-jest.mock('./aws_crypto_helpers', () => {
+vi.mock('./aws_crypto_helpers', () => {
   const fakeHex = (input: string): string => {
     let hash = 0;
     for (let i = 0; i < input.length; i++) {
@@ -20,8 +22,8 @@ jest.mock('./aws_crypto_helpers', () => {
     return hash.toString(16).padStart(8, '0').repeat(8);
   };
   return {
-    sha256Hash: jest.fn(async (message: string) => fakeHex(message)),
-    calculateAWSA4Signature: jest.fn(async (...args: string[]) => fakeHex(args.join('|'))),
+    sha256Hash: vi.fn(async (message: string) => fakeHex(message)),
+    calculateAWSA4Signature: vi.fn(async (...args: string[]) => fakeHex(args.join('|'))),
   };
 });
 
@@ -41,11 +43,11 @@ const decodeToken = (token: string): URL => {
 
 describe('buildEksBearerToken', () => {
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-07-08T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-07-08T12:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('produces a presigned STS GetCallerIdentity URL for the cluster region', async () => {

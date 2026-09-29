@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
 
-const mockFetch = jest.spyOn(global, 'fetch');
+const mockFetch = vi.spyOn(global, 'fetch');
 
 const javaVersionsXML = `<?xml version="1.0" encoding="UTF-8"?>
 <metadata>

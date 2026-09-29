@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EPISODE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
 import type { RulesClient } from '../../lib/rules_client';
 import { loadRuleMetadata } from './load_rule_metadata';
 
 describe('loadRuleMetadata', () => {
-  let getRule: jest.Mock;
+  let getRule: Mock;
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
 
   beforeEach(() => {
-    getRule = jest.fn();
+    getRule = vi.fn();
     ({ loggerService, mockLogger } = createLoggerService());
   });
 

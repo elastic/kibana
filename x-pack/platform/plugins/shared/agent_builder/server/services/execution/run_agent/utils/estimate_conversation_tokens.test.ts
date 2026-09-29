@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import {
@@ -48,11 +50,11 @@ const createMockToolManager = (
   > = new Map()
 ): ToolManager =>
   ({
-    getSummarizer: jest.fn((toolId: string) => summarizers.get(toolId)),
+    getSummarizer: vi.fn((toolId: string) => summarizers.get(toolId)),
   } as unknown as ToolManager);
 
 const createMockToolRegistry = (): ToolRegistry =>
-  ({ get: jest.fn(async () => undefined) } as unknown as ToolRegistry);
+  ({ get: vi.fn(async () => undefined) } as unknown as ToolRegistry);
 
 const createMockRound = (toolResultValue: string): ProcessedConversationRound =>
   ({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
 import {
@@ -32,7 +34,7 @@ describe('endpoint telemetry task test', () => {
       current: new Date().toISOString(),
     };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    mockTelemetryEventsSender.getTelemetryUsageCluster = jest
+    mockTelemetryEventsSender.getTelemetryUsageCluster = vi
       .fn()
       .mockReturnValue(telemetryUsageCounter);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
@@ -69,11 +71,11 @@ describe('endpoint telemetry task test', () => {
       current: new Date().toISOString(),
     };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    mockTelemetryEventsSender.getTelemetryUsageCluster = jest
+    mockTelemetryEventsSender.getTelemetryUsageCluster = vi
       .fn()
       .mockReturnValue(telemetryUsageCounter);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
-    mockTelemetryReceiver.fetchPolicyConfigs = jest.fn().mockRejectedValueOnce(new Error());
+    mockTelemetryReceiver.fetchPolicyConfigs = vi.fn().mockRejectedValueOnce(new Error());
     const telemetryEndpointTaskConfig = createTelemetryEndpointTaskConfig(1);
     const mockTaskMetrics = createMockTaskMetrics();
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { createEvent, fireEvent, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,13 +23,19 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { renderWithTestingProviders } from '../../../common/mock';
 import * as i18n from '../translations';
 
-jest.mock('./template_form', () => ({
-  TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
-}));
+vi.mock('./template_form', () => {
+      const mocked = {
+      TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./template_preview', () => ({
-  TemplatePreview: () => <div data-test-subj="template-preview" />,
-}));
+vi.mock('./template_preview', () => {
+      const mocked = {
+      TemplatePreview: () => <div data-test-subj="template-preview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const capturedEditorLayoutProps: {
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
@@ -41,54 +50,66 @@ const capturedEditorLayoutProps: {
   yamlValue?: string;
 } = {};
 
-jest.mock('./template_editor_layout', () => ({
-  TemplateEditorLayout: (props: {
-    onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
-    onCaseDefaultChange?: (
-      field: 'name' | 'description' | 'severity' | 'category' | 'tags' | 'assignees',
-      value: string | string[] | CaseAssignees
-    ) => void;
-    onSettingsChange?: (settings: unknown) => void;
-    onConnectorChange?: (connector: unknown) => void;
-    [key: string]: unknown;
-  }) => {
-    capturedEditorLayoutProps.onFieldDefaultChange = props.onFieldDefaultChange;
-    capturedEditorLayoutProps.onCaseDefaultChange = props.onCaseDefaultChange;
-    capturedEditorLayoutProps.onSettingsChange = props.onSettingsChange;
-    capturedEditorLayoutProps.onConnectorChange = props.onConnectorChange;
-    capturedEditorLayoutProps.metadata = props.metadata as TemplateMetadata;
-    capturedEditorLayoutProps.onMetadataChange =
-      props.onMetadataChange as typeof capturedEditorLayoutProps.onMetadataChange;
-    capturedEditorLayoutProps.yamlValue = props.yamlValue as string;
-    return (
-      <>
-        <div data-test-subj="template-yaml-editor" />
-        <div data-test-subj="template-preview" />
-      </>
-    );
-  },
-}));
+vi.mock('./template_editor_layout', () => {
+      const mocked = {
+      TemplateEditorLayout: (props: {
+        onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+        onCaseDefaultChange?: (
+          field: 'name' | 'description' | 'severity' | 'category' | 'tags' | 'assignees',
+          value: string | string[] | CaseAssignees
+        ) => void;
+        onSettingsChange?: (settings: unknown) => void;
+        onConnectorChange?: (connector: unknown) => void;
+        [key: string]: unknown;
+      }) => {
+        capturedEditorLayoutProps.onFieldDefaultChange = props.onFieldDefaultChange;
+        capturedEditorLayoutProps.onCaseDefaultChange = props.onCaseDefaultChange;
+        capturedEditorLayoutProps.onSettingsChange = props.onSettingsChange;
+        capturedEditorLayoutProps.onConnectorChange = props.onConnectorChange;
+        capturedEditorLayoutProps.metadata = props.metadata as TemplateMetadata;
+        capturedEditorLayoutProps.onMetadataChange =
+          props.onMetadataChange as typeof capturedEditorLayoutProps.onMetadataChange;
+        capturedEditorLayoutProps.yamlValue = props.yamlValue as string;
+        return (
+          <>
+            <div data-test-subj="template-yaml-editor" />
+            <div data-test-subj="template-preview" />
+          </>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNavigateToCasesTemplates = jest.fn();
+const mockNavigateToCasesTemplates = vi.fn();
 
-jest.mock('../../../common/navigation', () => ({
-  useCasesTemplatesNavigation: () => ({
-    getCasesTemplatesUrl: jest.fn().mockReturnValue('/templates'),
-    navigateToCasesTemplates: mockNavigateToCasesTemplates,
-  }),
-}));
+vi.mock('../../../common/navigation', () => {
+      const mocked = {
+      useCasesTemplatesNavigation: () => ({
+        getCasesTemplatesUrl: vi.fn().mockReturnValue('/templates'),
+        navigateToCasesTemplates: mockNavigateToCasesTemplates,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCasesLocalStorage = jest.fn(
-  (..._args: unknown[]): [unknown, (value: unknown) => void] => [undefined, jest.fn()]
+const mockUseCasesLocalStorage = vi.fn(
+  (..._args: unknown[]): [unknown, (value: unknown) => void] => [undefined, vi.fn()]
 );
-jest.mock('../../../common/use_cases_local_storage', () => ({
-  useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
-}));
+vi.mock('../../../common/use_cases_local_storage', () => {
+      const mocked = {
+      useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseDebouncedYamlEdit = jest.fn();
-jest.mock('../hooks/use_debounced_yaml_edit', () => ({
-  useDebouncedYamlEdit: (...args: unknown[]) => mockUseDebouncedYamlEdit(...args),
-}));
+const mockUseDebouncedYamlEdit = vi.fn();
+vi.mock('../hooks/use_debounced_yaml_edit', () => {
+      const mocked = {
+      useDebouncedYamlEdit: (...args: unknown[]) => mockUseDebouncedYamlEdit(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Template identity (name/description/tags) is no longer part of the YAML — the editor buffer only
 // holds case defaults, settings, connector, and fields.
@@ -147,19 +168,19 @@ describe('getTemplateEditorBodyOffset', () => {
 });
 
 describe('TemplateFormLayout', () => {
-  const mockOnCreate = jest.fn();
-  const mockHandleReset = jest.fn();
-  const mockSetStoredMetadataState = jest.fn();
+  const mockOnCreate = vi.fn();
+  const mockHandleReset = vi.fn();
+  const mockSetStoredMetadataState = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOnCreate.mockResolvedValue(undefined);
     mockUseCasesLocalStorage.mockReturnValue([undefined, mockSetStoredMetadataState]);
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: baseEditorYaml,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -259,7 +280,7 @@ describe('TemplateFormLayout', () => {
   });
 
   it('replaces the legacy settings-guidance comment in persisted YAML drafts', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     const yamlWithLegacyComment = `name: Case default title
 # Case settings (sync alerts, extract observables) and the default connector are configured in the
 # Settings tab of the preview panel, not here.
@@ -268,7 +289,7 @@ fields: []`;
       value: yamlWithLegacyComment,
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -282,12 +303,12 @@ fields: []`;
   });
 
   it('does not write template identity into the YAML on metadata edits', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: baseEditorYaml,
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -314,9 +335,9 @@ fields: []`;
   it('never surfaces template identity keys in the editor buffer', () => {
     mockUseDebouncedYamlEdit.mockImplementation((_storageKey: string, initialYaml: string) => ({
       value: initialYaml,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     }));
@@ -341,12 +362,12 @@ fields: []`}
   });
 
   it('mirrors case-default edits into top-level YAML keys', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: baseEditorYaml,
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -363,14 +384,14 @@ fields: []`}
   });
 
   it('slots a newly added case default into render-panel order and keeps fields last', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     // A case default (severity) plus the custom `fields` block. We add `name`, which comes before
     // severity in the render panel; `fields` must stay at the bottom.
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'severity: high\nfields: []',
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -391,12 +412,12 @@ fields: []`}
   });
 
   it('mirrors case-default assignees edits into top-level YAML keys', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: baseEditorYaml,
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -413,7 +434,7 @@ fields: []`}
   });
 
   it('keeps the assignees key present (as []) when assignees are cleared', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: `name: Case default title
 assignees:
@@ -421,7 +442,7 @@ assignees:
 fields: []`,
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -441,7 +462,7 @@ fields: []`,
   });
 
   it('removes a cleared case-default scalar entirely rather than writing null', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: `name: Case default title
 description: Some default
@@ -449,7 +470,7 @@ severity: high
 fields: []`,
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -468,12 +489,12 @@ fields: []`,
   });
 
   it('writes a case-default edit even after every key was deleted (empty buffer)', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: '',
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -493,12 +514,12 @@ fields: []`,
   });
 
   it('writes a case-default edit into a comment-only buffer while preserving the comment', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: '# Custom fields rendered on the case when this template is applied.\n',
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -532,7 +553,7 @@ fields: []`,
   it('does not render reset button when no changes', () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: baseEditorYaml,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
       isSaved: false,
@@ -547,7 +568,7 @@ fields: []`,
   it('renders reset button when there are changes', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
       isSaved: false,
@@ -562,12 +583,12 @@ fields: []`,
   });
 
   it('keeps settings changes out of the YAML editor buffer (panel-owned)', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: baseEditorYaml,
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -583,12 +604,12 @@ fields: []`,
   });
 
   it('keeps connector changes out of the YAML editor buffer (panel-owned)', () => {
-    const mockYamlOnChange = jest.fn();
+    const mockYamlOnChange = vi.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: baseEditorYaml,
       onChange: mockYamlOnChange,
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -610,9 +631,9 @@ category: ""
 tags: []
 assignees: []
 fields: []`,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -656,9 +677,9 @@ connector:
   id: none
   fields: null
 fields: []`,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
-      clearDraft: jest.fn(),
+      clearDraft: vi.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -680,7 +701,7 @@ fields: []`,
   it('shows revert action in create mode', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
       isSaved: false,
@@ -698,7 +719,7 @@ fields: []`,
   it('shows revert action in edit mode', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
       isSaved: false,
@@ -716,7 +737,7 @@ fields: []`,
   it('shows confirmation modal when reset button is clicked', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
       isSaved: false,
@@ -734,7 +755,7 @@ fields: []`,
   it('calls handleReset when user confirms reset', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
       isSaved: false,
@@ -752,7 +773,7 @@ fields: []`,
   it('closes modal without calling handleReset when user cancels', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
       isSaved: false,
@@ -771,7 +792,7 @@ fields: []`,
   it('disables reset button when saving', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: true,
       isSaved: false,
@@ -793,7 +814,7 @@ fields:
     label: Effort
     type: keyword
 `,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
       isSaved: false,
@@ -834,15 +855,15 @@ fields:
 });
 
 describe('handleFieldDefaultChange', () => {
-  const mockOnCreate = jest.fn();
-  const mockHandleReset = jest.fn();
-  let onYamlChange: jest.Mock;
+  const mockOnCreate = vi.fn();
+  const mockHandleReset = vi.fn();
+  let onYamlChange: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedEditorLayoutProps.onFieldDefaultChange = undefined;
     mockOnCreate.mockResolvedValue(undefined);
-    onYamlChange = jest.fn();
+    onYamlChange = vi.fn();
   });
 
   const setupWithYaml = (yaml: string) => {

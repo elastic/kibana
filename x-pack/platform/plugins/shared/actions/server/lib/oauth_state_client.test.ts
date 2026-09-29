@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { OAuthStateClient } from './oauth_state_client';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
-jest.mock('@kbn/core/server', () => {
-  const actual = jest.requireActual('@kbn/core/server');
+vi.mock('@kbn/core/server', async () => {
+  const actual = (await vi.importActual('@kbn/core/server'));
   return {
     ...actual,
     SavedObjectsUtils: {
       ...actual.SavedObjectsUtils,
-      generateId: jest.fn().mockReturnValue('generated-id'),
+      generateId: vi.fn().mockReturnValue('generated-id'),
     },
   };
 });
@@ -25,15 +28,15 @@ jest.mock('@kbn/core/server', () => {
 const mockLogger = loggingSystemMock.create().get();
 
 const mockUnsecuredSavedObjectsClient = {
-  create: jest.fn(),
-  find: jest.fn(),
-  delete: jest.fn(),
-  createPointInTimeFinder: jest.fn(),
-  bulkDelete: jest.fn(),
+  create: vi.fn(),
+  find: vi.fn(),
+  delete: vi.fn(),
+  createPointInTimeFinder: vi.fn(),
+  bulkDelete: vi.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
-  getDecryptedAsInternalUser: jest.fn(),
+  getDecryptedAsInternalUser: vi.fn(),
 };
 
 const createClient = () =>
@@ -45,20 +48,20 @@ const createClient = () =>
 
 describe('OAuthStateClient', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    (SavedObjectsUtils.generateId as jest.Mock).mockReturnValue('generated-id');
+    vi.resetAllMocks();
+    (SavedObjectsUtils.generateId as Mock).mockReturnValue('generated-id');
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('create', () => {
     it('creates OAuth state with PKCE parameters', async () => {
       const client = createClient();
       const now = new Date('2025-06-01T12:00:00.000Z');
-      jest.useFakeTimers();
-      jest.setSystemTime(now);
+      vi.useFakeTimers();
+      vi.setSystemTime(now);
       mockUnsecuredSavedObjectsClient.create.mockResolvedValue({
         id: 'generated-id',
         attributes: {
@@ -292,7 +295,7 @@ describe('OAuthStateClient', () => {
       const client = createClient();
 
       const mockFinder = {
-        find: jest.fn().mockImplementation(async function* () {
+        find: vi.fn().mockImplementation(async function* () {
           yield {
             saved_objects: [
               { id: 'expired-1', type: OAUTH_STATE_SAVED_OBJECT_TYPE },
@@ -300,7 +303,7 @@ describe('OAuthStateClient', () => {
             ],
           };
         }),
-        close: jest.fn(),
+        close: vi.fn(),
       };
       mockUnsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue(mockFinder);
       mockUnsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
@@ -338,7 +341,7 @@ describe('OAuthStateClient', () => {
       const client = createClient();
 
       const mockFinder = {
-        find: jest.fn().mockImplementation(async function* () {
+        find: vi.fn().mockImplementation(async function* () {
           yield {
             saved_objects: [{ id: 'expired-1', type: OAUTH_STATE_SAVED_OBJECT_TYPE }],
           };
@@ -349,7 +352,7 @@ describe('OAuthStateClient', () => {
             ],
           };
         }),
-        close: jest.fn(),
+        close: vi.fn(),
       };
       mockUnsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue(mockFinder);
       mockUnsecuredSavedObjectsClient.bulkDelete

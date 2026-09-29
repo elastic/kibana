@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
@@ -13,29 +16,29 @@ import { AbortMonitor } from './abort_monitor';
 
 const createMockExecutionClient = (
   overrides: Partial<AgentExecutionClient> = {}
-): jest.Mocked<AgentExecutionClient> =>
+): Mocked<AgentExecutionClient> =>
   ({
-    create: jest.fn(),
-    get: jest.fn(),
-    updateStatus: jest.fn(),
-    appendEvents: jest.fn(),
-    peek: jest.fn(),
-    readEvents: jest.fn(),
+    create: vi.fn(),
+    get: vi.fn(),
+    updateStatus: vi.fn(),
+    appendEvents: vi.fn(),
+    peek: vi.fn(),
+    readEvents: vi.fn(),
     ...overrides,
-  } as jest.Mocked<AgentExecutionClient>);
+  } as Mocked<AgentExecutionClient>);
 
 describe('AbortMonitor', () => {
   let logger: MockedLogger;
-  let executionClient: jest.Mocked<AgentExecutionClient>;
+  let executionClient: Mocked<AgentExecutionClient>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     logger = loggerMock.create();
     executionClient = createMockExecutionClient();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should not be aborted initially', () => {
@@ -79,10 +82,10 @@ describe('AbortMonitor', () => {
     monitor.start();
 
     // Advance timer to trigger the first poll
-    jest.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(2000);
 
     // Wait for async operations
-    await jest.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(monitor.getSignal().aborted).toBe(true);
     expect(monitor.getSignal().reason).toEqual(abortReason);
@@ -116,8 +119,8 @@ describe('AbortMonitor', () => {
 
     monitor.start();
 
-    jest.advanceTimersByTime(2000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(2000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(monitor.getSignal().aborted).toBe(false);
     monitor.stop();
@@ -151,8 +154,8 @@ describe('AbortMonitor', () => {
     monitor.start();
 
     // Advance and let one poll happen
-    jest.advanceTimersByTime(2000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(2000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(executionClient.get).toHaveBeenCalledTimes(1);
 
@@ -160,8 +163,8 @@ describe('AbortMonitor', () => {
     monitor.stop();
 
     // Advance more - no further polls should happen
-    jest.advanceTimersByTime(4000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(4000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(executionClient.get).toHaveBeenCalledTimes(1);
   });
@@ -194,15 +197,15 @@ describe('AbortMonitor', () => {
     monitor.start();
 
     // First poll - completed
-    jest.advanceTimersByTime(2000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(2000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(monitor.getSignal().aborted).toBe(false);
     expect(executionClient.get).toHaveBeenCalledTimes(1);
 
     // No further polls should happen
-    jest.advanceTimersByTime(4000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(4000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(executionClient.get).toHaveBeenCalledTimes(1);
   });
@@ -235,15 +238,15 @@ describe('AbortMonitor', () => {
     monitor.start();
 
     // First poll - failed
-    jest.advanceTimersByTime(2000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(2000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(monitor.getSignal().aborted).toBe(false);
     expect(executionClient.get).toHaveBeenCalledTimes(1);
 
     // No further polls should happen
-    jest.advanceTimersByTime(4000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(4000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(executionClient.get).toHaveBeenCalledTimes(1);
   });
@@ -276,14 +279,14 @@ describe('AbortMonitor', () => {
     monitor.start();
 
     // First poll - error
-    jest.advanceTimersByTime(2000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(2000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(monitor.getSignal().aborted).toBe(false);
 
     // Second poll - aborted
-    jest.advanceTimersByTime(2000);
-    await jest.advanceTimersByTimeAsync(0);
+    vi.advanceTimersByTime(2000);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(monitor.getSignal().aborted).toBe(true);
     monitor.stop();

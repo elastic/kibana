@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { casesQueriesKeys } from '../../../containers/constants';
@@ -14,12 +16,12 @@ import React from 'react';
 
 describe('useRefreshCases', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should refresh data on refresh', async () => {
     const queryClient = createTestQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useRefreshCases(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,

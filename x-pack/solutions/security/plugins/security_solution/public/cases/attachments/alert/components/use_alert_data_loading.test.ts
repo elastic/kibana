@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useAlertDataLoading } from './use_alert_data_loading';
 
-const mockRefetch = jest.fn();
+const mockRefetch = vi.fn();
 
 const baseParams = {
   hasRuleIdFromMetadata: false,
@@ -22,8 +24,8 @@ const baseParams = {
 
 describe('useAlertDataLoading', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('returns false when alert data is present and nothing is loading', () => {
@@ -85,13 +87,13 @@ describe('useAlertDataLoading', () => {
 
   describe('retry behaviour', () => {
     it('returns true (retry pending) when first fetch completes with no matching data', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const { result } = renderHook(() => useAlertDataLoading(baseParams));
       expect(result.current).toBe(true);
     });
 
     it('fires refetchAlertData after 300ms and returns false after the retry', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       // Empty alertsData → first fetch returned no data → retry should fire.
       const { result, rerender } = renderHook(() => useAlertDataLoading(baseParams));
 
@@ -99,7 +101,7 @@ describe('useAlertDataLoading', () => {
       expect(mockRefetch).not.toHaveBeenCalled();
 
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       expect(mockRefetch).toHaveBeenCalledTimes(1);
@@ -110,29 +112,29 @@ describe('useAlertDataLoading', () => {
     });
 
     it('does not fire a retry when rule ID is already in metadata', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       renderHook(() => useAlertDataLoading({ ...baseParams, hasRuleIdFromMetadata: true }));
 
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       expect(mockRefetch).not.toHaveBeenCalled();
     });
 
     it('does not fire a second retry after the first has already run', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const { rerender } = renderHook(() => useAlertDataLoading(baseParams));
 
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
       expect(mockRefetch).toHaveBeenCalledTimes(1);
 
       rerender();
 
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
       expect(mockRefetch).toHaveBeenCalledTimes(1);
     });

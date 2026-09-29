@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createInternalError } from '@kbn/agent-builder-common';
@@ -18,17 +20,17 @@ describe('getHandlerWrapper', () => {
   const createCtx = (uiSettingValues: Record<string, boolean> = {}) =>
     ({
       core: Promise.resolve({
-        uiSettings: { client: { get: jest.fn(async (key: string) => uiSettingValues[key]) } },
+        uiSettings: { client: { get: vi.fn(async (key: string) => uiSettingValues[key]) } },
       }),
       licensing: Promise.resolve({
-        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
       }),
     } as any);
 
   const req = httpServerMock.createKibanaRequest();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('feature flag gating', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -16,7 +18,7 @@ import type { MenuItem } from './hierarchical_actions_menu';
 describe('HierarchicalActionsMenu', () => {
   const renderer = createFleetTestRendererMock();
 
-  const mockOnClick = jest.fn();
+  const mockOnClick = vi.fn();
 
   const basicMenuItems: MenuItem[] = [
     {
@@ -88,7 +90,7 @@ describe('HierarchicalActionsMenu', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Basic rendering', () => {
@@ -132,7 +134,7 @@ describe('HierarchicalActionsMenu', () => {
 
   describe('Controlled mode', () => {
     it('should work in controlled mode with isOpen and onToggle', async () => {
-      const onToggle = jest.fn();
+      const onToggle = vi.fn();
       const utils = renderer.render(
         <HierarchicalActionsMenu
           items={basicMenuItems}
@@ -151,7 +153,7 @@ describe('HierarchicalActionsMenu', () => {
     });
 
     it('should close menu when action is clicked', async () => {
-      const onToggle = jest.fn();
+      const onToggle = vi.fn();
       const utils = renderer.render(
         <HierarchicalActionsMenu
           items={basicMenuItems}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,9 +16,9 @@ import { ConnectionWizard } from '.';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import type { CloudConnectedAppContextValue } from '../../../app_context';
 
-jest.mock('../../../app_context');
+vi.mock('../../../app_context');
 
-const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.MockedFunction<
+const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as MockedFunction<
   typeof useCloudConnectedAppContext
 >;
 
@@ -28,22 +31,22 @@ const renderWithIntl = (component: React.ReactElement) => {
 };
 
 describe('ConnectionWizard', () => {
-  const mockOnConnect = jest.fn();
+  const mockOnConnect = vi.fn();
   const mockTelemetryClient = {
-    trackClusterConnected: jest.fn(),
-    trackClusterDisconnected: jest.fn(),
-    trackServiceEnabled: jest.fn(),
-    trackServiceDisabled: jest.fn(),
-    trackLinkClicked: jest.fn(),
+    trackClusterConnected: vi.fn(),
+    trackClusterDisconnected: vi.fn(),
+    trackServiceEnabled: vi.fn(),
+    trackServiceDisabled: vi.fn(),
+    trackLinkClicked: vi.fn(),
   };
   const mockApiService = {
-    authenticate: jest.fn(),
-    useLoadConfig: jest.fn(),
-    useLoadClusterDetails: jest.fn(),
-    updateServices: jest.fn(),
-    disconnectCluster: jest.fn(),
+    authenticate: vi.fn(),
+    useLoadConfig: vi.fn(),
+    useLoadClusterDetails: vi.fn(),
+    updateServices: vi.fn(),
+    disconnectCluster: vi.fn(),
   };
-  const mockSetJustConnected = jest.fn();
+  const mockSetJustConnected = vi.fn();
   const mockContext: CloudConnectedAppContextValue = {
     chrome: {} as any,
     application: {} as any,
@@ -70,11 +73,11 @@ describe('ConnectionWizard', () => {
     justConnected: false,
     setJustConnected: mockSetJustConnected,
     autoEnablingEis: false,
-    setAutoEnablingEis: jest.fn(),
+    setAutoEnablingEis: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudConnectedAppContext.mockReturnValue(mockContext);
   });
 
@@ -168,7 +171,7 @@ describe('ConnectionWizard', () => {
   });
 
   it('should display error callout when authentication fails', async () => {
-    mockApiService.authenticate = jest.fn().mockResolvedValue({
+    mockApiService.authenticate = vi.fn().mockResolvedValue({
       data: null,
       error: { message: 'Invalid API key' },
     });
@@ -193,7 +196,7 @@ describe('ConnectionWizard', () => {
     const authenticatePromise = new Promise((resolve) => {
       resolveAuthenticate = resolve;
     });
-    mockApiService.authenticate = jest.fn().mockReturnValue(authenticatePromise);
+    mockApiService.authenticate = vi.fn().mockReturnValue(authenticatePromise);
 
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
@@ -217,7 +220,7 @@ describe('ConnectionWizard', () => {
   });
 
   it('should call onConnect callback on successful authentication', async () => {
-    mockApiService.authenticate = jest.fn().mockResolvedValue({
+    mockApiService.authenticate = vi.fn().mockResolvedValue({
       data: { success: true, cluster_id: 'cluster-123', organization_id: 'org-123' },
       error: null,
     });
@@ -240,7 +243,7 @@ describe('ConnectionWizard', () => {
   });
 
   it('should set justConnected to true on successful authentication', async () => {
-    mockApiService.authenticate = jest.fn().mockResolvedValue({
+    mockApiService.authenticate = vi.fn().mockResolvedValue({
       data: { success: true, cluster_id: 'cluster-123', organization_id: 'org-123' },
       error: null,
     });

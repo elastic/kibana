@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IPercentileAggConfig } from './percentiles';
 import { getPercentilesMetricAgg } from './percentiles';
 import type { IAggConfigs } from '../agg_configs';
@@ -47,7 +49,7 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
         },
       ],
       { typesRegistry },
-      jest.fn()
+      vi.fn()
     );
   });
 

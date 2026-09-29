@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -17,9 +20,9 @@ import {
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from '../hooks/use_fetch_related_alerts_by_session';
 
-jest.mock('../hooks/use_fetch_related_alerts_by_session');
+vi.mock('../hooks/use_fetch_related_alerts_by_session');
 
-const mockOnShowCorrelationsDetails = jest.fn();
+const mockOnShowCorrelationsDetails = vi.fn();
 
 const entityId = 'entityId';
 const scopeId = 'scopeId';
@@ -41,11 +44,11 @@ const renderRelatedAlertsBySession = () =>
 
 describe('<RelatedAlertsBySession />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render single related alerts correctly', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 1,
@@ -57,7 +60,7 @@ describe('<RelatedAlertsBySession />', () => {
   });
 
   it('should render multiple related alerts correctly', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 2,
@@ -69,7 +72,7 @@ describe('<RelatedAlertsBySession />', () => {
   });
 
   it('should render loading skeleton', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
       loading: true,
     });
 
@@ -78,7 +81,7 @@ describe('<RelatedAlertsBySession />', () => {
   });
 
   it('should render null if error', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
       loading: false,
       error: true,
     });
@@ -88,7 +91,7 @@ describe('<RelatedAlertsBySession />', () => {
   });
 
   it('should open the expanded section to the correct tab when the number is clicked', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 1,

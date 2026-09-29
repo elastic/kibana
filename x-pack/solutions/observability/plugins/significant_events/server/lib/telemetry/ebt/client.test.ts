@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { EbtTelemetryClient } from './client';
 import {
@@ -13,17 +16,17 @@ import {
 } from './constants';
 
 describe('EbtTelemetryClient', () => {
-  let analyticsService: jest.Mocked<AnalyticsServiceSetup>;
+  let analyticsService: Mocked<AnalyticsServiceSetup>;
   let client: EbtTelemetryClient;
 
   beforeEach(() => {
     analyticsService = {
-      reportEvent: jest.fn(),
-      registerEventType: jest.fn(),
-      registerShipper: jest.fn(),
-      registerContextProvider: jest.fn(),
-      removeContextProvider: jest.fn(),
-      optIn: jest.fn(),
+      reportEvent: vi.fn(),
+      registerEventType: vi.fn(),
+      registerShipper: vi.fn(),
+      registerContextProvider: vi.fn(),
+      removeContextProvider: vi.fn(),
+      optIn: vi.fn(),
       telemetryCounter$: {} as any,
     };
     client = new EbtTelemetryClient(analyticsService);

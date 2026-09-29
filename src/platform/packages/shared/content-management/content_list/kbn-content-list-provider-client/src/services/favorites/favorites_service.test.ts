@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -16,18 +19,18 @@ import { createFavoritesService } from './favorites_service';
 
 describe('createFavoritesService', () => {
   const http = {
-    get: jest.fn(),
-    post: jest.fn(),
-  } as unknown as jest.Mocked<HttpStart>;
+    get: vi.fn(),
+    post: vi.fn(),
+  } as unknown as Mocked<HttpStart>;
   const userProfile = {
-    getEnabled$: jest.fn(),
-  } as unknown as jest.Mocked<UserProfileServiceStart>;
+    getEnabled$: vi.fn(),
+  } as unknown as Mocked<UserProfileServiceStart>;
   const usageCollection = {
-    reportUiCounter: jest.fn(),
-  } as unknown as jest.Mocked<UsageCollectionStart>;
+    reportUiCounter: vi.fn(),
+  } as unknown as Mocked<UsageCollectionStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     userProfile.getEnabled$.mockReturnValue(of(true));
   });
 

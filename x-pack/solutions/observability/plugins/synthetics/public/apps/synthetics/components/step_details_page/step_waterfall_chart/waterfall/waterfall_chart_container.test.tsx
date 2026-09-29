@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { WaterfallChartContainer } from './waterfall_chart_container';
@@ -135,7 +137,7 @@ const defaultState = {
 
 describe('WaterfallChartContainer', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   it('does not display waterfall chart unavailable when isWaterfallSupported is true', () => {

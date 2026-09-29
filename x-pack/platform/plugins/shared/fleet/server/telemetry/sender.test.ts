@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable dot-notation */
 
 import { URL } from 'url';
@@ -21,9 +23,9 @@ import { UpdateEventType } from '../services/upgrade_sender';
 
 import { TelemetryEventsSender } from './sender';
 
-jest.mock('axios', () => {
+vi.mock('axios', () => {
   return {
-    post: jest.fn(),
+    post: vi.fn(),
   };
 });
 
@@ -34,7 +36,7 @@ describe('TelemetryEventsSender', () => {
   beforeEach(async () => {
     logger = loggingSystemMock.createLogger();
     sender = new TelemetryEventsSender(logger);
-    sender['fetchClusterInfo'] = jest.fn(async () => {
+    sender['fetchClusterInfo'] = vi.fn(async () => {
       return {
         cluster_uuid: '1',
         cluster_name: 'name',
@@ -44,7 +46,7 @@ describe('TelemetryEventsSender', () => {
       } as InfoResponse;
     });
     await sender.start(undefined, {
-      elasticsearch: { client: { asInternalUser: { info: jest.fn(async () => ({})) } } },
+      elasticsearch: { client: { asInternalUser: { info: vi.fn(async () => ({})) } } },
     } as any);
   });
 
@@ -64,11 +66,11 @@ describe('TelemetryEventsSender', () => {
 
     it('should send events when due', async () => {
       sender['telemetryStart'] = {
-        getIsOptedIn: jest.fn(async () => true),
+        getIsOptedIn: vi.fn(async () => true),
         isOptedIn$: new Observable<boolean>(),
       };
       sender['telemetrySetup'] = {
-        getTelemetryUrl: jest.fn(
+        getTelemetryUrl: vi.fn(
           async () => new URL('https://telemetry-staging.elastic.co/v3/send/snapshot')
         ),
       };
@@ -82,7 +84,7 @@ describe('TelemetryEventsSender', () => {
           eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
         },
       ]);
-      sender['sendEvents'] = jest.fn();
+      sender['sendEvents'] = vi.fn();
 
       await sender['sendIfDue']();
 
@@ -95,7 +97,7 @@ describe('TelemetryEventsSender', () => {
 
     it("shouldn't send when telemetry is disabled", async () => {
       const telemetryStart = {
-        getIsOptedIn: jest.fn(async () => false),
+        getIsOptedIn: vi.fn(async () => false),
         isOptedIn$: new Observable<boolean>(),
       };
       sender['telemetryStart'] = telemetryStart;
@@ -109,7 +111,7 @@ describe('TelemetryEventsSender', () => {
           eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
         },
       ]);
-      sender['sendEvents'] = jest.fn();
+      sender['sendEvents'] = vi.fn();
 
       await sender['sendIfDue']();
 
@@ -118,11 +120,11 @@ describe('TelemetryEventsSender', () => {
 
     it('should send events to separate channels', async () => {
       sender['telemetryStart'] = {
-        getIsOptedIn: jest.fn(async () => true),
+        getIsOptedIn: vi.fn(async () => true),
         isOptedIn$: new Observable<boolean>(),
       };
       sender['telemetrySetup'] = {
-        getTelemetryUrl: jest.fn(
+        getTelemetryUrl: vi.fn(
           async () => new URL('https://telemetry.elastic.co/v3/send/snapshot')
         ),
       };
@@ -130,14 +132,14 @@ describe('TelemetryEventsSender', () => {
       const myChannelEvents = [{ 'event.kind': '1' }, { 'event.kind': '2' }];
       // @ts-ignore
       sender.queueTelemetryEvents('my-channel', myChannelEvents);
-      sender['queuesPerChannel']['my-channel']['getEvents'] = jest.fn(() => myChannelEvents);
+      sender['queuesPerChannel']['my-channel']['getEvents'] = vi.fn(() => myChannelEvents);
 
       expect(sender['queuesPerChannel']['my-channel']['queue'].length).toBe(2);
 
       const myChannel2Events = [{ 'event.kind': '3' }];
       // @ts-ignore
       sender.queueTelemetryEvents('my-channel2', myChannel2Events);
-      sender['queuesPerChannel']['my-channel2']['getEvents'] = jest.fn(() => myChannel2Events);
+      sender['queuesPerChannel']['my-channel2']['getEvents'] = vi.fn(() => myChannel2Events);
 
       expect(sender['queuesPerChannel']['my-channel2']['queue'].length).toBe(1);
 

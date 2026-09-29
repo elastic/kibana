@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -20,8 +22,8 @@ describe('EditingColumn', () => {
   const column = {
     name: 'foo',
     field: 'foo',
-    render: jest.fn(),
-    editingRender: jest.fn<React.ReactNode, [any, (value: string) => void, EditingRenderFlags]>(
+    render: vi.fn(),
+    editingRender: vi.fn<React.ReactNode, [any, (value: string) => void, EditingRenderFlags]>(
       () => <div data-test-subj="editing-view" />
     ),
   };
@@ -37,11 +39,11 @@ describe('EditingColumn', () => {
   };
 
   const mockActions = {
-    setEditingItemValue: jest.fn(),
+    setEditingItemValue: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockActions(mockActions);
     setMockValues(mockValues);
   });

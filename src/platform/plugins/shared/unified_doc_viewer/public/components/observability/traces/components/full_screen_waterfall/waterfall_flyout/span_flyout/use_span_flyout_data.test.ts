@@ -7,29 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { UnifiedSpanDocument } from '@kbn/apm-types';
 import { useSpanFlyoutData } from './use_span_flyout_data';
 
-const mockUseFetchSpan = jest.fn();
+const mockUseFetchSpan = vi.fn();
 
-jest.mock('../../hooks/use_fetch_span', () => ({
-  useFetchSpan: (params: { spanId: string; traceId: string }) => mockUseFetchSpan(params),
-}));
+vi.mock('../../hooks/use_fetch_span', () => {
+      const mocked = {
+      useFetchSpan: (params: { spanId: string; traceId: string }) => mockUseFetchSpan(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../helpers/is_span', () => ({
-  isSpanHit: jest.fn((hit) => {
-    if (!hit) return false;
-    return hit.flattened?.['span.id'] !== undefined;
-  }),
-}));
+vi.mock('../../helpers/is_span', () => {
+      const mocked = {
+      isSpanHit: vi.fn((hit) => {
+        if (!hit) return false;
+        return hit.flattened?.['span.id'] !== undefined;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useSpanFlyoutData', () => {
   const spanId = 'test-span-id';
   const traceId = 'test-trace-id';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return loading true when fetching span', () => {
@@ -111,7 +119,7 @@ describe('useSpanFlyoutData', () => {
       error: undefined,
     });
 
-    const isSpanHitMock = jest.requireMock('../../helpers/is_span').isSpanHit;
+    const isSpanHitMock = (await vi.importMock('../../helpers/is_span')).isSpanHit;
     isSpanHitMock.mockReturnValue(true);
 
     const { result } = renderHook(() => useSpanFlyoutData({ spanId, traceId }));
@@ -137,7 +145,7 @@ describe('useSpanFlyoutData', () => {
       error: undefined,
     });
 
-    const isSpanHitMock = jest.requireMock('../../helpers/is_span').isSpanHit;
+    const isSpanHitMock = (await vi.importMock('../../helpers/is_span')).isSpanHit;
     isSpanHitMock.mockReturnValue(false);
 
     const { result } = renderHook(() => useSpanFlyoutData({ spanId, traceId }));

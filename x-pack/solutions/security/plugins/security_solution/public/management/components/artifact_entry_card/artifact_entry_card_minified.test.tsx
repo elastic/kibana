@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -23,10 +26,10 @@ describe.each([
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: (props: ArtifactEntryCardMinifiedProps) => ReturnType<AppContextTestRender['render']>;
-  let onToggleSelectedArtifactMock: jest.Mock;
+  let onToggleSelectedArtifactMock: Mock;
 
   beforeEach(() => {
-    onToggleSelectedArtifactMock = jest.fn();
+    onToggleSelectedArtifactMock = vi.fn();
     item = generateItem();
     appTestContext = createAppRootMockRenderer();
     render = (props) => {

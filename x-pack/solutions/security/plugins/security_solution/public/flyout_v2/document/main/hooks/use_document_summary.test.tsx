@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useDocumentSummary } from './use_document_summary';
 import type { PromptContext } from '@kbn/elastic-assistant';
@@ -13,16 +16,16 @@ import { useChatComplete } from '@kbn/elastic-assistant/impl/assistant/api/chat_
 import { useFetchDocumentSummary } from './use_fetch_document_summary';
 import { useBulkUpdateDocumentSummary } from './use_bulk_update_document_summary';
 
-jest.mock('@kbn/elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete');
-jest.mock(
+vi.mock('@kbn/elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete');
+vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields'
 );
-jest.mock('./use_fetch_document_summary');
-jest.mock('./use_bulk_update_document_summary');
+vi.mock('./use_fetch_document_summary');
+vi.mock('./use_bulk_update_document_summary');
 const promptContext: PromptContext = {
   category: 'alert',
   description: 'Alert summary',
-  getPromptContext: jest
+  getPromptContext: vi
     .fn()
     .mockResolvedValue('{ host.name: "test-host", more.data: 123, "user.name": "test-user"}'),
   id: '_promptContextId',
@@ -31,31 +34,31 @@ const promptContext: PromptContext = {
   replacements: { 'host.name': '12345' },
 };
 describe('useDocumentSummary', () => {
-  const mockSendMessage = jest.fn();
-  const mockAbortStream = jest.fn();
-  const mockRefetchSummary = jest.fn();
-  const mockBulkUpdate = jest.fn();
+  const mockSendMessage = vi.fn();
+  const mockAbortStream = vi.fn();
+  const mockRefetchSummary = vi.fn();
+  const mockBulkUpdate = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useChatComplete as jest.Mock).mockReturnValue({
+    (useChatComplete as Mock).mockReturnValue({
       sendMessage: mockSendMessage,
       abortStream: mockAbortStream,
     });
 
-    (useFetchAnonymizationFields as jest.Mock).mockReturnValue({
+    (useFetchAnonymizationFields as Mock).mockReturnValue({
       data: [],
       isFetched: true,
     });
 
-    (useFetchDocumentSummary as jest.Mock).mockReturnValue({
+    (useFetchDocumentSummary as Mock).mockReturnValue({
       data: { data: [] },
       refetch: mockRefetchSummary,
       isFetched: true,
     });
 
-    (useBulkUpdateDocumentSummary as jest.Mock).mockReturnValue({
+    (useBulkUpdateDocumentSummary as Mock).mockReturnValue({
       bulkUpdate: mockBulkUpdate,
     });
   });
@@ -78,7 +81,7 @@ describe('useDocumentSummary', () => {
   });
 
   it('should fetch AI summary when fetchAISummary is called', async () => {
-    (useFetchDocumentSummary as jest.Mock)
+    (useFetchDocumentSummary as Mock)
       .mockReturnValueOnce({
         data: {
           data: [{ id: 'summary-id', summary: '', replacements: {} }],
@@ -159,7 +162,7 @@ describe('useDocumentSummary', () => {
   });
 
   it('should recover summaries wrapped in markdown code fences', async () => {
-    (useFetchDocumentSummary as jest.Mock)
+    (useFetchDocumentSummary as Mock)
       .mockReturnValueOnce({
         data: { data: [], prompt: 'Generate an alert summary!' },
         refetch: mockRefetchSummary,
@@ -212,7 +215,7 @@ describe('useDocumentSummary', () => {
   });
 
   it('should recover summaries embedded in prose', async () => {
-    (useFetchDocumentSummary as jest.Mock)
+    (useFetchDocumentSummary as Mock)
       .mockReturnValueOnce({
         data: { data: [], prompt: 'Generate an alert summary!' },
         refetch: mockRefetchSummary,
@@ -267,7 +270,7 @@ describe('useDocumentSummary', () => {
   it('should use raw text as summary when the AI response is not valid JSON', async () => {
     const rawMarkdown = '## Alert Summary\n\nThis alert was triggered by a suspicious process.';
 
-    (useFetchDocumentSummary as jest.Mock)
+    (useFetchDocumentSummary as Mock)
       .mockReturnValueOnce({
         data: { data: [], prompt: 'Generate an alert summary!' },
         refetch: mockRefetchSummary,
@@ -335,7 +338,7 @@ describe('useDocumentSummary', () => {
   });
 
   it('should keep hasSummary true when regeneration fails but a persisted summary exists', async () => {
-    (useFetchDocumentSummary as jest.Mock).mockReturnValue({
+    (useFetchDocumentSummary as Mock).mockReturnValue({
       data: {
         data: [{ id: 'summary-id', summary: 'Existing summary', replacements: {} }],
         prompt: 'Generate an alert summary!',

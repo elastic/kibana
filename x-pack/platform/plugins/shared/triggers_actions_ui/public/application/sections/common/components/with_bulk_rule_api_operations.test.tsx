@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,60 +18,86 @@ import type { SortField } from '../../../lib/rule_api/load_execution_log_aggrega
 import type { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
-  loadExecutionLogAggregations: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/mute', () => ({
-  muteRules: jest.fn(),
-  muteRule: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/unmute', () => ({
-  unmuteRules: jest.fn(),
-  unmuteRule: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/bulk_delete', () => ({
-  bulkDeleteRules: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/bulk_enable', () => ({
-  bulkEnableRules: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/bulk_disable', () => ({
-  bulkDisableRules: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/get_rule', () => ({
-  loadRule: jest.fn(),
-}));
-jest.mock('@kbn/response-ops-rule-form/src/common/apis/resolve_rule', () => ({
-  resolveRule: jest.fn(),
-}));
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
-  getRuleTypes: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
-  loadActionErrorLog: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
+      const mocked = {
+      loadExecutionLogAggregations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/mute', () => {
+      const mocked = {
+      muteRules: vi.fn(),
+      muteRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/unmute', () => {
+      const mocked = {
+      unmuteRules: vi.fn(),
+      unmuteRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/bulk_delete', () => {
+      const mocked = {
+      bulkDeleteRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/bulk_enable', () => {
+      const mocked = {
+      bulkEnableRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/bulk_disable', () => {
+      const mocked = {
+      bulkDisableRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/get_rule', () => {
+      const mocked = {
+      loadRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-rule-form/src/common/apis/resolve_rule', () => {
+      const mocked = {
+      resolveRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
+      const mocked = {
+      getRuleTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/load_action_error_log', () => {
+      const mocked = {
+      loadActionErrorLog: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { loadExecutionLogAggregations } = jest.requireMock(
-  '../../../lib/rule_api/load_execution_log_aggregations'
-);
-const { muteRules, muteRule } = jest.requireMock('../../../lib/rule_api/mute');
-const { unmuteRules, unmuteRule } = jest.requireMock('../../../lib/rule_api/unmute');
-const { bulkDeleteRules } = jest.requireMock('../../../lib/rule_api/bulk_delete');
-const { bulkEnableRules } = jest.requireMock('../../../lib/rule_api/bulk_enable');
-const { bulkDisableRules } = jest.requireMock('../../../lib/rule_api/bulk_disable');
-const { loadRule } = jest.requireMock('../../../lib/rule_api/get_rule');
-const { resolveRule } = jest.requireMock(
-  '@kbn/response-ops-rule-form/src/common/apis/resolve_rule'
-);
-const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { loadActionErrorLog } = jest.requireMock('../../../lib/rule_api/load_action_error_log');
+const { loadExecutionLogAggregations } = (await vi.importMock('../../../lib/rule_api/load_execution_log_aggregations'));
+const { muteRules, muteRule } = (await vi.importMock('../../../lib/rule_api/mute'));
+const { unmuteRules, unmuteRule } = (await vi.importMock('../../../lib/rule_api/unmute'));
+const { bulkDeleteRules } = (await vi.importMock('../../../lib/rule_api/bulk_delete'));
+const { bulkEnableRules } = (await vi.importMock('../../../lib/rule_api/bulk_enable'));
+const { bulkDisableRules } = (await vi.importMock('../../../lib/rule_api/bulk_disable'));
+const { loadRule } = (await vi.importMock('../../../lib/rule_api/get_rule'));
+const { resolveRule } = (await vi.importMock('@kbn/response-ops-rule-form/src/common/apis/resolve_rule'));
+const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
+const { loadActionErrorLog } = (await vi.importMock('../../../lib/rule_api/load_action_error_log'));
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('with_bulk_rule_api_operations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Minimal helper to build a button that invokes a provided HOC method with optional args

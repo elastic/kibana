@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,26 +16,38 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useLastAgentId } from '../../../hooks/use_last_agent_id';
 
-jest.mock('../../../context/conversation/conversation_context', () => ({
-  useConversationContext: jest.fn(),
-}));
+vi.mock('../../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_navigation', () => ({
-  useNavigation: jest.fn(),
-}));
+vi.mock('../../../hooks/use_navigation', () => {
+      const mocked = {
+      useNavigation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_last_agent_id', () => ({
-  useLastAgentId: jest.fn(),
-}));
+vi.mock('../../../hooks/use_last_agent_id', () => {
+      const mocked = {
+      useLastAgentId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // EBT click props helper — irrelevant to these tests
-jest.mock('@kbn/ebt-click', () => ({
-  getEbtProps: jest.fn(() => ({})),
-}));
+vi.mock('@kbn/ebt-click', () => {
+      const mocked = {
+      getEbtProps: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversationContext = jest.mocked(useConversationContext);
-const mockUseNavigation = jest.mocked(useNavigation);
-const mockUseLastAgentId = jest.mocked(useLastAgentId);
+const mockUseConversationContext = vi.mocked(useConversationContext);
+const mockUseNavigation = vi.mocked(useNavigation);
+const mockUseLastAgentId = vi.mocked(useLastAgentId);
 
 const renderButton = () =>
   render(
@@ -42,14 +57,14 @@ const renderButton = () =>
   );
 
 describe('StartNewConversationButton', () => {
-  let setConversationId: jest.Mock;
-  let resetAttachments: jest.Mock;
-  let navigateToAgentBuilderUrl: jest.Mock;
+  let setConversationId: Mock;
+  let resetAttachments: Mock;
+  let navigateToAgentBuilderUrl: Mock;
 
   beforeEach(() => {
-    setConversationId = jest.fn();
-    resetAttachments = jest.fn();
-    navigateToAgentBuilderUrl = jest.fn();
+    setConversationId = vi.fn();
+    resetAttachments = vi.fn();
+    navigateToAgentBuilderUrl = vi.fn();
 
     mockUseNavigation.mockReturnValue({
       navigateToAgentBuilderUrl,

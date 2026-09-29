@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ExitWhileNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
@@ -33,28 +36,28 @@ describe('ExitWhileNodeImpl', () => {
       condition: 'steps.testStep.inner_step.output.status : "success"',
     };
     wfExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
-    wfExecutionRuntimeManager.navigateToNextNode = jest.fn();
-    wfExecutionRuntimeManager.navigateToNode = jest.fn();
+    wfExecutionRuntimeManager.navigateToNextNode = vi.fn();
+    wfExecutionRuntimeManager.navigateToNode = vi.fn();
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
-    stepExecutionRuntime.finishStep = jest.fn();
-    stepExecutionRuntime.getCurrentStepState = jest.fn();
+    stepExecutionRuntime.finishStep = vi.fn();
+    stepExecutionRuntime.getCurrentStepState = vi.fn();
     stepExecutionRuntime.contextManager = {
-      renderValueWithContext: jest.fn().mockImplementation((input) => input),
-      getContext: jest.fn().mockReturnValue({}),
+      renderValueWithContext: vi.fn().mockImplementation((input) => input),
+      getContext: vi.fn().mockReturnValue({}),
     } as any;
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
-    workflowLogger.logDebug = jest.fn();
+    workflowLogger.logDebug = vi.fn();
 
     stepIoService = {
-      evictStaleLoopOutputs: jest.fn(),
-      unpinLoopScope: jest.fn(),
-      pinLoopSource: jest.fn(),
+      evictStaleLoopOutputs: vi.fn(),
+      unpinLoopScope: vi.fn(),
+      pinLoopSource: vi.fn(),
     } as unknown as StepIoService;
 
     workflowGraph = {
-      getInnerStepIds: jest.fn().mockReturnValue(new Set(['inner_step'])),
+      getInnerStepIds: vi.fn().mockReturnValue(new Set(['inner_step'])),
     } as unknown as WorkflowGraph;
 
     underTest = new ExitWhileNodeImpl(
@@ -69,7 +72,7 @@ describe('ExitWhileNodeImpl', () => {
 
   describe('when no while state exists', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue(undefined);
     });
 
     it('should throw an error', () => {
@@ -81,10 +84,10 @@ describe('ExitWhileNodeImpl', () => {
 
   describe('when condition evaluates to true and under max-iterations', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         true
       );
     });
@@ -111,10 +114,10 @@ describe('ExitWhileNodeImpl', () => {
 
   describe('when condition evaluates to false', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 2,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         false
       );
     });
@@ -149,7 +152,7 @@ describe('ExitWhileNodeImpl', () => {
 
   describe('when max-iterations is reached', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
       node.maxIterations = 2;
@@ -219,13 +222,13 @@ describe('ExitWhileNodeImpl', () => {
 
   describe('condition evaluation edge cases', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 0,
       });
     });
 
     it('should handle boolean true condition', () => {
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         true
       );
 
@@ -235,7 +238,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean false condition', () => {
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         false
       );
 
@@ -246,7 +249,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle undefined condition as false', () => {
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         undefined
       );
 
@@ -264,10 +267,10 @@ describe('ExitWhileNodeImpl', () => {
     // latest execution right before evaluating, otherwise a concurrent flush
     // can evict it between prepareForRead and the synchronous re-evaluation.
     it('should pin the condition source before evaluating when the loop continues', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         true
       );
 
@@ -277,12 +280,12 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should pin the condition source before rendering the condition', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
       const callOrder: string[] = [];
-      (stepIoService.pinLoopSource as jest.Mock).mockImplementation(() => callOrder.push('pin'));
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockImplementation(
+      (stepIoService.pinLoopSource as Mock).mockImplementation(() => callOrder.push('pin'));
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockImplementation(
         () => {
           callOrder.push('render');
           return true;
@@ -295,10 +298,10 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should pin the condition source even on the iteration that exits the loop', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 2,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         false
       );
 
@@ -311,7 +314,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should not pin the condition source when max-iterations short-circuits evaluation', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
       node.maxIterations = 2;
@@ -325,10 +328,10 @@ describe('ExitWhileNodeImpl', () => {
 
   describe('stale loop output eviction', () => {
     it('should evict stale loop outputs when condition is false', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 2,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         false
       );
 
@@ -339,7 +342,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should evict stale loop outputs when max-iterations reached with continue', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
       node.maxIterations = 2;
@@ -350,7 +353,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should evict stale loop outputs before throwing on max-iterations with on-limit fail', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
       node.maxIterations = 2;
@@ -361,10 +364,10 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should not evict stale loop outputs when looping back', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 0,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
         true
       );
 

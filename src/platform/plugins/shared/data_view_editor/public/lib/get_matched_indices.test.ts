@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import type { Tag } from '@kbn/data-views-plugin/public/types';
 import { getMatchedIndices } from './get_matched_indices';
 
-jest.mock('../constants', () => ({
-  MAX_NUMBER_OF_MATCHING_INDICES: 6,
-}));
+vi.mock('../constants', () => {
+      const mocked = {
+      MAX_NUMBER_OF_MATCHING_INDICES: 6,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const tags: Tag[] = [];
 const indices = [

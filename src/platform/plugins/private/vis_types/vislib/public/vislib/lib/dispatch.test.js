@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
@@ -40,7 +42,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
     mockedSVGElementGetBBox = setSVGElementGetBBox(100);
     mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
-    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
+    mockWidth = vi.spyOn($.prototype, 'width').mockReturnValue(900);
   });
 
   afterAll(() => {
@@ -219,17 +221,21 @@ describe('Vislib Dispatch Class Test Suite', function () {
     const config = _.defaultsDeep({}, vislibParams);
     const vis = getVis(config);
     const mockUiState = getMockUiState();
-    test('should attach whatever gets passed on vis.on() to chart.events', function (done) {
-      vis.on('someEvent', _.noop);
-      vis.render(data, mockUiState);
+    test('should attach whatever gets passed on vis.on() to chart.events', () =>
+        new Promise((resolve, reject) => {
+        const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
 
-      vis.handler.charts.forEach(function (chart) {
-        expect(chart.events.listenerCount('someEvent')).toBe(1);
-      });
+              vis.on('someEvent', _.noop);
+              vis.render(data, mockUiState);
 
-      destroyVis(vis);
-      done();
-    });
+              vis.handler.charts.forEach(function (chart) {
+                expect(chart.events.listenerCount('someEvent')).toBe(1);
+              });
+
+              destroyVis(vis);
+              done();
+            
+        }));
 
     test('can be added after rendering', function () {
       vis.render(data, mockUiState);

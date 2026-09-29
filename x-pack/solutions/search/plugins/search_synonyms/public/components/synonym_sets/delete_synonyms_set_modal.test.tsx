@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { DeleteSynonymsSetModal } from './delete_synonyms_set_modal';
@@ -12,11 +15,14 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useDeleteSynonymsSet } from '../../hooks/use_delete_synonyms_set';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-jest.mock('../../hooks/use_delete_synonyms_set', () => ({
-  useDeleteSynonymsSet: jest.fn(() => ({
-    mutate: jest.fn(),
-  })),
-}));
+vi.mock('../../hooks/use_delete_synonyms_set', () => {
+      const mocked = {
+      useDeleteSynonymsSet: vi.fn(() => ({
+        mutate: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DeleteSynonymsSetModal', () => {
   const queryClient = new QueryClient();
@@ -25,13 +31,13 @@ describe('DeleteSynonymsSetModal', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not use mutation when cancel is pressed', () => {
-    const onClose = jest.fn();
-    const mutate = jest.fn();
-    (useDeleteSynonymsSet as unknown as jest.Mock).mockReturnValue({
+    const onClose = vi.fn();
+    const mutate = vi.fn();
+    (useDeleteSynonymsSet as unknown as Mock).mockReturnValue({
       mutate,
     });
     render(
@@ -50,10 +56,10 @@ describe('DeleteSynonymsSetModal', () => {
   });
 
   it('should delete the synonyms set when delete is pressed', () => {
-    const onClose = jest.fn();
-    const mutate = jest.fn();
+    const onClose = vi.fn();
+    const mutate = vi.fn();
 
-    (useDeleteSynonymsSet as unknown as jest.Mock).mockReturnValue({
+    (useDeleteSynonymsSet as unknown as Mock).mockReturnValue({
       mutate,
     });
 
@@ -73,10 +79,10 @@ describe('DeleteSynonymsSetModal', () => {
   });
 
   it('should show error message if synonyms set is attached to an index', () => {
-    const onClose = jest.fn();
-    const mutate = jest.fn();
+    const onClose = vi.fn();
+    const mutate = vi.fn();
 
-    (useDeleteSynonymsSet as unknown as jest.Mock).mockReturnValue({
+    (useDeleteSynonymsSet as unknown as Mock).mockReturnValue({
       mutate,
     });
 
@@ -95,7 +101,7 @@ describe('DeleteSynonymsSetModal', () => {
     expect(mutate).toHaveBeenCalledWith({ synonymsSetId: '123' });
 
     act(() => {
-      (useDeleteSynonymsSet as unknown as jest.Mock).mock.calls[0][1](
+      (useDeleteSynonymsSet as unknown as Mock).mock.calls[0][1](
         'Synonyms set is attached to an index'
       );
     });

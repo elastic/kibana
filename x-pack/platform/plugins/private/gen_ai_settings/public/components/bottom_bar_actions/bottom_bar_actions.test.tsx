@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import { BottomBarActions } from './bottom_bar_actions';
 import React from 'react';
@@ -12,7 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 describe('bottom_bar_actions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function Providers({ children }: { children: React.ReactNode }) {
@@ -24,8 +26,8 @@ describe('bottom_bar_actions', () => {
   }
 
   it('renders correctly', () => {
-    const onDiscardChanges = jest.fn();
-    const onSave = jest.fn();
+    const onDiscardChanges = vi.fn();
+    const onSave = vi.fn();
     render(
       <BottomBarActions
         isLoading={true}

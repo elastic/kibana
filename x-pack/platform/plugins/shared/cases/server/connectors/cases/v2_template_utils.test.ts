@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SavedObject, Logger } from '@kbn/core/server';
 import { CustomFieldTypes } from '../../../common/types/domain';
@@ -95,22 +97,22 @@ describe('resolveV2Template', () => {
   const makeClient = (impl: Partial<CasesClient['templates']>): CasesClient =>
     ({
       templates: {
-        getAllTemplates: jest.fn(),
-        getTemplate: jest.fn(),
-        createTemplate: jest.fn(),
-        updateTemplate: jest.fn(),
-        deleteTemplate: jest.fn(),
-        getTags: jest.fn(),
-        getAuthors: jest.fn(),
+        getAllTemplates: vi.fn(),
+        getTemplate: vi.fn(),
+        createTemplate: vi.fn(),
+        updateTemplate: vi.fn(),
+        deleteTemplate: vi.fn(),
+        getTags: vi.fn(),
+        getAuthors: vi.fn(),
         ...impl,
       },
     } as unknown as CasesClient);
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns parsed definition for a valid template', async () => {
     const client = makeClient({
-      getTemplate: jest.fn().mockResolvedValue(makeTemplateSO('t1', childYaml)),
+      getTemplate: vi.fn().mockResolvedValue(makeTemplateSO('t1', childYaml)),
     });
 
     const result = await resolveV2Template(client, 't1', '1', 'securitySolution', mockLogger);
@@ -120,7 +122,7 @@ describe('resolveV2Template', () => {
 
   it('returns null and logs warn when template not found', async () => {
     const client = makeClient({
-      getTemplate: jest.fn().mockResolvedValue(undefined),
+      getTemplate: vi.fn().mockResolvedValue(undefined),
     });
 
     const result = await resolveV2Template(
@@ -139,7 +141,7 @@ describe('resolveV2Template', () => {
 
   it('returns null and logs warn when template owner does not match', async () => {
     const client = makeClient({
-      getTemplate: jest
+      getTemplate: vi
         .fn()
         .mockResolvedValue(makeTemplateSO('t1', childYaml, { owner: 'observability' })),
     });
@@ -154,7 +156,7 @@ describe('resolveV2Template', () => {
 
   it('returns null and logs warn when definition YAML is invalid', async () => {
     const client = makeClient({
-      getTemplate: jest.fn().mockResolvedValue(makeTemplateSO('t1', ': invalid yaml [')),
+      getTemplate: vi.fn().mockResolvedValue(makeTemplateSO('t1', ': invalid yaml [')),
     });
 
     const result = await resolveV2Template(client, 't1', '1', 'securitySolution', mockLogger);
@@ -172,7 +174,7 @@ describe('resolveV2TemplateForLegacyKey', () => {
   ): CasesClient =>
     ({
       templates: {
-        getAllTemplates: jest.fn().mockResolvedValue({
+        getAllTemplates: vi.fn().mockResolvedValue({
           templates: templates.map((t) => ({
             templateId: 'tmpl-id',
             name: 'Test template',
@@ -188,7 +190,7 @@ describe('resolveV2TemplateForLegacyKey', () => {
       },
     } as unknown as CasesClient);
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('resolves by legacyKey (exact v1 lineage) and returns id + version', async () => {
     const client = makeClientWithTemplates([
@@ -321,7 +323,7 @@ describe('buildExtendedFieldsFromTemplate', () => {
   const makeClientWithDefs = (defs: FieldDefinition[]): CasesClient =>
     ({
       fieldDefinitions: {
-        getFieldDefinitions: jest
+        getFieldDefinitions: vi
           .fn()
           .mockResolvedValue({ fieldDefinitions: defs, total: defs.length }),
       },

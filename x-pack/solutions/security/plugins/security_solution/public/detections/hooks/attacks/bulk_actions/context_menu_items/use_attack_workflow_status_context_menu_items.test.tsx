@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -13,12 +16,12 @@ import { useAttackWorkflowStatusContextMenuItems } from './use_attack_workflow_s
 import { useBulkAttackWorkflowStatusItems } from '../bulk_action_items/use_bulk_attack_workflow_status_items';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 
-jest.mock('../bulk_action_items/use_bulk_attack_workflow_status_items');
-jest.mock('../use_attacks_privileges');
+vi.mock('../bulk_action_items/use_bulk_attack_workflow_status_items');
+vi.mock('../use_attacks_privileges');
 
 const mockUseBulkAttackWorkflowStatusItems =
-  useBulkAttackWorkflowStatusItems as jest.MockedFunction<typeof useBulkAttackWorkflowStatusItems>;
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+  useBulkAttackWorkflowStatusItems as MockedFunction<typeof useBulkAttackWorkflowStatusItems>;
+const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
 
@@ -29,9 +32,9 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useAttackWorkflowStatusContextMenuItems', () => {
-  const mockClosePopover = jest.fn();
-  const mockSetIsLoading = jest.fn();
-  const mockOnSuccess = jest.fn();
+  const mockClosePopover = vi.fn();
+  const mockSetIsLoading = vi.fn();
+  const mockOnSuccess = vi.fn();
 
   const defaultProps = {
     attacksWithWorkflowStatus: [
@@ -48,7 +51,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
 
     mockUseAttacksPrivileges.mockReturnValue({
@@ -63,7 +66,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
           key: 'open-attack-status',
           'data-test-subj': 'open-attack-status',
           label: 'Open',
-          onClick: jest.fn(),
+          onClick: vi.fn(),
           disableOnQuery: true,
         },
       ],
@@ -72,7 +75,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
           id: 1,
           title: React.createElement('div', null, 'Status'),
           'data-test-subj': 'attack-status-context-menu-panel',
-          renderContent: jest.fn((props) => React.createElement('div', null, 'Status Panel')),
+          renderContent: vi.fn((props) => React.createElement('div', null, 'Status Panel')),
         },
       ],
     });
@@ -142,7 +145,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
       ],
     };
 
-    const mockRenderContent = jest.fn((renderProps) =>
+    const mockRenderContent = vi.fn((renderProps) =>
       React.createElement('div', null, 'Status Panel')
     );
     mockUseBulkAttackWorkflowStatusItems.mockReturnValue({
@@ -167,7 +170,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
   });
 
   it('should pass correct props to panel renderContent', () => {
-    const mockRenderContent = jest.fn((props) => React.createElement('div', null, 'Status Panel'));
+    const mockRenderContent = vi.fn((props) => React.createElement('div', null, 'Status Panel'));
     mockUseBulkAttackWorkflowStatusItems.mockReturnValue({
       items: [],
       panels: [

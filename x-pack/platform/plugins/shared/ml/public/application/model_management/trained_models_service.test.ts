@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { BehaviorSubject, throwError, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { TrainedModelsApiService } from '../services/ml_api_service/trained_models';
@@ -22,15 +25,15 @@ import type { DeploymentParamsMapper } from './deployment_params_mapper';
 
 // Helper that resolves on the next microtask tick
 const flushPromises = () =>
-  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+  new Promise((resolve) => require('timers').setImmediate(resolve));
 
 describe('TrainedModelsService', () => {
-  let mockTrainedModelsApiService: jest.Mocked<TrainedModelsApiService>;
+  let mockTrainedModelsApiService: Mocked<TrainedModelsApiService>;
   let trainedModelsService: TrainedModelsService;
   let scheduledDeploymentsSubject: BehaviorSubject<ScheduledDeployment[]>;
-  let mockSetScheduledDeployments: jest.Mock<any, any>;
-  let mockTelemetryService: jest.Mocked<ITelemetryClient>;
-  let mockDeploymentParamsMapper: jest.Mocked<DeploymentParamsMapper>;
+  let mockSetScheduledDeployments: Mock<any, any>;
+  let mockTelemetryService: Mocked<ITelemetryClient>;
+  let mockDeploymentParamsMapper: Mocked<DeploymentParamsMapper>;
 
   const startModelAllocationResponseMock = {
     assignment: {
@@ -73,34 +76,34 @@ describe('TrainedModelsService', () => {
     vCPUUsage: 'low',
   };
 
-  const mockDisplayErrorToast = jest.fn();
-  const mockDisplaySuccessToast = jest.fn();
+  const mockDisplayErrorToast = vi.fn();
+  const mockDisplaySuccessToast = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     scheduledDeploymentsSubject = new BehaviorSubject<ScheduledDeployment[]>([]);
-    mockSetScheduledDeployments = jest.fn((deployments: ScheduledDeployment[]) => {
+    mockSetScheduledDeployments = vi.fn((deployments: ScheduledDeployment[]) => {
       scheduledDeploymentsSubject.next(deployments);
     });
 
     mockTelemetryService = {
-      trackTrainedModelsDeploymentCreated: jest.fn(),
-    } as unknown as jest.Mocked<ITelemetryClient>;
+      trackTrainedModelsDeploymentCreated: vi.fn(),
+    } as unknown as Mocked<ITelemetryClient>;
 
     mockTrainedModelsApiService = {
-      getTrainedModelsList: jest.fn(),
-      installElasticTrainedModelConfig: jest.fn(),
-      stopModelAllocation: jest.fn(),
-      startModelAllocation: jest.fn(),
-      updateModelDeployment: jest.fn(),
-      getModelsDownloadStatus: jest.fn(),
-      deleteTrainedModel: jest.fn(),
-    } as unknown as jest.Mocked<TrainedModelsApiService>;
+      getTrainedModelsList: vi.fn(),
+      installElasticTrainedModelConfig: vi.fn(),
+      stopModelAllocation: vi.fn(),
+      startModelAllocation: vi.fn(),
+      updateModelDeployment: vi.fn(),
+      getModelsDownloadStatus: vi.fn(),
+      deleteTrainedModel: vi.fn(),
+    } as unknown as Mocked<TrainedModelsApiService>;
 
     mockDeploymentParamsMapper = {
-      mapUiToApiDeploymentParams: jest.fn().mockReturnValue({
+      mapUiToApiDeploymentParams: vi.fn().mockReturnValue({
         modelId: 'test-model',
         deploymentParams: {
           deployment_id: 'my-deployment-id',
@@ -109,13 +112,13 @@ describe('TrainedModelsService', () => {
           number_of_allocations: 1,
         },
       }),
-      mapApiToUiDeploymentParams: jest.fn().mockReturnValue({
+      mapApiToUiDeploymentParams: vi.fn().mockReturnValue({
         deploymentId: 'my-deployment-id',
         optimized: 'optimizedForIngest',
         adaptiveResources: false,
         vCPUUsage: 'low',
       }),
-    } as unknown as jest.Mocked<DeploymentParamsMapper>;
+    } as unknown as Mocked<DeploymentParamsMapper>;
 
     trainedModelsService = new TrainedModelsService(mockTrainedModelsApiService);
     trainedModelsService.init({
@@ -132,7 +135,7 @@ describe('TrainedModelsService', () => {
 
   afterEach(() => {
     trainedModelsService.destroy();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('initializes and fetches models successfully', () => {
@@ -163,7 +166,7 @@ describe('TrainedModelsService', () => {
     trainedModelsService.fetchModels();
 
     // Advance timers enough to pass the debounceTime(100)
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
@@ -249,7 +252,7 @@ describe('TrainedModelsService', () => {
     trainedModelsService.startModelDeployment('test-model', deploymentParamsUiMock);
 
     // Advance timers enough to pass the debounceTime(100)
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledWith({
@@ -294,7 +297,7 @@ describe('TrainedModelsService', () => {
     trainedModelsService.startModelDeployment('error-model', deploymentParamsUiMock);
 
     // Advance timers enough to pass the debounceTime(100)
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
@@ -387,7 +390,7 @@ describe('TrainedModelsService', () => {
     // First deployment
     trainedModelsService.startModelDeployment('test-model', deploymentParamsUiMock);
 
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
@@ -395,13 +398,13 @@ describe('TrainedModelsService', () => {
       expect.stringContaining('my-deployment-id')
     );
 
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     // Second deployment
     trainedModelsService.startModelDeployment('test-model', deploymentParamsUiMock);
 
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledTimes(2);

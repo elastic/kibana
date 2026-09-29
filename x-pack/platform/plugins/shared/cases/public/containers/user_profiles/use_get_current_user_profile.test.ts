@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useToasts, useKibana } from '../../common/lib/kibana';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -13,17 +16,17 @@ import * as api from './api';
 import { useGetCurrentUserProfile } from './use_get_current_user_profile';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('./api');
+vi.mock('../../common/lib/kibana');
+vi.mock('./api');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 describe('useGetCurrentUserProfile', () => {
-  const addSuccess = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
+  const addSuccess = vi.fn();
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError: vi.fn() });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useKibanaMock.mockReturnValue({
       services: { ...createStartServicesMock() },
@@ -31,7 +34,7 @@ describe('useGetCurrentUserProfile', () => {
   });
 
   it('calls getCurrentUserProfile with correct arguments', async () => {
-    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    const spyOnGetCurrentUserProfile = vi.spyOn(api, 'getCurrentUserProfile');
 
     renderHook(() => useGetCurrentUserProfile(), {
       wrapper: TestProviders,
@@ -47,14 +50,14 @@ describe('useGetCurrentUserProfile', () => {
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {
-    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    const spyOnGetCurrentUserProfile = vi.spyOn(api, 'getCurrentUserProfile');
 
     spyOnGetCurrentUserProfile.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
     renderHook(() => useGetCurrentUserProfile(), {
       wrapper: TestProviders,
@@ -66,14 +69,14 @@ describe('useGetCurrentUserProfile', () => {
   });
 
   it('does not show a toast error message when a 404 error is returned', async () => {
-    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    const spyOnGetCurrentUserProfile = vi.spyOn(api, 'getCurrentUserProfile');
 
     spyOnGetCurrentUserProfile.mockImplementation(() => {
       throw new MockServerError('profile not found', 404);
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
     renderHook(() => useGetCurrentUserProfile(), {
       wrapper: TestProviders,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ExecutionStatus, type WorkflowDetailDto, type WorkflowExecutionDto } from '@kbn/workflows';
@@ -16,25 +19,31 @@ import {
   type WorkflowsManagementApi,
 } from './invoke_alert_retrieval_workflow';
 
-const mockWriteAttackDiscoveryEvent = jest.fn();
+const mockWriteAttackDiscoveryEvent = vi.fn();
 
-jest.mock('../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/persistence', () => ({
-  getDurationNanoseconds: jest.fn().mockReturnValue(1000000),
-}));
+vi.mock('../../lib/persistence', () => {
+      const mocked = {
+      getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('invokeAlertRetrievalWorkflow', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockRequest = {} as KibanaRequest;
@@ -46,14 +55,14 @@ describe('invokeAlertRetrievalWorkflow', () => {
   } as AuthenticatedUser;
 
   const mockEventLogger = {
-    logEvent: jest.fn(),
+    logEvent: vi.fn(),
   } as unknown as IEventLogger;
 
   const mockWorkflowsManagementApi: WorkflowsManagementApi = {
-    getWorkflow: jest.fn(),
-    getWorkflowExecution: jest.fn(),
-    runWorkflow: jest.fn(),
-    scheduleWorkflow: jest.fn(),
+    getWorkflow: vi.fn(),
+    getWorkflowExecution: vi.fn(),
+    runWorkflow: vi.fn(),
+    scheduleWorkflow: vi.fn(),
   };
 
   const workflowId = 'workflow-default-alert-retrieval';
@@ -154,19 +163,19 @@ describe('invokeAlertRetrievalWorkflow', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('when workflow executes successfully', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
     });
@@ -444,7 +453,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when workflow is not found', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(null);
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(null);
     });
 
     it('throws an AttackDiscoveryError', async () => {
@@ -504,7 +513,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when workflow has no definition', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         definition: null,
       });
@@ -532,7 +541,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when workflow is not valid', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         valid: false,
       });
@@ -560,7 +569,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when workflow is not enabled', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue({
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue({
         ...mockWorkflow,
         enabled: false,
       });
@@ -594,9 +603,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockFailedExecution
       );
     });
@@ -627,9 +636,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCancelledExecution
       );
     });
@@ -660,9 +669,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockTimedOutExecution
       );
     });
@@ -688,9 +697,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when execution is not found during polling', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(null);
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(null);
     });
 
     it('throws an error', async () => {
@@ -707,9 +716,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithoutStep
       );
     });
@@ -719,7 +728,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
       const expectation = expect(promise).rejects.toBeInstanceOf(AttackDiscoveryError);
 
-      await jest.advanceTimersByTimeAsync(6000);
+      await vi.advanceTimersByTimeAsync(6000);
 
       await expectation;
     });
@@ -731,7 +740,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
         errorCategory: 'workflow_error',
       });
 
-      await jest.advanceTimersByTimeAsync(6000);
+      await vi.advanceTimersByTimeAsync(6000);
 
       await expectation;
     });
@@ -743,7 +752,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
         'Alert retrieval step not found in workflow execution'
       );
 
-      await jest.advanceTimersByTimeAsync(6000);
+      await vi.advanceTimersByTimeAsync(6000);
 
       await expectation;
     });
@@ -761,9 +770,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithNoOutput
       );
     });
@@ -789,8 +798,8 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when runWorkflow throws', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockRejectedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockRejectedValue(
         new Error('Failed to run workflow')
       );
     });
@@ -851,9 +860,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithStringApiConfig
       );
     });
@@ -881,9 +890,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithEmptyOutput
       );
     });
@@ -926,9 +935,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock)
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock)
         .mockResolvedValueOnce(mockRunningExecution)
         .mockResolvedValue(mockCompletedExecution);
     });
@@ -937,7 +946,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
       const promise = invokeAlertRetrievalWorkflow(defaultProps);
 
       // Advance timers to trigger polling
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
       const result = await promise;
 
@@ -948,13 +957,13 @@ describe('invokeAlertRetrievalWorkflow', () => {
       const promise = invokeAlertRetrievalWorkflow(defaultProps);
 
       // Advance timers to trigger polling
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
       await promise;
 
       expect(mockLogger.debug).toHaveBeenCalledWith(expect.any(Function));
 
-      const [[debugMessageFactory]] = (mockLogger.debug as unknown as jest.Mock).mock.calls as [
+      const [[debugMessageFactory]] = (mockLogger.debug as unknown as Mock).mock.calls as [
         [() => string]
       ];
 
@@ -969,9 +978,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockRunningExecution
       );
     });
@@ -981,7 +990,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
       const expectation = expect(promise).rejects.toThrow('Workflow timed out after 1000ms');
 
-      await jest.advanceTimersByTimeAsync(2000);
+      await vi.advanceTimersByTimeAsync(2000);
 
       await expectation;
     });
@@ -989,9 +998,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when writeAttackDiscoveryEvent fails for started event', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
       mockWriteAttackDiscoveryEvent.mockRejectedValueOnce(new Error('Event logging failed'));
@@ -1009,9 +1018,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when writeAttackDiscoveryEvent fails for succeeded event', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
       mockWriteAttackDiscoveryEvent
@@ -1031,8 +1040,8 @@ describe('invokeAlertRetrievalWorkflow', () => {
 
   describe('when writeAttackDiscoveryEvent fails for failed event', () => {
     beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockRejectedValue(
+      (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as Mock).mockRejectedValue(
         new Error('Workflow error')
       );
       mockWriteAttackDiscoveryEvent.mockRejectedValue(new Error('Event logging failed'));
@@ -1054,13 +1063,13 @@ describe('invokeAlertRetrievalWorkflow', () => {
     };
 
     it('throws timeout error when max wait time is exceeded', async () => {
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       const timeoutApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn().mockResolvedValue(mockWorkflow),
-        getWorkflowExecution: jest.fn().mockResolvedValue(mockPendingExecution),
-        runWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
-        scheduleWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
+        getWorkflow: vi.fn().mockResolvedValue(mockWorkflow),
+        getWorkflowExecution: vi.fn().mockResolvedValue(mockPendingExecution),
+        runWorkflow: vi.fn().mockResolvedValue('workflow-run-id'),
+        scheduleWorkflow: vi.fn().mockResolvedValue('workflow-run-id'),
       };
 
       // We need to test with a very short timeout to avoid slow tests
@@ -1075,7 +1084,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
       expect(execution?.status).toBe('pending');
 
       // Restore fake timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
   });
 });

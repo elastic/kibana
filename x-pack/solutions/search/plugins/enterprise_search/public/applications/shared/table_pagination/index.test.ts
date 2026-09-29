@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { convertMetaToPagination, handlePageChange, updateMetaPageIndex } from '.';
 
 describe('convertMetaToPagination', () => {
@@ -26,7 +28,7 @@ describe('convertMetaToPagination', () => {
 
 describe('handlePageChange', () => {
   it('creates an onChange handler that calls a passed callback with the new page index', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const handler = handlePageChange(mockCallback);
 
     handler({ page: { index: 0 } });

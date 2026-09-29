@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 
 import { getCapabilities } from './capabilities';
 import { API_ERROR } from '../../translations';
 
-jest.mock('@kbn/core-http-browser');
+vi.mock('@kbn/core-http-browser');
 
 const mockHttp = {
-  get: jest.fn(),
+  get: vi.fn(),
 } as unknown as HttpSetup;
 
 describe('Capabilities API tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getCapabilities', () => {
@@ -32,7 +35,7 @@ describe('Capabilities API tests', () => {
     });
 
     it('returns API_ERROR when the response status is error', async () => {
-      (mockHttp.get as jest.Mock).mockResolvedValue({ status: API_ERROR });
+      (mockHttp.get as Mock).mockResolvedValue({ status: API_ERROR });
 
       const result = await getCapabilities({ http: mockHttp });
 

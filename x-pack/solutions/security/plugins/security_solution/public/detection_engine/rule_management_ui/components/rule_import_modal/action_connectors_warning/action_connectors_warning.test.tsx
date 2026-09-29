@@ -4,15 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ActionConnectorWarnings } from '.';
 
-jest.mock('../../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: { http: { basePath: { prepend: jest.fn() } } },
-  }),
-}));
+vi.mock('../../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: { http: { basePath: { prepend: vi.fn() } } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('ActionConnectorWarnings', () => {
   test('should not render if importedActionConnectorsCount is falsy and empty warnings array', () => {
     const wrapper = render(

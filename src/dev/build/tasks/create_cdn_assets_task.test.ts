@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { resolve } from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -16,36 +19,45 @@ import { Build } from '../lib';
 import { getMockConfig } from '../lib/__mocks__/get_config';
 import { copyAll } from '../lib';
 
-jest.mock('../lib');
-jest.mock('globby', () => ({ globbySync: jest.fn() }));
-jest.mock('del', () => jest.fn().mockResolvedValue(undefined));
+vi.mock('../lib');
+vi.mock('globby', () => {
+      const mocked = { globbySync: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('del', () => vi.fn().mockResolvedValue(undefined));
 
-jest.mock('@kbn/core-i18n-server-internal', () => ({
-  getKibanaTranslationFiles: jest.fn().mockResolvedValue([]),
-  discoverAllTranslationPaths: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('@kbn/core-i18n-server-internal', () => {
+      const mocked = {
+      getKibanaTranslationFiles: vi.fn().mockResolvedValue([]),
+      discoverAllTranslationPaths: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    init: jest.fn(),
-    getTranslation: jest.fn().mockReturnValue({}),
-  },
-  i18nLoader: {
-    registerTranslationFiles: jest.fn(),
-    getTranslationsByLocale: jest.fn().mockResolvedValue({}),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        init: vi.fn(),
+        getTranslation: vi.fn().mockReturnValue({}),
+      },
+      i18nLoader: {
+        registerTranslationFiles: vi.fn(),
+        getTranslationsByLocale: vi.fn().mockResolvedValue({}),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { globbySync } = jest.requireMock('globby') as { globbySync: jest.Mock };
+const { globbySync } = (await vi.importMock('globby')) as { globbySync: Mock };
 globbySync.mockReturnValue([]);
 
-const mockedCopyAll = copyAll as jest.MockedFunction<typeof copyAll>;
+const mockedCopyAll = copyAll as MockedFunction<typeof copyAll>;
 
 const config = getMockConfig();
 const log = new ToolingLog();
 const buildSource = '/mock/build/root';
 const mockedBuild = new Build(config);
-(mockedBuild.resolvePath as jest.Mock).mockReturnValue(buildSource);
+(mockedBuild.resolvePath as Mock).mockReturnValue(buildSource);
 
 describe('CreateCdnAssets', () => {
   beforeEach(() => {

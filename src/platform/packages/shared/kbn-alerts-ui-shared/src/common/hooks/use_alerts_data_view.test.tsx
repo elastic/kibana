@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -19,8 +21,8 @@ import { fetchAlertsFields } from '../apis/fetch_alerts_fields';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useAlertsDataView } from './use_alerts_data_view';
 
-jest.mock('../apis/fetch_alerts_index_names');
-const mockFetchAlertsIndexNames = jest
+vi.mock('../apis/fetch_alerts_index_names');
+const mockFetchAlertsIndexNames = vi
   .mocked(fetchAlertsIndexNames)
   .mockResolvedValue([
     '.alerts-observability.uptime.alerts-*',
@@ -29,8 +31,8 @@ const mockFetchAlertsIndexNames = jest
     '.alerts-observability.apm.alerts-*',
   ]);
 
-jest.mock('../apis/fetch_alerts_fields');
-const mockFetchAlertsFields = jest
+vi.mock('../apis/fetch_alerts_fields');
+const mockFetchAlertsFields = vi
   .mocked(fetchAlertsFields)
   .mockResolvedValue({ browserFields: {}, fields: [] });
 
@@ -52,7 +54,7 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 
 describe('useAlertsDataView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

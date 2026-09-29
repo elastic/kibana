@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -15,11 +17,11 @@ import { searchListItemByValues } from './search_list_item_by_values';
 
 describe('search_list_item_by_values', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Returns a an empty array of items if the value is empty', async () => {

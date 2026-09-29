@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -12,21 +14,30 @@ import moment from 'moment';
 import { parseArrayEntry, parseFormData, ToolTestFlyout } from './test_tools';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 
-const mockUseTool = jest.fn();
-const mockUseExecuteTool = jest.fn();
-const mockUseAgentBuilderServices = jest.fn();
+const mockUseTool = vi.fn();
+const mockUseExecuteTool = vi.fn();
+const mockUseAgentBuilderServices = vi.fn();
 
-jest.mock('../../../hooks/tools/use_tools', () => ({
-  useTool: () => mockUseTool(),
-}));
+vi.mock('../../../hooks/tools/use_tools', () => {
+      const mocked = {
+      useTool: () => mockUseTool(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/tools/use_execute_tools', () => ({
-  useExecuteTool: () => mockUseExecuteTool(),
-}));
+vi.mock('../../../hooks/tools/use_execute_tools', () => {
+      const mocked = {
+      useExecuteTool: () => mockUseExecuteTool(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => mockUseAgentBuilderServices(),
-}));
+vi.mock('../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => mockUseAgentBuilderServices(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockToolDefinition: ToolDefinitionWithSchema = {
   id: 'test-tool',
@@ -170,11 +181,11 @@ describe('ToolTestFlyout date-time picker', () => {
     },
   };
 
-  const mockOnClose = jest.fn();
-  const mockExecuteTool = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockExecuteTool = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAgentBuilderServices.mockReturnValue({
       docLinksService: {
         agentBuilderTools: 'https://example.com/docs',
@@ -265,11 +276,11 @@ describe('ToolTestFlyout array combo box', () => {
     },
   };
 
-  const mockOnClose = jest.fn();
-  const mockExecuteTool = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockExecuteTool = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAgentBuilderServices.mockReturnValue({
       docLinksService: {
         agentBuilderTools: 'https://example.com/docs',
@@ -341,11 +352,11 @@ describe('ToolTestFlyout numeric field', () => {
     },
   };
 
-  const mockOnClose = jest.fn();
-  const mockExecuteTool = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockExecuteTool = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAgentBuilderServices.mockReturnValue({
       docLinksService: {
         agentBuilderTools: 'https://example.com/docs',

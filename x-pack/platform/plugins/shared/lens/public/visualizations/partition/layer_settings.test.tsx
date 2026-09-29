@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { LayerSettings } from './layer_settings';
 import type {
@@ -31,7 +33,7 @@ describe('layer settings', () => {
     const props: VisualizationLayerSettingsProps<LensPartitionVisualizationState> & {
       section: 'data' | 'appearance';
     } = {
-      setState: jest.fn(),
+      setState: vi.fn(),
       layerId,
       state: getState(false),
       frame: {} as FramePublicAPI,

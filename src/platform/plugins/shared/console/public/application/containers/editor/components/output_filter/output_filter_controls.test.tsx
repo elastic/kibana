@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,26 +21,32 @@ import {
   useOutputFilterActionContext,
 } from '../../../../contexts/output_filter_context';
 
-jest.mock('../../../../contexts', () => ({
-  useRequestReadContext: jest.fn(),
-}));
+vi.mock('../../../../contexts', () => {
+      const mocked = {
+      useRequestReadContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../contexts/output_filter_context', () => ({
-  useOutputFilterReadContext: jest.fn(),
-  useOutputFilterActionContext: jest.fn(),
-}));
+vi.mock('../../../../contexts/output_filter_context', () => {
+      const mocked = {
+      useOutputFilterReadContext: vi.fn(),
+      useOutputFilterActionContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRequestReadContext = useRequestReadContext as jest.MockedFunction<
+const mockUseRequestReadContext = useRequestReadContext as MockedFunction<
   typeof useRequestReadContext
 >;
-const mockUseOutputFilterReadContext = useOutputFilterReadContext as jest.MockedFunction<
+const mockUseOutputFilterReadContext = useOutputFilterReadContext as MockedFunction<
   typeof useOutputFilterReadContext
 >;
-const mockUseOutputFilterActionContext = useOutputFilterActionContext as jest.MockedFunction<
+const mockUseOutputFilterActionContext = useOutputFilterActionContext as MockedFunction<
   typeof useOutputFilterActionContext
 >;
 
-const mockSetIsExpanded = jest.fn();
+const mockSetIsExpanded = vi.fn();
 
 const renderComponent = () =>
   render(
@@ -51,11 +60,11 @@ const makeData = (statusCode: number) => [
 ];
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseOutputFilterActionContext.mockReturnValue({
-    setExpression: jest.fn(),
-    setMode: jest.fn(),
-    setInvertMatch: jest.fn(),
+    setExpression: vi.fn(),
+    setMode: vi.fn(),
+    setInvertMatch: vi.fn(),
     setIsExpanded: mockSetIsExpanded,
   });
 });

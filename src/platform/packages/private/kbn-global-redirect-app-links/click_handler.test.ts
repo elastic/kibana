@@ -7,24 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createClickHandler } from './click_handler';
 
-jest.mock('@kbn/shared-ux-utility', () => ({
-  getClosestLink: jest.fn(),
-}));
+vi.mock('@kbn/shared-ux-utility', () => {
+      const mocked = {
+      getClosestLink: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getClosestLink } = jest.requireMock('@kbn/shared-ux-utility');
+const { getClosestLink } = (await vi.importMock('@kbn/shared-ux-utility'));
 
 describe('createClickHandler', () => {
-  let navigateToUrl: jest.Mock;
+  let navigateToUrl: Mock;
   let clickHandler: (event: MouseEvent) => void;
   let event: MouseEvent;
 
   beforeEach(() => {
-    navigateToUrl = jest.fn();
+    navigateToUrl = vi.fn();
     clickHandler = createClickHandler(navigateToUrl);
     event = new MouseEvent('click', { button: 0 });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('should ignore clicks', () => {
@@ -270,7 +276,7 @@ describe('createClickHandler', () => {
       link.href = 'http://example.com/path';
       getClosestLink.mockReturnValue(link);
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
       Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
 
@@ -285,7 +291,7 @@ describe('createClickHandler', () => {
       link.href = 'http://example.com/path';
       getClosestLink.mockReturnValue(link);
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
       Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
 
@@ -301,7 +307,7 @@ describe('createClickHandler', () => {
       link.target = '_self';
       getClosestLink.mockReturnValue(link);
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
       Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
 
@@ -317,7 +323,7 @@ describe('createClickHandler', () => {
       link.rel = 'noopener';
       getClosestLink.mockReturnValue(link);
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
       Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
 
@@ -342,7 +348,7 @@ describe('createClickHandler', () => {
       link.href = 'http://example.com/new-path';
       getClosestLink.mockReturnValue(link);
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
       Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
 
@@ -367,7 +373,7 @@ describe('createClickHandler', () => {
       link.href = 'http://example.com/path?new=2';
       getClosestLink.mockReturnValue(link);
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
       Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
 
@@ -392,7 +398,7 @@ describe('createClickHandler', () => {
       link.href = 'https://example.com/new-path';
       getClosestLink.mockReturnValue(link);
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
       Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,30 +15,42 @@ import * as inlineFilterPopoverModule from './inline_filter_popover';
 import * as useBulkGetProfilesModule from '../../hooks/use_bulk_get_profiles';
 import * as useCurrentUserProfileModule from '../../hooks/use_current_user_profile';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      userProfile: {},
-      notifications: { toasts: { addError: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          userProfile: {},
+          notifications: { toasts: { addError: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/user-profile-components', () => ({
-  UserAvatar: () => null,
-}));
+vi.mock('@kbn/user-profile-components', () => {
+      const mocked = {
+      UserAvatar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_bulk_get_profiles', () => ({
-  useBulkGetProfiles: jest.fn(),
-}));
+vi.mock('../../hooks/use_bulk_get_profiles', () => {
+      const mocked = {
+      useBulkGetProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_current_user_profile', () => ({
-  useCurrentUserProfile: jest.fn(),
-}));
+vi.mock('../../hooks/use_current_user_profile', () => {
+      const mocked = {
+      useCurrentUserProfile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfilesModule.useBulkGetProfiles);
-const mockUseCurrentUserProfile = jest.mocked(useCurrentUserProfileModule.useCurrentUserProfile);
-const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
+const mockUseBulkGetProfiles = vi.mocked(useBulkGetProfilesModule.useBulkGetProfiles);
+const mockUseCurrentUserProfile = vi.mocked(useCurrentUserProfileModule.useCurrentUserProfile);
+const InlineFilterPopoverSpy = vi.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 
 const mockProfiles = [
   {
@@ -59,7 +73,7 @@ const mockProfiles = [
 describe('AlertEpisodesAssigneeFilter', () => {
   const defaultProps = {
     selectedAssigneeUid: undefined,
-    onAssigneeChange: jest.fn(),
+    onAssigneeChange: vi.fn(),
     assigneeUids: ['uid-alice', 'uid-bob', 'uid-charlie'],
     'data-test-subj': 'test-assignee-filter',
   };
@@ -67,7 +81,7 @@ describe('AlertEpisodesAssigneeFilter', () => {
   const user = userEvent.setup({ delay: null });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseBulkGetProfiles.mockReturnValue({
       data: mockProfiles,
       isFetching: false,
@@ -164,7 +178,7 @@ describe('AlertEpisodesAssigneeFilter', () => {
   });
 
   it('calls onAssigneeChange with uid when a value is selected', async () => {
-    const onAssigneeChange = jest.fn();
+    const onAssigneeChange = vi.fn();
     render(<AlertEpisodesAssigneeFilter {...defaultProps} onAssigneeChange={onAssigneeChange} />);
     await openPopover();
 
@@ -177,7 +191,7 @@ describe('AlertEpisodesAssigneeFilter', () => {
   });
 
   it('calls onAssigneeChange with undefined when selection is cleared', async () => {
-    const onAssigneeChange = jest.fn();
+    const onAssigneeChange = vi.fn();
     render(<AlertEpisodesAssigneeFilter {...defaultProps} onAssigneeChange={onAssigneeChange} />);
     await openPopover();
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
@@ -18,9 +21,9 @@ import { ActionResponseOutputs } from './action_response_outputs';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('ActionResponseOutputs component', () => {
   let appTestContext: AppContextTestRender;

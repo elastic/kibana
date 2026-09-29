@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -19,69 +22,102 @@ import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 import { useDownloadAIValueReport } from '../hooks/use_download_ai_value_report';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 
-jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
-  useSyncTimerangeUrlParam: jest.fn(),
-}));
+vi.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => {
+      const mocked = {
+      useSyncTimerangeUrlParam: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn(),
-}));
+vi.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => {
+      const mocked = {
+      useAlertsPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(),
-}));
+vi.mock('../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../helper_hooks', () => ({
-  useHasSecurityCapability: jest.fn(),
-}));
+vi.mock('../../helper_hooks', () => {
+      const mocked = {
+      useHasSecurityCapability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_selector', () => ({
-  useDeepEqualSelector: jest.fn(),
-  useShallowEqualSelector: jest.fn(),
-}));
+vi.mock('../../common/hooks/use_selector', () => {
+      const mocked = {
+      useDeepEqualSelector: vi.fn(),
+      useShallowEqualSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../providers/ai_value/export_provider', () => ({
-  AIValueExportProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useAIValueExportContext: jest.fn(),
-}));
+vi.mock('../providers/ai_value/export_provider', () => {
+      const mocked = {
+      AIValueExportProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      useAIValueExportContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_download_ai_value_report', () => ({
-  useDownloadAIValueReport: jest.fn(),
-}));
+vi.mock('../hooks/use_download_ai_value_report', () => {
+      const mocked = {
+      useDownloadAIValueReport: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/ai_value', () => ({
-  AIValueReport: jest.fn(() => <div data-test-subj="ai-value-report" />),
-}));
+vi.mock('../components/ai_value', () => {
+      const mocked = {
+      AIValueReport: vi.fn(() => <div data-test-subj="ai-value-report" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/super_date_picker', () => ({
-  SuperDatePicker: jest.fn(() => <div data-test-subj="mock-super-date-picker" />),
-}));
+vi.mock('../../common/components/super_date_picker', () => {
+      const mocked = {
+      SuperDatePicker: vi.fn(() => <div data-test-subj="mock-super-date-picker" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/ai_value/value_report_exporter', () => ({
-  ValueReportExporter: ({ children }: { children: (exportPDF: () => void) => React.ReactNode }) =>
-    children(jest.fn()),
-}));
+vi.mock('../components/ai_value/value_report_exporter', () => {
+      const mocked = {
+      ValueReportExporter: ({ children }: { children: (exportPDF: () => void) => React.ReactNode }) =>
+        children(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/no_privileges', () => ({
-  NoPrivileges: () => <div data-test-subj="no-privileges" />,
-}));
+vi.mock('../../common/components/no_privileges', () => {
+      const mocked = {
+      NoPrivileges: () => <div data-test-subj="no-privileges" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseDeepEqualSelector = useDeepEqualSelector as jest.MockedFunction<
+const mockUseDeepEqualSelector = useDeepEqualSelector as MockedFunction<
   typeof useDeepEqualSelector
 >;
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.MockedFunction<
+const mockUseAlertsPrivileges = useAlertsPrivileges as MockedFunction<
   typeof useAlertsPrivileges
 >;
-const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
-const mockUseHasSecurityCapability = useHasSecurityCapability as jest.MockedFunction<
+const mockUseDataView = useDataView as MockedFunction<typeof useDataView>;
+const mockUseHasSecurityCapability = useHasSecurityCapability as MockedFunction<
   typeof useHasSecurityCapability
 >;
-const mockAIValueReport = AIValueReport as jest.MockedFunction<typeof AIValueReport>;
-const mockUseAIValueExportContext = useAIValueExportContext as jest.Mock;
-const mockUseDownloadAIValueReport = useDownloadAIValueReport as jest.MockedFunction<
+const mockAIValueReport = AIValueReport as MockedFunction<typeof AIValueReport>;
+const mockUseAIValueExportContext = useAIValueExportContext as Mock;
+const mockUseDownloadAIValueReport = useDownloadAIValueReport as MockedFunction<
   typeof useDownloadAIValueReport
 >;
-const mockSuperDatePicker = SuperDatePicker as jest.MockedFunction<typeof SuperDatePicker>;
+const mockSuperDatePicker = SuperDatePicker as MockedFunction<typeof SuperDatePicker>;
 
 const renderAIValue = () =>
   render(
@@ -92,7 +128,7 @@ const renderAIValue = () =>
 
 describe('AIValue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseDeepEqualSelector.mockReturnValue({
       from: '2023-01-01T00:00:00.000Z',
       to: '2023-01-31T23:59:59.999Z',
@@ -113,13 +149,13 @@ describe('AIValue', () => {
     mockUseDataView.mockReturnValue({
       status: 'ready',
       dataView: {
-        hasMatchedIndices: jest.fn(),
+        hasMatchedIndices: vi.fn(),
       } as never,
     });
     mockUseHasSecurityCapability.mockReturnValue(true);
     mockUseAIValueExportContext.mockReturnValue({ isExportMode: false });
     mockUseDownloadAIValueReport.mockReturnValue({
-      toggleContextMenu: jest.fn(),
+      toggleContextMenu: vi.fn(),
       isExportEnabled: false,
     });
   });
@@ -151,7 +187,7 @@ describe('AIValue', () => {
 
   it('disables export button when there is no report data even if export integration is available', () => {
     mockUseDownloadAIValueReport.mockReturnValue({
-      toggleContextMenu: jest.fn(),
+      toggleContextMenu: vi.fn(),
       isExportEnabled: true,
     });
 

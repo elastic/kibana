@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { hostsFactory } from '.';
 import { HostsQueries } from '../../../../../common/search_strategy';
 import { allHosts } from './all';
@@ -13,10 +15,10 @@ import { hostOverview } from './overview';
 
 import { uncommonProcesses } from './uncommon_processes';
 
-jest.mock('./all');
-jest.mock('./details');
-jest.mock('./overview');
-jest.mock('./uncommon_processes');
+vi.mock('./all');
+vi.mock('./details');
+vi.mock('./overview');
+vi.mock('./uncommon_processes');
 
 describe('hostsFactory', () => {
   test('should include correct apis', () => {

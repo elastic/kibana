@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,7 +25,7 @@ const renderWithIntl = (ui: React.ReactElement) => {
 describe('of expression', () => {
   it('renders of builtin aggregation types', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedAggField = jest.fn();
+    const onChangeSelectedAggField = vi.fn();
 
     renderWithIntl(
       <OfExpression
@@ -46,7 +48,7 @@ describe('of expression', () => {
 
   it('renders with custom aggregation types', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedAggField = jest.fn();
+    const onChangeSelectedAggField = vi.fn();
 
     renderWithIntl(
       <OfExpression
@@ -83,7 +85,7 @@ describe('of expression', () => {
 
   it('renders with default aggregation type preselected if no aggType was set', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedAggField = jest.fn();
+    const onChangeSelectedAggField = vi.fn();
 
     renderWithIntl(
       <OfExpression
@@ -105,7 +107,7 @@ describe('of expression', () => {
 
   it('renders a helptext when passed as a prop', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedAggField = jest.fn();
+    const onChangeSelectedAggField = vi.fn();
 
     renderWithIntl(
       <OfExpression
@@ -124,7 +126,7 @@ describe('of expression', () => {
   });
 
   it('clears selected agg field if fields does not contain current selection', async () => {
-    const onChangeSelectedAggField = jest.fn();
+    const onChangeSelectedAggField = vi.fn();
 
     renderWithIntl(
       <OfExpression

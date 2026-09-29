@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import moment from 'moment';
 import { useDiscoverUrl } from './use_discover_url';
@@ -24,11 +27,14 @@ import {
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../typings/alerts';
 
-jest.mock('../../../../utils/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../utils/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRedirectUrl = jest.fn();
+const mockGetRedirectUrl = vi.fn();
 
 const getServices = () => ({
   services: {
@@ -46,8 +52,8 @@ const MOCK_ALERT = {
 
 describe('useDiscoverUrl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue(getServices());
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue(getServices());
   });
 
   it('returns null when rule or alert missing', () => {

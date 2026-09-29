@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { cloneRule } from './clone';
 
@@ -53,7 +55,7 @@ describe('cloneRule', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http.post.mockResolvedValueOnce(resolvedValue);
   });
 

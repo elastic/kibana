@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { APP_ID, ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
 
-jest.mock('../../../kibana_services');
-jest.mock('./util/load_index_settings');
+vi.mock('../../../kibana_services');
+vi.mock('./util/load_index_settings');
 
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { decode } from '@kbn/rison';
@@ -61,7 +63,7 @@ describe('ESSearchSource', () => {
 
             throw new Error(`Unsupported search source field: ${fieldName}`);
           },
-          setField: jest.fn(),
+          setField: vi.fn(),
           getSearchRequestBody() {
             return {
               scripted_fields: 'shouldNotGetAddedToTileUrl',

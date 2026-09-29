@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ContentListProvider } from '@kbn/content-list-provider';
@@ -45,7 +47,7 @@ describe('ContentList', () => {
   });
 
   it("renders children inside a flex-column wrapper during 'populated'", async () => {
-    const findItems = jest.fn(async () => ({
+    const findItems = vi.fn(async () => ({
       items: buildItems(3),
       total: 3,
     }));
@@ -62,7 +64,7 @@ describe('ContentList', () => {
   });
 
   it("renders the provider-derived default empty state during 'empty'", async () => {
-    const findItems = jest.fn(async () => ({ items: [], total: 0 }));
+    const findItems = vi.fn(async () => ({ items: [], total: 0 }));
 
     renderWithProvider(
       <ContentList>
@@ -80,7 +82,7 @@ describe('ContentList', () => {
   });
 
   it("renders the emptyState prop (not children) during 'empty'", async () => {
-    const findItems = jest.fn(async () => ({ items: [], total: 0 }));
+    const findItems = vi.fn(async () => ({ items: [], total: 0 }));
 
     renderWithProvider(
       <ContentList emptyState={<div data-test-subj="empty">nothing here</div>}>
@@ -94,7 +96,7 @@ describe('ContentList', () => {
   });
 
   it('supports null emptyState to intentionally suppress the default prompt', async () => {
-    const findItems = jest.fn(async () => ({ items: [], total: 0 }));
+    const findItems = vi.fn(async () => ({ items: [], total: 0 }));
 
     renderWithProvider(
       <ContentList emptyState={null}>
@@ -109,7 +111,7 @@ describe('ContentList', () => {
   });
 
   it("renders children (not emptyState) during 'initialLoad'", () => {
-    const findItems = jest.fn(() => new Promise<FindItemsResult>(() => undefined));
+    const findItems = vi.fn(() => new Promise<FindItemsResult>(() => undefined));
 
     renderWithProvider(
       <ContentList emptyState={<div data-test-subj="empty">empty</div>}>

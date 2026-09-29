@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -36,7 +38,7 @@ describe('Connector Model Versions', () => {
     const version2 = versions['2'] as SavedObjectsFullModelVersion;
     const context: SavedObjectModelTransformationContext = {
       log: {
-        get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),
+        get: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn() }),
       } as unknown as Logger,
       modelVersion: 2,
       namespaceType: 'single',
@@ -171,7 +173,7 @@ describe('Connector Model Versions', () => {
 
       expect(
         backfillFn!(mockDocument as never, {
-          log: { get: () => ({ debug: jest.fn() }) } as never,
+          log: { get: () => ({ debug: vi.fn() }) } as never,
           modelVersion: 3,
           namespaceType: 'single',
         })
@@ -192,7 +194,7 @@ describe('Connector Model Versions', () => {
     const version4 = versions['4'] as SavedObjectsFullModelVersion;
     const context: SavedObjectModelTransformationContext = {
       log: {
-        get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),
+        get: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn() }),
       } as unknown as Logger,
       modelVersion: 4,
       namespaceType: 'single',

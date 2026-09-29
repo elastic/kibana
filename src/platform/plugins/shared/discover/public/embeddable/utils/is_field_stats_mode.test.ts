@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -18,7 +20,7 @@ const dataViewMock = buildDataViewMock({ name: 'test-data-view' });
 
 const createMockUiSettings = (showFieldStats: boolean): IUiSettingsClient => {
   return {
-    get: jest.fn((key: string) => {
+    get: vi.fn((key: string) => {
       if (key === SHOW_FIELD_STATISTICS) {
         return showFieldStats;
       }
@@ -32,7 +34,7 @@ const createMockSavedSearch = (viewMode: VIEW_MODE, columns: string[] | undefine
     viewMode,
     columns,
     searchSource: {
-      getField: jest.fn((field: string) => {
+      getField: vi.fn((field: string) => {
         if (field === 'query') {
           return { language: 'kuery' }; // Default to non-ES|QL query
         }

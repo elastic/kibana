@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -22,31 +24,43 @@ import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/comm
 import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: () => mockDispatch,
-}));
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: () => mockDispatch,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseDataGridColumnsCellActions = jest.fn(
+const mockUseDataGridColumnsCellActions = vi.fn(
   (_: object): Array<Array<() => JSX.Element>> => []
 );
-jest.mock('@kbn/cell-actions', () => ({
-  ...jest.requireActual('@kbn/cell-actions'),
-  useDataGridColumnsCellActions: (params: object) => mockUseDataGridColumnsCellActions(params),
-}));
+vi.mock('@kbn/cell-actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/cell-actions')),
+      useDataGridColumnsCellActions: (params: object) => mockUseDataGridColumnsCellActions(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
-const mockGetColumnHeaders = jest.fn(() => headersJustTimestamp);
-jest.mock('./column_headers/helpers', () => ({
-  ...jest.requireActual('./column_headers/helpers'),
-  getColumnHeaders: () => mockGetColumnHeaders(),
-}));
+const mockGetColumnHeaders = vi.fn(() => headersJustTimestamp);
+vi.mock('./column_headers/helpers', async () => {
+      const mocked = {
+      ...(await vi.importActual('./column_headers/helpers')),
+      getColumnHeaders: () => mockGetColumnHeaders(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_selector', () => ({
-  useShallowEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
-  useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
-}));
+vi.mock('../../hooks/use_selector', () => {
+      const mocked = {
+      useShallowEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
+      useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataViewId = 'security-solution-default';
 
@@ -66,7 +80,7 @@ describe('DataTable', () => {
     getFieldSpec: () => undefined,
     data: mockTimelineData,
     id: TableId.test,
-    loadPage: jest.fn(),
+    loadPage: vi.fn(),
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     totalItems: 1,
@@ -75,10 +89,10 @@ describe('DataTable', () => {
     pagination: {
       pageSize: 25,
       pageIndex: 0,
-      onChangeItemsPerPage: jest.fn(),
-      onChangePage: jest.fn(),
+      onChangeItemsPerPage: vi.fn(),
+      onChangePage: vi.fn(),
     },
-    fieldsBrowserComponent: jest.fn(() => <div />),
+    fieldsBrowserComponent: vi.fn(() => <div />),
   };
 
   beforeEach(() => {

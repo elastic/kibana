@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { filter, last, lastValueFrom, map, of, throwError, toArray } from 'rxjs';
 import { v4 } from 'uuid';
 import type { MessageAddEvent, StreamingChatResponseEventWithoutError } from '../../common';
@@ -21,8 +24,8 @@ import type { ObservabilityAIAssistantChatService } from '../types';
 import { complete } from './complete';
 
 const client = {
-  chat: jest.fn(),
-  complete: jest.fn(),
+  chat: vi.fn(),
+  complete: vi.fn(),
 } as unknown as ObservabilityAIAssistantChatService;
 
 const connectorId = 'foo';
@@ -78,7 +81,7 @@ const createLlmResponse = (
 type CompleteParameters = Parameters<typeof complete>[0];
 
 describe('complete', () => {
-  const requestCallback: jest.MockedFunction<Parameters<typeof complete>[1]> = jest.fn();
+  const requestCallback: MockedFunction<Parameters<typeof complete>[1]> = vi.fn();
 
   beforeEach(() => {
     requestCallback.mockReset();
@@ -124,9 +127,9 @@ describe('complete', () => {
   });
 
   describe('with screen context and an action is called', () => {
-    const respondFn: jest.MockedFn<any> = jest.fn();
+    const respondFn: MockedFunction<any> = vi.fn();
 
-    const getScreenContexts: CompleteParameters['getScreenContexts'] = jest.fn().mockReturnValue([
+    const getScreenContexts: CompleteParameters['getScreenContexts'] = vi.fn().mockReturnValue([
       {
         actions: [
           {

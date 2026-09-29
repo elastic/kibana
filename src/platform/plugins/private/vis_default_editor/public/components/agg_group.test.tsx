@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -21,8 +24,8 @@ import { DefaultEditorAggAdd } from './agg_add';
 import type { EditorVisState } from './sidebar/state/reducers';
 import { EuiThemeProvider } from '@elastic/eui';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -35,26 +38,32 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('./agg', () => ({
-  DefaultEditorAgg: () => <div />,
-}));
+vi.mock('./agg', () => {
+      const mocked = {
+      DefaultEditorAgg: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agg_add', () => ({
-  DefaultEditorAggAdd: () => <div />,
-}));
+vi.mock('./agg_add', () => {
+      const mocked = {
+      DefaultEditorAggAdd: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggGroupProps;
   let aggs: IAggConfigs;
   let schemas: ISchemas;
-  let setTouched: jest.Mock;
-  let setValidity: jest.Mock;
-  let reorderAggs: jest.Mock;
+  let setTouched: Mock;
+  let setValidity: Mock;
+  let reorderAggs: Mock;
 
   beforeEach(() => {
-    setTouched = jest.fn();
-    setValidity = jest.fn();
-    reorderAggs = jest.fn();
+    setTouched = vi.fn();
+    setValidity = vi.fn();
+    reorderAggs = vi.fn();
     schemas = createMockedVisEditorSchemas([
       {
         name: 'metrics',
@@ -113,9 +122,9 @@ describe('DefaultEditorAgg component', () => {
       reorderAggs,
       addSchema: () => {},
       removeAgg: () => {},
-      setAggParamValue: jest.fn(),
-      setStateParamValue: jest.fn(),
-      onAggTypeChange: jest.fn(),
+      setAggParamValue: vi.fn(),
+      setStateParamValue: vi.fn(),
+      onAggTypeChange: vi.fn(),
       onToggleEnableAgg: () => {},
     };
   });

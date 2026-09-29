@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -23,11 +25,11 @@ const renderComponent = (props: ComponentProps<typeof TimeTypeSection>) => {
 
 describe('TimeTypeSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render null when timeRange is not provided', () => {
-    const onTimeTypeChange = jest.fn();
+    const onTimeTypeChange = vi.fn();
 
     renderComponent({
       isAbsoluteTimeByDefault: false,
@@ -41,7 +43,7 @@ describe('TimeTypeSection', () => {
 
   it('should render absolute time range', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: '2022-01-02T00:00:00.000Z' };
-    const onTimeTypeChange = jest.fn();
+    const onTimeTypeChange = vi.fn();
 
     renderComponent({
       timeRange,
@@ -58,7 +60,7 @@ describe('TimeTypeSection', () => {
 
   it('should render relative time range', () => {
     const timeRange = { from: 'now', to: 'now+15m' };
-    const onTimeTypeChange = jest.fn();
+    const onTimeTypeChange = vi.fn();
 
     renderComponent({
       timeRange,
@@ -76,7 +78,7 @@ describe('TimeTypeSection', () => {
 
   it('should hide switch when timeRange is already absolute', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: '2022-01-02T00:00:00.000Z' };
-    const onTimeTypeChange = jest.fn();
+    const onTimeTypeChange = vi.fn();
 
     renderComponent({
       timeRange,
@@ -91,7 +93,7 @@ describe('TimeTypeSection', () => {
 
   it('should render with mixed time range (absolute from, relative to)', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: 'now' };
-    const onTimeTypeChange = jest.fn();
+    const onTimeTypeChange = vi.fn();
 
     renderComponent({
       timeRange,
@@ -109,7 +111,7 @@ describe('TimeTypeSection', () => {
 
   it('should render with mixed time range (relative from, absolute to)', () => {
     const timeRange = { from: 'now-30m', to: '2022-01-01T00:00:00.000Z' };
-    const onTimeTypeChange = jest.fn();
+    const onTimeTypeChange = vi.fn();
 
     renderComponent({
       timeRange,
@@ -127,7 +129,7 @@ describe('TimeTypeSection', () => {
 
   it('should render "now"', () => {
     const timeRange = { from: 'now-30m', to: 'now' };
-    const onTimeTypeChange = jest.fn();
+    const onTimeTypeChange = vi.fn();
 
     renderComponent({
       timeRange,
@@ -141,7 +143,7 @@ describe('TimeTypeSection', () => {
 
   it('should handle plain "now" value correctly in mixed ranges', () => {
     const timeRange = { from: '2025-11-10T14:17:51.794Z', to: 'now' };
-    const onTimeTypeChange = jest.fn();
+    const onTimeTypeChange = vi.fn();
 
     renderComponent({
       timeRange,

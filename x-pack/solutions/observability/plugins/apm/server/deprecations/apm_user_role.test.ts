@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { GetDeprecationsContext, IScopedClusterClient, CoreSetup } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getDeprecationsInfo } from './apm_user_role';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 let context: GetDeprecationsContext;
-let esClient: jest.Mocked<IScopedClusterClient>;
+let esClient: Mocked<IScopedClusterClient>;
 const core = { docLinks: { version: 'main' } } as unknown as CoreSetup;
 const logger = loggingSystemMock.createLogger();
 const security = { license: { isEnabled: () => true } } as unknown as SecurityPluginSetup;
@@ -19,10 +22,10 @@ const security = { license: { isEnabled: () => true } } as unknown as SecurityPl
 describe('apm_user deprecation', () => {
   beforeEach(async () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
+    esClient.asCurrentUser.security.getUser = vi.fn().mockResolvedValue({
       xyz: { username: 'normal_user', roles: ['data_analyst'] },
     });
-    esClient.asCurrentUser.security.getRoleMapping = jest.fn().mockResolvedValue({});
+    esClient.asCurrentUser.security.getRoleMapping = vi.fn().mockResolvedValue({});
 
     context = { esClient } as unknown as GetDeprecationsContext;
   });
@@ -35,7 +38,7 @@ describe('apm_user deprecation', () => {
 
   describe('users assigned to a removed role', () => {
     test('logs a deprecation when a user was found with a removed apm_user role', async () => {
-      esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
+      esClient.asCurrentUser.security.getUser = vi.fn().mockResolvedValue({
         foo: {
           username: 'foo',
           roles: ['kibana_admin', 'apm_user'],
@@ -48,7 +51,7 @@ describe('apm_user deprecation', () => {
 
   describe('roles mapped to a removed role', () => {
     test('logs a deprecation when a role was found that maps to the removed apm_user role', async () => {
-      esClient.asCurrentUser.security.getRoleMapping = jest
+      esClient.asCurrentUser.security.getRoleMapping = vi
         .fn()
         .mockResolvedValue({ dungeon_master: { roles: ['apm_user'] } });
 
@@ -67,8 +70,8 @@ describe('apm_user deprecation', () => {
   it('insufficient permissions', async () => {
     const permissionsError = new Error('you shall not pass');
     (permissionsError as unknown as { statusCode: number }).statusCode = 403;
-    esClient.asCurrentUser.security.getUser = jest.fn().mockRejectedValue(permissionsError);
-    esClient.asCurrentUser.security.getRoleMapping = jest.fn().mockRejectedValue(permissionsError);
+    esClient.asCurrentUser.security.getUser = vi.fn().mockRejectedValue(permissionsError);
+    esClient.asCurrentUser.security.getRoleMapping = vi.fn().mockRejectedValue(permissionsError);
 
     expect(await getDeprecationsInfo(context, core, { logger, security })).toMatchInlineSnapshot(`
       Array [

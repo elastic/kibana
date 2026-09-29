@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   fetchBrowserJourney,
   fetchLastSuccessfulCheck,
@@ -14,14 +17,17 @@ import {
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 
-jest.mock('../../../../utils/api_service', () => ({
-  apiService: { get: jest.fn(), post: jest.fn() },
-}));
+vi.mock('../../../../utils/api_service', () => {
+      const mocked = {
+      apiService: { get: vi.fn(), post: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getJourneyScreenshot', () => {
   const url = 'http://localhost:5601/internal/uptime/journey/screenshot/checkgroup/step';
   it('returns null if the response status is not 200', async () => {
-    const mockFetch = jest.fn().mockRejectedValueOnce({ status: 404 });
+    const mockFetch = vi.fn().mockRejectedValueOnce({ status: 404 });
     (global as any).fetch = mockFetch;
 
     const result = await getJourneyScreenshot(url);
@@ -31,17 +37,17 @@ describe('getJourneyScreenshot', () => {
   it('returns a ref if `content-type` is application/json', async () => {
     const mockResponse = {
       headers: {
-        get: jest.fn().mockImplementation((header) => {
+        get: vi.fn().mockImplementation((header) => {
           if (header === 'content-type') return 'application/json';
           if (header === 'caption-name') return 'stepName';
           if (header === 'max-steps') return '0';
         }),
       },
-      json: jest.fn().mockResolvedValue({}),
+      json: vi.fn().mockResolvedValue({}),
       status: 200,
     };
 
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
     global.fetch = mockFetch;
 
     const result = await getJourneyScreenshot('imgSrc');
@@ -55,17 +61,17 @@ describe('getJourneyScreenshot', () => {
   it('returns a blob when `content-type` is not application/json', async () => {
     const mockResponse = {
       headers: {
-        get: jest.fn().mockImplementation((header) => {
+        get: vi.fn().mockImplementation((header) => {
           if (header === 'content-type') return 'image/jpeg';
           if (header === 'caption-name') return 'stepName';
           if (header === 'max-steps') return '0';
         }),
       },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
       status: 200,
     };
 
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
     global.fetch = mockFetch;
 
     const result = await getJourneyScreenshot(url);
@@ -79,17 +85,17 @@ describe('getJourneyScreenshot', () => {
   it('does not retry if `shouldBackoff` is false', async () => {
     const mockResponse = {
       headers: {
-        get: jest.fn().mockImplementation((header) => {
+        get: vi.fn().mockImplementation((header) => {
           if (header === 'content-type') return 'image/jpeg';
           if (header === 'caption-name') return 'stepName';
           if (header === 'max-steps') return '0';
         }),
       },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
       status: 404,
     };
 
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
     global.fetch = mockFetch;
 
     const result = await getJourneyScreenshot(url, { shouldBackoff: false });
@@ -100,29 +106,29 @@ describe('getJourneyScreenshot', () => {
   it('will retry `n` times', async () => {
     const mockFailResponse = {
       headers: {
-        get: jest.fn().mockImplementation((header) => {
+        get: vi.fn().mockImplementation((header) => {
           if (header === 'content-type') return 'image/jpeg';
           if (header === 'caption-name') return 'stepName';
           if (header === 'max-steps') return '0';
         }),
       },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
       status: 404,
     };
     const mockSuccessResponse = {
       headers: {
-        get: jest.fn().mockImplementation((header) => {
+        get: vi.fn().mockImplementation((header) => {
           if (header === 'content-type') return 'application/json';
           if (header === 'caption-name') return 'stepName';
           if (header === 'max-steps') return '0';
         }),
       },
-      json: jest.fn().mockResolvedValue({}),
+      json: vi.fn().mockResolvedValue({}),
       status: 200,
     };
     let fetchCount = 0;
 
-    const mockFetch = jest.fn().mockImplementation(() => {
+    const mockFetch = vi.fn().mockImplementation(() => {
       fetchCount++;
       if (fetchCount > 4) {
         return mockSuccessResponse;
@@ -144,17 +150,17 @@ describe('getJourneyScreenshot', () => {
     const initialBackoff = 10;
     const mockResponse = {
       headers: {
-        get: jest.fn().mockImplementation((header) => {
+        get: vi.fn().mockImplementation((header) => {
           if (header === 'content-type') return 'image/jpeg';
           if (header === 'caption-name') return 'stepName';
           if (header === 'max-steps') return '0';
         }),
       },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
       status: 404,
     };
 
-    const mockFetch = jest.fn().mockReturnValue(mockResponse);
+    const mockFetch = vi.fn().mockReturnValue(mockResponse);
     global.fetch = mockFetch;
 
     const result = await getJourneyScreenshot(url, {
@@ -168,7 +174,7 @@ describe('getJourneyScreenshot', () => {
 });
 
 describe('fetchBrowserJourney remoteName plumbing', () => {
-  const mockGet = apiService.get as jest.Mock;
+  const mockGet = apiService.get as Mock;
 
   beforeEach(() => {
     mockGet.mockReset();
@@ -235,7 +241,7 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
 });
 
 describe('fetchScreenshotBlockSet remoteName plumbing', () => {
-  const mockPost = apiService.post as jest.Mock;
+  const mockPost = apiService.post as Mock;
 
   beforeEach(() => {
     mockPost.mockReset();
@@ -261,7 +267,7 @@ describe('fetchScreenshotBlockSet remoteName plumbing', () => {
 });
 
 describe('fetchLastSuccessfulCheck remoteName plumbing', () => {
-  const mockGet = apiService.get as jest.Mock;
+  const mockGet = apiService.get as Mock;
   const baseParams = {
     monitorId: 'm-1',
     timestamp: '2025-01-01T00:00:00Z',

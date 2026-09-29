@@ -5,26 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { useAgentVersion } from './use_agent_version';
 import { useKibanaVersion } from './use_kibana_version';
 import { sendGetAgentsAvailableVersions } from './use_request';
 
-jest.mock('./use_kibana_version');
-jest.mock('./use_request');
+vi.mock('./use_kibana_version');
+vi.mock('./use_request');
 
 describe('useAgentVersion', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return agent version that matches Kibana version if released', async () => {
     const mockKibanaVersion = '8.8.1';
     const mockAvailableVersions = ['8.9.0', '8.8.1', '8.8.0', '8.7.0'];
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockResolvedValue({
       data: { items: mockAvailableVersions },
     });
 
@@ -39,8 +42,8 @@ describe('useAgentVersion', () => {
     const mockKibanaVersion = '8.8.1';
     const mockAvailableVersions = ['8.9.0', '8.8.2', '8.8.0', '8.7.0'];
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockResolvedValue({
       data: { items: mockAvailableVersions },
     });
 
@@ -55,8 +58,8 @@ describe('useAgentVersion', () => {
     const mockKibanaVersion = '8.11.0';
     const mockAvailableVersions = ['8.8.0', '8.7.0', '8.9.2', '7.16.0'];
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockResolvedValue({
       data: { items: mockAvailableVersions },
     });
 
@@ -71,8 +74,8 @@ describe('useAgentVersion', () => {
     const mockKibanaVersion = '8.8.3';
     const mockAvailableVersions = ['8.8.0', '8.8.1', '8.8.2', '8.7.0', '8.9.2', '7.16.0'];
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockResolvedValue({
       data: { items: mockAvailableVersions },
     });
 
@@ -87,8 +90,8 @@ describe('useAgentVersion', () => {
     const mockKibanaVersion = '8.10.0-SNAPSHOT';
     const mockAvailableVersions = ['8.8.0', '8.7.0', '8.9.2', '7.16.0'];
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockResolvedValue({
       data: { items: mockAvailableVersions },
     });
 
@@ -103,8 +106,8 @@ describe('useAgentVersion', () => {
     const mockKibanaVersion = '8.11.0';
     const mockAvailableVersions: string[] = [];
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockResolvedValue({
       data: { items: mockAvailableVersions },
     });
 
@@ -118,8 +121,8 @@ describe('useAgentVersion', () => {
   it('should return kibana version if the list of available agent versions is not available', async () => {
     const mockKibanaVersion = '8.11.0';
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockRejectedValue(new Error('Fetching error'));
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockRejectedValue(new Error('Fetching error'));
 
     const { result } = renderHook(() => useAgentVersion());
 
@@ -138,8 +141,8 @@ describe('useAgentVersion', () => {
       '7.16.0',
     ];
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockResolvedValue({
       data: { items: mockAvailableVersions },
     });
 
@@ -163,8 +166,8 @@ describe('useAgentVersion', () => {
       '7.16.0',
     ];
 
-    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
-    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+    (useKibanaVersion as Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as Mock).mockResolvedValue({
       data: { items: mockAvailableVersions },
     });
 

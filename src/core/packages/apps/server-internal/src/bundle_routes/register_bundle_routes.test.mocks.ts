@@ -7,19 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const registerRouteForBundleMock = jest.fn();
-jest.doMock('./bundles_route', () => ({
-  registerRouteForBundle: registerRouteForBundleMock,
-}));
+import { vi } from 'vitest';
 
-jest.doMock('@kbn/ui-shared-deps-src', () => ({
-  distDir: 'uiSharedDepsSrcDistDir',
-}));
+export const registerRouteForBundleMock = vi.fn();
+vi.doMock('./bundles_route', () => {
+      const mocked = {
+      registerRouteForBundle: registerRouteForBundleMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.doMock('@kbn/ui-shared-deps-npm', () => ({
-  distDir: 'uiSharedDepsNpmDistDir',
-}));
+vi.doMock('@kbn/ui-shared-deps-src', () => {
+      const mocked = {
+      distDir: 'uiSharedDepsSrcDistDir',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.doMock('@kbn/monaco/server', () => ({
-  bundleDir: 'kbnMonacoBundleDir',
-}));
+vi.doMock('@kbn/ui-shared-deps-npm', () => {
+      const mocked = {
+      distDir: 'uiSharedDepsNpmDistDir',
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.doMock('@kbn/monaco/server', () => {
+      const mocked = {
+      bundleDir: 'kbnMonacoBundleDir',
+    };
+      return { ...mocked, default: mocked };
+    });

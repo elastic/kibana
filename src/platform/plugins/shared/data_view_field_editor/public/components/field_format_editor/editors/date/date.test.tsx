@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createFieldFormatMock } from '../test_utils';
 import { DateFormatEditor } from './date';
@@ -17,18 +19,18 @@ import { screen } from '@testing-library/react';
 const fieldType = 'date';
 
 const format = createFieldFormatMock({
-  getParamDefaults: jest.fn().mockImplementation(() => {
+  getParamDefaults: vi.fn().mockImplementation(() => {
     return { pattern: 'MMMM Do YYYY, HH:mm:ss.SSS' };
   }),
-  convertToReact: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
+  convertToReact: vi.fn().mockImplementation((input: string) => `converted date for ${input}`),
 });
 
 const formatParams = { pattern: '' };
 
 const mockedTimeNow = 1529097045190;
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const renderDateFormatEditor = () =>
   renderWithI18n(
@@ -43,11 +45,11 @@ const renderDateFormatEditor = () =>
 
 describe('DateFormatEditor', () => {
   beforeEach(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(mockedTimeNow);
+    vi.spyOn(Date, 'now').mockReturnValue(mockedTimeNow);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should have a formatId', () => {

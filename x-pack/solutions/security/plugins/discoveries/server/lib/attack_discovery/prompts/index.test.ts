@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getAttackDiscoveryPrompts } from '.';
 import * as promptModule from '../../prompt';
 
-jest.mock('../../prompt');
+vi.mock('../../prompt');
 
 describe('getAttackDiscoveryPrompts', () => {
-  const mockGetPromptsByGroupId = jest.fn();
+  const mockGetPromptsByGroupId = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (promptModule.getPromptsByGroupId as jest.Mock) = mockGetPromptsByGroupId;
+    vi.clearAllMocks();
+    (promptModule.getPromptsByGroupId as Mock) = mockGetPromptsByGroupId;
   });
 
   it('returns combined prompts from saved objects', async () => {
@@ -75,7 +78,7 @@ describe('getAttackDiscoveryPrompts', () => {
   it('passes all parameters to getPromptsByGroupId', async () => {
     mockGetPromptsByGroupId.mockResolvedValue([]);
 
-    const mockGetInferenceConnectorById = jest.fn();
+    const mockGetInferenceConnectorById = vi.fn();
 
     await getAttackDiscoveryPrompts({
       connectorId: 'test-connector',

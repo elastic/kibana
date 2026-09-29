@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { FleetError } from '../../errors';
 import { packagePolicyService } from '../../services';
 
@@ -14,13 +17,16 @@ import {
   installCustomAsset,
 } from './custom_assets';
 
-jest.mock('../../services', () => ({
-  packagePolicyService: {
-    list: jest.fn(),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      packagePolicyService: {
+        list: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 
 describe('custom assets', () => {
   const integrations = [
@@ -78,7 +84,7 @@ describe('custom assets', () => {
     it('should return custom assets', async () => {
       esClientMock = {
         cluster: {
-          getComponentTemplate: jest.fn().mockResolvedValue({
+          getComponentTemplate: vi.fn().mockResolvedValue({
             component_templates: [
               {
                 name: 'logs-system.auth@custom',
@@ -102,7 +108,7 @@ describe('custom assets', () => {
           }),
         },
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({
+          getPipeline: vi.fn().mockResolvedValue({
             'logs-system.auth@custom': {
               processors: [
                 {
@@ -166,12 +172,12 @@ describe('custom assets', () => {
     it('should set custom assets as deleted', async () => {
       esClientMock = {
         cluster: {
-          getComponentTemplate: jest.fn().mockResolvedValue({
+          getComponentTemplate: vi.fn().mockResolvedValue({
             component_templates: [],
           }),
         },
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({}),
+          getPipeline: vi.fn().mockResolvedValue({}),
         },
       };
       const previousSyncIntegrationsData = {
@@ -213,12 +219,12 @@ describe('custom assets', () => {
     it('should remove custom assets if deleted earlier than ttl', async () => {
       esClientMock = {
         cluster: {
-          getComponentTemplate: jest.fn().mockResolvedValue({
+          getComponentTemplate: vi.fn().mockResolvedValue({
             component_templates: [],
           }),
         },
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({}),
+          getPipeline: vi.fn().mockResolvedValue({}),
         },
       };
       const previousSyncIntegrationsData = {
@@ -336,7 +342,7 @@ describe('custom assets', () => {
 
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockImplementation((request) => {
+          getPipeline: vi.fn().mockImplementation((request) => {
             if (request?.id === 'filestream-pipeline1') {
               return Promise.resolve({
                 [request?.id as string]: {
@@ -379,7 +385,7 @@ describe('custom assets', () => {
     it('should delete component template if deleted', async () => {
       esClientMock = {
         cluster: {
-          getComponentTemplate: jest.fn().mockResolvedValue({
+          getComponentTemplate: vi.fn().mockResolvedValue({
             component_templates: [
               {
                 name: 'logs-system.auth@custom',
@@ -397,7 +403,7 @@ describe('custom assets', () => {
               },
             ],
           }),
-          deleteComponentTemplate: jest.fn().mockResolvedValue({}),
+          deleteComponentTemplate: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -413,7 +419,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.cluster.deleteComponentTemplate).toHaveBeenCalledWith(
@@ -427,10 +433,10 @@ describe('custom assets', () => {
     it('should do nothing if component template deleted and not exists', async () => {
       esClientMock = {
         cluster: {
-          getComponentTemplate: jest.fn().mockResolvedValue({
+          getComponentTemplate: vi.fn().mockResolvedValue({
             component_templates: [],
           }),
-          deleteComponentTemplate: jest.fn().mockResolvedValue({}),
+          deleteComponentTemplate: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -446,7 +452,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.cluster.deleteComponentTemplate).not.toHaveBeenCalled();
@@ -455,10 +461,10 @@ describe('custom assets', () => {
     it('should install component template if not exists', async () => {
       esClientMock = {
         cluster: {
-          getComponentTemplate: jest.fn().mockResolvedValue({
+          getComponentTemplate: vi.fn().mockResolvedValue({
             component_templates: [],
           }),
-          putComponentTemplate: jest.fn().mockResolvedValue({}),
+          putComponentTemplate: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -481,7 +487,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.cluster.putComponentTemplate).toHaveBeenCalledWith(
@@ -504,7 +510,7 @@ describe('custom assets', () => {
     it('should update component template if changed', async () => {
       esClientMock = {
         cluster: {
-          getComponentTemplate: jest.fn().mockResolvedValue({
+          getComponentTemplate: vi.fn().mockResolvedValue({
             component_templates: [
               {
                 name: 'logs-system.auth@custom',
@@ -522,7 +528,7 @@ describe('custom assets', () => {
               },
             ],
           }),
-          putComponentTemplate: jest.fn().mockResolvedValue({}),
+          putComponentTemplate: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -545,7 +551,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.cluster.putComponentTemplate).toHaveBeenCalledWith(
@@ -568,7 +574,7 @@ describe('custom assets', () => {
     it('should not update component template if not changed', async () => {
       esClientMock = {
         cluster: {
-          getComponentTemplate: jest.fn().mockResolvedValue({
+          getComponentTemplate: vi.fn().mockResolvedValue({
             component_templates: [
               {
                 name: 'logs-system.auth@custom',
@@ -586,7 +592,7 @@ describe('custom assets', () => {
               },
             ],
           }),
-          putComponentTemplate: jest.fn().mockResolvedValue({}),
+          putComponentTemplate: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -609,7 +615,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.cluster.putComponentTemplate).not.toHaveBeenCalled();
@@ -620,7 +626,7 @@ describe('custom assets', () => {
     it('should delete ingest pipeline if deleted', async () => {
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({
+          getPipeline: vi.fn().mockResolvedValue({
             'logs-system.auth@custom': {
               processors: [
                 {
@@ -631,7 +637,7 @@ describe('custom assets', () => {
               ],
             },
           }),
-          deletePipeline: jest.fn().mockResolvedValue({}),
+          deletePipeline: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -647,7 +653,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.ingest.deletePipeline).toHaveBeenCalledWith(
@@ -661,8 +667,8 @@ describe('custom assets', () => {
     it('should do nothing if ingest pipeline deleted and not exists', async () => {
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({}),
-          deletePipeline: jest.fn().mockResolvedValue({}),
+          getPipeline: vi.fn().mockResolvedValue({}),
+          deletePipeline: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -678,7 +684,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.ingest.deletePipeline).not.toHaveBeenCalled();
@@ -687,8 +693,8 @@ describe('custom assets', () => {
     it('should install ingest pipeline if not exists', async () => {
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({}),
-          putPipeline: jest.fn().mockResolvedValue({}),
+          getPipeline: vi.fn().mockResolvedValue({}),
+          putPipeline: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -717,7 +723,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.ingest.putPipeline).toHaveBeenCalledWith(
@@ -740,7 +746,7 @@ describe('custom assets', () => {
     it('should update ingest pipeline if version changed', async () => {
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({
+          getPipeline: vi.fn().mockResolvedValue({
             'logs-system.auth@custom': {
               processors: [
                 {
@@ -752,7 +758,7 @@ describe('custom assets', () => {
               version: 1,
             },
           }),
-          putPipeline: jest.fn().mockResolvedValue({}),
+          putPipeline: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -776,7 +782,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.ingest.putPipeline).toHaveBeenCalledWith(
@@ -798,7 +804,7 @@ describe('custom assets', () => {
     it('should update ingest pipeline if changed without version', async () => {
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({
+          getPipeline: vi.fn().mockResolvedValue({
             'logs-system.auth@custom': {
               processors: [
                 {
@@ -809,7 +815,7 @@ describe('custom assets', () => {
               ],
             },
           }),
-          putPipeline: jest.fn().mockResolvedValue({}),
+          putPipeline: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -832,7 +838,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.ingest.putPipeline).toHaveBeenCalledWith(
@@ -853,7 +859,7 @@ describe('custom assets', () => {
     it('should not update ingest pipeline if not changed', async () => {
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({
+          getPipeline: vi.fn().mockResolvedValue({
             'logs-system.auth@custom': {
               processors: [
                 {
@@ -865,7 +871,7 @@ describe('custom assets', () => {
               version: 1,
             },
           }),
-          putPipeline: jest.fn().mockResolvedValue({}),
+          putPipeline: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -889,7 +895,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
@@ -898,7 +904,7 @@ describe('custom assets', () => {
     it('should not update ingest pipeline if not changed except timestamps', async () => {
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({
+          getPipeline: vi.fn().mockResolvedValue({
             'logs-system.auth@custom': {
               processors: [
                 {
@@ -910,7 +916,7 @@ describe('custom assets', () => {
               created_date_millis: 1762258252589,
             },
           }),
-          putPipeline: jest.fn().mockResolvedValue({}),
+          putPipeline: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -934,7 +940,7 @@ describe('custom assets', () => {
         },
         esClientMock,
         new AbortController().signal,
-        { debug: jest.fn() } as any
+        { debug: vi.fn() } as any
       );
 
       expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
@@ -943,8 +949,8 @@ describe('custom assets', () => {
     it('should not create ingest pipeline if has enrich processor', async () => {
       esClientMock = {
         ingest: {
-          getPipeline: jest.fn().mockResolvedValue({}),
-          putPipeline: jest.fn().mockResolvedValue({}),
+          getPipeline: vi.fn().mockResolvedValue({}),
+          putPipeline: vi.fn().mockResolvedValue({}),
         },
       };
 
@@ -976,7 +982,7 @@ describe('custom assets', () => {
           },
           esClientMock,
           new AbortController().signal,
-          { debug: jest.fn() } as any
+          { debug: vi.fn() } as any
         )
       ).rejects.toThrow(
         new FleetError(

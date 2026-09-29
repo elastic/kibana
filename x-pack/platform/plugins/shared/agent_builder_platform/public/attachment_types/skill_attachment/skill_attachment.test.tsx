@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -15,26 +17,32 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachment } from '../../../common/attachments';
 import { createSkillAttachmentDefinition } from './skill_attachment';
 
-jest.mock('@kbn/agent-builder-plugin/public', () => ({
-  SKILLS_API_PATH: '/api/agent_builder/skills',
-  AGENTBUILDER_APP_ID: 'agent_builder',
-}));
+vi.mock('@kbn/agent-builder-plugin/public', () => {
+      const mocked = {
+      SKILLS_API_PATH: '/api/agent_builder/skills',
+      AGENTBUILDER_APP_ID: 'agent_builder',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./skill_diff_viewer', () => ({
-  SkillDiffViewer: ({
-    beforeContent,
-    afterContent,
-  }: {
-    beforeContent: string;
-    afterContent: string;
-  }) => (
-    <div
-      data-test-subj="skillDiffViewerStub"
-      data-before={beforeContent}
-      data-after={afterContent}
-    />
-  ),
-}));
+vi.mock('./skill_diff_viewer', () => {
+      const mocked = {
+      SkillDiffViewer: ({
+        beforeContent,
+        afterContent,
+      }: {
+        beforeContent: string;
+        afterContent: string;
+      }) => (
+        <div
+          data-test-subj="skillDiffViewerStub"
+          data-before={beforeContent}
+          data-after={afterContent}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SHOW_DIFF_LABEL = 'Show diff';
 
@@ -172,11 +180,11 @@ const buildOldCommittedAttachment = (): SkillAttachment =>
   } as unknown as SkillAttachment);
 
 const setup = () => {
-  const post = jest.fn().mockResolvedValue({ id: NEW_SKILL_ID });
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-  const addSkillToAgent = jest.fn().mockResolvedValue({});
-  const updateOrigin = jest.fn().mockResolvedValue(undefined);
+  const post = vi.fn().mockResolvedValue({ id: NEW_SKILL_ID });
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
+  const addSkillToAgent = vi.fn().mockResolvedValue({});
+  const updateOrigin = vi.fn().mockResolvedValue(undefined);
 
   const http = { post } as unknown as HttpStart;
   const notifications = {
@@ -184,9 +192,9 @@ const setup = () => {
   } as unknown as CoreStart['notifications'];
   const application = {
     capabilities: { agentBuilder: { manageSkills: true } },
-    getUrlForApp: jest.fn(),
+    getUrlForApp: vi.fn(),
   } as unknown as CoreStart['application'];
-  const agents = { list: jest.fn(), addSkillToAgent } as unknown as AgentsServiceStartContract;
+  const agents = { list: vi.fn(), addSkillToAgent } as unknown as AgentsServiceStartContract;
 
   const definition = createSkillAttachmentDefinition({ http, notifications, application, agents });
 

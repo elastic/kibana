@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,12 +14,15 @@ import { TemplatePreviewPanel } from './template_preview_panel';
 import type { ParsedTemplateEntry } from '../hooks/use_parse_yaml';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
 
-jest.mock('../field_types/field_renderer', () => ({
-  TemplateFieldRenderer: jest.fn(() => <div data-test-subj="template-field-renderer" />),
-}));
+vi.mock('../field_types/field_renderer', () => {
+      const mocked = {
+      TemplateFieldRenderer: vi.fn(() => <div data-test-subj="template-field-renderer" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TemplatePreviewPanel', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
   let mockFlyoutRef: React.RefObject<HTMLDivElement>;
 
   const mockTemplate: ParsedTemplateEntry = {
@@ -46,9 +51,9 @@ describe('TemplatePreviewPanel', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockElement = document.createElement('div');
-    mockElement.getBoundingClientRect = jest.fn(() => ({
+    mockElement.getBoundingClientRect = vi.fn(() => ({
       top: 100,
       left: 500,
       right: 800,

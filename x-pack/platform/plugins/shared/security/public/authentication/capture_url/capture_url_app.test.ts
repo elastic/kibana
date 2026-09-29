@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { captureURLApp } from './capture_url_app';
 
 describe('captureURLApp', () => {
-  let mockLocationReplace: jest.Mock;
+  let mockLocationReplace: Mock;
   beforeAll(() => {
-    mockLocationReplace = jest.fn();
+    mockLocationReplace = vi.fn();
     Object.defineProperty(window, 'location', {
       value: {
         href: 'https://some-host',

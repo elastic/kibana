@@ -5,35 +5,40 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
 
 import { getPreconfiguredOutputFromConfig, SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT } from './outputs';
 
-jest.mock('../app_context', () => ({
-  appContextService: {
-    getExperimentalFeatures: jest.fn().mockReturnValue({ useSpaceAwareness: false }),
-    getInternalUserSOClient: jest.fn(),
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
-    getLogger: () =>
-      new Proxy(
-        {},
-        {
-          get() {
-            return jest.fn();
-          },
-        }
-      ),
-    getTaskManagerStart: jest.fn(),
-    getCloud: jest.fn().mockReturnValue(null),
-    getConfig: jest.fn().mockReturnValue({}),
-  },
-}));
+vi.mock('../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getExperimentalFeatures: vi.fn().mockReturnValue({ useSpaceAwareness: false }),
+        getInternalUserSOClient: vi.fn(),
+        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+        getLogger: () =>
+          new Proxy(
+            {},
+            {
+              get() {
+                return vi.fn();
+              },
+            }
+          ),
+        getTaskManagerStart: vi.fn(),
+        getCloud: vi.fn().mockReturnValue(null),
+        getConfig: vi.fn().mockReturnValue({}),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../agent_policy_update');
-jest.mock('../output');
-jest.mock('../epm/packages/bundled_packages');
-jest.mock('../epm/archive');
-jest.mock('../settings');
+vi.mock('../agent_policy_update');
+vi.mock('../output');
+vi.mock('../epm/packages/bundled_packages');
+vi.mock('../epm/archive');
+vi.mock('../settings');
 
 describe('getPreconfiguredOutputFromConfig — serverless managed output allow_edit injection', () => {
   const baseConfig = {

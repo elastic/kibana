@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-jest.mock('./tooltip_popover', () => ({
-  TooltipPopover: () => {
-    return <div>mockTooltipPopover</div>;
-  },
-}));
+import { vi } from 'vitest';
+
+vi.mock('./tooltip_popover', () => {
+      const mocked = {
+      TooltipPopover: () => {
+        return <div>mockTooltipPopover</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import sinon from 'sinon';
 import React from 'react';

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../common/mock';
@@ -27,10 +29,10 @@ const STEPS: CasesTourStep[] = [
 const Anchor = () => <button type="button" data-test-subj="anchor-a" aria-label="anchor" />;
 
 describe('GuidedTour', () => {
-  const scrollIntoViewMock = jest.fn();
+  const scrollIntoViewMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     Element.prototype.scrollIntoView = scrollIntoViewMock;
   });
 
@@ -38,7 +40,7 @@ describe('GuidedTour', () => {
     renderWithTestingProviders(
       <>
         <Anchor />
-        <GuidedTour steps={STEPS} isActive={false} onFinish={jest.fn()} testIdPrefix="test-tour" />
+        <GuidedTour steps={STEPS} isActive={false} onFinish={vi.fn()} testIdPrefix="test-tour" />
       </>
     );
 
@@ -47,7 +49,7 @@ describe('GuidedTour', () => {
   });
 
   it('finishes immediately when active with no steps', () => {
-    const onFinish = jest.fn();
+    const onFinish = vi.fn();
     renderWithTestingProviders(
       <GuidedTour steps={[]} isActive onFinish={onFinish} testIdPrefix="test-tour" />
     );
@@ -56,7 +58,7 @@ describe('GuidedTour', () => {
   });
 
   it('does not finish while inactive even with no steps', () => {
-    const onFinish = jest.fn();
+    const onFinish = vi.fn();
     renderWithTestingProviders(
       <GuidedTour steps={[]} isActive={false} onFinish={onFinish} testIdPrefix="test-tour" />
     );
@@ -68,7 +70,7 @@ describe('GuidedTour', () => {
     renderWithTestingProviders(
       <>
         <Anchor />
-        <GuidedTour steps={STEPS} isActive onFinish={jest.fn()} testIdPrefix="test-tour" />
+        <GuidedTour steps={STEPS} isActive onFinish={vi.fn()} testIdPrefix="test-tour" />
       </>
     );
 
@@ -83,7 +85,7 @@ describe('GuidedTour', () => {
     renderWithTestingProviders(
       <>
         <Anchor />
-        <GuidedTour steps={STEPS} isActive={false} onFinish={jest.fn()} testIdPrefix="test-tour" />
+        <GuidedTour steps={STEPS} isActive={false} onFinish={vi.fn()} testIdPrefix="test-tour" />
       </>
     );
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { MAX_DOCS_PER_PAGE, MAX_USER_ACTIONS_PER_PAGE } from '../../../common/constants';
 import { createMockClient } from '../metrics/test_utils/client';
 import { createCasesClientMockArgs } from '../mocks';
@@ -15,7 +18,7 @@ describe('findUserActions', () => {
   const clientArgs = createCasesClientMockArgs();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('errors', () => {
@@ -71,7 +74,7 @@ describe('findUserActions', () => {
     });
 
     beforeEach(() => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO(),
         createMockUserActionSO({
           payload: {
@@ -113,7 +116,7 @@ describe('findUserActions', () => {
         expect.arrayContaining([expect.anything()])
       );
       expect(
-        (clientArgs.services.userActionService.finder.decodeUserActions as jest.Mock).mock
+        (clientArgs.services.userActionService.finder.decodeUserActions as Mock).mock
           .calls[0][0]
       ).toHaveLength(1);
       expect(result.total).toBe(2);
@@ -134,7 +137,7 @@ describe('findUserActions', () => {
     });
 
     it('matches comment content stored in the unified `data.content` shape', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           payload: {
             comment: {
@@ -234,7 +237,7 @@ describe('findUserActions', () => {
     });
 
     it('uses standard find when search is not provided', async () => {
-      clientArgs.services.userActionService.finder.find = jest.fn().mockResolvedValue({
+      clientArgs.services.userActionService.finder.find = vi.fn().mockResolvedValue({
         saved_objects: [createMockUserActionSO()],
         page: 1,
         per_page: 20,
@@ -268,7 +271,7 @@ describe('findUserActions', () => {
     });
 
     it('handles user actions with null created_by fields', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           created_by: { username: null, full_name: null, email: null },
           payload: {
@@ -287,7 +290,7 @@ describe('findUserActions', () => {
     });
 
     it('does not match null created_by fields against search term', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           created_by: { username: null, full_name: null, email: null },
           payload: { title: 'some title' },
@@ -304,7 +307,7 @@ describe('findUserActions', () => {
     });
 
     it('matches text custom field values', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'customFields',
           payload: {
@@ -326,7 +329,7 @@ describe('findUserActions', () => {
     });
 
     it('does not match toggle or number custom field values', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'customFields',
           payload: {
@@ -348,7 +351,7 @@ describe('findUserActions', () => {
     });
 
     it('matches extended field values', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'extended_fields',
           payload: {
@@ -373,7 +376,7 @@ describe('findUserActions', () => {
     });
 
     it('projects only matching fields from a multi-field extended_fields update', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'extended_fields',
           payload: {
@@ -399,7 +402,7 @@ describe('findUserActions', () => {
     });
 
     it('keeps every matching field when several values contain the term', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'extended_fields',
           payload: {
@@ -428,7 +431,7 @@ describe('findUserActions', () => {
     });
 
     it('keeps the full extended_fields map when search matches the author', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'extended_fields',
           created_by: {
@@ -461,7 +464,7 @@ describe('findUserActions', () => {
     });
 
     it('projects extended_fields case-insensitively', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'extended_fields',
           payload: {
@@ -486,7 +489,7 @@ describe('findUserActions', () => {
     });
 
     it('does not keep a field whose key looks like the search term', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'extended_fields',
           payload: {
@@ -511,7 +514,7 @@ describe('findUserActions', () => {
     });
 
     it('omits non-string extended_fields values from a value-hit projection', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'extended_fields',
           payload: {
@@ -556,7 +559,7 @@ describe('findUserActions', () => {
           label: 'option_1',
         },
       };
-      clientArgs.services.userActionService.finder.find = jest.fn().mockResolvedValue({
+      clientArgs.services.userActionService.finder.find = vi.fn().mockResolvedValue({
         saved_objects: [
           createMockUserActionSO({
             type: 'extended_fields',
@@ -575,7 +578,7 @@ describe('findUserActions', () => {
     });
 
     it('matches custom field values in create_case payload', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'create_case',
           payload: {
@@ -603,7 +606,7 @@ describe('findUserActions', () => {
     });
 
     it('matches severity user action values', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'severity',
           payload: { severity: 'critical' },
@@ -620,7 +623,7 @@ describe('findUserActions', () => {
     });
 
     it('matches severity values in create_case payload', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'create_case',
           payload: {
@@ -647,7 +650,7 @@ describe('findUserActions', () => {
     });
 
     it('matches file names on unified file attachments', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           payload: {
             comment: {
@@ -679,7 +682,7 @@ describe('findUserActions', () => {
     });
 
     it('matches file names on legacy externalReference file attachments', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           payload: {
             comment: {
@@ -713,7 +716,7 @@ describe('findUserActions', () => {
     });
 
     it('matches any file name when a legacy attachment holds multiple files', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           payload: {
             comment: {
@@ -753,7 +756,7 @@ describe('findUserActions', () => {
     });
 
     it('does not throw when a file entry is missing a name', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           payload: {
             comment: {
@@ -778,7 +781,7 @@ describe('findUserActions', () => {
     });
 
     it('does not throw when file metadata is missing or malformed', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           payload: {
             comment: {
@@ -810,7 +813,7 @@ describe('findUserActions', () => {
     });
 
     it('does not match unrelated file names', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           payload: {
             comment: {
@@ -842,7 +845,7 @@ describe('findUserActions', () => {
     });
 
     it('matches assignee profile uids', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'assignees',
           payload: { assignees: [{ uid: 'assignee-profile-uid' }] },
@@ -861,7 +864,7 @@ describe('findUserActions', () => {
     // ── workflow user-action search (finding 4) ───────────────────────────────
 
     it('matches workflow user action by workflow name', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'workflow',
           payload: {
@@ -880,7 +883,7 @@ describe('findUserActions', () => {
     });
 
     it('matches workflow user action by observable value for observable origin', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'workflow',
           payload: {
@@ -900,7 +903,7 @@ describe('findUserActions', () => {
     });
 
     it('does not match workflow user action by workflow id or executionId', async () => {
-      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+      clientArgs.services.userActionService.finder.findAll = vi.fn().mockResolvedValue([
         createMockUserActionSO({
           type: 'workflow',
           payload: {
@@ -927,7 +930,7 @@ describe('findUserActions', () => {
 
   describe('author filter', () => {
     beforeEach(() => {
-      clientArgs.services.userActionService.finder.find = jest.fn().mockResolvedValue({
+      clientArgs.services.userActionService.finder.find = vi.fn().mockResolvedValue({
         saved_objects: [],
         page: 1,
         per_page: 20,

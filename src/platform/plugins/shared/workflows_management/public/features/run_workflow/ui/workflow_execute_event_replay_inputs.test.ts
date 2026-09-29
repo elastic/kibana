@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EventTriggerReplayInput, TriggerEventReplaySource } from '@kbn/workflows';
 import { buildTriggerEventReplayInputs } from './workflow_execute_event_replay_inputs';
 
 describe('buildTriggerEventReplayInputs', () => {
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: false });
-    jest.setSystemTime(new Date('2025-06-15T10:00:00.000Z'));
+    vi.useFakeTimers({ legacyFakeTimers: false });
+    vi.setSystemTime(new Date('2025-06-15T10:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns a typed EventTriggerReplayInput', () => {

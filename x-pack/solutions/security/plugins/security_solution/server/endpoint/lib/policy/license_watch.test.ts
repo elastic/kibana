@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import pRetry from 'p-retry';
 import { Subject } from 'rxjs';
 import { LicenseService } from '../../../../common/license';
@@ -21,14 +24,14 @@ import { createMockEndpointAppContextService } from '../../mocks';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-jest.mock('p-retry', () => {
-  const originalPRetry = jest.requireActual('p-retry');
-  return jest.fn().mockImplementation((fn, options) => {
+vi.mock('p-retry', () => {
+  const originalPRetry = require('p-retry');
+  return vi.fn().mockImplementation((fn, options) => {
     return originalPRetry(fn, options);
   });
 });
 
-const pRetryMock = jest.mocked(pRetry);
+const pRetryMock = vi.mocked(pRetry);
 
 const MockPackagePolicyWithEndpointPolicy = (
   cb?: (p: PolicyConfig) => PolicyConfig
@@ -46,7 +49,7 @@ const MockPackagePolicyWithEndpointPolicy = (
 
 describe('Policy-Changing license watcher', () => {
   let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
-  let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
+  let packagePolicySvcMock: Mocked<PackagePolicyClient>;
 
   const Enterprise = licenseMock.createLicense({
     license: { type: 'enterprise', mode: 'enterprise' },
@@ -58,7 +61,7 @@ describe('Policy-Changing license watcher', () => {
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
     packagePolicySvcMock = endpointServiceMock.getInternalFleetServices()
-      .packagePolicy as jest.Mocked<PackagePolicyClient>;
+      .packagePolicy as Mocked<PackagePolicyClient>;
   });
 
   it('is activated on license changes', () => {
@@ -68,7 +71,7 @@ describe('Policy-Changing license watcher', () => {
     const pw = new PolicyWatcher(endpointServiceMock);
 
     // swap out watch function, just to ensure it gets called when a license change happens
-    const mockWatch = jest.fn();
+    const mockWatch = vi.fn();
     pw.watch = mockWatch;
 
     // licenseService is watching our subject for incoming licenses
@@ -352,7 +355,7 @@ describe('Policy-Changing license watcher', () => {
     });
 
     it('logs retry attempts for package policy list failures', async () => {
-      const loggerSpy = jest.spyOn(endpointServiceMock.createLogger(), 'debug');
+      const loggerSpy = vi.spyOn(endpointServiceMock.createLogger(), 'debug');
 
       pRetryMock.mockImplementationOnce((fn: any, options: any) => {
         // simulate a failed attempt
@@ -383,7 +386,7 @@ describe('Policy-Changing license watcher', () => {
     });
 
     it('logs retry attempts for package policy update failures', async () => {
-      const loggerSpy = jest.spyOn(endpointServiceMock.createLogger(), 'debug');
+      const loggerSpy = vi.spyOn(endpointServiceMock.createLogger(), 'debug');
 
       pRetryMock.mockImplementation((fn: any, options: any) => {
         if (fn.name === 'bound list') {

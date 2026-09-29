@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -26,7 +28,7 @@ const DEFAULT_VALUES = {
 
 describe('ModelStarted', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(DEFAULT_VALUES);
   });
   it('renders dismiss button if it is set to dismissable', () => {

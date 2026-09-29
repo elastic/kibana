@@ -5,37 +5,40 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import { KubernetesAssetImage } from './kubernetes_asset_image';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useEuiTheme: jest.fn(),
+    useEuiTheme: vi.fn(),
   };
 });
 
-jest.mock('../../images/kubernetes_dashboards/ecs_light.svg', () => 'ecs-light-mock.svg', {
+vi.mock('../../images/kubernetes_dashboards/ecs_light.svg', () => 'ecs-light-mock.svg', {
   virtual: true,
 });
-jest.mock('../../images/kubernetes_dashboards/ecs_dark.svg', () => 'ecs-dark-mock.svg', {
+vi.mock('../../images/kubernetes_dashboards/ecs_dark.svg', () => 'ecs-dark-mock.svg', {
   virtual: true,
 });
-jest.mock('../../images/kubernetes_dashboards/semconv_light.svg', () => 'semconv-light-mock.svg', {
+vi.mock('../../images/kubernetes_dashboards/semconv_light.svg', () => 'semconv-light-mock.svg', {
   virtual: true,
 });
-jest.mock('../../images/kubernetes_dashboards/semconv_dark.svg', () => 'semconv-dark-mock.svg', {
+vi.mock('../../images/kubernetes_dashboards/semconv_dark.svg', () => 'semconv-dark-mock.svg', {
   virtual: true,
 });
 
-const useEuiThemeMock = useEuiTheme as jest.MockedFunction<typeof useEuiTheme>;
+const useEuiThemeMock = useEuiTheme as MockedFunction<typeof useEuiTheme>;
 
 describe('KubernetesAssetImage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('ECS type', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
@@ -55,9 +57,9 @@ describe('ManagementService', () => {
     // Setup phase:
     const setup = managementService.setup();
     const testSection = setup.register({ id: 'test-section', title: 'Test Section' });
-    testSection.registerApp({ id: 'test-app-1', title: 'Test App 1', mount: jest.fn() });
-    testSection.registerApp({ id: 'test-app-2', title: 'Test App 2', mount: jest.fn() });
-    testSection.registerApp({ id: 'test-app-3', title: 'Test App 3', mount: jest.fn() });
+    testSection.registerApp({ id: 'test-app-1', title: 'Test App 1', mount: vi.fn() });
+    testSection.registerApp({ id: 'test-app-2', title: 'Test App 2', mount: vi.fn() });
+    testSection.registerApp({ id: 'test-app-3', title: 'Test App 3', mount: vi.fn() });
 
     expect(testSection).not.toBeUndefined();
 

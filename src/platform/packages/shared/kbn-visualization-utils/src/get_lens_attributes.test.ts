@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getLensAttributesFromSuggestion } from './get_lens_attributes';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -17,7 +19,7 @@ describe('getLensAttributesFromSuggestion', () => {
     id: `index-pattern-with-timefield-id`,
     title: `index-pattern-with-timefield-title`,
     fields: [],
-    getFieldByName: jest.fn(),
+    getFieldByName: vi.fn(),
     timeFieldName: '@timestamp',
     isPersisted: () => false,
     toSpec: () => ({}),

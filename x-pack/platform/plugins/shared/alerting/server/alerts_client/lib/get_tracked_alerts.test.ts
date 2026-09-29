@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ALERT_INSTANCE_ID,
@@ -85,7 +87,7 @@ const makeHit = ({
 
 describe('get_tracked_alerts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('createEmptyTrackedAlerts', () => {
@@ -313,7 +315,7 @@ describe('get_tracked_alerts', () => {
 
   describe('getTrackedAlerts', () => {
     it('fetches tracked alerts via tracked field query', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         hits: [
           makeHit({
             uuid: 'uuid-1',
@@ -340,7 +342,7 @@ describe('get_tracked_alerts', () => {
     });
 
     it('fetches missing alerts by id when state has extra uuids', async () => {
-      const search = jest
+      const search = vi
         .fn()
         .mockResolvedValueOnce({
           hits: [
@@ -402,7 +404,7 @@ describe('get_tracked_alerts', () => {
     });
 
     it('does not fetch missing alerts when all state uuids are tracked', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         hits: [
           makeHit({
             uuid: 'uuid-1',
@@ -427,7 +429,7 @@ describe('get_tracked_alerts', () => {
     });
 
     it('handles empty state uuids', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         hits: [
           makeHit({
             uuid: 'uuid-1',
@@ -454,7 +456,7 @@ describe('get_tracked_alerts', () => {
     });
 
     it('handles no tracked alerts found with no state alerts', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         hits: [],
       });
 
@@ -474,7 +476,7 @@ describe('get_tracked_alerts', () => {
     });
 
     it('fetches missing alerts when no tracked alerts found but state has alerts', async () => {
-      const search = jest
+      const search = vi
         .fn()
         .mockResolvedValueOnce({
           hits: [],
@@ -508,7 +510,7 @@ describe('get_tracked_alerts', () => {
     });
 
     it('correctly passes query parameters for tracked alerts query', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         hits: [],
       });
 
@@ -536,7 +538,7 @@ describe('get_tracked_alerts', () => {
 
     it('logs error and returns partial results when fetchAlertsByIds fails', async () => {
       const searchError = new Error('search failure');
-      const search = jest
+      const search = vi
         .fn()
         .mockResolvedValueOnce({
           hits: [],
@@ -568,7 +570,7 @@ describe('get_tracked_alerts', () => {
     });
 
     it('handles multiple missing alerts', async () => {
-      const search = jest
+      const search = vi
         .fn()
         .mockResolvedValueOnce({
           hits: [],

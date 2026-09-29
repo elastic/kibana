@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { readFile } from 'fs/promises';
 import http, { type Server } from 'http';
 import path from 'path';
@@ -176,16 +178,16 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
 
     beforeEach(() => {
       originalNow = Date.now();
-      jest.useFakeTimers({
+      vi.useFakeTimers({
         // Keep timer primitives real so node-fetch / p-retry behave normally;
         // we only fake `Date` so TTL expiry can be driven from the test.
         doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate'],
       });
-      jest.setSystemTime(new Date(originalNow));
+      vi.setSystemTime(new Date(originalNow));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('keeps serving the cached catalog when the upstream becomes unreachable', async () => {
@@ -198,7 +200,7 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
 
       await localServer.close();
 
-      jest.setSystemTime(new Date(originalNow + TTL_MS + 1));
+      vi.setSystemTime(new Date(originalNow + TTL_MS + 1));
 
       const second = await fetcher.listTemplates();
       expect(second).toHaveLength(1);

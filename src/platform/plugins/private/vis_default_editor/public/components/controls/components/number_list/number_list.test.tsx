@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -15,20 +17,26 @@ import type { NumberListProps } from './number_list';
 import { NumberList } from './number_list';
 import { NumberRow } from './number_row';
 
-jest.mock('./number_row', () => ({
-  NumberRow: () => 'NumberRow',
-}));
+vi.mock('./number_row', () => {
+      const mocked = {
+      NumberRow: () => 'NumberRow',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  htmlIdGenerator: jest.fn(() => {
-    let counter = 1;
-    return () => `12${counter++}`;
-  }),
-  EuiSpacer: jest.requireActual('@elastic/eui').EuiSpacer,
-  EuiFlexItem: jest.requireActual('@elastic/eui').EuiFlexItem,
-  EuiButtonEmpty: jest.requireActual('@elastic/eui').EuiButtonEmpty,
-  EuiFormErrorText: jest.requireActual('@elastic/eui').EuiFormErrorText,
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      htmlIdGenerator: vi.fn(() => {
+        let counter = 1;
+        return () => `12${counter++}`;
+      }),
+      EuiSpacer: (await vi.importActual('@elastic/eui')).EuiSpacer,
+      EuiFlexItem: (await vi.importActual('@elastic/eui')).EuiFlexItem,
+      EuiButtonEmpty: (await vi.importActual('@elastic/eui')).EuiButtonEmpty,
+      EuiFormErrorText: (await vi.importActual('@elastic/eui')).EuiFormErrorText,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('NumberList', () => {
   let defaultProps: NumberListProps;
@@ -40,9 +48,9 @@ describe('NumberList', () => {
       range: '[1, 10]',
       showValidation: false,
       unitName: 'value',
-      onChange: jest.fn(),
-      setTouched: jest.fn(),
-      setValidity: jest.fn(),
+      onChange: vi.fn(),
+      setTouched: vi.fn(),
+      setValidity: vi.fn(),
     };
   });
 

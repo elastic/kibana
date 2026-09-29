@@ -7,24 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { isFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { generateScoutConfigManifest, updateScoutConfigManifests } from './manifests';
 import { playwrightCLI } from '../playwright/cli_wrapper';
 
-jest.mock('../playwright/cli_wrapper', () => ({
-  playwrightCLI: { test: jest.fn() },
-}));
+vi.mock('../playwright/cli_wrapper', () => {
+      const mocked = {
+      playwrightCLI: { test: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/scout-reporting', () => ({
-  testConfigs: { all: [], log: null },
-  testConfigManifests: { findPaths: jest.fn().mockReturnValue([]) },
-  getGitSHA1ForPath: jest.fn().mockResolvedValue('abc123'),
-  testableModules: { allIncludingConfigs: [] },
-}));
+vi.mock('@kbn/scout-reporting', () => {
+      const mocked = {
+      testConfigs: { all: [], log: null },
+      testConfigManifests: { findPaths: vi.fn().mockReturnValue([]) },
+      getGitSHA1ForPath: vi.fn().mockResolvedValue('abc123'),
+      testableModules: { allIncludingConfigs: [] },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('generateScoutConfigManifest', () => {
-  const playwrightTestMock = playwrightCLI.test as jest.Mock;
+  const playwrightTestMock = playwrightCLI.test as Mock;
   const configPath = 'x-pack/some/test/scout/api/playwright.config.ts';
 
   beforeEach(() => {
@@ -60,9 +69,9 @@ describe('generateScoutConfigManifest', () => {
   });
 });
 
-describe('updateScoutConfigManifests', () => {
-  const playwrightTestMock = playwrightCLI.test as jest.Mock;
-  const mockScoutReporting = jest.requireMock('@kbn/scout-reporting');
+describe('updateScoutConfigManifests', async () => {
+  const playwrightTestMock = playwrightCLI.test as Mock;
+  const mockScoutReporting = (await vi.importMock('@kbn/scout-reporting'));
 
   const configPath = 'x-pack/some/test/scout/api/playwright.config.ts';
   const mockConfig = {
@@ -77,11 +86,11 @@ describe('updateScoutConfigManifests', () => {
     mockScoutReporting.testConfigs.all = [mockConfig];
     mockScoutReporting.getGitSHA1ForPath.mockResolvedValue('abc123');
     log = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warning: jest.fn(),
-      error: jest.fn(),
-      write: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warning: vi.fn(),
+      error: vi.fn(),
+      write: vi.fn(),
     } as unknown as ToolingLog;
   });
 

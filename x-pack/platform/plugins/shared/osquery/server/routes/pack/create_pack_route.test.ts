@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -14,16 +17,22 @@ import { createPackRequestBodySchema } from '../../../common/api/packs/create_pa
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn(),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/get_user_info', () => ({
-  getUserInfo: jest.fn(),
-}));
+vi.mock('../../lib/get_user_info', () => {
+      const mocked = {
+      getUserInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const fetchAllItemsFromListMock = (listMock: jest.Mock) =>
-  jest.fn().mockImplementation(async () => {
+const fetchAllItemsFromListMock = (listMock: Mock) =>
+  vi.fn().mockImplementation(async () => {
     const { items = [] } = await listMock();
 
     return (async function* () {
@@ -75,11 +84,11 @@ describe('createPackRoute', () => {
   }: {
     agentPolicies: Array<{ id: string; name: string }>;
     packagePolicies: Array<Record<string, unknown>>;
-    packagePolicyUpdate: jest.Mock;
+    packagePolicyUpdate: Mock;
   }) => {
     const mockClient = {
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockImplementation((_type, attributes, options) =>
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockImplementation((_type, attributes, options) =>
         Promise.resolve({
           id: 'pack-id',
           attributes,
@@ -88,23 +97,23 @@ describe('createPackRoute', () => {
       ),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester', profile_uid: 'uid-1' });
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester', profile_uid: 'uid-1' });
 
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: packagePolicies });
+    const packagePolicyList = vi.fn().mockResolvedValue({ items: packagePolicies });
 
     const mockRouter = createMockRouter();
     mockOsqueryContext = {
-      logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+      logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
       security: {},
-      getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+      getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
       experimentalFeatures: { rruleScheduling: true },
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-        getAgentPolicyService: jest.fn().mockReturnValue({
-          getByIds: jest.fn().mockResolvedValue(agentPolicies),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+        getAgentPolicyService: vi.fn().mockReturnValue({
+          getByIds: vi.fn().mockResolvedValue(agentPolicies),
         }),
-        getPackagePolicyService: jest.fn().mockReturnValue({
+        getPackagePolicyService: vi.fn().mockReturnValue({
           list: packagePolicyList,
           fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
           update: packagePolicyUpdate,
@@ -125,12 +134,12 @@ describe('createPackRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Fleet package-policy write dedup', () => {
     it('a package policy shared by two agent policies is written exactly once', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       setupRoute({
         agentPolicies: [
           { id: 'agent-policy-a', name: 'agent-policy-a' },
@@ -174,7 +183,7 @@ describe('createPackRoute', () => {
     });
 
     it('two agent policies resolving to distinct package policies each get updated once', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       setupRoute({
         agentPolicies: [
           { id: 'agent-policy-a', name: 'agent-policy-a' },
@@ -206,7 +215,7 @@ describe('createPackRoute', () => {
     });
 
     it('1:1 agent-policy-to-package-policy targeting writes the same config as a single agent policy', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       setupRoute({
         agentPolicies: [{ id: 'agent-policy-a', name: 'agent-policy-a' }],
         packagePolicies: [
@@ -246,7 +255,7 @@ describe('createPackRoute', () => {
     });
 
     it('shared package policy with differing shards resolves deterministically (max rule)', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       setupRoute({
         agentPolicies: [
           { id: 'agent-policy-a', name: 'agent-policy-a' },
@@ -286,7 +295,7 @@ describe('createPackRoute', () => {
 
   describe('per-query interval convergence on create', () => {
     it('marker-less bare per-query interval is dropped when pack uses interval mode', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const { mockClient } = setupRoute({
         agentPolicies: [],
         packagePolicies: [],
@@ -322,7 +331,7 @@ describe('createPackRoute', () => {
     });
 
     it('explicit schedule_type: interval override is preserved on create', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const { mockClient } = setupRoute({
         agentPolicies: [],
         packagePolicies: [],
@@ -359,7 +368,7 @@ describe('createPackRoute', () => {
 
   describe('V5: pack-level execution defaults on create', () => {
     it('stores min_osquery_version and result_type on the SO when provided', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const { mockClient } = setupRoute({
         agentPolicies: [],
         packagePolicies: [],
@@ -391,7 +400,7 @@ describe('createPackRoute', () => {
     });
 
     it('omits min_osquery_version and result_type from SO when not provided (legacy shape)', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const { mockClient } = setupRoute({
         agentPolicies: [],
         packagePolicies: [],
@@ -419,7 +428,7 @@ describe('createPackRoute', () => {
     });
 
     it('surfaces min_osquery_version and result_type in response data', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       setupRoute({ agentPolicies: [], packagePolicies: [], packagePolicyUpdate });
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -447,7 +456,7 @@ describe('createPackRoute', () => {
     });
 
     it('per-query enabled: false is persisted to the SO', async () => {
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       const { mockClient } = setupRoute({
         agentPolicies: [],
         packagePolicies: [],

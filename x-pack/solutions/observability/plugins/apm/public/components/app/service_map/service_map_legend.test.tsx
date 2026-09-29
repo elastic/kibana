@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { css } from '@emotion/react';
@@ -13,28 +15,31 @@ import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
 const MOCK_DOCS_LINK = 'https://www.elastic.co/docs/apm/service-maps#service-maps-legend';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {
-      docLinks: {
-        links: {
-          apm: {
-            supportedServiceMaps: MOCK_DOCS_LINK,
-            supportedServiceMapsLegend: MOCK_DOCS_LINK,
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {
+          docLinks: {
+            links: {
+              apm: {
+                supportedServiceMaps: MOCK_DOCS_LINK,
+                supportedServiceMapsLegend: MOCK_DOCS_LINK,
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const controlIconCss = css`
   min-inline-size: 32px;

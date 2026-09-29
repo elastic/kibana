@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -321,7 +323,7 @@ describe('Create Default Policy tests ', () => {
     });
 
     it('should set meta.billable', async () => {
-      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+      const isBillablePolicySpy = vi.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
       const config = createEndpointConfig({ preset: 'DataCollection' });
 
       isBillablePolicySpy.mockReturnValue(false);
@@ -455,7 +457,7 @@ describe('Create Default Policy tests ', () => {
 
   describe('Device Control Removal', () => {
     it('should remove device control when endpointTrustedDevices product feature is disabled', async () => {
-      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      const removeDeviceControlSpy = vi.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
       productFeaturesService = createProductFeaturesServiceMock(
         ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_trusted_devices')
       );
@@ -467,7 +469,7 @@ describe('Create Default Policy tests ', () => {
     });
 
     it('should remove device control when trustedDevices experimental feature is disabled', async () => {
-      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      const removeDeviceControlSpy = vi.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
       const experimentalFeaturesWithTrustedDevicesDisabled = {
         trustedDevices: false,
       } as ExperimentalFeatures;
@@ -498,7 +500,7 @@ describe('Create Default Policy tests ', () => {
     });
 
     it('should remove device control when both endpointTrustedDevices product feature and experimental feature are disabled', async () => {
-      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      const removeDeviceControlSpy = vi.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
       productFeaturesService = createProductFeaturesServiceMock(
         ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_trusted_devices')
       );
@@ -532,7 +534,7 @@ describe('Create Default Policy tests ', () => {
     });
 
     it('should NOT remove device control when both endpointTrustedDevices product feature and trustedDevices experimental feature are enabled', async () => {
-      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      const removeDeviceControlSpy = vi.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
       // Both features are enabled by default in the test setup
 
       await createDefaultPolicyCallback();
@@ -776,7 +778,7 @@ describe('Create Default Policy tests ', () => {
       };
 
       it('should remove Linux DNS events from default policy', async () => {
-        const removeLinuxDnsEventsSpy = jest.spyOn(PolicyConfigHelpers, 'removeLinuxDnsEvents');
+        const removeLinuxDnsEventsSpy = vi.spyOn(PolicyConfigHelpers, 'removeLinuxDnsEvents');
         const defaultPolicy = policyFactory();
 
         const policy = await createDefaultPolicyWithFeature();
@@ -878,7 +880,7 @@ describe('Create Default Policy tests ', () => {
       };
 
       it('should NOT remove Linux DNS events from default policy', async () => {
-        const removeLinuxDnsEventsSpy = jest.spyOn(PolicyConfigHelpers, 'removeLinuxDnsEvents');
+        const removeLinuxDnsEventsSpy = vi.spyOn(PolicyConfigHelpers, 'removeLinuxDnsEvents');
         const defaultPolicy = policyFactory();
 
         const policy = await createDefaultPolicyWithFeature();

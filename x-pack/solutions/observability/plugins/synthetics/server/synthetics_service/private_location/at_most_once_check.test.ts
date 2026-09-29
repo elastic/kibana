@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { findAtMostOnceViolations } from './at_most_once_check';
 
 const esqlResponse = (values: Array<[string, number, string[]]>) => ({
@@ -21,7 +23,7 @@ const esqlResponse = (values: Array<[string, number, string[]]>) => ({
 });
 
 const mockEsClient = (response: unknown) => ({
-  esql: { query: jest.fn().mockResolvedValue(response) },
+  esql: { query: vi.fn().mockResolvedValue(response) },
 });
 
 describe('findAtMostOnceViolations', () => {

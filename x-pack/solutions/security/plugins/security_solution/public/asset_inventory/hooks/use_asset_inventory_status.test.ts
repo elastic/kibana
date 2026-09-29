@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { useAssetInventoryStatus } from './use_asset_inventory_status';
@@ -14,45 +16,60 @@ import { createTestProviderWrapper } from '../test/test_provider';
 const mockEntityStoreStatusQuery = {
   data: undefined as unknown,
   isLoading: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 };
-const mockUseUiSetting = jest.fn();
-const mockIsExperimentalFeatureEnabled = jest.fn();
-const mockFetchEntityStoreV2Privileges = jest.fn();
-const mockSearch = jest.fn();
-const mockPostInstallAssetInventoryDataView = jest.fn();
+const mockUseUiSetting = vi.fn();
+const mockIsExperimentalFeatureEnabled = vi.fn();
+const mockFetchEntityStoreV2Privileges = vi.fn();
+const mockSearch = vi.fn();
+const mockPostInstallAssetInventoryDataView = vi.fn();
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      data: {
-        search: { search: mockSearch },
-      },
-    },
-  }),
-  useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
-}));
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          data: {
+            search: { search: mockSearch },
+          },
+        },
+      }),
+      useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
-    mockIsExperimentalFeatureEnabled(...args),
-}));
+vi.mock('../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
+        mockIsExperimentalFeatureEnabled(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity_analytics/components/entity_store/hooks/use_entity_store', () => ({
-  useEntityStoreStatus: () => mockEntityStoreStatusQuery,
-}));
+vi.mock('../../entity_analytics/components/entity_store/hooks/use_entity_store', () => {
+      const mocked = {
+      useEntityStoreStatus: () => mockEntityStoreStatusQuery,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity_analytics/api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
-  }),
-}));
+vi.mock('../../entity_analytics/api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_asset_inventory_routes', () => ({
-  useAssetInventoryRoutes: () => ({
-    postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
-  }),
-}));
+vi.mock('./use_asset_inventory_routes', () => {
+      const mocked = {
+      useAssetInventoryRoutes: () => ({
+        postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory';
 
@@ -93,7 +110,7 @@ const renderStatusHook = () =>
 
 describe('useAssetInventoryStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setUiSettings({ assetInventory: true });
     mockIsExperimentalFeatureEnabled.mockReturnValue(true);
     setHasDocs(false);

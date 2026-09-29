@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { getIndexTemplate, createOrUpdateIndexTemplate } from './create_or_update_index_template';
@@ -80,7 +82,7 @@ describe('getIndexTemplate', () => {
   });
 
   it(`should create index template with given parameters in default namespace`, () => {
-    dataStreamAdapter.getIndexTemplateFields = jest.fn().mockReturnValue({
+    dataStreamAdapter.getIndexTemplateFields = vi.fn().mockReturnValue({
       index_patterns: ['.internal.alerts-test.alerts-default-*'],
       rollover_alias: '.alerts-test.alerts-default',
     });
@@ -105,7 +107,7 @@ describe('getIndexTemplate', () => {
   });
 
   it(`should create index template with given parameters in custom namespace`, () => {
-    dataStreamAdapter.getIndexTemplateFields = jest.fn().mockReturnValue({
+    dataStreamAdapter.getIndexTemplateFields = vi.fn().mockReturnValue({
       index_patterns: ['.internal.alerts-test.alerts-another-space-*'],
       rollover_alias: '.alerts-test.alerts-another-space',
     });
@@ -202,8 +204,8 @@ describe('createOrUpdateIndexTemplate', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
+    vi.resetAllMocks();
+    vi.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
   it(`should call esClient to put index template, stamped with a content hash`, async () => {

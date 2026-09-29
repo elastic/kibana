@@ -5,29 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SchemaSelector } from './schema_selector';
 
-const mockReportSchemaSelectorInteraction = jest.fn();
+const mockReportSchemaSelectorInteraction = vi.fn();
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      telemetry: {
-        reportSchemaSelectorInteraction: mockReportSchemaSelectorInteraction,
-      },
-    },
-  }),
-}));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          telemetry: {
+            reportSchemaSelectorInteraction: mockReportSchemaSelectorInteraction,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderSelector = (
   props: Partial<React.ComponentProps<typeof SchemaSelector>> &
     Pick<React.ComponentProps<typeof SchemaSelector>, 'value' | 'schemas'>
 ) => {
-  const onChange = props.onChange ?? jest.fn();
+  const onChange = props.onChange ?? vi.fn();
   return render(
     <EuiProvider>
       <I18nProvider>
@@ -45,11 +50,11 @@ const renderSelector = (
 
 describe('SchemaSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the invalid token when preferredSchema is missing from available schemas', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderSelector({ value: 'semconv', schemas: ['ecs'], onChange });
 
     expect(screen.getByTestId('infraSchemaSelectorInvalidToken')).toBeInTheDocument();

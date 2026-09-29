@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -18,11 +20,11 @@ const ref = { id: 'doc-1', index: '.ds-logs-nginx-2024.01.01-000001' };
 const setup = (response: IKibanaSearchResponse) => {
   const services = createDiscoverServicesMock();
 
-  jest.mocked(services.data.search.search).mockImplementation(() => of(response));
+  vi.mocked(services.data.search.search).mockImplementation(() => of(response));
 
   return {
     data: services.data,
-    getSearchParams: () => jest.mocked(services.data.search.search).mock.calls[0][0],
+    getSearchParams: () => vi.mocked(services.data.search.search).mock.calls[0][0],
   };
 };
 

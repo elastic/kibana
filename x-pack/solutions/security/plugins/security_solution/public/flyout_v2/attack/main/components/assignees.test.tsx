@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -28,49 +31,55 @@ import {
 import { ATTACK_ASSIGNEE_ACTION_IDS } from '../../../../common/constants/action_ids';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-jest.mock(
+vi.mock(
   '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items'
 );
-jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
-jest.mock('../../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges');
-jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../../common/hooks/use_upselling');
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
-  useBulkGetUserProfiles: ({ uids }: { uids: Set<string> }) => ({
-    data:
-      uids.size > 0
-        ? [
-            {
-              uid: 'uid-1',
-              enabled: true,
-              user: { username: 'user1', full_name: 'User 1' },
-              data: {},
-            },
-          ]
-        : undefined,
-  }),
-}));
-jest.mock('../../../../common/components/empty_value', () => ({
-  getEmptyTagValue: () => '—',
-}));
+vi.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
+vi.mock('../../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges');
+vi.mock('../../../../common/hooks/use_license');
+vi.mock('../../../../common/hooks/use_upselling');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
+      const mocked = {
+      useBulkGetUserProfiles: ({ uids }: { uids: Set<string> }) => ({
+        data:
+          uids.size > 0
+            ? [
+                {
+                  uid: 'uid-1',
+                  enabled: true,
+                  user: { username: 'user1', full_name: 'User 1' },
+                  data: {},
+                },
+              ]
+            : undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/empty_value', () => {
+      const mocked = {
+      getEmptyTagValue: () => '—',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUseAttackAssigneesContextMenuItems =
-  useAttackAssigneesContextMenuItems as jest.MockedFunction<
+  useAttackAssigneesContextMenuItems as MockedFunction<
     typeof useAttackAssigneesContextMenuItems
   >;
 const mockUseInvalidateFindAttackDiscoveries =
-  useInvalidateFindAttackDiscoveries as jest.MockedFunction<
+  useInvalidateFindAttackDiscoveries as MockedFunction<
     typeof useInvalidateFindAttackDiscoveries
   >;
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
-const mockUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
-const mockUseUpsellingMessage = useUpsellingMessage as jest.MockedFunction<
+const mockUseLicense = useLicense as MockedFunction<typeof useLicense>;
+const mockUseUpsellingMessage = useUpsellingMessage as MockedFunction<
   typeof useUpsellingMessage
 >;
 
-const mockInvalidateFindAttackDiscoveries = jest.fn();
+const mockInvalidateFindAttackDiscoveries = vi.fn();
 
 const defaultMenuItems = {
   items: [
@@ -84,7 +93,7 @@ const defaultMenuItems = {
       key: ATTACK_ASSIGNEE_ACTION_IDS.unassignAll,
       'data-test-subj': 'remove-attack-assignees-menu-item',
       name: 'Remove all assignees',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     },
   ],
   panels: [{ id: 2, title: 'Assignees', content: <div data-test-subj="assignees-panel" /> }],
@@ -106,7 +115,7 @@ const buildHit = (
     },
   } as unknown as DataTableRecord);
 
-const renderAssignees = (hit = buildHit(), onAttackUpdated = jest.fn()) =>
+const renderAssignees = (hit = buildHit(), onAttackUpdated = vi.fn()) =>
   render(
     <TestProviders>
       <Assignees hit={hit} onAttackUpdated={onAttackUpdated} />
@@ -115,7 +124,7 @@ const renderAssignees = (hit = buildHit(), onAttackUpdated = jest.fn()) =>
 
 describe('<Assignees /> (v2)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAttackAssigneesContextMenuItems.mockReturnValue(defaultMenuItems);
     mockUseInvalidateFindAttackDiscoveries.mockReturnValue(mockInvalidateFindAttackDiscoveries);
     mockUseAttacksPrivileges.mockReturnValue({
@@ -165,7 +174,7 @@ describe('<Assignees /> (v2)', () => {
   });
 
   it('onSuccess calls onAttackUpdated and invalidateFindAttackDiscoveries', () => {
-    const onAttackUpdated = jest.fn();
+    const onAttackUpdated = vi.fn();
     let capturedOnSuccess: (() => void) | undefined;
     mockUseAttackAssigneesContextMenuItems.mockImplementation((args) => {
       capturedOnSuccess = args.onSuccess;

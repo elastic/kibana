@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ServiceAccountsServiceContract } from '@kbn/core-security-server';
 import { WorkloadTypeRegistry } from '../workload_type_registry';
@@ -15,17 +18,17 @@ import { createPluginScopedServiceAccounts } from './plugin_scoped_service_accou
 const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
 const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
 
-const createDelegate = (): jest.Mocked<ServiceAccountsServiceContract> => ({
-  isEnabled: jest.fn().mockReturnValue(true),
-  create: jest.fn(),
-  bindWorkload: jest.fn(),
-  unbindWorkload: jest.fn(),
-  getWorkloadBinding: jest.fn(),
-  withScopedRequestForWorkload: jest.fn(),
+const createDelegate = (): Mocked<ServiceAccountsServiceContract> => ({
+  isEnabled: vi.fn().mockReturnValue(true),
+  create: vi.fn(),
+  bindWorkload: vi.fn(),
+  unbindWorkload: vi.fn(),
+  getWorkloadBinding: vi.fn(),
+  withScopedRequestForWorkload: vi.fn(),
 });
 
 describe('createPluginScopedServiceAccounts', () => {
-  let delegate: jest.Mocked<ServiceAccountsServiceContract>;
+  let delegate: Mocked<ServiceAccountsServiceContract>;
   let workloadTypes: WorkloadTypeRegistry;
 
   beforeEach(() => {
@@ -81,7 +84,7 @@ describe('createPluginScopedServiceAccounts', () => {
     });
 
     it('runs a scoped request with the plugin id first', async () => {
-      const fn = jest.fn();
+      const fn = vi.fn();
       delegate.withScopedRequestForWorkload.mockResolvedValue('result');
 
       await expect(
@@ -122,7 +125,7 @@ describe('createPluginScopedServiceAccounts', () => {
       [
         'withScopedRequestForWorkload',
         (scoped: ReturnType<typeof scopedTo>) =>
-          scoped.withScopedRequestForWorkload({ ...unregistered, spaceId: 'default' }, jest.fn()),
+          scoped.withScopedRequestForWorkload({ ...unregistered, spaceId: 'default' }, vi.fn()),
       ],
     ])('%s rejects without reaching the delegate', async (_name, call) => {
       await expect(call(scopedTo('alerting'))).rejects.toThrow(expectedMessage);
@@ -162,7 +165,7 @@ describe('createPluginScopedServiceAccounts', () => {
         [
           'withScopedRequestForWorkload',
           (scoped: ReturnType<typeof scopedTo>) =>
-            scoped.withScopedRequestForWorkload({ ...WORKLOAD_IN_SPACE, workloadId }, jest.fn()),
+            scoped.withScopedRequestForWorkload({ ...WORKLOAD_IN_SPACE, workloadId }, vi.fn()),
         ],
       ] as const;
 

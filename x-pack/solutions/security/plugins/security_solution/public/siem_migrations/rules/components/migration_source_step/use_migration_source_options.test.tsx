@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useMigrationSourceOptions } from './use_migration_source_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { MigrationSource } from '../../../common/types';
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockExperimentalFeature = (
   flags: Partial<Record<'qradarRulesMigration' | 'sentinelRulesMigration', boolean>>
 ) => {
-  (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+  (useIsExperimentalFeatureEnabled as Mock).mockImplementation(
     (feature: 'qradarRulesMigration' | 'sentinelRulesMigration') => flags[feature] ?? false
   );
 };

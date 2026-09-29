@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -35,8 +37,8 @@ const makeSection = (
   isFetching: false,
   isPreviousData: false,
   error: null,
-  fetchNextPage: jest.fn(),
-  refetch: jest.fn(),
+  fetchNextPage: vi.fn(),
+  refetch: vi.fn(),
   ...overrides,
 });
 

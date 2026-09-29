@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { type SavedObjectSanitizedDoc } from '@kbn/core-saved-objects-server';
@@ -50,7 +52,7 @@ describe('Saved Objects type validation helper', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('validation helper', () => {

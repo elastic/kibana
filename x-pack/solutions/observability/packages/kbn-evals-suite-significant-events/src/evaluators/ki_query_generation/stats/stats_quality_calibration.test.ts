@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import { createStatsQualityCalibrationEvaluator } from './stats_quality_calibration';
 import type { KIQueryGenerationEvaluationExample, KIQueryGenerationOutput } from '../types';
 
 const createMockCriteriaFn = () => {
-  const innerEvaluate = jest.fn().mockResolvedValue({ score: 0.8, explanation: 'LLM result' });
+  const innerEvaluate = vi.fn().mockResolvedValue({ score: 0.8, explanation: 'LLM result' });
 
-  const criteriaFn = jest.fn(
+  const criteriaFn = vi.fn(
     (_criteria: EvaluationCriterion[]) =>
       ({
         name: 'mock_criteria',

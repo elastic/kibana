@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MigrationReadyPanel } from './migration_ready_panel';
@@ -17,11 +20,11 @@ import { useStartMigration } from '../../logic/use_start_migration';
 import { MigrationDataInputContextProvider } from '../../../common/components';
 import { MigrationSource } from '../../../common/types';
 
-jest.mock('../../../../common/lib/kibana/use_kibana');
+vi.mock('../../../../common/lib/kibana/use_kibana');
 
-jest.mock('../../logic/use_start_migration');
-const useStartMigrationMock = useStartMigration as jest.Mock;
-const mockStartMigration = jest.fn();
+vi.mock('../../logic/use_start_migration');
+const useStartMigrationMock = useStartMigration as Mock;
+const mockStartMigration = vi.fn();
 
 const mockMigrationStateWithError: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.READY,
@@ -67,16 +70,16 @@ const missingLookup: SiemMigrationResourceBase = {
   name: 'lookup1',
 };
 
-jest.mock('../../../common/hooks/use_get_missing_resources');
-const useGetMissingResourcesMock = useGetMissingResources as jest.Mock;
+vi.mock('../../../common/hooks/use_get_missing_resources');
+const useGetMissingResourcesMock = useGetMissingResources as Mock;
 
 const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
   return render(<MigrationReadyPanel migrationStats={migrationStats} />, {
     wrapper: ({ children }) => (
       <TestProviders>
         <MigrationDataInputContextProvider
-          openFlyout={jest.fn()}
-          closeFlyout={jest.fn()}
+          openFlyout={vi.fn()}
+          closeFlyout={vi.fn()}
           isFlyoutOpen={false}
         >
           {children}
@@ -89,7 +92,7 @@ const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
 describe('MigrationReadyPanel', () => {
   beforeEach(() => {
     useGetMissingResourcesMock.mockReturnValue({
-      getMissingResources: jest.fn().mockResolvedValue([]),
+      getMissingResources: vi.fn().mockResolvedValue([]),
       isLoading: false,
     });
 
@@ -124,8 +127,8 @@ describe('MigrationReadyPanel', () => {
         wrapper: ({ children }) => (
           <TestProviders>
             <MigrationDataInputContextProvider
-              openFlyout={jest.fn()}
-              closeFlyout={jest.fn()}
+              openFlyout={vi.fn()}
+              closeFlyout={vi.fn()}
               isFlyoutOpen={false}
             >
               {children}
@@ -171,7 +174,7 @@ describe('MigrationReadyPanel', () => {
 
   describe('Missing Resources', () => {
     const missingResources = [missingMacro, missingLookup];
-    const mockGetMissingResources = jest.fn();
+    const mockGetMissingResources = vi.fn();
 
     beforeEach(() => {
       mockGetMissingResources.mockReset();

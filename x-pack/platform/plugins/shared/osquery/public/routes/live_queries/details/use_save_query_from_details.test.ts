@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
@@ -12,12 +15,15 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
 import { useSaveQueryFromDetails } from './use_save_query_from_details';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_error_toast', () => ({
-  useErrorToast: () => jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/use_error_toast', () => {
+      const mocked = {
+      useErrorToast: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -47,12 +53,12 @@ const createMockData = (overrides: Partial<LiveQueryDetailsItem> = {}): LiveQuer
 });
 
 describe('useSaveQueryFromDetails', () => {
-  let mockHttp: { get: jest.Mock };
+  let mockHttp: { get: Mock };
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHttp = { get: jest.fn() };
+    vi.clearAllMocks();
+    mockHttp = { get: vi.fn() };
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => null, warn: () => null, error: () => null },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, renderHook, waitFor } from '@testing-library/react';
 import type React from 'react';
 import { useCheckResourcesStep } from '.';
@@ -13,19 +16,19 @@ import { useGetMissingResources } from '../../../../../../../common/hooks/use_ge
 import { getRuleMigrationStatsMock } from '../../../../../../__mocks__';
 import { MigrationSource } from '../../../../../../../common/types';
 
-jest.mock('../../../../../../../common/hooks/use_get_missing_resources');
+vi.mock('../../../../../../../common/hooks/use_get_missing_resources');
 
-const mockUseGetMissingResources = useGetMissingResources as jest.Mock;
+const mockUseGetMissingResources = useGetMissingResources as Mock;
 
 const mockMigrationStats = getRuleMigrationStatsMock({ id: 'test-id' });
 
 describe('useCheckResourcesStep', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns step props with "current" status and calls getMissingResources', async () => {
-    const getMissingResources = jest.fn();
+    const getMissingResources = vi.fn();
     mockUseGetMissingResources.mockReturnValue({
       getMissingResources,
       isLoading: false,
@@ -37,7 +40,7 @@ describe('useCheckResourcesStep', () => {
         useCheckResourcesStep({
           status: 'current',
           migrationStats: mockMigrationStats,
-          onMissingResourcesFetched: jest.fn(),
+          onMissingResourcesFetched: vi.fn(),
         }),
       { wrapper: TestProviders }
     );
@@ -57,7 +60,7 @@ describe('useCheckResourcesStep', () => {
 
   it('returns step props with "loading" status', () => {
     mockUseGetMissingResources.mockReturnValue({
-      getMissingResources: jest.fn(),
+      getMissingResources: vi.fn(),
       isLoading: true,
       error: null,
     });
@@ -67,7 +70,7 @@ describe('useCheckResourcesStep', () => {
         useCheckResourcesStep({
           status: 'current',
           migrationStats: mockMigrationStats,
-          onMissingResourcesFetched: jest.fn(),
+          onMissingResourcesFetched: vi.fn(),
         }),
       { wrapper: TestProviders }
     );
@@ -77,7 +80,7 @@ describe('useCheckResourcesStep', () => {
 
   it('returns step props with "danger" status on error', () => {
     mockUseGetMissingResources.mockReturnValue({
-      getMissingResources: jest.fn(),
+      getMissingResources: vi.fn(),
       isLoading: false,
       error: new Error('test error'),
     });
@@ -87,7 +90,7 @@ describe('useCheckResourcesStep', () => {
         useCheckResourcesStep({
           status: 'current',
           migrationStats: mockMigrationStats,
-          onMissingResourcesFetched: jest.fn(),
+          onMissingResourcesFetched: vi.fn(),
         }),
       { wrapper: TestProviders }
     );
@@ -96,7 +99,7 @@ describe('useCheckResourcesStep', () => {
   });
 
   it('does not call getMissingResources when status is not "current"', () => {
-    const getMissingResources = jest.fn();
+    const getMissingResources = vi.fn();
     mockUseGetMissingResources.mockReturnValue({
       getMissingResources,
       isLoading: false,
@@ -108,7 +111,7 @@ describe('useCheckResourcesStep', () => {
         useCheckResourcesStep({
           status: 'incomplete',
           migrationStats: mockMigrationStats,
-          onMissingResourcesFetched: jest.fn(),
+          onMissingResourcesFetched: vi.fn(),
         }),
       { wrapper: TestProviders }
     );
@@ -135,7 +138,7 @@ describe('useCheckResourcesStep', () => {
   ])(
     'returns check resources copy for %s',
     (migrationSource, expectedTitle, expectedDescription) => {
-      const getMissingResources = jest.fn();
+      const getMissingResources = vi.fn();
       mockUseGetMissingResources.mockReturnValue({
         getMissingResources,
         isLoading: false,
@@ -147,7 +150,7 @@ describe('useCheckResourcesStep', () => {
           useCheckResourcesStep({
             status: 'incomplete',
             migrationStats: mockMigrationStats,
-            onMissingResourcesFetched: jest.fn(),
+            onMissingResourcesFetched: vi.fn(),
             migrationSource,
           }),
         { wrapper: TestProviders }

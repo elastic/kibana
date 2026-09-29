@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { tagKibanaAssets } from './tag_assets';
 
 describe('tagKibanaAssets', () => {
   const savedObjectTagAssignmentService = {
-    updateTagAssignments: jest.fn(),
+    updateTagAssignments: vi.fn(),
   } as any;
   const savedObjectTagClient = {
-    get: jest.fn(),
-    create: jest.fn(),
+    get: vi.fn(),
+    create: vi.fn(),
   } as any;
 
   const FOO_TAG_ID = 'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default';

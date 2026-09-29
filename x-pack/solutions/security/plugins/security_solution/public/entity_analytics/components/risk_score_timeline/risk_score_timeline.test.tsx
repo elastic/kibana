@@ -5,27 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { RiskScoreTimeline } from './risk_score_timeline';
 
-const mockSettings = jest.fn();
-const mockLineSeries = jest.fn();
-const mockLineAnnotation = jest.fn();
-const mockSuperDatePicker = jest.fn();
+const mockSettings = vi.fn();
+const mockLineSeries = vi.fn();
+const mockLineAnnotation = vi.fn();
+const mockSuperDatePicker = vi.fn();
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiSuperDatePicker: (props: Record<string, unknown>) => {
-    mockSuperDatePicker(props);
-    return <div data-test-subj="riskScoreTimeline-RangeSelect" />;
-  },
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiSuperDatePicker: (props: Record<string, unknown>) => {
+        mockSuperDatePicker(props);
+        return <div data-test-subj="riskScoreTimeline-RangeSelect" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const original = require('@elastic/charts');
   return {
     ...original,
     Chart: ({ children }: { children: React.ReactNode }) => (
@@ -47,10 +52,13 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-const mockUseRiskScoreHistory = jest.fn();
-jest.mock('../../api/hooks/use_risk_score_history', () => ({
-  useRiskScoreHistory: (params: unknown) => mockUseRiskScoreHistory(params),
-}));
+const mockUseRiskScoreHistory = vi.fn();
+vi.mock('../../api/hooks/use_risk_score_history', () => {
+      const mocked = {
+      useRiskScoreHistory: (params: unknown) => mockUseRiskScoreHistory(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const entries = [
   {
@@ -75,8 +83,8 @@ const defaultProps = {
   entityId: 'user:test-id',
   from: 'now-90d',
   to: 'now',
-  onPointSelect: jest.fn(),
-  onRangeChange: jest.fn(),
+  onPointSelect: vi.fn(),
+  onRangeChange: vi.fn(),
 };
 
 const renderTimeline = (props: Partial<React.ComponentProps<typeof RiskScoreTimeline>> = {}) =>
@@ -88,7 +96,7 @@ const renderTimeline = (props: Partial<React.ComponentProps<typeof RiskScoreTime
 
 describe('RiskScoreTimeline', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseRiskScoreHistory.mockReturnValue({
       data: { entity_id: 'user:test-id', entity_type: 'user', interval: '1d', entries },
       isLoading: false,
@@ -146,7 +154,7 @@ describe('RiskScoreTimeline', () => {
   });
 
   it('selects the nearest entry timestamp on projection click', () => {
-    const onPointSelect = jest.fn();
+    const onPointSelect = vi.fn();
     renderTimeline({ onPointSelect });
 
     const { onProjectionClick } = mockSettings.mock.calls[0][0];
@@ -157,7 +165,7 @@ describe('RiskScoreTimeline', () => {
   });
 
   it('clears the selection when the selected point is clicked again', () => {
-    const onPointSelect = jest.fn();
+    const onPointSelect = vi.fn();
     renderTimeline({ onPointSelect, selectedTimestamp: '2026-01-10T00:00:00.000Z' });
 
     const { onProjectionClick } = mockSettings.mock.calls[0][0];
@@ -167,7 +175,7 @@ describe('RiskScoreTimeline', () => {
   });
 
   it('ignores projection clicks without an x value', () => {
-    const onPointSelect = jest.fn();
+    const onPointSelect = vi.fn();
     renderTimeline({ onPointSelect });
 
     const { onProjectionClick } = mockSettings.mock.calls[0][0];
@@ -214,7 +222,7 @@ describe('RiskScoreTimeline', () => {
   });
 
   it('propagates a valid range change through onTimeChange', () => {
-    const onRangeChange = jest.fn();
+    const onRangeChange = vi.fn();
     renderTimeline({ onRangeChange });
 
     const { onTimeChange } = mockSuperDatePicker.mock.calls[0][0];
@@ -226,7 +234,7 @@ describe('RiskScoreTimeline', () => {
   });
 
   it('ignores invalid range changes', () => {
-    const onRangeChange = jest.fn();
+    const onRangeChange = vi.fn();
     renderTimeline({ onRangeChange });
 
     const { onTimeChange } = mockSuperDatePicker.mock.calls[0][0];

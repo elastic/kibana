@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -16,14 +19,17 @@ import { useConnectors } from '../../hooks/use_connectors';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
-jest.mock('../../hooks/use_connectors');
-jest.mock('../../hooks/use_registered_features');
-jest.mock('./add_model_popover', () => ({
-  AddModelPopover: () => <button type="button">Add</button>,
-}));
+vi.mock('../../hooks/use_connectors');
+vi.mock('../../hooks/use_registered_features');
+vi.mock('./add_model_popover', () => {
+      const mocked = {
+      AddModelPopover: () => <button type="button">Add</button>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConnectors = useConnectors as jest.Mock;
-const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
+const mockUseConnectors = useConnectors as Mock;
+const mockUseRegisteredFeatures = useRegisteredFeatures as Mock;
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const queryClient = new QueryClient();
@@ -86,7 +92,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           parentName="Parent"
           parentDescription="desc"
           features={[makeFeatureItem(regularFeature)]}
-          onEndpointsChange={jest.fn()}
+          onEndpointsChange={vi.fn()}
           invalidEndpointIds={new Set()}
           deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"
@@ -104,7 +110,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           parentName="Parent"
           parentDescription="desc"
           features={[makeFeatureItem(optOutFeature)]}
-          onEndpointsChange={jest.fn()}
+          onEndpointsChange={vi.fn()}
           invalidEndpointIds={new Set()}
           deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"
@@ -122,7 +128,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           parentName="Parent"
           parentDescription="desc"
           features={[makeFeatureItem(regularFeature), makeFeatureItem(optOutFeature)]}
-          onEndpointsChange={jest.fn()}
+          onEndpointsChange={vi.fn()}
           invalidEndpointIds={new Set()}
           deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"

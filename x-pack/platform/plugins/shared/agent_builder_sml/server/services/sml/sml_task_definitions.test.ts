@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   TaskManagerSetupContract,
@@ -22,39 +25,39 @@ import {
 const mockEsClient = {};
 const mockSoRepository = {};
 
-const mockUiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
-const mockUiSettings = { asScopedToClient: jest.fn().mockReturnValue(mockUiSettingsClient) };
+const mockUiSettingsClient = { get: vi.fn().mockResolvedValue(true) };
+const mockUiSettings = { asScopedToClient: vi.fn().mockReturnValue(mockUiSettingsClient) };
 
-const mockCrawler = { crawl: jest.fn().mockResolvedValue(undefined) };
+const mockCrawler = { crawl: vi.fn().mockResolvedValue(undefined) };
 const mockSmlService = {
-  getCrawler: jest.fn().mockReturnValue(mockCrawler),
-  getTypeDefinition: jest.fn(),
-  listTypeDefinitions: jest.fn().mockReturnValue([]),
-  search: jest.fn(),
-  checkItemsAccess: jest.fn(),
-  indexAttachment: jest.fn(),
-  getDocuments: jest.fn(),
+  getCrawler: vi.fn().mockReturnValue(mockCrawler),
+  getTypeDefinition: vi.fn(),
+  listTypeDefinitions: vi.fn().mockReturnValue([]),
+  search: vi.fn(),
+  checkItemsAccess: vi.fn(),
+  indexAttachment: vi.fn(),
+  getDocuments: vi.fn(),
 };
 const mockLogger = loggerMock.create();
-(mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
-const mockGetCrawlerDeps = jest.fn().mockResolvedValue({
+(mockLogger.get as Mock).mockReturnValue(mockLogger);
+const mockGetCrawlerDeps = vi.fn().mockResolvedValue({
   smlService: mockSmlService,
   elasticsearch: { client: { asInternalUser: mockEsClient } },
-  savedObjects: { createInternalRepository: jest.fn().mockReturnValue(mockSoRepository) },
+  savedObjects: { createInternalRepository: vi.fn().mockReturnValue(mockSoRepository) },
   uiSettings: mockUiSettings,
   logger: mockLogger,
 });
 
 const mockTaskManager = {
-  registerTaskDefinitions: jest.fn(),
-  ensureScheduled: jest.fn().mockResolvedValue(undefined),
+  registerTaskDefinitions: vi.fn(),
+  ensureScheduled: vi.fn().mockResolvedValue(undefined),
 };
 
 const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTypeDefinition => ({
   id: 'visualization',
-  list: jest.fn(),
-  getSmlEntry: jest.fn(),
-  toAttachment: jest.fn(),
+  list: vi.fn(),
+  getSmlEntry: vi.fn(),
+  toAttachment: vi.fn(),
   ...overrides,
 });
 
@@ -77,12 +80,12 @@ function getRegisteredTaskRunner(params: { attachmentType?: string }) {
 
 describe('sml_task_definitions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUiSettingsClient.get.mockResolvedValue(true);
     mockGetCrawlerDeps.mockResolvedValue({
       smlService: mockSmlService,
       elasticsearch: { client: { asInternalUser: mockEsClient } },
-      savedObjects: { createInternalRepository: jest.fn().mockReturnValue(mockSoRepository) },
+      savedObjects: { createInternalRepository: vi.fn().mockReturnValue(mockSoRepository) },
       uiSettings: mockUiSettings,
       logger: mockLogger,
     });
@@ -180,7 +183,7 @@ describe('sml_task_definitions', () => {
     });
 
     it('creates the internal repository using only the hidden types the definition declares', async () => {
-      const mockCreateInternalRepository = jest.fn().mockReturnValue({});
+      const mockCreateInternalRepository = vi.fn().mockReturnValue({});
       mockGetCrawlerDeps.mockResolvedValue({
         smlService: mockSmlService,
         elasticsearch: { client: { asInternalUser: mockEsClient } },

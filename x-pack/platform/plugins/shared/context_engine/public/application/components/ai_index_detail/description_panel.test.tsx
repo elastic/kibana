@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -55,7 +57,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel
         isLoading={false}
         aiIndex={{ ...aiIndex, description: 'My custom description' }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />
     );
@@ -66,7 +68,7 @@ describe('DescriptionPanel', () => {
 
   it('renders the empty fallback when no description is provided', () => {
     renderWithProviders(
-      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged={false} />
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
@@ -75,7 +77,7 @@ describe('DescriptionPanel', () => {
 
   it('renders read-only empty fallback for managed AI indexes', () => {
     renderWithProviders(
-      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged />
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
@@ -84,7 +86,7 @@ describe('DescriptionPanel', () => {
 
   it('does not render the edit button while loading', () => {
     renderWithProviders(
-      <DescriptionPanel isLoading aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+      <DescriptionPanel isLoading aiIndex={aiIndex} onSaved={vi.fn()} isManaged={false} />
     );
 
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
@@ -95,7 +97,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel
         isLoading
         aiIndex={{ ...aiIndex, description: 'My custom description' }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />
     );
@@ -109,7 +111,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel
         isLoading={false}
         aiIndex={{ ...aiIndex, description: 'My custom description' }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />
     );
@@ -121,14 +123,14 @@ describe('DescriptionPanel', () => {
 
   it('hides the edit button for managed AI indexes', () => {
     renderWithProviders(
-      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged />
     );
 
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
   });
 
   it('saves the edited description, exits edit mode, and calls onSaved', async () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
 
@@ -168,7 +170,7 @@ describe('DescriptionPanel', () => {
   });
 
   it('keeps the editor open and does not call onSaved when the save fails', async () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockRejectedValue(new Error('save failed'));
 
@@ -203,7 +205,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel
         isLoading={false}
         aiIndex={{ ...aiIndex, description: 'My custom description' }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />,
       testServices
@@ -225,7 +227,7 @@ describe('DescriptionPanel', () => {
 
   it('shows a warning when the description is within 5% of the max length', () => {
     renderWithProviders(
-      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged={false} />
     );
 
     fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
@@ -239,7 +241,7 @@ describe('DescriptionPanel', () => {
 
   it('shows an error and disables Save when the description exceeds the max length', () => {
     renderWithProviders(
-      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged={false} />
     );
 
     fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
@@ -259,7 +261,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel
         isLoading={false}
         aiIndex={{ ...aiIndex, description: 'My custom description' }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />,
       testServices

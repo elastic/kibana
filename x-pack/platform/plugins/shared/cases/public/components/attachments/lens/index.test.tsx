@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { Suspense } from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common';
@@ -20,7 +22,7 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import { allCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 
 describe('getVisualizationAttachmentType', () => {
-  const mockEmbeddableComponent = jest
+  const mockEmbeddableComponent = vi
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
 
@@ -46,8 +48,8 @@ describe('getVisualizationAttachmentType', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(KibanaServices, 'get').mockReturnValue({
+    vi.clearAllMocks();
+    vi.spyOn(KibanaServices, 'get').mockReturnValue({
       lens: { canUseEditor: () => true },
     } as unknown as ReturnType<typeof KibanaServices.get>);
   });
@@ -165,7 +167,7 @@ describe('getVisualizationAttachmentType', () => {
     });
 
     it('getActions omits the open-in-lens action without lens editor permission', () => {
-      jest.spyOn(KibanaServices, 'get').mockReturnValue({
+      vi.spyOn(KibanaServices, 'get').mockReturnValue({
         lens: { canUseEditor: () => false },
       } as unknown as ReturnType<typeof KibanaServices.get>);
 

@@ -5,31 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useConditionalRequest } from '../../../../../hooks';
 
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  useConditionalRequest: jest.fn().mockReturnValue({
-    data: null,
-    error: null,
-    isLoading: false,
-    sendRequest: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      useConditionalRequest: vi.fn().mockReturnValue({
+        data: null,
+        error: null,
+        isLoading: false,
+        sendRequest: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePackagePoliciesWithAgentPolicy', () => {
   beforeEach(() => {
-    jest.mocked(useConditionalRequest).mockClear();
+    vi.mocked(useConditionalRequest).mockClear();
   });
 
   it('sends the package-policy list request by default', () => {
     renderHook(() => usePackagePoliciesWithAgentPolicy({ page: 1, perPage: 10, kuery: 'foo' }));
 
-    expect(jest.mocked(useConditionalRequest)).toHaveBeenCalledWith(
+    expect(vi.mocked(useConditionalRequest)).toHaveBeenCalledWith(
       expect.objectContaining({
         method: 'get',
         query: { page: 1, perPage: 10, kuery: 'foo' },
@@ -44,7 +49,7 @@ describe('usePackagePoliciesWithAgentPolicy', () => {
     );
 
     // Both the package-policy list request and the bulk agent-policy request are skipped.
-    for (const [config] of jest.mocked(useConditionalRequest).mock.calls) {
+    for (const [config] of vi.mocked(useConditionalRequest).mock.calls) {
       expect(config.shouldSendRequest).toBe(false);
     }
   });

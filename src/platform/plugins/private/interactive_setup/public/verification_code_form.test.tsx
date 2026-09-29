@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -15,19 +17,22 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { Providers } from './plugin';
 import { VerificationCodeForm } from './verification_code_form';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => `id-${Math.random()}`,
-  useGeneratedHtmlId: () => `id-${Math.random()}`,
-}));
+vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+      const mocked = {
+      htmlIdGenerator: () => () => `id-${Math.random()}`,
+      useGeneratedHtmlId: () => `id-${Math.random()}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('VerificationCodeForm', () => {
-  jest.setTimeout(20_000);
+  vi.setConfig({ testTimeout: 20_000 });
 
   it('calls enrollment API when submitting form', async () => {
     const coreStart = coreMock.createStart();
     coreStart.http.post.mockResolvedValue({});
 
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const { findByRole, findByLabelText } = render(
       <Providers services={coreStart}>
@@ -64,7 +69,7 @@ describe('VerificationCodeForm', () => {
 
   it('validates form', async () => {
     const coreStart = coreMock.createStart();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
       <Providers services={coreStart}>

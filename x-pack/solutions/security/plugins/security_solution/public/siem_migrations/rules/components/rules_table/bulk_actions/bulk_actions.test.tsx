@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { BulkActions } from './bulk_actions';
@@ -18,14 +21,14 @@ import type { SiemMigrationsService } from '../../../../service';
 import { getRuleMigrationRuleMock } from '../../../../../../common/siem_migrations/model/__mocks__';
 import { getRuleMigrationTranslationStatsMock } from '../../../__mocks__';
 
-jest.mock('../../../../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+vi.mock('../../../../../common/lib/kibana');
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const mockSiemMigrationsService = {
   rules: {
-    getMissingCapabilities: jest.fn(),
+    getMissingCapabilities: vi.fn(),
   },
-} as unknown as jest.MockedObjectDeep<SiemMigrationsService>;
+} as unknown as Mocked<SiemMigrationsService>;
 
 describe('BulkActions', () => {
   beforeEach(() => {
@@ -38,7 +41,7 @@ describe('BulkActions', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the bulk actions component', () => {
@@ -66,7 +69,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -99,7 +102,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -125,7 +128,7 @@ describe('BulkActions', () => {
         failed: 2,
       },
     });
-    const reprocessFailedRules = jest.fn();
+    const reprocessFailedRules = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <BulkActions
@@ -133,7 +136,7 @@ describe('BulkActions', () => {
           translationStats={mockTranslationStats}
           isTableLoading={false}
           reprocessFailedRules={reprocessFailedRules}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -173,7 +176,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -206,7 +209,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -232,7 +235,7 @@ describe('BulkActions', () => {
         failed: 2,
       },
     });
-    const installTranslatedRule = jest.fn();
+    const installTranslatedRule = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <BulkActions
@@ -240,7 +243,7 @@ describe('BulkActions', () => {
           translationStats={mockTranslationStats}
           isTableLoading={false}
           installTranslatedRule={installTranslatedRule}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -280,7 +283,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -313,7 +316,7 @@ describe('BulkActions', () => {
         translation_result: MigrationTranslationResult.FULL,
       }),
     ];
-    const installSelectedRule = jest.fn();
+    const installSelectedRule = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <BulkActions
@@ -321,7 +324,7 @@ describe('BulkActions', () => {
           translationStats={mockTranslationStats}
           isTableLoading={false}
           installSelectedRule={installSelectedRule}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -361,8 +364,8 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          installSelectedRule={jest.fn()}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          installSelectedRule={vi.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );
@@ -406,8 +409,8 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          installSelectedRule={jest.fn()}
-          setMissingIndexPatternFlyoutOpen={jest.fn()}
+          installSelectedRule={vi.fn()}
+          setMissingIndexPatternFlyoutOpen={vi.fn()}
         />
       </TestProviders>
     );

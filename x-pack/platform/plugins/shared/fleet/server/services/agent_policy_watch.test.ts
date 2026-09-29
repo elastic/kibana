@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ILicense } from '@kbn/licensing-types';
@@ -28,32 +31,32 @@ import { PolicyWatcher } from './agent_policy_watch';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
-jest.mock('./agent_policy');
-const agentPolicySvcMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+vi.mock('./agent_policy');
+const agentPolicySvcMock = agentPolicyService as Mocked<typeof agentPolicyService>;
 
-jest.mock('p-retry', () => {
-  const originalPRetry = jest.requireActual('p-retry');
-  return jest.fn().mockImplementation((fn, options) => {
+vi.mock('p-retry', () => {
+  const originalPRetry = require('p-retry');
+  return vi.fn().mockImplementation((fn, options) => {
     return originalPRetry(fn, options);
   });
 });
 
-const pRetryMock = jest.mocked(pRetry);
+const pRetryMock = vi.mocked(pRetry);
 
 describe('Agent Policy-Changing license watcher', () => {
   const logger = loggingSystemMock.create().get('license_watch.test');
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
-  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
+  let soClientMock: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     soClientMock =
-      appContextService.getInternalUserSOClientWithoutSpaceExtension() as jest.Mocked<SavedObjectsClientContract>;
+      appContextService.getInternalUserSOClientWithoutSpaceExtension() as Mocked<SavedObjectsClientContract>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     pRetryMock.mockClear();
   });
 
@@ -75,7 +78,7 @@ describe('Agent Policy-Changing license watcher', () => {
     const pw = new PolicyWatcher(logger);
 
     // swap out watch function, just to ensure it gets called when a license change happens
-    const mockWatch = jest.fn();
+    const mockWatch = vi.fn();
     pw.watch = mockWatch;
 
     // licenseService is watching our subject for incoming licenses
@@ -94,7 +97,7 @@ describe('Agent Policy-Changing license watcher', () => {
   });
 
   it('should return if all policies are compliant', async () => {
-    jest.spyOn(agentPolicySvcMock, 'fetchAllAgentPolicies').mockReturnValue([] as any);
+    vi.spyOn(agentPolicySvcMock, 'fetchAllAgentPolicies').mockReturnValue([] as any);
 
     const pw = new PolicyWatcher(logger);
 
@@ -108,8 +111,8 @@ describe('Agent Policy-Changing license watcher', () => {
 
   it('should bulk update policies that are not compliant', async () => {
     const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-      jest.fn().mockResolvedValue(
-        jest.fn(async function* () {
+      vi.fn().mockResolvedValue(
+        vi.fn(async function* () {
           const chunkSize = 1000; // Emulate paginated response
           for (let i = 0; i < items.length; i += chunkSize) {
             yield items.slice(i, i + chunkSize);
@@ -168,8 +171,8 @@ describe('Agent Policy-Changing license watcher', () => {
 
   it('should return failed policies if bulk update fails', async () => {
     const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-      jest.fn().mockResolvedValue(
-        jest.fn(async function* () {
+      vi.fn().mockResolvedValue(
+        vi.fn(async function* () {
           yield items;
         })()
       );
@@ -212,7 +215,7 @@ describe('Agent Policy-Changing license watcher', () => {
       licenseService.start(licenseEmitter);
       pw.start(licenseService);
 
-      const mockWatch = jest.fn().mockResolvedValue(undefined);
+      const mockWatch = vi.fn().mockResolvedValue(undefined);
       pw.watch = mockWatch;
 
       licenseEmitter.next(Platinum);
@@ -263,7 +266,7 @@ describe('Agent Policy-Changing license watcher', () => {
       licenseService.start(licenseEmitter);
       pw.start(licenseService);
 
-      const mockWatch = jest.fn().mockResolvedValue(undefined);
+      const mockWatch = vi.fn().mockResolvedValue(undefined);
       pw.watch = mockWatch;
 
       licenseEmitter.next(Platinum);
@@ -285,8 +288,8 @@ describe('Agent Policy-Changing license watcher', () => {
 
     it('should throw error if watch method throws after exhausting retries', async () => {
       const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-        jest.fn().mockResolvedValue(
-          jest.fn(async function* () {
+        vi.fn().mockResolvedValue(
+          vi.fn(async function* () {
             yield items;
           })()
         );
@@ -318,8 +321,8 @@ describe('Agent Policy-Changing license watcher', () => {
 
     it('should throw error when some policies fail to update', async () => {
       const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-        jest.fn().mockResolvedValue(
-          jest.fn(async function* () {
+        vi.fn().mockResolvedValue(
+          vi.fn(async function* () {
             yield items;
           })()
         );
@@ -353,8 +356,8 @@ describe('Agent Policy-Changing license watcher', () => {
 
     it('should handle errors during async iteration gracefully', async () => {
       const getMockAgentPolicyFetchAllAgentPolicies = () =>
-        jest.fn().mockResolvedValue(
-          jest.fn(async function* () {
+        vi.fn().mockResolvedValue(
+          vi.fn(async function* () {
             throw new Error('Not Found');
           })()
         );

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockedSearchService } from '../../../mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { createFetchIndicators } from './fetch_indicators';
@@ -14,12 +16,12 @@ import { FactoryQueryType } from '../../../../../common/threat_intelligence/cons
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
 describe('FetchIndicatorsService', () => {
-  beforeEach(jest.clearAllMocks);
+  beforeEach(vi.clearAllMocks);
 
   describe('indicatorsQuery()', () => {
     describe('when query is successful', () => {
       beforeEach(() => {
-        jest
+        vi
           .mocked(mockedSearchService.search)
           .mockReturnValue(new BehaviorSubject(indicatorsResponse));
       });
@@ -69,7 +71,7 @@ describe('FetchIndicatorsService', () => {
 
     describe('when query fails', () => {
       beforeEach(() => {
-        jest
+        vi
           .mocked(mockedSearchService.search)
           .mockReturnValue(throwError(() => new Error('some random exception')));
       });

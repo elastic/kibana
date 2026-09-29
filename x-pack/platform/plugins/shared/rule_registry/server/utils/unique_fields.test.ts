@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mergeUniqueFieldsByName } from './unique_fields';
 
 describe('mergeUniqueFieldsByName', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('merges fields and removes duplicates', async () => {

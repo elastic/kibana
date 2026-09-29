@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { setCustomFieldStepDefinition } from './set_custom_field';
 import type { CasesClient } from '../../client';
@@ -22,7 +24,7 @@ describe('setCustomFieldStepDefinition', () => {
   };
 
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = setCustomFieldStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.setCustomField');
@@ -35,16 +37,16 @@ describe('setCustomFieldStepDefinition', () => {
       ...createCaseResponseFixture,
       customFields: [{ key: 'first_key', type: 'text' as const, value: 'updated value' }],
     };
-    const get = jest
+    const get = vi
       .fn()
       .mockResolvedValueOnce(createCaseResponseFixture)
       .mockResolvedValueOnce(updatedCase);
-    const replaceCustomField = jest.fn().mockResolvedValue({
+    const replaceCustomField = vi.fn().mockResolvedValue({
       key: 'first_key',
       type: 'text' as const,
       value: 'updated value',
     });
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, replaceCustomField },
     } as unknown as CasesClient);
     const definition = setCustomFieldStepDefinition(getCasesClient);
@@ -73,13 +75,13 @@ describe('setCustomFieldStepDefinition', () => {
       ...createCaseResponseFixture,
       customFields: [{ key: 'first_key', type: 'text' as const, value: 'updated value' }],
     };
-    const get = jest.fn().mockResolvedValue(updatedCase);
-    const replaceCustomField = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(updatedCase);
+    const replaceCustomField = vi.fn().mockResolvedValue({
       key: 'first_key',
       type: 'text' as const,
       value: 'updated value',
     });
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, replaceCustomField },
     } as unknown as CasesClient);
     const definition = setCustomFieldStepDefinition(getCasesClient);
@@ -109,14 +111,14 @@ describe('setCustomFieldStepDefinition', () => {
   });
 
   it('pushes case when push-case is enabled', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const replaceCustomField = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const replaceCustomField = vi.fn().mockResolvedValue({
       key: 'first_key',
       type: 'text' as const,
       value: 'updated value',
     });
-    const push = jest.fn().mockResolvedValue(undefined);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const push = vi.fn().mockResolvedValue(undefined);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, replaceCustomField, push },
     } as unknown as CasesClient);
     const definition = setCustomFieldStepDefinition(getCasesClient);
@@ -131,9 +133,9 @@ describe('setCustomFieldStepDefinition', () => {
   });
 
   it('returns translated error when replace custom field throws', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const replaceCustomField = jest.fn().mockRejectedValue(new Error('replace failed'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const replaceCustomField = vi.fn().mockRejectedValue(new Error('replace failed'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, replaceCustomField },
     } as unknown as CasesClient);
     const definition = setCustomFieldStepDefinition(getCasesClient);

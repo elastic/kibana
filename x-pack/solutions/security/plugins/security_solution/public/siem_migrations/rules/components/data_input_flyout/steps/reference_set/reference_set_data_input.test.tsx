@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { ReferenceSetDataInput } from './reference_set_data_input';
@@ -14,43 +16,46 @@ import { TestProviders } from '../../../../../../common/mock';
 import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 import { QradarDataInputStep } from '../../types';
 
-const mockAddError = jest.fn();
-const mockAddSuccess = jest.fn();
+const mockAddError = vi.fn();
+const mockAddSuccess = vi.fn();
 
-jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      siemMigrations: {
-        rules: {
-          api: {},
-          telemetry: {
-            reportSetupLookupNameCopied: jest.fn(),
+vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          siemMigrations: {
+            rules: {
+              api: {},
+              telemetry: {
+                reportSetupLookupNameCopied: vi.fn(),
+              },
+            },
+          },
+          notifications: {
+            toasts: {
+              addError: mockAddError,
+              addSuccess: mockAddSuccess,
+            },
           },
         },
-      },
-      notifications: {
-        toasts: {
-          addError: mockAddError,
-          addSuccess: mockAddSuccess,
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ReferenceSetDataInput', () => {
   const defaultProps = {
     dataInputStep: QradarDataInputStep.ReferenceSet,
     migrationSource: MigrationSource.QRADAR,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
-    setDataInputStep: jest.fn(),
-    onMigrationCreated: jest.fn(),
-    onMissingResourcesFetched: jest.fn(),
+    setDataInputStep: vi.fn(),
+    onMigrationCreated: vi.fn(),
+    onMissingResourcesFetched: vi.fn(),
     missingResourcesIndexed: { lookups: ['lookup1', 'lookup2'], macros: [] },
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders step number', () => {

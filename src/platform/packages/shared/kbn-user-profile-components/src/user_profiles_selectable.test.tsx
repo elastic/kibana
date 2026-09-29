@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { UserProfile } from '@kbn/core-user-profile-common';
@@ -185,7 +187,7 @@ describe('UserProfilesSelectable', () => {
   });
 
   it('should trigger `onChange` callback when selection changes', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const [firstOption, secondOption] = userProfiles;
     const wrapper = mount(
       <UserProfilesSelectable
@@ -208,7 +210,7 @@ describe('UserProfilesSelectable', () => {
   });
 
   it('should continue to display `selectedOptions` when getting unchecked', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const [firstOption] = userProfiles;
     const wrapper = mount(
       <UserProfilesSelectable selectedOptions={[firstOption]} onChange={onChange} />
@@ -229,7 +231,7 @@ describe('UserProfilesSelectable', () => {
   });
 
   it('should trigger `onSearchChange` callback when search term changes', () => {
-    const onSearchChange = jest.fn();
+    const onSearchChange = vi.fn();
     const wrapper = mount(<UserProfilesSelectable onSearchChange={onSearchChange} />);
     wrapper.find('input[type="search"]').simulate('change', { target: { value: 'search' } });
     expect(onSearchChange).toHaveBeenCalledWith('search');
@@ -259,7 +261,7 @@ describe('UserProfilesSelectable', () => {
     });
 
     it('should trigger `onChange` callback with `null` when "no users" get selected', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const [firstOption] = userProfiles;
       const wrapper = mount(
         <UserProfilesSelectable options={[null, firstOption]} onChange={onChange} />
@@ -270,7 +272,7 @@ describe('UserProfilesSelectable', () => {
     });
 
     it('should trigger `onChange` callback with empty array when nothing gets selected', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const [firstOption] = userProfiles;
       const wrapper = mount(
         <UserProfilesSelectable
@@ -285,7 +287,7 @@ describe('UserProfilesSelectable', () => {
     });
 
     it('should trigger `onChange` callback with selected option when selected', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const [firstOption] = userProfiles;
       const wrapper = mount(
         <UserProfilesSelectable options={[null, firstOption]} onChange={onChange} />

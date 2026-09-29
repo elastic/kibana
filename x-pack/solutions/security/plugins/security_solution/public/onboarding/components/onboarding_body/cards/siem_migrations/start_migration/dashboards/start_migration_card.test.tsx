@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { TestProviders } from '../../../../../../../common/mock';
@@ -16,19 +18,19 @@ import { render, screen } from '@testing-library/react';
 import * as useGetMigrationTranslationStatsModule from '../../../../../../../siem_migrations/dashboards/logic/use_get_migration_translation_stats';
 import * as useGetMissingResourcesModule from '../../../../../../../siem_migrations/common/hooks/use_get_missing_resources';
 
-const useLatestStatsSpy = jest.spyOn(useLatestStatsModule, 'useLatestStats');
+const useLatestStatsSpy = vi.spyOn(useLatestStatsModule, 'useLatestStats');
 
-const useGetMigrationTranslationStatsSpy = jest.spyOn(
+const useGetMigrationTranslationStatsSpy = vi.spyOn(
   useGetMigrationTranslationStatsModule,
   'useGetMigrationTranslationStats'
 );
 
-const useGetMissingResourcesMock = jest.spyOn(
+const useGetMissingResourcesMock = vi.spyOn(
   useGetMissingResourcesModule,
   'useGetMissingResources'
 );
 
-const useUpsellingComponentSpy = jest.spyOn(useUpsellingComponentModule, 'useUpsellingComponent');
+const useUpsellingComponentSpy = vi.spyOn(useUpsellingComponentModule, 'useUpsellingComponent');
 
 const MockUpsellingComponent = () => {
   return <div data-test-subj="mockUpsellSection">{`Start Migrations Upselling Component`}</div>;
@@ -37,7 +39,7 @@ const MockUpsellingComponent = () => {
 const mockedLatestStats = {
   data: [],
   isLoading: false,
-  refreshStats: jest.fn(),
+  refreshStats: vi.fn(),
 };
 
 const mockTranslationStats = {
@@ -61,18 +63,18 @@ const mockTranslationStats = {
 >;
 
 const mockMissingResources = {
-  getMissingResources: jest.fn(() => []),
+  getMissingResources: vi.fn(() => []),
   isLoading: false,
 } as unknown as ReturnType<typeof useGetMissingResourcesModule.useGetMissingResources>;
 
 type TestComponentProps = ComponentProps<typeof StartDashboardMigrationCard>;
 const defaultProps: TestComponentProps = {
-  setComplete: jest.fn(),
-  isCardComplete: jest.fn(
+  setComplete: vi.fn(),
+  isCardComplete: vi.fn(
     (cardId: OnboardingCardId) => cardId === OnboardingCardId.siemMigrationsAiConnectors
   ),
-  setExpandedCardId: jest.fn(),
-  checkComplete: jest.fn(),
+  setExpandedCardId: vi.fn(),
+  checkComplete: vi.fn(),
   isCardAvailable: () => true,
   checkCompleteMetadata: {
     missingCapabilities: [],
@@ -100,7 +102,7 @@ describe('StartDashboardMigrationCard', () => {
     useGetMissingResourcesMock.mockReturnValue(mockMissingResources);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should render upsell correctly when available', () => {
     useUpsellingComponentSpy.mockReturnValue(MockUpsellingComponent);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAssistantTelemetry } from '.';
 import { AssistantEventTypes } from '../../common/lib/telemetry/events/ai_assistant/types';
@@ -16,8 +18,8 @@ const mockedTelemetry = {
   ...createTelemetryServiceMock(),
 };
 
-jest.mock('../../context/typed_kibana_context/typed_kibana_context', () => {
-  const original = jest.requireActual('../../context/typed_kibana_context/typed_kibana_context');
+vi.mock('../../context/typed_kibana_context/typed_kibana_context', async () => {
+  const original = (await vi.importActual('../../context/typed_kibana_context/typed_kibana_context'));
 
   return {
     ...original,
@@ -29,15 +31,18 @@ jest.mock('../../context/typed_kibana_context/typed_kibana_context', () => {
   };
 });
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  getConversationById: jest.fn().mockReturnValue({
-    id: customId,
-    title: 'Custom',
-    apiConfig: {},
-    replacements: {},
-    messages: [],
-  }),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      getConversationById: vi.fn().mockReturnValue({
+        id: customId,
+        title: 'Custom',
+        apiConfig: {},
+        replacements: {},
+        messages: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const trackingFns = [
   { name: 'reportAssistantInvoked', eventType: AssistantEventTypes.AssistantInvoked },
@@ -48,7 +53,7 @@ const trackingFns = [
 
 describe('useAssistantTelemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should return the expected telemetry object with tracking functions', () => {
     const { result } = renderHook(() => useAssistantTelemetry());

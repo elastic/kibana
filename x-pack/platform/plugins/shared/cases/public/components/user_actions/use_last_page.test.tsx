@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useLastPage } from './use_last_page';
@@ -29,11 +31,11 @@ const userActionsStats: CaseUserActionsStats = {
   totalOtherActionDeletions: 0,
 };
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
 describe('useLastPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns correctly', async () => {

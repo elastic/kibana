@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { FieldValueSuggestions } from '.';
 import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import * as obsHooks from '../../hooks/use_es_search';
 
-jest.setTimeout(30000);
+vi.setConfig({ testTimeout: 30000 });
 
 describe('FieldValueSuggestions', () => {
-  jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(1500);
-  jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(1500);
+  vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(1500);
+  vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(1500);
 
   function setupSearch(data: any) {
     // @ts-ignore
-    jest.spyOn(obsHooks, 'useEsSearch').mockReturnValue({
+    vi.spyOn(obsHooks, 'useEsSearch').mockReturnValue({
       data: {
         took: 17,
         timed_out: false,
@@ -84,7 +86,7 @@ describe('FieldValueSuggestions', () => {
       { key: 'Japan', doc_count: 100 },
     ]);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     const { rerender } = render(
       <EuiThemeProvider>

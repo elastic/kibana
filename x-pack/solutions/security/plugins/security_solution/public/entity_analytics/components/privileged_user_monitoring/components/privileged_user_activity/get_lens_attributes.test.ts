@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiThemeComputed } from '@elastic/eui';
 import { getLensAttributes } from './get_lens_attributes';
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
-    v4: jest.fn(() => 'uuidv4()'),
+    v4: vi.fn(() => 'uuidv4()'),
   };
 });
 

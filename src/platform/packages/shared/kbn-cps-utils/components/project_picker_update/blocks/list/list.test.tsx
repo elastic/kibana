@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useRef } from 'react';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
@@ -25,10 +27,10 @@ class MockIntersectionObserver {
 
   root: Element | null;
   callback: IntersectionObserverCallback;
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-  takeRecords = jest.fn(() => []);
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  takeRecords = vi.fn(() => []);
 
   constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
     this.callback = callback;
@@ -74,8 +76,8 @@ const defaultProps = {
   originProjectId: 'p1',
   defaultProjectRoutingGetter: () => '',
   currentProjectRoutingGetter: () => '',
-  onProjectRoutingChange: jest.fn(),
-  fetchProjectsByRouting: jest.fn(async () => ({
+  onProjectRoutingChange: vi.fn(),
+  fetchProjectsByRouting: vi.fn(async () => ({
     origin: null,
     linkedProjects: [],
   })),
@@ -125,7 +127,7 @@ const AddFilterExpression = ({ expression }: { expression: FilterExpressionValue
 
 const createDeferredFetch = () => {
   let resolve!: (value: { origin: CPSProject | null; linkedProjects: CPSProject[] }) => void;
-  const fetchProjectsByRouting = jest.fn(
+  const fetchProjectsByRouting = vi.fn(
     () =>
       new Promise<{ origin: CPSProject | null; linkedProjects: CPSProject[] }>((res) => {
         resolve = res;

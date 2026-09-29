@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { LoadedBenchConfig } from './config/types';
 import { runPairedConfig } from './run_paired_config';
 import { fromModuleBenchmark } from './runner/from_module_benchmark';
@@ -15,13 +18,13 @@ import type { ProcStats } from './runner/monitor/types';
 import type { BenchmarkRunResult } from './runner/types';
 import type { GlobalRunContext } from './types';
 
-jest.mock('./runner/from_module_benchmark');
-jest.mock('./runner/run_benchmark');
+vi.mock('./runner/from_module_benchmark');
+vi.mock('./runner/run_benchmark');
 
-const mockedFromModuleBenchmark = fromModuleBenchmark as jest.MockedFunction<
+const mockedFromModuleBenchmark = fromModuleBenchmark as MockedFunction<
   typeof fromModuleBenchmark
 >;
-const mockedCreateBenchmarkExecutor = createBenchmarkExecutor as jest.MockedFunction<
+const mockedCreateBenchmarkExecutor = createBenchmarkExecutor as MockedFunction<
   typeof createBenchmarkExecutor
 >;
 
@@ -96,7 +99,7 @@ describe('runPairedConfig', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('alternates starts, discards whole invalid pairs, and cleans up both sides', async () => {
@@ -105,14 +108,14 @@ describe('runPairedConfig', () => {
     const targetResults = [completedRun(), completedRun(), completedRun()];
     const createExecutor = (side: 'baseline' | 'target', results: BenchmarkRunResult[]) => {
       const executor: BenchmarkExecutor = {
-        beforeAll: jest.fn(async () => {
+        beforeAll: vi.fn(async () => {
           lifecycle.push(`${side}:beforeAll`);
         }),
-        run: jest.fn(async () => {
+        run: vi.fn(async () => {
           lifecycle.push(`${side}:run`);
           return results.shift() ?? completedRun();
         }),
-        afterAll: jest.fn(async () => {
+        afterAll: vi.fn(async () => {
           lifecycle.push(`${side}:afterAll`);
         }),
         profilesDir: '',

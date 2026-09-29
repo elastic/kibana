@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -14,38 +17,50 @@ import { OnboardingRouter } from './onboarding_router';
 import { useSyncUrlDetails } from './hooks/use_url_detail';
 import { useOnboardingContext } from './onboarding_context';
 
-const mockRedirect = jest.fn((_props: unknown) => null);
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
+const mockRedirect = vi.fn((_props: unknown) => null);
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
   return {
     ...actual,
     Redirect: (props: unknown) => mockRedirect(props),
   };
 });
 
-jest.mock('./hooks/use_url_detail', () => ({
-  ...jest.requireActual('./hooks/use_url_detail'),
-  useSyncUrlDetails: jest.fn(),
-}));
+vi.mock('./hooks/use_url_detail', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hooks/use_url_detail')),
+      useSyncUrlDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./onboarding_context', () => ({
-  ...jest.requireActual('./onboarding_context'),
-  useOnboardingContext: jest.fn(),
-}));
+vi.mock('./onboarding_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('./onboarding_context')),
+      useOnboardingContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./onboarding_header', () => ({
-  OnboardingHeader: () => <div data-test-subj="onboardingHeader" />,
-}));
+vi.mock('./onboarding_header', () => {
+      const mocked = {
+      OnboardingHeader: () => <div data-test-subj="onboardingHeader" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./onboarding_body', () => ({
-  OnboardingBody: () => <div data-test-subj="onboardingBody" />,
-}));
+vi.mock('./onboarding_body', () => {
+      const mocked = {
+      OnboardingBody: () => <div data-test-subj="onboardingBody" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('OnboardingRouter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSyncUrlDetails as jest.Mock).mockReturnValue({ isLoading: false });
-    (useOnboardingContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSyncUrlDetails as Mock).mockReturnValue({ isLoading: false });
+    (useOnboardingContext as Mock).mockReturnValue({
       config: new Map([
         [OnboardingTopicId.siemMigrations, { id: OnboardingTopicId.siemMigrations }],
       ]),

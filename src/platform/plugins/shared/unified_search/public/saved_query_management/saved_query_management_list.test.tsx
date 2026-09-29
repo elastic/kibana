@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -118,17 +120,17 @@ describe('Saved query management list component', () => {
 
   beforeEach(() => {
     props = {
-      onLoad: jest.fn(),
-      onClearSavedQuery: jest.fn(),
-      onClose: jest.fn(),
+      onLoad: vi.fn(),
+      onClearSavedQuery: vi.fn(),
+      onClose: vi.fn(),
       showSaveQuery: true,
       savedQueryService: {
         ...dataMock.query.savedQueries,
-        findSavedQueries: jest.fn().mockResolvedValue({
+        findSavedQueries: vi.fn().mockResolvedValue({
           total: 1,
           queries: [testQuery],
         }),
-        deleteSavedQuery: jest.fn(),
+        deleteSavedQuery: vi.fn(),
       },
       queryBarMenuRef: React.createRef(),
     };
@@ -144,7 +146,7 @@ describe('Saved query management list component', () => {
       ...props,
       savedQueryService: {
         ...dataMock.query.savedQueries,
-        findSavedQueries: jest.fn().mockResolvedValue({ total: 0, queries: [] }),
+        findSavedQueries: vi.fn().mockResolvedValue({ total: 0, queries: [] }),
       },
     };
     render(wrapSavedQueriesListComponentInContext(newProps));
@@ -165,7 +167,7 @@ describe('Saved query management list component', () => {
       ...props,
       savedQueryService: {
         ...props.savedQueryService,
-        findSavedQueries: jest.fn().mockResolvedValue({
+        findSavedQueries: vi.fn().mockResolvedValue({
           total: 6,
           queries: generateSavedQueries(5),
         }),
@@ -204,8 +206,8 @@ describe('Saved query management list component', () => {
   });
 
   it('should call the onLoad and onClose function', async () => {
-    const onLoadSpy = jest.fn();
-    const onCloseSpy = jest.fn();
+    const onLoadSpy = vi.fn();
+    const onCloseSpy = vi.fn();
     const newProps = {
       ...props,
       onLoad: onLoadSpy,
@@ -254,11 +256,11 @@ describe('Saved query management list component', () => {
       ...props,
       savedQueryService: {
         ...props.savedQueryService,
-        findSavedQueries: jest.fn().mockResolvedValue({
+        findSavedQueries: vi.fn().mockResolvedValue({
           total: 1,
           queries: [{ ...testQuery, namespaces: ['one', 'two'] }],
         }),
-        deleteSavedQuery: jest.fn(),
+        deleteSavedQuery: vi.fn(),
       },
     };
     render(wrapSavedQueriesListComponentInContext(newProps));
@@ -271,14 +273,14 @@ describe('Saved query management list component', () => {
   });
 
   it('should call deleteSavedQuery and onClearSavedQuery on delete of the current selected query', async () => {
-    const deleteSavedQuerySpy = jest.fn();
-    const onClearSavedQuerySpy = jest.fn();
+    const deleteSavedQuerySpy = vi.fn();
+    const onClearSavedQuerySpy = vi.fn();
     const newProps = {
       ...props,
       loadedSavedQuery: testQuery,
       savedQueryService: {
         ...props.savedQueryService,
-        findSavedQueries: jest.fn().mockResolvedValue({
+        findSavedQueries: vi.fn().mockResolvedValue({
           total: 2,
           queries: generateSavedQueries(1),
         }),
@@ -313,7 +315,7 @@ describe('Saved query management list component', () => {
       ...props,
       savedQueryService: {
         ...props.savedQueryService,
-        findSavedQueries: jest.fn().mockResolvedValue({
+        findSavedQueries: vi.fn().mockResolvedValue({
           total: 6,
           queries: generateSavedQueries(5),
         }),
@@ -324,7 +326,7 @@ describe('Saved query management list component', () => {
   });
 
   it('should allow navigating between saved query pages', async () => {
-    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+    const findSavedQueriesSpy = vi.fn().mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(5),
     });
@@ -364,7 +366,7 @@ describe('Saved query management list component', () => {
   });
 
   it('should not clear the currently selected saved query when navigating between pages', async () => {
-    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+    const findSavedQueriesSpy = vi.fn().mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(5),
     });
@@ -402,7 +404,7 @@ describe('Saved query management list component', () => {
   });
 
   it('should allow providing a search term', async () => {
-    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+    const findSavedQueriesSpy = vi.fn().mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(5),
     });
@@ -444,7 +446,7 @@ describe('Saved query management list component', () => {
   it('should correctly handle out of order responses', async () => {
     const completionOrder: number[] = [];
     let triggerResolve = () => {};
-    const findSavedQueriesSpy = jest.fn().mockImplementation(async (_, __, page) => {
+    const findSavedQueriesSpy = vi.fn().mockImplementation(async (_, __, page) => {
       let queries: ReturnType<typeof generateSavedQueries> = [];
       if (page === 1) {
         queries = generateSavedQueries(5);
@@ -534,7 +536,7 @@ describe('Saved query management list component', () => {
       loadedSavedQuery: fooQuery,
       savedQueryService: {
         ...props.savedQueryService,
-        findSavedQueries: jest.fn().mockResolvedValue({
+        findSavedQueries: vi.fn().mockResolvedValue({
           total: 2,
           queries: [barQuery, fooQuery],
         }),
@@ -554,7 +556,7 @@ describe('Saved query management list component', () => {
       loadedSavedQuery: fooQuery,
       savedQueryService: {
         ...props.savedQueryService,
-        findSavedQueries: jest.fn().mockResolvedValue({
+        findSavedQueries: vi.fn().mockResolvedValue({
           total: 6,
           queries: generateSavedQueries(5),
         }),
@@ -569,7 +571,7 @@ describe('Saved query management list component', () => {
   });
 
   it('should not hoist the currently loaded saved query to the top of the list if there is a search term', async () => {
-    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+    const findSavedQueriesSpy = vi.fn().mockResolvedValue({
       total: 2,
       queries: [barQuery, fooQuery],
     });
@@ -598,7 +600,7 @@ describe('Saved query management list component', () => {
   });
 
   it('should not hoist the currently loaded saved query to the top of the list if not on the first page', async () => {
-    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+    const findSavedQueriesSpy = vi.fn().mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(5),
     });

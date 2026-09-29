@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { UseAlertTagsActionsProps } from './use_alert_tags_actions';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -17,12 +20,12 @@ import { TestProviders } from '../../../../common/mock';
 import { useSetAlertTags } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_tags';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 
-jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_tags');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_tags');
+vi.mock('../../../../common/lib/kibana');
 
 const defaultProps: UseAlertTagsActionsProps = {
-  closePopover: jest.fn(),
+  closePopover: vi.fn(),
   ecsRowData: {
     _id: '123',
     kibana: {
@@ -31,7 +34,7 @@ const defaultProps: UseAlertTagsActionsProps = {
       },
     },
   },
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 };
 
 const renderContextMenu = (
@@ -55,13 +58,13 @@ const renderContextMenu = (
 
 describe('useAlertTagsActions', () => {
   beforeEach(() => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({
       hasAlertsUpdate: true,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render alert tagging actions', () => {
@@ -103,7 +106,7 @@ describe('useAlertTagsActions', () => {
   });
 
   it("should not render alert tagging actions if user doesn't have write permissions", () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({
       hasAlertsUpdate: false,
     });
     const { result } = renderHook(() => useAlertTagsActions(defaultProps), {
@@ -153,8 +156,8 @@ describe('useAlertTagsActions', () => {
   });
 
   it('should render the nested panel', async () => {
-    (useSetAlertTags as jest.Mock).mockReturnValue(jest.fn());
-    (useUiSetting$ as jest.Mock).mockReturnValue([['default-test-tag-1', 'default-test-tag-2']]);
+    (useSetAlertTags as Mock).mockReturnValue(vi.fn());
+    (useUiSetting$ as Mock).mockReturnValue([['default-test-tag-1', 'default-test-tag-2']]);
 
     const { result } = renderHook(() => useAlertTagsActions(defaultProps), {
       wrapper: TestProviders,

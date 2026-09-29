@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../common/constants';
 import { appContextService } from '../app_context';
 
 import { isIacProvisionerEnabled, isIacProvisionerSupportedFor } from './iac_provisioner';
 
-jest.mock('../app_context');
+vi.mock('../app_context');
 
 const mockEnvironment = ({
   isCloudEnabled = false,
@@ -24,18 +26,18 @@ const mockEnvironment = ({
   agentlessEnabled?: boolean;
   iacProvisionerEnabled?: boolean;
 }) => {
-  jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+  vi.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: agentlessEnabled },
   } as any);
-  jest
+  vi
     .spyOn(appContextService, 'getCloud')
     .mockReturnValue({ isCloudEnabled, isServerlessEnabled } as any);
 
   if (iacProvisionerEnabled === undefined) {
-    jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue(undefined);
+    vi.spyOn(appContextService, 'getFeatureFlags').mockReturnValue(undefined);
   } else {
-    jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
-      getBooleanValue$: jest.fn().mockReturnValue(of(iacProvisionerEnabled)),
+    vi.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
+      getBooleanValue$: vi.fn().mockReturnValue(of(iacProvisionerEnabled)),
     } as any);
   }
 };
@@ -44,7 +46,7 @@ const mockEnvironment = ({
 // public/hooks/use_iac_provisioner.test.ts — the two must stay in agreement.
 describe('isIacProvisionerEnabled', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each([
@@ -94,7 +96,7 @@ describe('isIacProvisionerEnabled', () => {
 
 describe('isIacProvisionerSupportedFor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('is true for aws when IaCP is enabled', async () => {

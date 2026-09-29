@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import moment from 'moment';
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
@@ -16,7 +19,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 
 let clock: sinon.SinonFakeTimers;
 
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 describe('clearExpiredSnoozes()', () => {
@@ -26,7 +29,7 @@ describe('clearExpiredSnoozes()', () => {
   afterAll(() => clock.restore());
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clock.reset();
   });
 

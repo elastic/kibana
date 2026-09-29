@@ -5,35 +5,46 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { syncNewMonitorBulk } from './add_monitor_bulk';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { ConfigKey } from '../../../../common/runtime_types';
 
-jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
-  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
-}));
+vi.mock('@kbn/fleet-plugin/server/services/package_policy', () => {
+      const mocked = {
+      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'mock-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../telemetry/monitor_upgrade_sender', () => ({
-  formatTelemetryEvent: jest.fn(),
-  sendTelemetryEvents: jest.fn(),
-}));
+vi.mock('../../telemetry/monitor_upgrade_sender', () => {
+      const mocked = {
+      formatTelemetryEvent: vi.fn(),
+      sendTelemetryEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('syncNewMonitorBulk', () => {
   const mockMonitorConfigRepository = {
-    createBulk: jest.fn(),
+    createBulk: vi.fn(),
   };
 
   const mockSyntheticsMonitorClient = {
-    addMonitors: jest.fn(),
+    addMonitors: vi.fn(),
   };
 
   const mockRouteContext = {
     server: {
-      logger: { error: jest.fn() },
+      logger: { error: vi.fn() },
       telemetry: {},
     },
     syntheticsMonitorClient: mockSyntheticsMonitorClient,
@@ -41,10 +52,10 @@ describe('syncNewMonitorBulk', () => {
     request: { query: {} },
   } as any;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     let idCounter = 0;
-    jest.requireMock('uuid').v4.mockImplementation(() => `monitor-${++idCounter}`);
+    (await vi.importMock('uuid')).v4.mockImplementation(() => `monitor-${++idCounter}`);
   });
 
   describe('package policy references', () => {

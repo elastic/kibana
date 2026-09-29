@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../../test';
 import { createAppRootMockRenderer } from '../../../test';
@@ -24,11 +27,11 @@ describe('Tree view Breadcrumb component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let onSelect: jest.Mock;
+  let onSelect: Mock;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    onSelect = jest.fn();
+    onSelect = vi.fn();
   });
 
   describe('When Breadcrumb is mounted', () => {

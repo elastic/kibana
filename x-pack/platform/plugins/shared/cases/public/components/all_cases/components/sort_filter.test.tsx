@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,11 +16,11 @@ import { SortFilter } from './sort_filter';
 
 describe('SortFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a select with newest first and oldest first options', () => {
-    renderWithTestingProviders(<SortFilter sortOrder="desc" onChange={jest.fn()} />);
+    renderWithTestingProviders(<SortFilter sortOrder="desc" onChange={vi.fn()} />);
 
     const select = screen.getByTestId('cases-list-sort-select');
     expect(select).toBeInTheDocument();
@@ -26,21 +28,21 @@ describe('SortFilter', () => {
   });
 
   it('displays "Newest first" when sortOrder is desc', () => {
-    renderWithTestingProviders(<SortFilter sortOrder="desc" onChange={jest.fn()} />);
+    renderWithTestingProviders(<SortFilter sortOrder="desc" onChange={vi.fn()} />);
 
     const select = screen.getByTestId('cases-list-sort-select');
     expect(select).toHaveValue('desc');
   });
 
   it('displays "Oldest first" when sortOrder is asc', () => {
-    renderWithTestingProviders(<SortFilter sortOrder="asc" onChange={jest.fn()} />);
+    renderWithTestingProviders(<SortFilter sortOrder="asc" onChange={vi.fn()} />);
 
     const select = screen.getByTestId('cases-list-sort-select');
     expect(select).toHaveValue('asc');
   });
 
   it('calls onChange with "asc" when selecting oldest first', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithTestingProviders(<SortFilter sortOrder="desc" onChange={onChange} />);
 
     await userEvent.selectOptions(screen.getByTestId('cases-list-sort-select'), 'asc');
@@ -49,7 +51,7 @@ describe('SortFilter', () => {
   });
 
   it('calls onChange with "desc" when selecting newest first', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithTestingProviders(<SortFilter sortOrder="asc" onChange={onChange} />);
 
     await userEvent.selectOptions(screen.getByTestId('cases-list-sort-select'), 'desc');

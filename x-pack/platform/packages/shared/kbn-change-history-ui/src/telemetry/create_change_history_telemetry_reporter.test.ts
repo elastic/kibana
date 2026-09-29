@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ChangeHistoryTelemetryEventTypes } from './types';
 import { createChangeHistoryTelemetryReporter } from './create_change_history_telemetry_reporter';
 import { TEST_CHANGE_HISTORY_SCOPE } from '../test_utils/change_history_test_fixtures';
 
 describe('createChangeHistoryTelemetryReporter', () => {
   it('reports events with scope fields and eventName merged', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     const telemetry = createChangeHistoryTelemetryReporter({
       analytics: { reportEvent },
       scope: TEST_CHANGE_HISTORY_SCOPE,
@@ -64,7 +66,7 @@ describe('createChangeHistoryTelemetryReporter', () => {
   });
 
   it('is a no-op when enabled is false', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     const telemetry = createChangeHistoryTelemetryReporter({
       analytics: { reportEvent },
       scope: TEST_CHANGE_HISTORY_SCOPE,
@@ -77,7 +79,7 @@ describe('createChangeHistoryTelemetryReporter', () => {
   });
 
   it('does not throw when reportEvent fails', () => {
-    const reportEvent = jest.fn().mockImplementation(() => {
+    const reportEvent = vi.fn().mockImplementation(() => {
       throw new Error('analytics unavailable');
     });
     const telemetry = createChangeHistoryTelemetryReporter({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -21,9 +24,9 @@ import {
   LOCKED_CARD_BEHAVIOR_TITLE,
 } from './protection_settings_card/behaviour_protection_card';
 
-jest.mock('../../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('Policy Behaviour Protection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').behaviour;
@@ -40,7 +43,7 @@ describe('Policy Behaviour Protection Card', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };

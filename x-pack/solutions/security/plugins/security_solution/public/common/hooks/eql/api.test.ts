@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -40,7 +42,7 @@ const triggerValidateEql = () => {
 
 describe('validateEql', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('handle EqlSearchStrategyResponse', () => {

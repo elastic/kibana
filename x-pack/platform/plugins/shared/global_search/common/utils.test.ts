@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { convertResultUrl } from './utils';
 
 const createBasePath = () => ({
-  prepend: jest.fn(),
+  prepend: vi.fn(),
 });
 
 describe('convertResultUrl', () => {

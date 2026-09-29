@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,8 +17,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { Rule } from '../../../../types';
 import { RuleErrorLog } from './rule_error_log';
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-jest.mock('../../../../common/lib/kibana');
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+vi.mock('../../../../common/lib/kibana');
 
 const mockLogResponse: any = {
   totalErrors: 12,
@@ -119,12 +122,12 @@ const mockRule: Rule = {
   revision: 0,
 };
 
-const loadActionErrorLogMock = jest.fn();
+const loadActionErrorLogMock = vi.fn();
 
 describe('rule_error_log', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((value: string) => {
+    vi.clearAllMocks();
+    useKibanaMock().services.uiSettings.get = vi.fn().mockImplementation((value: string) => {
       if (value === 'timepicker:quickRanges') {
         return [
           {
@@ -139,7 +142,7 @@ describe('rule_error_log', () => {
   });
 
   it('renders correctly', async () => {
-    const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
+    const nowMock = vi.spyOn(Date, 'now').mockReturnValue(0);
     renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
@@ -171,7 +174,7 @@ describe('rule_error_log', () => {
   });
 
   it('can sort on timestamp columns', async () => {
-    const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
+    const nowMock = vi.spyOn(Date, 'now').mockReturnValue(0);
 
     renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
@@ -209,7 +212,7 @@ describe('rule_error_log', () => {
   });
 
   it('can paginate', async () => {
-    const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
+    const nowMock = vi.spyOn(Date, 'now').mockReturnValue(0);
 
     loadActionErrorLogMock.mockResolvedValue({
       ...mockLogResponse,
@@ -254,7 +257,7 @@ describe('rule_error_log', () => {
   });
 
   it('can filter by start and end date', async () => {
-    const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
+    const nowMock = vi.spyOn(Date, 'now').mockReturnValue(0);
 
     renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />

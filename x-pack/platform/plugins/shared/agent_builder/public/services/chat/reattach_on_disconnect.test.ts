@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { concat, EMPTY, lastValueFrom, Observable, of, switchAll, throwError, toArray } from 'rxjs';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
@@ -55,7 +57,7 @@ describe('isDisconnectError', () => {
 
 describe('streamWithReattach', () => {
   it('reattaches after a network error, resuming after the events already received', async () => {
-    const reattach = jest.fn(async (_offset: number) =>
+    const reattach = vi.fn(async (_offset: number) =>
       of(chunk('c'), terminated, conversationUpdated)
     );
 
@@ -77,7 +79,7 @@ describe('streamWithReattach', () => {
   });
 
   it('reattaches after a gateway timeout on the initial request', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(terminated, conversationUpdated));
+    const reattach = vi.fn(async (_offset: number) => of(terminated, conversationUpdated));
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -93,7 +95,7 @@ describe('streamWithReattach', () => {
 
   it('does not reattach after an error sent by Kibana', async () => {
     const error = createAgentBuilderError(AgentBuilderErrorCode.internalError, 'boom');
-    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
+    const reattach = vi.fn(async (_offset: number) => of(conversationUpdated));
 
     await expect(
       lastValueFrom(
@@ -113,7 +115,7 @@ describe('streamWithReattach', () => {
 
   it('does not reattach after an HTTP error answered by Kibana', async () => {
     const error = httpFetchError(400);
-    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
+    const reattach = vi.fn(async (_offset: number) => of(conversationUpdated));
 
     await expect(
       lastValueFrom(
@@ -131,7 +133,7 @@ describe('streamWithReattach', () => {
     const controller = new AbortController();
     controller.abort();
     const error = new TypeError('network error');
-    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
+    const reattach = vi.fn(async (_offset: number) => of(conversationUpdated));
 
     await expect(
       lastValueFrom(
@@ -148,7 +150,7 @@ describe('streamWithReattach', () => {
 
   it('surfaces the error without another attempt when the reattach cannot connect', async () => {
     const error = httpFetchError();
-    const reattach = jest.fn((_offset: number) => Promise.reject(error));
+    const reattach = vi.fn((_offset: number) => Promise.reject(error));
 
     await expect(
       lastValueFrom(
@@ -167,7 +169,7 @@ describe('streamWithReattach', () => {
   });
 
   it('reattaches again after a reattach that connected is cut as well', async () => {
-    const reattach = jest
+    const reattach = vi
       .fn<Promise<Observable<ChatEvent>>, [number]>()
       .mockImplementationOnce(async () =>
         concat(
@@ -195,7 +197,7 @@ describe('streamWithReattach', () => {
   });
 
   it('reattaches after a network error following the terminal event', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
+    const reattach = vi.fn(async (_offset: number) => of(conversationUpdated));
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -214,7 +216,7 @@ describe('streamWithReattach', () => {
   });
 
   it('reattaches when the stream closes between the terminal and the conversation event', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
+    const reattach = vi.fn(async (_offset: number) => of(conversationUpdated));
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -229,7 +231,7 @@ describe('streamWithReattach', () => {
   });
 
   it('reattaches when the stream closes before the end of the execution', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(terminated, conversationUpdated));
+    const reattach = vi.fn(async (_offset: number) => of(terminated, conversationUpdated));
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -244,7 +246,7 @@ describe('streamWithReattach', () => {
   });
 
   it('reattaches when the initial response closes before its first event', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(chunk('a'), conversationCreated));
+    const reattach = vi.fn(async (_offset: number) => of(chunk('a'), conversationCreated));
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -259,7 +261,7 @@ describe('streamWithReattach', () => {
   });
 
   it('reattaches again when a reattach closes before delivering any event', async () => {
-    const reattach = jest
+    const reattach = vi
       .fn<Promise<Observable<ChatEvent>>, [number]>()
       .mockImplementationOnce(async () => EMPTY)
       .mockImplementationOnce(async () => of(chunk('b'), conversationUpdated));
@@ -277,7 +279,7 @@ describe('streamWithReattach', () => {
   });
 
   it('does not reattach once the conversation event was received', async () => {
-    const reattach = jest.fn(async (_offset: number) => of(conversationUpdated));
+    const reattach = vi.fn(async (_offset: number) => of(conversationUpdated));
 
     const received = await lastValueFrom(
       streamWithReattach({
@@ -293,7 +295,7 @@ describe('streamWithReattach', () => {
 
   it('surfaces the original error when the execution to reattach to does not exist', async () => {
     const error = httpFetchError(504);
-    const reattach = jest.fn((_offset: number) => Promise.reject(httpFetchError(404)));
+    const reattach = vi.fn((_offset: number) => Promise.reject(httpFetchError(404)));
 
     await expect(
       lastValueFrom(
@@ -309,7 +311,7 @@ describe('streamWithReattach', () => {
 
   it('surfaces the not found error when the reattach followed a closed stream', async () => {
     const error = httpFetchError(404);
-    const reattach = jest.fn((_offset: number) => Promise.reject(error));
+    const reattach = vi.fn((_offset: number) => Promise.reject(error));
 
     await expect(
       lastValueFrom(
@@ -324,7 +326,7 @@ describe('streamWithReattach', () => {
 
   it('closes the reattached connection on unsubscribe', async () => {
     let reattachedConnectionClosed = false;
-    const reattach = jest.fn(
+    const reattach = vi.fn(
       async (_offset: number) =>
         new Observable<ChatEvent>(() => () => {
           reattachedConnectionClosed = true;

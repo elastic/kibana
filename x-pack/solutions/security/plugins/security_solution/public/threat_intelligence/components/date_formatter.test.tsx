@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import moment from 'moment-timezone';
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -17,9 +20,9 @@ const mockInvalidStringDate = 'invalid date';
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
-jest.mock('../hooks/use_kibana_ui_settings');
-const mockUseDateFormat = useDateFormat as jest.Mock;
-const mockUseTimeZone = useTimeZone as jest.Mock;
+vi.mock('../hooks/use_kibana_ui_settings');
+const mockUseDateFormat = useDateFormat as Mock;
+const mockUseTimeZone = useTimeZone as Mock;
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 

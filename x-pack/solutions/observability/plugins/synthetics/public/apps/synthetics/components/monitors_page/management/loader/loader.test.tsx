@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '../../../../utils/testing/rtl_helpers';
@@ -12,7 +14,7 @@ import { Loader } from './loader';
 
 describe('<Loader />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows children when loading and error are both false', () => {

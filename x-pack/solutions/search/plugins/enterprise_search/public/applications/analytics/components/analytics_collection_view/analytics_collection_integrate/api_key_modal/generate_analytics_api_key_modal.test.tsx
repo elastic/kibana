@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -13,16 +15,16 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-const mockActions = { makeRequest: jest.fn(), setKeyName: jest.fn() };
+const mockActions = { makeRequest: vi.fn(), setKeyName: vi.fn() };
 
 const mockValues = { apiKey: '', isLoading: false, isSuccess: false, keyName: '' };
 
 import { GenerateAnalyticsApiKeyModal } from './generate_analytics_api_key_modal';
 
-const onCloseMock = jest.fn();
+const onCloseMock = vi.fn();
 describe('GenerateAnalyticsApiKeyModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(mockValues);
     setMockActions(mockActions);
   });

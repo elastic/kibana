@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { UserActionParameters } from '../types';
 import { TemplateUserActionBuilder } from './template';
 
@@ -23,17 +25,17 @@ describe('TemplateUserActionBuilder', () => {
   let builder: TemplateUserActionBuilder;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     builder = new TemplateUserActionBuilder();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('when a template is applied', () => {

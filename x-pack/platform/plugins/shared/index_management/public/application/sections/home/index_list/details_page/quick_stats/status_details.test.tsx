@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -13,11 +15,14 @@ import type { Index } from '../../../../../../../common';
 import type { DocCountState } from './quick_stats';
 import { StatusDetails } from './status_details';
 
-jest.mock('../../../../../app_context', () => ({
-  useAppContext: jest.fn(),
-}));
+vi.mock('../../../../../app_context', () => {
+      const mocked = {
+      useAppContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAppContext = jest.mocked(useAppContext);
+const mockUseAppContext = vi.mocked(useAppContext);
 
 const defaultProps: {
   docCount: DocCountState;
@@ -37,7 +42,7 @@ const renderComponent = (overrides: Partial<typeof defaultProps> = {}) => {
 
 describe('StatusDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAppContext.mockReturnValue({
       config: { enableIndexStats: true },
     } as ReturnType<typeof useAppContext>);

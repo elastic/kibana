@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { LeadEntity } from '../../types';
 
-const mockGetSecurityMlJobIds = jest.fn();
-jest.mock('../../../ml_anomaly_detection/get_security_ml_job_ids', () => ({
-  getSecurityMlJobIds: (...args: unknown[]) => mockGetSecurityMlJobIds(...args),
-}));
+const mockGetSecurityMlJobIds = vi.fn();
+vi.mock('../../../ml_anomaly_detection/get_security_ml_job_ids', () => {
+      const mocked = {
+      getSecurityMlJobIds: (...args: unknown[]) => mockGetSecurityMlJobIds(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createAnomalyDetectionModule } from './module';
 import { buildAnomalyObservation } from './observations';
@@ -36,10 +41,10 @@ const fakeRequest = {} as KibanaRequest;
 const fakeSoClient = {} as SavedObjectsClientContract;
 
 describe('anomaly_detection_module', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('createAnomalyDetectionModule', () => {
-    const fakeMl = { mlSystemProvider: jest.fn() } as unknown as MlPluginSetup;
+    const fakeMl = { mlSystemProvider: vi.fn() } as unknown as MlPluginSetup;
 
     it('exposes the anomaly_detection module weight', () => {
       const module = createAnomalyDetectionModule({
@@ -122,7 +127,7 @@ describe('anomaly_detection_module', () => {
   describe('fetchAnomalySummariesForEntities', () => {
     it('returns an empty map when there are no security ML jobs', async () => {
       mockGetSecurityMlJobIds.mockResolvedValue([]);
-      const mlSystemProvider = jest.fn();
+      const mlSystemProvider = vi.fn();
       const ml = { mlSystemProvider } as unknown as MlPluginSetup;
 
       const result = await fetchAnomalySummariesForEntities({
@@ -139,7 +144,7 @@ describe('anomaly_detection_module', () => {
 
     it('aggregates anomalies per entity keyed by EUID', async () => {
       mockGetSecurityMlJobIds.mockResolvedValue(['job-1']);
-      const mlAnomalySearch = jest.fn().mockResolvedValue({
+      const mlAnomalySearch = vi.fn().mockResolvedValue({
         aggregations: {
           by_entity: {
             buckets: [
@@ -171,7 +176,7 @@ describe('anomaly_detection_module', () => {
         },
       });
       const ml = {
-        mlSystemProvider: jest.fn().mockReturnValue({ mlAnomalySearch }),
+        mlSystemProvider: vi.fn().mockReturnValue({ mlAnomalySearch }),
       } as unknown as MlPluginSetup;
 
       const result = await fetchAnomalySummariesForEntities({
@@ -202,7 +207,7 @@ describe('anomaly_detection_module', () => {
           by_field_value: 'logon',
         },
       });
-      const mlAnomalySearch = jest.fn().mockResolvedValue({
+      const mlAnomalySearch = vi.fn().mockResolvedValue({
         aggregations: {
           by_entity: {
             buckets: [
@@ -219,7 +224,7 @@ describe('anomaly_detection_module', () => {
         },
       });
       const ml = {
-        mlSystemProvider: jest.fn().mockReturnValue({ mlAnomalySearch }),
+        mlSystemProvider: vi.fn().mockReturnValue({ mlAnomalySearch }),
       } as unknown as MlPluginSetup;
 
       const result = await fetchAnomalySummariesForEntities({
@@ -238,8 +243,8 @@ describe('anomaly_detection_module', () => {
     it('swallows search errors and continues', async () => {
       mockGetSecurityMlJobIds.mockResolvedValue(['job-1']);
       const ml = {
-        mlSystemProvider: jest.fn().mockReturnValue({
-          mlAnomalySearch: jest.fn().mockRejectedValue(new Error('boom')),
+        mlSystemProvider: vi.fn().mockReturnValue({
+          mlAnomalySearch: vi.fn().mockRejectedValue(new Error('boom')),
         }),
       } as unknown as MlPluginSetup;
 

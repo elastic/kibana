@@ -5,57 +5,93 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { OSQUERY_SEARCH_STRATEGY } from './search_strategy/constants';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { OsqueryPlugin } from './plugin';
 import type { SetupPlugins } from './types';
 
-jest.mock('./search_strategy/osquery', () => ({
-  osquerySearchStrategyProvider: jest.fn(),
-}));
-jest.mock('./utils/register_features', () => ({ registerFeatures: jest.fn() }));
-jest.mock('./saved_objects', () => ({ initSavedObjects: jest.fn() }));
-jest.mock('./routes', () => ({ defineRoutes: jest.fn() }));
-jest.mock('./handlers/action/create_action_service', () => ({
-  createActionService: jest.fn(() => ({ stop: jest.fn() })),
-}));
-jest.mock('./create_config', () => ({
-  createConfig: jest.fn(() => ({ experimentalFeatures: { rruleScheduling: false } })),
-}));
-jest.mock('./lib/reconcile_schedule_ids_task', () => ({
-  RECONCILE_TASK_TYPE: 'osquery:reconcile-schedule-ids',
-  runReconcileTask: jest.fn(),
-  scheduleReconcileTask: jest.fn(),
-}));
-jest.mock('./lib/osquery_app_context_services', () => ({
-  OsqueryAppContextService: jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })),
-}));
-jest.mock('./lib/telemetry/sender', () => ({
-  TelemetryEventsSender: jest.fn(() => ({ setup: jest.fn(), start: jest.fn(), stop: jest.fn() })),
-}));
-jest.mock('./lib/telemetry/receiver', () => ({
-  TelemetryReceiver: jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })),
-}));
-jest.mock('./lib/schema_service', () => ({ SchemaService: jest.fn(() => ({})) }));
+vi.mock('./search_strategy/osquery', () => {
+      const mocked = {
+      osquerySearchStrategyProvider: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./utils/register_features', () => {
+      const mocked = { registerFeatures: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./saved_objects', () => {
+      const mocked = { initSavedObjects: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./routes', () => {
+      const mocked = { defineRoutes: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./handlers/action/create_action_service', () => {
+      const mocked = {
+      createActionService: vi.fn(() => ({ stop: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./create_config', () => {
+      const mocked = {
+      createConfig: vi.fn(() => ({ experimentalFeatures: { rruleScheduling: false } })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lib/reconcile_schedule_ids_task', () => {
+      const mocked = {
+      RECONCILE_TASK_TYPE: 'osquery:reconcile-schedule-ids',
+      runReconcileTask: vi.fn(),
+      scheduleReconcileTask: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lib/osquery_app_context_services', () => {
+      const mocked = {
+      OsqueryAppContextService: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lib/telemetry/sender', () => {
+      const mocked = {
+      TelemetryEventsSender: vi.fn(() => ({ setup: vi.fn(), start: vi.fn(), stop: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lib/telemetry/receiver', () => {
+      const mocked = {
+      TelemetryReceiver: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lib/schema_service', () => {
+      const mocked = { SchemaService: vi.fn(() => ({})) };
+      return { ...mocked, default: mocked };
+    });
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('OsqueryPlugin setup', () => {
   const createSetupDeps = () => {
-    const registerSearchStrategy = jest.fn();
+    const registerSearchStrategy = vi.fn();
     const core = coreMock.createSetup();
     const dataStart = { data: { search: {} } };
 
-    core.getStartServices = jest
+    core.getStartServices = vi
       .fn()
       .mockResolvedValue([coreMock.createStart(), dataStart, {}]) as typeof core.getStartServices;
 
     const plugins = {
-      features: { registerKibanaFeature: jest.fn() },
+      features: { registerKibanaFeature: vi.fn() },
       security: { authz: {} },
       data: { search: { registerSearchStrategy } },
-      taskManager: { registerTaskDefinitions: jest.fn() },
+      taskManager: { registerTaskDefinitions: vi.fn() },
       licensing: {},
     } as unknown as SetupPlugins;
 
@@ -63,12 +99,12 @@ describe('OsqueryPlugin setup', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers the osquery search strategy once under the OSQUERY_SEARCH_STRATEGY symbol', async () => {
-    const strategyInstance = { search: jest.fn(), cancel: jest.fn() };
-    (osquerySearchStrategyProvider as jest.Mock).mockReturnValue(strategyInstance);
+    const strategyInstance = { search: vi.fn(), cancel: vi.fn() };
+    (osquerySearchStrategyProvider as Mock).mockReturnValue(strategyInstance);
 
     const { core, plugins, registerSearchStrategy } = createSetupDeps();
     const plugin = new OsqueryPlugin(coreMock.createPluginInitializerContext());
@@ -92,7 +128,7 @@ describe('OsqueryPlugin setup', () => {
     await flushPromises();
 
     expect(osquerySearchStrategyProvider).toHaveBeenCalledTimes(1);
-    const osqueryContext = (osquerySearchStrategyProvider as jest.Mock).mock.calls[0][2];
+    const osqueryContext = (osquerySearchStrategyProvider as Mock).mock.calls[0][2];
     expect(osqueryContext).toEqual(
       expect.objectContaining({
         security: plugins.security,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { RuleEventsClient } from './rule_events_client';
 
@@ -55,14 +58,14 @@ const ruleEventSource = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const createClient = (queryImpl: (request: { query: string }) => Promise<ESQLSearchResponse>) => {
-  const query = jest.fn(queryImpl);
+  const query = vi.fn(queryImpl);
   return {
     client: new RuleEventsClient({ esClient: { esql: { query } } as never, space: 'default' }),
     query,
   };
 };
 
-const lastQuery = (query: jest.Mock, predicate: (q: string) => boolean = () => true): string => {
+const lastQuery = (query: Mock, predicate: (q: string) => boolean = () => true): string => {
   const call = query.mock.calls
     .map((call_) => (call_[0] as { query: string }).query)
     .find((q) => predicate(q));

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ActionTypeSelectorModal } from './action_type_selector_modal';
@@ -34,10 +36,10 @@ const actionTypes = [
 ];
 const actionTypeRegistry = {
   ...actionTypeRegistryMock.create(),
-  get: jest.fn().mockReturnValue({ iconClass: 'icon-class' }),
+  get: vi.fn().mockReturnValue({ iconClass: 'icon-class' }),
 };
-const onClose = jest.fn();
-const onSelect = jest.fn();
+const onClose = vi.fn();
+const onSelect = vi.fn();
 
 const defaultProps = {
   actionTypes,
@@ -49,7 +51,7 @@ const defaultProps = {
 
 describe('ActionTypeSelectorModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render modal with header and body when actionTypes is not empty', () => {

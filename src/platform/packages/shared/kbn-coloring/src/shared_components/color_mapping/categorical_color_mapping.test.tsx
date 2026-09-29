@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -42,10 +44,10 @@ const mockFormatter = fieldFormatsServiceMock.createStartContract().deserialize(
 describe('color mapping', () => {
   let defaultProps: ColorMappingProps;
 
-  mockFormatter.convertToText = jest.fn(
+  mockFormatter.convertToText = vi.fn(
     (v: any) => (typeof v === 'string' ? specialTokens.get(v) ?? v : JSON.stringify(v)) // simple way to check formatting is applied
   );
-  const onModelUpdateFn = jest.fn();
+  const onModelUpdateFn = vi.fn();
 
   beforeEach(() => {
     defaultProps = {

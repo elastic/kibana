@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { internalStateActions } from '..';
 import * as resetDiscoverSessionActions from './reset_discover_session';
 import { setup } from './reset_discover_session.test';
 
 describe('openDiscoverSession', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should open discover session by navigating to locator if session id differs', async () => {
     const { internalState, services } = await setup();
 
-    const navigateSpy = jest.spyOn(services.locator, 'navigate');
-    const resetDiscoverSessionSpy = jest.spyOn(resetDiscoverSessionActions, 'resetDiscoverSession');
+    const navigateSpy = vi.spyOn(services.locator, 'navigate');
+    const resetDiscoverSessionSpy = vi.spyOn(resetDiscoverSessionActions, 'resetDiscoverSession');
 
     await internalState
       .dispatch(
@@ -39,8 +41,8 @@ describe('openDiscoverSession', () => {
   it('should reset discover session if session id is the same', async () => {
     const { internalState, persistedDiscoverSession, services } = await setup();
 
-    const navigateSpy = jest.spyOn(services.locator, 'navigate');
-    const resetDiscoverSessionSpy = jest.spyOn(resetDiscoverSessionActions, 'resetDiscoverSession');
+    const navigateSpy = vi.spyOn(services.locator, 'navigate');
+    const resetDiscoverSessionSpy = vi.spyOn(resetDiscoverSessionActions, 'resetDiscoverSession');
 
     await internalState
       .dispatch(

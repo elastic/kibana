@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -16,17 +19,29 @@ import { getSignalVersionsByIndex } from './get_signal_versions_by_index';
 import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
 import { getIndexAliasPerSpace } from './get_index_alias_per_space';
 
-jest.mock('./get_index_versions_by_index', () => ({ getIndexVersionsByIndex: jest.fn() }));
-jest.mock('./get_signal_versions_by_index', () => ({ getSignalVersionsByIndex: jest.fn() }));
-jest.mock('./get_latest_index_template_version', () => ({
-  getLatestIndexTemplateVersion: jest.fn(),
-}));
-jest.mock('./get_index_alias_per_space', () => ({ getIndexAliasPerSpace: jest.fn() }));
+vi.mock('./get_index_versions_by_index', () => {
+      const mocked = { getIndexVersionsByIndex: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_signal_versions_by_index', () => {
+      const mocked = { getSignalVersionsByIndex: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_latest_index_template_version', () => {
+      const mocked = {
+      getLatestIndexTemplateVersion: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_index_alias_per_space', () => {
+      const mocked = { getIndexAliasPerSpace: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const getIndexVersionsByIndexMock = getIndexVersionsByIndex as jest.Mock;
-const getSignalVersionsByIndexMock = getSignalVersionsByIndex as jest.Mock;
-const getLatestIndexTemplateVersionMock = getLatestIndexTemplateVersion as jest.Mock;
-const getIndexAliasPerSpaceMock = getIndexAliasPerSpace as jest.Mock;
+const getIndexVersionsByIndexMock = getIndexVersionsByIndex as Mock;
+const getSignalVersionsByIndexMock = getSignalVersionsByIndex as Mock;
+const getLatestIndexTemplateVersionMock = getLatestIndexTemplateVersion as Mock;
+const getIndexAliasPerSpaceMock = getIndexAliasPerSpace as Mock;
 
 const TEMPLATE_VERSION = 77;
 
@@ -77,7 +92,7 @@ describe('getNonMigratedSignalsInfo', () => {
 
   it('returns empty when error happens', async () => {
     getLatestIndexTemplateVersionMock.mockRejectedValueOnce(new Error('Test failure'));
-    const debugSpy = jest.spyOn(logger, 'debug');
+    const debugSpy = vi.spyOn(logger, 'debug');
 
     const result = await getNonMigratedSignalsInfo({
       esClient,

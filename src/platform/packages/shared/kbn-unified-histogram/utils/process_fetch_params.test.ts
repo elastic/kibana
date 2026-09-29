@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -25,7 +27,7 @@ describe('processFetchParams', () => {
   const services = unifiedHistogramServicesMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('assigns filters and esqlVariables to empty arrays if not provided', () => {

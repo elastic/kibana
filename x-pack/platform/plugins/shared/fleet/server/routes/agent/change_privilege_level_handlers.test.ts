@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type {
   ElasticsearchClient,
   KibanaResponseFactory,
@@ -21,17 +24,20 @@ import { FleetUnauthorizedError } from '../../errors';
 
 import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
 
-jest.mock('../../services/agents', () => ({
-  changeAgentPrivilegeLevel: jest.fn(),
-}));
+vi.mock('../../services/agents', () => {
+      const mocked = {
+      changeAgentPrivilegeLevel: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Change privilege level handlers', () => {
   describe('changeAgentPrivilegeLevelHandler', () => {
-    let esClientMock: jest.Mocked<ElasticsearchClient>;
-    let soClientMock: jest.Mocked<SavedObjectsClientContract>;
+    let esClientMock: Mocked<ElasticsearchClient>;
+    let soClientMock: Mocked<SavedObjectsClientContract>;
     let mockContext: any;
     let mockRequest: any;
-    let mockResponse: jest.Mocked<KibanaResponseFactory>;
+    let mockResponse: Mocked<KibanaResponseFactory>;
 
     const agentId = 'agent-id';
     const options = {
@@ -40,7 +46,7 @@ describe('Change privilege level handlers', () => {
     const mockActionResponse = { id: 'action-id' };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
       soClientMock = savedObjectsClientMock.create();
@@ -65,7 +71,7 @@ describe('Change privilege level handlers', () => {
     });
 
     it('returns success if agent privilege level can be changed', async () => {
-      (changeAgentPrivilegeLevel as jest.Mock).mockResolvedValue({
+      (changeAgentPrivilegeLevel as Mock).mockResolvedValue({
         actionId: mockActionResponse.id,
       });
 
@@ -81,7 +87,7 @@ describe('Change privilege level handlers', () => {
     });
 
     it('returns 403 if agent privilege level cannot be changed', async () => {
-      (changeAgentPrivilegeLevel as jest.Mock).mockRejectedValue(
+      (changeAgentPrivilegeLevel as Mock).mockRejectedValue(
         new FleetUnauthorizedError('Cannot remove root privilege')
       );
 

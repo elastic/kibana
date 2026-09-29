@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { UsersType } from '../../../../explore/users/store/model';
 import { getAnomaliesUserTableColumnsCurated } from './get_anomalies_user_table_columns';
 
 import * as i18n from './translations';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 
 const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();

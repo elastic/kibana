@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -24,48 +27,60 @@ import AlertDetailsAppSection from './alert_details_app_section';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
 
-jest.mock('@kbn/observability-alert-details', () => ({
-  AlertAnnotation: () => {},
-  AlertActiveTimeRangeAnnotation: () => {},
-  useAlertsHistory: () => ({
-    data: {
-      histogramTriggeredAlerts: [
-        { key_as_string: '2023-04-10T00:00:00.000Z', key: 1681084800000, doc_count: 2 },
-      ],
-      avgTimeToRecoverUS: 0,
-      totalTriggeredAlerts: 2,
-    },
-    isLoading: false,
-    isError: false,
-  }),
-}));
+vi.mock('@kbn/observability-alert-details', () => {
+      const mocked = {
+      AlertAnnotation: () => {},
+      AlertActiveTimeRangeAnnotation: () => {},
+      useAlertsHistory: () => ({
+        data: {
+          histogramTriggeredAlerts: [
+            { key_as_string: '2023-04-10T00:00:00.000Z', key: 1681084800000, doc_count: 2 },
+          ],
+          avgTimeToRecoverUS: 0,
+          totalTriggeredAlerts: 2,
+        },
+        isLoading: false,
+        isError: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
-  getPaddedAlertTimeRange: () => ({
-    from: '2023-03-28T10:43:13.802Z',
-    to: '2023-03-29T13:14:09.581Z',
-  }),
-}));
+vi.mock('@kbn/observability-get-padded-alert-time-range-util', () => {
+      const mocked = {
+      getPaddedAlertTimeRange: () => ({
+        from: '2023-03-28T10:43:13.802Z',
+        to: '2023-03-29T13:14:09.581Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../rule_condition_chart/rule_condition_chart', () => ({
-  RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
-}));
+vi.mock('../../../rule_condition_chart/rule_condition_chart', () => {
+      const mocked = {
+      RuleConditionChart: vi.fn(() => <div data-test-subj="RuleConditionChart" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./log_rate_analysis', () => ({
-  LogRateAnalysis: jest.fn(() => <div data-test-subj="LogRateAnalysis" />),
-}));
+vi.mock('./log_rate_analysis', () => {
+      const mocked = {
+      LogRateAnalysis: vi.fn(() => <div data-test-subj="LogRateAnalysis" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices = {
   ...coreMock.createStart(),
   charts: mockedChartStartContract,
   aiops: {
-    EmbeddableChangePointChart: jest.fn(),
+    EmbeddableChangePointChart: vi.fn(),
   },
   data: {
     search: {
       searchSource: {
-        create: jest.fn().mockResolvedValue({
-          getField: jest.fn().mockReturnValue({ id: 'test-index' }),
+        create: vi.fn().mockResolvedValue({
+          getField: vi.fn().mockReturnValue({ id: 'test-index' }),
         }),
       },
     },
@@ -73,9 +88,9 @@ const mockServices = {
   share: {
     url: {
       locators: {
-        get: jest
+        get: vi
           .fn()
-          .mockReturnValue({ getRedirectUrl: jest.fn().mockReturnValue('/view-in-app-url') }),
+          .mockReturnValue({ getRedirectUrl: vi.fn().mockReturnValue('/view-in-app-url') }),
       },
     },
   },
@@ -88,11 +103,14 @@ const mockServices = {
   },
 };
 
-jest.mock('../../../../utils/kibana_react', () => ({
-  useKibana: () => ({
-    services: mockServices,
-  }),
-}));
+vi.mock('../../../../utils/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: mockServices,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
@@ -116,7 +134,7 @@ describe('AlertDetailsAppSection', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render rule and alert data', async () => {
@@ -127,8 +145,8 @@ describe('AlertDetailsAppSection', () => {
   });
 
   it('should render annotations', async () => {
-    const mockedRuleConditionChart = jest.fn(() => <div data-test-subj="RuleConditionChart" />);
-    (RuleConditionChart as jest.Mock).mockImplementation(mockedRuleConditionChart);
+    const mockedRuleConditionChart = vi.fn(() => <div data-test-subj="RuleConditionChart" />);
+    (RuleConditionChart as Mock).mockImplementation(mockedRuleConditionChart);
     const alertDetailsAppSectionComponent = renderComponent(
       {},
       { ['kibana.alert.end']: '2023-03-28T14:40:00.000Z' }

@@ -5,27 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { ContextualServiceMapSectionProps } from '../../../service_map/contextual_map/contextual_service_map_section';
 import { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
 import { MobileServiceOverviewServiceMapSection } from '.';
 
-const mockUseApmParams = jest.fn();
-jest.mock('../../../../../hooks/use_apm_params', () => ({
-  useApmParams: () => mockUseApmParams(),
-}));
+const mockUseApmParams = vi.fn();
+vi.mock('../../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => mockUseApmParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseApmServiceContext = jest.fn();
-jest.mock('../../../../../context/apm_service/use_apm_service_context', () => ({
-  useApmServiceContext: () => mockUseApmServiceContext(),
-}));
+const mockUseApmServiceContext = vi.fn();
+vi.mock('../../../../../context/apm_service/use_apm_service_context', () => {
+      const mocked = {
+      useApmServiceContext: () => mockUseApmServiceContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockContextualServiceMapSection = jest.fn((_props: ContextualServiceMapSectionProps) => null);
-jest.mock('../../../service_map/contextual_map/contextual_service_map_section', () => ({
-  ContextualServiceMapSection: (props: ContextualServiceMapSectionProps) =>
-    mockContextualServiceMapSection(props),
-}));
+const mockContextualServiceMapSection = vi.fn((_props: ContextualServiceMapSectionProps) => null);
+vi.mock('../../../service_map/contextual_map/contextual_service_map_section', () => {
+      const mocked = {
+      ContextualServiceMapSection: (props: ContextualServiceMapSectionProps) =>
+        mockContextualServiceMapSection(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseQuery = {
   environment: 'ENVIRONMENT_ALL',

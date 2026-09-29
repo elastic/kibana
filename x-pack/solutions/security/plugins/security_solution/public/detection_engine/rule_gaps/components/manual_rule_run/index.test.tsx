@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -16,8 +18,8 @@ const convertToDatePickerFormat = (date: moment.Moment) => {
 };
 
 describe('ManualRuleRunModal', () => {
-  const onCancelMock = jest.fn();
-  const onConfirmMock = jest.fn();
+  const onCancelMock = vi.fn();
+  const onConfirmMock = vi.fn();
 
   let startDatePicker: Element;
   let endDatePicker: Element;

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ActionsClient } from '../../../../actions_client';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
@@ -32,21 +35,21 @@ import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+    connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
       actual.connectorTypeIsDual(actionTypeId)
     ),
   };
 });
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -55,50 +58,59 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-jest.mock('../../../../lib/get_oauth_jwt_access_token', () => ({
-  getOAuthJwtAccessToken: jest.fn(),
-}));
-jest.mock('../../../../lib/get_oauth_client_credentials_access_token', () => ({
-  getOAuthClientCredentialsAccessToken: jest.fn(),
-}));
+vi.mock('../../../../lib/get_oauth_jwt_access_token', () => {
+      const mocked = {
+      getOAuthJwtAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../lib/get_oauth_client_credentials_access_token', () => {
+      const mocked = {
+      getOAuthClientCredentialsAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: () => 'uuidv4',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'uuidv4',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const bulkExecutionEnqueuer = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const eventLogClient = eventLogClientMock.create();
-const getEventLogClient = jest.fn();
+const getEventLogClient = vi.fn();
 const connectorTokenClient = connectorTokenClientMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const getAxiosInstanceWithAuth = jest.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
-const actionTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
+const actionTypeRegistry: ActionTypeRegistry = vi.fn() as unknown as ActionTypeRegistry;
 const authTypeRegistry: AuthTypeRegistry =
   authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
 describe('getAll()', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation((actionTypeId: string) =>
-      jest.requireActual('@kbn/connector-specs').connectorTypeHasInboundEvents(actionTypeId)
+    vi.resetAllMocks();
+    (connectorTypeHasInboundEvents as Mock).mockImplementation(async (actionTypeId: string) =>
+      (await vi.importActual('@kbn/connector-specs')).connectorTypeHasInboundEvents(actionTypeId)
     );
-    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
-      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    (connectorTypeIsDual as Mock).mockImplementation(async (actionTypeId: string) =>
+      (await vi.importActual('@kbn/connector-specs')).connectorTypeIsDual(actionTypeId)
     );
-    actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+    actionTypeRegistry.isDeprecated = vi.fn().mockReturnValue(false);
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -119,8 +131,8 @@ describe('getAll()', () => {
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
     });
-    (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
+    (getOAuthJwtAccessToken as Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
+    (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValue(
       `Bearer clienttokentokentoken`
     );
     getEventLogClient.mockResolvedValue(eventLogClient);
@@ -671,10 +683,10 @@ describe('getAll()', () => {
     });
 
     test('reports inbound events off for a dual connector without identity', async () => {
-      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (connectorTypeHasInboundEvents as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
-      (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (connectorTypeIsDual as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
@@ -730,10 +742,10 @@ describe('getAll()', () => {
     });
 
     test('reports inbound events on for a dual connector with identity', async () => {
-      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (connectorTypeHasInboundEvents as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
-      (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (connectorTypeIsDual as Mock).mockImplementation(
         (actionTypeId: string) => actionTypeId === '.dual'
       );
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
@@ -867,7 +879,7 @@ describe('getAll()', () => {
 
     test('returns deprecated connectors', async () => {
       // force registry to return deprecated true
-      actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(true);
+      actionTypeRegistry.isDeprecated = vi.fn().mockReturnValue(true);
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 1,
         per_page: 10,
@@ -1465,9 +1477,9 @@ describe('getAll()', () => {
 
 describe('getAllUnsecured()', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
-    actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+    vi.resetAllMocks();
+    vi.clearAllMocks();
+    actionTypeRegistry.isDeprecated = vi.fn().mockReturnValue(false);
   });
 
   test('calls internalSavedObjectRepository with parameters and returns inMemoryConnectors correctly', async () => {

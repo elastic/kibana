@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -25,22 +28,22 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepSaveArchiveEntries, cleanupArchiveEntriesStep } from './step_save_archive_entries';
 
-jest.mock('../../../archive/storage', () => {
+vi.mock('../../../archive/storage', async () => {
   return {
-    ...jest.requireActual('../../../archive/storage'),
-    saveArchiveEntriesFromAssetsMap: jest.fn(),
-    removeArchiveEntries: jest.fn(),
+    ...(await vi.importActual('../../../archive/storage')),
+    saveArchiveEntriesFromAssetsMap: vi.fn(),
+    removeArchiveEntries: vi.fn(),
   };
 });
 
 const mockedSaveArchiveEntriesFromAssetsMap =
-  saveArchiveEntriesFromAssetsMap as jest.MockedFunction<typeof saveArchiveEntriesFromAssetsMap>;
+  saveArchiveEntriesFromAssetsMap as MockedFunction<typeof saveArchiveEntriesFromAssetsMap>;
 
-const mockedRemoveArchiveEntries = removeArchiveEntries as jest.MockedFunction<
+const mockedRemoveArchiveEntries = removeArchiveEntries as MockedFunction<
   typeof removeArchiveEntries
 >;
-let soClient: jest.Mocked<SavedObjectsClientContract>;
-let esClient: jest.Mocked<ElasticsearchClient>;
+let soClient: Mocked<SavedObjectsClientContract>;
+let esClient: Mocked<ElasticsearchClient>;
 
 const assetsMap = new Map([
   [
@@ -113,7 +116,7 @@ describe('stepSaveArchiveEntries', () => {
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
-    jest.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockReset();
+    vi.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockReset();
   });
 
   appContextService.start(
@@ -141,13 +144,13 @@ describe('stepSaveArchiveEntries', () => {
   };
 
   it('Should return empty packageAssetRefs if saved_objects were not found', async () => {
-    jest.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockResolvedValue({
+    vi.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockResolvedValue({
       saved_objects: [],
     });
     const res = await stepSaveArchiveEntries({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -169,7 +172,7 @@ describe('stepSaveArchiveEntries', () => {
   });
 
   it('Should return packageAssetRefs', async () => {
-    jest.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockResolvedValue({
+    vi.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockResolvedValue({
       saved_objects: [
         {
           id: 'test',
@@ -190,7 +193,7 @@ describe('stepSaveArchiveEntries', () => {
     const res = await stepSaveArchiveEntries({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -218,7 +221,7 @@ describe('stepSaveArchiveEntries', () => {
   });
 
   it('should save package icons, readme, and changelog but not Kibana assets with useStreaming:true ', async () => {
-    jest.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockResolvedValue({
+    vi.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockResolvedValue({
       saved_objects: [
         {
           id: 'test',
@@ -239,7 +242,7 @@ describe('stepSaveArchiveEntries', () => {
     await stepSaveArchiveEntries({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -257,7 +260,7 @@ describe('stepSaveArchiveEntries', () => {
     });
     expect(
       [
-        ...(jest
+        ...(vi
           .mocked(mockedSaveArchiveEntriesFromAssetsMap)
           .mock.lastCall?.[0].assetsMap?.keys() ?? []),
       ].sort()
@@ -312,7 +315,7 @@ describe('cleanupArchiveEntriesStep', () => {
     await cleanupArchiveEntriesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -340,7 +343,7 @@ describe('cleanupArchiveEntriesStep', () => {
     await cleanupArchiveEntriesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -366,7 +369,7 @@ describe('cleanupArchiveEntriesStep', () => {
     await cleanupArchiveEntriesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -390,7 +393,7 @@ describe('cleanupArchiveEntriesStep', () => {
     await cleanupArchiveEntriesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -415,7 +418,7 @@ describe('cleanupArchiveEntriesStep', () => {
     await cleanupArchiveEntriesStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,

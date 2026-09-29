@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createPageVisibility$ } from './page_visibility';
 
 let mockPageVisibility: DocumentVisibilityState = 'visible';
-jest.spyOn(document, 'visibilityState', 'get').mockImplementation(() => mockPageVisibility);
+vi.spyOn(document, 'visibilityState', 'get').mockImplementation(() => mockPageVisibility);
 
 test('createPageVisibility$ returns an observable that emits visibility state', () => {
   const pageVisibility$ = createPageVisibility$();
 
-  const fn = jest.fn();
+  const fn = vi.fn();
   pageVisibility$.subscribe(fn);
 
   expect(fn).toHaveBeenCalledTimes(1);

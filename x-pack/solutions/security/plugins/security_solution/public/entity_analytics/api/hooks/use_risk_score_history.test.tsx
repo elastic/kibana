@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -14,15 +17,21 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import { EntityType } from '../../../../common/entity_analytics/types';
 
-jest.mock('../api');
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
-jest.mock('../../../common/hooks/use_error_toast', () => ({
-  useErrorToast: jest.fn(),
-}));
+vi.mock('../api');
+vi.mock('../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/hooks/use_error_toast', () => {
+      const mocked = {
+      useErrorToast: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchRiskScoreHistory = jest.fn();
+const mockFetchRiskScoreHistory = vi.fn();
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
     {children}
@@ -49,11 +58,11 @@ const historyResponse = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (useEntityAnalyticsRoutes as jest.Mock).mockReturnValue({
+  vi.clearAllMocks();
+  (useEntityAnalyticsRoutes as Mock).mockReturnValue({
     fetchRiskScoreHistory: mockFetchRiskScoreHistory,
   });
-  (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
   mockFetchRiskScoreHistory.mockResolvedValue(historyResponse);
 });
 
@@ -111,7 +120,7 @@ describe('useRiskScoreHistory', () => {
   });
 
   it('does not fetch when the riskScoreHistoryEnabled feature flag is off', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(false);
 
     renderHook(() => useRiskScoreHistory(defaultParams), { wrapper: TestWrapper });
 
@@ -126,7 +135,7 @@ describe('useRiskScoreHistory', () => {
     renderHook(() => useRiskScoreHistory(defaultParams), { wrapper: TestWrapper });
 
     await waitFor(() => {
-      const calls = (useErrorToast as jest.Mock).mock.calls;
+      const calls = (useErrorToast as Mock).mock.calls;
       const errorCall = calls.find(([, e]: [unknown, unknown]) => e != null);
       expect(errorCall?.[1]).toBe(error);
     });

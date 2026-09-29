@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { CrowdStrikeTokenManager } from './token_manager';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -19,9 +22,9 @@ import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
 
 describe('CrowdStrikeTokenManager', () => {
   let csTokenManager: CrowdStrikeTokenManager;
-  let connectorTokenClientMock: jest.Mocked<ConnectorTokenClientContract>;
+  let connectorTokenClientMock: Mocked<ConnectorTokenClientContract>;
   let usageCollector: ConnectorUsageCollector;
-  let mockRequest: jest.Mock;
+  let mockRequest: Mock;
 
   const createConnectorTokenMock = (overrides: Partial<ConnectorToken> = {}): ConnectorToken => {
     const expiresAt = new Date();
@@ -40,14 +43,14 @@ describe('CrowdStrikeTokenManager', () => {
   };
 
   beforeEach(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     const mockServices = actionsMock.createServices();
-    connectorTokenClientMock = jest.mocked(mockServices.connectorTokenClient);
+    connectorTokenClientMock = vi.mocked(mockServices.connectorTokenClient);
 
     // Apply connector token client mock behavior
     let cachedTokenMock: ConnectorToken | null = null;
 
-    jest
+    vi
       .spyOn(
         connectorTokenClientMock as unknown as { create: ConnectorTokenClientContract['create'] },
         'create'
@@ -72,7 +75,7 @@ describe('CrowdStrikeTokenManager', () => {
         return cachedTokenMock;
       }) as unknown as ConnectorTokenClientContract['create']);
 
-    jest
+    vi
       .spyOn(
         connectorTokenClientMock as unknown as { update: ConnectorTokenClientContract['update'] },
         'update'
@@ -91,11 +94,11 @@ describe('CrowdStrikeTokenManager', () => {
         }
       );
 
-    jest.spyOn(connectorTokenClientMock, 'get').mockImplementation(async () => {
+    vi.spyOn(connectorTokenClientMock, 'get').mockImplementation(async () => {
       return { hasErrors: !cachedTokenMock, connectorToken: cachedTokenMock };
     });
 
-    jest.spyOn(connectorTokenClientMock, 'updateOrReplace').mockImplementation(async (options) => {
+    vi.spyOn(connectorTokenClientMock, 'updateOrReplace').mockImplementation(async (options) => {
       // Calculate expiration time based on expiresInSec
       const expiresAt = new Date(
         options.tokenRequestDate + (options.expiresInSec ?? 0) * 1000
@@ -108,12 +111,12 @@ describe('CrowdStrikeTokenManager', () => {
       });
     });
 
-    jest.spyOn(connectorTokenClientMock, 'deleteConnectorTokens').mockImplementation(async () => {
+    vi.spyOn(connectorTokenClientMock, 'deleteConnectorTokens').mockImplementation(async () => {
       cachedTokenMock = null;
     });
 
     const serviceParams: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets> & {
-      apiRequest: jest.Mock;
+      apiRequest: Mock;
     } = {
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: 'connector-id', type: '.crowdstrike' },
@@ -140,7 +143,7 @@ describe('CrowdStrikeTokenManager', () => {
       },
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#get()', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -14,13 +16,16 @@ import { DashboardEnhanceButton } from './dashboard_enhance_button';
 
 let mockApplicationBreakpoint: string | undefined = 'xl';
 
-jest.mock('@kbn/core-chrome-layout-utils', () => ({
-  useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
-}));
+vi.mock('@kbn/core-chrome-layout-utils', () => {
+      const mocked = {
+      useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TOOLTIP = 'Improve the content and style of your dashboard using AI';
 
-const renderButton = (onClick = jest.fn()) => {
+const renderButton = (onClick = vi.fn()) => {
   render(
     <EuiThemeProvider>
       <DashboardEnhanceButton action={{ onClick, tooltip: TOOLTIP }} />

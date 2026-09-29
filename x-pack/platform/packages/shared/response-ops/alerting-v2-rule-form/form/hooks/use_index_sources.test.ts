@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -14,16 +16,16 @@ import type { EsqlDatasetsResult } from '@kbn/esql-types';
 import { createQueryClientWrapper } from '../../test_utils';
 import { useIndexSources } from './use_index_sources';
 
-jest.mock('@kbn/esql-utils');
+vi.mock('@kbn/esql-utils');
 
-const mockGetESQLSources = jest.mocked(getESQLSources);
+const mockGetESQLSources = vi.mocked(getESQLSources);
 
 describe('useIndexSources', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let application: ReturnType<typeof applicationServiceMock.createStartContract>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http = httpServiceMock.createStartContract();
     application = applicationServiceMock.createStartContract();
   });
@@ -113,7 +115,7 @@ describe('useIndexSources', () => {
   describe('with getDatasets', () => {
     it('merges federated datasets into the options list', async () => {
       mockGetESQLSources.mockResolvedValue([{ name: 'logs-*', hidden: false }]);
-      const mockGetDatasets = jest.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
+      const mockGetDatasets = vi.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
         datasets: [
           { name: 'federation.orders', data_source: 's3', resource: 'orders' },
           { name: 'federation.customers', data_source: 's3', resource: 'customers' },
@@ -138,7 +140,7 @@ describe('useIndexSources', () => {
 
     it('deduplicates datasets that share a name with an existing index', async () => {
       mockGetESQLSources.mockResolvedValue([{ name: 'logs-*', hidden: false }]);
-      const mockGetDatasets = jest.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
+      const mockGetDatasets = vi.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
         datasets: [
           { name: 'logs-*', data_source: 's3', resource: 'logs' },
           { name: 'federation.events', data_source: 's3', resource: 'events' },
@@ -159,7 +161,7 @@ describe('useIndexSources', () => {
 
     it('returns only index options when getDatasets resolves with an empty list', async () => {
       mockGetESQLSources.mockResolvedValue([{ name: 'logs-*', hidden: false }]);
-      const mockGetDatasets = jest
+      const mockGetDatasets = vi
         .fn<Promise<EsqlDatasetsResult>, []>()
         .mockResolvedValue({ datasets: [] });
 
@@ -177,7 +179,7 @@ describe('useIndexSources', () => {
 
     it('returns only datasets when getESQLSources fails', async () => {
       mockGetESQLSources.mockRejectedValue(new Error('Sources unavailable'));
-      const mockGetDatasets = jest.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
+      const mockGetDatasets = vi.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
         datasets: [{ name: 'federation.orders', data_source: 's3', resource: 'orders' }],
       });
 
@@ -195,7 +197,7 @@ describe('useIndexSources', () => {
 
     it('returns only index options when getDatasets fails', async () => {
       mockGetESQLSources.mockResolvedValue([{ name: 'logs-*', hidden: false }]);
-      const mockGetDatasets = jest
+      const mockGetDatasets = vi
         .fn<Promise<EsqlDatasetsResult>, []>()
         .mockRejectedValue(new Error('Datasets unavailable'));
 

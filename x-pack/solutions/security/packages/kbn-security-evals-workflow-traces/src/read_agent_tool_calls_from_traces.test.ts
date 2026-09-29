@@ -5,27 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { toHashedId } from '@kbn/agent-builder-server';
 import { readAgentToolCallsFromTraces } from './read_agent_tool_calls_from_traces';
 
 const silentLog = {
-  warning: jest.fn(),
-  info: jest.fn(),
-  debug: jest.fn(),
-  error: jest.fn(),
+  warning: vi.fn(),
+  info: vi.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
 } as unknown as ToolingLog;
 
 const mockClient = (
   responses: Array<{ columns: Array<{ name: string }>; values: unknown[][] }>
 ) => {
-  const request = jest.fn();
+  const request = vi.fn();
   for (const response of responses) {
     request.mockResolvedValueOnce(response);
   }
   return { transport: { request } } as unknown as EsClient & {
-    transport: { request: jest.Mock };
+    transport: { request: Mock };
   };
 };
 
@@ -143,7 +146,7 @@ describe('readAgentToolCallsFromTraces', () => {
   });
 
   it('probes the same index pattern when no tool spans match, and accepts empty when spans exist', async () => {
-    const request = jest.fn(async ({ body }: { body: { query: string } }) =>
+    const request = vi.fn(async ({ body }: { body: { query: string } }) =>
       body.query.includes('STATS')
         ? { columns: [{ name: 'span_count' }], values: [[3]] }
         : { columns: [{ name: 'tool_id' }], values: [] }
@@ -165,7 +168,7 @@ describe('readAgentToolCallsFromTraces', () => {
   });
 
   it('retries while the probe finds no spans, then reports unavailable', async () => {
-    const request = jest.fn(async ({ body }: { body: { query: string } }) =>
+    const request = vi.fn(async ({ body }: { body: { query: string } }) =>
       body.query.includes('STATS')
         ? { columns: [{ name: 'span_count' }], values: [[0]] }
         : { columns: [{ name: 'tool_id' }], values: [] }

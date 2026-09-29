@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
@@ -19,7 +21,7 @@ describe('getOutputSchemaForStepType', () => {
   let registry: WorkflowContextRegistry;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConnectorsMap = new Map();
     mockStepOutput = undefined;
     registry = createMockWorkflowContextRegistry({
@@ -321,7 +323,7 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepOutput = {
         outputSchema: { def: { type: 'unknown' } } as any,
-        getDynamicOutputSchema: jest.fn().mockReturnValue(mockDynamicSchema),
+        getDynamicOutputSchema: vi.fn().mockReturnValue(mockDynamicSchema),
       };
 
       const mockNode = {
@@ -359,7 +361,7 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepOutput = {
         outputSchema: mockStaticSchema,
-        getDynamicOutputSchema: jest.fn().mockImplementation(() => {
+        getDynamicOutputSchema: vi.fn().mockImplementation(() => {
           throw new Error('Dynamic schema generation failed');
         }),
       };

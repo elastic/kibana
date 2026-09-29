@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
@@ -14,15 +17,21 @@ import { useKibana } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useMarkdownEditorPluginClickedEBT } from './use_markdown_editor_ebt';
 
-jest.mock('../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/cases_context/use_cases_context', () => ({
-  useCasesContext: jest.fn(),
-}));
+vi.mock('../components/cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getMockServices = (reportEvent: jest.Mock) => ({
+const getMockServices = (reportEvent: Mock) => ({
   services: {
     analytics: {
       reportEvent,
@@ -31,12 +40,12 @@ const getMockServices = (reportEvent: jest.Mock) => ({
 });
 
 describe('useMarkdownEditorPluginClickedEBT', () => {
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue(getMockServices(reportEvent));
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: [SECURITY_SOLUTION_OWNER] });
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue(getMockServices(reportEvent));
+    (useCasesContext as Mock).mockReturnValue({ owner: [SECURITY_SOLUTION_OWNER] });
   });
 
   it('reports the plugin type with the owner', () => {

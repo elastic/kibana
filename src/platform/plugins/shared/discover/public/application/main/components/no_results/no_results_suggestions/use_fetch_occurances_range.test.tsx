@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import * as RxApi from 'rxjs';
@@ -26,7 +28,7 @@ import {
 
 const services = createDiscoverServicesMock();
 
-const lastValueFromSpy = jest.spyOn(RxApi, 'lastValueFrom');
+const lastValueFromSpy = vi.spyOn(RxApi, 'lastValueFrom');
 
 const render = async (params: Omit<Params, 'services'>) => {
   const hookResult = renderHook(() => useFetchOccurrencesRange({ ...params, services }), {
@@ -260,7 +262,7 @@ describe('useFetchOccurrencesRange', () => {
     });
 
     it('should handle AbortError silently', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
       lastValueFromSpy.mockImplementation(async () => {
         const error = new Error('Aborted');
         error.name = 'AbortError';

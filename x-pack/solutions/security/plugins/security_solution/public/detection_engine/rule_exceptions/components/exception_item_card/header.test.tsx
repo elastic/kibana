@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
@@ -25,13 +27,13 @@ describe('ExceptionItemCardHeader', () => {
               key: 'edit',
               icon: 'pencil',
               label: i18n.EXCEPTION_ITEM_EDIT_BUTTON,
-              onClick: jest.fn(),
+              onClick: vi.fn(),
             },
             {
               key: 'delete',
               icon: 'trash',
               label: i18n.EXCEPTION_ITEM_DELETE_BUTTON,
-              onClick: jest.fn(),
+              onClick: vi.fn(),
             },
           ]}
         />
@@ -44,8 +46,8 @@ describe('ExceptionItemCardHeader', () => {
   });
 
   it('it displays actions', () => {
-    const handleEdit = jest.fn();
-    const handleDelete = jest.fn();
+    const handleEdit = vi.fn();
+    const handleDelete = vi.fn();
     const wrapper = mount(
       <TestProviders>
         <ExceptionItemCardHeader
@@ -85,8 +87,8 @@ describe('ExceptionItemCardHeader', () => {
   });
 
   it('it disables actions if disableActions is true', () => {
-    const handleEdit = jest.fn();
-    const handleDelete = jest.fn();
+    const handleEdit = vi.fn();
+    const handleDelete = vi.fn();
     const wrapper = mount(
       <TestProviders>
         <ExceptionItemCardHeader

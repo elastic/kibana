@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { transformLinksIn, transformLinksOut } from './transform_links';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../constants';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../constants';
 
-jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('fb1b3fc7-6e12-4542-bcf5-c61ad77241c5')
-    .mockReturnValueOnce('1409fabb-1d2b-49c2-a2dc-705bd8fabd0c'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi
+        .fn()
+        .mockReturnValueOnce('fb1b3fc7-6e12-4542-bcf5-c61ad77241c5')
+        .mockReturnValueOnce('1409fabb-1d2b-49c2-a2dc-705bd8fabd0c'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('extractReferences', () => {
   test('should extract dashboard references from dashboard links', () => {

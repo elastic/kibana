@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSetAlertTags } from './use_set_alert_tags';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 
-jest.mock('../../../hooks/use_app_toasts');
+vi.mock('../../../hooks/use_app_toasts');
 
 describe('useSetAlertTags', () => {
   it('should return a function', () => {
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
+    (useAppToasts as Mock).mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
     });
 
     const { result } = renderHook(() => useSetAlertTags());

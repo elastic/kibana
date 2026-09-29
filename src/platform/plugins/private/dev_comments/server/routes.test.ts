@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RequestHandler } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { COMMENTS_API_PATH } from '../common';
@@ -17,9 +20,9 @@ import { registerCommentsRoutes } from './routes';
 describe('comments routes', () => {
   const router = httpServiceMock.createRouter();
   const client = {
-    create: jest.fn(),
-    update: jest.fn(),
-  } as unknown as jest.Mocked<CommentsClient>;
+    create: vi.fn(),
+    update: vi.fn(),
+  } as unknown as Mocked<CommentsClient>;
   registerCommentsRoutes(router, Promise.resolve(client));
 
   const handler = (method: 'post' | 'patch', path: string): RequestHandler => {

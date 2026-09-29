@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errorToToaster } from './utils';
 import { ToasterError } from './errors';
 
@@ -13,10 +15,10 @@ const ApiError = class extends Error {
 };
 
 describe('error_to_toaster', () => {
-  let dispatchToaster = jest.fn();
+  let dispatchToaster = vi.fn();
 
   beforeEach(() => {
-    dispatchToaster = jest.fn();
+    dispatchToaster = vi.fn();
   });
 
   describe('#errorToToaster', () => {

@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { generateConnectorName, toValidIndexName } from './generate_connector_name';
 import { indexOrAliasExists } from './exists_index';
 import { MANAGED_CONNECTOR_INDEX_PREFIX } from '../constants';
 
-jest.mock('./exists_index');
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => '12345678-abcd-1234-efgh-123456789012'),
-}));
+vi.mock('./exists_index');
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => '12345678-abcd-1234-efgh-123456789012'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('generateConnectorName', () => {
   const mockClient = {} as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default behavior: index doesn't exist
-    (indexOrAliasExists as jest.Mock).mockResolvedValue(false);
+    (indexOrAliasExists as Mock).mockResolvedValue(false);
   });
 
   describe('toValidIndexName function', () => {
@@ -70,7 +76,7 @@ describe('generateConnectorName', () => {
 
     it('appends a suffix if index name already exists', async () => {
       // First call: index exists, second call: index doesn't exist
-      (indexOrAliasExists as jest.Mock).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+      (indexOrAliasExists as Mock).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
 
       const result = await generateConnectorName(mockClient, 'test-type', false, 'My Connector!');
 
@@ -90,7 +96,7 @@ describe('generateConnectorName', () => {
 
     it('throws error after 20 failed attempts to generate unique name', async () => {
       // Always return true (index exists) for all calls
-      (indexOrAliasExists as jest.Mock).mockResolvedValue(true);
+      (indexOrAliasExists as Mock).mockResolvedValue(true);
 
       await expect(
         generateConnectorName(mockClient, 'test-type', false, 'My Connector!')
@@ -117,7 +123,7 @@ describe('generateConnectorName', () => {
     });
 
     it('tries different suffixes if index name already exists', async () => {
-      (indexOrAliasExists as jest.Mock).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+      (indexOrAliasExists as Mock).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
 
       const result = await generateConnectorName(mockClient, 'testType', false);
 
@@ -132,7 +138,7 @@ describe('generateConnectorName', () => {
     });
 
     it('throws error after 20 failed attempts to generate unique name', async () => {
-      (indexOrAliasExists as jest.Mock).mockResolvedValue(true);
+      (indexOrAliasExists as Mock).mockResolvedValue(true);
 
       await expect(generateConnectorName(mockClient, 'testType', false)).rejects.toThrow(
         'generate_index_name_error'

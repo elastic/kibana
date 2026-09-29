@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import {
   createToolHandlerContext,
@@ -21,10 +23,10 @@ const makePackage = (name: string, status: string) => ({ name, status });
 const createMockDeps = (fleetAvailable = true) => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
-  const getPackagesMock = jest.fn();
+  const getPackagesMock = vi.fn();
 
   const fleetPlugin = fleetAvailable
-    ? { packageService: { asScoped: jest.fn().mockReturnValue({ getPackages: getPackagesMock }) } }
+    ? { packageService: { asScoped: vi.fn().mockReturnValue({ getPackages: getPackagesMock }) } }
     : undefined;
 
   mockCore.getStartServices.mockResolvedValue([mockCoreStart, { fleet: fleetPlugin }, {}] as never);

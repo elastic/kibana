@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -19,17 +21,26 @@ import {
 } from './test_ids';
 import { AlertReason } from './alert_reason';
 
-jest.mock('../../../../timelines/components/timeline/body/renderers/get_row_renderer', () => ({
-  getRowRenderer: jest.fn(),
-}));
+vi.mock('../../../../timelines/components/timeline/body/renderers/get_row_renderer', () => {
+      const mocked = {
+      getRowRenderer: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../timelines/components/timeline/body/renderers', () => ({
-  defaultRowRenderers: [],
-}));
+vi.mock('../../../../timelines/components/timeline/body/renderers', () => {
+      const mocked = {
+      defaultRowRenderers: [],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => ({
-  useEventDetails: jest.fn(),
-}));
+vi.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => {
+      const mocked = {
+      useEventDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -65,12 +76,12 @@ const ERROR_MESSAGE = 'There was an error displaying data.';
 const mockDataAsNestedObject = { _id: 'test-id' };
 
 describe('<AlertReason />', () => {
-  const mockGetRowRenderer = jest.mocked(getRowRenderer);
-  const mockUseEventDetails = jest.mocked(useEventDetails);
-  const mockRenderRow = jest.fn();
+  const mockGetRowRenderer = vi.mocked(getRowRenderer);
+  const mockUseEventDetails = vi.mocked(useEventDetails);
+  const mockRenderRow = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRenderRow.mockReturnValue(
       <span data-test-subj="full-reason-renderer">{'Full reason renderer'}</span>
     );
@@ -83,9 +94,9 @@ describe('<AlertReason />', () => {
       browserFields: {},
       dataAsNestedObject: mockDataAsNestedObject,
       dataFormattedForFieldBrowser: null,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       loading: false,
-      refetchFlyoutData: jest.fn(),
+      refetchFlyoutData: vi.fn(),
       searchHit: undefined,
     });
   });
@@ -154,9 +165,9 @@ describe('<AlertReason />', () => {
       browserFields: {},
       dataAsNestedObject: null,
       dataFormattedForFieldBrowser: null,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       loading: true,
-      refetchFlyoutData: jest.fn(),
+      refetchFlyoutData: vi.fn(),
       searchHit: undefined,
     });
 

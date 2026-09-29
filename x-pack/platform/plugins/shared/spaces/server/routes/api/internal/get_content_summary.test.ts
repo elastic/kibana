@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { capitalize } from 'lodash';
 import * as Rx from 'rxjs';
 
@@ -45,7 +48,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(vi.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -220,7 +223,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
       },
     };
 
-    const findMock = savedObjectsClient.find as jest.Mock;
+    const findMock = savedObjectsClient.find as Mock;
 
     findMock.mockReturnValue(mockAggregationResult);
 
@@ -292,7 +295,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
       },
     };
 
-    const findMock = savedObjectsClient.find as jest.Mock;
+    const findMock = savedObjectsClient.find as Mock;
 
     findMock.mockReturnValue(mockAggregationResult);
 
@@ -385,7 +388,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
       },
     };
 
-    const findMock = savedObjectsClient.find as jest.Mock;
+    const findMock = savedObjectsClient.find as Mock;
 
     findMock.mockReturnValue(mockAggregationResult);
 

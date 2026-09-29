@@ -5,29 +5,40 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AvailabilityPanel } from './availability_panel';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-const mockEmbeddable = jest.fn((_props: Record<string, unknown>) => null);
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      exploratoryView: { ExploratoryViewEmbeddable: mockEmbeddable },
-    },
-  }),
-}));
+const mockEmbeddable = vi.fn((_props: Record<string, unknown>) => null);
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          exploratoryView: { ExploratoryViewEmbeddable: mockEmbeddable },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMonitorQueryFilters = jest.fn();
-jest.mock('../hooks/use_monitor_query_filters', () => ({
-  useMonitorQueryFilters: () => mockUseMonitorQueryFilters(),
-}));
+const mockUseMonitorQueryFilters = vi.fn();
+vi.mock('../hooks/use_monitor_query_filters', () => {
+      const mocked = {
+      useMonitorQueryFilters: () => mockUseMonitorQueryFilters(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSyntheticsDataViewIndexPatterns = jest.fn();
-jest.mock('../hooks/use_synthetics_data_view_index_patterns', () => ({
-  useSyntheticsDataViewIndexPatterns: () => mockUseSyntheticsDataViewIndexPatterns(),
-}));
+const mockUseSyntheticsDataViewIndexPatterns = vi.fn();
+vi.mock('../hooks/use_synthetics_data_view_index_patterns', () => {
+      const mocked = {
+      useSyntheticsDataViewIndexPatterns: () => mockUseSyntheticsDataViewIndexPatterns(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // AvailabilityPanel is the simplest of the 11 Overview-tab consumers of
 // ExploratoryViewEmbeddable. The CCS plumbing in PR5 is identical across all

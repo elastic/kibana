@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -258,12 +261,12 @@ describe('toExceptionItemOutput', () => {
 });
 
 describe('findExceptionItemByItemId', () => {
-  let mockContextManager: jest.Mocked<StepHandlerContext['contextManager']>;
+  let mockContextManager: Mocked<StepHandlerContext['contextManager']>;
 
   beforeEach(() => {
     mockContextManager = {
-      callKibanaApi: jest.fn(),
-    } as unknown as jest.Mocked<StepHandlerContext['contextManager']>;
+      callKibanaApi: vi.fn(),
+    } as unknown as Mocked<StepHandlerContext['contextManager']>;
   });
 
   it('returns the validated item summary when the item exists', async () => {
@@ -321,8 +324,8 @@ describe('findExceptionItemByItemId', () => {
 describe('createExceptionItemForRule', () => {
   const mockManager = () =>
     ({
-      callKibanaApi: jest.fn().mockResolvedValue({ status: 200, headers: {}, body: [apiItem] }),
-    } as unknown as jest.Mocked<StepHandlerContext['contextManager']>);
+      callKibanaApi: vi.fn().mockResolvedValue({ status: 200, headers: {}, body: [apiItem] }),
+    } as unknown as Mocked<StepHandlerContext['contextManager']>);
 
   it('sends a POST to the rule exceptions endpoint and returns the validated item', async () => {
     const mockContextManager = mockManager();
@@ -386,8 +389,8 @@ describe('createExceptionItemForRule', () => {
 describe('createExceptionItemInList', () => {
   it('sends a POST with the list targeting and item fields, returning the validated summary', async () => {
     const mockContextManager = {
-      callKibanaApi: jest.fn().mockResolvedValue({ status: 200, headers: {}, body: apiItem }),
-    } as unknown as jest.Mocked<StepHandlerContext['contextManager']>;
+      callKibanaApi: vi.fn().mockResolvedValue({ status: 200, headers: {}, body: apiItem }),
+    } as unknown as Mocked<StepHandlerContext['contextManager']>;
 
     const created = await createExceptionItemInList(
       mockContextManager,
@@ -422,8 +425,8 @@ describe('createExceptionItemInList', () => {
 
   it('omits item_id when not provided', async () => {
     const mockContextManager = {
-      callKibanaApi: jest.fn().mockResolvedValue({ status: 200, headers: {}, body: apiItem }),
-    } as unknown as jest.Mocked<StepHandlerContext['contextManager']>;
+      callKibanaApi: vi.fn().mockResolvedValue({ status: 200, headers: {}, body: apiItem }),
+    } as unknown as Mocked<StepHandlerContext['contextManager']>;
 
     await createExceptionItemInList(
       mockContextManager,
@@ -446,8 +449,8 @@ describe('createExceptionItemInList', () => {
 describe('updateExceptionItemByItemId', () => {
   it('sends a PUT with the item fields, without comments', async () => {
     const mockContextManager = {
-      callKibanaApi: jest.fn().mockResolvedValue({ status: 200, headers: {}, body: apiItem }),
-    } as unknown as jest.Mocked<StepHandlerContext['contextManager']>;
+      callKibanaApi: vi.fn().mockResolvedValue({ status: 200, headers: {}, body: apiItem }),
+    } as unknown as Mocked<StepHandlerContext['contextManager']>;
 
     const updated = await updateExceptionItemByItemId(
       mockContextManager,

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { InstallFormField } from '@kbn/workflows-library';
@@ -14,21 +17,24 @@ import { InstallForm } from './install_form';
 
 // The connector picker has its own test; stub it so this one stays focused on
 // the schema-driven dispatch (and needs no services/query providers).
-jest.mock('./connector_field', () => ({
-  ConnectorField: ({
-    connectorType,
-    onChange,
-    'data-test-subj': dataTestSubj,
-  }: {
-    connectorType: string;
-    onChange: (id: string) => void;
-    'data-test-subj'?: string;
-  }) => (
-    <button type="button" data-test-subj={dataTestSubj} onClick={() => onChange('connector-1')}>
-      {connectorType}
-    </button>
-  ),
-}));
+vi.mock('./connector_field', () => {
+      const mocked = {
+      ConnectorField: ({
+        connectorType,
+        onChange,
+        'data-test-subj': dataTestSubj,
+      }: {
+        connectorType: string;
+        onChange: (id: string) => void;
+        'data-test-subj'?: string;
+      }) => (
+        <button type="button" data-test-subj={dataTestSubj} onClick={() => onChange('connector-1')}>
+          {connectorType}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const FIELDS: InstallFormField[] = [
   { name: 'plain-text', inputType: 'text', label: 'Plain text', required: true },
@@ -50,8 +56,8 @@ const FIELDS: InstallFormField[] = [
 const fieldSubj = (name: string) => `workflowLibraryInstallForm-field-${name}`;
 
 describe('InstallForm', () => {
-  let onChange: jest.Mock;
-  let onCommit: jest.Mock;
+  let onChange: Mock;
+  let onCommit: Mock;
 
   const renderForm = (
     values: Record<string, unknown> = {},
@@ -68,9 +74,9 @@ describe('InstallForm', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    onChange = jest.fn();
-    onCommit = jest.fn();
+    vi.clearAllMocks();
+    onChange = vi.fn();
+    onCommit = vi.fn();
   });
 
   it('should render one control per field with its label and description', () => {

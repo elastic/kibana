@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import ServerLogParamsFields from './server_log_params';
 
 describe('ServerLogParamsFields renders', () => {
   test('all params fields is rendered', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const actionParams = {
       level: ServerLogLevelOptions.TRACE,
       message: 'test',
@@ -39,7 +41,7 @@ describe('ServerLogParamsFields renders', () => {
     const actionParams = {
       message: 'test message',
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
 
     renderWithI18n(
       <ServerLogParamsFields
@@ -58,7 +60,7 @@ describe('ServerLogParamsFields renders', () => {
       level: ServerLogLevelOptions.TRACE,
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
 
     renderWithI18n(
       <ServerLogParamsFields
@@ -78,7 +80,7 @@ describe('ServerLogParamsFields renders', () => {
       level: ServerLogLevelOptions.TRACE,
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <ServerLogParamsFields
         actionParams={actionParams}
@@ -111,7 +113,7 @@ describe('ServerLogParamsFields renders', () => {
       level: ServerLogLevelOptions.TRACE,
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <ServerLogParamsFields
         actionParams={actionParams}
@@ -163,7 +165,7 @@ describe('ServerLogParamsFields renders', () => {
       level: ServerLogLevelOptions.TRACE,
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <ServerLogParamsFields
         actionParams={{ ...actionParams, message: 'not the default message' }}
@@ -196,7 +198,7 @@ describe('ServerLogParamsFields renders', () => {
       level: ServerLogLevelOptions.TRACE,
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <ServerLogParamsFields
         actionParams={{ ...actionParams, message: 'not the default message' }}

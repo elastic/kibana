@@ -5,40 +5,57 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getHosts } from './get_hosts';
 import type { GetHostParameters } from '../types';
 
-jest.mock('./get_filtered_hosts', () => ({
-  getFilteredHostNames: jest.fn(),
-}));
+vi.mock('./get_filtered_hosts', () => {
+      const mocked = {
+      getFilteredHostNames: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_apm_hosts', () => ({
-  getApmHostNames: jest.fn(),
-}));
+vi.mock('./get_apm_hosts', () => {
+      const mocked = {
+      getApmHostNames: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_all_hosts', () => ({
-  getAllHosts: jest.fn(),
-}));
+vi.mock('./get_all_hosts', () => {
+      const mocked = {
+      getAllHosts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_hosts_alerts_count', () => ({
-  getHostsAlertsCount: jest.fn(),
-}));
+vi.mock('./get_hosts_alerts_count', () => {
+      const mocked = {
+      getHostsAlertsCount: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils', () => ({
-  ...jest.requireActual('../utils'),
-  assertQueryStructure: jest.fn(),
-}));
+vi.mock('../utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../utils')),
+      assertQueryStructure: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getFilteredHostNames } = jest.requireMock('./get_filtered_hosts');
-const { getApmHostNames } = jest.requireMock('./get_apm_hosts');
-const { getAllHosts } = jest.requireMock('./get_all_hosts');
-const { getHostsAlertsCount } = jest.requireMock('./get_hosts_alerts_count');
+const { getFilteredHostNames } = (await vi.importMock('./get_filtered_hosts'));
+const { getApmHostNames } = (await vi.importMock('./get_apm_hosts'));
+const { getAllHosts } = (await vi.importMock('./get_all_hosts'));
+const { getHostsAlertsCount } = (await vi.importMock('./get_hosts_alerts_count'));
 
 const mockInfraMetricsClient = {} as GetHostParameters['infraMetricsClient'];
 const mockAlertsClient = {} as GetHostParameters['alertsClient'];
 const mockApmDataAccessServices = {
-  getDocumentSources: jest.fn().mockResolvedValue([{ source: 'mock' }]),
-  getHostNames: jest.fn(),
+  getDocumentSources: vi.fn().mockResolvedValue([{ source: 'mock' }]),
+  getHostNames: vi.fn(),
 } as unknown as GetHostParameters['apmDataAccessServices'];
 
 const host = (name: string, metadata: Array<{ name: string; value: string | null }> = []) => ({
@@ -60,7 +77,7 @@ const baseParams: GetHostParameters = {
 
 describe('getHosts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getAllHosts.mockResolvedValue([]);
     getHostsAlertsCount.mockResolvedValue([]);
   });

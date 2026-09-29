@@ -7,30 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { DataViewField, IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { SchemaConfig } from '../../..';
 import { getFormulaForPipelineAgg, getFormulaForAgg } from './formula';
 
-const mockGetMetricFromParentPipelineAgg = jest.fn();
-const mockIsPercentileAgg = jest.fn();
-const mockIsPercentileRankAgg = jest.fn();
-const mockIsPipeline = jest.fn();
-const mockIsStdDevAgg = jest.fn();
-const mockGetFieldByName = jest.fn();
+const mockGetMetricFromParentPipelineAgg = vi.fn();
+const mockIsPercentileAgg = vi.fn();
+const mockIsPercentileRankAgg = vi.fn();
+const mockIsPipeline = vi.fn();
+const mockIsStdDevAgg = vi.fn();
+const mockGetFieldByName = vi.fn();
 const originalGetFieldByName = stubLogstashDataView.getFieldByName;
 
-jest.mock('../utils', () => {
-  const utils = jest.requireActual('../utils');
+vi.mock('../utils', async () => {
+  const utils = (await vi.importActual('../utils'));
   return {
     ...utils,
-    getFieldNameFromField: jest.fn((field) => field),
-    getMetricFromParentPipelineAgg: jest.fn(() => mockGetMetricFromParentPipelineAgg()),
-    isPercentileAgg: jest.fn(() => mockIsPercentileAgg()),
-    isPercentileRankAgg: jest.fn(() => mockIsPercentileRankAgg()),
-    isPipeline: jest.fn(() => mockIsPipeline()),
-    isStdDevAgg: jest.fn(() => mockIsStdDevAgg()),
+    getFieldNameFromField: vi.fn((field) => field),
+    getMetricFromParentPipelineAgg: vi.fn(() => mockGetMetricFromParentPipelineAgg()),
+    isPercentileAgg: vi.fn(() => mockIsPercentileAgg()),
+    isPercentileRankAgg: vi.fn(() => mockIsPercentileRankAgg()),
+    isPipeline: vi.fn(() => mockIsPipeline()),
+    isStdDevAgg: vi.fn(() => mockIsStdDevAgg()),
   };
 });
 
@@ -96,7 +98,7 @@ const aggs: Array<SchemaConfig<METRIC_TYPES>> = [
 
 describe('getFormulaForPipelineAgg', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dataView.getFieldByName = originalGetFieldByName;
   });
 
@@ -266,7 +268,7 @@ describe('getFormulaForAgg', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dataView.getFieldByName = originalGetFieldByName;
   });
 

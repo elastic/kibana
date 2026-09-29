@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { TypeRegistry } from './type_registry';
 import type {
   ActionTypeModel,
@@ -51,7 +53,7 @@ const getTestActionType = (
   });
 };
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('register()', () => {
   test('able to register alert types', () => {

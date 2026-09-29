@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   type AppContextTestRender,
   createAppRootMockRenderer,
@@ -45,7 +47,7 @@ describe('PolicySelectorMenuButton component', () => {
 
     props = {
       selectedPolicyIds: [],
-      onChange: jest.fn((updatedPolicySelection, updatedAdditionalItems) => {
+      onChange: vi.fn((updatedPolicySelection, updatedAdditionalItems) => {
         // Update props and re-render component so we get the latest state of it after user interactions
         const updatedProps: PolicySelectorProps = {
           ...props,

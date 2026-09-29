@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { invert } from 'lodash/fp';
 
 import { getAnonymizedValue } from '.';
 
-jest.mock('uuid', () => ({
-  v4: () => 'test-uuid',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'test-uuid',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getAnonymizedValue', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns a new UUID when currentReplacements is not provided', () => {
     const currentReplacements = undefined;

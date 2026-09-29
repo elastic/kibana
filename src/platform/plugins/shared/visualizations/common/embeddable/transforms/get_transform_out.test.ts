@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getTransformOut } from './get_transform_out';
 import type { StoredVis } from './types';
 
@@ -23,7 +25,7 @@ describe('getTransformOut', () => {
     type: 'dashboard',
   };
 
-  const transformEnhancementsOutMock = jest.fn((state, references) => {
+  const transformEnhancementsOutMock = vi.fn((state, references) => {
     const { dashboardRefName, ...restOfDrilldown } = storedDrilldown;
     return {
       ...state,

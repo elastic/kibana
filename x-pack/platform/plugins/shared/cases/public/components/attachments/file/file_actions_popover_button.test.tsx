@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { screen, waitFor, within } from '@testing-library/react';
@@ -22,18 +25,18 @@ import { FileActionsPopoverButton } from './file_actions_popover_button';
 import { useDeleteFileAttachment } from '../../../containers/use_delete_file_attachment';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
-jest.mock('../../../containers/use_delete_file_attachment');
+vi.mock('../../../containers/use_delete_file_attachment');
 
-const useDeleteFileAttachmentMock = useDeleteFileAttachment as jest.Mock;
+const useDeleteFileAttachmentMock = useDeleteFileAttachment as Mock;
 
 // Failing: See https://github.com/elastic/kibana/issues/207257
 describe('FileActionsPopoverButton', () => {
-  const mutate = jest.fn();
+  const mutate = vi.fn();
 
   useDeleteFileAttachmentMock.mockReturnValue({ isLoading: false, mutate });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders file actions popover button correctly', async () => {
@@ -157,7 +160,7 @@ describe('FileActionsPopoverButton', () => {
     beforeEach(() => {
       Object.defineProperty(navigator, 'clipboard', {
         value: {
-          writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+          writeText: vi.fn().mockImplementation(() => Promise.resolve()),
         },
         writable: true,
       });

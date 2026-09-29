@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { ManageUserInfo, useUserInfo } from '.';
@@ -16,13 +19,13 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../containers/detection_engine/alerts/api');
-jest.mock('../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../containers/detection_engine/alerts/api');
+vi.mock('../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('useUserInfo', () => {
   beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -55,8 +58,8 @@ describe('useUserInfo', () => {
   });
 
   it('calls createSignalIndex if signal index template is outdated', async () => {
-    const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
-    const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex').mockResolvedValueOnce({
+    const spyOnCreateSignalIndex = vi.spyOn(api, 'createSignalIndex');
+    const spyOnGetSignalIndex = vi.spyOn(api, 'getSignalIndex').mockResolvedValueOnce({
       name: 'mock-signal-index',
       index_mapping_outdated: true,
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,28 +16,31 @@ import type { ContentInsightsClientPublic } from '@kbn/content-management-conten
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { SavedObjectActivityRow } from './saved_object_activity_row';
 
-jest.mock('@kbn/content-management-content-insights-public', () => ({
-  ContentInsightsProvider: ({
-    contentInsightsClient,
-    children,
-  }: {
-    contentInsightsClient: unknown;
-    children: React.ReactNode;
-  }) => (
-    <div
-      data-test-subj="contentInsightsProvider"
-      data-client-id={(contentInsightsClient as { id?: string })?.id ?? ''}
-    >
-      {children}
-    </div>
-  ),
-  ActivityView: ({ entityNamePlural }: { entityNamePlural?: string }) => (
-    <div data-test-subj="activityView">activity:{entityNamePlural}</div>
-  ),
-  ViewsStats: ({ item }: { item: { id: string } }) => (
-    <div data-test-subj="viewsStats">views:{item.id}</div>
-  ),
-}));
+vi.mock('@kbn/content-management-content-insights-public', () => {
+      const mocked = {
+      ContentInsightsProvider: ({
+        contentInsightsClient,
+        children,
+      }: {
+        contentInsightsClient: unknown;
+        children: React.ReactNode;
+      }) => (
+        <div
+          data-test-subj="contentInsightsProvider"
+          data-client-id={(contentInsightsClient as { id?: string })?.id ?? ''}
+        >
+          {children}
+        </div>
+      ),
+      ActivityView: ({ entityNamePlural }: { entityNamePlural?: string }) => (
+        <div data-test-subj="activityView">activity:{entityNamePlural}</div>
+      ),
+      ViewsStats: ({ item }: { item: { id: string } }) => (
+        <div data-test-subj="viewsStats">views:{item.id}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SavedObjectActivityRow', () => {
   const service = { id: 'svc-1' } as unknown as ContentInsightsClientPublic;

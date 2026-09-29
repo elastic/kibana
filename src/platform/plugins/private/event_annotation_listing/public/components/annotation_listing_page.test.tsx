@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -34,26 +37,29 @@ import {
 // path without rendering the real flyout (which pulls in Lens internals).
 // `useGroupEditor` imports the flyout via its inner sibling path, so the
 // mock must target that path rather than the package barrel.
-jest.mock('./group_editor_flyout/group_editor_flyout', () => ({
-  GroupEditorFlyout: jest.fn(({ group, updateGroup, onSave, onClose, searchSessionId }: any) => (
-    <div data-test-subj="mock-group-editor-flyout">
-      <span data-test-subj="mock-group-editor-flyout-title">{group?.title}</span>
-      <span data-test-subj="mock-group-editor-flyout-session">{searchSessionId}</span>
-      <button
-        data-test-subj="mock-group-editor-flyout-update"
-        onClick={() => updateGroup({ ...group, tags: ['my-new-tag'] })}
-      >
-        update
-      </button>
-      <button data-test-subj="mock-group-editor-flyout-save" onClick={() => onSave()}>
-        save
-      </button>
-      <button data-test-subj="mock-group-editor-flyout-close" onClick={() => onClose()}>
-        close
-      </button>
-    </div>
-  )),
-}));
+vi.mock('./group_editor_flyout/group_editor_flyout', () => {
+      const mocked = {
+      GroupEditorFlyout: vi.fn(({ group, updateGroup, onSave, onClose, searchSessionId }: any) => (
+        <div data-test-subj="mock-group-editor-flyout">
+          <span data-test-subj="mock-group-editor-flyout-title">{group?.title}</span>
+          <span data-test-subj="mock-group-editor-flyout-session">{searchSessionId}</span>
+          <button
+            data-test-subj="mock-group-editor-flyout-update"
+            onClick={() => updateGroup({ ...group, tags: ['my-new-tag'] })}
+          >
+            update
+          </button>
+          <button data-test-subj="mock-group-editor-flyout-save" onClick={() => onSave()}>
+            save
+          </button>
+          <button data-test-subj="mock-group-editor-flyout-close" onClick={() => onClose()}>
+            close
+          </button>
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildContent = (id: string, title: string): EventAnnotationGroupContent => ({
   id,
@@ -77,9 +83,9 @@ const renderPage = (
   const items = overrides.items ?? [buildContent('item-1', 'Group A')];
 
   const mockEventAnnotationService: EventAnnotationServiceType = {
-    findAnnotationGroupContent: jest.fn().mockResolvedValue({ total: items.length, hits: items }),
-    deleteAnnotationGroups: jest.fn().mockResolvedValue(undefined),
-    loadAnnotationGroup: jest.fn().mockResolvedValue({
+    findAnnotationGroupContent: vi.fn().mockResolvedValue({ total: items.length, hits: items }),
+    deleteAnnotationGroups: vi.fn().mockResolvedValue(undefined),
+    loadAnnotationGroup: vi.fn().mockResolvedValue({
       annotations: [],
       description: '',
       tags: [],
@@ -87,8 +93,8 @@ const renderPage = (
       title: 'Group A',
       ignoreGlobalFilters: false,
     } as EventAnnotationGroupConfig),
-    updateAnnotationGroup: jest.fn().mockResolvedValue(undefined),
-    createAnnotationGroup: jest.fn().mockResolvedValue(undefined),
+    updateAnnotationGroup: vi.fn().mockResolvedValue(undefined),
+    createAnnotationGroup: vi.fn().mockResolvedValue(undefined),
     ...(overrides.mockEventAnnotationService ?? {}),
   } as EventAnnotationServiceType;
 
@@ -96,7 +102,7 @@ const renderPage = (
   // `savedObjects:perPage` from `core.uiSettings` at mount, then forwards
   // `listingLimit` to the consumer's `findItems`.
   const core = coreMock.createStart() as unknown as CoreStart;
-  (core.uiSettings.get as jest.Mock).mockImplementation((key: string) => {
+  (core.uiSettings.get as Mock).mockImplementation((key: string) => {
     if (key === 'savedObjects:listingLimit') {
       return 30;
     }
@@ -110,7 +116,7 @@ const renderPage = (
   (core.application.capabilities as unknown as Record<string, unknown>).visualize_v2 =
     overrides.visualizeCapabilities ?? { delete: true, save: true };
 
-  const searchSessionStartMethod = jest.fn<string, []>(() => 'some-session-id');
+  const searchSessionStartMethod = vi.fn<string, []>(() => 'some-session-id');
 
   // `useNavigateToLens` only invokes `embeddable.getStateTransfer()` when the
   // empty-state CTA is clicked, which none of these tests reach. An empty
@@ -132,7 +138,7 @@ const renderPage = (
     LensEmbeddableComponent: () => <div />,
     sessionService: {
       start: searchSessionStartMethod,
-      clear: jest.fn(),
+      clear: vi.fn(),
     } as Partial<ISessionService> as ISessionService,
     embeddable: mockEmbeddable,
   };
@@ -286,9 +292,7 @@ describe('annotation list view', () => {
       // Re-open by closing and re-clicking to take a new session reading once
       // the mocked flyout invokes the refresh; the component re-renders the
       // flyout body with the new searchSessionId.
-      const { GroupEditorFlyout } = jest.requireMock(
-        './group_editor_flyout/group_editor_flyout'
-      ) as { GroupEditorFlyout: jest.Mock };
+      const { GroupEditorFlyout } = (await vi.importMock('./group_editor_flyout/group_editor_flyout')) as { GroupEditorFlyout: Mock };
       const lastCallProps =
         GroupEditorFlyout.mock.calls[GroupEditorFlyout.mock.calls.length - 1][0];
       act(() => {

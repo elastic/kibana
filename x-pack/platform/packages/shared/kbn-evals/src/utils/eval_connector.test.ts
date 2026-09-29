@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import type { InferenceEndpointDefinition } from './inference_endpoint_definition';
@@ -16,11 +19,14 @@ import {
   type StackConnectorDefinition,
 } from './eval_connector';
 
-jest.mock('@kbn/gen-ai-functional-testing', () => ({
-  getAvailableConnectors: jest.fn(),
-}));
+vi.mock('@kbn/gen-ai-functional-testing', () => {
+      const mocked = {
+      getAvailableConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getAvailableConnectorsMock = getAvailableConnectors as jest.MockedFunction<
+const getAvailableConnectorsMock = getAvailableConnectors as MockedFunction<
   typeof getAvailableConnectors
 >;
 

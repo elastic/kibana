@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,8 +17,8 @@ import { AppContextProvider, type AppDependencies } from '../../../../app_contex
 import { MappingsEditorProvider } from '../../mappings_editor_context';
 import { ConfigurationForm } from './configuration_form';
 
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/components', () => {
-  const original = jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/components');
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/components', async () => {
+  const original = (await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/components'));
   return {
     ...original,
     // JsonEditorField pulls in the shared-ux code editor (Monaco) which requires Canvas/Suspense.

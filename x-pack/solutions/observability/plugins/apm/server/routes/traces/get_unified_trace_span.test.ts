@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getUnifiedTraceSpan } from './get_unified_trace_span';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -16,7 +19,7 @@ function createApmEventClientMock(hit?: {
   _ignored?: string[];
 }): APMEventClient {
   return {
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       hits: { hits: hit ? [{ _id: 'doc-1', _index: 'traces-otel', ...hit }] : [] },
     }),
   } as unknown as APMEventClient;
@@ -42,7 +45,7 @@ describe('getUnifiedTraceSpan', () => {
     const apmEventClient = createApmEventClientMock({ fields: { 'span.id': ['span-1'] } });
     await callGetUnifiedTraceSpan(apmEventClient);
 
-    const searchParams = (apmEventClient.search as jest.Mock).mock.calls[0][1];
+    const searchParams = (apmEventClient.search as Mock).mock.calls[0][1];
     expect(searchParams._source).toEqual(
       expect.arrayContaining([INPUT_MESSAGES_FIELD, 'attributes.gen_ai.output.messages'])
     );

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createFlyout } from './create_flyout';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import {
@@ -40,7 +42,7 @@ describe('createFlyout', () => {
 
   const indexEditorTelemetryService = new IndexEditorTelemetryService(
     {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as unknown as AnalyticsServiceStart,
     true,
     true,
@@ -51,9 +53,9 @@ describe('createFlyout', () => {
   const dataTableColumns$ = new Subject<DatatableColumn[]>();
 
   const indexUpdateService = {
-    setIndexName: jest.fn(),
-    setIndexCreated: jest.fn(),
-    exit: jest.fn(),
+    setIndexName: vi.fn(),
+    setIndexCreated: vi.fn(),
+    exit: vi.fn(),
     completed$: of(),
     totalHits$,
     dataTableColumns$,
@@ -74,13 +76,13 @@ describe('createFlyout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     totalHits$.next(0);
     dataTableColumns$.next([]);
   });
 
   it('should call trackFlyoutOpened with correct data when index exists', async () => {
-    const trackFlyoutOpenedSpy = jest.spyOn(deps.indexEditorTelemetryService, 'trackFlyoutOpened');
+    const trackFlyoutOpenedSpy = vi.spyOn(deps.indexEditorTelemetryService, 'trackFlyoutOpened');
 
     createFlyout(deps, {
       doesIndexExist: true,
@@ -102,7 +104,7 @@ describe('createFlyout', () => {
   });
 
   it('should call trackFlyoutOpened with zero counts when index does not exist', () => {
-    const trackFlyoutOpenedSpy = jest.spyOn(deps.indexEditorTelemetryService, 'trackFlyoutOpened');
+    const trackFlyoutOpenedSpy = vi.spyOn(deps.indexEditorTelemetryService, 'trackFlyoutOpened');
 
     createFlyout(deps, {
       doesIndexExist: false,

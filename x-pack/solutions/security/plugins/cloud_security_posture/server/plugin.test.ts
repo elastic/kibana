@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -51,11 +54,11 @@ describe('Cloud Security Posture Plugin', () => {
     let fleetMock: ReturnType<typeof createFleetStartContractMock>;
     let mockPlugins: CspServerPluginStartDeps;
     let contextMock: ReturnType<typeof coreMock.createCustomRequestHandlerContext>;
-    let findMock: jest.Mock;
+    let findMock: Mock;
     let plugin: CspPlugin;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       fleetMock = createFleetStartContractMock();
       mockPlugins = {
@@ -68,7 +71,7 @@ describe('Cloud Security Posture Plugin', () => {
       };
 
       contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
-      findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
+      findMock = mockRouteContext.core.savedObjects.client.find as Mock;
       findMock.mockReturnValue(
         Promise.resolve({
           saved_objects: [
@@ -92,11 +95,11 @@ describe('Cloud Security Posture Plugin', () => {
     it('should initialize when package installed', async () => {
       fleetMock.packageService.asInternalUser.getInstallation.mockResolvedValue({
         install_version: '1.0.0',
-      } as jest.Mocked<Installation>);
+      } as Mocked<Installation>);
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const spy = vi.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
 
       await plugin.start(coreMock.createStart(), mockPlugins);
       await mockPlugins.fleet.fleetSetupCompleted();
@@ -113,7 +116,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const spy = vi.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
 
       await plugin.start(coreMock.createStart(), mockPlugins);
       await mockPlugins.fleet.fleetSetupCompleted();
@@ -126,7 +129,7 @@ describe('Cloud Security Posture Plugin', () => {
     });
 
     it('should retry getInstallation on failures', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       let callCount = 0;
       fleetMock.packageService.asInternalUser.getInstallation.mockImplementation(
@@ -135,28 +138,28 @@ describe('Cloud Security Posture Plugin', () => {
           if (callCount < 3) {
             throw new Error(`ES connection failed ${callCount}`);
           }
-          return { install_version: '1.0.0' } as jest.Mocked<Installation>;
+          return { install_version: '1.0.0' } as Mocked<Installation>;
         }
       );
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
-      const loggerWarnSpy = jest.spyOn(context.logger.get(), 'warn');
+      const spy = vi.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const loggerWarnSpy = vi.spyOn(context.logger.get(), 'warn');
 
       await plugin.start(coreMock.createStart(), mockPlugins);
 
       // Fast-forward through all pending timers multiple times to ensure
       // all retry attempts have a chance to execute
       for (let i = 0; i < 5; i++) {
-        jest.runAllTimers();
+        vi.runAllTimers();
         // Allow any pending promises to resolve
         await Promise.resolve();
       }
 
       await mockPlugins.fleet.fleetSetupCompleted();
 
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       expect(loggerWarnSpy).toHaveBeenCalled();
       expect(loggerWarnSpy.mock.calls[0][0]).toMatch(/failed and will be retried/);
@@ -168,27 +171,27 @@ describe('Cloud Security Posture Plugin', () => {
     });
 
     it('should handle getInstallation complete failure after retries', async () => {
-      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+      vi.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
 
       const testError = new Error('ES connection failed persistently');
       fleetMock.packageService.asInternalUser.getInstallation.mockRejectedValue(testError);
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
-      const loggerErrorSpy = jest.spyOn(context.logger.get(), 'error');
+      const spy = vi.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const loggerErrorSpy = vi.spyOn(context.logger.get(), 'error');
 
       await plugin.start(coreMock.createStart(), mockPlugins);
 
       // Fast-forward through all pending timers to trigger all retry attempts
       for (let i = 0; i < 10; i++) {
-        jest.runOnlyPendingTimers();
+        vi.runOnlyPendingTimers();
         await Promise.resolve();
       }
 
       await mockPlugins.fleet.fleetSetupCompleted();
 
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalled();
       expect(spy).toHaveBeenCalledTimes(0);
@@ -225,7 +228,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+      const spy = vi.spyOn(plugin, 'initialize').mockImplementation();
 
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
@@ -293,7 +296,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+      const spy = vi.spyOn(plugin, 'initialize').mockImplementation();
 
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
@@ -366,7 +369,7 @@ describe('Cloud Security Posture Plugin', () => {
         const coreStart = coreMock.createStart();
         const context = coreMock.createPluginInitializerContext<unknown>();
         plugin = new CspPlugin(context);
-        const spy = jest.spyOn(plugin, 'uninstallResources').mockImplementation();
+        const spy = vi.spyOn(plugin, 'uninstallResources').mockImplementation();
 
         // Act
         await plugin.start(coreStart, mockPlugins);

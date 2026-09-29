@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PackageVerificationStatus } from '../../common/types';
 import type { PackageInfo } from '../types';
 
 import { ExperimentalFeaturesService, isPackageUnverified } from '.';
 
-const mockGet = jest.spyOn(ExperimentalFeaturesService, 'get');
+const mockGet = vi.spyOn(ExperimentalFeaturesService, 'get');
 
 const createPackage = ({
   verificationStatus = 'unknown',

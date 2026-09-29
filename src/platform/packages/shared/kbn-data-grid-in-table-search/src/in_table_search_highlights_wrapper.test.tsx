@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useContext } from 'react';
 import { InTableSearchHighlightsWrapper } from './in_table_search_highlights_wrapper';
 import { InTableSearchCellContext } from './in_table_search_cell_context';
@@ -116,7 +118,7 @@ describe('InTableSearchHighlightsWrapper', () => {
 
   describe('does not modify the DOM and only counts search matches (dry run)', () => {
     it('with matches', async () => {
-      const onHighlightsCountFound = jest.fn();
+      const onHighlightsCountFound = vi.fn();
       const { container } = render(
         <InTableSearchHighlightsWrapper
           inTableSearchTerm="test"
@@ -142,7 +144,7 @@ describe('InTableSearchHighlightsWrapper', () => {
     });
 
     it('with single match', async () => {
-      const onHighlightsCountFound = jest.fn();
+      const onHighlightsCountFound = vi.fn();
 
       const { container } = render(
         <InTableSearchHighlightsWrapper
@@ -162,7 +164,7 @@ describe('InTableSearchHighlightsWrapper', () => {
     });
 
     it('with no matches', async () => {
-      const onHighlightsCountFound = jest.fn();
+      const onHighlightsCountFound = vi.fn();
       const { container } = render(
         <InTableSearchHighlightsWrapper
           inTableSearchTerm="test3"
@@ -181,7 +183,7 @@ describe('InTableSearchHighlightsWrapper', () => {
     });
 
     it('with no search term', async () => {
-      const onHighlightsCountFound = jest.fn();
+      const onHighlightsCountFound = vi.fn();
       const { container } = render(
         <InTableSearchHighlightsWrapper onHighlightsCountFound={onHighlightsCountFound} {...colors}>
           <div>test</div>
@@ -203,7 +205,7 @@ describe('InTableSearchHighlightsWrapper', () => {
       render(
         <InTableSearchHighlightsWrapper
           inTableSearchTerm="x"
-          onHighlightsCountFound={jest.fn()}
+          onHighlightsCountFound={vi.fn()}
           {...colors}
         >
           <CountingProofCell />

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution } from '@kbn/workflows';
@@ -17,19 +19,19 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 
 describe('handleQueuedWorkflowRunAtTaskStart', () => {
   const logger = loggingSystemMock.create().get() as Logger;
-  const updateMock = jest.fn().mockResolvedValue(undefined);
+  const updateMock = vi.fn().mockResolvedValue(undefined);
 
   const workflowExecutionRepository = {
     updateWorkflowExecution: updateMock,
   } as unknown as WorkflowExecutionRepository;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers().setSystemTime(new Date('2025-08-05T20:00:00.000Z'));
+    vi.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(new Date('2025-08-05T20:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns false when execution is not queued', async () => {

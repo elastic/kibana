@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -18,10 +21,10 @@ import type { IInterpreterRenderHandlers } from '../common';
 const element: HTMLElement = {} as HTMLElement;
 const mockNotificationService = {
   toasts: {
-    addError: jest.fn(() => {}),
+    addError: vi.fn(() => {}),
   },
 };
-jest.mock('./services', () => {
+vi.mock('./services', () => {
   const renderers: Record<string, unknown> = {
     test: {
       render: (el: HTMLElement, value: unknown, handlers: IInterpreterRenderHandlers) => {
@@ -31,16 +34,16 @@ jest.mock('./services', () => {
   };
 
   return {
-    getRenderersRegistry: jest.fn(() => ({
-      get: jest.fn((id: string) => renderers[id]),
+    getRenderersRegistry: vi.fn(() => ({
+      get: vi.fn((id: string) => renderers[id]),
     })),
-    getNotifications: jest.fn(() => {
+    getNotifications: vi.fn(() => {
       return mockNotificationService;
     }),
   };
 });
 
-const mockMockErrorRenderFunction = jest.fn(
+const mockMockErrorRenderFunction = vi.fn(
   (el: HTMLElement, error: ExpressionRenderError, handlers: IInterpreterRenderHandlers) =>
     handlers.done()
 );
@@ -101,8 +104,8 @@ describe('ExpressionRenderHandler', () => {
     });
 
     it('should throw error if the rendering function throws', async () => {
-      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
-      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
+      (getRenderersRegistry as Mock).mockReturnValueOnce({ get: () => true });
+      (getRenderersRegistry as Mock).mockReturnValueOnce({
         get: () => ({
           render: () => {
             throw new Error('renderer error');
@@ -118,9 +121,9 @@ describe('ExpressionRenderHandler', () => {
     });
 
     it('should pass through provided "hasCompatibleActions" to the expression renderer', async () => {
-      const hasCompatibleActions = jest.fn();
-      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
-      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
+      const hasCompatibleActions = vi.fn();
+      (getRenderersRegistry as Mock).mockReturnValueOnce({ get: () => true });
+      (getRenderersRegistry as Mock).mockReturnValueOnce({
         get: () => ({
           render: (domNode: HTMLElement, config: unknown, handlers: IInterpreterRenderHandlers) => {
             handlers.hasCompatibleActions!({
@@ -145,10 +148,10 @@ describe('ExpressionRenderHandler', () => {
     });
 
     it('should pass through provided "getCompatibleCellValueActions" to the expression renderer', async () => {
-      const getCompatibleCellValueActions = jest.fn();
+      const getCompatibleCellValueActions = vi.fn();
       const cellValueActionsParameter = [{ value: 'testValue' }];
-      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
-      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
+      (getRenderersRegistry as Mock).mockReturnValueOnce({ get: () => true });
+      (getRenderersRegistry as Mock).mockReturnValueOnce({
         get: () => ({
           render: (domNode: HTMLElement, config: unknown, handlers: IInterpreterRenderHandlers) => {
             handlers.getCompatibleCellValueActions!(cellValueActionsParameter);

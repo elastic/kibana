@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { JsonDataCode } from './json_data_code';
 
 // Mock the JSONCodeEditorCommonMemoized component to inspect the props it receives
-const mockJSONCodeEditorCommonMemoized = jest.fn();
+const mockJSONCodeEditorCommonMemoized = vi.fn();
 
-jest.mock('./json_editor_common', () => ({
-  JSONCodeEditorCommonMemoized: (props: Record<string, unknown>) => {
-    mockJSONCodeEditorCommonMemoized(props);
-    return (
-      <div data-test-subj={props['data-test-subj'] as string}>{props.jsonValue as string}</div>
-    );
-  },
-}));
+vi.mock('./json_editor_common', () => {
+      const mocked = {
+      JSONCodeEditorCommonMemoized: (props: Record<string, unknown>) => {
+        mockJSONCodeEditorCommonMemoized(props);
+        return (
+          <div data-test-subj={props['data-test-subj'] as string}>{props.jsonValue as string}</div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('JsonDataCode', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the formatted JSON string', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { huntForThreat } from './hunt_for_threat';
 import type { ResolvedIndexScope } from '@kbn/alertzero-common';
@@ -26,8 +29,8 @@ const scope: ResolvedIndexScope = {
  */
 const buildEsClient = (searchResponse: unknown, requiredMatches = 0): ElasticsearchClient =>
   ({
-    search: jest.fn().mockResolvedValue(searchResponse),
-    count: jest.fn().mockResolvedValue({ count: requiredMatches }),
+    search: vi.fn().mockResolvedValue(searchResponse),
+    count: vi.fn().mockResolvedValue({ count: requiredMatches }),
   } as unknown as ElasticsearchClient);
 
 const emptySearchResponse = {
@@ -87,7 +90,7 @@ describe('huntForThreat', () => {
         techniques: [' ', 't1078.004'],
       });
 
-      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const [[searchBody]] = (esClient.search as Mock).mock.calls;
       const serialized = JSON.stringify(searchBody.query.bool.should);
       expect(serialized).toContain('10.0.0.1');
       expect(serialized).toContain('T1078.004');
@@ -103,7 +106,7 @@ describe('huntForThreat', () => {
 
       await huntForThreat(esClient, { scope, iocs: [{ type: 'domain', value: ' example.com ' }] });
 
-      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const [[searchBody]] = (esClient.search as Mock).mock.calls;
       expect(searchBody.query.bool.should).toEqual(
         expect.arrayContaining([
           { term: { 'dns.question.name': { value: 'example.com', case_insensitive: true } } },
@@ -188,7 +191,7 @@ describe('huntForThreat', () => {
         time_range,
       });
 
-      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const [[searchBody]] = (esClient.search as Mock).mock.calls;
       expect(searchBody.query.bool.filter).toEqual([
         { range: { '@timestamp': { gte: expected.from, lt: expected.to } } },
       ]);
@@ -519,7 +522,7 @@ describe('huntForThreat', () => {
 
     await huntForThreat(esClient, { scope, iocs: [{ type: 'ip', value: '10.0.0.1' }] });
 
-    const [{ aggs }] = (esClient.search as jest.Mock).mock.calls[0];
+    const [{ aggs }] = (esClient.search as Mock).mock.calls[0];
     expect(aggs.affected_users.aggs.non_human_identity).toEqual({
       filter: {
         bool: {
@@ -542,7 +545,7 @@ describe('huntForThreat', () => {
 
       await huntForThreat(esClient, { scope, iocs: [{ type: 'hash', value: UPPER_SHA256 }] });
 
-      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const [[searchBody]] = (esClient.search as Mock).mock.calls;
       expect(searchBody.query.bool.should).toEqual(
         expect.arrayContaining([{ term: { 'file.hash.sha256': UPPER_SHA256.toLowerCase() } }])
       );
@@ -593,7 +596,7 @@ describe('huntForThreat', () => {
 
       await huntForThreat(esClient, { scope, iocs: [{ type: 'domain', value: 'Example.COM' }] });
 
-      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const [[searchBody]] = (esClient.search as Mock).mock.calls;
       // Folding the report's value would not be enough: the document is just as
       // likely to be the side carrying the mixed case.
       expect(searchBody.query.bool.should).toEqual(
@@ -608,7 +611,7 @@ describe('huntForThreat', () => {
 
       await huntForThreat(esClient, { scope, iocs: [{ type: 'ip', value: '10.0.0.1' }] });
 
-      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const [[searchBody]] = (esClient.search as Mock).mock.calls;
       expect(searchBody.query.bool.should).toEqual(
         expect.arrayContaining([{ term: { 'source.ip': '10.0.0.1' } }])
       );
@@ -668,7 +671,7 @@ describe('huntForThreat', () => {
 
         await huntForThreat(esClient, { scope, iocs: [{ type, value }] });
 
-        const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+        const [[searchBody]] = (esClient.search as Mock).mock.calls;
         expect(searchBody._source).toEqual(expect.arrayContaining([...expectedFields]));
       }
     );
@@ -678,7 +681,7 @@ describe('huntForThreat', () => {
 
       await huntForThreat(esClient, { scope, iocs: [{ type: 'ip', value: '10.0.0.1' }] });
 
-      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const [[searchBody]] = (esClient.search as Mock).mock.calls;
       expect(searchBody._source).toEqual(
         expect.arrayContaining(['@timestamp', 'kibana.alert.rule.threat'])
       );
@@ -727,8 +730,8 @@ describe('huntForThreat', () => {
       countOverrides: Record<string, unknown> = {}
     ): ElasticsearchClient =>
       ({
-        search: jest.fn().mockResolvedValue({ ...emptySearchResponse, ...searchOverrides }),
-        count: jest.fn().mockResolvedValue({ count: 0, ...countOverrides }),
+        search: vi.fn().mockResolvedValue({ ...emptySearchResponse, ...searchOverrides }),
+        count: vi.fn().mockResolvedValue({ count: 0, ...countOverrides }),
       } as unknown as ElasticsearchClient);
 
     it('reports a timed-out scope search as a retryable gap instead of a quiet environment', async () => {

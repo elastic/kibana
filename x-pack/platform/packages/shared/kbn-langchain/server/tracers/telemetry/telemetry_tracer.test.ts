@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { TelemetryParams } from './telemetry_tracer';
 import { TelemetryTracer } from './telemetry_tracer';
@@ -187,9 +189,9 @@ describe('TelemetryTracer', () => {
   let logger: Logger;
   let telemetryParams: TelemetryParams;
   let telemetryTracer: TelemetryTracer;
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     telemetry = {
       reportEvent,
     } as unknown as AnalyticsServiceSetup;

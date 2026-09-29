@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -28,7 +30,7 @@ const table: Datatable = {
   rows: [{ a: 123 }],
 };
 
-const DefaultCellPopover = jest.fn(
+const DefaultCellPopover = vi.fn(
   ({ cellActions }: Pick<EuiDataGridCellPopoverElementProps, 'cellActions'>) => (
     <div data-test-subj="defaultCellPopover">{cellActions}</div>
   )
@@ -38,7 +40,7 @@ const defaultPopoverProps: EuiDataGridCellPopoverElementProps = {
   rowIndex: 0,
   colIndex: 0,
   columnId: 'a',
-  setCellPopoverProps: jest.fn(),
+  setCellPopoverProps: vi.fn(),
   DefaultCellPopover,
   cellActions: <span data-test-subj="cellActions">actions</span>,
   children: <div>children</div>,

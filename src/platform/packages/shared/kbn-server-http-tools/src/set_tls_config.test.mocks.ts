@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getServerTLSOptionsMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./get_tls_options', () => {
-  const actual = jest.requireActual('./get_tls_options');
+export const getServerTLSOptionsMock = vi.fn();
+
+vi.doMock('./get_tls_options', async () => {
+  const actual = (await vi.importActual('./get_tls_options'));
   return {
     ...actual,
     getServerTLSOptions: getServerTLSOptionsMock,

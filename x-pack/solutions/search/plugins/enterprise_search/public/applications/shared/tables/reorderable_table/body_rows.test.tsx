@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -13,7 +15,7 @@ import { BodyRows } from './body_rows';
 
 describe('BodyRows', () => {
   it('renders a row for each provided item', () => {
-    const renderItem = jest.fn((_item, itemIndex) => (
+    const renderItem = vi.fn((_item, itemIndex) => (
       <div key={itemIndex} data-test-subj={`row-${itemIndex}`} />
     ));
 

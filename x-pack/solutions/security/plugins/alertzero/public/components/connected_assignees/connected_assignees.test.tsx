@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -20,16 +23,19 @@ import {
 } from '@kbn/agentic-investigations-plugin/public';
 import { ConnectedAssignees } from './connected_assignees';
 
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
-  useAssignEscalation: jest.fn(),
-  useAssignInvestigation: jest.fn(),
-  useUserProfiles: jest.fn(),
-  useSuggestUserProfiles: jest.fn(),
-}));
+vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+      useAssignEscalation: vi.fn(),
+      useAssignInvestigation: vi.fn(),
+      useUserProfiles: vi.fn(),
+      useSuggestUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agentic-investigations-common', () => {
-  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+vi.mock('@kbn/agentic-investigations-common', async () => {
+  const actual = (await vi.importActual('@kbn/agentic-investigations-common'));
   return {
     ...actual,
     // eslint-disable-next-line react/display-name
@@ -63,13 +69,13 @@ jest.mock('@kbn/agentic-investigations-common', () => {
   };
 });
 
-const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
-const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
-const mockUseUserProfiles = useUserProfiles as jest.Mock;
-const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
+const mockUseAssignEscalation = useAssignEscalation as Mock;
+const mockUseAssignInvestigation = useAssignInvestigation as Mock;
+const mockUseUserProfiles = useUserProfiles as Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as Mock;
 
-const escalationMutate = jest.fn().mockResolvedValue({});
-const investigationMutate = jest.fn().mockResolvedValue({});
+const escalationMutate = vi.fn().mockResolvedValue({});
+const investigationMutate = vi.fn().mockResolvedValue({});
 
 const renderPicker = (
   props: Partial<React.ComponentProps<typeof ConnectedAssignees>> & {
@@ -109,7 +115,7 @@ beforeEach(() => {
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
 describe('ConnectedAssignees', () => {
   it('calls the escalation mutation for templateId: escalation', async () => {

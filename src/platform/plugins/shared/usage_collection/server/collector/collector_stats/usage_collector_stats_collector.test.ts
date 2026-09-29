@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CollectorsStatsCollectorParams } from './usage_collector_stats_collector';
 import { usageCollectorsStatsCollector } from './usage_collector_stats_collector';
 import { UsageCollector } from '../usage_collector';
@@ -16,7 +18,7 @@ import { createCollectorFetchContextMock } from '../../mocks';
 describe('usageCollectorsStatsCollector', () => {
   const logger = loggingSystemMock.createLogger();
   const mockFetchContext = createCollectorFetchContextMock();
-  const mockMakeUsageCollector = jest.fn().mockImplementation((args) => {
+  const mockMakeUsageCollector = vi.fn().mockImplementation((args) => {
     return new UsageCollector(logger, args);
   });
   const mockCollectorSet = { makeUsageCollector: mockMakeUsageCollector };

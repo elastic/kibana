@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ILicense } from '@kbn/licensing-types';
 import { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import {
@@ -25,11 +27,11 @@ describe('readPolicyBaseline', () => {
     const service = new EndpointAppContextService();
     const setupContract = createMockEndpointAppContextServiceSetupContract();
     const startContract = createMockEndpointAppContextServiceStartContract();
-    startContract.licenseService.getLicenseInformation = jest
+    startContract.licenseService.getLicenseInformation = vi
       .fn()
       .mockReturnValue(availableLicense);
-    startContract.licenseService.getLicenseType = jest.fn().mockReturnValue('platinum');
-    startContract.licenseService.getLicenseUID = jest.fn().mockReturnValue('license-uid');
+    startContract.licenseService.getLicenseType = vi.fn().mockReturnValue('platinum');
+    startContract.licenseService.getLicenseUID = vi.fn().mockReturnValue('license-uid');
     startContract.telemetryConfigProvider.getIsOptedIn.mockReturnValue(
       isOptedIn === 'unresolved' ? undefined : isOptedIn
     );
@@ -39,7 +41,7 @@ describe('readPolicyBaseline', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the baseline identity and environment for a named preset', () => {
@@ -99,7 +101,7 @@ describe('readPolicyBaseline', () => {
 
   it('refuses to compute a baseline when the license is unavailable', () => {
     const { service } = createStartedService();
-    service.getLicenseService().getLicenseInformation = jest.fn().mockReturnValue(null);
+    service.getLicenseService().getLicenseInformation = vi.fn().mockReturnValue(null);
 
     expect(() => readPolicyBaseline(service, { preset: 'EDRComplete' })).toThrow(
       PolicyBaselineUnavailableError

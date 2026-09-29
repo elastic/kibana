@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient } from '@kbn/react-query';
@@ -15,15 +17,15 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
 import { createQueryClientWrapper } from '../../../shared/test_utils/query_client_wrapper';
 
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_kibana');
 
 describe('ServiceAccountName', () => {
   const services = createStartServicesMock();
   let queryClient: QueryClient;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
-    jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
+    vi.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
     services.security.serviceAccounts.isEnabled.mockReturnValue(true);
   });
   afterEach(() => queryClient.clear());

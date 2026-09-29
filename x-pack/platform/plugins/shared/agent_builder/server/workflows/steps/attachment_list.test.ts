@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { listAttachmentsStepDefinition } from './attachment_list';
 import {
   createStepHandlerContext,
   createWorkflowStepAttachmentClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
+const experimentalEnabled = vi.fn().mockResolvedValue(true);
+const experimentalDisabled = vi.fn().mockResolvedValue(false);
 
 describe('listAttachmentsStepDefinition', () => {
   it('creates the expected step definition structure', () => {
@@ -28,7 +30,7 @@ describe('listAttachmentsStepDefinition', () => {
 
   it('returns a summary of active attachments by default', async () => {
     const { list, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         results: [
           {
             id: 'att-1',
@@ -74,7 +76,7 @@ describe('listAttachmentsStepDefinition', () => {
 
   it('forwards include_deleted to the client', async () => {
     const { list, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      list: jest.fn().mockResolvedValue({ results: [], total_token_estimate: 0 }),
+      list: vi.fn().mockResolvedValue({ results: [], total_token_estimate: 0 }),
     });
 
     const definition = listAttachmentsStepDefinition({
@@ -111,7 +113,7 @@ describe('listAttachmentsStepDefinition', () => {
 
   it('returns an error when the client throws', async () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      list: jest.fn().mockRejectedValue(new Error('boom')),
+      list: vi.fn().mockRejectedValue(new Error('boom')),
     });
 
     const definition = listAttachmentsStepDefinition({

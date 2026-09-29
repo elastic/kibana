@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
@@ -42,7 +44,7 @@ describe('splitIntoBuckets', () => {
     return {
       id,
       capabilityPath: Array.isArray(paths) ? paths : [paths],
-      switcher: jest.fn(),
+      switcher: vi.fn(),
     };
   };
 
@@ -83,9 +85,9 @@ describe('convertBucketToSwitcher', () => {
   };
 
   test('the underlying switchers are all called', async () => {
-    const switcher1 = jest.fn();
-    const switcher2 = jest.fn();
-    const switcher3 = jest.fn();
+    const switcher1 = vi.fn();
+    const switcher2 = vi.fn();
+    const switcher3 = vi.fn();
 
     const bucket: SwitcherBucket = {
       bucketPaths: new Set(['*']),
@@ -103,9 +105,9 @@ describe('convertBucketToSwitcher', () => {
   });
 
   test('the underlying switchers are called with the correct arguments', async () => {
-    const switcher1 = jest.fn();
-    const switcher2 = jest.fn();
-    const switcher3 = jest.fn();
+    const switcher1 = vi.fn();
+    const switcher2 = vi.fn();
+    const switcher3 = vi.fn();
 
     const bucket: SwitcherBucket = {
       bucketPaths: new Set(['*']),
@@ -124,9 +126,9 @@ describe('convertBucketToSwitcher', () => {
   });
 
   test('returns the aggregated result from all the underlying switchers', async () => {
-    const switcher1 = jest.fn().mockResolvedValue({ foo: { bar: 1 } });
-    const switcher2 = jest.fn().mockResolvedValue({ bar: { hello: 2 } });
-    const switcher3 = jest.fn().mockResolvedValue({ hello: { dolly: 3 } });
+    const switcher1 = vi.fn().mockResolvedValue({ foo: { bar: 1 } });
+    const switcher2 = vi.fn().mockResolvedValue({ bar: { hello: 2 } });
+    const switcher3 = vi.fn().mockResolvedValue({ hello: { dolly: 3 } });
 
     const bucket: SwitcherBucket = {
       bucketPaths: new Set(['*']),
@@ -147,9 +149,9 @@ describe('convertBucketToSwitcher', () => {
   });
 
   test('result aggregation works even for non-intersecting nested values', async () => {
-    const switcher1 = jest.fn().mockResolvedValue({ nested: { foo: 1 } });
-    const switcher2 = jest.fn().mockResolvedValue({ nested: { bar: 2 } });
-    const switcher3 = jest.fn().mockResolvedValue({ nested: { dolly: 3 } });
+    const switcher1 = vi.fn().mockResolvedValue({ nested: { foo: 1 } });
+    const switcher2 = vi.fn().mockResolvedValue({ nested: { bar: 2 } });
+    const switcher3 = vi.fn().mockResolvedValue({ nested: { dolly: 3 } });
 
     const bucket: SwitcherBucket = {
       bucketPaths: new Set(['*']),

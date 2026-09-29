@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -28,9 +30,9 @@ const createMockAuthz = (grants: Grants) => {
     [WorkflowsManagementApiActions.read]: grants.read,
   };
 
-  const get = jest.fn((apiPrivilege: string) => `api:${apiPrivilege}`);
+  const get = vi.fn((apiPrivilege: string) => `api:${apiPrivilege}`);
 
-  const atSpace = jest.fn(async (_spaceId: string, { kibana }: { kibana: string[] }) => {
+  const atSpace = vi.fn(async (_spaceId: string, { kibana }: { kibana: string[] }) => {
     const kibanaPrivileges = kibana.map((kibanaAction) => {
       const apiPrivilege = kibanaAction.replace(/^api:/, '');
 
@@ -47,10 +49,10 @@ const createMockAuthz = (grants: Grants) => {
     };
   });
 
-  const checkPrivilegesWithRequest = jest.fn(() => ({
+  const checkPrivilegesWithRequest = vi.fn(() => ({
     atSpace,
-    atSpaces: jest.fn(),
-    globally: jest.fn(),
+    atSpaces: vi.fn(),
+    globally: vi.fn(),
   }));
 
   const authz = {

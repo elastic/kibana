@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,11 +21,14 @@ import {
 } from './json_tree_viewer';
 import { ROOT_ID, getNodeId } from './tree_model';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  copyToClipboard: jest.fn(),
-}));
-const copyToClipboardMock = jest.mocked(copyToClipboard);
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      copyToClipboard: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const copyToClipboardMock = vi.mocked(copyToClipboard);
 
 const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
 const copyTestId = (path: string) => `jsonTreeViewerCopy-${getNodeId(path.split('.'))}`;
@@ -437,7 +442,7 @@ describe('JsonTreeViewer', () => {
       render(
         <JsonTreeViewer
           json={{ message: 'hello' }}
-          getLeafActions={twoActions(jest.fn(), jest.fn())}
+          getLeafActions={twoActions(vi.fn(), vi.fn())}
         />
       );
 
@@ -456,8 +461,8 @@ describe('JsonTreeViewer', () => {
     });
 
     it('invokes an action onClick when the button is clicked', async () => {
-      const onFilterFor = jest.fn();
-      const onFilterOut = jest.fn();
+      const onFilterFor = vi.fn();
+      const onFilterOut = vi.fn();
       render(
         <JsonTreeViewer
           json={{ message: 'hello' }}
@@ -477,7 +482,7 @@ describe('JsonTreeViewer', () => {
       render(
         <JsonTreeViewer
           json={{ message: 'hello' }}
-          getLeafActions={twoActions(jest.fn(), jest.fn())}
+          getLeafActions={twoActions(vi.fn(), vi.fn())}
         />
       );
 

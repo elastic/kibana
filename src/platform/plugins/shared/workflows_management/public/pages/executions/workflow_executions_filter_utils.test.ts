@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import {
   getControlPanelIdByFieldName,
@@ -34,7 +36,7 @@ describe('workflow executions filter utils', () => {
   });
 
   it('finds control panel id by field name', () => {
-    const setSelectedOptions = jest.fn();
+    const setSelectedOptions = vi.fn();
     const filterGroupHandler = {
       getInput: () => ({
         initialChildControlState: {

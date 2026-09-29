@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -15,17 +18,17 @@ import { sendGetOutputHealth, useStartServices } from '../../../../hooks';
 
 import { OutputHealth } from './output_health';
 
-jest.mock('../../../../hooks', () => {
+vi.mock('../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
-    useStartServices: jest.fn(),
-    sendGetOutputHealth: jest.fn(),
+    ...(await vi.importActual('../../../../hooks')),
+    useStartServices: vi.fn(),
+    sendGetOutputHealth: vi.fn(),
   };
 });
 
-jest.mock('@elastic/eui', () => {
+vi.mock('@elastic/eui', async () => {
   return {
-    ...jest.requireActual('@elastic/eui'),
+    ...(await vi.importActual('@elastic/eui')),
     EuiToolTip: (props: any) => (
       <div data-test-subj="outputHealthBadgeTooltip" data-tooltip-content={props.content}>
         {props.children}
@@ -34,9 +37,9 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockUseStartServices = useStartServices as Mock;
 
-const mockSendGetOutputHealth = sendGetOutputHealth as jest.Mock;
+const mockSendGetOutputHealth = sendGetOutputHealth as Mock;
 
 // FLAKY: https://github.com/elastic/kibana/issues/201412
 // FLAKY: https://github.com/elastic/kibana/issues/201068

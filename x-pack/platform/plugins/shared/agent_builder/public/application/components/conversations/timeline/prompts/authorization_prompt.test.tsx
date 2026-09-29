@@ -5,28 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import { AuthorizationPrompt } from './authorization_prompt';
 
-jest.mock('@kbn/response-ops-oauth-hooks', () => ({
-  useConnectorOAuthConnect: jest.fn(() => ({
-    connect: jest.fn(),
-    cancelConnect: jest.fn(),
-    isConnecting: false,
-  })),
-  OAuthRedirectMode: { NewTab: 'new_tab' },
-}));
+vi.mock('@kbn/response-ops-oauth-hooks', () => {
+      const mocked = {
+      useConnectorOAuthConnect: vi.fn(() => ({
+        connect: vi.fn(),
+        cancelConnect: vi.fn(),
+        isConnecting: false,
+      })),
+      OAuthRedirectMode: { NewTab: 'new_tab' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_toasts', () => ({
-  useToasts: () => ({ addErrorToast: jest.fn() }),
-}));
+vi.mock('../../../../hooks/use_toasts', () => {
+      const mocked = {
+      useToasts: () => ({ addErrorToast: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../connectors/connector_type_icon', () => ({
-  ConnectorTypeIcon: () => <span />,
-}));
+vi.mock('../../../connectors/connector_type_icon', () => {
+      const mocked = {
+      ConnectorTypeIcon: () => <span />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -48,8 +59,8 @@ describe('AuthorizationPrompt', () => {
     renderWithProviders(
       <AuthorizationPrompt
         prompt={basePrompt}
-        onAuthorize={jest.fn()}
-        onCancel={jest.fn()}
+        onAuthorize={vi.fn()}
+        onCancel={vi.fn()}
         isAnswered
         answeredValue={false}
       />
@@ -63,8 +74,8 @@ describe('AuthorizationPrompt', () => {
     renderWithProviders(
       <AuthorizationPrompt
         prompt={basePrompt}
-        onAuthorize={jest.fn()}
-        onCancel={jest.fn()}
+        onAuthorize={vi.fn()}
+        onCancel={vi.fn()}
         isAnswered
         answeredValue
       />

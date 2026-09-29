@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -18,29 +21,35 @@ import type { RegisterEntityMaintainerConfig } from './types';
 import { EntityMaintainerTaskStatus } from './types';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../execution_context';
 
-const mockEnsureScheduled = jest.fn();
-const mockRegisterTaskDefinitions = jest.fn();
-const mockCreateInternalRepository = jest.fn();
-const mockGetStartServices = jest.fn();
-const mockLicenseCheck = jest.fn();
-const mockGetLicense = jest.fn();
+const mockEnsureScheduled = vi.fn();
+const mockRegisterTaskDefinitions = vi.fn();
+const mockCreateInternalRepository = vi.fn();
+const mockGetStartServices = vi.fn();
+const mockLicenseCheck = vi.fn();
+const mockGetLicense = vi.fn();
 
-jest.mock('./entity_maintainers_registry', () => ({
-  entityMaintainersRegistry: {
-    getAll: jest.fn(),
-    register: jest.fn(),
-    hasId: jest.fn(),
-  },
-}));
-jest.mock('../should_delete_orphaned_task', () => ({
-  shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
-}));
+vi.mock('./entity_maintainers_registry', () => {
+      const mocked = {
+      entityMaintainersRegistry: {
+        getAll: vi.fn(),
+        register: vi.fn(),
+        hasId: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../should_delete_orphaned_task', () => {
+      const mocked = {
+      shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const registryMock = jest.requireMock('./entity_maintainers_registry')
+const registryMock = (await vi.importMock('./entity_maintainers_registry'))
   .entityMaintainersRegistry as {
-  register: jest.Mock;
-  getAll: jest.Mock;
-  hasId: jest.Mock;
+  register: Mock;
+  getAll: Mock;
+  hasId: Mock;
 };
 
 function createMockDeps() {
@@ -50,7 +59,7 @@ function createMockDeps() {
     type: 'platinum',
   });
   const logger = loggerMock.create();
-  (logger.get as jest.Mock) = jest.fn().mockReturnValue(logger);
+  (logger.get as Mock) = vi.fn().mockReturnValue(logger);
   const request = { headers: {} } as KibanaRequest;
   const taskManagerStart = {
     ensureScheduled: mockEnsureScheduled.mockResolvedValue(undefined),
@@ -62,7 +71,7 @@ function createMockDeps() {
   const coreStart = {
     savedObjects: {
       createInternalRepository: mockCreateInternalRepository.mockReturnValue({}),
-      getScopedClient: jest.fn().mockReturnValue({}),
+      getScopedClient: vi.fn().mockReturnValue({}),
     },
     elasticsearch: {
       client: {
@@ -70,7 +79,7 @@ function createMockDeps() {
       },
     },
     executionContext: {
-      withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()),
+      withContext: vi.fn(<T>(_ctx: unknown, fn: () => T) => fn()),
     },
   };
   const plugins = {
@@ -78,11 +87,11 @@ function createMockDeps() {
       getLicense: mockGetLicense,
     },
   };
-  const startContract = { createCRUDClient: jest.fn() };
+  const startContract = { createCRUDClient: vi.fn() };
   const core = {
     getStartServices: mockGetStartServices.mockResolvedValue([coreStart, plugins, startContract]),
   };
-  const analytics = { reportEvent: jest.fn() };
+  const analytics = { reportEvent: vi.fn() };
   return {
     logger,
     request,
@@ -90,14 +99,14 @@ function createMockDeps() {
     taskManagerSetup,
     core,
     analytics,
-    withContextSpy: coreStart.executionContext.withContext as jest.Mock,
+    withContextSpy: coreStart.executionContext.withContext as Mock,
   };
 }
 
 function createMockConfig(
   overrides?: Partial<RegisterEntityMaintainerConfig>
 ): RegisterEntityMaintainerConfig {
-  const defaultRun = jest.fn().mockResolvedValue({ foo: 'bar' });
+  const defaultRun = vi.fn().mockResolvedValue({ foo: 'bar' });
   const { run = defaultRun, ...rest } = overrides ?? {};
   return {
     id: 'test-maintainer',
@@ -111,7 +120,7 @@ function createMockConfig(
 
 describe('entity_maintainer task', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('scheduleEntityMaintainerTask', () => {
@@ -287,7 +296,7 @@ describe('entity_maintainer task', () => {
 
     it('should trigger the correct run method upon registration and scheduling', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const run = jest.fn().mockResolvedValue({ key: 'value' });
+      const run = vi.fn().mockResolvedValue({ key: 'value' });
       const config = createMockConfig({ run, minLicense: 'enterprise' });
 
       registerEntityMaintainerTask({
@@ -336,7 +345,7 @@ describe('entity_maintainer task', () => {
 
     it('should not call run when license check is not valid', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const run = jest.fn().mockResolvedValue({ key: 'value' });
+      const run = vi.fn().mockResolvedValue({ key: 'value' });
       const config = createMockConfig({ run });
 
       registerEntityMaintainerTask({
@@ -379,8 +388,8 @@ describe('entity_maintainer task', () => {
 
     it('should trigger all run methods when multiple registrations occur with single scheduling', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const runA = jest.fn().mockResolvedValue({ from: 'a' });
-      const runB = jest.fn().mockResolvedValue({ from: 'b' });
+      const runA = vi.fn().mockResolvedValue({ from: 'a' });
+      const runB = vi.fn().mockResolvedValue({ from: 'b' });
 
       registerEntityMaintainerTask({
         taskManager: taskManagerSetup as any,
@@ -424,8 +433,8 @@ describe('entity_maintainer task', () => {
 
     it('should execute setup method only once', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const setup = jest.fn().mockResolvedValue({ initialized: true });
-      const run = jest.fn().mockResolvedValue({ synced: true });
+      const setup = vi.fn().mockResolvedValue({ initialized: true });
+      const run = vi.fn().mockResolvedValue({ synced: true });
       const config = createMockConfig({ setup, run });
 
       registerEntityMaintainerTask({
@@ -476,8 +485,8 @@ describe('entity_maintainer task', () => {
 
     it('should change state across lifecycle as run or setup change it', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const setup = jest.fn().mockResolvedValue({ setupState: 1 });
-      const run = jest.fn().mockImplementation(({ status }) => {
+      const setup = vi.fn().mockResolvedValue({ setupState: 1 });
+      const run = vi.fn().mockImplementation(({ status }) => {
         const prev = status.state.runState ?? status.state.setupState ?? 0;
         return Promise.resolve({ ...status.state, runState: prev + 1 });
       });
@@ -519,7 +528,7 @@ describe('entity_maintainer task', () => {
 
     it('should populate lastErrorTimestamp when run throws', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const run = jest.fn().mockRejectedValue(new Error('run failed'));
+      const run = vi.fn().mockRejectedValue(new Error('run failed'));
       const config = createMockConfig({ run });
 
       registerEntityMaintainerTask({
@@ -550,7 +559,7 @@ describe('entity_maintainer task', () => {
 
     it('should set status.metadata lastSuccessTimestamp and runs correctly', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const run = jest.fn().mockResolvedValue({ done: true });
+      const run = vi.fn().mockResolvedValue({ done: true });
       const config = createMockConfig({ run });
 
       registerEntityMaintainerTask({
@@ -582,7 +591,7 @@ describe('entity_maintainer task', () => {
 
     it('should return current state without calling run when fakeRequest is missing', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const run = jest.fn();
+      const run = vi.fn();
       const config = createMockConfig({ run });
 
       registerEntityMaintainerTask({

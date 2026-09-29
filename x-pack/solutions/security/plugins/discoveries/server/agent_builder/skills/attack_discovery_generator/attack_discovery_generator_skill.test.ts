@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
@@ -21,7 +23,7 @@ import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from '../tools/get_default_esql_query_
 
 const attackDiscoveryGeneratorSkill = createAttackDiscoveryGeneratorSkill({
   getEventLogIndex: async () => 'event-log-*',
-  workflowExecutionLookup: { getWorkflowExecution: jest.fn() },
+  workflowExecutionLookup: { getWorkflowExecution: vi.fn() },
 });
 
 describe('attackDiscoveryGeneratorSkill', () => {

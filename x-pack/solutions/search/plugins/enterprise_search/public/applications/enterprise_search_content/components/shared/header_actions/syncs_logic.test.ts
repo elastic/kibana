@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
 import type { Connector } from '@kbn/search-connectors';
@@ -155,7 +157,7 @@ describe('SyncsLogic', () => {
   const DEFAULT_VALUES = {};
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mount();
   });
   it('has expected default values', () => {
@@ -165,12 +167,12 @@ describe('SyncsLogic', () => {
   describe('actions', () => {
     describe('cancelSyncs', () => {
       it("should not call makeCancelSyncRequest if connector doesn't exist", () => {
-        SyncsLogic.actions.makeCancelSyncsRequest = jest.fn();
+        SyncsLogic.actions.makeCancelSyncsRequest = vi.fn();
         SyncsLogic.actions.cancelSyncs(undefined);
         expect(SyncsLogic.actions.makeCancelSyncsRequest).not.toHaveBeenCalled();
       });
       it('should call clearFlashMessages and request if a connector is passed', () => {
-        SyncsLogic.actions.makeCancelSyncsRequest = jest.fn();
+        SyncsLogic.actions.makeCancelSyncsRequest = vi.fn();
         SyncsLogic.actions.cancelSyncs(mockConnector);
         expect(SyncsLogic.actions.makeCancelSyncsRequest).toHaveBeenCalled();
       });
@@ -178,12 +180,12 @@ describe('SyncsLogic', () => {
 
     describe('startAccessControlSync', () => {
       it("should not call makeStartAccessControlSyncRequest if connector doesn't exist", () => {
-        SyncsLogic.actions.makeStartAccessControlSyncRequest = jest.fn();
+        SyncsLogic.actions.makeStartAccessControlSyncRequest = vi.fn();
         SyncsLogic.actions.startAccessControlSync(undefined);
         expect(SyncsLogic.actions.makeStartAccessControlSyncRequest).not.toHaveBeenCalled();
       });
       it('should call makeStartAccessControlSyncRequest if a connector is passed', () => {
-        SyncsLogic.actions.makeStartAccessControlSyncRequest = jest.fn();
+        SyncsLogic.actions.makeStartAccessControlSyncRequest = vi.fn();
         SyncsLogic.actions.startAccessControlSync({
           ...mockConnector,
           features: {
@@ -194,7 +196,7 @@ describe('SyncsLogic', () => {
         expect(SyncsLogic.actions.makeStartAccessControlSyncRequest).toHaveBeenCalled();
       });
       it('should not call makeStartAccessControlSyncRequest if incremental sync is not enabled', () => {
-        SyncsLogic.actions.makeStartAccessControlSyncRequest = jest.fn();
+        SyncsLogic.actions.makeStartAccessControlSyncRequest = vi.fn();
         SyncsLogic.actions.startAccessControlSync({ ...mockConnector, features: {} });
         expect(SyncsLogic.actions.makeStartAccessControlSyncRequest).not.toHaveBeenCalled();
       });
@@ -202,12 +204,12 @@ describe('SyncsLogic', () => {
 
     describe('startIncrementalSync', () => {
       it("should not call makeStartIncrementalSyncRequest if connector doesn't exist", () => {
-        SyncsLogic.actions.makeStartIncrementalSyncRequest = jest.fn();
+        SyncsLogic.actions.makeStartIncrementalSyncRequest = vi.fn();
         SyncsLogic.actions.startIncrementalSync(undefined);
         expect(SyncsLogic.actions.makeStartIncrementalSyncRequest).not.toHaveBeenCalled();
       });
       it('should call makeStartIncrementalSyncRequest if a connector is passed', () => {
-        SyncsLogic.actions.makeStartIncrementalSyncRequest = jest.fn();
+        SyncsLogic.actions.makeStartIncrementalSyncRequest = vi.fn();
         SyncsLogic.actions.startIncrementalSync({
           ...mockConnector,
           features: {
@@ -218,7 +220,7 @@ describe('SyncsLogic', () => {
         expect(SyncsLogic.actions.makeStartIncrementalSyncRequest).toHaveBeenCalled();
       });
       it('should not call makeStartIncrementalSyncRequest if incremental sync is not enabled', () => {
-        SyncsLogic.actions.makeStartIncrementalSyncRequest = jest.fn();
+        SyncsLogic.actions.makeStartIncrementalSyncRequest = vi.fn();
         SyncsLogic.actions.startIncrementalSync({ ...mockConnector, features: {} });
         expect(SyncsLogic.actions.makeStartIncrementalSyncRequest).not.toHaveBeenCalled();
       });
@@ -226,12 +228,12 @@ describe('SyncsLogic', () => {
 
     describe('startSync', () => {
       it("should not call makeStartSyncRequest if connector doesn't exist", () => {
-        SyncsLogic.actions.makeStartSyncRequest = jest.fn();
+        SyncsLogic.actions.makeStartSyncRequest = vi.fn();
         SyncsLogic.actions.startSync(undefined);
         expect(SyncsLogic.actions.makeStartSyncRequest).not.toHaveBeenCalled();
       });
       it('should call makeStartSyncRequest if a connector is passed', () => {
-        SyncsLogic.actions.makeStartSyncRequest = jest.fn();
+        SyncsLogic.actions.makeStartSyncRequest = vi.fn();
         SyncsLogic.actions.startSync(mockConnector);
         expect(SyncsLogic.actions.makeStartSyncRequest).toHaveBeenCalled();
       });

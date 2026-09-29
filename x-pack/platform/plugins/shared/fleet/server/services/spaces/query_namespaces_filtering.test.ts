@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isSpaceAwarenessEnabled } from './helpers';
 import { addNamespaceFilteringToQuery } from './query_namespaces_filtering';
 
-jest.mock('./helpers');
+vi.mock('./helpers');
 
 describe('addNamespaceFilteringToQuery', () => {
   const baseActionQuery = {
@@ -66,7 +68,7 @@ describe('addNamespaceFilteringToQuery', () => {
 
   describe('with isSpaceAwarenessEnabled returning false', () => {
     beforeEach(() => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     });
 
     it('should return the same query', async () => {
@@ -78,7 +80,7 @@ describe('addNamespaceFilteringToQuery', () => {
 
   describe('with isSpaceAwarenessEnabled returning true', () => {
     beforeEach(() => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
     it('should return the same query if the current namespace is undefined', async () => {

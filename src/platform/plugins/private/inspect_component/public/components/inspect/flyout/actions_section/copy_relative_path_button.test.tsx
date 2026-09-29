@@ -7,18 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { CopyRelativePathButton } from './copy_relative_path_button';
 import { copyToClipboard } from '@elastic/eui';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  copyToClipboard: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      copyToClipboard: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCopyToClipboard = jest.mocked(copyToClipboard);
+const mockCopyToClipboard = vi.mocked(copyToClipboard);
 
 const propsMock = {
   relativePath: '/src/components/example/component.tsx',
@@ -26,7 +31,7 @@ const propsMock = {
 
 describe('CopyRelativePathButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render correctly', () => {

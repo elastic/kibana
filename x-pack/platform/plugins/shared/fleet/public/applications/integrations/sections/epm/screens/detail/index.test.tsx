@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { act } from '@testing-library/react';
@@ -62,7 +65,7 @@ describe('When on integration detail', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     testRenderer = createIntegrationsTestRendererMock();
     mockedApi = mockApiCalls(testRenderer.startServices.http);
     act(() => testRenderer.mountHistory.push(detailPageUrlPath));
@@ -618,7 +621,7 @@ describe('When on integration detail', () => {
 });
 
 interface MockedApi<
-  R extends Record<string, jest.MockedFunction<any>> = Record<string, jest.MockedFunction<any>>
+  R extends Record<string, MockedFunction<any>> = Record<string, MockedFunction<any>>
 > {
   /** Will return a promise that resolves when triggered APIs are complete */
   waitForApi: () => Promise<void>;
@@ -627,17 +630,17 @@ interface MockedApi<
 }
 
 interface EpmPackageDetailsResponseProvidersMock {
-  epmGetInfo: jest.MockedFunction<
+  epmGetInfo: MockedFunction<
     (pkgName: string, pkgVersion?: string, options?: { prerelease?: boolean }) => GetInfoResponse
   >;
-  epmGetFile: jest.MockedFunction<() => string>;
-  epmGetStats: jest.MockedFunction<() => GetStatsResponse>;
-  fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
-  packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
-  agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
-  appCheckPermissions: jest.MockedFunction<() => CheckPermissionsResponse>;
-  getSettings: jest.MockedFunction<() => GetSettingsResponse>;
-  getVerificationKeyId: jest.MockedFunction<() => GetVerificationKeyIdResponse>;
+  epmGetFile: MockedFunction<() => string>;
+  epmGetStats: MockedFunction<() => GetStatsResponse>;
+  fleetSetup: MockedFunction<() => GetFleetStatusResponse>;
+  packagePolicyList: MockedFunction<() => GetPackagePoliciesResponse>;
+  agentPolicyList: MockedFunction<() => GetAgentPoliciesResponse>;
+  appCheckPermissions: MockedFunction<() => CheckPermissionsResponse>;
+  getSettings: MockedFunction<() => GetSettingsResponse>;
+  getVerificationKeyId: MockedFunction<() => GetVerificationKeyIdResponse>;
 }
 
 const mockApiCalls = (
@@ -1137,15 +1140,15 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       });
     },
     responseProvider: {
-      epmGetInfo: jest.fn().mockReturnValue(epmPackageResponse),
-      epmGetFile: jest.fn().mockReturnValue(packageReadMe),
-      epmGetStats: jest.fn().mockReturnValue(epmGetStatsResponse),
-      fleetSetup: jest.fn().mockReturnValue(agentsSetupResponse),
-      packagePolicyList: jest.fn().mockReturnValue(packagePoliciesResponse),
-      agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
-      appCheckPermissions: jest.fn().mockReturnValue(appCheckPermissionsResponse),
-      getSettings: jest.fn().mockReturnValue(getSettingsResponse),
-      getVerificationKeyId: jest.fn().mockReturnValue(getVerificationKeyIdResponse),
+      epmGetInfo: vi.fn().mockReturnValue(epmPackageResponse),
+      epmGetFile: vi.fn().mockReturnValue(packageReadMe),
+      epmGetStats: vi.fn().mockReturnValue(epmGetStatsResponse),
+      fleetSetup: vi.fn().mockReturnValue(agentsSetupResponse),
+      packagePolicyList: vi.fn().mockReturnValue(packagePoliciesResponse),
+      agentPolicyList: vi.fn().mockReturnValue(agentPoliciesResponse),
+      appCheckPermissions: vi.fn().mockReturnValue(appCheckPermissionsResponse),
+      getSettings: vi.fn().mockReturnValue(getSettingsResponse),
+      getVerificationKeyId: vi.fn().mockReturnValue(getVerificationKeyIdResponse),
     },
   };
 

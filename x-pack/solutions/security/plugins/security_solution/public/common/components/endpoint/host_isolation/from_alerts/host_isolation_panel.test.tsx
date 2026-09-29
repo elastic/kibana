@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { HostIsolationPanel } from '.';
@@ -21,10 +24,10 @@ const queryClient = new QueryClient({
   },
 });
 
-jest.mock('../../../../experimental_features_service');
+vi.mock('../../../../experimental_features_service');
 
-const useKibanaMock = mockUseKibana as jest.Mock;
-jest.mock('../../../../lib/kibana');
+const useKibanaMock = mockUseKibana as Mock;
+vi.mock('../../../../lib/kibana');
 
 describe('HostIsolationPanel', () => {
   const renderWithContext = (Element: React.ReactElement) =>
@@ -35,10 +38,10 @@ describe('HostIsolationPanel', () => {
   beforeEach(() => {
     useKibanaMock.mockReturnValue({
       ...mockUseKibana(),
-      services: { ...mockUseKibana().services, notifications: { toasts: jest.fn() } },
+      services: { ...mockUseKibana().services, notifications: { toasts: vi.fn() } },
     });
 
-    cancelCallback = jest.fn();
+    cancelCallback = vi.fn();
     details = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
   });
 

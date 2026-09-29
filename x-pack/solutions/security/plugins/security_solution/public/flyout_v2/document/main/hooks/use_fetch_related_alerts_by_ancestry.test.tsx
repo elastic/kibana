@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type {
@@ -14,7 +17,7 @@ import type {
 import { useFetchRelatedAlertsByAncestry } from './use_fetch_related_alerts_by_ancestry';
 import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_process_tree';
 
-jest.mock('./use_alert_prevalence_from_process_tree');
+vi.mock('./use_alert_prevalence_from_process_tree');
 
 const documentId = 'documentId';
 const indices = ['index1'];
@@ -26,7 +29,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
   >;
 
   it('should return loading true while data is loading', () => {
-    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+    (useAlertPrevalenceFromProcessTree as Mock).mockReturnValue({
       loading: true,
       error: false,
       alertIds: [],
@@ -41,7 +44,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
   });
 
   it('should return error true if data fetching has errored out', () => {
-    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+    (useAlertPrevalenceFromProcessTree as Mock).mockReturnValue({
       loading: false,
       error: true,
       alertIds: [],
@@ -56,7 +59,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
   });
 
   it('should return data and count when data fetching is successful', () => {
-    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+    (useAlertPrevalenceFromProcessTree as Mock).mockReturnValue({
       loading: false,
       error: false,
       alertIds: ['1', '2'],
@@ -71,7 +74,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
   });
 
   it('forwards the interval to useAlertPrevalenceFromProcessTree when provided', () => {
-    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+    (useAlertPrevalenceFromProcessTree as Mock).mockReturnValue({
       loading: false,
       error: false,
       alertIds: [],
@@ -88,7 +91,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
   });
 
   it('forwards undefined interval when not provided', () => {
-    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+    (useAlertPrevalenceFromProcessTree as Mock).mockReturnValue({
       loading: false,
       error: false,
       alertIds: [],
@@ -104,8 +107,8 @@ describe('useFetchRelatedAlertsByAncestry', () => {
   });
 
   it('forwards the refetch function from useAlertPrevalenceFromProcessTree', () => {
-    const refetchMock = jest.fn();
-    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+    const refetchMock = vi.fn();
+    (useAlertPrevalenceFromProcessTree as Mock).mockReturnValue({
       loading: false,
       error: false,
       alertIds: [],

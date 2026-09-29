@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -227,7 +229,7 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(8);
 
       it('with displayLimit=0, shows badges without button', async () => {
-        const listOnClick = jest.fn();
+        const listOnClick = vi.fn();
         const { container } = await createSpaceList({
           spaces,
           props: { namespaces: [...namespaces, '?'], displayLimit: 0, listOnClick },
@@ -240,7 +242,7 @@ describe('SpaceListInternal', () => {
       });
 
       it('with displayLimit=1, shows badges with button', async () => {
-        const listOnClick = jest.fn();
+        const listOnClick = vi.fn();
         const { container } = await createSpaceList({
           spaces,
           props: { namespaces: [...namespaces, '?'], displayLimit: 1, listOnClick },

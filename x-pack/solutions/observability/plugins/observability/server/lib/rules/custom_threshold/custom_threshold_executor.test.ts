@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -29,10 +31,16 @@ import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
-jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({
-  getViewInAppUrl: jest.fn().mockReturnValue('mockedViewInApp'),
-}));
+vi.mock('./lib/evaluate_rule', () => {
+      const mocked = { evaluateRule: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => {
+      const mocked = {
+      getViewInAppUrl: vi.fn().mockReturnValue('mockedViewInApp'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
@@ -133,9 +141,8 @@ const mockOptions = {
 };
 
 const mockTimeRange = { start: Date.now() - 60000, end: Date.now() };
-const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
-  return jest
-    .requireMock('./lib/evaluate_rule')
+const setEvaluationResults = async (response: Array<Record<string, Evaluation>>) => {
+  return (await vi.importMock('./lib/evaluate_rule'))
     .evaluateRule.mockImplementation(() =>
       response.map((evaluations) => ({ evaluations, timeRange: mockTimeRange }))
     );
@@ -172,7 +179,7 @@ const mockedDataView = {
   ...mockedIndex,
 };
 const mockedSearchSource = {
-  getField: jest.fn(() => mockedDataView),
+  getField: vi.fn(() => mockedDataView),
 } as any as ISearchSource;
 let services: RuleExecutorServicesMock;
 
@@ -194,9 +201,9 @@ const setup = () => {
 
   services = {
     ...alertsServices,
-    getSearchSourceClient: jest.fn().mockResolvedValue({
+    getSearchSourceClient: vi.fn().mockResolvedValue({
       ...searchSourceCommonMock,
-      createLazy: jest.fn(() => Promise.resolve(mockedSearchSource)),
+      createLazy: vi.fn(() => Promise.resolve(mockedSearchSource)),
     }),
   };
 
@@ -248,7 +255,7 @@ describe('The custom threshold alert type', () => {
     setup();
 
     describe('check error scenarios', () => {
-      beforeEach(() => jest.clearAllMocks());
+      beforeEach(() => vi.clearAllMocks());
       afterAll(() => clearInstances());
       const execute = (
         comparator: COMPARATORS,
@@ -307,7 +314,7 @@ describe('The custom threshold alert type', () => {
     });
 
     describe('querying the entire infrastructure', () => {
-      beforeEach(() => jest.clearAllMocks());
+      beforeEach(() => vi.clearAllMocks());
       afterAll(() => clearInstances());
       const instanceID = '*';
       const execute = (
@@ -449,7 +456,7 @@ describe('The custom threshold alert type', () => {
     });
 
     describe('querying the entire infrastructure with warning threshold', () => {
-      beforeEach(() => jest.clearAllMocks());
+      beforeEach(() => vi.clearAllMocks());
       afterAll(() => clearInstances());
       const instanceID = '*';
       const execute = () =>
@@ -518,7 +525,7 @@ describe('The custom threshold alert type', () => {
     });
 
     describe('querying with a groupBy parameter', () => {
-      beforeEach(() => jest.clearAllMocks());
+      beforeEach(() => vi.clearAllMocks());
       afterAll(() => clearInstances());
       const execute = (
         comparator: COMPARATORS,
@@ -1793,7 +1800,7 @@ describe('The custom threshold alert type', () => {
     });
 
     describe('querying recovered alert with a count aggregator', () => {
-      beforeEach(() => jest.clearAllMocks());
+      beforeEach(() => vi.clearAllMocks());
       afterAll(() => clearInstances());
       const execute = (
         comparator: COMPARATORS,
@@ -1838,13 +1845,13 @@ describe('The custom threshold alert type', () => {
             },
           },
         ]);
-        const mockedSetContext = jest.fn();
+        const mockedSetContext = vi.fn();
         services.alertFactory.done.mockImplementation(() => {
           return {
-            getRecoveredAlerts: jest.fn().mockReturnValue([
+            getRecoveredAlerts: vi.fn().mockReturnValue([
               {
                 setContext: mockedSetContext,
-                getId: jest.fn().mockReturnValue('mockedId'),
+                getId: vi.fn().mockReturnValue('mockedId'),
               },
             ]),
           };
@@ -1904,7 +1911,7 @@ describe('The custom threshold alert type', () => {
 
       test('includes group by information in the recovered alert document', async () => {
         setEvaluationResults([{}]);
-        const mockedSetContext = jest.fn();
+        const mockedSetContext = vi.fn();
         services.alertsClient.getRecoveredAlerts.mockImplementation((params: any) => {
           return [
             {
@@ -1913,9 +1920,9 @@ describe('The custom threshold alert type', () => {
                 state: [],
                 context: {},
                 id: 'host-0',
-                getId: jest.fn().mockReturnValue('host-0'),
-                getUuid: jest.fn().mockReturnValue('mockedUuid'),
-                getStart: jest.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
+                getId: vi.fn().mockReturnValue('host-0'),
+                getUuid: vi.fn().mockReturnValue('mockedUuid'),
+                getStart: vi.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
               },
               hit: {
                 'host.name': 'host-0',
@@ -1931,10 +1938,10 @@ describe('The custom threshold alert type', () => {
         });
         services.alertFactory.done.mockImplementation(() => {
           return {
-            getRecoveredAlerts: jest.fn().mockReturnValue([
+            getRecoveredAlerts: vi.fn().mockReturnValue([
               {
                 setContext: mockedSetContext,
-                getId: jest.fn().mockReturnValue('mockedId'),
+                getId: vi.fn().mockReturnValue('mockedId'),
               },
             ]),
           };
@@ -1966,7 +1973,7 @@ describe('The custom threshold alert type', () => {
       });
       test('includes reason message in the recovered alert context pulled from the last active alert ', async () => {
         setEvaluationResults([{}]);
-        const mockedSetContext = jest.fn();
+        const mockedSetContext = vi.fn();
         services.alertsClient.getRecoveredAlerts.mockImplementation((params: any) => {
           return [
             {
@@ -1975,9 +1982,9 @@ describe('The custom threshold alert type', () => {
                 state: [],
                 context: {},
                 id: 'host-0',
-                getId: jest.fn().mockReturnValue('host-0'),
-                getUuid: jest.fn().mockReturnValue('mockedUuid'),
-                getStart: jest.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
+                getId: vi.fn().mockReturnValue('host-0'),
+                getUuid: vi.fn().mockReturnValue('mockedUuid'),
+                getStart: vi.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
               },
               hit: {
                 'host.name': 'host-0',
@@ -1988,10 +1995,10 @@ describe('The custom threshold alert type', () => {
         });
         services.alertFactory.done.mockImplementation(() => {
           return {
-            getRecoveredAlerts: jest.fn().mockReturnValue([
+            getRecoveredAlerts: vi.fn().mockReturnValue([
               {
                 setContext: mockedSetContext,
-                getId: jest.fn().mockReturnValue('mockedId'),
+                getId: vi.fn().mockReturnValue('mockedId'),
               },
             ]),
           };
@@ -2601,7 +2608,7 @@ describe('The custom threshold alert type', () => {
 
     describe('noDataBehavior parameter', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         clearInstances();
       });
       afterAll(() => clearInstances());
@@ -3129,8 +3136,8 @@ describe('The custom threshold alert type', () => {
           });
         };
 
-        const trackedMissingGroups = () =>
-          jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6];
+        const trackedMissingGroups = async () =>
+          (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][6];
 
         test('remainActive still tracks missing groups', async () => {
           await runWith({
@@ -3425,7 +3432,7 @@ describe('The custom threshold alert type', () => {
     setup();
 
     describe('querying the entire infrastructure', () => {
-      beforeEach(() => jest.clearAllMocks());
+      beforeEach(() => vi.clearAllMocks());
       afterAll(() => clearInstances());
       const instanceID = '*';
       const execute = (
@@ -3551,7 +3558,7 @@ describe('The custom threshold alert type', () => {
     });
 
     describe('querying with a groupBy parameter', () => {
-      beforeEach(() => jest.clearAllMocks());
+      beforeEach(() => vi.clearAllMocks());
       afterAll(() => clearInstances());
       const execute = (
         comparator: COMPARATORS,
@@ -5294,7 +5301,7 @@ describe('The custom threshold alert type', () => {
     setup();
 
     describe('querying the entire infrastructure', () => {
-      beforeEach(() => jest.clearAllMocks());
+      beforeEach(() => vi.clearAllMocks());
       afterAll(() => clearInstances());
       const instanceID = '*';
       const execute = (

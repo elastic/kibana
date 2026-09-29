@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import { materializeDecisionTrees, workspacePathForTree } from './materialize';
@@ -26,23 +29,23 @@ const TREE: DecisionTreeDetail = {
   learnings: [],
 };
 
-const createStore = (trees: DecisionTreeDetail[]): jest.Mocked<DecisionTreeStore> =>
+const createStore = (trees: DecisionTreeDetail[]): Mocked<DecisionTreeStore> =>
   ({
-    list: jest
+    list: vi
       .fn()
       .mockResolvedValue(trees.map(({ markdown, mermaid, learnings, ...summary }) => summary)),
-    get: jest
+    get: vi
       .fn()
       .mockImplementation(async (treeId: string) => trees.find((tree) => tree.tree_id === treeId)),
-    commit: jest.fn(),
-    listVersions: jest.fn(),
-    getVersion: jest.fn(),
-    archive: jest.fn(),
-  } as jest.Mocked<DecisionTreeStore>);
+    commit: vi.fn(),
+    listVersions: vi.fn(),
+    getVersion: vi.fn(),
+    archive: vi.fn(),
+  } as Mocked<DecisionTreeStore>);
 
 const createSession = () => ({
-  mkdirs: jest.fn().mockResolvedValue([true]),
-  writeFiles: jest.fn().mockResolvedValue([]),
+  mkdirs: vi.fn().mockResolvedValue([true]),
+  writeFiles: vi.fn().mockResolvedValue([]),
 });
 
 describe('workspacePathForTree', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -12,20 +14,26 @@ import { ViewResultsInDiscoverAction } from './view_results_in_discover';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import { TestProvidersWithServices } from '../__test_helpers__/create_mock_kibana_services';
 
-const mockGetUrl = jest.fn();
+const mockGetUrl = vi.fn();
 
-jest.mock('../common/hooks/use_logs_data_view', () => ({
-  useLogsDataView: jest.fn(() => ({
-    data: { id: 'logs-osquery-data-view-id', title: 'logs-osquery_manager.result*' },
-  })),
-}));
+vi.mock('../common/hooks/use_logs_data_view', () => {
+      const mocked = {
+      useLogsDataView: vi.fn(() => ({
+        data: { id: 'logs-osquery-data-view-id', title: 'logs-osquery_manager.result*' },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../common/lib/kibana', () => ({
-  ...jest.requireActual('../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setupKibana = (overrides: Record<string, unknown> = {}) => {
   mockGetUrl.mockResolvedValue('http://localhost:5601/app/discover#/test-url');
@@ -57,7 +65,7 @@ const setupKibana = (overrides: Record<string, unknown> = {}) => {
 
 describe('ViewResultsInDiscoverAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
   });
 
@@ -336,7 +344,7 @@ describe('ViewResultsInDiscoverAction', () => {
       const buttonArgs = mockGetUrl.mock.calls[0][0];
 
       unmount();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockGetUrl.mockResolvedValue('http://localhost:5601/app/discover#/test-url');
 
       render(

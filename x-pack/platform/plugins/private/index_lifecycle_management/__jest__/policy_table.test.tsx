@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment-timezone';
 import React from 'react';
 import { screen, within, fireEvent, waitFor } from '@testing-library/react';
@@ -76,22 +78,28 @@ for (let i = 1; i < TOTAL_POLICIES; i++) {
   });
 }
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    createHref: jest.fn(),
-    push: jest.fn(),
-    location: {
-      search: '',
-    },
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({
+        createHref: vi.fn(),
+        push: vi.fn(),
+        location: {
+          search: '',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReactRouterNavigate = jest.fn();
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  reactRouterNavigate: () => mockReactRouterNavigate(),
-}));
+const mockReactRouterNavigate = vi.fn();
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      reactRouterNavigate: () => mockReactRouterNavigate(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getPolicyLinks = () => screen.queryAllByTestId('policyTablePolicyNameLink');
 
@@ -133,7 +141,7 @@ const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
         services={{ getUrlForApp: () => '', docLinks: docLinksServiceMock.createStartContract() }}
       >
         <PolicyListContextProvider>
-          <PolicyList updatePolicies={jest.fn()} policies={testPolicies} />
+          <PolicyList updatePolicies={vi.fn()} policies={testPolicies} />
         </PolicyListContextProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
@@ -141,16 +149,16 @@ const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
 };
 
 beforeAll(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 describe('policy table', () => {
   beforeEach(() => {
-    jest.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(false);
+    vi.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(false);
     window.localStorage.removeItem('ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT');
   });
 
@@ -429,7 +437,7 @@ describe('policy table', () => {
 
   describe('read only view', () => {
     beforeEach(() => {
-      jest.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(true);
+      vi.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(true);
     });
 
     test(`doesn't show actions column in the table`, () => {

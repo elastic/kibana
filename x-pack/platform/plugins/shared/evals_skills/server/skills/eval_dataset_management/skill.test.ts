@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { evalsDatasetTools } from '../common/tool_ids';
@@ -15,7 +17,7 @@ import { createEvalDatasetManagementSkill } from './skill';
 
 const deps: EvalDatasetManagementToolDeps = {
   logger: loggingSystemMock.createLogger(),
-  getStartDependencies: jest.fn(),
+  getStartDependencies: vi.fn(),
 };
 
 const writeToolIds = [

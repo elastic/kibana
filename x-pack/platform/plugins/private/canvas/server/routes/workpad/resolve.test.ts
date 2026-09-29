@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeResolveWorkpadRoute } from './resolve';
@@ -33,7 +35,7 @@ describe('RESOLVE workpad', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it(`returns 200 when the workpad is found`, async () => {

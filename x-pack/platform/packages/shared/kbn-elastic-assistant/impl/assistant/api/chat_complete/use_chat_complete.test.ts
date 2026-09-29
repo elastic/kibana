@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useChatComplete } from './use_chat_complete';
 import { useLoadConnectors } from '@kbn/inference-connectors';
@@ -12,37 +15,46 @@ import { useAssistantContext } from '../../../..';
 import type { ChatCompleteResponse } from './post_chat_complete';
 import { postChatComplete } from './post_chat_complete';
 
-jest.mock('../../../..', () => ({
-  useAssistantContext: jest.fn(),
-}));
+vi.mock('../../../..', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./post_chat_complete', () => ({
-  postChatComplete: jest.fn(),
-}));
+vi.mock('./post_chat_complete', () => {
+      const mocked = {
+      postChatComplete: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useChatComplete', () => {
   const mockAbortController = {
-    abort: jest.fn(),
+    abort: vi.fn(),
     signal: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    global.AbortController = jest.fn(
+    vi.clearAllMocks();
+    global.AbortController = vi.fn(
       () => mockAbortController
     ) as unknown as typeof AbortController;
 
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       alertsIndexPattern: 'mock-alerts-index-pattern',
       http: {},
       traceOptions: {},
     });
 
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       data: [{ id: 'mock-connector-id', actionTypeId: '.gen-ai' }],
     });
   });
@@ -57,7 +69,7 @@ describe('useChatComplete', () => {
 
   it('should call postChatComplete when sendMessage is invoked', async () => {
     const mockResponse = { data: 'mock-response' };
-    (postChatComplete as jest.Mock).mockResolvedValue(mockResponse);
+    (postChatComplete as Mock).mockResolvedValue(mockResponse);
 
     const { result } = renderHook(() => useChatComplete({ connectorId: 'mock-connector-id' }));
 
@@ -89,7 +101,7 @@ describe('useChatComplete', () => {
   });
 
   it('should set isLoading to true while sending a message and false after completion', async () => {
-    (postChatComplete as jest.Mock).mockResolvedValue({});
+    (postChatComplete as Mock).mockResolvedValue({});
 
     const { result } = renderHook(() => useChatComplete({ connectorId: 'mock-connector-id' }), {
       // TODO: fails with concurrent mode

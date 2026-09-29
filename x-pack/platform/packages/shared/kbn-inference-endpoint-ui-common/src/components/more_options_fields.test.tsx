@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MoreOptionsFields } from './more_options_fields';
 import { render, screen } from '@testing-library/react';
@@ -124,7 +126,7 @@ describe('MoreOptionsFields', () => {
     render(
       <MockFormProvider>
         <MoreOptionsFields
-          onSetProviderConfigEntry={jest.fn()}
+          onSetProviderConfigEntry={vi.fn()}
           isEdit={false}
           optionalProviderFormFields={mockOptionalProviderFormFields}
         />
@@ -141,7 +143,7 @@ describe('MoreOptionsFields', () => {
     render(
       <MockFormProvider>
         <MoreOptionsFields
-          onSetProviderConfigEntry={jest.fn()}
+          onSetProviderConfigEntry={vi.fn()}
           isEdit={false}
           optionalProviderFormFields={mockOptionalProviderFormFields}
         />
@@ -162,7 +164,7 @@ describe('MoreOptionsFields', () => {
     render(
       <MockFormProvider>
         <MoreOptionsFields
-          onSetProviderConfigEntry={jest.fn()}
+          onSetProviderConfigEntry={vi.fn()}
           isEdit={false}
           optionalProviderFormFields={mockOptionalProviderFormFields}
         />
@@ -186,7 +188,7 @@ describe('MoreOptionsFields', () => {
     render(
       <MockFormProvider>
         <MoreOptionsFields
-          onSetProviderConfigEntry={jest.fn()}
+          onSetProviderConfigEntry={vi.fn()}
           isEdit={false}
           optionalProviderFormFields={mockOptionalProviderFormFields}
         />
@@ -204,7 +206,7 @@ describe('MoreOptionsFields', () => {
     render(
       <MockFormProvider>
         <MoreOptionsFields
-          onSetProviderConfigEntry={jest.fn()}
+          onSetProviderConfigEntry={vi.fn()}
           isEdit={false}
           optionalProviderFormFields={mockOptionalProviderFormFields}
         />
@@ -223,7 +225,7 @@ describe('MoreOptionsFields', () => {
     render(
       <MockFormProvider>
         <MoreOptionsFields
-          onSetProviderConfigEntry={jest.fn()}
+          onSetProviderConfigEntry={vi.fn()}
           isEdit={false}
           optionalProviderFormFields={mockOptionalProviderFormFields}
         />

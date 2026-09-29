@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { cloneDeep } from 'lodash';
 import userEvent from '@testing-library/user-event';
@@ -73,7 +75,7 @@ describe('Policy form DeviceControlSettingCardSwitch component', () => {
 
     formProps = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': 'test',
       selected: true,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -27,37 +30,46 @@ import {
   setIsModalOpen,
 } from './update_elser_mappings_modal.test_helpers';
 
-jest.mock('../../../../../components/mappings_editor/lib/utils', () => ({
-  deNormalize: jest.fn(),
-  prepareFieldsForEisUpdate: jest.fn(),
-  isElserOnMlNodeSemanticField: jest.fn(),
-  getFieldConfig: jest.fn(() => ({
-    serializer: jest.fn(),
-    deserializer: jest.fn(),
-  })),
-}));
+vi.mock('../../../../../components/mappings_editor/lib/utils', () => {
+      const mocked = {
+      deNormalize: vi.fn(),
+      prepareFieldsForEisUpdate: vi.fn(),
+      isElserOnMlNodeSemanticField: vi.fn(),
+      getFieldConfig: vi.fn(() => ({
+        serializer: vi.fn(),
+        deserializer: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../components/mappings_editor/mappings_state_context');
+vi.mock('../../../../../components/mappings_editor/mappings_state_context');
 
-jest.mock('../../../../../services/api', () => ({
-  updateIndexMappings: jest.fn(),
-}));
+vi.mock('../../../../../services/api', () => {
+      const mocked = {
+      updateIndexMappings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../services', () => ({
-  documentationService: {
-    docLinks: {
-      enterpriseSearch: {
-        elasticInferenceService: 'http://example.com/docs',
+vi.mock('../../../../../services', () => {
+      const mocked = {
+      documentationService: {
+        docLinks: {
+          enterpriseSearch: {
+            elasticInferenceService: 'http://example.com/docs',
+          },
+        },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const deNormalizeMock = jest.mocked(deNormalize);
-const prepareFieldsForEisUpdateMock = jest.mocked(prepareFieldsForEisUpdate);
-const isElserOnMlNodeSemanticFieldMock = jest.mocked(isElserOnMlNodeSemanticField);
-const mappingsContextMock = jest.mocked(mappingsContext);
-const updateIndexMappingsMock = jest.mocked(apiService.updateIndexMappings);
+const deNormalizeMock = vi.mocked(deNormalize);
+const prepareFieldsForEisUpdateMock = vi.mocked(prepareFieldsForEisUpdate);
+const isElserOnMlNodeSemanticFieldMock = vi.mocked(isElserOnMlNodeSemanticField);
+const mappingsContextMock = vi.mocked(mappingsContext);
+const updateIndexMappingsMock = vi.mocked(apiService.updateIndexMappings);
 
 // The accessible name of a selectable option is built from its content, which
 // includes the appended inference id badge.
@@ -67,8 +79,8 @@ const getMappingOption = (container: HTMLElement, fieldName: string) =>
   });
 
 let notificationService: NotificationService;
-let showSuccessToastSpy: jest.SpyInstance;
-let showDangerToastSpy: jest.SpyInstance;
+let showSuccessToastSpy: MockInstance;
+let showDangerToastSpy: MockInstance;
 
 const renderEisUpdateCallout = ({
   hasUpdatePrivileges = true,
@@ -96,11 +108,11 @@ const renderEisUpdateCallout = ({
 
 describe('UpdateElserMappingsModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    const toasts = { add: jest.fn() } as any;
+    vi.clearAllMocks();
+    const toasts = { add: vi.fn() } as any;
     notificationService = new NotificationService(toasts);
-    showSuccessToastSpy = jest.spyOn(notificationService, 'showSuccessToast');
-    showDangerToastSpy = jest.spyOn(notificationService, 'showDangerToast');
+    showSuccessToastSpy = vi.spyOn(notificationService, 'showSuccessToast');
+    showDangerToastSpy = vi.spyOn(notificationService, 'showDangerToast');
     const fieldsById: NormalizedFields = createMappingViewFieldsFixture();
 
     mappingsContextMock.useMappingsState.mockReturnValue({

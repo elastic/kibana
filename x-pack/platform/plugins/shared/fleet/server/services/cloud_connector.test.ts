@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -37,23 +40,23 @@ import { CloudConnectorService } from './cloud_connector';
 import { appContextService } from './app_context';
 
 // Mock dependencies
-jest.mock('./app_context');
+vi.mock('./app_context');
 
 const mockAppContextService = appContextService;
 
 describe('CloudConnectorService', () => {
   let service: CloudConnectorService;
-  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockLogger: jest.Mocked<ReturnType<typeof loggerMock.create>>;
+  let mockSoClient: Mocked<SavedObjectsClientContract>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
+  let mockLogger: Mocked<ReturnType<typeof loggerMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Setup mocks
     mockLogger = loggerMock.create();
-    mockAppContextService.getLogger = jest.fn().mockReturnValue(mockLogger);
-    mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
+    mockAppContextService.getLogger = vi.fn().mockReturnValue(mockLogger);
+    mockAppContextService.getExperimentalFeatures = vi.fn().mockReturnValue({
       useSpaceAwareness: false,
     });
 
@@ -108,7 +111,7 @@ describe('CloudConnectorService', () => {
     };
 
     it('should create a cloud connector successfully with space awareness enabled', async () => {
-      jest
+      vi
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
         .mockResolvedValue(true);
 
@@ -176,7 +179,7 @@ describe('CloudConnectorService', () => {
     });
 
     it('should create a cloud connector with accountType', async () => {
-      jest
+      vi
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
         .mockResolvedValue(true);
 
@@ -270,7 +273,7 @@ describe('CloudConnectorService', () => {
     });
 
     it('should create a cloud connector with organization accountType', async () => {
-      jest
+      vi
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
         .mockResolvedValue(true);
 
@@ -403,7 +406,7 @@ describe('CloudConnectorService', () => {
 
     describe('duplicate name validation', () => {
       it('should check for duplicate names using optimized query (SO_SEARCH_LIMIT and fields)', async () => {
-        jest
+        vi
           .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
@@ -441,7 +444,7 @@ describe('CloudConnectorService', () => {
       });
 
       it('should throw error when duplicate name exists (case-insensitive)', async () => {
-        jest
+        vi
           .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
@@ -470,7 +473,7 @@ describe('CloudConnectorService', () => {
       });
 
       it('should throw error when duplicate name exists with extra whitespace', async () => {
-        jest
+        vi
           .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
@@ -499,7 +502,7 @@ describe('CloudConnectorService', () => {
       });
 
       it('should allow creation when no duplicate names exist', async () => {
-        jest
+        vi
           .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
@@ -530,7 +533,7 @@ describe('CloudConnectorService', () => {
       });
 
       it('should normalize connector name by trimming and collapsing spaces', async () => {
-        jest
+        vi
           .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
@@ -571,7 +574,7 @@ describe('CloudConnectorService', () => {
       });
 
       it('should handle large number of existing connectors efficiently', async () => {
-        jest
+        vi
           .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 

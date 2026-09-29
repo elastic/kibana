@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ResolutionClient } from '../../..';
@@ -62,7 +65,7 @@ const createCandidate = (id: string, namespace = 'active_directory', userName = 
 const createDeps = ({
   esClient,
   resolutionClient,
-  telemetry = { report: jest.fn() },
+  telemetry = { report: vi.fn() },
 }: {
   esClient: ElasticsearchClient;
   resolutionClient: ResolutionClient;
@@ -78,15 +81,15 @@ const createDeps = ({
 });
 
 describe('runRelatedUserAliasResolution', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let cascadeLinkEntities: jest.Mock;
+  let esClient: Mocked<ElasticsearchClient>;
+  let cascadeLinkEntities: Mock;
   let resolutionClient: ResolutionClient;
 
   beforeEach(() => {
     esClient = {
-      search: jest.fn(),
-    } as unknown as jest.Mocked<ElasticsearchClient>;
-    cascadeLinkEntities = jest.fn().mockResolvedValue({
+      search: vi.fn(),
+    } as unknown as Mocked<ElasticsearchClient>;
+    cascadeLinkEntities = vi.fn().mockResolvedValue({
       linked: ['user:ad'],
       retargeted: [],
       skipped: [],

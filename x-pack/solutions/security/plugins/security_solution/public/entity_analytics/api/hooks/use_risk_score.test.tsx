@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useRiskScore } from './use_risk_score';
 import { TestProviders } from '../../../common/mock';
@@ -16,31 +19,43 @@ import { useRiskEngineStatus } from './use_risk_engine_status';
 import { useLicense } from '../../../common/hooks/use_license';
 import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics';
 import { EntityRiskQueries } from '../../../../common/api/search_strategy';
-jest.mock('../../../common/hooks/use_license');
+vi.mock('../../../common/hooks/use_license');
 
-jest.mock('../../../helper_hooks', () => ({
-  useHasSecurityCapability: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../helper_hooks', () => {
+      const mocked = {
+      useHasSecurityCapability: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: jest.fn(),
-}));
+vi.mock('../../../common/containers/use_search_strategy', () => {
+      const mocked = {
+      useSearchStrategy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_app_toasts');
-jest.mock('./use_risk_engine_status', () => ({
-  useRiskEngineStatus: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_app_toasts');
+vi.mock('./use_risk_engine_status', () => {
+      const mocked = {
+      useRiskEngineStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLicense = useLicense as jest.Mock;
-const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockUseRiskEngineStatus = useRiskEngineStatus as jest.Mock;
-const mockSearch = jest.fn();
+const mockUseLicense = useLicense as Mock;
+const mockUseSearchStrategy = useSearchStrategy as Mock;
+const mockUseRiskEngineStatus = useRiskEngineStatus as Mock;
+const mockSearch = vi.fn();
 
-let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
 const defaultRisk = {
   data: undefined,
@@ -84,9 +99,9 @@ const mockRiskEngineStatus = (status: RiskEngineStatusResponse['risk_engine_stat
 };
 describe.each([EntityType.host, EntityType.user])('useRiskScore entityType: %s', (riskEntity) => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
     mockUseSearchStrategy.mockReturnValue(defaultSearchResponse);
     mockUseLicense.mockReturnValue({
       isPlatinumPlus: () => true,

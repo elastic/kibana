@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
@@ -14,20 +17,20 @@ import { getPendingLensAttach } from '../../../attachments/lens/lens_return/stor
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { useLensDraftComment } from './use_lens_draft_comment';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../attachments/lens/lens_return/storage');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../attachments/lens/lens_return/storage');
 
 describe('useLensDraftComment', () => {
-  const getIncomingEmbeddablePackage = jest.fn();
-  const storageGet = jest.fn();
-  const storageRemove = jest.fn();
+  const getIncomingEmbeddablePackage = vi.fn();
+  const storageGet = vi.fn();
+  const storageRemove = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getPendingLensAttach as jest.Mock).mockReturnValue(false);
+    vi.clearAllMocks();
+    (getPendingLensAttach as Mock).mockReturnValue(false);
     storageGet.mockReturnValue(undefined);
     getIncomingEmbeddablePackage.mockReturnValue(undefined);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: { currentAppId$: of('cases') },
         embeddable: {

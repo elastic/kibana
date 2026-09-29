@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -29,16 +32,16 @@ const since = new Date(requestedAt);
 const task = (fields: Partial<ConcreteTaskInstance>) => fields as ConcreteTaskInstance;
 
 describe('InstallAll task', () => {
-  let installProductIfNeeded: jest.Mock;
-  let wasUninstalledSince: jest.Mock;
-  let withLock: jest.Mock;
+  let installProductIfNeeded: Mock;
+  let wasUninstalledSince: Mock;
+  let withLock: Mock;
   let logger: ReturnType<typeof loggerMock.create>;
   let runTask: () => Promise<unknown>;
 
   beforeEach(() => {
-    installProductIfNeeded = jest.fn().mockResolvedValue(true);
-    wasUninstalledSince = jest.fn().mockResolvedValue(false);
-    withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
+    installProductIfNeeded = vi.fn().mockResolvedValue(true);
+    wasUninstalledSince = vi.fn().mockResolvedValue(false);
+    withLock = vi.fn((_lockId: string, callback: () => Promise<void>) => callback());
     logger = loggerMock.create();
     const taskManager = taskManagerMock.createSetup();
     registerInstallAllTaskDefinition({

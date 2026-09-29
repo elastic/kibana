@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -15,18 +17,21 @@ import type { VegaVisualizationDependencies } from './plugin';
 import type { VegaInspectorAdapters } from './vega_inspector';
 import { createVegaFn } from './vega_fn';
 
-const mockVegaRequestHandler = jest.fn();
-const mockCreateVegaRequestHandler = jest.fn(() => mockVegaRequestHandler);
+const mockVegaRequestHandler = vi.fn();
+const mockCreateVegaRequestHandler = vi.fn(() => mockVegaRequestHandler);
 
-jest.mock('./async_services', () => ({
-  createVegaRequestHandler: mockCreateVegaRequestHandler,
-}));
+vi.mock('./async_services', () => {
+      const mocked = {
+      createVegaRequestHandler: mockCreateVegaRequestHandler,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createVegaFn', () => {
   const visualizationDependencies = {
     core: coreMock.createSetup(),
     plugins: { data: dataPluginMock.createSetupContract() },
-    getServiceSettings: jest.fn(),
+    getServiceSettings: vi.fn(),
   } as unknown as VegaVisualizationDependencies;
 
   const executionContext = {

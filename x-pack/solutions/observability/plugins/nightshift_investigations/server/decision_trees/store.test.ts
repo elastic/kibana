@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { parseMermaidDecisionTree } from '@kbn/nightshift-decision-trees';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
@@ -28,9 +30,9 @@ const learning: LearningRecord = {
 };
 
 const createEsClient = () => ({
-  get: jest.fn().mockResolvedValue({ found: false }),
-  search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-  index: jest.fn().mockResolvedValue({}),
+  get: vi.fn().mockResolvedValue({ found: false }),
+  search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
+  index: vi.fn().mockResolvedValue({}),
 });
 
 const createStore = (esClient: ReturnType<typeof createEsClient>) =>
@@ -91,7 +93,7 @@ describe('commit', () => {
 
   it('indexes without creating the backing index first', async () => {
     const esClient = createEsClient();
-    const indices = { create: jest.fn(), exists: jest.fn() };
+    const indices = { create: vi.fn(), exists: vi.fn() };
     (esClient as typeof esClient & { indices: typeof indices }).indices = indices;
 
     await createStore(esClient).commit({

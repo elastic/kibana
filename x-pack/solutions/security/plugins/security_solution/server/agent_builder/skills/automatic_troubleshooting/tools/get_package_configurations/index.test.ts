@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type {
   TransformGetTransformResponse,
   TransformGetTransformStatsResponse,
@@ -29,7 +32,7 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
   let mockEsClient: ScopedClusterClientMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEndpointAppContextService = createMockEndpointAppContext().service;
     mockPackageClient = mockEndpointAppContextService.getInternalFleetServices().packages;
@@ -102,9 +105,9 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 
       (
-        mockPackageClient as jest.Mocked<typeof mockPackageClient>
+        mockPackageClient as Mocked<typeof mockPackageClient>
       ).getInstallation.mockResolvedValue(mockInstallation);
-      (mockPackageClient as jest.Mocked<typeof mockPackageClient>).getPackage.mockResolvedValue(
+      (mockPackageClient as Mocked<typeof mockPackageClient>).getPackage.mockResolvedValue(
         mockPackageData
       );
 
@@ -247,7 +250,7 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
     });
 
     it('handles case when package is not installed', async () => {
-      (mockPackageClient.getInstallation as jest.Mock).mockResolvedValue(undefined);
+      (mockPackageClient.getInstallation as Mock).mockResolvedValue(undefined);
 
       const mockTransformResponse: TransformGetTransformResponse = {
         count: 0,
@@ -320,8 +323,8 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
         },
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 
-      (mockPackageClient.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
-      (mockPackageClient.getPackage as jest.Mock).mockResolvedValue(mockPackageData);
+      (mockPackageClient.getInstallation as Mock).mockResolvedValue(mockInstallation);
+      (mockPackageClient.getPackage as Mock).mockResolvedValue(mockPackageData);
 
       const mockTransformResponse: TransformGetTransformResponse = {
         count: 0,
@@ -399,8 +402,8 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
         },
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 
-      (mockPackageClient.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
-      (mockPackageClient.getPackage as jest.Mock).mockResolvedValue(mockPackageData);
+      (mockPackageClient.getInstallation as Mock).mockResolvedValue(mockInstallation);
+      (mockPackageClient.getPackage as Mock).mockResolvedValue(mockPackageData);
 
       const mockTransformResponse: TransformGetTransformResponse = {
         count: 2,
@@ -523,7 +526,7 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
     });
 
     it('uses asCurrentUser for Elasticsearch client calls', async () => {
-      (mockPackageClient.getInstallation as jest.Mock).mockResolvedValue(undefined);
+      (mockPackageClient.getInstallation as Mock).mockResolvedValue(undefined);
 
       const mockTransformResponse: TransformGetTransformResponse = {
         count: 0,
@@ -613,8 +616,8 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
         },
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 
-      (mockPackageClient.getInstallation as jest.Mock).mockResolvedValue(mockInstallation);
-      (mockPackageClient.getPackage as jest.Mock).mockResolvedValue(mockPackageData);
+      (mockPackageClient.getInstallation as Mock).mockResolvedValue(mockInstallation);
+      (mockPackageClient.getPackage as Mock).mockResolvedValue(mockPackageData);
 
       const mockTransformResponse: TransformGetTransformResponse = {
         count: 0,

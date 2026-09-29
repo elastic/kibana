@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { GET_INDEX_RESULTS } from '../../../common/constants';
 import { serverMock } from '../../__mocks__/server';
 import { requestMock } from '../../__mocks__/request';
@@ -21,14 +23,17 @@ const searchResponse = {
   hits: { total: { value: 1 }, hits: [{ _source: resultDocument }] },
 } as unknown as SearchResponse<ResultDocument>;
 
-const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
+const mockCheckIndicesPrivileges = vi.fn(({ indices }: CheckIndicesPrivilegesParam) =>
   Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
 );
 
-jest.mock('./privileges', () => ({
-  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
-    mockCheckIndicesPrivileges(params),
-}));
+vi.mock('./privileges', () => {
+      const mocked = {
+      checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+        mockCheckIndicesPrivileges(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTestSetup = () => {
   const server = serverMock.create();
@@ -45,7 +50,7 @@ const createTestSetup = () => {
 };
 
 describe('getIndexResultsRoute route', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
   describe('when querying', () => {
     describe('when the request is successful', () => {
       it('returns the result with total', async () => {

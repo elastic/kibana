@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 /*
  * Kept apart from workflow_execution_flyout.test.tsx: the step mocks below stub out the data the
  * loading-error tests in that file assert on.
@@ -25,84 +28,108 @@ import {
   createMockWorkflowExecutionDto,
 } from '../../../shared/test_utils';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    copyToClipboard: jest.fn(),
+    copyToClipboard: vi.fn(),
   };
 });
 
-jest.mock('../../../entities/workflows/model/use_workflow_execution_polling');
+vi.mock('../../../entities/workflows/model/use_workflow_execution_polling');
 
-const mockSetSelectedStepExecution = jest.fn();
+const mockSetSelectedStepExecution = vi.fn();
 const mockUrlState: { selectedStepExecutionId: string | undefined } = {
   selectedStepExecutionId: undefined,
 };
 
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => ({
-    selectedStepExecutionId: mockUrlState.selectedStepExecutionId,
-    setSelectedStepExecution: mockSetSelectedStepExecution,
-  }),
-}));
+vi.mock('../../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => ({
+        selectedStepExecutionId: mockUrlState.selectedStepExecutionId,
+        setSelectedStepExecution: mockSetSelectedStepExecution,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
-  useNavigateToExecution: () => ({
-    href: '/app/workflows/workflow-1?tab=executions&executionId=exec-1',
-    navigate: jest.fn(),
-  }),
-}));
+vi.mock('../../../hooks/navigation/use_navigate_to_execution', () => {
+      const mocked = {
+      useNavigateToExecution: () => ({
+        href: '/app/workflows/workflow-1?tab=executions&executionId=exec-1',
+        navigate: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../model/use_step_execution', () => ({
-  useStepExecution: () => ({
-    data: {
-      input: { host: 'web-1' },
-      output: { result: 'ok', details: { field: 'abc' } },
-    },
-    isLoading: false,
-  }),
-}));
+vi.mock('../model/use_step_execution', () => {
+      const mocked = {
+      useStepExecution: () => ({
+        data: {
+          input: { host: 'web-1' },
+          output: { result: 'ok', details: { field: 'abc' } },
+        },
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../model/use_child_workflow_executions', () => ({
-  useChildWorkflowExecutions: () => ({ childExecutions: new Map(), isLoading: false }),
-}));
+vi.mock('../model/use_child_workflow_executions', () => {
+      const mocked = {
+      useChildWorkflowExecutions: () => ({ childExecutions: new Map(), isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
-  useAvailableConnectors: () => ({ connectorTypes: {} }),
-  useFetchConnector: () => ({ data: undefined }),
-}));
+vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
+      const mocked = {
+      useAvailableConnectors: () => ({ connectorTypes: {} }),
+      useFetchConnector: () => ({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./execution_take_action_split_button', () => ({
-  ExecutionTakeActionSplitButton: () => null,
-}));
+vi.mock('./execution_take_action_split_button', () => {
+      const mocked = {
+      ExecutionTakeActionSplitButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_step_execution_tree', () => ({
-  WorkflowStepExecutionTree: ({
-    onStepExecutionClick,
-    selectedId,
-  }: {
-    onStepExecutionClick: (stepExecutionId: string) => void;
-    selectedId: string | null;
-  }) => (
-    <div data-test-subj="workflow-step-execution-tree">
-      <div data-test-subj="tree-selected-id">{selectedId || 'No Selection'}</div>
-      <button
-        type="button"
-        data-test-subj="mock-step-click"
-        onClick={() => onStepExecutionClick('step-123')}
-      >
-        {'Click Step'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./workflow_step_execution_tree', () => {
+      const mocked = {
+      WorkflowStepExecutionTree: ({
+        onStepExecutionClick,
+        selectedId,
+      }: {
+        onStepExecutionClick: (stepExecutionId: string) => void;
+        selectedId: string | null;
+      }) => (
+        <div data-test-subj="workflow-step-execution-tree">
+          <div data-test-subj="tree-selected-id">{selectedId || 'No Selection'}</div>
+          <button
+            type="button"
+            data-test-subj="mock-step-click"
+            onClick={() => onStepExecutionClick('step-123')}
+          >
+            {'Click Step'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
-  StepIcon: () => <span data-test-subj="step-icon" />,
-}));
+vi.mock('../../../shared/ui/step_icons/step_icon', () => {
+      const mocked = {
+      StepIcon: () => <span data-test-subj="step-icon" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCopyToClipboard = copyToClipboard as jest.MockedFunction<typeof copyToClipboard>;
+const mockCopyToClipboard = copyToClipboard as MockedFunction<typeof copyToClipboard>;
 
 const step: WorkflowStepExecutionDto = createMockStepExecutionDto({
   id: 'step-123',
@@ -112,15 +139,15 @@ const step: WorkflowStepExecutionDto = createMockStepExecutionDto({
 });
 
 const renderFlyout = () =>
-  render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
+  render(<WorkflowExecutionFlyout executionId="exec-1" onClose={vi.fn()} />, {
     wrapper: getTestProvider({}),
   });
 
 describe('WorkflowExecutionFlyout step URL and field paths', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUrlState.selectedStepExecutionId = undefined;
-    jest.mocked(useWorkflowExecutionPolling).mockReturnValue({
+    vi.mocked(useWorkflowExecutionPolling).mockReturnValue({
       workflowExecution: createMockWorkflowExecutionDto({
         id: 'exec-1',
         workflowId: 'workflow-1',
@@ -184,7 +211,7 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
 
   it('offers copy only on metadata rows that exist in the workflow context', () => {
     mockUrlState.selectedStepExecutionId = 'trigger';
-    jest.mocked(useWorkflowExecutionPolling).mockReturnValue({
+    vi.mocked(useWorkflowExecutionPolling).mockReturnValue({
       workflowExecution: createMockWorkflowExecutionDto({
         id: 'exec-1',
         workflowId: 'workflow-1',

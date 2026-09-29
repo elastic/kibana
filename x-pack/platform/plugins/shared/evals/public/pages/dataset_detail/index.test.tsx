@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -23,67 +25,82 @@ import {
 } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 
-jest.mock('../../hooks/use_evals_api');
-jest.mock('../../hooks/use_evals_permissions');
-jest.mock('@kbn/code-editor', () => ({ CodeEditor: () => null }));
-jest.mock('@kbn/llm-trace-waterfall', () => ({
-  TraceWaterfall: () => null,
-  useTraceSpans: () => ({
-    spans: [],
-    durationMs: 0,
-    isLoading: false,
-    error: undefined,
-  }),
-}));
-jest.mock('../../components/copy_dataset_flyout', () => ({
-  CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
-    <div data-test-subj="copyDatasetFlyoutMock">
-      {datasetId}: {datasetName}
-    </div>
-  ),
-}));
-jest.mock('../../components/import_dataset_flyout', () => ({
-  ImportDatasetFlyout: ({
-    initialDataset,
-    onClose,
-  }: {
-    initialDataset?: { id: string };
-    onClose: () => void;
-  }) => (
-    <div data-test-subj="importDatasetFlyoutMock">
-      <span>{initialDataset?.id}</span>
-      <button type="button" onClick={onClose}>
-        Close import
-      </button>
-    </div>
-  ),
-}));
-jest.mock('../../components/dataset_spaces', () => ({
-  DatasetSharedNotice: () => null,
-  DatasetSpacesBadge: () => null,
-  DatasetSpacesPicker: () => null,
-  SharedChangeConfirmModal: () => null,
-  getRemovedSpaceIds: () => [],
-  useDatasetSharing: () => ({
-    isEnabled: false,
-    isShared: false,
-    activeSpaceId: undefined,
-  }),
-}));
+vi.mock('../../hooks/use_evals_api');
+vi.mock('../../hooks/use_evals_permissions');
+vi.mock('@kbn/code-editor', () => {
+      const mocked = { CodeEditor: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/llm-trace-waterfall', () => {
+      const mocked = {
+      TraceWaterfall: () => null,
+      useTraceSpans: () => ({
+        spans: [],
+        durationMs: 0,
+        isLoading: false,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/copy_dataset_flyout', () => {
+      const mocked = {
+      CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
+        <div data-test-subj="copyDatasetFlyoutMock">
+          {datasetId}: {datasetName}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/import_dataset_flyout', () => {
+      const mocked = {
+      ImportDatasetFlyout: ({
+        initialDataset,
+        onClose,
+      }: {
+        initialDataset?: { id: string };
+        onClose: () => void;
+      }) => (
+        <div data-test-subj="importDatasetFlyoutMock">
+          <span>{initialDataset?.id}</span>
+          <button type="button" onClick={onClose}>
+            Close import
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/dataset_spaces', () => {
+      const mocked = {
+      DatasetSharedNotice: () => null,
+      DatasetSpacesBadge: () => null,
+      DatasetSpacesPicker: () => null,
+      SharedChangeConfirmModal: () => null,
+      getRemovedSpaceIds: () => [],
+      useDatasetSharing: () => ({
+        isEnabled: false,
+        isShared: false,
+        activeSpaceId: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseDataset = jest.mocked(useDataset);
-const mockedUseDatasetTagSuggestions = jest.mocked(useDatasetTagSuggestions);
-const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
-const mockedUseEvaluationExperiments = jest.mocked(useEvaluationExperiments);
-const mockedUseAddExamples = jest.mocked(useAddExamples);
-const mockedUseUpdateDataset = jest.mocked(useUpdateDataset);
-const mockedUseUpdateExample = jest.mocked(useUpdateExample);
-const mockedUseDeleteExample = jest.mocked(useDeleteExample);
-const mockedUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
-const mockedUseExampleScores = jest.mocked(useExampleScores);
+const mockedUseDataset = vi.mocked(useDataset);
+const mockedUseDatasetTagSuggestions = vi.mocked(useDatasetTagSuggestions);
+const mockedUseEvalsPermissions = vi.mocked(useEvalsPermissions);
+const mockedUseEvaluationExperiments = vi.mocked(useEvaluationExperiments);
+const mockedUseAddExamples = vi.mocked(useAddExamples);
+const mockedUseUpdateDataset = vi.mocked(useUpdateDataset);
+const mockedUseUpdateExample = vi.mocked(useUpdateExample);
+const mockedUseDeleteExample = vi.mocked(useDeleteExample);
+const mockedUseEvalsTraceFetcher = vi.mocked(useEvalsTraceFetcher);
+const mockedUseExampleScores = vi.mocked(useExampleScores);
 
 const mutationResult = {
-  mutateAsync: jest.fn(),
+  mutateAsync: vi.fn(),
   isLoading: false,
 };
 
@@ -131,7 +148,7 @@ describe('DatasetDetailPage dataset actions', () => {
     mockedUseDeleteExample.mockReturnValue(
       mutationResult as unknown as ReturnType<typeof useDeleteExample>
     );
-    mockedUseEvalsTraceFetcher.mockReturnValue(jest.fn());
+    mockedUseEvalsTraceFetcher.mockReturnValue(vi.fn());
     mockedUseExampleScores.mockReturnValue({
       data: { scores: [], total: 0 },
       isLoading: false,

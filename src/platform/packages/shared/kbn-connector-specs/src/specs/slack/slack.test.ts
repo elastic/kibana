@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getConnectorSpec, isKibanaManagedAuthTypeId } from '../../..';
 import type { ActionContext } from '../../connector_spec';
 import { SPECS_ALLOWED_EVENTS } from '../../specs_allowed_events';
@@ -25,17 +27,17 @@ import {
 
 describe('Slack', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -1517,8 +1519,8 @@ describe('Slack', () => {
   });
 
   describe('relay auth', () => {
-    const relayTrigger = jest.fn();
-    const relayListBindings = jest.fn();
+    const relayTrigger = vi.fn();
+    const relayListBindings = vi.fn();
     const relayContext = {
       ...mockContext,
       secrets: { authType: 'relay', tenantKey: 'team-A' },

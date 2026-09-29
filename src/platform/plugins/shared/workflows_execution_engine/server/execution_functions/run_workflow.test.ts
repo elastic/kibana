@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -38,44 +41,53 @@ import type {
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
-const mockGetCurrentWorkflow = jest.fn().mockResolvedValue(null);
-jest.mock('@kbn/workflows', () => ({
-  ...jest.requireActual('@kbn/workflows'),
-  WorkflowRepository: jest.fn().mockImplementation(() => ({ getWorkflow: mockGetCurrentWorkflow })),
-}));
-jest.mock('./setup_dependencies');
-jest.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => ({
-  handleQueuedWorkflowRunAtTaskStart: jest.fn().mockResolvedValue(false),
-}));
-jest.mock('../workflow_execution_loop', () => ({
-  workflowExecutionLoop: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('elastic-apm-node', () => ({
+const mockGetCurrentWorkflow = vi.fn().mockResolvedValue(null);
+vi.mock('@kbn/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows')),
+      WorkflowRepository: vi.fn().mockImplementation(() => ({ getWorkflow: mockGetCurrentWorkflow })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./setup_dependencies');
+vi.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => {
+      const mocked = {
+      handleQueuedWorkflowRunAtTaskStart: vi.fn().mockResolvedValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../workflow_execution_loop', () => {
+      const mocked = {
+      workflowExecutionLoop: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('elastic-apm-node', () => ({
   __esModule: true,
   default: {
-    startSpan: jest.fn(),
+    startSpan: vi.fn(),
   },
 }));
 
-const mockSetupDependencies = setupDependencies as jest.MockedFunction<typeof setupDependencies>;
-const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
+const mockSetupDependencies = setupDependencies as MockedFunction<typeof setupDependencies>;
+const mockWorkflowExecutionLoop = workflowExecutionLoop as MockedFunction<
   typeof workflowExecutionLoop
 >;
-const mockStartSpan = apm.startSpan as jest.Mock;
+const mockStartSpan = apm.startSpan as Mock;
 
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 const mockHandleQueuedWorkflowRunAtTaskStart =
-  handleQueuedWorkflowRunAtTaskStart as jest.MockedFunction<
+  handleQueuedWorkflowRunAtTaskStart as MockedFunction<
     typeof handleQueuedWorkflowRunAtTaskStart
   >;
 
 describe('runWorkflow', () => {
   it('finalizes pending steps before publishing an identity failure', async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const dependencies = mockContextDependencies();
-    jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
-    jest
+    vi.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+    vi
       .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
       .mockRejectedValue(
         new Error('The workload binding does not match the expected service account.')
@@ -83,8 +95,8 @@ describe('runWorkflow', () => {
     const workflowExecutionRepository = new WorkflowExecutionRepository(
       createMockWorkflowDataClient()
     );
-    jest.spyOn(workflowExecutionRepository, 'updateWorkflowExecution').mockResolvedValue(undefined);
-    jest.spyOn(workflowExecutionRepository, 'getWorkflowExecutionById').mockResolvedValue({
+    vi.spyOn(workflowExecutionRepository, 'updateWorkflowExecution').mockResolvedValue(undefined);
+    vi.spyOn(workflowExecutionRepository, 'getWorkflowExecutionById').mockResolvedValue({
       isTestRun: false,
       context: {},
       yaml: '',
@@ -113,10 +125,10 @@ describe('runWorkflow', () => {
       'default'
     );
     if (!execution) throw new Error('Missing test execution');
-    jest
+    vi
       .spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion')
       .mockResolvedValue({ execution, seqNo: 1, primaryTerm: 1 });
-    jest
+    vi
       .spyOn(workflowExecutionRepository, 'tryUpdateWorkflowExecutionWithVersion')
       .mockResolvedValue(true);
     const stepExecutionRepository = createMockStepExecutionRepository();
@@ -167,8 +179,8 @@ describe('runWorkflow', () => {
     let workflowRuntime: ReturnType<typeof createMockWorkflowRuntime>;
     let workflowExecutionRepository: ReturnType<typeof createMockWorkflowExecutionRepository>;
     let stepExecutionRepository: ReturnType<typeof createMockStepExecutionRepository>;
-    let mockGetWorkflowExecutionFromState: jest.Mock;
-    const recordedSpans: Array<{ end: jest.Mock; setOutcome: jest.Mock }> = [];
+    let mockGetWorkflowExecutionFromState: Mock;
+    const recordedSpans: Array<{ end: Mock; setOutcome: Mock }> = [];
 
     const defaultRunningExecution = () => ({
       id: workflowRunId,
@@ -202,12 +214,12 @@ describe('runWorkflow', () => {
       });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       recordedSpans.length = 0;
       mockWorkflowExecutionEngine.triggerEvents.isEnabled = true;
 
       mockStartSpan.mockImplementation(() => {
-        const span = { end: jest.fn(), setOutcome: jest.fn() };
+        const span = { end: vi.fn(), setOutcome: vi.fn() };
         recordedSpans.push(span);
         return span;
       });
@@ -221,13 +233,13 @@ describe('runWorkflow', () => {
       workflowExecutionRepository = createMockWorkflowExecutionRepository();
       stepExecutionRepository = createMockStepExecutionRepository();
 
-      mockGetWorkflowExecutionFromState = jest.fn().mockImplementation(defaultRunningExecution);
+      mockGetWorkflowExecutionFromState = vi.fn().mockImplementation(defaultRunningExecution);
 
       mockSetupDependencies.mockResolvedValue({
         ...buildMockSetupDependenciesReturn({ workflowRuntime, workflowExecutionRepository }),
         workflowExecutionState: {
           getWorkflowExecution: mockGetWorkflowExecutionFromState,
-          getLastFailedStepContext: jest.fn(),
+          getLastFailedStepContext: vi.fn(),
         } as unknown as WorkflowExecutionState,
       });
 
@@ -300,7 +312,7 @@ describe('runWorkflow', () => {
             ...childExecution,
             status: ExecutionStatus.FAILED,
           });
-        const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const internalResumeWorkflowExecution = vi.fn().mockResolvedValue(undefined);
 
         await runWorkflowWithDefaults({ internalResumeWorkflowExecution });
 
@@ -618,7 +630,7 @@ describe('runWorkflow', () => {
         expect(logger.error).toHaveBeenCalledWith(
           `Workflow execution ${workflowRunId} failed during runtime start: boom`
         );
-        const stackCalls = (logger.error as jest.Mock).mock.calls.filter((c: string[]) =>
+        const stackCalls = (logger.error as Mock).mock.calls.filter((c: string[]) =>
           String(c[0]).includes('runtime start error stack')
         );
         expect(stackCalls).toHaveLength(0);
@@ -652,7 +664,7 @@ describe('runWorkflow', () => {
       });
 
       it('calls reportWorkflowExecution when final execution exists', async () => {
-        const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const reportWorkflowExecution = vi.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
         workflowExecutionRepository.getWorkflowExecutionById
@@ -669,7 +681,7 @@ describe('runWorkflow', () => {
       });
 
       it('does not call reportWorkflowExecution when getWorkflowExecutionById returns null', async () => {
-        const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const reportWorkflowExecution = vi.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
         workflowExecutionRepository.getWorkflowExecutionById
@@ -682,7 +694,7 @@ describe('runWorkflow', () => {
       });
 
       it('logs warn and resolves when getWorkflowExecutionById throws in metering block', async () => {
-        const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const reportWorkflowExecution = vi.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
         workflowExecutionRepository.getWorkflowExecutionById
@@ -712,7 +724,7 @@ describe('runWorkflow', () => {
 
       it('reports metering once via handlePostExecutionLoop when queued run ends FAILED', async () => {
         mockHandleQueuedWorkflowRunAtTaskStart.mockResolvedValueOnce(true);
-        const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const reportWorkflowExecution = vi.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
         const failedExecution = {
           id: workflowRunId,
@@ -741,12 +753,12 @@ describe('runWorkflow', () => {
     const logger = loggingSystemMock.create().get();
     const fakeRequest = { headers: {} } as KibanaRequest;
     let dependencies: ReturnType<typeof mockContextDependencies>;
-    let mockGetWorkflowExecutionById: jest.Mock;
-    let mockGetLastFailedStepContext: jest.Mock;
-    let mockGetWorkflowExecutionStatus: jest.Mock;
-    let mockGetWorkflowExecution: jest.Mock;
-    let mockGetWorkflowExecutionFromState: jest.Mock;
-    let mockRuntimeStart: jest.Mock;
+    let mockGetWorkflowExecutionById: Mock;
+    let mockGetLastFailedStepContext: Mock;
+    let mockGetWorkflowExecutionStatus: Mock;
+    let mockGetWorkflowExecution: Mock;
+    let mockGetWorkflowExecutionFromState: Mock;
+    let mockRuntimeStart: Mock;
     const mockWorkflowExecutionRepositoryForEmit = createMockWorkflowExecutionRepository();
     const mockStepExecutionRepositoryForEmit = createMockStepExecutionRepository();
 
@@ -763,16 +775,16 @@ describe('runWorkflow', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       dependencies = mockContextDependencies();
-      mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
-      mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
-      mockGetWorkflowExecutionStatus = jest.fn();
-      mockGetWorkflowExecution = jest.fn();
-      mockGetWorkflowExecutionFromState = jest
+      mockGetWorkflowExecutionById = vi.fn().mockResolvedValue(null);
+      mockGetLastFailedStepContext = vi.fn().mockReturnValue(undefined);
+      mockGetWorkflowExecutionStatus = vi.fn();
+      mockGetWorkflowExecution = vi.fn();
+      mockGetWorkflowExecutionFromState = vi
         .fn()
         .mockReturnValue(nonTerminalExecutionForFreshFetch);
-      mockRuntimeStart = jest.fn().mockResolvedValue(undefined);
+      mockRuntimeStart = vi.fn().mockResolvedValue(undefined);
 
       mockWorkflowExecutionEngineLocal.triggerEvents.emitEvent.mockClear();
       mockWorkflowExecutionEngineLocal.triggerEvents.emitEvent.mockResolvedValue(undefined);
@@ -1005,7 +1017,7 @@ describe('runWorkflow', () => {
         triggeredBy: 'manual',
       };
       mockGetWorkflowExecutionFromState.mockReturnValue(cancelledExecution);
-      const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+      const reportWorkflowExecution = vi.fn().mockResolvedValue(undefined);
 
       await runWorkflow({
         workflowRunId,

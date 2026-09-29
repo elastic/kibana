@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
@@ -16,8 +19,8 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
-const mockDateNow = jest.fn().mockReturnValue(dateNow);
-Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
+const mockDateNow = vi.fn().mockReturnValue(dateNow);
+Date.now = vi.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
 const defaultUseQueryAlertsReturn = {
   loading: false,
@@ -27,47 +30,53 @@ const defaultUseQueryAlertsReturn = {
   request: '',
   refetch: () => {},
 };
-const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => {
+const mockUseQueryAlerts = vi.fn().mockReturnValue(defaultUseQueryAlertsReturn);
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => {
   return {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
 
-const mockUseGlobalTime = jest
+const mockUseGlobalTime = vi
   .fn()
-  .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() });
-jest.mock('../../../../common/containers/use_global_time', () => {
+  .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() });
+vi.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
 });
 
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: jest.fn(() => ({
-    entity: null,
-    entityRecord: null,
-    firstSeen: null,
-    lastSeen: null,
-    isLoading: false,
-    error: null,
-    refetch: jest.fn(),
-  })),
-}));
+vi.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: vi.fn(() => ({
+        entity: null,
+        entityRecord: null,
+        firstSeen: null,
+        lastSeen: null,
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
-  return { ...actual, useUiSetting: jest.fn(() => false) };
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  return { ...actual, useUiSetting: vi.fn(() => false) };
 });
 
-jest.mock('@kbn/entity-store/public', () => ({
-  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-  useEntityStoreEuidApi: jest.fn(() => undefined),
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+      useEntityStoreEuidApi: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUiSetting = useUiSetting as jest.Mock;
-const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
-const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
+const mockUseUiSetting = useUiSetting as Mock;
+const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as Mock;
+const mockUseEntityFromStore = useEntityFromStore as Mock;
 
 // helper function to render the hook
 const renderUseAlertsByStatus = (props: Partial<UseAlertsByStatusProps> = {}) =>
@@ -88,7 +97,7 @@ const renderUseAlertsByStatus = (props: Partial<UseAlertsByStatusProps> = {}) =>
 
 describe('useAlertsByStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
     mockUseQueryAlerts.mockReturnValue(defaultUseQueryAlertsReturn);
     mockUseUiSetting.mockReturnValue(false);
@@ -100,7 +109,7 @@ describe('useAlertsByStatus', () => {
       lastSeen: null,
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -190,7 +199,7 @@ describe('useAlertsByStatus', () => {
   });
 
   it('should fall back to identity field term filters when entity store v2 is disabled and no entityRecord is provided', () => {
-    const mockGetEuidFilterBasedOnDocument = jest.fn();
+    const mockGetEuidFilterBasedOnDocument = vi.fn();
     mockUseUiSetting.mockReturnValue(false);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
@@ -220,7 +229,7 @@ describe('useAlertsByStatus', () => {
   it('should use entityRecord to build the filter when entityRecord is passed in', () => {
     const mockEntityRecord = { entity: { id: 'host-1' }, host: { name: 'my-host' } };
     const mockFilter = { term: { 'entity.id': 'host-1' } };
-    const mockGetEuidFilterBasedOnDocument = jest.fn().mockReturnValue(mockFilter);
+    const mockGetEuidFilterBasedOnDocument = vi.fn().mockReturnValue(mockFilter);
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },

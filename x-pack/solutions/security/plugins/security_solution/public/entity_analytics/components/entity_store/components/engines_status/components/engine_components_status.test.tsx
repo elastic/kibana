@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EngineComponentsStatusTable } from './engine_components_status';
@@ -33,15 +35,15 @@ const mockComponents: EngineComponentStatus[] = [
   installedComponent,
 ];
 
-const mockGetUrlForApp = jest.fn();
+const mockGetUrlForApp = vi.fn();
 
-jest.mock('../../../../../../common/lib/kibana', () => {
+vi.mock('../../../../../../common/lib/kibana', () => {
   return {
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: vi.fn().mockReturnValue({
       services: {
         application: {
           getUrlForApp: () => mockGetUrlForApp(),
-          navigateToApp: jest.fn(),
+          navigateToApp: vi.fn(),
         },
       },
     }),

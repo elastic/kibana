@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -44,7 +46,7 @@ describe('ApiKeysCpsCallout', () => {
 
   it('renders nothing when the project has no linked projects', async () => {
     const cpsManager = createCpsManager();
-    jest.mocked(cpsManager.hasLinkedProjects).mockReturnValue(false);
+    vi.mocked(cpsManager.hasLinkedProjects).mockReturnValue(false);
 
     renderCallout(cpsManager);
 
@@ -54,7 +56,7 @@ describe('ApiKeysCpsCallout', () => {
 
   it('renders the callout with a docs link when the project has linked projects', async () => {
     const cpsManager = createCpsManager();
-    jest.mocked(cpsManager.hasLinkedProjects).mockReturnValue(true);
+    vi.mocked(cpsManager.hasLinkedProjects).mockReturnValue(true);
 
     renderCallout(cpsManager);
 
@@ -70,8 +72,8 @@ describe('ApiKeysCpsCallout', () => {
 
   it('renders nothing when the CPS manager fails to become ready', async () => {
     const cpsManager = createCpsManager();
-    jest.mocked(cpsManager.whenReady).mockRejectedValue(new Error('failed to fetch projects'));
-    jest.mocked(cpsManager.hasLinkedProjects).mockReturnValue(true);
+    vi.mocked(cpsManager.whenReady).mockRejectedValue(new Error('failed to fetch projects'));
+    vi.mocked(cpsManager.hasLinkedProjects).mockReturnValue(true);
 
     renderCallout(cpsManager);
 

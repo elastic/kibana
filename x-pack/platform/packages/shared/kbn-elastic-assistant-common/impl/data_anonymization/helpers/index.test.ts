@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   isAllowed,
   isAnonymized,
@@ -20,7 +22,7 @@ const anonymizationFields = [
 ];
 
 describe('helpers', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('getIsDataAnonymizable', () => {
     it('returns false for string data', () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { PersistedState } from './persisted_state';
 
 describe('Persisted State Provider', () => {
@@ -234,14 +237,14 @@ describe('Persisted State Provider', () => {
 
   describe('events', () => {
     let persistedState: PersistedState;
-    let emitSpy: jest.SpyInstance;
+    let emitSpy: MockInstance;
 
     const getByType = (type: string): any[] => {
       return emitSpy.mock.calls.filter(([callType]) => callType === type);
     };
 
     const watchEmitter = (state: any) => {
-      return jest.spyOn(state, 'emit');
+      return vi.spyOn(state, 'emit');
     };
 
     beforeEach(() => {

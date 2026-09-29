@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RulesClient } from '../rules_client';
@@ -20,10 +23,10 @@ import { getRulesClientMockParams } from '../../test_utils';
 describe('getHistory()', () => {
   const eventLogClient = eventLogClientMock.create();
 
-  const changeTrackingService: jest.Mocked<IScopedChangeTrackingService> = {
-    log: jest.fn(),
-    logBulk: jest.fn(),
-    getHistory: jest.fn(),
+  const changeTrackingService: Mocked<IScopedChangeTrackingService> = {
+    log: vi.fn(),
+    logBulk: vi.fn(),
+    getHistory: vi.fn(),
   };
 
   const kibanaVersion = 'v9.5.0';
@@ -39,7 +42,7 @@ describe('getHistory()', () => {
 
   beforeEach(() => {
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
-    (auditLogger.log as jest.Mock).mockClear();
+    (auditLogger.log as Mock).mockClear();
     changeTrackingService.log.mockReset();
     changeTrackingService.logBulk.mockReset();
     changeTrackingService.getHistory.mockReset();
@@ -367,10 +370,10 @@ describe('getHistory()', () => {
         actionGroups: [],
         defaultActionGroupId: '',
         recoveryActionGroup: { id: '', name: '' },
-        validate: { params: { validate: jest.fn() } },
+        validate: { params: { validate: vi.fn() } },
         isExportable: true,
         minimumLicenseRequired: 'basic',
-        executor: jest.fn(),
+        executor: vi.fn(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       changeTrackingService.getHistory.mockResolvedValueOnce({

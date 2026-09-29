@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -30,11 +32,11 @@ const queueElement = (props: Partial<React.ComponentProps<typeof ConversationQue
     briefingType="respond"
     briefingList={[investigation]}
     isOpen
-    onToggle={jest.fn()}
-    onClickAction={jest.fn()}
-    onClickCard={jest.fn()}
-    onOpenChat={jest.fn()}
-    onClickRecommendedAction={jest.fn()}
+    onToggle={vi.fn()}
+    onClickAction={vi.fn()}
+    onClickCard={vi.fn()}
+    onOpenChat={vi.fn()}
+    onClickRecommendedAction={vi.fn()}
     renderAssignees={() => null}
     {...props}
   />
@@ -118,7 +120,7 @@ describe('ConversationQueue', () => {
   });
 
   it('reports a toggle so the caller can drive its fetch', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     renderQueue({ isOpen: false, onToggle });
 
     fireEvent.click(trigger());
@@ -130,25 +132,25 @@ describe('ConversationQueue', () => {
     const showMore = () => screen.getByTestId('conversationQueueShowMore-respond');
 
     it('offers only the rows it can still load', () => {
-      renderQueue({ count: 100, remaining: 30, onShowMore: jest.fn() });
+      renderQueue({ count: 100, remaining: 30, onShowMore: vi.fn() });
 
       expect(showMore()).toHaveTextContent('Show more (30)');
     });
 
     it('is absent with nothing left to load', () => {
-      renderQueue({ count: 1, remaining: 0, onShowMore: jest.fn() });
+      renderQueue({ count: 1, remaining: 0, onShowMore: vi.fn() });
 
       expect(screen.queryByTestId('conversationQueueShowMore-respond')).not.toBeInTheDocument();
     });
 
     it('is absent while closed', () => {
-      renderQueue({ isOpen: false, remaining: 30, onShowMore: jest.fn() });
+      renderQueue({ isOpen: false, remaining: 30, onShowMore: vi.fn() });
 
       expect(screen.queryByTestId('conversationQueueShowMore-respond')).not.toBeInTheDocument();
     });
 
     it('asks the caller for the next page', () => {
-      const onShowMore = jest.fn();
+      const onShowMore = vi.fn();
       renderQueue({ remaining: 30, onShowMore });
 
       fireEvent.click(showMore());
@@ -157,13 +159,13 @@ describe('ConversationQueue', () => {
     });
 
     it('disables itself while the next page is in flight', () => {
-      renderQueue({ remaining: 30, onShowMore: jest.fn(), isLoadingMore: true });
+      renderQueue({ remaining: 30, onShowMore: vi.fn(), isLoadingMore: true });
 
       expect(showMore()).toBeDisabled();
     });
 
     it('names the bucket, since every queue renders one', () => {
-      renderQueue({ remaining: 30, onShowMore: jest.fn() });
+      renderQueue({ remaining: 30, onShowMore: vi.fn() });
 
       expect(showMore()).toHaveAccessibleName('Show more (30) in Respond');
     });
@@ -185,7 +187,7 @@ describe('ConversationQueue', () => {
     });
 
     it('offers a way out, rather than only waiting for the next poll', () => {
-      const onRetry = jest.fn();
+      const onRetry = vi.fn();
       renderQueue({ isError: true, briefingList: [], count: undefined, onRetry });
 
       fireEvent.click(screen.getByTestId('conversationQueueRetry-respond'));
@@ -200,7 +202,7 @@ describe('ConversationQueue', () => {
     });
 
     it('says a Show more failed, which the rows on screen otherwise hide', () => {
-      const onShowMore = jest.fn();
+      const onShowMore = vi.fn();
       renderQueue({ remaining: 30, onShowMore, hasLoadMoreError: true });
 
       // The rows that did load stay, so this is the only sign the click failed.

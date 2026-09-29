@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { NULL_LABEL } from '@kbn/field-formats-common';
 import { SourceFormat } from './source';
 import { expectReactElementWithNull } from '../test_utils';
 
 describe('Source Format', () => {
   test('should render stringified object', () => {
-    const source = new SourceFormat({}, jest.fn());
+    const source = new SourceFormat({}, vi.fn());
 
     const hit = {
       foo: 'bar',
@@ -31,14 +33,14 @@ describe('Source Format', () => {
   });
 
   test('returns a plain JSON string for an object', () => {
-    const source = new SourceFormat({}, jest.fn());
+    const source = new SourceFormat({}, vi.fn());
 
     expect(source.convertToText({ foo: 'bar', n: 42 })).toBe('{"foo":"bar","n":42}');
     expect(source.convertToReact({ foo: 'bar', n: 42 })).toBe('{"foo":"bar","n":42}');
   });
 
   test('handles missing values', () => {
-    const source = new SourceFormat({}, jest.fn());
+    const source = new SourceFormat({}, vi.fn());
 
     expect(source.convertToText(null)).toBe(NULL_LABEL);
     expect(source.convertToText(undefined)).toBe(NULL_LABEL);
@@ -47,7 +49,7 @@ describe('Source Format', () => {
   });
 
   test('returns the single element without brackets for a one-element array', () => {
-    const source = new SourceFormat({}, jest.fn());
+    const source = new SourceFormat({}, vi.fn());
 
     expect(source.convertToText([{ foo: 'bar' }])).toBe('["{\\"foo\\":\\"bar\\"}"]');
     expect(source.convertToReact([{ foo: 'bar' }])).toBe('{"foo":"bar"}');

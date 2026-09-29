@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type * as i18nModule from './i18n';
 import type { Translation, TranslationInput } from '../translation';
 import type { Formats } from './formats';
@@ -31,14 +34,14 @@ const createExpectedTranslations = (
 describe.skip('I18n engine', () => {
   let i18n: typeof i18nModule;
 
-  beforeEach(() => {
-    i18n = jest.requireActual('./i18n');
+  beforeEach(async () => {
+    i18n = (await vi.importActual('./i18n'));
   });
 
   afterEach(() => {
     // isolate modules for every test so that local module state doesn't conflict between tests
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
   });
 
   describe('useTranslation', () => {
@@ -679,9 +682,9 @@ describe.skip('I18n engine', () => {
   });
 
   describe('load', () => {
-    let mockFetch: jest.SpyInstance;
+    let mockFetch: MockInstance;
     beforeEach(() => {
-      mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation();
+      mockFetch = vi.spyOn(global as any, 'fetch').mockImplementation();
     });
 
     test('fails if server returns >= 400 status code', async () => {
@@ -709,7 +712,7 @@ describe.skip('I18n engine', () => {
 
       mockFetch.mockResolvedValue({
         status: 200,
-        json: jest.fn().mockResolvedValue(translations),
+        json: vi.fn().mockResolvedValue(translations),
       });
 
       await expect(i18n.load('some-url')).resolves.toBeUndefined();
@@ -729,13 +732,13 @@ describe.skip('I18n engine', () => {
 describe('i18n.initDefault', () => {
   let i18n: typeof i18nModule;
 
-  beforeEach(() => {
-    i18n = jest.requireActual('./i18n');
+  beforeEach(async () => {
+    i18n = (await vi.importActual('./i18n'));
   });
 
   afterEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
   });
 
   test('marks the engine as initialized', () => {

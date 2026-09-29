@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
@@ -28,7 +30,7 @@ const element = null as unknown as HTMLElement;
 
 let testScheduler: TestScheduler;
 
-jest.mock('./services', () => {
+vi.mock('./services', () => {
   let renderMode: RenderMode | undefined;
   const renderers: Record<string, unknown> = {
     test: {
@@ -65,10 +67,10 @@ jest.mock('./services', () => {
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
     }),
-    getNotifications: jest.fn(() => {
+    getNotifications: vi.fn(() => {
       return {
         toasts: {
-          addError: jest.fn(() => {}),
+          addError: vi.fn(() => {}),
         },
       };
     }),
@@ -202,7 +204,7 @@ describe('ExpressionLoader', () => {
   it('cancels the previous request when the expression is updated', () => {
     const expressionLoader = new ExpressionLoader(element, 'sleep 10', {});
     const execution = __getLastExecution();
-    jest.spyOn(execution, 'cancel');
+    vi.spyOn(execution, 'cancel');
 
     expect(execution.cancel).toHaveBeenCalledTimes(0);
     expressionLoader.update('var bar', {});

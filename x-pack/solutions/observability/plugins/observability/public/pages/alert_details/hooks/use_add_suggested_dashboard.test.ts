@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useAddSuggestedDashboards } from './use_add_suggested_dashboard';
@@ -26,22 +28,25 @@ const TEST_DASHBOARD = {
   description: 'Test Description',
 };
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
+vi.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
-const mockUpdateRule = jest.fn();
+const mockUpdateRule = vi.fn();
 
-jest.mock('@kbn/response-ops-rule-form/src/common/hooks', () => ({
-  useUpdateRule: jest.fn(
-    (params: { onSuccess: (data: Rule) => Promise<void>; onError: (error: any) => void }) => {
-      capturedOnSuccess = params.onSuccess;
-      capturedOnError = params.onError;
-      return { mutateAsync: mockUpdateRule };
-    }
-  ),
-}));
+vi.mock('@kbn/response-ops-rule-form/src/common/hooks', () => {
+      const mocked = {
+      useUpdateRule: vi.fn(
+        (params: { onSuccess: (data: Rule) => Promise<void>; onError: (error: any) => void }) => {
+          capturedOnSuccess = params.onSuccess;
+          capturedOnError = params.onError;
+          return { mutateAsync: mockUpdateRule };
+        }
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRule = {
   id: TEST_RULE_ID,
@@ -52,7 +57,7 @@ const mockRule = {
   },
 } as unknown as Rule;
 
-const mockOnSuccessAddSuggestedDashboard = jest.fn();
+const mockOnSuccessAddSuggestedDashboard = vi.fn();
 
 const mockDashboard = {
   id: TEST_DASHBOARD.id,
@@ -62,7 +67,7 @@ const mockDashboard = {
 
 describe('useAddSuggestedDashboards', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have addingDashboardId as undefined when initially rendered', () => {

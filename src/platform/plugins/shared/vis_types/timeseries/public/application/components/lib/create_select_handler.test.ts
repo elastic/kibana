@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { HandleChange } from './create_select_handler';
 import { createSelectHandler } from './create_select_handler';
 
@@ -16,7 +18,7 @@ describe('createSelectHandler', () => {
     let changeHandler: ReturnType<typeof createSelectHandler>;
 
     beforeEach(() => {
-      handleChange = jest.fn();
+      handleChange = vi.fn();
       changeHandler = createSelectHandler(handleChange);
     });
 

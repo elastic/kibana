@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as tar from 'tar';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -15,12 +17,15 @@ import { generateAgentConfigTar } from './generate_agent_config';
 import type { InstalledIntegration } from '../types';
 
 // Mock the Fleet transformation function
-jest.mock('@kbn/fleet-plugin/server/services/output_client', () => ({
-  transformOutputToFullPolicyOutput: jest.fn((output: Output) => ({
-    ...output,
-    api_key: 'test-api-key',
-  })),
-}));
+vi.mock('@kbn/fleet-plugin/server/services/output_client', () => {
+      const mocked = {
+      transformOutputToFullPolicyOutput: vi.fn((output: Output) => ({
+        ...output,
+        api_key: 'test-api-key',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('generateAgentConfigTar', () => {
   let tempDir: string;

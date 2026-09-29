@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { focusFirstFocusable } from './focus_helpers';
 
 describe('focusFirstFocusable', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
     document.body.innerHTML = '';
   });
 
@@ -27,7 +29,7 @@ describe('focusFirstFocusable', () => {
     document.body.appendChild(container);
 
     focusFirstFocusable(container);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(document.activeElement).toBe(button);
   });
@@ -37,7 +39,7 @@ describe('focusFirstFocusable', () => {
     document.body.appendChild(button);
 
     focusFirstFocusable(button);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(document.activeElement).toBe(button);
   });
@@ -48,7 +50,7 @@ describe('focusFirstFocusable', () => {
     previouslyFocused.focus();
 
     focusFirstFocusable(null);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(document.activeElement).toBe(previouslyFocused);
   });
@@ -62,7 +64,7 @@ describe('focusFirstFocusable', () => {
     button.id = 'deferred';
     document.body.appendChild(button);
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(document.activeElement).toBe(button);
   });
@@ -78,7 +80,7 @@ describe('focusFirstFocusable', () => {
     innerButton.focus();
 
     focusFirstFocusable(container);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     // focus stays on the already-focused descendant instead of jumping to the first one
     expect(document.activeElement).toBe(innerButton);
@@ -93,7 +95,7 @@ describe('focusFirstFocusable', () => {
       document.body.appendChild(hiddenContainer);
 
       focusFirstFocusable(hiddenContainer);
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).toBe(button);
       // the focusable element's own visibility is overridden so it can receive focus,
@@ -110,7 +112,7 @@ describe('focusFirstFocusable', () => {
       document.body.appendChild(hiddenContainer);
 
       focusFirstFocusable(hiddenContainer);
-      jest.runAllTimers();
+      vi.runAllTimers();
       expect(button.style.visibility).toBe('visible');
 
       button.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
@@ -125,7 +127,7 @@ describe('focusFirstFocusable', () => {
       document.body.appendChild(container);
 
       focusFirstFocusable(container);
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).toBe(button);
       expect(container.style.visibility).toBe('');
@@ -141,7 +143,7 @@ describe('focusFirstFocusable', () => {
       document.body.appendChild(hiddenContainer);
 
       focusFirstFocusable(hiddenContainer);
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).not.toBe(button);
       // the element's overridden visibility is restored right away instead of being

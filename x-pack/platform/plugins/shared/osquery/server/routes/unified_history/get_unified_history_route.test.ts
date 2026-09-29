@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import {
@@ -15,51 +18,60 @@ import {
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getUnifiedHistoryRoute } from './get_unified_history_route';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({
-    find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-  }),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/ccs_utils', () => ({
-  hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
-  prefixIndexPatternsWithCcs: jest.fn((pattern: string) => pattern),
-}));
+vi.mock('../../utils/ccs_utils', () => {
+      const mocked = {
+      hasConnectedRemoteClusters: vi.fn().mockResolvedValue(false),
+      prefixIndexPatternsWithCcs: vi.fn((pattern: string) => pattern),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/get_result_counts_for_actions', () => ({
-  getResultCountsForActions: jest.fn().mockResolvedValue(new Map()),
-}));
+vi.mock('../../lib/get_result_counts_for_actions', () => {
+      const mocked = {
+      getResultCountsForActions: vi.fn().mockResolvedValue(new Map()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getUnifiedHistoryRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
-  let mockEsClient: { search: jest.Mock };
-  let mockScopedEsClient: { search: jest.Mock };
+  let mockEsClient: { search: Mock };
+  let mockScopedEsClient: { search: Mock };
 
   const emptyScheduledAggregations = {
     aggregations: { scheduled_executions: { buckets: [] } },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockEsClient = { search: jest.fn() };
-    mockScopedEsClient = { search: jest.fn() };
+    mockEsClient = { search: vi.fn() };
+    mockScopedEsClient = { search: vi.fn() };
 
     mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      isCpsActive: vi.fn().mockResolvedValue(false),
       logFactory: {
-        get: jest.fn().mockReturnValue({ debug: jest.fn(), warn: jest.fn(), error: jest.fn() }),
+        get: vi.fn().mockReturnValue({ debug: vi.fn(), warn: vi.fn(), error: vi.fn() }),
       },
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
       },
-      getStartServices: jest.fn().mockResolvedValue([
+      getStartServices: vi.fn().mockResolvedValue([
         {
           elasticsearch: {
             client: {
               asInternalUser: mockEsClient,
-              asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
+              asScoped: vi.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
             },
           },
         },
@@ -85,7 +97,7 @@ describe('getUnifiedHistoryRoute', () => {
     beforeEach(() => {
       mockOsqueryContext = {
         ...mockOsqueryContext,
-        isCpsActive: jest.fn().mockResolvedValue(true),
+        isCpsActive: vi.fn().mockResolvedValue(true),
       } as unknown as OsqueryAppContext;
 
       mockScopedEsClient.search
@@ -146,8 +158,8 @@ describe('getUnifiedHistoryRoute', () => {
 
   describe('when no linked projects are visible to the principal', () => {
     it('uses the internal ES client and never scopes the cluster client', async () => {
-      const asScoped = jest.fn();
-      mockOsqueryContext.getStartServices = jest.fn().mockResolvedValue([
+      const asScoped = vi.fn();
+      mockOsqueryContext.getStartServices = vi.fn().mockResolvedValue([
         {
           elasticsearch: {
             client: {

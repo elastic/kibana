@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { API_ENDPOINT } from '../../common';
 import { procedureNames } from '../../common/rpc';
 
@@ -20,19 +23,19 @@ describe('RpcClient', () => {
      */
 
     const proceduresSpys = procedureNames.reduce<{
-      [key: string]: { name: string; spy: jest.Mock };
+      [key: string]: { name: string; spy: Mock };
     }>(
       (acc, name) => ({
         ...acc,
         [name]: {
           name,
-          spy: jest.fn(),
+          spy: vi.fn(),
         },
       }),
       {}
     );
 
-    const post = jest.fn(async (endPoint: string, data: any) => {
+    const post = vi.fn(async (endPoint: string, data: any) => {
       const [_, name] = endPoint.split(`${API_ENDPOINT}/`);
       proceduresSpys[name]?.spy(endPoint, data);
       return { result: `${name}mockedResponse` };

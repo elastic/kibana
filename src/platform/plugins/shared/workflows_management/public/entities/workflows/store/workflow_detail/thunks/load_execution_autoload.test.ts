@@ -7,23 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionListDto } from '@kbn/workflows';
 import { loadExecutionThunk } from './load_execution_thunk';
 import { createMockStore } from '../../__mocks__/store.mock';
 import { setExecution, setStepExecutionPages, setStepExecutionsTotal } from '../slice';
 
-const mockGetExecution = jest.fn();
-const mockGetExecutionSteps = jest.fn();
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => ({
-    getExecution: mockGetExecution,
-    getExecutionSteps: mockGetExecutionSteps,
-  })),
-}));
-jest.mock('../utils/computation', () => ({
-  performComputation: jest.fn(() => ({ yamlString: 'test' })),
-}));
+const mockGetExecution = vi.fn();
+const mockGetExecutionSteps = vi.fn();
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => ({
+        getExecution: mockGetExecution,
+        getExecutionSteps: mockGetExecutionSteps,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils/computation', () => {
+      const mocked = {
+      performComputation: vi.fn(() => ({ yamlString: 'test' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const execution: WorkflowExecutionDto = {
   id: 'exec-a',

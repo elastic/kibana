@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -16,14 +19,14 @@ import { RowRendererValues } from '../../../../../common/api/timeline';
 import { defaultUdtHeaders } from '../../timeline/body/column_headers/default_headers';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 
-jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
-jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
+vi.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => vi.fn(),
   };
 });
 
@@ -32,7 +35,7 @@ const renderNewTimelineButton = () =>
 
 describe('NewTimelineButton', () => {
   it('should render 2 options in the popover when clicking on the button', async () => {
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({
       id: '',
       indexPatterns: [],
     });
@@ -70,12 +73,12 @@ describe('NewTimelineButton', () => {
       '.siem-signals-spacename',
     ];
 
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({
       id: dataViewId,
       indexPatterns: selectedPatterns,
     });
 
-    const spy = jest.spyOn(timelineActions, 'createTimeline');
+    const spy = vi.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId } = renderNewTimelineButton();
 

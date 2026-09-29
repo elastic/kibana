@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -23,26 +26,26 @@ import {
   getEnrollmentAPIKey,
 } from './enrollment_api_key';
 
-jest.mock('../audit_logging');
-jest.mock('../agent_policy');
-jest.mock('../app_context');
-jest.mock('../spaces/helpers');
+vi.mock('../audit_logging');
+vi.mock('../agent_policy');
+vi.mock('../app_context');
+vi.mock('../spaces/helpers');
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
     v4: () => 'mock-uuid',
   };
 });
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-let mockedLogger: jest.Mocked<Logger>;
+let mockedLogger: Mocked<Logger>;
 
 describe('enrollment api keys', () => {
   beforeEach(() => {
@@ -50,7 +53,7 @@ describe('enrollment api keys', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('generateEnrollmentAPIKey', () => {
@@ -261,7 +264,7 @@ describe('enrollment api keys', () => {
       mockedAppContextService.getSecurity.mockReturnValue({
         authc: {
           apiKeys: {
-            invalidateAsInternalUser: jest.fn().mockResolvedValue({}),
+            invalidateAsInternalUser: vi.fn().mockResolvedValue({}),
           },
         },
       } as any);
@@ -334,7 +337,7 @@ describe('enrollment api keys', () => {
       mockedAppContextService.getSecurity.mockReturnValue({
         authc: {
           apiKeys: {
-            invalidateAsInternalUser: jest.fn().mockResolvedValue({
+            invalidateAsInternalUser: vi.fn().mockResolvedValue({
               invalidated_api_keys: ['hidden-api-key-id'],
               previously_invalidated_api_keys: [],
               error_count: 0,

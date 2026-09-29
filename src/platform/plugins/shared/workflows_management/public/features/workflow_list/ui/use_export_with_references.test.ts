@@ -7,54 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useExportWithReferences } from './use_export_with_references';
 
 const mockNotifications = {
   toasts: {
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addError: jest.fn(),
+    addSuccess: vi.fn(),
+    addWarning: vi.fn(),
+    addError: vi.fn(),
   },
 };
 
-const mockReportWorkflowExported = jest.fn();
+const mockReportWorkflowExported = vi.fn();
 
 const mockApi = {
-  exportWorkflows: jest.fn(),
+  exportWorkflows: vi.fn(),
 };
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: () => mockApi,
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: () => mockApi,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: mockNotifications,
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          notifications: mockNotifications,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_telemetry', () => ({
-  useTelemetry: () => ({
-    reportWorkflowExported: mockReportWorkflowExported,
-  }),
-}));
+vi.mock('../../../hooks/use_telemetry', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        reportWorkflowExported: mockReportWorkflowExported,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock export_workflows module
-const mockExportWorkflows = jest.fn();
-const mockExportSingleWorkflow = jest.fn().mockResolvedValue(undefined);
-const mockFindMissingReferencedIds = jest.fn();
-const mockResolveAllReferences = jest.fn();
+const mockExportWorkflows = vi.fn();
+const mockExportSingleWorkflow = vi.fn().mockResolvedValue(undefined);
+const mockFindMissingReferencedIds = vi.fn();
+const mockResolveAllReferences = vi.fn();
 
-jest.mock('../../../common/lib/export_workflows', () => ({
-  exportWorkflows: (...args: unknown[]) => mockExportWorkflows(...args),
-  exportSingleWorkflow: (...args: unknown[]) => mockExportSingleWorkflow(...args),
-  findMissingReferencedIds: (...args: unknown[]) => mockFindMissingReferencedIds(...args),
-  resolveAllReferences: (...args: unknown[]) => mockResolveAllReferences(...args),
-}));
+vi.mock('../../../common/lib/export_workflows', () => {
+      const mocked = {
+      exportWorkflows: (...args: unknown[]) => mockExportWorkflows(...args),
+      exportSingleWorkflow: (...args: unknown[]) => mockExportSingleWorkflow(...args),
+      findMissingReferencedIds: (...args: unknown[]) => mockFindMissingReferencedIds(...args),
+      resolveAllReferences: (...args: unknown[]) => mockResolveAllReferences(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
   id: 'wf-1',
@@ -76,10 +90,10 @@ const createMockWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): Workf
 
 describe('useExportWithReferences', () => {
   const allWorkflowsMap = new Map<string, WorkflowListItemDto>();
-  const onComplete = jest.fn();
+  const onComplete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     allWorkflowsMap.clear();
     mockFindMissingReferencedIds.mockReturnValue([]);
   });

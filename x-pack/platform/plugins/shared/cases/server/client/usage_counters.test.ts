@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   createCasesClientInternalMock,
   createCasesClientMock,
@@ -17,20 +19,29 @@ import type { CasesClientSource } from './types';
 import { incrementCasesClientCounter, withUsageCounter } from './usage_counters';
 import { createAttachmentsSubClient } from './attachments/client';
 
-jest.mock('./cases/create', () => ({ create: jest.fn().mockResolvedValue({ id: 123 }) }));
-jest.mock('./cases/get', () => ({
-  get: jest.fn().mockResolvedValue({}),
-  resolve: jest.fn().mockResolvedValue({}),
-  getCasesByAlertID: jest.fn().mockResolvedValue([]),
-  getReporters: jest.fn().mockResolvedValue([]),
-  getTags: jest.fn().mockResolvedValue([]),
-  getCategories: jest.fn().mockResolvedValue([]),
-}));
-jest.mock('./attachments/add', () => ({ addComment: jest.fn().mockResolvedValue({}) }));
+vi.mock('./cases/create', () => {
+      const mocked = { create: vi.fn().mockResolvedValue({ id: 123 }) };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./cases/get', () => {
+      const mocked = {
+      get: vi.fn().mockResolvedValue({}),
+      resolve: vi.fn().mockResolvedValue({}),
+      getCasesByAlertID: vi.fn().mockResolvedValue([]),
+      getReporters: vi.fn().mockResolvedValue([]),
+      getTags: vi.fn().mockResolvedValue([]),
+      getCategories: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./attachments/add', () => {
+      const mocked = { addComment: vi.fn().mockResolvedValue({}) };
+      return { ...mocked, default: mocked };
+    });
 
 describe('withUsageCounter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const usageCounter = usageCollectionPluginMock.createSetupContract().createUsageCounter('cases');
@@ -49,14 +60,14 @@ describe('withUsageCounter', () => {
   );
 
   it('wrapper function should forward arguments and return correct value', async () => {
-    const operation = jest.fn().mockResolvedValue('result');
+    const operation = vi.fn().mockResolvedValue('result');
     const wrapped = withUsageCounter('create_case', clientArgs, operation);
     await expect(wrapped('argument')).resolves.toBe('result');
     expect(operation).toHaveBeenCalledWith('argument');
   });
 
   it('wrapper function should forward failures', async () => {
-    const operationError = jest.fn().mockRejectedValue(new Error('failure'));
+    const operationError = vi.fn().mockRejectedValue(new Error('failure'));
     const wrapped = withUsageCounter('create_case', clientArgs, operationError);
     await expect(wrapped('argument')).rejects.toThrow('failure');
     expect(operationError).toHaveBeenCalledWith('argument');
@@ -101,7 +112,7 @@ describe('withUsageCounter', () => {
 
 describe('incrementCasesClientCounter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const usageCounter = usageCollectionPluginMock.createSetupContract().createUsageCounter('cases');

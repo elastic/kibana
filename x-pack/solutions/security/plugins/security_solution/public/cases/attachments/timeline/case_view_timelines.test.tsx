@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,32 +20,41 @@ import { useEditTimelineBatchActions } from '../../../timelines/components/open_
 import { TimelinesTable } from '../../../timelines/components/open_timeline/timelines_table';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('./use_get_timelines_by_ids');
-jest.mock('../../../timelines/components/open_timeline/helpers', () => ({
-  ...jest.requireActual('../../../timelines/components/open_timeline/helpers'),
-  useQueryTimelineById: () => jest.fn(),
-}));
+vi.mock('./use_get_timelines_by_ids');
+vi.mock('../../../timelines/components/open_timeline/helpers', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../timelines/components/open_timeline/helpers')),
+      useQueryTimelineById: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../timelines/components/open_timeline/timelines_table', () => ({
-  TimelinesTable: jest.fn(() => <div data-test-subj="timelines-table" />),
-}));
+vi.mock('../../../timelines/components/open_timeline/timelines_table', () => {
+      const mocked = {
+      TimelinesTable: vi.fn(() => <div data-test-subj="timelines-table" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetBatchItemsPopoverContent = jest.fn(() => (
+const mockGetBatchItemsPopoverContent = vi.fn(() => (
   <div data-test-subj="batch-popover-content" />
 ));
 
-jest.mock('../../../timelines/components/open_timeline/edit_timeline_batch_actions', () => ({
-  useEditTimelineBatchActions: jest.fn(() => ({
-    getBatchItemsPopoverContent: mockGetBatchItemsPopoverContent,
-    onCompleteBatchActions: jest.fn(),
-  })),
-}));
+vi.mock('../../../timelines/components/open_timeline/edit_timeline_batch_actions', () => {
+      const mocked = {
+      useEditTimelineBatchActions: vi.fn(() => ({
+        getBatchItemsPopoverContent: mockGetBatchItemsPopoverContent,
+        onCompleteBatchActions: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseGetTimelinesByIds = useGetTimelinesByIds as jest.MockedFunction<
+const mockedUseGetTimelinesByIds = useGetTimelinesByIds as MockedFunction<
   typeof useGetTimelinesByIds
 >;
-const mockedTimelinesTable = TimelinesTable as unknown as jest.Mock;
-const mockedUseEditTimelineBatchActions = useEditTimelineBatchActions as jest.Mock;
+const mockedTimelinesTable = TimelinesTable as unknown as Mock;
+const mockedUseEditTimelineBatchActions = useEditTimelineBatchActions as Mock;
 
 const buildCaseData = (comments: Array<{ type: string; attachmentId?: string | string[] }>) =>
   ({
@@ -53,12 +65,12 @@ const buildCaseData = (comments: Array<{ type: string; attachmentId?: string | s
 
 describe('CaseViewTimelines', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseGetTimelinesByIds.mockReturnValue({
       timelines: [],
       totalCount: 0,
       loading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -104,7 +116,7 @@ describe('CaseViewTimelines', () => {
       ] as never,
       totalCount: 1,
       loading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getTabs } from '.';
 import { ALERTS_LIST, ALERTS_PREVIEW, ALERT_SUMMARY } from '../../translations';
 
@@ -18,8 +20,8 @@ const mockProps = {
     size: 100,
     start: 'now-7',
   },
-  setAlertsPreviewStackBy0: jest.fn(),
-  setAlertSummaryStackBy0: jest.fn(),
+  setAlertsPreviewStackBy0: vi.fn(),
+  setAlertSummaryStackBy0: vi.fn(),
 };
 
 describe('getTabs', () => {

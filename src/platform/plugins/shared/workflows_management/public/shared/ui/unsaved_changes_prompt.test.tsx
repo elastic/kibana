@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -17,15 +20,18 @@ import { UnsavedChangesPrompt } from './unsaved_changes_prompt';
 let mockPromptMessage: ((location: any) => string | boolean) | null = null;
 let mockLocation = { pathname: '/workflow-123' };
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  Prompt: ({ when, message }: { when: boolean; message: (location: any) => string | boolean }) => {
-    // Store the message function for testing
-    mockPromptMessage = message;
-    return when ? <div data-test-subj="unsaved-changes-prompt" /> : null;
-  },
-  useLocation: () => mockLocation,
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      Prompt: ({ when, message }: { when: boolean; message: (location: any) => string | boolean }) => {
+        // Store the message function for testing
+        mockPromptMessage = message;
+        return when ? <div data-test-subj="unsaved-changes-prompt" /> : null;
+      },
+      useLocation: () => mockLocation,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (component: React.ReactElement, initialPath = '/workflow-123') => {
   return render(
@@ -36,13 +42,13 @@ const renderWithProviders = (component: React.ReactElement, initialPath = '/work
 };
 
 describe('UnsavedChangesPrompt', () => {
-  let addEventListenerSpy: jest.SpyInstance;
-  let removeEventListenerSpy: jest.SpyInstance;
+  let addEventListenerSpy: MockInstance;
+  let removeEventListenerSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    addEventListenerSpy = jest.spyOn(window, 'addEventListener');
-    removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    vi.clearAllMocks();
+    addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+    removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
     // Clear any stored prompt message and reset location
     mockPromptMessage = null;
     mockLocation = { pathname: '/workflow-123' };
@@ -139,7 +145,7 @@ describe('UnsavedChangesPrompt', () => {
       expect(beforeUnloadHandler).toBeDefined();
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         returnValue: '',
       } as any;
 
@@ -159,7 +165,7 @@ describe('UnsavedChangesPrompt', () => {
       expect(beforeUnloadHandler).toBeDefined();
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         returnValue: '',
       } as any;
 

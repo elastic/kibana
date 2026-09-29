@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
@@ -15,7 +18,7 @@ import { documentationService } from '../../../../../services';
 import { getProcessorDescriptor } from '../../shared';
 import { Fail } from './fail';
 
-const FormWrapper = ({ onSubmit }: { onSubmit: jest.Mock }) => {
+const FormWrapper = ({ onSubmit }: { onSubmit: Mock }) => {
   const { form } = useForm({ defaultValue: { fields: {} } });
 
   return (
@@ -46,7 +49,7 @@ describe('Fail processor fields', () => {
 
   describe('WHEN the message is empty', () => {
     it('SHOULD reject the form with the required-message error', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       render(<FormWrapper onSubmit={onSubmit} />);
 
       fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -58,7 +61,7 @@ describe('Fail processor fields', () => {
 
   describe('WHEN the message is provided', () => {
     it('SHOULD submit the message as form data', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       render(<FormWrapper onSubmit={onSubmit} />);
 
       fireEvent.change(within(screen.getByTestId('messageField')).getByTestId('input'), {

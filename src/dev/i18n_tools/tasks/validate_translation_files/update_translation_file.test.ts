@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('fs/promises', () => ({
-  writeFile: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('fs/promises', () => {
+      const mocked = {
+      writeFile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { writeFile } from 'fs/promises';
 import { updateTranslationFile } from './update_translation_file';
 
-const writeFileMock = writeFile as jest.MockedFunction<typeof writeFile>;
+const writeFileMock = writeFile as MockedFunction<typeof writeFile>;
 
 describe('updateTranslationFile', () => {
   beforeEach(() => {

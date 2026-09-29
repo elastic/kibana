@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,13 +15,14 @@ import type { RuleStatusPanelWithApiProps } from './rule_status_panel';
 import { RuleStatusPanel } from './rule_status_panel';
 import { mockRule } from './test_helpers';
 
-jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
-  loadExecutionLogAggregations: jest.fn(),
-}));
+vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
+      const mocked = {
+      loadExecutionLogAggregations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { loadExecutionLogAggregations } = jest.requireMock(
-  '../../../lib/rule_api/load_execution_log_aggregations'
-);
+const { loadExecutionLogAggregations } = (await vi.importMock('../../../lib/rule_api/load_execution_log_aggregations'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,26 +41,29 @@ const RuleStatusPanelWithProvider = (props: RuleStatusPanelWithApiProps) => {
   );
 };
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {
-        toasts: {
-          addSuccess: jest.fn(),
-          addDanger: jest.fn(),
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          notifications: {
+            toasts: {
+              addSuccess: vi.fn(),
+              addDanger: vi.fn(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAPIs = {
-  bulkEnableRules: jest.fn().mockResolvedValue({ errors: [] }),
-  bulkDisableRules: jest.fn(),
-  snoozeRule: jest.fn(),
-  unsnoozeRule: jest.fn(),
+  bulkEnableRules: vi.fn().mockResolvedValue({ errors: [] }),
+  bulkDisableRules: vi.fn(),
+  snoozeRule: vi.fn(),
+  unsnoozeRule: vi.fn(),
 };
-const requestRefresh = jest.fn();
+const requestRefresh = vi.fn();
 
 describe('rule status panel', () => {
   beforeEach(() => {
@@ -68,7 +74,7 @@ describe('rule status panel', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches and renders the number of executions in the last 24 hours', async () => {

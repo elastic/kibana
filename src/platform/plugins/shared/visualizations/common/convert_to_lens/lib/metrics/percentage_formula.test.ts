@@ -7,22 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { getPercentageColumnFormulaColumn } from './percentage_formula';
 import type { SchemaConfig } from '../../..';
 import type { FormulaIndexPatternColumn } from '@kbn/lens-common';
 
-const mockGetFormulaForAgg = jest.fn();
-const mockCreateFormulaColumn = jest.fn();
+const mockGetFormulaForAgg = vi.fn();
+const mockCreateFormulaColumn = vi.fn();
 
-jest.mock('./formula', () => ({
-  getFormulaForAgg: jest.fn(() => mockGetFormulaForAgg()),
-}));
+vi.mock('./formula', () => {
+      const mocked = {
+      getFormulaForAgg: vi.fn(() => mockGetFormulaForAgg()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../convert', () => ({
-  createFormulaColumn: jest.fn((formula) => mockCreateFormulaColumn(formula)),
-}));
+vi.mock('../convert', () => {
+      const mocked = {
+      createFormulaColumn: vi.fn((formula) => mockCreateFormulaColumn(formula)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getPercentageColumnFormulaColumn', () => {
   const visType = 'heatmap';
@@ -41,7 +49,7 @@ describe('getPercentageColumnFormulaColumn', () => {
   ];
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test.each<

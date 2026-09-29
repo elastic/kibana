@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -19,8 +21,8 @@ import { createAppMockRenderer } from '../../test_utils';
 
 describe('spec connector edit flyout Test tab', () => {
   let appMockRenderer: AppMockRenderer;
-  const onClose = jest.fn();
-  const onConnectorUpdated = jest.fn();
+  const onClose = vi.fn();
+  const onConnectorUpdated = vi.fn();
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -73,15 +75,15 @@ describe('spec connector edit flyout Test tab', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
     actionTypeRegistry.has.mockReturnValue(false);
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse(true));
-    appMockRenderer.coreStart.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+    appMockRenderer.coreStart.http.get = vi.fn().mockResolvedValue(mockSpecResponse(true));
+    appMockRenderer.coreStart.uiSettings.get = vi.fn().mockImplementation((key: string) => {
       if (key === 'workflows:ui:enabled') {
         return true;
       }
@@ -113,7 +115,7 @@ describe('spec connector edit flyout Test tab', () => {
   });
 
   it('hides the Test tab for a spec connector that has not opted in to testing', async () => {
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse(false));
+    appMockRenderer.coreStart.http.get = vi.fn().mockResolvedValue(mockSpecResponse(false));
 
     appMockRenderer.render(
       <EditConnectorFlyout
@@ -165,7 +167,7 @@ describe('spec connector edit flyout Test tab', () => {
     const specPromise = new Promise<ReturnType<typeof mockSpecResponse>>((resolve) => {
       resolveSpec = resolve;
     });
-    appMockRenderer.coreStart.http.get = jest.fn().mockReturnValue(specPromise);
+    appMockRenderer.coreStart.http.get = vi.fn().mockReturnValue(specPromise);
 
     appMockRenderer.render(
       <EditConnectorFlyout
@@ -190,7 +192,7 @@ describe('spec connector edit flyout Test tab', () => {
 
   it('shows error state on the Test tab when spec fetch fails and retries', async () => {
     const errorMessage = 'Failed to fetch spec';
-    appMockRenderer.coreStart.http.get = jest
+    appMockRenderer.coreStart.http.get = vi
       .fn()
       .mockRejectedValueOnce(new Error(errorMessage))
       .mockResolvedValueOnce(mockSpecResponse(true));
@@ -224,8 +226,8 @@ describe('spec connector edit flyout Test tab', () => {
 
 describe('stack connector edit flyout — embedder path (no connector-types fetch)', () => {
   let appMockRenderer: AppMockRenderer;
-  const onClose = jest.fn();
-  const onConnectorUpdated = jest.fn();
+  const onClose = vi.fn();
+  const onConnectorUpdated = vi.fn();
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
   const stackConnector = createMockActionConnector({
@@ -239,7 +241,7 @@ describe('stack connector edit flyout — embedder path (no connector-types fetc
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,

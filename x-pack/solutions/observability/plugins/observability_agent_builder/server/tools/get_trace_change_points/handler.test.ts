@@ -5,30 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getToolHandler } from './handler';
 
-const mockSearch = jest.fn().mockResolvedValue({ aggregations: { groups: { buckets: [] } } });
+const mockSearch = vi.fn().mockResolvedValue({ aggregations: { groups: { buckets: [] } } });
 
-jest.mock('../../utils/build_apm_resources', () => ({
-  buildApmResources: jest.fn().mockResolvedValue({
-    apmEventClient: { search: (...args: unknown[]) => mockSearch(...args) },
-    apmDataAccessServices: {},
-  }),
-}));
+vi.mock('../../utils/build_apm_resources', () => {
+      const mocked = {
+      buildApmResources: vi.fn().mockResolvedValue({
+        apmEventClient: { search: (...args: unknown[]) => mockSearch(...args) },
+        apmDataAccessServices: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/get_preferred_document_source', () => ({
-  getPreferredDocumentSource: jest.fn().mockResolvedValue({
-    rollupInterval: '1m',
-    hasDurationSummaryField: false,
-    documentType: 'transactionMetric',
-  }),
-}));
+vi.mock('../../utils/get_preferred_document_source', () => {
+      const mocked = {
+      getPreferredDocumentSource: vi.fn().mockResolvedValue({
+        rollupInterval: '1m',
+        hasDurationSummaryField: false,
+        documentType: 'transactionMetric',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const BASE_ARGS = {
   core: {} as any,
   plugins: {} as any,
   request: {} as any,
-  logger: { debug: jest.fn(), error: jest.fn() } as any,
+  logger: { debug: vi.fn(), error: vi.fn() } as any,
   groupBy: 'service.name',
   latencyType: 'avg' as const,
 };

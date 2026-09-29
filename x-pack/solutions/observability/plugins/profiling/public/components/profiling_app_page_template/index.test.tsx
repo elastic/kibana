@@ -5,21 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
-jest.mock('react-router-dom', () => ({ useLocation: jest.fn() }));
-jest.mock('../../hooks/use_profiling_router');
-jest.mock('../../hooks/use_default_time_range');
-jest.mock('../contexts/profiling_dependencies/use_profiling_dependencies');
-jest.mock('../contexts/back_navigation/use_back_navigation');
-jest.mock('./primary_profiling_search_bar', () => ({
-  PrimaryProfilingSearchBar: () => null,
-}));
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: () => null,
-  SuppressChromeBackButton: () => null,
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = { useLocation: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_profiling_router');
+vi.mock('../../hooks/use_default_time_range');
+vi.mock('../contexts/profiling_dependencies/use_profiling_dependencies');
+vi.mock('../contexts/back_navigation/use_back_navigation');
+vi.mock('./primary_profiling_search_bar', () => {
+      const mocked = {
+      PrimaryProfilingSearchBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/app-header', () => {
+      const mocked = {
+      AppHeader: () => null,
+      SuppressChromeBackButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useLocation } from 'react-router-dom';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -29,30 +41,30 @@ import { useBackNavigation } from '../contexts/back_navigation/use_back_navigati
 import { ProfilingAppPageTemplate } from '.';
 
 describe('ProfilingAppPageTemplate', () => {
-  const mockLink = jest.fn().mockReturnValue('/mock-url');
+  const mockLink = vi.fn().mockReturnValue('/mock-url');
 
   beforeAll(() => {
     // jsdom does not implement window.scrollTo; silence the "not implemented" warning.
-    jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   const mockDefaultTimeRange = { from: 'now-30m', to: 'now-5m' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockLink.mockReturnValue('/mock-url');
 
-    (useDefaultTimeRange as jest.Mock).mockReturnValue(mockDefaultTimeRange);
+    (useDefaultTimeRange as Mock).mockReturnValue(mockDefaultTimeRange);
 
-    (useProfilingRouter as jest.Mock).mockReturnValue({ link: mockLink });
+    (useProfilingRouter as Mock).mockReturnValue({ link: mockLink });
 
-    (useBackNavigation as jest.Mock).mockReturnValue(undefined);
+    (useBackNavigation as Mock).mockReturnValue(undefined);
 
-    (useProfilingDependencies as jest.Mock).mockReturnValue({
+    (useProfilingDependencies as Mock).mockReturnValue({
       start: {
         observabilityShared: {
           navigation: {
@@ -64,7 +76,7 @@ describe('ProfilingAppPageTemplate', () => {
   });
 
   const renderTemplate = (search: string) => {
-    (useLocation as jest.Mock).mockReturnValue({ search, pathname: '/stacktraces/executables' });
+    (useLocation as Mock).mockReturnValue({ search, pathname: '/stacktraces/executables' });
     render(<ProfilingAppPageTemplate hideSearchBar />);
   };
 

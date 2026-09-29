@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import { encode } from '../../common/lib/embeddable_dataurl';
@@ -13,7 +16,7 @@ import { embeddableService, logger } from '../kibana_services';
 import { getDecodedConfig, makeWorkpad } from './fixtures';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
-const mockTransformIn = jest.fn((config: any) => {
+const mockTransformIn = vi.fn((config: any) => {
   const { savedObjectId, ...remainingConfig } = config;
   return {
     state: remainingConfig,
@@ -23,18 +26,21 @@ const mockTransformIn = jest.fn((config: any) => {
   };
 });
 
-jest.mock('../kibana_services', () => ({
-  embeddableService: {
-    getTransforms: jest.fn((type: string) => {
-      return {
-        transformIn: mockTransformIn,
-      };
-    }),
-  },
-  logger: {
-    warn: jest.fn(),
-  },
-}));
+vi.mock('../kibana_services', () => {
+      const mocked = {
+      embeddableService: {
+        getTransforms: vi.fn((type: string) => {
+          return {
+            transformIn: mockTransformIn,
+          };
+        }),
+      },
+      logger: {
+        warn: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('transformWorkpadIn', () => {
   it('transforms REST API embeddable state to stored state', () => {
@@ -64,8 +70,8 @@ describe('transformWorkpadIn', () => {
   });
 
   it('logs warnings when transformation fails and returns the original embeddable config and no references', () => {
-    (embeddableService.getTransforms as jest.Mock).mockReturnValue({
-      transformIn: jest.fn(() => {
+    (embeddableService.getTransforms as Mock).mockReturnValue({
+      transformIn: vi.fn(() => {
         throw new Error('Transform failed');
       }),
     });

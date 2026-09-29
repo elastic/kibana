@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
@@ -17,16 +19,19 @@ import { EsqlQueryExpression, getTimeFilter } from './esql_query_expression';
 import type { EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
 
-jest.mock('../validation', () => ({
-  hasExpressionValidationErrors: jest.fn(),
-}));
-const { hasExpressionValidationErrors } = jest.requireMock('../validation');
+vi.mock('../validation', () => {
+      const mocked = {
+      hasExpressionValidationErrors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { hasExpressionValidationErrors } = (await vi.importMock('../validation'));
 
-jest.mock('@kbn/data-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/data-plugin/public');
+vi.mock('@kbn/data-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/data-plugin/public'));
   return {
     ...actual,
-    getEsQueryConfig: jest.fn().mockReturnValue({
+    getEsQueryConfig: vi.fn().mockReturnValue({
       allowLeadingWildcards: true,
       queryStringOptions: {},
       ignoreFilterIfFieldNotInIndex: false,
@@ -34,42 +39,42 @@ jest.mock('@kbn/data-plugin/public', () => {
   };
 });
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-  const module = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const module = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...module,
   };
 });
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common', () => {
-  const module = jest.requireActual('@kbn/triggers-actions-ui-plugin/public/common');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common', async () => {
+  const module = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public/common'));
   return {
     ...module,
-    getTimeOptions: jest.fn(),
+    getTimeOptions: vi.fn(),
     firstFieldOption: { text: '@timestamp', value: '@timestamp' },
-    getTimeFieldOptions: jest.fn().mockReturnValue([
+    getTimeFieldOptions: vi.fn().mockReturnValue([
       { value: '@timestamp', text: '@timestamp' },
       { value: 'event.ingested', text: 'event.ingested' },
     ]),
   };
 });
 
-jest.mock('@kbn/esql-utils', () => {
+vi.mock('@kbn/esql-utils', () => {
   return {
-    getESQLResults: jest.fn().mockResolvedValue({}),
-    getIndexPattern: jest.fn(),
-    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getESQLAdHocDataview: jest.fn().mockResolvedValue({
+    getESQLResults: vi.fn().mockResolvedValue({}),
+    getIndexPattern: vi.fn(),
+    getIndexPatternFromESQLQuery: vi.fn().mockReturnValue('index1'),
+    getESQLAdHocDataview: vi.fn().mockResolvedValue({
       timeFieldName: '@timestamp',
-      getIndexPattern: jest.fn().mockReturnValue('*'),
+      getIndexPattern: vi.fn().mockReturnValue('*'),
     }),
-    formatESQLColumns: jest.fn().mockReturnValue([]),
-    getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
+    formatESQLColumns: vi.fn().mockReturnValue([]),
+    getProjectRoutingFromEsqlQuery: vi.fn().mockReturnValue(undefined),
   };
 });
 
-const esqlUtilsMock = jest.requireMock('@kbn/esql-utils');
-const triggersActionsCommonMock = jest.requireMock('@kbn/triggers-actions-ui-plugin/public/common');
+const esqlUtilsMock = (await vi.importMock('@kbn/esql-utils'));
+const triggersActionsCommonMock = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/common'));
 const { getProjectRoutingFromEsqlQuery } = esqlUtilsMock;
 
 const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
@@ -106,15 +111,15 @@ describe('EsqlQueryRuleTypeExpression', () => {
   const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     hasExpressionValidationErrors.mockReturnValue(false);
-    global.Date.now = jest.fn(() => fakeNow.getTime());
+    global.Date.now = vi.fn(() => fakeNow.getTime());
 
     esqlUtilsMock.getESQLResults.mockResolvedValue({});
     esqlUtilsMock.getESQLAdHocDataview.mockResolvedValue({
       timeFieldName: '@timestamp',
-      getIndexPattern: jest.fn().mockReturnValue('*'),
+      getIndexPattern: vi.fn().mockReturnValue('*'),
     });
     esqlUtilsMock.getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
 
@@ -123,7 +128,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
       { value: 'event.ingested', text: 'event.ingested' },
     ]);
 
-    dataViewMock.getFieldsForWildcard = jest.fn().mockResolvedValue(defaultFieldSpecs);
+    dataViewMock.getFieldsForWildcard = vi.fn().mockResolvedValue(defaultFieldSpecs);
   });
 
   test('should render EsqlQueryRuleTypeExpression with chosen time field', async () => {

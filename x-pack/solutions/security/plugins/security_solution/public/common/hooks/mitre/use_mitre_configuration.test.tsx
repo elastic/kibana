@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana } from '../../lib/kibana';
 import { useMitreConfiguration } from './use_mitre_configuration';
@@ -12,27 +15,33 @@ import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-commo
 import { mockMitreEntitySummaryBuckets } from './use_mitre_configuration.mock';
 import { LEGACY_FRAMEWORK_VERSION } from '../../../../common/detection_engine/mitre/mitre_data_adapter';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 // ─── Managed-source hook (from mitre_attack plugin) ───────────────────────────
-const mockUseFetchMitreEntitiesQuery = jest.fn();
-jest.mock('@kbn/mitre-attack-plugin/public', () => ({
-  useFetchMitreEntitiesQuery: (...args: unknown[]) => mockUseFetchMitreEntitiesQuery(...args),
-  FETCH_MITRE_ENTITIES_QUERY_KEY: ['GET', '/internal/mitre/entities'],
-}));
+const mockUseFetchMitreEntitiesQuery = vi.fn();
+vi.mock('@kbn/mitre-attack-plugin/public', () => {
+      const mocked = {
+      useFetchMitreEntitiesQuery: (...args: unknown[]) => mockUseFetchMitreEntitiesQuery(...args),
+      FETCH_MITRE_ENTITIES_QUERY_KEY: ['GET', '/internal/mitre/entities'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ─── Legacy-source hook ────────────────────────────────────────────────────────
-const mockUseFetchLegacyMitreQuery = jest.fn();
-jest.mock('./use_fetch_bundled_mitre_query', () => ({
-  useFetchLegacyMitreQuery: (...args: unknown[]) => mockUseFetchLegacyMitreQuery(...args),
-  LEGACY_BUNDLED_MITRE_QUERY_KEY: (types?: string[]) => [
-    'LAZY_BLOB',
-    'mitre_tactics_techniques',
-    types?.join(',') ?? null,
-  ],
-}));
+const mockUseFetchLegacyMitreQuery = vi.fn();
+vi.mock('./use_fetch_bundled_mitre_query', () => {
+      const mocked = {
+      useFetchLegacyMitreQuery: (...args: unknown[]) => mockUseFetchLegacyMitreQuery(...args),
+      LEGACY_BUNDLED_MITRE_QUERY_KEY: (types?: string[]) => [
+        'LAZY_BLOB',
+        'mitre_tactics_techniques',
+        types?.join(',') ?? null,
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const mockManagedData = {
   framework: 'enterprise' as const,
@@ -60,15 +69,15 @@ const makeQueryResult = (data: unknown, opts: { isLoading?: boolean; isError?: b
 
 describe('useMitreConfiguration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.clearAllMocks();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     // Default: both hooks return idle/empty results
     mockUseFetchMitreEntitiesQuery.mockReturnValue(makeQueryResult(undefined));
     mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(undefined));
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('when mitreAttack.isEnabled is false', () => {
@@ -315,7 +324,7 @@ describe('useMitreConfiguration', () => {
       );
 
       // Flag on (managed)
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       setupKibanaMock(true);
       mockUseFetchMitreEntitiesQuery.mockReturnValue(makeQueryResult(mockManagedData));
       mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(undefined));
@@ -335,7 +344,7 @@ describe('useMitreConfiguration', () => {
       expect(legacyResult.current.frameworkVersion).not.toMatch(/^v/);
 
       // Managed path
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       setupKibanaMock(true);
       mockUseFetchMitreEntitiesQuery.mockReturnValue(makeQueryResult(mockManagedData));
       mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(undefined));

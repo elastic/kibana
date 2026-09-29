@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   getAllKibanaTranslationFilesMock,
   groupFilesByLocaleMock,
@@ -47,7 +49,7 @@ describe('I18nService', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     groupFilesByLocaleMock.mockReturnValue({});
     computeLocaleFileHashMock.mockResolvedValue('mock-file-hash');
     configService = getConfigService();

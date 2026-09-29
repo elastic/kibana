@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RefObject } from 'react';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
@@ -17,9 +20,9 @@ import { useExpressionRenderer } from './use_expression_renderer';
 import * as loader from '../loader';
 
 describe('useExpressionRenderer', () => {
-  const expressionLoaderSpy = jest.spyOn(loader, 'ExpressionLoader');
+  const expressionLoaderSpy = vi.spyOn(loader, 'ExpressionLoader');
   let nodeRef: RefObject<HTMLElement>;
-  let expressionLoader: jest.Mocked<loader.ExpressionLoader> & {
+  let expressionLoader: Mocked<loader.ExpressionLoader> & {
     data$: Subject<unknown>;
     events$: Subject<unknown>;
     loading$: Subject<void>;
@@ -34,10 +37,10 @@ describe('useExpressionRenderer', () => {
       events$: new Subject(),
       loading$: new Subject(),
       render$: new Subject(),
-      cancel: jest.fn(),
-      destroy: jest.fn(),
-      inspect: jest.fn(),
-      update: jest.fn(),
+      cancel: vi.fn(),
+      destroy: vi.fn(),
+      inspect: vi.fn(),
+      update: vi.fn(),
     } as unknown as typeof expressionLoader;
 
     expressionLoaderSpy.mockImplementation(() => expressionLoader);
@@ -49,7 +52,7 @@ describe('useExpressionRenderer', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return default state', () => {
@@ -69,22 +72,22 @@ describe('useExpressionRenderer', () => {
   });
 
   it('should debounce property changes', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     hook.rerender({ debounce: 1000, expression: 'something else' });
     expect(expressionLoader.update).not.toHaveBeenCalled();
 
     expect(hook.result.current).toEqual(expect.objectContaining({ isLoading: true }));
 
-    act(() => void jest.advanceTimersByTime(1000));
+    act(() => void vi.advanceTimersByTime(1000));
     expect(hook.result.current).toEqual(expect.objectContaining({ isLoading: false }));
     expect(expressionLoader.update).toHaveBeenCalledWith('something else', {});
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should not debounce if loader optaions are not changed', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     hook.rerender({ expression: 'something else', partial: true });
     hook.rerender({
@@ -97,13 +100,13 @@ describe('useExpressionRenderer', () => {
     expect(hook.result.current).toEqual(expect.objectContaining({ isLoading: false }));
     expect(expressionLoader.update).toHaveBeenCalledTimes(1);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should handle rendering errors', () => {
     expressionLoaderSpy.mockClear();
-    const onRenderError = jest.fn();
-    const done = jest.fn();
+    const onRenderError = vi.fn();
+    const done = vi.fn();
     hook.rerender({ onRenderError, expression: 'something' });
 
     expect(expressionLoaderSpy).toHaveBeenCalledTimes(1);
@@ -125,7 +128,7 @@ describe('useExpressionRenderer', () => {
   });
 
   it('should notify loader handlers on custom error rendering', () => {
-    const done = jest.fn();
+    const done = vi.fn();
     hook.rerender({ expression: 'something', hasCustomErrorRenderer: true });
 
     expect(expressionLoaderSpy).toHaveBeenCalledTimes(1);
@@ -147,7 +150,7 @@ describe('useExpressionRenderer', () => {
   });
 
   it('should call the event handler', () => {
-    const onEvent = jest.fn();
+    const onEvent = vi.fn();
     hook.rerender({ onEvent, expression: 'something' });
     act(() => expressionLoader.events$.next('event'));
 
@@ -156,7 +159,7 @@ describe('useExpressionRenderer', () => {
 
   it('should call the data handler', () => {
     const adapters = {};
-    const onData$ = jest.fn();
+    const onData$ = vi.fn();
     hook.rerender({ onData$, expression: 'something' });
     expressionLoader.inspect.mockReturnValueOnce(adapters);
     act(() => expressionLoader.data$.next({ partial: true, result: 'something' }));
@@ -166,7 +169,7 @@ describe('useExpressionRenderer', () => {
 
   it('should update on loader options changes', () => {
     const adapters = {};
-    const onData$ = jest.fn();
+    const onData$ = vi.fn();
     hook.rerender({ onData$, expression: 'something' });
     expressionLoader.inspect.mockReturnValueOnce(adapters);
     act(() => expressionLoader.data$.next({ partial: true, result: 'something' }));
@@ -175,7 +178,7 @@ describe('useExpressionRenderer', () => {
   });
 
   it('should call the render handler', () => {
-    const onRender$ = jest.fn();
+    const onRender$ = vi.fn();
     hook.rerender({ onRender$, expression: 'something' });
     act(() => expressionLoader.render$.next(1));
 
@@ -188,7 +191,7 @@ describe('useExpressionRenderer', () => {
   });
 
   it('should not call the render handler when there is a custom error renderer', () => {
-    const onRender$ = jest.fn();
+    const onRender$ = vi.fn();
     hook.rerender({ onRender$, expression: 'something', hasCustomErrorRenderer: true });
 
     expect(expressionLoaderSpy).toHaveBeenCalledTimes(1);
@@ -196,7 +199,7 @@ describe('useExpressionRenderer', () => {
     const [[, , loaderParams]] = expressionLoaderSpy.mock.calls;
     act(() =>
       loaderParams?.onRenderError?.(document.createElement('div'), new Error('something'), {
-        done: jest.fn(),
+        done: vi.fn(),
       } as unknown as IInterpreterRenderHandlers)
     );
     act(() => expressionLoader.render$.next(1));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -14,26 +17,26 @@ import { RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID, RESPONSE_DETAILS_TEST_ID } from 
 import { ResponseDetailsContent } from './response_details';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../../common/lib/kibana'));
   return {
     ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: vi.fn().mockReturnValue({
       services: {
         data: {
           search: {
             search: () => ({
               subscribe: () => ({
-                unsubscribe: jest.fn(),
+                unsubscribe: vi.fn(),
               }),
             }),
           },
         },
         osquery: {
-          OsqueryResults: jest.fn().mockReturnValue(null),
-          fetchAllLiveQueries: jest.fn().mockReturnValue({
+          OsqueryResults: vi.fn().mockReturnValue(null),
+          fetchAllLiveQueries: vi.fn().mockReturnValue({
             data: {
               data: {
                 items: [
@@ -53,14 +56,14 @@ jest.mock('../../../../../common/lib/kibana', () => {
           }),
         },
         sessionView: {
-          getSessionView: jest.fn(() => <div />),
+          getSessionView: vi.fn(() => <div />),
         },
       },
     }),
   };
 });
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 const NO_PRIVILEGES_MESSAGE =
   'ResponsesPermission deniedTo access these results, ask your administrator for Elastic Defend Kibana privileges.';

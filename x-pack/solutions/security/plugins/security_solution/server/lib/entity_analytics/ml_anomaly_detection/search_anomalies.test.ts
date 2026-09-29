@@ -5,28 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { buildScoreRangeFilter, searchEntityAnomalies } from './search_anomalies';
 import { makeHit, makeResponse } from './test_helpers';
 
-jest.mock('./get_security_ml_job_ids', () => ({
-  getSecurityMlJobIds: jest.fn().mockResolvedValue(['security-job-1', 'security-job-2']),
-}));
+vi.mock('./get_security_ml_job_ids', () => {
+      const mocked = {
+      getSecurityMlJobIds: vi.fn().mockResolvedValue(['security-job-1', 'security-job-2']),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
-  euid: {
-    dsl: {
-      getEuidFilterBasedOnEntityRecord: jest
-        .fn()
-        .mockReturnValue({ term: { 'user.name': 'alice' } }),
-    },
-  },
-}));
+vi.mock('@kbn/entity-store/common/euid_helpers', () => {
+      const mocked = {
+      euid: {
+        dsl: {
+          getEuidFilterBasedOnEntityRecord: vi
+            .fn()
+            .mockReturnValue({ term: { 'user.name': 'alice' } }),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockEntityFilter = { term: { 'user.name': 'alice' } };
 
-let mockMlAnomalySearch: jest.Mock;
+let mockMlAnomalySearch: Mock;
 let mockMl: MlPluginSetup;
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 const soClient = savedObjectsClientMock.create();
@@ -42,18 +51,18 @@ const defaultOpts = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   logger = loggingSystemMock.createLogger();
-  mockMlAnomalySearch = jest.fn().mockResolvedValue(makeResponse([]));
+  mockMlAnomalySearch = vi.fn().mockResolvedValue(makeResponse([]));
   mockMl = {
-    mlSystemProvider: jest.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch }),
-    modulesProvider: jest.fn().mockReturnValue({ listModules: jest.fn().mockResolvedValue([]) }),
+    mlSystemProvider: vi.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch }),
+    modulesProvider: vi.fn().mockReturnValue({ listModules: vi.fn().mockResolvedValue([]) }),
   } as unknown as MlPluginSetup;
 });
 
 describe('searchEntityAnomalies', () => {
   it('returns empty result without querying ML when no security job IDs are known', async () => {
-    const { getSecurityMlJobIds } = jest.requireMock('./get_security_ml_job_ids');
+    const { getSecurityMlJobIds } = (await vi.importMock('./get_security_ml_job_ids'));
     getSecurityMlJobIds.mockResolvedValueOnce([]);
 
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
@@ -78,7 +87,7 @@ describe('searchEntityAnomalies', () => {
   });
 
   it('sends the correct base query to mlAnomalySearch', async () => {
-    const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
+    const { euid } = (await vi.importMock('@kbn/entity-store/common/euid_helpers'));
 
     await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
@@ -318,10 +327,10 @@ describe('searchEntityAnomalies', () => {
 
   it('skips hits where actual or typical is missing', async () => {
     for (const field of ['actual', 'typical'] as const) {
-      jest.clearAllMocks();
-      mockMlAnomalySearch = jest.fn().mockResolvedValue(makeResponse([]));
+      vi.clearAllMocks();
+      mockMlAnomalySearch = vi.fn().mockResolvedValue(makeResponse([]));
       mockMl = {
-        mlSystemProvider: jest.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch }),
+        mlSystemProvider: vi.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch }),
       } as unknown as MlPluginSetup;
 
       const hit = makeHit({ entityId: 'user:alice' });
@@ -343,7 +352,7 @@ describe('searchEntityAnomalies', () => {
   });
 
   it('returns empty result and logs a warning when entity filter cannot be built', async () => {
-    const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
+    const { euid } = (await vi.importMock('@kbn/entity-store/common/euid_helpers'));
     euid.dsl.getEuidFilterBasedOnEntityRecord.mockReturnValueOnce(undefined);
 
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });

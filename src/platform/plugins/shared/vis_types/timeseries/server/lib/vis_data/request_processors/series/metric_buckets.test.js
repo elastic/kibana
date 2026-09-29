@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { metricBuckets } from './metric_buckets';
 
 describe('metricBuckets(req, panel, series)', () => {
@@ -49,7 +51,7 @@ describe('metricBuckets(req, panel, series)', () => {
       },
       {},
       {},
-      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      { maxBucketsLimit: 2000, getValidTimeInterval: vi.fn(() => '1d') },
       {
         get: async () => 50,
       }
@@ -57,7 +59,7 @@ describe('metricBuckets(req, panel, series)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     await metricBucketsProcessor(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });

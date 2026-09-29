@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { MemoryRouter } from 'react-router-dom';
@@ -15,12 +18,15 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { ApplicationRedirect } from '.';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RedirectWithReplace', () => {
-  const navigateToUrlMock = jest.fn();
+  const navigateToUrlMock = vi.fn();
   const coreMock = {
     application: {
       navigateToUrl: navigateToUrlMock,
@@ -28,7 +34,7 @@ describe('RedirectWithReplace', () => {
   };
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({ services: coreMock });
+    (useKibana as Mock).mockReturnValue({ services: coreMock });
 
     // Mock window.location.pathname
     Object.defineProperty(window, 'location', {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   clearBroadcastChannelInstances,
@@ -25,16 +27,16 @@ import {
 import { LogoutReason } from '../../common/types';
 import type { SessionInfo } from '../../common/types';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
-jest.spyOn(window, 'addEventListener');
-jest.spyOn(window, 'removeEventListener');
+vi.spyOn(window, 'addEventListener');
+vi.spyOn(window, 'removeEventListener');
 
-jest.spyOn(document, 'addEventListener');
-jest.spyOn(document, 'removeEventListener');
+vi.spyOn(document, 'addEventListener');
+vi.spyOn(document, 'removeEventListener');
 
-const nowMock = jest.spyOn(Date, 'now');
-const visibilityStateMock = jest.spyOn(document, 'visibilityState', 'get');
+const nowMock = vi.spyOn(Date, 'now');
+const visibilityStateMock = vi.spyOn(document, 'visibilityState', 'get');
 
 function createSessionTimeout(
   expiresInMs: number | null = 60 * 60 * 1000,
@@ -44,7 +46,7 @@ function createSessionTimeout(
   const { http, notifications, overlays, ...coreStart } = coreMock.createStart();
   const toast = Symbol();
   const modal = {
-    close: jest.fn(),
+    close: vi.fn(),
   };
   notifications.toasts.add.mockReturnValue(toast as any);
   overlays.openModal.mockReturnValue(modal as any);
@@ -71,8 +73,8 @@ function createSessionTimeout(
 
 describe('SessionTimeout', () => {
   afterEach(async () => {
-    jest.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllMocks();
+    vi.clearAllTimers();
     clearBroadcastChannelInstances();
   });
 
@@ -138,7 +140,7 @@ describe('SessionTimeout', () => {
     await sessionTimeout.start();
     sessionTimeout.stop();
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(sessionExpired.logout).not.toHaveBeenCalled();
   });
@@ -167,7 +169,7 @@ describe('SessionTimeout', () => {
     await sessionTimeout.start();
     expect(http.fetch).toHaveBeenCalledTimes(1);
 
-    jest.advanceTimersByTime(
+    vi.advanceTimersByTime(
       60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS - SESSION_CHECK_MS
     );
 
@@ -258,7 +260,7 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, sessionExpired } = createSessionTimeout(60 * 1000);
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(30 * 1000);
+    vi.advanceTimersByTime(30 * 1000);
 
     const [broadcastChannelMock] = getBroadcastChannelInstances();
 
@@ -272,7 +274,7 @@ describe('SessionTimeout', () => {
       })
     );
 
-    jest.advanceTimersByTime(30 * 1000);
+    vi.advanceTimersByTime(30 * 1000);
 
     expect(sessionExpired.logout).not.toHaveBeenCalled();
   });
@@ -281,7 +283,7 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, notifications, overlays } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(
+    vi.advanceTimersByTime(
       60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS
     );
 
@@ -299,7 +301,7 @@ describe('SessionTimeout', () => {
       expect.objectContaining({ asSystemRequest: true })
     );
 
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
     expect(http.fetch).toHaveBeenLastCalledWith(
@@ -324,7 +326,7 @@ describe('SessionTimeout', () => {
       canBeExtended: false,
     });
 
-    jest.advanceTimersByTime(showWarningInMs);
+    vi.advanceTimersByTime(showWarningInMs);
 
     expect(notifications.toasts.add).toHaveBeenCalled();
     expect(overlays.openModal).not.toHaveBeenCalled();
@@ -353,13 +355,13 @@ describe('SessionTimeout', () => {
 
     // We would normally show the warning at this point in time. However, since the warning has been
     // dismissed for 10 minutes we will only show it after 10 minutes have elapsed
-    jest.advanceTimersByTime(showWarningInMs);
+    vi.advanceTimersByTime(showWarningInMs);
     expect(notifications.toasts.add).not.toHaveBeenCalled();
     expect(overlays.openModal).not.toHaveBeenCalled();
 
     // Advance the timer further so that a total have 10 minutes would have passed. This is the
     // expiration time of the warning that was dismissed.
-    jest.advanceTimersByTime(9 * 60 * 1000 - showWarningInMs);
+    vi.advanceTimersByTime(9 * 60 * 1000 - showWarningInMs);
     expect(notifications.toasts.add).toHaveBeenCalled();
   });
 
@@ -367,7 +369,7 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, overlays } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(
+    vi.advanceTimersByTime(
       60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS
     );
 
@@ -388,7 +390,7 @@ describe('SessionTimeout', () => {
     );
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS);
+    vi.advanceTimersByTime(60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS);
 
     expect(sessionExpired.logout).toHaveBeenCalledWith(LogoutReason.SESSION_IDLE_TIMEOUT);
   });
@@ -401,7 +403,7 @@ describe('SessionTimeout', () => {
     );
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS);
+    vi.advanceTimersByTime(60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS);
 
     expect(sessionExpired.logout).toHaveBeenCalledWith(LogoutReason.SESSION_LIFESPAN_TIMEOUT);
   });
@@ -410,7 +412,7 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, sessionExpired } = createSessionTimeout(SESSION_GRACE_PERIOD_MS / 2);
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(0);
+    vi.advanceTimersByTime(0);
 
     expect(sessionExpired.logout).toHaveBeenCalled();
   });
@@ -419,7 +421,7 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, sessionExpired } = createSessionTimeout(null);
     await sessionTimeout.start();
 
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(sessionExpired.logout).not.toHaveBeenCalled();
   });
@@ -430,7 +432,7 @@ describe('SessionTimeout', () => {
     http.fetch.mockResolvedValue(''); // Session endpoint return 204 No content when session does not exist
     await sessionTimeout.start();
 
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(sessionExpired.logout).not.toHaveBeenCalled();
   });
@@ -438,34 +440,34 @@ describe('SessionTimeout', () => {
 
 describe('startTimer', () => {
   it('executes callback after time elapses', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     startTimer(callback, 100);
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
   it('executes callback after a very long time elapses', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     startTimer(callback, 0x7fffffff + 100);
-    jest.advanceTimersByTime(0x7fffffff + 100);
+    vi.advanceTimersByTime(0x7fffffff + 100);
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
   it('does not executes callback if stopped before time elapses', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     const stop = startTimer(callback, 100);
-    jest.advanceTimersByTime(50);
+    vi.advanceTimersByTime(50);
     stop();
-    jest.advanceTimersByTime(50);
+    vi.advanceTimersByTime(50);
     expect(callback).toHaveBeenCalledTimes(0);
   });
 
   it('does not executes callback if stopped before a very long time elapses', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     const stop = startTimer(callback, 0x7fffffff + 100);
-    jest.advanceTimersByTime(0x7fffffff + 50);
+    vi.advanceTimersByTime(0x7fffffff + 50);
     stop();
-    jest.advanceTimersByTime(50);
+    vi.advanceTimersByTime(50);
     expect(callback).toHaveBeenCalledTimes(0);
   });
 });

@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateEventStatusToolHandler } from './handler';
 
 const makeLogger = () =>
-  ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as never);
+  ({ error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } as never);
 
 describe('updateEventStatusToolHandler', () => {
   it('creates a new event version when status changes', async () => {
     const eventClient = {
-      findByEventUuid: jest.fn().mockResolvedValue({
+      findByEventUuid: vi.fn().mockResolvedValue({
         hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'open' }],
       }),
-      findLatestByEventId: jest.fn().mockResolvedValue({
+      findLatestByEventId: vi.fn().mockResolvedValue({
         event_uuid: 'event-1',
         event_id: 'event-id-1',
         status: 'open',
       }),
-      bulkCreate: jest.fn().mockResolvedValue({}),
+      bulkCreate: vi.fn().mockResolvedValue({}),
     };
 
     const result = await updateEventStatusToolHandler({
@@ -47,9 +49,9 @@ describe('updateEventStatusToolHandler', () => {
 
   it('ignores when event is missing or status unchanged', async () => {
     const eventClientMissing = {
-      findByEventUuid: jest.fn().mockResolvedValue({ hits: [] }),
-      findLatestByEventId: jest.fn().mockResolvedValue(undefined),
-      bulkCreate: jest.fn(),
+      findByEventUuid: vi.fn().mockResolvedValue({ hits: [] }),
+      findLatestByEventId: vi.fn().mockResolvedValue(undefined),
+      bulkCreate: vi.fn(),
     };
     const missing = await updateEventStatusToolHandler({
       eventClient: eventClientMissing as never,
@@ -60,15 +62,15 @@ describe('updateEventStatusToolHandler', () => {
     expect(missing).toEqual({ updated: 0, ignored: 1, status: 'dismissed' });
 
     const eventClientSame = {
-      findByEventUuid: jest.fn().mockResolvedValue({
+      findByEventUuid: vi.fn().mockResolvedValue({
         hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'dismissed' }],
       }),
-      findLatestByEventId: jest.fn().mockResolvedValue({
+      findLatestByEventId: vi.fn().mockResolvedValue({
         event_uuid: 'event-1',
         event_id: 'event-id-1',
         status: 'dismissed',
       }),
-      bulkCreate: jest.fn(),
+      bulkCreate: vi.fn(),
     };
     const same = await updateEventStatusToolHandler({
       eventClient: eventClientSame as never,

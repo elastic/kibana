@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { nlToStreamlang } from './nl_to_streamlang';
 import type { NlToStreamlangDeps } from './nl_to_streamlang';
 import type { ProcessingSimulationResponse } from '@kbn/streams-schema';
@@ -46,15 +49,15 @@ const inlineSamples = (
 
 describe('nlToStreamlang', () => {
   const createMockDeps = (): NlToStreamlangDeps & {
-    mockInferenceClient: { chatComplete: jest.Mock };
-    mockEsClient: { search: jest.Mock };
+    mockInferenceClient: { chatComplete: Mock };
+    mockEsClient: { search: Mock };
   } => {
     const mockInferenceClient = {
-      chatComplete: jest.fn(),
+      chatComplete: vi.fn(),
     };
 
     const mockEsClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: sampleDocuments.map((doc) => ({ _source: doc })),
         },
@@ -63,11 +66,11 @@ describe('nlToStreamlang', () => {
 
     return {
       streamsClient: {
-        getStream: jest.fn().mockResolvedValue(wiredStreamDef('logs.ecs.test')),
+        getStream: vi.fn().mockResolvedValue(wiredStreamDef('logs.ecs.test')),
       } as unknown as NlToStreamlangDeps['streamsClient'],
       esClient: mockEsClient as unknown as NlToStreamlangDeps['esClient'],
       inferenceClient: mockInferenceClient as unknown as NlToStreamlangDeps['inferenceClient'],
-      simulatePipeline: jest.fn().mockResolvedValue(makeSimResponse()),
+      simulatePipeline: vi.fn().mockResolvedValue(makeSimResponse()),
       mockInferenceClient,
       mockEsClient,
     };
@@ -168,7 +171,7 @@ describe('nlToStreamlang', () => {
     });
     deps.mockInferenceClient.chatComplete.mockResolvedValue({ content: validSteps });
 
-    (deps.simulatePipeline as jest.Mock)
+    (deps.simulatePipeline as Mock)
       .mockResolvedValueOnce(
         makeSimResponse({
           definition_error: { type: 'generic_simulation_failure', message: 'grok pattern failed' },
@@ -203,7 +206,7 @@ describe('nlToStreamlang', () => {
       }),
     });
 
-    (deps.simulatePipeline as jest.Mock).mockResolvedValue(
+    (deps.simulatePipeline as Mock).mockResolvedValue(
       makeSimResponse({
         detected_fields: [{ name: 'attributes.client_ip', esType: 'keyword' }],
         documents: [

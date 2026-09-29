@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   SavedObject,
   SavedObjectsServiceSetup,
@@ -18,10 +21,10 @@ import type { RawAction } from '../types';
 import type { ActionTypeRegistry } from '../action_type_registry';
 
 describe('setupSavedObjects - onImport', () => {
-  let savedObjectsSetup: jest.Mocked<SavedObjectsServiceSetup>;
+  let savedObjectsSetup: Mocked<SavedObjectsServiceSetup>;
   let encryptedSavedObjects: ReturnType<typeof encryptedSavedObjectsMock.createSetup>;
   let actionTypeRegistry: ReturnType<typeof actionTypeRegistryMock.create>;
-  let mockRepo: jest.Mocked<Pick<ISavedObjectsRepository, 'bulkDelete'>>;
+  let mockRepo: Mocked<Pick<ISavedObjectsRepository, 'bulkDelete'>>;
 
   const createConnector = (
     id: string,
@@ -46,12 +49,12 @@ describe('setupSavedObjects - onImport', () => {
 
   beforeEach(() => {
     savedObjectsSetup = {
-      registerType: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsServiceSetup>;
+      registerType: vi.fn(),
+    } as unknown as Mocked<SavedObjectsServiceSetup>;
 
     encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     actionTypeRegistry = actionTypeRegistryMock.create();
-    mockRepo = { bulkDelete: jest.fn().mockResolvedValue({ statuses: [] }) };
+    mockRepo = { bulkDelete: vi.fn().mockResolvedValue({ statuses: [] }) };
 
     setupSavedObjects(
       savedObjectsSetup,
@@ -137,8 +140,8 @@ describe('setupSavedObjects - onImport', () => {
 describe('setupSavedObjects - encrypted action type', () => {
   it('registers V3 encryption for secrets and last-saver identity keys', () => {
     const savedObjectsSetup = {
-      registerType: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsServiceSetup>;
+      registerType: vi.fn(),
+    } as unknown as Mocked<SavedObjectsServiceSetup>;
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     const actionTypeRegistry = actionTypeRegistryMock.create();
 

@@ -7,23 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { useQueryableEsqlColumns } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
-jest.mock('../../../../../plugin', () => ({
-  getUnifiedDocViewerServices: jest.fn(),
-}));
+vi.mock('../../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLQueryColumnsRaw: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLQueryColumnsRaw: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetESQLQueryColumnsRaw = getESQLQueryColumnsRaw as jest.Mock;
-const mockSearch = jest.fn();
+const mockGetESQLQueryColumnsRaw = getESQLQueryColumnsRaw as Mock;
+const mockSearch = vi.fn();
 
-(getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+(getUnifiedDocViewerServices as Mock).mockReturnValue({
   data: {
     search: {
       search: mockSearch,
@@ -33,7 +42,7 @@ const mockSearch = jest.fn();
 
 describe('useQueryableEsqlColumns', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not resolve columns when no index pattern is provided', () => {

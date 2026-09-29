@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type { RouteValidator } from '@kbn/core-http-server';
 import {
@@ -59,10 +61,10 @@ describe('prepareResponseValidation', () => {
       request: {},
       response: {
         200: {
-          body: jest.fn(() => schema.string()),
+          body: vi.fn(() => schema.string()),
         },
         404: {
-          body: jest.fn(() => schema.string()),
+          body: vi.fn(() => schema.string()),
         },
         500: {
           description: 'just a description',

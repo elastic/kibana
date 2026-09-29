@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { MongoDBConnector } from './mongodb';
@@ -16,18 +18,18 @@ import { MongoDBConnector } from './mongodb';
 // lives in lib/clients/mongodb_client_type.ts and is tested there.
 // ---------------------------------------------------------------------------
 
-const mockCountDocuments = jest.fn();
-const mockFindToArray = jest.fn();
-const mockAggregateToArray = jest.fn();
-const mockListCollections = jest.fn();
-const mockListCollectionsToArray = jest.fn();
-const mockCommand = jest.fn();
-const mockDb = jest.fn();
-const mockCollection = jest.fn();
-const mockInsertOne = jest.fn();
-const mockUpdateOne = jest.fn();
-const mockDeleteOne = jest.fn();
-const mockGetClient = jest.fn();
+const mockCountDocuments = vi.fn();
+const mockFindToArray = vi.fn();
+const mockAggregateToArray = vi.fn();
+const mockListCollections = vi.fn();
+const mockListCollectionsToArray = vi.fn();
+const mockCommand = vi.fn();
+const mockDb = vi.fn();
+const mockCollection = vi.fn();
+const mockInsertOne = vi.fn();
+const mockUpdateOne = vi.fn();
+const mockDeleteOne = vi.fn();
+const mockGetClient = vi.fn();
 
 // ---------------------------------------------------------------------------
 // Test context
@@ -37,7 +39,7 @@ const mockContext = {
   client: {} as ActionContext['client'], // unused — connector uses the mongodb client type
   getClient: mockGetClient,
   config: { uri: 'mongodb://localhost:27017/test_db' },
-  log: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
+  log: { debug: vi.fn(), error: vi.fn(), warn: vi.fn() },
 } as unknown as ActionContext;
 
 // ---------------------------------------------------------------------------
@@ -45,7 +47,7 @@ const mockContext = {
 // ---------------------------------------------------------------------------
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   mockCommand.mockResolvedValue({ ok: 1 });
   mockGetClient.mockResolvedValue({ db: mockDb });
@@ -60,8 +62,8 @@ beforeEach(() => {
 
   // collection() returns an object with find/aggregate/countDocuments/insertOne/updateOne/deleteOne
   mockCollection.mockReturnValue({
-    find: jest.fn().mockReturnValue({ toArray: mockFindToArray }),
-    aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+    find: vi.fn().mockReturnValue({ toArray: mockFindToArray }),
+    aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
     countDocuments: mockCountDocuments,
     insertOne: mockInsertOne,
     updateOne: mockUpdateOne,
@@ -245,8 +247,8 @@ describe('find', () => {
     mockFindToArray.mockResolvedValue(docs);
 
     const collectionInstance = {
-      find: jest.fn().mockReturnValue({ toArray: mockFindToArray }),
-      aggregate: jest.fn(),
+      find: vi.fn().mockReturnValue({ toArray: mockFindToArray }),
+      aggregate: vi.fn(),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -274,8 +276,8 @@ describe('find', () => {
   it('defaults to empty filter and limit 100 when omitted', async () => {
     mockFindToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn().mockReturnValue({ toArray: mockFindToArray }),
-      aggregate: jest.fn(),
+      find: vi.fn().mockReturnValue({ toArray: mockFindToArray }),
+      aggregate: vi.fn(),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -331,8 +333,8 @@ describe('aggregate', () => {
     mockAggregateToArray.mockResolvedValue(results);
 
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -356,8 +358,8 @@ describe('aggregate', () => {
   it('preserves an existing $limit stage when it is within the cap', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -379,8 +381,8 @@ describe('aggregate', () => {
   it('replaces an existing $limit stage that exceeds the cap', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -401,8 +403,8 @@ describe('aggregate', () => {
   it('appends a $limit inside each $facet branch, not just the outer pipeline', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -427,8 +429,8 @@ describe('aggregate', () => {
   it('preserves an existing within-cap $limit inside a $facet branch', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -450,8 +452,8 @@ describe('aggregate', () => {
   it('clamps every branch of a multi-branch $facet independently', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -486,8 +488,8 @@ describe('aggregate', () => {
   it('appends a $limit inside a $lookup sub-pipeline, not just the outer pipeline', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -512,8 +514,8 @@ describe('aggregate', () => {
   it('preserves an existing within-cap $limit inside a $lookup sub-pipeline', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -537,8 +539,8 @@ describe('aggregate', () => {
   it('leaves a $lookup without its own pipeline (equality-match form) untouched', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -562,8 +564,8 @@ describe('aggregate', () => {
   it('appends a $limit inside a $unionWith object-form sub-pipeline', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -586,8 +588,8 @@ describe('aggregate', () => {
   it('leaves a bare-collection-name $unionWith untouched', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      find: vi.fn(),
+      aggregate: vi.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -688,8 +690,8 @@ describe('count', () => {
     mockCountDocuments.mockResolvedValue(42);
 
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn(),
+      find: vi.fn(),
+      aggregate: vi.fn(),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,
@@ -710,8 +712,8 @@ describe('count', () => {
   it('counts all documents when filter omitted', async () => {
     mockCountDocuments.mockResolvedValue(1000);
     const collectionInstance = {
-      find: jest.fn(),
-      aggregate: jest.fn(),
+      find: vi.fn(),
+      aggregate: vi.fn(),
       countDocuments: mockCountDocuments,
       insertOne: mockInsertOne,
       updateOne: mockUpdateOne,

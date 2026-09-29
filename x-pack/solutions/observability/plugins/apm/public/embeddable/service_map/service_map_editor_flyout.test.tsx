@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -16,14 +18,17 @@ import {
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { EmbeddableDeps } from '../types';
 
-jest.mock('../../hooks/use_adhoc_apm_data_view', () => ({
-  useAdHocApmDataView: () => ({
-    dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
-    apmIndices: undefined,
-  }),
-}));
+vi.mock('../../hooks/use_adhoc_apm_data_view', () => {
+      const mocked = {
+      useAdHocApmDataView: () => ({
+        dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
+        apmIndices: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockQueryStringInput = jest.fn(({ query, onChange, onSubmit, dataTestSubj, placeholder }) => (
+const mockQueryStringInput = vi.fn(({ query, onChange, onSubmit, dataTestSubj, placeholder }) => (
   <input
     data-test-subj={dataTestSubj}
     value={query.query}
@@ -35,7 +40,7 @@ const mockQueryStringInput = jest.fn(({ query, onChange, onSubmit, dataTestSubj,
   />
 ));
 
-const mockHttpGet = jest.fn().mockResolvedValue({ terms: [] });
+const mockHttpGet = vi.fn().mockResolvedValue({ terms: [] });
 const mockCoreStart = {
   http: {
     get: mockHttpGet,
@@ -65,8 +70,8 @@ const mockDeps = {
 
 async function renderFlyout(props: Partial<ServiceMapEditorFlyoutProps> = {}) {
   const defaultProps: ServiceMapEditorFlyoutProps = {
-    onCancel: jest.fn(),
-    onSave: jest.fn(),
+    onCancel: vi.fn(),
+    onSave: vi.fn(),
     ariaLabelledBy: 'flyout-title',
     deps: mockDeps,
   };
@@ -84,13 +89,13 @@ async function renderFlyout(props: Partial<ServiceMapEditorFlyoutProps> = {}) {
 
 describe('<ServiceMapEditorFlyout/>', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     mockHttpGet.mockResolvedValue({ terms: [] });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('when adding a new panel', () => {
@@ -140,7 +145,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
   describe('when the user submits the form', () => {
     it('calls onSave with default values when no changes made', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       await renderFlyout({ onSave });
 
       fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
@@ -161,7 +166,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
     });
 
     it('calls onSave with kuery value', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       await renderFlyout({ onSave });
 
       fireEvent.change(screen.getByTestId('apmServiceMapEditorKueryInput'), {
@@ -188,7 +193,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
   describe('when the user cancels', () => {
     it('calls onCancel', async () => {
-      const onCancel = jest.fn();
+      const onCancel = vi.fn();
       await renderFlyout({ onCancel });
 
       fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -199,14 +204,14 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
   describe('preview-until-save (live preview)', () => {
     it('does not call onPreview on initial mount', async () => {
-      const onPreview = jest.fn();
+      const onPreview = vi.fn();
       await renderFlyout({ onPreview });
 
       expect(onPreview).not.toHaveBeenCalled();
     });
 
     it('calls onPreview when a control changes', async () => {
-      const onPreview = jest.fn();
+      const onPreview = vi.fn();
       await renderFlyout({ onPreview });
 
       fireEvent.click(screen.getByTestId('apmServiceMapEditorSyncFiltersToggle'));
@@ -219,7 +224,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
     });
 
     it('reverts on unmount when the flyout was not saved', async () => {
-      const onRevert = jest.fn();
+      const onRevert = vi.fn();
       const { unmount } = await renderFlyout({ onRevert });
 
       unmount();
@@ -228,8 +233,8 @@ describe('<ServiceMapEditorFlyout/>', () => {
     });
 
     it('does not revert on unmount after saving', async () => {
-      const onRevert = jest.fn();
-      const onSave = jest.fn();
+      const onRevert = vi.fn();
+      const onSave = vi.fn();
       const { unmount } = await renderFlyout({ onRevert, onSave });
 
       fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
@@ -245,7 +250,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
       expect(screen.queryByTestId('apmServiceMapEditorPreviewHint')).not.toBeInTheDocument();
       unmount();
 
-      await renderFlyout({ onPreview: jest.fn() });
+      await renderFlyout({ onPreview: vi.fn() });
       expect(screen.getByTestId('apmServiceMapEditorPreviewHint')).toBeInTheDocument();
     });
   });
@@ -262,7 +267,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
       // Advance past debounce
       await act(async () => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       await waitFor(() => {
@@ -290,7 +295,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
       // Advance past debounce
       await act(async () => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       await waitFor(() => {
@@ -339,7 +344,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
   describe('service name selection', () => {
     it('clears service name when selection is removed', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       mockHttpGet.mockResolvedValue({ terms: ['service-a', 'service-b'] });
       await renderFlyout({ onSave });
 
@@ -349,7 +354,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
       // Select a service
       fireEvent.change(input, { target: { value: 'service-a' } });
       await act(async () => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       await waitFor(() => {
@@ -380,7 +385,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
     });
 
     it('saves multi-select as highlighted_service_names without service_name', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       mockHttpGet.mockResolvedValue({ terms: ['service-a', 'service-b'] });
       await renderFlyout({ onSave });
 
@@ -389,7 +394,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
       fireEvent.change(input, { target: { value: 'service-a' } });
       await act(async () => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
       await waitFor(() => {
         expect(screen.getByRole('option', { name: 'service-a' })).toBeInTheDocument();
@@ -398,7 +403,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
       fireEvent.change(input, { target: { value: 'service-b' } });
       await act(async () => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
       await waitFor(() => {
         expect(screen.getByRole('option', { name: 'service-b' })).toBeInTheDocument();
@@ -418,7 +423,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
     });
 
     it('clears service_name when loading state that also has highlighted_service_names', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       await renderFlyout({
         onSave,
         initialState: {
@@ -443,7 +448,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
 
   describe('environment selection', () => {
     it('updates environment when a new option is selected', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       mockHttpGet.mockResolvedValue({ terms: ['production', 'staging'] });
       await renderFlyout({ onSave });
 

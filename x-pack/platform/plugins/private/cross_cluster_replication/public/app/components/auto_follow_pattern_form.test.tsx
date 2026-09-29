@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateFormErrors } from './auto_follow_pattern_form';
 import type { AutoFollowPatternValidationErrors } from '../services/auto_follow_pattern_validators';
 
-jest.mock('../services/auto_follow_pattern_validators', () => ({
-  validateAutoFollowPattern: jest.fn(),
-  validateLeaderIndexPattern: jest.fn(),
-}));
+vi.mock('../services/auto_follow_pattern_validators', () => {
+      const mocked = {
+      validateAutoFollowPattern: vi.fn(),
+      validateLeaderIndexPattern: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<AutoFollowPatternForm state update', () => {
   describe('updateFormErrors()', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -15,55 +18,70 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useAttacksKpiState } from './common/use_attacks_kpi_state';
 import { KpiViewSelection } from './kpi_view_select/helpers';
 
-jest.mock('./attacks_summary_panel', () => ({
-  AttacksSummaryPanel: ({
-    title,
-    setIsExpanded,
-  }: {
-    title: React.ReactNode;
-    setIsExpanded: (val: boolean) => void;
-  }) => (
-    <div data-test-subj="mock-summary-view-content">
-      {title}
-      <button
-        data-test-subj="query-toggle-header"
-        onClick={() => setIsExpanded(false)}
-        type="button"
-      >
-        {'Toggle'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./attacks_summary_panel', () => {
+      const mocked = {
+      AttacksSummaryPanel: ({
+        title,
+        setIsExpanded,
+      }: {
+        title: React.ReactNode;
+        setIsExpanded: (val: boolean) => void;
+      }) => (
+        <div data-test-subj="mock-summary-view-content">
+          {title}
+          <button
+            data-test-subj="query-toggle-header"
+            onClick={() => setIsExpanded(false)}
+            type="button"
+          >
+            {'Toggle'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./attacks_trends_panel', () => ({
-  AttacksTrendsPanel: ({ title }: { title: React.ReactNode }) => (
-    <div data-test-subj="mock-trends-panel">{title}</div>
-  ),
-}));
+vi.mock('./attacks_trends_panel', () => {
+      const mocked = {
+      AttacksTrendsPanel: ({ title }: { title: React.ReactNode }) => (
+        <div data-test-subj="mock-trends-panel">{title}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./attacks_count_panel', () => ({
-  AttacksCountPanel: ({ title }: { title: React.ReactNode }) => (
-    <div data-test-subj="mock-count-panel">{title}</div>
-  ),
-}));
+vi.mock('./attacks_count_panel', () => {
+      const mocked = {
+      AttacksCountPanel: ({ title }: { title: React.ReactNode }) => (
+        <div data-test-subj="mock-count-panel">{title}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./attacks_treemap_panel', () => ({
-  AttacksTreemapPanel: ({ title }: { title: React.ReactNode }) => (
-    <div data-test-subj="mock-treemap-panel">{title}</div>
-  ),
-}));
+vi.mock('./attacks_treemap_panel', () => {
+      const mocked = {
+      AttacksTreemapPanel: ({ title }: { title: React.ReactNode }) => (
+        <div data-test-subj="mock-treemap-panel">{title}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/containers/query_toggle');
+vi.mock('../../../../common/containers/query_toggle');
 
-jest.mock('./common/use_attacks_kpi_state', () => ({
-  useAttacksKpiState: jest.fn(),
-}));
+vi.mock('./common/use_attacks_kpi_state', () => {
+      const mocked = {
+      useAttacksKpiState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetToggleStatus = jest.fn();
-const mockUseQueryToggle = useQueryToggle as jest.Mock;
-const mockSetViewSelection = jest.fn();
-const mockUseAttacksKpiState = useAttacksKpiState as jest.Mock;
+const mockSetToggleStatus = vi.fn();
+const mockUseQueryToggle = useQueryToggle as Mock;
+const mockSetViewSelection = vi.fn();
+const mockUseAttacksKpiState = useAttacksKpiState as Mock;
 
 const defaultProps: KPIsSectionProps = {
   pageFilters: [],
@@ -75,7 +93,7 @@ const defaultProps: KPIsSectionProps = {
 
 describe('<KPIsSection />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({
       toggleStatus: true,
       setToggleStatus: mockSetToggleStatus,

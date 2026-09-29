@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -12,11 +14,11 @@ import { timelineActions } from '../../store';
 import { TimelineBottomBar } from '.';
 import { TimelineId } from '../../../../common/types';
 
-jest.mock('react-redux-v7', () => {
-  const origin = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const origin = require('react-redux-v7');
   return {
     ...origin,
-    useDispatch: jest.fn().mockReturnValue(jest.fn()),
+    useDispatch: vi.fn().mockReturnValue(vi.fn()),
   };
 });
 
@@ -50,7 +52,7 @@ describe('TimelineBottomBar', () => {
   });
 
   test('should dispatch show action when clicking on the title', () => {
-    const spy = jest.spyOn(timelineActions, 'showTimeline');
+    const spy = vi.spyOn(timelineActions, 'showTimeline');
 
     const { getByTestId } = render(
       <TestProviders>

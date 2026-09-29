@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { runAutomationHandler } from './handler';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
-  hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
-  executeWorkflow: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
+      const mocked = {
+      hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
+      hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
+      executeWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../assert_context_engine_write_access', () => ({
-  assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../assert_context_engine_write_access', () => {
+      const mocked = {
+      assertContextEngineWriteAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege, executeWorkflow } =
-  jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+  (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
 
-const { assertContextEngineWriteAccess } = jest.requireMock(
-  '../../assert_context_engine_write_access'
-);
+const { assertContextEngineWriteAccess } = (await vi.importMock('../../assert_context_engine_write_access'));
 
 describe('runAutomationHandler', () => {
   const request = httpServerMock.createKibanaRequest();
@@ -32,10 +38,10 @@ describe('runAutomationHandler', () => {
   const spaceId = 'default';
   const workflowId = 'wf-123';
 
-  const getWorkflowMock = jest.fn();
-  const updateWorkflowMock = jest.fn();
+  const getWorkflowMock = vi.fn();
+  const updateWorkflowMock = vi.fn();
 
-  const getCoreStart = jest.fn().mockResolvedValue({
+  const getCoreStart = vi.fn().mockResolvedValue({
     http: { basePath: { serverBasePath: '' } },
   });
 
@@ -54,7 +60,7 @@ describe('runAutomationHandler', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     hasWorkflowExecutePrivilege.mockResolvedValue(true);
     hasWorkflowUpdatePrivilege.mockResolvedValue(true);
     assertContextEngineWriteAccess.mockResolvedValue(undefined);

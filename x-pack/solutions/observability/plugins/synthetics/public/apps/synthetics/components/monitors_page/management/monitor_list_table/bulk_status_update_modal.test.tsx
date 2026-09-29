@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
@@ -16,26 +19,35 @@ import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
 
-jest.mock('../../../../../../hooks/use_kibana_space', () => ({
-  useKibanaSpace: jest.fn(),
-}));
+vi.mock('../../../../../../hooks/use_kibana_space', () => {
+      const mocked = {
+      useKibanaSpace: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../hooks/use_capabilities', () => ({
-  ...jest.requireActual('../../../../../../hooks/use_capabilities'),
-  useCanUsePublicLocationsPermission: jest.fn(),
-}));
+vi.mock('../../../../../../hooks/use_capabilities', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../hooks/use_capabilities')),
+      useCanUsePublicLocationsPermission: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../state', () => ({
-  ...jest.requireActual('../../../../state'),
-  fetchBulkUpdateMonitors: jest.fn(),
-}));
+vi.mock('../../../../state', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../state')),
+      fetchBulkUpdateMonitors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaSpaceMock = useKibanaSpace as jest.MockedFunction<typeof useKibanaSpace>;
+const useKibanaSpaceMock = useKibanaSpace as MockedFunction<typeof useKibanaSpace>;
 const useCanUsePublicLocationsPermissionMock =
-  useCanUsePublicLocationsPermission as jest.MockedFunction<
+  useCanUsePublicLocationsPermission as MockedFunction<
     typeof useCanUsePublicLocationsPermission
   >;
-const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as jest.MockedFunction<
+const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as MockedFunction<
   typeof fetchBulkUpdateMonitors
 >;
 
@@ -64,11 +76,11 @@ const makeMonitor = (
   } as unknown as EncryptedSyntheticsSavedMonitor);
 
 describe('<BulkStatusUpdateModal />', () => {
-  const onClose = jest.fn();
-  const reloadPage = jest.fn();
+  const onClose = vi.fn();
+  const reloadPage = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaSpaceMock.mockReturnValue({ space: { id: 'default' } } as ReturnType<
       typeof useKibanaSpace
     >);

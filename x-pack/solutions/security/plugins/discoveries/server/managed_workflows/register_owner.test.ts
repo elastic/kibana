@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerOwner } from './register_owner';
 
 const createMockWorkflowsExtensions = () => ({
-  registerManagedWorkflowOwner: jest.fn(),
-  registerStepType: jest.fn(),
+  registerManagedWorkflowOwner: vi.fn(),
+  registerStepType: vi.fn(),
 });
 
 describe('registerOwner', () => {

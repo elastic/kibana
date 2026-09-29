@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { APP_ID } from '../../common/constants';
 import {
@@ -14,13 +16,13 @@ import {
 
 describe('managed workflows', () => {
   const createManagedClient = () => ({
-    install: jest.fn().mockResolvedValue(undefined),
-    uninstall: jest.fn().mockResolvedValue(undefined),
-    ready: jest.fn().mockResolvedValue(undefined),
-    getWorkflowStatus: jest.fn().mockResolvedValue(undefined),
-    getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
-    listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
-    execute: jest.fn().mockResolvedValue('execution-id'),
+    install: vi.fn().mockResolvedValue(undefined),
+    uninstall: vi.fn().mockResolvedValue(undefined),
+    ready: vi.fn().mockResolvedValue(undefined),
+    getWorkflowStatus: vi.fn().mockResolvedValue(undefined),
+    getInstalledWorkflowState: vi.fn().mockResolvedValue(null),
+    listInstalledWorkflowStates: vi.fn().mockResolvedValue([]),
+    execute: vi.fn().mockResolvedValue('execution-id'),
   });
 
   it('registers Security Solution as a managed workflow owner', () => {

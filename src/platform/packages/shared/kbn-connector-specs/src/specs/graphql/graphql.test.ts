@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { GraphQLConnector } from './graphql';
 
@@ -14,17 +16,17 @@ describe('GraphQLConnector', () => {
   const ENDPOINT = 'https://api.example.com/graphql';
 
   const mockClient = {
-    post: jest.fn(),
+    post: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
     config: { url: ENDPOINT },
-    log: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), warn: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // ---------------------------------------------------------------------------

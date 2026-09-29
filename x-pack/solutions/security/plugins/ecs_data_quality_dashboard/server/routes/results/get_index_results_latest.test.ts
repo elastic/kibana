@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { GET_INDEX_RESULTS_LATEST } from '../../../common/constants';
 
 import { serverMock } from '../../__mocks__/server';
@@ -18,19 +21,25 @@ import type { ResultDocument } from '../../schemas/result';
 import type { CheckIndicesPrivilegesParam } from './privileges';
 import { getRangeFilteredIndices } from '../../helpers/get_range_filtered_indices';
 
-const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
+const mockCheckIndicesPrivileges = vi.fn(({ indices }: CheckIndicesPrivilegesParam) =>
   Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
 );
-jest.mock('./privileges', () => ({
-  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
-    mockCheckIndicesPrivileges(params),
-}));
+vi.mock('./privileges', () => {
+      const mocked = {
+      checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+        mockCheckIndicesPrivileges(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../helpers/get_range_filtered_indices', () => ({
-  getRangeFilteredIndices: jest.fn(),
-}));
+vi.mock('../../helpers/get_range_filtered_indices', () => {
+      const mocked = {
+      getRangeFilteredIndices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRangeFilteredIndices = getRangeFilteredIndices as jest.Mock;
+const mockGetRangeFilteredIndices = getRangeFilteredIndices as Mock;
 
 const startDate = 'now-7d';
 const endDate = 'now';
@@ -64,7 +73,7 @@ describe('getIndexResultsLatestRoute route', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       server = serverMock.create();
       logger = loggerMock.create();
@@ -282,7 +291,7 @@ describe('getIndexResultsLatestRoute route', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       server = serverMock.create();
       logger = loggerMock.create();

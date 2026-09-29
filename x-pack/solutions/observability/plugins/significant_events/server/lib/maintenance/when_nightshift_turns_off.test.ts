@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { NIGHTSHIFT_FLAG_SETTLE_MS, whenNightshiftTurnsOff } from './when_nightshift_turns_off';
 
 describe('whenNightshiftTurnsOff', () => {
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
 
   it('emits only for settled runtime on→off flips, never for boot-time or transient readings', () => {
     const enabled$ = new Subject<boolean>();
-    const onTurnedOff = jest.fn();
+    const onTurnedOff = vi.fn();
     whenNightshiftTurnsOff(enabled$).subscribe(onTurnedOff);
     const emit = (value: boolean, holdMs: number) => {
       enabled$.next(value);
-      jest.advanceTimersByTime(holdMs);
+      vi.advanceTimersByTime(holdMs);
     };
 
     // Boot: fallback `false`, a transient `true` against an incomplete context, then the

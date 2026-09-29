@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { coreMock } from '@kbn/core/server/mocks';
 import { MonitoringCollectionPlugin } from './plugin';
 
@@ -17,7 +20,7 @@ describe('monitoring_collection plugin', () => {
       context = coreMock.createPluginInitializerContext();
       plugin = new MonitoringCollectionPlugin(context);
       coreSetup = coreMock.createSetup();
-      coreSetup.getStartServices = jest.fn().mockResolvedValue([
+      coreSetup.getStartServices = vi.fn().mockResolvedValue([
         {
           application: {},
         },
@@ -115,11 +118,11 @@ describe('monitoring_collection plugin', () => {
         },
       });
       const metrics = await plugin.getMetric('test');
-      expect((logger.warn as jest.Mock).mock.calls.length).toBe(2);
-      expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
+      expect((logger.warn as Mock).mock.calls.length).toBe(2);
+      expect((logger.warn as Mock).mock.calls[0][0]).toBe(
         `Skipping registration of metric type 'test'. This type is not supported in the allowlist.`
       );
-      expect((logger.warn as jest.Mock).mock.calls[1][0]).toBe(
+      expect((logger.warn as Mock).mock.calls[1][0]).toBe(
         `Call to 'getMetric' failed because type 'test' does not exist.`
       );
       expect(metrics).toBeUndefined();

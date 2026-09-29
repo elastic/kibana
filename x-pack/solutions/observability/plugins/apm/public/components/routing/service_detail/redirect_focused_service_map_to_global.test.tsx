@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
@@ -20,12 +22,15 @@ const mockQuery = {
   serviceGroup: '',
 };
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
-    path: { serviceName: 'opbeans-java' },
-    query: mockQuery,
-  }),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({
+        path: { serviceName: 'opbeans-java' },
+        query: mockQuery,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RedirectFocusedServiceMapToGlobal', () => {
   it('redirects to the global service map with service.name controlSelections', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -18,10 +20,10 @@ const makeMissingWorkflow = (id: string, name: string): WorkflowListItemDto =>
   ({ id, name } as WorkflowListItemDto);
 
 describe('ExportReferencesModal', () => {
-  const mockOnIgnore = jest.fn();
-  const mockOnAddDirect = jest.fn();
-  const mockOnAddAll = jest.fn();
-  const mockOnCancel = jest.fn();
+  const mockOnIgnore = vi.fn();
+  const mockOnAddDirect = vi.fn();
+  const mockOnAddAll = vi.fn();
+  const mockOnCancel = vi.fn();
 
   const missingWorkflows = [
     makeMissingWorkflow('ref-1', 'Referenced Workflow 1'),
@@ -37,7 +39,7 @@ describe('ExportReferencesModal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the modal with title and description', () => {

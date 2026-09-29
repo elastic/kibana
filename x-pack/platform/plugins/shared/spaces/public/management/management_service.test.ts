@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
@@ -19,7 +21,7 @@ import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
-const eventTracker = new EventTracker({ reportEvent: jest.fn() });
+const eventTracker = new EventTracker({ reportEvent: vi.fn() });
 const logger = loggingSystemMock.createLogger();
 
 describe('ManagementService', () => {
@@ -32,7 +34,7 @@ describe('ManagementService', () => {
   describe('#setup', () => {
     it('registers the spaces management page under the kibana section', () => {
       const mockKibanaSection = {
-        registerApp: jest.fn(),
+        registerApp: vi.fn(),
       } as unknown as ManagementSection;
       const managementMockSetup = managementPluginMock.createSetupContract();
       managementMockSetup.sections.section.kibana = mockKibanaSection;
@@ -47,7 +49,7 @@ describe('ManagementService', () => {
         logger,
         getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: getRolesAPIClientMock,
-        getPrivilegesAPIClient: jest.fn(),
+        getPrivilegesAPIClient: vi.fn(),
         getSecurityLicense: getSecurityLicenseMock,
         eventTracker,
         isServerless: false,
@@ -73,7 +75,7 @@ describe('ManagementService', () => {
         logger,
         getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: getRolesAPIClientMock,
-        getPrivilegesAPIClient: jest.fn(),
+        getPrivilegesAPIClient: vi.fn(),
         getSecurityLicense: getSecurityLicenseMock,
         eventTracker,
         isServerless: false,
@@ -83,9 +85,9 @@ describe('ManagementService', () => {
 
   describe('#stop', () => {
     it('disables the spaces management page', () => {
-      const mockSpacesManagementPage = { disable: jest.fn() };
+      const mockSpacesManagementPage = { disable: vi.fn() };
       const mockKibanaSection = {
-        registerApp: jest.fn().mockReturnValue(mockSpacesManagementPage),
+        registerApp: vi.fn().mockReturnValue(mockSpacesManagementPage),
       } as unknown as ManagementSection;
       const managementMockSetup = managementPluginMock.createSetupContract();
       managementMockSetup.sections.section.kibana = mockKibanaSection;
@@ -99,8 +101,8 @@ describe('ManagementService', () => {
         config,
         logger,
         getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
-        getRolesAPIClient: jest.fn(),
-        getPrivilegesAPIClient: jest.fn(),
+        getRolesAPIClient: vi.fn(),
+        getPrivilegesAPIClient: vi.fn(),
         getSecurityLicense: getSecurityLicenseMock,
         eventTracker,
         isServerless: false,

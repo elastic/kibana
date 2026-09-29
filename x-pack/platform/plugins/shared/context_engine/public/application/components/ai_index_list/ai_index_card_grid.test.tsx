@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,47 +15,53 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { AiIndexCardGrid } from './ai_index_card_grid';
 
-const mockRefetch = jest.fn();
+const mockRefetch = vi.fn();
 
-jest.mock('@kbn/content-list-provider', () => ({
-  ...jest.requireActual('@kbn/content-list-provider'),
-  useContentListPhase: () => 'populated',
-  useContentListItems: () => ({
-    items: [
-      {
-        id: 'my-ai-index',
-        type: 'data_stream',
-        managed: false,
-        updatedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-        references: [],
-        attributes: { title: 'my-ai-index' },
-        aiIndex: {
-          id: 'my-ai-index',
-          managed: false,
-          dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
-          automations: [],
-          sources: [],
-          traces: [],
-          date_created: '2026-01-01T00:00:00.000Z',
-          date_modified: '2026-01-01T00:00:00.000Z',
-        },
-      },
-    ],
-    totalItems: 1,
-    hasNoResults: false,
-    refetch: mockRefetch,
-  }),
-  useContentListSearch: () => ({ setQueryFromText: jest.fn() }),
-}));
+vi.mock('@kbn/content-list-provider', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/content-list-provider')),
+      useContentListPhase: () => 'populated',
+      useContentListItems: () => ({
+        items: [
+          {
+            id: 'my-ai-index',
+            type: 'data_stream',
+            managed: false,
+            updatedAt: '2026-01-01T00:00:00.000Z',
+            createdAt: '2026-01-01T00:00:00.000Z',
+            references: [],
+            attributes: { title: 'my-ai-index' },
+            aiIndex: {
+              id: 'my-ai-index',
+              managed: false,
+              dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+              automations: [],
+              sources: [],
+              traces: [],
+              date_created: '2026-01-01T00:00:00.000Z',
+              date_modified: '2026-01-01T00:00:00.000Z',
+            },
+          },
+        ],
+        totalItems: 1,
+        hasNoResults: false,
+        refetch: mockRefetch,
+      }),
+      useContentListSearch: () => ({ setQueryFromText: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./ai_index_delete_confirm_modal', () => ({
-  AiIndexDeleteConfirmModal: ({ onSuccess }: { onSuccess: () => void }) => (
-    <button type="button" onClick={onSuccess}>
-      trigger-on-success
-    </button>
-  ),
-}));
+vi.mock('./ai_index_delete_confirm_modal', () => {
+      const mocked = {
+      AiIndexDeleteConfirmModal: ({ onSuccess }: { onSuccess: () => void }) => (
+        <button type="button" onClick={onSuccess}>
+          trigger-on-success
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderGrid = () => {
   const services = coreMock.createStart();
@@ -71,7 +79,7 @@ const renderGrid = () => {
 
 describe('AiIndexCardGrid', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRefetch.mockResolvedValue(undefined);
   });
 

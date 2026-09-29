@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
@@ -35,13 +38,13 @@ const binding = (
 });
 
 describe('ServiceAccountWorkloadBindings', () => {
-  let store: jest.Mocked<WorkloadBindingStore>;
-  let backend: jest.Mocked<ServiceAccountsBackend>;
+  let store: Mocked<WorkloadBindingStore>;
+  let backend: Mocked<ServiceAccountsBackend>;
   let license: ReturnType<typeof licenseMock.create>;
-  let checkPrivileges: jest.Mock;
-  let getCurrentUser: jest.Mock;
-  let getCurrentUserProfileId: jest.Mock;
-  let getSpaceId: jest.Mock;
+  let checkPrivileges: Mock;
+  let getCurrentUser: Mock;
+  let getCurrentUserProfileId: Mock;
+  let getSpaceId: Mock;
   let logger: MockedLogger;
   let mintedRequest: KibanaRequest;
   let bindings: ServiceAccountWorkloadBindings;
@@ -52,7 +55,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       license,
       store,
       backend,
-      checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally: checkPrivileges }),
+      checkPrivilegesWithRequest: vi.fn().mockReturnValue({ globally: checkPrivileges }),
       getCurrentUser,
       getCurrentUserProfileId,
       getSpaceId,
@@ -63,33 +66,33 @@ describe('ServiceAccountWorkloadBindings', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     store = {
-      set: jest.fn().mockImplementation(async (attributes) => binding(attributes)),
-      delete: jest.fn().mockResolvedValue(true),
-      getVerified: jest.fn().mockResolvedValue(binding()),
-      findByServiceAccountId: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<WorkloadBindingStore>;
+      set: vi.fn().mockImplementation(async (attributes) => binding(attributes)),
+      delete: vi.fn().mockResolvedValue(true),
+      getVerified: vi.fn().mockResolvedValue(binding()),
+      findByServiceAccountId: vi.fn().mockResolvedValue([]),
+    } as unknown as Mocked<WorkloadBindingStore>;
 
     mintedRequest = httpServerMock.createFakeKibanaRequest({
       headers: { authorization: 'Bearer essu_token' },
     });
 
     backend = {
-      create: jest.fn(),
-      list: jest.fn(),
-      get: jest.fn(),
-      createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
-      reauthenticateFakeRequest: jest.fn(),
-      releaseFakeRequest: jest.fn(),
+      create: vi.fn(),
+      list: vi.fn(),
+      get: vi.fn(),
+      createFakeRequest: vi.fn().mockResolvedValue(mintedRequest),
+      reauthenticateFakeRequest: vi.fn(),
+      releaseFakeRequest: vi.fn(),
     };
 
     license = licenseMock.create();
     license.isEnabled.mockReturnValue(true);
-    checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
-    getCurrentUser = jest
+    checkPrivileges = vi.fn().mockResolvedValue({ hasAllRequested: true });
+    getCurrentUser = vi
       .fn()
       .mockReturnValue(mockAuthenticatedUser({ username: 'elastic', profile_uid: 'profile-uid' }));
-    getCurrentUserProfileId = jest.fn().mockResolvedValue('profile-uid');
-    getSpaceId = jest.fn().mockReturnValue('default');
+    getCurrentUserProfileId = vi.fn().mockResolvedValue('profile-uid');
+    getSpaceId = vi.fn().mockReturnValue('default');
 
     bindings = build();
   });
@@ -248,7 +251,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     it('rejects a rebind between the consumer lookup and credential creation', async () => {
       const original = await bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE);
       store.getVerified.mockResolvedValue({ ...binding(), serviceAccountId: 'another-account' });
-      const execute = jest.fn();
+      const execute = vi.fn();
 
       await expect(
         bindings.withScopedRequest(
@@ -262,7 +265,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
 
     it('mints the expected account when the binding matches', async () => {
-      const execute = jest.fn().mockResolvedValue('executed');
+      const execute = vi.fn().mockResolvedValue('executed');
       await expect(
         bindings.withScopedRequest(
           PLUGIN_ID,
@@ -342,7 +345,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       // The registry invokes the interceptor once for the initial mint, before any refresh.
       const captureRefreshInterceptor = async (): Promise<ServiceAccountMintInterceptor> => {
         const interceptor = await captureInterceptor();
-        await interceptor(jest.fn().mockResolvedValue('essu_initial'));
+        await interceptor(vi.fn().mockResolvedValue('essu_initial'));
         store.getVerified.mockClear();
         return interceptor;
       };
@@ -350,7 +353,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       it('lets the initial mint through on the strength of the verification just made', async () => {
         const interceptor = await captureInterceptor();
         expect(store.getVerified).toHaveBeenCalledTimes(1);
-        const mint = jest.fn().mockResolvedValue('essu_initial');
+        const mint = vi.fn().mockResolvedValue('essu_initial');
 
         await expect(interceptor(mint)).resolves.toBe('essu_initial');
         expect(store.getVerified).toHaveBeenCalledTimes(1);
@@ -359,7 +362,7 @@ describe('ServiceAccountWorkloadBindings', () => {
 
       it('re-reads the binding before allowing a re-mint', async () => {
         const interceptor = await captureRefreshInterceptor();
-        const mint = jest.fn().mockResolvedValue('essu_fresh');
+        const mint = vi.fn().mockResolvedValue('essu_fresh');
 
         await expect(interceptor(mint)).resolves.toBe('essu_fresh');
         expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
@@ -369,7 +372,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       it('permits a same-account replacement binding that changed between checks', async () => {
         const interceptor = await captureRefreshInterceptor();
         store.getVerified.mockResolvedValue(binding({ boundAt: '2026-09-23T12:00:00Z' }));
-        const mint = jest.fn().mockResolvedValue('fresh-token');
+        const mint = vi.fn().mockResolvedValue('fresh-token');
         await expect(interceptor(mint)).resolves.toBe('fresh-token');
       });
 
@@ -378,7 +381,7 @@ describe('ServiceAccountWorkloadBindings', () => {
         let finishMint: (token: string) => void = () => {
           throw new Error('Mint has not started');
         };
-        const mint = jest.fn(
+        const mint = vi.fn(
           () =>
             new Promise<string>((resolve) => {
               finishMint = resolve;
@@ -398,7 +401,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       it('refuses to re-mint once the workload has been unbound, and says so', async () => {
         const interceptor = await captureRefreshInterceptor();
         store.getVerified.mockResolvedValue(null);
-        const mint = jest.fn();
+        const mint = vi.fn();
 
         await expect(interceptor(mint)).rejects.toMatchObject({ output: { statusCode: 404 } });
         expect(mint).not.toHaveBeenCalled();
@@ -412,7 +415,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       it('refuses to re-mint when the binding no longer verifies', async () => {
         const interceptor = await captureRefreshInterceptor();
         store.getVerified.mockRejectedValue(new Error('failed integrity verification'));
-        const mint = jest.fn();
+        const mint = vi.fn();
 
         await expect(interceptor(mint)).rejects.toThrowError('failed integrity verification');
         expect(mint).not.toHaveBeenCalled();
@@ -421,7 +424,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       it('refuses to re-mint when the workload was re-bound to a different service account', async () => {
         const interceptor = await captureRefreshInterceptor();
         store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'a-different-account' }));
-        const mint = jest.fn();
+        const mint = vi.fn();
 
         await expect(interceptor(mint)).rejects.toMatchObject({
           message:

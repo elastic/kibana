@@ -5,74 +5,109 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: {} }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_navigation', () => ({
-  useNavigation: () => ({ navigateToAgentBuilderUrl: jest.fn() }),
-}));
+vi.mock('../../../hooks/use_navigation', () => {
+      const mocked = {
+      useNavigation: () => ({ navigateToAgentBuilderUrl: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/agents/use_agents', () => ({
-  useAgentBuilderAgents: () => ({ isFetched: true, agents: [] }),
-}));
+vi.mock('../../../hooks/agents/use_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: () => ({ isFetched: true, agents: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
-  useValidateAgentId: () => () => true,
-}));
+vi.mock('../../../hooks/agents/use_validate_agent_id', () => {
+      const mocked = {
+      useValidateAgentId: () => () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_last_agent_id', () => ({
-  useLastAgentId: () => 'test-agent',
-  getLastAgentId: () => 'test-agent',
-}));
+vi.mock('../../../hooks/use_last_agent_id', () => {
+      const mocked = {
+      useLastAgentId: () => 'test-agent',
+      getLastAgentId: () => 'test-agent',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/active_space_context', () => ({
-  useActiveSpaceId: () => 'default',
-}));
+vi.mock('../../../context/active_space_context', () => {
+      const mocked = {
+      useActiveSpaceId: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_conversation_list', () => ({
-  useConversationList: () => ({ conversations: [], isLoading: false, refresh: jest.fn() }),
-}));
+vi.mock('../../../hooks/use_conversation_list', () => {
+      const mocked = {
+      useConversationList: () => ({ conversations: [], isLoading: false, refresh: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_route_access_config', () => ({
-  useRouteAccessConfig: () => ({
-    featureFlags: { experimental: false },
-    capabilities: { isUIAMEnabled: false },
-  }),
-}));
+vi.mock('../../../hooks/use_route_access_config', () => {
+      const mocked = {
+      useRouteAccessConfig: () => ({
+        featureFlags: { experimental: false },
+        capabilities: { isUIAMEnabled: false },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./shared/sidebar_header', () => ({
-  SidebarHeader: () => null,
-}));
+vi.mock('./shared/sidebar_header', () => {
+      const mocked = {
+      SidebarHeader: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-use/lib/useLocalStorage', () => ({
+vi.mock('react-use/lib/useLocalStorage', () => ({
   __esModule: true,
-  default: () => [undefined, jest.fn()],
+  default: () => [undefined, vi.fn()],
 }));
 
-jest.mock('../../../context/streaming/streaming_context', () => ({
-  useStreamingContext: () => ({
-    activeStreams: new Set(),
-    byConversationId: {},
-  }),
-}));
+vi.mock('../../../context/streaming/streaming_context', () => {
+      const mocked = {
+      useStreamingContext: () => ({
+        activeStreams: new Set(),
+        byConversationId: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_conversation_list_mutations', () => ({
-  useConversationListMutations: () => ({
-    deleteConversation: jest.fn(),
-    renameConversation: jest.fn(),
-    markAsRead: jest.fn(),
-    markAsUnread: jest.fn(),
-    markAsPinned: jest.fn(),
-    markAsUnpinned: jest.fn(),
-  }),
-}));
+vi.mock('../../../hooks/use_conversation_list_mutations', () => {
+      const mocked = {
+      useConversationListMutations: () => ({
+        deleteConversation: vi.fn(),
+        renameConversation: vi.fn(),
+        markAsRead: vi.fn(),
+        markAsUnread: vi.fn(),
+        markAsPinned: vi.fn(),
+        markAsUnpinned: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { UnifiedSidebar } from './unified_sidebar';
 
@@ -80,7 +115,7 @@ const renderSidebar = (path: string) =>
   render(
     <EuiProvider>
       <MemoryRouter initialEntries={[path]}>
-        <UnifiedSidebar isCondensed={false} onToggleCondensed={jest.fn()} />
+        <UnifiedSidebar isCondensed={false} onToggleCondensed={vi.fn()} />
       </MemoryRouter>
     </EuiProvider>
   );

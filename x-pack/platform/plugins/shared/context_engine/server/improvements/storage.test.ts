@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Improvement } from '../../common/http_api/improvements';
@@ -118,7 +120,7 @@ describe('installImprovementsIndexTemplate', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggerMock.create();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('ships the mappings as a template, leaving the index for the first write to create', async () => {
     await installImprovementsIndexTemplate({ esClient, logger });
@@ -143,7 +145,7 @@ describe('createImprovementsClient', () => {
 
   const document = { revision_id: 'rev-1' } as Improvement;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('reads an index that may not exist yet, since an empty store is not an error', async () => {
     await client.search({ size: 1, query: { match_all: {} } });

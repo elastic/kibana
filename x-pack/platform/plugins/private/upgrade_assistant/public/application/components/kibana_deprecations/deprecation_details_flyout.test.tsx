@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -32,12 +34,12 @@ const createFeatureDeprecation = (
   filterType: 'feature',
 });
 
-const mockCloseFlyout = jest.fn();
-const mockResolveDeprecation = jest.fn().mockResolvedValue(undefined);
+const mockCloseFlyout = vi.fn();
+const mockResolveDeprecation = vi.fn().mockResolvedValue(undefined);
 
 describe('DeprecationDetailsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('WHEN deprecation has a single manual step', () => {

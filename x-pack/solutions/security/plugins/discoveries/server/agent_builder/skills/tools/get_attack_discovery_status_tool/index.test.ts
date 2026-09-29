@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -20,13 +23,13 @@ import {
 import { extractPipelineValidationData } from '../../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data';
 import { getWorkflowExecutionsTracking } from '../../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking';
 
-jest.mock('../../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking');
-jest.mock('../../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data');
+vi.mock('../../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking');
+vi.mock('../../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data');
 
-const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as jest.MockedFunction<
+const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as MockedFunction<
   typeof getWorkflowExecutionsTracking
 >;
-const mockExtractPipelineValidationData = extractPipelineValidationData as jest.MockedFunction<
+const mockExtractPipelineValidationData = extractPipelineValidationData as MockedFunction<
   typeof extractPipelineValidationData
 >;
 
@@ -55,8 +58,8 @@ describe('GET_ATTACK_DISCOVERY_STATUS_TOOL_ID', () => {
 describe('getAttackDiscoveryStatusTool', () => {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchClientMock.createScopedClusterClient();
-  const mockGetEventLogIndex = jest.fn<Promise<string>, []>().mockResolvedValue('event-log-*');
-  const mockGetWorkflowExecution = jest.fn<
+  const mockGetEventLogIndex = vi.fn<Promise<string>, []>().mockResolvedValue('event-log-*');
+  const mockGetWorkflowExecution = vi.fn<
     ReturnType<WorkflowExecutionLookup['getWorkflowExecution']>,
     Parameters<WorkflowExecutionLookup['getWorkflowExecution']>
   >();
@@ -94,7 +97,7 @@ describe('getAttackDiscoveryStatusTool', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getStartServices: async () => ({
         coreStart: {
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(enabled) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(enabled) },
         } as never,
         pluginsStart: {} as never,
       }),
@@ -102,7 +105,7 @@ describe('getAttackDiscoveryStatusTool', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient.asCurrentUser.security.authenticate.mockResolvedValue({
       username: 'test-user',
     } as unknown as Awaited<ReturnType<typeof mockEsClient.asCurrentUser.security.authenticate>>);

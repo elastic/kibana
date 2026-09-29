@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 describe('bulkEditActionToRulesClientOperation', () => {
   const actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-  } as unknown as jest.Mocked<ActionsClient>;
+    isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as Mocked<ActionsClient>;
   test('should transform tags bulk edit actions correctly', () => {
     expect(
       bulkEditActionToRulesClientOperation(actionsClient, {

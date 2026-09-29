@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -38,14 +41,14 @@ const attributes = (
 describe('WorkloadBindingStore', () => {
   let client: ReturnType<typeof savedObjectsClientMock.create>;
   let encryptedClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>;
-  let isEncryptionError: jest.Mock<boolean, [Error]>;
+  let isEncryptionError: Mock<boolean, [Error]>;
   let logger: MockedLogger;
   let store: WorkloadBindingStore;
 
   beforeEach(() => {
     client = savedObjectsClientMock.create();
     encryptedClient = encryptedSavedObjectsMock.createClient();
-    isEncryptionError = jest.fn().mockReturnValue(false);
+    isEncryptionError = vi.fn().mockReturnValue(false);
     logger = loggingSystemMock.createLogger();
     store = new WorkloadBindingStore({
       client,
@@ -326,7 +329,7 @@ describe('WorkloadBindingStore', () => {
     });
 
     it('closes the finder even when a page fails', async () => {
-      const close = jest.fn();
+      const close = vi.fn();
       client.createPointInTimeFinder.mockReturnValue({
         async *find() {
           throw new Error('search failed');
@@ -343,7 +346,7 @@ describe('WorkloadBindingStore', () => {
 
   /** Stubs the point-in-time finder with the given pages; returns its `close` spy. */
   function mockFinder(pages: Array<Array<Partial<{ id: string; attributes: unknown }>>>) {
-    const close = jest.fn();
+    const close = vi.fn();
     client.createPointInTimeFinder.mockReturnValue({
       async *find() {
         for (const page of pages) {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -21,15 +23,15 @@ const createAccessChecker = ({
 }) => {
   const licensing = {
     license$: new BehaviorSubject({
-      hasAtLeast: jest.fn().mockReturnValue(hasEnterpriseLicense),
+      hasAtLeast: vi.fn().mockReturnValue(hasEnterpriseLicense),
       isActive: hasEnterpriseLicense,
     }),
   } as unknown as LicensingPluginStart;
 
   const inference = {
     getConnectors: connectorsReject
-      ? jest.fn().mockRejectedValue(connectorsReject)
-      : jest
+      ? vi.fn().mockRejectedValue(connectorsReject)
+      : vi
           .fn()
           .mockResolvedValue(
             Array.from({ length: connectorCount }, (_, index) => ({ id: `c-${index}` }))

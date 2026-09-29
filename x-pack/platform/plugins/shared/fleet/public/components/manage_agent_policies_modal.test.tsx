@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from '@testing-library/react';
 
@@ -18,55 +21,59 @@ import { useGetAgentPolicies } from '../hooks';
 
 import { ManageAgentPoliciesModal } from './manage_agent_policies_modal';
 
-jest.mock('../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks', () => ({
-  ...jest.requireActual(
-    '../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks'
-  ),
-  usePackagePolicyWithRelatedData: jest.fn().mockReturnValue({
-    packageInfo: {},
-    packagePolicy: { name: 'Integration 1' },
-    savePackagePolicy: jest.fn().mockResolvedValue({ error: undefined }),
-  }),
-}));
+vi.mock('../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks')),
+      usePackagePolicyWithRelatedData: vi.fn().mockReturnValue({
+        packageInfo: {},
+        packagePolicy: { name: 'Integration 1' },
+        savePackagePolicy: vi.fn().mockResolvedValue({ error: undefined }),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks', () => ({
-  ...jest.requireActual('../hooks'),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addSuccess: jest.fn(),
-        addError: jest.fn(),
-      },
-    },
-  }),
-  useGetAgentPolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [] as AgentPolicy[],
-    },
-    isLoading: false,
-  }),
-  useGetPackagePolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [{ name: 'Integration 1', revision: 2, id: 'integration1', policy_ids: ['policy1'] }],
-    },
-    isLoading: false,
-  }),
-  useGetOutputs: jest.fn().mockReturnValue({
-    data: {
-      items: [
-        {
-          id: 'logstash-1',
-          type: 'logstash',
+vi.mock('../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../hooks')),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
+          },
         },
-      ],
-    },
-    isLoading: false,
-  }),
-}));
+      }),
+      useGetAgentPolicies: vi.fn().mockReturnValue({
+        data: {
+          items: [] as AgentPolicy[],
+        },
+        isLoading: false,
+      }),
+      useGetPackagePolicies: vi.fn().mockReturnValue({
+        data: {
+          items: [{ name: 'Integration 1', revision: 2, id: 'integration1', policy_ids: ['policy1'] }],
+        },
+        isLoading: false,
+      }),
+      useGetOutputs: vi.fn().mockReturnValue({
+        data: {
+          items: [
+            {
+              id: 'logstash-1',
+              type: 'logstash',
+            },
+          ],
+        },
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ManageAgentPoliciesModal', () => {
   let testRenderer: TestRenderer;
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
   const mockPolicies = [{ name: 'Test policy', revision: 2, id: 'policy1' }] as AgentPolicy[];
 
   const render = (policies?: AgentPolicy[]) =>
@@ -75,14 +82,14 @@ describe('ManageAgentPoliciesModal', () => {
         selectedAgentPolicies={policies || mockPolicies}
         packagePolicyId="integration1"
         onClose={mockOnClose}
-        onAgentPoliciesChange={jest.fn()}
+        onAgentPoliciesChange={vi.fn()}
       />
     );
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
 
-    (useGetAgentPolicies as jest.Mock).mockReturnValue({
+    (useGetAgentPolicies as Mock).mockReturnValue({
       data: {
         items: [
           { name: 'Test policy', revision: 2, id: 'policy1' },
@@ -117,7 +124,7 @@ describe('ManageAgentPoliciesModal', () => {
   }, 10000);
 
   it('should keep managed policy when policies are changed', async () => {
-    (useGetAgentPolicies as jest.Mock).mockReturnValue({
+    (useGetAgentPolicies as Mock).mockReturnValue({
       data: {
         items: [
           { name: 'Test policy', revision: 2, id: 'policy1', is_managed: true },

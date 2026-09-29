@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { GLOBAL_SPACE_ID } from '../../../common/threat_intel';
@@ -24,14 +26,14 @@ describe('space_filter', () => {
 
     it('delegates to the spaces service when installed', () => {
       const spaces = {
-        getSpaceId: jest.fn().mockReturnValue('team-a'),
+        getSpaceId: vi.fn().mockReturnValue('team-a'),
       } as unknown as SpacesServiceStart;
       expect(resolveCurrentSpaceId(spaces, request)).toBe('team-a');
     });
 
     it('fails closed: propagates errors from an installed spaces service', () => {
       const spaces = {
-        getSpaceId: jest.fn(() => {
+        getSpaceId: vi.fn(() => {
           throw new Error('boom');
         }),
       } as unknown as SpacesServiceStart;

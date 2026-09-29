@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
@@ -41,11 +43,11 @@ import type { TransformManager } from './transform_manager';
 import { UpdateSLO } from './update_slo';
 
 describe('UpdateSLO', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
-  let mockTransformManager: jest.Mocked<TransformManager>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
+  let mockTransformManager: Mocked<TransformManager>;
   let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockLogger: jest.Mocked<MockedLogger>;
-  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
+  let mockLogger: Mocked<MockedLogger>;
+  let mockSummaryTransformManager: Mocked<TransformManager>;
   let updateSLO: UpdateSLO;
 
   beforeEach(() => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,44 +19,53 @@ import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 const ELASTIC_UID = 'elastic_uid';
 const ELASTIC_ACTOR = { profile_uid: ELASTIC_UID };
 
-const mockBulkGet = jest.fn();
+const mockBulkGet = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return {
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-      };
-    }
-    if (token === 'settings') {
-      return {
-        client: { get: () => 'YYYY-MM-DD HH:mm' },
-      };
-    }
-    if (token === 'userProfile') {
-      return { bulkGet: mockBulkGet };
-    }
-    if (token === 'http') {
-      return {
-        basePath: { prepend: (path: string) => `/base${path}` },
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'application') {
+          return {
+            getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+          };
+        }
+        if (token === 'settings') {
+          return {
+            client: { get: () => 'YYYY-MM-DD HH:mm' },
+          };
+        }
+        if (token === 'userProfile') {
+          return { bulkGet: mockBulkGet };
+        }
+        if (token === 'http') {
+          return {
+            basePath: { prepend: (path: string) => `/base${path}` },
+          };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockIsLicenseValid = true;
-jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-}));
+vi.mock('../../../hooks/use_is_action_policies_license_valid', () => {
+      const mocked = {
+      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_workflow', () => ({
-  useFetchWorkflow: (id: string) => ({
-    data: { id, name: `Workflow ${id}` },
-    isLoading: false,
-  }),
-}));
+vi.mock('../../../hooks/use_fetch_workflow', () => {
+      const mocked = {
+      useFetchWorkflow: (id: string) => ({
+        data: { id, name: `Workflow ${id}` },
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_SUBJ = {
   flyout: 'actionPolicyDetailsFlyout',
@@ -96,29 +108,29 @@ interface RenderProps {
   policy?: ActionPolicyResponse;
   canWrite?: boolean;
   isStateLoading?: boolean;
-  onClose?: jest.Mock;
-  onEdit?: jest.Mock;
-  onClone?: jest.Mock;
-  onDelete?: jest.Mock;
-  onEnable?: jest.Mock;
-  onDisable?: jest.Mock;
-  onSnooze?: jest.Mock;
-  onCancelSnooze?: jest.Mock;
-  onUpdateApiKey?: jest.Mock;
+  onClose?: Mock;
+  onEdit?: Mock;
+  onClone?: Mock;
+  onDelete?: Mock;
+  onEnable?: Mock;
+  onDisable?: Mock;
+  onSnooze?: Mock;
+  onCancelSnooze?: Mock;
+  onUpdateApiKey?: Mock;
 }
 
 const renderFlyout = (props: RenderProps = {}) => {
   const policy = props.policy ?? createPolicy();
   const handlers = {
-    onClose: props.onClose ?? jest.fn(),
-    onEdit: props.onEdit ?? jest.fn(),
-    onClone: props.onClone ?? jest.fn(),
-    onDelete: props.onDelete ?? jest.fn(),
-    onEnable: props.onEnable ?? jest.fn(),
-    onDisable: props.onDisable ?? jest.fn(),
-    onSnooze: props.onSnooze ?? jest.fn(),
-    onCancelSnooze: props.onCancelSnooze ?? jest.fn(),
-    onUpdateApiKey: props.onUpdateApiKey ?? jest.fn(),
+    onClose: props.onClose ?? vi.fn(),
+    onEdit: props.onEdit ?? vi.fn(),
+    onClone: props.onClone ?? vi.fn(),
+    onDelete: props.onDelete ?? vi.fn(),
+    onEnable: props.onEnable ?? vi.fn(),
+    onDisable: props.onDisable ?? vi.fn(),
+    onSnooze: props.onSnooze ?? vi.fn(),
+    onCancelSnooze: props.onCancelSnooze ?? vi.fn(),
+    onUpdateApiKey: props.onUpdateApiKey ?? vi.fn(),
   };
 
   render(
@@ -139,7 +151,7 @@ const renderFlyout = (props: RenderProps = {}) => {
 
 describe('ActionPolicyDetailsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsLicenseValid = true;
     mockBulkGet.mockResolvedValue([
       { uid: ELASTIC_UID, user: { username: 'elastic', full_name: 'Elastic User' } },
@@ -210,14 +222,14 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
 
     it('calls onDisable when the switch is toggled off on an enabled policy', () => {
-      const onDisable = jest.fn();
+      const onDisable = vi.fn();
       renderFlyout({ policy: createPolicy({ enabled: true }), onDisable });
       fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch'));
       expect(onDisable).toHaveBeenCalledWith('policy-1');
     });
 
     it('calls onEnable when the switch is toggled on on a disabled policy', () => {
-      const onEnable = jest.fn();
+      const onEnable = vi.fn();
       renderFlyout({ policy: createPolicy({ enabled: false }), onEnable });
       fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch'));
       expect(onEnable).toHaveBeenCalledWith('policy-1');
@@ -236,7 +248,7 @@ describe('ActionPolicyDetailsFlyout', () => {
 
     it('keeps the switch enabled on an enabled policy when the license is not valid', () => {
       mockIsLicenseValid = false;
-      const onDisable = jest.fn();
+      const onDisable = vi.fn();
       renderFlyout({ policy: createPolicy({ enabled: true }), onDisable });
       fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch'));
       expect(onDisable).toHaveBeenCalledWith('policy-1');

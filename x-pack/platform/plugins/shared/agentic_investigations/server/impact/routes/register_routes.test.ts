@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
@@ -37,14 +40,14 @@ const ANALYST = {
 };
 
 const ownerConversation = {
-  get: jest.fn().mockResolvedValue({
+  get: vi.fn().mockResolvedValue({
     permissions: { update_access_control: true, rename: true, delete: true },
   }),
 };
 
 /** The stamp reads back the document `attach` indexed. */
-const impactReadsAfterAttach = (attach: jest.Mock) =>
-  jest.fn(async () => {
+const impactReadsAfterAttach = (attach: Mock) =>
+  vi.fn(async () => {
     const attached = [...attach.mock.results].reverse().find((entry) => entry.type === 'return');
     if (!attached) {
       throw new ImpactNotFoundError('conv-1');
@@ -57,10 +60,10 @@ const registerAndCollect = (
   service: Partial<ImpactService>,
   getAttachmentClient: ImpactRouteDependencies['getAttachmentClient'] = async () =>
     ({
-      create: jest.fn().mockResolvedValue({ id: 'impact-1' }),
-      update: jest.fn(),
-      get: jest.fn(),
-      delete: jest.fn(),
+      create: vi.fn().mockResolvedValue({ id: 'impact-1' }),
+      update: vi.fn(),
+      get: vi.fn(),
+      delete: vi.fn(),
     } as never),
   getConversationClient: ImpactRouteDependencies['getConversationClient'] = async () =>
     ownerConversation as never
@@ -68,12 +71,12 @@ const registerAndCollect = (
   const router = httpServiceMock.createRouter();
   const posts: RegisteredRoute[] = [];
   const gets: RegisteredRoute[] = [];
-  const attach = (service.attach ?? jest.fn()) as jest.Mock;
+  const attach = (service.attach ?? vi.fn()) as Mock;
 
-  (router.versioned.post as jest.Mock).mockImplementation((config) => ({
+  (router.versioned.post as Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => posts.push({ config, handler }),
   }));
-  (router.versioned.get as jest.Mock).mockImplementation((config) => ({
+  (router.versioned.get as Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => gets.push({ config, handler }),
   }));
 
@@ -82,7 +85,7 @@ const registerAndCollect = (
     logger: loggingSystemMock.createLogger(),
     getImpactService: () =>
       ({
-        revertAttach: jest.fn().mockResolvedValue(undefined),
+        revertAttach: vi.fn().mockResolvedValue(undefined),
         ...service,
         attach,
         getByConversationId: service.getByConversationId ?? impactReadsAfterAttach(attach),
@@ -98,7 +101,7 @@ const registerAndCollect = (
 
 describe('investigation impact routes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('gates attach and get on the investigations manage privilege', () => {
@@ -117,7 +120,7 @@ describe('investigation impact routes', () => {
   });
 
   it('attaches through the service with the space and the resolved user, never a body actor', async () => {
-    const attach = jest.fn().mockResolvedValue({
+    const attach = vi.fn().mockResolvedValue({
       written: { id: 'impact-1', conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
     });
     const { posts } = registerAndCollect({ attach });
@@ -144,10 +147,10 @@ describe('investigation impact routes', () => {
       conversationId: 'conv-1',
       entities: [{ id: 'user-1' }],
     };
-    const attach = jest.fn().mockResolvedValue({ written: impact });
-    const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const attach = vi.fn().mockResolvedValue({ written: impact });
+    const create = vi.fn().mockResolvedValue({ id: 'impact-1' });
     const conversations = {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         permissions: { update_access_control: true },
       }),
     };
@@ -182,13 +185,13 @@ describe('investigation impact routes', () => {
   });
 
   it('does not write impact when the caller cannot update the conversation', async () => {
-    const attach = jest.fn();
+    const attach = vi.fn();
     const { posts } = registerAndCollect(
       { attach },
-      async () => ({ create: jest.fn() } as never),
+      async () => ({ create: vi.fn() } as never),
       async () =>
         ({
-          get: jest.fn().mockResolvedValue({
+          get: vi.fn().mockResolvedValue({
             permissions: { update_access_control: false },
           }),
         } as never)
@@ -208,7 +211,7 @@ describe('investigation impact routes', () => {
   });
 
   it('does not write impact when Agent Builder clients cannot be resolved', async () => {
-    const attach = jest.fn();
+    const attach = vi.fn();
     const { posts } = registerAndCollect({ attach }, async () => {
       throw new Error(
         'Agent Builder is not available until the agenticInvestigations plugin has started'
@@ -229,7 +232,7 @@ describe('investigation impact routes', () => {
   });
 
   it('maps a missing impact to 404', async () => {
-    const getByConversationId = jest.fn().mockRejectedValue(new ImpactNotFoundError('conv-1'));
+    const getByConversationId = vi.fn().mockRejectedValue(new ImpactNotFoundError('conv-1'));
     const { gets } = registerAndCollect({ getByConversationId });
     const response = httpServerMock.createResponseFactory();
 
@@ -243,7 +246,7 @@ describe('investigation impact routes', () => {
   });
 
   it('maps an invalid attach to 400', async () => {
-    const attach = jest.fn().mockRejectedValue(new ImpactInvalidRequestError('too many'));
+    const attach = vi.fn().mockRejectedValue(new ImpactInvalidRequestError('too many'));
     const { posts } = registerAndCollect({ attach });
     const response = httpServerMock.createResponseFactory();
 
@@ -259,7 +262,7 @@ describe('investigation impact routes', () => {
   });
 
   it('maps an attach that lost every version check to 409', async () => {
-    const attach = jest.fn().mockRejectedValue(new ImpactConflictError('conv-1'));
+    const attach = vi.fn().mockRejectedValue(new ImpactConflictError('conv-1'));
     const { posts } = registerAndCollect({ attach });
     const response = httpServerMock.createResponseFactory();
 

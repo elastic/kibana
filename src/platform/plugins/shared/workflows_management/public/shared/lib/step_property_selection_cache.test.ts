@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SelectionDetails, SelectionOption } from '@kbn/workflows/types/v1';
 import type { StepPropertyItem } from '@kbn/workflows-yaml';
 import {
@@ -40,15 +42,15 @@ describe('step_property_selection_cache', () => {
   const mockDetails: SelectionDetails = { message: 'ok' };
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
     clearCache();
   });
 
   afterEach(() => {
     clearCache();
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   function makeItem(overrides: Partial<StepPropertyItem> = {}): StepPropertyItem {
@@ -122,14 +124,14 @@ describe('step_property_selection_cache', () => {
     it('should expire after TTL', () => {
       const key = 'k-exp';
       setCachedStepPropertyValidationOutcome(key, null, mockDetails);
-      jest.advanceTimersByTime(30 * 1000 + 1);
+      vi.advanceTimersByTime(30 * 1000 + 1);
       expect(getCachedStepPropertyValidationOutcome(key)).toBeNull();
     });
 
     it('should return outcome within TTL', () => {
       const key = 'k-ok';
       setCachedStepPropertyValidationOutcome(key, mockOption1, mockDetails);
-      jest.advanceTimersByTime(30 * 1000 - 1);
+      vi.advanceTimersByTime(30 * 1000 - 1);
       expect(getCachedStepPropertyValidationOutcome(key)?.resolvedOption).toEqual(mockOption1);
     });
   });
@@ -269,7 +271,7 @@ describe('step_property_selection_cache', () => {
     it('should not expire search cache entries by time (list persists until replaced)', () => {
       cacheSearchOptions('step.type', 'config', 'proxy.id', [mockOption1]);
 
-      jest.advanceTimersByTime(30 * 1000 + 1);
+      vi.advanceTimersByTime(30 * 1000 + 1);
 
       const cached = getCachedSearchOption('step.type', 'config', 'proxy.id', 'proxy-1');
       expect(cached).toEqual(mockOption1);

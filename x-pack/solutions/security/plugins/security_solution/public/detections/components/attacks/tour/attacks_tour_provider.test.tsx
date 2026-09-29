@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -13,29 +16,29 @@ import { AttacksTourProvider, useAttacksTour } from './attacks_tour_provider';
 import type { AttacksTourState } from './constants';
 import { ATTACKS_TOUR_CALLOUT_STORAGE_KEY, ATTACKS_TOUR_STORAGE_KEY } from './constants';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 const createStorageMock = (initial: Record<string, unknown> = {}) => {
   const store = new Map<string, unknown>(Object.entries(initial));
   return {
-    get: jest.fn((key: string) => store.get(key)),
-    set: jest.fn((key: string, value: unknown) => store.set(key, value)),
-    remove: jest.fn((key: string) => store.delete(key)),
+    get: vi.fn((key: string) => store.get(key)),
+    set: vi.fn((key: string, value: unknown) => store.set(key, value)),
+    remove: vi.fn((key: string) => store.delete(key)),
   };
 };
 
 let storage: ReturnType<typeof createStorageMock>;
-let reportEvent: jest.Mock;
+let reportEvent: Mock;
 
 const setupServices = (toursEnabled: boolean) => {
-  reportEvent = jest.fn();
+  reportEvent = vi.fn();
   useKibanaMock.mockReturnValue({
     services: {
       storage,
       telemetry: { reportEvent },
-      notifications: { tours: { isEnabled: jest.fn(() => toursEnabled) } },
+      notifications: { tours: { isEnabled: vi.fn(() => toursEnabled) } },
       docLinks: { links: { siem: { attacksPage: 'http://docs.test/attacks' } } },
     },
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
@@ -18,12 +21,12 @@ import { categories } from '../../containers/mock';
 import { EuiButton } from '@elastic/eui';
 import { renderWithTestingProviders } from '../../common/mock';
 
-jest.mock('../../containers/use_get_categories');
+vi.mock('../../containers/use_get_categories');
 
-const useGetCategoriesMock = useGetCategories as jest.Mock;
+const useGetCategoriesMock = useGetCategories as Mock;
 
 describe('Category', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   const FormComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm({ onSubmit });
@@ -37,7 +40,7 @@ describe('Category', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetCategoriesMock.mockReturnValue({ isLoading: false, data: categories });
   });
 

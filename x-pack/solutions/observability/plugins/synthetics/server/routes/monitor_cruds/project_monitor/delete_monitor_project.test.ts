@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
 import type { RouteContext } from '../../types';
 import { deleteSyntheticsMonitorProjectRoute } from './delete_monitor_project';
 
-jest.mock('../services/delete_monitor_api', () => ({
-  DeleteMonitorAPI: jest.fn(),
-}));
+vi.mock('../services/delete_monitor_api', () => {
+      const mocked = {
+      DeleteMonitorAPI: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../services/validate_space_id', () => ({
-  validateSpaceId: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../services/validate_space_id', () => {
+      const mocked = {
+      validateSpaceId: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const monitor = {
   id: 'config-id',
@@ -32,7 +40,7 @@ const createRouteContext = () =>
       body: { monitors: ['journey-id'] },
     },
     monitorConfigRepository: {
-      find: jest.fn().mockResolvedValue({ saved_objects: [monitor] }),
+      find: vi.fn().mockResolvedValue({ saved_objects: [monitor] }),
     },
   } as unknown as RouteContext<
     { projectName: string },
@@ -40,9 +48,9 @@ const createRouteContext = () =>
     { monitors: string[] }
   >);
 
-const installExecuteResult = (executeResult: object) => {
-  const { DeleteMonitorAPI } = jest.requireMock('../services/delete_monitor_api');
-  const execute = jest.fn().mockResolvedValue(executeResult);
+const installExecuteResult = async (executeResult: object) => {
+  const { DeleteMonitorAPI } = (await vi.importMock('../services/delete_monitor_api'));
+  const execute = vi.fn().mockResolvedValue(executeResult);
   DeleteMonitorAPI.mockImplementation(() => ({ execute }));
   return { execute };
 };
@@ -51,7 +59,7 @@ describe('deleteSyntheticsMonitorProjectRoute', () => {
   const route = deleteSyntheticsMonitorProjectRoute();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('deletes the filtered monitors through the authorized execution path', async () => {

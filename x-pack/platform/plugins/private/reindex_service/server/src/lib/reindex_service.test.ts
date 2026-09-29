@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => ({
-  esIndicesStateCheck: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
+vi.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => {
+      const mocked = {
+      esIndicesStateCheck: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { BehaviorSubject } from 'rxjs';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
@@ -28,8 +34,8 @@ import type { ReindexService } from './reindex_service';
 import { reindexServiceFactory } from './reindex_service';
 
 const versionMock = {
-  getMajorVersion: jest.fn().mockReturnValue(8),
-  getPrevMajorVersion: jest.fn().mockReturnValue(7),
+  getMajorVersion: vi.fn().mockReturnValue(8),
+  getPrevMajorVersion: vi.fn().mockReturnValue(7),
 } as unknown as Version;
 
 const asApiResponse = <T>(body: T): TransportResult<T> =>
@@ -38,7 +44,7 @@ const asApiResponse = <T>(body: T): TransportResult<T> =>
   } as TransportResult<T>);
 
 describe('reindexService', () => {
-  let actions: jest.Mocked<any>;
+  let actions: Mocked<any>;
   let clusterClient: ScopedClusterClientMock;
   let log: Logger;
   let service: ReindexService;
@@ -54,16 +60,16 @@ describe('reindexService', () => {
     Promise.reject(`Mock function ${name} was not implemented!`);
 
   beforeEach(() => {
-    (esIndicesStateCheck as jest.Mock).mockResolvedValue({});
+    (esIndicesStateCheck as Mock).mockResolvedValue({});
     actions = {
-      createReindexOp: jest.fn(unimplemented('createReindexOp')),
-      deleteReindexOp: jest.fn(unimplemented('deleteReindexOp')),
-      updateReindexOp: jest.fn(updateMockImpl),
-      runWhileLocked: jest.fn((reindexOp: any, func: any) => func(reindexOp)),
-      findReindexOperations: jest.fn(unimplemented('findReindexOperations')),
-      findAllByStatus: jest.fn(unimplemented('findAllInProgressOperations')),
-      getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
-      cleanupChanges: jest.fn(),
+      createReindexOp: vi.fn(unimplemented('createReindexOp')),
+      deleteReindexOp: vi.fn(unimplemented('deleteReindexOp')),
+      updateReindexOp: vi.fn(updateMockImpl),
+      runWhileLocked: vi.fn((reindexOp: any, func: any) => func(reindexOp)),
+      findReindexOperations: vi.fn(unimplemented('findReindexOperations')),
+      findAllByStatus: vi.fn(unimplemented('findAllInProgressOperations')),
+      getFlatSettings: vi.fn(unimplemented('getFlatSettings')),
+      cleanupChanges: vi.fn(),
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
     log = loggingSystemMock.create().get();
@@ -284,7 +290,7 @@ describe('reindexService', () => {
 
   describe('pauseReindexOperation', () => {
     it('runs with runWhileLocked', async () => {
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.inProgress },
       } as any);
@@ -300,7 +306,7 @@ describe('reindexService', () => {
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.inProgress },
       } as ReindexSavedObject;
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
 
       await expect(service.pauseReindexOperation('myIndex')).resolves.toEqual({
         id: '2',
@@ -319,7 +325,7 @@ describe('reindexService', () => {
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.failed },
       } as ReindexSavedObject;
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
 
       await expect(service.pauseReindexOperation('myIndex')).rejects.toThrow();
       expect(actions.updateReindexOp).not.toHaveBeenCalled();
@@ -327,7 +333,7 @@ describe('reindexService', () => {
     });
 
     it('throws if reindex operation does not exist', async () => {
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
       await expect(service.pauseReindexOperation('myIndex')).rejects.toThrow();
       expect(actions.updateReindexOp).not.toHaveBeenCalled();
       findSpy.mockRestore();
@@ -336,7 +342,7 @@ describe('reindexService', () => {
 
   describe('resumeReindexOperation', () => {
     it('runs with runWhileLocked', async () => {
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.paused },
       } as any);
@@ -352,7 +358,7 @@ describe('reindexService', () => {
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.paused },
       } as ReindexSavedObject;
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
 
       await expect(service.resumeReindexOperation('myIndex')).resolves.toEqual({
         id: '2',
@@ -378,7 +384,7 @@ describe('reindexService', () => {
           },
         },
       } as ReindexSavedObject;
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
 
       await service.resumeReindexOperation('myIndex');
 
@@ -400,7 +406,7 @@ describe('reindexService', () => {
           },
         },
       } as ReindexSavedObject;
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
 
       await service.resumeReindexOperation('myIndex', { enqueue: true });
 
@@ -419,7 +425,7 @@ describe('reindexService', () => {
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.failed },
       } as ReindexSavedObject;
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
 
       await expect(service.resumeReindexOperation('myIndex')).rejects.toThrow();
       expect(actions.updateReindexOp).not.toHaveBeenCalled();
@@ -427,7 +433,7 @@ describe('reindexService', () => {
     });
 
     it('throws if reindex operation does not exist', async () => {
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
       await expect(service.resumeReindexOperation('myIndex')).rejects.toThrow();
       expect(actions.updateReindexOp).not.toHaveBeenCalled();
       findSpy.mockRestore();
@@ -436,7 +442,7 @@ describe('reindexService', () => {
 
   describe('cancelReindexing', () => {
     it('cancels the reindex task', async () => {
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
         id: '2',
         attributes: {
           indexName: 'myIndex',
@@ -459,7 +465,7 @@ describe('reindexService', () => {
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.failed, reindexTaskId: '999333' },
       } as ReindexSavedObject;
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
 
       await expect(service.cancelReindexing('myIndex')).rejects.toThrow();
       expect(clusterClient.asCurrentUser.tasks.cancel).not.toHaveBeenCalledWith(
@@ -480,7 +486,7 @@ describe('reindexService', () => {
           reindexTaskId: '999333',
         },
       } as ReindexSavedObject;
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
 
       await expect(service.cancelReindexing('myIndex')).rejects.toThrow();
       expect(clusterClient.asCurrentUser.tasks.cancel).not.toHaveBeenCalledWith(
@@ -492,7 +498,7 @@ describe('reindexService', () => {
     });
 
     it('throws if reindex operation does not exist', async () => {
-      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
+      const findSpy = vi.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
       await expect(service.cancelReindexing('myIndex')).rejects.toThrow();
       findSpy.mockRestore();
     });

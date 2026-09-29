@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { SeverityLevelPanel } from '.';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../alerts_summary_charts_panel/use_summary_chart_data');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../alerts_summary_charts_panel/use_summary_chart_data');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
 describe('Severity level panel', () => {
@@ -25,8 +28,8 @@ describe('Severity level panel', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSummaryChartData as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSummaryChartData as Mock).mockReturnValue({
       items: [],
       isLoading: false,
     });

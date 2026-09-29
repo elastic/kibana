@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { of } from 'rxjs';
 import { SolutionsViewBadge } from './solutions_view_badge';
@@ -26,7 +28,7 @@ const createMockServices = ({
 }): DiscoverServices => {
   return {
     spaces: {
-      getActiveSpace$: jest.fn().mockReturnValue(of(getActiveSpaceReturn)),
+      getActiveSpace$: vi.fn().mockReturnValue(of(getActiveSpaceReturn)),
       isSolutionViewEnabled,
     },
     theme: {

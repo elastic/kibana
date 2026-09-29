@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerDocumentsSampleRoute } from './register_documents_sample_route';
 import { addInternalBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
@@ -21,7 +23,7 @@ const mockRequest: RequestMock = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   registerDocumentsSampleRoute({
     ...routeDependencies,
     router,

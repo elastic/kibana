@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   createTestEnv,
   configServiceMock as configMock,
   rawConfigServiceMock as rawMock,
 } from '@kbn/config-mocks';
 
-export const envCreateDefaultMock = jest.fn().mockImplementation(() => createTestEnv);
-export const configServiceMock = jest.fn().mockImplementation(() => configMock.create());
-export const rawConfigServiceMock = jest.fn().mockImplementation(() => rawMock.create());
-jest.doMock('@kbn/config', () => ({
-  Env: {
-    createDefault: envCreateDefaultMock,
-  },
-  ConfigService: configServiceMock,
-  RawConfigService: rawConfigServiceMock,
-}));
+export const envCreateDefaultMock = vi.fn().mockImplementation(() => createTestEnv);
+export const configServiceMock = vi.fn().mockImplementation(() => configMock.create());
+export const rawConfigServiceMock = vi.fn().mockImplementation(() => rawMock.create());
+vi.doMock('@kbn/config', () => {
+      const mocked = {
+      Env: {
+        createDefault: envCreateDefaultMock,
+      },
+      ConfigService: configServiceMock,
+      RawConfigService: rawConfigServiceMock,
+    };
+      return { ...mocked, default: mocked };
+    });

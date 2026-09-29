@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import moment from 'moment';
 
 import { act } from '@testing-library/react';
@@ -15,10 +18,10 @@ import { INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH } from '@kbn/alerting-plug
 
 import { KibanaServices } from '../../../../common/lib/kibana';
 
-const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../../../common/lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
+vi.mock('../../../../common/lib/kibana');
 
-const fetchMock = jest.fn();
+const fetchMock = vi.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 const apiVersion = '2023-10-31';

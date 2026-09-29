@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, Subject } from 'rxjs';
 import {
   Collector,
@@ -35,7 +37,7 @@ describe('telemetry_ops_stats', () => {
   const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() => registerOpsStatsCollector(usageCollectionMock, metrics$));
-  afterAll(() => jest.clearAllTimers());
+  afterAll(() => vi.clearAllTimers());
 
   test('registered collector is set', () => {
     expect(collector).not.toBeUndefined();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { SavedObjectReference } from '@kbn/core/server';
 
@@ -12,9 +15,12 @@ import { transformFromLegacyActions } from './transform_legacy_actions';
 import { transformToNotifyWhen } from './transform_to_notify_when';
 import type { LegacyIRuleActionsAttributes } from './types';
 
-jest.mock('./transform_to_notify_when', () => ({
-  transformToNotifyWhen: jest.fn(),
-}));
+vi.mock('./transform_to_notify_when', () => {
+      const mocked = {
+      transformToNotifyWhen: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const legacyActionsAttr: LegacyIRuleActionsAttributes = {
   actions: [
@@ -57,7 +63,7 @@ describe('transformFromLegacyActions', () => {
   });
 
   it('should return notifyWhen as result of transformToNotifyWhen if it is not null', () => {
-    (transformToNotifyWhen as jest.Mock).mockReturnValueOnce('onActiveAlert');
+    (transformToNotifyWhen as Mock).mockReturnValueOnce('onActiveAlert');
     const actions = transformFromLegacyActions(legacyActionsAttr, references);
 
     expect(transformToNotifyWhen).toHaveBeenCalledWith('1d');
@@ -65,14 +71,14 @@ describe('transformFromLegacyActions', () => {
   });
 
   it('should return notifyWhen as onThrottleInterval when transformToNotifyWhen returns null', () => {
-    (transformToNotifyWhen as jest.Mock).mockReturnValueOnce(null);
+    (transformToNotifyWhen as Mock).mockReturnValueOnce(null);
     const actions = transformFromLegacyActions(legacyActionsAttr, references);
 
     expect(actions[0].frequency?.notifyWhen).toBe('onActiveAlert');
   });
 
   it('should return transformed legacy actions', () => {
-    (transformToNotifyWhen as jest.Mock).mockReturnValue('onThrottleInterval');
+    (transformToNotifyWhen as Mock).mockReturnValue('onThrottleInterval');
 
     const actions = transformFromLegacyActions(legacyActionsAttr, references);
 

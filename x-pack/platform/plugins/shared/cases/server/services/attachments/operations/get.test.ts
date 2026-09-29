@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { unset } from 'lodash';
 
 import { fromKueryExpression } from '@kbn/es-query';
@@ -62,7 +64,7 @@ describe('AttachmentService getter', () => {
   let attachmentGetter: AttachmentGetter;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     attachmentGetter = createAttachmentGetter(false);
   });
 

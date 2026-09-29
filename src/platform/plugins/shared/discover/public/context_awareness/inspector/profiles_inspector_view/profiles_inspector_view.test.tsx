@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import { ProfilesInspectorView } from './profiles_inspector_view';
 import React from 'react';
@@ -14,10 +16,10 @@ import { getRootContextMock, getDataSourceContextMock } from '../../__mocks__';
 import type { ContextsAdapter } from '../../hooks';
 
 const mockContextsAdapter: ContextsAdapter = {
-  getRootContext: jest.fn().mockReturnValue(getRootContextMock()),
-  getDataSourceContext: jest.fn().mockReturnValue(getDataSourceContextMock()),
-  getDocumentContexts: jest.fn().mockReturnValue({}),
-  openDocDetails: jest.fn(),
+  getRootContext: vi.fn().mockReturnValue(getRootContextMock()),
+  getDataSourceContext: vi.fn().mockReturnValue(getDataSourceContextMock()),
+  getDocumentContexts: vi.fn().mockReturnValue({}),
+  openDocDetails: vi.fn(),
 };
 
 const setup = () => {

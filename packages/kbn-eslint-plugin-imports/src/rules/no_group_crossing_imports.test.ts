@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RuleTester } from 'eslint';
 import dedent from 'dedent';
 import { NoGroupCrossingImportsRule } from './no_group_crossing_imports';
@@ -30,7 +32,7 @@ const make = (from: ModuleInfo, to: ModuleInfo, imp = 'import') => ({
   `,
 });
 
-jest.mock('../get_import_resolver', () => {
+vi.mock('../get_import_resolver', () => {
   return {
     getImportResolver() {
       return {
@@ -45,7 +47,7 @@ jest.mock('../get_import_resolver', () => {
   };
 });
 
-jest.mock('../helpers/repo_source_classifier', () => {
+vi.mock('../helpers/repo_source_classifier', () => {
   return {
     getRepoSourceClassifier() {
       return {

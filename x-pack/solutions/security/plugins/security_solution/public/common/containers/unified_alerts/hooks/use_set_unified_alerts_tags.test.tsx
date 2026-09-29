@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,9 +17,9 @@ import { setUnifiedAlertsTags } from '../api';
 import { useInvalidateSearchUnifiedAlerts } from './use_search_unified_alerts';
 import { getUpdateByQueryResponseMock } from '../__mocks__';
 
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('../api');
-jest.mock('./use_search_unified_alerts');
+vi.mock('../../../hooks/use_app_toasts');
+vi.mock('../api');
+vi.mock('./use_search_unified_alerts');
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -33,15 +36,15 @@ const createWrapper = () => {
 };
 
 describe('useSetUnifiedAlertsTags', () => {
-  const mockInvalidate = jest.fn();
+  const mockInvalidate = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
     });
-    (useInvalidateSearchUnifiedAlerts as jest.Mock).mockReturnValue(mockInvalidate);
+    (useInvalidateSearchUnifiedAlerts as Mock).mockReturnValue(mockInvalidate);
   });
 
   it('should call setUnifiedAlertsTags and show success toast', async () => {
@@ -53,7 +56,7 @@ describe('useSetUnifiedAlertsTags', () => {
       ids: ['alert-1', 'alert-2'],
     };
     const mockResponse = getUpdateByQueryResponseMock({ updated: 2 });
-    (setUnifiedAlertsTags as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (setUnifiedAlertsTags as Mock).mockResolvedValueOnce(mockResponse);
 
     const { addSuccess } = useAppToasts();
     const { result } = renderHook(() => useSetUnifiedAlertsTags(), {
@@ -80,7 +83,7 @@ describe('useSetUnifiedAlertsTags', () => {
       ids: ['alert-1'],
     };
     const error = new Error('Test error');
-    (setUnifiedAlertsTags as jest.Mock).mockRejectedValueOnce(error);
+    (setUnifiedAlertsTags as Mock).mockRejectedValueOnce(error);
 
     const { addError } = useAppToasts();
     const { result } = renderHook(() => useSetUnifiedAlertsTags(), {

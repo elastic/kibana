@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,29 +23,35 @@ import { TemplateEdit } from './template_edit';
 import { UiMetricService } from '../../services/ui_metric';
 import type { UseRequestResponse, Error as EsUiSharedError } from '../../../shared_imports';
 
-const mockUseAppContext = jest.fn();
-jest.mock('../../app_context', () => ({
-  ...jest.requireActual('../../app_context'),
-  useAppContext: () => mockUseAppContext(),
-}));
+const mockUseAppContext = vi.fn();
+vi.mock('../../app_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../app_context')),
+      useAppContext: () => mockUseAppContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/use_request', () => ({
+vi.mock('../../services/use_request', () => ({
   __esModule: true,
-  sendRequest: jest.fn(),
-  useRequest: jest.fn(),
+  sendRequest: vi.fn(),
+  useRequest: vi.fn(),
 }));
 
-jest.mock('../../../shared_imports', () => ({
-  PageLoading: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="pageLoading">{children}</div>
-  ),
-  PageError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={dataTestSubj ?? 'pageError'} />
-  ),
-  attemptToURIDecode: (value: string) => value,
-}));
+vi.mock('../../../shared_imports', () => {
+      const mocked = {
+      PageLoading: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="pageLoading">{children}</div>
+      ),
+      PageError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+        <div data-test-subj={dataTestSubj ?? 'pageError'} />
+      ),
+      attemptToURIDecode: (value: string) => value,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components', () => ({
+vi.mock('../../components', () => ({
   __esModule: true,
   TemplateForm: ({
     defaultValue,
@@ -130,19 +138,19 @@ const getUseRequestMock = <T,>({
   isLoading,
   error,
   data,
-  resendRequest: jest.fn(),
+  resendRequest: vi.fn(),
 });
 
 describe('TemplateEdit', () => {
   beforeEach(() => {
-    breadcrumbService.setup(jest.fn());
+    breadcrumbService.setup(vi.fn());
     setUiMetricService(new UiMetricService('index_management'));
-    jest.mocked(sendRequest).mockResolvedValue({ data: null, error: null });
+    vi.mocked(sendRequest).mockResolvedValue({ data: null, error: null });
     mockUseAppContext.mockReturnValue({ config: { enableLegacyTemplates: true } });
   });
 
   test('renders loading state', () => {
-    jest.mocked(useRequest).mockReturnValue(
+    vi.mocked(useRequest).mockReturnValue(
       getUseRequestMock<TemplateDeserialized>({
         isInitialRequest: true,
         isLoading: true,
@@ -158,7 +166,7 @@ describe('TemplateEdit', () => {
   });
 
   test('renders error state when load fails', () => {
-    jest.mocked(useRequest).mockReturnValue(
+    vi.mocked(useRequest).mockReturnValue(
       getUseRequestMock<TemplateDeserialized>({
         isLoading: false,
         error: createRequestError('boom'),
@@ -173,7 +181,7 @@ describe('TemplateEdit', () => {
   });
 
   test('blocks editing cloud managed templates', () => {
-    jest.mocked(useRequest).mockReturnValue(
+    vi.mocked(useRequest).mockReturnValue(
       getUseRequestMock({
         isLoading: false,
         error: null,
@@ -190,7 +198,7 @@ describe('TemplateEdit', () => {
   });
 
   test('shows system template warning callout', () => {
-    jest.mocked(useRequest).mockReturnValue(
+    vi.mocked(useRequest).mockReturnValue(
       getUseRequestMock({
         isLoading: false,
         error: null,
@@ -205,7 +213,7 @@ describe('TemplateEdit', () => {
   });
 
   test('shows deprecated template warning callout', () => {
-    jest.mocked(useRequest).mockReturnValue(
+    vi.mocked(useRequest).mockReturnValue(
       getUseRequestMock({
         isLoading: false,
         error: null,
@@ -221,11 +229,11 @@ describe('TemplateEdit', () => {
 
   test('wires save to PUT /index_templates/{name} and navigates', async () => {
     const template = makeTemplate();
-    jest
+    vi
       .mocked(useRequest)
       .mockReturnValue(getUseRequestMock({ isLoading: false, error: null, data: template }));
     const { history, location, match } = createRouterProps({ name: template.name });
-    const pushSpy = jest.spyOn(history, 'push');
+    const pushSpy = vi.spyOn(history, 'push');
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
 

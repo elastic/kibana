@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvider } from './test/provider';
@@ -14,17 +17,17 @@ import type { State } from './store/state';
 import { initialUiState } from './store/state';
 import { of } from 'rxjs';
 
-const mockGet = jest.fn();
-const mockSet = jest.fn();
-const mockChange$ = jest.fn().mockReturnValue(of({}));
-jest.mock('@kbn/kibana-utils-plugin/public');
-const { createKbnUrlStateStorage } = jest.requireMock('@kbn/kibana-utils-plugin/public');
+const mockGet = vi.fn();
+const mockSet = vi.fn();
+const mockChange$ = vi.fn().mockReturnValue(of({}));
+vi.mock('@kbn/kibana-utils-plugin/public');
+const { createKbnUrlStateStorage } = (await vi.importMock('@kbn/kibana-utils-plugin/public'));
 
 const urlKey = 'urlKey';
 
 describe('UrlSynchronizer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGet.mockReset();
     mockSet.mockReset();
     mockChange$.mockReset();
@@ -32,7 +35,7 @@ describe('UrlSynchronizer', () => {
   });
 
   it(`should not dispatch any actions or update url if urlKey isn't passed`, () => {
-    const urlChangedAction = jest.spyOn(actions, 'urlChangedAction');
+    const urlChangedAction = vi.spyOn(actions, 'urlChangedAction');
 
     const initialState: State = {
       panels: {
@@ -60,7 +63,7 @@ describe('UrlSynchronizer', () => {
   });
 
   it('should update url if no panels exist', () => {
-    (createKbnUrlStateStorage as jest.Mock).mockReturnValue({
+    (createKbnUrlStateStorage as Mock).mockReturnValue({
       get: mockGet,
       set: mockSet,
       change$: mockChange$,
@@ -87,12 +90,12 @@ describe('UrlSynchronizer', () => {
   });
 
   it('should dispatch action and update url with the correct value', () => {
-    const urlChangedAction = jest.spyOn(actions, 'urlChangedAction');
+    const urlChangedAction = vi.spyOn(actions, 'urlChangedAction');
 
-    (createKbnUrlStateStorage as jest.Mock).mockReturnValue({
-      get: jest.fn().mockReturnValue({}),
+    (createKbnUrlStateStorage as Mock).mockReturnValue({
+      get: vi.fn().mockReturnValue({}),
       set: mockSet,
-      change$: jest.fn().mockReturnValue(of({})),
+      change$: vi.fn().mockReturnValue(of({})),
     });
     const initialState: State = {
       panels: {
@@ -124,12 +127,12 @@ describe('UrlSynchronizer', () => {
   });
 
   it('should clear panels when url state is missing', () => {
-    const urlChangedAction = jest.spyOn(actions, 'urlChangedAction');
+    const urlChangedAction = vi.spyOn(actions, 'urlChangedAction');
 
-    (createKbnUrlStateStorage as jest.Mock).mockReturnValue({
-      get: jest.fn().mockReturnValue(undefined),
+    (createKbnUrlStateStorage as Mock).mockReturnValue({
+      get: vi.fn().mockReturnValue(undefined),
       set: mockSet,
-      change$: jest.fn().mockReturnValue(of(undefined)),
+      change$: vi.fn().mockReturnValue(of(undefined)),
     });
 
     const initialState: State = {

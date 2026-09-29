@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { monaco } from '@kbn/code-editor';
 import type { FixWithAiTarget } from './register_fix_with_ai_code_action_provider';
 import {
@@ -51,23 +54,23 @@ const provideCodeActions = (
   ) as monaco.languages.CodeActionList;
 
 describe('registerFixWithAiCodeActionProvider', () => {
-  let registerCodeActionProvider: jest.SpyInstance;
-  let registerCommand: jest.SpyInstance;
+  let registerCodeActionProvider: MockInstance;
+  let registerCommand: MockInstance;
   let provider: CodeActionProvider;
   let commandHandler: CommandHandler;
-  let providerDispose: jest.Mock;
-  let commandDispose: jest.Mock;
+  let providerDispose: Mock;
+  let commandDispose: Mock;
 
   beforeEach(() => {
-    providerDispose = jest.fn();
-    commandDispose = jest.fn();
-    registerCodeActionProvider = jest
+    providerDispose = vi.fn();
+    commandDispose = vi.fn();
+    registerCodeActionProvider = vi
       .spyOn(monaco.languages, 'registerCodeActionProvider')
       .mockImplementation((_language, codeActionProvider) => {
         provider = codeActionProvider;
         return { dispose: providerDispose };
       });
-    registerCommand = jest
+    registerCommand = vi
       .spyOn(monaco.editor, 'registerCommand')
       .mockImplementation((_id, handler) => {
         commandHandler = handler as CommandHandler;
@@ -81,7 +84,7 @@ describe('registerFixWithAiCodeActionProvider', () => {
   });
 
   it('offers one quick fix, pointing at the fix command', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel });
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => vi.fn(), isEditorModel });
 
     const { actions } = provideCodeActions(provider, [buildMarker()]);
 
@@ -103,7 +106,7 @@ describe('registerFixWithAiCodeActionProvider', () => {
   });
 
   it('ignores hint markers and markers without a message', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel });
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => vi.fn(), isEditorModel });
 
     const { actions } = provideCodeActions(provider, [
       buildMarker({ severity: monaco.MarkerSeverity.Hint }),
@@ -122,7 +125,7 @@ describe('registerFixWithAiCodeActionProvider', () => {
   });
 
   it('merges every marker under the cursor into one action at the earliest position', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel });
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => vi.fn(), isEditorModel });
 
     const { actions } = provideCodeActions(provider, [
       buildMarker({ startColumn: 25, message: 'expected "|" before filter' }),
@@ -140,7 +143,7 @@ describe('registerFixWithAiCodeActionProvider', () => {
   });
 
   it('offers no quick fix for another yaml model, such as a version preview', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel });
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => vi.fn(), isEditorModel });
 
     const { actions } = provideCodeActions(provider, [buildMarker()], otherModel);
 
@@ -148,7 +151,7 @@ describe('registerFixWithAiCodeActionProvider', () => {
   });
 
   it('runs the current handler when the command is executed', () => {
-    const fixWithAi = jest.fn();
+    const fixWithAi = vi.fn();
     registerFixWithAiCodeActionProvider({ getFixWithAi: () => fixWithAi, isEditorModel });
 
     commandHandler({}, { startLineNumber: 3, startColumn: 5, message: 'Boom', severity: 'error' });
@@ -162,7 +165,7 @@ describe('registerFixWithAiCodeActionProvider', () => {
   });
 
   it('disposes the command and the provider', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel }).dispose();
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => vi.fn(), isEditorModel }).dispose();
 
     expect(commandDispose).toHaveBeenCalled();
     expect(providerDispose).toHaveBeenCalled();

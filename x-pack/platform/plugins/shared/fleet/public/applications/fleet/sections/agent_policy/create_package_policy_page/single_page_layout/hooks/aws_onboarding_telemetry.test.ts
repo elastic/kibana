@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import {
@@ -18,29 +21,38 @@ import { useIntraAppState } from '../../../../../../../hooks/use_intra_app_state
 
 import { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';
 
-jest.mock('../../../../../../../../common/telemetry/aws_onboarding_events', () => ({
-  ...jest.requireActual('../../../../../../../../common/telemetry/aws_onboarding_events'),
-  reportAwsOnboardingCredentialsAdded: jest.fn(),
-  reportAwsOnboardingDeployClicked: jest.fn(),
-  reportAwsOnboardingEnrollmentSucceeded: jest.fn(),
-}));
+vi.mock('../../../../../../../../common/telemetry/aws_onboarding_events', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../../../common/telemetry/aws_onboarding_events')),
+      reportAwsOnboardingCredentialsAdded: vi.fn(),
+      reportAwsOnboardingDeployClicked: vi.fn(),
+      reportAwsOnboardingEnrollmentSucceeded: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../../hooks'),
-  useStartServices: jest.fn(),
-}));
+vi.mock('../../../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../../hooks')),
+      useStartServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks/use_intra_app_state', () => ({
-  useIntraAppState: jest.fn(),
-}));
+vi.mock('../../../../../../../hooks/use_intra_app_state', () => {
+      const mocked = {
+      useIntraAppState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAnalytics = { reportEvent: jest.fn() };
+const mockAnalytics = { reportEvent: vi.fn() };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   sessionStorage.removeItem(AWS_ONBOARDING_TELEMETRY_STORAGE_KEY);
-  (useStartServices as jest.Mock).mockReturnValue({ analytics: mockAnalytics });
-  (useIntraAppState as jest.Mock).mockReturnValue({
+  (useStartServices as Mock).mockReturnValue({ analytics: mockAnalytics });
+  (useIntraAppState as Mock).mockReturnValue({
     telemetrySource: 'aws_quickstart',
   });
 });
@@ -55,7 +67,7 @@ describe('useAwsOnboardingTelemetry — gating', () => {
   });
 
   it('no-ops when telemetrySource is not aws_quickstart', () => {
-    (useIntraAppState as jest.Mock).mockReturnValue({ telemetrySource: undefined });
+    (useIntraAppState as Mock).mockReturnValue({ telemetrySource: undefined });
     const { result } = renderHook(() =>
       useAwsOnboardingTelemetry({ pkgName: 'aws_cloudwatch_input_otel' })
     );
@@ -78,7 +90,7 @@ describe('useAwsOnboardingTelemetry — gating', () => {
   });
 
   it('no-ops when analytics is unavailable', () => {
-    (useStartServices as jest.Mock).mockReturnValue({ analytics: undefined });
+    (useStartServices as Mock).mockReturnValue({ analytics: undefined });
     const { result } = renderHook(() =>
       useAwsOnboardingTelemetry({ pkgName: 'aws_cloudwatch_input_otel' })
     );

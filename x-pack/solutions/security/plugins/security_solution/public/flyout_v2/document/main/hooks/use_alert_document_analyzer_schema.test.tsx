@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
@@ -15,8 +18,8 @@ import type {
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
 import { useHttp } from '../../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/react-query');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('@kbn/react-query');
 
 describe('useAlertPrevalenceFromProcessTree', () => {
   let hookResult: RenderHookResult<
@@ -25,17 +28,17 @@ describe('useAlertPrevalenceFromProcessTree', () => {
   >;
 
   beforeEach(() => {
-    (useHttp as jest.Mock).mockReturnValue({
-      get: jest.fn(),
+    (useHttp as Mock).mockReturnValue({
+      get: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return all properties when loading', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: true,
       data: [],
     });
@@ -59,7 +62,7 @@ describe('useAlertPrevalenceFromProcessTree', () => {
   });
 
   it('should return all properties with data', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: [
         {
@@ -89,7 +92,7 @@ describe('useAlertPrevalenceFromProcessTree', () => {
   });
 
   it('should return error when no data', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: [],
     });

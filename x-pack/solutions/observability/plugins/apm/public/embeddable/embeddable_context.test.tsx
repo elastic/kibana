@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useContext } from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -26,34 +28,40 @@ import * as urlParamHelpers from '../context/url_params_context/helpers';
 import * as apmPluginModule from '../plugin';
 import * as createCallApmApiModule from '../services/rest/create_call_apm_api';
 
-jest.mock('../context/time_range_metadata/time_range_metadata_context', () => ({
-  TimeRangeMetadataContextProvider: ({
-    children,
-    start,
-    end,
-    kuery,
-  }: {
-    children: React.ReactNode;
-    start: string;
-    end: string;
-    kuery: string;
-  }) => (
-    <div
-      data-test-subj="time-range-metadata-provider"
-      data-start={start}
-      data-end={end}
-      data-kuery={kuery}
-    >
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../context/time_range_metadata/time_range_metadata_context', () => {
+      const mocked = {
+      TimeRangeMetadataContextProvider: ({
+        children,
+        start,
+        end,
+        kuery,
+      }: {
+        children: React.ReactNode;
+        start: string;
+        end: string;
+        kuery: string;
+      }) => (
+        <div
+          data-test-subj="time-range-metadata-provider"
+          data-start={start}
+          data-end={end}
+          data-kuery={kuery}
+        >
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../context/apm_index_settings/apm_index_settings_context', () => ({
-  ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="apm-index-settings-provider">{children}</div>
-  ),
-}));
+vi.mock('../context/apm_index_settings/apm_index_settings_context', () => {
+      const mocked = {
+      ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="apm-index-settings-provider">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext
@@ -110,12 +118,12 @@ function LocationProbe() {
 }
 
 describe('ApmEmbeddableContext', () => {
-  const mockGetDateRange = jest.spyOn(urlParamHelpers, 'getDateRange');
-  const mockCreateCallApmApi = jest.spyOn(createCallApmApiModule, 'createCallApmApi');
-  const mockSetApmInternalServices = jest.spyOn(apmPluginModule, 'setApmInternalServices');
+  const mockGetDateRange = vi.spyOn(urlParamHelpers, 'getDateRange');
+  const mockCreateCallApmApi = vi.spyOn(createCallApmApiModule, 'createCallApmApi');
+  const mockSetApmInternalServices = vi.spyOn(apmPluginModule, 'setApmInternalServices');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetDateRange.mockReturnValue({
       start: '2024-01-01T00:00:00.000Z',
       end: '2024-01-01T00:15:00.000Z',
@@ -165,7 +173,7 @@ describe('ApmEmbeddableContext', () => {
       isCpsEnabled$.subscribe((enabled) => {
         latest = enabled;
       });
-      const useBooleanValue = jest.fn((_flagName: string, fallback: boolean) =>
+      const useBooleanValue = vi.fn((_flagName: string, fallback: boolean) =>
         useObservable(isCpsEnabled$, latest ?? fallback)
       );
 

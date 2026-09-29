@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
 import { InvestigationUnavailableError } from '@kbn/nightshift-investigations-plugin/server';
@@ -27,22 +30,22 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
 const createNightshiftInvestigations = (
   executionId = 'exec-abc'
 ): NightshiftInvestigationsServerStart => {
-  const start = jest.fn().mockResolvedValue({ investigation_id: executionId });
+  const start = vi.fn().mockResolvedValue({ investigation_id: executionId });
   return {
-    getInvestigationsClient: jest.fn().mockReturnValue({ start }),
+    getInvestigationsClient: vi.fn().mockReturnValue({ start }),
   } as unknown as NightshiftInvestigationsServerStart;
 };
 
 const getStartMock = (nightshiftInvestigations: NightshiftInvestigationsServerStart) =>
-  (nightshiftInvestigations.getInvestigationsClient as jest.Mock).mock.results[0].value.start;
+  (nightshiftInvestigations.getInvestigationsClient as Mock).mock.results[0].value.start;
 
 const createRequest = () => ({} as KibanaRequest);
 const createLogger = () =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger);
 
 describe('triggerInvestigationWorkflow', () => {
@@ -143,13 +146,13 @@ describe('triggerInvestigationWorkflow', () => {
   });
 
   it('returns undefined and logs a warning when client.start() throws InvestigationUnavailableError', async () => {
-    const start = jest
+    const start = vi
       .fn()
       .mockRejectedValue(
         new InvestigationUnavailableError('Investigations are not configured in this space')
       );
     const nightshiftInvestigations = {
-      getInvestigationsClient: jest.fn().mockReturnValue({ start }),
+      getInvestigationsClient: vi.fn().mockReturnValue({ start }),
     } as unknown as NightshiftInvestigationsServerStart;
     const logger = createLogger();
 
@@ -167,9 +170,9 @@ describe('triggerInvestigationWorkflow', () => {
   });
 
   it('rethrows unexpected errors from client.start()', async () => {
-    const start = jest.fn().mockRejectedValue(new Error('Elasticsearch connection refused'));
+    const start = vi.fn().mockRejectedValue(new Error('Elasticsearch connection refused'));
     const nightshiftInvestigations = {
-      getInvestigationsClient: jest.fn().mockReturnValue({ start }),
+      getInvestigationsClient: vi.fn().mockReturnValue({ start }),
     } as unknown as NightshiftInvestigationsServerStart;
 
     await expect(

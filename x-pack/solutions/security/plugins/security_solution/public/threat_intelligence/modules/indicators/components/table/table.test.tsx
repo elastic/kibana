@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { IndicatorsTableProps } from './table';
@@ -15,9 +17,12 @@ import { generateMockIndicator } from '../../../../../../common/threat_intellige
 import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
 import { IOC_DETAILS_TITLE_TEST_ID } from '../../../../../flyout_v2/ioc/main/test_ids';
 
-jest.mock('../../../../hooks/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: jest.fn(() => ({ investigateInTimelineFn: jest.fn() })),
-}));
+vi.mock('../../../../hooks/use_investigate_in_timeline', () => {
+      const mocked = {
+      useInvestigateInTimeline: vi.fn(() => ({ investigateInTimelineFn: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const stub = () => {};
 

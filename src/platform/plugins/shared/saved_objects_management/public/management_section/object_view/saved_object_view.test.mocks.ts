@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.doMock('lodash', () => {
-  const original = jest.requireActual('lodash');
-  return {
+import { vi } from 'vitest';
+import type { LoDashStatic } from 'lodash';
+
+vi.doMock('lodash', async () => {
+  // lodash is CommonJS: its namespace only exposes `default`, so spreading it would drop every helper.
+  const { default: original } = await vi.importActual<{ default: LoDashStatic }>('lodash');
+  const mocked = {
     ...original,
     get: (func: Function) => {
       function get(this: any, args: any[]) {
@@ -18,14 +22,15 @@ jest.doMock('lodash', () => {
       return get;
     },
   };
+  return { ...mocked, default: mocked };
 });
 
-export const bulkGetObjectsMock = jest.fn();
-jest.doMock('../../lib/bulk_get_objects', () => ({
+export const bulkGetObjectsMock = vi.fn();
+vi.doMock('../../lib/bulk_get_objects', () => ({
   bulkGetObjects: bulkGetObjectsMock,
 }));
 
-export const bulkDeleteObjectsMock = jest.fn();
-jest.doMock('../../lib/bulk_delete_objects', () => ({
+export const bulkDeleteObjectsMock = vi.fn();
+vi.doMock('../../lib/bulk_delete_objects', () => ({
   bulkDeleteObjects: bulkDeleteObjectsMock,
 }));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -19,28 +22,34 @@ import * as hooks from '../use_is_osquery_available';
 import { useKibana } from '../../common/lib/kibana';
 import { AGENT_STATUS_ERROR, EMPTY_PROMPT, NOT_AVAILABLE, PERMISSION_DENIED } from './translations';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/experimental_features_context', () => ({
-  ...jest.requireActual('../../common/experimental_features_context'),
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/experimental_features_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/experimental_features_context')),
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Infra's embedded usage renders <OsqueryAction formType="simple" hideAgentsField ... />,
 // which terminates in <LiveQuery ...>. Stub LiveQuery so these tests can assert the
 // props the osquery package receives from the embedder without mounting the full
 // Monaco + agent-selector + submit subtree.
-jest.mock('../../live_queries', () => ({
-  LiveQuery: (props: Record<string, unknown>) => (
-    <div
-      data-test-subj="live-query-mock"
-      data-form-type={String(props.formType ?? '')}
-      data-hide-agents-field={String(props.hideAgentsField ?? '')}
-      data-agent-id={String(props.agentId ?? '')}
-    />
-  ),
-}));
+vi.mock('../../live_queries', () => {
+      const mocked = {
+      LiveQuery: (props: Record<string, unknown>) => (
+        <div
+          data-test-subj="live-query-mock"
+          data-form-type={String(props.formType ?? '')}
+          data-hide-agents-field={String(props.hideAgentsField ?? '')}
+          data-agent-id={String(props.agentId ?? '')}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const defaultUseOsqueryAvailableResult = {
   osqueryAvailable: true,
@@ -50,7 +59,7 @@ const defaultUseOsqueryAvailableResult = {
   policyLoading: false,
 };
 
-const spyUseIsOsqueryAvailable = jest
+const spyUseIsOsqueryAvailable = vi
   .spyOn(hooks, 'useIsOsqueryAvailable')
   .mockImplementation(() => ({
     ...defaultUseOsqueryAvailableResult,
@@ -72,9 +81,9 @@ const mockKibana = (permissionType: unknown = defaultPermissions) => {
       },
       notifications: {
         toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
-          remove: jest.fn(),
+          addError: vi.fn(),
+          addSuccess: vi.fn(),
+          remove: vi.fn(),
         },
       },
     },

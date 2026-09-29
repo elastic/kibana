@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FilterRatioAgg } from './filter_ratio';
@@ -15,9 +17,12 @@ import { EuiComboBox } from '@elastic/eui';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { setDataStart } from '../../../services';
 
-jest.mock('../query_bar_wrapper', () => ({
-  QueryBarWrapper: jest.fn(() => null),
-}));
+vi.mock('../query_bar_wrapper', () => {
+      const mocked = {
+      QueryBarWrapper: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TSVB Filter Ratio', () => {
   beforeAll(() => setDataStart(dataPluginMock.createStartContract()));
@@ -29,9 +34,9 @@ describe('TSVB Filter Ratio', () => {
     const wrapper = mountWithIntl(
       <div>
         <FilterRatioAgg
-          onAdd={jest.fn()}
-          onChange={jest.fn()}
-          onDelete={jest.fn()}
+          onAdd={vi.fn()}
+          onChange={vi.fn()}
+          onDelete={vi.fn()}
           panel={panel}
           fields={FIELDS}
           model={metric}

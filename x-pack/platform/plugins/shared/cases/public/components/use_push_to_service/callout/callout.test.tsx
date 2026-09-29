@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -16,7 +18,7 @@ import { noCasesSettingsPermission, renderWithTestingProviders } from '../../../
 import userEvent from '@testing-library/user-event';
 
 describe('Callout', () => {
-  const handleButtonClick = jest.fn();
+  const handleButtonClick = vi.fn();
   const defaultProps: CallOutProps = {
     id: 'md5-hex',
     type: 'primary',
@@ -32,7 +34,7 @@ describe('Callout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('It renders the callout', () => {

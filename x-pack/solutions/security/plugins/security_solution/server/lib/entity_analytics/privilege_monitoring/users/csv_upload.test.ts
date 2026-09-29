@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { Readable, Transform } from 'stream';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createPrivilegedUsersCsvService } from './csv_upload';
@@ -12,13 +15,13 @@ import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import type { HapiReadableStream } from '../../../../types';
 
 // Mock external dependencies
-jest.mock('papaparse');
-jest.mock('./streams/privileged_user_parse_transform');
-jest.mock('../../shared/streams/batching');
-jest.mock('../engine/elasticsearch/indices');
-jest.mock('./bulk/query_existing_users');
-jest.mock('./bulk/upsert_batch');
-jest.mock('./bulk/soft_delete_omitted_users');
+vi.mock('papaparse');
+vi.mock('./streams/privileged_user_parse_transform');
+vi.mock('../../shared/streams/batching');
+vi.mock('../engine/elasticsearch/indices');
+vi.mock('./bulk/query_existing_users');
+vi.mock('./bulk/upsert_batch');
+vi.mock('./bulk/soft_delete_omitted_users');
 
 // Import and setup mocks
 import Papa from 'papaparse';
@@ -37,18 +40,18 @@ import type {
 import { accumulateUpsertResults } from './bulk/utils';
 import { right, left } from 'fp-ts/Either';
 
-const mockPapa = Papa as jest.Mocked<typeof Papa>;
-const mockPrivilegedUserParserTransform = privilegedUserParserTransform as jest.MockedFunction<
+const mockPapa = Papa as Mocked<typeof Papa>;
+const mockPrivilegedUserParserTransform = privilegedUserParserTransform as MockedFunction<
   typeof privilegedUserParserTransform
 >;
-const mockBatchPartitions = batchPartitions as jest.MockedFunction<typeof batchPartitions>;
-const mockQueryExistingUsers = queryExistingUsers as jest.MockedFunction<typeof queryExistingUsers>;
-const mockBulkUpsertBatch = bulkUpsertBatch as jest.MockedFunction<typeof bulkUpsertBatch>;
-const mockSoftDeleteOmittedUsers = softDeleteOmittedUsers as jest.MockedFunction<
+const mockBatchPartitions = batchPartitions as MockedFunction<typeof batchPartitions>;
+const mockQueryExistingUsers = queryExistingUsers as MockedFunction<typeof queryExistingUsers>;
+const mockBulkUpsertBatch = bulkUpsertBatch as MockedFunction<typeof bulkUpsertBatch>;
+const mockSoftDeleteOmittedUsers = softDeleteOmittedUsers as MockedFunction<
   typeof softDeleteOmittedUsers
 >;
 const mockCreatePrivmonIndexService =
-  mockIndexModule.createPrivmonIndexService as jest.MockedFunction<
+  mockIndexModule.createPrivmonIndexService as MockedFunction<
     typeof mockIndexModule.createPrivmonIndexService
   >;
 
@@ -68,7 +71,7 @@ describe('CSV Upload Service', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock Papa Parse with transform streams
     const mockCsvStream = new Transform({
@@ -107,10 +110,10 @@ describe('CSV Upload Service', () => {
 
     // Mock Elasticsearch client
     mockEsClient = {
-      search: jest.fn(),
-      update: jest.fn(),
-      index: jest.fn(),
-      count: jest.fn(),
+      search: vi.fn(),
+      update: vi.fn(),
+      index: vi.fn(),
+      count: vi.fn(),
     } as unknown as ElasticsearchClient;
 
     // Mock data client
@@ -121,28 +124,28 @@ describe('CSV Upload Service', () => {
         },
       },
       index: mockIndex,
-      log: jest.fn(),
+      log: vi.fn(),
     } as unknown as PrivilegeMonitoringDataClient;
 
     // Mock index service
     const mockIndexService = {
-      initialisePrivmonIndex: jest.fn().mockResolvedValue(undefined),
-      _createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
-      _upsertIndex: jest.fn().mockResolvedValue(undefined),
-      doesIndexExist: jest.fn().mockResolvedValue(true),
+      initialisePrivmonIndex: vi.fn().mockResolvedValue(undefined),
+      _createIngestPipelineIfDoesNotExist: vi.fn().mockResolvedValue(undefined),
+      _upsertIndex: vi.fn().mockResolvedValue(undefined),
+      doesIndexExist: vi.fn().mockResolvedValue(true),
     };
     mockCreatePrivmonIndexService.mockReturnValue(mockIndexService);
 
     // Mock bulk operations
     mockQueryExistingUsers.mockReturnValue(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         existingUsers: {},
         uploaded: [],
       })
     );
 
     mockBulkUpsertBatch.mockReturnValue(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         batch: {
           uploaded: [],
         },
@@ -154,7 +157,7 @@ describe('CSV Upload Service', () => {
     );
 
     mockSoftDeleteOmittedUsers.mockReturnValue(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         updated: { errors: [], failed: 0, successful: 0 },
         deleted: { errors: [], failed: 0, successful: 0 },
       })
@@ -210,7 +213,7 @@ describe('CSV Upload Service', () => {
 
       // Override the soft delete operation to return errors
       mockSoftDeleteOmittedUsers.mockReturnValueOnce(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           updated: { errors: [{ message: 'Bulk operation failed' }], failed: 1, successful: 0 },
           deleted: { errors: [], failed: 0, successful: 0 },
         })
@@ -347,7 +350,7 @@ describe('CSV Upload Service', () => {
 
       // Mock soft delete to return some results
       mockSoftDeleteOmittedUsers.mockReturnValue(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           updated: { errors: [], failed: 1, successful: 2 },
           deleted: { errors: [{ message: 'Delete error' }], failed: 1, successful: 1 },
         })
@@ -370,13 +373,13 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
   const mockIndex = 'test-privilege-monitoring-index';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock Elasticsearch client
     mockEsClient = {
-      search: jest.fn(),
-      update: jest.fn(),
-      index: jest.fn(),
+      search: vi.fn(),
+      update: vi.fn(),
+      index: vi.fn(),
     } as unknown as ElasticsearchClient;
 
     // Mock data client
@@ -387,15 +390,15 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
         },
       },
       index: mockIndex,
-      log: jest.fn(),
+      log: vi.fn(),
     } as unknown as PrivilegeMonitoringDataClient;
 
     // Mock index service
     const mockIndexService = {
-      initialisePrivmonIndex: jest.fn().mockResolvedValue(undefined),
-      _createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
-      _upsertIndex: jest.fn().mockResolvedValue(undefined),
-      doesIndexExist: jest.fn().mockResolvedValue(true),
+      initialisePrivmonIndex: vi.fn().mockResolvedValue(undefined),
+      _createIngestPipelineIfDoesNotExist: vi.fn().mockResolvedValue(undefined),
+      _upsertIndex: vi.fn().mockResolvedValue(undefined),
+      doesIndexExist: vi.fn().mockResolvedValue(true),
     };
     mockCreatePrivmonIndexService.mockReturnValue(mockIndexService);
   });
@@ -409,10 +412,10 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
       ];
 
       // Mock search returns users to delete
-      (mockEsClient.search as jest.Mock).mockResolvedValue({
+      (mockEsClient.search as Mock).mockResolvedValue({
         hits: { hits: usersToDelete },
       });
-      (mockEsClient.update as jest.Mock).mockResolvedValue({});
+      (mockEsClient.update as Mock).mockResolvedValue({});
 
       // Test the soft-delete search query logic
       const expectedQuery = {
@@ -428,7 +431,7 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
       };
 
       await mockEsClient.search(expectedQuery);
-      expect(mockEsClient.search as jest.Mock).toHaveBeenCalledWith(expectedQuery);
+      expect(mockEsClient.search as Mock).toHaveBeenCalledWith(expectedQuery);
 
       // Test soft-delete update operations
       for (const userDoc of usersToDelete) {
@@ -440,14 +443,14 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
         });
       }
 
-      expect(mockEsClient.update as jest.Mock).toHaveBeenCalledTimes(2);
-      expect(mockEsClient.update as jest.Mock).toHaveBeenCalledWith({
+      expect(mockEsClient.update as Mock).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.update as Mock).toHaveBeenCalledWith({
         index: mockIndex,
         id: 'user3-id',
         refresh: 'wait_for',
         doc: { user: { is_privileged: false } },
       });
-      expect(mockEsClient.update as jest.Mock).toHaveBeenCalledWith({
+      expect(mockEsClient.update as Mock).toHaveBeenCalledWith({
         index: mockIndex,
         id: 'user4-id',
         refresh: 'wait_for',
@@ -458,10 +461,10 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
     it('should handle soft-delete errors gracefully', async () => {
       const userDoc = { _id: 'user-id', _source: { user: { name: 'testuser' } } };
 
-      (mockEsClient.search as jest.Mock).mockResolvedValue({
+      (mockEsClient.search as Mock).mockResolvedValue({
         hits: { hits: [userDoc] },
       });
-      (mockEsClient.update as jest.Mock).mockRejectedValue(new Error('Update failed'));
+      (mockEsClient.update as Mock).mockRejectedValue(new Error('Update failed'));
 
       try {
         await mockEsClient.update({
@@ -476,7 +479,7 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
     });
 
     it('should handle search errors during soft-delete', async () => {
-      (mockEsClient.search as jest.Mock).mockRejectedValue(new Error('Search failed'));
+      (mockEsClient.search as Mock).mockRejectedValue(new Error('Search failed'));
 
       try {
         await mockEsClient.search({
@@ -591,10 +594,10 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
     it('should validate index initialization logic', () => {
       // Test that the service properly sets up the index service mock
       const mockIndexService = {
-        initialisePrivmonIndex: jest.fn().mockResolvedValue(undefined),
-        _createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
-        _upsertIndex: jest.fn().mockResolvedValue(undefined),
-        doesIndexExist: jest.fn().mockResolvedValue(true),
+        initialisePrivmonIndex: vi.fn().mockResolvedValue(undefined),
+        _createIngestPipelineIfDoesNotExist: vi.fn().mockResolvedValue(undefined),
+        _upsertIndex: vi.fn().mockResolvedValue(undefined),
+        doesIndexExist: vi.fn().mockResolvedValue(true),
       };
 
       // Test the index initialization flow

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import DateMath from '@kbn/datemath';
 import type { PingHistogramComponentProps } from './ping_histogram';
@@ -18,12 +20,12 @@ describe('PingHistogram component', () => {
     mockMoment();
     mockMomentTimezone();
     mockDataPlugin();
-    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy = vi.spyOn(DateMath, 'parse');
     dateMathSpy.mockReturnValue(20);
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const props: PingHistogramComponentProps = {

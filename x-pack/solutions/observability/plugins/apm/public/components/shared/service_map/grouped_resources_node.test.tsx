@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
@@ -12,8 +14,8 @@ import { GroupedResourcesNode } from './grouped_resources_node';
 import type { GroupedNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({
@@ -24,9 +26,12 @@ jest.mock('@elastic/eui', () => {
 });
 
 // Mock the span icon
-jest.mock('@kbn/apm-ui-shared', () => ({
-  getSpanIcon: jest.fn(() => 'mock-span-icon.svg'),
-}));
+vi.mock('@kbn/apm-ui-shared', () => {
+      const mocked = {
+      getSpanIcon: vi.fn(() => 'mock-span-icon.svg'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultNodeProps = {
   id: 'grouped-resources',

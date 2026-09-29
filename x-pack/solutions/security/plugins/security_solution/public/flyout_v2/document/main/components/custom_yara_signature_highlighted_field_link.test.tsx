@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -25,16 +28,19 @@ import {
   isCustomYaraSignatureHighlightedField,
 } from './custom_yara_signature_highlighted_field_link';
 
-jest.mock('../../../../management/pages/custom_yara_signatures/service/api_client', () => ({
-  CustomYaraSignaturesApiClient: {
-    getInstance: jest.fn(),
-  },
-}));
+vi.mock('../../../../management/pages/custom_yara_signatures/service/api_client', () => {
+      const mocked = {
+      CustomYaraSignaturesApiClient: {
+        getInstance: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
     useAppUrl: () => ({
@@ -43,15 +49,15 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
-const mockGetInstance = CustomYaraSignaturesApiClient.getInstance as jest.Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
+const mockGetInstance = CustomYaraSignaturesApiClient.getInstance as Mock;
 
 const ENTRY_ID = '123-456';
 const ITEM_ID = 'artifact-item-id';
 const SIGNATURE_NOT_FOUND_TOOLTIP = 'YARA signature does not exist.';
 
-const getArtifactMock = jest.fn();
+const getArtifactMock = vi.fn();
 
 const createHit = (entryId?: string): DataTableRecord =>
   ({
@@ -90,7 +96,7 @@ describe('isCustomYaraSignatureHighlightedField', () => {
 
 describe('CustomYaraSignatureHighlightedFieldLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getArtifactMock.mockResolvedValue({ id: ENTRY_ID, item_id: ITEM_ID });
     mockGetInstance.mockReturnValue({ get: getArtifactMock });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);

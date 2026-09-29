@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
 import type {
@@ -23,8 +25,8 @@ const MULTI_NS_TYPE = 'multi';
 const OTHER_TYPE = 'other';
 
 describe('checkReferenceOrigins', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
+  let typeRegistry: Mocked<ISavedObjectTypeRegistry>;
   let find: (typeof savedObjectsClient)['find'];
 
   const getResultMock = (...objectIds: string[]) => ({

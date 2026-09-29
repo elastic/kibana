@@ -5,26 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { RuleParams } from '../../rule_schema';
 import { getQueryRuleParams, getMlRuleParams } from '../../rule_schema/mocks';
 import { runExecutionValidation } from './run_execution_validation';
 
-jest.mock('@kbn/data-views-plugin/server', () => ({
-  IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
-    getIndexPatternMatches: jest.fn().mockResolvedValue({
-      matchedIndexPatterns: ['auditbeat-*'],
-      matchedIndices: ['auditbeat-1'],
-    }),
-  })),
-}));
+vi.mock('@kbn/data-views-plugin/server', () => {
+      const mocked = {
+      IndexPatternsFetcher: vi.fn().mockImplementation(() => ({
+        getIndexPatternMatches: vi.fn().mockResolvedValue({
+          matchedIndexPatterns: ['auditbeat-*'],
+          matchedIndices: ['auditbeat-1'],
+        }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/utils', () => ({
-  ...jest.requireActual('../utils/utils'),
-  hasTimestampFields: jest.fn().mockResolvedValue({ warningMessage: undefined }),
-  checkForFrozenIndices: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../utils/utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../utils/utils')),
+      hasTimestampFields: vi.fn().mockResolvedValue({ warningMessage: undefined }),
+      checkForFrozenIndices: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('runExecutionValidation', () => {
   let scopedClusterClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
@@ -54,7 +62,7 @@ describe('runExecutionValidation', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   });

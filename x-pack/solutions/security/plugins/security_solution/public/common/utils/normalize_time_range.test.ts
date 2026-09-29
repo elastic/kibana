@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { normalizeTimeRange } from './normalize_time_range';
 import type { URLTimeRange, AbsoluteTimeRange, RelativeTimeRange } from '../store/inputs/model';
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../store/inputs/model';
 import DateMath from '@kbn/datemath';
 import { getTimeRangeSettings } from './default_date_settings';
 
-const getTimeRangeSettingsMock = getTimeRangeSettings as jest.Mock;
+const getTimeRangeSettingsMock = getTimeRangeSettings as Mock;
 
-jest.mock('./default_date_settings');
+vi.mock('./default_date_settings');
 
 getTimeRangeSettingsMock.mockImplementation(() => ({
   from: '2020-07-04T08:20:18.966Z',
@@ -23,9 +26,9 @@ getTimeRangeSettingsMock.mockImplementation(() => ({
 }));
 
 describe('#normalizeTimeRange', () => {
-  let dateMathSpy: jest.SpyInstance;
+  let dateMathSpy: MockInstance;
   beforeAll(() => {
-    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy = vi.spyOn(DateMath, 'parse');
     dateMathSpy.mockImplementation((date: string) =>
       date === 'now'
         ? { toISOString: () => new Date('2020-07-08T08:20:18.966Z') }
@@ -34,7 +37,7 @@ describe('#normalizeTimeRange', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('Absolute time range returns defaults for empty strings', () => {
     const dateTimeRange: URLTimeRange = {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useQueryClient } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -17,23 +20,29 @@ import {
   createMockWorkflowExecutionDto,
 } from '../../../shared/test_utils';
 
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: jest.fn(),
-}));
+vi.mock('@kbn/react-query', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-query')),
+      useQueryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_step_execution', () => ({
-  useStepExecution: jest.fn(),
-}));
+vi.mock('./use_step_execution', () => {
+      const mocked = {
+      useStepExecution: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQueryClient = useQueryClient as jest.MockedFunction<typeof useQueryClient>;
-const mockUseStepExecution = useStepExecution as jest.MockedFunction<typeof useStepExecution>;
+const mockUseQueryClient = useQueryClient as MockedFunction<typeof useQueryClient>;
+const mockUseStepExecution = useStepExecution as MockedFunction<typeof useStepExecution>;
 
 describe('useWaitingStepResume', () => {
-  const mockInvalidateQueries = jest.fn();
+  const mockInvalidateQueries = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
     } as unknown as ReturnType<typeof useQueryClient>);
@@ -250,7 +259,7 @@ describe('useWaitingStepResume', () => {
   });
 
   it('reports a resume error and retries when the waiting step fetch fails', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     mockUseStepExecution.mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -282,7 +291,7 @@ describe('useWaitingStepResume', () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useStepExecution>);
 
     const execution = createMockWorkflowExecutionDto({ status: ExecutionStatus.RUNNING });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
@@ -17,17 +20,17 @@ import { useShouldDisableStatus } from '../../../../actions/status/use_should_di
 import { useCasesConfig } from '../../../../../common/lib/kibana';
 import type { CaseUI } from '../../../../../../common';
 
-jest.mock('../../../../../containers/use_get_case_connectors');
-jest.mock('../../../../../containers/use_delete_cases');
-jest.mock('../../../../actions/status/use_should_disable_status');
-jest.mock('../../../../../common/navigation/hooks');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../use_on_refresh_case_view_page');
+vi.mock('../../../../../containers/use_get_case_connectors');
+vi.mock('../../../../../containers/use_delete_cases');
+vi.mock('../../../../actions/status/use_should_disable_status');
+vi.mock('../../../../../common/navigation/hooks');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../use_on_refresh_case_view_page');
 
-const mockCanExecuteWorkflow = jest.fn(() => false);
+const mockCanExecuteWorkflow = vi.fn(() => false);
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
     useWorkflowsCapabilities: () => ({
@@ -37,19 +40,19 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
-const mockDeleteCases = jest.fn();
-const mockOnStatusChanged = jest.fn();
-const mockOnSeverityChanged = jest.fn();
+const mockDeleteCases = vi.fn();
+const mockOnStatusChanged = vi.fn();
+const mockOnSeverityChanged = vi.fn();
 
-(useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
-(useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
-(useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
+(useGetCaseConnectors as Mock).mockReturnValue({ data: {} });
+(useDeleteCases as Mock).mockReturnValue({ mutate: mockDeleteCases });
+(useShouldDisableStatus as Mock).mockReturnValue(() => false);
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
 
 describe('useCaseViewHeader', () => {
-  const onUpdateField = jest.fn();
+  const onUpdateField = vi.fn();
   const defaultArgs = {
     caseData: basicCase,
     onUpdateField,
@@ -58,10 +61,10 @@ describe('useCaseViewHeader', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
-    (useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
+    vi.clearAllMocks();
+    (useGetCaseConnectors as Mock).mockReturnValue({ data: {} });
+    (useDeleteCases as Mock).mockReturnValue({ mutate: mockDeleteCases });
+    (useShouldDisableStatus as Mock).mockReturnValue(() => false);
   });
 
   it('returns an editable title with case name only', () => {
@@ -284,7 +287,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('does not include status dropdown items when status is disabled', () => {
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
+    (useShouldDisableStatus as Mock).mockReturnValue(() => true);
 
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
@@ -381,7 +384,7 @@ describe('useCaseViewHeader', () => {
 
     act(() => {
       const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
-      settingsItem?.run?.({ triggerElement: mockElement, returnFocus: jest.fn() });
+      settingsItem?.run?.({ triggerElement: mockElement, returnFocus: vi.fn() });
     });
 
     expect(result.current.isSettingsOpen).toBe(true);
@@ -421,7 +424,7 @@ describe('useCaseViewHeader', () => {
   });
 
   describe('run workflow menu item', () => {
-    const mockUseCasesConfig = useCasesConfig as jest.Mock;
+    const mockUseCasesConfig = useCasesConfig as Mock;
     const defaultCasesConfig = mockUseCasesConfig();
 
     const findRunWorkflowItem = (menu: ReturnType<typeof useCaseViewHeader>['menu']) =>

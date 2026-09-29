@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 const ENV_KEYS = [
   'KI_QUERY_GENERATION_KI_FEATURE_SOURCE',
   'SIGEVENTS_QUERYGEN_FEATURES_SOURCE',
 ] as const;
 
 const loadSources = async (env: Partial<Record<(typeof ENV_KEYS)[number], string>> = {}) => {
-  jest.resetModules();
+  vi.resetModules();
   for (const key of ENV_KEYS) {
     delete process.env[key];
   }

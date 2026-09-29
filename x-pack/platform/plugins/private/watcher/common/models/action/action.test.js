@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Action } from './action';
 import { ACTION_TYPES } from '../../constants';
 
-jest.mock('./logging_action', () => ({
-  LoggingAction: {
-    fromUpstreamJson: jest.fn(({ id }) => ({
-      errors: null,
-      action: { id, type: 'logging' },
-    })),
-  },
-}));
+vi.mock('./logging_action', () => {
+      const mocked = {
+      LoggingAction: {
+        fromUpstreamJson: vi.fn(({ id }) => ({
+          errors: null,
+          action: { id, type: 'logging' },
+        })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('action', () => {
   describe('Action', () => {

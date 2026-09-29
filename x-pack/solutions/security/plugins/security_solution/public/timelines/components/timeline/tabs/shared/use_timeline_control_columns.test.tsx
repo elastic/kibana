@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 import { render, renderHook, screen } from '@testing-library/react';
@@ -19,15 +22,18 @@ import { initialUserPrivilegesState } from '../../../../../common/components/use
 import { useTimelineUnifiedDataTableContext } from '../../unified_components/data_table/use_timeline_unified_data_table_context';
 import { BUTTON_TEST_ID } from '../../../../../common/components/header_actions/pin_event_action';
 
-jest.mock('../../../../../common/hooks/use_license', () => ({
-  useLicense: jest.fn().mockReturnValue({
-    isEnterprise: () => true,
-  }),
-}));
-const useLicenseMock = useLicense as jest.Mock;
+vi.mock('../../../../../common/hooks/use_license', () => {
+      const mocked = {
+      useLicense: vi.fn().mockReturnValue({
+        isEnterprise: () => true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+const useLicenseMock = useLicense as Mock;
 
-jest.mock('../../unified_components/data_table/use_timeline_unified_data_table_context');
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../unified_components/data_table/use_timeline_unified_data_table_context');
+vi.mock('../../../../../common/components/user_privileges');
 
 const rawEvents = mockTimelineData.map(
   (event) =>
@@ -39,7 +45,7 @@ const rawEvents = mockTimelineData.map(
 );
 
 describe('useTimelineControlColumns', () => {
-  const refetchMock = jest.fn();
+  const refetchMock = vi.fn();
 
   describe('leadingControlColumns', () => {
     it('should return the leading control columns', () => {
@@ -51,7 +57,7 @@ describe('useTimelineControlColumns', () => {
             events: [],
             rawEvents: [],
             eventIdToNoteIds: {},
-            onToggleShowNotes: jest.fn(),
+            onToggleShowNotes: vi.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -71,7 +77,7 @@ describe('useTimelineControlColumns', () => {
             events: [],
             rawEvents: [],
             eventIdToNoteIds: {},
-            onToggleShowNotes: jest.fn(),
+            onToggleShowNotes: vi.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -92,7 +98,7 @@ describe('useTimelineControlColumns', () => {
             events: [],
             rawEvents: [],
             eventIdToNoteIds: {},
-            onToggleShowNotes: jest.fn(),
+            onToggleShowNotes: vi.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -142,13 +148,13 @@ describe('useTimelineControlColumns', () => {
         isEnterprise: () => true,
         isPlatinumPlus: () => true,
       });
-      (useTimelineUnifiedDataTableContext as jest.Mock).mockReturnValue({
+      (useTimelineUnifiedDataTableContext as Mock).mockReturnValue({
         expanded: { id: mockTimelineData[0]._id },
       });
     });
 
     it('should render the notes and pin buttons when the user has the correct privileges', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         notesPrivileges: { crud: true, read: true },
         timelinePrivileges: { crud: true },
@@ -162,7 +168,7 @@ describe('useTimelineControlColumns', () => {
             events: mockTimelineData,
             rawEvents,
             eventIdToNoteIds: {},
-            onToggleShowNotes: jest.fn(),
+            onToggleShowNotes: vi.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -181,7 +187,7 @@ describe('useTimelineControlColumns', () => {
     });
 
     it('should not render the notes and pin buttons when the user does not have the correct privilege', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         notesPrivileges: { crud: false, read: false },
         timelinePrivileges: { crud: false },
@@ -195,7 +201,7 @@ describe('useTimelineControlColumns', () => {
             events: mockTimelineData,
             rawEvents,
             eventIdToNoteIds: {},
-            onToggleShowNotes: jest.fn(),
+            onToggleShowNotes: vi.fn(),
           }),
         {
           wrapper: TestProviders,

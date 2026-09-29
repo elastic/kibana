@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
@@ -20,27 +23,27 @@ import {
 } from './onboarding_workflow_client';
 const statusRequest = httpServerMock.createKibanaRequest();
 
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+const createMockManagementApi = (overrides: Record<string, Mock> = {}) => {
   const api = {
-    getWorkflow: jest.fn().mockResolvedValue({
+    getWorkflow: vi.fn().mockResolvedValue({
       id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       name: 'onboarding',
       enabled: true,
       definition: {},
       yaml: '',
     }),
-    runWorkflow: jest.fn().mockResolvedValue('execution-id'),
-    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-    getWorkflowExecution: jest.fn().mockResolvedValue(null),
-    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    runWorkflow: vi.fn().mockResolvedValue('execution-id'),
+    getWorkflowExecutions: vi.fn().mockResolvedValue({ results: [], total: 0 }),
+    getWorkflowExecution: vi.fn().mockResolvedValue(null),
+    cancelWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
-  return { ...api, getClient: jest.fn(() => api) };
+  return { ...api, getClient: vi.fn(() => api) };
 };
 
-const createClient = (overrides: Record<string, jest.Mock> = {}) => {
+const createClient = (overrides: Record<string, Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
-  const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+  const telemetry = { trackOnboardingScheduled: vi.fn() } as never;
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
     telemetry,
@@ -119,7 +122,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('throws when the workflow is not found', async () => {
       const { client } = createClient({
-        getWorkflow: jest.fn().mockResolvedValue(null),
+        getWorkflow: vi.fn().mockResolvedValue(null),
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -137,7 +140,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('throws when the workflow has no definition', async () => {
       const { client } = createClient({
-        getWorkflow: jest.fn().mockResolvedValue({ id: 'wf', definition: null }),
+        getWorkflow: vi.fn().mockResolvedValue({ id: 'wf', definition: null }),
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -168,7 +171,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('returns InProgress for a running execution', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
         }),
       });
@@ -183,10 +186,10 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('returns Completed with output details for a completed execution', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.COMPLETED }],
         }),
-        getWorkflowExecution: jest.fn().mockResolvedValue({
+        getWorkflowExecution: vi.fn().mockResolvedValue({
           context: {
             output: {
               featuresSkipped: false,
@@ -225,10 +228,10 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('returns Completed with defaults when full execution fetch returns null', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.COMPLETED }],
         }),
-        getWorkflowExecution: jest.fn().mockResolvedValue(null),
+        getWorkflowExecution: vi.fn().mockResolvedValue(null),
       });
 
       const result = await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
@@ -254,7 +257,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('returns Failed with error message for a failed execution', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [
             {
               id: 'exec-1',
@@ -276,7 +279,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('returns Failed with timeout message for a timed-out execution', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.TIMED_OUT, error: null }],
         }),
       });
@@ -292,7 +295,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('returns Canceled for a cancelled execution', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.CANCELLED }],
         }),
       });
@@ -353,7 +356,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('maps each execution to a status summary and fills missing streams with NotStarted', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [
             {
               id: 'exec-1',
@@ -393,9 +396,9 @@ describe('StreamsKIsOnboardingClient', () => {
     });
 
     it('does not fetch the completed output for completed executions', async () => {
-      const getWorkflowExecution = jest.fn().mockResolvedValue(null);
+      const getWorkflowExecution = vi.fn().mockResolvedValue(null);
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [
             {
               id: 'exec-1',
@@ -420,7 +423,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
     it('ignores executions whose concurrency group key is unknown or unrequested', async () => {
       const { client } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [
             { id: 'exec-1', status: ExecutionStatus.RUNNING, concurrencyGroupKey: undefined },
             {
@@ -446,7 +449,7 @@ describe('StreamsKIsOnboardingClient', () => {
   describe('cancel', () => {
     it('cancels the latest execution for the stream', async () => {
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
         }),
       });
@@ -474,7 +477,7 @@ describe('StreamsKIsOnboardingClient', () => {
   describe('cancelAllRunning', () => {
     it('cancels all non-terminal onboarding executions', async () => {
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [
             { id: 'exec-1', status: ExecutionStatus.RUNNING },
             { id: 'exec-2', status: ExecutionStatus.PENDING },
@@ -513,7 +516,7 @@ describe('StreamsKIsOnboardingClient', () => {
         { id: 'exec-2', status: ExecutionStatus.RUNNING },
       ];
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({ results: executions }),
+        getWorkflowExecutions: vi.fn().mockResolvedValue({ results: executions }),
       });
 
       const result = await client.getRecentExecutions(statusRequest);

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -21,61 +24,64 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Only `buildElasticsearchRequest` is stubbed — `getElasticsearchConnectors` stays real so the
 // output normalization is driven by the actual connector contracts.
-jest.mock('@kbn/workflows', () => ({
-  ...jest.requireActual('@kbn/workflows'),
-  buildElasticsearchRequest: jest.fn(),
-}));
+vi.mock('@kbn/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows')),
+      buildElasticsearchRequest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedBuildRequest = buildElasticsearchRequest as jest.MockedFunction<
+const mockedBuildRequest = buildElasticsearchRequest as MockedFunction<
   typeof buildElasticsearchRequest
 >;
 
 describe('ElasticsearchActionStepImpl', () => {
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
-  let mockWorkflowLogger: jest.Mocked<IWorkflowEventLogger>;
-  let mockContextManager: jest.Mocked<WorkflowContextManager>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
+  let mockWorkflowLogger: Mocked<IWorkflowEventLogger>;
+  let mockContextManager: Mocked<WorkflowContextManager>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
     mockEsClient = {
       transport: {
-        request: jest.fn().mockResolvedValue({ acknowledged: true }),
+        request: vi.fn().mockResolvedValue({ acknowledged: true }),
       },
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+    } as unknown as Mocked<ElasticsearchClient>;
 
     mockContextManager = {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         workflow: { id: 'test', name: 'test', enabled: true, spaceId: 'default' },
       }),
-      getDependencies: jest.fn().mockReturnValue({
+      getDependencies: vi.fn().mockReturnValue({
         config: { maxResponseSize: new ByteSizeValue(10 * 1024 * 1024) },
       }),
-      renderValueAccordingToContext: jest.fn((value) => value),
-      getEsClientAsUser: jest.fn().mockReturnValue(mockEsClient),
+      renderValueAccordingToContext: vi.fn((value) => value),
+      getEsClientAsUser: vi.fn().mockReturnValue(mockEsClient),
     } as any;
 
     mockStepExecutionRuntime = {
       contextManager: mockContextManager,
-      startStep: jest.fn().mockResolvedValue(undefined),
-      finishStep: jest.fn().mockResolvedValue(undefined),
-      failStep: jest.fn().mockResolvedValue(undefined),
-      setInput: jest.fn().mockResolvedValue(undefined),
+      startStep: vi.fn().mockResolvedValue(undefined),
+      finishStep: vi.fn().mockResolvedValue(undefined),
+      failStep: vi.fn().mockResolvedValue(undefined),
+      setInput: vi.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       node: {},
-    } as unknown as jest.Mocked<StepExecutionRuntime>;
+    } as unknown as Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
-    } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
+      navigateToNextNode: vi.fn(),
+    } as unknown as Mocked<WorkflowExecutionRuntimeManager>;
 
     mockWorkflowLogger = {
-      logInfo: jest.fn(),
-      logError: jest.fn(),
-      logDebug: jest.fn(),
-    } as unknown as jest.Mocked<IWorkflowEventLogger>;
+      logInfo: vi.fn(),
+      logError: vi.fn(),
+      logDebug: vi.fn(),
+    } as unknown as Mocked<IWorkflowEventLogger>;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('transport.request integration', () => {
@@ -332,7 +338,7 @@ describe('ElasticsearchActionStepImpl', () => {
 
     it('should wrap the scalar HEAD response of a HEAD connector in an object', async () => {
       mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
-      (mockEsClient.transport.request as jest.Mock).mockResolvedValue(true);
+      (mockEsClient.transport.request as Mock).mockResolvedValue(true);
 
       const stepWith = { index: 'my-index' };
       const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
@@ -344,7 +350,7 @@ describe('ElasticsearchActionStepImpl', () => {
 
     it('should leave an object response of indices.exists untouched', async () => {
       mockedBuildRequest.mockReturnValue({ method: 'GET', path: '/my-index' });
-      (mockEsClient.transport.request as jest.Mock).mockResolvedValue({ 'my-index': {} });
+      (mockEsClient.transport.request as Mock).mockResolvedValue({ 'my-index': {} });
 
       const stepWith = { index: 'my-index', method: 'GET' };
       const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
@@ -356,7 +362,7 @@ describe('ElasticsearchActionStepImpl', () => {
 
     it('should leave a null response of indices.exists untouched', async () => {
       mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
-      (mockEsClient.transport.request as jest.Mock).mockResolvedValue(null);
+      (mockEsClient.transport.request as Mock).mockResolvedValue(null);
 
       const stepWith = { index: 'my-index' };
       const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
@@ -367,7 +373,7 @@ describe('ElasticsearchActionStepImpl', () => {
     });
 
     it('should NOT wrap scalar responses of connectors that do not default to HEAD', async () => {
-      (mockEsClient.transport.request as jest.Mock).mockResolvedValue('green open my-index');
+      (mockEsClient.transport.request as Mock).mockResolvedValue('green open my-index');
 
       const stepWith = { method: 'GET', path: '/_cat/indices' };
       const result = await (buildStep('elasticsearch.request', stepWith) as any)._run(stepWith);
@@ -377,7 +383,7 @@ describe('ElasticsearchActionStepImpl', () => {
 
     it('should NOT wrap scalar responses of a non-HEAD connector', async () => {
       mockedBuildRequest.mockReturnValue({ method: 'GET', path: '/my-index/_search' });
-      (mockEsClient.transport.request as jest.Mock).mockResolvedValue('raw text');
+      (mockEsClient.transport.request as Mock).mockResolvedValue('raw text');
 
       const stepWith = { index: 'my-index' };
       const result = await (buildStep('elasticsearch.search', stepWith) as any)._run(stepWith);
@@ -391,7 +397,7 @@ describe('ElasticsearchActionStepImpl', () => {
       const sizeError = new errors.RequestAbortedError(
         'The content length (15000000) is bigger than the maximum allowed string (10485760)'
       );
-      mockEsClient.transport.request = jest.fn().mockRejectedValue(sizeError);
+      mockEsClient.transport.request = vi.fn().mockRejectedValue(sizeError);
 
       const stepWith = {
         index: 'large-index',
@@ -423,7 +429,7 @@ describe('ElasticsearchActionStepImpl', () => {
 
     it('should NOT map other RequestAbortedError (non-size) to StepSizeLimitExceeded', async () => {
       const abortError = new errors.RequestAbortedError('Request aborted by user');
-      mockEsClient.transport.request = jest.fn().mockRejectedValue(abortError);
+      mockEsClient.transport.request = vi.fn().mockRejectedValue(abortError);
 
       const stepWith = {
         index: 'test',

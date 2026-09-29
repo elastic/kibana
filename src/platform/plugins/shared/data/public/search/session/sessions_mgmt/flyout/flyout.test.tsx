@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
@@ -46,7 +48,7 @@ const setup = () => {
     featureFlags: mockCoreStart.featureFlags,
   });
 
-  const onClose = jest.fn();
+  const onClose = vi.fn();
   const user = userEvent.setup();
 
   render(

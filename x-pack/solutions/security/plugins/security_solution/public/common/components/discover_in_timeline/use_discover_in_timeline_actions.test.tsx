@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -29,12 +32,12 @@ let mockDiscoverStateContainerRef = {
   current: createMockDiscoverStateContainer(discoverServices),
 };
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,
@@ -56,8 +59,8 @@ const mockState: State = {
   },
 };
 
-jest.mock('./use_discover_in_timeline_actions', () => {
-  const actual = jest.requireActual('./use_discover_in_timeline_actions');
+vi.mock('./use_discover_in_timeline_actions', async () => {
+  const actual = (await vi.importActual('./use_discover_in_timeline_actions'));
   return actual;
 });
 
@@ -131,21 +134,21 @@ export const savedSearchMock = {
 
 const startServicesMock = createStartServicesMock();
 
-startServicesMock.dataViews.get = jest.fn(
+startServicesMock.dataViews.get = vi.fn(
   async () =>
     ({
-      getIndexPattern: jest.fn(),
+      getIndexPattern: vi.fn(),
     } as unknown as DataView)
 );
 
 describe('useDiscoverInTimelineActions', () => {
   beforeEach(() => {
-    (useKibana as jest.Mock).mockImplementation(() => ({
+    (useKibana as Mock).mockImplementation(() => ({
       services: startServicesMock,
     }));
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('getAppStateFromSavedSearch', () => {
     it('should reach out to discover to convert app state from saved search', async () => {
@@ -205,7 +208,7 @@ describe('useDiscoverInTimelineActions', () => {
       ).toHaveBeenCalledWith({ from: 'now-15m', to: 'now', mode: 'relative' });
     });
     it('should restore the time range the ES|QL search runs against from the saved search', async () => {
-      (startServicesMock.savedSearch.get as jest.Mock).mockResolvedValueOnce(savedSearchMock);
+      (startServicesMock.savedSearch.get as Mock).mockResolvedValueOnce(savedSearchMock);
       const { result } = renderTestHook();
 
       await result.current.resetDiscoverAppState(savedSearchMock.id);
@@ -216,7 +219,7 @@ describe('useDiscoverInTimelineActions', () => {
     });
     it('should fall back to the default time range when the saved search has none', async () => {
       const { timeRange, ...savedSearchWithoutTimeRange } = savedSearchMock;
-      (startServicesMock.savedSearch.get as jest.Mock).mockResolvedValueOnce(
+      (startServicesMock.savedSearch.get as Mock).mockResolvedValueOnce(
         savedSearchWithoutTimeRange
       );
       const { result } = renderTestHook();
@@ -228,7 +231,7 @@ describe('useDiscoverInTimelineActions', () => {
       ).toHaveBeenCalledWith({ from: 'now-15m', to: 'now', mode: 'relative' });
     });
     it('should not consider a restore pending while the ES|QL tab is mounted', async () => {
-      (startServicesMock.savedSearch.get as jest.Mock).mockResolvedValueOnce(savedSearchMock);
+      (startServicesMock.savedSearch.get as Mock).mockResolvedValueOnce(savedSearchMock);
       const { result } = renderTestHook();
 
       await result.current.resetDiscoverAppState(savedSearchMock.id);
@@ -286,7 +289,7 @@ describe('useDiscoverInTimelineActions', () => {
       // Without this, the redux copy stays null and every later timeline save skips persisting
       // the Discover session, because `patchTimeline` is guarded on it.
       const newSavedSearchId = 'newly-created-saved-search-id';
-      (startServicesMock.savedSearch.save as jest.Mock).mockResolvedValueOnce(newSavedSearchId);
+      (startServicesMock.savedSearch.save as Mock).mockResolvedValueOnce(newSavedSearchId);
 
       const { result } = renderTestHook();
 
@@ -333,7 +336,7 @@ describe('useDiscoverInTimelineActions', () => {
       const { columns, dataViewId, indexNames } = timelineDefaults;
 
       const newSavedSearchId = 'newly-created-saved-search-id';
-      (startServicesMock.savedSearch.save as jest.Mock).mockImplementationOnce(async () => {
+      (startServicesMock.savedSearch.save as Mock).mockImplementationOnce(async () => {
         // the user creates a new timeline before the save resolves
         store.dispatch(
           timelineActions.createTimeline({

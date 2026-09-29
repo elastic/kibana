@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { TestProviders } from '../../mock';
 
@@ -16,12 +18,12 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
-    useLocation: jest.fn().mockReturnValue([{ pathname: '/overview' }]),
+    useLocation: vi.fn().mockReturnValue([{ pathname: '/overview' }]),
   };
 });
 
@@ -37,7 +39,7 @@ const request = getRequest();
 const response =
   '{"took": 880,"timed_out": false,"_shards": {"total": 26,"successful": 26,"skipped": 0,"failed": 0},"hits": {"max_score": null,"hits": []},"aggregations": {"hosts": {"value": 541},"hosts_histogram": {"buckets": [{"key_as_string": "2019 - 07 - 05T01: 00: 00.000Z", "key": 1562288400000, "doc_count": 1492321, "count": { "value": 105 }}, {"key_as_string": "2019 - 07 - 05T13: 00: 00.000Z", "key": 1562331600000, "doc_count": 2412761, "count": { "value": 453}},{"key_as_string": "2019 - 07 - 06T01: 00: 00.000Z", "key": 1562374800000, "doc_count": 111658, "count": { "value": 15}}],"interval": "12h"}},"status": 200}';
 
-const closeModal = jest.fn();
+const closeModal = vi.fn();
 
 const defaultProps: ModalInspectProps = {
   closeModal,
@@ -249,7 +251,7 @@ describe('Modal Inspect', () => {
 
   describe('index pattern messaging', () => {
     test('should show no messaging when all patterns match sourcerer selection', () => {
-      jest.mocked(useDataView).mockReturnValue(withIndices(defaultIndices));
+      vi.mocked(useDataView).mockReturnValue(withIndices(defaultIndices));
 
       renderModal();
 

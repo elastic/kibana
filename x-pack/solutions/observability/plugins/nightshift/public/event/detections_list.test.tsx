@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,32 +15,41 @@ import type { LifecycleDetection, SignificantEvent } from '@kbn/significant-even
 import { DetectionsList, MAX_VISIBLE_DETECTIONS } from './detections_list';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_fetch_event_lifecycle');
-jest.mock('../detection/change_point_visualization', () => ({
-  ChangePointSparkline: ({ data }: { data: Array<{ x: number; y: number }> }) => (
-    <div data-test-subj="mockDetectionSparkline" data-point-count={data.length} />
-  ),
-}));
+vi.mock('../hooks/use_fetch_event_lifecycle');
+vi.mock('../detection/change_point_visualization', () => {
+      const mocked = {
+      ChangePointSparkline: ({ data }: { data: Array<{ x: number; y: number }> }) => (
+        <div data-test-subj="mockDetectionSparkline" data-point-count={data.length} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: { basePath: { prepend: (path: string) => `/base${path}` } },
-      charts: {
-        theme: {
-          useChartsBaseTheme: () => ({}),
-          useSparklineOverrides: () => ({}),
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: { basePath: { prepend: (path: string) => `/base${path}` } },
+          charts: {
+            theme: {
+              useChartsBaseTheme: () => ({}),
+              useSparklineOverrides: () => ({}),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchEventLifecycle = useFetchEventLifecycle as jest.Mock;
+const mockUseFetchEventLifecycle = useFetchEventLifecycle as Mock;
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
@@ -88,7 +100,7 @@ function setLifecycle({
   isLoading = false,
   isFetching = false,
   isError = false,
-  refetch = jest.fn(),
+  refetch = vi.fn(),
 } = {}) {
   mockUseFetchEventLifecycle.mockReturnValue({
     data: isLoading || isError ? undefined : { detections, events: [] },
@@ -262,7 +274,7 @@ describe('DetectionsList', () => {
 
   it('renders the whole detection card as a clickable element', () => {
     setLifecycle({ detections: [mockDetection()] });
-    renderList({ onDetectionClick: jest.fn() });
+    renderList({ onDetectionClick: vi.fn() });
 
     const card = screen.getByTestId('nightshiftDetectionCard');
     expect(card).toHaveAttribute('role', 'button');
@@ -282,7 +294,7 @@ describe('DetectionsList', () => {
 
   it('calls onDetectionClick with the detection when a card is clicked', () => {
     const detection = mockDetection();
-    const onDetectionClick = jest.fn();
+    const onDetectionClick = vi.fn();
     setLifecycle({ detections: [detection] });
     renderList({ onDetectionClick });
 
@@ -297,7 +309,7 @@ describe('DetectionsList', () => {
         mockDetection({ detection_id: 'det-2', rule_name: 'second-detection' }),
       ],
     });
-    renderList({ selectedDetectionId: 'det-2', onDetectionClick: jest.fn() });
+    renderList({ selectedDetectionId: 'det-2', onDetectionClick: vi.fn() });
 
     const cards = screen.getAllByTestId('nightshiftDetectionCard');
     expect(cards[0]).toHaveAttribute('aria-pressed', 'false');
@@ -398,7 +410,7 @@ describe('DetectionsList', () => {
 
     it('takes the last visible slot for a selected detection past the cap', () => {
       setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
-      renderList({ selectedDetectionId: 'det-4', onDetectionClick: jest.fn() });
+      renderList({ selectedDetectionId: 'det-4', onDetectionClick: vi.fn() });
 
       const cards = screen.getAllByTestId('nightshiftDetectionCard');
       expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS);
@@ -410,7 +422,7 @@ describe('DetectionsList', () => {
 
     it('never offers a +0 more toggle when a single overflow detection is selected', () => {
       setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 1) });
-      renderList({ selectedDetectionId: 'det-3', onDetectionClick: jest.fn() });
+      renderList({ selectedDetectionId: 'det-3', onDetectionClick: vi.fn() });
 
       const cards = screen.getAllByTestId('nightshiftDetectionCard');
       expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS);
@@ -420,7 +432,7 @@ describe('DetectionsList', () => {
 
     it('ignores a selected detection that is no longer in the list', () => {
       setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
-      renderList({ selectedDetectionId: 'det-already-gone', onDetectionClick: jest.fn() });
+      renderList({ selectedDetectionId: 'det-already-gone', onDetectionClick: vi.fn() });
 
       expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
       expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');

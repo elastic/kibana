@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createHash } from 'crypto';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEvents } from './fetch_events_graph';
@@ -19,23 +21,23 @@ describe('fetchEvents', () => {
   let logger: Logger;
 
   beforeEach(() => {
-    const toRecordsMock = jest.fn().mockResolvedValue({ columns: [], records: [{ id: 'dummy' }] });
+    const toRecordsMock = vi.fn().mockResolvedValue({ columns: [], records: [{ id: 'dummy' }] });
     esClient.asCurrentUser.helpers.esql.mockReturnValue({
       toRecords: toRecordsMock,
-      toArrowTable: jest.fn(),
-      toArrowReader: jest.fn(),
+      toArrowTable: vi.fn(),
+      toArrowReader: vi.fn(),
     });
 
     logger = {
-      trace: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      error: jest.fn(),
+      trace: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as Logger;
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should throw an error for an invalid index pattern', async () => {

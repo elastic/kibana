@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { monaco as mockMonaco } from '@kbn/code-editor';
@@ -24,56 +27,65 @@ const BUILTIN_INPUTS: JsonModelSchemaType = {
   required: ['notificationGroup'],
 };
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    onChange,
-    editorDidMount,
-    dataTestSubj,
-  }: {
-    value: string;
-    onChange?: (value: string) => void;
-    editorDidMount?: (editor: { getModel: () => { uri: { toString: () => string } } }) => void;
-    dataTestSubj?: string;
-  }) => {
-    editorDidMount?.({
-      getModel: () => ({ uri: { toString: () => 'inmemory://test/manual-input.json' } }),
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({
+        value,
+        onChange,
+        editorDidMount,
+        dataTestSubj,
+      }: {
+        value: string;
+        onChange?: (value: string) => void;
+        editorDidMount?: (editor: { getModel: () => { uri: { toString: () => string } } }) => void;
+        dataTestSubj?: string;
+      }) => {
+        editorDidMount?.({
+          getModel: () => ({ uri: { toString: () => 'inmemory://test/manual-input.json' } }),
+        });
+
+        return (
+          <textarea
+            data-test-subj={dataTestSubj || 'code-editor'}
+            value={value}
+            onChange={(event) => onChange?.(event.target.value)}
+          />
+        );
+      },
+      monaco: {
+        languages: {
+          json: {
+            jsonDefaults: {
+              setDiagnosticsOptions: vi.fn(),
+            },
+          },
+        },
+        editor: {},
+      },
+    };
+      return { ...mocked, default: mocked };
     });
 
-    return (
-      <textarea
-        data-test-subj={dataTestSubj || 'code-editor'}
-        value={value}
-        onChange={(event) => onChange?.(event.target.value)}
-      />
-    );
-  },
-  monaco: {
-    languages: {
-      json: {
-        jsonDefaults: {
-          setDiagnosticsOptions: jest.fn(),
-        },
-      },
-    },
-    editor: {},
-  },
-}));
+vi.mock('./input_validation_callout', () => {
+      const mocked = {
+      InputValidationCallout: ({ errors }: { errors: string }) => (
+        <div data-test-subj="workflow-input-validation-callout">{errors}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./input_validation_callout', () => ({
-  InputValidationCallout: ({ errors }: { errors: string }) => (
-    <div data-test-subj="workflow-input-validation-callout">{errors}</div>
-  ),
-}));
-
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderForm = (value: string) => {
-  const setValue = jest.fn();
-  const setErrors = jest.fn();
+  const setValue = vi.fn();
+  const setErrors = vi.fn();
 
   render(
     <WorkflowExecuteManualForm
@@ -91,7 +103,7 @@ const renderForm = (value: string) => {
 
 describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers Monaco JSON schema with merged kibana.definitions for $ref resolution', async () => {
@@ -102,7 +114,7 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
     });
 
     const options = (
-      mockMonaco.languages.json.jsonDefaults.setDiagnosticsOptions as jest.Mock
+      mockMonaco.languages.json.jsonDefaults.setDiagnosticsOptions as Mock
     ).mock.calls.at(-1)?.[0];
 
     expect(options?.schemas?.[0]?.schema).toMatchObject({

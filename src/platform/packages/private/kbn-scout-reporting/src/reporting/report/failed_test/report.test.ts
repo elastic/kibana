@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -16,9 +18,9 @@ import type { TestFailure } from './test_failure';
 
 const createMockLog = (): ToolingLog =>
   ({
-    info: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    success: vi.fn(),
   } as unknown as ToolingLog);
 
 const createMockFailure = (overrides: Partial<TestFailure> = {}): TestFailure => ({

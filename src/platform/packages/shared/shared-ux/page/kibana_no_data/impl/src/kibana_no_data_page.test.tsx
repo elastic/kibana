@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
@@ -24,14 +26,14 @@ describe('KibanaNoDataPage', () => {
     docsLink: 'http://www.docs.com',
   };
 
-  const onDataViewCreated = jest.fn();
+  const onDataViewCreated = vi.fn();
   const config = {
     hasESData: false,
     hasDataView: false,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders NoDataConfigPage when no ES data exists', async () => {
@@ -78,8 +80,8 @@ describe('KibanaNoDataPage', () => {
     const neverResolvePromise = new Promise<boolean>(() => {});
 
     // Mock the service methods to return promises that never resolve
-    mockServices.hasESData = jest.fn().mockReturnValue(neverResolvePromise);
-    mockServices.hasDataView = jest.fn().mockReturnValue(neverResolvePromise);
+    mockServices.hasESData = vi.fn().mockReturnValue(neverResolvePromise);
+    mockServices.hasDataView = vi.fn().mockReturnValue(neverResolvePromise);
 
     const { container } = render(
       <KibanaNoDataPageProvider {...mockServices}>
@@ -101,8 +103,8 @@ describe('KibanaNoDataPage', () => {
     const neverResolvePromise = new Promise<boolean>(() => {});
 
     // Mock the service methods to return promises that never resolve
-    mockServices.hasESData = jest.fn().mockReturnValue(neverResolvePromise);
-    mockServices.hasDataView = jest.fn().mockReturnValue(neverResolvePromise);
+    mockServices.hasESData = vi.fn().mockReturnValue(neverResolvePromise);
+    mockServices.hasDataView = vi.fn().mockReturnValue(neverResolvePromise);
 
     const { container } = render(
       <KibanaNoDataPageProvider {...mockServices}>

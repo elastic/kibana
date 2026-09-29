@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getEql } from './eql';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
-jest.mock('@kbn/i18n', () => {
+vi.mock('@kbn/i18n', () => {
   return {
     i18n: {
       translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
@@ -29,28 +31,28 @@ describe('eql', () => {
   let eql: EqlExpressionFunctionDefinition;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startDependencies = [
       {
         uiSettings: {
-          get: jest.fn().mockReturnValue(true),
+          get: vi.fn().mockReturnValue(true),
         },
       },
       {
         dataViews: {
-          get: jest.fn(),
-          create: jest.fn(),
+          get: vi.fn(),
+          create: vi.fn(),
         },
       },
       {
         search: {
-          eql: jest.fn(async (params: any) => ({
+          eql: vi.fn(async (params: any) => ({
             rawResponse: params,
           })),
         },
       },
     ];
-    getStartServices = jest.fn().mockResolvedValue(startDependencies);
+    getStartServices = vi.fn().mockResolvedValue(startDependencies);
     eql = getEql({ getStartServices });
   });
 

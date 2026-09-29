@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import user from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
@@ -29,8 +31,8 @@ describe('UserForm', () => {
   const authc = securityMock.createSetup().authc;
   const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
 
-  const onCancelMock = jest.fn();
-  const onSuccessMock = jest.fn();
+  const onCancelMock = vi.fn();
+  const onSuccessMock = vi.fn();
 
   let defaultProps: UserFormProps;
 

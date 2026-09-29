@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { nanosToMillis } from '../common';
 import type { IEvent, IEventLogger, IEventLogService } from '.';
 import { ECS_VERSION } from './types';
@@ -21,12 +24,12 @@ const WRITE_LOG_WAIT_MILLIS = 3000;
 
 describe('EventLogger', () => {
   let systemLogger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let esContext: jest.Mocked<EsContext>;
+  let esContext: Mocked<EsContext>;
   let service: IEventLogService;
   let eventLogger: IEventLogger;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     systemLogger = loggingSystemMock.createLogger();
     esContext = contextMock.create();
     service = new EventLogService({

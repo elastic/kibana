@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { TimelineDownloader } from './export_timeline';
@@ -20,47 +23,50 @@ import { useParams } from 'react-router-dom';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { exportSelectedTimeline } from '../../../containers/api';
 
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/utils/download_blob');
-jest.mock('../../../containers/api', () => ({
-  exportSelectedTimeline: jest.fn(),
-}));
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/utils/download_blob');
+vi.mock('../../../containers/api', () => {
+      const mocked = {
+      exportSelectedTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('.', () => {
+vi.mock('.', () => {
   return {
-    useExportTimeline: jest.fn(),
+    useExportTimeline: vi.fn(),
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
 
   return {
     ...actual,
-    useParams: jest.fn(),
+    useParams: vi.fn(),
   };
 });
 
 describe('TimelineDownloader', () => {
-  const mockAddSuccess = jest.fn();
-  (useAppToasts as jest.Mock).mockReturnValue({ addSuccess: mockAddSuccess });
-  (exportSelectedTimeline as jest.Mock).mockReturnValue(new Blob());
+  const mockAddSuccess = vi.fn();
+  (useAppToasts as Mock).mockReturnValue({ addSuccess: mockAddSuccess });
+  (exportSelectedTimeline as Mock).mockReturnValue(new Blob());
 
   let wrapper: ReactWrapper;
   const exportedIds = ['baa20980-6301-11ea-9223-95b6d4dd806c'];
   const defaultTestProps = {
     exportedIds,
-    getExportedData: jest.fn(),
+    getExportedData: vi.fn(),
     isEnableDownloader: true,
-    onComplete: jest.fn(),
+    onComplete: vi.fn(),
   };
 
   beforeEach(() => {
-    (useParams as jest.Mock).mockReturnValue({ tabName: 'default' });
+    (useParams as Mock).mockReturnValue({ tabName: 'default' });
   });
 
   afterEach(() => {
-    (useParams as jest.Mock).mockReset();
+    (useParams as Mock).mockReset();
     mockAddSuccess.mockClear();
   });
 
@@ -119,7 +125,7 @@ describe('TimelineDownloader', () => {
       const testProps = {
         ...defaultTestProps,
       };
-      (useParams as jest.Mock).mockReturnValue({ tabName: 'template' });
+      (useParams as Mock).mockReturnValue({ tabName: 'template' });
 
       wrapper = mount(<TimelineDownloader {...testProps} />);
 

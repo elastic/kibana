@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID } from '@kbn/alertzero-common';
@@ -20,10 +23,10 @@ const managedUpdateAuthzResult = Object.fromEntries(
   WorkflowsManagementOperationPrivileges.updateManaged.map((privilege) => [privilege, true])
 );
 
-const setupRoute = (update: jest.Mock) => {
+const setupRoute = (update: Mock) => {
   const router = httpServiceMock.createRouter();
-  const addVersion = jest.fn();
-  (router.versioned.patch as jest.Mock).mockReturnValue({ addVersion });
+  const addVersion = vi.fn();
+  (router.versioned.patch as Mock).mockReturnValue({ addVersion });
 
   registerUpdateWorkerRoute({
     router,
@@ -43,8 +46,8 @@ const setupRoute = (update: jest.Mock) => {
 
 describe('registerUpdateWorkerRoute', () => {
   it('requires alertzero_write and checks Workflows managed-update as extended privileges', () => {
-    const { router } = setupRoute(jest.fn());
-    const [{ security }] = (router.versioned.patch as jest.Mock).mock.calls[0] as [
+    const { router } = setupRoute(vi.fn());
+    const [{ security }] = (router.versioned.patch as Mock).mock.calls[0] as [
       { security: { authz: { requiredPrivileges: string[]; extendedPrivileges: string[] } } }
     ];
 
@@ -55,7 +58,7 @@ describe('registerUpdateWorkerRoute', () => {
   });
 
   it('maps unavailable to 503 when enablement is authorized', async () => {
-    const update = jest.fn().mockResolvedValue({ outcome: 'unavailable' });
+    const update = vi.fn().mockResolvedValue({ outcome: 'unavailable' });
     const { handler } = setupRoute(update);
     const response = httpServerMock.createResponseFactory();
 
@@ -87,7 +90,7 @@ describe('registerUpdateWorkerRoute', () => {
   });
 
   it('returns 403 when enabling a worker without managed-update privileges', async () => {
-    const update = jest.fn();
+    const update = vi.fn();
     const { handler } = setupRoute(update);
     const response = httpServerMock.createResponseFactory();
 
@@ -109,7 +112,7 @@ describe('registerUpdateWorkerRoute', () => {
   });
 
   it('updates settings without Workflows managed-update privileges', async () => {
-    const update = jest.fn().mockResolvedValue({
+    const update = vi.fn().mockResolvedValue({
       outcome: 'updated',
       response: { worker: { id: TRIAGE } },
     });

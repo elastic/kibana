@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
@@ -15,13 +18,16 @@ import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delet
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
+vi.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
 
-const softDeleteGapsMock = softDeleteGaps as jest.Mock;
+const softDeleteGapsMock = softDeleteGaps as Mock;
 
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
@@ -36,13 +42,13 @@ const {
   auditLogger,
   backfillClient,
 } = getRulesClientMockParams({
-  invalidateApiKeyNow: jest.fn(),
+  invalidateApiKeyNow: vi.fn(),
   eventLogger,
 });
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 const fakeRuleName = 'fakeRuleName';
@@ -407,9 +413,9 @@ describe('delete()', () => {
 
   describe('change tracking', () => {
     const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
@@ -486,7 +492,7 @@ describe('delete()', () => {
       setRuleType();
 
       const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+      const dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(startTimeMs);
 
       try {
         await trackingClient.delete({ id: '1' });

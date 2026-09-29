@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EventBus } from '../event_bus';
@@ -22,7 +24,7 @@ import {
 
 describe('RuleEventPublisher', () => {
   let publisher: RuleEventPublisher;
-  let eventBus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
+  let eventBus: Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let request: KibanaRequest;
 
   beforeEach(() => {

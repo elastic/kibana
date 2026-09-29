@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { StatementSection } from './statement_section';
 import { shallow } from 'enzyme';
@@ -14,7 +16,7 @@ describe('StatementSection component', () => {
   let onShowVertexDetails;
 
   beforeEach(() => {
-    onShowVertexDetails = jest.fn();
+    onShowVertexDetails = vi.fn();
     props = {
       elements: [
         {

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { CcrShard } from './ccr_shard';
 
-jest.mock('../../chart', () => ({
-  MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
-}));
+vi.mock('../../chart', () => {
+      const mocked = {
+      MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CcrShard', () => {
   const props = {

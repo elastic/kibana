@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { EsqlFieldType } from '@kbn/esql-types';
 import {
   mockContext,
@@ -123,11 +126,11 @@ const timeseriesContext = { ...mockContext, isTimeseriesSource: true };
 describe('STATS Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
     mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
+    (mockCallbacks.getColumnsForQuery as Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
   const suggest = async (query: string, context = mockContext) => {
@@ -265,7 +268,7 @@ describe('STATS Autocomplete', () => {
           'date',
           'date_nanos',
         ]);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFields.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
@@ -289,7 +292,7 @@ describe('STATS Autocomplete', () => {
           mockCallbacks
         );
         const expectedFieldsRound = getFieldNamesByType(roundParameterTypes);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFieldsRound.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
@@ -341,7 +344,7 @@ describe('STATS Autocomplete', () => {
           mockCallbacks
         );
         const expectedFieldsAvg = getFieldNamesByType(AVG_TYPES);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFieldsAvg.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
@@ -399,7 +402,7 @@ describe('STATS Autocomplete', () => {
           'text',
           'keyword',
         ]);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFields.map((name) => ({ label: name, text: name }))
         );
         const expected = [
@@ -435,7 +438,7 @@ describe('STATS Autocomplete', () => {
       test('inside a function arg with hint.kind === "aggregation" (e.g. SPARKLINE first arg), only aggregation functions are suggested', async () => {
         // Mock fields just to verify they get suppressed even when the resolver would return them
         const allFields = getFieldNamesByType('any');
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           allFields.map((name) => ({ label: name, text: name }))
         );
 
@@ -456,7 +459,7 @@ describe('STATS Autocomplete', () => {
 
       test('inside function argument list', async () => {
         const expectedFieldsAvg = getFieldNamesByType(AVG_TYPES);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFieldsAvg.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
@@ -560,7 +563,7 @@ describe('STATS Autocomplete', () => {
 
         it('suggests after operator', async () => {
           const expectedFieldsStrings = getFieldNamesByType(['text', 'keyword']);
-          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+          (mockCallbacks.getByType as Mock).mockResolvedValue(
             expectedFieldsStrings.map((name) => ({ label: name, text: name }))
           );
           await statsExpectSuggestions(
@@ -768,7 +771,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space before expression right hand side operand', async () => {
         const expectedFieldsNumeric = getFieldNamesByType(['integer', 'double', 'long']);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFieldsNumeric.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
@@ -791,7 +794,7 @@ describe('STATS Autocomplete', () => {
           mockCallbacks
         );
         const expectedFieldsAny = getFieldNamesByType(['any']);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFieldsAny.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
@@ -881,7 +884,7 @@ describe('STATS Autocomplete', () => {
           'date_nanos',
           ...ESQL_COMMON_NUMERIC_TYPES,
         ]);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFields.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
@@ -935,7 +938,7 @@ describe('STATS Autocomplete', () => {
           'date_period',
           'time_duration',
         ] as EsqlFieldType[]);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        (mockCallbacks.getByType as Mock).mockResolvedValue(
           expectedFields1.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(

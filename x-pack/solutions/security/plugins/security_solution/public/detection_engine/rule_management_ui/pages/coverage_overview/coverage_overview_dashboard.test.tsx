@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
@@ -14,14 +17,20 @@ import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
 import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
 
-jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
-jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
+vi.mock('../../../../common/utils/route/spy_routes', () => {
+      const mocked = { SpyRoute: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
 
 // The invalid MITRE rules callout is gated behind the mitreAttackUpdatesUIEnabled
 // feature flag, which is off by default. Force it on for this test suite.
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderCoverageOverviewDashboard = () => {
   return render(
@@ -35,12 +44,12 @@ const renderCoverageOverviewDashboard = () => {
 
 describe('CoverageOverviewDashboard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useFetchCoverageOverviewQuery as Mock).mockReturnValue({
       data: getMockCoverageOverviewDashboard(),
       isLoading: false,
       isMitreError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -67,11 +76,11 @@ describe('CoverageOverviewDashboard', () => {
       },
     ];
 
-    (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
+    (useFetchCoverageOverviewQuery as Mock).mockReturnValue({
       data: mockDashboard,
       isLoading: false,
       isMitreError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderCoverageOverviewDashboard();
@@ -80,11 +89,11 @@ describe('CoverageOverviewDashboard', () => {
   });
 
   test('shows a loading spinner while isLoading is true', () => {
-    (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
+    (useFetchCoverageOverviewQuery as Mock).mockReturnValue({
       data: undefined,
       isLoading: true,
       isMitreError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderCoverageOverviewDashboard();
@@ -94,11 +103,11 @@ describe('CoverageOverviewDashboard', () => {
   });
 
   test('shows a MITRE error callout when isMitreError is true and loading is false', () => {
-    (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
+    (useFetchCoverageOverviewQuery as Mock).mockReturnValue({
       data: undefined,
       isLoading: false,
       isMitreError: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderCoverageOverviewDashboard();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -15,19 +18,22 @@ import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { RULE_DETAILS_LOADING_TEST_ID } from './test_ids';
 import { FLYOUT_ERROR_TEST_ID } from '../../shared/components/test_ids';
 
-const mockFooter = jest.fn();
-jest.mock('./footer', () => ({
-  Footer: (props: Record<string, unknown>) => {
-    mockFooter(props);
-    return <div data-test-subj="ruleDetailsFooter" />;
-  },
-}));
+const mockFooter = vi.fn();
+vi.mock('./footer', () => {
+      const mocked = {
+      Footer: (props: Record<string, unknown>) => {
+        mockFooter(props);
+        return <div data-test-subj="ruleDetailsFooter" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRuleDetails = useRuleDetails as jest.Mock;
-jest.mock('./hooks/use_rule_details');
+const mockUseRuleDetails = useRuleDetails as Mock;
+vi.mock('./hooks/use_rule_details');
 
-const mockGetStepsData = getStepsData as jest.Mock;
-jest.mock('../../../detection_engine/common/helpers');
+const mockGetStepsData = getStepsData as Mock;
+vi.mock('../../../detection_engine/common/helpers');
 
 const rule = { name: 'rule name', description: 'rule description' } as RuleResponse;
 

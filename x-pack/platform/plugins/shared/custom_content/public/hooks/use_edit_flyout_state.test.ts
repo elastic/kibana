@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
-jest.mock('../services');
-jest.mock('@kbn/custom-content-renderer');
-jest.mock('@kbn/data-plugin/public', () => ({ getEsQueryConfig: jest.fn() }));
+vi.mock('../services');
+vi.mock('@kbn/custom-content-renderer');
+vi.mock('@kbn/data-plugin/public', () => {
+      const mocked = { getEsQueryConfig: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 import type { HttpStart } from '@kbn/core/public';
 import {
@@ -22,17 +28,17 @@ import {
 import { getServices } from '../services';
 import { useEditFlyoutState } from './use_edit_flyout_state';
 
-const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
-const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
-const mockSanitizeHtml = sanitizeHtml as jest.MockedFunction<typeof sanitizeHtml>;
-const mockApplyHtmlTheme = applyHtmlTheme as jest.MockedFunction<typeof applyHtmlTheme>;
+const mockFetchEsqlData = fetchEsqlData as MockedFunction<typeof fetchEsqlData>;
+const mockFillTemplate = fillTemplate as MockedFunction<typeof fillTemplate>;
+const mockSanitizeHtml = sanitizeHtml as MockedFunction<typeof sanitizeHtml>;
+const mockApplyHtmlTheme = applyHtmlTheme as MockedFunction<typeof applyHtmlTheme>;
 
 const mockHttp = {} as unknown as HttpStart;
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (getServices as jest.Mock).mockReturnValue({
+  vi.clearAllMocks();
+  (getServices as Mock).mockReturnValue({
     core: { http: mockHttp, uiSettings: {} },
     search: mockSearch,
     agentBuilder: undefined,
@@ -43,7 +49,7 @@ beforeEach(() => {
   mockApplyHtmlTheme.mockReturnValue('<html>prepared</html>');
 });
 
-const mockOnRunPreview = jest.fn();
+const mockOnRunPreview = vi.fn();
 
 const mockEuiTheme = {} as unknown as EuiThemeComputed;
 
@@ -97,7 +103,7 @@ describe('useEditFlyoutState', () => {
     });
 
     it('is true when agentBuilder is defined', () => {
-      (getServices as jest.Mock).mockReturnValue({
+      (getServices as Mock).mockReturnValue({
         core: { http: mockHttp },
         search: mockSearch,
         agentBuilder: {},

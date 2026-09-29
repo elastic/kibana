@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useVerticalBreakpoint } from './use_vertical_breakpoint';
 
 describe('useVerticalBreakpoint', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   function setWindowHeight(height: number) {
@@ -51,7 +53,7 @@ describe('useVerticalBreakpoint', () => {
     setWindowHeight(500);
     expect(result.current).toBe('tall');
     act(() => {
-      jest.advanceTimersByTime(100); // debounce
+      vi.advanceTimersByTime(100); // debounce
     });
     expect(result.current).toBe('short');
   });

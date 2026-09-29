@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { EuiSelectable } from '@elastic/eui';
 import Boom from '@hapi/boom';
 import { act, render, screen, waitFor } from '@testing-library/react';
@@ -25,57 +28,60 @@ import { ALL_SPACES_ID } from '../../../common/constants';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    EuiSelectable: jest.fn((props: any) => <actual.EuiSelectable {...props} />),
+    EuiSelectable: vi.fn((props: any) => <actual.EuiSelectable {...props} />),
   };
 });
 
-jest.mock('./selectable_spaces_control', () => {
-  const actual = jest.requireActual('./selectable_spaces_control');
+vi.mock('./selectable_spaces_control', async () => {
+  const actual = (await vi.importActual('./selectable_spaces_control'));
   return {
-    SelectableSpacesControl: jest.fn((props: any) => <actual.SelectableSpacesControl {...props} />),
+    SelectableSpacesControl: vi.fn((props: any) => <actual.SelectableSpacesControl {...props} />),
   };
 });
 
-jest.mock('./share_mode_control', () => {
-  const actual = jest.requireActual('./share_mode_control');
+vi.mock('./share_mode_control', async () => {
+  const actual = (await vi.importActual('./share_mode_control'));
   return {
-    ShareModeControl: jest.fn((props: any) => <actual.ShareModeControl {...props} />),
+    ShareModeControl: vi.fn((props: any) => <actual.ShareModeControl {...props} />),
   };
 });
 
-jest.mock('./alias_table', () => {
-  const actual = jest.requireActual('./alias_table');
+vi.mock('./alias_table', async () => {
+  const actual = (await vi.importActual('./alias_table'));
   return {
-    AliasTable: jest.fn((props: any) => <actual.AliasTable {...props} />),
+    AliasTable: vi.fn((props: any) => <actual.AliasTable {...props} />),
   };
 });
 
-jest.mock('./relatives_footer', () => {
-  const actual = jest.requireActual('./relatives_footer');
+vi.mock('./relatives_footer', async () => {
+  const actual = (await vi.importActual('./relatives_footer'));
   return {
-    RelativesFooter: jest.fn((props: any) => <actual.RelativesFooter {...props} />),
+    RelativesFooter: vi.fn((props: any) => <actual.RelativesFooter {...props} />),
   };
 });
 
-jest.mock('../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal', () => ({
-  CopyToSpaceFlyoutInternal: () => <div data-test-subj="copy-to-space-flyout" />,
-}));
+vi.mock('../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal', () => {
+      const mocked = {
+      CopyToSpaceFlyoutInternal: () => <div data-test-subj="copy-to-space-flyout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockedSelectableSpacesControl = SelectableSpacesControl as unknown as jest.MockedFunction<
+const MockedSelectableSpacesControl = SelectableSpacesControl as unknown as MockedFunction<
   typeof SelectableSpacesControl
 >;
-const MockedShareModeControl = ShareModeControl as unknown as jest.MockedFunction<
+const MockedShareModeControl = ShareModeControl as unknown as MockedFunction<
   typeof ShareModeControl
 >;
-const MockedAliasTable = AliasTable as unknown as jest.MockedFunction<typeof AliasTable>;
-const MockedRelativesFooter = RelativesFooter as unknown as jest.MockedFunction<
+const MockedAliasTable = AliasTable as unknown as MockedFunction<typeof AliasTable>;
+const MockedRelativesFooter = RelativesFooter as unknown as MockedFunction<
   typeof RelativesFooter
 >;
-const MockedEuiSelectable = EuiSelectable as unknown as jest.Mock;
+const MockedEuiSelectable = EuiSelectable as unknown as Mock;
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -90,8 +96,8 @@ interface SetupOpts {
 }
 
 const setup = async (opts: SetupOpts = {}) => {
-  const onClose = jest.fn();
-  const onUpdate = jest.fn();
+  const onClose = vi.fn();
+  const onUpdate = vi.fn();
 
   const mockSpacesManager = spacesManagerMock.create();
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 import { aggregateMappingAdditions } from './aggregate_model_changes';
 
@@ -49,8 +51,8 @@ describe('aggregateMappingAdditions', () => {
     const changes: SavedObjectsModelChange[] = [
       { type: 'mappings_addition', addedMappings: { foo: { type: 'text' } } },
       { type: 'mappings_deprecation', deprecatedMappings: [] },
-      { type: 'data_backfill', backfillFn: jest.fn() },
-      { type: 'unsafe_transform', transformFn: jest.fn() },
+      { type: 'data_backfill', backfillFn: vi.fn() },
+      { type: 'unsafe_transform', transformFn: vi.fn() },
       { type: 'data_removal', removedAttributePaths: [] },
     ];
     const output = aggregateMappingAdditions(changes);

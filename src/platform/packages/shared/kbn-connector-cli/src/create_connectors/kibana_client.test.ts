@@ -24,7 +24,10 @@ function createTestServer(handler: http.RequestListener): Promise<void> {
   });
 }
 
-afterEach((done) => {
+afterEach(() =>
+new Promise<void>((resolve, reject) => {
+const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
   if (server) {
     const s = server;
     server = undefined;
@@ -32,7 +35,8 @@ afterEach((done) => {
   } else {
     done();
   }
-});
+
+}));
 
 describe('detectKibana', () => {
   it('detects a running Kibana and returns connection info', async () => {

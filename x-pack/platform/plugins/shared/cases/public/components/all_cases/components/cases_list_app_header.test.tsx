@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
@@ -17,11 +20,11 @@ import { getListMenu } from './header_menu';
 import { allCasesPermissions } from '../../../common/mock/permissions';
 import * as listI18n from '../translations';
 
-jest.mock('../../../common/navigation/hooks');
+vi.mock('../../../common/navigation/hooks');
 
 describe('CasesListAppHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the app header with the Cases title', () => {
@@ -88,7 +91,7 @@ describe('CasesListAppHeader', () => {
   });
 
   describe('templates button', () => {
-    let getConfigSpy: jest.SpyInstance;
+    let getConfigSpy: MockInstance;
 
     afterEach(() => {
       getConfigSpy?.mockRestore();
@@ -106,7 +109,7 @@ describe('CasesListAppHeader', () => {
     });
 
     it('displays the templates button when the feature flag is enabled and the user has manageTemplates permission', async () => {
-      getConfigSpy = jest
+      getConfigSpy = vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -122,7 +125,7 @@ describe('CasesListAppHeader', () => {
     });
 
     it('does not display the templates button when the user lacks manageTemplates permission', () => {
-      getConfigSpy = jest
+      getConfigSpy = vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -136,7 +139,7 @@ describe('CasesListAppHeader', () => {
     });
 
     it('displays the templates button even when the user lacks settings permission', async () => {
-      getConfigSpy = jest
+      getConfigSpy = vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
@@ -159,10 +162,10 @@ describe('CasesListAppHeader', () => {
     const baseArgs = {
       permissions: allCasesPermissions(),
       isTemplatesEnabled: false,
-      navigateToCreateCase: jest.fn(),
-      navigateToConfigureCases: jest.fn(),
-      navigateToCasesTemplates: jest.fn(),
-      getCasesTemplatesUrl: jest.fn().mockReturnValue('/templates'),
+      navigateToCreateCase: vi.fn(),
+      navigateToConfigureCases: vi.fn(),
+      navigateToCasesTemplates: vi.fn(),
+      getCasesTemplatesUrl: vi.fn().mockReturnValue('/templates'),
     };
 
     it('does not set tooltipContent when action license is fully enabled', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
@@ -21,22 +24,22 @@ import type { DataFederationKibanaServices } from '../types';
 
 const createToastsMock = (): ToastsStart =>
   ({
-    addSuccess: jest.fn(),
-    addDanger: jest.fn(),
+    addSuccess: vi.fn(),
+    addDanger: vi.fn(),
   } as unknown as ToastsStart);
 
 const createClientMock = (): DataSourcesClient =>
   ({
-    add: jest.fn().mockResolvedValue(undefined),
-    getById: jest.fn().mockResolvedValue(undefined),
-    delete: jest.fn().mockResolvedValue(undefined),
+    add: vi.fn().mockResolvedValue(undefined),
+    getById: vi.fn().mockResolvedValue(undefined),
+    delete: vi.fn().mockResolvedValue(undefined),
   } as unknown as DataSourcesClient);
 
 const createDatasetsClientMock = (): DatasetsClient =>
   ({
-    add: jest.fn().mockResolvedValue(undefined),
-    get: jest.fn().mockResolvedValue([]),
-    delete: jest.fn().mockResolvedValue(undefined),
+    add: vi.fn().mockResolvedValue(undefined),
+    get: vi.fn().mockResolvedValue([]),
+    delete: vi.fn().mockResolvedValue(undefined),
   } as unknown as DatasetsClient);
 
 const createDocLinksMock = (): DocLinksStart =>
@@ -72,7 +75,7 @@ const federatedS3DataSource: S3DataSourceWithSecrets = {
   },
 };
 
-const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
+const renderFederatedS3EditFlyout = (onSave: Mock) => {
   const services: DataFederationKibanaServices = {
     dataSourcesClient: createClientMock(),
     datasetsClient: createDatasetsClientMock(),
@@ -90,7 +93,7 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
     <EuiProvider>
       <KibanaContextProvider services={services}>
         <CreateDataSourceFlyout
-          onClose={jest.fn()}
+          onClose={vi.fn()}
           onSave={onSave}
           existingDataSourceNames={[]}
           initialDataSource={federatedS3DataSource}
@@ -115,7 +118,7 @@ describe('CreateDataSourceFlyout', () => {
     const savePromise = new Promise<string | null>((resolve) => {
       resolveSave = resolve;
     });
-    const onSave = jest.fn().mockReturnValue(savePromise);
+    const onSave = vi.fn().mockReturnValue(savePromise);
 
     const initialDataSource: DataSource = {
       type: 's3',
@@ -133,7 +136,7 @@ describe('CreateDataSourceFlyout', () => {
       <EuiProvider>
         <KibanaContextProvider services={services}>
           <CreateDataSourceFlyout
-            onClose={jest.fn()}
+            onClose={vi.fn()}
             onSave={onSave}
             existingDataSourceNames={[]}
             initialDataSource={initialDataSource}
@@ -166,13 +169,13 @@ describe('CreateDataSourceFlyout', () => {
       docLinks: createDocLinksMock(),
       featureFlags: {},
     };
-    const onSave = jest.fn().mockResolvedValue(null);
+    const onSave = vi.fn().mockResolvedValue(null);
 
     const { getByTestId, queryByTestId, findByText, queryByText } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
           <CreateDataSourceFlyout
-            onClose={jest.fn()}
+            onClose={vi.fn()}
             onSave={onSave}
             existingDataSourceNames={[]}
           />
@@ -202,7 +205,7 @@ describe('CreateDataSourceFlyout', () => {
       docLinks: createDocLinksMock(),
       featureFlags: {},
     };
-    const onSave = jest.fn().mockResolvedValue('validation_exception: something went wrong');
+    const onSave = vi.fn().mockResolvedValue('validation_exception: something went wrong');
 
     const initialDataSource: DataSource = {
       type: 's3',
@@ -217,7 +220,7 @@ describe('CreateDataSourceFlyout', () => {
       <EuiProvider>
         <KibanaContextProvider services={services}>
           <CreateDataSourceFlyout
-            onClose={jest.fn()}
+            onClose={vi.fn()}
             onSave={onSave}
             existingDataSourceNames={[]}
             initialDataSource={initialDataSource}
@@ -242,13 +245,13 @@ describe('CreateDataSourceFlyout', () => {
       docLinks: createDocLinksMock(),
       featureFlags: {},
     };
-    const onSave = jest.fn().mockResolvedValue(null);
+    const onSave = vi.fn().mockResolvedValue(null);
 
     const { getByTestId, findByText } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
           <CreateDataSourceFlyout
-            onClose={jest.fn()}
+            onClose={vi.fn()}
             onSave={onSave}
             existingDataSourceNames={[]}
           />
@@ -309,7 +312,7 @@ describe('CreateDataSourceFlyout', () => {
     });
 
     it('does not save when submitted by a button without a submit type', async () => {
-      const onSave = jest.fn().mockResolvedValue(null);
+      const onSave = vi.fn().mockResolvedValue(null);
       const { getByTestId } = renderFederatedS3EditFlyout(onSave);
 
       const setupSteps = getByTestId('createDataSourceFlyoutS3FederatedManualSteps');
@@ -326,7 +329,7 @@ describe('CreateDataSourceFlyout', () => {
     });
 
     it('saves when submitted by the submit button', async () => {
-      const onSave = jest.fn().mockResolvedValue(null);
+      const onSave = vi.fn().mockResolvedValue(null);
       const { getByTestId } = renderFederatedS3EditFlyout(onSave);
 
       const form = getByTestId('editDataSourceFlyout').querySelector('form');
@@ -340,7 +343,7 @@ describe('CreateDataSourceFlyout', () => {
   });
 
   it('preserves S3 federated identity settings that are not editable in the UI on edit', async () => {
-    const onSave = jest.fn().mockResolvedValue(null);
+    const onSave = vi.fn().mockResolvedValue(null);
     const { getByTestId } = renderFederatedS3EditFlyout(onSave);
 
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));

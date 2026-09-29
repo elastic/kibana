@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import {
@@ -16,10 +18,10 @@ import { useConvertIndexToLookup } from './use_convert_index_to_lookup';
 import { getReindexStatus, startReindex } from '../../services';
 import { advanceTimersByTime } from '../../../../__jest__/helpers/fake_timers';
 
-jest.mock('../../services');
+vi.mock('../../services');
 
-const mockedGetReindexStatus = jest.mocked(getReindexStatus);
-const mockedStartReindex = jest.mocked(startReindex);
+const mockedGetReindexStatus = vi.mocked(getReindexStatus);
+const mockedStartReindex = vi.mocked(startReindex);
 
 const SOURCE_INDEX_NAME = 'my-index';
 
@@ -53,20 +55,20 @@ const createReindexStatusResponse = (
 
 const defaultHookArgs = {
   sourceIndexName: SOURCE_INDEX_NAME,
-  onSuccess: jest.fn(),
-  onClose: jest.fn(),
+  onSuccess: vi.fn(),
+  onClose: vi.fn(),
 };
 
 describe('useConvertIndexToLookup', () => {
   beforeEach(() => {
     // NOTE: This suite intentionally uses fake timers for performance.
     // The hook polls on an interval (e.g. 3s). Using real timers would introduce real-time waits in CI.
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('successful conversion', () => {

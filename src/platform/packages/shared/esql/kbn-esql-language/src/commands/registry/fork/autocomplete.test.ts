@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { EsqlFieldType } from '@kbn/esql-types';
 import {
   mockContext,
@@ -138,11 +141,11 @@ const forkExpectSuggestions = async (
 describe('FORK Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
     mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
+    (mockCallbacks.getColumnsForQuery as Mock).mockResolvedValue([...lookupIndexFields]);
   });
   describe('FORK ...', () => {
     test('suggests new branch on empty command', async () => {
@@ -178,7 +181,7 @@ describe('FORK Autocomplete', () => {
           await forkExpectSuggestions('FROM a | FORK (WHERE ', EMPTY_WHERE_SUGGESTIONS);
           await forkExpectSuggestions('FROM a | FORK (WHERE key', EMPTY_WHERE_SUGGESTIONS);
           const expectedFields = getFieldNamesByType(['text', 'keyword', 'ip', 'version']);
-          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+          (mockCallbacks.getByType as Mock).mockResolvedValue(
             expectedFields.map((name) => ({ label: name, text: name }))
           );
           await forkExpectSuggestions(
@@ -223,7 +226,7 @@ describe('FORK Autocomplete', () => {
 
         test('dissect', async () => {
           const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
-          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+          (mockCallbacks.getByType as Mock).mockResolvedValue(
             expectedFields.map((name) => ({ label: name, text: name }))
           );
           await forkExpectSuggestions(
@@ -274,7 +277,7 @@ describe('FORK Autocomplete', () => {
 
         test('change_point', async () => {
           const expectedFields = getFieldNamesByType(ESQL_NUMBER_TYPES);
-          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+          (mockCallbacks.getByType as Mock).mockResolvedValue(
             expectedFields.map((name) => ({ label: name, text: name }))
           );
           await forkExpectSuggestions(
@@ -294,7 +297,7 @@ describe('FORK Autocomplete', () => {
             mockCallbacks
           );
           const expectedFieldsAny = getFieldNamesByType('any');
-          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+          (mockCallbacks.getByType as Mock).mockResolvedValue(
             expectedFieldsAny.map((name) => ({ label: name, text: name }))
           );
           await forkExpectSuggestions(
@@ -346,7 +349,7 @@ describe('FORK Autocomplete', () => {
 
           it('suggest within a function', async () => {
             const expectedFields = getFieldNamesByType(AVG_TYPES);
-            (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+            (mockCallbacks.getByType as Mock).mockResolvedValue(
               expectedFields.map((name) => ({ label: name, text: name }))
             );
             await forkExpectSuggestions(
@@ -417,7 +420,7 @@ describe('FORK Autocomplete', () => {
               'unsigned_long',
               'double',
             ]);
-            (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+            (mockCallbacks.getByType as Mock).mockResolvedValue(
               expectedFields.map((name) => ({ label: name, text: name }))
             );
             await forkExpectSuggestions(

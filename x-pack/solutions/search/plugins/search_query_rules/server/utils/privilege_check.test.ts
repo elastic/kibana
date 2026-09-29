@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreRequestHandlerContext, KibanaResponseFactory } from '@kbn/core/server';
 import { checkPrivileges } from './privilege_check';
 
@@ -13,26 +15,26 @@ const MOCK_CORE = {
     client: {
       asCurrentUser: {
         security: {
-          hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: false }),
+          hasPrivileges: vi.fn().mockResolvedValue({ has_all_requested: false }),
         },
       },
     },
   },
   security: {
     authc: {
-      getCurrentUser: jest.fn().mockReturnValue(null),
+      getCurrentUser: vi.fn().mockReturnValue(null),
     },
   },
 } as unknown as CoreRequestHandlerContext;
 
 const MOCK_RESPONSE = {
-  customError: jest.fn(),
-  forbidden: jest.fn(),
+  customError: vi.fn(),
+  forbidden: vi.fn(),
 } as unknown as KibanaResponseFactory;
 
 describe('privilege check util', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return 502 error if user is not available', async () => {
@@ -49,7 +51,7 @@ describe('privilege check util', () => {
   });
   it('should return forbidden error if user does not have required privileges', async () => {
     const mockCore = { ...MOCK_CORE };
-    mockCore.security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'test_user' });
+    mockCore.security.authc.getCurrentUser = vi.fn().mockReturnValue({ username: 'test_user' });
     const mockResponse = { ...MOCK_RESPONSE };
     await checkPrivileges(mockCore, mockResponse);
 
@@ -59,8 +61,8 @@ describe('privilege check util', () => {
   });
   it('should not return an error if all checks are passed', async () => {
     const mockCore = { ...MOCK_CORE };
-    mockCore.security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'test_user' });
-    mockCore.elasticsearch.client.asCurrentUser.security.hasPrivileges = jest
+    mockCore.security.authc.getCurrentUser = vi.fn().mockReturnValue({ username: 'test_user' });
+    mockCore.elasticsearch.client.asCurrentUser.security.hasPrivileges = vi
       .fn()
       .mockResolvedValue({ has_all_requested: true });
 

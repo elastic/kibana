@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent } from '@testing-library/react';
@@ -13,35 +15,44 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { Footer } from './footer';
 import { FOOTER_TEST_ID, FOOTER_TAKE_ACTION_BUTTON_TEST_ID } from './constants/test_ids';
 
-jest.mock('@kbn/es-query', () => ({
-  isNonLocalIndexName: jest.fn((indexName: string) => indexName.includes('::')),
-}));
+vi.mock('@kbn/es-query', () => {
+      const mocked = {
+      isNonLocalIndexName: vi.fn((indexName: string) => indexName.includes('::')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../detections/components/attacks/table/attacks_group_take_action_items', () => ({
-  AttacksGroupTakeActionItems: ({
-    onActionSuccess,
-    isRemoteDocument,
-  }: {
-    onActionSuccess?: () => void;
-    isRemoteDocument: boolean;
-  }) => (
-    <div data-test-subj="mockAttacksGroupTakeActionItems" data-is-remote={String(isRemoteDocument)}>
-      <button type="button" data-test-subj="mockActionButton" onClick={onActionSuccess}>
-        {'Action'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../detections/components/attacks/table/attacks_group_take_action_items', () => {
+      const mocked = {
+      AttacksGroupTakeActionItems: ({
+        onActionSuccess,
+        isRemoteDocument,
+      }: {
+        onActionSuccess?: () => void;
+        isRemoteDocument: boolean;
+      }) => (
+        <div data-test-subj="mockAttacksGroupTakeActionItems" data-is-remote={String(isRemoteDocument)}>
+          <button type="button" data-test-subj="mockActionButton" onClick={onActionSuccess}>
+            {'Action'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../detections/components/attacks/table/attack_details/attack_ai_assistant_button',
-  () => ({
-    AttackAiAssistantButton: ({ attack }: { attack: AttackDiscoveryAlert }) => (
-      <button type="button" data-test-subj="mockAiAssistantButton" data-attack-id={attack.id}>
-        {'AI Assistant'}
-      </button>
-    ),
-  })
+  () => {
+      const mocked = {
+        AttackAiAssistantButton: ({ attack }: { attack: AttackDiscoveryAlert }) => (
+          <button type="button" data-test-subj="mockAiAssistantButton" data-attack-id={attack.id}>
+            {'AI Assistant'}
+          </button>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecord =>
@@ -66,7 +77,7 @@ const createMockAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): Attack
 describe('<Footer />', () => {
   const mockHit = createMockHit();
   const mockAttack = createMockAttack();
-  const onAttackUpdated = jest.fn();
+  const onAttackUpdated = vi.fn();
 
   const renderFooter = (props?: Partial<Parameters<typeof Footer>[0]>) =>
     render(
@@ -76,7 +87,7 @@ describe('<Footer />', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the footer panel', () => {

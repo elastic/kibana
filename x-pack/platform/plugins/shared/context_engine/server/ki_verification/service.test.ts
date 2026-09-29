@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { KiVerifierRegistry } from './registry';
 import { KiVerificationInputError } from './errors';
@@ -14,7 +16,7 @@ import type { KiVerificationContext, KiVerifier, KiVerifierOutcome } from './typ
 const makeVerifier = (id: string, outcome: KiVerifierOutcome, applies = true): KiVerifier => ({
   id,
   applies: () => applies,
-  verify: jest.fn(async () => outcome),
+  verify: vi.fn(async () => outcome),
 });
 
 describe('KiVerificationService', () => {
@@ -116,7 +118,7 @@ describe('KiVerificationService', () => {
     const thrower: KiVerifier = {
       id: 'thrower',
       applies: () => true,
-      verify: jest.fn(async () => {
+      verify: vi.fn(async () => {
         throw new Error('boom');
       }),
     };
@@ -132,7 +134,7 @@ describe('KiVerificationService', () => {
     const aborter: KiVerifier = {
       id: 'aborter',
       applies: () => true,
-      verify: jest.fn(async () => {
+      verify: vi.fn(async () => {
         throw abortError;
       }),
     };
@@ -148,7 +150,7 @@ describe('KiVerificationService', () => {
       applies: () => {
         throw new Error('applies boom');
       },
-      verify: jest.fn(async () => ({ passed: true as const })),
+      verify: vi.fn(async () => ({ passed: true as const })),
     };
     registry.register(thrower);
 

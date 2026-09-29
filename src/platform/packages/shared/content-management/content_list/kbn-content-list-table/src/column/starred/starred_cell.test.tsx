@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
@@ -17,8 +19,8 @@ import {
 } from '@kbn/content-list-provider';
 import { StarredCell } from './starred_cell';
 
-jest.mock('@kbn/content-management-favorites-public', () => {
-  const actual = jest.requireActual('@kbn/content-management-favorites-public');
+vi.mock('@kbn/content-management-favorites-public', async () => {
+  const actual = (await vi.importActual('@kbn/content-management-favorites-public'));
 
   return {
     ...actual,
@@ -30,7 +32,7 @@ jest.mock('@kbn/content-management-favorites-public', () => {
   };
 });
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,

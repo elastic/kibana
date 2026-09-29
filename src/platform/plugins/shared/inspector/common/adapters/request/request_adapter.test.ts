@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RequestAdapter } from './request_adapter';
 import type { Request } from './types';
 
@@ -47,7 +49,7 @@ describe('RequestAdapter', () => {
 
   describe('change events', () => {
     it('should emit it when starting a new request', () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       adapter.once('change', spy);
       expect(spy).not.toHaveBeenCalled();
       adapter.start('request');
@@ -55,7 +57,7 @@ describe('RequestAdapter', () => {
     });
 
     it('should emit it when updating the request', () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       adapter.on('change', spy);
       expect(spy).not.toHaveBeenCalled();
       const req = adapter.start('request');

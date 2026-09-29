@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterValueButton } from './filter_value_btn';
@@ -22,7 +24,7 @@ describe('FilterValueButton', function () {
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
-        setIsNestedOpen={jest.fn()}
+        setIsNestedOpen={vi.fn()}
         negate={false}
         series={mockUxSeries}
       />
@@ -41,7 +43,7 @@ describe('FilterValueButton', function () {
           seriesId={0}
           value={'Chrome'}
           isNestedOpen={{ value: '', negate: false }}
-          setIsNestedOpen={jest.fn()}
+          setIsNestedOpen={vi.fn()}
           negate={true}
           series={mockUxSeries}
         />
@@ -65,7 +67,7 @@ describe('FilterValueButton', function () {
           seriesId={0}
           value={'Chrome'}
           isNestedOpen={{ value: '', negate: false }}
-          setIsNestedOpen={jest.fn()}
+          setIsNestedOpen={vi.fn()}
           negate={true}
           allSelectedValues={['Firefox']}
           series={mockUxSeries}
@@ -97,7 +99,7 @@ describe('FilterValueButton', function () {
           seriesId={0}
           value={'Chrome'}
           isNestedOpen={{ value: '', negate: false }}
-          setIsNestedOpen={jest.fn()}
+          setIsNestedOpen={vi.fn()}
           negate={false}
           allSelectedValues={['Chrome', 'Firefox']}
           series={mockUxSeries}
@@ -125,7 +127,7 @@ describe('FilterValueButton', function () {
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
-        setIsNestedOpen={jest.fn()}
+        setIsNestedOpen={vi.fn()}
         negate={true}
         allSelectedValues={['Chrome', 'Firefox']}
         series={mockUxSeries}
@@ -153,7 +155,7 @@ describe('FilterValueButton', function () {
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
-        setIsNestedOpen={jest.fn()}
+        setIsNestedOpen={vi.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
@@ -187,7 +189,7 @@ describe('FilterValueButton', function () {
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
-        setIsNestedOpen={jest.fn()}
+        setIsNestedOpen={vi.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
@@ -218,7 +220,7 @@ describe('FilterValueButton', function () {
     mockUseSeriesFilter();
     mockUseValuesList();
 
-    const setIsNestedOpen = jest.fn();
+    const setIsNestedOpen = vi.fn();
 
     render(
       <FilterValueButton
@@ -245,7 +247,7 @@ describe('FilterValueButton', function () {
     mockUseSeriesFilter();
     mockUseValuesList();
 
-    const setIsNestedOpen = jest.fn();
+    const setIsNestedOpen = vi.fn();
 
     render(
       <FilterValueButton

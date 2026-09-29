@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
@@ -21,46 +24,61 @@ import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { createUseKibanaMockValue } from '../../../mocks';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 
-const mockSetSelectedExecution = jest.fn();
-const mockRefetch = jest.fn().mockResolvedValue(undefined);
+const mockSetSelectedExecution = vi.fn();
+const mockRefetch = vi.fn().mockResolvedValue(undefined);
 
 const mockWorkflowApi = createMockWorkflowApi();
-const mockUseWorkflowsCapabilities = jest.fn(() => createMockWorkflowsCapabilities());
-const mockUseUiSetting = jest.fn();
+const mockUseWorkflowsCapabilities = vi.fn(() => createMockWorkflowsCapabilities());
+const mockUseUiSetting = vi.fn();
 
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_kibana');
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useUiSetting: (settingId: string, defaultValue?: boolean) =>
-    mockUseUiSetting(settingId, defaultValue),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useUiSetting: (settingId: string, defaultValue?: boolean) =>
+        mockUseUiSetting(settingId, defaultValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  getIndexSelectionHandler: jest.fn(() => jest.fn()),
-  useWorkflowsApi: () => mockWorkflowApi,
-  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      getIndexSelectionHandler: vi.fn(() => vi.fn()),
+      useWorkflowsApi: () => mockWorkflowApi,
+      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_telemetry', () => ({
-  useTelemetry: () => ({
-    reportWorkflowExecutionsCancelled: jest.fn(),
-  }),
-}));
+vi.mock('../../../hooks/use_telemetry', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        reportWorkflowExecutionsCancelled: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_serial_polling', () => ({
-  useSerialPolling: jest.fn(),
-}));
+vi.mock('../../../hooks/use_serial_polling', () => {
+      const mocked = {
+      useSerialPolling: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSerialPolling = jest.mocked(useSerialPolling);
+const mockUseSerialPolling = vi.mocked(useSerialPolling);
 
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => ({
-    selectedExecutionId: null,
-    setSelectedExecution: mockSetSelectedExecution,
-  }),
-}));
+vi.mock('../../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => ({
+        selectedExecutionId: null,
+        setSelectedExecution: mockSetSelectedExecution,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWorkflowExecutions: WorkflowExecutionListDto = {
   results: [
@@ -102,25 +120,28 @@ const mockWorkflowExecutionsWithRunning: WorkflowExecutionListDto = {
   total: 1,
 };
 
-const mockUseWorkflowExecutions = jest.fn();
-jest.mock('../../../entities/workflows/model/use_workflow_executions', () => ({
-  useWorkflowExecutions: (...args: unknown[]) => mockUseWorkflowExecutions(...args),
-}));
+const mockUseWorkflowExecutions = vi.fn();
+vi.mock('../../../entities/workflows/model/use_workflow_executions', () => {
+      const mocked = {
+      useWorkflowExecutions: (...args: unknown[]) => mockUseWorkflowExecutions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowExecutionList (stateful)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     mockWorkflowApi.cancelAllWorkflowExecutions.mockResolvedValue(undefined);
     mockUseUiSetting.mockReturnValue(true);
-    (useKibana as jest.Mock).mockReturnValue(createUseKibanaMockValue());
+    (useKibana as Mock).mockReturnValue(createUseKibanaMockValue());
 
     mockUseWorkflowExecutions.mockReturnValue({
       data: mockWorkflowExecutions,
       isInitialLoading: false,
       isLoadingMore: false,
       error: null,
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
       refetch: mockRefetch,
     });
   });
@@ -144,7 +165,7 @@ describe('WorkflowExecutionList (stateful)', () => {
       isInitialLoading: true,
       isLoadingMore: false,
       error: null,
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
       refetch: mockRefetch,
     });
     renderComponent();
@@ -157,7 +178,7 @@ describe('WorkflowExecutionList (stateful)', () => {
       isInitialLoading: false,
       isLoadingMore: false,
       error: new Error('Network error'),
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
       refetch: mockRefetch,
     });
     renderComponent();
@@ -204,7 +225,7 @@ describe('WorkflowExecutionList (stateful)', () => {
       isInitialLoading: false,
       isLoadingMore: false,
       error: null,
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
       refetch: mockRefetch,
     });
     renderComponent();
@@ -228,7 +249,7 @@ describe('WorkflowExecutionList (stateful)', () => {
       isInitialLoading: false,
       isLoadingMore: false,
       error: null,
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
       refetch: mockRefetch,
     });
     renderComponent();
@@ -251,7 +272,7 @@ describe('WorkflowExecutionList (stateful)', () => {
       isInitialLoading: false,
       isLoadingMore: false,
       error: null,
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
       refetch: mockRefetch,
     });
     renderComponent();

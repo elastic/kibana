@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { runAppMenuAction, enhanceAppMenuItemWithRunAction } from './run_app_menu_action';
@@ -16,7 +18,7 @@ describe('run app menu actions', () => {
   describe('runAppMenuAction', () => {
     it('should call the run function with correct params', async () => {
       let capturedParams: DiscoverAppMenuRunActionParams | undefined;
-      const mockRun = jest.fn((params: DiscoverAppMenuRunActionParams) => {
+      const mockRun = vi.fn((params: DiscoverAppMenuRunActionParams) => {
         capturedParams = params;
       });
       const appMenuItem: DiscoverAppMenuItemType = {
@@ -34,7 +36,7 @@ describe('run app menu actions', () => {
         appMenuItem,
         anchorElement,
         services: discoverServiceMock,
-        returnFocus: jest.fn(),
+        returnFocus: vi.fn(),
       });
 
       expect(mockRun).toHaveBeenCalledTimes(1);
@@ -49,7 +51,7 @@ describe('run app menu actions', () => {
     });
 
     it('should not render anything when only run is defined', async () => {
-      const mockRun = jest.fn();
+      const mockRun = vi.fn();
       const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
@@ -65,7 +67,7 @@ describe('run app menu actions', () => {
         appMenuItem,
         anchorElement,
         services: discoverServiceMock,
-        returnFocus: jest.fn(),
+        returnFocus: vi.fn(),
       });
 
       expect(mockRun).toHaveBeenCalled();
@@ -74,7 +76,7 @@ describe('run app menu actions', () => {
 
     it('should render content returned from render', async () => {
       let capturedParams: DiscoverAppMenuRunActionParams | undefined;
-      const mockRender = jest.fn((params: DiscoverAppMenuRunActionParams) => {
+      const mockRender = vi.fn((params: DiscoverAppMenuRunActionParams) => {
         capturedParams = params;
         return <div data-test-subj="test-content">Custom Content</div>;
       });
@@ -94,7 +96,7 @@ describe('run app menu actions', () => {
         appMenuItem,
         anchorElement,
         services: discoverServiceMock,
-        returnFocus: jest.fn(),
+        returnFocus: vi.fn(),
       });
 
       if (!capturedParams) {
@@ -110,7 +112,7 @@ describe('run app menu actions', () => {
     it('should call onFinishAction to cleanup', async () => {
       let capturedParams: DiscoverAppMenuRunActionParams | undefined;
 
-      const mockRender = jest.fn((params) => {
+      const mockRender = vi.fn((params) => {
         capturedParams = params;
         return <div data-test-subj="test-content">Custom Content</div>;
       });
@@ -126,7 +128,7 @@ describe('run app menu actions', () => {
 
       const anchorElement = document.createElement('div');
       document.body.appendChild(anchorElement);
-      const returnFocusMock = jest.fn();
+      const returnFocusMock = vi.fn();
 
       await runAppMenuAction({
         appMenuItem,
@@ -156,7 +158,7 @@ describe('run app menu actions', () => {
 
   describe('enhanceAppMenuItemWithRunAction', () => {
     it('should wrap the run function', () => {
-      const mockRun = jest.fn();
+      const mockRun = vi.fn();
       const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
@@ -176,7 +178,7 @@ describe('run app menu actions', () => {
     });
 
     it('should wrap the render function', () => {
-      const mockRender = jest.fn(() => null);
+      const mockRender = vi.fn(() => null);
       const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
@@ -196,7 +198,7 @@ describe('run app menu actions', () => {
     });
 
     it('should call runAppMenuAction when wrapper is invoked', async () => {
-      const mockRun = jest.fn();
+      const mockRun = vi.fn();
       const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
@@ -214,8 +216,8 @@ describe('run app menu actions', () => {
       const triggerElement = document.createElement('div');
       enhanced.run?.({
         triggerElement,
-        returnFocus: jest.fn(),
-        context: { onFinishAction: jest.fn() },
+        returnFocus: vi.fn(),
+        context: { onFinishAction: vi.fn() },
       });
 
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -224,7 +226,7 @@ describe('run app menu actions', () => {
     });
 
     it('should recursively enhance nested items', () => {
-      const mockNestedRender = jest.fn(() => null);
+      const mockNestedRender = vi.fn(() => null);
       const appMenuItem: DiscoverAppMenuItemType = {
         id: 'parent',
         order: 1,
@@ -259,7 +261,7 @@ describe('run app menu actions', () => {
         label: 'Action 1',
         iconType: 'share',
         testId: 'my-test-id',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const enhanced = enhanceAppMenuItemWithRunAction({

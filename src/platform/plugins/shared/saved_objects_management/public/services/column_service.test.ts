@@ -54,7 +54,7 @@ describe('SavedObjectsManagementColumnRegistry', () => {
       const column = createColumn('my-column');
       setup.register(column);
       expect(() => setup.register(column)).toThrowErrorMatchingInlineSnapshot(
-        `"Saved Objects Management Column with id 'my-column' already exists"`
+        `[Error: Saved Objects Management Column with id 'my-column' already exists]`
       );
     });
 

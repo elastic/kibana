@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/moon', () => ({
-  getMoonChangedFiles: jest.fn(),
-  getAffectedMoonProjectsFromChangedFiles: jest.fn(),
-}));
+import { vi } from 'vitest';
+
+vi.mock('@kbn/moon', () => {
+      const mocked = {
+      getMoonChangedFiles: vi.fn(),
+      getAffectedMoonProjectsFromChangedFiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import fs from 'fs';
 import os from 'os';

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 import type { PhaseEvent } from '@kbn/presentation-publishing';
@@ -14,9 +16,12 @@ import { createLensEmbeddableFactory } from './lens_embeddable';
 import { createEmptyLensState } from './helper';
 import { makeEmbeddableServices } from './mocks';
 
-jest.mock('./data_loader', () => ({
-  loadEmbeddableData: () => ({ cleanup: jest.fn() }),
-}));
+vi.mock('./data_loader', () => {
+      const mocked = {
+      loadEmbeddableData: () => ({ cleanup: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildPanel = async (
   initialState: LensWireAPIConfig,
@@ -70,11 +75,11 @@ describe('Lens embeddable applySerializedState', () => {
 
   it('refreshes library defaults after the referenced document changes', async () => {
     const services = makeEmbeddableServices();
-    services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+    services.attributeService.loadFromLibrary = vi.fn().mockResolvedValue({
       attributes: createEmptyLensState('lnsMetric', 'Old title', 'Old description').attributes,
     });
     const panel = await buildPanel({ ref_id: 'same-id' }, services);
-    services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+    services.attributeService.loadFromLibrary = vi.fn().mockResolvedValue({
       attributes: createEmptyLensState('lnsMetric', 'New title', 'New description').attributes,
     });
 
@@ -107,7 +112,7 @@ describe('Lens embeddable applySerializedState', () => {
 
   it('keeps custom panel overrides separate from updated library defaults', async () => {
     const services = makeEmbeddableServices();
-    services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+    services.attributeService.loadFromLibrary = vi.fn().mockResolvedValue({
       attributes: createEmptyLensState('lnsMetric', 'Old title', 'Old description').attributes,
     });
     const panelState = {
@@ -116,7 +121,7 @@ describe('Lens embeddable applySerializedState', () => {
       description: 'Custom description',
     };
     const panel = await buildPanel(panelState, services);
-    services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+    services.attributeService.loadFromLibrary = vi.fn().mockResolvedValue({
       attributes: createEmptyLensState('lnsMetric', 'New title', 'New description').attributes,
     });
 
@@ -135,7 +140,7 @@ describe('Lens embeddable applySerializedState', () => {
     async (description) => {
       const services = makeEmbeddableServices();
       const { attributes } = createEmptyLensState('lnsMetric', 'Metric');
-      services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+      services.attributeService.loadFromLibrary = vi.fn().mockResolvedValue({
         attributes: { ...attributes, description },
       });
       const panel = await buildPanel({ ref_id: 'same-id', description: 'Old fallback' }, services);
@@ -155,14 +160,14 @@ describe('Lens embeddable applySerializedState', () => {
     const services = makeEmbeddableServices();
     const { attributes: oldAttributes } = createEmptyLensState('lnsMetric', 'Old title');
     const { attributes: newAttributes } = createEmptyLensState('lnsMetric', 'New title');
-    services.attributeService.loadFromLibrary = jest
+    services.attributeService.loadFromLibrary = vi
       .fn()
       .mockResolvedValue({ attributes: oldAttributes });
     const panel = await buildPanel({ ref_id: 'same-id' }, services);
 
     let resolveFirst!: (value: { attributes: typeof oldAttributes }) => void;
     let resolveSecond!: (value: { attributes: typeof newAttributes }) => void;
-    services.attributeService.loadFromLibrary = jest
+    services.attributeService.loadFromLibrary = vi
       .fn()
       .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
       .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));

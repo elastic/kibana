@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,12 +15,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { useCopyDataset } from '../hooks/use_evals_api';
 import { CopyDatasetFlyout } from './copy_dataset_flyout';
 
-jest.mock('../hooks/use_evals_api');
+vi.mock('../hooks/use_evals_api');
 
-const mockUseCopyDataset = useCopyDataset as jest.MockedFunction<typeof useCopyDataset>;
-const mutateAsync = jest.fn();
-const onClose = jest.fn();
-const onCopied = jest.fn();
+const mockUseCopyDataset = useCopyDataset as MockedFunction<typeof useCopyDataset>;
+const mutateAsync = vi.fn();
+const onClose = vi.fn();
+const onCopied = vi.fn();
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <I18nProvider>{children}</I18nProvider>
@@ -36,7 +39,7 @@ const renderFlyout = () =>
   );
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mutateAsync.mockResolvedValue({
     dataset_id: 'copied-dataset-id',
     name: 'Golden set (copy)',

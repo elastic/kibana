@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useGetMigrationRules, useInvalidateGetMigrationRules } from './use_get_migration_rules';
@@ -12,20 +15,23 @@ import { migrationRules } from '../__mocks__';
 import { getMigrationRules } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../api');
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: jest.fn(),
-}));
+vi.mock('../api');
+vi.mock('@kbn/react-query', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-query')),
+      useQueryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Get Migration Rules Hooks', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useGetMigrationRules', () => {
     it('returns rules and total count', async () => {
-      (getMigrationRules as jest.Mock).mockResolvedValue({
+      (getMigrationRules as Mock).mockResolvedValue({
         data: migrationRules,
         total: 2,
       });
@@ -53,7 +59,7 @@ describe('Get Migration Rules Hooks', () => {
 
     it('handles API errors gracefully', async () => {
       const mockError = new Error('API error');
-      (getMigrationRules as jest.Mock).mockRejectedValue(mockError);
+      (getMigrationRules as Mock).mockRejectedValue(mockError);
 
       const { result } = renderHook(
         () =>
@@ -77,10 +83,10 @@ describe('Get Migration Rules Hooks', () => {
   });
 
   describe('useInvalidateGetMigrationRules', () => {
-    const invalidateQueries = jest.fn();
+    const invalidateQueries = vi.fn();
 
     beforeEach(() => {
-      (useQueryClient as jest.Mock).mockReturnValue({
+      (useQueryClient as Mock).mockReturnValue({
         invalidateQueries,
       });
     });

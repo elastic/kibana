@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -15,15 +17,21 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useCreateCsvReport } from './use_create_csv_report';
 import { testQueryClientConfig } from '../utils/test';
 
-jest.mock('../apis/create_csv_report', () => ({
-  createCsvReport: jest.fn(),
-}));
+vi.mock('../apis/create_csv_report', () => {
+      const mocked = {
+      createCsvReport: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: jest.fn((node) => node),
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: vi.fn((node) => node),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { createCsvReport } = jest.requireMock('../apis/create_csv_report');
+const { createCsvReport } = (await vi.importMock('../apis/create_csv_report'));
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -51,7 +59,7 @@ const variables = {
 
 describe('useCreateCsvReport', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

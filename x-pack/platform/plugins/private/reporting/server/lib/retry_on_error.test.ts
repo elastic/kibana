@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { retryOnError } from './retry_on_error';
 import { SavedReport } from './store';
@@ -29,18 +31,18 @@ const report = new SavedReport({
 
 describe('retryOnError', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    jest.spyOn(global, 'setTimeout');
-    jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.spyOn(global, 'setTimeout');
+    vi.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
   it(`doesn't retry if operation is successful`, async () => {
-    const operationMock = jest.fn().mockResolvedValue('success');
+    const operationMock = vi.fn().mockResolvedValue('success');
     expect(await retryOnError({ operation: operationMock, retries: 3, report, logger })).toEqual(
       'success'
     );
@@ -54,12 +56,12 @@ describe('retryOnError', () => {
 
   it('logs an error message on retry', async () => {
     const error = new Error('fail');
-    const operationMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
+    const operationMock = vi.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
 
     const retryPromise = retryOnError({ operation: operationMock, retries: 3, report, logger });
     await Promise.resolve();
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     await retryPromise;
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -83,7 +85,7 @@ describe('retryOnError', () => {
 
   it('does not log if no retries are configured', async () => {
     const error = new Error('fail');
-    const operationMock = jest.fn().mockRejectedValueOnce(error);
+    const operationMock = vi.fn().mockRejectedValueOnce(error);
 
     await expect(
       retryOnError({ operation: operationMock, retries: 0, report, logger })
@@ -97,7 +99,7 @@ describe('retryOnError', () => {
 
   it('does not retry if error is KibanaShuttingDownError', async () => {
     const error = new KibanaShuttingDownError('shutdown');
-    const operationMock = jest.fn().mockRejectedValueOnce(error);
+    const operationMock = vi.fn().mockRejectedValueOnce(error);
 
     await expect(
       retryOnError({ operation: operationMock, retries: 3, report, logger })
@@ -113,7 +115,7 @@ describe('retryOnError', () => {
 
   it('retries with an exponential backoff', async () => {
     const error = new Error('fail');
-    const operationMock = jest
+    const operationMock = vi
       .fn()
       .mockRejectedValueOnce(error)
       .mockRejectedValueOnce(error)
@@ -123,7 +125,7 @@ describe('retryOnError', () => {
     const retryPromise = retryOnError({ operation: operationMock, retries: 3, report, logger });
     await Promise.resolve();
 
-    jest.runAllTimersAsync().catch(() => {});
+    vi.runAllTimersAsync().catch(() => {});
     expect(await retryPromise).toEqual('success');
     // initial attempt + 3 retries
     expect(setTimeout).toHaveBeenCalledTimes(3);
@@ -167,12 +169,12 @@ describe('retryOnError', () => {
 
   it('throws error if number of retries exceeds max allowed', async () => {
     const error = new Error('fail');
-    const operationMock = jest.fn().mockRejectedValue(error);
+    const operationMock = vi.fn().mockRejectedValue(error);
 
     const retryPromise = retryOnError({ operation: operationMock, retries: 3, report, logger });
     await Promise.resolve();
 
-    jest.runAllTimersAsync().catch(() => {});
+    vi.runAllTimersAsync().catch(() => {});
     await expect(retryPromise).rejects.toThrowErrorMatchingInlineSnapshot(`"fail"`);
 
     // initial attempt + 3 retries

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -45,14 +47,14 @@ function makeSoClient() {
   const put = (type: string, id: string, attributes: Record<string, unknown>) =>
     store.set(key(type, id), { attributes, version: String(nextVersion++) });
   return {
-    get: jest.fn(async (type: string, id: string) => {
+    get: vi.fn(async (type: string, id: string) => {
       const stored = store.get(key(type, id));
       if (!stored) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
       return { id, type, references: [], ...stored };
     }),
-    create: jest.fn(
+    create: vi.fn(
       async (
         type: string,
         attributes: Record<string, unknown>,
@@ -65,7 +67,7 @@ function makeSoClient() {
         return { id: options.id, type, references: [], attributes };
       }
     ),
-    update: jest.fn(
+    update: vi.fn(
       async (
         type: string,
         id: string,
@@ -100,13 +102,13 @@ function makeManagementApi(options?: {
   const failEnableId = (): string | undefined =>
     typeof options?.failEnableFor === 'object' ? options.failEnableFor.id : options?.failEnableFor;
 
-  const getWorkflow = jest.fn(async (id: string, spaceId: string) => ({
+  const getWorkflow = vi.fn(async (id: string, spaceId: string) => ({
     id,
     enabled: enabled.get(stateKey(id, spaceId)) ?? true,
     definition: { id },
   }));
 
-  const updateWorkflow = jest.fn(
+  const updateWorkflow = vi.fn(
     async (id: string, patch: { enabled?: boolean }, spaceId: string) => {
       if (options?.failUpdateFor === id) {
         throw new Error(`update failed for ${id}`);
@@ -126,7 +128,7 @@ function makeManagementApi(options?: {
     }
   );
 
-  const cancelAllActiveWorkflowExecutions = jest.fn(
+  const cancelAllActiveWorkflowExecutions = vi.fn(
     async (workflowId: string, _spaceId: string, _request: unknown) => {
       if (options?.failCancelAllFor === workflowId) {
         throw new Error(`cancel-all failed for ${workflowId}`);
@@ -140,7 +142,7 @@ function makeManagementApi(options?: {
       getWorkflow,
       updateWorkflow,
       cancelAllActiveWorkflowExecutions,
-      getClient: jest.fn(() => ({ getWorkflow })),
+      getClient: vi.fn(() => ({ getWorkflow })),
     },
     getWorkflow,
     updateWorkflow,
@@ -156,10 +158,10 @@ interface BulkError {
 // Alerting v2 rules client stub. Records the ids each call received and returns
 // the configured per-id errors (empty = all succeeded).
 function makeV2RulesClient(options?: { disableErrors?: BulkError[]; enableErrors?: BulkError[] }) {
-  const bulkDisableRules = jest.fn(async (_params: { ids: string[] }) => ({
+  const bulkDisableRules = vi.fn(async (_params: { ids: string[] }) => ({
     errors: options?.disableErrors ?? [],
   }));
-  const bulkEnableRules = jest.fn(async (_params: { ids: string[] }) => ({
+  const bulkEnableRules = vi.fn(async (_params: { ids: string[] }) => ({
     errors: options?.enableErrors ?? [],
   }));
   return { bulkDisableRules, bulkEnableRules };
@@ -171,16 +173,16 @@ function makeUiSettingsClient(
 ) {
   const store = new Map<string, boolean | number | string>(Object.entries(initial));
   return {
-    get: jest.fn(async <T>(key: string, defaultValue?: T) =>
+    get: vi.fn(async <T>(key: string, defaultValue?: T) =>
       store.has(key) ? (store.get(key) as T) : defaultValue
     ),
-    set: jest.fn(async (key: string, value: boolean | number | string) => {
+    set: vi.fn(async (key: string, value: boolean | number | string) => {
       if (options?.failSetFor === key) {
         throw new Error(`set failed for ${key}`);
       }
       store.set(key, value);
     }),
-    getAll: jest.fn(async () => Object.fromEntries(store)),
+    getAll: vi.fn(async () => Object.fromEntries(store)),
     _store: store,
   };
 }
@@ -207,7 +209,7 @@ function makeService(params?: {
   // `null` models the alerting v2 plugin being unavailable.
   const v2RulesClient =
     params?.v2RulesClient === null ? undefined : params?.v2RulesClient ?? makeV2RulesClient();
-  const getRuleBackedQueryLinks = jest.fn(async () =>
+  const getRuleBackedQueryLinks = vi.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );
 
@@ -232,13 +234,13 @@ function makeService(params?: {
 
   // One space per page, so a sweep that stops after the first page misses `space-a`.
   const spacesRepository = {
-    createPointInTimeFinder: jest.fn(() => ({
+    createPointInTimeFinder: vi.fn(() => ({
       async *find() {
         for (const id of params?.internalSpaceIds ?? params?.spaceIds ?? ['default']) {
           yield { saved_objects: [{ id }] };
         }
       },
-      close: jest.fn(),
+      close: vi.fn(),
     })),
   };
   // System sweeps scope Settings per space, so each space gets its own client and a
@@ -256,31 +258,31 @@ function makeService(params?: {
     internalSpaceUiSettingsClients.set(spaceId, client);
     return client;
   };
-  const internalClient = { asScopedToNamespace: jest.fn((spaceId: string) => ({ spaceId })) };
+  const internalClient = { asScopedToNamespace: vi.fn((spaceId: string) => ({ spaceId })) };
 
   const savedObjects = {
-    createInternalRepository: jest.fn((types: string[]) =>
+    createInternalRepository: vi.fn((types: string[]) =>
       types.includes('space') ? spacesRepository : soClient
     ),
-    getScopedClient: jest.fn(),
-    getUnsafeInternalClient: jest.fn(() => internalClient),
+    getScopedClient: vi.fn(),
+    getUnsafeInternalClient: vi.fn(() => internalClient),
   };
 
   const server = {
     core: {
       savedObjects,
       uiSettings: {
-        asScopedToClient: jest.fn((client?: { spaceId?: string }) =>
+        asScopedToClient: vi.fn((client?: { spaceId?: string }) =>
           client?.spaceId ? getInternalSpaceUiSettingsClient(client.spaceId) : spaceUiSettingsClient
         ),
-        globalAsScopedToClient: jest.fn(() => globalUiSettingsClient),
+        globalAsScopedToClient: vi.fn(() => globalUiSettingsClient),
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
     spaces: {
       spacesService: {
-        createSpacesClient: jest.fn(() => ({
-          getAll: jest.fn(async () => {
+        createSpacesClient: vi.fn(() => ({
+          getAll: vi.fn(async () => {
             if (params?.spacesGetAllThrows) {
               throw new Error('spaces unavailable');
             }
@@ -291,7 +293,7 @@ function makeService(params?: {
     },
   } as unknown as SignificantEventsServer;
 
-  const getScopedClients = jest.fn(async () => ({
+  const getScopedClients = vi.fn(async () => ({
     getKnowledgeIndicatorClient: async () => ({ getRuleBackedQueryLinks }),
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
     globalUiSettingsClient,
@@ -433,12 +435,12 @@ describe('SignificantEventsMaintenanceService', () => {
       const stateKey = (id: string, spaceId: string) => `${id}@${spaceId}`;
       let failOnboarding = true;
 
-      const getWorkflow = jest.fn(async (id: string, spaceId: string) => ({
+      const getWorkflow = vi.fn(async (id: string, spaceId: string) => ({
         id,
         enabled: enabled.get(stateKey(id, spaceId)) ?? true,
         definition: { id },
       }));
-      const updateWorkflow = jest.fn(
+      const updateWorkflow = vi.fn(
         async (id: string, patch: { enabled?: boolean }, spaceId: string) => {
           if (failOnboarding && id === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID) {
             throw new Error('update failed for onboarding');
@@ -455,10 +457,10 @@ describe('SignificantEventsMaintenanceService', () => {
         }
       );
       const api = {
-        getClient: jest.fn(() => ({ getWorkflow })),
+        getClient: vi.fn(() => ({ getWorkflow })),
         getWorkflow,
         updateWorkflow,
-        cancelAllActiveWorkflowExecutions: jest.fn(),
+        cancelAllActiveWorkflowExecutions: vi.fn(),
       };
       const { service } = makeService({ management: api });
 

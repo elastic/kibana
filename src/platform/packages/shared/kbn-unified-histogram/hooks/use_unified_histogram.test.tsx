@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { type ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -107,7 +109,7 @@ describe('useUnifiedHistogram', () => {
       expect(result.current.isInitialized).toBe(true);
     });
     const fetch$ = result.current.chartProps?.fetch$;
-    const fetchSpy = jest.fn();
+    const fetchSpy = vi.fn();
     fetch$?.subscribe(fetchSpy);
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(fetchSpy).toHaveBeenCalledWith({

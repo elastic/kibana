@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import { createSyncMarkersStrategy } from './sync_markers_strategy';
 
@@ -16,8 +18,8 @@ const createMockSource = (): MonitoringEntitySource => ({
 });
 
 const createMockService = () => ({
-  getLastProcessedMarker: jest.fn(),
-  updateLastProcessedMarker: jest.fn(),
+  getLastProcessedMarker: vi.fn(),
+  updateLastProcessedMarker: vi.fn(),
 });
 
 describe('createSyncMarkersStrategy', () => {

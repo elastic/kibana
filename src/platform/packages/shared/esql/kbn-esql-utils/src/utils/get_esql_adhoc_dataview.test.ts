@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
@@ -15,19 +17,19 @@ import { getIndexForESQLQuery } from './get_esql_adhoc_dataview';
 
 function createMockDataViewsService() {
   return {
-    create: jest.fn(async (spec: Record<string, unknown>) => ({
+    create: vi.fn(async (spec: Record<string, unknown>) => ({
       id: spec.id,
       title: spec.title,
       timeFieldName: spec.timeFieldName,
-      toSpec: jest.fn(() => ({ ...spec })),
+      toSpec: vi.fn(() => ({ ...spec })),
     })),
-    clearInstanceCache: jest.fn(),
+    clearInstanceCache: vi.fn(),
   } as unknown as DataViewsPublicPluginStart;
 }
 
 function createMockHttp(timeField?: string) {
   return {
-    post: jest.fn(async () => ({ timeField })),
+    post: vi.fn(async () => ({ timeField })),
   } as unknown as HttpStart;
 }
 
@@ -42,9 +44,9 @@ describe('getESQLAdHocDataview', () => {
 
   beforeEach(async () => {
     dataViewsService = createMockDataViewsService();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     // Re-import the module to get a fresh timeFieldCache for each test
-    jest.resetModules();
+    vi.resetModules();
     ({ getESQLAdHocDataview } = await import('./get_esql_adhoc_dataview'));
   });
 
@@ -223,9 +225,9 @@ describe('getESQLAdHocDataview', () => {
 
     it('should leave timeFieldName undefined on HTTP failure', async () => {
       const http = {
-        post: jest.fn().mockRejectedValue(new Error('network error')),
+        post: vi.fn().mockRejectedValue(new Error('network error')),
       } as unknown as HttpStart;
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await getESQLAdHocDataview({
         dataViewsService,
@@ -286,7 +288,7 @@ describe('getESQLAdHocDataview', () => {
         resolveHttp = resolve;
       });
       const http = {
-        post: jest.fn(() => httpPromise),
+        post: vi.fn(() => httpPromise),
       } as unknown as HttpStart;
 
       const query = uniqueQuery();
@@ -303,12 +305,12 @@ describe('getESQLAdHocDataview', () => {
 
     it('should retry after HTTP failure', async () => {
       const http = {
-        post: jest
+        post: vi
           .fn()
           .mockRejectedValueOnce(new Error('fail'))
           .mockResolvedValueOnce({ timeField: '@timestamp' }),
       } as unknown as HttpStart;
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const query = uniqueQuery();
       const result1 = await getESQLAdHocDataview({ dataViewsService, query, http });
@@ -370,7 +372,7 @@ describe('getIndexForESQLQuery', () => {
     datasets: Array<{ name: string; data_source: string; resource: string }>
   ) {
     return {
-      get: jest.fn().mockImplementation((path: string) => {
+      get: vi.fn().mockImplementation((path: string) => {
         if (path === LOCAL_ROUTE) return Promise.resolve(local);
         if (path === REMOTE_ROUTE) return Promise.resolve(remote);
         if (path === DATASETS_ROUTE) return Promise.resolve({ datasets });
@@ -415,7 +417,7 @@ describe('getIndexForESQLQuery', () => {
 
   it('returns null when the datasets endpoint fails', async () => {
     const http = {
-      get: jest.fn().mockImplementation((path: string) => {
+      get: vi.fn().mockImplementation((path: string) => {
         if (path === DATASETS_ROUTE) return Promise.reject(new Error('network error'));
         return Promise.resolve([]);
       }),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useRuleFromTimeline } from './use_rule_from_timeline';
 import { useGetInitialUrlParamValue } from '../../common/utils/global_query_string/helpers';
@@ -21,26 +24,26 @@ import {
 } from '../../data_view_manager/mocks/mock_data_view';
 import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../common/hooks/use_experimental_features');
-jest.mock('../../common/utils/global_query_string/helpers');
-jest.mock('../../timelines/containers/api');
-jest.mock('../../common/hooks/use_app_toasts');
-jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
-jest.mock('../../common/components/link_to', () => {
-  const originalModule = jest.requireActual('../../common/components/link_to');
+vi.mock('../../common/hooks/use_experimental_features');
+vi.mock('../../common/utils/global_query_string/helpers');
+vi.mock('../../timelines/containers/api');
+vi.mock('../../common/hooks/use_app_toasts');
+vi.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
+vi.mock('../../common/components/link_to', async () => {
+  const originalModule = (await vi.importActual('../../common/components/link_to'));
   return {
     ...originalModule,
-    getTimelineUrl: jest.fn(),
-    useFormatUrl: jest.fn().mockReturnValue({
-      formatUrl: jest.fn().mockImplementation((path: string) => path),
+    getTimelineUrl: vi.fn(),
+    useFormatUrl: vi.fn().mockReturnValue({
+      formatUrl: vi.fn().mockImplementation((path: string) => path),
     }),
   };
 });
-jest.mock('../../data_view_manager/hooks/use_data_view');
+vi.mock('../../data_view_manager/hooks/use_data_view');
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -102,19 +105,19 @@ const selectedTimeline: ResolveTimelineResponse = {
 // probably depends on some weird timing or other non-deterministic behavior.
 // https://github.com/elastic/security-team/issues/11959
 describe('useRuleFromTimeline', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
-  const setRuleQuery = jest.fn();
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  const setRuleQuery = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-    (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => timelineId);
-    (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
+    (useGetInitialUrlParamValue as Mock).mockReturnValue(() => timelineId);
+    (resolveTimeline as Mock).mockResolvedValue(selectedTimeline);
   });
 
   describe('initial data view === rule from timeline data view', () => {
     beforeEach(() => {
-      jest.mocked(useDataView).mockReturnValue(withIndices(['awesome-*'], 'custom-data-view-id'));
+      vi.mocked(useDataView).mockReturnValue(withIndices(['awesome-*'], 'custom-data-view-id'));
     });
 
     it('does not reset timeline sourcerer if it originally had same data view as the timeline used in the rule', async () => {
@@ -134,13 +137,13 @@ describe('useRuleFromTimeline', () => {
       const customDataView = getMockDataViewWithMatchedIndices(['awesome-*']);
       customDataView.id = 'custom-data-view-id';
 
-      jest
+      vi
         .mocked(useDataView)
         .mockReturnValueOnce({ status: 'ready', dataView: initialDataView })
         .mockReturnValue({ status: 'ready', dataView: customDataView });
     });
     it('if no timeline id in URL, loading: false and query not set', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => undefined);
+      (useGetInitialUrlParamValue as Mock).mockReturnValue(() => undefined);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
 
       expect(result.current.loading).toEqual(false);
@@ -155,7 +158,7 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('when from timeline data view id === selected data view id and browser fields is not empty, set rule data to match from timeline query', async () => {
-      (useGetInitialUrlParamValue as jest.Mock)
+      (useGetInitialUrlParamValue as Mock)
         .mockReturnValueOnce(() => timelineId)
         .mockReturnValue(() => undefined);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
@@ -222,8 +225,8 @@ describe('useRuleFromTimeline', () => {
           eqlOptions,
         },
       };
-      (resolveTimeline as jest.Mock).mockResolvedValue(eqlTimeline);
-      (useGetInitialUrlParamValue as jest.Mock)
+      (resolveTimeline as Mock).mockResolvedValue(eqlTimeline);
+      (useGetInitialUrlParamValue as Mock)
         .mockReturnValueOnce(() => undefined)
         .mockReturnValue(() => timelineId);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
@@ -242,7 +245,7 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('Sets rule from timeline query via callback', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => undefined);
+      (useGetInitialUrlParamValue as Mock).mockReturnValue(() => undefined);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(false);
       await act(async () => {
@@ -293,7 +296,7 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('Handles error when query is malformed', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => undefined);
+      (useGetInitialUrlParamValue as Mock).mockReturnValue(() => undefined);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(false);
       const tl = {

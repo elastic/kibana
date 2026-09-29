@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getOptionProperties, TABLE_ID, TREEMAP_ID, TREND_ID, CHARTS_ID } from './helpers';
 import * as i18n from './translations';
 
 describe('helpers', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('getOptionProperties', () => {
     test('it returns the expected properties when alertViewSelection is Trend', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   clearWorkflowYamlComputationCache,
   getCachedWorkflowYamlComputationAsync,
@@ -15,12 +17,12 @@ import {
 
 describe('workflow_yaml_computation_cache', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
     clearWorkflowYamlComputationCache();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('keeps recently accessed entries when evicting beyond the max cache size', async () => {
@@ -42,7 +44,7 @@ describe('workflow_yaml_computation_cache', () => {
       yamlDocument: expect.anything(),
     });
     const recomputedEntry = getCachedWorkflowYamlComputationAsync('name: evictable-0\n');
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
     await expect(recomputedEntry).resolves.toMatchObject({
       yamlDocument: expect.anything(),
     });

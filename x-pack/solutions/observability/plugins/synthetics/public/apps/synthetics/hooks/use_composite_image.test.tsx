@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import * as redux from 'react-redux-v7';
 import { waitFor, renderHook } from '@testing-library/react';
 import type {
@@ -15,10 +18,13 @@ import { fetchBlocksAction } from '../state';
 import { shouldCompose, useComposeImageFromRef } from './use_composite_image';
 import * as compose from '../utils/monitor_test_result/compose_screenshot_images';
 
-const mockUrlParams = jest.fn();
-jest.mock('./use_url_params', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('./use_url_params', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MIME = 'image/jpeg';
 
@@ -151,12 +157,12 @@ describe('use composite image', () => {
   });
 
   describe('useComposeImageFromRef', () => {
-    let useDispatchMock: jest.Mock;
+    let useDispatchMock: Mock;
     let canvasMock: unknown;
-    let removeChildSpy: jest.Mock;
-    let selectorSpy: jest.SpyInstance;
-    let composeSpy: jest.SpyInstance;
-    let documentCreateElementSpy: jest.SpyInstance<
+    let removeChildSpy: Mock;
+    let selectorSpy: MockInstance;
+    let composeSpy: MockInstance;
+    let documentCreateElementSpy: MockInstance<
       ReturnType<typeof document.createElement>,
       Parameters<typeof document.createElement>
     >;
@@ -165,17 +171,17 @@ describe('use composite image', () => {
     const superCreateElement = document.createElement;
 
     beforeAll(() => {
-      documentCreateElementSpy = jest.spyOn(document, 'createElement');
+      documentCreateElementSpy = vi.spyOn(document, 'createElement');
     });
 
     beforeEach(() => {
-      useDispatchMock = jest.fn();
-      removeChildSpy = jest.fn();
+      useDispatchMock = vi.fn();
+      removeChildSpy = vi.fn();
       canvasMock = {
         parentElement: {
           removeChild: removeChildSpy,
         },
-        toDataURL: jest.fn().mockReturnValue('compose success'),
+        toDataURL: vi.fn().mockReturnValue('compose success'),
       };
 
       // @ts-expect-error mocking canvas element for testing
@@ -187,16 +193,16 @@ describe('use composite image', () => {
         return superCreateElement.call(document, tagName, options);
       });
 
-      jest.spyOn(redux, 'useDispatch').mockReturnValue(useDispatchMock);
-      selectorSpy = jest.spyOn(redux, 'useSelector').mockReturnValue({ blocks });
-      composeSpy = jest
+      vi.spyOn(redux, 'useDispatch').mockReturnValue(useDispatchMock);
+      selectorSpy = vi.spyOn(redux, 'useSelector').mockReturnValue({ blocks });
+      composeSpy = vi
         .spyOn(compose, 'composeScreenshotRef')
         .mockReturnValue(new Promise((r) => r([])));
       mockUrlParams.mockReturnValue({});
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('does not compose if all blocks are not loaded 2', () => {

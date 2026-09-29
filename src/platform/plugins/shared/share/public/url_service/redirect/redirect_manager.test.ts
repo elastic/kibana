@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RedirectManager } from './redirect_manager';
 import { MockUrlService } from '../../mocks';
 import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
@@ -40,7 +42,7 @@ const setup = () => {
 describe('on page mount', () => {
   test('execute locator "navigate" method', async () => {
     const { locator, manager } = setup();
-    const spy = jest.spyOn(locator, 'navigate');
+    const spy = vi.spyOn(locator, 'navigate');
     const search = `l=TEST_LOCATOR&v=0.0.3&p=${encodeURIComponent(JSON.stringify({}))}`;
 
     expect(spy).toHaveBeenCalledTimes(0);
@@ -55,7 +57,7 @@ describe('on page mount', () => {
 
   test('passes arguments provided in URL to locator "navigate" method', async () => {
     const { locator, manager } = setup();
-    const spy = jest.spyOn(locator, 'navigate');
+    const spy = vi.spyOn(locator, 'navigate');
     const search = `l=TEST_LOCATOR&v=0.0.3&p=${encodeURIComponent(
       JSON.stringify({
         foo: 'bar',
@@ -78,7 +80,7 @@ describe('on page mount', () => {
 
   test('migrates parameters on-the-fly to the latest version', async () => {
     const { locator, manager } = setup();
-    const spy = jest.spyOn(locator, 'navigate');
+    const spy = vi.spyOn(locator, 'navigate');
     const search = `l=TEST_LOCATOR&v=0.0.1&p=${encodeURIComponent(
       JSON.stringify({
         num: 1,

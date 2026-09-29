@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   extractEnabledLegacyRules,
   migrateLegacyUiSettingsIntoGlobalProfile,
@@ -13,17 +16,20 @@ import { ensureGlobalAnonymizationProfile } from './global_profile_initializer';
 import type { Logger } from '@kbn/core/server';
 import type { ProfilesRepository } from '../repository';
 
-jest.mock('./global_profile_initializer', () => ({
-  ensureGlobalAnonymizationProfile: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./global_profile_initializer', () => {
+      const mocked = {
+      ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('legacy_ui_settings_migration', () => {
   const logger = {
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as unknown as Pick<Logger, 'warn'>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty rules when settings string is invalid JSON', () => {
@@ -82,7 +88,7 @@ describe('legacy_ui_settings_migration', () => {
   });
 
   it('returns false when migration fails and logs warning', async () => {
-    (ensureGlobalAnonymizationProfile as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+    (ensureGlobalAnonymizationProfile as Mock).mockRejectedValueOnce(new Error('boom'));
 
     const result = await migrateLegacyUiSettingsIntoGlobalProfile({
       namespace: 'default',

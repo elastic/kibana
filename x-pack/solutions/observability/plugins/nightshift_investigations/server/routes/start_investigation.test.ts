@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { startInvestigationRoute } from './start_investigation';
 
 const { handler, params } = startInvestigationRoute['POST /internal/nightshift/investigations'];
@@ -22,14 +24,14 @@ const alert = {
   'kibana.alert.start': '2026-09-02T10:00:00.000Z',
 };
 
-const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
-const getInvestigationsClient = jest.fn().mockReturnValue({ start });
-const getAlertsClient = jest.fn().mockResolvedValue({
-  getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['.alerts-observability.test']),
-  get: jest.fn().mockResolvedValue(alert),
+const start = vi.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+const getInvestigationsClient = vi.fn().mockReturnValue({ start });
+const getAlertsClient = vi.fn().mockResolvedValue({
+  getAuthorizedAlertsIndices: vi.fn().mockResolvedValue(['.alerts-observability.test']),
+  get: vi.fn().mockResolvedValue(alert),
 });
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 it('loads the alert and builds the investigation context server-side', async () => {
   await expect(

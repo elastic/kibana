@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { findRulesRequestSchema, MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -17,7 +19,7 @@ const getFindRulesRequests = () =>
 
 describe('fetchRulesByIds', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHttp.get.mockResolvedValue({
       items: [],
       total: 0,

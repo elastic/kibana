@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License"
@@ -26,24 +29,27 @@ import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { IndexEditorErrors } from '../types';
 
 // Mock child components
-jest.mock('./empty_prompt', () => ({
-  EmptyPrompt: () => <div>EmptyPrompt</div>,
-}));
+vi.mock('./empty_prompt', () => {
+      const mocked = {
+      EmptyPrompt: () => <div>EmptyPrompt</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock hooks and modules
-jest.mock('@kbn/file-upload');
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('./modals/override_warning_modal');
+vi.mock('@kbn/file-upload');
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('./modals/override_warning_modal');
 
-const mockUseFileUploadContext = useFileUploadContext as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
-const mockGetOverrideConfirmation = getOverrideConfirmation as jest.Mock;
+const mockUseFileUploadContext = useFileUploadContext as Mock;
+const mockUseKibana = useKibana as Mock;
+const mockGetOverrideConfirmation = getOverrideConfirmation as Mock;
 
 const mockIndexUpdateService = {
-  setError: jest.fn(),
-  discardUnsavedChanges: jest.fn(),
+  setError: vi.fn(),
+  discardUnsavedChanges: vi.fn(),
   canEditIndex: true,
-  setIsSaving: jest.fn(),
+  setIsSaving: vi.fn(),
   isSaving$: {
     subscribe: (cb: (isSaving: boolean) => void) => {
       cb(false);
@@ -53,16 +59,16 @@ const mockIndexUpdateService = {
 };
 
 const mockFileUploadManager = {
-  addFiles: jest.fn(),
-  removeFile: jest.fn(),
-  getFiles: jest.fn().mockReturnValue([]),
+  addFiles: vi.fn(),
+  removeFile: vi.fn(),
+  getFiles: vi.fn().mockReturnValue([]),
 };
 
 describe('FileDropzone', () => {
   let fileUploadContext: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     fileUploadContext = {
       fileUploadManager: mockFileUploadManager,
       filesStatus: [],

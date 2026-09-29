@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { EnterTryBlockNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -16,9 +19,9 @@ import { EnterTryBlockNodeImpl } from '../enter_try_block_node_impl';
 describe('EnterTryBlockNodeImpl', () => {
   let underTest: EnterTryBlockNodeImpl;
   let node: EnterTryBlockNode;
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
-  let mockStepLogger: jest.Mocked<IWorkflowEventLogger>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
+  let mockStepLogger: Mocked<IWorkflowEventLogger>;
 
   beforeEach(() => {
     node = {
@@ -32,20 +35,20 @@ describe('EnterTryBlockNodeImpl', () => {
     };
 
     mockStepLogger = {
-      logError: jest.fn(),
+      logError: vi.fn(),
     } as any;
 
     mockStepExecutionRuntime = {
-      startStep: jest.fn().mockResolvedValue(undefined),
-      getCurrentStepState: jest.fn(),
-      setCurrentStepState: jest.fn().mockResolvedValue(undefined),
+      startStep: vi.fn().mockResolvedValue(undefined),
+      getCurrentStepState: vi.fn(),
+      setCurrentStepState: vi.fn().mockResolvedValue(undefined),
       stepLogger: mockStepLogger,
     } as any;
 
     mockWorkflowRuntime = {
-      navigateToNode: jest.fn(),
-      getWorkflowErrorSerialized: jest.fn(),
-      setWorkflowError: jest.fn(),
+      navigateToNode: vi.fn(),
+      getWorkflowErrorSerialized: vi.fn(),
+      setWorkflowError: vi.fn(),
     } as any;
 
     underTest = new EnterTryBlockNodeImpl(node, mockStepExecutionRuntime, mockWorkflowRuntime);
@@ -64,11 +67,11 @@ describe('EnterTryBlockNodeImpl', () => {
 
     it('should execute steps in correct order', async () => {
       const calls: string[] = [];
-      mockStepExecutionRuntime.startStep = jest.fn().mockImplementation(() => {
+      mockStepExecutionRuntime.startStep = vi.fn().mockImplementation(() => {
         calls.push('startStep');
         return Promise.resolve();
       });
-      mockWorkflowRuntime.navigateToNode = jest.fn().mockImplementation(() => {
+      mockWorkflowRuntime.navigateToNode = vi.fn().mockImplementation(() => {
         calls.push('goToStep');
       });
 
@@ -85,12 +88,12 @@ describe('EnterTryBlockNodeImpl', () => {
     };
 
     beforeEach(() => {
-      mockWorkflowRuntime.getWorkflowErrorSerialized = jest.fn().mockReturnValue(mockWorkflowError);
+      mockWorkflowRuntime.getWorkflowErrorSerialized = vi.fn().mockReturnValue(mockWorkflowError);
     });
 
     describe('when fallback has not been executed yet', () => {
       beforeEach(() => {
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue({});
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue({});
       });
 
       it('should log error message', async () => {
@@ -127,21 +130,21 @@ describe('EnterTryBlockNodeImpl', () => {
 
       it('should execute operations in correct order', async () => {
         const calls: string[] = [];
-        mockStepLogger.logError = jest.fn().mockImplementation(() => {
+        mockStepLogger.logError = vi.fn().mockImplementation(() => {
           calls.push('logError');
         });
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockImplementation(() => {
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockImplementation(() => {
           calls.push('getCurrentStepState');
           return {};
         });
-        mockStepExecutionRuntime.setCurrentStepState = jest.fn().mockImplementation(() => {
+        mockStepExecutionRuntime.setCurrentStepState = vi.fn().mockImplementation(() => {
           calls.push('setCurrentStepState');
           return Promise.resolve();
         });
-        mockWorkflowRuntime.setWorkflowError = jest.fn().mockImplementation(() => {
+        mockWorkflowRuntime.setWorkflowError = vi.fn().mockImplementation(() => {
           calls.push('setWorkflowError');
         });
-        mockWorkflowRuntime.navigateToNode = jest.fn().mockImplementation(() => {
+        mockWorkflowRuntime.navigateToNode = vi.fn().mockImplementation(() => {
           calls.push('navigateToNode');
         });
 
@@ -161,7 +164,7 @@ describe('EnterTryBlockNodeImpl', () => {
           customProperty: 'value',
           anotherProperty: 123,
         };
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue(existingState);
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue(existingState);
 
         await underTest.catchError();
 
@@ -176,7 +179,7 @@ describe('EnterTryBlockNodeImpl', () => {
 
     describe('when step state is null or undefined', () => {
       beforeEach(() => {
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue(null);
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue(null);
       });
 
       it('should handle null step state gracefully', async () => {
@@ -197,7 +200,7 @@ describe('EnterTryBlockNodeImpl', () => {
 
     describe('when fallback has already been executed', () => {
       beforeEach(() => {
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue({
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue({
           isFallbackExecuted: true,
         });
       });
@@ -232,7 +235,7 @@ describe('EnterTryBlockNodeImpl', () => {
 
     describe('when fallback flag is explicitly false', () => {
       beforeEach(() => {
-        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue({
+        mockStepExecutionRuntime.getCurrentStepState = vi.fn().mockReturnValue({
           isFallbackExecuted: false,
           someOtherData: 'test',
         });

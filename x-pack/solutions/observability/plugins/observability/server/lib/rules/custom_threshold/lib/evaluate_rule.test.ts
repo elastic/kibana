@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -16,15 +19,15 @@ import { evaluateRule } from './evaluate_rule';
 import { getData } from './get_data';
 import { checkMissingGroups } from './check_missing_group';
 
-jest.mock('./get_data');
-jest.mock('./check_missing_group');
+vi.mock('./get_data');
+vi.mock('./check_missing_group');
 
-const mockedGetData = getData as jest.MockedFunction<typeof getData>;
-const mockedCheckMissingGroups = checkMissingGroups as jest.MockedFunction<
+const mockedGetData = getData as MockedFunction<typeof getData>;
+const mockedCheckMissingGroups = checkMissingGroups as MockedFunction<
   typeof checkMissingGroups
 >;
 
-const logger = { debug: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn() } as unknown as Logger;
 const esClient = {} as ElasticsearchClient;
 
 const criterion = {
@@ -61,7 +64,7 @@ const esQueryConfig = {
 
 describe('evaluateRule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('suppresses the redundant * entry when per-group no-data entries coexist', async () => {

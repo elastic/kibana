@@ -7,18 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { initializeESQLControlManager } from './esql_control_manager';
 import { BehaviorSubject } from 'rxjs';
+import { getESQLSingleColumnValues } from '../../../common/options_list/get_esql_single_column_values';
 
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
-jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
+vi.mock('../../../common/options_list/get_esql_single_column_values', () => {
   const fn = Object.assign(
-    jest.fn(async () => ({
+    vi.fn(async () => ({
       values: MOCK_VALUES_FROM_QUERY,
       column: { type: 'keyword' },
     })),
@@ -29,13 +33,11 @@ jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
   return { getESQLSingleColumnValues: fn };
 });
 
-const getMock = () =>
-  jest.requireMock('../../../common/options_list/get_esql_single_column_values')
-    .getESQLSingleColumnValues as jest.Mock;
+const getMock = () => getESQLSingleColumnValues as unknown as Mock;
 
 const mockFetch$ = new BehaviorSubject({});
-jest.mock('@kbn/presentation-publishing', () => ({
-  ...jest.requireActual('@kbn/presentation-publishing'),
+vi.mock('@kbn/presentation-publishing', async () => ({
+  ...(await vi.importActual('@kbn/presentation-publishing')),
   fetch$: () => mockFetch$,
 }));
 
@@ -57,7 +59,7 @@ describe('initializeESQLControlManager', () => {
       } as OptionsListESQLControlState;
 
       let dataHasLoaded = false;
-      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, vi.fn());
 
       selections.internalApi.availableOptions$.subscribe((result) => {
         if (result?.length === 5) dataHasLoaded = true;
@@ -95,7 +97,7 @@ describe('initializeESQLControlManager', () => {
         control_type: EsqlControlType.STATIC_VALUES,
       } as OptionsListESQLControlState;
 
-      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, vi.fn());
 
       await waitFor(() => {
         const availableOptions = selections.internalApi.availableOptions$.getValue();
@@ -134,7 +136,7 @@ describe('initializeESQLControlManager', () => {
         esql_query: '',
       } as OptionsListESQLControlState;
 
-      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, vi.fn());
       await waitFor(() => {
         const variable = selections.api.esqlVariable$.getValue();
         expect(variable).toEqual({
@@ -161,7 +163,7 @@ describe('initializeESQLControlManager', () => {
         esql_query: '',
       } as OptionsListESQLControlState;
 
-      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, vi.fn());
       await waitFor(() => {
         const variable = selections.api.esqlVariable$.getValue();
         expect(variable).toEqual({
@@ -188,7 +190,7 @@ describe('initializeESQLControlManager', () => {
         title: 'My variable',
       } as OptionsListESQLControlState;
 
-      const setDataLoadingMock = jest.fn();
+      const setDataLoadingMock = vi.fn();
       initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
 
       setDataLoadingMock.mockClear();
@@ -234,7 +236,7 @@ describe('initializeESQLControlManager', () => {
         title: 'My variable',
       } as OptionsListESQLControlState;
 
-      const setDataLoadingMock = jest.fn();
+      const setDataLoadingMock = vi.fn();
       initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
 
       // Initial variables
@@ -277,7 +279,7 @@ describe('initializeESQLControlManager', () => {
         title: 'My variable',
       } as OptionsListESQLControlState;
 
-      const setDataLoadingMock = jest.fn();
+      const setDataLoadingMock = vi.fn();
       initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
 
       setDataLoadingMock.mockClear();
@@ -316,7 +318,7 @@ describe('initializeESQLControlManager', () => {
 
       const mock = getMock();
       mock.mockClear();
-      initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+      initializeESQLControlManager(uuid, dashboardApi, initialState, vi.fn());
 
       await waitFor(() => {
         expect(mock).toHaveBeenCalled();
@@ -338,7 +340,7 @@ describe('initializeESQLControlManager', () => {
 
       const mock = getMock();
       mock.mockClear();
-      const manager = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+      const manager = initializeESQLControlManager(uuid, dashboardApi, initialState, vi.fn());
 
       await waitFor(() => {
         expect(mock).toHaveBeenCalled();
@@ -363,7 +365,7 @@ describe('initializeESQLControlManager', () => {
 
       const mock = getMock();
       mock.mockClear();
-      const manager = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+      const manager = initializeESQLControlManager(uuid, dashboardApi, initialState, vi.fn());
 
       await waitFor(() => {
         expect(mock).toHaveBeenCalled();
@@ -388,7 +390,7 @@ describe('initializeESQLControlManager', () => {
 
       const mock = getMock();
       mock.mockClear();
-      initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+      initializeESQLControlManager(uuid, dashboardApi, initialState, vi.fn());
 
       // Wait for initial fetch (triggered on subscription); mock was cleared before init
       // so mock.mock.calls[0] belongs to this manager's initial fetch

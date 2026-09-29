@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   BROWSER_TRACE_NAME,
@@ -15,20 +17,23 @@ import {
 import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-const mockUrlParams = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useStepWaterfallMetrics', () => {
   beforeEach(() => {
     mockUrlParams.mockReturnValue({});
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns result as expected', () => {
-    const searchHook = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
+    const searchHook = vi.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
       loading: false,
       data: {
         hits: {
@@ -108,7 +113,7 @@ describe('useStepWaterfallMetrics', () => {
   it('queries the CCS-prefixed index when remoteName is in the URL', () => {
     mockUrlParams.mockReturnValue({ remoteName: 'remote-a' });
 
-    const searchHook = jest
+    const searchHook = vi
       .spyOn(searchHooks, 'useEsSearch')
       .mockReturnValue({ loading: false, data: undefined } as any);
 

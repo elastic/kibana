@@ -5,29 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useTimeRange } from './use_time_range';
 import * as datemath from '../utils/datemath';
 import * as reloadRequestTimeModule from './use_reload_request_time';
 
-jest.mock('../utils/datemath');
-jest.mock('./use_reload_request_time');
+vi.mock('../utils/datemath');
+vi.mock('./use_reload_request_time');
 
 describe('useTimeRange', () => {
-  const mockParseDateRange = datemath.parseDateRange as jest.Mock;
+  const mockParseDateRange = datemath.parseDateRange as Mock;
   const mockUseReloadRequestTimeContext =
-    reloadRequestTimeModule.useReloadRequestTimeContext as jest.Mock;
+    reloadRequestTimeModule.useReloadRequestTimeContext as Mock;
 
   beforeEach(() => {
-    Date.now = jest.fn(() => new Date(Date.UTC(2021, 0, 1, 12)).valueOf());
+    Date.now = vi.fn(() => new Date(Date.UTC(2021, 0, 1, 12)).valueOf());
     mockUseReloadRequestTimeContext.mockReturnValue({
       reloadRequestTime: 0,
-      updateReloadRequestTime: jest.fn(),
+      updateReloadRequestTime: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns default timestamps when rangeFrom and rangeTo are not provided', () => {
@@ -78,7 +81,7 @@ describe('useTimeRange', () => {
 
     mockUseReloadRequestTimeContext.mockReturnValue({
       reloadRequestTime: 1_000,
-      updateReloadRequestTime: jest.fn(),
+      updateReloadRequestTime: vi.fn(),
     });
 
     const { result, rerender } = renderHook(() =>
@@ -90,7 +93,7 @@ describe('useTimeRange', () => {
     // Simulate refresh: reloadRequestTime advances.
     mockUseReloadRequestTimeContext.mockReturnValue({
       reloadRequestTime: 2_000,
-      updateReloadRequestTime: jest.fn(),
+      updateReloadRequestTime: vi.fn(),
     });
 
     rerender();

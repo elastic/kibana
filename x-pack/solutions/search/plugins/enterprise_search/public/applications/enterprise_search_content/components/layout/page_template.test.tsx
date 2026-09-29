@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 
-jest.mock('../../../shared/layout/nav', () => ({
-  useEnterpriseSearchNav: () => [],
-}));
+vi.mock('../../../shared/layout/nav', () => {
+      const mocked = {
+      useEnterpriseSearchNav: () => [],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // SetEnterpriseSearchContentChrome renders null — mock it to verify trail prop is wired correctly.
-jest.mock('../../../shared/kibana_chrome', () => ({
-  SetEnterpriseSearchContentChrome: jest.fn(() => null),
-}));
+vi.mock('../../../shared/kibana_chrome', () => {
+      const mocked = {
+      SetEnterpriseSearchContentChrome: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 
@@ -26,11 +34,11 @@ import { SetEnterpriseSearchContentChrome } from '../../../shared/kibana_chrome'
 
 import { EnterpriseSearchContentPageTemplate } from './page_template';
 
-const MockedSetChrome = jest.mocked(SetEnterpriseSearchContentChrome);
+const MockedSetChrome = vi.mocked(SetEnterpriseSearchContentChrome);
 
 describe('EnterpriseSearchContentPageTemplate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {

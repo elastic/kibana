@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -29,19 +32,19 @@ import { useCaseConfigureResponse } from '../../configure_cases/__mock__';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { useCasesToast } from '../../../common/use_cases_toast';
 
-jest.mock('../../../containers/use_get_tags');
-jest.mock('../../../containers/use_get_categories');
-jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
-jest.mock('../../../containers/configure/use_get_case_configuration');
-jest.mock('../../../common/use_cases_toast');
+vi.mock('../../../containers/use_get_tags');
+vi.mock('../../../containers/use_get_categories');
+vi.mock('../../../containers/user_profiles/use_suggest_user_profiles');
+vi.mock('../../../containers/configure/use_get_case_configuration');
+vi.mock('../../../common/use_cases_toast');
 
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
-const useCasesToastMock = useCasesToast as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
+const useCasesToastMock = useCasesToast as Mock;
 const MORE_FILTERS_TEST_ID = 'options-filter-popover-button-more-filters';
-const onFilterChanged = jest.fn();
+const onFilterChanged = vi.fn();
 /** The filter pills share their row with only the "More filters" (edit-filters) button. */
 const EXTRA_TOOLBAR_BUTTON_COUNT = 1;
-const showInfoToast = jest.fn();
+const showInfoToast = vi.fn();
 
 const props: CasesTableFiltersProps = {
   countClosedCases: 1234,
@@ -53,15 +56,15 @@ const props: CasesTableFiltersProps = {
   isLoading: false,
   canCreateCase: true,
   currentUserProfile: undefined,
-  deselectCases: jest.fn(),
+  deselectCases: vi.fn(),
   viewMode: VIEW_TOGGLE_TABLE_ID,
-  onViewModeChange: jest.fn(),
+  onViewModeChange: vi.fn(),
   selectedColumns: [],
-  onSelectedColumnsChange: jest.fn(),
+  onSelectedColumnsChange: vi.fn(),
   listFields: [],
-  onListFieldsChange: jest.fn(),
+  onListFieldsChange: vi.fn(),
   sortOrder: 'desc',
-  onSortOrderChange: jest.fn(),
+  onSortOrderChange: vi.fn(),
 };
 
 describe('CasesTableFilters ', () => {
@@ -104,25 +107,25 @@ describe('CasesTableFilters ', () => {
   });
 
   beforeEach(() => {
-    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
-    (useGetCategories as jest.Mock).mockReturnValue({
+    (useGetTags as Mock).mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
+    (useGetCategories as Mock).mockReturnValue({
       data: ['twix', 'snickers'],
       isLoading: false,
     });
-    (useSuggestUserProfiles as jest.Mock).mockReturnValue({ data: userProfiles, isLoading: false });
+    (useSuggestUserProfiles as Mock).mockReturnValue({ data: userProfiles, isLoading: false });
 
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useCasesToastMock.mockReturnValue({
       showInfoToast,
-      showSuccessToast: jest.fn(),
-      showErrorToast: jest.fn(),
-      showDangerToast: jest.fn(),
-      showSuccessAttach: jest.fn(),
+      showSuccessToast: vi.fn(),
+      showErrorToast: vi.fn(),
+      showDangerToast: vi.fn(),
+      showSuccessAttach: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     window.localStorage.clear();
   });
 
@@ -219,7 +222,7 @@ describe('CasesTableFilters ', () => {
   });
 
   it('shows a hidden-fields info toast once when searching with templates enabled', async () => {
-    const getConfigSpy = jest
+    const getConfigSpy = vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig
@@ -496,7 +499,7 @@ describe('CasesTableFilters ', () => {
     });
 
     it('should render the create case button when isSelectorView is true and onCreateCasePressed are passed', async () => {
-      const onCreateCasePressed = jest.fn();
+      const onCreateCasePressed = vi.fn();
 
       renderWithTestingProviders(
         <CasesTableFilters
@@ -510,7 +513,7 @@ describe('CasesTableFilters ', () => {
     });
 
     it('should call the onCreateCasePressed when create case is clicked', async () => {
-      const onCreateCasePressed = jest.fn();
+      const onCreateCasePressed = vi.fn();
 
       renderWithTestingProviders(
         <CasesTableFilters
@@ -528,7 +531,7 @@ describe('CasesTableFilters ', () => {
     });
 
     it('should disable the create case button without create permission', async () => {
-      const onCreateCasePressed = jest.fn();
+      const onCreateCasePressed = vi.fn();
 
       renderWithTestingProviders(
         <CasesTableFilters
@@ -568,7 +571,7 @@ describe('CasesTableFilters ', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       localStorage.clear();
     });
 
@@ -704,7 +707,7 @@ describe('CasesTableFilters ', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should not render the more button when in selector view', async () => {

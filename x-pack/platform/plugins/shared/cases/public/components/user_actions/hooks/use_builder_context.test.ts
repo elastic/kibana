@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useBuilderContext } from './use_builder_context';
 import { useCasesContext } from '../../cases_context/use_cases_context';
@@ -12,16 +15,19 @@ import { basicCase } from '../../../containers/mock';
 import { casesConfigurationsMock } from '../../../containers/configure/mock';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({ euiTheme: { colors: {}, size: {} } }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({ euiTheme: { colors: {}, size: {} } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cases_context/use_cases_context');
+vi.mock('../../cases_context/use_cases_context');
 
-const useCasesContextMock = useCasesContext as jest.Mock;
+const useCasesContextMock = useCasesContext as Mock;
 
-const mockUnifiedRegistry = { list: jest.fn() };
+const mockUnifiedRegistry = { list: vi.fn() };
 
 const defaultArgs = {
   caseData: basicCase,
@@ -32,13 +38,13 @@ const defaultArgs = {
   manageMarkdownEditIds: [],
   selectedOutlineCommentId: '',
   loadingCommentIds: [],
-  handleOutlineComment: jest.fn(),
-  handleDeleteComment: jest.fn(),
+  handleOutlineComment: vi.fn(),
+  handleDeleteComment: vi.fn(),
 };
 
 describe('useBuilderContext', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCasesContextMock.mockReturnValue({
       owner: ['securitySolution'],
       unifiedAttachmentTypeRegistry: mockUnifiedRegistry,

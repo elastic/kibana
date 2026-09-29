@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -12,11 +15,11 @@ import { useChoices } from './use_choices';
 import { getChoices } from './api';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('./api');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('./api');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const getChoicesMock = getChoices as jest.Mock;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const getChoicesMock = getChoices as Mock;
 
 const actionConnector = createMockActionConnector({
   secrets: {
@@ -64,7 +67,7 @@ describe('UseChoices', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const fields = ['category'];

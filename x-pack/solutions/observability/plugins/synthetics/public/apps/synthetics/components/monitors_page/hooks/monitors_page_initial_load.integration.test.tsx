@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { Provider } from 'react-redux-v7';
 import type { Store } from 'redux-v4';
@@ -168,11 +171,11 @@ const renderWithDelayedFilters = (store: Store) => {
 
 describe('Monitor management page — initial load API call counts', () => {
   let recorded: RecordedCall[];
-  let getSpy: jest.SpyInstance;
+  let getSpy: MockInstance;
 
   beforeEach(() => {
     recorded = [];
-    getSpy = jest
+    getSpy = vi
       .spyOn(apiService, 'get')
       .mockImplementation(async (url: string, params?: Record<string, unknown>) => {
         recorded.push({ url, query: params });

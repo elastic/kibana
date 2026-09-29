@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useScrollToActive } from './use_scroll_to_active';
@@ -29,7 +31,7 @@ describe('useScrollToActive', () => {
     const { result } = renderHook(() => useScrollToActive(true));
 
     const element = document.createElement('div');
-    const scrollIntoView = jest.spyOn(element, 'scrollIntoView');
+    const scrollIntoView = vi.spyOn(element, 'scrollIntoView');
 
     result.current(element);
 
@@ -40,7 +42,7 @@ describe('useScrollToActive', () => {
     const { result } = renderHook(() => useScrollToActive(false));
 
     const element = document.createElement('div');
-    const scrollIntoView = jest.spyOn(element, 'scrollIntoView');
+    const scrollIntoView = vi.spyOn(element, 'scrollIntoView');
 
     result.current(element);
 

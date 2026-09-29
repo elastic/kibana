@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import { validateConnector, validateToolName, validateConfig } from './validate_configuration';
 
-jest.mock('@kbn/agent-builder-common', () => ({
-  createBadRequestError: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-common', () => {
+      const mocked = {
+      createBadRequestError: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateBadRequestError = createBadRequestError as jest.MockedFunction<
+const mockCreateBadRequestError = createBadRequestError as MockedFunction<
   typeof createBadRequestError
 >;
 
 describe('MCP validate_configuration', () => {
-  let mockActions: jest.Mocked<ActionsPluginStart>;
+  let mockActions: Mocked<ActionsPluginStart>;
   let mockActionsClient: {
-    get: jest.Mock;
-    execute: jest.Mock;
+    get: Mock;
+    execute: Mock;
   };
   let mockRequest: KibanaRequest;
 
@@ -35,16 +41,16 @@ describe('MCP validate_configuration', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockActionsClient = {
-      get: jest.fn(),
-      execute: jest.fn(),
+      get: vi.fn(),
+      execute: vi.fn(),
     };
 
     mockActions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
-    } as unknown as jest.Mocked<ActionsPluginStart>;
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
+    } as unknown as Mocked<ActionsPluginStart>;
 
     mockRequest = {} as KibanaRequest;
 

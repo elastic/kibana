@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, within, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,9 +22,9 @@ import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
 import type { SetRequired } from 'type-fest';
 import { EuiContextMenu } from '@elastic/eui';
 
-const renderChildComponent = jest.fn();
-const takeActionItems = jest.fn(mockGroupingProps.takeActionItems);
-const mockTracker = jest.fn();
+const renderChildComponent = vi.fn();
+const takeActionItems = vi.fn(mockGroupingProps.takeActionItems);
+const mockTracker = vi.fn();
 
 const testProps: SetRequired<GroupingProps<{}>, 'data'> = {
   ...mockGroupingProps,
@@ -33,7 +35,7 @@ const testProps: SetRequired<GroupingProps<{}>, 'data'> = {
 
 describe('Grouping', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Renders groups count when groupsCount > 0', () => {
@@ -219,7 +221,7 @@ describe('Grouping', () => {
   });
 
   it('Renders groupPanelRenderer when provided', () => {
-    const groupPanelRenderer = jest.fn();
+    const groupPanelRenderer = vi.fn();
     render(
       <I18nProvider>
         <Grouping {...testProps} groupPanelRenderer={groupPanelRenderer} />
@@ -251,7 +253,7 @@ describe('Grouping', () => {
     );
   });
   it('Renders groupPanelRenderer when provided with isLoading attribute', () => {
-    const groupPanelRenderer = jest.fn();
+    const groupPanelRenderer = vi.fn();
     render(
       <I18nProvider>
         <Grouping {...testProps} isLoading groupPanelRenderer={groupPanelRenderer} />
@@ -279,7 +281,7 @@ describe('Grouping', () => {
 
     it('calls custom groupsUnit callback correctly', () => {
       // Provide a custom groupsUnit function in testProps
-      const customGroupsUnit = jest.fn(
+      const customGroupsUnit = vi.fn(
         (n, parentSelectedGroup, hasNullGroup) => `${n} custom units`
       );
       const customProps = { ...testProps, groupsUnit: customGroupsUnit };
@@ -295,7 +297,7 @@ describe('Grouping', () => {
     });
 
     it('calls custom groupsUnit callback with hasNullGroup = false and null group in current page', () => {
-      const customGroupsUnit = jest.fn(
+      const customGroupsUnit = vi.fn(
         (n, parentSelectedGroup, hasNullGroup) => `${n} custom units`
       );
 
@@ -323,7 +325,7 @@ describe('Grouping', () => {
   });
 
   it('calls custom groupsUnit callback with hasNullGroup = true and no null group in current page', () => {
-    const customGroupsUnit = jest.fn((n, parentSelectedGroup, hasNullGroup) => `${n} custom units`);
+    const customGroupsUnit = vi.fn((n, parentSelectedGroup, hasNullGroup) => `${n} custom units`);
 
     const customProps = {
       ...testProps,
@@ -689,7 +691,7 @@ describe('Grouping', () => {
     });
 
     it('resets an out-of-range activePage once the real (capped) pageCount is known', () => {
-      const onChangeGroupsPage = jest.fn();
+      const onChangeGroupsPage = vi.fn();
       const smallGroupsProps = {
         ...testProps,
         activePage: 999,

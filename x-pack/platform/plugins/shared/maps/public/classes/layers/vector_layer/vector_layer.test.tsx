@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable max-classes-per-file */
 
-jest.mock('../../styles/vector/vector_style', () => ({
-  VectorStyle: class MockVectorStyle {},
-}));
+vi.mock('../../styles/vector/vector_style', () => {
+      const mocked = {
+      VectorStyle: class MockVectorStyle {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('12345'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('12345'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   AGG_TYPE,

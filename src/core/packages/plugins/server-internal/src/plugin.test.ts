@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { ContainerModule } from 'inversify';
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
@@ -34,24 +37,36 @@ import {
   createPluginStartContext,
 } from './plugin_context';
 
-const mockPluginInitializer = jest.fn();
-const mockContainerModuleCallback: jest.MockedFunction<
+const mockPluginInitializer = vi.fn();
+const mockContainerModuleCallback: MockedFunction<
   ConstructorParameters<typeof ContainerModule>[0]
-> = jest.fn();
+> = vi.fn();
 const pluginModule = new ContainerModule(mockContainerModuleCallback);
 const logger = loggingSystemMock.create();
-jest.doMock(
+vi.doMock(
   join('plugin-with-initializer-path', 'server'),
-  () => ({ plugin: mockPluginInitializer }),
+  () => {
+      const mocked = { plugin: mockPluginInitializer };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
-jest.doMock(join('plugin-without-initializer-path', 'server'), () => ({}), {
+vi.doMock(join('plugin-without-initializer-path', 'server'), () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    }, {
   virtual: true,
 });
-jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
+vi.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => {
+      const mocked = { plugin: {} };
+      return { ...mocked, default: mocked };
+    }, {
   virtual: true,
 });
-jest.doMock(join('plugin-with-module', 'server'), () => ({ module: pluginModule }), {
+vi.doMock(join('plugin-with-module', 'server'), () => {
+      const mocked = { module: pluginModule };
+      return { ...mocked, default: mocked };
+    }, {
   virtual: true,
 });
 
@@ -103,7 +118,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 test('`constructor` correctly initializes plugin instance', () => {
@@ -274,7 +289,7 @@ test('`init` fails if object returned from initializer does not define `setup` f
     }),
   });
 
-  const mockPluginInstance = { run: jest.fn() };
+  const mockPluginInstance = { run: vi.fn() };
   mockPluginInitializer.mockResolvedValue(mockPluginInstance);
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -299,7 +314,7 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
     initializerContext,
   });
 
-  const mockPluginInstance = { setup: jest.fn().mockResolvedValue({ contract: 'yes' }) };
+  const mockPluginInstance = { setup: vi.fn().mockResolvedValue({ contract: 'yes' }) };
   mockPluginInitializer.mockResolvedValue(mockPluginInstance);
 
   await plugin.init();
@@ -389,7 +404,7 @@ test('`start` fails invoked for the `preboot` plugin', async () => {
     }),
   });
 
-  const mockPluginInstance = { setup: jest.fn() };
+  const mockPluginInstance = { setup: vi.fn() };
   mockPluginInitializer.mockResolvedValue(mockPluginInstance);
 
   await plugin.init();
@@ -420,8 +435,8 @@ test('`start` calls plugin.start with context and dependencies', async () => {
 
   const pluginStartContract = { contract: 'start-contract' };
   const mockPluginInstance = {
-    setup: jest.fn(),
-    start: jest.fn().mockResolvedValue(pluginStartContract),
+    setup: vi.fn(),
+    start: vi.fn().mockResolvedValue(pluginStartContract),
   };
   mockPluginInitializer.mockResolvedValue(mockPluginInstance);
 
@@ -460,7 +475,7 @@ test("`start` resolves `startDependencies` Promise after plugin's start", async 
   let startDependenciesResolved = false;
 
   const mockPluginInstance = {
-    setup: jest.fn(),
+    setup: vi.fn(),
     start: async () => {
       // delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -541,7 +556,7 @@ test('`stop` fails if plugin is not set up', async () => {
     }),
   });
 
-  const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
+  const mockPluginInstance = { setup: vi.fn(), stop: vi.fn() };
   mockPluginInitializer.mockResolvedValue(mockPluginInstance);
 
   await expect(plugin.stop()).rejects.toMatchInlineSnapshot(
@@ -566,7 +581,7 @@ test('`stop` does nothing if plugin does not define `stop` function', async () =
     }),
   });
 
-  mockPluginInitializer.mockResolvedValue({ setup: jest.fn() });
+  mockPluginInitializer.mockResolvedValue({ setup: vi.fn() });
   await plugin.init();
   await plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {});
 
@@ -589,7 +604,7 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
     }),
   });
 
-  const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
+  const mockPluginInstance = { setup: vi.fn(), stop: vi.fn() };
   mockPluginInitializer.mockResolvedValue(mockPluginInstance);
   await plugin.init();
   await plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {});
@@ -639,11 +654,14 @@ describe('#getConfigSchema()', () => {
     const configDescriptor = {
       schema: pluginSchema,
     };
-    jest.doMock(
+    vi.doMock(
       join('plugin-with-schema', 'server'),
-      () => ({
-        config: configDescriptor,
-      }),
+      () => {
+          const mocked = {
+                config: configDescriptor,
+              };
+          return { ...mocked, default: mocked };
+        },
       { virtual: true }
     );
     const manifest = createPluginManifest();
@@ -665,7 +683,10 @@ describe('#getConfigSchema()', () => {
   });
 
   it('returns null if config definition not specified', async () => {
-    jest.doMock(join('plugin-with-no-definition', 'server'), () => ({}), { virtual: true });
+    vi.doMock(join('plugin-with-no-definition', 'server'), () => {
+          const mocked = {};
+          return { ...mocked, default: mocked };
+        }, { virtual: true });
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
     const plugin = new PluginWrapper({
@@ -702,15 +723,18 @@ describe('#getConfigSchema()', () => {
   });
 
   it('throws if plugin contains invalid schema', async () => {
-    jest.doMock(
+    vi.doMock(
       join('plugin-invalid-schema', 'server'),
-      () => ({
-        config: {
-          schema: {
-            validate: () => null,
-          },
+      () => {
+          const mocked = {
+                config: {
+                  schema: {
+                    validate: () => null,
+                  },
+                },
+              };
+          return { ...mocked, default: mocked };
         },
-      }),
       { virtual: true }
     );
     const manifest = createPluginManifest();

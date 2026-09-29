@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
@@ -61,7 +63,7 @@ const evaluatorRegistry = createEvaluatorRegistryMock([
     origin: 'built_in',
     description: 'Built-in correctness evaluator',
     direction: 'maximize',
-    evaluate: jest.fn(),
+    evaluate: vi.fn(),
   },
 ]);
 
@@ -81,24 +83,24 @@ const setupRoute = ({
 }) => {
   const router = httpServiceMock.createRouter();
   const logger = loggingSystemMock.createLogger();
-  const getSpaceId = jest.fn().mockResolvedValue(spaceId);
-  const getCurrentUsername = jest.fn().mockResolvedValue('alice');
+  const getSpaceId = vi.fn().mockResolvedValue(spaceId);
+  const getCurrentUsername = vi.fn().mockResolvedValue('alice');
   const client = {
-    create: jest.fn(),
-    getLatest: jest.fn(),
-    getVersion: jest.fn(),
-    listVersions: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    create: vi.fn(),
+    getLatest: vi.fn(),
+    getVersion: vi.fn(),
+    listVersions: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   };
-  const evaluatorDefinitionService = { getClient: jest.fn().mockReturnValue(client) };
+  const evaluatorDefinitionService = { getClient: vi.fn().mockReturnValue(client) };
 
   registerRoute({
     router,
     logger,
     canEncrypt: false,
     evaluatorRegistry,
-    getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+    getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
     getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
     getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     getSpaceId,

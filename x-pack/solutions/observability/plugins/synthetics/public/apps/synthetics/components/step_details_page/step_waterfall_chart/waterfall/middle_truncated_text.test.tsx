@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { within, fireEvent, waitFor } from '@testing-library/react';
 import { getChunks, MiddleTruncatedText } from './middle_truncated_text';
@@ -32,7 +34,7 @@ describe('Component', () => {
         index={1}
         ariaLabel={longString}
         url={longString}
-        onClick={jest.fn()}
+        onClick={vi.fn()}
         highestIndex={10}
       />
     );
@@ -64,7 +66,7 @@ describe('Component', () => {
   });
 
   it('renders a button when onClick function is passed', async () => {
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
     const { getByTestId } = render(
       <MiddleTruncatedText
         index={1}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import {
   mockAlerts,
@@ -22,8 +24,8 @@ describe('ProcessTreeAlerts component', () => {
   const processTreeAlertsProps: ProcessTreeAlertsDeps = {
     alerts: mockAlerts,
     alertTypeCounts: mockAlertTypeCounts,
-    onAlertSelected: jest.fn(),
-    onShowAlertDetails: jest.fn(),
+    onAlertSelected: vi.fn(),
+    onShowAlertDetails: vi.fn(),
   };
 
   beforeEach(() => {
@@ -56,7 +58,7 @@ describe('ProcessTreeAlerts component', () => {
     });
 
     it('should execute onAlertSelected when clicking on an alert', async () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       renderResult = mockedContext.render(
         <ProcessTreeAlerts {...processTreeAlertsProps} onAlertSelected={mockFn} />
       );

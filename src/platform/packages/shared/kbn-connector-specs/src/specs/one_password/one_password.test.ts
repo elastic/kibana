@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { OnePasswordConnector } from './one_password';
@@ -16,20 +19,20 @@ const ACCOUNT_UUID = 'ACCT-UUID-1234';
 
 describe('OnePasswordConnector', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-  } as unknown as jest.Mocked<AxiosInstance>;
+    get: vi.fn(),
+    post: vi.fn(),
+  } as unknown as Mocked<AxiosInstance>;
 
   const mockContext = {
     client: mockClient,
     config: {
       accountUuid: ACCOUNT_UUID,
     },
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {
@@ -102,7 +105,7 @@ describe('OnePasswordConnector', () => {
     };
 
     it('should list users without filters', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: usersList });
+      (mockClient.get as Mock).mockResolvedValue({ data: usersList });
 
       const result = await OnePasswordConnector.actions.listUsers.handler(mockContext, {});
 
@@ -114,7 +117,7 @@ describe('OnePasswordConnector', () => {
 
     it('should list users filtered by state', async () => {
       const activeOnly = { results: [usersList.results[0]] };
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: activeOnly });
+      (mockClient.get as Mock).mockResolvedValue({ data: activeOnly });
 
       const result = await OnePasswordConnector.actions.listUsers.handler(mockContext, {
         filter: 'user.isActive()',
@@ -127,7 +130,7 @@ describe('OnePasswordConnector', () => {
     });
 
     it('should support pagination parameters', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: usersList });
+      (mockClient.get as Mock).mockResolvedValue({ data: usersList });
 
       await OnePasswordConnector.actions.listUsers.handler(mockContext, {
         maxPageSize: 10,
@@ -144,7 +147,7 @@ describe('OnePasswordConnector', () => {
 
     it('should propagate API errors', async () => {
       const error = new Error('Unauthorized');
-      (mockClient.get as jest.Mock).mockRejectedValue(error);
+      (mockClient.get as Mock).mockRejectedValue(error);
 
       await expect(OnePasswordConnector.actions.listUsers.handler(mockContext, {})).rejects.toThrow(
         'Unauthorized'
@@ -163,7 +166,7 @@ describe('OnePasswordConnector', () => {
     };
 
     it('should get a single user by UUID', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: userDetail });
+      (mockClient.get as Mock).mockResolvedValue({ data: userDetail });
 
       const result = await OnePasswordConnector.actions.getUser.handler(mockContext, {
         uuid: 'USER1234567890ABCDEF12',
@@ -177,7 +180,7 @@ describe('OnePasswordConnector', () => {
 
     it('should propagate 404 errors', async () => {
       const error = new Error('Not found');
-      (mockClient.get as jest.Mock).mockRejectedValue(error);
+      (mockClient.get as Mock).mockRejectedValue(error);
 
       await expect(
         OnePasswordConnector.actions.getUser.handler(mockContext, { uuid: 'NONEXISTENT' })
@@ -196,7 +199,7 @@ describe('OnePasswordConnector', () => {
     };
 
     it('should suspend an active user', async () => {
-      (mockClient.post as jest.Mock).mockResolvedValue({ data: suspendedUser });
+      (mockClient.post as Mock).mockResolvedValue({ data: suspendedUser });
 
       const result = await OnePasswordConnector.actions.suspendUser.handler(mockContext, {
         uuid: 'USER1234567890ABCDEF12',
@@ -211,7 +214,7 @@ describe('OnePasswordConnector', () => {
 
     it('should propagate errors when suspending fails', async () => {
       const error = new Error('Cannot suspend account owner');
-      (mockClient.post as jest.Mock).mockRejectedValue(error);
+      (mockClient.post as Mock).mockRejectedValue(error);
 
       await expect(
         OnePasswordConnector.actions.suspendUser.handler(mockContext, { uuid: 'OWNER-UUID' })
@@ -230,7 +233,7 @@ describe('OnePasswordConnector', () => {
     };
 
     it('should reactivate a suspended user', async () => {
-      (mockClient.post as jest.Mock).mockResolvedValue({ data: reactivatedUser });
+      (mockClient.post as Mock).mockResolvedValue({ data: reactivatedUser });
 
       const result = await OnePasswordConnector.actions.reactivateUser.handler(mockContext, {
         uuid: 'USER1234567890ABCDEF12',
@@ -245,7 +248,7 @@ describe('OnePasswordConnector', () => {
 
     it('should propagate errors when reactivation fails', async () => {
       const error = new Error('User is not suspended');
-      (mockClient.post as jest.Mock).mockRejectedValue(error);
+      (mockClient.post as Mock).mockRejectedValue(error);
 
       await expect(
         OnePasswordConnector.actions.reactivateUser.handler(mockContext, {
@@ -259,7 +262,7 @@ describe('OnePasswordConnector', () => {
     const testSpec = OnePasswordConnector.test;
 
     it('should return success when API is accessible', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ status: 200, data: { results: [] } });
+      (mockClient.get as Mock).mockResolvedValue({ status: 200, data: { results: [] } });
 
       const result = await testSpec.handler(mockContext);
 
@@ -271,7 +274,7 @@ describe('OnePasswordConnector', () => {
     });
 
     it('should throw on error', async () => {
-      (mockClient.get as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (mockClient.get as Mock).mockRejectedValue(new Error('Network error'));
 
       await expect(testSpec.handler(mockContext)).rejects.toThrow('Network error');
     });
@@ -280,7 +283,7 @@ describe('OnePasswordConnector', () => {
       const err = Object.assign(new Error('Forbidden'), {
         response: { status: 403, data: { code: 7, message: 'no_owner_remain', details: [] } },
       });
-      (mockClient.get as jest.Mock).mockRejectedValue(err);
+      (mockClient.get as Mock).mockRejectedValue(err);
 
       await expect(testSpec.handler(mockContext)).rejects.toThrow('1Password API error (403):');
     });

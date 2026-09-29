@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { ChatFunctionClient } from '@kbn/observability-ai-assistant-plugin/server/service/chat_function_client';
@@ -13,8 +15,8 @@ import { EXECUTE_QUERY_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plu
 
 describe('executeQuery function', () => {
   const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
-    search: jest.fn(),
-    fieldCaps: jest.fn(),
+    search: vi.fn(),
+    fieldCaps: vi.fn(),
     esql: {
       query: () => Promise.resolve({ columns: [], values: [] }),
     },
@@ -23,21 +25,21 @@ describe('executeQuery function', () => {
   const consoleOrPassThrough = () => {};
 
   const loggerMock: DeeplyMockedKeys<Logger> = {
-    log: jest.fn().mockImplementation(consoleOrPassThrough),
-    error: jest.fn().mockImplementation(consoleOrPassThrough),
-    debug: jest.fn().mockImplementation(consoleOrPassThrough),
-    trace: jest.fn().mockImplementation(consoleOrPassThrough),
-    isLevelEnabled: jest.fn().mockReturnValue(true),
+    log: vi.fn().mockImplementation(consoleOrPassThrough),
+    error: vi.fn().mockImplementation(consoleOrPassThrough),
+    debug: vi.fn().mockImplementation(consoleOrPassThrough),
+    trace: vi.fn().mockImplementation(consoleOrPassThrough),
+    isLevelEnabled: vi.fn().mockReturnValue(true),
   } as any;
 
   let result: any;
   const timeoutError = new Error('Request timed out');
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const functionClient = new ChatFunctionClient([]);
 
     // mock the esql query to throw a timeout error
-    currentUserEsClientMock.esql.query = jest.fn().mockImplementation(() => {
+    currentUserEsClientMock.esql.query = vi.fn().mockImplementation(() => {
       const error = timeoutError;
       error.name = 'TimeoutError';
       throw error;
@@ -57,7 +59,7 @@ describe('executeQuery function', () => {
     });
 
     result = await functionClient.executeFunction({
-      chat: jest.fn(),
+      chat: vi.fn(),
       name: EXECUTE_QUERY_FUNCTION_NAME,
       args: JSON.stringify({ query: 'FROM logs-* | LIMIT 10' }),
       messages: [],

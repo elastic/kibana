@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../common/mock/endpoint';
@@ -14,11 +17,11 @@ import { ConsoleManager } from '../components/console';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useLicense } from '../../common/hooks/use_license';
 
-jest.mock('../../common/components/user_privileges');
-jest.mock('../../common/hooks/use_license');
+vi.mock('../../common/components/user_privileges');
+vi.mock('../../common/hooks/use_license');
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useLicenseMock = useLicense as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
+const useLicenseMock = useLicense as Mock;
 
 describe('useWithShowResponder()', () => {
   let mockedContext: AppContextTestRender;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -19,14 +21,17 @@ import type { AnomalySummaryEntry } from '../../../../../../common/api/entity_an
 import { getAnomalyData } from './get_anomaly_data';
 import { getEntityAnomalies } from '../../../anomaly_summary';
 
-jest.mock('../../../anomaly_summary');
-jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
-  euid: {
-    dsl: {
-      getEuidFilterBasedOnDocument: jest.fn(),
-    },
-  },
-}));
+vi.mock('../../../anomaly_summary');
+vi.mock('@kbn/entity-store/common/euid_helpers', () => {
+      const mocked = {
+      euid: {
+        dsl: {
+          getEuidFilterBasedOnDocument: vi.fn(),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 const soClient = savedObjectsClientMock.create();
@@ -85,10 +90,10 @@ const makeMl = (
   jobs: Array<{ id: string; groups?: string[]; displayName?: string; description?: string }> = [],
   anomalies: unknown[] = []
 ) => {
-  const mockGetAnomaliesTableData = jest.fn().mockResolvedValue({ anomalies, interval: 'auto' });
+  const mockGetAnomaliesTableData = vi.fn().mockResolvedValue({ anomalies, interval: 'auto' });
   return {
-    jobServiceProvider: jest.fn().mockReturnValue({
-      jobsSummary: jest.fn().mockResolvedValue(
+    jobServiceProvider: vi.fn().mockReturnValue({
+      jobsSummary: vi.fn().mockResolvedValue(
         jobs.map((j) => ({
           id: j.id,
           groups: j.groups ?? ['security'],
@@ -97,7 +102,7 @@ const makeMl = (
         }))
       ),
     }),
-    resultsServiceProvider: jest.fn().mockReturnValue({
+    resultsServiceProvider: vi.fn().mockReturnValue({
       getAnomaliesTableData: mockGetAnomaliesTableData,
     }),
     _getAnomaliesTableData: mockGetAnomaliesTableData,
@@ -105,7 +110,7 @@ const makeMl = (
 };
 
 const makeUiSettingsClient = (anomalyScore = 50) => ({
-  get: jest.fn().mockResolvedValue(anomalyScore),
+  get: vi.fn().mockResolvedValue(anomalyScore),
 });
 
 const baseOptions = {
@@ -120,8 +125,8 @@ const baseOptions = {
 const mockEuidFilter = { term: { 'user.name': 'mock-euid-entity' } };
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  jest.mocked(euid.dsl.getEuidFilterBasedOnDocument).mockReturnValue(mockEuidFilter);
+  vi.clearAllMocks();
+  vi.mocked(euid.dsl.getEuidFilterBasedOnDocument).mockReturnValue(mockEuidFilter);
 });
 
 describe('getAnomalyData', () => {
@@ -136,7 +141,7 @@ describe('getAnomalyData', () => {
       });
 
       expect(result).toEqual([]);
-      expect(jest.mocked(getEntityAnomalies)).not.toHaveBeenCalled();
+      expect(vi.mocked(getEntityAnomalies)).not.toHaveBeenCalled();
     });
   });
 
@@ -151,7 +156,7 @@ describe('getAnomalyData', () => {
       });
 
       expect(result).toEqual([[]]);
-      expect(jest.mocked(getEntityAnomalies)).not.toHaveBeenCalled();
+      expect(vi.mocked(getEntityAnomalies)).not.toHaveBeenCalled();
     });
 
     it('returns empty array per entity when entity id is missing', async () => {
@@ -163,12 +168,12 @@ describe('getAnomalyData', () => {
         uiSettingsClient: makeUiSettingsClient() as never,
       });
 
-      expect(jest.mocked(getEntityAnomalies)).not.toHaveBeenCalled();
+      expect(vi.mocked(getEntityAnomalies)).not.toHaveBeenCalled();
       expect(result).toEqual([[]]);
     });
 
     it('calls getEntityAnomalies with the correct parameters', async () => {
-      jest.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [], total: 0 });
+      vi.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [], total: 0 });
 
       await getAnomalyData({
         ...baseOptions,
@@ -178,7 +183,7 @@ describe('getAnomalyData', () => {
         uiSettingsClient: makeUiSettingsClient() as never,
       });
 
-      expect(jest.mocked(getEntityAnomalies)).toHaveBeenCalledWith(
+      expect(vi.mocked(getEntityAnomalies)).toHaveBeenCalledWith(
         expect.objectContaining({
           entityId: 'user:alice',
           entityType: 'user',
@@ -189,9 +194,9 @@ describe('getAnomalyData', () => {
     });
 
     it('forwards mitreDataClient to getEntityAnomalies when provided', async () => {
-      jest.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [], total: 0 });
+      vi.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [], total: 0 });
 
-      const mockMitreDataClient: MitreAttackDataClient = { list: jest.fn(), getById: jest.fn() };
+      const mockMitreDataClient: MitreAttackDataClient = { list: vi.fn(), getById: vi.fn() };
 
       await getAnomalyData({
         ...baseOptions,
@@ -202,14 +207,14 @@ describe('getAnomalyData', () => {
         uiSettingsClient: makeUiSettingsClient() as never,
       });
 
-      expect(jest.mocked(getEntityAnomalies)).toHaveBeenCalledWith(
+      expect(vi.mocked(getEntityAnomalies)).toHaveBeenCalledWith(
         expect.objectContaining({ mitreDataClient: mockMitreDataClient })
       );
     });
 
     it('maps anomaly results to AnomalyRecord correctly', async () => {
       const entry = makeAnomalySummaryEntry({ jobId: 'security-job-1', recordScore: 88 });
-      jest.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [entry], total: 1 });
+      vi.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [entry], total: 1 });
 
       const result = await getAnomalyData({
         ...baseOptions,
@@ -228,7 +233,7 @@ describe('getAnomalyData', () => {
     it('issues one getEntityAnomalies call per entity and returns results in input order', async () => {
       const entryA = makeAnomalySummaryEntry({ jobId: 'job-a', recordScore: 90 });
       const entryB = makeAnomalySummaryEntry({ jobId: 'job-b', recordScore: 50 });
-      jest
+      vi
         .mocked(getEntityAnomalies)
         .mockResolvedValueOnce({ anomalies: [entryA], total: 1 })
         .mockResolvedValueOnce({ anomalies: [entryB], total: 1 });
@@ -244,7 +249,7 @@ describe('getAnomalyData', () => {
         uiSettingsClient: makeUiSettingsClient() as never,
       });
 
-      expect(jest.mocked(getEntityAnomalies)).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(getEntityAnomalies)).toHaveBeenCalledTimes(2);
       expect(result).toHaveLength(2);
       expect((result[0][0].source as AnomalySummaryEntry).recordScore).toBe(90);
       expect((result[1][0].source as AnomalySummaryEntry).recordScore).toBe(50);

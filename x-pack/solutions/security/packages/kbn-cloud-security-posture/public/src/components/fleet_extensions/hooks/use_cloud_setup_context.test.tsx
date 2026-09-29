@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -204,7 +206,7 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 
 describe('useCloudSetup', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCloud.cloudId =
       'my-deployment:ZXhhbXBsZS5jbG91ZC5lbGFzdGljLmNvJGRlZmF1bHQkY2liYW5hLWNvbXBvbmVudC1pZCRvdGhlcg==';
   });

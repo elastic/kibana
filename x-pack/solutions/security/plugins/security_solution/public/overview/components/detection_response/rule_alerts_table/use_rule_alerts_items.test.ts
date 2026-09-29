@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 
@@ -20,8 +22,8 @@ import { useRuleAlertsItems } from './use_rule_alerts_items';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
-const mockDateNow = jest.fn().mockReturnValue(dateNow);
-Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
+const mockDateNow = vi.fn().mockReturnValue(dateNow);
+Date.now = vi.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
 const defaultUseQueryAlertsReturn = {
   loading: false,
@@ -31,17 +33,17 @@ const defaultUseQueryAlertsReturn = {
   request: '',
   refetch: () => {},
 };
-const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => {
+const mockUseQueryAlerts = vi.fn().mockReturnValue(defaultUseQueryAlertsReturn);
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => {
   return {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
 
-const mockUseGlobalTime = jest
+const mockUseGlobalTime = vi
   .fn()
-  .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() });
-jest.mock('../../../../common/containers/use_global_time', () => {
+  .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() });
+vi.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
@@ -59,7 +61,7 @@ const renderUseRuleAlertsItems = (props: Partial<UseRuleAlertsItemsProps> = {}) 
 
 describe('useRuleAlertsItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
     mockUseQueryAlerts.mockReturnValue(defaultUseQueryAlertsReturn);
   });

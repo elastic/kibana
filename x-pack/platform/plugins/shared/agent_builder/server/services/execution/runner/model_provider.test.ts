@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -18,9 +21,9 @@ import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { createModelProvider, createModelProviderFactory } from './model_provider';
 
-jest.mock('../../../utils/resolve_selected_connector_id');
+vi.mock('../../../utils/resolve_selected_connector_id');
 
-const resolveSelectedConnectorIdMock = resolveSelectedConnectorId as jest.MockedFn<
+const resolveSelectedConnectorIdMock = resolveSelectedConnectorId as MockedFunction<
   typeof resolveSelectedConnectorId
 >;
 
@@ -31,21 +34,21 @@ interface FastEndpointMock {
 
 const createSearchInferenceEndpointsMock = (
   endpoints: FastEndpointMock[] = []
-): jest.Mocked<SearchInferenceEndpointsPluginStart> => {
+): Mocked<SearchInferenceEndpointsPluginStart> => {
   return {
     features: {} as any,
     endpoints: {
-      getForFeature: jest.fn().mockResolvedValue({
+      getForFeature: vi.fn().mockResolvedValue({
         endpoints,
         warnings: [],
         soEntryFound: false,
       }),
     },
-  } as unknown as jest.Mocked<SearchInferenceEndpointsPluginStart>;
+  } as unknown as Mocked<SearchInferenceEndpointsPluginStart>;
 };
 
-const createTrackingServiceMock = (): jest.Mocked<Pick<TrackingService, 'trackLLMUsage'>> => ({
-  trackLLMUsage: jest.fn(),
+const createTrackingServiceMock = (): Mocked<Pick<TrackingService, 'trackLLMUsage'>> => ({
+  trackLLMUsage: vi.fn(),
 });
 
 const setupDeps = ({
@@ -64,7 +67,7 @@ const setupDeps = ({
   const trackingService = createTrackingServiceMock() as unknown as TrackingService;
 
   savedObjects.getScopedClient.mockReturnValue({} as any);
-  const get = jest.fn(async () => undefined);
+  const get = vi.fn(async () => undefined);
   uiSettings.asScopedToClient.mockReturnValue({ get } as any);
 
   return {
@@ -97,7 +100,7 @@ const getCompletionCallback = (
 
 const setupChatAndClient = (inference: ReturnType<typeof inferenceMock.createStartContract>) => {
   const chatModel = { kind: 'chat-model' };
-  const getConnectorById = jest.fn().mockResolvedValue(createConnectorMock());
+  const getConnectorById = vi.fn().mockResolvedValue(createConnectorMock());
   const inferenceClient = { getConnectorById };
 
   inference.getChatModel.mockResolvedValue(chatModel as any);
@@ -112,7 +115,7 @@ describe('createModelProvider', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getDefaultModel', () => {
@@ -414,11 +417,11 @@ describe('createModelProvider', () => {
 
     it('wraps chatComplete on the inference client to inject reasoning by default', async () => {
       const deps = setupDeps();
-      const chatCompleteMock = jest.fn().mockResolvedValue(undefined);
+      const chatCompleteMock = vi.fn().mockResolvedValue(undefined);
       const boundClient = {
         chatComplete: chatCompleteMock,
-        bindTo: jest.fn(),
-        getConnectorById: jest.fn().mockResolvedValue(createConnectorMock()),
+        bindTo: vi.fn(),
+        getConnectorById: vi.fn().mockResolvedValue(createConnectorMock()),
       };
       deps.inference.getChatModel.mockResolvedValue({} as any);
       deps.inference.getClient.mockReturnValue(boundClient as any);
@@ -434,11 +437,11 @@ describe('createModelProvider', () => {
 
     it('lets a caller-supplied reasoning override the injected default', async () => {
       const deps = setupDeps();
-      const chatCompleteMock = jest.fn().mockResolvedValue(undefined);
+      const chatCompleteMock = vi.fn().mockResolvedValue(undefined);
       const boundClient = {
         chatComplete: chatCompleteMock,
-        bindTo: jest.fn(),
-        getConnectorById: jest.fn().mockResolvedValue(createConnectorMock()),
+        bindTo: vi.fn(),
+        getConnectorById: vi.fn().mockResolvedValue(createConnectorMock()),
       };
       deps.inference.getChatModel.mockResolvedValue({} as any);
       deps.inference.getClient.mockReturnValue(boundClient as any);

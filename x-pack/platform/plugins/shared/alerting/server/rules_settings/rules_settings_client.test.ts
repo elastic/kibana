@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RulesSettingsClientConstructorOptions } from './rules_settings_client';
 import { RulesSettingsClient } from './rules_settings_client';
 import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
@@ -13,16 +16,16 @@ import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_quer
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
-const rulesSettingsClientParams: jest.Mocked<RulesSettingsClientConstructorOptions> = {
+const rulesSettingsClientParams: Mocked<RulesSettingsClientConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
-  getUserName: jest.fn(),
+  getUserName: vi.fn(),
   savedObjectsClient,
   isServerless: false,
 };
 
 describe('RulesSettingsClient', () => {
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('can initialize correctly', async () => {

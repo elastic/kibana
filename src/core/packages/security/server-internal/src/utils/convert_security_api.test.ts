@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { convertSecurityApi } from './convert_security_api';
@@ -21,41 +23,41 @@ describe('convertSecurityApi', () => {
     workloadTypes = new WorkloadTypeRegistry();
     source = {
       authc: {
-        getCurrentUser: jest.fn(),
-        getRedactedSessionId: jest.fn(),
+        getCurrentUser: vi.fn(),
+        getRedactedSessionId: vi.fn(),
         apiKeys: {
-          areAPIKeysEnabled: jest.fn(),
-          areCrossClusterAPIKeysEnabled: jest.fn(),
-          validate: jest.fn(),
-          invalidate: jest.fn(),
-          invalidateAsInternalUser: jest.fn(),
-          grantAsInternalUser: jest.fn(),
-          cloneAsInternalUser: jest.fn(),
-          create: jest.fn(),
-          update: jest.fn(),
+          areAPIKeysEnabled: vi.fn(),
+          areCrossClusterAPIKeysEnabled: vi.fn(),
+          validate: vi.fn(),
+          invalidate: vi.fn(),
+          invalidateAsInternalUser: vi.fn(),
+          grantAsInternalUser: vi.fn(),
+          cloneAsInternalUser: vi.fn(),
+          create: vi.fn(),
+          update: vi.fn(),
           uiam: {
-            grant: jest.fn(),
-            invalidate: jest.fn(),
-            convert: jest.fn(),
-            getInternalCallerAttestationHeaders: jest.fn(),
-            isOwnClientAuthentication: jest.fn(),
-            isExternalApiKey: jest.fn(),
+            grant: vi.fn(),
+            invalidate: vi.fn(),
+            convert: vi.fn(),
+            getInternalCallerAttestationHeaders: vi.fn(),
+            isOwnClientAuthentication: vi.fn(),
+            isExternalApiKey: vi.fn(),
           },
         },
       },
       audit: {
-        asScoped: jest.fn().mockReturnValue(createAuditLoggerMock.create()),
+        asScoped: vi.fn().mockReturnValue(createAuditLoggerMock.create()),
         withoutRequest: createAuditLoggerMock.create(),
       },
       serviceAccounts: {
-        isEnabled: jest.fn(),
-        create: jest.fn(),
-        bindWorkload: jest.fn(),
-        unbindWorkload: jest.fn(),
-        getWorkloadBinding: jest.fn(),
-        withScopedRequestForWorkload: jest.fn(),
+        isEnabled: vi.fn(),
+        create: vi.fn(),
+        bindWorkload: vi.fn(),
+        unbindWorkload: vi.fn(),
+        getWorkloadBinding: vi.fn(),
+        withScopedRequestForWorkload: vi.fn(),
       },
-      fakeRequestEnricher: jest.fn(),
+      fakeRequestEnricher: vi.fn(),
     };
   });
 

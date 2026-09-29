@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { noCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import type { AddObservableProps } from './add_observable';
@@ -15,7 +17,7 @@ import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 import { postObservable } from '../../containers/api';
 
-jest.mock('../../containers/api');
+vi.mock('../../containers/api');
 
 const platinumLicense = licensingMock.createLicense({
   license: { type: 'platinum' },
@@ -31,7 +33,7 @@ describe('AddObservable', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the button as enabled when subscribed to platinum', async () => {
@@ -76,7 +78,7 @@ describe('AddObservable', () => {
 
     expect(screen.queryByTestId('cases-observables-add-modal')).not.toBeInTheDocument();
 
-    expect(jest.mocked(postObservable)).toHaveBeenCalledWith(
+    expect(vi.mocked(postObservable)).toHaveBeenCalledWith(
       { observable: { description: '', typeKey: 'observable-type-ipv4', value: '127.0.0.1' } },
       'mock-id'
     );

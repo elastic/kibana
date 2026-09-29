@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConfirmRuleClose } from './confirm_rule_close';
 
-const renderModal = (onCancel = jest.fn(), onConfirm = jest.fn()) =>
+const renderModal = (onCancel = vi.fn(), onConfirm = vi.fn()) =>
   render(
     <IntlProvider locale="en">
       <ConfirmRuleClose onCancel={onCancel} onConfirm={onConfirm} />
@@ -26,14 +28,14 @@ describe('ConfirmRuleClose', () => {
   });
 
   it('calls onConfirm when Discard changes is clicked', () => {
-    const onConfirm = jest.fn();
-    renderModal(jest.fn(), onConfirm);
+    const onConfirm = vi.fn();
+    renderModal(vi.fn(), onConfirm);
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
   it('calls onCancel when Continue editing is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     renderModal(onCancel);
     fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
     expect(onCancel).toHaveBeenCalledTimes(1);

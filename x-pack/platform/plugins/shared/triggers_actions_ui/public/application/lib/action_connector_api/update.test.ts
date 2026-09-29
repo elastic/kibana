@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ActionConnectorWithoutId } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { updateActionConnector } from '.';
@@ -12,7 +14,7 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('updateActionConnector', () => {
   test('should call the update API', async () => {

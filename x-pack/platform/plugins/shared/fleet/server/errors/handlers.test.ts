@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
@@ -30,7 +32,7 @@ describe('defaultFleetErrorHandler', () => {
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appContextService.stop();
   });
 

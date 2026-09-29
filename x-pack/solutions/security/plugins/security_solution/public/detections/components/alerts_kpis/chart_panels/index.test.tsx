@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -16,34 +19,37 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 import { createResetGroupByFieldAction } from '../alerts_histogram_panel/helpers';
 
-jest.mock('./alerts_local_storage');
+vi.mock('./alerts_local_storage');
 
-jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
-jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
-  useRefetchByRestartingSession: jest.fn().mockReturnValue({
-    session: {
-      current: {
-        start: jest.fn(),
-      },
-    },
-    searchSessionId: 'mockSearchSessionId',
-    refetchByRestartingSession: jest.fn(),
-  }),
-}));
+vi.mock('../../../../common/components/visualization_actions/lens_embeddable');
+vi.mock('../../../../common/components/page/use_refetch_by_session', () => {
+      const mocked = {
+      useRefetchByRestartingSession: vi.fn().mockReturnValue({
+        session: {
+          current: {
+            start: vi.fn(),
+          },
+        },
+        searchSessionId: 'mockSearchSessionId',
+        refetchByRestartingSession: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
 
   return {
     ...originalModule,
-    useParams: jest.fn(),
-    useHistory: jest.fn(),
+    useParams: vi.fn(),
+    useHistory: vi.fn(),
     useLocation: () => ({ pathname: '' }),
   };
 });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -51,20 +57,20 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: () => ({
       services: {
         application: {
-          navigateToUrl: jest.fn(),
+          navigateToUrl: vi.fn(),
         },
         storage: {
-          get: jest.fn(),
-          set: jest.fn(),
+          get: vi.fn(),
+          set: vi.fn(),
         },
       },
     }),
   };
 });
 
-const mockSetToggle = jest.fn();
-const mockUseQueryToggle = useQueryToggle as jest.Mock;
-jest.mock('../../../../common/containers/query_toggle');
+const mockSetToggle = vi.fn();
+const mockUseQueryToggle = useQueryToggle as Mock;
+vi.mock('../../../../common/containers/query_toggle');
 
 const defaultAlertSettings = {
   alertViewSelection: 'trend',
@@ -74,19 +80,19 @@ const defaultAlertSettings = {
   groupBySelection: 'host.name',
   riskChartStackBy0: 'kibana.alert.rule.name',
   riskChartStackBy1: 'host.name',
-  setAlertViewSelection: jest.fn(),
-  setCountTableStackBy0: jest.fn(),
-  setCountTableStackBy1: jest.fn(),
-  setGroupBySelection: jest.fn(),
-  setIsTreemapPanelExpanded: jest.fn(),
-  setRiskChartStackBy0: jest.fn(),
-  setRiskChartStackBy1: jest.fn(),
-  setTrendChartStackBy: jest.fn(),
+  setAlertViewSelection: vi.fn(),
+  setCountTableStackBy0: vi.fn(),
+  setCountTableStackBy1: vi.fn(),
+  setGroupBySelection: vi.fn(),
+  setIsTreemapPanelExpanded: vi.fn(),
+  setRiskChartStackBy0: vi.fn(),
+  setRiskChartStackBy1: vi.fn(),
+  setTrendChartStackBy: vi.fn(),
   trendChartStackBy: 'kibana.alert.rule.name',
 };
 
 const defaultProps = {
-  addFilter: jest.fn(),
+  addFilter: vi.fn(),
   alertsDefaultFilters: [
     {
       meta: {
@@ -131,7 +137,7 @@ const defaultProps = {
   signalIndexName: '.alerts-security.alerts-default',
   showBuildingBlockAlerts: false,
   showOnlyThreatIndicatorAlerts: false,
-  updateDateRangeCallback: jest.fn(),
+  updateDateRangeCallback: vi.fn(),
 };
 
 const resetGroupByFields = () => {
@@ -144,10 +150,10 @@ const resetGroupByFields = () => {
 
 describe('ChartPanels', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
 
-    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+    (useAlertsLocalStorage as Mock).mockReturnValue({
       ...defaultAlertSettings,
     });
   });
@@ -205,7 +211,7 @@ describe('ChartPanels', () => {
   describe(`'Reset group by fields' context menu action`, () => {
     describe('Group by', () => {
       test(`it resets the 'Group by' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is 'treemap'`, async () => {
-        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+        (useAlertsLocalStorage as Mock).mockReturnValue({
           ...defaultAlertSettings,
           alertViewSelection: 'treemap',
         });
@@ -239,13 +245,13 @@ describe('ChartPanels', () => {
 
       describe.each([['trend'], ['table']])(`when 'alertViewSelection' is '%s'`, (view) => {
         test(`it has resets the 'Group by' field as an extra action`, async () => {
-          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+          (useAlertsLocalStorage as Mock).mockReturnValue({
             ...defaultAlertSettings,
             alertViewSelection: view,
           });
 
           const mockResetGroupByFieldsAction = [
-            createResetGroupByFieldAction({ callback: jest.fn(), order: 5 }),
+            createResetGroupByFieldAction({ callback: vi.fn(), order: 5 }),
           ];
 
           const testProps = {
@@ -261,10 +267,10 @@ describe('ChartPanels', () => {
 
           await waitFor(() => {
             expect(
-              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions.length
+              (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions.length
             ).toEqual(1);
             expect(
-              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
+              (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions[0].id
             ).toEqual('resetGroupByField');
           });
         });
@@ -275,13 +281,13 @@ describe('ChartPanels', () => {
         ['table', 'kibana.alert.rule.name'],
       ])(`when 'alertViewSelection' is '%s'`, (view, defaultGroupBy) => {
         test(`it has resets the 'Group by' field as an extra action, with default value ${defaultGroupBy}`, async () => {
-          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+          (useAlertsLocalStorage as Mock).mockReturnValue({
             ...defaultAlertSettings,
             alertViewSelection: view,
           });
 
           const mockResetGroupByFieldsAction = [
-            createResetGroupByFieldAction({ callback: jest.fn(), order: 5 }),
+            createResetGroupByFieldAction({ callback: vi.fn(), order: 5 }),
           ];
 
           const testProps = {
@@ -297,12 +303,12 @@ describe('ChartPanels', () => {
 
           await waitFor(() => {
             expect(
-              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions.length
+              (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions.length
             ).toEqual(1);
             expect(
-              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
+              (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions[0].id
             ).toEqual('resetGroupByField');
-            expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].stackByField).toEqual(
+            expect((LensEmbeddable as unknown as Mock).mock.calls[0][0].stackByField).toEqual(
               defaultGroupBy
             );
           });
@@ -312,7 +318,7 @@ describe('ChartPanels', () => {
 
     describe('Group by top', () => {
       test(`it resets the 'Group by top' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is 'treemap'`, async () => {
-        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+        (useAlertsLocalStorage as Mock).mockReturnValue({
           ...defaultAlertSettings,
           alertViewSelection: 'treemap',
         });
@@ -345,7 +351,7 @@ describe('ChartPanels', () => {
       });
 
       test(`it renders the 'Group by top' field to the default value, when 'alertViewSelection' is 'table'`, async () => {
-        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+        (useAlertsLocalStorage as Mock).mockReturnValue({
           ...defaultAlertSettings,
           alertViewSelection: 'table',
         });
@@ -360,7 +366,7 @@ describe('ChartPanels', () => {
 
         await waitFor(() => {
           expect(
-            (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions.breakdownField
+            (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraOptions.breakdownField
           ).toEqual(defaultValue);
         });
       });
@@ -368,7 +374,7 @@ describe('ChartPanels', () => {
   });
 
   test('it renders the table loading spinner when data is loading and `alertViewSelection` is table', async () => {
-    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+    (useAlertsLocalStorage as Mock).mockReturnValue({
       ...defaultAlertSettings,
       alertViewSelection: 'table',
     });
@@ -385,7 +391,7 @@ describe('ChartPanels', () => {
   });
 
   test('it renders the alerts count panel when `alertViewSelection` is table', async () => {
-    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+    (useAlertsLocalStorage as Mock).mockReturnValue({
       ...defaultAlertSettings,
       alertViewSelection: 'table',
     });
@@ -402,7 +408,7 @@ describe('ChartPanels', () => {
   });
 
   test('it renders the treemap loading spinner when data is loading and `alertViewSelection` is treemap', async () => {
-    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+    (useAlertsLocalStorage as Mock).mockReturnValue({
       ...defaultAlertSettings,
       alertViewSelection: 'treemap',
     });
@@ -419,7 +425,7 @@ describe('ChartPanels', () => {
   });
 
   test('it renders the treemap panel when `alertViewSelection` is treemap', async () => {
-    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+    (useAlertsLocalStorage as Mock).mockReturnValue({
       ...defaultAlertSettings,
       alertViewSelection: 'treemap',
     });
@@ -436,7 +442,7 @@ describe('ChartPanels', () => {
   });
 
   test('it renders the charts loading spinner when data is loading and `alertViewSelection` is charts', async () => {
-    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+    (useAlertsLocalStorage as Mock).mockReturnValue({
       ...defaultAlertSettings,
       alertViewSelection: 'charts',
     });
@@ -452,7 +458,7 @@ describe('ChartPanels', () => {
   });
 
   test('it renders the charts panel when `alertViewSelection` is charts', async () => {
-    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+    (useAlertsLocalStorage as Mock).mockReturnValue({
       ...defaultAlertSettings,
       alertViewSelection: 'charts',
     });

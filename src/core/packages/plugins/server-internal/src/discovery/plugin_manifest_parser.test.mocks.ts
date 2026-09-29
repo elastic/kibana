@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const realFs = jest.requireActual('fs');
+import { vi } from 'vitest';
 
-export const mockReadFile = jest.fn();
-const mockStat = jest.fn();
-jest.doMock('fs', () => ({
-  ...realFs,
-  readFile: mockReadFile,
-  stat: mockStat,
-}));
+const realFs = require('fs');
+
+export const mockReadFile = vi.fn();
+const mockStat = vi.fn();
+vi.doMock('fs', () => {
+      const mocked = {
+      ...realFs,
+      readFile: mockReadFile,
+      stat: mockStat,
+    };
+      return { ...mocked, default: mocked };
+    });

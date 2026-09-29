@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { OnboardingBody } from './onboarding_body';
@@ -12,17 +15,17 @@ import { useExpandedCard } from './hooks/use_expanded_card';
 import { useCompletedCards } from './hooks/use_completed_cards';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../onboarding_context');
-jest.mock('./hooks/use_body_config');
-jest.mock('./hooks/use_expanded_card');
-jest.mock('./hooks/use_completed_cards');
+vi.mock('../onboarding_context');
+vi.mock('./hooks/use_body_config');
+vi.mock('./hooks/use_expanded_card');
+vi.mock('./hooks/use_completed_cards');
 
-const mockUseBodyConfig = useBodyConfig as jest.Mock;
-const mockUseExpandedCard = useExpandedCard as jest.Mock;
-const mockUseCompletedCards = useCompletedCards as jest.Mock;
+const mockUseBodyConfig = useBodyConfig as Mock;
+const mockUseExpandedCard = useExpandedCard as Mock;
+const mockUseCompletedCards = useCompletedCards as Mock;
 
 // Mock the hooks to return desired test data
-const mockComponent = jest.fn(function Component(_: { setComplete: (complete: boolean) => void }) {
+const mockComponent = vi.fn(function Component(_: { setComplete: (complete: boolean) => void }) {
   return <div>{'Card 1 Content'}</div>;
 });
 mockUseBodyConfig.mockReturnValue([
@@ -39,23 +42,23 @@ mockUseBodyConfig.mockReturnValue([
   },
 ]);
 
-const mockSetExpandedCardId = jest.fn();
+const mockSetExpandedCardId = vi.fn();
 mockUseExpandedCard.mockReturnValue({
   expandedCardId: null,
   setExpandedCardId: mockSetExpandedCardId,
 });
-const mockCheckCardComplete = jest.fn();
-const mockSetCardComplete = jest.fn();
+const mockCheckCardComplete = vi.fn();
+const mockSetCardComplete = vi.fn();
 mockUseCompletedCards.mockReturnValue({
-  isCardComplete: jest.fn(() => false),
+  isCardComplete: vi.fn(() => false),
   setCardComplete: mockSetCardComplete,
-  getCardCheckCompleteResult: jest.fn(),
+  getCardCheckCompleteResult: vi.fn(),
   checkCardComplete: mockCheckCardComplete,
 });
 
 describe('OnboardingBody Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the OnboardingBody component with the correct content', () => {
@@ -102,7 +105,7 @@ describe('OnboardingBody Component', () => {
 
   describe('when the card is set as complete from the card component', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockComponent.mockImplementationOnce(function Component({ setComplete }) {
         setComplete(true);
         return <div>{'Card 1 Content'}</div>;
@@ -126,7 +129,7 @@ describe('OnboardingBody Component', () => {
 
   describe('when the card is set as incomplete from the card component', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockComponent.mockImplementationOnce(function Component({ setComplete }) {
         setComplete(false);
         return <div>{'Card 1 Content'}</div>;

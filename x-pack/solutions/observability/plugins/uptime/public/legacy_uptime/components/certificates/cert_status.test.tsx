@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -15,10 +17,10 @@ import moment from 'moment';
 
 describe('CertStatus', () => {
   beforeEach(() => {
-    const spy = jest.spyOn(redux, 'useDispatch');
-    spy.mockReturnValue(jest.fn());
+    const spy = vi.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(vi.fn());
 
-    const spy1 = jest.spyOn(redux, 'useSelector');
+    const spy1 = vi.spyOn(redux, 'useSelector');
     spy1.mockReturnValue(true);
   });
 

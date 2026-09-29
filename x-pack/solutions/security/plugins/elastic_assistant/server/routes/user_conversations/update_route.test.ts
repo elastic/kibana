@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { User } from '@kbn/elastic-assistant-common';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
 import { getUpdateConversationRequest, requestMock } from '../../__mocks__/request';
@@ -27,7 +29,7 @@ describe('Update conversation route', () => {
   const mockUser1 = authenticatedUser;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -40,7 +42,7 @@ describe('Update conversation route', () => {
 
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     context.elasticAssistant.telemetry = analyticsServiceMock.createAnalyticsServiceSetup();
-    context.elasticAssistant.auditLogger = { log: jest.fn() } as unknown as AuditLogger;
+    context.elasticAssistant.auditLogger = { log: vi.fn() } as unknown as AuditLogger;
     updateConversationRoute(server.router);
   });
 

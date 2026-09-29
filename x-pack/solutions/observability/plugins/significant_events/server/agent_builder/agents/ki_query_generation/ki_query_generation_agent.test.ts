@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { SCS_AGENT_BUILDER_TOOL_IDS } from '../../../lib/semantic_code_search_grounding/semantic_code_search_tools';
 import { KI_QUERY_GENERATION_SKILL_ID } from '../../skills/ki_query_generation';
@@ -24,10 +26,10 @@ describe('kiQueryGenerationAgentType', () => {
 
   it('feature-gates every registered SCS tool', async () => {
     const enabledAgentType = createKIQueryGenerationAgentType({
-      isSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(true),
+      isSemanticCodeSearchGroundingEnabled: vi.fn().mockResolvedValue(true),
     });
     const disabledAgentType = createKIQueryGenerationAgentType({
-      isSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(false),
+      isSemanticCodeSearchGroundingEnabled: vi.fn().mockResolvedValue(false),
     });
     if (
       typeof enabledAgentType.baseConfiguration !== 'function' ||

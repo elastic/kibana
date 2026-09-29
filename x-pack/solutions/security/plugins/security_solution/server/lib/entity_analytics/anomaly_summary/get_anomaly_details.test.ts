@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -12,15 +14,18 @@ import { getEntityAnomalies } from './get_anomaly_details';
 import type { AnomalyHit } from '../ml_anomaly_detection/types';
 import type { JobConfig } from '../ml_anomaly_detection/get_job_config';
 
-jest.mock('../ml_anomaly_detection', () => ({
-  searchEntityAnomalies: jest.fn(),
-  fetchBaselineBehavior: jest.fn(),
-  getJobConfig: jest.fn(),
-  getSecurityMlJobIds: jest.fn(),
-}));
+vi.mock('../ml_anomaly_detection', () => {
+      const mocked = {
+      searchEntityAnomalies: vi.fn(),
+      fetchBaselineBehavior: vi.fn(),
+      getJobConfig: vi.fn(),
+      getSecurityMlJobIds: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { searchEntityAnomalies, fetchBaselineBehavior, getJobConfig, getSecurityMlJobIds } =
-  jest.requireMock('../ml_anomaly_detection');
+  (await vi.importMock('../ml_anomaly_detection'));
 
 const makeAnomaly = (overrides: Partial<AnomalyHit> = {}): AnomalyHit => ({
   _id: 'anomaly-1',
@@ -65,11 +70,11 @@ const defaultParams = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   logger = loggingSystemMock.createLogger();
   esClient = {} as unknown as ElasticsearchClient;
   mockMl = {
-    mlSystemProvider: jest.fn().mockReturnValue({}),
+    mlSystemProvider: vi.fn().mockReturnValue({}),
   } as unknown as MlPluginSetup;
   searchEntityAnomalies.mockResolvedValue({ hits: [], total: 0 });
   getSecurityMlJobIds.mockResolvedValue(['security-job-1']);

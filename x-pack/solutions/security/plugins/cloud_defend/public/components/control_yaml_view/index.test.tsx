@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@kbn/code-editor-mock/jest_helper';
@@ -20,10 +23,10 @@ import * as i18n from './translations';
 import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
 import { useConfigModel } from './hooks/use_config_model';
 
-jest.mock('./hooks/use_config_model');
+vi.mock('./hooks/use_config_model');
 
 describe('<ControlYamlView />', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
     return (
@@ -36,9 +39,9 @@ describe('<ControlYamlView />', () => {
   beforeEach(() => {
     onChange.mockClear();
     // Set default mock for useConfigModel to return non null value
-    (useConfigModel as jest.Mock).mockReturnValue({
-      getValue: jest.fn(() => ''),
-      setValue: jest.fn(),
+    (useConfigModel as Mock).mockReturnValue({
+      getValue: vi.fn(() => ''),
+      setValue: vi.fn(),
     });
   });
 
@@ -85,7 +88,7 @@ describe('<ControlYamlView />', () => {
 
   it('handles loading state', async () => {
     // Force the hook to return null
-    (useConfigModel as jest.Mock).mockReturnValue(null);
+    (useConfigModel as Mock).mockReturnValue(null);
 
     const { getByText, queryByText } = render(<WrappedComponent />);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -14,7 +16,7 @@ import { ServiceAccountsEmptyPrompt } from './service_accounts_empty_prompt';
 
 describe('ServiceAccountsEmptyPrompt', () => {
   it('renders the empty state and starts account creation', () => {
-    const onCreateAccount = jest.fn();
+    const onCreateAccount = vi.fn();
 
     renderWithKibanaRenderContext(
       <ServiceAccountsEmptyPrompt canCreate onCreateAccount={onCreateAccount} />
@@ -32,7 +34,7 @@ describe('ServiceAccountsEmptyPrompt', () => {
 
   it('does not offer account creation without the save capability', () => {
     renderWithKibanaRenderContext(
-      <ServiceAccountsEmptyPrompt canCreate={false} onCreateAccount={jest.fn()} />
+      <ServiceAccountsEmptyPrompt canCreate={false} onCreateAccount={vi.fn()} />
     );
 
     expect(screen.getByRole('heading', { name: 'No service accounts available' })).toBeVisible();

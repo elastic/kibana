@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 // Mock parseDuration function
-jest.mock('../../../../utils', () => ({
-  parseDuration: jest.fn(),
-  renderDuration: jest.requireActual('../../../../utils/render_duration/render_duration')
-    .renderDuration,
-}));
+vi.mock('../../../../utils', async () => {
+      const mocked = {
+      parseDuration: vi.fn(),
+      renderDuration: (await vi.importActual('../../../../utils/render_duration/render_duration'))
+        .renderDuration,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { parseDuration } from '../../../../utils';
@@ -20,7 +26,7 @@ import type { StepExecutionRuntime } from '../../../../workflow_context_manager/
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterStepTimeoutZoneNodeImpl } from '../enter_step_timeout_zone_node_impl';
 
-const mockParseDuration = parseDuration as jest.MockedFunction<typeof parseDuration>;
+const mockParseDuration = parseDuration as MockedFunction<typeof parseDuration>;
 
 describe('EnterStepTimeoutZoneNodeImpl', () => {
   let node: EnterTimeoutZoneNode;
@@ -32,7 +38,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
   let mockDateNow: Date;
 
   beforeAll(() => {
-    jest.spyOn(global, 'Date').mockImplementation((...args) => {
+    vi.spyOn(global, 'Date').mockImplementation((...args) => {
       if (args.length) {
         return new originalDateCtor(...args);
       }
@@ -41,11 +47,11 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     });
   });
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     node = {
       id: 'test-timeout-zone',
@@ -60,17 +66,17 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     };
 
     stepExecutionRuntimeMock = {
-      startStep: jest.fn().mockResolvedValue(undefined),
-      setCurrentStepState: jest.fn(),
+      startStep: vi.fn().mockResolvedValue(undefined),
+      setCurrentStepState: vi.fn(),
       stepExecutionId: 'step-exec-123',
       stepExecution: mockStepExecution,
       contextManager: {
-        renderValueAccordingToContext: jest.fn((value: unknown) => value),
+        renderValueAccordingToContext: vi.fn((value: unknown) => value),
       },
     } as unknown as StepExecutionRuntime;
 
     wfExecutionRuntimeManagerMock = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
 
     impl = new EnterStepTimeoutZoneNodeImpl(
@@ -105,11 +111,11 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     it('should execute methods in correct order', async () => {
       const callOrder: string[] = [];
 
-      stepExecutionRuntimeMock.startStep = jest.fn().mockImplementation(() => {
+      stepExecutionRuntimeMock.startStep = vi.fn().mockImplementation(() => {
         callOrder.push('startStep');
         return Promise.resolve();
       });
-      wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn().mockImplementation(() => {
+      wfExecutionRuntimeManagerMock.navigateToNextNode = vi.fn().mockImplementation(() => {
         callOrder.push('navigateToNextNode');
       });
 
@@ -128,7 +134,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     it('should render a Liquid timeout and freeze the result on step state', async () => {
       node.timeout = '{{ inputs.stepTimeout }}';
       (
-        stepExecutionRuntimeMock.contextManager.renderValueAccordingToContext as jest.Mock
+        stepExecutionRuntimeMock.contextManager.renderValueAccordingToContext as Mock
       ).mockReturnValue(' 2m ');
 
       await impl.run();
@@ -144,7 +150,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     it('should throw and not navigate when the timeout renders to an invalid duration', async () => {
       node.timeout = '{{ inputs.stepTimeout }}';
       (
-        stepExecutionRuntimeMock.contextManager.renderValueAccordingToContext as jest.Mock
+        stepExecutionRuntimeMock.contextManager.renderValueAccordingToContext as Mock
       ).mockReturnValue('soon');
 
       await expect(impl.run()).rejects.toThrow('Invalid duration format: soon');
@@ -158,7 +164,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     beforeEach(() => {
       monitoredContextMock = {
         abortController: {
-          abort: jest.fn(),
+          abort: vi.fn(),
         },
       } as any as StepExecutionRuntime;
     });

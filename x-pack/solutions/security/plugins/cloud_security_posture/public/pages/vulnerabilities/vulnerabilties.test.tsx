@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import Chance from 'chance';
 import {
@@ -28,26 +31,26 @@ import { useLicenseManagementLocatorApi } from '../../common/api/use_license_man
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { VULNERABILITIES_PAGE } from './test_subjects';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_data_view');
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_is_subscription_status_valid');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
-jest.mock('../../common/navigation/use_csp_integration_link');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_data_view');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
+vi.mock('../../common/api/use_license_management_locator_api');
+vi.mock('../../common/hooks/use_is_subscription_status_valid');
+vi.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
+vi.mock('../../common/navigation/use_csp_integration_link');
 
 const chance = new Chance();
 
 beforeEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 
-  (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+  (useLicenseManagementLocatorApi as Mock).mockImplementation(() =>
     createReactQueryResponse({
       status: 'success',
       data: true,
     })
   );
 
-  (useDataView as jest.Mock).mockReturnValue({
+  (useDataView as Mock).mockReturnValue({
     status: 'success',
     data: createStubDataView({
       spec: {
@@ -67,7 +70,7 @@ const renderVulnerabilitiesPage = () => {
 
 describe('<Vulnerabilities />', () => {
   it('No vulnerabilities  state: not-deployed - shows NotDeployed instead of vulnerabilities ', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -78,8 +81,8 @@ describe('<Vulnerabilities />', () => {
         },
       })
     );
-    (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCISIntegrationPoliciesLink as Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as Mock).mockImplementation(() => chance.url());
 
     renderVulnerabilitiesPage();
 
@@ -95,7 +98,7 @@ describe('<Vulnerabilities />', () => {
   });
 
   it('No vulnerabilities  state: indexing - shows Indexing instead of vulnerabilities ', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -106,7 +109,7 @@ describe('<Vulnerabilities />', () => {
         },
       })
     );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as Mock).mockImplementation(() => chance.url());
 
     renderVulnerabilitiesPage();
 
@@ -121,7 +124,7 @@ describe('<Vulnerabilities />', () => {
   });
 
   it('No vulnerabilities  state: index-timeout - shows IndexTimeout instead of vulnerabilities ', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -132,7 +135,7 @@ describe('<Vulnerabilities />', () => {
         },
       })
     );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as Mock).mockImplementation(() => chance.url());
     renderVulnerabilitiesPage();
 
     expectIdsInDoc({
@@ -146,7 +149,7 @@ describe('<Vulnerabilities />', () => {
   });
 
   it('No vulnerabilities  state: unprivileged - shows Unprivileged instead of vulnerabilities ', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -157,7 +160,7 @@ describe('<Vulnerabilities />', () => {
         },
       })
     );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as Mock).mockImplementation(() => chance.url());
 
     renderVulnerabilitiesPage();
 
@@ -172,7 +175,7 @@ describe('<Vulnerabilities />', () => {
   });
 
   it('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -190,7 +193,7 @@ describe('<Vulnerabilities />', () => {
         },
       })
     );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as Mock).mockImplementation(() => chance.url());
 
     renderVulnerabilitiesPage();
 
@@ -205,7 +208,7 @@ describe('<Vulnerabilities />', () => {
   });
 
   it('renders Vulnerabilities page when there are findings', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -214,7 +217,7 @@ describe('<Vulnerabilities />', () => {
       })
     );
 
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'success',
       data: createStubDataView({
         spec: {

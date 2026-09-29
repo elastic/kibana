@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint @typescript-eslint/no-var-requires: 0 */
 
-jest.mock('../selectors/map_selectors', () => ({}));
-jest.mock('../reducers/non_serializable_instances', () => ({}));
-jest.mock('./data_request_actions', () => {
+vi.mock('../selectors/map_selectors', () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../reducers/non_serializable_instances', () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./data_request_actions', () => {
   return {
     syncDataForAllLayers: () => {},
   };
 });
-jest.mock('../kibana_services', () => {
+vi.mock('../kibana_services', () => {
   return {
     getMapsCapabilities() {
       return { save: true };
@@ -24,15 +32,15 @@ jest.mock('../kibana_services', () => {
 
 import { mapExtentChanged, setMouseCoordinates, setQuery } from './map_actions';
 
-const getStoreMock = jest.fn();
-const dispatchMock = jest.fn();
+const getStoreMock = vi.fn();
+const dispatchMock = vi.fn();
 const vectorTileAdapterMock = {
-  setTiles: jest.fn(),
+  setTiles: vi.fn(),
 };
 
 describe('map_actions', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('mapExtentChanged', () => {

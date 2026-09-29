@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
@@ -19,8 +22,8 @@ import type { StepExecutionRepository } from '../repositories/step_execution_rep
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 import '../workflow_event_logger/mocks';
-jest.mock('../repositories/workflow_execution_repository');
-jest.mock('@kbn/workflows/graph');
+vi.mock('../repositories/workflow_execution_repository');
+vi.mock('@kbn/workflows/graph');
 
 describe('setupDependencies', () => {
   const workflowRunId = 'test-workflow-run-id';
@@ -39,15 +42,15 @@ describe('setupDependencies', () => {
   };
 
   const mockScopedActionsClient = {
-    getAll: jest.fn(),
-    execute: jest.fn(),
+    getAll: vi.fn(),
+    execute: vi.fn(),
   };
 
   const mockLogger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
 
   const mockConfig: WorkflowsExecutionEngineConfig = {
@@ -69,52 +72,52 @@ describe('setupDependencies', () => {
   };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
-  let mockWorkflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;
-  let mockStepExecutionRepository: jest.Mocked<StepExecutionRepository>;
+  let mockWorkflowExecutionRepository: Mocked<WorkflowExecutionRepository>;
+  let mockStepExecutionRepository: Mocked<StepExecutionRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockDependencies = mockContextDependencies();
-    mockDependencies.actions.getActionsClientWithRequest = jest
+    mockDependencies.actions.getActionsClientWithRequest = vi
       .fn()
       .mockResolvedValue(mockScopedActionsClient);
 
     mockWorkflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue(mockWorkflowExecution),
-      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<WorkflowExecutionRepository>;
+      getWorkflowExecutionById: vi.fn().mockResolvedValue(mockWorkflowExecution),
+      updateWorkflowExecution: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Mocked<WorkflowExecutionRepository>;
 
-    mockStepExecutionRepository = {} as unknown as jest.Mocked<StepExecutionRepository>;
+    mockStepExecutionRepository = {} as unknown as Mocked<StepExecutionRepository>;
 
-    (WorkflowExecutionRepository as jest.Mock).mockImplementation(
+    (WorkflowExecutionRepository as Mock).mockImplementation(
       () => mockWorkflowExecutionRepository
     );
 
     const mockWorkflowGraph = {
-      fromWorkflowDefinition: jest.fn().mockReturnThis(),
-      getStepGraph: jest.fn().mockReturnThis(),
+      fromWorkflowDefinition: vi.fn().mockReturnThis(),
+      getStepGraph: vi.fn().mockReturnThis(),
       topologicalOrder: ['entry-node'],
-      getNode: jest.fn().mockReturnValue({ id: 'entry-node' }),
-      getNodeStack: jest.fn().mockReturnValue([]),
-      getAllNodes: jest.fn().mockReturnValue([]),
-      getEdges: jest.fn().mockReturnValue([]),
-      getInnerStepIds: jest.fn().mockReturnValue(new Set()),
-      getWorkflowLevelTimeout: jest.fn(),
+      getNode: vi.fn().mockReturnValue({ id: 'entry-node' }),
+      getNodeStack: vi.fn().mockReturnValue([]),
+      getAllNodes: vi.fn().mockReturnValue([]),
+      getEdges: vi.fn().mockReturnValue([]),
+      getInnerStepIds: vi.fn().mockReturnValue(new Set()),
+      getWorkflowLevelTimeout: vi.fn(),
     };
-    (WorkflowGraph.fromWorkflowDefinition as jest.Mock) = jest
+    (WorkflowGraph.fromWorkflowDefinition as Mock) = vi
       .fn()
       .mockReturnValue(mockWorkflowGraph);
   });
 
   it('should use user-scoped ES client from coreStart', async () => {
     const mockScopedClient = {
-      search: jest.fn(),
-      index: jest.fn(),
+      search: vi.fn(),
+      index: vi.fn(),
     } as unknown as ElasticsearchClient;
 
     const mockAsCurrentUser = mockScopedClient;
-    const mockAsScoped = jest.fn().mockReturnValue({
+    const mockAsScoped = vi.fn().mockReturnValue({
       asCurrentUser: mockAsCurrentUser,
     });
 
@@ -142,11 +145,11 @@ describe('setupDependencies', () => {
 
   it('should use scoped actions client with fakeRequest', async () => {
     const mockScopedClient = {
-      search: jest.fn(),
-      index: jest.fn(),
+      search: vi.fn(),
+      index: vi.fn(),
     } as unknown as ElasticsearchClient;
 
-    mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+    mockDependencies.coreStart.elasticsearch.client.asScoped = vi.fn().mockReturnValue({
       asCurrentUser: mockScopedClient,
     });
 
@@ -173,11 +176,11 @@ describe('setupDependencies', () => {
   describe('WorkflowGraph', () => {
     beforeEach(() => {
       const mockScopedClient = {
-        search: jest.fn(),
-        index: jest.fn(),
+        search: vi.fn(),
+        index: vi.fn(),
       } as unknown as ElasticsearchClient;
 
-      mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+      mockDependencies.coreStart.elasticsearch.client.asScoped = vi.fn().mockReturnValue({
         asCurrentUser: mockScopedClient,
       });
     });
@@ -229,10 +232,10 @@ describe('setupDependencies', () => {
   describe('graph build failure', () => {
     beforeEach(() => {
       const mockScopedClient = {
-        search: jest.fn(),
-        index: jest.fn(),
+        search: vi.fn(),
+        index: vi.fn(),
       } as unknown as ElasticsearchClient;
-      mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+      mockDependencies.coreStart.elasticsearch.client.asScoped = vi.fn().mockReturnValue({
         asCurrentUser: mockScopedClient,
       });
     });
@@ -242,10 +245,10 @@ describe('setupDependencies', () => {
       const buildError = new Error(
         'Parallel step "outer" has a branch body with nested flow-control, which is not supported yet.'
       );
-      (WorkflowGraph.fromWorkflowDefinition as jest.Mock) = jest.fn(() => {
+      (WorkflowGraph.fromWorkflowDefinition as Mock) = vi.fn(() => {
         throw buildError;
       });
-      (isGraphBuildError as unknown as jest.Mock).mockReturnValue(true);
+      (isGraphBuildError as unknown as Mock).mockReturnValue(true);
 
       await expect(
         setupDependencies(
@@ -272,10 +275,10 @@ describe('setupDependencies', () => {
     it('rethrows non-graph-build errors unchanged (no clean-failure persistence)', async () => {
       const mockFakeRequest = { headers: {} } as KibanaRequest;
       const otherError = new Error('some other failure');
-      (WorkflowGraph.fromWorkflowDefinition as jest.Mock) = jest.fn(() => {
+      (WorkflowGraph.fromWorkflowDefinition as Mock) = vi.fn(() => {
         throw otherError;
       });
-      (isGraphBuildError as unknown as jest.Mock).mockReturnValue(false);
+      (isGraphBuildError as unknown as Mock).mockReturnValue(false);
 
       await expect(
         setupDependencies(
@@ -296,13 +299,13 @@ describe('setupDependencies', () => {
 
   it('throws when the workflow execution document is missing', async () => {
     const mockFakeRequest = { headers: {} } as KibanaRequest;
-    mockWorkflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue(null);
+    mockWorkflowExecutionRepository.getWorkflowExecutionById = vi.fn().mockResolvedValue(null);
 
     const mockScopedClient = {
-      search: jest.fn(),
-      index: jest.fn(),
+      search: vi.fn(),
+      index: vi.fn(),
     } as unknown as ElasticsearchClient;
-    mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+    mockDependencies.coreStart.elasticsearch.client.asScoped = vi.fn().mockReturnValue({
       asCurrentUser: mockScopedClient,
     });
 
@@ -328,11 +331,11 @@ describe('setupDependencies', () => {
   describe('workflowsExtensions', () => {
     beforeEach(() => {
       const mockScopedClient = {
-        search: jest.fn(),
-        index: jest.fn(),
+        search: vi.fn(),
+        index: vi.fn(),
       } as unknown as ElasticsearchClient;
 
-      mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+      mockDependencies.coreStart.elasticsearch.client.asScoped = vi.fn().mockReturnValue({
         asCurrentUser: mockScopedClient,
       });
     });
@@ -348,7 +351,7 @@ describe('setupDependencies', () => {
           resolve();
         };
       });
-      (mockDependencies.workflowsExtensions.isReady as jest.Mock).mockReturnValue(isReadyPromise);
+      (mockDependencies.workflowsExtensions.isReady as Mock).mockReturnValue(isReadyPromise);
 
       const setupPromise = setupDependencies(
         workflowRunId,

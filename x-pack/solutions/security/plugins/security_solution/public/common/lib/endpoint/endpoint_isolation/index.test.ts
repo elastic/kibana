@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { KibanaServices } from '../../kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { isolateHost, unIsolateHost } from '.';
@@ -14,10 +17,10 @@ import {
   UNISOLATE_HOST_ROUTE_V2,
 } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../kibana');
+vi.mock('../../kibana');
 
 describe('When using Host Isolation library', () => {
-  const mockKibanaServices = KibanaServices.get as jest.Mock;
+  const mockKibanaServices = KibanaServices.get as Mock;
 
   beforeEach(() => {
     mockKibanaServices.mockReturnValue(coreMock.createStart({ basePath: '/mock' }));

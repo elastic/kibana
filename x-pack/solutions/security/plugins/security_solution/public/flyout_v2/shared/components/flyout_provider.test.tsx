@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -21,25 +23,37 @@ import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { flyoutProviders } from './flyout_provider';
 
-jest.mock('../../../common/components/user_privileges/user_privileges_context', () => ({
-  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../common/components/user_privileges/user_privileges_context', () => {
+      const mocked = {
+      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/discover_in_timeline/provider', () => ({
-  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
-jest.mock('../../../assistant/provider', () => ({
-  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../../cases/components/provider/provider', () => ({
-  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../common/components/discover_in_timeline/provider', () => {
+      const mocked = {
+      DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../assistant/provider', () => {
+      const mocked = {
+      AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../cases/components/provider/provider', () => {
+      const mocked = {
+      CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const services = {
   uiActions: {
-    getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+    getTriggerCompatibleActions: vi.fn().mockResolvedValue([]),
   },
   upselling: new UpsellingService(),
   data: {
@@ -67,15 +81,15 @@ const services = {
   },
   notifications: {
     toasts: {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      addInfo: jest.fn(),
-      remove: jest.fn(),
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
     },
   },
   theme: {
-    getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+    getTheme: vi.fn().mockReturnValue({ darkMode: false }),
     theme$: of({ darkMode: false }),
   },
   http: {},
@@ -189,7 +203,7 @@ describe('flyoutProviders', () => {
     it('does NOT seed the global time range when on a Security app path', () => {
       window.history.pushState({}, '', '/app/security/alerts');
       const store = createStore(() => ({}));
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
 
       render(flyoutProviders({ services, store, children: <div /> }));
 
@@ -202,7 +216,7 @@ describe('flyoutProviders', () => {
     it('seeds the global time range from the timefilter when NOT on a Security app path', () => {
       window.history.pushState({}, '', '/app/discover');
       const store = createStore(() => ({}));
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
 
       render(flyoutProviders({ services, store, children: <div /> }));
 

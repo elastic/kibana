@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ScriptedFieldItem } from '../../types';
 import React from 'react';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
@@ -25,7 +27,7 @@ const createScriptedField = ({
 
 const baseProps: Pick<React.ComponentProps<typeof Table>, 'euiTablePersist'> = {
   euiTablePersist: {
-    onTableChange: jest.fn(),
+    onTableChange: vi.fn(),
     pageSize: 10,
     sorting: { sort: { direction: 'asc', field: 'name' } },
   },
@@ -84,8 +86,8 @@ const getRowByText = (text: string) => {
 };
 
 const renderTable = ({
-  deleteField = jest.fn(),
-  editField = jest.fn(),
+  deleteField = vi.fn(),
+  editField = vi.fn(),
   tableItems = items,
 }: {
   deleteField?: React.ComponentProps<typeof Table>['deleteField'];
@@ -107,11 +109,11 @@ const renderTable = ({
 
 describe('Table', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
+    vi.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should render normally', () => {
@@ -132,7 +134,7 @@ describe('Table', () => {
 
   it('should allow edits', async () => {
     const user = userEvent.setup();
-    const editField = jest.fn();
+    const editField = vi.fn();
 
     renderTable({ editField });
 
@@ -143,7 +145,7 @@ describe('Table', () => {
 
   it('should allow deletes', async () => {
     const user = userEvent.setup();
-    const deleteField = jest.fn();
+    const deleteField = vi.fn();
 
     renderTable({ deleteField });
 

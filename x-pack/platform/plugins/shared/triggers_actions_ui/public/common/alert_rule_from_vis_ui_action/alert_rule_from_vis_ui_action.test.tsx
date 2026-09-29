@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { act } from '@testing-library/react';
@@ -22,37 +25,40 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { AggregateQuery, Query } from '@kbn/es-query';
 
 // mock lazy flyout component
-jest.mock('@kbn/presentation-util', () => ({
-  openLazyFlyout: ({
-    loadContent,
-  }: {
-    loadContent: ({
-      closeFlyout,
-    }: {
-      closeFlyout: () => void;
-    }) => Promise<JSX.Element | null | void>;
-  }) => {
-    return loadContent({ closeFlyout: jest.fn() });
-  },
-}));
+vi.mock('@kbn/presentation-util', () => {
+      const mocked = {
+      openLazyFlyout: ({
+        loadContent,
+      }: {
+        loadContent: ({
+          closeFlyout,
+        }: {
+          closeFlyout: () => void;
+        }) => Promise<JSX.Element | null | void>;
+      }) => {
+        return loadContent({ closeFlyout: vi.fn() });
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract> = {
-  has: jest.fn(),
-  register: jest.fn(),
-  get: jest.fn(),
-  list: jest.fn(),
+const ruleTypeRegistry: Mocked<RuleTypeRegistryContract> = {
+  has: vi.fn(),
+  register: vi.fn(),
+  get: vi.fn(),
+  list: vi.fn(),
 };
-const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
-  has: jest.fn(),
-  register: jest.fn(),
-  get: jest.fn(),
-  list: jest.fn(),
+const actionTypeRegistry: Mocked<ActionTypeRegistryContract> = {
+  has: vi.fn(),
+  register: vi.fn(),
+  get: vi.fn(),
+  list: vi.fn(),
 };
 
 const parentApiMock = createParentApiMock();
 
 const embeddableMock = getLensApiMock({
-  getLegacySerializedState: jest.fn(() => ({
+  getLegacySerializedState: vi.fn(() => ({
     attributes: {
       state: {
         datasourceStates: {
@@ -67,7 +73,7 @@ const embeddableMock = getLensApiMock({
       },
     },
   })) as unknown as LensApi['getLegacySerializedState'],
-  getInspectorAdapters: jest.fn(() => ({
+  getInspectorAdapters: vi.fn(() => ({
     tables: {
       tables: [],
     },
@@ -88,11 +94,11 @@ const startDependenciesMock = {
     },
     overlays: {
       ...embeddableServices.coreStart.overlays,
-      openFlyout: jest.fn((a) => a),
+      openFlyout: vi.fn((a) => a),
     },
   },
 };
-const spy = jest.spyOn(AlertFlyoutComponentModule, 'getRuleFlyoutComponent');
+const spy = vi.spyOn(AlertFlyoutComponentModule, 'getRuleFlyoutComponent');
 
 describe('AlertRuleFromVisAction', () => {
   const action = new AlertRuleFromVisAction(
@@ -118,7 +124,7 @@ describe('AlertRuleFromVisAction', () => {
 
   afterAll(() => {
     // clear the spy created with spyOn
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("creates a rule with the visualization's ES|QL query plus an additional threshold line", async () => {
@@ -447,7 +453,7 @@ describe('AlertRuleFromVisAction', () => {
         query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
           esql: 'FROM index | STATS count = COUNT(*)',
         }),
-        getInspectorAdapters: jest.fn(() => ({
+        getInspectorAdapters: vi.fn(() => ({
           tables: {
             tables: {
               foo: {
@@ -473,7 +479,7 @@ describe('AlertRuleFromVisAction', () => {
             },
           },
         })),
-        getLegacySerializedState: jest.fn(() => ({
+        getLegacySerializedState: vi.fn(() => ({
           attributes: {
             state: {
               datasourceStates: {
@@ -513,7 +519,7 @@ describe('AlertRuleFromVisAction', () => {
         query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
           esql: 'FROM index | STATS count = COUNT(*) BY group',
         }),
-        getInspectorAdapters: jest.fn(() => ({
+        getInspectorAdapters: vi.fn(() => ({
           tables: {
             tables: {
               foo: {
@@ -539,7 +545,7 @@ describe('AlertRuleFromVisAction', () => {
             },
           },
         })),
-        getLegacySerializedState: jest.fn(() => ({
+        getLegacySerializedState: vi.fn(() => ({
           attributes: {
             state: {
               datasourceStates: {

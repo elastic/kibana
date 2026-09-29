@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -20,24 +23,22 @@ import { useAllNonManagedAgentPolicies } from '../../create_package_policy_page/
 
 import { StepEditHosts } from './step_edit_hosts';
 
-jest.mock('../../create_package_policy_page/components/steps/components/use_policies', () => {
+vi.mock('../../create_package_policy_page/components/steps/components/use_policies', async () => {
   return {
-    ...jest.requireActual(
-      '../../create_package_policy_page/components/steps/components/use_policies'
-    ),
-    useAllNonManagedAgentPolicies: jest.fn(),
+    ...(await vi.importActual('../../create_package_policy_page/components/steps/components/use_policies')),
+    useAllNonManagedAgentPolicies: vi.fn(),
   };
 });
 
-jest.mock('../../../../hooks', () => {
+vi.mock('../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
-    useGetAgentPolicies: jest.fn(),
-    useGetOutputs: jest.fn().mockResolvedValue({
+    ...(await vi.importActual('../../../../hooks')),
+    useGetAgentPolicies: vi.fn(),
+    useGetOutputs: vi.fn().mockResolvedValue({
       data: [],
       isLoading: false,
     }),
-    sendGetOneAgentPolicy: jest.fn().mockImplementation((id) =>
+    sendGetOneAgentPolicy: vi.fn().mockImplementation((id) =>
       Promise.resolve({
         data: { item: { id, name: `Agent policy ${id}` } },
       })
@@ -97,15 +98,15 @@ describe('StepEditHosts', () => {
     (renderResult = testRenderer.render(
       <StepEditHosts
         agentPolicies={agentPolicies}
-        updateAgentPolicies={jest.fn()}
+        updateAgentPolicies={vi.fn()}
         newAgentPolicy={newAgentPolicy}
-        updateNewAgentPolicy={jest.fn()}
+        updateNewAgentPolicy={vi.fn()}
         withSysMonitoring={false}
-        updateSysMonitoring={jest.fn()}
+        updateSysMonitoring={vi.fn()}
         validation={validation}
         packageInfo={packageInfo}
-        setHasAgentPolicyError={jest.fn()}
-        updateSelectedTab={jest.fn()}
+        setHasAgentPolicyError={vi.fn()}
+        updateSelectedTab={vi.fn()}
         selectedAgentPolicyIds={[]}
       />
     ));
@@ -114,13 +115,13 @@ describe('StepEditHosts', () => {
   });
 
   it('should display create form when no agent policies', async () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+    (useGetAgentPolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [],
       },
     });
 
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([]);
+    (useAllNonManagedAgentPolicies as MockedFunction<any>).mockReturnValue([]);
 
     render();
 
@@ -130,12 +131,12 @@ describe('StepEditHosts', () => {
   });
 
   it('should display new policy button and existing policies when agent policies exist', () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+    (useGetAgentPolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+    (useAllNonManagedAgentPolicies as MockedFunction<any>).mockReturnValue([
       { id: '1', name: 'Agent policy 1', namespace: 'default' },
     ]);
 
@@ -148,7 +149,7 @@ describe('StepEditHosts', () => {
   });
 
   it('should display dropdown without preselected value when multiple agent policies', async () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+    (useGetAgentPolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [
           { id: '1', name: 'Agent policy 1', namespace: 'default' },
@@ -165,12 +166,12 @@ describe('StepEditHosts', () => {
   });
 
   it('should display delete button when add button clicked', async () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+    (useGetAgentPolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+    (useAllNonManagedAgentPolicies as MockedFunction<any>).mockReturnValue([
       { id: '1', name: 'Agent policy 1', namespace: 'default' },
     ]);
 

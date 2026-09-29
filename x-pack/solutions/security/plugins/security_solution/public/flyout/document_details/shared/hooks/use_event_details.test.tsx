@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseEventDetailsParams, UseEventDetailsResult } from './use_event_details';
@@ -14,13 +17,16 @@ import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useGetFieldsData } from './use_get_fields_data';
 
-jest.mock('../../../../common/hooks/use_space_id');
-jest.mock('../../../../common/utils/route/use_route_spy');
-jest.mock('../../../../timelines/containers/details');
-jest.mock('./use_get_fields_data');
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => true,
-}));
+vi.mock('../../../../common/hooks/use_space_id');
+vi.mock('../../../../common/utils/route/use_route_spy');
+vi.mock('../../../../timelines/containers/details');
+vi.mock('./use_get_fields_data');
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const eventId = 'eventId';
 const indexName = 'indexName';
@@ -49,10 +55,10 @@ describe('useEventDetails', () => {
   let hookResult: RenderHookResult<UseEventDetailsResult, UseEventDetailsParams>;
 
   it('should return all properties', () => {
-    jest.mocked(useSpaceId).mockReturnValue('default');
-    (useRouteSpy as jest.Mock).mockReturnValue([{ pageName: 'alerts' }]);
-    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, [], {}, {}, jest.fn()]);
-    jest.mocked(useGetFieldsData).mockReturnValue({ getFieldsData: (field: string) => field });
+    vi.mocked(useSpaceId).mockReturnValue('default');
+    (useRouteSpy as Mock).mockReturnValue([{ pageName: 'alerts' }]);
+    (useTimelineEventsDetails as Mock).mockReturnValue([false, [], {}, {}, vi.fn()]);
+    vi.mocked(useGetFieldsData).mockReturnValue({ getFieldsData: (field: string) => field });
 
     hookResult = renderHook(() => useEventDetails({ eventId, indexName }));
 

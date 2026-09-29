@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ESQLSource } from './esql_source';
 
-const mockGetDataViewFields = jest.fn().mockResolvedValue({
+const mockGetDataViewFields = vi.fn().mockResolvedValue({
   dateFields: ['timestamp', 'utc_timestamp'],
   geoFields: ['location', 'utc_timestamp'],
 });
@@ -23,7 +25,7 @@ describe('UpdateSourceEditor', () => {
     }
 
     test('should set geoField when checked and geo field is not set', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
         narrowByMapBounds: false,
@@ -46,7 +48,7 @@ describe('UpdateSourceEditor', () => {
     });
 
     test('should not reset geoField when checked and geoField is set', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
         geoField: 'dest_location',
@@ -73,7 +75,7 @@ describe('UpdateSourceEditor', () => {
     }
 
     test('should set dateField when checked and date field is not set', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
         narrowByGlobalTime: false,
@@ -96,7 +98,7 @@ describe('UpdateSourceEditor', () => {
     });
 
     test('should not reset dateField when checked and dateField is set', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
         dateField: 'utc_timestamp',

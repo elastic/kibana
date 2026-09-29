@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import type {
@@ -15,9 +17,9 @@ import { RuleSource } from './rules_table_saved_state';
 import { mockRulesTablePersistedState } from './__mocks__/mock_rules_table_persistent_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/utils/global_query_string/helpers');
-jest.mock('./rules_table_context');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/utils/global_query_string/helpers');
+vi.mock('./rules_table_context');
 
 describe('useRulesTableSavedState', () => {
   const urlSavedState: RulesTableUrlSavedState = {
@@ -41,7 +43,7 @@ describe('useRulesTableSavedState', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the state is not saved', () => {

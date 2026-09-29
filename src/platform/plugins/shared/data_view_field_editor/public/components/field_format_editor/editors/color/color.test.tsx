@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import React from 'react';
 import { ColorFormatEditor } from './color';
@@ -18,15 +20,15 @@ import { screen } from '@testing-library/react';
 const fieldType = 'string';
 
 const format = {
-  convertToReact: jest.fn(),
+  convertToReact: vi.fn(),
 };
 
 const formatParams = {
   colors: [{ ...DEFAULT_CONVERTER_COLOR }],
 };
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const renderEditor = (params = formatParams, props: { fieldType?: string } = {}) =>
   renderWithI18n(

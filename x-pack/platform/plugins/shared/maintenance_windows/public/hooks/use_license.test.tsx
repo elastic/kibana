@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { renderHook } from '@testing-library/react';
 import { useLicense } from './use_license';
@@ -15,7 +17,7 @@ let appMockRenderer: AppMockRenderer;
 
 describe('useLicense', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('isAtLeastPlatinum', () => {

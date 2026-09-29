@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
@@ -17,14 +20,14 @@ import { useInvestigateAlert } from './use_investigate_alert';
 import { useKibana } from '../utils/kibana_react';
 import { setInvestigationsClient } from '../services/investigations_client';
 
-jest.mock('../utils/kibana_react');
+vi.mock('../utils/kibana_react');
 
-const useKibanaMock = useKibana as jest.Mock;
-const fetchMock = jest.fn();
-const addSuccess = jest.fn();
-const addDanger = jest.fn();
+const useKibanaMock = useKibana as Mock;
+const fetchMock = vi.fn();
+const addSuccess = vi.fn();
+const addDanger = vi.fn();
 const mockLocator = {
-  getRedirectUrl: jest.fn(({ investigationId }: { investigationId: string }) =>
+  getRedirectUrl: vi.fn(({ investigationId }: { investigationId: string }) =>
     investigationId ? `/app/nightshift?investigationId=${investigationId}` : ''
   ),
 } as unknown as InvestigationLocator;
@@ -62,7 +65,7 @@ const renderInvestigateAlert = (alertId = 'alert-1') =>
 
 describe('useInvestigateAlert', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => {}, warn: () => {}, error: () => {} },
@@ -73,7 +76,7 @@ describe('useInvestigateAlert', () => {
         share: {
           url: {
             locators: {
-              get: jest.fn(() => mockLocator),
+              get: vi.fn(() => mockLocator),
             },
           },
         },

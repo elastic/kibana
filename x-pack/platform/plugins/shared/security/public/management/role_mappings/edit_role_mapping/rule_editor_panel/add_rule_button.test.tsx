@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
@@ -15,7 +17,7 @@ import { AllRule, FieldRule } from '../../model';
 describe('AddRuleButton', () => {
   it('allows a field rule to be created', () => {
     const props = {
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     };
 
     const wrapper = mountWithIntl(<AddRuleButton {...props} />);
@@ -36,7 +38,7 @@ describe('AddRuleButton', () => {
 
   it('allows a rule group to be created', () => {
     const props = {
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     };
 
     const wrapper = mountWithIntl(<AddRuleButton {...props} />);

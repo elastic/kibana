@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
@@ -19,8 +21,8 @@ const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 
 describe('createWorkflowTroubleshootingSkill', () => {
   const mockFetcher: WorkflowFetcher = {
-    getWorkflow: jest.fn(),
-    getWorkflowExecution: jest.fn(),
+    getWorkflow: vi.fn(),
+    getWorkflowExecution: vi.fn(),
   };
 
   const skill = createWorkflowTroubleshootingSkill(mockFetcher);

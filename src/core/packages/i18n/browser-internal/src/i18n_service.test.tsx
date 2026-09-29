@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 
-jest.mock('@elastic/eui', () => {
+vi.mock('@elastic/eui', () => {
   return {
     EuiContext: function MockEuiContext({
       i18n,
@@ -23,7 +25,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/i18n-react', () => {
+vi.mock('@kbn/i18n-react', () => {
   return {
     I18nProvider: function MockI18nProvider({ children }: { children: React.ReactNode }) {
       return children;
@@ -36,8 +38,8 @@ import React from 'react';
 import { I18nService } from './i18n_service';
 
 afterEach(() => {
-  jest.clearAllMocks();
-  jest.resetModules();
+  vi.clearAllMocks();
+  vi.resetModules();
 });
 
 describe('#start()', () => {

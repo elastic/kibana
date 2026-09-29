@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { waitFor, fireEvent, screen } from '@testing-library/react';
@@ -13,7 +15,7 @@ import { SortActivity, sortOptions } from './sort_activity';
 import { renderWithTestingProviders } from '../../common/mock';
 
 describe('SortActivity ', () => {
-  const onSortActivityChange = jest.fn();
+  const onSortActivityChange = vi.fn();
 
   it('renders correctly', () => {
     renderWithTestingProviders(

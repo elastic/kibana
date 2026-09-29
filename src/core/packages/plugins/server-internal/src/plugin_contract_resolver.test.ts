@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 1));
@@ -59,7 +61,7 @@ describe('RuntimePluginContractResolver', () => {
     });
 
     it('resolves a single request', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       resolver.onSetup(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler(contracts));
 
       await fewTicks();
@@ -84,9 +86,9 @@ describe('RuntimePluginContractResolver', () => {
     });
 
     it('resolves multiple requests', async () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
-      const handler3 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
+      const handler3 = vi.fn();
 
       resolver.onSetup(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler1(contracts));
       resolver.onSetup(SOURCE_PLUGIN, ['pluginB']).then((contracts) => handler2(contracts));
@@ -142,8 +144,8 @@ describe('RuntimePluginContractResolver', () => {
         })
       );
 
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
       resolver.onSetup(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler1(contracts));
       resolver.onSetup(SOURCE_PLUGIN, ['pluginB']).then((contracts) => handler2(contracts));
 
@@ -213,7 +215,7 @@ describe('RuntimePluginContractResolver', () => {
     });
 
     it('resolves a single request', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       resolver.onStart(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler(contracts));
 
       await fewTicks();
@@ -238,9 +240,9 @@ describe('RuntimePluginContractResolver', () => {
     });
 
     it('resolves multiple requests', async () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
-      const handler3 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
+      const handler3 = vi.fn();
 
       resolver.onStart(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler1(contracts));
       resolver.onStart(SOURCE_PLUGIN, ['pluginB']).then((contracts) => handler2(contracts));
@@ -296,8 +298,8 @@ describe('RuntimePluginContractResolver', () => {
         })
       );
 
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
       resolver.onStart(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler1(contracts));
       resolver.onStart(SOURCE_PLUGIN, ['pluginB']).then((contracts) => handler2(contracts));
 

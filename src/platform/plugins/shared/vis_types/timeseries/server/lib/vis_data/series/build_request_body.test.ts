@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { buildRequestBody } from './build_request_body';
 
 const body = JSON.parse(`
@@ -73,7 +75,7 @@ describe('buildRequestBody(req)', () => {
   test('returns a valid body', async () => {
     const panel = body.panels[0];
     const series = panel.series[0];
-    const getValidTimeInterval = jest.fn(() => '10s');
+    const getValidTimeInterval = vi.fn(() => '10s');
     const capabilities = {
       timezone: 'UTC',
       getValidTimeInterval,
@@ -93,7 +95,7 @@ describe('buildRequestBody(req)', () => {
       {
         get: async () => 50,
       },
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         timeField: '@timestamp',
       })
     );

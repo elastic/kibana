@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   createAgentBuilderUsageCounter,
@@ -31,9 +34,9 @@ describe('usage_counters', () => {
     });
 
     it('creates a usage counter when usageCollection is provided', () => {
-      const mockUsageCounter = { incrementCounter: jest.fn() } as unknown as UsageCounter;
+      const mockUsageCounter = { incrementCounter: vi.fn() } as unknown as UsageCounter;
       const mockUsageCollection = {
-        createUsageCounter: jest.fn().mockReturnValue(mockUsageCounter),
+        createUsageCounter: vi.fn().mockReturnValue(mockUsageCounter),
       } as unknown as UsageCollectionSetup;
 
       const result = createAgentBuilderUsageCounter(mockUsageCollection);
@@ -46,12 +49,12 @@ describe('usage_counters', () => {
   });
 
   describe('trackToolCall', () => {
-    let mockUsageCounter: jest.Mocked<UsageCounter>;
+    let mockUsageCounter: Mocked<UsageCounter>;
 
     beforeEach(() => {
       mockUsageCounter = {
-        incrementCounter: jest.fn(),
-      } as unknown as jest.Mocked<UsageCounter>;
+        incrementCounter: vi.fn(),
+      } as unknown as Mocked<UsageCounter>;
     });
 
     it('does nothing when usageCounter is undefined', () => {
@@ -110,12 +113,12 @@ describe('usage_counters', () => {
   });
 
   describe('trackLLMUsage', () => {
-    let mockUsageCounter: jest.Mocked<UsageCounter>;
+    let mockUsageCounter: Mocked<UsageCounter>;
 
     beforeEach(() => {
       mockUsageCounter = {
-        incrementCounter: jest.fn(),
-      } as unknown as jest.Mocked<UsageCounter>;
+        incrementCounter: vi.fn(),
+      } as unknown as Mocked<UsageCounter>;
     });
 
     it('does nothing when usageCounter is undefined', () => {
@@ -155,12 +158,12 @@ describe('usage_counters', () => {
   });
 
   describe('trackConversationRound', () => {
-    let mockUsageCounter: jest.Mocked<UsageCounter>;
+    let mockUsageCounter: Mocked<UsageCounter>;
 
     beforeEach(() => {
       mockUsageCounter = {
-        incrementCounter: jest.fn(),
-      } as unknown as jest.Mocked<UsageCounter>;
+        incrementCounter: vi.fn(),
+      } as unknown as Mocked<UsageCounter>;
     });
 
     it('does nothing when usageCounter is undefined', () => {
@@ -234,12 +237,12 @@ describe('usage_counters', () => {
   });
 
   describe('trackQueryToResultTime', () => {
-    let mockUsageCounter: jest.Mocked<UsageCounter>;
+    let mockUsageCounter: Mocked<UsageCounter>;
 
     beforeEach(() => {
       mockUsageCounter = {
-        incrementCounter: jest.fn(),
-      } as unknown as jest.Mocked<UsageCounter>;
+        incrementCounter: vi.fn(),
+      } as unknown as Mocked<UsageCounter>;
     });
 
     it('does nothing when usageCounter is undefined', () => {
@@ -313,12 +316,12 @@ describe('usage_counters', () => {
   });
 
   describe('trackSkillInvocation', () => {
-    let mockUsageCounter: jest.Mocked<UsageCounter>;
+    let mockUsageCounter: Mocked<UsageCounter>;
 
     beforeEach(() => {
       mockUsageCounter = {
-        incrementCounter: jest.fn(),
-      } as unknown as jest.Mocked<UsageCounter>;
+        incrementCounter: vi.fn(),
+      } as unknown as Mocked<UsageCounter>;
     });
 
     it('does nothing when usageCounter is undefined', () => {
@@ -357,12 +360,12 @@ describe('usage_counters', () => {
   });
 
   describe('trackPluginImport', () => {
-    let mockUsageCounter: jest.Mocked<UsageCounter>;
+    let mockUsageCounter: Mocked<UsageCounter>;
 
     beforeEach(() => {
       mockUsageCounter = {
-        incrementCounter: jest.fn(),
-      } as unknown as jest.Mocked<UsageCounter>;
+        incrementCounter: vi.fn(),
+      } as unknown as Mocked<UsageCounter>;
     });
 
     it('does nothing when usageCounter is undefined', () => {

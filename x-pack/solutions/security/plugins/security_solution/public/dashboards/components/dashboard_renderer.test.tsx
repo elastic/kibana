@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 import {
@@ -14,20 +17,20 @@ import {
 import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
-jest.mock('@kbn/dashboard-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/dashboard-plugin/public');
+vi.mock('@kbn/dashboard-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/dashboard-plugin/public'));
   return {
     ...actual,
-    DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
-    DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
+    DashboardRenderer: vi.fn(() => <div data-test-subj="dashboardRenderer" />),
+    DashboardTopNav: vi.fn(() => <span data-test-subj="dashboardTopNav" />),
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
   return {
     ...actual,
-    useParams: jest.fn().mockReturnValue({
+    useParams: vi.fn().mockReturnValue({
       detailName: '2d50f100-be6f-11ed-964a-ffa67304840e',
     }),
   };
@@ -49,7 +52,7 @@ describe('DashboardRenderer', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {
@@ -60,7 +63,7 @@ describe('DashboardRenderer', () => {
   it('renders with correct options', async () => {
     render(<DashboardRenderer {...props} />, { wrapper: TestProviders });
     const options = await (
-      DashboardContainerRenderer as unknown as jest.Mock
+      DashboardContainerRenderer as unknown as Mock
     ).mock.calls[0][0].getCreationOptions();
     const input = options.getInitialInput();
 
@@ -90,10 +93,10 @@ describe('DashboardRenderer', () => {
 
   describe('dashboardContainer', () => {
     const dashboardContainer = {
-      setFilters: jest.fn(),
-      setQuery: jest.fn(),
-      setTimeRange: jest.fn(),
-    } as unknown as jest.Mocked<DashboardApi>;
+      setFilters: vi.fn(),
+      setQuery: vi.fn(),
+      setTimeRange: vi.fn(),
+    } as unknown as Mocked<DashboardApi>;
 
     it('should initialize filters', () => {
       render(<DashboardRenderer {...{ ...props, dashboardContainer }} />, {

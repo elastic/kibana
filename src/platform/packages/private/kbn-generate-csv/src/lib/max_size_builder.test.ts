@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Writable } from 'stream';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
 let content: string;
-let stream: jest.Mocked<Writable>;
+let stream: Mocked<Writable>;
 
 describe('MaxSizeStringBuilder', function () {
   beforeEach(() => {
     content = '';
-    stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
+    stream = { write: vi.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
   });
 
   describe('tryAppend', function () {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -26,7 +28,7 @@ describe('FrozenEnterpriseRequiredCallout', () => {
   });
 
   it('renders the upgrade button and calls onUpgradeEnterprise when clicked', () => {
-    const onUpgradeEnterprise = jest.fn();
+    const onUpgradeEnterprise = vi.fn();
 
     renderWithI18n(
       <FrozenEnterpriseRequiredCallout

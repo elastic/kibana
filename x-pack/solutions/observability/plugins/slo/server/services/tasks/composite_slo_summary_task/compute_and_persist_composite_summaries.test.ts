@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass, MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
 import apm from 'elastic-apm-node';
@@ -22,34 +25,37 @@ import { computeCompositeSummary } from '../../composites/compute_composite_summ
 import { computeAndPersistCompositeSummaries } from './compute_and_persist_composite_summaries';
 import { COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES } from './constants';
 
-jest.mock('@kbn/apm-utils', () => ({
-  addTransactionLabels: jest.fn(),
-  withSpan: jest.fn((_opts: unknown, cb: () => unknown) => cb()),
-}));
+vi.mock('@kbn/apm-utils', () => {
+      const mocked = {
+      addTransactionLabels: vi.fn(),
+      withSpan: vi.fn((_opts: unknown, cb: () => unknown) => cb()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('elastic-apm-node', () => ({
-  default: { setCustomContext: jest.fn() },
+vi.mock('elastic-apm-node', () => ({
+  default: { setCustomContext: vi.fn() },
   __esModule: true,
 }));
 
-jest.mock('../../summary_client');
-jest.mock('../../burn_rates_client');
-jest.mock('../../composites/compute_composite_summary');
+vi.mock('../../summary_client');
+vi.mock('../../burn_rates_client');
+vi.mock('../../composites/compute_composite_summary');
 
-const MockDefaultSummaryClient = DefaultSummaryClient as jest.MockedClass<
+const MockDefaultSummaryClient = DefaultSummaryClient as MockedClass<
   typeof DefaultSummaryClient
 >;
-const mockComputeCompositeSummary = computeCompositeSummary as jest.MockedFunction<
+const mockComputeCompositeSummary = computeCompositeSummary as MockedFunction<
   typeof computeCompositeSummary
 >;
 
-const addTransactionLabelsMock = addTransactionLabels as jest.MockedFunction<
+const addTransactionLabelsMock = addTransactionLabels as MockedFunction<
   typeof addTransactionLabels
 >;
-const setCustomContextMock = apm.setCustomContext as jest.MockedFunction<
+const setCustomContextMock = apm.setCustomContext as MockedFunction<
   typeof apm.setCustomContext
 >;
-const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
 const COMPOSITE_ID = 'composite-slo-id-12345678';
 const MEMBER_ID = 'member-slo-id-123456789';
@@ -164,7 +170,7 @@ describe('computeAndPersistCompositeSummaries', () => {
   let logger: ReturnType<typeof loggerMock.create>;
   let abortController: AbortController;
   let signal: AbortSignal;
-  let mockComputeSummaries: jest.Mock;
+  let mockComputeSummaries: Mock;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -172,24 +178,24 @@ describe('computeAndPersistCompositeSummaries', () => {
     logger = loggerMock.create();
     abortController = new AbortController();
     signal = abortController.signal;
-    jest.useFakeTimers().setSystemTime(TEST_DATE);
-    jest.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(TEST_DATE);
+    vi.clearAllMocks();
     addTransactionLabelsMock.mockClear();
     setCustomContextMock.mockClear();
     withSpanMock.mockClear();
 
-    mockComputeSummaries = jest
+    mockComputeSummaries = vi
       .fn()
       .mockResolvedValue([buildSummaryResult(), buildSummaryResult()]);
     MockDefaultSummaryClient.mockImplementation(
       () =>
         ({
-          computeSummary: jest.fn(),
+          computeSummary: vi.fn(),
           computeSummaries: mockComputeSummaries,
         } as any)
     );
-    (DefaultBurnRatesClient as jest.MockedClass<typeof DefaultBurnRatesClient>).mockImplementation(
-      () => ({ calculate: jest.fn(), calculateBatch: jest.fn() } as any)
+    (DefaultBurnRatesClient as MockedClass<typeof DefaultBurnRatesClient>).mockImplementation(
+      () => ({ calculate: vi.fn(), calculateBatch: vi.fn() } as any)
     );
     mockComputeCompositeSummary.mockReturnValue(buildCompositeSummary());
 
@@ -200,17 +206,17 @@ describe('computeAndPersistCompositeSummaries', () => {
       page: 1,
     });
 
-    (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+    (esClient.bulk as unknown as Mock).mockResolvedValue({ errors: false, items: [] });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   function mockPointInTimeFinder(
     pages: Array<Array<SavedObjectsFindResult<StoredCompositeSLODefinition>>>
   ) {
-    const closeMock = jest.fn();
+    const closeMock = vi.fn();
     soClient.createPointInTimeFinder.mockReturnValue({
       close: closeMock,
       async *find() {
@@ -285,7 +291,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         signal,
       });
 
-      const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
+      const bulkCall = (esClient.bulk as unknown as Mock).mock.calls[0][0];
       const doc = bulkCall.operations[1];
 
       expect(doc).toMatchObject({
@@ -359,7 +365,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         signal,
       });
 
-      const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
+      const bulkCall = (esClient.bulk as unknown as Mock).mock.calls[0][0];
       expect(bulkCall.operations[0].index._id).toBe(`default:${COMPOSITE_ID}`);
     });
   });
@@ -434,7 +440,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         signal,
       });
 
-      const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
+      const bulkCall = (esClient.bulk as unknown as Mock).mock.calls[0][0];
       const doc = bulkCall.operations[1];
       expect(doc.unresolvedMemberIds).toEqual([MEMBER_ID, MEMBER_ID_2]);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(MEMBER_ID));
@@ -542,7 +548,7 @@ describe('computeAndPersistCompositeSummaries', () => {
 
     it('logs bulk errors without throwing', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({
+      (esClient.bulk as unknown as Mock).mockResolvedValue({
         errors: true,
         items: [{ index: { error: { reason: 'document too large' } } }],
       });
@@ -559,7 +565,7 @@ describe('computeAndPersistCompositeSummaries', () => {
 
     it('returns gracefully on RequestAbortedError', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(
+      (esClient.bulk as unknown as Mock).mockRejectedValue(
         new errors.RequestAbortedError('aborted')
       );
 
@@ -575,7 +581,7 @@ describe('computeAndPersistCompositeSummaries', () => {
 
     it('rethrows non-abort errors', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(
+      (esClient.bulk as unknown as Mock).mockRejectedValue(
         new Error('ES cluster unavailable')
       );
 
@@ -591,7 +597,7 @@ describe('computeAndPersistCompositeSummaries', () => {
 
     it('always closes the finder, even on error', async () => {
       const { closeMock } = mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(new Error('fatal'));
+      (esClient.bulk as unknown as Mock).mockRejectedValue(new Error('fatal'));
 
       await expect(
         computeAndPersistCompositeSummaries({
@@ -613,7 +619,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       mockPointInTimeFinder([page1, page2]);
 
       // Abort after first page is yielded
-      const closeMock = jest.fn();
+      const closeMock = vi.fn();
       soClient.createPointInTimeFinder.mockReturnValue({
         close: closeMock,
         async *find() {
@@ -718,7 +724,7 @@ describe('computeAndPersistCompositeSummaries', () => {
 
     it('sets aborted outcome when bulk rejects RequestAbortedError', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(
+      (esClient.bulk as unknown as Mock).mockRejectedValue(
         new errors.RequestAbortedError('aborted')
       );
 
@@ -738,7 +744,7 @@ describe('computeAndPersistCompositeSummaries', () => {
 
     it('sets error outcome when bulk rejects a non-abort error', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(new Error('ES unavailable'));
+      (esClient.bulk as unknown as Mock).mockRejectedValue(new Error('ES unavailable'));
 
       await expect(
         computeAndPersistCompositeSummaries({

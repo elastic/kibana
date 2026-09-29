@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../../../common/mock/test_providers';
@@ -12,13 +15,13 @@ import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { mockReportLinkClick } from '../../../../../../../common/lib/integrations/hooks/__mocks__/mocks';
 
-jest.mock('../../../../../../../common/lib/kibana');
-jest.mock('../../../../../../../common/lib/integrations/hooks/integration_context');
+vi.mock('../../../../../../../common/lib/kibana');
+vi.mock('../../../../../../../common/lib/integrations/hooks/integration_context');
 
 describe('AgentlessAvailableCallout', () => {
-  const mockUseKibana = useKibana as jest.Mock;
+  const mockUseKibana = useKibana as Mock;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         docLinks: {

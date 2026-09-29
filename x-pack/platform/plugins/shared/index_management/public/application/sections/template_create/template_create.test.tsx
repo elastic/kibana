@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,25 +19,34 @@ import { getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate } from '../../services/api';
 import { TemplateCreate } from './template_create';
 
-jest.mock('../../services/api', () => ({
-  ...jest.requireActual('../../services/api'),
-  saveTemplate: jest.fn(),
-}));
+vi.mock('../../services/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../services/api')),
+      saveTemplate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAppContext = jest.fn();
-jest.mock('../../app_context', () => ({
-  ...jest.requireActual('../../app_context'),
-  useAppContext: () => mockUseAppContext(),
-}));
+const mockUseAppContext = vi.fn();
+vi.mock('../../app_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../app_context')),
+      useAppContext: () => mockUseAppContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLocation = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: () => mockUseLocation(),
-}));
+const mockUseLocation = vi.fn();
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: () => mockUseLocation(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockTemplateToSave: TemplateDeserialized | null = null;
-const mockTemplateFormPropsSpy = jest.fn();
+const mockTemplateFormPropsSpy = vi.fn();
 
 interface TemplateFormMockProps {
   defaultValue?: TemplateDeserialized;
@@ -44,7 +55,7 @@ interface TemplateFormMockProps {
   isLegacy?: boolean;
 }
 
-jest.mock('../../components', () => ({
+vi.mock('../../components', () => ({
   __esModule: true,
   TemplateForm: (props: TemplateFormMockProps) => {
     mockTemplateFormPropsSpy(props);
@@ -82,15 +93,15 @@ const renderWithProviders = (ui: React.ReactElement) => render(<I18nProvider>{ui
 
 describe('TemplateCreate', () => {
   beforeEach(() => {
-    breadcrumbService.setup(jest.fn());
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    breadcrumbService.setup(vi.fn());
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
     mockTemplateFormPropsSpy.mockClear();
     mockUseLocation.mockReturnValue({ search: '' });
     mockTemplateToSave = null;
     mockUseAppContext.mockReturnValue({ config: { enableLegacyTemplates: true } });
     const okResponse: Awaited<ReturnType<typeof saveTemplate>> = { data: null, error: null };
-    jest.mocked(saveTemplate).mockResolvedValue(okResponse);
+    vi.mocked(saveTemplate).mockResolvedValue(okResponse);
   });
 
   describe('WHEN legacy query param is set and legacy templates are enabled', () => {
@@ -151,7 +162,7 @@ describe('TemplateCreate', () => {
       if (!match) {
         throw new Error('Expected route to match /create_template');
       }
-      const pushSpy = jest.spyOn(history, 'push');
+      const pushSpy = vi.spyOn(history, 'push');
 
       const template: TemplateDeserialized = {
         name: 'new_template',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { CRUDClient } from './crud_client';
@@ -338,12 +341,12 @@ describe('CRUDClient', () => {
   });
 
   describe('asset criticality trigger emit', () => {
-    let emitWorkflowTriggerEvent: jest.Mock;
+    let emitWorkflowTriggerEvent: Mock;
     let clientWithEmit: CRUDClient;
 
     beforeEach(() => {
       esClient.indices.exists.mockResolvedValue(true);
-      emitWorkflowTriggerEvent = jest.fn().mockResolvedValue(undefined);
+      emitWorkflowTriggerEvent = vi.fn().mockResolvedValue(undefined);
       clientWithEmit = new CRUDClient({
         esClient,
         logger,
@@ -603,12 +606,12 @@ describe('CRUDClient', () => {
   });
 
   describe('risk score trigger emit', () => {
-    let emitWorkflowTriggerEvent: jest.Mock;
+    let emitWorkflowTriggerEvent: Mock;
     let clientWithEmit: CRUDClient;
 
     beforeEach(() => {
       esClient.indices.exists.mockResolvedValue(true);
-      emitWorkflowTriggerEvent = jest.fn().mockResolvedValue(undefined);
+      emitWorkflowTriggerEvent = vi.fn().mockResolvedValue(undefined);
       clientWithEmit = new CRUDClient({
         esClient,
         logger,

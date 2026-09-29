@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
@@ -24,11 +27,11 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { mount } from 'enzyme';
 import { PageScope } from '../../../data_view_manager/constants';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
@@ -36,17 +39,20 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-jest.mock('./use_timelines_events');
+vi.mock('./use_timelines_events');
 
-jest.mock('../../utils/normalize_time_range');
+vi.mock('../../utils/normalize_time_range');
 
-const mockUseFieldBrowserOptions = jest.fn();
-jest.mock('../../../timelines/components/fields_browser', () => ({
-  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
-}));
+const mockUseFieldBrowserOptions = vi.fn();
+vi.mock('../../../timelines/components/fields_browser', () => {
+      const mocked = {
+      useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+const mockUseResizeObserver: Mock = useResizeObserver as Mock;
+vi.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const from = '2019-08-27T22:10:56.794Z';
@@ -68,10 +74,10 @@ const testProps: EventsViewerProps = {
 };
 describe('StatefulEventsViewer', () => {
   beforeAll(() => {
-    (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
+    (useTimelineEvents as Mock).mockReturnValue([false, mockEventViewerResponse]);
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders the events viewer', () => {
@@ -96,7 +102,7 @@ describe('StatefulEventsViewer', () => {
   });
 
   test('it closes field editor when unmounted', () => {
-    const mockCloseEditor = jest.fn();
+    const mockCloseEditor = vi.fn();
     mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
       editorActionsRef.current = { closeEditor: mockCloseEditor };
       return {};

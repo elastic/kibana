@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -21,7 +24,7 @@ import type { FindItemsParams, FindItemsResult } from '../../datasource';
 import { parseSearch } from './url_codec';
 
 describe('ContentListUrlSync', () => {
-  const mockFindItems = jest.fn(
+  const mockFindItems = vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: [],
       total: 0,
@@ -56,7 +59,7 @@ describe('ContentListUrlSync', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -85,8 +88,8 @@ describe('ContentListUrlSync', () => {
     const history = createMemoryHistory({
       initialEntries: ['/app?q=dashboard&sort=updatedAt%3Adesc'],
     });
-    const replaceSpy = jest.spyOn(history, 'replace');
-    const pushSpy = jest.spyOn(history, 'push');
+    const replaceSpy = vi.spyOn(history, 'replace');
+    const pushSpy = vi.spyOn(history, 'push');
 
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper({ history }),
@@ -106,8 +109,8 @@ describe('ContentListUrlSync', () => {
     const history = createMemoryHistory({
       initialEntries: ['/app?sort=title%3Aasc'],
     });
-    const replaceSpy = jest.spyOn(history, 'replace');
-    const pushSpy = jest.spyOn(history, 'push');
+    const replaceSpy = vi.spyOn(history, 'replace');
+    const pushSpy = vi.spyOn(history, 'push');
 
     renderHook(() => useContentListState(), {
       wrapper: createWrapper({ history }),
@@ -193,8 +196,8 @@ describe('ContentListUrlSync', () => {
 
   it('writes query and sort changes to the URL via history.replace', async () => {
     const history = createMemoryHistory({ initialEntries: ['/app'] });
-    const replaceSpy = jest.spyOn(history, 'replace');
-    const pushSpy = jest.spyOn(history, 'push');
+    const replaceSpy = vi.spyOn(history, 'replace');
+    const pushSpy = vi.spyOn(history, 'push');
 
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper({ history }),
@@ -287,7 +290,7 @@ describe('ContentListUrlSync', () => {
 
   it('does not rebind the history listener for equivalent inline sorting config', async () => {
     const history = createMemoryHistory({ initialEntries: ['/app'] });
-    const listenSpy = jest.spyOn(history, 'listen');
+    const listenSpy = vi.spyOn(history, 'listen');
 
     const InlineFeaturesWrapper = ({ children }: { children: React.ReactNode }) => (
       <Router history={history}>
@@ -324,10 +327,10 @@ describe('ContentListUrlSync', () => {
   });
 
   describe('with multiple URL-syncing lists on the same history', () => {
-    let warnSpy: jest.SpyInstance;
+    let warnSpy: MockInstance;
 
     beforeEach(() => {
-      warnSpy = jest.spyOn(globalThis.console, 'warn').mockImplementation(() => {});
+      warnSpy = vi.spyOn(globalThis.console, 'warn').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -404,7 +407,7 @@ describe('ContentListUrlSync', () => {
 
     it('does not write to the URL from the secondary list', async () => {
       const history = createMemoryHistory({ initialEntries: ['/app'] });
-      const replaceSpy = jest.spyOn(history, 'replace');
+      const replaceSpy = vi.spyOn(history, 'replace');
 
       const primary = renderHook(() => useContentListState(), {
         wrapper: createWrapper({ history, id: 'dashboards' }),

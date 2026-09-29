@@ -5,21 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    KeyMod: { CtrlCmd: 2048 },
-    KeyCode: { KeyK: 41 },
-  },
-}));
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      monaco: {
+        KeyMod: { CtrlCmd: 2048 },
+        KeyCode: { KeyK: 41 },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetFieldDefinitions = jest.fn();
-jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
-}));
+const mockUseGetFieldDefinitions = vi.fn();
+vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { renderWithTestingProviders } from '../../../common/mock';
 
@@ -40,13 +49,13 @@ const user = userEvent.setup({ pointerEventsCheck: 0 });
 const createEditor = (lineNumber: number) =>
   ({
     getPosition: () => ({ lineNumber, column: 1 }),
-    addAction: () => ({ dispose: jest.fn() }),
-    focus: jest.fn(),
+    addAction: () => ({ dispose: vi.fn() }),
+    focus: vi.fn(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial Monaco editor test double
   } as any);
 
-const renderMenu = (opts: { lineNumber?: number; value?: string; onChange?: jest.Mock } = {}) => {
-  const onChange = opts.onChange ?? jest.fn();
+const renderMenu = (opts: { lineNumber?: number; value?: string; onChange?: Mock } = {}) => {
+  const onChange = opts.onChange ?? vi.fn();
   renderWithTestingProviders(
     <TemplateActionsMenu
       editor={createEditor(opts.lineNumber ?? 1)}
@@ -60,7 +69,7 @@ const renderMenu = (opts: { lineNumber?: number; value?: string; onChange?: jest
 
 describe('TemplateActionsMenu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [{ fieldDefinitionId: 'root_cause', name: 'root_cause' }] },
       isLoading: false,
@@ -141,8 +150,8 @@ label: Root cause
 type: keyword
 `;
 
-    const renderFieldDefinitionMenu = (opts: { value?: string; onChange?: jest.Mock } = {}) => {
-      const onChange = opts.onChange ?? jest.fn();
+    const renderFieldDefinitionMenu = (opts: { value?: string; onChange?: Mock } = {}) => {
+      const onChange = opts.onChange ?? vi.fn();
       renderWithTestingProviders(
         <TemplateActionsMenu
           editor={createEditor(1)}

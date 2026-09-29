@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useCreateTimeline } from './use_create_timeline';
@@ -21,20 +24,20 @@ import { PageScope } from '../../data_view_manager/constants';
 import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 
-jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
-jest.mock('../../common/containers/use_global_time', () => {
+vi.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
+vi.mock('../../common/containers/use_global_time', () => {
   return {
-    useGlobalTime: jest.fn().mockReturnValue({
+    useGlobalTime: vi.fn().mockReturnValue({
       from: '2022-04-05T12:00:00.000Z',
       to: '2022-04-08T12:00:00.000Z',
-      setQuery: () => jest.fn(),
-      deleteQuery: () => jest.fn(),
+      setQuery: () => vi.fn(),
+      deleteQuery: () => vi.fn(),
     }),
   };
 });
-jest.mock('../../common/lib/kibana');
-jest.mock('../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('../../data_view_manager/hooks/use_select_data_view');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('../../data_view_manager/hooks/use_select_data_view');
 
 const mockDefaultPatterns = {
   id: 'security-solution',
@@ -53,14 +56,14 @@ const mockDefaultPatterns = {
 };
 
 describe('useCreateTimeline', () => {
-  const resetDiscoverAppState = jest.fn().mockResolvedValue({});
-  const selectDataView = jest.fn();
+  const resetDiscoverAppState = vi.fn().mockResolvedValue({});
+  const selectDataView = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({ resetDiscoverAppState });
-    (useSelectDataView as jest.Mock).mockReturnValue(selectDataView);
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue(mockDefaultPatterns);
+    vi.clearAllMocks();
+    (useDiscoverInTimelineContext as Mock).mockReturnValue({ resetDiscoverAppState });
+    (useSelectDataView as Mock).mockReturnValue(selectDataView);
+    (useSecurityDefaultPatterns as Mock).mockReturnValue(mockDefaultPatterns);
   });
 
   it('should return a function', () => {
@@ -78,9 +81,9 @@ describe('useCreateTimeline', () => {
   });
 
   it('should dispatch correct actions when calling the returned function', async () => {
-    const createTimeline = jest.spyOn(timelineActions, 'createTimeline');
-    const addLinkTo = jest.spyOn(inputsActions, 'addLinkTo');
-    const addNotes = jest.spyOn(appActions, 'addNotes');
+    const createTimeline = vi.spyOn(timelineActions, 'createTimeline');
+    const addLinkTo = vi.spyOn(inputsActions, 'addLinkTo');
+    const addNotes = vi.spyOn(appActions, 'addNotes');
 
     const hookResult = renderHook(
       () =>
@@ -115,7 +118,7 @@ describe('useCreateTimeline', () => {
   });
 
   it('should run the onClick method if provided', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const hookResult = renderHook(
       () =>
         useCreateTimeline({
@@ -137,8 +140,8 @@ describe('useCreateTimeline', () => {
   });
 
   it('should dispatch removeLinkTo action if absolute timeRange is passed to callback', async () => {
-    const removeLinkTo = jest.spyOn(inputsActions, 'removeLinkTo');
-    const setAbsoluteRangeDatePicker = jest.spyOn(inputsActions, 'setAbsoluteRangeDatePicker');
+    const removeLinkTo = vi.spyOn(inputsActions, 'removeLinkTo');
+    const setAbsoluteRangeDatePicker = vi.spyOn(inputsActions, 'setAbsoluteRangeDatePicker');
 
     const hookResult = renderHook(
       () =>
@@ -161,7 +164,7 @@ describe('useCreateTimeline', () => {
   });
 
   it('should dispatch removeLinkTo action if relative timeRange is passed to callback', async () => {
-    const setRelativeRangeDatePicker = jest.spyOn(inputsActions, 'setRelativeRangeDatePicker');
+    const setRelativeRangeDatePicker = vi.spyOn(inputsActions, 'setRelativeRangeDatePicker');
 
     const hookResult = renderHook(
       () =>

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { BuildkiteMetadata } from './buildkite';
 
 describe('buildkite metadata', () => {
@@ -20,7 +22,7 @@ describe('buildkite metadata', () => {
     delete nextEnv.BUILDKITE_RETRY_COUNT;
 
     process.env = { ...nextEnv, ...env };
-    jest.resetModules();
+    vi.resetModules();
     return (await import('./buildkite')).buildkite;
   };
 

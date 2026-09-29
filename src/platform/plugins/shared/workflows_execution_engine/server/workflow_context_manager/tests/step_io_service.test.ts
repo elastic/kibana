@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { JsonValue } from '@kbn/utility-types';
@@ -32,13 +35,13 @@ import { WorkflowExecutionState } from '../workflow_execution_state';
  */
 function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {}) {
   const workflowExecutionRepository = {
-    updateWorkflowExecution: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowExecutionRepository>;
+    updateWorkflowExecution: vi.fn(),
+  } as unknown as Mocked<WorkflowExecutionRepository>;
 
   const stepExecutionRepository = {
-    bulkUpsert: jest.fn().mockResolvedValue(undefined),
-    getStepExecutionsByIds: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<StepExecutionRepository>;
+    bulkUpsert: vi.fn().mockResolvedValue(undefined),
+    getStepExecutionsByIds: vi.fn().mockResolvedValue([]),
+  } as unknown as Mocked<StepExecutionRepository>;
 
   const fakeWorkflowExecution = {
     id: 'test-workflow-execution-id',
@@ -787,7 +790,7 @@ describe('StepIoService', () => {
 
       // Cycle 1: persists + queues for eviction.
       await service.flushStepChanges();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // Cycle 2: drains eviction; no new doc change should be sent.
       await service.flushStepChanges();
@@ -1325,7 +1328,7 @@ describe('StepIoService', () => {
       service.setStepInput('step-1', { message: 'hello' });
 
       await service.flushStepChanges();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       await service.flushStepChanges();
       expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
@@ -1401,7 +1404,7 @@ describe('StepIoService', () => {
 
     function makeGraph(innerStepIdsByLoop: Record<string, Set<string>>) {
       return {
-        getInnerStepIds: jest.fn(
+        getInnerStepIds: vi.fn(
           (loopStepId: string) => innerStepIdsByLoop[loopStepId] ?? new Set()
         ),
       };
@@ -1508,7 +1511,7 @@ describe('StepIoService', () => {
     ) {
       const harness = buildHarness();
       harness.state.updateWorkflowExecution({ stepExecutionIds: steps.map((s) => s.id) });
-      const calls = harness.stepExecutionRepository.getStepExecutionsByIds as jest.Mock;
+      const calls = harness.stepExecutionRepository.getStepExecutionsByIds as Mock;
       calls.mockReset();
       // First call: load without outputs.
       calls.mockResolvedValueOnce(steps);
@@ -2801,7 +2804,7 @@ describe('StepIoService', () => {
       await service.flushStepChanges();
 
       // The step is still running, so its doc carries no aggregate yet.
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+      (stepExecutionRepository.getStepExecutionsByIds as Mock).mockResolvedValue([
         { id, output: null, workflowRunId: 'test-workflow-execution-id' },
       ]);
 
@@ -2847,7 +2850,7 @@ describe('StepIoService', () => {
 
       // Hold the read open so the write below lands mid-flight.
       let releaseRead: (docs: unknown[]) => void = () => {};
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockReturnValue(
+      (stepExecutionRepository.getStepExecutionsByIds as Mock).mockReturnValue(
         new Promise((resolve) => {
           releaseRead = resolve as (docs: unknown[]) => void;
         })
@@ -2885,7 +2888,7 @@ describe('StepIoService', () => {
       await service.flushStepChanges();
 
       let releaseRead: (docs: unknown[]) => void = () => {};
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockReturnValue(
+      (stepExecutionRepository.getStepExecutionsByIds as Mock).mockReturnValue(
         new Promise((resolve) => {
           releaseRead = resolve as (docs: unknown[]) => void;
         })

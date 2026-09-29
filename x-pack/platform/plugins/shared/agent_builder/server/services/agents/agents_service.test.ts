@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -26,19 +29,19 @@ import { createClient, createSystemClient } from './persisted/client';
 import { runSkillRefCleanup } from './persisted/skill_reference_cleanup';
 import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
 
-jest.mock('@kbn/agent-builder-server/allow_lists');
-jest.mock('./persisted/client');
-jest.mock('./persisted/tool_reference_cleanup');
-jest.mock('./persisted/skill_reference_cleanup');
+vi.mock('@kbn/agent-builder-server/allow_lists');
+vi.mock('./persisted/client');
+vi.mock('./persisted/tool_reference_cleanup');
+vi.mock('./persisted/skill_reference_cleanup');
 
-const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as jest.MockedFunction<
+const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as MockedFunction<
   typeof isAllowedBuiltinAgent
 >;
-const isAllowedAgentTypeMock = isAllowedAgentType as jest.MockedFunction<typeof isAllowedAgentType>;
-const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
-const createSystemClientMock = createSystemClient as jest.MockedFunction<typeof createSystemClient>;
-const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
-const runSkillRefCleanupMock = runSkillRefCleanup as jest.MockedFunction<typeof runSkillRefCleanup>;
+const isAllowedAgentTypeMock = isAllowedAgentType as MockedFunction<typeof isAllowedAgentType>;
+const createClientMock = createClient as MockedFunction<typeof createClient>;
+const createSystemClientMock = createSystemClient as MockedFunction<typeof createSystemClient>;
+const runToolRefCleanupMock = runToolRefCleanup as MockedFunction<typeof runToolRefCleanup>;
+const runSkillRefCleanupMock = runSkillRefCleanup as MockedFunction<typeof runSkillRefCleanup>;
 
 const createStartDeps = (): AgentsServiceStartDeps => ({
   security: securityServiceMock.createStart(),
@@ -153,7 +156,7 @@ describe('AgentsService', () => {
   describe('#start', () => {
     let started: AgentsServiceStart;
     let request: KibanaRequest;
-    const ensureAgent = jest.fn();
+    const ensureAgent = vi.fn();
 
     beforeEach(() => {
       isAllowedBuiltinAgentMock.mockReturnValue(true);
@@ -271,8 +274,8 @@ describe('AgentsService', () => {
         });
 
         createClientMock.mockResolvedValue({
-          has: jest.fn().mockResolvedValue(true),
-          getWithAccess: jest.fn().mockResolvedValue({
+          has: vi.fn().mockResolvedValue(true),
+          getWithAccess: vi.fn().mockResolvedValue({
             ...agent,
             access_control: undefined,
             created_by: undefined,

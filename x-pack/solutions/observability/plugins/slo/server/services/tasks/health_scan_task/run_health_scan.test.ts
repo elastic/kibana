@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -16,8 +19,8 @@ import { computeHealth } from '../../../domain/services/compute_health';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { runHealthScan } from './run_health_scan';
 
-jest.mock('../../../domain/services/compute_health');
-const computeHealthMock = computeHealth as jest.MockedFunction<typeof computeHealth>;
+vi.mock('../../../domain/services/compute_health');
+const computeHealthMock = computeHealth as MockedFunction<typeof computeHealth>;
 
 describe('runHealthScan', () => {
   let scopedClusterClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
@@ -33,16 +36,16 @@ describe('runHealthScan', () => {
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
     signal = new AbortController().signal;
-    jest.clearAllMocks();
-    jest.useFakeTimers().setSystemTime(TEST_DATE);
-    jest.spyOn(global, 'setTimeout').mockImplementation((fn: () => void) => {
+    vi.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(TEST_DATE);
+    vi.spyOn(global, 'setTimeout').mockImplementation((fn: () => void) => {
       fn();
       return 0 as unknown as NodeJS.Timeout;
     });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   function createMockStoredSLO(
@@ -89,7 +92,7 @@ describe('runHealthScan', () => {
   }
 
   function mockPointInTimeFinder(pages: Array<Array<SavedObjectsFindResult<StoredSLODefinition>>>) {
-    const closeMock = jest.fn();
+    const closeMock = vi.fn();
     soClient.createPointInTimeFinder.mockReturnValue({
       close: closeMock,
       async *find() {

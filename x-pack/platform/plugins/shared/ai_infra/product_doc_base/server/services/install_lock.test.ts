@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import {
   PRODUCT_DOC_INSTALL_LOCK_ID,
@@ -13,15 +16,15 @@ import {
 } from './install_lock';
 
 describe('install lock', () => {
-  let withLock: jest.Mock;
+  let withLock: Mock;
 
   beforeEach(() => {
-    withLock = jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
+    withLock = vi.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
   });
 
   describe('tryWithInstallLock', () => {
     it('runs the callback under the install lock and resolves true', async () => {
-      const run = jest.fn().mockResolvedValue(undefined);
+      const run = vi.fn().mockResolvedValue(undefined);
 
       await expect(
         tryWithInstallLock({ lockManager: { withLock }, run, metadata: { item: 'kibana' } })
@@ -36,7 +39,7 @@ describe('install lock', () => {
     it('resolves false when the lock is held', async () => {
       withLock.mockRejectedValue(new LockAcquisitionError('held'));
 
-      await expect(tryWithInstallLock({ lockManager: { withLock }, run: jest.fn() })).resolves.toBe(
+      await expect(tryWithInstallLock({ lockManager: { withLock }, run: vi.fn() })).resolves.toBe(
         false
       );
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps, FC } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -13,15 +15,15 @@ import { createPartialObjectMock } from '../utils/test';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { DefaultCellValue } from './default_cell_value';
 
-jest.mock('./system_cell', () => {
-  const original = jest.requireActual('./system_cell');
+vi.mock('./system_cell', async () => {
+  const original = (await vi.importActual('./system_cell'));
   return {
     ...original,
-    SystemCell: jest.fn(() => <div data-test-subj="systemCell" />),
+    SystemCell: vi.fn(() => <div data-test-subj="systemCell" />),
   };
 });
-jest.mock('./default_cell_value');
-jest.mocked(DefaultCellValue as FC).mockReturnValue(<div data-test-subj="defaultCell" />);
+vi.mock('./default_cell_value');
+vi.mocked(DefaultCellValue as FC).mockReturnValue(<div data-test-subj="defaultCell" />);
 
 const props = createPartialObjectMock<ComponentProps<typeof CellValueHost>>({
   isLoading: false,
@@ -53,7 +55,7 @@ describe('CellValueHost', () => {
       <CellValueHost
         {...props}
         columnId="otherField"
-        renderCellValue={jest.fn(() => (
+        renderCellValue={vi.fn(() => (
           <div data-test-subj="customRenderCellValue" />
         ))}
       />

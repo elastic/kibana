@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { listActionsTool } from './list_actions_tool';
 import type { ActionsService } from '../services/actions/actions_service';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const request = httpServerMock.createKibanaRequest();
-const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
+const logger = () => ({ error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() });
 
-const serviceWith = (list: jest.Mock) => ({ list } as Pick<ActionsService, 'list'>);
+const serviceWith = (list: Mock) => ({ list } as Pick<ActionsService, 'list'>);
 
 const run = async (
   service: Pick<ActionsService, 'list'>,
@@ -40,7 +43,7 @@ const ACTION = (over: Partial<Record<string, unknown>> = {}) => ({
 
 describe('listActionsTool', () => {
   it('lists all actions when called without categories', async () => {
-    const list = jest.fn().mockResolvedValue({
+    const list = vi.fn().mockResolvedValue({
       actions: [
         ACTION({
           inputSchema: {
@@ -69,7 +72,7 @@ describe('listActionsTool', () => {
   });
 
   it('forwards categories to the service and reports empty results explicitly', async () => {
-    const list = jest.fn().mockResolvedValue({ actions: [], total: 0 });
+    const list = vi.fn().mockResolvedValue({ actions: [], total: 0 });
     const result = await run(serviceWith(list), { categories: ['escalate'] });
     expect(list).toHaveBeenCalledWith('space-a', request, ['escalate']);
     expect(result.results[0].data).toMatchObject({
@@ -79,14 +82,14 @@ describe('listActionsTool', () => {
   });
 
   it('returns an error result instead of throwing when the service fails', async () => {
-    const list = jest.fn().mockRejectedValue(new Error('workflows management down'));
+    const list = vi.fn().mockRejectedValue(new Error('workflows management down'));
     const result = await run(serviceWith(list));
     expect(result.results[0].type).not.toBe(ToolResultType.other);
     expect(JSON.stringify(result.results[0])).toContain('workflows management down');
   });
 
   it('declares the documented tool id and read-only annotations', () => {
-    const tool = listActionsTool(() => serviceWith(jest.fn()));
+    const tool = listActionsTool(() => serviceWith(vi.fn()));
     expect(tool.id).toBe('security.alertzero.actions.list');
     expect(tool.annotations).toMatchObject({
       readOnlyHint: true,

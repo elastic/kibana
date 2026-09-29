@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { MonitorTagsComboBox } from './monitor_tags_combo_box';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
-  useFetcher: jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+      useFetcher: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useFetcherMock = useFetcher as jest.Mock;
+const useFetcherMock = useFetcher as Mock;
 
 describe('<MonitorTagsComboBox />', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useFetcherMock.mockReturnValue({ data: ['prod', 'staging'], loading: false });
   });
 

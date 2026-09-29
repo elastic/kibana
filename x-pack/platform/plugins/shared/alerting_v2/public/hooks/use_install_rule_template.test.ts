@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData, RuleResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
@@ -12,14 +15,17 @@ import { RulesApi } from '../services/rules_api';
 import { createHookTestProviders } from '../test_utils/test_providers';
 import { useInstallRuleTemplate } from './use_install_rule_template';
 
-jest.mock('@kbn/core-di-browser');
-jest.mock('../services/rules_api');
-jest.mock('./invalidate_rules_content_list', () => ({
-  invalidateRulesContentList: jest.fn(() => Promise.resolve()),
-}));
+vi.mock('@kbn/core-di-browser');
+vi.mock('../services/rules_api');
+vi.mock('./invalidate_rules_content_list', () => {
+      const mocked = {
+      invalidateRulesContentList: vi.fn(() => Promise.resolve()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
+const mockUseService = useService as MockedFunction<typeof useService>;
+const mockCoreStart = CoreStart as MockedFunction<typeof CoreStart>;
 
 const mockCreatePayload: CreateRuleData = {
   kind: 'signal',
@@ -57,16 +63,16 @@ const mockRuleResponse: RuleResponse = {
 const createWrapper = () => createHookTestProviders();
 
 describe('useInstallRuleTemplate', () => {
-  const mockCreateRule = jest.fn();
-  const mockDisableRule = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
-  const mockAddDanger = jest.fn();
-  const mockNavigateToUrl = jest.fn();
-  const mockPrepend = jest.fn((path: string) => path);
+  const mockCreateRule = vi.fn();
+  const mockDisableRule = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddError = vi.fn();
+  const mockAddDanger = vi.fn();
+  const mockNavigateToUrl = vi.fn();
+  const mockPrepend = vi.fn((path: string) => path);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCoreStart.mockImplementation((key: string) => key as any);
 

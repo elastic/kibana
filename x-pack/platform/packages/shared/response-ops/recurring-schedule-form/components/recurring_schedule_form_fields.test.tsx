@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render, within, screen } from '@testing-library/react';
@@ -44,7 +46,7 @@ const TestWrapper = ({ children, iv = initialValue }: PropsWithChildren<{ iv?: F
 
 describe('RecurringScheduleForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all form fields', async () => {

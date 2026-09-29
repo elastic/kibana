@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { ENTRY_LEADER_ENTITY_ID, CONTAINER_IMAGE_NAME } from '../../../common/constants';
 import type { AppContextTestRender } from '../../test';
@@ -62,17 +65,20 @@ const MOCK_DATA = {
 };
 const MOCK_DATA_VIEW_ID = 'dataViewId';
 
-jest.mock('../../hooks/use_filter', () => ({
-  useSetFilter: () => ({
-    getFilterForValueButton: jest.fn(),
-    getFilterOutValueButton: jest.fn(),
-    getCopyButton: jest.fn(),
-    filterManager: {},
-  }),
-}));
+vi.mock('../../hooks/use_filter', () => {
+      const mocked = {
+      useSetFilter: () => ({
+        getFilterForValueButton: vi.fn(),
+        getFilterOutValueButton: vi.fn(),
+        getCopyButton: vi.fn(),
+        filterManager: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks');
-const mockUseFetchData = useFetchContainerNameData as jest.Mock;
+vi.mock('./hooks');
+const mockUseFetchData = useFetchContainerNameData as Mock;
 
 describe('ContainerNameWidget component', () => {
   let renderResult: ReturnType<typeof render>;

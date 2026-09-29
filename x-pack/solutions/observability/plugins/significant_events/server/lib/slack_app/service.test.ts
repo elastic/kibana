@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
@@ -19,15 +22,18 @@ import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './save
 const request = {} as unknown as KibanaRequest;
 
 // Shared across tests via `createHarness`'s injected `relayClient`, reset in `beforeEach`.
-const startInstall = jest.fn();
-const fetchClaim = jest.fn();
-const unbind = jest.fn();
-const getAgent = jest.fn();
-const getRegistry = jest.fn();
+const startInstall = vi.fn();
+const fetchClaim = vi.fn();
+const unbind = vi.fn();
+const getAgent = vi.fn();
+const getRegistry = vi.fn();
 
-jest.mock('@kbn/core-http-server-utils', () => ({
-  kibanaRequestFactory: jest.fn((rawRequest) => rawRequest),
-}));
+vi.mock('@kbn/core-http-server-utils', () => {
+      const mocked = {
+      kibanaRequestFactory: vi.fn((rawRequest) => rawRequest),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface HarnessOptions {
   /** `streams.significantEventsAppsEnabled` feature flag value. Defaults to enabled. */
@@ -38,27 +44,27 @@ interface HarnessOptions {
 
 function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: HarnessOptions = {}) {
   const soClient = {
-    get: jest
+    get: vi
       .fn()
       .mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(RELAY_APP_CONNECTION_SO_TYPE)
       ),
-    create: jest.fn().mockResolvedValue({ id: RELAY_APP_CONNECTION_SO_ID }),
-    delete: jest.fn().mockResolvedValue({}),
+    create: vi.fn().mockResolvedValue({ id: RELAY_APP_CONNECTION_SO_ID }),
+    delete: vi.fn().mockResolvedValue({}),
   };
-  const grantAsInternalUser = jest.fn();
-  const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
-  const getBooleanValue$ = jest.fn().mockReturnValue(of(featureFlagEnabled));
+  const grantAsInternalUser = vi.fn();
+  const invalidateAsInternalUser = vi.fn().mockResolvedValue({});
+  const getBooleanValue$ = vi.fn().mockReturnValue(of(featureFlagEnabled));
   const logger = {
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    get: jest.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    get: vi.fn(),
   } as unknown as Logger;
-  (logger.get as jest.Mock).mockReturnValue(logger);
+  (logger.get as Mock).mockReturnValue(logger);
 
-  const getLicense = jest.fn().mockResolvedValue({ type: 'platinum' });
+  const getLicense = vi.fn().mockResolvedValue({ type: 'platinum' });
 
   // Mutated in place like the actions plugin's own array, so `getRegisteredTenantKey` sees what the
   // service just did. The `isDynamic` handling mirrors the plugin: registration is refused for any
@@ -68,7 +74,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     secrets?: Record<string, string>;
     isDynamic?: boolean;
   }> = [];
-  const registerDynamicConnector = jest.fn(
+  const registerDynamicConnector = vi.fn(
     (connector: { id: string; secrets?: Record<string, string> }) => {
       if (inMemoryConnectors.some(({ id }) => id === connector.id)) {
         return false;
@@ -77,7 +83,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
       return true;
     }
   );
-  const unregisterDynamicConnector = jest.fn((connectorId: string) => {
+  const unregisterDynamicConnector = vi.fn((connectorId: string) => {
     const index = inMemoryConnectors.findIndex(
       ({ id, isDynamic }) => id === connectorId && isDynamic === true
     );
@@ -96,15 +102,15 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     actions: { registerDynamicConnector, unregisterDynamicConnector, inMemoryConnectors },
     relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
     core: {
-      savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
+      savedObjects: { getScopedClient: vi.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue$ },
-      http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: jest.fn() },
+      http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: vi.fn() },
     },
     licensing: { getLicense },
     security: {
       authc: {
         apiKeys: { grantAsInternalUser, invalidateAsInternalUser },
-        getCurrentUser: jest.fn().mockReturnValue({ username: 'admin' }),
+        getCurrentUser: vi.fn().mockReturnValue({ username: 'admin' }),
       },
     },
   } as unknown as SignificantEventsServer;
@@ -124,7 +130,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
 
 describe('SlackAppService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getAgent.mockRejectedValue(createAgentNotFoundError({ agentId: 'nightshift.investigation' }));
     getRegistry.mockResolvedValue({ get: getAgent });
   });
@@ -655,7 +661,7 @@ describe('SlackAppService', () => {
   });
 
   describe('listBindings', () => {
-    const listBindings = jest.fn();
+    const listBindings = vi.fn();
 
     function createHarnessWithListBindings(opts?: HarnessOptions) {
       const harness = createHarness(opts);
@@ -798,8 +804,8 @@ describe('SlackAppService', () => {
   });
 
   describe('bindChannel / unbindChannel', () => {
-    const bind = jest.fn();
-    const unbindChannel = jest.fn();
+    const bind = vi.fn();
+    const unbindChannel = vi.fn();
 
     function createHarnessWithChannelOps(opts?: HarnessOptions) {
       const harness = createHarness(opts);
@@ -807,7 +813,7 @@ describe('SlackAppService', () => {
         startInstall,
         fetchClaim,
         unbind,
-        listBindings: jest.fn(),
+        listBindings: vi.fn(),
         bind,
         unbindChannel,
       };

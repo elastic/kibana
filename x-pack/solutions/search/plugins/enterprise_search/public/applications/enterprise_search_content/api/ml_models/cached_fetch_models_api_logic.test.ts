@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import type { HttpError } from '../../../../../common/types/api';
@@ -54,14 +56,14 @@ const FETCH_MODELS_API_ERROR_RESPONSE = {
   },
 } as HttpError;
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('TextExpansionCalloutLogic', () => {
   const { mount } = new LogicMounter(CachedFetchModelsApiLogic);
   const { mount: mountFetchModelsApiLogic } = new LogicMounter(FetchModelsApiLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mountFetchModelsApiLogic();
     mount();
   });
@@ -74,7 +76,7 @@ describe('TextExpansionCalloutLogic', () => {
           pollTimeoutId: 'timeout-id',
         });
 
-        jest.spyOn(CachedFetchModelsApiLogic.actions, 'createPollTimeout');
+        vi.spyOn(CachedFetchModelsApiLogic.actions, 'createPollTimeout');
 
         CachedFetchModelsApiLogic.actions.apiError(FETCH_MODELS_API_ERROR_RESPONSE);
 
@@ -89,7 +91,7 @@ describe('TextExpansionCalloutLogic', () => {
           pollTimeoutId: 'timeout-id',
         });
 
-        jest.spyOn(CachedFetchModelsApiLogic.actions, 'createPollTimeout');
+        vi.spyOn(CachedFetchModelsApiLogic.actions, 'createPollTimeout');
 
         CachedFetchModelsApiLogic.actions.apiSuccess(FETCH_MODELS_API_DATA_RESPONSE);
 
@@ -105,15 +107,15 @@ describe('TextExpansionCalloutLogic', () => {
           pollTimeoutId: 'timeout-id',
         });
 
-        jest.spyOn(global, 'clearTimeout');
+        vi.spyOn(global, 'clearTimeout');
 
         CachedFetchModelsApiLogic.actions.createPollTimeout(duration);
 
         expect(clearTimeout).toHaveBeenCalledWith('timeout-id');
       });
       it('sets polling timeout', () => {
-        jest.spyOn(global, 'setTimeout');
-        jest.spyOn(CachedFetchModelsApiLogic.actions, 'setTimeoutId');
+        vi.spyOn(global, 'setTimeout');
+        vi.spyOn(CachedFetchModelsApiLogic.actions, 'setTimeoutId');
 
         CachedFetchModelsApiLogic.actions.createPollTimeout(duration);
 
@@ -129,15 +131,15 @@ describe('TextExpansionCalloutLogic', () => {
           pollTimeoutId: 'timeout-id',
         });
 
-        jest.spyOn(global, 'clearTimeout');
+        vi.spyOn(global, 'clearTimeout');
 
         CachedFetchModelsApiLogic.actions.startPolling();
 
         expect(clearTimeout).toHaveBeenCalledWith('timeout-id');
       });
       it('makes API request and sets polling timeout', () => {
-        jest.spyOn(CachedFetchModelsApiLogic.actions, 'makeRequest');
-        jest.spyOn(CachedFetchModelsApiLogic.actions, 'createPollTimeout');
+        vi.spyOn(CachedFetchModelsApiLogic.actions, 'makeRequest');
+        vi.spyOn(CachedFetchModelsApiLogic.actions, 'createPollTimeout');
 
         CachedFetchModelsApiLogic.actions.startPolling();
 
@@ -153,14 +155,14 @@ describe('TextExpansionCalloutLogic', () => {
           pollTimeoutId: 'timeout-id',
         });
 
-        jest.spyOn(global, 'clearTimeout');
+        vi.spyOn(global, 'clearTimeout');
 
         CachedFetchModelsApiLogic.actions.stopPolling();
 
         expect(clearTimeout).toHaveBeenCalledWith('timeout-id');
       });
       it('clears polling timeout value', () => {
-        jest.spyOn(CachedFetchModelsApiLogic.actions, 'clearPollTimeout');
+        vi.spyOn(CachedFetchModelsApiLogic.actions, 'clearPollTimeout');
 
         CachedFetchModelsApiLogic.actions.stopPolling();
 

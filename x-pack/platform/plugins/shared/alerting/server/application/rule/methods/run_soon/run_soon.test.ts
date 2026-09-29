@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
@@ -59,7 +61,7 @@ describe('runSoon()', () => {
 
   beforeEach(() => {
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-    (auditLogger.log as jest.Mock).mockClear();
+    (auditLogger.log as Mock).mockClear();
     rulesClient = new RulesClient(rulesClientParams);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRule);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);

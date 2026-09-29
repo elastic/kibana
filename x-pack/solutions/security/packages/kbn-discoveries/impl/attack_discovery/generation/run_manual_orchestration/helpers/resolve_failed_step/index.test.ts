@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { resolveFailedStep } from '.';
 
 const mockAlertRetrievalResult = {
@@ -34,12 +36,12 @@ const mockGenerationResult = {
 
 describe('resolveFailedStep', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2024-01-01T00:00:10.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:10.000Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns retrieval when alertRetrievalResult is undefined', () => {

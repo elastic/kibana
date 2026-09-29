@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { EuiButton } from '@elastic/eui';
@@ -17,69 +20,75 @@ import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migrati
 import { MigrationSource } from '../../../common/types';
 import type { HandleMissingResourcesIndexed } from '../../../common/types';
 
-const mockOnClose = jest.fn();
-const mockStartMigration = jest.fn();
-const mockShowModal = jest.fn();
+const mockOnClose = vi.fn();
+const mockStartMigration = vi.fn();
+const mockShowModal = vi.fn();
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useGeneratedHtmlId: jest.fn(() => 'generated-id'),
+    useGeneratedHtmlId: vi.fn(() => 'generated-id'),
   };
 });
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      siemMigrations: {
-        rules: {
-          api: {
-            getMissingResources: jest.fn(),
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          siemMigrations: {
+            rules: {
+              api: {
+                getMissingResources: vi.fn(),
+              },
+              telemetry: {
+                reportSetupLookupNameCopied: vi.fn(),
+              },
+            },
           },
-          telemetry: {
-            reportSetupLookupNameCopied: jest.fn(),
+          notifications: {
+            toasts: {
+              addError: vi.fn(),
+              addSuccess: vi.fn(),
+              addWarning: vi.fn(),
+              addInfo: vi.fn(),
+              remove: vi.fn(),
+            },
+          },
+          triggersActionsUi: {
+            actionTypeRegistry: {
+              get: vi.fn().mockReturnValue('Mock Action Type'),
+            },
           },
         },
-      },
-      notifications: {
-        toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
-          addWarning: jest.fn(),
-          addInfo: jest.fn(),
-          remove: jest.fn(),
-        },
-      },
-      triggersActionsUi: {
-        actionTypeRegistry: {
-          get: jest.fn().mockReturnValue('Mock Action Type'),
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile', () => ({
-  useGetCurrentUserProfile: () => ({
-    data: { user: { full_name: 'Test User', username: 'testuser' } },
-  }),
-}));
+vi.mock('../../../../common/components/user_profiles/use_get_current_user_profile', () => {
+      const mocked = {
+      useGetCurrentUserProfile: () => ({
+        data: { user: { full_name: 'Test User', username: 'testuser' } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_get_missing_resources', () => {
-  const actual = jest.requireActual('../../../common/hooks/use_get_missing_resources');
+vi.mock('../../../common/hooks/use_get_missing_resources', async () => {
+  const actual = (await vi.importActual('../../../common/hooks/use_get_missing_resources'));
   return {
     ...actual,
     useGetMissingResources: () => ({
       isLoading: false,
       error: null,
-      getMissingResources: jest.fn(),
+      getMissingResources: vi.fn(),
     }),
   };
 });
 
-jest.mock('../../logic/use_start_migration', () => {
-  const actual = jest.requireActual('../../logic/use_start_migration');
+vi.mock('../../logic/use_start_migration', async () => {
+  const actual = (await vi.importActual('../../logic/use_start_migration'));
   return {
     ...actual,
     useStartMigration: () => ({
@@ -90,25 +99,37 @@ jest.mock('../../logic/use_start_migration', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(() => true),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMissingResources = jest.fn();
-jest.mock('../../../common/hooks/use_missing_resources', () => ({
-  useMissingResources: (...args: unknown[]) => mockUseMissingResources(...args),
-}));
+const mockUseMissingResources = vi.fn();
+vi.mock('../../../common/hooks/use_missing_resources', () => {
+      const mocked = {
+      useMissingResources: (...args: unknown[]) => mockUseMissingResources(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../service/hooks/use_enhance_rules', () => ({
-  useEnhanceRules: () => ({ enhanceRules: jest.fn(), isLoading: false, error: null }),
-}));
+vi.mock('../../service/hooks/use_enhance_rules', () => {
+      const mocked = {
+      useEnhanceRules: () => ({ enhanceRules: vi.fn(), isLoading: false, error: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addError: jest.fn(), addSuccess: jest.fn() }),
-}));
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({ addError: vi.fn(), addSuccess: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_start_rules_migration_modal');
-const useStartRulesMigrationModalMock = useStartRulesMigrationModal as jest.MockedFunction<
+vi.mock('../../hooks/use_start_rules_migration_modal');
+const useStartRulesMigrationModalMock = useStartRulesMigrationModal as MockedFunction<
   typeof useStartRulesMigrationModal
 >;
 
@@ -116,7 +137,7 @@ describe('MigrationDataInputFlyout', () => {
   beforeEach(() => {
     mockUseMissingResources.mockReturnValue({
       missingResourcesIndexed: undefined,
-      onMissingResourcesFetched: jest.fn(),
+      onMissingResourcesFetched: vi.fn(),
       missingResourceCount: 0,
     });
 
@@ -142,7 +163,7 @@ describe('MigrationDataInputFlyout', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the data input flyout', () => {
@@ -316,7 +337,7 @@ describe('MigrationDataInputFlyout', () => {
     const MISSING_LOOKUPS = { macros: [], lookups: ['ref_set_1', 'ref_set_2'] };
 
     beforeEach(() => {
-      const react = jest.requireActual('react');
+      const react = require('react');
       mockUseMissingResources.mockImplementation(
         ({
           handleMissingResourcesIndexed,
@@ -334,7 +355,7 @@ describe('MigrationDataInputFlyout', () => {
 
           return {
             missingResourcesIndexed: MISSING_LOOKUPS,
-            onMissingResourcesFetched: jest.fn(),
+            onMissingResourcesFetched: vi.fn(),
             missingResourceCount: MISSING_LOOKUPS.lookups.length,
           };
         }
@@ -350,7 +371,7 @@ describe('MigrationDataInputFlyout', () => {
     it('advances from Reference Set step to Enhancements step when skip button is clicked', async () => {
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <MigrationDataInputFlyout onClose={jest.fn()} migrationStats={qradarMigrationStats} />
+          <MigrationDataInputFlyout onClose={vi.fn()} migrationStats={qradarMigrationStats} />
         </TestProviders>
       );
 

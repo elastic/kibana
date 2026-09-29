@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
 import { waitFor, fireEvent } from '@testing-library/react';
@@ -13,13 +16,16 @@ import { render } from '../../utils/testing/rtl_helpers';
 import { ToggleAlertFlyoutButton } from './toggle_alert_flyout_button';
 import { makeSyntheticsPermissionsCore } from '../../utils/testing/rtl_helpers';
 
-jest.mock('./hooks/use_synthetics_rules', () => ({
-  useSyntheticsRules: jest.fn(),
-}));
+vi.mock('./hooks/use_synthetics_rules', () => {
+      const mocked = {
+      useSyntheticsRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const useSyntheticsRulesModule = require('./hooks/use_synthetics_rules');
-const mockUseSyntheticsRules = useSyntheticsRulesModule.useSyntheticsRules as jest.MockedFunction<
+const mockUseSyntheticsRules = useSyntheticsRulesModule.useSyntheticsRules as MockedFunction<
   typeof useSyntheticsRulesModule.useSyntheticsRules
 >;
 
@@ -46,7 +52,7 @@ describe('ToggleAlertFlyoutButton', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSyntheticsRules.mockReturnValue({
       loading: false,
       EditAlertFlyout: null,

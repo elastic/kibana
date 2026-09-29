@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiSwitch } from '@elastic/eui';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { PerOsSettingCard } from './per_os_setting_card';
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 describe('PerOsSettingCard', () => {
   it('renders title, description, and the master toggle without the legacy header', () => {
     const render = createAppRootMockRenderer();
@@ -23,7 +25,7 @@ describe('PerOsSettingCard', () => {
             label="Malware protections"
             showLabel={false}
             checked={true}
-            onChange={jest.fn()}
+            onChange={vi.fn()}
           />
         }
       >

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -12,16 +15,19 @@ import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/t
 import { EnterpriseGuard } from './enterprise_guard';
 import { useLicense } from '../../common/hooks/use_license';
 
-jest.mock('../../app/home/template_wrapper', () => ({
-  SecuritySolutionTemplateWrapper: () => <div />,
-}));
-jest.mock('../../common/hooks/use_license');
+vi.mock('../../app/home/template_wrapper', () => {
+      const mocked = {
+      SecuritySolutionTemplateWrapper: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/use_license');
 
 describe('<EnterpriseGuard />', () => {
   describe('when on enterprise plan', () => {
     beforeEach(() => {
-      (useLicense as jest.Mock).mockReturnValue({
-        isEnterprise: jest.fn().mockReturnValue(true),
+      (useLicense as Mock).mockReturnValue({
+        isEnterprise: vi.fn().mockReturnValue(true),
       });
     });
 
@@ -41,8 +47,8 @@ describe('<EnterpriseGuard />', () => {
 
   describe('when not on enterprise plan', () => {
     beforeEach(() => {
-      (useLicense as jest.Mock).mockReturnValue({
-        isEnterprise: jest.fn().mockReturnValue(false),
+      (useLicense as Mock).mockReturnValue({
+        isEnterprise: vi.fn().mockReturnValue(false),
       });
     });
 

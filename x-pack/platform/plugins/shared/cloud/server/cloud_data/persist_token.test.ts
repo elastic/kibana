@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { persistTokenCloudData } from './persist_token'; // Adjust the import based on the actual file path
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -12,22 +15,22 @@ import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from '../routes/constants';
 
 const mockSavedObjectsClient = {
-  get: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
+  get: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
 } as unknown as SavedObjectsClientContract;
 
 const mockLogger = {
-  error: jest.fn(),
+  error: vi.fn(),
 } as unknown as Logger;
 
 describe('persistTokenCloudData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates a new saved object if none exists and onboardingToken is provided', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+    (mockSavedObjectsClient.get as Mock).mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError()
     );
     await persistTokenCloudData(mockSavedObjectsClient, {
@@ -49,7 +52,7 @@ describe('persistTokenCloudData', () => {
   });
 
   it('creates a new saved object if none exists and resourceData is provided', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+    (mockSavedObjectsClient.get as Mock).mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError()
     );
     await persistTokenCloudData(mockSavedObjectsClient, {
@@ -84,7 +87,7 @@ describe('persistTokenCloudData', () => {
   });
 
   it('creates a new saved object if none exists and security details are provided', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+    (mockSavedObjectsClient.get as Mock).mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError()
     );
     await persistTokenCloudData(mockSavedObjectsClient, {
@@ -119,7 +122,7 @@ describe('persistTokenCloudData', () => {
   });
 
   it('updates an existing saved object if onboardingToken is provided', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
+    (mockSavedObjectsClient.get as Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
         onboardingData: {
@@ -147,7 +150,7 @@ describe('persistTokenCloudData', () => {
   });
 
   it('updates an existing saved object if resourceData is provided', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
+    (mockSavedObjectsClient.get as Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
         onboardingData: {
@@ -193,7 +196,7 @@ describe('persistTokenCloudData', () => {
   });
 
   it('updates an existing saved object if security details are provided', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
+    (mockSavedObjectsClient.get as Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
         onboardingData: {
@@ -240,7 +243,7 @@ describe('persistTokenCloudData', () => {
   });
 
   it('does nothing if onboardingToken and security details are the same', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
+    (mockSavedObjectsClient.get as Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
         onboardingData: {
@@ -273,7 +276,7 @@ describe('persistTokenCloudData', () => {
   });
 
   it('logs an error if get throws an unexpected error', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+    (mockSavedObjectsClient.get as Mock).mockRejectedValue(
       SavedObjectsErrorHelpers.createBadRequestError()
     );
 
@@ -287,7 +290,7 @@ describe('persistTokenCloudData', () => {
   });
 
   it('throws an error if get throws an unexpected error and returnError is true', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+    (mockSavedObjectsClient.get as Mock).mockRejectedValue(
       SavedObjectsErrorHelpers.createBadRequestError()
     );
 
@@ -302,11 +305,11 @@ describe('persistTokenCloudData', () => {
   });
 
   it('logs an error if create throws an error', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+    (mockSavedObjectsClient.get as Mock).mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError()
     );
     const error = new Error('Create error');
-    (mockSavedObjectsClient.create as jest.Mock).mockRejectedValue(error);
+    (mockSavedObjectsClient.create as Mock).mockRejectedValue(error);
 
     await persistTokenCloudData(mockSavedObjectsClient, {
       logger: mockLogger,
@@ -318,11 +321,11 @@ describe('persistTokenCloudData', () => {
   });
 
   it('throws an error if create throws an error and returnError is true', async () => {
-    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+    (mockSavedObjectsClient.get as Mock).mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError()
     );
     const error = new Error('Create error');
-    (mockSavedObjectsClient.create as jest.Mock).mockRejectedValue(error);
+    (mockSavedObjectsClient.create as Mock).mockRejectedValue(error);
 
     await expect(
       persistTokenCloudData(mockSavedObjectsClient, {

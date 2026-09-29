@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -136,8 +138,8 @@ const mockServices = {
     rules: createSiemMigrationsMock().rules,
     dashboards: {
       ...createSiemMigrationsMock().dashboards,
-      hasMissingCapabilities: jest.fn().mockReturnValue(false),
-      getMissingCapabilities: jest.fn().mockReturnValue([]),
+      hasMissingCapabilities: vi.fn().mockReturnValue(false),
+      getMissingCapabilities: vi.fn().mockReturnValue([]),
     },
   } as unknown as SiemMigrationsService,
 };
@@ -149,34 +151,34 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 const renderTestComponent = (partialProps: Partial<MigrationDashboardsTableProps> = {}) => {
   const defaultProps: MigrationDashboardsTableProps = {
     migrationStats: mockStats,
-    refetchData: jest.fn(),
+    refetchData: vi.fn(),
   };
 
   const props = { ...defaultProps, ...partialProps };
   return render(<MigrationDashboardsTable {...props} />, { wrapper: Wrapper });
 };
 
-jest.spyOn(useGetMigrationDashboardsModule, 'useGetMigrationDashboards').mockReturnValue({
+vi.spyOn(useGetMigrationDashboardsModule, 'useGetMigrationDashboards').mockReturnValue({
   data: { migrationDashboards: mockDashboards, total: 2 },
   isLoading: false,
 } as unknown as ReturnType<typeof useGetMigrationDashboardsModule.useGetMigrationDashboards>);
 
-jest
+vi
   .spyOn(useGetMigrationTranslationStatsModule, 'useGetMigrationTranslationStats')
   .mockReturnValue({
     data: mockTranslationStats,
     isLoading: false,
   } as unknown as ReturnType<typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats>);
 
-const mockInstallMigrationDashboards = jest.fn();
-const mockInstallMigrationDashboard = jest.fn();
+const mockInstallMigrationDashboards = vi.fn();
+const mockInstallMigrationDashboard = vi.fn();
 
-jest.spyOn(useInstallMigrationDashboardsModule, 'useInstallMigrationDashboards').mockReturnValue({
+vi.spyOn(useInstallMigrationDashboardsModule, 'useInstallMigrationDashboards').mockReturnValue({
   mutateAsync: mockInstallMigrationDashboards,
   isLoading: false,
 } as unknown as ReturnType<typeof useInstallMigrationDashboardsModule.useInstallMigrationDashboards>);
 
-jest.spyOn(useInstallMigrationDashboardModule, 'useInstallMigrationDashboard').mockReturnValue({
+vi.spyOn(useInstallMigrationDashboardModule, 'useInstallMigrationDashboard').mockReturnValue({
   mutateAsync: mockInstallMigrationDashboard,
   isLoading: false,
 } as unknown as ReturnType<typeof useInstallMigrationDashboardModule.useInstallMigrationDashboard>);

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -14,21 +17,21 @@ import { getAllSpacesWithCases } from '../../utils';
 import { createCasesAnalyticsIndexesForSpaceId, scheduleCasesAnalyticsSyncTasks } from '../..';
 import { SchedulerTaskRunner } from './scheduler_task_runner';
 
-jest.mock('../../utils');
-const getAllSpacesWithCasesMock = getAllSpacesWithCases as jest.Mock;
+vi.mock('../../utils');
+const getAllSpacesWithCasesMock = getAllSpacesWithCases as Mock;
 
-jest.mock('../..');
+vi.mock('../..');
 const createCasesAnalyticsIndexesForSpaceIdMock =
-  createCasesAnalyticsIndexesForSpaceId as jest.Mock;
-const scheduleCasesAnalyticsSyncTasksMock = scheduleCasesAnalyticsSyncTasks as jest.Mock;
+  createCasesAnalyticsIndexesForSpaceId as Mock;
+const scheduleCasesAnalyticsSyncTasksMock = scheduleCasesAnalyticsSyncTasks as Mock;
 
 describe('SchedulerTaskRunner', () => {
   const initialSpaces = ['default', 'another-one'];
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const getESClient = jest.fn().mockResolvedValue(esClient);
-  const getTaskManager = jest.fn().mockResolvedValue(taskManagerMock.createSetup());
-  const getUnsecureSavedObjectsClient = jest.fn().mockResolvedValue(savedObjectsClientMock);
+  const getESClient = vi.fn().mockResolvedValue(esClient);
+  const getTaskManager = vi.fn().mockResolvedValue(taskManagerMock.createSetup());
+  const getUnsecureSavedObjectsClient = vi.fn().mockResolvedValue(savedObjectsClientMock);
   getAllSpacesWithCasesMock.mockResolvedValue(initialSpaces);
 
   const analyticsConfig = {
@@ -44,7 +47,7 @@ describe('SchedulerTaskRunner', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     createCasesAnalyticsIndexesForSpaceIdMock.mockResolvedValue(undefined);
 
     esClient.indices.exists.mockResolvedValue(true);

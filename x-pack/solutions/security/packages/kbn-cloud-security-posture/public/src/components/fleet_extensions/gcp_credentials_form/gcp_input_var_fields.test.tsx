@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -15,50 +17,56 @@ import { GCP_INPUT_FIELDS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-comm
 import { GCP_CREDENTIALS_TYPE } from '../constants';
 
 // Mock the LazyPackagePolicyInputVarField component
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  LazyPackagePolicyInputVarField: ({
-    varDef,
-    value,
-    onChange,
-    'data-test-subj': testSubj,
-  }: {
-    varDef?: { title?: string };
-    value?: string;
-    onChange?: (value: string) => void;
-    'data-test-subj'?: string;
-  }) => (
-    <div data-test-subj={testSubj || 'mock-lazy-field'}>
-      <textarea
-        data-test-subj="mock-textarea"
-        value={value || ''}
-        onChange={(e) => onChange && onChange(e.target.value)}
-        placeholder={varDef?.title || 'Mock field'}
-      />
-    </div>
-  ),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      LazyPackagePolicyInputVarField: ({
+        varDef,
+        value,
+        onChange,
+        'data-test-subj': testSubj,
+      }: {
+        varDef?: { title?: string };
+        value?: string;
+        onChange?: (value: string) => void;
+        'data-test-subj'?: string;
+      }) => (
+        <div data-test-subj={testSubj || 'mock-lazy-field'}>
+          <textarea
+            data-test-subj="mock-textarea"
+            value={value || ''}
+            onChange={(e) => onChange && onChange(e.target.value)}
+            placeholder={varDef?.title || 'Mock field'}
+          />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the utils
-jest.mock('../utils', () => ({
-  fieldIsInvalid: jest.fn((value, hasInvalidRequiredVars) => {
-    return hasInvalidRequiredVars && (!value || value.trim() === '');
-  }),
-  findVariableDef: jest.fn((packageInfo, fieldId) => ({
-    name: fieldId,
-    title: `Mock ${fieldId} title`,
-    type: 'text',
-    required: true,
-  })),
-  gcpField: {
-    fields: {
-      'gcp.organization_id': { label: 'Organization ID' },
-      'gcp.project_id': { label: 'Project ID' },
-      'gcp.credentials.type': { label: 'Credentials Type' },
-      'gcp.credentials.file': { label: 'Credentials File' },
-      'gcp.credentials.json': { label: 'Credentials JSON' },
-    },
-  },
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      fieldIsInvalid: vi.fn((value, hasInvalidRequiredVars) => {
+        return hasInvalidRequiredVars && (!value || value.trim() === '');
+      }),
+      findVariableDef: vi.fn((packageInfo, fieldId) => ({
+        name: fieldId,
+        title: `Mock ${fieldId} title`,
+        type: 'text',
+        required: true,
+      })),
+      gcpField: {
+        fields: {
+          'gcp.organization_id': { label: 'Organization ID' },
+          'gcp.project_id': { label: 'Project ID' },
+          'gcp.credentials.type': { label: 'Credentials Type' },
+          'gcp.credentials.file': { label: 'Credentials File' },
+          'gcp.credentials.json': { label: 'Credentials JSON' },
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
@@ -72,7 +80,7 @@ describe('GcpInputVarFields', () => {
     // Add other properties your test actually uses
   } as unknown as PackageInfo;
 
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   const defaultFields = [
     {
@@ -108,7 +116,7 @@ describe('GcpInputVarFields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {

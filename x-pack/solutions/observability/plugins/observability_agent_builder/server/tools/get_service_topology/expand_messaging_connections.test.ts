@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ExitSpanSample } from '../../data_registry/data_registry_types';
 import {
   expandMessagingConnections,
@@ -13,13 +16,16 @@ import {
 import type { ConnectionWithKey } from './types';
 import { makeExternalConnection } from './test_helpers';
 
-jest.mock('./get_trace_ids_from_exit_spans', () => ({
-  getTraceIdsFromExitSpansTargetingDependency: jest.fn(),
-}));
+vi.mock('./get_trace_ids_from_exit_spans', () => {
+      const mocked = {
+      getTraceIdsFromExitSpansTargetingDependency: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getTraceIdsFromExitSpansTargetingDependency } from './get_trace_ids_from_exit_spans';
 
-const mockGetTraceIds = getTraceIdsFromExitSpansTargetingDependency as jest.MockedFunction<
+const mockGetTraceIds = getTraceIdsFromExitSpansTargetingDependency as MockedFunction<
   typeof getTraceIdsFromExitSpansTargetingDependency
 >;
 
@@ -32,14 +38,14 @@ function makeSpan(serviceName: string, resource: string, spanType: string): Exit
   };
 }
 
-const mockLogger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn(), info: jest.fn() } as any;
+const mockLogger = { debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn() } as any;
 const mockApmEventClient = {} as any;
 const mockRequest = {} as any;
 
 function createMockDataRegistry(spansPerCall: Array<ExitSpanSample[] | null>) {
   let callIndex = 0;
   return {
-    getData: jest.fn(async () => {
+    getData: vi.fn(async () => {
       const result = spansPerCall[callIndex] ?? null;
       callIndex++;
       return result;
@@ -66,7 +72,7 @@ function callExpand({
 
 describe('expandMessagingConnections', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty array when messagingDeps is empty', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { RulesClientContext } from '../../../rules_client/types';
@@ -14,46 +17,58 @@ import { getRuleIdsWithGaps } from '../../../application/gaps/methods/get_rule_i
 import { findGapsSearchAfter } from '../find_gaps';
 import { updateGapsInEventLog } from './update_gaps_in_event_log';
 import type { Logger } from '@kbn/core/server';
-jest.mock('../find_gaps', () => ({
-  findGapsSearchAfter: jest.fn(),
-}));
+vi.mock('../find_gaps', () => {
+      const mocked = {
+      findGapsSearchAfter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../application/gaps/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps',
-  () => ({
-    getRuleIdsWithGaps: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        getRuleIdsWithGaps: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../task/utils', () => ({
-  filterGapsWithOverlappingBackfills: jest.fn(async (gaps: unknown[]) => gaps),
-}));
+vi.mock('../task/utils', () => {
+      const mocked = {
+      filterGapsWithOverlappingBackfills: vi.fn(async (gaps: unknown[]) => gaps),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./update_gaps_in_event_log', () => ({
-  updateGapsInEventLog: jest.fn(async ({ gaps, prepareGaps }) => {
-    if (typeof prepareGaps === 'function') {
-      await prepareGaps(gaps);
-    }
-    return true;
-  }),
-}));
+vi.mock('./update_gaps_in_event_log', () => {
+      const mocked = {
+      updateGapsInEventLog: vi.fn(async ({ gaps, prepareGaps }) => {
+        if (typeof prepareGaps === 'function') {
+          await prepareGaps(gaps);
+        }
+        return true;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('cleanupStuckInProgressGaps', () => {
   const logger = {
-    info: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
 
-  const eventLogger = { initialize: jest.fn() } as unknown as IEventLogger;
+  const eventLogger = { initialize: vi.fn() } as unknown as IEventLogger;
 
   const eventLogClient = {
-    closePointInTime: jest.fn(async () => {}),
+    closePointInTime: vi.fn(async () => {}),
   } as unknown as IEventLogClient;
 
   const rulesClientContext = {
-    getActionsClient: jest.fn(async () => ({})),
+    getActionsClient: vi.fn(async () => ({})),
     backfillClient: {},
     internalSavedObjectsRepository: {},
   } as unknown as RulesClientContext;
@@ -61,11 +76,11 @@ describe('cleanupStuckInProgressGaps', () => {
   const startDate = new Date('2024-01-01T00:00:00.000Z');
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('resets in_progress_intervals for gaps without overlapping backfills and updates updated_at', async () => {
-    const mockedGetRuleIdsWithGaps = getRuleIdsWithGaps as jest.MockedFunction<
+    const mockedGetRuleIdsWithGaps = getRuleIdsWithGaps as MockedFunction<
       typeof getRuleIdsWithGaps
     >;
     mockedGetRuleIdsWithGaps.mockResolvedValue({
@@ -89,9 +104,9 @@ describe('cleanupStuckInProgressGaps', () => {
     };
 
     const gaps = [mkGap('r-1', '1'), mkGap('r-2', '2')];
-    const spies = gaps.map((g) => jest.spyOn(g, 'setUpdatedAt'));
+    const spies = gaps.map((g) => vi.spyOn(g, 'setUpdatedAt'));
 
-    const mockedFindGapsSearchAfter = findGapsSearchAfter as jest.MockedFunction<
+    const mockedFindGapsSearchAfter = findGapsSearchAfter as MockedFunction<
       typeof findGapsSearchAfter
     >;
     mockedFindGapsSearchAfter.mockResolvedValue({
@@ -100,8 +115,8 @@ describe('cleanupStuckInProgressGaps', () => {
       pitId: undefined,
     } as Awaited<ReturnType<typeof findGapsSearchAfter>>);
 
-    const { filterGapsWithOverlappingBackfills } = jest.requireMock('../task/utils');
-    (filterGapsWithOverlappingBackfills as jest.Mock).mockResolvedValue(gaps);
+    const { filterGapsWithOverlappingBackfills } = (await vi.importMock('../task/utils'));
+    (filterGapsWithOverlappingBackfills as Mock).mockResolvedValue(gaps);
 
     await cleanupStuckInProgressGaps({
       rulesClientContext,
@@ -113,7 +128,7 @@ describe('cleanupStuckInProgressGaps', () => {
 
     // updateGapsInEventLog should be called once per rule with gaps reset
     expect(updateGapsInEventLog).toHaveBeenCalled();
-    const calls = (updateGapsInEventLog as jest.Mock).mock.calls;
+    const calls = (updateGapsInEventLog as Mock).mock.calls;
     const allGapsPassed: Gap[] = calls.flatMap((c: unknown[]) => (c[0] as { gaps: Gap[] }).gaps);
     // in progress intervals cleared and updated_at set
     allGapsPassed.forEach((g) => {
@@ -123,7 +138,7 @@ describe('cleanupStuckInProgressGaps', () => {
   });
 
   it('does not reset in_progress_intervals when overlapping backfills exist, but updates updated_at', async () => {
-    const mockedGetRuleIdsWithGaps = getRuleIdsWithGaps as jest.MockedFunction<
+    const mockedGetRuleIdsWithGaps = getRuleIdsWithGaps as MockedFunction<
       typeof getRuleIdsWithGaps
     >;
     mockedGetRuleIdsWithGaps.mockResolvedValue({
@@ -142,9 +157,9 @@ describe('cleanupStuckInProgressGaps', () => {
       lte: new Date('2024-01-01T01:30:00.000Z'),
     });
     const originalInProgress = gap.inProgressIntervals.slice();
-    const setUpdatedAtSpy = jest.spyOn(gap, 'setUpdatedAt');
+    const setUpdatedAtSpy = vi.spyOn(gap, 'setUpdatedAt');
 
-    const mockedFindGapsSearchAfter = findGapsSearchAfter as jest.MockedFunction<
+    const mockedFindGapsSearchAfter = findGapsSearchAfter as MockedFunction<
       typeof findGapsSearchAfter
     >;
     mockedFindGapsSearchAfter.mockResolvedValue({
@@ -154,8 +169,8 @@ describe('cleanupStuckInProgressGaps', () => {
     } as Awaited<ReturnType<typeof findGapsSearchAfter>>);
 
     // Simulate that overlapping backfills exist, so no reset should occur
-    const { filterGapsWithOverlappingBackfills } = jest.requireMock('../task/utils');
-    (filterGapsWithOverlappingBackfills as jest.Mock).mockResolvedValueOnce([]);
+    const { filterGapsWithOverlappingBackfills } = (await vi.importMock('../task/utils'));
+    (filterGapsWithOverlappingBackfills as Mock).mockResolvedValueOnce([]);
 
     await cleanupStuckInProgressGaps({
       rulesClientContext,

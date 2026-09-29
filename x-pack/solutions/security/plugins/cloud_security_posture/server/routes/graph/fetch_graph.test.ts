@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
@@ -21,34 +24,37 @@ import { fetchEntityEnrichment } from './fetch_entity_enrichment';
 import { resolveEntitiesIndexName } from './utils';
 import type { EventEdge, RelationshipEdge, EntityRecord } from './types';
 
-jest.mock('./fetch_events_graph');
-jest.mock('./fetch_entity_relationships_graph');
-jest.mock('./parse_records');
-jest.mock('./fetch_entity_enrichment');
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  resolveEntitiesIndexName: jest.fn(),
-}));
+vi.mock('./fetch_events_graph');
+vi.mock('./fetch_entity_relationships_graph');
+vi.mock('./parse_records');
+vi.mock('./fetch_entity_enrichment');
+vi.mock('./utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils')),
+      resolveEntitiesIndexName: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedFetchEvents = fetchEvents as jest.MockedFunction<typeof fetchEvents>;
-const mockedFetchEntityRelationships = fetchEntityRelationships as jest.MockedFunction<
+const mockedFetchEvents = fetchEvents as MockedFunction<typeof fetchEvents>;
+const mockedFetchEntityRelationships = fetchEntityRelationships as MockedFunction<
   typeof fetchEntityRelationships
 >;
-const mockedFetchEntities = fetchEntities as jest.MockedFunction<typeof fetchEntities>;
-const mockedFetchEntityEnrichment = fetchEntityEnrichment as jest.MockedFunction<
+const mockedFetchEntities = fetchEntities as MockedFunction<typeof fetchEntities>;
+const mockedFetchEntityEnrichment = fetchEntityEnrichment as MockedFunction<
   typeof fetchEntityEnrichment
 >;
-const mockedRegroupEvents = regroupEvents as jest.MockedFunction<typeof regroupEvents>;
-const mockedEnrichEventDocData = enrichEventDocData as jest.MockedFunction<
+const mockedRegroupEvents = regroupEvents as MockedFunction<typeof regroupEvents>;
+const mockedEnrichEventDocData = enrichEventDocData as MockedFunction<
   typeof enrichEventDocData
 >;
-const mockedRegroupRelationships = regroupRelationships as jest.MockedFunction<
+const mockedRegroupRelationships = regroupRelationships as MockedFunction<
   typeof regroupRelationships
 >;
-const mockedEnrichRelationshipDocData = enrichRelationshipDocData as jest.MockedFunction<
+const mockedEnrichRelationshipDocData = enrichRelationshipDocData as MockedFunction<
   typeof enrichRelationshipDocData
 >;
-const mockedApplyEnrichmentToEntityRecords = enrichEntityRecords as jest.MockedFunction<
+const mockedApplyEnrichmentToEntityRecords = enrichEntityRecords as MockedFunction<
   typeof enrichEntityRecords
 >;
 
@@ -127,7 +133,7 @@ describe('fetchGraph', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should call fetchEvents with correct parameters', async () => {
@@ -214,7 +220,7 @@ describe('fetchGraph', () => {
       { id: 'entity-2', isOrigin: false },
     ];
 
-    (resolveEntitiesIndexName as jest.Mock).mockResolvedValueOnce(
+    (resolveEntitiesIndexName as Mock).mockResolvedValueOnce(
       '.entities.v2.latest.default-00001'
     );
 

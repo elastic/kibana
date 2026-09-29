@@ -5,22 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useCaseAttachmentWorkflowContext } from './case_attachment_workflow_context';
 import { CaseAttachmentWorkflowProvider } from './case_attachment_workflow_provider';
 import { useCanRunCaseWorkflow } from './use_run_case_workflow';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
-  useRefreshCaseViewPage: () => jest.fn(),
-}));
-jest.mock('./use_run_case_workflow', () => ({
-  ...jest.requireActual('./use_run_case_workflow'),
-  useCanRunCaseWorkflow: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana');
+vi.mock('../case_view/use_on_refresh_case_view_page', () => {
+      const mocked = {
+      useRefreshCaseViewPage: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_run_case_workflow', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_run_case_workflow')),
+      useCanRunCaseWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
+const mockUseCanRunCaseWorkflow = vi.mocked(useCanRunCaseWorkflow);
 
 describe('useCaseAttachmentWorkflowContext', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (

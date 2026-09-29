@@ -7,28 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { HttpMonacoConnectorStepHandler } from './http_connector_step_handler';
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
 import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getCachedAllConnectors } from '../connectors_cache';
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
-jest.mock('../connectors_cache', () => ({
-  getCachedAllConnectors: jest.fn(),
-}));
+vi.mock('../connectors_cache', () => {
+      const mocked = {
+      getCachedAllConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/schema', () => ({
-  getCachedAllConnectorsMap: jest.fn(),
-}));
+vi.mock('../../../../../common/schema', () => {
+      const mocked = {
+      getCachedAllConnectorsMap: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('HttpMonacoConnectorStepHandler', () => {
   let handler: HttpMonacoConnectorStepHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockStabilityBadgeThemeForTests();
-    (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
-    (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(null);
+    (getCachedAllConnectors as Mock).mockReturnValue([]);
+    (getCachedAllConnectorsMap as Mock).mockReturnValue(null);
     handler = new HttpMonacoConnectorStepHandler();
   });
 
@@ -71,7 +80,7 @@ describe('HttpMonacoConnectorStepHandler', () => {
     });
 
     it('should prepend stability badge when connector has tech_preview stability', async () => {
-      (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(
+      (getCachedAllConnectorsMap as Mock).mockReturnValue(
         new Map([['http', { type: 'http', stability: 'tech_preview' }]])
       );
       const stepContext = createMockStepContext();

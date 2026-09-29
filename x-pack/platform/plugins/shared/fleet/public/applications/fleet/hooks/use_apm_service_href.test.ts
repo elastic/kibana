@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import type { DataStream } from '../types';
@@ -12,8 +14,8 @@ import * as useLocatorModule from '../../../hooks/use_locator';
 
 import { useAPMServiceDetailHref } from './use_apm_service_href';
 
-jest.mock('../../../hooks/use_locator', () => {
-  const apmLocatorMock = { getUrl: jest.fn().mockResolvedValue('') };
+vi.mock('../../../hooks/use_locator', () => {
+  const apmLocatorMock = { getUrl: vi.fn().mockResolvedValue('') };
   return {
     useLocator: () => apmLocatorMock,
   };
@@ -23,7 +25,7 @@ const apmLocatorMock = useLocatorModule.useLocator('APM_LOCATOR')?.getUrl;
 // FLAKY: https://github.com/elastic/kibana/issues/201876
 describe.skip('useApmServiceHref hook', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("doesn't call the apm locator when given a non APM datastream", async () => {

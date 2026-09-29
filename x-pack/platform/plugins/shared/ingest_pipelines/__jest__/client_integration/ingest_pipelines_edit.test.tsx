@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
@@ -79,7 +81,7 @@ describe('<PipelinesEdit />', () => {
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_EDIT.name, PIPELINE_TO_EDIT);
 
     // Required by normalizePipelineNameFromParams() which uses window.location.pathname.

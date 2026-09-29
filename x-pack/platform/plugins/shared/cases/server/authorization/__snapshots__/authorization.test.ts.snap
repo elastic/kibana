@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`authorization ensureAuthorized with operation arrays handles multiple operations successfully when authorized 1`] = `
 Array [

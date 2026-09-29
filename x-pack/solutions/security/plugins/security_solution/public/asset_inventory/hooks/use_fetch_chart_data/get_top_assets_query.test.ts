@@ -5,20 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getTopAssetsQuery } from './get_top_assets_query';
 import { ASSET_FIELDS } from '../../constants';
 import { addEmptyDataFilterQuery } from '../../utils/add_empty_data_filter';
 
-jest.mock('../fetch_utils', () => ({
-  getMultiFieldsSort: jest.fn().mockReturnValue([{ field: 'mocked_sort' }]),
-}));
+vi.mock('../fetch_utils', () => {
+      const mocked = {
+      getMultiFieldsSort: vi.fn().mockReturnValue([{ field: 'mocked_sort' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/add_empty_data_filter', () => ({
-  addEmptyDataFilterQuery: jest.fn((queryBoolFilter) => [
-    ...queryBoolFilter,
-    { match_phrase: { 'entity.id': '' } },
-  ]),
-}));
+vi.mock('../../utils/add_empty_data_filter', () => {
+      const mocked = {
+      addEmptyDataFilterQuery: vi.fn((queryBoolFilter) => [
+        ...queryBoolFilter,
+        { match_phrase: { 'entity.id': '' } },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getTopAssetsQuery', () => {
   const query = {

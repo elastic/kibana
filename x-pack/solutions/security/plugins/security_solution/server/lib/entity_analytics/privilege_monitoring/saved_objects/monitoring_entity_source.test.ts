@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   MonitoringEntitySource,
@@ -21,7 +23,7 @@ describe('MonitoringEntitySourceDescriptorClient', () => {
       namespace: 'default',
     });
 
-    const updateSpy = jest
+    const updateSpy = vi
       .spyOn(client, 'update')
       .mockResolvedValue({ id: 'source-id' } as MonitoringEntitySource);
 
@@ -52,17 +54,17 @@ describe('MonitoringEntitySourceDescriptorClient', () => {
       matchersModifiedByUser: true,
     } as MonitoringEntitySource;
 
-    jest.spyOn(client, 'find').mockResolvedValue({
+    vi.spyOn(client, 'find').mockResolvedValue({
       sources: [existing],
       page: 1,
       per_page: 10,
       total: 1,
     });
 
-    const updateWithoutMatchersSpy = jest
+    const updateWithoutMatchersSpy = vi
       .spyOn(client, 'updateWithoutMatchers')
       .mockResolvedValue(existing);
-    const updateSpy = jest.spyOn(client, 'update').mockResolvedValue(existing);
+    const updateSpy = vi.spyOn(client, 'update').mockResolvedValue(existing);
 
     const updateAttrs: MonitoringEntitySourceAttributes = {
       type: 'index',
@@ -93,17 +95,17 @@ describe('MonitoringEntitySourceDescriptorClient', () => {
       matchersModifiedByUser: false,
     } as MonitoringEntitySource;
 
-    jest.spyOn(client, 'find').mockResolvedValue({
+    vi.spyOn(client, 'find').mockResolvedValue({
       sources: [existing],
       page: 1,
       per_page: 10,
       total: 1,
     });
 
-    const updateWithoutMatchersSpy = jest
+    const updateWithoutMatchersSpy = vi
       .spyOn(client, 'updateWithoutMatchers')
       .mockResolvedValue(existing);
-    const updateSpy = jest.spyOn(client, 'update').mockResolvedValue(existing);
+    const updateSpy = vi.spyOn(client, 'update').mockResolvedValue(existing);
 
     const updateAttrs: MonitoringEntitySourceAttributes = {
       type: 'index',

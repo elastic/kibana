@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
@@ -215,8 +217,8 @@ describe('checkAndFormatPrivileges', () => {
   const buildSecurityMock = (kibanaAuthorized: Array<{ privilege: string; authorized: boolean }>) =>
     ({
       authz: {
-        checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(
-          jest.fn().mockResolvedValue({
+        checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(
+          vi.fn().mockResolvedValue({
             hasAllRequested: kibanaAuthorized.every(({ authorized }) => authorized),
             privileges: {
               elasticsearch: { cluster: [], index: {} },

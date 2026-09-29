@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -13,46 +16,52 @@ import { useUpdateAlertsStatus } from '.';
 import * as updateAlertsModule from '../../../../../common/components/toolbar/bulk_actions/update_alerts';
 import * as appToastsModule from '../../../../../common/hooks/use_app_toasts';
 
-jest.mock('../../../../../common/components/toolbar/bulk_actions/update_alerts');
-jest.mock('../../../../../common/hooks/use_app_toasts');
-jest.mock('../../../use_find_attack_discoveries', () => ({
-  useInvalidateFindAttackDiscoveries: () => jest.fn(),
-}));
-jest.mock('./translations', () => ({
-  SUCCESSFULLY_MARKED_ALERTS: jest.fn(() => 'success'),
-  UPDATED_ALERTS_WITH_VERSION_CONFLICTS: jest.fn(() => 'version conflict'),
-  PARTIALLY_UPDATED_ALERTS: jest.fn(() => 'partial'),
-  ERROR_UPDATING_ALERTS: 'error',
-}));
+vi.mock('../../../../../common/components/toolbar/bulk_actions/update_alerts');
+vi.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('../../../use_find_attack_discoveries', () => {
+      const mocked = {
+      useInvalidateFindAttackDiscoveries: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./translations', () => {
+      const mocked = {
+      SUCCESSFULLY_MARKED_ALERTS: vi.fn(() => 'success'),
+      UPDATED_ALERTS_WITH_VERSION_CONFLICTS: vi.fn(() => 'version conflict'),
+      PARTIALLY_UPDATED_ALERTS: vi.fn(() => 'partial'),
+      ERROR_UPDATING_ALERTS: 'error',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUpdateAlertsStatus', () => {
-  let addSuccess: jest.Mock;
-  let addError: jest.Mock;
-  let addWarning: jest.Mock;
+  let addSuccess: Mock;
+  let addError: Mock;
+  let addWarning: Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    addSuccess = jest.fn();
-    addError = jest.fn();
-    addWarning = jest.fn();
-    jest.spyOn(appToastsModule, 'useAppToasts').mockReturnValue({
+    addSuccess = vi.fn();
+    addError = vi.fn();
+    addWarning = vi.fn();
+    vi.spyOn(appToastsModule, 'useAppToasts').mockReturnValue({
       addError,
       addSuccess,
       addWarning,
-      addInfo: jest.fn(),
-      remove: jest.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
       api: {
-        add: jest.fn(),
-        addDanger: jest.fn(),
-        addError: jest.fn(),
-        addInfo: jest.fn(),
-        addSuccess: jest.fn(),
-        addWarning: jest.fn(),
-        get$: jest.fn(),
-        remove: jest.fn(),
+        add: vi.fn(),
+        addDanger: vi.fn(),
+        addError: vi.fn(),
+        addInfo: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        get$: vi.fn(),
+        remove: vi.fn(),
       },
     });
-    (updateAlertsModule.updateAlertStatus as jest.Mock).mockReset();
+    (updateAlertsModule.updateAlertStatus as Mock).mockReset();
     queryClient = new QueryClient();
   });
 
@@ -61,7 +70,7 @@ describe('useUpdateAlertsStatus', () => {
   );
 
   it('returns a mutation that calls updateAlertStatus and addSuccess on full update', async () => {
-    (updateAlertsModule.updateAlertStatus as jest.Mock).mockResolvedValue({
+    (updateAlertsModule.updateAlertStatus as Mock).mockResolvedValue({
       updated: 2,
       version_conflicts: 0,
     });
@@ -76,7 +85,7 @@ describe('useUpdateAlertsStatus', () => {
   });
 
   it('returns a mutation that calls addWarning on version conflict', async () => {
-    (updateAlertsModule.updateAlertStatus as jest.Mock).mockResolvedValue({
+    (updateAlertsModule.updateAlertStatus as Mock).mockResolvedValue({
       updated: 1,
       version_conflicts: 1,
     });
@@ -91,7 +100,7 @@ describe('useUpdateAlertsStatus', () => {
   });
 
   it('returns a mutation that calls addWarning on partial update with no version conflict', async () => {
-    (updateAlertsModule.updateAlertStatus as jest.Mock).mockResolvedValue({
+    (updateAlertsModule.updateAlertStatus as Mock).mockResolvedValue({
       updated: 1,
       version_conflicts: 0,
     });
@@ -106,7 +115,7 @@ describe('useUpdateAlertsStatus', () => {
   });
 
   it('returns a mutation that calls addError on error', async () => {
-    (updateAlertsModule.updateAlertStatus as jest.Mock).mockRejectedValue(new Error('fail'));
+    (updateAlertsModule.updateAlertStatus as Mock).mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useUpdateAlertsStatus(), { wrapper });
 

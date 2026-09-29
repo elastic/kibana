@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -15,14 +18,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { SecurityNavControl } from './nav_control_component';
 
-jest.mock('@kbn/core-user-profile-browser-hooks', () => {
-  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
-  return { ...actual, useCurrentUser: jest.fn() };
+vi.mock('@kbn/core-user-profile-browser-hooks', async () => {
+  const actual = (await vi.importActual('@kbn/core-user-profile-browser-hooks'));
+  return { ...actual, useCurrentUser: vi.fn() };
 });
-jest.mock('react-use/lib/useObservable');
+vi.mock('react-use/lib/useObservable');
 
-const useObservableMock = useObservable as jest.Mock;
-const useCurrentUserMock = useCurrentUser as jest.Mock;
+const useObservableMock = useObservable as Mock;
+const useCurrentUserMock = useCurrentUser as Mock;
 
 const userMenuLinks$ = new BehaviorSubject([]);
 

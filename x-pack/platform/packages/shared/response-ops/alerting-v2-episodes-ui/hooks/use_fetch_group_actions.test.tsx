@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
@@ -12,9 +14,9 @@ import type { GroupActionRow } from '../queries/group_actions_query';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchGroupActions } from './use_fetch_group_actions';
 
-jest.mock('../apis/fetch_group_actions');
+vi.mock('../apis/fetch_group_actions');
 
-const fetchGroupActionsMock = jest.mocked(fetchGroupActions);
+const fetchGroupActionsMock = vi.mocked(fetchGroupActions);
 const mockExpressions = {} as ExpressionsStart;
 const mockSpaces = createMockSpaces();
 
@@ -23,7 +25,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchGroupActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

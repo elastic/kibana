@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
@@ -12,13 +15,13 @@ import { ensureClusterPrivilege } from './cluster_privilege';
 
 describe('ensureClusterPrivilege', () => {
   let logger: MockedLogger;
-  let globally: jest.Mock;
-  let checkPrivilegesWithRequest: jest.Mock;
+  let globally: Mock;
+  let checkPrivilegesWithRequest: Mock;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    globally = jest.fn().mockResolvedValue({ hasAllRequested: true });
-    checkPrivilegesWithRequest = jest.fn().mockReturnValue({ globally });
+    globally = vi.fn().mockResolvedValue({ hasAllRequested: true });
+    checkPrivilegesWithRequest = vi.fn().mockReturnValue({ globally });
   });
 
   const check = (action = 'create a service account') =>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
@@ -15,9 +18,9 @@ import { AttacksEventTypes } from '../../../../../../../common/lib/telemetry';
 import { Title } from '.';
 import { TestProviders } from '../../../../../../../common/mock';
 
-const mockReportEvent = jest.fn();
-jest.mock('../../../../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../../../../common/lib/kibana');
+const mockReportEvent = vi.fn();
+vi.mock('../../../../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../../../../common/lib/kibana'));
   return {
     ...original,
     useKibana: () => {
@@ -35,33 +38,42 @@ jest.mock('../../../../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('@kbn/elastic-assistant-common', () => ({
-  ATTACK_DISCOVERY_AD_HOC_RULE_ID: 'ad-hoc-rule-id',
-  API_VERSIONS: {
-    public: {
-      v1: '2023-10-31',
-    },
-    internal: {
-      v1: '1',
-    },
-  },
-  replaceAnonymizedValuesWithOriginalValues: jest.fn((params) => params.messageContent),
-}));
+vi.mock('@kbn/elastic-assistant-common', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_AD_HOC_RULE_ID: 'ad-hoc-rule-id',
+      API_VERSIONS: {
+        public: {
+          v1: '2023-10-31',
+        },
+        internal: {
+          v1: '1',
+        },
+      },
+      replaceAnonymizedValuesWithOriginalValues: vi.fn((params) => params.messageContent),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../settings_flyout/schedule/details_flyout', () => ({
-  DetailsFlyout: ({ scheduleId, onClose }: { scheduleId: string; onClose: () => void }) => (
-    <div data-test-subj="detailsFlyout">
-      {scheduleId}
-      <button type="button" onClick={onClose} data-test-subj="closeFlyout">
-        {'Close'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../../../settings_flyout/schedule/details_flyout', () => {
+      const mocked = {
+      DetailsFlyout: ({ scheduleId, onClose }: { scheduleId: string; onClose: () => void }) => (
+        <div data-test-subj="detailsFlyout">
+          {scheduleId}
+          <button type="button" onClick={onClose} data-test-subj="closeFlyout">
+            {'Close'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../utils/is_attack_discovery_alert', () => ({
-  isAttackDiscoveryAlert: jest.fn((discovery) => !!discovery.alertRuleUuid),
-}));
+vi.mock('../../../../../utils/is_attack_discovery_alert', () => {
+      const mocked = {
+      isAttackDiscoveryAlert: vi.fn((discovery) => !!discovery.alertRuleUuid),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Test wrapper with QueryClient and TestProviders
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -100,14 +112,14 @@ const defaultProps = {
   attackDiscovery: mockRawResponse,
   isOpen: 'closed' as const,
   isSelected: false,
-  onToggle: jest.fn(),
-  setIsOpen: jest.fn(),
-  setIsSelected: jest.fn(),
+  onToggle: vi.fn(),
+  setIsOpen: vi.fn(),
+  setIsSelected: vi.fn(),
   showAnonymized: false,
 };
 
 describe('Title', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('rendering', () => {
     it('renders the title component', () => {
@@ -131,7 +143,7 @@ describe('Title', () => {
     });
 
     it('labels the checkbox with the title, with the original values replaced', () => {
-      jest.mocked(replaceAnonymizedValuesWithOriginalValues).mockReturnValue('Original title');
+      vi.mocked(replaceAnonymizedValuesWithOriginalValues).mockReturnValue('Original title');
 
       render(
         <TestWrapper>
@@ -143,7 +155,7 @@ describe('Title', () => {
     });
 
     it('labels the checkbox with the anonymized title when showAnonymized is true', () => {
-      jest.mocked(replaceAnonymizedValuesWithOriginalValues).mockReturnValue('Original title');
+      vi.mocked(replaceAnonymizedValuesWithOriginalValues).mockReturnValue('Original title');
 
       render(
         <TestWrapper>
@@ -167,7 +179,7 @@ describe('Title', () => {
 
   describe('user interactions', () => {
     it('calls setIsSelected when checkbox is clicked', async () => {
-      const setIsSelected = jest.fn();
+      const setIsSelected = vi.fn();
       render(
         <TestWrapper>
           <Title {...defaultProps} setIsSelected={setIsSelected} />
@@ -183,12 +195,12 @@ describe('Title', () => {
     });
 
     describe('when the accordion button is clicked', () => {
-      let setIsOpen: jest.Mock;
-      let onToggle: jest.Mock;
+      let setIsOpen: Mock;
+      let onToggle: Mock;
 
       beforeEach(async () => {
-        setIsOpen = jest.fn();
-        onToggle = jest.fn();
+        setIsOpen = vi.fn();
+        onToggle = vi.fn();
         render(
           <TestWrapper>
             <Title {...defaultProps} setIsOpen={setIsOpen} onToggle={onToggle} />
@@ -245,7 +257,7 @@ describe('Title', () => {
     });
 
     it('handles an attack discovery without an id when a checkbox is clicked', async () => {
-      const setIsSelected = jest.fn();
+      const setIsSelected = vi.fn();
       const discoveryWithoutId = { ...mockRawResponse, id: undefined };
       render(
         <TestWrapper>

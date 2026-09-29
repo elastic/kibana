@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { render } from '@testing-library/react';
@@ -17,10 +19,13 @@ import {
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
 } from '../test_subjects';
 
-const mockNavToFindings = jest.fn();
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => ({
-  useNavigateFindings: () => mockNavToFindings,
-}));
+const mockNavToFindings = vi.fn();
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => {
+      const mocked = {
+      useNavigateFindings: () => mockNavToFindings,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<BenchmarksSection />', () => {
   const renderBenchmarks = (alterMockData = {}, namespace?: string) =>

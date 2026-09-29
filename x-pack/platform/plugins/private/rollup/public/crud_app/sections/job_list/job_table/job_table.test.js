@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { Pager } from '@elastic/eui';
 import { fireEvent, screen, within } from '@testing-library/react';
@@ -14,16 +16,16 @@ import { getJobs, jobCount } from '../../../../../fixtures';
 import { createRollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 
-jest.mock('../../../../kibana_services', () => {
-  const services = jest.requireActual('../../../../kibana_services');
+vi.mock('../../../../kibana_services', async () => {
+  const services = (await vi.importActual('../../../../kibana_services'));
   return {
     ...services,
-    trackUiMetric: jest.fn(),
+    trackUiMetric: vi.fn(),
   };
 });
 
-jest.mock('../../../services', () => {
-  const services = jest.requireActual('../../../services');
+vi.mock('../../../services', async () => {
+  const services = (await vi.importActual('../../../services'));
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),
@@ -56,13 +58,13 @@ const renderComponent = (overrides = {}) => {
 
 describe('<JobTable />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('table rows', () => {
     const totalJobs = jobCount;
     const jobs = getJobs(totalJobs);
-    const openDetailPanel = jest.fn();
+    const openDetailPanel = vi.fn();
 
     beforeEach(() => {
       renderComponent({ jobs, openDetailPanel });

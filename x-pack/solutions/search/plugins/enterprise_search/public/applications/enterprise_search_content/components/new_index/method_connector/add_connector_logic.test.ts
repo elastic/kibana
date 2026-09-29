@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -16,9 +18,12 @@ import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_l
 import type { AddConnectorValues } from './add_connector_logic';
 import { AddConnectorLogic } from './add_connector_logic';
 
-jest.mock('../../../../shared/kibana', () => ({
-  KibanaLogic: { values: { navigateToUrl: jest.fn() } },
-}));
+vi.mock('../../../../shared/kibana', () => {
+      const mocked = {
+      KibanaLogic: { values: { navigateToUrl: vi.fn() } },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DEFAULT_VALUES: AddConnectorValues = {
   isModalVisible: false,
@@ -54,10 +59,10 @@ describe('AddConnectorLogic', () => {
 
     describe('apiSuccess', () => {
       it('navigates to correct spot and flashes success toast', async () => {
-        jest.useFakeTimers({ legacyFakeTimers: true });
+        vi.useFakeTimers({ legacyFakeTimers: true });
         AddConnectorApiLogic.actions.apiSuccess({ id: 'success123' } as any);
         await nextTick();
-        jest.advanceTimersByTime(1001);
+        vi.advanceTimersByTime(1001);
         await nextTick();
         expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
           '/connectors/success123/configuration'

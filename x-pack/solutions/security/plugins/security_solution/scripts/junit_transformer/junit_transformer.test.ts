@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { promises as fs } from 'fs';
 import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
@@ -46,11 +48,11 @@ describe('junit_transformer', () => {
       },
 
       log: {
-        info: jest.fn(),
-        write: jest.fn(),
-        error: jest.fn(),
-        success: jest.fn(),
-        warning: jest.fn(),
+        info: vi.fn(),
+        write: vi.fn(),
+        error: vi.fn(),
+        success: vi.fn(),
+        warning: vi.fn(),
       },
     };
   });

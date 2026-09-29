@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MonitorAlerts } from './monitor_alerts';
@@ -12,35 +14,50 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 const ALERTS_INDEX_PATTERN = '.alerts-observability*';
 
-const mockEmbeddable = jest.fn((_props: Record<string, unknown>) => null);
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      exploratoryView: { ExploratoryViewEmbeddable: mockEmbeddable },
-    },
-  }),
-}));
+const mockEmbeddable = vi.fn((_props: Record<string, unknown>) => null);
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          exploratoryView: { ExploratoryViewEmbeddable: mockEmbeddable },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMonitorQueryFilters = jest.fn();
-jest.mock('../hooks/use_monitor_query_filters', () => ({
-  useMonitorQueryFilters: () => mockUseMonitorQueryFilters(),
-}));
+const mockUseMonitorQueryFilters = vi.fn();
+vi.mock('../hooks/use_monitor_query_filters', () => {
+      const mocked = {
+      useMonitorQueryFilters: () => mockUseMonitorQueryFilters(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSelectedLocation = jest.fn();
-jest.mock('../hooks/use_selected_location', () => ({
-  useSelectedLocation: () => mockUseSelectedLocation(),
-}));
+const mockUseSelectedLocation = vi.fn();
+vi.mock('../hooks/use_selected_location', () => {
+      const mocked = {
+      useSelectedLocation: () => mockUseSelectedLocation(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSyntheticsDataViewIndexPatterns = jest.fn();
-jest.mock('../hooks/use_synthetics_data_view_index_patterns', () => ({
-  useSyntheticsDataViewIndexPatterns: () => mockUseSyntheticsDataViewIndexPatterns(),
-}));
+const mockUseSyntheticsDataViewIndexPatterns = vi.fn();
+vi.mock('../hooks/use_synthetics_data_view_index_patterns', () => {
+      const mocked = {
+      useSyntheticsDataViewIndexPatterns: () => mockUseSyntheticsDataViewIndexPatterns(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // AlertActions performs Redux + URL plumbing we don't need to exercise here;
 // stub it out to keep the render focused on embeddable wiring.
-jest.mock('./alert_actions', () => ({
-  AlertActions: () => null,
-}));
+vi.mock('./alert_actions', () => {
+      const mocked = {
+      AlertActions: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MonitorAlerts CCS plumbing', () => {
   const baseProps = { from: 'now-30d/d', to: 'now', dateLabel: 'Last 30 days' };

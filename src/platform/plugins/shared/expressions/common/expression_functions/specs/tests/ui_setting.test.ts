@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../../..');
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
+vi.mock('../../..');
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getUiSettingFnBrowser as getUiSettingFn } from '../ui_setting';
@@ -15,18 +18,18 @@ import { functionWrapper } from './utils';
 
 describe('uiSetting', () => {
   describe('fn', () => {
-    let getStartDependencies: jest.MockedFunction<
+    let getStartDependencies: MockedFunction<
       Parameters<typeof getUiSettingFn>[0]['getStartDependencies']
     >;
     const uiSettingWrapper = () => functionWrapper(getUiSettingFn({ getStartDependencies }));
     let uiSetting: ReturnType<typeof uiSettingWrapper>;
-    let uiSettings: jest.Mocked<IUiSettingsClient>;
+    let uiSettings: Mocked<IUiSettingsClient>;
 
     beforeEach(() => {
       uiSettings = {
-        get: jest.fn(),
-      } as unknown as jest.Mocked<IUiSettingsClient>;
-      getStartDependencies = jest.fn(async () => ({
+        get: vi.fn(),
+      } as unknown as Mocked<IUiSettingsClient>;
+      getStartDependencies = vi.fn(async () => ({
         uiSettings,
       })) as unknown as typeof getStartDependencies;
 

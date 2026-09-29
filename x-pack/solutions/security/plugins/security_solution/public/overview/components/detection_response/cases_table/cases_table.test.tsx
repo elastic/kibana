@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render } from '@testing-library/react';
@@ -14,9 +16,9 @@ import { parsedCasesItems } from './mock_data';
 import { CasesTable } from './cases_table';
 import type { UseCaseItems } from './use_case_items';
 
-const mockGetAppUrl = jest.fn();
-jest.mock('../../../../common/lib/kibana/hooks', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/hooks');
+const mockGetAppUrl = vi.fn();
+vi.mock('../../../../common/lib/kibana/hooks', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana/hooks'));
   return {
     ...original,
     useNavigation: () => ({
@@ -31,7 +33,7 @@ const defaultCaseItemsReturn: UseCaseItemsReturn = {
   isLoading: false,
   updatedAt: Date.now(),
 };
-const mockUseCaseItems = jest.fn(() => defaultCaseItemsReturn);
+const mockUseCaseItems = vi.fn(() => defaultCaseItemsReturn);
 const mockUseCaseItemsReturn = (overrides: Partial<UseCaseItemsReturn>) => {
   mockUseCaseItems.mockReturnValueOnce({
     ...defaultCaseItemsReturn,
@@ -39,9 +41,12 @@ const mockUseCaseItemsReturn = (overrides: Partial<UseCaseItemsReturn>) => {
   });
 };
 
-jest.mock('./use_case_items', () => ({
-  useCaseItems: () => mockUseCaseItems(),
-}));
+vi.mock('./use_case_items', () => {
+      const mocked = {
+      useCaseItems: () => mockUseCaseItems(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = () =>
   render(
@@ -52,7 +57,7 @@ const renderComponent = () =>
 
 describe('CasesTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render empty table', () => {

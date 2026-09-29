@@ -5,22 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { installationStatuses } from '../../../../../../../../common/constants';
 import type { PackageListItem } from '../../../../../types';
 
 import { applyGrouping } from './apply_grouping';
 
-const mockMapToCard = jest.fn();
-jest.mock('../card_utils', () => ({
-  mapToCard: (...args: unknown[]) => mockMapToCard(...args),
-}));
+const mockMapToCard = vi.fn();
+vi.mock('../card_utils', () => {
+      const mocked = {
+      mapToCard: (...args: unknown[]) => mockMapToCard(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../integration_groups', () => ({
-  INTEGRATION_GROUPS: {
-    nginx: { title: 'Nginx', description: 'Nginx description', icons: [] },
-    redis: { title: 'Redis', description: 'Redis description', icons: [] },
-  },
-}));
+vi.mock('../integration_groups', () => {
+      const mocked = {
+      INTEGRATION_GROUPS: {
+        nginx: { title: 'Nginx', description: 'Nginx description', icons: [] },
+        redis: { title: 'Redis', description: 'Redis description', icons: [] },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makePackage = (overrides: Record<string, unknown> = {}): PackageListItem =>
   ({
@@ -35,14 +43,14 @@ const makePackage = (overrides: Record<string, unknown> = {}): PackageListItem =
   } as unknown as PackageListItem);
 
 const baseParams = {
-  getHref: jest.fn().mockReturnValue('/mock/collection/href'),
-  getAbsolutePath: jest.fn((p: string) => p),
-  addBasePath: jest.fn((p: string) => p),
+  getHref: vi.fn().mockReturnValue('/mock/collection/href'),
+  getAbsolutePath: vi.fn((p: string) => p),
+  addBasePath: vi.fn((p: string) => p),
 };
 
 describe('applyGrouping', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     baseParams.getHref.mockReturnValue('/mock/collection/href');
     mockMapToCard.mockImplementation(({ item }: { item: PackageListItem }) => ({
       id: `epr:${item.id}`,

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateTransform } from './update_transform';
 
 describe('updateTransform', () => {
   const createEsClient = () =>
     ({
       transform: {
-        getTransform: jest.fn().mockResolvedValue({
+        getTransform: vi.fn().mockResolvedValue({
           transforms: [
             {
               source: {
@@ -29,7 +31,7 @@ describe('updateTransform', () => {
             },
           ],
         }),
-        updateTransform: jest.fn().mockResolvedValue({ acknowledged: true }),
+        updateTransform: vi.fn().mockResolvedValue({ acknowledged: true }),
       },
     } as any);
 

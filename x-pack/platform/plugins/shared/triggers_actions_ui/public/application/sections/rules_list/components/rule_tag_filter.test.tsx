@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,7 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleTagFilter } from './rule_tag_filter';
 import { getRuleTags } from '@kbn/response-ops-rules-apis/apis/get_rule_tags';
 
-const onChangeMock = jest.fn();
+const onChangeMock = vi.fn();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,11 +25,11 @@ const queryClient = new QueryClient({
   },
 });
 
-const observe = jest.fn();
-const unobserve = jest.fn();
-const disconnect = jest.fn();
+const observe = vi.fn();
+const unobserve = vi.fn();
+const disconnect = vi.fn();
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const WithProviders = ({ children }: { children: any }) => (
   <IntlProvider locale="en">
@@ -35,8 +37,8 @@ const WithProviders = ({ children }: { children: any }) => (
   </IntlProvider>
 );
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_tags');
-const mockGetRuleTags = jest.mocked(getRuleTags);
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_tags');
+const mockGetRuleTags = vi.mocked(getRuleTags);
 
 const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: WithProviders });
@@ -47,13 +49,13 @@ const tags = ['a', 'b', 'c', 'd', 'e', 'f'];
 describe('rule_tag_filter', () => {
   beforeEach(() => {
     Object.assign(window, {
-      IntersectionObserver: jest.fn(() => ({
+      IntersectionObserver: vi.fn(() => ({
         observe,
         unobserve,
         disconnect,
       })),
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetRuleTags.mockResolvedValue({
       data: tags,
       page: 1,

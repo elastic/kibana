@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
@@ -55,7 +57,7 @@ const requiredProperties = {
   rowIndex: 0,
   colIndex: 0,
   columnId: '',
-  setCellProps: jest.fn(),
+  setCellProps: vi.fn(),
   isExpandable: false,
   isExpanded: false,
   isDetails: false,

@@ -7,25 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { getCachedAllConnectors } from './connectors_cache';
 import { getRequiredParamsForConnector } from './get_required_params_for_connector';
 
 // Mock the dependencies
-jest.mock('./connectors_cache', () => ({
-  getCachedAllConnectors: jest.fn(),
-}));
+vi.mock('./connectors_cache', () => {
+      const mocked = {
+      getCachedAllConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows', () => ({
-  isInternalConnector: jest.fn(),
-}));
+vi.mock('@kbn/workflows', () => {
+      const mocked = {
+      isInternalConnector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const isInternalConnector = jest.requireMock('@kbn/workflows').isInternalConnector as jest.Mock;
+const isInternalConnector = (await vi.importMock('@kbn/workflows')).isInternalConnector as Mock;
 
 describe('getRequiredParamsForConnector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when connector has examples', () => {
@@ -50,7 +59,7 @@ describe('getRequiredParamsForConnector', () => {
         },
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(true);
 
       const result = getRequiredParamsForConnector('elasticsearch.index');
@@ -87,7 +96,7 @@ describe('getRequiredParamsForConnector', () => {
         },
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(true);
 
       const result = getRequiredParamsForConnector('elasticsearch.search');
@@ -123,7 +132,7 @@ describe('getRequiredParamsForConnector', () => {
         },
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(true);
 
       const result = getRequiredParamsForConnector('elasticsearch.custom');
@@ -143,7 +152,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('elasticsearch.index');
@@ -162,7 +171,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('elasticsearch.search');
@@ -181,7 +190,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('elasticsearch.get');
@@ -211,7 +220,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('elasticsearch.search');
@@ -234,7 +243,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('elasticsearch.search');
@@ -265,7 +274,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('elasticsearch.search');
@@ -278,7 +287,7 @@ describe('getRequiredParamsForConnector', () => {
 
   describe('fallback to basic connector params', () => {
     it('should return basic params for console connector', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+      (getCachedAllConnectors as Mock).mockReturnValue([]);
 
       const result = getRequiredParamsForConnector('console');
 
@@ -286,7 +295,7 @@ describe('getRequiredParamsForConnector', () => {
     });
 
     it('should return basic params for slack connector', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+      (getCachedAllConnectors as Mock).mockReturnValue([]);
 
       const result = getRequiredParamsForConnector('slack');
 
@@ -294,7 +303,7 @@ describe('getRequiredParamsForConnector', () => {
     });
 
     it('should return basic params for http connector', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+      (getCachedAllConnectors as Mock).mockReturnValue([]);
 
       const result = getRequiredParamsForConnector('http');
 
@@ -305,7 +314,7 @@ describe('getRequiredParamsForConnector', () => {
     });
 
     it('should return basic params for wait connector', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+      (getCachedAllConnectors as Mock).mockReturnValue([]);
 
       const result = getRequiredParamsForConnector('wait');
 
@@ -313,7 +322,7 @@ describe('getRequiredParamsForConnector', () => {
     });
 
     it('should return empty array for unknown connector type', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+      (getCachedAllConnectors as Mock).mockReturnValue([]);
 
       const result = getRequiredParamsForConnector('unknown-connector');
 
@@ -331,7 +340,7 @@ describe('getRequiredParamsForConnector', () => {
         },
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockImplementation(() => {
         throw new Error('Test error');
       });
@@ -348,7 +357,7 @@ describe('getRequiredParamsForConnector', () => {
         // No paramsSchema
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
 
       const result = getRequiredParamsForConnector('elasticsearch.index');
 
@@ -378,7 +387,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('.slack', mockDynamicConnectorTypes);
@@ -406,7 +415,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('elasticsearch.search');
@@ -428,7 +437,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('elasticsearch.search');
@@ -467,7 +476,7 @@ describe('getRequiredParamsForConnector', () => {
     ]);
 
     beforeEach(() => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         { type: 'security.setAttackStatus', paramsSchema: setAttackStatusSchema },
       ]);
       isInternalConnector.mockReturnValue(false);
@@ -514,7 +523,7 @@ describe('getRequiredParamsForConnector', () => {
     ]);
 
     beforeEach(() => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         { type: 'security.setAlertTags', paramsSchema: setAlertTagsSchema },
       ]);
       isInternalConnector.mockReturnValue(false);
@@ -542,7 +551,7 @@ describe('getRequiredParamsForConnector', () => {
     });
 
     it('should render an enum field as its first option', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         defaultConnector(z.object({ level: z.enum(['low', 'medium', 'high']) })),
       ]);
       const result = getRequiredParamsForConnector('custom.typed');
@@ -550,7 +559,7 @@ describe('getRequiredParamsForConnector', () => {
     });
 
     it('should render a boolean field as false', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         defaultConnector(z.object({ enabled: z.boolean() })),
       ]);
       const result = getRequiredParamsForConnector('custom.typed');
@@ -558,7 +567,7 @@ describe('getRequiredParamsForConnector', () => {
     });
 
     it('should render a number field as zero', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         defaultConnector(z.object({ count: z.number() })),
       ]);
       const result = getRequiredParamsForConnector('custom.typed');
@@ -566,7 +575,7 @@ describe('getRequiredParamsForConnector', () => {
     });
 
     it('should resolve fields through a wrapped (optional/default) top-level schema', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         defaultConnector(z.object({ case_id: z.string() }).optional() as unknown as z.ZodType),
       ]);
       const result = getRequiredParamsForConnector('custom.typed');
@@ -590,7 +599,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('cases.addAttachment');
@@ -609,7 +618,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('cases.addAttachments');
@@ -628,7 +637,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('cases.addAttachmentOptional');
@@ -649,7 +658,7 @@ describe('getRequiredParamsForConnector', () => {
         }),
       };
 
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+      (getCachedAllConnectors as Mock).mockReturnValue([mockConnector]);
       isInternalConnector.mockReturnValue(false);
 
       const result = getRequiredParamsForConnector('custom.connector');

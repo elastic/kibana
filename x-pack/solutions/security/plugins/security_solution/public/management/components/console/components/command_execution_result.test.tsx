@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
@@ -12,19 +15,19 @@ import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import type { CommandExecutionResultProps } from './command_execution_result';
 import { CommandExecutionResult } from './command_execution_result';
 
-jest.mock('../hooks/state_selectors/use_data_test_subj');
+vi.mock('../hooks/state_selectors/use_data_test_subj');
 
 describe('When using CommandExecutionResult component', () => {
   let render: (
     props?: Partial<CommandExecutionResultProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let useDataTestSubjMock: jest.MockedFunction<typeof useDataTestSubj>;
+  let useDataTestSubjMock: MockedFunction<typeof useDataTestSubj>;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
-    useDataTestSubjMock = useDataTestSubj as jest.MockedFunction<typeof useDataTestSubj>;
+    useDataTestSubjMock = useDataTestSubj as MockedFunction<typeof useDataTestSubj>;
     useDataTestSubjMock.mockReturnValue('consoleTestSubj');
 
     render = (props = {}) => {

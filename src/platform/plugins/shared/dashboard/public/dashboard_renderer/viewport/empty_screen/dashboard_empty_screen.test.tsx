@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -20,9 +23,9 @@ import { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_empty_screen_chat_act
 
 let mockFeaturedItemsLoading = false;
 let mockHasChatAction = true;
-const mockExecute = jest.fn();
+const mockExecute = vi.fn();
 
-jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', () => {
+vi.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', () => {
   return {
     useFeaturedItems: () => ({
       featuredItems: [
@@ -30,7 +33,7 @@ jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', 
           id: '1',
           name: 'Mock Add Panel',
           icon: 'chart',
-          onClick: jest.fn(),
+          onClick: vi.fn(),
           order: 0,
           ['data-test-subj']: 'mockAddPanelAction',
         },
@@ -59,8 +62,8 @@ describe('DashboardEmptyScreen', () => {
     mockFeaturedItemsLoading = false;
     mockHasChatAction = true;
     mockExecute.mockClear();
-    (uiActionsService.hasAction as jest.Mock).mockImplementation(() => mockHasChatAction);
-    (uiActionsService.getAction as jest.Mock).mockResolvedValue({
+    (uiActionsService.hasAction as Mock).mockImplementation(() => mockHasChatAction);
+    (uiActionsService.getAction as Mock).mockResolvedValue({
       execute: mockExecute,
     });
   });

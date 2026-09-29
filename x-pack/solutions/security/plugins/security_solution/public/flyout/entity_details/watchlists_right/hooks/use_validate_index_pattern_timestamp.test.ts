@@ -5,25 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useValidateIndexPatternTimestamp } from './use_validate_index_pattern_timestamp';
 
-const mockGetFieldsForWildcard = jest.fn();
+const mockGetFieldsForWildcard = vi.fn();
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      data: {
-        dataViews: {
-          getFieldsForWildcard: mockGetFieldsForWildcard,
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          data: {
+            dataViews: {
+              getFieldsForWildcard: mockGetFieldsForWildcard,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { QueryClient, QueryClientProvider } = jest.requireActual('@kbn/react-query');
-const React = jest.requireActual('react');
+const { QueryClient, QueryClientProvider } = (await vi.importActual('@kbn/react-query'));
+const React = require('react');
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -36,7 +41,7 @@ function createWrapper() {
 
 describe('useValidateIndexPatternTimestamp', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns undefined and does not fetch when no patterns are selected', () => {

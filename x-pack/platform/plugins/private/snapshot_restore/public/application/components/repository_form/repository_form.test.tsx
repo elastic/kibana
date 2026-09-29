@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
@@ -19,11 +21,11 @@ import { RepositoryForm } from './repository_form';
 
 const repositoryTypes: RepositoryType[] = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
 
-jest.mock('../../services/http', () => {
-  const actual = jest.requireActual<typeof import('../../services/http')>('../../services/http');
+vi.mock('../../services/http', async () => {
+  const actual = (await vi.importActual<typeof import('../../services/http')>('../../services/http'));
   return {
     ...actual,
-    useLoadRepositoryTypes: jest.fn().mockReturnValue({
+    useLoadRepositoryTypes: vi.fn().mockReturnValue({
       isLoading: false,
       error: null,
       data: repositoryTypes,
@@ -49,8 +51,8 @@ const mockDocLinks = {
   },
 };
 
-jest.mock('../../app_context', () => {
-  const actual = jest.requireActual<typeof import('../../app_context')>('../../app_context');
+vi.mock('../../app_context', async () => {
+  const actual = (await vi.importActual<typeof import('../../app_context')>('../../app_context'));
 
   return {
     ...actual,
@@ -67,9 +69,9 @@ textService.setup(i18n);
 
 const emptyRepository = { name: '', type: null, settings: {} };
 
-const onSaveMock = jest.fn();
-const clearSaveErrorMock = jest.fn();
-const onCancelMock = jest.fn();
+const onSaveMock = vi.fn();
+const clearSaveErrorMock = vi.fn();
+const onCancelMock = vi.fn();
 
 const renderForm = (overrides: Record<string, unknown> = {}) => {
   return render(
@@ -107,7 +109,7 @@ const goToStepTwo = (name: string, type: RepositoryType) => {
 
 describe('<RepositoryForm />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('step navigation', () => {

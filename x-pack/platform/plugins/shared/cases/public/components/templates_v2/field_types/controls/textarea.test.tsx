@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,8 +14,8 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { Textarea } from './textarea';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiMarkdownEditor: ({
@@ -100,7 +102,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
 describe('Textarea', () => {
   describe('plain mode (no markdown)', () => {
     it('renders EuiTextArea when markdown is not set', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByRole('textbox')).toBeInTheDocument();
@@ -108,34 +110,34 @@ describe('Textarea', () => {
     });
 
     it('disables the textarea while saving', () => {
-      render(<FormWrapper isSaving onSubmitResult={jest.fn()} />);
+      render(<FormWrapper isSaving onSubmitResult={vi.fn()} />);
 
       expect(screen.getByRole('textbox')).toBeDisabled();
     });
 
     it('renders the label', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByText('Details')).toBeInTheDocument();
     });
 
     it('shows Optional label when isRequired is false', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired={false} onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByText('Optional')).toBeInTheDocument();
     });
 
     it('does not show Optional label when isRequired is true', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired onSubmitResult={onSubmitResult} />);
 
       expect(screen.queryByText('Optional')).not.toBeInTheDocument();
     });
 
     it('submits the typed value', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
 
       await userEvent.type(screen.getByRole('textbox'), 'Hello world');
@@ -154,20 +156,20 @@ describe('Textarea', () => {
 
   describe('markdown mode', () => {
     it('renders MarkdownEditor when metadata.markdown is true', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper markdown onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByTestId('template-field-markdown-editor')).toBeInTheDocument();
     });
 
     it('makes the markdown editor read-only while saving', () => {
-      render(<FormWrapper markdown isSaving onSubmitResult={jest.fn()} />);
+      render(<FormWrapper markdown isSaving onSubmitResult={vi.fn()} />);
 
       expect(screen.getByTestId('template-field-markdown-editor')).toBeDisabled();
     });
 
     it('renders EuiTextArea when metadata.markdown is false', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper markdown={false} onSubmitResult={onSubmitResult} />);
 
       expect(screen.queryByTestId('template-field-markdown-editor')).not.toBeInTheDocument();
@@ -175,7 +177,7 @@ describe('Textarea', () => {
     });
 
     it('submits the typed value from markdown editor', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper markdown onSubmitResult={onSubmitResult} />);
 
       const editor = screen.getByTestId('template-field-markdown-editor');
@@ -193,7 +195,7 @@ describe('Textarea', () => {
     });
 
     it('renders with pre-populated value', () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper markdown initialValue="# Existing content" onSubmitResult={onSubmitResult} />
       );
@@ -205,7 +207,7 @@ describe('Textarea', () => {
 
   describe('validation', () => {
     it('blocks submission when isRequired is true and value is empty', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -216,7 +218,7 @@ describe('Textarea', () => {
     });
 
     it('shows error message when required validation fails', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -227,7 +229,7 @@ describe('Textarea', () => {
     });
 
     it('blocks submission when isRequired is true and value is empty in markdown mode', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper isRequired markdown onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -238,7 +240,7 @@ describe('Textarea', () => {
     });
 
     it('allows submission when isRequired is true and value is pre-populated', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper isRequired initialValue="Some content" onSubmitResult={onSubmitResult} />
       );
@@ -251,7 +253,7 @@ describe('Textarea', () => {
     });
 
     it('validates minLength', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(<FormWrapper minLengthValue={10} initialValue="ab" onSubmitResult={onSubmitResult} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -262,7 +264,7 @@ describe('Textarea', () => {
     });
 
     it('validates maxLength', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper
           maxLengthValue={5}
@@ -279,7 +281,7 @@ describe('Textarea', () => {
     });
 
     it('validates pattern', async () => {
-      const onSubmitResult = jest.fn();
+      const onSubmitResult = vi.fn();
       render(
         <FormWrapper
           patternValidation={{ regex: '^[A-Z]', message: 'Must start with uppercase' }}

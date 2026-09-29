@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
@@ -29,11 +32,14 @@ import {
 } from '../../evaluators/trace_readiness';
 import { registerGetTraceEvidenceRoute } from './get_trace_evidence';
 
-jest.mock('../../evaluators/evidence/evidence_service');
-jest.mock('../../evaluators/trace_readiness', () => ({
-  ...jest.requireActual('../../evaluators/trace_readiness'),
-  awaitTraceReady: jest.fn(),
-}));
+vi.mock('../../evaluators/evidence/evidence_service');
+vi.mock('../../evaluators/trace_readiness', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../evaluators/trace_readiness')),
+      awaitTraceReady: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 const ROUND: EvidenceRound = {
@@ -69,11 +75,11 @@ const buildResponseError = (statusCode: number): errors.ResponseError =>
   });
 
 describe('GET /internal/evals/traces/{traceId}/evidence', () => {
-  const hasTraceDocumentsMock = evidenceServiceModule.hasTraceDocuments as jest.Mock;
-  const hasResolvedEvidenceMock = evidenceServiceModule.hasResolvedEvidence as jest.Mock;
-  const extractSelectedEvidenceMock = evidenceServiceModule.extractSelectedEvidence as jest.Mock;
-  const extractProfilesEvidenceMock = evidenceServiceModule.extractProfilesEvidence as jest.Mock;
-  const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
+  const hasTraceDocumentsMock = evidenceServiceModule.hasTraceDocuments as Mock;
+  const hasResolvedEvidenceMock = evidenceServiceModule.hasResolvedEvidence as Mock;
+  const extractSelectedEvidenceMock = evidenceServiceModule.extractSelectedEvidence as Mock;
+  const extractProfilesEvidenceMock = evidenceServiceModule.extractProfilesEvidence as Mock;
+  const awaitTraceReadyMock = awaitTraceReady as MockedFunction<typeof awaitTraceReady>;
 
   const setup = () => {
     const router = httpServiceMock.createRouter();
@@ -83,7 +89,7 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });
@@ -115,7 +121,7 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     hasTraceDocumentsMock.mockResolvedValue(true);
     hasResolvedEvidenceMock.mockReturnValue(true);
     extractSelectedEvidenceMock.mockResolvedValue({ selected: PROFILE_RESULT });

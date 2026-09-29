@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import type {
   ElasticsearchClient,
   KibanaResponseFactory,
@@ -25,14 +28,14 @@ import { type FleetRequestHandlerContext } from '../..';
 import { requestDiagnosticsHandler } from './request_diagnostics_handler';
 
 const requestDiagnosticsWithErrorHandler = withDefaultErrorHandler(requestDiagnosticsHandler);
-jest.mock('../../services/agents');
+vi.mock('../../services/agents');
 
-const mockGetAgentById = getAgentById as jest.Mock;
+const mockGetAgentById = getAgentById as Mock;
 
 describe('request diagnostics handler', () => {
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
+  let mockSavedObjectsClient: Mocked<SavedObjectsClientContract>;
+  let mockElasticsearchClient: Mocked<ElasticsearchClient>;
   let mockContext: FleetRequestHandlerContext;
   let mockRequest: KibanaRequest<
     { agentId: string },
@@ -45,7 +48,7 @@ describe('request diagnostics handler', () => {
     mockSavedObjectsClient = savedObjectsClientMock.create();
     mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockResponse = httpServerMock.createResponseFactory();
-    jest.spyOn(AgentService, 'requestDiagnostics').mockResolvedValue({ actionId: '1' });
+    vi.spyOn(AgentService, 'requestDiagnostics').mockResolvedValue({ actionId: '1' });
     mockContext = {
       core: {
         savedObjects: {

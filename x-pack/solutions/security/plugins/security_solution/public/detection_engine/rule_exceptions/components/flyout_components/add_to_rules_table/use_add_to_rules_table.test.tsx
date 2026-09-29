@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render as rTLRender, waitFor, act, renderHook } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -13,15 +16,15 @@ import { getRulesSchemaMock } from '../../../../../../common/api/detection_engin
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { useAddToRulesTable } from './use_add_to_rules_table';
 
-jest.mock('../../../../rule_management/logic/use_find_rules');
+vi.mock('../../../../rule_management/logic/use_find_rules');
 
 const mockedRule = getRulesSchemaMock();
-const onRuleSelectionChangeMock = jest.fn();
+const onRuleSelectionChangeMock = vi.fn();
 const initiallySelectedRules = [{ ...mockedRule, id: '345', name: 'My rule' }] as Rule[];
 
 describe('useAddToRulesTable', () => {
   it('should call the useFindRules with the correct parameters', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [mockedRule],
         total: 0,
@@ -34,7 +37,7 @@ describe('useAddToRulesTable', () => {
         onRuleSelectionChange: onRuleSelectionChangeMock,
       })
     );
-    expect(useFindRules as jest.Mock).toHaveBeenCalledWith({
+    expect(useFindRules as Mock).toHaveBeenCalledWith({
       sort_field: 'enabled',
       sort_order: 'desc',
       pagination: {
@@ -44,7 +47,7 @@ describe('useAddToRulesTable', () => {
     });
   });
   it('should return all stored rule if less than 10000 when calling the useFindRules', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: Array(30).fill(mockedRule),
         total: 0,
@@ -64,7 +67,7 @@ describe('useAddToRulesTable', () => {
     expect(isLoading).toBeFalsy();
   });
   it('should return isLoading true and pagination as default if useFindRules is fetching', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [],
         total: 0,
@@ -95,7 +98,7 @@ describe('useAddToRulesTable', () => {
     );
   });
   it('should sort initially selected rules on top', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [mockedRule, { ...mockedRule, id: '345', name: 'My rule' }],
         total: 0,
@@ -116,7 +119,7 @@ describe('useAddToRulesTable', () => {
     );
   });
   it('should filter out duplicated tags from tag options', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [
           { ...mockedRule, tags: ['some fake tag 1'] },
@@ -146,7 +149,7 @@ describe('useAddToRulesTable', () => {
     ]);
   });
   it('should call onRuleLinkChange when switch of a rule is clicked', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [
           mockedRule,
@@ -180,7 +183,7 @@ describe('useAddToRulesTable', () => {
     ]);
   });
   it('should change the pagination when onTableChange is called', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [
           mockedRule,

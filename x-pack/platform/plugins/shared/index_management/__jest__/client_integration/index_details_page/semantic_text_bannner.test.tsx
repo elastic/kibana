@@ -5,30 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SemanticTextBanner } from '../../../public/application/sections/home/index_list/details_page/semantic_text_banner';
 
-const mockNavigate = jest.fn();
-const mockUseAppContext = jest.fn();
-jest.mock('../../../public/application/app_context', () => ({
-  useAppContext: () => mockUseAppContext(),
-}));
+const mockNavigate = vi.fn();
+const mockUseAppContext = vi.fn();
+vi.mock('../../../public/application/app_context', () => {
+      const mocked = {
+      useAppContext: () => mockUseAppContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);
 };
 
 describe('SemanticTextBanner', () => {
-  let getItemSpy: jest.SpyInstance;
-  let setItemSpy: jest.SpyInstance;
+  let getItemSpy: MockInstance;
+  let setItemSpy: MockInstance;
 
   beforeEach(() => {
     localStorage.clear();
     mockNavigate.mockClear();
-    getItemSpy = jest.spyOn(Storage.prototype, 'getItem');
-    setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+    getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+    setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
   });
 
   afterEach(() => {

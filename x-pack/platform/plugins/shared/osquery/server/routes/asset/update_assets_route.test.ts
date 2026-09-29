@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -45,10 +48,10 @@ const makeInstalledPack = (version = 1, overrides: Record<string, unknown> = {})
 describe('updateAssetsRoute', () => {
   let routeHandler: RequestHandler;
   let mockSavedObjectsClient: {
-    find: jest.Mock;
-    get: jest.Mock;
-    create: jest.Mock;
-    update: jest.Mock;
+    find: Mock;
+    get: Mock;
+    create: Mock;
+    update: Mock;
   };
 
   const mockInstallation = {
@@ -56,23 +59,23 @@ describe('updateAssetsRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockSavedObjectsClient = {
-      find: jest.fn(),
-      get: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
+      find: vi.fn(),
+      get: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
     };
 
     const mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
+        get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
       service: {
-        getPackageService: jest.fn().mockReturnValue({
+        getPackageService: vi.fn().mockReturnValue({
           asInternalUser: {
-            getInstallation: jest.fn().mockResolvedValue(mockInstallation),
+            getInstallation: vi.fn().mockResolvedValue(mockInstallation),
           },
         }),
       },
@@ -97,7 +100,7 @@ describe('updateAssetsRoute', () => {
         // getCurrentUser returns a numeric ID (simulating ECH) — the route should ignore it
         security: {
           authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ username: '1234567890' }),
+            getCurrentUser: vi.fn().mockReturnValue({ username: '1234567890' }),
           },
         },
       }),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
@@ -62,20 +65,20 @@ describe('validateSettings', () => {
 });
 
 describe('validateSettingsWithDryRun', () => {
-  let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
+  let mockScopedClusterClient: Mocked<IScopedClusterClient>;
 
   beforeEach(() => {
     mockScopedClusterClient = {
       asCurrentUser: {
         indices: {
-          putDataStreamSettings: jest.fn(),
+          putDataStreamSettings: vi.fn(),
         },
       },
     } as unknown as IScopedClusterClient;
   });
 
   it('does not throw when settings pass dry_run validation', async () => {
-    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = vi
       .fn()
       .mockResolvedValue({
         data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
@@ -102,7 +105,7 @@ describe('validateSettingsWithDryRun', () => {
   it('throws when settings fail dry_run validation', async () => {
     const errorMessage =
       'index setting [index.refresh_interval=1s] should be either -1 or equal to or greater than 5s';
-    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = vi
       .fn()
       .mockResolvedValue({
         data_streams: [
@@ -155,7 +158,7 @@ describe('validateSettingsWithDryRun', () => {
   });
 
   it('sends all settings in non-serverless mode', async () => {
-    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = vi
       .fn()
       .mockResolvedValue({
         data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],

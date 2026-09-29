@@ -7,28 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ServiceNameLink } from './service_name_link';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
-jest.mock('../../../../plugin', () => ({
-  getUnifiedDocViewerServices: jest.fn(),
-}));
+vi.mock('../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SERVICE_NAME = 'opbeans-java';
 const APM_HREF = 'http://apm/services/opbeans-java';
 
-const mockGetTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
-const mockGetRedirectUrl = jest.fn(() => APM_HREF);
-const mockNavigate = jest.fn();
-const mockGetById = jest.fn(() => undefined as any);
+const mockGetTime = vi.fn(() => ({ from: 'now-15m', to: 'now' }));
+const mockGetRedirectUrl = vi.fn(() => APM_HREF);
+const mockNavigate = vi.fn();
+const mockGetById = vi.fn(() => undefined as any);
 
 const mockServices = {
   share: {
     url: {
       locators: {
-        get: jest.fn(() => ({
+        get: vi.fn(() => ({
           getRedirectUrl: mockGetRedirectUrl,
           navigate: mockNavigate,
         })),
@@ -62,15 +68,15 @@ const defaultProps = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (getUnifiedDocViewerServices as jest.Mock).mockReturnValue(mockServices);
+  vi.clearAllMocks();
+  (getUnifiedDocViewerServices as Mock).mockReturnValue(mockServices);
 });
 
 describe('ServiceNameLink with service flyout feature registered', () => {
   beforeEach(() => {
     mockGetById.mockReturnValue({
       id: 'observability-service-flyout',
-      renderServiceFlyout: jest.fn(),
+      renderServiceFlyout: vi.fn(),
     });
   });
 
@@ -81,7 +87,7 @@ describe('ServiceNameLink with service flyout feature registered', () => {
   });
 
   it('calls onClick when the link is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<ServiceNameLink {...defaultProps} onClick={onClick} />);
 
     fireEvent.click(screen.getByTestId('serviceNameLink'));
@@ -90,7 +96,7 @@ describe('ServiceNameLink with service flyout feature registered', () => {
   });
 
   it('renders plain text when the user has no APM access, even if the flyout feature is registered', () => {
-    (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+    (getUnifiedDocViewerServices as Mock).mockReturnValue({
       ...mockServices,
       core: { application: { capabilities: { apm: { show: false } } } },
     });
@@ -114,7 +120,7 @@ describe('ServiceNameLink without service flyout feature', () => {
   });
 
   it('renders plain text when the user has no APM access', () => {
-    (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+    (getUnifiedDocViewerServices as Mock).mockReturnValue({
       ...mockServices,
       core: { application: { capabilities: { apm: { show: false } } } },
     });
@@ -126,9 +132,9 @@ describe('ServiceNameLink without service flyout feature', () => {
   });
 
   it('renders plain text when the APM locator is not available', () => {
-    (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+    (getUnifiedDocViewerServices as Mock).mockReturnValue({
       ...mockServices,
-      share: { url: { locators: { get: jest.fn(() => undefined) } } },
+      share: { url: { locators: { get: vi.fn(() => undefined) } } },
     });
 
     render(<ServiceNameLink {...defaultProps} />);

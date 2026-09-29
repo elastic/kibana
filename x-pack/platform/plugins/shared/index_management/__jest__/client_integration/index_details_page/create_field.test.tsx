@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -16,18 +18,16 @@ import { getMockForm, resetForm, setMockForm } from './create_field.helpers';
 import type { FormState, MockForm } from './create_field.helpers';
 import { getMockFormState } from './create_field.helpers';
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('../../../public/application/components/mappings_editor/shared_imports', () => {
-  const actual = jest.requireActual(
-    '../../../public/application/components/mappings_editor/shared_imports'
-  );
+vi.mock('../../../public/application/components/mappings_editor/shared_imports', async () => {
+  const actual = (await vi.importActual('../../../public/application/components/mappings_editor/shared_imports'));
   const {
     getMockFormState: getMockFormStateFromHelpers,
     resetForm: resetFormState,
     setMockForm: setMockFormRef,
     updateMockFormState,
-  } = jest.requireActual('./create_field.helpers') as typeof import('./create_field.helpers');
+  } = (await vi.importActual('./create_field.helpers')) as typeof import('./create_field.helpers');
   const DefaultFormWrapper = ({
     children,
     ...props
@@ -59,20 +59,20 @@ jest.mock('../../../public/application/components/mappings_editor/shared_imports
       );
     },
     useForm: () => {
-      const submit = jest.fn(async () => ({ isValid: true, data: getMockFormStateFromHelpers() }));
-      const reset = jest.fn(() => {
+      const submit = vi.fn(async () => ({ isValid: true, data: getMockFormStateFromHelpers() }));
+      const reset = vi.fn(() => {
         resetFormState();
       });
-      const getErrors = jest.fn(() => []);
-      const getFormData = jest.fn(() => getMockFormStateFromHelpers());
-      const setFieldValue = jest.fn((field: keyof FormState, value: unknown) => {
+      const getErrors = vi.fn(() => []);
+      const getFormData = vi.fn(() => getMockFormStateFromHelpers());
+      const setFieldValue = vi.fn((field: keyof FormState, value: unknown) => {
         updateMockFormState(field, value);
       });
-      const getFields = jest.fn(() => ({
+      const getFields = vi.fn(() => ({
         name: { value: getMockFormStateFromHelpers().name },
       }));
-      const unsubscribe = jest.fn();
-      const subscribe = jest.fn((_listener?: unknown) => ({
+      const unsubscribe = vi.fn();
+      const subscribe = vi.fn((_listener?: unknown) => ({
         unsubscribe,
       }));
 
@@ -94,11 +94,11 @@ jest.mock('../../../public/application/components/mappings_editor/shared_imports
   };
 });
 
-jest.mock(
+vi.mock(
   '../../../public/application/components/mappings_editor/components/document_fields/field_parameters',
-  () => {
+  async () => {
     const { getMockFormState: getMockFormStateFromHelpers, updateMockFormState } =
-      jest.requireActual('./create_field.helpers') as typeof import('./create_field.helpers');
+      (await vi.importActual('./create_field.helpers')) as typeof import('./create_field.helpers');
 
     return {
       TypeParameter: ({
@@ -133,51 +133,64 @@ jest.mock(
   }
 );
 
-jest.mock(
+vi.mock(
   '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/reference_field_selects',
-  () => ({
-    ReferenceFieldSelects: () => null,
-  })
+  () => {
+      const mocked = {
+        ReferenceFieldSelects: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock(
+vi.mock(
   '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id',
-  () => ({
-    SelectInferenceId: () => null,
-  })
+  () => {
+      const mocked = {
+        SelectInferenceId: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../public/application/components/mappings_editor/mappings_state_context', () => ({
-  ...jest.requireActual(
-    '../../../public/application/components/mappings_editor/mappings_state_context'
-  ),
-  useMappingsState: () => ({
-    fields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
-    mappingViewFields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
-  }),
-  useDispatch: () => mockDispatch,
-}));
+vi.mock('../../../public/application/components/mappings_editor/mappings_state_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../public/application/components/mappings_editor/mappings_state_context')),
+      useMappingsState: () => ({
+        fields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
+        mappingViewFields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
+      }),
+      useDispatch: () => mockDispatch,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../public/application/app_context', () => ({
-  ...jest.requireActual('../../../public/application/app_context'),
-  useAppContext: jest.fn(() => ({
-    config: { enforceAdaptiveAllocations: false },
-    services: {
-      notificationService: {
-        toasts: {},
-      },
-    },
-  })),
-}));
+vi.mock('../../../public/application/app_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../public/application/app_context')),
+      useAppContext: vi.fn(() => ({
+        config: { enforceAdaptiveAllocations: false },
+        services: {
+          notificationService: {
+            toasts: {},
+          },
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../public/application/services/api', () => ({
-  ...jest.requireActual('../../../public/application/services/api'),
-  useLoadInferenceEndpoints: jest.fn().mockReturnValue({
-    data: [],
-    isLoading: false,
-    resendRequest: jest.fn(),
-  }),
-}));
+vi.mock('../../../public/application/services/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../public/application/services/api')),
+      useLoadInferenceEndpoints: vi.fn().mockReturnValue({
+        data: [],
+        isLoading: false,
+        resendRequest: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const emptyAllFields: NormalizedFields['byId'] = {};
 
@@ -190,8 +203,8 @@ const defaultProps: ComponentProps<typeof CreateField> = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  jest.restoreAllMocks();
+  vi.clearAllMocks();
+  vi.restoreAllMocks();
   setMockForm(null);
   resetForm();
 });
@@ -225,7 +238,7 @@ describe('<CreateField />', () => {
         fireEvent.change(nameInput, { target: { value: 'semantic_field' } });
 
         const fieldTypeInput = screen.getByTestId('fieldTypeInput') as HTMLInputElement;
-        const focusSpy = jest.spyOn(fieldTypeInput, 'focus');
+        const focusSpy = vi.spyOn(fieldTypeInput, 'focus');
 
         fireEvent.mouseDown(document.body);
         fireEvent.mouseUp(document.body);
@@ -250,7 +263,7 @@ describe('<CreateField />', () => {
       getMockForm()!.setFieldValue('type', 'keyword');
 
       const fieldTypeInput = screen.getByTestId('fieldTypeInput') as HTMLInputElement;
-      const focusSpy = jest.spyOn(fieldTypeInput, 'focus');
+      const focusSpy = vi.spyOn(fieldTypeInput, 'focus');
 
       const addButton = screen.getByTestId('addButton');
       fireEvent.click(addButton);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -13,18 +16,18 @@ import type { SmlAutocompleteResult } from '../services/sml/types';
 import { registerAutocompleteRoute } from './autocomplete';
 
 const createMockSmlService = () => ({
-  search: jest.fn(),
-  autocomplete: jest.fn(),
-  checkItemsAccess: jest.fn(),
-  indexAttachment: jest.fn(),
-  getDocuments: jest.fn(),
-  getTypeDefinition: jest.fn(),
-  listTypeDefinitions: jest.fn(),
-  getCrawler: jest.fn(),
+  search: vi.fn(),
+  autocomplete: vi.fn(),
+  checkItemsAccess: vi.fn(),
+  indexAttachment: vi.fn(),
+  getDocuments: vi.fn(),
+  getTypeDefinition: vi.fn(),
+  listTypeDefinitions: vi.fn(),
+  getCrawler: vi.fn(),
 });
 
 const createMockUiSettingsClient = (enabled = true) => ({
-  get: jest.fn().mockImplementation(async (key: string) => {
+  get: vi.fn().mockImplementation(async (key: string) => {
     if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
     return undefined;
   }),
@@ -41,9 +44,9 @@ describe('registerAutocompleteRoute', () => {
     mockSmlService = createMockSmlService();
 
     const coreSetup = coreMock.createSetup();
-    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([
+    (coreSetup.getStartServices as Mock).mockResolvedValue([
       {},
-      { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('test-space') } } },
+      { spaces: { spacesService: { getSpaceId: vi.fn().mockReturnValue('test-space') } } },
       {},
     ]);
 
@@ -139,7 +142,7 @@ describe('registerAutocompleteRoute', () => {
 
   it('falls back to default space when spaces plugin is unavailable', async () => {
     const coreSetup = coreMock.createSetup();
-    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([{}, {}, {}]);
+    (coreSetup.getStartServices as Mock).mockResolvedValue([{}, {}, {}]);
 
     const localRouter = httpServiceMock.createRouter();
     registerAutocompleteRoute({

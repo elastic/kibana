@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
@@ -19,12 +22,12 @@ import { ChatExperience } from './chat_experience';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
 
-jest.mock('../../contexts/settings_context');
-jest.mock('../../hooks/use_kibana');
+vi.mock('../../contexts/settings_context');
+vi.mock('../../hooks/use_kibana');
 
 let lastFieldRowProps: unknown;
 
-jest.mock('@kbn/management-settings-components-field-row', () => {
+vi.mock('@kbn/management-settings-components-field-row', () => {
   return {
     FieldRowProvider: ({ children }: { children: React.ReactNode }) => (
       <div data-test-subj="fieldRowProvider">{children}</div>
@@ -36,8 +39,8 @@ jest.mock('@kbn/management-settings-components-field-row', () => {
   };
 });
 
-const mockUseSettingsContext = useSettingsContext as jest.MockedFunction<typeof useSettingsContext>;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseSettingsContext = useSettingsContext as MockedFunction<typeof useSettingsContext>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 type ReportEvent = (eventType: string, payload: Record<string, unknown>) => void;
 
@@ -54,8 +57,8 @@ const setup = ({
 } = {}) => {
   lastFieldRowProps = undefined;
 
-  const handleFieldChange = jest.fn<ReturnType<OnFieldChangeFn>, Parameters<OnFieldChangeFn>>();
-  const reportEvent = jest.fn<ReturnType<ReportEvent>, Parameters<ReportEvent>>();
+  const handleFieldChange = vi.fn<ReturnType<OnFieldChangeFn>, Parameters<OnFieldChangeFn>>();
+  const reportEvent = vi.fn<ReturnType<ReportEvent>, Parameters<ReportEvent>>();
 
   const unsavedChanges: Record<string, UnsavedFieldChange> = {};
   const fields: Record<string, FieldDefinition> = hasField
@@ -72,8 +75,8 @@ const setup = ({
 
   mockUseKibana.mockReturnValue({
     services: {
-      settings: { client: { validateValue: jest.fn() } },
-      notifications: { toasts: { addDanger: jest.fn() } },
+      settings: { client: { validateValue: vi.fn() } },
+      notifications: { toasts: { addDanger: vi.fn() } },
       docLinks: {
         links: {
           management: {} as unknown,
@@ -100,7 +103,7 @@ const setup = ({
 
 describe('ChatExperience', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     lastFieldRowProps = undefined;
     try {
       sessionStorage.clear();

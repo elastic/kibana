@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
@@ -17,41 +19,56 @@ import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 import type { FullScreenWaterfallProps } from '../full_screen_waterfall';
 
-jest.mock('../../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: () => ({
-    indexes: { apm: { traces: 'apm-traces-*' } },
-  }),
-}));
+vi.mock('../../../../../hooks/use_data_sources', () => {
+      const mocked = {
+      useDataSourcesContext: () => ({
+        indexes: { apm: { traces: 'apm-traces-*' } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
-  useDiscoverLinkAndEsqlQuery: () => ({
-    discoverUrl: 'http://localhost/discover',
-    esqlQueryString: 'FROM traces',
-  }),
-}));
+vi.mock('../../../../../hooks/use_discover_link_and_esql_query', () => {
+      const mocked = {
+      useDiscoverLinkAndEsqlQuery: () => ({
+        discoverUrl: 'http://localhost/discover',
+        esqlQueryString: 'FROM traces',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_open_in_discover_section_action', () => ({
-  useOpenInDiscoverSectionAction: () => null,
-}));
+vi.mock('../../../../../hooks/use_open_in_discover_section_action', () => {
+      const mocked = {
+      useOpenInDiscoverSectionAction: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./full_screen_waterfall_tour_step', () => ({
-  TraceWaterfallTourStep: () => null,
-}));
+vi.mock('./full_screen_waterfall_tour_step', () => {
+      const mocked = {
+      TraceWaterfallTourStep: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../content_framework/lazy_content_framework_section', () => ({
-  ContentFrameworkSection: ({ children, actions }: any) => (
-    <div data-test-subj="contentFrameworkSection">
-      {actions?.map((action: any, i: number) => (
-        <button key={i} data-test-subj={action.dataTestSubj} onClick={action.onClick}>
-          {action.label}
-        </button>
-      ))}
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../../content_framework/lazy_content_framework_section', () => {
+      const mocked = {
+      ContentFrameworkSection: ({ children, actions }: any) => (
+        <div data-test-subj="contentFrameworkSection">
+          {actions?.map((action: any, i: number) => (
+            <button key={i} data-test-subj={action.dataTestSubj} onClick={action.onClick}>
+              {action.label}
+            </button>
+          ))}
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFullScreenWaterfall = jest.fn(
+const mockFullScreenWaterfall = vi.fn(
   ({
     activeFlyoutType,
     docId,
@@ -67,9 +84,12 @@ const mockFullScreenWaterfall = jest.fn(
   )
 );
 
-jest.mock('../full_screen_waterfall', () => ({
-  FullScreenWaterfall: (props: FullScreenWaterfallProps) => mockFullScreenWaterfall(props),
-}));
+vi.mock('../full_screen_waterfall', () => {
+      const mocked = {
+      FullScreenWaterfall: (props: FullScreenWaterfallProps) => mockFullScreenWaterfall(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TraceWaterfall', () => {
   const defaultProps = {
@@ -95,7 +115,7 @@ describe('TraceWaterfall', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the focused trace waterfall without docId', () => {

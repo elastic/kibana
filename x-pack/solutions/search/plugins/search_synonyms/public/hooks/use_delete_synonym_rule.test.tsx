@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockDelete = jest.fn();
-const mockDeleteSuccess = jest.fn();
-const mockDeleteError = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const mockDelete = vi.fn();
+const mockDeleteSuccess = vi.fn();
+const mockDeleteError = vi.fn();
 
 describe('useDeleteSynonymRule hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: {
@@ -43,7 +46,7 @@ describe('useDeleteSynonymRule hook', () => {
   };
 
   it('should delete the synonym rule', async () => {
-    const { useDeleteSynonymRule } = jest.requireActual('./use_delete_synonym_rule');
+    const { useDeleteSynonymRule } = (await vi.importActual('./use_delete_synonym_rule'));
 
     const { result } = renderHook(() => useDeleteSynonymRule(), { wrapper });
 
@@ -58,7 +61,7 @@ describe('useDeleteSynonymRule hook', () => {
       body: { message: 'An error occurred' },
     };
     mockDelete.mockRejectedValue(error);
-    const { useDeleteSynonymRule } = jest.requireActual('./use_delete_synonym_rule');
+    const { useDeleteSynonymRule } = (await vi.importActual('./use_delete_synonym_rule'));
 
     const { result } = renderHook(() => useDeleteSynonymRule(), { wrapper });
 

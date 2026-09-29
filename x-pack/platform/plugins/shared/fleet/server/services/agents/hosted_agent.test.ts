@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { Agent } from '../../types';
 
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
-jest.mock('../agent_policy', () => {
+vi.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
-      getByIds: jest.fn().mockResolvedValue([
+      getByIds: vi.fn().mockResolvedValue([
         { id: 'hosted-policy', is_managed: true },
         { id: 'regular-policy', is_managed: false },
       ]),

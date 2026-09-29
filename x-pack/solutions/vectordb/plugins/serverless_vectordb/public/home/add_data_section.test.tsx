@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -13,12 +16,15 @@ import { GETTING_STARTED_PATH } from '../../common/constants';
 import { useKibana } from '../hooks/use_kibana';
 import { AddDataSection } from './add_data_section';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 describe('AddDataSection', () => {
-  const navigateToApp = jest.fn();
+  const navigateToApp = vi.fn();
 
   // the cards are styled from the theme, so they need a theme in context
   const renderSection = () =>
@@ -29,7 +35,7 @@ describe('AddDataSection', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({ services: { application: { navigateToApp } } });
   });
 

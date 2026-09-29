@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { last } from 'lodash';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -19,21 +22,24 @@ import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { TypeRegistry } from '../../application/type_registry';
 
-const mockRuleFormFlyout = jest.fn((props) => <div data-test-subj={props['data-test-subj']} />);
+const mockRuleFormFlyout = vi.fn((props) => <div data-test-subj={props['data-test-subj']} />);
 
-jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
-  RuleForm: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
-}));
+vi.mock('@kbn/response-ops-rule-form/flyout', () => {
+      const mocked = {
+      RuleForm: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createRegistryMock<
   T extends PublicMethodsOf<TypeRegistry<{ id: string }>>
->(): jest.Mocked<T> {
+>(): Mocked<T> {
   return {
-    has: jest.fn(),
-    register: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-  } as jest.Mocked<T>;
+    has: vi.fn(),
+    register: vi.fn(),
+    get: vi.fn(),
+    list: vi.fn(),
+  } as Mocked<T>;
 }
 const ruleTypeRegistry = createRegistryMock<RuleTypeRegistryContract>();
 const actionTypeRegistry = createRegistryMock<ActionTypeRegistryContract>();
@@ -61,7 +67,7 @@ async function renderFlyout(
     ruleTypeRegistry,
     actionTypeRegistry,
     parentApi,
-    jest.fn(),
+    vi.fn(),
     {
       ...initialValues,
       params: defaultParams,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
@@ -15,109 +17,139 @@ import {
   getKnowledgeIndicatorTitle,
 } from './use_knowledge_indicators_table';
 
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
 const mockToasts = {
-  addSuccess: jest.fn(),
-  addWarning: jest.fn(),
-  addInfo: jest.fn(),
-  addError: jest.fn(),
+  addSuccess: vi.fn(),
+  addWarning: vi.fn(),
+  addInfo: vi.fn(),
+  addError: vi.fn(),
 };
 
 let mockQuery: Record<string, unknown> = {};
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: { notifications: { toasts: mockToasts } },
-  }),
-}));
+vi.mock('../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: { notifications: { toasts: mockToasts } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_significant_events_app_params', () => ({
-  useSignificantEventsAppParams: () => ({ query: mockQuery }),
-}));
+vi.mock('../../../../hooks/use_significant_events_app_params', () => {
+      const mocked = {
+      useSignificantEventsAppParams: () => ({ query: mockQuery }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_significant_events_app_router', () => ({
-  useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
-}));
+vi.mock('../../../../hooks/use_significant_events_app_router', () => {
+      const mocked = {
+      useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockKnowledgeIndicators: KnowledgeIndicator[] = [];
 let mockIsLoading = false;
-const mockRefetch = jest.fn();
+const mockRefetch = vi.fn();
 
-jest.mock('../../../../hooks/use_fetch_knowledge_indicators', () => ({
-  useFetchKnowledgeIndicators: () => ({
-    knowledgeIndicators: mockKnowledgeIndicators,
-    occurrencesByQueryId: {},
-    isLoading: mockIsLoading,
-    isEmpty: !mockIsLoading && mockKnowledgeIndicators.length === 0,
-    refetch: mockRefetch,
-  }),
-}));
+vi.mock('../../../../hooks/use_fetch_knowledge_indicators', () => {
+      const mocked = {
+      useFetchKnowledgeIndicators: () => ({
+        knowledgeIndicators: mockKnowledgeIndicators,
+        occurrencesByQueryId: {},
+        isLoading: mockIsLoading,
+        isEmpty: !mockIsLoading && mockKnowledgeIndicators.length === 0,
+        refetch: mockRefetch,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExcludeFeaturesInBulk = jest.fn();
-const mockRestoreFeaturesInBulk = jest.fn();
+const mockExcludeFeaturesInBulk = vi.fn();
+const mockRestoreFeaturesInBulk = vi.fn();
 
-jest.mock('../../../../hooks/use_discovery_features_api', () => ({
-  useDiscoveryFeaturesApi: () => ({
-    excludeFeaturesInBulk: mockExcludeFeaturesInBulk,
-    restoreFeaturesInBulk: mockRestoreFeaturesInBulk,
-  }),
-}));
+vi.mock('../../../../hooks/use_discovery_features_api', () => {
+      const mocked = {
+      useDiscoveryFeaturesApi: () => ({
+        excludeFeaturesInBulk: mockExcludeFeaturesInBulk,
+        restoreFeaturesInBulk: mockRestoreFeaturesInBulk,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPromote = jest.fn();
+const mockPromote = vi.fn();
 
-jest.mock('../../../../hooks/use_queries_api', () => ({
-  useQueriesApi: () => ({
-    promote: mockPromote,
-  }),
-}));
+vi.mock('../../../../hooks/use_queries_api', () => {
+      const mocked = {
+      useQueriesApi: () => ({
+        promote: mockPromote,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInvalidatePromoteRelatedQueries = jest.fn().mockResolvedValue(undefined);
+const mockInvalidatePromoteRelatedQueries = vi.fn().mockResolvedValue(undefined);
 
-jest.mock('../../../../hooks/use_invalidate_promote_queries', () => ({
-  useInvalidatePromoteRelatedQueries: () => mockInvalidatePromoteRelatedQueries,
-}));
+vi.mock('../../../../hooks/use_invalidate_promote_queries', () => {
+      const mocked = {
+      useInvalidatePromoteRelatedQueries: () => mockInvalidatePromoteRelatedQueries,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDeleteKnowledgeIndicatorsInBulk = jest.fn();
+const mockDeleteKnowledgeIndicatorsInBulk = vi.fn();
 let mockIsDeleting = false;
 
-jest.mock('../../../../hooks/use_knowledge_indicators_bulk_delete', () => ({
-  useKnowledgeIndicatorsBulkDelete: ({ onSuccess }: { onSuccess?: () => void }) => {
-    mockBulkDeleteOnSuccess = onSuccess;
-    return {
-      deleteKnowledgeIndicatorsInBulk: mockDeleteKnowledgeIndicatorsInBulk,
-      isDeleting: mockIsDeleting,
+vi.mock('../../../../hooks/use_knowledge_indicators_bulk_delete', () => {
+      const mocked = {
+      useKnowledgeIndicatorsBulkDelete: ({ onSuccess }: { onSuccess?: () => void }) => {
+        mockBulkDeleteOnSuccess = onSuccess;
+        return {
+          deleteKnowledgeIndicatorsInBulk: mockDeleteKnowledgeIndicatorsInBulk,
+          isDeleting: mockIsDeleting,
+        };
+      },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 let mockBulkDeleteOnSuccess: (() => void) | undefined;
 
-jest.mock('@kbn/react-hooks', () => ({
-  useDebouncedValue: (value: string) => value,
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useDebouncedValue: (value: string) => value,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockIsMutatingValue = 0;
-const mockMutate = jest.fn();
+const mockMutate = vi.fn();
 let mockMutationCallbacks: {
   onSuccess?: (result: PromoteResult) => Promise<void>;
   onError?: (e: Error) => void;
 } = {};
 
-jest.mock('@kbn/react-query', () => ({
-  useIsMutating: () => mockIsMutatingValue,
-  useMutation: (config: {
-    mutationFn: (ids: string[]) => Promise<unknown>;
-    onSuccess?: (result: PromoteResult) => Promise<void>;
-    onError?: (e: Error) => void;
-  }) => {
-    mockMutationCallbacks = { onSuccess: config.onSuccess, onError: config.onError };
-    return {
-      mutate: mockMutate,
-      isLoading: false,
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useIsMutating: () => mockIsMutatingValue,
+      useMutation: (config: {
+        mutationFn: (ids: string[]) => Promise<unknown>;
+        onSuccess?: (result: PromoteResult) => Promise<void>;
+        onError?: (e: Error) => void;
+      }) => {
+        mockMutationCallbacks = { onSuccess: config.onSuccess, onError: config.onError };
+        return {
+          mutate: mockMutate,
+          isLoading: false,
+        };
+      },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 function makeFeature(
   overrides: Partial<Feature> & { id: string; stream_name: string } & Record<string, unknown>
@@ -180,7 +212,7 @@ describe('getKnowledgeIndicatorTitle', () => {
 
 describe('useKnowledgeIndicatorsTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockQuery = {};
     mockKnowledgeIndicators = [];
     mockIsLoading = false;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { InvestigationFields } from '../../../../common/api/detection_engine';
 import type { Rule } from './types';
 import { transformRuleFromAlertHit } from './use_rule_with_fallback';
@@ -43,7 +45,7 @@ export const getMockAlertSearchResponse = (rule: Rule) => ({
 
 describe('use_rule_with_fallback', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('transformRuleFromAlertHit', () => {
     // Testing edge case, where if hook does not find the rule and turns to the alert document,

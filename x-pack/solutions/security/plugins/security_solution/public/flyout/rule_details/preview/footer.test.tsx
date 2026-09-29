@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID } from './test_ids';
@@ -14,8 +17,8 @@ import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_ag
 import { TestProviders } from '../../../common/mock';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 
-jest.mock('../../../flyout_v2/rule/main/hooks/use_rule_details_link');
-jest.mock('../../../agent_builder/hooks/use_agent_builder_availability');
+vi.mock('../../../flyout_v2/rule/main/hooks/use_rule_details_link');
+vi.mock('../../../agent_builder/hooks/use_agent_builder_availability');
 
 const renderRulePreviewFooter = ({ isPreviewMode = false }: { isPreviewMode?: boolean } = {}) =>
   render(
@@ -26,14 +29,14 @@ const renderRulePreviewFooter = ({ isPreviewMode = false }: { isPreviewMode?: bo
 
 describe('<RulePreviewFooter />', () => {
   beforeEach(() => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
       isAgentBuilderEnabled: false,
     });
   });
 
   it('should render rule details link in preview mode when ruleId is available', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
+    (useRuleDetailsLink as Mock).mockReturnValue('rule_details_link');
     const { getByTestId } = renderRulePreviewFooter({ isPreviewMode: true });
 
     expect(getByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
@@ -44,20 +47,20 @@ describe('<RulePreviewFooter />', () => {
   });
 
   it('should not render rule details link outside preview mode', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
+    (useRuleDetailsLink as Mock).mockReturnValue('rule_details_link');
     const { container } = renderRulePreviewFooter({ isPreviewMode: false });
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should not render the footer if rule link and agent chat are not available', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
+    (useRuleDetailsLink as Mock).mockReturnValue(null);
     const { container } = renderRulePreviewFooter();
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render the footer when agent chat is enabled even without rule link', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useRuleDetailsLink as Mock).mockReturnValue(null);
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: true,
       isAgentBuilderEnabled: true,
     });
@@ -67,8 +70,8 @@ describe('<RulePreviewFooter />', () => {
   });
 
   it('should render both chat and link in preview mode when both are available', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useRuleDetailsLink as Mock).mockReturnValue('rule_details_link');
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: true,
       isAgentBuilderEnabled: true,
     });

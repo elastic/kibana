@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IncomingMessage } from 'http';
 import type { Http2ServerRequest } from 'http2';
 import { Socket } from 'net';
@@ -25,7 +27,7 @@ describe('KibanaSocket', () => {
     it('delegates a call to tls.Socket instance', () => {
       const tlsSocket = new TLSSocket(new Socket());
       const cert = { issuerCertificate: {} } as DetailedPeerCertificate;
-      const spy = jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => cert);
+      const spy = vi.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => cert);
       const socket = new KibanaSocket(tlsSocket);
       const result = socket.getPeerCertificate(true);
 
@@ -36,7 +38,7 @@ describe('KibanaSocket', () => {
 
     it('returns `null` if tls.Socket getPeerCertificate returns null', () => {
       const tlsSocket = new TLSSocket(new Socket());
-      jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => null as any);
+      vi.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => null as any);
       const socket = new KibanaSocket(tlsSocket);
 
       expect(socket.getPeerCertificate()).toBeNull();
@@ -44,7 +46,7 @@ describe('KibanaSocket', () => {
 
     it('returns `null` if tls.Socket getPeerCertificate returns empty object', () => {
       const tlsSocket = new TLSSocket(new Socket());
-      jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => ({} as any));
+      vi.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => ({} as any));
       const socket = new KibanaSocket(tlsSocket);
 
       expect(socket.getPeerCertificate()).toBeNull();
@@ -61,7 +63,7 @@ describe('KibanaSocket', () => {
     it('delegates a call to tls.Socket instance', () => {
       const tlsSocket = new TLSSocket(new Socket());
       const protocol = 'TLSv1.2';
-      const spy = jest.spyOn(tlsSocket, 'getProtocol').mockImplementation(() => protocol);
+      const spy = vi.spyOn(tlsSocket, 'getProtocol').mockImplementation(() => protocol);
       const socket = new KibanaSocket(tlsSocket);
       const result = socket.getProtocol();
 
@@ -71,7 +73,7 @@ describe('KibanaSocket', () => {
 
     it('returns `null` if tls.Socket getProtocol returns null', () => {
       const tlsSocket = new TLSSocket(new Socket());
-      jest.spyOn(tlsSocket, 'getProtocol').mockImplementation(() => null as any);
+      vi.spyOn(tlsSocket, 'getProtocol').mockImplementation(() => null as any);
       const socket = new KibanaSocket(tlsSocket);
 
       expect(socket.getProtocol()).toBeNull();
@@ -82,15 +84,15 @@ describe('KibanaSocket', () => {
     it('throws error for net.Socket instance', async () => {
       const socket = new KibanaSocket(new Socket());
 
-      expect(() => socket.renegotiate({})).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot renegotiate a connection when TLS is not enabled."`
-      );
+      await expect(() => socket.renegotiate({})).rejects.toThrowErrorMatchingInlineSnapshot(
+                `"Cannot renegotiate a connection when TLS is not enabled."`
+              );
     });
 
     it('delegates a call to tls.Socket instance', async () => {
       const tlsSocket = new TLSSocket(new Socket());
       const result = Symbol();
-      const spy = jest.spyOn(tlsSocket, 'renegotiate').mockImplementation((_, callback) => {
+      const spy = vi.spyOn(tlsSocket, 'renegotiate').mockImplementation((_, callback) => {
         callback(result as any);
         return undefined;
       });
@@ -103,13 +105,13 @@ describe('KibanaSocket', () => {
     it('throws error if tls.Socket renegotiate returns error', async () => {
       const tlsSocket = new TLSSocket(new Socket());
       const error = new Error('Oh no!');
-      jest.spyOn(tlsSocket, 'renegotiate').mockImplementation((_, callback) => {
+      vi.spyOn(tlsSocket, 'renegotiate').mockImplementation((_, callback) => {
         callback(error);
         return undefined;
       });
       const socket = new KibanaSocket(tlsSocket);
 
-      expect(() => socket.renegotiate({})).rejects.toThrow(error);
+      await expect(() => socket.renegotiate({})).rejects.toThrow(error);
     });
   });
 
@@ -245,7 +247,7 @@ describe('resolveRawSocket', () => {
   it('keeps reporting the peer certificate after the HTTP/2 stream is destroyed', () => {
     const sessionSocket = new TLSSocket(new Socket());
     const peerCertificate = { subject: 'CN=first_client' } as unknown as DetailedPeerCertificate;
-    jest.spyOn(sessionSocket, 'getPeerCertificate').mockReturnValue(peerCertificate);
+    vi.spyOn(sessionSocket, 'getPeerCertificate').mockReturnValue(peerCertificate);
 
     const req = {
       socket: new Socket(),

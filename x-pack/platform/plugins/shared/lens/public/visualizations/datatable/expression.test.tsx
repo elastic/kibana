@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import type { DatatableProps } from '../../../common/expressions';
 import type { FormatFactory } from '../../../common/types';
@@ -127,7 +129,7 @@ describe('datatable_expression', () => {
     it('should return no data if an empty table is passed', async () => {
       const { data } = sampleArgs();
       data.rows = [];
-      const hasCompatibleActions = jest.fn();
+      const hasCompatibleActions = vi.fn();
       expect(
         await getColumnsFilterable(data, {
           hasCompatibleActions,
@@ -138,7 +140,7 @@ describe('datatable_expression', () => {
 
     it('should call the handler for each column', async () => {
       const { data } = sampleArgs();
-      const hasCompatibleActions = jest.fn().mockResolvedValue(true);
+      const hasCompatibleActions = vi.fn().mockResolvedValue(true);
       expect(
         await getColumnsFilterable(data, {
           hasCompatibleActions,
@@ -153,7 +155,7 @@ describe('datatable_expression', () => {
         { a: null, b: null, c: null },
         { a: 'shoes', b: 1588024800000, c: 3 },
       ];
-      const hasCompatibleActions = jest.fn().mockResolvedValue(true);
+      const hasCompatibleActions = vi.fn().mockResolvedValue(true);
       expect(
         await getColumnsFilterable(data, {
           hasCompatibleActions,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -15,30 +17,45 @@ import type { LiveQueryFormFields } from '.';
 import type { OsqueryCapabilities } from '../../__test_helpers__/create_mock_kibana_services';
 import { ROLE_CAPABILITIES } from '../../__test_helpers__/create_mock_kibana_services';
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../editor', () => ({
-  OsqueryEditor: ({ defaultValue }: { defaultValue: string }) => (
-    <div data-test-subj="osqueryEditor">{defaultValue}</div>
-  ),
-}));
+vi.mock('../../editor', () => {
+      const mocked = {
+      OsqueryEditor: ({ defaultValue }: { defaultValue: string }) => (
+        <div data-test-subj="osqueryEditor">{defaultValue}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../packs/queries/lazy_ecs_mapping_editor_field', () => ({
-  ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
-}));
+vi.mock('../../packs/queries/lazy_ecs_mapping_editor_field', () => {
+      const mocked = {
+      ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
-  SavedQueriesDropdown: () => <div data-test-subj="savedQueriesDropdown">Saved Queries</div>,
-}));
+vi.mock('../../saved_queries/saved_queries_dropdown', () => {
+      const mocked = {
+      SavedQueriesDropdown: () => <div data-test-subj="savedQueriesDropdown">Saved Queries</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../form/timeout_field', () => ({
-  TimeoutField: () => <div data-test-subj="timeoutField">Timeout</div>,
-}));
+vi.mock('../../form/timeout_field', () => {
+      const mocked = {
+      TimeoutField: () => <div data-test-subj="timeoutField">Timeout</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setupKibana = (capabilities: Partial<OsqueryCapabilities> = {}) => {
   const osqueryCapabilities = {
@@ -84,7 +101,7 @@ import LiveQueryQueryField from './live_query_query_field';
 
 describe('LiveQueryQueryField', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
   });
 

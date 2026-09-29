@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { initTmsRasterLayer } from './tms_raster_layer';
 
 type InitTmsRasterLayerParams = Parameters<typeof initTmsRasterLayer>[0];
@@ -23,8 +25,8 @@ describe('vega_map_view/tms_raster_layer', () => {
   beforeEach(() => {
     id = 'foo_tms_layer_id';
     map = {
-      addSource: jest.fn(),
-      addLayer: jest.fn(),
+      addSource: vi.fn(),
+      addLayer: vi.fn(),
     } as unknown as MapType;
     context = {
       tiles: ['http://some.tile.com/map/{z}/{x}/{y}.jpg'],

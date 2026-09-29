@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { RulesClient } from '../rules_client';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
@@ -29,7 +31,7 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();

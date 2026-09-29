@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import {
   expectSuggestions,
@@ -54,12 +57,12 @@ const expectUserAgentSuggestionsContains = async (
 
 describe('USER_AGENT Autocomplete', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('suggests a new user-defined column name after the USER_AGENT keyword', async () => {
     const mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('ua');
+    (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('ua');
 
     await expectUserAgentSuggestions('FROM a | USER_AGENT ', ['${1:user_agent} = '], mockCallbacks);
   });
@@ -70,7 +73,7 @@ describe('USER_AGENT Autocomplete', () => {
 
   it('suggests string fields and string functions after the assignment operator', async () => {
     const mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getByType as Mock).mockResolvedValue([
       { label: 'uaString', text: 'uaString ' },
     ]);
 
@@ -86,7 +89,7 @@ describe('USER_AGENT Autocomplete', () => {
 
   it('suggests string fields and string functions when expression is an incomplete function call', async () => {
     const mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getByType as Mock).mockResolvedValue([
       { label: 'uaString', text: 'uaString ' },
     ]);
 

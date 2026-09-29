@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -18,8 +20,8 @@ import {
   mockMeta,
 } from './test_utils/confirm_step_test_scaffold';
 
-jest.mock('../../../../../../../app_context', () => {
-  const actual = jest.requireActual('../../../../../../../app_context');
+vi.mock('../../../../../../../app_context', async () => {
+  const actual = (await vi.importActual('../../../../../../../app_context'));
 
   return {
     ...actual,
@@ -42,36 +44,42 @@ jest.mock('../../../../../../../app_context', () => {
   };
 });
 
-jest.mock('./warnings', () => ({
-  IncompatibleDataInDataStreamWarningCheckbox: ({
-    isChecked,
-    onChange,
-    id,
-  }: WarningCheckboxProps) => (
-    <input
-      type="checkbox"
-      checked={isChecked}
-      onChange={onChange}
-      id={id}
-      data-test-subj={id}
-      aria-label={id}
-    />
-  ),
-  AffectExistingSetupsWarningCheckbox: ({ isChecked, onChange, id }: WarningCheckboxProps) => (
-    <input
-      type="checkbox"
-      checked={isChecked}
-      onChange={onChange}
-      id={id}
-      data-test-subj={id}
-      aria-label={id}
-    />
-  ),
-}));
+vi.mock('./warnings', () => {
+      const mocked = {
+      IncompatibleDataInDataStreamWarningCheckbox: ({
+        isChecked,
+        onChange,
+        id,
+      }: WarningCheckboxProps) => (
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={onChange}
+          id={id}
+          data-test-subj={id}
+          aria-label={id}
+        />
+      ),
+      AffectExistingSetupsWarningCheckbox: ({ isChecked, onChange, id }: WarningCheckboxProps) => (
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={onChange}
+          id={id}
+          data-test-subj={id}
+          aria-label={id}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/nodes_low_disk_space', () => ({
-  NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowDiskSpaceCallout" />,
-}));
+vi.mock('../../../../../common/nodes_low_disk_space', () => {
+      const mocked = {
+      NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowDiskSpaceCallout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWarnings = createWarnings('readonly');
 
@@ -82,11 +90,11 @@ describe('ConfirmMigrationReadonlyFlyoutStep', () => {
   });
 
   it('blocks start until all warning checkboxes are checked', () => {
-    const startAction = jest.fn();
+    const startAction = vi.fn();
 
     renderWithI18n(
       <ConfirmMigrationReadonlyFlyoutStep
-        closeModal={jest.fn()}
+        closeModal={vi.fn()}
         startAction={startAction}
         warnings={mockWarnings}
         meta={mockMeta}
@@ -126,8 +134,8 @@ describe('ConfirmMigrationReadonlyFlyoutStep', () => {
 
     renderWithI18n(
       <ConfirmMigrationReadonlyFlyoutStep
-        closeModal={jest.fn()}
-        startAction={jest.fn()}
+        closeModal={vi.fn()}
+        startAction={vi.fn()}
         warnings={[]}
         meta={mockMeta}
         lastIndexCreationDateFormatted="Tuesday, March 5th 2024, 1:02:03 pm"

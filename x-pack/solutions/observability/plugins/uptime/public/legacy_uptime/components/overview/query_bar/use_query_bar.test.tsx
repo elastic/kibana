@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { MockRouter, MockKibanaProvider } from '../../../lib/helper/rtl_helpers';
@@ -19,13 +22,13 @@ const SAMPLE_ES_FILTERS = `{"bool":{"should":[{"match_phrase":{"monitor.id":"Nod
 describe('useQueryBar', () => {
   let DEFAULT_URL_PARAMS: UptimeUrlParams;
   let wrapper: any;
-  let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
-  let useGetUrlParamsSpy: jest.SpyInstance<UptimeUrlParams>;
-  let updateUrlParamsMock: jest.Mock;
-  let useUpdateKueryStringSpy: jest.SpyInstance;
+  let useUrlParamsSpy: MockInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
+  let useGetUrlParamsSpy: MockInstance<UptimeUrlParams>;
+  let updateUrlParamsMock: Mock;
+  let useUpdateKueryStringSpy: MockInstance;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     DEFAULT_URL_PARAMS = {
       absoluteDateRangeStart: 100,
       absoluteDateRangeEnd: 200,
@@ -44,18 +47,18 @@ describe('useQueryBar', () => {
         </MockKibanaProvider>
       </MountWithReduxProvider>
     );
-    useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
-    useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
-    useUpdateKueryStringSpy = jest.spyOn(ES_FILTERS, 'useGenerateUpdatedKueryString');
-    updateUrlParamsMock = jest.fn();
+    useUrlParamsSpy = vi.spyOn(URL, 'useUrlParams');
+    useGetUrlParamsSpy = vi.spyOn(URL, 'useGetUrlParams');
+    useUpdateKueryStringSpy = vi.spyOn(ES_FILTERS, 'useGenerateUpdatedKueryString');
+    updateUrlParamsMock = vi.fn();
 
-    useUrlParamsSpy.mockImplementation(() => [jest.fn(), updateUrlParamsMock]);
+    useUrlParamsSpy.mockImplementation(() => [vi.fn(), updateUrlParamsMock]);
     useGetUrlParamsSpy.mockReturnValue(DEFAULT_URL_PARAMS);
     useUpdateKueryStringSpy.mockReturnValue([SAMPLE_ES_FILTERS]);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it.each([
@@ -116,7 +119,7 @@ describe('useQueryBar', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(DEBOUNCE_INTERVAL + 50);
+        vi.advanceTimersByTime(DEBOUNCE_INTERVAL + 50);
       });
 
       if (shouldExpectCall) {

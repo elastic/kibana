@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   createAttachmentAlreadyExistsError,
   createConversationNotFoundError,
@@ -24,21 +27,21 @@ const impact: Impact = {
 
 const ownerConversations = () =>
   ({
-    get: jest.fn().mockResolvedValue({ permissions: { update_access_control: true } }),
-  } as unknown as ConversationPublicClient & { get: jest.Mock });
+    get: vi.fn().mockResolvedValue({ permissions: { update_access_control: true } }),
+  } as unknown as ConversationPublicClient & { get: Mock });
 
 const run = ({
   attachments,
   conversations = ownerConversations(),
-  readImpact = jest.fn().mockResolvedValue(impact),
-  writeImpact = jest.fn().mockResolvedValue({ written: impact }),
-  revertImpact = jest.fn().mockResolvedValue(undefined),
+  readImpact = vi.fn().mockResolvedValue(impact),
+  writeImpact = vi.fn().mockResolvedValue({ written: impact }),
+  revertImpact = vi.fn().mockResolvedValue(undefined),
 }: {
   attachments: AttachmentPublicClient;
   conversations?: ConversationPublicClient;
-  readImpact?: jest.Mock;
-  writeImpact?: jest.Mock;
-  revertImpact?: jest.Mock;
+  readImpact?: Mock;
+  writeImpact?: Mock;
+  revertImpact?: Mock;
 }) =>
   attachImpactToInvestigation({
     attachments,
@@ -52,8 +55,8 @@ const run = ({
 describe('attachImpactToInvestigation', () => {
   it('writes impact only after the caller is the conversation owner, then creates the attachment', async () => {
     const conversations = ownerConversations();
-    const writeImpact = jest.fn().mockResolvedValue({ written: impact });
-    const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const writeImpact = vi.fn().mockResolvedValue({ written: impact });
+    const create = vi.fn().mockResolvedValue({ id: 'impact-1' });
 
     await run({
       conversations,
@@ -78,9 +81,9 @@ describe('attachImpactToInvestigation', () => {
   });
 
   it('does not write impact when the conversation is missing or not owned', async () => {
-    const writeImpact = jest.fn();
+    const writeImpact = vi.fn();
     const conversations = {
-      get: jest
+      get: vi
         .fn()
         .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conv-1' })),
     } as unknown as ConversationPublicClient;
@@ -89,20 +92,20 @@ describe('attachImpactToInvestigation', () => {
       run({
         conversations,
         writeImpact,
-        attachments: { create: jest.fn() } as unknown as AttachmentPublicClient,
+        attachments: { create: vi.fn() } as unknown as AttachmentPublicClient,
       })
     ).rejects.toMatchObject({ code: 'conversationNotFound' });
     expect(writeImpact).not.toHaveBeenCalled();
   });
 
   it('updates the existing attachment when the conversation already has one', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const update = vi.fn().mockResolvedValue({ id: 'impact-1' });
     const attachments = {
-      create: jest
+      create: vi
         .fn()
         .mockRejectedValue(createAttachmentAlreadyExistsError({ attachmentId: 'impact-1' })),
-      get: jest.fn().mockResolvedValue({ id: 'impact-1', active: true }),
-      delete: jest.fn(),
+      get: vi.fn().mockResolvedValue({ id: 'impact-1', active: true }),
+      delete: vi.fn(),
       update,
     };
 
@@ -117,15 +120,15 @@ describe('attachImpactToInvestigation', () => {
   });
 
   it('leaves a soft-deleted attachment in place and still returns the impact', async () => {
-    const create = jest
+    const create = vi
       .fn()
       .mockRejectedValueOnce(createAttachmentAlreadyExistsError({ attachmentId: 'impact-1' }));
-    const deleteAttachment = jest.fn();
-    const update = jest.fn();
-    const revertImpact = jest.fn().mockResolvedValue(undefined);
+    const deleteAttachment = vi.fn();
+    const update = vi.fn();
+    const revertImpact = vi.fn().mockResolvedValue(undefined);
     const attachments = {
       create,
-      get: jest.fn().mockResolvedValue({ id: 'impact-1', active: false }),
+      get: vi.fn().mockResolvedValue({ id: 'impact-1', active: false }),
       delete: deleteAttachment,
       update,
     };
@@ -144,9 +147,9 @@ describe('attachImpactToInvestigation', () => {
 
   it('reverts to the document the successful write overwrote', async () => {
     const previous: Impact = { ...impact, entities: [{ id: 'user-1' }] };
-    const writeImpact = jest.fn().mockResolvedValue({ written: impact, previous });
-    const revertImpact = jest.fn().mockResolvedValue(undefined);
-    const readImpact = jest.fn().mockResolvedValue(impact);
+    const writeImpact = vi.fn().mockResolvedValue({ written: impact, previous });
+    const revertImpact = vi.fn().mockResolvedValue(undefined);
+    const readImpact = vi.fn().mockResolvedValue(impact);
 
     await expect(
       run({
@@ -154,7 +157,7 @@ describe('attachImpactToInvestigation', () => {
         writeImpact,
         revertImpact,
         attachments: {
-          create: jest.fn().mockRejectedValue(new Error('conversation write failed')),
+          create: vi.fn().mockRejectedValue(new Error('conversation write failed')),
         } as unknown as AttachmentPublicClient,
       })
     ).rejects.toThrow('conversation write failed');
@@ -167,16 +170,16 @@ describe('attachImpactToInvestigation', () => {
       ...impact,
       entities: [{ id: 'host-1' }, { id: 'user-2' }],
     };
-    const writeImpact = jest.fn().mockResolvedValue({ written: impact });
-    const readImpact = jest.fn().mockResolvedValue(merged);
-    const revertImpact = jest.fn().mockResolvedValue(undefined);
-    const update = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const writeImpact = vi.fn().mockResolvedValue({ written: impact });
+    const readImpact = vi.fn().mockResolvedValue(merged);
+    const revertImpact = vi.fn().mockResolvedValue(undefined);
+    const update = vi.fn().mockResolvedValue({ id: 'impact-1' });
     const attachments = {
-      create: jest
+      create: vi
         .fn()
         .mockRejectedValue(createAttachmentAlreadyExistsError({ attachmentId: 'impact-1' })),
-      get: jest.fn().mockResolvedValue({ id: 'impact-1', active: true }),
-      delete: jest.fn(),
+      get: vi.fn().mockResolvedValue({ id: 'impact-1', active: true }),
+      delete: vi.fn(),
       update,
     };
 
@@ -202,15 +205,15 @@ describe('attachImpactToInvestigation', () => {
       ...impact,
       entities: [{ id: 'host-1' }, { id: 'user-2' }],
     };
-    const writeImpact = jest.fn().mockResolvedValue({ written: impact });
-    const readImpact = jest.fn().mockResolvedValueOnce(impact).mockResolvedValue(merged);
-    const update = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const writeImpact = vi.fn().mockResolvedValue({ written: impact });
+    const readImpact = vi.fn().mockResolvedValueOnce(impact).mockResolvedValue(merged);
+    const update = vi.fn().mockResolvedValue({ id: 'impact-1' });
     const attachments = {
-      create: jest
+      create: vi
         .fn()
         .mockRejectedValue(createAttachmentAlreadyExistsError({ attachmentId: 'impact-1' })),
-      get: jest.fn().mockResolvedValue({ id: 'impact-1', active: true }),
-      delete: jest.fn(),
+      get: vi.fn().mockResolvedValue({ id: 'impact-1', active: true }),
+      delete: vi.fn(),
       update,
     };
 

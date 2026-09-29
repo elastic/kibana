@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { ContentEditorKibanaDependencies, TagSelectorProps } from './services';
@@ -18,7 +20,7 @@ type PluginTagListProps = React.ComponentProps<SavedObjectsTagging['ui']['compon
 const createCoreMock = (): ContentEditorKibanaDependencies['core'] =>
   ({
     analytics: {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     },
     i18n: {},
     theme: {
@@ -26,14 +28,14 @@ const createCoreMock = (): ContentEditorKibanaDependencies['core'] =>
     },
     userProfile: {},
     overlays: {
-      openSystemFlyout: jest.fn(() => ({
+      openSystemFlyout: vi.fn(() => ({
         onClose: Promise.resolve(),
         close: () => Promise.resolve(),
       })),
     },
     notifications: {
       toasts: {
-        addDanger: jest.fn(),
+        addDanger: vi.fn(),
       },
     },
     rendering: {
@@ -67,8 +69,8 @@ const TagListConsumer = ({ tagIds }: { tagIds: string[] }) => {
 
 describe('ContentEditorKibanaProvider', () => {
   test('adapts tag IDs to saved object references for the plugin TagList', () => {
-    const PluginTagList = jest.fn<React.ReactElement | null, [PluginTagListProps]>(() => null);
-    const SavedObjectSaveModalTagSelector = jest.fn<React.ReactElement | null, [TagSelectorProps]>(
+    const PluginTagList = vi.fn<React.ReactElement | null, [PluginTagListProps]>(() => null);
+    const SavedObjectSaveModalTagSelector = vi.fn<React.ReactElement | null, [TagSelectorProps]>(
       () => null
     );
 

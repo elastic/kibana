@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import './welcome.test.mocks';
 import { Welcome } from './welcome';
 
-const renderWelcome = (onSkip = jest.fn()) => {
+const renderWelcome = (onSkip = vi.fn()) => {
   render(
     <I18nProvider>
       <EuiThemeProvider>

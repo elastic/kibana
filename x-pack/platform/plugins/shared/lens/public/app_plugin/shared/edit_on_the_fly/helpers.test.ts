@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getESQLResults, formatESQLColumns, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -34,19 +37,25 @@ const getTextBasedLayers = (
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { buildDisplayRowsFromEsqlValues, getGridAttrs, getSuggestions } from './helpers';
 
-const mockSuggestionApi = suggestionsApi as jest.Mock;
-const mockFetchData = getESQLResults as jest.Mock;
-const mockformatESQLColumns = formatESQLColumns as jest.Mock;
-const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.Mock;
-const mockReadUserChartTypeFromSessionStorage = readUserChartTypeFromSessionStorage as jest.Mock;
+const mockSuggestionApi = suggestionsApi as Mock;
+const mockFetchData = getESQLResults as Mock;
+const mockformatESQLColumns = formatESQLColumns as Mock;
+const mockGetESQLAdHocDataview = getESQLAdHocDataview as Mock;
+const mockReadUserChartTypeFromSessionStorage = readUserChartTypeFromSessionStorage as Mock;
 
-jest.mock('../../../lens_suggestions_api', () => ({
-  suggestionsApi: jest.fn(() => mockAllSuggestions),
-}));
+vi.mock('../../../lens_suggestions_api', () => {
+      const mocked = {
+      suggestionsApi: vi.fn(() => mockAllSuggestions),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../chart_type_session_storage', () => ({
-  readUserChartTypeFromSessionStorage: jest.fn(),
-}));
+vi.mock('../../../chart_type_session_storage', () => {
+      const mocked = {
+      readUserChartTypeFromSessionStorage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryResponseColumns = [
   {
@@ -72,17 +81,17 @@ const queryResponseColumns = [
   },
 ];
 
-jest.mock('@kbn/esql-utils', () => {
+vi.mock('@kbn/esql-utils', () => {
   return {
-    getESQLResults: jest.fn().mockResolvedValue({
+    getESQLResults: vi.fn().mockResolvedValue({
       response: {
         columns: queryResponseColumns,
         values: [],
       },
     }),
-    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
-    formatESQLColumns: jest.fn().mockReturnValue(queryResponseColumns),
+    getIndexPatternFromESQLQuery: vi.fn().mockReturnValue('index1'),
+    getESQLAdHocDataview: vi.fn().mockResolvedValue({}),
+    formatESQLColumns: vi.fn().mockReturnValue(queryResponseColumns),
   };
 });
 
@@ -136,7 +145,7 @@ describe('Lens inline editing helpers', () => {
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
     mockStartDependencies.data.dataViews = dataViews;
     const uiSettingsMock = {
-      get: jest.fn(),
+      get: vi.fn(),
     } as unknown as IUiSettingsClient;
 
     const dataviewSpecArr = [
@@ -166,7 +175,7 @@ describe('Lens inline editing helpers', () => {
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
-        jest.fn()
+        vi.fn()
       );
       expect(suggestionsAttributes?.visualizationType).toBe(mockAllSuggestions[0].visualizationId);
       expect(suggestionsAttributes?.state.visualization).toStrictEqual(
@@ -198,7 +207,7 @@ describe('Lens inline editing helpers', () => {
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
-        jest.fn(),
+        vi.fn(),
         undefined,
         undefined,
         [],
@@ -223,7 +232,7 @@ describe('Lens inline editing helpers', () => {
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
-        jest.fn()
+        vi.fn()
       );
       expect(mockAllSuggestions[0].title).not.toBe('');
       expect(suggestionsAttributes?.title).toBe('');
@@ -239,7 +248,7 @@ describe('Lens inline editing helpers', () => {
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
-        jest.fn()
+        vi.fn()
       );
       expect(suggestionsAttributes).toBeUndefined();
     });
@@ -248,7 +257,7 @@ describe('Lens inline editing helpers', () => {
       mockFetchData.mockImplementation(() => {
         throw new Error('sorry!');
       });
-      const setErrorsSpy = jest.fn();
+      const setErrorsSpy = vi.fn();
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
@@ -267,7 +276,7 @@ describe('Lens inline editing helpers', () => {
       mockFetchData.mockImplementation(() => {
         throw new Error('aborted');
       });
-      const setErrorsSpy = jest.fn();
+      const setErrorsSpy = vi.fn();
       const abortController = new AbortController();
       abortController.abort();
       const suggestionsAttributes = await getSuggestions(
@@ -358,7 +367,7 @@ describe('Lens inline editing helpers', () => {
           mockDatasourceMap(),
           mockVisualizationMap(),
           dataviewSpecArr,
-          jest.fn(),
+          vi.fn(),
           undefined,
           undefined,
           [],
@@ -427,7 +436,7 @@ describe('Lens inline editing helpers', () => {
           mockDatasourceMap(),
           mockVisualizationMap(),
           dataviewSpecArr,
-          jest.fn(),
+          vi.fn(),
           undefined,
           undefined,
           [],
@@ -551,7 +560,7 @@ describe('Lens inline editing helpers', () => {
           mockDatasourceMap(),
           mockVisualizationMap(),
           dataviewSpecArr,
-          jest.fn(),
+          vi.fn(),
           undefined,
           undefined,
           [],
@@ -591,7 +600,7 @@ describe('Lens inline editing helpers', () => {
           mockDatasourceMap(),
           mockVisualizationMap(),
           dataviewSpecArr,
-          jest.fn(),
+          vi.fn(),
           undefined,
           undefined,
           [],
@@ -634,7 +643,7 @@ describe('Lens inline editing helpers', () => {
     };
 
     const uiSettingsMock = {
-      get: jest.fn(),
+      get: vi.fn(),
     } as unknown as IUiSettingsClient;
 
     it('returns the columns if the array is not empty in the response', async () => {

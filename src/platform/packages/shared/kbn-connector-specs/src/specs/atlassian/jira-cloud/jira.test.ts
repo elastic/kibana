@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../../connector_spec';
 import { toAdf } from './adf';
 import { JiraConnector } from './jira';
@@ -14,20 +16,20 @@ import { CreateIssueInputSchema } from './types';
 
 describe('JiraConnector', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
     config: { subdomain: 'mycompany' },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('auth', () => {

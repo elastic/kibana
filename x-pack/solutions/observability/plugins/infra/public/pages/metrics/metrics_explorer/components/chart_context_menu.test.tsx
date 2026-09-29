@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -48,7 +50,7 @@ const renderComponent = (props: Props) => {
 describe('MetricsExplorerChartContextMenu', () => {
   it('should render all options when all conditions are met', async () => {
     const user = userEvent.setup();
-    const onFilter = jest.fn();
+    const onFilter = vi.fn();
 
     renderComponent({
       timeRange,
@@ -72,7 +74,7 @@ describe('MetricsExplorerChartContextMenu', () => {
   it('should not display View metrics for incompatible groupBy', async () => {
     const user = userEvent.setup();
     const customOptions = { ...options, groupBy: 'system.network.name' };
-    const onFilter = jest.fn();
+    const onFilter = vi.fn();
 
     renderComponent({
       timeRange,

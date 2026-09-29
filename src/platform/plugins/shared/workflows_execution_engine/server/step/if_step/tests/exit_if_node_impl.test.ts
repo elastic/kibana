@@ -7,24 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitIfNodeImpl } from '../exit_if_node_impl';
 
 describe('ExitIfNodeImpl', () => {
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
   let impl: ExitIfNodeImpl;
 
   beforeEach(() => {
     mockStepExecutionRuntime = {
-      finishStep: jest.fn().mockResolvedValue(undefined),
-      getCurrentStepState: jest.fn().mockReturnValue(undefined),
-      setCurrentStepState: jest.fn(),
+      finishStep: vi.fn().mockResolvedValue(undefined),
+      getCurrentStepState: vi.fn().mockReturnValue(undefined),
+      setCurrentStepState: vi.fn(),
     } as any;
 
     mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as any;
 
     impl = new ExitIfNodeImpl(mockStepExecutionRuntime, mockWorkflowRuntime);

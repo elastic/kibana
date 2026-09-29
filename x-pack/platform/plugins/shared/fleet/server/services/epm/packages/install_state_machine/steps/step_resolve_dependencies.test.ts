@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import {
   savedObjectsClientMock,
@@ -26,43 +29,43 @@ import type { InstallContext } from '../_state_machine_package_install';
 
 import { stepResolveDependencies } from './step_resolve_dependencies';
 
-jest.mock('../../../../audit_logging');
-jest.mock('../../../../app_context', () => {
+vi.mock('../../../../audit_logging');
+vi.mock('../../../../app_context', () => {
   return {
     appContextService: {
-      getExperimentalFeatures: jest.fn(),
-      getLogger: jest.fn().mockReturnValue({
-        debug: jest.fn(),
+      getExperimentalFeatures: vi.fn(),
+      getLogger: vi.fn().mockReturnValue({
+        debug: vi.fn(),
       }),
-      getLockManagerService: jest.fn().mockReturnValue({
-        withLock: jest
+      getLockManagerService: vi.fn().mockReturnValue({
+        withLock: vi
           .fn()
           .mockImplementation((_lockName: string, fn: () => Promise<void>) => fn()),
       }),
     },
   };
 });
-jest.mock('../../get');
-jest.mock('../../install');
-jest.mock('../../remove');
-jest.mock('../../../registry');
-jest.mock('../../utils');
+vi.mock('../../get');
+vi.mock('../../install');
+vi.mock('../../remove');
+vi.mock('../../../registry');
+vi.mock('../../utils');
 
 // Use same path as step so we get the mock and can configure it
 
-const mockGetExperimentalFeatures = jest.mocked(appContextService.getExperimentalFeatures);
+const mockGetExperimentalFeatures = vi.mocked(appContextService.getExperimentalFeatures);
 
-const mockedGetInstallation = jest.mocked(getInstallation);
-const mockedGetInstalledPackageSavedObjects = jest.mocked(getInstalledPackageSavedObjects);
-const mockedInstallPackage = jest.mocked(installPackage);
-const mockedRemoveInstallation = jest.mocked(removeInstallation);
-const mockedFetchList = jest.mocked(fetchList);
-const mockedWithPackageSpan = jest.mocked(withPackageSpan);
-const mockedPkgToPkgKey = jest.mocked(pkgToPkgKey);
+const mockedGetInstallation = vi.mocked(getInstallation);
+const mockedGetInstalledPackageSavedObjects = vi.mocked(getInstalledPackageSavedObjects);
+const mockedInstallPackage = vi.mocked(installPackage);
+const mockedRemoveInstallation = vi.mocked(removeInstallation);
+const mockedFetchList = vi.mocked(fetchList);
+const mockedWithPackageSpan = vi.mocked(withPackageSpan);
+const mockedPkgToPkgKey = vi.mocked(pkgToPkgKey);
 
 describe('stepResolveDependencies', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
   const logger = loggingSystemMock.createLogger();
 
   const createContext = (overrides: Partial<InstallContext> = {}): InstallContext =>
@@ -90,7 +93,7 @@ describe('stepResolveDependencies', () => {
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockGetExperimentalFeatures.mockReturnValue({
       enableResolveDependencies: true,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Appender } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { getLoggerContext } from '@kbn/core-logging-common-internal';
@@ -16,20 +18,20 @@ const context = getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];
 let logger: BaseLogger;
 const factory = {
-  get: jest.fn().mockImplementation(() => logger),
+  get: vi.fn().mockImplementation(() => logger),
 };
 
 const timestamp = new Date(2012, 1, 1);
 beforeEach(() => {
-  jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
+  vi.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
 
-  appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
+  appenderMocks = [{ append: vi.fn() }, { append: vi.fn() }];
   logger = new BaseLogger(context, LogLevel.All, appenderMocks, factory);
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
 });
 
 test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', () => {

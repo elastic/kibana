@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -15,8 +17,8 @@ import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_migration_state';
 import { ChecklistFlyoutStep } from './checklist_reindex_step';
 
-jest.mock('../../../../../../../app_context', () => {
-  const actual = jest.requireActual('../../../../../../../app_context');
+vi.mock('../../../../../../../app_context', async () => {
+  const actual = (await vi.importActual('../../../../../../../app_context'));
 
   return {
     ...actual,
@@ -30,20 +32,29 @@ jest.mock('../../../../../../../app_context', () => {
   };
 });
 
-jest.mock('../../../../../common/nodes_low_disk_space', () => ({
-  NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowSpaceCallout" />,
-}));
+vi.mock('../../../../../common/nodes_low_disk_space', () => {
+      const mocked = {
+      NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowSpaceCallout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./callouts', () => ({
-  FetchFailedCallout: ({ hasFetchFailed }: { hasFetchFailed: boolean }) => (
-    <div data-test-subj="fetchFailedCallout">{String(hasFetchFailed)}</div>
-  ),
-  NoPrivilegesCallout: () => <div data-test-subj="noPrivilegesCallout" />,
-}));
+vi.mock('./callouts', () => {
+      const mocked = {
+      FetchFailedCallout: ({ hasFetchFailed }: { hasFetchFailed: boolean }) => (
+        <div data-test-subj="fetchFailedCallout">{String(hasFetchFailed)}</div>
+      ),
+      NoPrivilegesCallout: () => <div data-test-subj="noPrivilegesCallout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./progress', () => ({
-  MigrationProgress: () => <div data-test-subj="migrationProgress" />,
-}));
+vi.mock('./progress', () => {
+      const mocked = {
+      MigrationProgress: () => <div data-test-subj="migrationProgress" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMigrationState = (overrides: Partial<MigrationState>): MigrationState => ({
   loadingState: LoadingState.Success,
@@ -61,8 +72,8 @@ const createMigrationState = (overrides: Partial<MigrationState>): MigrationStat
 
 const renderChecklistFlyout = ({
   migrationState,
-  executeAction = jest.fn(),
-  cancelAction = jest.fn(),
+  executeAction = vi.fn(),
+  cancelAction = vi.fn(),
   dataStreamName = 'my-ds',
 }: {
   migrationState: MigrationState;
@@ -72,7 +83,7 @@ const renderChecklistFlyout = ({
 }) => {
   renderWithI18n(
     <ChecklistFlyoutStep
-      closeFlyout={jest.fn()}
+      closeFlyout={vi.fn()}
       migrationState={migrationState}
       executeAction={executeAction}
       cancelAction={cancelAction}
@@ -108,7 +119,7 @@ describe('ChecklistFlyoutStep (data streams)', () => {
   });
 
   it('shows cancel button when migration is in progress', () => {
-    const cancelAction = jest.fn();
+    const cancelAction = vi.fn();
 
     renderChecklistFlyout({
       migrationState: createMigrationState({

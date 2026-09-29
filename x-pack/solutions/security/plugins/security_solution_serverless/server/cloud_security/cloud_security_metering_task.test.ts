@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import Chance from 'chance';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -29,7 +31,7 @@ const cloudSecuritySolutions: Array<typeof CSPM | typeof KSPM> = [CSPM, KSPM];
 
 describe('getCloudSecurityUsageRecord', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return undefined if cloudSecuritySolution is missing', async () => {
@@ -344,7 +346,7 @@ describe('cloudSecurityMetringCallback', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return no records if cloud product line is missing', async () => {

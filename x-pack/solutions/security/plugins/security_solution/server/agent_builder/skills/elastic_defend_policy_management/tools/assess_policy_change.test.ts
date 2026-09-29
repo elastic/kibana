@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -26,25 +28,28 @@ import {
 } from './assess_policy_change';
 import { estimateGuardedEnvelopeTokens, fitsGuardedEnvelope } from './trim_policy_result';
 
-jest.mock('./create_policy_tool', () => {
-  const actual = jest.requireActual('./create_policy_tool');
+vi.mock('./create_policy_tool', async () => {
+  const actual = (await vi.importActual('./create_policy_tool'));
   return {
     ...actual,
-    createPolicyTool: jest.fn((options) => actual.createPolicyTool(options)),
+    createPolicyTool: vi.fn((options) => actual.createPolicyTool(options)),
   };
 });
 
-const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
+const mockedCreatePolicyTool = vi.mocked(createPolicyTool);
 
-jest.mock('../services/assess_change', () => ({
-  assessChange: jest.fn(),
-}));
+vi.mock('../services/assess_change', () => {
+      const mocked = {
+      assessChange: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SPACE_ID = 'space-marketing';
-const getStartServices = jest.fn(async () => [
-  { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+const getStartServices = vi.fn(async () => [
+  { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
 ]) as unknown as StartServicesAccessor;
-const mockedAssessChange = jest.mocked(assessChange);
+const mockedAssessChange = vi.mocked(assessChange);
 
 const MIXED_STATUS: Readonly<Record<string, number>> = {
   all: 27,

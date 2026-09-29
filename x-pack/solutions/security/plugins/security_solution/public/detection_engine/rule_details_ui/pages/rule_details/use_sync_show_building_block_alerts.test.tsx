@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
@@ -44,7 +46,7 @@ const renderUseSyncShowBuildingBlockAlerts = (
   isBuildingBlockRule: boolean,
   store = createMockStore()
 ) => {
-  const dispatchSpy = jest.spyOn(store, 'dispatch');
+  const dispatchSpy = vi.spyOn(store, 'dispatch');
 
   const view = renderHook((value: boolean) => useSyncShowBuildingBlockAlerts(value), {
     initialProps: isBuildingBlockRule,
@@ -56,7 +58,7 @@ const renderUseSyncShowBuildingBlockAlerts = (
 
 describe('useSyncShowBuildingBlockAlerts', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('does not dispatch when the rule-details table is missing', () => {

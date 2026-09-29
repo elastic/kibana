@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useCommandMenu } from './use_command_menu';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
 
-jest.mock('../../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => true,
-}));
+vi.mock('../../../../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useExperimentalFeatures: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/get_text_before_cursor');
-const mockGetTextBeforeCursor = jest.mocked(getTextBeforeCursor);
+vi.mock('./utils/get_text_before_cursor');
+const mockGetTextBeforeCursor = vi.mocked(getTextBeforeCursor);
 
 const mockElement = document.createElement('div');
 
 describe('useCommandMenuCommand', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns inactive match initially', () => {

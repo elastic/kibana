@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { basicCase } from '../../../../../containers/mock';
@@ -13,16 +16,16 @@ import * as caseViewI18n from '../../../translations';
 import { UserAvatarWithEmail } from './user_avatar_with_email';
 import { renderWithTestingProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../../common/navigation');
+vi.mock('../../../../../common/navigation');
 
-const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as Mock;
 
 describe('UserAvatarWithEmail', () => {
   const caseLink = 'https://example.com/cases/test';
-  const getCaseViewUrl = jest.fn().mockReturnValue(caseLink);
+  const getCaseViewUrl = vi.fn().mockReturnValue(caseLink);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCaseViewNavigationMock.mockReturnValue({ getCaseViewUrl });
   });
 

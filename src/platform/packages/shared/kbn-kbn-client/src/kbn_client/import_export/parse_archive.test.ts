@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { parseArchive } from './parse_archive';
 
-jest.mock('fs/promises', () => ({
-  readFile: jest.fn(),
-}));
+vi.mock('fs/promises', () => {
+      const mocked = {
+      readFile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReadFile = jest.requireMock('fs/promises').readFile;
+const mockReadFile = (await vi.importMock('fs/promises')).readFile;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 it('parses archives with \\n', async () => {

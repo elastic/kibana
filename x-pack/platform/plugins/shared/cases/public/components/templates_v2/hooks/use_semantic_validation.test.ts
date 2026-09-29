@@ -5,27 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
-const mockSetModelMarkers = jest.fn();
+const mockSetModelMarkers = vi.fn();
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    editor: {
-      setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
-    },
-    MarkerSeverity: { Error: 8, Warning: 4 },
-  },
-}));
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      monaco: {
+        editor: {
+          setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
+        },
+        MarkerSeverity: { Error: 8, Warning: 4 },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockConditionMarkers = jest.fn();
-const mockRuleMarkers = jest.fn();
-jest.mock('../utils/validate_condition_field_references', () => ({
-  getMissingConditionFieldMarkers: (value: string) => mockConditionMarkers(value),
-}));
-jest.mock('../utils/validate_field_validation_rules', () => ({
-  getInapplicableValidationRuleMarkers: (value: string) => mockRuleMarkers(value),
-}));
+const mockConditionMarkers = vi.fn();
+const mockRuleMarkers = vi.fn();
+vi.mock('../utils/validate_condition_field_references', () => {
+      const mocked = {
+      getMissingConditionFieldMarkers: (value: string) => mockConditionMarkers(value),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils/validate_field_validation_rules', () => {
+      const mocked = {
+      getInapplicableValidationRuleMarkers: (value: string) => mockRuleMarkers(value),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useSemanticValidation } from './use_semantic_validation';
 
@@ -37,14 +48,14 @@ const createEditor = (isDisposed = false) => {
 
 describe('useSemanticValidation', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     mockConditionMarkers.mockReturnValue([]);
     mockRuleMarkers.mockReturnValue([]);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('debounces marker writes and applies both validators after the delay', () => {
@@ -64,7 +75,7 @@ describe('useSemanticValidation', () => {
     // Nothing written before the debounce elapses.
     expect(mockSetModelMarkers).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
 
     expect(mockSetModelMarkers).toHaveBeenCalledTimes(1);
     const markers = mockSetModelMarkers.mock.calls[0][2];
@@ -75,7 +86,7 @@ describe('useSemanticValidation', () => {
 
   it('does not write markers when the model is disposed', () => {
     renderHook(() => useSemanticValidation(createEditor(true), 'name: T'));
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
     expect(mockSetModelMarkers).not.toHaveBeenCalled();
   });
 
@@ -85,7 +96,7 @@ describe('useSemanticValidation', () => {
     });
 
     renderHook(() => useSemanticValidation(createEditor(), 'name: T'));
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
 
     expect(mockSetModelMarkers).toHaveBeenCalledTimes(1);
     expect(mockSetModelMarkers.mock.calls[0][2]).toEqual([]);
@@ -93,7 +104,7 @@ describe('useSemanticValidation', () => {
 
   it('clears its owner markers on unmount (model not disposed)', () => {
     const { unmount } = renderHook(() => useSemanticValidation(createEditor(), 'name: T'));
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
     mockSetModelMarkers.mockClear();
 
     unmount();

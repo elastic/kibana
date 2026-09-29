@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -18,9 +21,9 @@ import { useIntegrationLastAlertIngested } from '../../../hooks/alert_summary/us
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
-jest.mock('../../../hooks/alert_summary/use_navigate_to_integrations_page');
-jest.mock('../../../hooks/alert_summary/use_integration_last_alert_ingested');
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('../../../hooks/alert_summary/use_navigate_to_integrations_page');
+vi.mock('../../../hooks/alert_summary/use_integration_last_alert_ingested');
+vi.mock('@kbn/kibana-react-plugin/public');
 
 const packages: PackageListItem[] = [
   {
@@ -43,11 +46,11 @@ const packages: PackageListItem[] = [
 
 describe('<IntegrationSection />', () => {
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: {
           basePath: {
-            prepend: jest.fn().mockReturnValue('/app/integrations/detail/splunk-0.1.0/overview'),
+            prepend: vi.fn().mockReturnValue('/app/integrations/detail/splunk-0.1.0/overview'),
           },
         },
       },
@@ -55,8 +58,8 @@ describe('<IntegrationSection />', () => {
   });
 
   it('should render a card for each integration ', () => {
-    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
-    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
+    (useNavigateToIntegrationsPage as Mock).mockReturnValue(vi.fn());
+    (useIntegrationLastAlertIngested as Mock).mockReturnValue({
       isLoading: true,
       lastAlertIngested: {},
     });
@@ -68,9 +71,9 @@ describe('<IntegrationSection />', () => {
   });
 
   it('should navigate to the fleet page when clicking on the add integrations button', () => {
-    const navigateToIntegrationsPage = jest.fn();
-    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(navigateToIntegrationsPage);
-    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue([]);
+    const navigateToIntegrationsPage = vi.fn();
+    (useNavigateToIntegrationsPage as Mock).mockReturnValue(navigateToIntegrationsPage);
+    (useIntegrationLastAlertIngested as Mock).mockReturnValue([]);
 
     const { getByTestId } = render(<IntegrationSection packages={[]} />);
 

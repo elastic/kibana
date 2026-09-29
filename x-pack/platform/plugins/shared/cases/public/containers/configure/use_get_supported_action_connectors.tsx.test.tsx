@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
@@ -12,20 +15,20 @@ import { noConnectorsCasePermission, TestProviders } from '../../common/mock';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import { useGetSupportedActionConnectors } from './use_get_supported_action_connectors';
 
-const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
+const useApplicationCapabilitiesMock = useApplicationCapabilities as Mocked<
   typeof useApplicationCapabilities
 >;
 
-jest.mock('../../common/lib/kibana');
-jest.mock('./api');
+vi.mock('../../common/lib/kibana');
+vi.mock('./api');
 
 describe('useConnectors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches connectors', async () => {
-    const spy = jest.spyOn(api, 'getSupportedActionConnectors');
+    const spy = vi.spyOn(api, 'getSupportedActionConnectors');
     renderHook(() => useGetSupportedActionConnectors(), {
       wrapper: TestProviders,
     });
@@ -34,10 +37,10 @@ describe('useConnectors', () => {
   });
 
   it('shows a toast error when the API returns error', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
-    const spyOnfetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
+    const spyOnfetchConnectors = vi.spyOn(api, 'getSupportedActionConnectors');
     spyOnfetchConnectors.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
@@ -50,7 +53,7 @@ describe('useConnectors', () => {
   });
 
   it('does not fetch connectors when the user does not has access to actions', async () => {
-    const spyOnFetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
+    const spyOnFetchConnectors = vi.spyOn(api, 'getSupportedActionConnectors');
     useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
     const { result } = renderHook(() => useGetSupportedActionConnectors(), {
@@ -67,7 +70,7 @@ describe('useConnectors', () => {
   });
 
   it('does not fetch connectors when the user does not has access to connectors', async () => {
-    const spyOnFetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
+    const spyOnFetchConnectors = vi.spyOn(api, 'getSupportedActionConnectors');
     useApplicationCapabilitiesMock().actions = { crud: true, read: true };
 
     const { result } = renderHook(() => useGetSupportedActionConnectors(), {

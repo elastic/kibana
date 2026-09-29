@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
@@ -19,9 +22,9 @@ import { getMockTimelineSearchSubscription } from '../../common/mock/mock_timeli
 
 const { initSortDefault, useTimelineEvents } = useTimelineEventsModule;
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
@@ -29,39 +32,45 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-jest.mock('../../notes/hooks/use_fetch_notes');
-const onLoadMock = jest.fn();
-const useFetchNotesMock = useFetchNotes as jest.Mock;
+vi.mock('../../notes/hooks/use_fetch_notes');
+const onLoadMock = vi.fn();
+const useFetchNotesMock = useFetchNotes as Mock;
 
-jest.mock('../../common/lib/apm/use_track_http_request');
-jest.mock('../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+vi.mock('../../common/lib/apm/use_track_http_request');
+vi.mock('../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 
-jest.mock('../../common/lib/kibana', () => ({
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  }),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {
-        capabilities: {
-          securitySolutionTimeline: {
-            crud: true,
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      }),
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              securitySolutionTimeline: {
+                crud: true,
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
-jest.mock('../../common/utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn(),
-}));
+const mockUseRouteSpy: Mock = useRouteSpy as Mock;
+vi.mock('../../common/utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 mockUseRouteSpy.mockReturnValue([
   {
@@ -118,7 +127,7 @@ describe('useTimelineEventsHandler', () => {
       onLoad: onLoadMock,
     });
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -134,7 +143,7 @@ describe('useTimelineEventsHandler', () => {
         },
         notifications: {
           toasts: {
-            addWarning: jest.fn(),
+            addWarning: vi.fn(),
           },
         },
       },
@@ -325,7 +334,7 @@ describe('useTimelineEventsHandler', () => {
     });
 
     it('returns isPartial true when the EQL strategy response is partial', async () => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: { securitySolutionTimeline: { crud: true } },
@@ -333,7 +342,7 @@ describe('useTimelineEventsHandler', () => {
           data: {
             search: {
               search: () => ({
-                subscribe: jest.fn().mockImplementation(({ next }) => {
+                subscribe: vi.fn().mockImplementation(({ next }) => {
                   const requestTimeout = setTimeout(() => {
                     next({
                       isRunning: false,
@@ -352,7 +361,7 @@ describe('useTimelineEventsHandler', () => {
                   };
                 }),
               }),
-              showError: jest.fn(),
+              showError: vi.fn(),
             },
           },
         },
@@ -375,7 +384,7 @@ describe('useTimelineEventsHandler', () => {
     });
 
     it('returns isPartial true when the completed EQL response reports shard failures', async () => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: { securitySolutionTimeline: { crud: true } },
@@ -383,7 +392,7 @@ describe('useTimelineEventsHandler', () => {
           data: {
             search: {
               search: () => ({
-                subscribe: jest.fn().mockImplementation(({ next }) => {
+                subscribe: vi.fn().mockImplementation(({ next }) => {
                   const requestTimeout = setTimeout(() => {
                     next({
                       isRunning: false,
@@ -409,7 +418,7 @@ describe('useTimelineEventsHandler', () => {
                   };
                 }),
               }),
-              showError: jest.fn(),
+              showError: vi.fn(),
             },
           },
         },
@@ -432,7 +441,7 @@ describe('useTimelineEventsHandler', () => {
     });
 
     it('returns shardFailures from the completed EQL response', async () => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: { securitySolutionTimeline: { crud: true } },
@@ -440,7 +449,7 @@ describe('useTimelineEventsHandler', () => {
           data: {
             search: {
               search: () => ({
-                subscribe: jest.fn().mockImplementation(({ next }) => {
+                subscribe: vi.fn().mockImplementation(({ next }) => {
                   const requestTimeout = setTimeout(() => {
                     next({
                       isRunning: false,
@@ -470,7 +479,7 @@ describe('useTimelineEventsHandler', () => {
                   };
                 }),
               }),
-              showError: jest.fn(),
+              showError: vi.fn(),
             },
           },
         },
@@ -499,7 +508,7 @@ describe('useTimelineEventsHandler', () => {
     });
 
     it('returns timedOut true when the completed EQL response timed out', async () => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: { securitySolutionTimeline: { crud: true } },
@@ -507,7 +516,7 @@ describe('useTimelineEventsHandler', () => {
           data: {
             search: {
               search: () => ({
-                subscribe: jest.fn().mockImplementation(({ next }) => {
+                subscribe: vi.fn().mockImplementation(({ next }) => {
                   const requestTimeout = setTimeout(() => {
                     next({
                       isRunning: false,
@@ -531,7 +540,7 @@ describe('useTimelineEventsHandler', () => {
                   };
                 }),
               }),
-              showError: jest.fn(),
+              showError: vi.fn(),
             },
           },
         },
@@ -556,8 +565,8 @@ describe('useTimelineEventsHandler', () => {
 
   describe('error/invalid states', () => {
     const uniqueError = 'UNIQUE_ERROR';
-    const onError = jest.fn();
-    const mockSubscribeWithError = jest.fn(({ error }) => {
+    const onError = vi.fn();
+    const mockSubscribeWithError = vi.fn(({ error }) => {
       error(uniqueError);
     });
 
@@ -565,12 +574,12 @@ describe('useTimelineEventsHandler', () => {
       onError.mockClear();
       mockSubscribeWithError.mockClear();
 
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           data: {
             search: {
               search: () => ({
-                subscribe: jest.fn().mockImplementation(({ error }) => {
+                subscribe: vi.fn().mockImplementation(({ error }) => {
                   const requestTimeout = setTimeout(() => {
                     mockSubscribeWithError({ error });
                   }, 100);

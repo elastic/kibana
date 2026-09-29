@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { MapCache } from 'lodash';
@@ -18,14 +21,14 @@ import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries
 const createMapCache = (): MapCache => {
   const store = new Map<string, unknown>();
   return {
-    get: jest.fn((key: string) => store.get(key)),
-    set: jest.fn((key: string, value: unknown) => {
+    get: vi.fn((key: string) => store.get(key)),
+    set: vi.fn((key: string, value: unknown) => {
       store.set(key, value);
       return store as unknown as MapCache;
     }),
-    has: jest.fn((key: string) => store.has(key)),
-    delete: jest.fn((key: string) => store.delete(key)),
-    clear: jest.fn(() => store.clear()),
+    has: vi.fn((key: string) => store.has(key)),
+    delete: vi.fn((key: string) => store.delete(key)),
+    clear: vi.fn(() => store.clear()),
   };
 };
 
@@ -37,7 +40,7 @@ const createDefaultParams = () => {
 
   // memoizedFieldsFromESQL never resolves so getColumnsFor stays pending,
   // letting us assert on the AbortSignal that was passed in.
-  const memoizedFieldsFromESQL = jest.fn(({ signal }: { signal?: AbortSignal }) => ({
+  const memoizedFieldsFromESQL = vi.fn(({ signal }: { signal?: AbortSignal }) => ({
     timestamp: Date.now(),
     result: new Promise(() => {
       // capture for assertions via the mock's call args
@@ -45,10 +48,10 @@ const createDefaultParams = () => {
     }),
   })) as unknown as Parameters<typeof useEsqlCallbacks>[0]['memoizedFieldsFromESQL'];
 
-  const memoizedSources = jest.fn() as unknown as Parameters<
+  const memoizedSources = vi.fn() as unknown as Parameters<
     typeof useEsqlCallbacks
   >[0]['memoizedSources'];
-  const memoizedHistoryStarredItems = jest.fn() as unknown as Parameters<
+  const memoizedHistoryStarredItems = vi.fn() as unknown as Parameters<
     typeof useEsqlCallbacks
   >[0]['memoizedHistoryStarredItems'];
 
@@ -56,18 +59,18 @@ const createDefaultParams = () => {
     query: {
       timefilter: {
         timefilter: {
-          getTime: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+          getTime: vi.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
         },
       },
     },
     search: {
-      search: jest.fn(),
+      search: vi.fn(),
     },
   } as unknown as Parameters<typeof useEsqlCallbacks>[0]['data'];
 
   const core = {
     http: {},
-    pricing: { getActiveProduct: jest.fn() },
+    pricing: { getActiveProduct: vi.fn() },
   } as unknown as CoreStart;
 
   return {
@@ -82,12 +85,12 @@ const createDefaultParams = () => {
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
     timeseriesIndicesCache,
-    memoizedTimeseriesIndices: jest.fn().mockReturnValue({
+    memoizedTimeseriesIndices: vi.fn().mockReturnValue({
       timestamp: Date.now(),
       result: Promise.resolve({ indices: [] }),
     }) as unknown as Parameters<typeof useEsqlCallbacks>[0]['memoizedTimeseriesIndices'],
     favoritesClient: {} as FavoritesClient<StarredQueryMetadata>,
-    getJoinIndicesCallback: jest.fn(),
+    getJoinIndicesCallback: vi.fn(),
     enableResourceBrowser: false,
   } as unknown as Parameters<typeof useEsqlCallbacks>[0];
 };
@@ -102,7 +105,7 @@ describe('useEsqlCallbacks', () => {
         result: Promise.resolve([]),
       });
 
-      (params.memoizedSources as unknown as jest.Mock).mockReturnValue({
+      (params.memoizedSources as unknown as Mock).mockReturnValue({
         timestamp: Date.now(),
         result: Promise.resolve([]),
       });
@@ -123,7 +126,7 @@ describe('useEsqlCallbacks', () => {
       };
       params.dataSourcesCache.set(DATA_SOURCES_CACHE_KEY, cacheEntry);
 
-      (params.memoizedSources as unknown as jest.Mock).mockReturnValue({
+      (params.memoizedSources as unknown as Mock).mockReturnValue({
         timestamp: Date.now(),
         result: Promise.resolve([]),
       });
@@ -141,7 +144,7 @@ describe('useEsqlCallbacks', () => {
       const params = createDefaultParams();
 
       let capturedSignal: AbortSignal | undefined;
-      (params.memoizedSources as unknown as jest.Mock).mockImplementation(
+      (params.memoizedSources as unknown as Mock).mockImplementation(
         (_core: unknown, _getLicense: unknown, _enrichSources: unknown, signal?: AbortSignal) => {
           capturedSignal = signal;
           return { timestamp: Date.now(), result: new Promise(() => {}) };
@@ -169,7 +172,7 @@ describe('useEsqlCallbacks', () => {
       // Kick off a request — it stays pending because the mock never resolves.
       void result.current.getColumnsFor!({ query: 'FROM logs | LIMIT 10' });
 
-      const memoized = params.memoizedFieldsFromESQL as unknown as jest.Mock;
+      const memoized = params.memoizedFieldsFromESQL as unknown as Mock;
       expect(memoized).toHaveBeenCalledTimes(1);
       const signal = memoized.mock.calls[0][0].signal as AbortSignal;
       expect(signal.aborted).toBe(false);
@@ -187,7 +190,7 @@ describe('useEsqlCallbacks', () => {
       const { result } = renderHook(() => useEsqlCallbacks(params));
 
       void result.current.getColumnsFor!({ query: 'FROM logs | LIMIT 10' });
-      const memoized = params.memoizedFieldsFromESQL as unknown as jest.Mock;
+      const memoized = params.memoizedFieldsFromESQL as unknown as Mock;
       const firstSignal = memoized.mock.calls[0][0].signal as AbortSignal;
 
       void result.current.getColumnsFor!({ query: 'FROM metrics | LIMIT 10' });
@@ -203,7 +206,7 @@ describe('useEsqlCallbacks', () => {
       const { result } = renderHook(() => useEsqlCallbacks(params));
 
       void result.current.getColumnsFor!({ query: 'FROM logs | LIMIT 10' });
-      const memoized = params.memoizedFieldsFromESQL as unknown as jest.Mock;
+      const memoized = params.memoizedFieldsFromESQL as unknown as Mock;
       const firstSignal = memoized.mock.calls[0][0].signal as AbortSignal;
 
       void result.current.getColumnsFor!({ query: 'FROM logs | LIMIT 10' });
@@ -218,7 +221,7 @@ describe('useEsqlCallbacks', () => {
       // Wire memoizedFieldsFromESQL to behave like lodash memoize on top of the
       // shared cache, so we can observe cache state across calls.
       const deferreds: Array<{ resolve: (value: unknown) => void }> = [];
-      (params.memoizedFieldsFromESQL as unknown as jest.Mock).mockImplementation(
+      (params.memoizedFieldsFromESQL as unknown as Mock).mockImplementation(
         ({ esqlQuery }: { esqlQuery: string }) => {
           if (params.esqlFieldsCache.has(esqlQuery)) {
             return params.esqlFieldsCache.get(esqlQuery);

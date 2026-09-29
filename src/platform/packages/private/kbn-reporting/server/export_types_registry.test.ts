@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ExportTypesRegistry } from './export_types_registry';
@@ -23,13 +26,13 @@ const getExportType = (overwrites = {}): ExportType => {
     jobType: 'testJobType',
     jobContentExtension: 'pdf',
     validLicenses: [LICENSE_TYPE_GOLD],
-    setup: jest.fn(),
-    start: jest.fn(),
+    setup: vi.fn(),
+    start: vi.fn(),
     shouldNotifyUsage: () => false,
     getFeatureUsageName: () => 'Reporting: test export',
-    notifyUsage: jest.fn(),
-    createJob: jest.fn(),
-    runTask: jest.fn(),
+    notifyUsage: vi.fn(),
+    createJob: vi.fn(),
+    runTask: vi.fn(),
     setupDeps: {} as unknown as BaseExportTypeSetupDeps,
     startDeps: {} as unknown as BaseExportTypeStartDeps,
     http: {} as unknown as HttpServiceSetup,
@@ -40,7 +43,7 @@ const getExportType = (overwrites = {}): ExportType => {
   } as unknown as ExportType;
 };
 describe('ExportTypesRegistry', () => {
-  let licensing: jest.Mocked<LicensingPluginSetup>;
+  let licensing: Mocked<LicensingPluginSetup>;
   let exportTypesRegistry: ExportTypesRegistry;
   beforeEach(() => {
     licensing = licensingMock.createSetup();

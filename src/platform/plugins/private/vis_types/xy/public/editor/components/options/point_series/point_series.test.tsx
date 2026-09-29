@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
@@ -16,13 +18,16 @@ import { act } from 'react-dom/test-utils';
 import { ChartType } from '../../../../../common';
 import { getAggs, getVis, getStateParams } from './point_series.mocks';
 
-jest.mock('../../../../services', () => ({
-  getPalettesService: jest.fn(() => {
-    return {
-      getPalettes: jest.fn(),
+vi.mock('../../../../services', () => {
+      const mocked = {
+      getPalettesService: vi.fn(() => {
+        return {
+          getPalettes: vi.fn(),
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 type PointSeriesOptionsProps = Parameters<typeof PointSeriesOptions>[0];
 
@@ -35,10 +40,10 @@ describe('PointSeries Editor', function () {
       aggs: getAggs(),
       hasHistogramAgg: false,
       isTabSelected: false,
-      setMultipleValidity: jest.fn(),
-      setTouched: jest.fn(),
-      setValue: jest.fn(),
-      setValidity: jest.fn(),
+      setMultipleValidity: vi.fn(),
+      setTouched: vi.fn(),
+      setValue: vi.fn(),
+      setValidity: vi.fn(),
       stateParams: getStateParams(ChartType.Histogram, false),
       vis: getVis('date_histogram'),
     } as unknown as PointSeriesOptionsProps;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -45,7 +47,7 @@ describe('ZodJsonSchemaValidator integration', () => {
   it('succeeds with ZodJsonSchemaValidator under the same restriction', async () => {
     const logger = loggerMock.create();
     const validator = new ZodJsonSchemaValidator(logger);
-    const spy = jest.spyOn(validator, 'getValidator');
+    const spy = vi.spyOn(validator, 'getValidator');
 
     const server = await createServerWithOutputSchema();
     const client = new Client(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -24,22 +27,28 @@ import {
 } from '../../../common/utils';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('./use_preview_route');
-jest.mock('../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({
-    from: '2020-07-07T08:20:18.966Z',
-    isInitializing: false,
-    to: '2020-07-08T08:20:18.966Z',
-    setQuery: jest.fn(),
-  }),
-}));
-jest.mock('./use_preview_invocation_count');
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('./use_preview_route');
+vi.mock('../../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn().mockReturnValue({
+        from: '2020-07-07T08:20:18.966Z',
+        isInitializing: false,
+        to: '2020-07-08T08:20:18.966Z',
+        setQuery: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_preview_invocation_count');
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const verifyRuleDefinitionMock = jest.fn().mockResolvedValue(true);
+const verifyRuleDefinitionMock = vi.fn().mockResolvedValue(true);
 
 // rule types that do not support logged requests
 const doNotSupportLoggedRequests: Type[] = ['threat_match'];
@@ -106,21 +115,21 @@ const defaultProps: RulePreviewProps = {
 
 describe('PreviewQuery', () => {
   beforeEach(() => {
-    (usePreviewRoute as jest.Mock).mockReturnValue({
+    (usePreviewRoute as Mock).mockReturnValue({
       hasNoiseWarning: false,
-      addNoiseWarning: jest.fn(),
-      createPreview: jest.fn(),
-      clearPreview: jest.fn(),
+      addNoiseWarning: vi.fn(),
+      createPreview: vi.fn(),
+      clearPreview: vi.fn(),
       logs: [],
       isPreviewRequestInProgress: false,
       previewId: undefined,
     });
 
-    (usePreviewInvocationCount as jest.Mock).mockReturnValue({ invocationCount: 500 });
+    (usePreviewInvocationCount as Mock).mockReturnValue({ invocationCount: 500 });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders timeframe select and preview button on render', async () => {
@@ -145,7 +154,7 @@ describe('PreviewQuery', () => {
   });
 
   test('it renders invocation count warning when invocation count is bigger then "REASONABLE_INVOCATION_COUNT"', async () => {
-    (usePreviewInvocationCount as jest.Mock).mockReturnValue({
+    (usePreviewInvocationCount as Mock).mockReturnValue({
       invocationCount: REASONABLE_INVOCATION_COUNT + 1,
     });
 

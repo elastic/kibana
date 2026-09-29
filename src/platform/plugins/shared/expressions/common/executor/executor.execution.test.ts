@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Executor } from './executor';
 import { parseExpression } from '../ast';
 import { Execution } from '../execution/execution';
 
-jest.mock('../execution/execution', () => ({
-  Execution: jest.fn(),
-}));
+vi.mock('../execution/execution', () => {
+      const mocked = {
+      Execution: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('Executor mocked execution tests', () => {

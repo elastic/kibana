@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -21,37 +24,40 @@ import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../constants';
 import type { SupportedSolutionView } from '../types';
 
-jest.mock('./modal', () => ({
-  SolutionViewSwitchModal: ({
-    onSwitch,
-    onClose,
-    isLoading,
-  }: {
-    onSwitch: (solution: SupportedSolutionView) => void;
-    onClose: () => void;
-    isLoading: boolean;
-  }) => (
-    <div>
-      <button type="button" onClick={() => onSwitch('oblt')} disabled={isLoading}>
-        Mock switch
-      </button>
-      <button type="button" onClick={onClose}>
-        Mock close
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./modal', () => {
+      const mocked = {
+      SolutionViewSwitchModal: ({
+        onSwitch,
+        onClose,
+        isLoading,
+      }: {
+        onSwitch: (solution: SupportedSolutionView) => void;
+        onClose: () => void;
+        isLoading: boolean;
+      }) => (
+        <div>
+          <button type="button" onClick={() => onSwitch('oblt')} disabled={isLoading}>
+            Mock switch
+          </button>
+          <button type="button" onClick={onClose}>
+            Mock close
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SolutionViewSwitchCallout', () => {
   const originalLocation = window.location;
-  let hrefSpy: jest.Mock;
+  let hrefSpy: Mock;
 
   beforeEach(() => {
-    hrefSpy = jest.fn();
+    hrefSpy = vi.fn();
     Object.defineProperty(window, 'location', {
       configurable: true,
       writable: true,
-      value: { ...originalLocation, reload: jest.fn() },
+      value: { ...originalLocation, reload: vi.fn() },
     });
     Object.defineProperty(window.location, 'href', {
       configurable: true,
@@ -65,7 +71,7 @@ describe('SolutionViewSwitchCallout', () => {
       value: originalLocation,
     });
     localStorage.clear();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const setup = async ({ updateSpaceRejects }: { updateSpaceRejects?: Error } = {}) => {
@@ -77,7 +83,7 @@ describe('SolutionViewSwitchCallout', () => {
 
     getStartServices.mockResolvedValue([coreStart, pluginsStart, undefined]);
 
-    const getUrlForAppSpy = jest
+    const getUrlForAppSpy = vi
       .spyOn(coreStart.application, 'getUrlForApp')
       .mockReturnValue('app/management/kibana/spaces');
 
@@ -94,7 +100,7 @@ describe('SolutionViewSwitchCallout', () => {
       spacesManager.updateSpace.mockResolvedValue(undefined);
     }
 
-    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
 
     const SolutionViewSwitchCalloutComponent = await getSolutionViewSwitchCalloutComponent({
       spacesManager,
@@ -149,7 +155,7 @@ describe('SolutionViewSwitchCallout', () => {
   });
 
   test('does not render when previously dismissed', async () => {
-    jest
+    vi
       .spyOn(Storage.prototype, 'getItem')
       .mockImplementation((key) =>
         key === `${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}.dismissed` ? 'true' : null

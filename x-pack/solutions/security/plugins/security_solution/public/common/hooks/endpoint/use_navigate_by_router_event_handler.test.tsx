@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../mock/endpoint';
 import { useNavigateByRouterEventHandler } from './use_navigate_by_router_event_handler';
 import { act, fireEvent, cleanup } from '@testing-library/react';
 
-type ClickHandlerMock<Return = void> = jest.Mock<
+type ClickHandlerMock<Return = void> = Mock<
   Return,
   [React.MouseEvent<HTMLAnchorElement, MouseEvent>]
 >;
@@ -37,14 +40,14 @@ describe('useNavigateByRouterEventHandler hook', () => {
 
   beforeEach(async () => {
     ({ render, history } = createAppRootMockRenderer());
-    clickHandlerSpy = jest.fn();
+    clickHandlerSpy = vi.fn();
     renderResult = render(<Link routeTo="/mock/path" onClick={clickHandlerSpy} />);
     linkEle = (await renderResult.findByText('mock link')) as HTMLAnchorElement;
   });
   afterEach(cleanup);
 
   it('should navigate to path via Router', () => {
-    const containerClickSpy = jest.fn();
+    const containerClickSpy = vi.fn();
     renderResult.container.addEventListener('click', containerClickSpy);
     expect(history.location.pathname).not.toEqual('/mock/path');
     act(() => {

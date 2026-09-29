@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -17,7 +20,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import { DocumentationManager } from './doc_manager';
 
-jest.mock('../../tasks');
+vi.mock('../../tasks');
 import {
   scheduleInstallAllTask,
   scheduleUninstallAllTask,
@@ -29,23 +32,23 @@ import {
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../install_lock';
 
-const scheduleInstallAllTaskMock = scheduleInstallAllTask as jest.MockedFn<
+const scheduleInstallAllTaskMock = scheduleInstallAllTask as MockedFunction<
   typeof scheduleInstallAllTask
 >;
-const scheduleUninstallAllTaskMock = scheduleUninstallAllTask as jest.MockedFn<
+const scheduleUninstallAllTaskMock = scheduleUninstallAllTask as MockedFunction<
   typeof scheduleUninstallAllTask
 >;
-const scheduleEnsureUpToDateTaskMock = scheduleEnsureUpToDateTask as jest.MockedFn<
+const scheduleEnsureUpToDateTaskMock = scheduleEnsureUpToDateTask as MockedFunction<
   typeof scheduleEnsureUpToDateTask
 >;
 const scheduleEnsureSecurityLabsUpToDateTaskMock =
-  scheduleEnsureSecurityLabsUpToDateTask as jest.MockedFn<
+  scheduleEnsureSecurityLabsUpToDateTask as MockedFunction<
     typeof scheduleEnsureSecurityLabsUpToDateTask
   >;
-const waitUntilTaskCompletedMock = waitUntilTaskCompleted as jest.MockedFn<
+const waitUntilTaskCompletedMock = waitUntilTaskCompleted as MockedFunction<
   typeof waitUntilTaskCompleted
 >;
-const getInstallAllTaskStatusMock = getInstallAllTaskStatus as jest.MockedFn<
+const getInstallAllTaskStatusMock = getInstallAllTaskStatus as MockedFunction<
   typeof getInstallAllTaskStatus
 >;
 
@@ -55,16 +58,16 @@ describe('DocumentationManager', () => {
   let taskManager: ReturnType<typeof taskManagerMock.createStart>;
   let licensing: ReturnType<typeof licensingMock.createStart>;
   let auditService: ReturnType<typeof securityServiceMock.createStart>['audit'];
-  let docInstallClient: jest.Mocked<ProductDocInstallClient>;
+  let docInstallClient: Mocked<ProductDocInstallClient>;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let packageInstaller: {
-    installSecurityLabs: jest.Mock;
-    uninstallSecurityLabs: jest.Mock;
-    getSecurityLabsStatus: jest.Mock;
+    installSecurityLabs: Mock;
+    uninstallSecurityLabs: Mock;
+    getSecurityLabsStatus: Mock;
   };
 
   let docManager: DocumentationManager;
-  let withLock: jest.Mock;
+  let withLock: Mock;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -83,22 +86,22 @@ describe('DocumentationManager', () => {
       ],
     });
     packageInstaller = {
-      installSecurityLabs: jest.fn().mockResolvedValue(undefined),
-      uninstallSecurityLabs: jest.fn().mockResolvedValue(undefined),
-      getSecurityLabsStatus: jest.fn().mockResolvedValue({ status: 'uninstalled' }),
+      installSecurityLabs: vi.fn().mockResolvedValue(undefined),
+      uninstallSecurityLabs: vi.fn().mockResolvedValue(undefined),
+      getSecurityLabsStatus: vi.fn().mockResolvedValue({ status: 'uninstalled' }),
     };
 
     docInstallClient = {
-      getInstallationStatus: jest.fn(),
-      getPreviouslyInstalledInferenceIds: jest
+      getInstallationStatus: vi.fn(),
+      getPreviouslyInstalledInferenceIds: vi
         .fn()
         .mockResolvedValue([
           defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
           defaultInferenceEndpoints.ELSER,
         ]),
-    } as unknown as jest.Mocked<ProductDocInstallClient>;
+    } as unknown as Mocked<ProductDocInstallClient>;
 
-    withLock = jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
+    withLock = vi.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
     docManager = new DocumentationManager({
       logger,
       taskManager,
@@ -179,7 +182,7 @@ describe('DocumentationManager', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const auditLog = auditService.withoutRequest;
-      auditService.asScoped = jest.fn(() => auditLog);
+      auditService.asScoped = vi.fn(() => auditLog);
 
       await docManager.install({
         force: false,
@@ -246,7 +249,7 @@ describe('DocumentationManager', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const auditLog = auditService.withoutRequest;
-      auditService.asScoped = jest.fn(() => auditLog);
+      auditService.asScoped = vi.fn(() => auditLog);
 
       await docManager.update({ wait: false, request, inferenceId: DEFAULT_INFERENCE_ID });
 
@@ -536,7 +539,7 @@ describe('DocumentationManager', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const auditLog = auditService.withoutRequest;
-      auditService.asScoped = jest.fn(() => auditLog);
+      auditService.asScoped = vi.fn(() => auditLog);
 
       await docManager.uninstall({ wait: false, request, inferenceId: DEFAULT_INFERENCE_ID });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -16,30 +19,42 @@ import { LoadingCallout } from '../../../loading_callout';
 
 const mockFutureTime = '2025-05-19T23:20:15.933Z';
 
-jest.mock('./get_approximate_future_time', () => ({
-  getApproximateFutureTime: jest.fn(() => new Date(mockFutureTime)),
-}));
-jest.mock('../../../utils/get_connector_name_from_id', () => ({
-  getConnectorNameFromId: jest.fn(() => 'Mock Connector Name'),
-}));
-jest.mock('../../../loading_callout', () => ({
-  LoadingCallout: jest.fn(() => <div data-test-subj="loadingCallout" />),
-}));
-jest.mock('../../../use_attack_discovery/helpers', () => ({
-  getGenAiConfig: jest.fn(() => ({ defaultModel: 'gpt-4o' })),
-}));
+vi.mock('./get_approximate_future_time', () => {
+      const mocked = {
+      getApproximateFutureTime: vi.fn(() => new Date(mockFutureTime)),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../utils/get_connector_name_from_id', () => {
+      const mocked = {
+      getConnectorNameFromId: vi.fn(() => 'Mock Connector Name'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../loading_callout', () => {
+      const mocked = {
+      LoadingCallout: vi.fn(() => <div data-test-subj="loadingCallout" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../use_attack_discovery/helpers', () => {
+      const mocked = {
+      getGenAiConfig: vi.fn(() => ({ defaultModel: 'gpt-4o' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockLoadingCallout = LoadingCallout as jest.MockedFunction<typeof LoadingCallout>;
+const MockLoadingCallout = LoadingCallout as MockedFunction<typeof LoadingCallout>;
 
 const defaultProps = {
   aiConnectors: getMockConnectors(),
   localStorageAttackDiscoveryMaxAlerts: undefined,
-  refetchGenerations: jest.fn(),
+  refetchGenerations: vi.fn(),
 };
 
 describe('Generations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a callout for every NON-dismissed generation', () => {
@@ -128,7 +143,7 @@ describe('Generations', () => {
     });
 
     it('passes onViewDetails to LoadingCallout', () => {
-      const onViewDetails = jest.fn();
+      const onViewDetails = vi.fn();
       const generation = {
         ...getMockGenerations().generations[0],
         status: 'succeeded' as const,

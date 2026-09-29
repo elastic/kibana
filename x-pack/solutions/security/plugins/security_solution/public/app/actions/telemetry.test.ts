@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { StartServices } from '../../types';
 import { enhanceActionWithTelemetry } from './telemetry';
 import { createAction } from '@kbn/ui-actions-plugin/public';
@@ -30,7 +32,7 @@ const context = {
 
 describe('enhanceActionWithTelemetry', () => {
   it('calls telemetry report when the action is executed', () => {
-    const telemetry = { reportEvent: jest.fn() };
+    const telemetry = { reportEvent: vi.fn() };
     const services = { telemetry } as unknown as StartServices;
 
     const enhancedAction = enhanceActionWithTelemetry(action, services);

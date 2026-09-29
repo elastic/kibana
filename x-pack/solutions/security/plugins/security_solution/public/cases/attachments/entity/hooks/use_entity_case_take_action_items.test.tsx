@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -12,12 +15,12 @@ import { useEntityCaseTakeActionItems } from './use_entity_case_take_action_item
 import { useCanAttachToCase } from '../../hooks/use_can_attach_to_case';
 import type { EntityToAttach } from '..';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../hooks/use_can_attach_to_case');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../hooks/use_can_attach_to_case');
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockUseCanAttachToCase = useCanAttachToCase as jest.Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
+const mockUseCanAttachToCase = useCanAttachToCase as Mock;
 
 const ENTITY: EntityToAttach = {
   id: 'entity-store-id-abc',
@@ -34,7 +37,7 @@ const renderItemKeys = (entity: EntityToAttach = ENTITY): Array<string | null> =
 
 describe('useEntityCaseTakeActionItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     mockUseCanAttachToCase.mockReturnValue(true);
     mockUseKibana().services.cases.config = { attachmentsEnabled: true };

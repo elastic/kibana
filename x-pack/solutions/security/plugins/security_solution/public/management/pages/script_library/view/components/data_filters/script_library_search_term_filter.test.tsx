@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,8 +19,8 @@ import {
 import { ScriptLibrarySearchTermFilter } from './script_library_search_term_filter';
 import { useScriptLibraryUrlParams as _useScriptLibraryUrlParams } from '../script_library_url_params';
 
-jest.mock('../script_library_url_params');
-const useScriptLibraryUrlParamsMock = _useScriptLibraryUrlParams as jest.Mock;
+vi.mock('../script_library_url_params');
+const useScriptLibraryUrlParamsMock = _useScriptLibraryUrlParams as Mock;
 
 describe('ScriptLibrarySearchTermFilter', () => {
   let render: (
@@ -25,13 +28,13 @@ describe('ScriptLibrarySearchTermFilter', () => {
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let mockOnChangeSearch: jest.Mock;
-  let mockSetUrlSearchTermsFilter: jest.Mock;
+  let mockOnChangeSearch: Mock;
+  let mockSetUrlSearchTermsFilter: Mock;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    mockOnChangeSearch = jest.fn();
-    mockSetUrlSearchTermsFilter = jest.fn();
+    mockOnChangeSearch = vi.fn();
+    mockSetUrlSearchTermsFilter = vi.fn();
 
     useScriptLibraryUrlParamsMock.mockReturnValue({
       searchTerms: [],
@@ -51,7 +54,7 @@ describe('ScriptLibrarySearchTermFilter', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Rendering', () => {

@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { welcomeServiceMock } from '../../services/welcome/welcome_service.mocks';
 
-jest.doMock('../kibana_services', () => ({
-  getServices: () => ({
-    addBasePath: (path: string) => `root${path}`,
-    trackUiMetric: () => {},
-    welcomeService: welcomeServiceMock.create(),
-    theme: {
-      getTheme: () => {
-        return {
-          theme$: jest.fn(),
-        };
-      },
-    },
-  }),
-}));
+vi.doMock('../kibana_services', () => {
+      const mocked = {
+      getServices: () => ({
+        addBasePath: (path: string) => `root${path}`,
+        trackUiMetric: () => {},
+        welcomeService: welcomeServiceMock.create(),
+        theme: {
+          getTheme: () => {
+            return {
+              theme$: vi.fn(),
+            };
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 
@@ -19,34 +22,34 @@ import { bulkInstallPackages } from './epm/packages';
 import { incrementPackageName } from './package_policies';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-const mockIncrementPackageName = incrementPackageName as jest.MockedFunction<
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+const mockIncrementPackageName = incrementPackageName as MockedFunction<
   typeof incrementPackageName
 >;
 
 const mockEnsureDefaultEnrollmentAPIKeyForAgentPolicy =
-  ensureDefaultEnrollmentAPIKeyForAgentPolicy as jest.MockedFunction<
+  ensureDefaultEnrollmentAPIKeyForAgentPolicy as MockedFunction<
     typeof ensureDefaultEnrollmentAPIKeyForAgentPolicy
   >;
 
-jest.mock('./epm/packages', () => {
+vi.mock('./epm/packages', () => {
   return {
-    bulkInstallPackages: jest.fn(),
+    bulkInstallPackages: vi.fn(),
   };
 });
 
-const mockedBulkInstallPackages = bulkInstallPackages as jest.Mocked<typeof bulkInstallPackages>;
+const mockedBulkInstallPackages = bulkInstallPackages as Mocked<typeof bulkInstallPackages>;
 
-jest.mock('./api_keys', () => {
+vi.mock('./api_keys', () => {
   return {
-    ensureDefaultEnrollmentAPIKeyForAgentPolicy: jest.fn(),
+    ensureDefaultEnrollmentAPIKeyForAgentPolicy: vi.fn(),
   };
 });
 
-jest.mock('./agent_policy');
-jest.mock('./package_policy');
-jest.mock('./package_policies');
+vi.mock('./agent_policy');
+vi.mock('./package_policy');
+vi.mock('./package_policies');
 
 function getPackagePolicy(name: string, policyId = '') {
   return {
@@ -83,9 +86,9 @@ describe('createAgentPolicyWithPackages', () => {
       (soClient: any, packageName: string, spaceIds: string[]) =>
         Promise.resolve(`${packageName}-1`)
     );
-    jest.mocked(mockedBulkInstallPackages).mockReset();
-    jest.mocked(mockedPackagePolicyService.create).mockReset();
-    jest
+    vi.mocked(mockedBulkInstallPackages).mockReset();
+    vi.mocked(mockedPackagePolicyService.create).mockReset();
+    vi
       .mocked(mockedPackagePolicyService.create)
       .mockImplementation((soClient, esClient, newPolicy) =>
         Promise.resolve({
@@ -100,7 +103,7 @@ describe('createAgentPolicyWithPackages', () => {
   });
 
   it('should retry via the lock when create throws PackagePolicyNameExistsError', async () => {
-    jest
+    vi
       .mocked(mockedPackagePolicyService.create)
       .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))
       .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))

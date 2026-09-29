@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
@@ -12,11 +14,11 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createCustomContentTemplateResolver } from './custom_content_resolver';
 
-const mockChatComplete = jest.fn();
-const mockEsqlQuery = jest.fn();
+const mockChatComplete = vi.fn();
+const mockEsqlQuery = vi.fn();
 
 const modelProvider = {
-  getDefaultModel: jest.fn().mockResolvedValue({
+  getDefaultModel: vi.fn().mockResolvedValue({
     inferenceClient: { chatComplete: mockChatComplete },
   }),
 } as unknown as ModelProvider;
@@ -27,10 +29,10 @@ const esClient = {
   },
 } as unknown as IScopedClusterClient;
 
-const logger = { debug: jest.fn(), warn: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn(), warn: vi.fn() } as unknown as Logger;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockEsqlQuery.mockResolvedValue({ columns: [], values: [] });
 });
 

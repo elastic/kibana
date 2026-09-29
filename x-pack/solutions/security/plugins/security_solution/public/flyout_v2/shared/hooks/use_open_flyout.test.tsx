@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useOpenFlyout } from './use_open_flyout';
@@ -21,23 +24,32 @@ import {
   FLYOUT_SESSION_KIND,
 } from '../../../common/lib/telemetry';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useStore: jest.fn(() => ({})),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(() => ({})),
-}));
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/is_in_security_app');
-jest.mock('../components/flyout_provider', () => ({
-  flyoutProviders: jest.fn(() => 'FLYOUT_CONTENT'),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useStore: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/is_in_security_app');
+vi.mock('../components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: vi.fn(() => 'FLYOUT_CONTENT'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenSystemFlyout = jest.fn();
-const mockReportEvent = jest.fn();
-const mockStorage = { get: jest.fn(), set: jest.fn() };
+const mockOpenSystemFlyout = vi.fn();
+const mockReportEvent = vi.fn();
+const mockStorage = { get: vi.fn(), set: vi.fn() };
 
 /** Builds a deferred `OverlayRef`-like value, letting the test resolve `onClose` on demand. */
 const createOverlayRef = () => {
@@ -45,20 +57,20 @@ const createOverlayRef = () => {
   const onClose = new Promise<void>((resolve) => {
     resolveClose = resolve;
   });
-  return { ref: { onClose, close: jest.fn() }, resolveClose: () => resolveClose() };
+  return { ref: { onClose, close: vi.fn() }, resolveClose: () => resolveClose() };
 };
 
 describe('useOpenFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
         telemetry: { reportEvent: mockReportEvent },
         storage: mockStorage,
       },
     });
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    (useIsInSecurityApp as Mock).mockReturnValue(true);
     // No persisted preference by default → falls back to 'overlay'.
     mockStorage.get.mockReturnValue(undefined);
   });
@@ -178,7 +190,7 @@ describe('useOpenFlyout', () => {
 
   it('composes with, rather than overwrites, a caller-supplied onResize', () => {
     mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
-    const callerOnResize = jest.fn();
+    const callerOnResize = vi.fn();
 
     const { result } = renderHook(() => useOpenFlyout());
     result.current(<div />, { size: 's', session: 'start', onResize: callerOnResize });

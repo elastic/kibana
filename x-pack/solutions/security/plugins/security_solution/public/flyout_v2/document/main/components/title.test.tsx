@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -12,39 +14,45 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { Title } from './title';
 import { TITLE_LINK_TEST_ID, TITLE_TEST_ID } from './test_ids';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: (_appId: string, { path }: { path: string }) =>
-          `/app/securitySolutionUI${path}`,
-      },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            getUrlForApp: (_appId: string, { path }: { path: string }) =>
+              `/app/securitySolutionUI${path}`,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/components/flyout_title', () => ({
-  FlyoutTitle: ({
-    title,
-    iconType,
-    isLink = false,
-    'data-test-subj': dataTestSubj,
-  }: {
-    title: string;
-    iconType?: string;
-    isLink?: boolean;
-    'data-test-subj'?: string;
-  }) => (
-    <div
-      data-test-subj={dataTestSubj}
-      data-title={title}
-      data-icon-type={iconType ?? ''}
-      data-is-link={String(isLink)}
-    >
-      {title}
-    </div>
-  ),
-}));
+vi.mock('../../../shared/components/flyout_title', () => {
+      const mocked = {
+      FlyoutTitle: ({
+        title,
+        iconType,
+        isLink = false,
+        'data-test-subj': dataTestSubj,
+      }: {
+        title: string;
+        iconType?: string;
+        isLink?: boolean;
+        'data-test-subj'?: string;
+      }) => (
+        <div
+          data-test-subj={dataTestSubj}
+          data-title={title}
+          data-icon-type={iconType ?? ''}
+          data-is-link={String(isLink)}
+        >
+          {title}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

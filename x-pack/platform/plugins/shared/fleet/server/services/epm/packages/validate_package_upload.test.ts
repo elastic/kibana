@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
@@ -20,30 +23,42 @@ import { getBundledPackageByName } from './bundled_packages';
 import { getPackageSavedObjects } from './get';
 import { validatePackageUpload } from './validate_package_upload';
 
-jest.mock('../../app_context', () => ({
-  appContextService: {
-    getConfig: jest.fn(() => ({})),
-    getExperimentalFeatures: jest.fn(() => ({ enableOtelIntegrations: true })),
-  },
-}));
+vi.mock('../../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getConfig: vi.fn(() => ({})),
+        getExperimentalFeatures: vi.fn(() => ({ enableOtelIntegrations: true })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../registry', () => ({
-  fetchFindLatestPackageOrThrow: jest.fn(),
-}));
+vi.mock('../registry', () => {
+      const mocked = {
+      fetchFindLatestPackageOrThrow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get', () => ({
-  getPackageSavedObjects: jest.fn(),
-}));
+vi.mock('./get', () => {
+      const mocked = {
+      getPackageSavedObjects: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./bundled_packages', () => ({
-  getBundledPackageByName: jest.fn(),
-}));
+vi.mock('./bundled_packages', () => {
+      const mocked = {
+      getBundledPackageByName: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGetConfig = appContextService.getConfig as jest.Mock;
-const mockedGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
-const mockedFetchLatest = Registry.fetchFindLatestPackageOrThrow as jest.Mock;
-const mockedGetPackageSavedObjects = getPackageSavedObjects as jest.Mock;
-const mockedGetBundledPackageByName = getBundledPackageByName as jest.Mock;
+const mockedGetConfig = appContextService.getConfig as Mock;
+const mockedGetExperimentalFeatures = appContextService.getExperimentalFeatures as Mock;
+const mockedFetchLatest = Registry.fetchFindLatestPackageOrThrow as Mock;
+const mockedGetPackageSavedObjects = getPackageSavedObjects as Mock;
+const mockedGetBundledPackageByName = getBundledPackageByName as Mock;
 
 const soClient = savedObjectsClientMock.create();
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -95,7 +110,7 @@ async function expectUploadRejected(params: Parameters<typeof validateUpload>[0]
 
 describe('validatePackageUpload', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedGetConfig.mockReturnValue({});
     mockedGetExperimentalFeatures.mockReturnValue({ enableOtelIntegrations: true });
     mockedFetchLatest.mockRejectedValue(new PackageNotFoundError('not found'));

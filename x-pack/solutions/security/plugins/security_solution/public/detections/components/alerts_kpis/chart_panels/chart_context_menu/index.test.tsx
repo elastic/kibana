@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
@@ -13,11 +15,11 @@ import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../../common/co
 import { TestProviders } from '../../../../../common/mock';
 import { ChartContextMenu } from '.';
 
-jest.setTimeout(30_000);
+vi.setConfig({ testTimeout: 30_000 });
 
 describe('ChartContextMenu', () => {
   const queryId = 'abcd';
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   test('it renders the chart context menu button', () => {
     const { getByTestId } = render(
@@ -26,8 +28,8 @@ describe('ChartContextMenu', () => {
           defaultStackByField={DEFAULT_STACK_BY_FIELD}
           defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
           queryId={queryId}
-          setStackBy={jest.fn()}
-          setStackByField1={jest.fn()}
+          setStackBy={vi.fn()}
+          setStackByField1={vi.fn()}
         />
       </TestProviders>
     );
@@ -42,8 +44,8 @@ describe('ChartContextMenu', () => {
           defaultStackByField={DEFAULT_STACK_BY_FIELD}
           defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
           queryId={queryId}
-          setStackBy={jest.fn()}
-          setStackByField1={jest.fn()}
+          setStackBy={vi.fn()}
+          setStackByField1={vi.fn()}
         />
       </TestProviders>
     );
@@ -56,8 +58,8 @@ describe('ChartContextMenu', () => {
   });
 
   test('it invokes `setStackBy` and `setStackByField1` when the Reset group by fields menu item selected', async () => {
-    const setStackBy = jest.fn();
-    const setStackByField1 = jest.fn();
+    const setStackBy = vi.fn();
+    const setStackByField1 = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>
@@ -83,7 +85,7 @@ describe('ChartContextMenu', () => {
   });
 
   test('it invokes `onReset` when the `Reset group by fields` menu item clicked', async () => {
-    const onReset = jest.fn();
+    const onReset = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>
@@ -92,8 +94,8 @@ describe('ChartContextMenu', () => {
           defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
           queryId={queryId}
           onReset={onReset}
-          setStackBy={jest.fn()}
-          setStackByField1={jest.fn()}
+          setStackBy={vi.fn()}
+          setStackByField1={vi.fn()}
         />
       </TestProviders>
     );

@@ -7,28 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHistory } from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { ProjectRoutingAccess } from '../types';
 import { useRouteBasedCpsPickerAccess } from './use_route_based_cps_picker_access';
 
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseHistory = jest.mocked(useHistory);
+const mockUseHistory = vi.mocked(useHistory);
 const mockCurrentAppId$ = new BehaviorSubject<string | undefined>('app-id');
 
 describe('useRouteBasedCpsPickerAccess', () => {
-  const registerAppAccess = jest.fn();
+  const registerAppAccess = vi.fn();
   const services = {
     application: { currentAppId$: mockCurrentAppId$ },
     cps: { cpsManager: { registerAppAccess } },
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCurrentAppId$.next('app-id');
     mockUseHistory.mockReturnValue({
       location: { pathname: '/app/alerts/rule/123' },

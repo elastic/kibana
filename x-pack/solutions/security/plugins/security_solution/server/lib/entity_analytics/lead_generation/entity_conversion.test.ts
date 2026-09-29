@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import {
@@ -132,7 +134,7 @@ describe('resolveDisplayName', () => {
 
 describe('fetchCandidateEntities', () => {
   const logger = loggingSystemMock.createLogger();
-  const listEntitiesBatch = jest.fn();
+  const listEntitiesBatch = vi.fn();
   const crudClient = { listEntitiesBatch } as unknown as EntityStoreCRUDClient;
 
   const STRATEGY_COUNT = 5;
@@ -141,7 +143,7 @@ describe('fetchCandidateEntities', () => {
   type BatchParams = Array<{ sortField: string; filter?: unknown; filterQuery?: string }>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listEntitiesBatch.mockImplementation((paramsList: BatchParams) =>
       Promise.resolve(paramsList.map(() => emptyResult))
     );

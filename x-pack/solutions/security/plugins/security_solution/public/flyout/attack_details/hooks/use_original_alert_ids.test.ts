@@ -5,25 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useAttackDetailsContext } from '../context';
 
-jest.mock('../context', () => ({
-  useAttackDetailsContext: jest.fn(),
-}));
+vi.mock('../context', () => {
+      const mocked = {
+      useAttackDetailsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/elastic-assistant-common', () => ({
-  getOriginalAlertIds: jest.fn(({ alertIds }: { alertIds: string[] }) => alertIds),
-}));
+vi.mock('@kbn/elastic-assistant-common', () => {
+      const mocked = {
+      getOriginalAlertIds: vi.fn(({ alertIds }: { alertIds: string[] }) => alertIds),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useOriginalAlertIds', () => {
-  const getFieldsDataMock = jest.fn();
+  const getFieldsDataMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAttackDetailsContext as Mock).mockReturnValue({
       getFieldsData: getFieldsDataMock,
     });
   });
@@ -83,7 +92,7 @@ describe('useOriginalAlertIds', () => {
       return null;
     });
 
-    const mockGetOriginalAlertIds = jest.mocked(getOriginalAlertIds);
+    const mockGetOriginalAlertIds = vi.mocked(getOriginalAlertIds);
     mockGetOriginalAlertIds.mockReturnValue(['real-id-1']);
 
     const { result } = renderHook(() => useOriginalAlertIds());

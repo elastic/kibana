@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import type {
@@ -15,7 +17,7 @@ import { attachMlInferencePipeline } from './attach_ml_inference_pipeline';
 describe('AttachMlInferencePipelineApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('createMlInferencePipeline', () => {
     it('calls the api', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -14,38 +16,53 @@ import { renderWithTestingProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
 import { ApplyTemplateModal } from './apply_template_modal';
 
-const mockChangeAppliedTemplate = jest.fn();
-jest.mock('../case_view/use_change_applied_template', () => ({
-  useChangeAppliedTemplate: () => ({
-    mutate: mockChangeAppliedTemplate,
-    isLoading: false,
-  }),
-}));
+const mockChangeAppliedTemplate = vi.fn();
+vi.mock('../case_view/use_change_applied_template', () => {
+      const mocked = {
+      useChangeAppliedTemplate: () => ({
+        mutate: mockChangeAppliedTemplate,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetTemplates = jest.fn();
-jest.mock('../templates_v2/hooks/use_get_templates', () => ({
-  useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
-}));
+const mockUseGetTemplates = vi.fn();
+vi.mock('../templates_v2/hooks/use_get_templates', () => {
+      const mocked = {
+      useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetTemplate = jest.fn();
-jest.mock('../templates_v2/hooks/use_get_template', () => ({
-  useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
-}));
+const mockUseGetTemplate = vi.fn();
+vi.mock('../templates_v2/hooks/use_get_template', () => {
+      const mocked = {
+      useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseTemplateNonGlobalFields = jest.fn();
-jest.mock('../templates_v2/hooks/use_template_non_global_fields', () => ({
-  useTemplateNonGlobalFields: (...args: unknown[]) => mockUseTemplateNonGlobalFields(...args),
-}));
+const mockUseTemplateNonGlobalFields = vi.fn();
+vi.mock('../templates_v2/hooks/use_template_non_global_fields', () => {
+      const mocked = {
+      useTemplateNonGlobalFields: (...args: unknown[]) => mockUseTemplateNonGlobalFields(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFormApiTrigger = jest.fn();
-const mockFormApiGetValues = jest.fn();
-const mockTemplateFieldsFormReady = jest.fn();
-jest.mock('../case_view/components/template_fields_form_ready', () => ({
-  EMPTY_EXTENDED_FIELDS: {},
-  TemplateFieldsFormReady: (...args: unknown[]) => mockTemplateFieldsFormReady(...args),
-}));
+const mockFormApiTrigger = vi.fn();
+const mockFormApiGetValues = vi.fn();
+const mockTemplateFieldsFormReady = vi.fn();
+vi.mock('../case_view/components/template_fields_form_ready', () => {
+      const mocked = {
+      EMPTY_EXTENDED_FIELDS: {},
+      TemplateFieldsFormReady: (...args: unknown[]) => mockTemplateFieldsFormReady(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOnClose = jest.fn();
+const mockOnClose = vi.fn();
 
 const mockTemplatesData = {
   templates: [
@@ -85,16 +102,16 @@ describe('ApplyTemplateModal', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+    vi.clearAllMocks();
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
 
     mockUseGetTemplates.mockReturnValue({ data: mockTemplatesData, isLoading: false });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isFetching: false });

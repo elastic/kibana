@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared';
 import { I18nProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -18,63 +20,81 @@ import { UnifiedWaterfallContainer } from './unified_waterfall_container';
 // Captures the latest props passed to TraceWaterfall
 let capturedTraceWaterfallProps: Record<string, any> = {};
 
-const MockTraceWaterfall = jest.fn((props: any) => {
+const MockTraceWaterfall = vi.fn((props: any) => {
   capturedTraceWaterfallProps = props;
   return <div data-test-subj="mock-trace-waterfall">{props.children}</div>;
 });
 
-jest.mock('../../../../../context/kibana_context/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      apmShared: {
-        TraceWaterfall: MockTraceWaterfall,
-      },
-    },
-  }),
-}));
+vi.mock('../../../../../context/kibana_context/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          apmShared: {
+            TraceWaterfall: MockTraceWaterfall,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNavigateToUrl = jest.fn();
+const mockNavigateToUrl = vi.fn();
 
-jest.mock('../../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {
-      application: { navigateToUrl: mockNavigateToUrl },
-    },
-  }),
-}));
+vi.mock('../../../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {
+          application: { navigateToUrl: mockNavigateToUrl },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRouterLink = jest.fn().mockReturnValue('/mock-service-overview-url');
+const mockRouterLink = vi.fn().mockReturnValue('/mock-service-overview-url');
 
-jest.mock('../../../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({
-    link: mockRouterLink,
-  }),
-}));
+vi.mock('../../../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => ({
+        link: mockRouterLink,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
-    query: {
-      flyoutDetailTab: 'metadata',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-    },
-  }),
-}));
+vi.mock('../../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({
+        query: {
+          flyoutDetailTab: 'metadata',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    start: '2025-01-15T11:00:00.000Z',
-    end: '2025-01-15T13:00:00.000Z',
-  }),
-}));
+vi.mock('../../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        start: '2025-01-15T11:00:00.000Z',
+        end: '2025-01-15T13:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUnifiedWaterfallFlyout = jest.fn((props: any) => (
+const mockUnifiedWaterfallFlyout = vi.fn((props: any) => (
   <div data-test-subj="mock-unified-waterfall-flyout" />
 ));
 
-jest.mock('./unified_waterfall_flyout', () => ({
-  UnifiedWaterfallFlyout: (props: any) => mockUnifiedWaterfallFlyout(props),
-}));
+vi.mock('./unified_waterfall_flyout', () => {
+      const mocked = {
+      UnifiedWaterfallFlyout: (props: any) => mockUnifiedWaterfallFlyout(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockTraceItems = (): TraceItem[] => [
   {
@@ -128,7 +148,7 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
 
   const history = createMemoryHistory({ initialEntries: [initialPath] });
 
-  const onShowCriticalPathChange = jest.fn();
+  const onShowCriticalPathChange = vi.fn();
 
   const result = renderWithTheme(
     <IntlProvider>
@@ -155,7 +175,7 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
 
 describe('UnifiedWaterfallContainer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRouterLink.mockReturnValue('/mock-service-overview-url');
     capturedTraceWaterfallProps = {};
   });

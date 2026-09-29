@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { ObservableForm, type ObservableFormProps } from './observable_form';
@@ -13,12 +15,12 @@ import { renderWithTestingProviders } from '../../common/mock';
 describe('ObservableForm', () => {
   const props: ObservableFormProps = {
     isLoading: false,
-    onSubmit: jest.fn(),
-    onCancel: jest.fn(),
+    onSubmit: vi.fn(),
+    onCancel: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

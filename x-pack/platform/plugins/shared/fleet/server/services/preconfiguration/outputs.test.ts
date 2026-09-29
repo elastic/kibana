@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { appContextService } from '../app_context';
@@ -28,42 +31,45 @@ import {
   hashSecret,
 } from './outputs';
 
-jest.mock('../agent_policy_update');
-jest.mock('../output');
-jest.mock('../epm/packages/bundled_packages');
-jest.mock('../epm/archive');
-jest.mock('../settings');
-jest.mock('../outputs/helpers');
+vi.mock('../agent_policy_update');
+vi.mock('../output');
+vi.mock('../epm/packages/bundled_packages');
+vi.mock('../epm/archive');
+vi.mock('../settings');
+vi.mock('../outputs/helpers');
 
-const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
-const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
+const mockedOutputService = outputService as Mocked<typeof outputService>;
+const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as MockedFunction<
   typeof checkOtlpOutputAllowed
 >;
 
-jest.mock('../app_context', () => ({
-  appContextService: {
-    getExperimentalFeatures: jest.fn().mockReturnValue({
-      useSpaceAwareness: false,
-      enableOtlpOutput: true,
-    }),
-    getInternalUserSOClient: jest.fn(),
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
-    getLogger: () =>
-      new Proxy(
-        {},
-        {
-          get() {
-            return jest.fn();
-          },
-        }
-      ),
-    getTaskManagerStart: jest.fn(),
-    getCloud: jest.fn().mockReturnValue(null),
-    getConfig: jest.fn().mockReturnValue({}),
-  },
-}));
+vi.mock('../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getExperimentalFeatures: vi.fn().mockReturnValue({
+          useSpaceAwareness: false,
+          enableOtlpOutput: true,
+        }),
+        getInternalUserSOClient: vi.fn(),
+        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+        getLogger: () =>
+          new Proxy(
+            {},
+            {
+              get() {
+                return vi.fn();
+              },
+            }
+          ),
+        getTaskManagerStart: vi.fn(),
+        getCloud: vi.fn().mockReturnValue(null),
+        getConfig: vi.fn().mockReturnValue({}),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
+const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = vi.spyOn(
   agentPolicy.agentPolicyService,
   'bumpAllAgentPoliciesForOutput'
 );
@@ -76,7 +82,7 @@ describe('Outputs preconfiguration', () => {
     logstashSecretHash = await hashSecret('secretKey');
     otlpKeyPemHash = await hashSecret('secretKeyPem');
     const internalSoClientWithoutSpaceExtension = savedObjectsClientMock.create();
-    jest
+    vi
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
       .mockReturnValue(internalSoClientWithoutSpaceExtension);
     internalSoClientWithoutSpaceExtension.find.mockResolvedValue({
@@ -354,14 +360,14 @@ describe('Outputs preconfiguration', () => {
       const originalGetCloud = appContextService.getCloud;
       const originalGetConfig = appContextService.getConfig;
 
-      jest.mocked(appContextService.getCloud).mockReturnValue({
+      vi.mocked(appContextService.getCloud).mockReturnValue({
         isCloudEnabled: true,
         isServerlessEnabled: false,
         elasticsearchUrl: 'https://test-es.co:9200',
       } as any);
 
       // Mock the isAgentlessEnabled function by mocking getConfig
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         agentless: { enabled: true },
         agents: {
           elasticsearch: {
@@ -402,20 +408,20 @@ describe('Outputs preconfiguration', () => {
       expect(result[1].allow_edit).toEqual(['hosts', 'ca_sha256']);
 
       // Restore original mocks
-      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
-      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+      vi.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      vi.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
 
     it('should not include ECH agentless output when agentless is disabled', async () => {
       const originalGetCloud = appContextService.getCloud;
       const originalGetConfig = appContextService.getConfig;
 
-      jest.mocked(appContextService.getCloud).mockReturnValue({
+      vi.mocked(appContextService.getCloud).mockReturnValue({
         isCloudEnabled: true,
         isServerlessEnabled: false,
       } as any);
 
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         agentless: { enabled: false },
         agents: {
           elasticsearch: { hosts: ['http://localhost:9200'] },
@@ -432,20 +438,20 @@ describe('Outputs preconfiguration', () => {
       expect(result[0].id).toBe('fleet-default-output');
 
       // Restore original mocks
-      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
-      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+      vi.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      vi.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
 
     it('should not include ECH agentless output in serverless environment', async () => {
       const originalGetCloud = appContextService.getCloud;
       const originalGetConfig = appContextService.getConfig;
 
-      jest.mocked(appContextService.getCloud).mockReturnValue({
+      vi.mocked(appContextService.getCloud).mockReturnValue({
         isCloudEnabled: true,
         isServerlessEnabled: true,
       } as any);
 
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         agentless: { enabled: true },
         agents: {
           elasticsearch: { hosts: ['http://localhost:9200'] },
@@ -462,21 +468,21 @@ describe('Outputs preconfiguration', () => {
       expect(result[0].id).toBe('fleet-default-output');
 
       // Restore original mocks
-      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
-      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+      vi.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      vi.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
 
     it('should include ECH agentless managed bulk output when managed bulk is enabled in cloud environment', async () => {
       const originalGetCloud = appContextService.getCloud;
       const originalGetConfig = appContextService.getConfig;
 
-      jest.mocked(appContextService.getCloud).mockReturnValue({
+      vi.mocked(appContextService.getCloud).mockReturnValue({
         isCloudEnabled: true,
         isServerlessEnabled: false,
         managedOtlp: { url: 'https://managed-otlp.example.com' },
       } as any);
 
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         agentless: { managedBulk: { enabled: true } },
         agents: {
           elasticsearch: { hosts: ['http://localhost:9200'] },
@@ -501,21 +507,21 @@ describe('Outputs preconfiguration', () => {
         is_preconfigured: true,
       });
 
-      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
-      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+      vi.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      vi.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
 
     it('should not include ECH agentless managed bulk output when managed bulk is disabled', async () => {
       const originalGetCloud = appContextService.getCloud;
       const originalGetConfig = appContextService.getConfig;
 
-      jest.mocked(appContextService.getCloud).mockReturnValue({
+      vi.mocked(appContextService.getCloud).mockReturnValue({
         isCloudEnabled: true,
         isServerlessEnabled: false,
         managedOtlp: { url: 'https://managed-otlp.example.com' },
       } as any);
 
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         agentless: { managedBulk: { enabled: false } },
         agents: {
           elasticsearch: { hosts: ['http://localhost:9200'] },
@@ -531,21 +537,21 @@ describe('Outputs preconfiguration', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('fleet-default-output');
 
-      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
-      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+      vi.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      vi.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
 
     it('should not include ECH agentless managed bulk output in serverless environment', async () => {
       const originalGetCloud = appContextService.getCloud;
       const originalGetConfig = appContextService.getConfig;
 
-      jest.mocked(appContextService.getCloud).mockReturnValue({
+      vi.mocked(appContextService.getCloud).mockReturnValue({
         isCloudEnabled: true,
         isServerlessEnabled: true,
         managedOtlp: { url: 'https://managed-otlp.example.com' },
       } as any);
 
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         agentless: { managedBulk: { enabled: true } },
         agents: {
           elasticsearch: { hosts: ['http://localhost:9200'] },
@@ -561,22 +567,22 @@ describe('Outputs preconfiguration', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('fleet-default-output');
 
-      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
-      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+      vi.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      vi.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
 
     it('should not modify the existing ECH agentless output when managed bulk is also enabled', async () => {
       const originalGetCloud = appContextService.getCloud;
       const originalGetConfig = appContextService.getConfig;
 
-      jest.mocked(appContextService.getCloud).mockReturnValue({
+      vi.mocked(appContextService.getCloud).mockReturnValue({
         isCloudEnabled: true,
         isServerlessEnabled: false,
         elasticsearchUrl: 'https://test-es.co:9200',
         managedOtlp: { url: 'https://managed-otlp.example.com' },
       } as any);
 
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         agentless: { enabled: true, managedBulk: { enabled: true } },
         agents: {
           elasticsearch: { hosts: ['http://localhost:9200'], ca_sha256: 'test-ca-sha256' },
@@ -600,8 +606,8 @@ describe('Outputs preconfiguration', () => {
         hosts: ['https://managed-otlp.example.com/_es'],
       });
 
-      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
-      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+      vi.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      vi.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
 
     it('should create a preconfigured ES output that does not exist', async () => {
@@ -1858,18 +1864,18 @@ describe('Outputs preconfiguration', () => {
 
 describe('createManagedBulkOutputMatcher', () => {
   beforeEach(() => {
-    (appContextService.getCloud as jest.Mock).mockReturnValue(null);
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getCloud as Mock).mockReturnValue(null);
+    (appContextService.getConfig as Mock).mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
     });
   });
 
   it('matches the ECH bulk output on hostname, ignoring the port added by normalizeHostsForAgents', () => {
-    (appContextService.getCloud as jest.Mock).mockReturnValue({
+    (appContextService.getCloud as Mock).mockReturnValue({
       managedOtlp: { url: 'https://managed-otlp.example.invalid' },
     });
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getConfig as Mock).mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentless: { managedBulk: { enabled: true } },
@@ -1886,7 +1892,7 @@ describe('createManagedBulkOutputMatcher', () => {
   });
 
   it('matches the serverless bulk output via the config-injected endpoint, with no cloud stub needed', () => {
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getConfig as Mock).mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       outputs: [
@@ -1912,10 +1918,10 @@ describe('createManagedBulkOutputMatcher', () => {
   });
 
   it('does not match a non-elasticsearch output type, even when the host matches', () => {
-    (appContextService.getCloud as jest.Mock).mockReturnValue({
+    (appContextService.getCloud as Mock).mockReturnValue({
       managedOtlp: { url: 'https://managed-otlp.example.invalid' },
     });
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getConfig as Mock).mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentless: { managedBulk: { enabled: true } },
@@ -1932,10 +1938,10 @@ describe('createManagedBulkOutputMatcher', () => {
   });
 
   it('does not match a direct-ES output on a different host', () => {
-    (appContextService.getCloud as jest.Mock).mockReturnValue({
+    (appContextService.getCloud as Mock).mockReturnValue({
       managedOtlp: { url: 'https://managed-otlp.example.invalid' },
     });
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getConfig as Mock).mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentless: { managedBulk: { enabled: true } },
@@ -1952,10 +1958,10 @@ describe('createManagedBulkOutputMatcher', () => {
   });
 
   it('does not match when the output has no hosts', () => {
-    (appContextService.getCloud as jest.Mock).mockReturnValue({
+    (appContextService.getCloud as Mock).mockReturnValue({
       managedOtlp: { url: 'https://managed-otlp.example.invalid' },
     });
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getConfig as Mock).mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentless: { managedBulk: { enabled: true } },
@@ -1980,10 +1986,10 @@ describe('createManagedBulkOutputMatcher', () => {
   });
 
   it('returns false and does not throw when cloud.managed_otlp.url is a malformed non-URL string', () => {
-    (appContextService.getCloud as jest.Mock).mockReturnValue({
+    (appContextService.getCloud as Mock).mockReturnValue({
       managedOtlp: { url: 'not-a-url' },
     });
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getConfig as Mock).mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentless: { managedBulk: { enabled: true } },

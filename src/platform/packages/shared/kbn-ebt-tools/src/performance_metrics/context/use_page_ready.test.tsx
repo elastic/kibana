@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V.
  * Licensed under the Elastic License 2.0 and other licenses.
@@ -17,15 +19,18 @@ import { usePageReady } from './use_page_ready';
 
 // We need to mock the PerformanceContext that the hook relies on so that we can
 // verify that its callbacks are invoked.
-const mockOnPageReady = jest.fn();
-const mockOnPageRefreshStart = jest.fn();
+const mockOnPageReady = vi.fn();
+const mockOnPageRefreshStart = vi.fn();
 
-jest.mock('../../..', () => ({
-  usePerformanceContext: () => ({
-    onPageReady: mockOnPageReady,
-    onPageRefreshStart: mockOnPageRefreshStart,
-  }),
-}));
+vi.mock('../../..', () => {
+      const mocked = {
+      usePerformanceContext: () => ({
+        onPageReady: mockOnPageReady,
+        onPageRefreshStart: mockOnPageRefreshStart,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePageReady', () => {
   beforeEach(() => {
@@ -96,7 +101,7 @@ describe('usePageReady', () => {
   });
 
   it('uses external customInitialLoad flag', async () => {
-    const external = { value: true, onInitialLoadReported: jest.fn() };
+    const external = { value: true, onInitialLoadReported: vi.fn() };
 
     const { rerender } = renderHook(
       ({ ready }) =>

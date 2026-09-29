@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { resolveClassicRules } from './resolve_classic_rules';
 
@@ -12,7 +14,7 @@ const mockHttp = httpServiceMock.createStartContract();
 
 describe('resolveClassicRules', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns an empty array without calling the API when no ids are provided', async () => {

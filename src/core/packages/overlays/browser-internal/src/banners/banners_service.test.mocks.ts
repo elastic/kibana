@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { InternalOverlayBannersStart } from './banners_service';
 
 // internal duplicate of public mock for `createStartContractMock`
 export const createStartContractMock = () => {
-  const startContract: jest.Mocked<InternalOverlayBannersStart> = {
-    add: jest.fn(),
-    remove: jest.fn(),
-    replace: jest.fn(),
-    get$: jest.fn(),
-    getComponent: jest.fn(),
+  const startContract: Mocked<InternalOverlayBannersStart> = {
+    add: vi.fn(),
+    remove: vi.fn(),
+    replace: vi.fn(),
+    get$: vi.fn(),
+    getComponent: vi.fn(),
   };
   return startContract;
 };

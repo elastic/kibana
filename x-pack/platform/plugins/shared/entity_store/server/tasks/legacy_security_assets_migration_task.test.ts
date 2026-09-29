@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -18,26 +21,26 @@ import { installSharedElasticsearchAssets } from '../domain/asset_manager/instal
 import { hasLegacySecurityAssets } from '../domain/asset_manager/migrate_legacy_security_assets';
 import { EngineDescriptorTypeName } from '../domain/saved_objects';
 
-jest.mock('../domain/asset_manager/install_assets');
-jest.mock('../domain/asset_manager/migrate_legacy_security_assets');
+vi.mock('../domain/asset_manager/install_assets');
+vi.mock('../domain/asset_manager/migrate_legacy_security_assets');
 
 const mockInstallSharedElasticsearchAssets =
-  installSharedElasticsearchAssets as jest.MockedFunction<typeof installSharedElasticsearchAssets>;
-const mockHasLegacySecurityAssets = hasLegacySecurityAssets as jest.MockedFunction<
+  installSharedElasticsearchAssets as MockedFunction<typeof installSharedElasticsearchAssets>;
+const mockHasLegacySecurityAssets = hasLegacySecurityAssets as MockedFunction<
   typeof hasLegacySecurityAssets
 >;
 
 describe('legacy_security_assets_migration_task', () => {
   const logger = loggerMock.create();
   let mockEsClient: ElasticsearchClient;
-  let mockFind: jest.Mock;
+  let mockFind: Mock;
   let coreStart: CoreStart;
-  let taskManager: jest.Mocked<Pick<TaskManagerStartContract, 'ensureScheduled'>>;
+  let taskManager: Mocked<Pick<TaskManagerStartContract, 'ensureScheduled'>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient = {} as ElasticsearchClient;
-    mockFind = jest.fn();
+    mockFind = vi.fn();
     mockInstallSharedElasticsearchAssets.mockResolvedValue(undefined);
     mockHasLegacySecurityAssets.mockResolvedValue(false);
 
@@ -48,12 +51,12 @@ describe('legacy_security_assets_migration_task', () => {
         },
       },
       savedObjects: {
-        createInternalRepository: jest.fn().mockReturnValue({ find: mockFind }),
+        createInternalRepository: vi.fn().mockReturnValue({ find: mockFind }),
       },
     } as unknown as CoreStart;
 
     taskManager = {
-      ensureScheduled: jest.fn().mockResolvedValue(undefined),
+      ensureScheduled: vi.fn().mockResolvedValue(undefined),
     };
   });
 

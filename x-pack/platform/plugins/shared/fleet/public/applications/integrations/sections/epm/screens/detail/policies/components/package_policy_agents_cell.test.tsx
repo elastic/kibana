@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent } from '@testing-library/react';
@@ -18,13 +21,13 @@ import type { AgentPolicy } from '../../../../../../types';
 
 import { PackagePolicyAgentsCell } from './package_policy_agents_cell';
 
-jest.mock('../../../../../../../../hooks/use_multiple_agent_policies');
-jest.mock('../../../../../../../../hooks/use_authz');
+vi.mock('../../../../../../../../hooks/use_multiple_agent_policies');
+vi.mock('../../../../../../../../hooks/use_authz');
 
-const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as MockedFunction<
   typeof useMultipleAgentPolicies
 >;
-const mockedUseAuthz = useAuthz as jest.MockedFunction<typeof useAuthz>;
+const mockedUseAuthz = useAuthz as MockedFunction<typeof useAuthz>;
 
 function renderCell({
   agentPolicies = [] as AgentPolicy[],
@@ -56,7 +59,7 @@ describe('PackagePolicyAgentsCell', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('when multiple agent policies is disabled', () => {

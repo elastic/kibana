@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ImportedEvents } from './imported_events';
 
-jest.mock('../../../../capabilities/check_capabilities');
+vi.mock('../../../../capabilities/check_capabilities');
 
 const testProps = {
   events: [
@@ -24,8 +26,8 @@ const testProps = {
   ],
   showRecurringWarning: false,
   includePastEvents: false,
-  onCheckboxToggle: jest.fn(),
-  onEventDelete: jest.fn(),
+  onCheckboxToggle: vi.fn(),
+  onEventDelete: vi.fn(),
   canCreateCalendar: true,
 };
 

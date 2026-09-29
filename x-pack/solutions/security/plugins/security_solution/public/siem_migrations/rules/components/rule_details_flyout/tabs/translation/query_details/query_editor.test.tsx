@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { QueryEditor } from './query_editor';
 import { TestProviders } from '../../../../../../../common/mock';
 
 describe('QueryEditor', () => {
-  const mockOnSave = jest.fn();
-  const mockOnCancel = jest.fn();
+  const mockOnSave = vi.fn();
+  const mockOnCancel = vi.fn();
 
   const setup = () => {
     return render(
@@ -28,7 +30,7 @@ describe('QueryEditor', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the initial rule name', () => {

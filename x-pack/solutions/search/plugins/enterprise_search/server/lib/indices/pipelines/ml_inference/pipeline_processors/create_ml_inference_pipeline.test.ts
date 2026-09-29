@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { getPrefixedInferencePipelineProcessorName } from '../../../../../utils/ml_inference_pipeline_utils';
@@ -13,11 +15,11 @@ import { createMlInferencePipeline } from './create_ml_inference_pipeline';
 
 const mockClient = {
   ingest: {
-    getPipeline: jest.fn(),
-    putPipeline: jest.fn(),
+    getPipeline: vi.fn(),
+    putPipeline: vi.fn(),
   },
   ml: {
-    getTrainedModels: jest.fn(),
+    getTrainedModels: vi.fn(),
   },
 };
 
@@ -42,7 +44,7 @@ describe('createMlInferencePipeline lib function', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should create the pipeline if it doesn't exist", async () => {

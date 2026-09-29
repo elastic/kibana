@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { firstValueFrom } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { type FlatMetadata, MetadataService } from './metadata_service';
 
-jest.mock('rxjs', () => {
-  const RxJs = jest.requireActual('rxjs');
+vi.mock('rxjs', () => {
+  const RxJs = require('rxjs');
 
   return {
     ...RxJs,
@@ -21,7 +23,7 @@ jest.mock('rxjs', () => {
 });
 
 describe('MetadataService', () => {
-  jest.useFakeTimers({ legacyFakeTimers: true });
+  vi.useFakeTimers({ legacyFakeTimers: true });
   let metadataService: MetadataService;
   let logger: MockedLogger;
 
@@ -34,8 +36,8 @@ describe('MetadataService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.clearAllMocks();
+    vi.clearAllTimers();
+    vi.clearAllMocks();
   });
 
   const initialMetadata: FlatMetadata = {

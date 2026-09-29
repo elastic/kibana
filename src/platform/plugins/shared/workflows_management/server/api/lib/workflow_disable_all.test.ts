@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { disableAllWorkflows } from './workflow_disable_all';
@@ -45,13 +47,13 @@ const makeHit = (
 });
 
 const makeStorageClient = (pages: Array<Array<ReturnType<typeof makeHit>>>) => {
-  const searchMock = jest.fn();
+  const searchMock = vi.fn();
   pages.forEach((hits) => {
     searchMock.mockResolvedValueOnce({ hits: { hits } });
   });
   searchMock.mockResolvedValue({ hits: { hits: [] } });
 
-  const bulkMock = jest.fn().mockImplementation(({ operations }) => {
+  const bulkMock = vi.fn().mockImplementation(({ operations }) => {
     const items = operations
       .filter((op: Record<string, unknown>) => 'index' in op)
       .map((op: { index: { _id: string } }) => ({
@@ -74,7 +76,7 @@ const disableAllParams = (overrides: Partial<Parameters<typeof disableAllWorkflo
 });
 
 describe('disableAllWorkflows', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns zero counts when no enabled workflows exist', async () => {
     const { storage } = makeStorageClient([[]]);

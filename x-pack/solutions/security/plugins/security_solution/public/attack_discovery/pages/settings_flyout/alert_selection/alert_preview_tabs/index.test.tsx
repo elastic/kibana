@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -18,35 +20,38 @@ import {
   PREVIEW_MATCHED_ALERTS_LOADING,
 } from '../translations';
 
-jest.mock('../preview_tab', () => ({
-  PreviewTab: ({
-    dataTestSubj,
-    end,
-    esqlQuery,
-    start,
-    tableStackBy0,
-  }: {
-    dataTestSubj?: string;
-    end: string;
-    esqlQuery?: string;
-    start: string;
-    tableStackBy0: string;
-  }) => (
-    <div
-      data-test-subj={dataTestSubj ?? 'previewTab'}
-      data-end={end}
-      data-esql-query={esqlQuery ?? ''}
-      data-start={start}
-      data-table-stack-by0={tableStackBy0}
-    />
-  ),
-}));
+vi.mock('../preview_tab', () => {
+      const mocked = {
+      PreviewTab: ({
+        dataTestSubj,
+        end,
+        esqlQuery,
+        start,
+        tableStackBy0,
+      }: {
+        dataTestSubj?: string;
+        end: string;
+        esqlQuery?: string;
+        start: string;
+        tableStackBy0: string;
+      }) => (
+        <div
+          data-test-subj={dataTestSubj ?? 'previewTab'}
+          data-end={end}
+          data-esql-query={esqlQuery ?? ''}
+          data-start={start}
+          data-table-stack-by0={tableStackBy0}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   alertsPreviewStackBy0: 'kibana.alert.rule.name',
   alertSummaryStackBy0: 'kibana.alert.severity',
-  setAlertsPreviewStackBy0: jest.fn(),
-  setAlertSummaryStackBy0: jest.fn(),
+  setAlertsPreviewStackBy0: vi.fn(),
+  setAlertSummaryStackBy0: vi.fn(),
   settings: {
     end: 'now',
     filters: [],
@@ -58,7 +63,7 @@ const defaultProps = {
 
 describe('AlertPreviewTabs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('accordion', () => {

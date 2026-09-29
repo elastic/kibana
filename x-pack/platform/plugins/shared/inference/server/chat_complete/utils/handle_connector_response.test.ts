@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, of, take } from 'rxjs';
 import { Readable } from 'stream';
 import type { InferenceInvokeResult } from './inference_executor';
@@ -23,7 +25,7 @@ describe('handleConnectorResponse', () => {
     const stream = Readable.from('hello');
     const input = stubResult({ data: stream });
 
-    const processStream = jest.fn().mockImplementation((arg: unknown) => {
+    const processStream = vi.fn().mockImplementation((arg: unknown) => {
       return of(arg);
     });
 
@@ -44,7 +46,7 @@ describe('handleConnectorResponse', () => {
       serviceMessage: 'something went bad',
     });
 
-    const processStream = jest.fn().mockImplementation((arg: unknown) => {
+    const processStream = vi.fn().mockImplementation((arg: unknown) => {
       return of(arg);
     });
 
@@ -59,7 +61,7 @@ describe('handleConnectorResponse', () => {
       status: 'ok',
     });
 
-    const processStream = jest.fn().mockImplementation((arg: unknown) => {
+    const processStream = vi.fn().mockImplementation((arg: unknown) => {
       return of(arg);
     });
 

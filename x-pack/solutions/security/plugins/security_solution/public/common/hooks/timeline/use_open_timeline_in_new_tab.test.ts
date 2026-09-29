@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { decode } from '@kbn/rison';
 import type { DataProvider } from '../../../../common/types';
@@ -13,9 +16,9 @@ import { EXISTS_OPERATOR, IS_OPERATOR } from '../../../../common/types/timeline'
 import { useKibana } from '../../lib/kibana';
 import { useOpenTimelineInNewTab } from './use_open_timeline_in_new_tab';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-const getUrlForApp = jest.fn(
+const getUrlForApp = vi.fn(
   (_appId: string, { path }: { path: string }) => `/app/security/${path}`
 );
 
@@ -35,14 +38,14 @@ const buildDataProvider = (field: string, value: string): DataProvider => ({
 });
 
 describe('useOpenTimelineInNewTab', () => {
-  let windowOpenSpy: jest.SpyInstance;
+  let windowOpenSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: { application: { getUrlForApp } },
     });
-    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
   });
 
   afterEach(() => {

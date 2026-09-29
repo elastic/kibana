@@ -5,30 +5,42 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import * as reactRedux from 'react-redux-v7';
 import { PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { useMonitorIntegrationHealth } from './use_monitor_integration_health';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useSelector: jest.fn(),
-  useDispatch: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useSelector: vi.fn(),
+      useDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsRefreshContext: jest.fn().mockReturnValue({ lastRefresh: 0 }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: vi.fn().mockReturnValue({ lastRefresh: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state/monitor_management/api', () => ({
-  resetMonitorAPI: jest.fn(),
-  resetMonitorBulkAPI: jest.fn(),
-}));
+vi.mock('../../../state/monitor_management/api', () => {
+      const mocked = {
+      resetMonitorAPI: vi.fn(),
+      resetMonitorBulkAPI: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
 
-const mockedResetMonitorAPI = resetMonitorAPI as jest.MockedFunction<typeof resetMonitorAPI>;
-const mockedResetMonitorBulkAPI = resetMonitorBulkAPI as jest.MockedFunction<
+const mockedResetMonitorAPI = resetMonitorAPI as MockedFunction<typeof resetMonitorAPI>;
+const mockedResetMonitorBulkAPI = resetMonitorBulkAPI as MockedFunction<
   typeof resetMonitorBulkAPI
 >;
 
@@ -68,7 +80,7 @@ const unhealthyMonitor = {
 };
 
 const setupSelectors = (healthData: { monitors: (typeof healthyMonitor)[]; errors: unknown[] }) => {
-  (reactRedux.useSelector as jest.Mock).mockImplementation((selector: any) => {
+  (reactRedux.useSelector as Mock).mockImplementation((selector: any) => {
     const fakeState = {
       monitorList: {
         data: { monitors: [] },
@@ -87,12 +99,12 @@ const setupSelectors = (healthData: { monitors: (typeof healthyMonitor)[]; error
 };
 
 describe('useMonitorIntegrationHealth', () => {
-  let dispatchSpy: jest.Mock;
+  let dispatchSpy: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    dispatchSpy = jest.fn();
-    (reactRedux.useDispatch as jest.Mock).mockReturnValue(dispatchSpy);
+    vi.clearAllMocks();
+    dispatchSpy = vi.fn();
+    (reactRedux.useDispatch as Mock).mockReturnValue(dispatchSpy);
   });
 
   it('does not re-fetch health when configIds is a new array reference with the same ids', () => {

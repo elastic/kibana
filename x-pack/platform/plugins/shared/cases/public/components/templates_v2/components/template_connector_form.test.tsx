@@ -5,32 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { TemplateConnectorForm } from './template_connector_form';
 
-const mockUseFormData = jest.fn();
+const mockUseFormData = vi.fn();
 
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
-  Form: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  useForm: () => ({ form: {} }),
-  useFormData: () => mockUseFormData(),
-}));
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => {
+      const mocked = {
+      Form: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+      useForm: () => ({ form: {} }),
+      useFormData: () => mockUseFormData(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../case_form_fields/connector', () => ({
-  Connector: () => <div data-test-subj="mock-connector" />,
-}));
+vi.mock('../../case_form_fields/connector', () => {
+      const mocked = {
+      Connector: () => <div data-test-subj="mock-connector" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/configure/use_get_supported_action_connectors', () => ({
-  useGetSupportedActionConnectors: () => ({
-    data: [{ id: 'my-connector', name: 'My Connector', actionTypeId: '.jira' }],
-    isLoading: false,
-  }),
-}));
+vi.mock('../../../containers/configure/use_get_supported_action_connectors', () => {
+      const mocked = {
+      useGetSupportedActionConnectors: () => ({
+        data: [{ id: 'my-connector', name: 'My Connector', actionTypeId: '.jira' }],
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TemplateConnectorForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('lifts the selected connector including its dynamic fields', async () => {
@@ -40,7 +51,7 @@ describe('TemplateConnectorForm', () => {
         fields: { issueType: '10001', priority: 'High', parent: null },
       },
     ]);
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(<TemplateConnectorForm onChange={onChange} />);
 
@@ -55,7 +66,7 @@ describe('TemplateConnectorForm', () => {
 
   it('lifts a .none connector with null fields when the id is not a real connector', async () => {
     mockUseFormData.mockReturnValue([{ connectorId: 'none', fields: {} }]);
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(<TemplateConnectorForm onChange={onChange} />);
 

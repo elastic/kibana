@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -25,31 +28,31 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
-jest.mock('@kbn/entity-store/public', () => {
-  const actual = jest.requireActual('@kbn/entity-store/public');
-  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+vi.mock('@kbn/entity-store/public', async () => {
+  const actual = (await vi.importActual('@kbn/entity-store/public'));
+  const { euid } = (await vi.importActual('@kbn/entity-store/common/euid_helpers'));
   return {
     ...actual,
-    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+    useEntityStoreEuidApi: vi.fn(() => ({ euid })),
   };
 });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
-  return { ...actual, useUiSetting: jest.fn() };
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  return { ...actual, useUiSetting: vi.fn() };
 });
-jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
+vi.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
+vi.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
@@ -59,56 +62,65 @@ jest.mock('react-redux-v7', () => {
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
-jest.mock('../../../../common/containers/use_global_time', () => {
-  const actual = jest.requireActual('../../../../common/containers/use_global_time');
+vi.mock('../../../../common/containers/use_global_time', async () => {
+  const actual = (await vi.importActual('../../../../common/containers/use_global_time'));
   return {
     ...actual,
-    useGlobalTime: jest
+    useGlobalTime: vi
       .fn()
-      .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() }),
+      .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
   };
 });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
-const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
+vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
+const mockUseMlUserPermissions = useMlCapabilities as Mock;
 
-const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
-jest.mock('../../../../helper_hooks', () => ({
-  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-}));
+const mockUseHasSecurityCapability = vi.fn().mockReturnValue(false);
+vi.mock('../../../../helper_hooks', () => {
+      const mocked = {
+      useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
-  AnomalyTableProvider: ({
-    children,
-  }: {
-    children: (args: {
-      anomaliesData: Anomalies;
-      isLoadingAnomaliesData: boolean;
-      jobNameById: Record<string, string | undefined>;
-    }) => React.ReactNode;
-  }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
-}));
+vi.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => {
+      const mocked = {
+      AnomalyTableProvider: ({
+        children,
+      }: {
+        children: (args: {
+          anomaliesData: Anomalies;
+          isLoadingAnomaliesData: boolean;
+          jobNameById: Record<string, string | undefined>;
+        }) => React.ReactNode;
+      }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../explore/hosts/containers/hosts/details');
-const mockUseHostDetails = useHostDetails as jest.Mock;
+vi.mock('../../../../explore/hosts/containers/hosts/details');
+const mockUseHostDetails = useHostDetails as Mock;
 
-jest.mock('../../../../common/containers/related_entities/related_users');
-const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
+vi.mock('../../../../common/containers/related_entities/related_users');
+const mockUseHostsRelatedUsers = useHostRelatedUsers as Mock;
 
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
-const mockUseRiskScore = useRiskScore as jest.Mock;
+vi.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+const mockUseRiskScore = useRiskScore as Mock;
 
-jest.mock('../../../../explore/users/containers/users/observed_details');
-const mockUseObservedUserDetails = useObservedUserDetails as jest.Mock;
+vi.mock('../../../../explore/users/containers/users/observed_details');
+const mockUseObservedUserDetails = useObservedUserDetails as Mock;
 
-jest.mock('../../../../common/containers/related_entities/related_hosts');
-const mockUseUsersRelatedHosts = useUserRelatedHosts as jest.Mock;
-const mockUseUiSetting = useUiSetting as jest.Mock;
-const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
+vi.mock('../../../../common/containers/related_entities/related_hosts');
+const mockUseUsersRelatedHosts = useUserRelatedHosts as Mock;
+const mockUseUiSetting = useUiSetting as Mock;
+const mockUseEntityFromStore = useEntityFromStore as Mock;
 
 const USER_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID);
 const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
@@ -134,22 +146,22 @@ describe('<EntitiesDetails />', () => {
       lastSeen: null,
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }));
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
     mockUseHasSecurityCapability.mockReturnValue(false);
     mockUseHostDetails.mockReturnValue([false, {}]);
     mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: false });
     mockUseHostsRelatedUsers.mockReturnValue({
-      inspect: jest.fn(),
-      refetch: jest.fn(),
+      inspect: vi.fn(),
+      refetch: vi.fn(),
       relatedUsers: [],
       loading: false,
     });
     mockUseObservedUserDetails.mockReturnValue([false, {}]);
     mockUseUsersRelatedHosts.mockReturnValue({
-      inspect: jest.fn(),
-      refetch: jest.fn(),
+      inspect: vi.fn(),
+      refetch: vi.fn(),
       relatedHosts: [],
       loading: false,
     });
@@ -209,7 +221,7 @@ describe('<EntitiesDetails />', () => {
       lastSeen: null,
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const contextValue = {
       ...mockContextValue,
@@ -246,7 +258,7 @@ describe('<EntitiesDetails />', () => {
       lastSeen: null,
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const { queryByText, getByTestId } = renderEntitiesDetails(mockContextValue);
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { DECISION_TREE_AI_INDEX_DEST } from '../../common/decision_trees';
 import { createLearningStore } from './learning_store';
@@ -12,8 +14,8 @@ import { createLearningStore } from './learning_store';
 const TREE_ID = 'symptom:checkout-high-latency';
 
 const createEsClient = () => ({
-  index: jest.fn().mockResolvedValue({}),
-  search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+  index: vi.fn().mockResolvedValue({}),
+  search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
 });
 
 const createStore = (esClient: ReturnType<typeof createEsClient>) =>

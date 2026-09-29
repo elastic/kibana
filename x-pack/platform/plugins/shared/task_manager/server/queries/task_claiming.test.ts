@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { TaskClaiming } from './task_claiming';
@@ -14,16 +16,19 @@ import { TaskPartitioner } from '../lib/task_partitioner';
 import type { KibanaDiscoveryService } from '../kibana_discovery_service';
 import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 
-jest.mock('../constants', () => ({
-  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
-    'limitedToZero',
-    'limitedToOne',
-    'anotherLimitedToZero',
-    'anotherLimitedToOne',
-    'limitedToTwo',
-    'limitedToFive',
-  ],
-}));
+vi.mock('../constants', () => {
+      const mocked = {
+      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+        'limitedToZero',
+        'limitedToOne',
+        'anotherLimitedToZero',
+        'anotherLimitedToOne',
+        'limitedToTwo',
+        'limitedToFive',
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const taskManagerLogger = mockLogger();
 const taskPartitioner = new TaskPartitioner({
@@ -33,7 +38,7 @@ const taskPartitioner = new TaskPartitioner({
   kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
 });
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
@@ -51,26 +56,26 @@ const taskDefinitions = new TaskTypeDictionary(taskManagerLogger);
 taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   dernstraight: {
     title: 'dernstraight',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   yawn: {
     title: 'yawn',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
 });
 
 const mockApmTrans = {
-  end: jest.fn(),
+  end: vi.fn(),
 };
 
 describe('TaskClaiming', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+    vi.clearAllMocks();
+    vi
       .spyOn(apm, 'startTransaction')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,31 +87,31 @@ describe('TaskClaiming', () => {
     definitions.registerTaskDefinitions({
       unlimited: {
         title: 'unlimited',
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
       anotherUnlimited: {
         title: 'anotherUnlimited',
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
       limitedToZero: {
         title: 'limitedToZero',
         maxConcurrency: 0,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
       limitedToOne: {
         title: 'limitedToOne',
         maxConcurrency: 1,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
       anotherLimitedToZero: {
         title: 'anotherLimitedToZero',
         maxConcurrency: 0,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
       limitedToTwo: {
         title: 'limitedToTwo',
         maxConcurrency: 2,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
     });
 

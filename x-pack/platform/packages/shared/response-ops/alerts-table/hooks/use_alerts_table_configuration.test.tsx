@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useAlertsTableConfiguration } from './use_alerts_table_configuration';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const mockStorageData = new Map<string, string>();
 const mockStorageWrapper = {
-  get: jest.fn((key: string) => mockStorageData.get(key)),
-  set: jest.fn((key: string, value: string) => mockStorageData.set(key, value)),
-  remove: jest.fn((key: string) => mockStorageData.delete(key)),
-  clear: jest.fn(() => mockStorageData.clear()),
+  get: vi.fn((key: string) => mockStorageData.get(key)),
+  set: vi.fn((key: string, value: string) => mockStorageData.set(key, value)),
+  remove: vi.fn((key: string) => mockStorageData.delete(key)),
+  clear: vi.fn(() => mockStorageData.clear()),
 };
 const notifications = notificationServiceMock.createStartContract();
 
 describe('useAlertsTableConfiguration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockStorageData.clear();
   });
 

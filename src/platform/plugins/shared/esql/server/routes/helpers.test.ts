@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { resolveIncludeDatasets } from './helpers';
 
 describe('resolveIncludeDatasets', () => {
   it('returns the setting value when the uiSettings client resolves it', async () => {
     const uiSettingsClient = {
-      get: jest.fn().mockResolvedValue(true),
+      get: vi.fn().mockResolvedValue(true),
     } as unknown as IUiSettingsClient;
 
     await expect(resolveIncludeDatasets(uiSettingsClient)).resolves.toBe(true);
@@ -21,7 +23,7 @@ describe('resolveIncludeDatasets', () => {
 
   it('returns false when the setting is not registered (esql plugin has no dependency on agent_builder)', async () => {
     const uiSettingsClient = {
-      get: jest
+      get: vi
         .fn()
         .mockRejectedValue(new Error('Unknown setting agentBuilder:experimentalFeatures')),
     } as unknown as IUiSettingsClient;

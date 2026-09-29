@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,9 +16,9 @@ import { of } from 'rxjs';
 import { ConnectedServicesPage, type ConnectedServicesPageProps } from '.';
 import { useCloudConnectedAppContext } from '../../app_context';
 
-jest.mock('../../app_context');
+vi.mock('../../app_context');
 
-const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.MockedFunction<
+const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as MockedFunction<
   typeof useCloudConnectedAppContext
 >;
 
@@ -28,9 +31,9 @@ const renderWithIntl = (component: React.ReactElement) => {
 };
 
 describe('ConnectedServicesPage', () => {
-  const mockRotateApiKey = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddDanger = jest.fn();
+  const mockRotateApiKey = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddDanger = vi.fn();
 
   const defaultProps: ConnectedServicesPageProps = {
     clusterDetails: {
@@ -62,12 +65,12 @@ describe('ConnectedServicesPage', () => {
         },
       },
     },
-    onServiceUpdate: jest.fn(),
-    onDisconnect: jest.fn(),
+    onServiceUpdate: vi.fn(),
+    onDisconnect: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRotateApiKey.mockResolvedValue({ data: { success: true } });
 
     mockUseCloudConnectedAppContext.mockReturnValue({
@@ -86,11 +89,11 @@ describe('ConnectedServicesPage', () => {
         },
       },
       telemetryService: {
-        trackLinkClicked: jest.fn(),
+        trackLinkClicked: vi.fn(),
       },
       apiService: {
         rotateApiKey: mockRotateApiKey,
-        disconnectCluster: jest.fn().mockResolvedValue({ data: { success: true } }),
+        disconnectCluster: vi.fn().mockResolvedValue({ data: { success: true } }),
       },
       licensing: {
         license$: of({ type: 'platinum' }),

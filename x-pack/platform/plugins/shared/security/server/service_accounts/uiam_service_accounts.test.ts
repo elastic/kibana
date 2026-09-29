@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
@@ -37,12 +40,12 @@ import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
 describe('UiamServiceAccounts', () => {
   let serviceAccounts: UiamServiceAccounts;
-  let mockLicense: jest.Mocked<SecurityLicense>;
-  let mockUiam: jest.Mocked<UiamServicePublic>;
-  let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
-  let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
+  let mockLicense: Mocked<SecurityLicense>;
+  let mockUiam: Mocked<UiamServicePublic>;
+  let mockCheckPrivileges: Mocked<CheckPrivileges>;
+  let mockCheckPrivilegesWithRequest: Mocked<CheckPrivilegesWithRequest>;
   let logger: Logger;
-  let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
+  let getCurrentUser: Mock<AuthenticatedUser | null, [KibanaRequest]>;
 
   const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
     hasAllRequested: authorized,
@@ -98,13 +101,13 @@ describe('UiamServiceAccounts', () => {
     mockLicense.isEnabled.mockReturnValue(true);
     logger = loggingSystemMock.create().get('service-accounts');
     mockUiam = uiamServiceMock.create();
-    getCurrentUser = jest.fn().mockReturnValue(null);
+    getCurrentUser = vi.fn().mockReturnValue(null);
     mockCheckPrivileges = {
-      atSpace: jest.fn(),
-      atSpaces: jest.fn(),
-      globally: jest.fn().mockResolvedValue(clusterPrivilegesResponse(true)),
+      atSpace: vi.fn(),
+      atSpaces: vi.fn(),
+      globally: vi.fn().mockResolvedValue(clusterPrivilegesResponse(true)),
     };
-    mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+    mockCheckPrivilegesWithRequest = vi.fn().mockReturnValue(mockCheckPrivileges);
 
     serviceAccounts = new UiamServiceAccounts({
       logger,
@@ -763,8 +766,8 @@ describe('UiamServiceAccounts', () => {
 
   describe('fake request lifecycle', () => {
     beforeEach(() => {
-      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
-      jest.setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
+      vi.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+      vi.setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
 
       let counter = 0;
       mockUiam.exchangeServiceAccountToken.mockImplementation(async () => ({
@@ -773,7 +776,7 @@ describe('UiamServiceAccounts', () => {
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     describe('#createFakeRequest', () => {
@@ -936,7 +939,7 @@ describe('UiamServiceAccounts', () => {
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
         ).rejects.toBeInstanceOf(ServiceAccountTokenExchangeError);
         expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('service-account-id'));
-        for (const call of jest.mocked(logger.error).mock.calls) {
+        for (const call of vi.mocked(logger.error).mock.calls) {
           expect(String(call[0])).not.toContain('secret-credential');
         }
       });
@@ -976,7 +979,7 @@ describe('UiamServiceAccounts', () => {
         });
         mockUiam.exchangeServiceAccountToken.mockClear();
 
-        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+        vi.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
 
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toEqual({
           authorization: 'Bearer essu_token_2',
@@ -992,7 +995,7 @@ describe('UiamServiceAccounts', () => {
         mockUiam.exchangeServiceAccountToken.mockClear();
         mockUiam.exchangeServiceAccountToken.mockRejectedValue(new Error('exchange failed'));
 
-        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+        vi.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
 
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
         // The stale credential is left in place for the original 401 to propagate.
@@ -1006,10 +1009,10 @@ describe('UiamServiceAccounts', () => {
         const otherRequest = await serviceAccounts.createFakeRequest({
           serviceAccountId: 'service-account-id',
         });
-        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+        vi.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
         mockUiam.exchangeServiceAccountToken.mockRejectedValueOnce(Boom.forbidden('revoked'));
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
-        jest.advanceTimersByTime(6_000);
+        vi.advanceTimersByTime(6_000);
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
         expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(3);
         expect(await serviceAccounts.reauthenticateFakeRequest(otherRequest)).toEqual({
@@ -1021,13 +1024,13 @@ describe('UiamServiceAccounts', () => {
         const request = await serviceAccounts.createFakeRequest({
           serviceAccountId: 'service-account-id',
         });
-        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+        vi.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
         mockUiam.exchangeServiceAccountToken.mockRejectedValueOnce(Boom.serverUnavailable());
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
-        jest.advanceTimersByTime(4_999);
+        vi.advanceTimersByTime(4_999);
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
         expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(2);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toEqual({
           authorization: 'Bearer essu_token_2',
         });
@@ -1039,7 +1042,7 @@ describe('UiamServiceAccounts', () => {
         });
         mockUiam.exchangeServiceAccountToken.mockClear();
 
-        jest.advanceTimersByTime(600_000);
+        vi.advanceTimersByTime(600_000);
 
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
         expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
@@ -1056,7 +1059,7 @@ describe('UiamServiceAccounts', () => {
 
         serviceAccounts.releaseFakeRequest(request);
 
-        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+        vi.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
 
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
         expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();

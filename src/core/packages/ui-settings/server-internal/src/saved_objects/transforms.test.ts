@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
@@ -20,7 +22,7 @@ describe('#transformDefaultIndex', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return early if the config object has already been transformed', async () => {

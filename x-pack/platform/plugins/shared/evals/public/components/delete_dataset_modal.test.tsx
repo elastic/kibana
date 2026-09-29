@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,14 +17,14 @@ import { useAccessibleSpaces } from '../hooks/use_spaces';
 import { useDeleteDataset, useEvaluationExperiments } from '../hooks/use_evals_api';
 import { DeleteDatasetModal } from './delete_dataset_modal';
 
-jest.mock('../hooks/use_spaces');
-jest.mock('../hooks/use_evals_api');
+vi.mock('../hooks/use_spaces');
+vi.mock('../hooks/use_evals_api');
 
-const mockUseAccessibleSpaces = useAccessibleSpaces as jest.MockedFunction<
+const mockUseAccessibleSpaces = useAccessibleSpaces as MockedFunction<
   typeof useAccessibleSpaces
 >;
-const mockUseDeleteDataset = useDeleteDataset as jest.MockedFunction<typeof useDeleteDataset>;
-const mockUseEvaluationExperiments = useEvaluationExperiments as jest.MockedFunction<
+const mockUseDeleteDataset = useDeleteDataset as MockedFunction<typeof useDeleteDataset>;
+const mockUseEvaluationExperiments = useEvaluationExperiments as MockedFunction<
   typeof useEvaluationExperiments
 >;
 
@@ -29,7 +32,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <I18nProvider>{children}</I18nProvider>
 );
 
-const mutateAsync = jest.fn().mockResolvedValue({ deleted: true, unshared: false });
+const mutateAsync = vi.fn().mockResolvedValue({ deleted: true, unshared: false });
 
 const renderModal = (spaceIds?: string[], examplesCount = 3) =>
   render(
@@ -38,13 +41,13 @@ const renderModal = (spaceIds?: string[], examplesCount = 3) =>
       datasetName="Golden set"
       examplesCount={examplesCount}
       spaceIds={spaceIds}
-      onClose={jest.fn()}
+      onClose={vi.fn()}
     />,
     { wrapper: Wrapper }
   );
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseAccessibleSpaces.mockReturnValue({
     isEnabled: true,
     isLoading: false,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { act, renderHook } from '@testing-library/react';
@@ -22,16 +25,16 @@ import { SUMMARIZE_CASE_PROMPT } from './translations';
 import { useAddCaseToChat } from './use_add_case_to_chat';
 import { useAgentBuilderAvailability } from './use_agent_builder_availability';
 
-jest.mock('../common/lib/kibana');
-jest.mock('./use_agent_builder_availability');
+vi.mock('../common/lib/kibana');
+vi.mock('./use_agent_builder_availability');
 
-const useCasesConfigMock = useCasesConfig as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
-const useAgentBuilderAvailabilityMock = useAgentBuilderAvailability as jest.Mock;
+const useCasesConfigMock = useCasesConfig as Mock;
+const useKibanaMock = useKibana as Mock;
+const useAgentBuilderAvailabilityMock = useAgentBuilderAvailability as Mock;
 
 describe('useAddCaseToChat', () => {
-  const openChat = jest.fn();
-  const getUrlForApp = jest.fn().mockReturnValue('/app/security/cases/basic-case-id');
+  const openChat = vi.fn();
+  const getUrlForApp = vi.fn().mockReturnValue('/app/security/cases/basic-case-id');
 
   const renderUseAddCaseToChat = (queryClient = createTestQueryClient()) =>
     renderHook(() => useAddCaseToChat(basicCase), {
@@ -65,7 +68,7 @@ describe('useAddCaseToChat', () => {
       id: 'conversation-1',
     });
     const chatEvents$ = new Subject<RoundCompleteEvent>();
-    const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
+    const getChatEvents$ = vi.fn().mockReturnValue(chatEvents$);
 
     useKibanaMock.mockReturnValue({
       services: {
@@ -84,7 +87,7 @@ describe('useAddCaseToChat', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCasesConfigMock.mockReturnValue({ chatEnabled: true });
     useAgentBuilderAvailabilityMock.mockReturnValue({ isAgentBuilderAvailable: true });
     useKibanaMock.mockReturnValue({
@@ -177,7 +180,7 @@ describe('useAddCaseToChat', () => {
 
   it('refreshes the current case view when a completed agent round updates the case', () => {
     const queryClient = createTestQueryClient();
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const { chatEvents$, getChatEvents$ } = mockAgentBuilderEvents();
 
     renderUseAddCaseToChat(queryClient);
@@ -195,7 +198,7 @@ describe('useAddCaseToChat', () => {
 
   it('does not refresh the case view for unrelated completed agent rounds', () => {
     const queryClient = createTestQueryClient();
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const { chatEvents$ } = mockAgentBuilderEvents();
 
     renderUseAddCaseToChat(queryClient);
@@ -209,7 +212,7 @@ describe('useAddCaseToChat', () => {
 
   it('unsubscribes from chat events on unmount', () => {
     const queryClient = createTestQueryClient();
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const { chatEvents$ } = mockAgentBuilderEvents();
 
     const { unmount } = renderUseAddCaseToChat(queryClient);

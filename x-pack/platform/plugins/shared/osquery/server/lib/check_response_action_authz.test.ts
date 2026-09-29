@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { isOsqueryResponseActionAuthorized } from './check_response_action_authz';
@@ -16,7 +18,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
   const createMockCoreStart = (capabilities: Record<string, boolean>): CoreStart =>
     ({
       capabilities: {
-        resolveCapabilities: jest.fn().mockResolvedValue({
+        resolveCapabilities: vi.fn().mockResolvedValue({
           osquery: capabilities,
         }),
       },

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -24,7 +26,7 @@ describe('Filter Agg', () => {
         min: undefined,
       };
     },
-    getFieldFormatsStart: jest.fn(),
+    getFieldFormatsStart: vi.fn(),
   };
 
   function init(params?: SerializableRecord) {
@@ -57,7 +59,7 @@ describe('Filter Agg', () => {
       {
         typesRegistry: mockAggTypesRegistry(depMocks),
       },
-      jest.fn()
+      vi.fn()
     );
     aggConfigs.setTimeRange({
       from: '2022-05-01T00:00:00.000Z',

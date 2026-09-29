@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -14,11 +17,11 @@ import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
-jest.mock('../../../../rule_management/logic/use_find_rules');
+vi.mock('../../../../rule_management/logic/use_find_rules');
 
 describe('ExceptionsAddToRulesOptions', () => {
   beforeEach(() => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRules as Mock).mockReturnValue({
       data: {
         rules: [getRulesSchemaMock(), { ...getRulesSchemaMock(), id: '345', name: 'My rule' }],
         total: 0,
@@ -35,8 +38,8 @@ describe('ExceptionsAddToRulesOptions', () => {
           isSingleRule
           isBulkAction={false}
           selectedRadioOption="add_to_rule"
-          onRuleSelectionChange={jest.fn()}
-          onRadioChange={jest.fn()}
+          onRuleSelectionChange={vi.fn()}
+          onRadioChange={vi.fn()}
         />
       </TestProviders>
     );
@@ -52,8 +55,8 @@ describe('ExceptionsAddToRulesOptions', () => {
           isSingleRule={false}
           isBulkAction
           selectedRadioOption="add_to_rules"
-          onRuleSelectionChange={jest.fn()}
-          onRadioChange={jest.fn()}
+          onRuleSelectionChange={vi.fn()}
+          onRadioChange={vi.fn()}
         />
       </TestProviders>
     );
@@ -69,8 +72,8 @@ describe('ExceptionsAddToRulesOptions', () => {
           isSingleRule={false}
           isBulkAction={false}
           selectedRadioOption="select_rules_to_add_to"
-          onRuleSelectionChange={jest.fn()}
-          onRadioChange={jest.fn()}
+          onRuleSelectionChange={vi.fn()}
+          onRadioChange={vi.fn()}
         />
       </TestProviders>
     );

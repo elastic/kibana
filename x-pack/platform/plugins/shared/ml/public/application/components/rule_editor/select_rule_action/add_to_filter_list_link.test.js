@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent } from '@testing-library/react';
@@ -13,7 +15,7 @@ import { AddToFilterListLink } from './add_to_filter_list_link';
 
 describe('AddToFilterListLink', () => {
   test(`renders the add to filter list link for a value`, () => {
-    const addItemToFilterList = jest.fn();
+    const addItemToFilterList = vi.fn();
 
     const { container, getByTestId } = renderWithI18n(
       <AddToFilterListLink

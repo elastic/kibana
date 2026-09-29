@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -24,7 +26,7 @@ describe('FieldComponent', () => {
           id: '1234',
           title: 'logstash-*',
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -45,7 +47,7 @@ describe('FieldComponent', () => {
           id: '1234',
           title: 'logstash-*',
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -64,7 +66,7 @@ describe('FieldComponent', () => {
           id: '1234',
           title: 'logstash-*',
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -85,7 +87,7 @@ describe('FieldComponent', () => {
         isClearable={true}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -104,7 +106,7 @@ describe('FieldComponent', () => {
           id: '1234',
           title: 'logstash-*',
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -115,7 +117,7 @@ describe('FieldComponent', () => {
   });
 
   it('it allows custom user input if "acceptsCustomOptions" is "true"', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const wrapper = render(
       <EsFieldSelector
         indexPattern={{

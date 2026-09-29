@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -31,7 +33,7 @@ describe('Test Discover Context ActionBar', () => {
 
   const renderComponent = (type: SurrDocType, propsOverride: Partial<ActionBarProps> = {}) => {
     const user = userEvent.setup();
-    const onChangeCount = jest.fn();
+    const onChangeCount = vi.fn();
     const props: ActionBarProps = {
       defaultStepSize: 5,
       docCount: 20,

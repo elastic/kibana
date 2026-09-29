@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ProjectRouting } from '@kbn/es-query';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -58,18 +60,18 @@ const setup = async () => {
 
 describe('tab_sync actions', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initializeAndSync', () => {
     it('should initialize and sync tab state', async () => {
-      const previousUnsubscribeFn = jest.fn();
+      const previousUnsubscribeFn = vi.fn();
       const { tabId, initializeSingleTab, runtimeStateManager } = await setup();
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
       tabRuntimeState.unsubscribeFn$.next(previousUnsubscribeFn);
 
-      const initializeAndSyncSpy = jest.spyOn(tabSyncApi, 'initializeAndSync');
+      const initializeAndSyncSpy = vi.spyOn(tabSyncApi, 'initializeAndSync');
 
       await initializeSingleTab({ tabId });
 
@@ -85,7 +87,7 @@ describe('tab_sync actions', () => {
       const releaseDataViewLoad = Promise.withResolvers<void>();
       const { internalState, services, tabId, initializeSingleTab } = await setup();
 
-      jest
+      vi
         .spyOn(resolveDataViewModule, 'loadAndResolveDataView')
         .mockImplementation(async (params) => {
           loadDataViewStarted.resolve(undefined);
@@ -94,8 +96,8 @@ describe('tab_sync actions', () => {
           return originalLoadAndResolveDataView(params);
         });
 
-      const initializeAndSyncSpy = jest.spyOn(tabSyncApi, 'initializeAndSync');
-      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+      const initializeAndSyncSpy = vi.spyOn(tabSyncApi, 'initializeAndSync');
+      const fetchDataSpy = vi.spyOn(internalStateActions, 'fetchData');
 
       const initializeSingleTabPromise = initializeSingleTab({
         tabId,
@@ -131,7 +133,7 @@ describe('tab_sync actions', () => {
       const rejectDataViewLoad = Promise.withResolvers<void>();
       const { internalState, tabId, initializeSingleTab } = await setup();
 
-      jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView').mockImplementation(async () => {
+      vi.spyOn(resolveDataViewModule, 'loadAndResolveDataView').mockImplementation(async () => {
         loadDataViewStarted.resolve(undefined);
         await rejectDataViewLoad.promise;
 
@@ -182,7 +184,7 @@ describe('tab_sync actions', () => {
       const tabRuntimeState = getTabRuntimeStateMock();
       runtimeStateManager.tabs.byId[tabId] = tabRuntimeState;
 
-      const mockUnsubscribe = jest.fn();
+      const mockUnsubscribe = vi.fn();
       tabRuntimeState.unsubscribeFn$.next(mockUnsubscribe);
 
       internalState.dispatch(
@@ -201,14 +203,14 @@ describe('tab_sync actions', () => {
       const { services, tabId, initializeSingleTab } = await setup();
       const cpsManager = services.cps?.cpsManager!;
       const projectRouting$ = new BehaviorSubject<ProjectRouting>(undefined);
-      const getProjectRoutingSpy = jest
+      const getProjectRoutingSpy = vi
         .spyOn(cpsManager, 'getProjectRouting$')
         .mockReturnValue(projectRouting$);
-      const markNonActiveTabsForRefetchSpy = jest.spyOn(
+      const markNonActiveTabsForRefetchSpy = vi.spyOn(
         internalStateActions,
         'markNonActiveTabsForRefetch'
       );
-      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+      const fetchDataSpy = vi.spyOn(internalStateActions, 'fetchData');
 
       await initializeSingleTab({ tabId });
 
@@ -224,7 +226,7 @@ describe('tab_sync actions', () => {
 
     it('should subscribe to createTabPersistableStateObservable for syncing locally persisted tab state', async () => {
       const mockTabState$: Subject<TabPersistableState> = new Subject();
-      const createTabPersistableStateObservableSpy = jest
+      const createTabPersistableStateObservableSpy = vi
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
 
@@ -246,12 +248,12 @@ describe('tab_sync actions', () => {
 
     it('should dispatch syncLocallyPersistedTabState when tabState observable emits', async () => {
       const mockTabState$: Subject<TabPersistableState> = new Subject();
-      jest
+      vi
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
 
       // Spy on the action creator before initialization
-      const syncLocallyPersistedTabStateSpy = jest.spyOn(
+      const syncLocallyPersistedTabStateSpy = vi.spyOn(
         internalStateActions,
         'syncLocallyPersistedTabState'
       );
@@ -353,7 +355,7 @@ describe('tab_sync actions', () => {
 
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
       const mockTabState$: Subject<TabPersistableState> = new Subject();
-      jest
+      vi
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
 

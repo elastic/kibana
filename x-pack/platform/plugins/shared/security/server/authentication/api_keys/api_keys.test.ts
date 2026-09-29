@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 // eslint-disable-next-line import/order
 import { mockGetFakeKibanaRequest, mockValidateKibanaPrivileges } from './api_keys.test.mock';
 
@@ -29,7 +31,7 @@ describe('API Keys', () => {
   let mockScopedClusterClient: ReturnType<
     typeof elasticsearchServiceMock.createScopedClusterClient
   >;
-  let mockLicense: jest.Mocked<SecurityLicense>;
+  let mockLicense: Mocked<SecurityLicense>;
   let logger: Logger;
   const roleDescriptors: { [key: string]: any } = { foo: true };
 

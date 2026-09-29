@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
@@ -15,13 +17,13 @@ describe('getUnifiedAlertsIndex', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
   });
 
   it('includes the detection alerts index together with the attack indices', async () => {
     const ruleDataClient = {
-      indexNameWithNamespace: jest.fn(() => '.alerts-security.alerts-default'),
+      indexNameWithNamespace: vi.fn(() => '.alerts-security.alerts-default'),
     } as unknown as IRuleDataClient;
 
     const index = await getUnifiedAlertsIndex({

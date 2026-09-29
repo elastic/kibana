@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import fs from 'fs';
 import axios from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -26,35 +29,35 @@ import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { ActionsPluginsStart } from '../plugin';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
-jest.mock('axios');
-const mockedAxiosPost = jest.spyOn(axios, 'post');
+vi.mock('axios');
+const mockedAxiosPost = vi.spyOn(axios, 'post');
 
 const nowStr = '2024-01-01T12:00:00.000Z';
 const nowDate = new Date(nowStr);
 
-jest.useFakeTimers();
-jest.setSystemTime(nowDate.getTime());
-const readFileSpy = jest.spyOn(fs, 'readFileSync');
+vi.useFakeTimers();
+vi.setSystemTime(nowDate.getTime());
+const readFileSpy = vi.spyOn(fs, 'readFileSync');
 
 describe('ConnectorUsageReportingTask', () => {
   const logger = loggingSystemMock.createLogger();
   const { createSetup } = coreMock;
   const { createSetup: taskManagerSetupMock, createStart: taskManagerStartMock } = taskManagerMock;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
   let mockCore: CoreSetup<ActionsPluginsStart>;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  let mockTaskManagerStart: jest.Mocked<TaskManagerStartContract>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerStart: Mocked<TaskManagerStartContract>;
 
   beforeEach(async () => {
     mockTaskManagerSetup = taskManagerSetupMock();
     mockTaskManagerStart = taskManagerStartMock();
     mockCore = createSetup();
     mockEsClient = (await mockCore.getStartServices())[0].elasticsearch.client
-      .asInternalUser as jest.Mocked<ElasticsearchClient>;
+      .asInternalUser as Mocked<ElasticsearchClient>;
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const createTaskRunner = async ({

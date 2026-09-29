@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { Mutable } from 'utility-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type { HttpApiTestSetupMock } from '../../mocks';
@@ -22,12 +25,15 @@ import { EndpointAuthorizationError, EndpointHttpError } from '../../errors';
 import { registerCustomYaraSignaturesRoutes } from '.';
 import { registerValidateCustomYaraSignatureRoute } from './validate';
 
-jest.mock('../../lib/custom_yara_signatures', () => ({
-  ...jest.requireActual('../../lib/custom_yara_signatures'),
-  validateCustomYaraRule: jest.fn(),
-}));
+vi.mock('../../lib/custom_yara_signatures', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../lib/custom_yara_signatures')),
+      validateCustomYaraRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateCustomYaraRule = validateCustomYaraRule as jest.MockedFunction<
+const mockValidateCustomYaraRule = validateCustomYaraRule as MockedFunction<
   typeof validateCustomYaraRule
 >;
 
@@ -129,7 +135,7 @@ describe('POST: validate custom YARA signature', () => {
 
     it('should error if user has no write authz to api', async () => {
       (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
       ).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteCustomYaraSignatures: false,
@@ -224,7 +230,7 @@ describe('POST: validate custom YARA signature', () => {
         expect(customErrorBody.message).not.toContain('memory access out of bounds');
 
         const logger = (
-          apiTestSetup.endpointAppContextMock.service.createLogger as jest.Mock
+          apiTestSetup.endpointAppContextMock.service.createLogger as Mock
         ).mock.results.at(-1)?.value;
         expect(logger.error).toHaveBeenCalledWith(engineError);
       });

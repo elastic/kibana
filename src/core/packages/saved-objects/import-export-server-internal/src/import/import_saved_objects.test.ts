@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   mockCollectSavedObjects,
   mockCheckReferenceOrigins,
@@ -55,7 +58,7 @@ const createAccessControlImportTransforms: AccessControlImportTransformsFactory 
 describe('#importSavedObjectsFromStream', () => {
   let logger: MockedLogger;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggerMock.create();
     // mock empty output of each of these mocked modules so the import doesn't throw an error
     mockCollectSavedObjects.mockResolvedValue({
@@ -84,8 +87,8 @@ describe('#importSavedObjectsFromStream', () => {
   let readStream: Readable;
   const objectLimit = 10;
   const overwrite = Symbol() as unknown as boolean;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
+  let typeRegistry: Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
   const setupOptions = ({
     createNewCopies = false,
@@ -228,7 +231,7 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('executes import hooks', async () => {
       const importHooks = {
-        foo: [jest.fn()],
+        foo: [vi.fn()],
       };
 
       const options = setupOptions({ importHooks });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,7 +16,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/mute_alert_instance';
 import { useMuteAlertInstance } from './use_mute_alert_instance';
 
-jest.mock('../apis/mute_alert_instance');
+vi.mock('../apis/mute_alert_instance');
 
 const params = { ruleId: '', alertInstanceId: '' };
 
@@ -32,11 +34,11 @@ describe('useMuteAlertInstance', () => {
   const addErrorMock = notifications.toasts.addError;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const muteAlertInstanceSpy = jest.spyOn(api, 'muteAlertInstance');
+    const muteAlertInstanceSpy = vi.spyOn(api, 'muteAlertInstance');
 
     const { result } = renderHook(() => useMuteAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
@@ -54,7 +56,7 @@ describe('useMuteAlertInstance', () => {
   });
 
   it('shows a toast error when the api returns an error', async () => {
-    const spy = jest.spyOn(api, 'muteAlertInstance').mockRejectedValue(new Error('An error'));
+    const spy = vi.spyOn(api, 'muteAlertInstance').mockRejectedValue(new Error('An error'));
 
     const { result } = renderHook(() => useMuteAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
@@ -69,7 +71,7 @@ describe('useMuteAlertInstance', () => {
   });
 
   it('runs against the default context when skipAlertsQueryContext is true', async () => {
-    const spy = jest.spyOn(api, 'muteAlertInstance');
+    const spy = vi.spyOn(api, 'muteAlertInstance');
 
     const { result } = renderHook(
       () => useMuteAlertInstance({ http, notifications, skipAlertsQueryContext: true }),

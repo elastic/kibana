@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useBreadcrumbs } from './use_breadcrumbs';
 import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../common';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 
-const mockSetBreadcrumbs = jest.fn();
-const mockSetTitle = jest.fn();
+const mockSetBreadcrumbs = vi.fn();
+const mockSetTitle = vi.fn();
 
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -30,12 +32,12 @@ jest.mock('../utils/kibana_react', () => {
   };
 });
 
-jest.mock('./use_navigation', () => {
-  const originalModule = jest.requireActual('./use_navigation');
+vi.mock('./use_navigation', async () => {
+  const originalModule = (await vi.importActual('./use_navigation'));
   return {
     ...originalModule,
-    useNavigation: jest.fn().mockReturnValue({
-      getAppUrl: jest.fn((params?: { deepLinkId: string }) => params?.deepLinkId ?? '/test'),
+    useNavigation: vi.fn().mockReturnValue({
+      getAppUrl: vi.fn((params?: { deepLinkId: string }) => params?.deepLinkId ?? '/test'),
     }),
   };
 });
@@ -44,7 +46,7 @@ let appMockRenderer: AppMockRenderer;
 
 describe('useBreadcrumbs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

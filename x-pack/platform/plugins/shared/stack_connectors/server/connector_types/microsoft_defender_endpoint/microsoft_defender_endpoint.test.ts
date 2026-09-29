@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
 import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 
@@ -232,9 +234,9 @@ describe('Microsoft Defender for Endpoint Connector', () => {
       // Mock only the external download URL (Microsoft Defender API is mocked in mocks.ts)
       connectorMock.apiMock[mockDownloadUrl] = () =>
         microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock({
-          pipe: jest.fn(),
-          on: jest.fn(),
-          read: jest.fn(),
+          pipe: vi.fn(),
+          on: vi.fn(),
+          read: vi.fn(),
         });
 
       await connectorMock.instanceMock.getActionResults(
@@ -265,7 +267,7 @@ describe('Microsoft Defender for Endpoint Connector', () => {
       const mockDownloadUrl = 'https://download.microsoft.com/mock-download-url/results.json';
 
       // Mock external download URL to return a stream (Microsoft Defender API uses default mock)
-      const mockStream = { pipe: jest.fn(), on: jest.fn(), read: jest.fn() };
+      const mockStream = { pipe: vi.fn(), on: vi.fn(), read: vi.fn() };
       connectorMock.apiMock[mockDownloadUrl] = () =>
         microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock(mockStream);
 

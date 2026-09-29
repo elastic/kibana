@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -25,9 +28,9 @@ const mockDataView = {
   isPersisted: () => false,
   getName: () => 'mock-data-view',
   toSpec: () => ({}),
-} as jest.Mocked<DataView>;
+} as Mocked<DataView>;
 
-const mockRefetch = jest.fn();
+const mockRefetch = vi.fn();
 
 const mockMetricsView = {
   indices: 'metricbeat-*',
@@ -41,7 +44,7 @@ const defaultUseMetricsViewWithSource: {
   source: { id: string } | undefined;
   isLoading: boolean;
   error: string | undefined;
-  refetch: jest.Mock;
+  refetch: Mock;
 } = {
   metricsView: mockMetricsView,
   source: { id: 'default' },
@@ -50,28 +53,37 @@ const defaultUseMetricsViewWithSource: {
   refetch: mockRefetch,
 };
 
-const mockUseMetricsViewWithSource = jest.fn(() => defaultUseMetricsViewWithSource);
+const mockUseMetricsViewWithSource = vi.fn(() => defaultUseMetricsViewWithSource);
 
-jest.mock('../hooks/use_metrics_view_with_source', () => ({
-  useMetricsViewWithSource: () => mockUseMetricsViewWithSource(),
-}));
+vi.mock('../hooks/use_metrics_view_with_source', () => {
+      const mocked = {
+      useMetricsViewWithSource: () => mockUseMetricsViewWithSource(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // `Expressions` renders child components (e.g. `UnifiedSearchBar`) that still read
 // `useMetricsDataViewContext`/`useSourceContext` directly from the container.
-jest.mock('../../../containers/metrics_source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({ source: { id: 'default' } }),
-  useMetricsDataViewContext: () => ({ metricsView: mockMetricsView }),
-}));
+vi.mock('../../../containers/metrics_source', () => {
+      const mocked = {
+      withSourceProvider: () => vi.fn,
+      useSourceContext: () => ({ source: { id: 'default' } }),
+      useMetricsDataViewContext: () => ({ metricsView: mockMetricsView }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      ...mockCoreMock.createStart(),
-      unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          ...mockCoreMock.createStart(),
+          unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Expression', () => {
   beforeEach(() => {

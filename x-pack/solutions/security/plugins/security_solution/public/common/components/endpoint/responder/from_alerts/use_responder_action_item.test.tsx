@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useResponderActionItem } from './use_responder_action_item';
 import { useUserPrivileges as _useUserPrivileges } from '../../../user_privileges';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
@@ -12,10 +15,10 @@ import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../mock/endpoint';
 import { endpointAlertDataMock } from '../../../../mock/endpoint/endpoint_alert_data_mock';
 
-jest.mock('../../../user_privileges');
-jest.mock('./use_responder_action_data');
+vi.mock('../../../user_privileges');
+vi.mock('./use_responder_action_data');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('useResponderActionItem', () => {
   let alertDetailItemData: TimelineEventsDetailsItem[];
@@ -37,7 +40,7 @@ describe('useResponderActionItem', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return Respond action menu item if user has Authz', () => {

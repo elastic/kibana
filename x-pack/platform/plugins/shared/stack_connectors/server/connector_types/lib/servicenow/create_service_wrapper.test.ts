@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import axios from 'axios';
 import { createServiceWrapper } from './create_service_wrapper';
 import type { Logger } from '@kbn/core/server';
@@ -14,17 +17,17 @@ import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connect
 import { snExternalServiceConfig } from './config';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const connectorTokenClient = connectorTokenClientMock.create();
 const configurationUtilities = actionsConfigMock.create();
 
-jest.mock('axios');
-axios.create = jest.fn(() => axios);
+vi.mock('axios');
+axios.create = vi.fn(() => axios);
 let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('createServiceWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
@@ -32,7 +35,7 @@ describe('createServiceWrapper', () => {
   });
 
   test('creates axios instance with apiUrl', () => {
-    const createServiceFn = jest.fn();
+    const createServiceFn = vi.fn();
     const credentials = {
       config: {
         apiUrl: 'https://test-sn.service-now.com',
@@ -65,7 +68,7 @@ describe('createServiceWrapper', () => {
   });
 
   test('handles apiUrl with trailing slash', () => {
-    const createServiceFn = jest.fn();
+    const createServiceFn = vi.fn();
     const credentials = {
       config: {
         apiUrl: 'https://test-sn.service-now.com/',

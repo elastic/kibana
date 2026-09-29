@@ -7,24 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Databricks } from './databricks';
 
 // Mock withMcpClient so handlers don't need a real MCP transport.
 // callToolJson/callToolContent also route through withMcpClient internally.
-const mockCallTool = jest.fn();
-const mockListTools = jest.fn();
+const mockCallTool = vi.fn();
+const mockListTools = vi.fn();
 
-jest.mock('../../lib/mcp/with_mcp_client', () => ({
-  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-    return fn({ callTool: mockCallTool, listTools: mockListTools });
-  }),
-}));
+vi.mock('../../lib/mcp/with_mcp_client', () => {
+      const mocked = {
+      withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+        return fn({ callTool: mockCallTool, listTools: mockListTools });
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // REST API mocks
-const mockGet = jest.fn();
-const mockPost = jest.fn();
+const mockGet = vi.fn();
+const mockPost = vi.fn();
 
 // Apply Zod defaults the way the framework does before invoking a handler.
 const parse = <K extends keyof typeof Databricks.actions>(
@@ -58,7 +63,7 @@ describe('Databricks', () => {
   const mockHandleContent = [{ type: 'text', text: JSON.stringify(mockStatementHandle) }];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockResultContent });
     mockListTools.mockResolvedValue({
       tools: [
@@ -265,7 +270,7 @@ describe('Databricks', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
+      const { withMcpClient } = (await vi.importMock('../../lib/mcp/with_mcp_client'));
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
       if (!Databricks.test) throw new Error('test handler not defined');
       await expect(Databricks.test.handler(mockContext)).rejects.toThrow('connection refused');

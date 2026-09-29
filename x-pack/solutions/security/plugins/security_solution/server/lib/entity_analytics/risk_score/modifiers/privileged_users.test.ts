@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 
@@ -19,7 +22,7 @@ import { allowedExperimentalValues } from '../../../../../common';
 
 describe('applyPrivmonModifier', () => {
   let logger: Logger;
-  let privmonUserCrudService: jest.Mocked<PrivmonUserCrudService>;
+  let privmonUserCrudService: Mocked<PrivmonUserCrudService>;
 
   const mockBucket: RiskScoreBucket = {
     key: { 'user.name': 'test-user' },
@@ -74,13 +77,13 @@ describe('applyPrivmonModifier', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     privmonUserCrudService = {
-      create: jest.fn(),
-      get: jest.fn(),
-      update: jest.fn(),
-      list: jest.fn().mockResolvedValue([]),
-      delete: jest.fn(),
+      create: vi.fn(),
+      get: vi.fn(),
+      update: vi.fn(),
+      list: vi.fn().mockResolvedValue([]),
+      delete: vi.fn(),
     };
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('with empty buckets', () => {

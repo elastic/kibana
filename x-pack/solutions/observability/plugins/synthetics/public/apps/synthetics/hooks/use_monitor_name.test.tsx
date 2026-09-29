@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { fetchMonitorManagementList } from '../state';
 import { useMonitorName } from './use_monitor_name';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn().mockReturnValue({ monitorId: '12345' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn().mockReturnValue({ monitorId: '12345' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../state', () => ({
-  ...jest.requireActual('../state'),
-  fetchMonitorManagementList: jest.fn(),
-}));
+vi.mock('../state', async () => {
+      const mocked = {
+      ...(await vi.importActual('../state')),
+      fetchMonitorManagementList: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useMonitorName', () => {
   const testMonitors = [
@@ -42,15 +51,15 @@ describe('useMonitorName', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (fetchMonitorManagementList as jest.Mock).mockResolvedValue({
+    (fetchMonitorManagementList as Mock).mockResolvedValue({
       monitors: testMonitors,
     });
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns expected initial and after load state', async () => {

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { setMockActions, setMockValues } from '../../../__mocks__';
 import React from 'react';
 
@@ -27,15 +30,15 @@ const appContext: AppDependencies = {
   hasPlatinumLicense: false,
   plugins: {} as unknown as SearchConnectorsPluginStartDependencies,
 };
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 const http = httpServiceMock.createSetupContract();
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 describe('SyncsContextMenu', () => {
-  const startSync = jest.fn();
-  const startIncrementalSync = jest.fn();
-  const startAccessControlSync = jest.fn();
-  const cancelSyncs = jest.fn();
+  const startSync = vi.fn();
+  const startIncrementalSync = vi.fn();
+  const startAccessControlSync = vi.fn();
+  const cancelSyncs = vi.fn();
 
   const mockValues = {
     hasDocumentLevelSecurityFeature: false,
@@ -62,8 +65,8 @@ describe('SyncsContextMenu', () => {
         http,
       },
       overlays: {
-        openFlyout: jest.fn(),
-        openModal: jest.fn(),
+        openFlyout: vi.fn(),
+        openModal: vi.fn(),
       },
     } as any);
     setMockValues(mockValues);

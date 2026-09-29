@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createActionsColumn } from './actions';
 
-const mockInstallRule = jest.fn();
-const mockOpenRuleDetails = jest.fn();
+const mockInstallRule = vi.fn();
+const mockOpenRuleDetails = vi.fn();
 
 describe('createActionsColumn', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the correct column definition', () => {

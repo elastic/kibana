@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -20,50 +23,50 @@ describe('getAttackDiscoveryGenerationsRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
 
   let mockContext: {
-    resolve: jest.Mock;
+    resolve: Mock;
     elasticAssistant: Promise<{
       logger: ReturnType<typeof loggingSystemMock.createLogger>;
       eventLogIndex: string;
       getSpaceId: () => string;
-      getAttackDiscoveryDataClient: jest.Mock;
+      getAttackDiscoveryDataClient: Mock;
     }>;
   };
   let mockRequest: Partial<KibanaRequest<unknown, unknown, unknown>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let mockDataClient: { getAttackDiscoveryGenerations: jest.Mock };
+  let mockDataClient: { getAttackDiscoveryGenerations: Mock };
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
-  let addVersionMock: jest.Mock;
+  let addVersionMock: Mock;
   let getHandler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     mockLogger = loggingSystemMock.createLogger();
     mockDataClient = {
-      getAttackDiscoveryGenerations: jest
+      getAttackDiscoveryGenerations: vi
         .fn()
         .mockResolvedValue(mockAttackDiscoveryGenerationsResponse),
     };
     mockContext = {
-      resolve: jest.fn().mockResolvedValue({ core: {}, elasticAssistant: {}, licensing: {} }),
+      resolve: vi.fn().mockResolvedValue({ core: {}, elasticAssistant: {}, licensing: {} }),
       elasticAssistant: Promise.resolve({
         logger: mockLogger,
         eventLogIndex: 'event-log-index',
         getSpaceId: () => 'default',
-        getAttackDiscoveryDataClient: jest.fn().mockResolvedValue(mockDataClient),
+        getAttackDiscoveryDataClient: vi.fn().mockResolvedValue(mockDataClient),
       }),
     };
     mockRequest = {
       query: { start: '2025-06-26T21:00:00.000Z', end: '2025-06-26T22:00:00.000Z', size: 10 },
     };
     mockResponse = httpServerMock.createResponseFactory();
-    jest
+    vi
       .spyOn(helpers, 'performChecks')
       .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
 
-    addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
     getAttackDiscoveryGenerationsRoute(router);
     getHandler = addVersionMock.mock.calls[0][1];
   });
@@ -94,7 +97,7 @@ describe('getAttackDiscoveryGenerationsRoute', () => {
   });
 
   it('returns an error when performChecks fails', async () => {
-    (helpers.performChecks as jest.Mock).mockResolvedValueOnce({
+    (helpers.performChecks as Mock).mockResolvedValueOnce({
       isSuccess: false,
       response: { status: 403, payload: { message: 'Forbidden' } },
     });

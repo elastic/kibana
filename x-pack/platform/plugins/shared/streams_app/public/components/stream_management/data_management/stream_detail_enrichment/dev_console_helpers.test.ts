@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   registerGrokSuggestion,
   clearGrokSuggestion,
@@ -16,10 +18,13 @@ import type { InteractiveModeSnapshot } from './state_management/interactive_mod
 import type { SimulationActorSnapshot } from './state_management/simulation_state_machine';
 
 // Mock the EUI functions
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  copyToClipboard: jest.fn(() => true),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      copyToClipboard: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('dev_console_helpers', () => {
   // Suppress console logs during tests
@@ -32,9 +37,9 @@ describe('dev_console_helpers', () => {
     clearGrokSuggestion();
     clearDissectSuggestion();
     // eslint-disable-next-line no-console
-    console.log = jest.fn();
+    console.log = vi.fn();
     // eslint-disable-next-line no-console
-    console.error = jest.fn();
+    console.error = vi.fn();
   });
 
   afterEach(() => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ModelCard } from './model_card';
@@ -24,7 +26,7 @@ describe('ModelCard', () => {
 
   it('renders name, test-subj, task types, categories, and avatar for a known creator', () => {
     const { getByText, getByTestId, container } = render(
-      <ModelCard model={baseModel} onClick={jest.fn()} />
+      <ModelCard model={baseModel} onClick={vi.fn()} />
     );
 
     expect(getByText('my-model', { exact: false })).toBeInTheDocument();
@@ -40,7 +42,7 @@ describe('ModelCard', () => {
       ...baseModel,
       modelCreator: 'UnknownCorp',
     };
-    const { container } = render(<ModelCard model={unknownModel} onClick={jest.fn()} />);
+    const { container } = render(<ModelCard model={unknownModel} onClick={vi.fn()} />);
 
     expect(container.querySelector('[data-euiicon-type="machineLearningApp"]')).not.toBeNull();
   });
@@ -51,7 +53,7 @@ describe('ModelCard', () => {
       taskTypes: ['some_future_type'],
       categories: [],
     } as unknown as GroupedModel;
-    const { getByText } = render(<ModelCard model={model} onClick={jest.fn()} />);
+    const { getByText } = render(<ModelCard model={model} onClick={vi.fn()} />);
     expect(getByText('some_future_type', { exact: false })).toBeInTheDocument();
   });
 
@@ -62,7 +64,7 @@ describe('ModelCard', () => {
         modelStatus: EisModelStatus.Preview,
       };
       const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
+        <ModelCard model={model} onClick={vi.fn()} />
       );
       expect(getByTestId('modelPreviewBadge-my-model')).toBeInTheDocument();
       expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
@@ -70,7 +72,7 @@ describe('ModelCard', () => {
     });
 
     it('does not render the preview badge when model status is GA', () => {
-      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={vi.fn()} />);
       expect(queryByTestId('modelPreviewBadge-my-model')).not.toBeInTheDocument();
     });
   });
@@ -88,7 +90,7 @@ describe('ModelCard', () => {
         },
       };
       const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
+        <ModelCard model={model} onClick={vi.fn()} />
       );
       expect(getByTestId('modelDeprecatedBadge-my-model')).toBeInTheDocument();
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
@@ -104,12 +106,12 @@ describe('ModelCard', () => {
           },
         },
       };
-      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      const { getByTestId } = render(<ModelCard model={model} onClick={vi.fn()} />);
       expect(getByTestId('modelDeprecatedBadge-my-model')).toBeInTheDocument();
     });
 
     it('does not render the deprecated badge when model status is GA', () => {
-      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={vi.fn()} />);
       expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
     });
   });
@@ -127,7 +129,7 @@ describe('ModelCard', () => {
         },
       };
       const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
+        <ModelCard model={model} onClick={vi.fn()} />
       );
       expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
       expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
@@ -143,12 +145,12 @@ describe('ModelCard', () => {
           },
         },
       };
-      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      const { getByTestId } = render(<ModelCard model={model} onClick={vi.fn()} />);
       expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
     });
 
     it('does not render the EOL badge when model status is GA', () => {
-      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={vi.fn()} />);
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
     });
   });
@@ -167,7 +169,7 @@ describe('ModelCard', () => {
           },
         ],
       };
-      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      const { getByTestId } = render(<ModelCard model={model} onClick={vi.fn()} />);
       expect(getByTestId('modelBlockedBadge-my-model')).toHaveTextContent('Blocked');
     });
 
@@ -185,13 +187,13 @@ describe('ModelCard', () => {
           },
         ],
       };
-      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      const { getByTestId } = render(<ModelCard model={model} onClick={vi.fn()} />);
       expect(getByTestId('modelBlockedBadge-my-model')).toBeInTheDocument();
       expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
     });
 
     it('does not render the blocked badge when no endpoint is denied by region policy', () => {
-      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={vi.fn()} />);
       expect(queryByTestId('modelBlockedBadge-my-model')).not.toBeInTheDocument();
     });
   });

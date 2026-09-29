@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { SearchBarProps, SearchBarStateProps } from './search_bar';
 import { SearchBar, SearchBarComponent } from './search_bar';
@@ -24,7 +27,10 @@ import { setDatasource, submitSearchSaga } from '../state_management';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
 
-jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
+vi.mock('../services/source_modal', () => {
+      const mocked = { openSourceModal: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 // Lightweight stand-in for the real KQL QueryStringInput: mounting the live editor kicks off
 // autocomplete/data-view async that intermittently overruns Jest's 5s budget under CI load. The
@@ -93,20 +99,20 @@ const SearchBarHarness = (props: SearchBarProps) => {
 
 // Failing: See https://github.com/elastic/kibana/issues/229631
 describe.skip('search_bar', () => {
-  let dispatchSpy: jest.Mock;
+  let dispatchSpy: Mock;
   let store: GraphStore;
   const defaultProps: SearchBarProps = {
     isLoading: false,
     urlQuery: null,
     indexPatternProvider: {
-      get: jest.fn(() =>
+      get: vi.fn(() =>
         Promise.resolve(createStubDataView({ spec: { fields: {}, name: 'Test Name' } }))
       ),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
     },
-    onIndexPatternChange: jest.fn(),
+    onIndexPatternChange: vi.fn(),
   };
 
   const renderSearchBar = (props: Partial<SearchBarProps> = {}) =>
@@ -145,7 +151,7 @@ describe.skip('search_bar', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     store = createMockGraphStore({
       sagas: [submitSearchSaga],
     }).store;
@@ -158,7 +164,7 @@ describe.skip('search_bar', () => {
       })
     );
 
-    dispatchSpy = jest.fn(store.dispatch);
+    dispatchSpy = vi.fn(store.dispatch);
     store.dispatch = dispatchSpy;
   });
 
@@ -216,8 +222,8 @@ describe.skip('search_bar', () => {
   it('should disable the graph button when no data view is configured', async () => {
     renderSearchBarComponent({
       ...defaultProps,
-      submit: jest.fn(),
-      onIndexPatternSelected: jest.fn(),
+      submit: vi.fn(),
+      onIndexPatternSelected: vi.fn(),
       currentDatasource: undefined,
       selectedFields: [
         {
@@ -238,8 +244,8 @@ describe.skip('search_bar', () => {
     renderSearchBarComponent({
       ...defaultProps,
       currentIndexPattern: createStubDataView({ spec: { fields: {}, name: 'Test Name' } }),
-      submit: jest.fn(),
-      onIndexPatternSelected: jest.fn(),
+      submit: vi.fn(),
+      onIndexPatternSelected: vi.fn(),
       currentDatasource: {
         type: 'indexpattern',
         id: '123',

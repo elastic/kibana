@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -25,16 +28,22 @@ import { buildRenderAttachmentTag } from './attachment_utils';
 import { buildEntityGraphAttachmentId } from './entity_graph_attachment_utils';
 import { getEntityGraphTool, SECURITY_GET_ENTITY_GRAPH_TOOL_ID } from './get_entity_graph_tool';
 
-jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
-}));
+vi.mock('../../utils/get_agent_builder_resource_availability', () => {
+      const mocked = {
+      getAgentBuilderResourceAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-const mockExecuteEsql = executeEsql as jest.Mock;
+const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
+const mockExecuteEsql = executeEsql as Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsEntityStoreV2: true,
@@ -69,11 +78,11 @@ describe('getEntityGraphTool', () => {
   );
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
-  const mockHasAtLeast = jest.fn().mockReturnValue(true);
-  const mockGetLicense = jest.fn().mockResolvedValue({ hasAtLeast: mockHasAtLeast });
+  const mockHasAtLeast = vi.fn().mockReturnValue(true);
+  const mockGetLicense = vi.fn().mockResolvedValue({ hasAtLeast: mockHasAtLeast });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({ status: 'available' });
     mockHasAtLeast.mockReturnValue(true);
@@ -188,8 +197,8 @@ describe('getEntityGraphTool', () => {
       mockExecuteEsql.mockResolvedValueOnce(exactHostHit);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });
@@ -234,8 +243,8 @@ describe('getEntityGraphTool', () => {
         .mockResolvedValueOnce(exactHostHit);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });
@@ -258,8 +267,8 @@ describe('getEntityGraphTool', () => {
       mockExecuteEsql.mockResolvedValueOnce(exactHostHit);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });
@@ -277,11 +286,11 @@ describe('getEntityGraphTool', () => {
       mockExecuteEsql.mockResolvedValueOnce(exactHostHit);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });
-      (context.attachments.update as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.update as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 2,
       });
@@ -382,8 +391,8 @@ describe('getEntityGraphTool', () => {
       mockExecuteEsql.mockResolvedValueOnce(exactHostHit);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockRejectedValueOnce(new Error('persist failed'));
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockRejectedValueOnce(new Error('persist failed'));
 
       const result = (await tool.handler(
         { entityType: 'host', entityId: 'host:server1' },
@@ -417,8 +426,8 @@ describe('getEntityGraphTool', () => {
       mockExecuteEsql.mockResolvedValueOnce(exactHostHit);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });

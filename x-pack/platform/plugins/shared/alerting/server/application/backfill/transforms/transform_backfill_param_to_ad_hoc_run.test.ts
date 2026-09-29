@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { adHocRunStatus, backfillInitiator } from '../../../../common/constants';
 import type { RuleDomain } from '../../rule/types';
 import type { ScheduleBackfillParam } from '../methods/schedule/types';
@@ -62,11 +64,11 @@ function getMockRule(overwrites: Record<string, unknown> = {}): RuleDomain {
 
 describe('transformBackfillParamToAdHocRun', () => {
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2024-01-30T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2024-01-30T00:00:00.000Z'));
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should transform backfill param with start and end', () => {

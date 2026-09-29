@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
@@ -28,14 +31,14 @@ import {
   parseAndVerifyReadme,
 } from './parse';
 
-jest.mock('../../app_context');
+vi.mock('../../app_context');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-let mockedLogger: jest.Mocked<Logger>;
+let mockedLogger: Mocked<Logger>;
 describe('parseDefaultIngestPipeline', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();

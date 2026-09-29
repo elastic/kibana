@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -12,19 +14,25 @@ import { AssigneesBadge } from './assignees_badge';
 import { UNKNOWN_USER_PROFILE_NAME } from '../../../../../common/components/user_profiles/translations';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 
-const mockUseBulkGetUserProfiles = jest.fn();
+const mockUseBulkGetUserProfiles = vi.fn();
 
-jest.mock('../../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
-  useBulkGetUserProfiles: () => mockUseBulkGetUserProfiles(),
-}));
+vi.mock('../../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
+      const mocked = {
+      useBulkGetUserProfiles: () => mockUseBulkGetUserProfiles(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/user-profile-components', () => ({
-  UserAvatar: () => <div data-test-subj="user-avatar" />,
-}));
+vi.mock('@kbn/user-profile-components', () => {
+      const mocked = {
+      UserAvatar: () => <div data-test-subj="user-avatar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AssigneesBadge', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseBulkGetUserProfiles.mockReturnValue({
       data: [
         { uid: '1', user: { username: 'user1', email: 'user1@example.com' }, data: {} },

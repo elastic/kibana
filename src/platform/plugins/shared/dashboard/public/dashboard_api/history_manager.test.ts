@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, combineLatest, firstValueFrom, map, Subject } from 'rxjs';
 import { initializeHistoryManager } from './history_manager';
 import { getSampleDashboardState } from '../mocks';
@@ -19,11 +21,11 @@ const makeSetup = async () => {
   // getStateCalled$.next() side-effect; updating stateRef keeps the implementation intact).
   const stateRef = { current: { ...initialState } as DashboardState };
 
-  const getState = jest.fn((): DashboardState => {
+  const getState = vi.fn((): DashboardState => {
     return { ...stateRef.current };
   });
 
-  const setState = jest.fn(async (state: DashboardState) => {
+  const setState = vi.fn(async (state: DashboardState) => {
     stateRef.current = state;
   });
 

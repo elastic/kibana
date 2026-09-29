@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { fetchClassicAlertsTags } from './fetch_classic_tags';
 
@@ -14,7 +16,7 @@ const TEST_RULE_TYPE_IDS = ['observability.rules.custom_threshold', '.es-query']
 
 describe('fetchClassicAlertsTags', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('extracts tag keys from the terms aggregation', async () => {

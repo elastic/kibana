@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { kibanaService } from '../../../utils/kibana_service';
 import { applyExcludedDataTiersToParams, getExcludedDataTiers } from './excluded_data_tiers';
 
 describe('excluded data tiers (client)', () => {
-  const getMock = jest.fn();
+  const getMock = vi.fn();
 
   const setExcludedTiers = (tiers: DataTier[] | undefined) => {
     getMock.mockReturnValue(tiers);

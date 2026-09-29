@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -28,7 +30,7 @@ describe('MiniTileCard', () => {
 
   it('invokes the host-provided onClick', async () => {
     const user = userEvent.setup();
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<MiniTileCard tile={{ ...baseTile, onClick }} />);
     await user.click(screen.getByTestId('mini-slack'));
     expect(onClick).toHaveBeenCalled();

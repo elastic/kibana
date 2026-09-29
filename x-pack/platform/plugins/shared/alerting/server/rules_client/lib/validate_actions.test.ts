@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ValidateActionsData } from './validate_actions';
 import { validateActions } from './validate_actions';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
@@ -13,10 +16,10 @@ import { RecoveredActionGroup, RuleNotifyWhen } from '../../../common';
 import type { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '..';
 
 describe('validateActions', () => {
-  const loggerErrorMock = jest.fn();
-  const getBulkMock = jest.fn();
-  const listTypesMock = jest.fn();
-  const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+  const loggerErrorMock = vi.fn();
+  const getBulkMock = vi.fn();
+  const listTypesMock = vi.fn();
+  const ruleType: Mocked<UntypedNormalizedRuleType> = {
     id: 'test',
     name: 'My test rule',
     actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -24,7 +27,7 @@ describe('validateActions', () => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
-    executor: jest.fn(),
+    executor: vi.fn(),
     producer: 'alerts',
     solution: 'stack',
     cancelAlertsOnRuleTimeout: true,
@@ -82,7 +85,7 @@ describe('validateActions', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return error message if actions have duplicated uuid', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -16,7 +18,7 @@ import {
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];

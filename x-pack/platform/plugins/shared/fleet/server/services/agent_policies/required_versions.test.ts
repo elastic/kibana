@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { appContextService } from '..';
 import { AgentPolicyInvalidError, FleetUnauthorizedError } from '../../errors';
 
@@ -14,7 +16,7 @@ import { validateRequiredVersions } from './required_versions';
 
 describe('validateRequiredVersions', () => {
   it('should throw error if feature flag is disabled', () => {
-    jest
+    vi
       .spyOn(appContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableAutomaticAgentUpgrades: false } as any);
 
@@ -29,13 +31,13 @@ describe('validateRequiredVersions', () => {
 
   describe('feature flag enabled', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutomaticAgentUpgrades: true } as any);
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
     });
     afterEach(() => {
-      jest.spyOn(licenseService, 'isEnterprise').mockClear();
+      vi.spyOn(licenseService, 'isEnterprise').mockClear();
     });
 
     it('should throw error if duplicate versions', () => {
@@ -52,7 +54,7 @@ describe('validateRequiredVersions', () => {
     });
 
     it('should throw error if license is not at least Enterprise', () => {
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+      vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
       expect(() => {
         validateRequiredVersions('test policy', [
           { version: '9.0.0', percentage: 10 },

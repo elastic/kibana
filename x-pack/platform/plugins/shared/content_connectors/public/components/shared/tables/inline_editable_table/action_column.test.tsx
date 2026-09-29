@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { screen, fireEvent } from '@testing-library/react';
@@ -29,15 +31,15 @@ describe('ActionColumn', () => {
     rowErrors: [],
   };
   const mockActions = {
-    editExistingItem: jest.fn(),
-    deleteItem: jest.fn(),
-    doneEditing: jest.fn(),
-    saveExistingItem: jest.fn(),
-    saveNewItem: jest.fn(),
+    editExistingItem: vi.fn(),
+    deleteItem: vi.fn(),
+    doneEditing: vi.fn(),
+    saveExistingItem: vi.fn(),
+    saveNewItem: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(mockValues);
     setMockActions(mockActions);
   });

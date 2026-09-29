@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,60 +18,72 @@ import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
 // Mock CodeEditor
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: (props: any) => (
-    <textarea
-      data-test-subj={props.dataTestSubj || 'code-editor'}
-      value={props.value}
-      onChange={(e) => props.onChange?.(e.target.value)}
-      readOnly={props.options?.readOnly}
-      aria-label={props['aria-label']}
-    />
-  ),
-  monaco: {
-    languages: {
-      json: {
-        jsonDefaults: {
-          setDiagnosticsOptions: jest.fn(),
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: (props: any) => (
+        <textarea
+          data-test-subj={props.dataTestSubj || 'code-editor'}
+          value={props.value}
+          onChange={(e) => props.onChange?.(e.target.value)}
+          readOnly={props.options?.readOnly}
+          aria-label={props['aria-label']}
+        />
+      ),
+      monaco: {
+        languages: {
+          json: {
+            jsonDefaults: {
+              setDiagnosticsOptions: vi.fn(),
+            },
+          },
         },
+        editor: {},
       },
-    },
-    editor: {},
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock input validation callout
-jest.mock('./input_validation_callout', () => ({
-  InputValidationCallout: ({ errors }: { errors: string }) => (
-    <div data-test-subj="workflow-input-validation-callout">{errors}</div>
-  ),
-}));
+vi.mock('./input_validation_callout', () => {
+      const mocked = {
+      InputValidationCallout: ({ errors }: { errors: string }) => (
+        <div data-test-subj="workflow-input-validation-callout">{errors}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock buildFieldsZodValidator
-jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
-  buildFieldsZodValidator: jest.fn(() => ({
-    safeParse: jest.fn(() => ({ success: true })),
-  })),
-}));
+vi.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => {
+      const mocked = {
+      buildFieldsZodValidator: vi.fn(() => ({
+        safeParse: vi.fn(() => ({ success: true })),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock theme constant
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });
 };
 
 describe('WorkflowExecuteManualForm', () => {
-  let mockSetValue: jest.Mock;
-  let mockSetErrors: jest.Mock;
+  let mockSetValue: Mock;
+  let mockSetErrors: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockSetValue = jest.fn();
-    mockSetErrors = jest.fn();
+    vi.clearAllMocks();
+    mockSetValue = vi.fn();
+    mockSetErrors = vi.fn();
   });
 
   it('should render the form with Input Data label', () => {
@@ -127,14 +142,14 @@ describe('WorkflowExecuteManualForm', () => {
 
   describe('initial input pre-fill', () => {
     const getInitialJson = (inputs?: JsonModelSchemaType): Record<string, unknown> => {
-      const setValue = jest.fn();
+      const setValue = vi.fn();
       renderWithProviders(
         <WorkflowExecuteManualForm
           value=""
           inputs={inputs}
           setValue={setValue}
           errors={null}
-          setErrors={jest.fn()}
+          setErrors={vi.fn()}
         />
       );
       expect(setValue).toHaveBeenCalled();

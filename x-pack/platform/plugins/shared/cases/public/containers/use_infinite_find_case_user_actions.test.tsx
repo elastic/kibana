@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
@@ -14,8 +17,8 @@ import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 const initialData = {
   data: undefined,
@@ -35,7 +38,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   const isEnabled = true;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns proper state on findCaseUserActions', async () => {
@@ -69,7 +72,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   });
 
   it('calls the API with correct parameters', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+    const spy = vi.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     renderHook(
       () =>
@@ -95,7 +98,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   });
 
   it('calls the API with search and authors parameters', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+    const spy = vi.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     renderHook(
       () =>
@@ -130,7 +133,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   });
 
   it('does not call API when not enabled', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+    const spy = vi.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     renderHook(
       () =>
@@ -150,10 +153,10 @@ describe('UseInfiniteFindCaseUserActions', () => {
   });
 
   it('shows a toast error when the API returns an error', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
+    const spy = vi.spyOn(api, 'findCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
     renderHook(() => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled), {
       wrapper: TestProviders,
@@ -167,7 +170,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   });
 
   it('fetches next page with correct params', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions');
+    const spy = vi.spyOn(api, 'findCaseUserActions');
 
     const { result } = renderHook(
       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
@@ -199,7 +202,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
     // one page short and a separate `useFindCaseUserActions` call fetches the
     // last page -- `shouldFetchAllPages` should make the infinite query keep
     // going all the way to the actual last page when `search`/`authors` is set.
-    const spy = jest
+    const spy = vi
       .spyOn(api, 'findCaseUserActions')
       .mockImplementation(async (_caseId, requestParams) => ({
         ...findCaseUserActionsResponse,
@@ -236,7 +239,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   });
 
   it('fetches through the last page as well when an authors filter is active', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(api, 'findCaseUserActions')
       .mockImplementation(async (_caseId, requestParams) => ({
         ...findCaseUserActionsResponse,
@@ -278,7 +281,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   });
 
   it('returns hasNextPage correctly', async () => {
-    jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+    vi.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     const { result } = renderHook(
       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),

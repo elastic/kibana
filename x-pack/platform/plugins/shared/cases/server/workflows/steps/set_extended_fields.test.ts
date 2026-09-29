@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { setExtendedFieldsStepDefinition } from './set_extended_fields';
 import type { CasesClient } from '../../client';
@@ -23,7 +25,7 @@ describe('setExtendedFieldsStepDefinition', () => {
   };
 
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = setExtendedFieldsStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.setExtendedFields');
@@ -36,9 +38,9 @@ describe('setExtendedFieldsStepDefinition', () => {
       ...createCaseResponseFixture,
       extended_fields: input.fields,
     };
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest.fn().mockResolvedValue([updatedCase]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi.fn().mockResolvedValue([updatedCase]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = setExtendedFieldsStepDefinition(getCasesClient);
@@ -64,9 +66,9 @@ describe('setExtendedFieldsStepDefinition', () => {
   });
 
   it('uses a provided version without a pre-update fetch', async () => {
-    const get = jest.fn();
-    const bulkUpdate = jest.fn().mockResolvedValue([createCaseResponseFixture]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn();
+    const bulkUpdate = vi.fn().mockResolvedValue([createCaseResponseFixture]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = setExtendedFieldsStepDefinition(getCasesClient);
@@ -86,9 +88,9 @@ describe('setExtendedFieldsStepDefinition', () => {
   });
 
   it('returns a forbidden error and never calls bulkUpdate when the version-resolving get is unauthorized', async () => {
-    const get = jest.fn().mockRejectedValue(new Error('Unauthorized to get case'));
-    const bulkUpdate = jest.fn();
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockRejectedValue(new Error('Unauthorized to get case'));
+    const bulkUpdate = vi.fn();
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = setExtendedFieldsStepDefinition(getCasesClient);
@@ -105,9 +107,9 @@ describe('setExtendedFieldsStepDefinition', () => {
   });
 
   it('surfaces a forbidden bulkUpdate error without applying a partial update', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest.fn().mockRejectedValue(new Error('Unauthorized to update case'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi.fn().mockRejectedValue(new Error('Unauthorized to update case'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = setExtendedFieldsStepDefinition(getCasesClient);
@@ -123,11 +125,11 @@ describe('setExtendedFieldsStepDefinition', () => {
   });
 
   it('surfaces the underlying validation message when bulkUpdate throws', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi
       .fn()
       .mockRejectedValue(new Error('Invalid value for extended field "priority_as_keyword"'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = setExtendedFieldsStepDefinition(getCasesClient);

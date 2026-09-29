@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -37,7 +39,7 @@ const Consumer = () => {
 
 describe('EsqlEditorActionsRegister', () => {
   it('registers the provided actions into the surrounding provider', () => {
-    const submitEsqlQuery = jest.fn();
+    const submitEsqlQuery = vi.fn();
     render(
       <EsqlEditorActionsProvider>
         <EsqlEditorActionsRegister
@@ -131,7 +133,7 @@ describe('EsqlEditorActionsRegister', () => {
     expect(() =>
       render(
         <>
-          <EsqlEditorActionsRegister currentQuery="FROM logs-*" submitEsqlQuery={jest.fn()} />
+          <EsqlEditorActionsRegister currentQuery="FROM logs-*" submitEsqlQuery={vi.fn()} />
           <Consumer />
         </>
       )

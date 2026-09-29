@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   mockCreatePluginPrebootSetupContext,
   mockCreatePluginSetupContext,
@@ -65,7 +68,7 @@ function createPlugin(
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
   });
-  jest.spyOn(plugin, 'init').mockResolvedValue();
+  vi.spyOn(plugin, 'init').mockResolvedValue();
   return plugin;
 }
 
@@ -206,7 +209,7 @@ test('`setupPlugins` throws if plugins have circular optional dependency', async
 
 test('`setupPlugins` ignores missing optional dependency', async () => {
   const plugin = createPlugin('some-id', { optional: ['missing-dep'] });
-  jest.spyOn(plugin, 'setup').mockResolvedValue('test');
+  vi.spyOn(plugin, 'setup').mockResolvedValue('test');
 
   pluginsSystem.addPlugin(plugin);
 
@@ -224,8 +227,8 @@ test('`setupPlugins` setups the runtimeResolver', async () => {
   const pluginA = createPlugin('pluginA', { required: [] });
   const pluginB = createPlugin('pluginB', { required: ['pluginA'] });
 
-  jest.spyOn(pluginA, 'setup').mockReturnValue('contractA');
-  jest.spyOn(pluginB, 'setup').mockReturnValue('contractB');
+  vi.spyOn(pluginA, 'setup').mockReturnValue('contractA');
+  vi.spyOn(pluginB, 'setup').mockReturnValue('contractB');
 
   pluginsSystem.addPlugin(pluginA);
   pluginsSystem.addPlugin(pluginB);
@@ -293,8 +296,8 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   const startContextMap = new Map();
 
   [...plugins.keys()].forEach((plugin, index) => {
-    jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
-    jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+    vi.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
+    vi.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
 
     setupContextMap.set(plugin.name, `setup-for-${plugin.name}`);
     startContextMap.set(plugin.name, `start-for-${plugin.name}`);
@@ -409,7 +412,7 @@ test('correctly orders preboot plugins and returns exposed values for "setup"', 
 
   const setupContextMap = new Map();
   [...plugins.keys()].forEach((plugin, index) => {
-    jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
+    vi.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
     setupContextMap.set(plugin.name, `setup-for-${plugin.name}`);
     prebootPluginSystem.addPlugin(plugin);
   });
@@ -459,7 +462,7 @@ test('`setupPlugins` only setups plugins that have server side', async () => {
   const thirdPluginToRun = createPlugin('order-1');
 
   [firstPluginToRun, secondPluginNotToRun, thirdPluginToRun].forEach((plugin, index) => {
-    jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
+    vi.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
 
     pluginsSystem.addPlugin(plugin);
   });
@@ -585,8 +588,8 @@ test('can start without plugins', async () => {
 
 test('cannot start preboot plugins', async () => {
   const prebootPlugin = createPlugin('order-0', { type: PluginType.preboot });
-  jest.spyOn(prebootPlugin, 'setup').mockResolvedValue({});
-  jest.spyOn(prebootPlugin, 'start').mockResolvedValue({});
+  vi.spyOn(prebootPlugin, 'setup').mockResolvedValue({});
+  vi.spyOn(prebootPlugin, 'start').mockResolvedValue({});
 
   const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
   prebootPluginSystem.addPlugin(prebootPlugin);
@@ -604,8 +607,8 @@ test('`startPlugins` only starts plugins that were setup', async () => {
   const thirdPluginToRun = createPlugin('order-1');
 
   [firstPluginToRun, secondPluginNotToRun, thirdPluginToRun].forEach((plugin, index) => {
-    jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-    jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+    vi.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+    vi.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
 
     pluginsSystem.addPlugin(plugin);
   });
@@ -627,21 +630,21 @@ test('`startPlugins` only starts plugins that were setup', async () => {
 
 describe('setup', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   it('throws timeout error if "setup" was not completed in 10 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-setup');
-    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
+    vi.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
     pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
     const promise = pluginsSystem.setupPlugins(setupDeps);
     process.nextTick(() => {
       // let the await init go through. then simulate the timeout
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     await expect(promise).rejects.toMatchInlineSnapshot(
@@ -655,27 +658,27 @@ describe('setup', () => {
       createPlugin('order-not-run', { server: false }),
       createPlugin('order-1'),
     ].forEach((plugin, index) => {
-      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      vi.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      vi.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
       pluginsSystem.addPlugin(plugin);
     });
     await pluginsSystem.setupPlugins(setupDeps);
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    const log = logger.get.mock.results[0].value as Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Setting up [2] plugins: [order-1,order-0]`);
   });
 });
 
 describe('start', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   it('throws timeout error if "start" was not completed in 10 sec.', async () => {
     const plugin = createPlugin('timeout-start');
-    jest.spyOn(plugin, 'setup').mockResolvedValue({});
-    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
+    vi.spyOn(plugin, 'setup').mockResolvedValue({});
+    vi.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
 
     pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
@@ -683,7 +686,7 @@ describe('start', () => {
 
     await pluginsSystem.setupPlugins(setupDeps);
     const promise = pluginsSystem.startPlugins(startDeps);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(
       `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
@@ -696,13 +699,13 @@ describe('start', () => {
       createPlugin('order-not-run', { server: false }),
       createPlugin('order-1'),
     ].forEach((plugin, index) => {
-      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      vi.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      vi.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
       pluginsSystem.addPlugin(plugin);
     });
     await pluginsSystem.setupPlugins(setupDeps);
     await pluginsSystem.startPlugins(startDeps);
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    const log = logger.get.mock.results[0].value as Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
   });
 
@@ -710,11 +713,11 @@ describe('start', () => {
     const pluginA = createPlugin('pluginA', { required: [] });
     const pluginB = createPlugin('pluginB', { required: ['pluginA'] });
 
-    jest.spyOn(pluginA, 'setup').mockReturnValue({});
-    jest.spyOn(pluginB, 'setup').mockReturnValue({});
+    vi.spyOn(pluginA, 'setup').mockReturnValue({});
+    vi.spyOn(pluginB, 'setup').mockReturnValue({});
 
-    jest.spyOn(pluginA, 'start').mockReturnValue('contractA');
-    jest.spyOn(pluginB, 'start').mockReturnValue('contractB');
+    vi.spyOn(pluginA, 'start').mockReturnValue('contractA');
+    vi.spyOn(pluginB, 'start').mockReturnValue('contractB');
 
     pluginsSystem.addPlugin(pluginA);
     pluginsSystem.addPlugin(pluginB);
@@ -756,15 +759,15 @@ describe('asynchronous plugins', () => {
     pluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
 
     const syncPlugin = createPlugin('sync-plugin');
-    jest.spyOn(syncPlugin, 'setup').mockReturnValue('setup-sync');
-    jest.spyOn(syncPlugin, 'start').mockReturnValue('start-sync');
+    vi.spyOn(syncPlugin, 'setup').mockReturnValue('setup-sync');
+    vi.spyOn(syncPlugin, 'start').mockReturnValue('start-sync');
     pluginsSystem.addPlugin(syncPlugin);
 
     const asyncPlugin = createPlugin('async-plugin');
-    jest
+    vi
       .spyOn(asyncPlugin, 'setup')
       .mockReturnValue(asyncSetup ? Promise.resolve('setup-async') : 'setup-sync');
-    jest
+    vi
       .spyOn(asyncPlugin, 'start')
       .mockReturnValue(asyncStart ? Promise.resolve('start-async') : 'start-sync');
     pluginsSystem.addPlugin(asyncPlugin);
@@ -780,7 +783,7 @@ describe('asynchronous plugins', () => {
       asyncStart: false,
     });
 
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    const log = logger.get.mock.results[0].value as Mocked<Logger>;
     expect(log.warn.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -797,7 +800,7 @@ describe('asynchronous plugins', () => {
       asyncStart: false,
     });
 
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    const log = logger.get.mock.results[0].value as Mocked<Logger>;
     expect(log.warn).not.toHaveBeenCalled();
   });
 
@@ -808,7 +811,7 @@ describe('asynchronous plugins', () => {
       asyncStart: true,
     });
 
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    const log = logger.get.mock.results[0].value as Mocked<Logger>;
     expect(log.warn.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -825,7 +828,7 @@ describe('asynchronous plugins', () => {
       asyncStart: true,
     });
 
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    const log = logger.get.mock.results[0].value as Mocked<Logger>;
     expect(log.warn).not.toHaveBeenCalled();
   });
 
@@ -836,7 +839,7 @@ describe('asynchronous plugins', () => {
       asyncStart: true,
     });
 
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    const log = logger.get.mock.results[0].value as Mocked<Logger>;
     expect(log.warn.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -974,11 +977,11 @@ describe('findCircularDependencies', () => {
 
 describe('stop', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const nextTick = () => new Promise((resolve) => setImmediate(resolve));
@@ -989,15 +992,15 @@ describe('stop', () => {
       createPlugin('plugin-2'),
       createPlugin('plugin-3'),
     ].map((plugin, index) => {
-      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      vi.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      vi.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
       pluginsSystem.addPlugin(plugin);
       return plugin;
     });
 
-    const stopSpy1 = jest.spyOn(plugin1, 'stop').mockImplementationOnce(() => Promise.resolve());
-    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
-    const stopSpy3 = jest.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy1 = vi.spyOn(plugin1, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy2 = vi.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy3 = vi.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
 
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
@@ -1005,7 +1008,7 @@ describe('stop', () => {
     const stopPromise = pluginsSystem.stopPlugins();
 
     await nextTick();
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await stopPromise;
 
@@ -1021,15 +1024,15 @@ describe('stop', () => {
       createPlugin('plugin-2'),
       createPlugin('plugin-3', { required: ['plugin-1', 'plugin-2'] }),
     ].map((plugin, index) => {
-      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      vi.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      vi.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
       pluginsSystem.addPlugin(plugin);
       return plugin;
     });
 
-    const stopSpy1 = jest.spyOn(plugin1, 'stop').mockImplementationOnce(() => Promise.resolve());
-    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
-    const stopSpy3 = jest.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy1 = vi.spyOn(plugin1, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy2 = vi.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy3 = vi.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
 
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
@@ -1037,7 +1040,7 @@ describe('stop', () => {
     const stopPromise = pluginsSystem.stopPlugins();
 
     await nextTick();
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await stopPromise;
 
@@ -1048,17 +1051,17 @@ describe('stop', () => {
   it('waits for 15 sec to finish "stop" and move on to the next plugin.', async () => {
     const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
       (plugin, index) => {
-        jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-        jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+        vi.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+        vi.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
         pluginsSystem.addPlugin(plugin);
         return plugin;
       }
     );
 
-    const stopSpy1 = jest
+    const stopSpy1 = vi
       .spyOn(plugin1, 'stop')
       .mockImplementationOnce(() => new Promise((resolve) => resolve));
-    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy2 = vi.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
 
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
@@ -1066,7 +1069,7 @@ describe('stop', () => {
     const stopPromise = pluginsSystem.stopPlugins();
 
     await nextTick();
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await stopPromise;
 
@@ -1087,17 +1090,17 @@ describe('stop', () => {
       createPlugin('plugin-2'),
       createPlugin('plugin-3', { required: ['plugin-1', 'plugin-2'] }),
     ].map((plugin, index) => {
-      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      vi.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      vi.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
       pluginsSystem.addPlugin(plugin);
       return plugin;
     });
 
-    const stopSpy1 = jest
+    const stopSpy1 = vi
       .spyOn(plugin1, 'stop')
       .mockImplementationOnce(() => Promise.reject('woups'));
-    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
-    const stopSpy3 = jest.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy2 = vi.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy3 = vi.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
 
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
@@ -1105,7 +1108,7 @@ describe('stop', () => {
     const stopPromise = pluginsSystem.stopPlugins();
 
     await nextTick();
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await stopPromise;
 

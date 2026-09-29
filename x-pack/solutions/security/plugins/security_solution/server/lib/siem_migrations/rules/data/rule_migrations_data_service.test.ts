@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
@@ -17,29 +20,32 @@ import type { SetupParams } from './rule_migrations_data_service';
 import { RuleMigrationsDataService } from './rule_migrations_data_service';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
 
-jest.mock('../index_migrators');
+vi.mock('../index_migrators');
 
-jest.mock('@kbn/index-adapter');
+vi.mock('@kbn/index-adapter');
 
 // This mock is required to have a way to await the index pattern name promise
 let mockIndexNameProviders: RuleMigrationIndexNameProviders;
-jest.mock('./rule_migrations_data_client', () => ({
-  RuleMigrationsDataClient: jest.fn((indexNameProviders: RuleMigrationIndexNameProviders) => {
-    mockIndexNameProviders = indexNameProviders;
-  }),
-}));
+vi.mock('./rule_migrations_data_client', () => {
+      const mocked = {
+      RuleMigrationsDataClient: vi.fn((indexNameProviders: RuleMigrationIndexNameProviders) => {
+        mockIndexNameProviders = indexNameProviders;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
-const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedClass<
+const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as MockedClass<
   typeof IndexPatternAdapter
 >;
-const MockedIndexAdapter = IndexAdapter as unknown as jest.MockedClass<typeof IndexAdapter>;
+const MockedIndexAdapter = IndexAdapter as unknown as MockedClass<typeof IndexAdapter>;
 
 const dependencies = {} as SiemMigrationsClientDependencies;
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const getComponentTemplate = (adapter: IndexAdapter) =>
-  (adapter.setComponentTemplate as jest.Mock).mock.calls[0][0];
+  (adapter.setComponentTemplate as Mock).mock.calls[0][0];
 
 describe('SiemRuleMigrationsDataService', () => {
   const kibanaVersion = '8.16.0';
@@ -52,7 +58,7 @@ describe('SiemRuleMigrationsDataService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient.inference.get.mockReset().mockResolvedValue({ endpoints: [] });
   });
 
@@ -226,8 +232,8 @@ describe('SiemRuleMigrationsDataService', () => {
           expectedId
         );
         expect(adapter.install).toHaveBeenCalledTimes(1);
-        expect(jest.mocked(adapter.setComponentTemplate).mock.invocationCallOrder[0]).toBeLessThan(
-          jest.mocked(adapter.install).mock.invocationCallOrder[0]
+        expect(vi.mocked(adapter.setComponentTemplate).mock.invocationCallOrder[0]).toBeLessThan(
+          vi.mocked(adapter.install).mock.invocationCallOrder[0]
         );
       }
       if (configuredId) {

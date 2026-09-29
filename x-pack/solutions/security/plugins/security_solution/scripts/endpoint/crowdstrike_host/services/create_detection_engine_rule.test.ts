@@ -5,27 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KbnClient } from '@kbn/test';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 import { createDetectionEngineCrowdStrikeRuleIfNeeded } from './create_detection_engine_rule';
 import * as detectionRulesServices from '../../common/detection_rules_services';
 
-jest.mock('../../common/detection_rules_services');
+vi.mock('../../common/detection_rules_services');
 
-const mockedDetectionRulesServices = detectionRulesServices as jest.Mocked<
+const mockedDetectionRulesServices = detectionRulesServices as Mocked<
   typeof detectionRulesServices
 >;
 
 describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
-  let mockKbnClient: jest.Mocked<KbnClient>;
+  let mockKbnClient: Mocked<KbnClient>;
   let mockLog: ReturnType<typeof createToolingLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockKbnClient = {
-      request: jest.fn(),
-    } as unknown as jest.Mocked<KbnClient>;
+      request: vi.fn(),
+    } as unknown as Mocked<KbnClient>;
 
     mockLog = createToolingLogger();
   });

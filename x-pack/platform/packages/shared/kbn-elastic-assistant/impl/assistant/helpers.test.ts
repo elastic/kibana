@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDefaultConnector, getOptionalRequestParams } from './helpers';
 import type { AIConnector } from '../connectorland/connector_selector';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -34,7 +36,7 @@ describe('helpers', () => {
       },
     };
 
-    const clientGet = jest.fn();
+    const clientGet = vi.fn();
 
     const settings = {
       client: {
@@ -43,7 +45,7 @@ describe('helpers', () => {
     } as unknown as SettingsStart;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientGet.mockImplementation((key: string) => {
         return undefined;
       });

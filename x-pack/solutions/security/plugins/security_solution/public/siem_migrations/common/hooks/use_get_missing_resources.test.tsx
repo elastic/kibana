@@ -5,44 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useGetMissingResources } from './use_get_missing_resources';
 
-const mockGetMissingResourcesRule = jest.fn();
-const mockGetMissingResourcesDashboard = jest.fn();
-const mockAddError = jest.fn();
+const mockGetMissingResourcesRule = vi.fn();
+const mockGetMissingResourcesDashboard = vi.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      siemMigrations: {
-        rules: {
-          api: {
-            getMissingResources: mockGetMissingResourcesRule,
+vi.mock('../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          siemMigrations: {
+            rules: {
+              api: {
+                getMissingResources: mockGetMissingResourcesRule,
+              },
+            },
+            dashboards: {
+              api: {
+                getDashboardMigrationMissingResources: mockGetMissingResourcesDashboard,
+              },
+            },
+          },
+          notifications: {
+            toasts: {
+              addError: mockAddError,
+            },
           },
         },
-        dashboards: {
-          api: {
-            getDashboardMigrationMissingResources: mockGetMissingResourcesDashboard,
-          },
-        },
-      },
-      notifications: {
-        toasts: {
-          addError: mockAddError,
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useGetMissingResources', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches missing resources for rules and calls onSuccess', async () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const missingResources = [{ id: '1', type: 'type', name: 'name' }];
     mockGetMissingResourcesRule.mockResolvedValue(missingResources);
 
@@ -58,7 +63,7 @@ describe('useGetMissingResources', () => {
   });
 
   it('fetches missing resources for dashboards and calls onSuccess', async () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const missingResources = [{ id: '2', type: 'type', name: 'name' }];
     mockGetMissingResourcesDashboard.mockResolvedValue(missingResources);
 
@@ -74,7 +79,7 @@ describe('useGetMissingResources', () => {
   });
 
   it('handles errors when fetching missing resources', async () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const error = new Error('Failed to fetch');
     mockGetMissingResourcesRule.mockRejectedValue({ body: error });
 

@@ -7,32 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { TraceRootSpan } from '@kbn/apm-types';
 import { TraceRootSpanProvider, useFetchTraceRootSpanContext } from './use_fetch_trace_root_span';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
-jest.mock('../../../../../plugin', () => ({
-  getUnifiedDocViewerServices: jest.fn(),
-}));
+vi.mock('../../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchRootSpanByTraceId = jest.fn<Promise<TraceRootSpan | undefined>, any>();
-const mockGetAbsoluteTime = jest.fn(() => ({
+const mockFetchRootSpanByTraceId = vi.fn<Promise<TraceRootSpan | undefined>, any>();
+const mockGetAbsoluteTime = vi.fn(() => ({
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-01T01:00:00.000Z',
 }));
 
-const mockGetById: jest.Mock<
+const mockGetById: Mock<
   | {
-      fetchRootSpanByTraceId: jest.Mock<Promise<TraceRootSpan | undefined>>;
+      fetchRootSpanByTraceId: Mock<Promise<TraceRootSpan | undefined>>;
     }
   | undefined
-> = jest.fn(() => ({
+> = vi.fn(() => ({
   fetchRootSpanByTraceId: mockFetchRootSpanByTraceId,
 }));
 
-(getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+(getUnifiedDocViewerServices as Mock).mockReturnValue({
   data: {
     query: {
       timefilter: {
@@ -52,7 +58,7 @@ const mockGetById: jest.Mock<
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockGetById.mockReturnValue({
     fetchRootSpanByTraceId: mockFetchRootSpanByTraceId,
   });

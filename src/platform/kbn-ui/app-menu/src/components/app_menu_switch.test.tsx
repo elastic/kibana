@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AppMenuSwitchComponent } from './app_menu_switch';
@@ -18,11 +20,11 @@ describe('AppMenuSwitchComponent', () => {
     label: 'Test switch',
     labelProps: { className: 'test-label' },
     checked: false,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render with the correct label', () => {
@@ -32,7 +34,7 @@ describe('AppMenuSwitchComponent', () => {
   });
 
   it('should call onChange with the new checked value when toggled', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(<AppMenuSwitchComponent switchConfig={{ ...defaultSwitchConfig, onChange }} />);
 
     fireEvent.click(screen.getByRole('switch'));

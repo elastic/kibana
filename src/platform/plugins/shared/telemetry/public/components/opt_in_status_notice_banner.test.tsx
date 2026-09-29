@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -43,7 +45,7 @@ describe('OptInStatusNoticeBanner', () => {
   });
 
   it('fires the "onSeenBanner" prop when a link is clicked', () => {
-    const onLinkClick = jest.fn();
+    const onLinkClick = vi.fn();
     const component = shallowWithIntl(
       <OptInStatusNoticeBanner
         onSeenBanner={onLinkClick}

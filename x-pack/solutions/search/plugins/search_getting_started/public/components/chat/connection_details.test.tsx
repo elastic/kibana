@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,14 +16,17 @@ import { ChatElasticsearchConnectionDetails } from './connection_details';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { useAgentBuilderMcpUrl } from '../../hooks/use_mcp_url';
 
-jest.mock('../../hooks/use_elasticsearch_url');
-jest.mock('../../hooks/use_mcp_url');
-jest.mock('@kbn/search-api-keys-components', () => ({
-  ApiKeyForm: () => <div data-test-subj="apiKeyForm" />,
-}));
+vi.mock('../../hooks/use_elasticsearch_url');
+vi.mock('../../hooks/use_mcp_url');
+vi.mock('@kbn/search-api-keys-components', () => {
+      const mocked = {
+      ApiKeyForm: () => <div data-test-subj="apiKeyForm" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseElasticsearchUrl = useElasticsearchUrl as jest.Mock;
-const mockUseAgentBuilderMcpUrl = useAgentBuilderMcpUrl as jest.Mock;
+const mockUseElasticsearchUrl = useElasticsearchUrl as Mock;
+const mockUseAgentBuilderMcpUrl = useAgentBuilderMcpUrl as Mock;
 
 const MOCK_ES_URL = 'https://my-deployment.es.us-east-1.aws.elastic.cloud';
 const MOCK_MCP_URL = 'https://my-kibana.kb.us-east-1.aws.elastic.cloud/api/agent_builder/mcp';

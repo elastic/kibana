@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { PaginationComponent, type PaginationComponentProps } from './pagination_component';
@@ -16,13 +18,13 @@ const defaultProps: PaginationComponentProps = {
   pageSize: 20,
   totalItems: 100,
   pageSizeOptions: [10, 20, 50],
-  onPageChange: jest.fn(),
-  onPageSizeChange: jest.fn(),
+  onPageChange: vi.fn(),
+  onPageSizeChange: vi.fn(),
 };
 
 describe('PaginationComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders pagination controls when there are items', () => {

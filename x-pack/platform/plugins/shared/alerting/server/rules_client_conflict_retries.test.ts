@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 
 import { RulesClient } from './rules_client';
@@ -17,9 +19,12 @@ import { RecoveredActionGroup } from '../common';
 import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 import { getRulesClientMockParams } from './test_utils';
 
-jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
-  validateScheduleLimit: jest.fn(),
-}));
+vi.mock('./application/rule/methods/get_schedule_frequency', () => {
+      const mocked = {
+      validateScheduleLimit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let rulesClient: RulesClient;
 
@@ -302,7 +307,7 @@ function setupRawRuleMocks(
 
 // setup for each test
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');

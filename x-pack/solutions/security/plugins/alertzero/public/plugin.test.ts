@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { AppStatus, type AppUpdater } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -31,7 +34,7 @@ const withSetting = (
   core: ReturnType<typeof coreMock.createStart>,
   setting$: Observable<boolean>
 ) => {
-  (core.uiSettings.get$ as jest.Mock).mockImplementation((id: string) => {
+  (core.uiSettings.get$ as Mock).mockImplementation((id: string) => {
     if (id !== ALERTZERO_ENABLED_SETTING_ID) {
       throw new Error(`Unexpected uiSetting read: ${id}`);
     }
@@ -79,7 +82,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
 
   const nextStatus = async (setting$: Observable<boolean>) => {
     const { coreSetup, plugin, coreStart } = setupPlugin(setting$);
-    const { updater$ } = (coreSetup.application.register as jest.Mock).mock.calls[0][0] as {
+    const { updater$ } = (coreSetup.application.register as Mock).mock.calls[0][0] as {
       updater$: Observable<AppUpdater>;
     };
     const firstStatus = firstValueFrom(statusUpdates$(updater$));
@@ -98,7 +101,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
   it('tracks later changes to the setting without a page reload', async () => {
     const setting$ = new BehaviorSubject(false);
     const { coreSetup, plugin, coreStart } = setupPlugin(setting$);
-    const { updater$ } = (coreSetup.application.register as jest.Mock).mock.calls[0][0] as {
+    const { updater$ } = (coreSetup.application.register as Mock).mock.calls[0][0] as {
       updater$: Observable<AppUpdater>;
     };
 
@@ -209,9 +212,9 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
   it('derives the space id from the base path so registration never waits on a round trip', async () => {
     // A non-default space is carried by the base path as `/s/<id>`, and that id scopes the
     // threat-report lookup, so assert it reaches the ES|QL the action button is built from.
-    const locator = { getRedirectUrl: jest.fn().mockReturnValue('/app/discover#/?x=1') };
+    const locator = { getRedirectUrl: vi.fn().mockReturnValue('/app/discover#/?x=1') };
     const share = {
-      url: { locators: { get: jest.fn().mockReturnValue(locator) } },
+      url: { locators: { get: vi.fn().mockReturnValue(locator) } },
     } as unknown as SharePluginStart;
 
     const { attachments } = startPlugin({ basePath: '/s/soc', share });

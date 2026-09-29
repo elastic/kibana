@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   registerBootstrapRouteMock,
   bootstrapRendererMock,
@@ -245,7 +248,7 @@ function renderTestCases(
     });
 
     it('does not resolve async default `getValue` for anonymous pages', async () => {
-      const getValue = jest.fn().mockResolvedValue('async-default');
+      const getValue = vi.fn().mockResolvedValue('async-default');
       uiSettings.client.getRegistered.mockReturnValue({
         registered: { name: 'title', getValue },
       });
@@ -259,7 +262,7 @@ function renderTestCases(
     });
 
     it('resolves async default `getValue` for non-anonymous pages', async () => {
-      const getValue = jest.fn().mockResolvedValue('async-default');
+      const getValue = vi.fn().mockResolvedValue('async-default');
       uiSettings.client.getRegistered.mockReturnValue({
         registered: { name: 'title', getValue },
       });
@@ -312,7 +315,7 @@ function renderTestCases(
     it('renders "core" CDN url injected', async () => {
       const userSettings = { 'theme:darkMode': { userValue: true } };
       uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
-      (mockRenderingPrebootDeps.http.staticAssets.getHrefBase as jest.Mock).mockImplementation(
+      (mockRenderingPrebootDeps.http.staticAssets.getHrefBase as Mock).mockImplementation(
         () => 'http://foo.bar:1773'
       );
       const [render] = await getRender();
@@ -392,8 +395,8 @@ function renderTestCases(
 
       const [render, deps] = await getRender();
 
-      (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
-      (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(true);
+      (deps.http.staticAssets.getHrefBase as Mock).mockReturnValueOnce('http://foo.bar:1773');
+      (deps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(true);
 
       const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
@@ -411,8 +414,8 @@ function renderTestCases(
 
       const [render, deps] = await getRender();
 
-      (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
-      (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(false);
+      (deps.http.staticAssets.getHrefBase as Mock).mockReturnValueOnce('http://foo.bar:1773');
+      (deps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(false);
 
       const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
@@ -623,16 +626,16 @@ describe('RenderingService', () => {
   let service: RenderingService;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(BUILD_DATE));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(BUILD_DATE));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new RenderingService(mockRenderingServiceParams);
 
     getSettingValueMock.mockImplementation((settingName: string) => settingName);
@@ -745,10 +748,10 @@ describe('RenderingService', () => {
         mockRenderingSetupDeps.userSettings.getUserSettings.mockResolvedValueOnce({
           locale: 'fr',
         } as UserSettings);
-        (mockRenderingSetupDeps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce(
+        (mockRenderingSetupDeps.http.staticAssets.getHrefBase as Mock).mockReturnValueOnce(
           'http://cdn.example.com'
         );
-        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(
           true
         );
 
@@ -770,7 +773,7 @@ describe('RenderingService', () => {
         mockRenderingSetupDeps.userSettings.getUserSettings.mockResolvedValueOnce({
           locale: 'fr',
         } as UserSettings);
-        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(
           false
         );
 
@@ -795,7 +798,7 @@ describe('RenderingService', () => {
           en: 'MOCK_HASH',
           'fr-FR': 'MOCK_FR_HASH',
         });
-        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(
           false
         );
 
@@ -858,7 +861,7 @@ describe('RenderingService', () => {
           en: 'MOCK_HASH',
           'fr-FR': 'MOCK_FR_HASH',
         });
-        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(
           false
         );
 
@@ -886,7 +889,7 @@ describe('RenderingService', () => {
       // setup and render added to assert the current theme name
       const { render } = await service.setup(mockRenderingSetupDeps);
       const themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
-      const getStringValue$ = jest
+      const getStringValue$ = vi
         .fn()
         .mockImplementation((_, _fallback) => themeName$.asObservable());
       service.start({
@@ -919,7 +922,7 @@ describe('RenderingService', () => {
       // setup and render added to assert the current theme name
       const { render } = await service.setup(mockRenderingSetupDeps);
       const themeName$ = new BehaviorSubject<ThemeName>('unknown' as any);
-      const getStringValue$ = jest
+      const getStringValue$ = vi
         .fn()
         .mockImplementation((_, _fallback) => themeName$.asObservable());
       service.start({
@@ -957,10 +960,10 @@ describe('RenderingService', () => {
     it('injects values returned by userStorage.asScoped().getForInjection()', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
-      const getForInjection = jest
+      const getForInjection = vi
         .fn()
         .mockResolvedValue({ 'navigation:layout': { hidden: ['discover'] } });
-      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      const asScoped = vi.fn().mockReturnValue({ getForInjection });
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       const content = await render(createKibanaRequest(), buildUiSettings());
@@ -976,7 +979,7 @@ describe('RenderingService', () => {
     it('injects unavailable/empty values when asScoped() returns null (no profile_uid)', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
-      const asScoped = jest.fn().mockReturnValue(null);
+      const asScoped = vi.fn().mockReturnValue(null);
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       const content = await render(createKibanaRequest(), buildUiSettings());
@@ -988,7 +991,7 @@ describe('RenderingService', () => {
     it('injects unavailable/empty values for anonymous pages without consulting userStorage', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
-      const asScoped = jest.fn();
+      const asScoped = vi.fn();
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       const content = await render(createKibanaRequest(), buildUiSettings(), {
@@ -1002,8 +1005,8 @@ describe('RenderingService', () => {
     it('throws when getForInjection() rejects', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
-      const getForInjection = jest.fn().mockRejectedValue(new Error('ES exploded'));
-      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      const getForInjection = vi.fn().mockRejectedValue(new Error('ES exploded'));
+      const asScoped = vi.fn().mockReturnValue({ getForInjection });
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
@@ -1012,10 +1015,10 @@ describe('RenderingService', () => {
     it('injects unavailable/empty values when getForInjection() rejects with a forbidden error', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
-      const getForInjection = jest
+      const getForInjection = vi
         .fn()
         .mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden')));
-      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      const asScoped = vi.fn().mockReturnValue({ getForInjection });
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       const content = await render(createKibanaRequest(), buildUiSettings());

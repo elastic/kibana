@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from './with_proc_runner';
 import { ProcRunner } from './proc_runner';
@@ -20,7 +22,7 @@ it('passes proc runner to a function', async () => {
 it('calls procRunner.teardown() if function returns synchronously', async () => {
   let teardownSpy;
   await withProcRunner(new ToolingLog(), async (proc) => {
-    teardownSpy = jest.spyOn(proc, 'teardown');
+    teardownSpy = vi.spyOn(proc, 'teardown');
   });
 
   expect(teardownSpy).toHaveBeenCalled();
@@ -32,7 +34,7 @@ it('calls procRunner.teardown() if function throw synchronous error, and rejects
 
   await expect(
     withProcRunner(new ToolingLog(), async (proc) => {
-      teardownSpy = jest.spyOn(proc, 'teardown');
+      teardownSpy = vi.spyOn(proc, 'teardown');
       throw error;
     })
   ).rejects.toThrow(error);
@@ -45,7 +47,7 @@ it('waits for promise to resolve before tearing down proc', async () => {
 
   await withProcRunner(new ToolingLog(), async (proc) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
-    teardownSpy = jest.spyOn(proc, 'teardown');
+    teardownSpy = vi.spyOn(proc, 'teardown');
   });
 
   expect(teardownSpy).not.toBe(undefined);
@@ -59,7 +61,7 @@ it('waits for promise to reject before tearing down proc and rejecting with the 
   await expect(
     withProcRunner(new ToolingLog(), async (proc) => {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      teardownSpy = jest.spyOn(proc, 'teardown');
+      teardownSpy = vi.spyOn(proc, 'teardown');
       throw error;
     })
   ).rejects.toThrow(error);

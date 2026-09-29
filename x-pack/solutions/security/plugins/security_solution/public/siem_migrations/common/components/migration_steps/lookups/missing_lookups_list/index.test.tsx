@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { MissingLookupsList } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 
 describe('MissingLookupsList', () => {
-  const omitLookup = jest.fn();
-  const onCopied = jest.fn();
+  const omitLookup = vi.fn();
+  const onCopied = vi.fn();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the component', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
@@ -15,7 +17,7 @@ const soEmptyResponse = { total: 0, saved_objects: [], per_page: 0, page: 1 };
 
 describe('getSavedObjectsCounts', () => {
   const fetchContextMock = createCollectorFetchContextMock();
-  const soClient = fetchContextMock.soClient as jest.Mocked<SavedObjectsClientContract>;
+  const soClient = fetchContextMock.soClient as Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     soClient.find.mockReset();

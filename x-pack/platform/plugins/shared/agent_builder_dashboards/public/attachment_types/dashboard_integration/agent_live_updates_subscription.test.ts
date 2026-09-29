@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -40,12 +42,12 @@ describe('createAgentLiveUpdatesSubscription', () => {
   const createHarness = () => {
     const chatEvents$ = new Subject();
     const activeConversation$ = new Subject();
-    const setState = jest.fn();
+    const setState = vi.fn();
 
     const agentBuilder = {
       events: {
         ui: { activeConversation$ },
-        getChatEvents$: jest.fn().mockReturnValue(chatEvents$),
+        getChatEvents$: vi.fn().mockReturnValue(chatEvents$),
       },
     } as unknown as AgentBuilderPluginStart;
 
@@ -57,7 +59,7 @@ describe('createAgentLiveUpdatesSubscription', () => {
     const subscription = createAgentLiveUpdatesSubscription({
       agentBuilder,
       api,
-      setAttachments: jest.fn(),
+      setAttachments: vi.fn(),
     });
 
     activeConversation$.next({ id: 'conversation-1', conversation: {} });

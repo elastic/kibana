@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import type { PolicyArtifactsAssignableListProps } from './policy_artifacts_assignable_list';
 import { PolicyArtifactsAssignableList } from './policy_artifacts_assignable_list';
@@ -15,7 +18,7 @@ import { getMockListResponse } from '../../../test_utils';
 
 describe('Policy artifacts list', () => {
   let mockedContext: AppContextTestRender;
-  let selectedArtifactsUpdatedMock: jest.Mock;
+  let selectedArtifactsUpdatedMock: Mock;
   let render: (
     props: PolicyArtifactsAssignableListProps
   ) => ReturnType<AppContextTestRender['render']>;
@@ -23,7 +26,7 @@ describe('Policy artifacts list', () => {
 
   afterEach(() => reactTestingLibrary.cleanup());
   beforeEach(() => {
-    selectedArtifactsUpdatedMock = jest.fn();
+    selectedArtifactsUpdatedMock = vi.fn();
     mockedContext = createAppRootMockRenderer();
     render = (props) => mockedContext.render(<PolicyArtifactsAssignableList {...props} />);
   });

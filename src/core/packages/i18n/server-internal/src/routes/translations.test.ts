@@ -7,37 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { Readable } from 'stream';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { registerTranslationsRoute } from './translations';
 
-jest.mock('fs/promises', () => ({
-  ...jest.requireActual('fs/promises'),
-  open: jest.fn(),
-}));
+vi.mock('fs/promises', () => {
+      const mocked = {
+      ...require('fs/promises'),
+      open: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    getTranslation: jest.fn().mockReturnValue({ locale: 'en', messages: {} }),
-  },
-  i18nLoader: {
-    getTranslationsByLocale: jest.fn(),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        getTranslation: vi.fn().mockReturnValue({ locale: 'en', messages: {} }),
+      },
+      i18nLoader: {
+        getTranslationsByLocale: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { open } from 'fs/promises';
 import { i18n } from '@kbn/i18n';
 
-const openMock = open as jest.MockedFunction<typeof open>;
-const getTranslationMock = i18n.getTranslation as jest.Mock;
+const openMock = open as MockedFunction<typeof open>;
+const getTranslationMock = i18n.getTranslation as Mock;
 
 const buildHandler = (opts: Omit<Parameters<typeof registerTranslationsRoute>[0], 'router'>) => {
   const router = mockRouter.create();
   registerTranslationsRoute({ ...opts, router });
   // The hashless route is registered first; return its handler.
-  return (router.get as jest.Mock).mock.calls[0][1] as Function;
+  return (router.get as Mock).mock.calls[0][1] as Function;
 };
 
 const makeRequest = (locale: string, translationHash?: string) => ({
@@ -45,8 +54,8 @@ const makeRequest = (locale: string, translationHash?: string) => ({
 });
 
 const makeResponse = () => {
-  const ok = jest.fn((payload: unknown) => payload);
-  const notFound = jest.fn((payload: unknown) => payload);
+  const ok = vi.fn((payload: unknown) => payload);
+  const notFound = vi.fn((payload: unknown) => payload);
   return { ok, notFound };
 };
 
@@ -68,7 +77,7 @@ const collectStream = (stream: Readable): Promise<string> =>
 const mockOpenWithContent = (content: string) => {
   const handle = {
     createReadStream: () => makeReadable(content),
-    close: jest.fn().mockResolvedValue(undefined),
+    close: vi.fn().mockResolvedValue(undefined),
   } as unknown as Awaited<ReturnType<typeof open>>;
   openMock.mockResolvedValue(handle);
   return handle;
@@ -76,7 +85,7 @@ const mockOpenWithContent = (content: string) => {
 
 describe('registerTranslationsRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOpenWithContent('');
     getTranslationMock.mockReturnValue({ locale: 'en', messages: {} });
   });
@@ -181,7 +190,7 @@ describe('registerTranslationsRoute', () => {
       const res = makeResponse();
       await handler({}, makeRequest('en'), res);
       expect(openMock).not.toHaveBeenCalled();
-      const { body } = (res.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (res.ok as Mock).mock.calls[0][0];
       expect(JSON.parse(body)).toEqual({ locale: 'en', messages: { key: 'value' } });
     });
 
@@ -192,7 +201,7 @@ describe('registerTranslationsRoute', () => {
       const res = makeResponse();
       await handler({}, makeRequest('fr-FR'), res);
       expect(openMock).toHaveBeenCalledWith('/translations/fr-FR.json', 'r');
-      const { body } = (res.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (res.ok as Mock).mock.calls[0][0];
       expect(body).toBeInstanceOf(Readable);
       const content = await collectStream(body);
       expect(JSON.parse(content)).toEqual({
@@ -215,7 +224,7 @@ describe('registerTranslationsRoute', () => {
       const handler = buildHandler(defaultOpts);
       const res = makeResponse();
       await handler({}, makeRequest('fr-FR'), res);
-      const { body } = (res.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (res.ok as Mock).mock.calls[0][0];
       const content = await collectStream(body);
       expect(JSON.parse(content)).toEqual({});
     });
@@ -227,7 +236,7 @@ describe('registerTranslationsRoute', () => {
       const res = makeResponse();
       await handler({}, makeRequest('fr-fr'), res);
       expect(openMock).toHaveBeenCalledWith('/translations/fr-FR.json', 'r');
-      const { body } = (res.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (res.ok as Mock).mock.calls[0][0];
       const content = await collectStream(body);
       expect(JSON.parse(content).locale).toBe('fr-FR');
     });

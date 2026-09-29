@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { buildModelVersionTransformFn } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
@@ -18,10 +20,13 @@ import { DISCOVER_SESSION_MODEL_VERSIONS } from '../../server/saved_objects/sche
 import { extractTabs, extractTabsBackfillFnV6, extractTabsTransformFnV13 } from './extract_tabs';
 import { SavedSearchType, VIEW_MODE } from '..';
 
-jest.mock('uuid', () => ({
-  ...jest.requireActual('uuid'),
-  v4: jest.fn(() => 'mock-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      ...require('uuid'),
+      v4: vi.fn(() => 'mock-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockContext: SavedObjectModelTransformationContext = {
   log: loggerMock.create(),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import * as reduxHooks from 'react-redux-v7';
@@ -20,24 +23,24 @@ import { useFetcher, useEsSearch } from '@kbn/observability-shared-plugin/public
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { getMonitorAction } from '../../../../state';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/observability-shared-plugin/public');
 
-const TagsListMock = TagsList as jest.Mock;
+const TagsListMock = TagsList as Mock;
 TagsListMock.mockReturnValue(<div>Tags list</div>);
 
-const useFetcherMock = useFetcher as jest.Mock;
+const useFetcherMock = useFetcher as Mock;
 
 useFetcherMock.mockReturnValue({
   data: { monitor: { tags: ['tag1', 'tag2'] } },
   status: 200,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 });
 
 // `jest.mock('@kbn/observability-shared-plugin/public')` auto-mocks every export
 // with `() => undefined`. The flyout renders `MonitorStatusPanel`, which now
 // reaches `useExternalMonitor` via `useSelectedMonitor`; that hook destructures
 // `useEsSearch(...)`, so the mock must return a non-undefined result.
-const useEsSearchMock = useEsSearch as jest.Mock;
+const useEsSearchMock = useEsSearch as Mock;
 
 interface DurationChartAttribute {
   time: {
@@ -53,7 +56,7 @@ interface ExploratoryViewEmbeddableProps {
   attributes: readonly [DurationChartAttribute, ...DurationChartAttribute[]];
 }
 
-const exploratoryViewEmbeddableMock = jest.fn((_props: ExploratoryViewEmbeddableProps) => null);
+const exploratoryViewEmbeddableMock = vi.fn((_props: ExploratoryViewEmbeddableProps) => null);
 
 useEsSearchMock.mockReturnValue({
   data: undefined,
@@ -63,10 +66,10 @@ useEsSearchMock.mockReturnValue({
 
 describe('Monitor Detail Flyout', () => {
   beforeEach(() => {
-    jest
+    vi
       .spyOn(observabilitySharedPublic, 'useTheme')
       .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
-    jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
+    vi.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
         docId: 'docId',
         monitor: {
@@ -93,16 +96,16 @@ describe('Monitor Detail Flyout', () => {
         '@timestamp': '2013-03-01 12:54:23',
       },
     });
-    jest.spyOn(statusByLocation, 'useStatusByLocation').mockReturnValue({
+    vi.spyOn(statusByLocation, 'useStatusByLocation').mockReturnValue({
       locations: [],
       loading: false,
     });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('close prop is called for built-in flyout close', () => {
-    const onCloseMock = jest.fn();
+    const onCloseMock = vi.fn();
     const { getByLabelText } = render(
       <MonitorDetailFlyout
         configId="123456"
@@ -110,8 +113,8 @@ describe('Monitor Detail Flyout', () => {
         location="US East"
         locationId="us-east"
         onClose={onCloseMock}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />
     );
     const closeButton = getByLabelText('Close this dialog');
@@ -128,9 +131,9 @@ describe('Monitor Detail Flyout', () => {
         id="test-id"
         location="US East"
         locationId="us-east"
-        onClose={jest.fn()}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onClose={vi.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />,
       {
         state: {
@@ -152,9 +155,9 @@ describe('Monitor Detail Flyout', () => {
         id="cross-space-id"
         location="US East"
         locationId="us-east"
-        onClose={jest.fn()}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onClose={vi.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />,
       {
         state: {
@@ -201,9 +204,9 @@ describe('Monitor Detail Flyout', () => {
         id="test-id"
         location="US East"
         locationId="us-east"
-        onClose={jest.fn()}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onClose={vi.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />,
       {
         state: {
@@ -233,11 +236,11 @@ describe('Monitor Detail Flyout', () => {
     useFetcherMock.mockReturnValue({
       data: undefined,
       loading: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
-    const mockDispatch = jest.fn();
-    jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+    const mockDispatch = vi.fn();
+    vi.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
 
     try {
       render(
@@ -247,9 +250,9 @@ describe('Monitor Detail Flyout', () => {
           location="US East"
           locationId="us-east"
           spaces={['team-a']}
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />
       );
 
@@ -269,8 +272,8 @@ describe('Monitor Detail Flyout', () => {
     // `fetchSavedObject` callback, whose identity changes whenever `space`
     // resolves. Without a guard, both effects fire in the same pass and
     // double-dispatch the request.
-    const mockDispatch = jest.fn();
-    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+    const mockDispatch = vi.fn();
+    const dispatchSpy = vi.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
 
     try {
       render(
@@ -279,9 +282,9 @@ describe('Monitor Detail Flyout', () => {
           id="test-id"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />
       );
 
@@ -296,8 +299,8 @@ describe('Monitor Detail Flyout', () => {
 
   it('renders details for fetch success', () => {
     const detailLink = '/app/synthetics/monitor/test-id';
-    jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
-    jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
+    vi.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
+    vi.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
 
     const { getByRole, getByText } = render(
       <MonitorDetailFlyout
@@ -305,9 +308,9 @@ describe('Monitor Detail Flyout', () => {
         id="test-id"
         location="US East"
         locationId="us-east"
-        onClose={jest.fn()}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onClose={vi.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />,
       {
         state: {
@@ -351,9 +354,9 @@ describe('Monitor Detail Flyout', () => {
           id="remote-monitor-id"
           location="europe-west3-a"
           locationId="europe-west3-a"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         {
           state: {
@@ -402,7 +405,7 @@ describe('Monitor Detail Flyout', () => {
     });
 
     it('renders both "View on remote cluster" and a CCS-aware "Go to monitor" button', () => {
-      const detailLinkSpy = jest
+      const detailLinkSpy = vi
         .spyOn(monitorDetailLocator, 'useMonitorDetailLocator')
         .mockReturnValue(
           '/app/synthetics/monitor/remote-config-id?locationId=europe-west3-a&remoteName=remote-cluster-1'
@@ -414,9 +417,9 @@ describe('Monitor Detail Flyout', () => {
           id="remote-monitor-id"
           location="europe-west3-a"
           locationId="europe-west3-a"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         {
           state: {
@@ -468,7 +471,7 @@ describe('Monitor Detail Flyout', () => {
       // Overview-status metadata can omit `remote.kibanaUrl` (the `top_metrics`
       // aggregation drops `text`-mapped fields), so the deep link must fall back
       // to the `kibanaUrl` read straight from the latest ping's `_source`.
-      jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
+      vi.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
         data: {
           docId: 'docId',
           kibanaUrl: 'https://ping-kibana.example.com',
@@ -488,9 +491,9 @@ describe('Monitor Detail Flyout', () => {
           id="remote-monitor-id"
           location="europe-west3-a"
           locationId="europe-west3-a"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         {
           state: {
@@ -574,7 +577,7 @@ describe('Monitor Detail Flyout', () => {
     };
 
     it('resolves a stale heartbeat monitor and renders it read-only (no Edit, no Go to monitor, no 404 callout)', () => {
-      jest
+      vi
         .spyOn(monitorDetailLocator, 'useMonitorDetailLocator')
         .mockReturnValue('/app/synthetics/monitor/hb-config-id?locationId=us-east');
 
@@ -584,9 +587,9 @@ describe('Monitor Detail Flyout', () => {
           id="hb-config-id"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         { state: heartbeatState }
       );
@@ -602,8 +605,8 @@ describe('Monitor Detail Flyout', () => {
     });
 
     it('does not dispatch the local saved-object fetch for heartbeat monitors', () => {
-      const mockDispatch = jest.fn();
-      jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+      const mockDispatch = vi.fn();
+      vi.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
 
       render(
         <MonitorDetailFlyout
@@ -611,9 +614,9 @@ describe('Monitor Detail Flyout', () => {
           id="hb-config-id"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         { state: heartbeatState }
       );
@@ -631,9 +634,9 @@ describe('Monitor Detail Flyout', () => {
           id="hb-config-id"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         { state: heartbeatState }
       );
@@ -651,8 +654,8 @@ describe('Monitor Detail Flyout', () => {
   });
 
   describe('agent builder attachment', () => {
-    const mockSetChatConfig = jest.fn();
-    const mockClearChatConfig = jest.fn();
+    const mockSetChatConfig = vi.fn();
+    const mockClearChatConfig = vi.fn();
     const mockAgentBuilder = {
       setChatConfig: mockSetChatConfig,
       clearChatConfig: mockClearChatConfig,
@@ -678,9 +681,9 @@ describe('Monitor Detail Flyout', () => {
           id="test-id"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         {
           state: monitorState,
@@ -710,9 +713,9 @@ describe('Monitor Detail Flyout', () => {
           id="test-id"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         {
           state: monitorState,
@@ -729,9 +732,9 @@ describe('Monitor Detail Flyout', () => {
           id="test-id"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         {
           state: monitorState,
@@ -802,9 +805,9 @@ describe('duration chart attributes', () => {
         id="test-id"
         location="US East"
         locationId="us-east"
-        onClose={jest.fn()}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onClose={vi.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />,
       {
         core: {
@@ -856,9 +859,9 @@ describe('duration chart attributes', () => {
         id="active-monitor"
         location="US East"
         locationId="us-east"
-        onClose={jest.fn()}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onClose={vi.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />,
       {
         core: {
@@ -882,8 +885,8 @@ describe('duration chart attributes', () => {
   it('retries the saved-object fetch when a leftover monitor remains after switching in push mode', () => {
     localStorage.setItem('synthetics.flyout.mode', 'push');
     exploratoryViewEmbeddableMock.mockClear();
-    const mockDispatch = jest.fn();
-    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+    const mockDispatch = vi.fn();
+    const dispatchSpy = vi.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
 
     try {
       const { getByText, queryByRole } = render<{
@@ -894,9 +897,9 @@ describe('duration chart attributes', () => {
           id="monitor-b"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         {
           core: {
@@ -931,8 +934,8 @@ describe('duration chart attributes', () => {
   });
 
   it('does not refetch after a non-404 saved-object error for the current monitor', () => {
-    const mockDispatch = jest.fn();
-    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+    const mockDispatch = vi.fn();
+    const dispatchSpy = vi.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
 
     try {
       render(
@@ -941,9 +944,9 @@ describe('duration chart attributes', () => {
           id="monitor-b"
           location="US East"
           locationId="us-east"
-          onClose={jest.fn()}
-          onEnabledChange={jest.fn()}
-          onLocationChange={jest.fn()}
+          onClose={vi.fn()}
+          onEnabledChange={vi.fn()}
+          onLocationChange={vi.fn()}
         />,
         {
           state: {
@@ -979,9 +982,9 @@ describe('duration chart attributes', () => {
         id="cross-space-id"
         location="US East"
         locationId="us-east"
-        onClose={jest.fn()}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onClose={vi.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />,
       {
         core: {
@@ -1041,9 +1044,9 @@ describe('duration chart attributes', () => {
         id="01435ca1-2c1f-44de-ba4e-b0a7bd14ef5c"
         location="US Central QA"
         locationId="us_central_qa"
-        onClose={jest.fn()}
-        onEnabledChange={jest.fn()}
-        onLocationChange={jest.fn()}
+        onClose={vi.fn()}
+        onEnabledChange={vi.fn()}
+        onLocationChange={vi.fn()}
       />,
       {
         core: {

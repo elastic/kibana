@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { FetchIntegrationPolicyNamespaceResponse } from '../../endpoint/services/fleet';
@@ -23,7 +25,7 @@ describe('createPolicyDataStreamsIfNeeded()', () => {
 
     policyNamespacesMock = { integrationPolicy: { '123': ['foo1', 'foo2'] } };
     (
-      endpointServicesMock.getInternalFleetServices().getPolicyNamespace as jest.Mock
+      endpointServicesMock.getInternalFleetServices().getPolicyNamespace as Mock
     ).mockResolvedValue(policyNamespacesMock);
   });
 

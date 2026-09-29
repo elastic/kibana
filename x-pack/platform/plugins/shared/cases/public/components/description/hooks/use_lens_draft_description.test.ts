@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { MutableRefObject } from 'react';
 import { renderHook, act } from '@testing-library/react';
 
@@ -12,17 +15,17 @@ import { useLensDraftComment } from '../../markdown_editor/plugins/lens/use_lens
 import type { DescriptionMarkdownRefObject } from '../types';
 import { useLensDraftDescription } from './use_lens_draft_description';
 
-jest.mock('../../markdown_editor/plugins/lens/use_lens_draft_comment');
+vi.mock('../../markdown_editor/plugins/lens/use_lens_draft_comment');
 
-const useLensDraftCommentMock = useLensDraftComment as jest.Mock;
-const clearDraftComment = jest.fn();
-const openLensModal = jest.fn();
+const useLensDraftCommentMock = useLensDraftComment as Mock;
+const clearDraftComment = vi.fn();
+const openLensModal = vi.fn();
 
 describe('useLensDraftDescription', () => {
-  const setIsEditable = jest.fn();
+  const setIsEditable = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useLensDraftCommentMock.mockReturnValue({
       clearDraftComment,
       openLensModal,
@@ -142,10 +145,10 @@ describe('useLensDraftDescription', () => {
   });
 
   it('sets comment and opens lens modal when ref is valid and has incoming lens state', () => {
-    const setComment = jest.fn();
+    const setComment = vi.fn();
     const editor = {
       textarea: document.createElement('textarea'),
-      replaceNode: jest.fn(),
+      replaceNode: vi.fn(),
       toolbar: null,
     };
     const descriptionMarkdownRef = {
@@ -172,10 +175,10 @@ describe('useLensDraftDescription', () => {
   });
 
   it('sets comment and clears draft when ref is valid and no incoming lens state', () => {
-    const setComment = jest.fn();
+    const setComment = vi.fn();
     const editor = {
       textarea: document.createElement('textarea'),
-      replaceNode: jest.fn(),
+      replaceNode: vi.fn(),
       toolbar: null,
     };
     const descriptionMarkdownRef = {

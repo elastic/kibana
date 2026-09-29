@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
@@ -124,7 +127,7 @@ describe('resolveStatusFromExecution', () => {
 describe('resolveInvestigationStatuses', () => {
   const logger = loggingSystemMock.createLogger();
 
-  const resolve = (getWorkflowExecution?: jest.Mock, workflowExecutionIds: string[] = ['exec-1']) =>
+  const resolve = (getWorkflowExecution?: Mock, workflowExecutionIds: string[] = ['exec-1']) =>
     resolveInvestigationStatuses({
       request: httpServerMock.createKibanaRequest(),
       workflowsManagement: getWorkflowExecution
@@ -136,11 +139,11 @@ describe('resolveInvestigationStatuses', () => {
     });
 
   it('omits an execution that does not exist', async () => {
-    await expect(resolve(jest.fn().mockResolvedValue(null))).resolves.toEqual({});
+    await expect(resolve(vi.fn().mockResolvedValue(null))).resolves.toEqual({});
   });
 
   it('reports an execution that cannot be read as unavailable', async () => {
-    await expect(resolve(jest.fn().mockRejectedValue(new Error('corrupt')))).resolves.toEqual({
+    await expect(resolve(vi.fn().mockRejectedValue(new Error('corrupt')))).resolves.toEqual({
       'exec-1': 'unavailable',
     });
   });
@@ -152,7 +155,7 @@ describe('resolveInvestigationStatuses', () => {
   it('limits concurrent execution reads', async () => {
     let activeReads = 0;
     let maxActiveReads = 0;
-    const getWorkflowExecution = jest.fn(async () => {
+    const getWorkflowExecution = vi.fn(async () => {
       activeReads += 1;
       maxActiveReads = Math.max(maxActiveReads, activeReads);
       await new Promise<void>((complete) => setImmediate(complete));

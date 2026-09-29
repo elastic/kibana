@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { CaseSeverity, SeverityFilter } from './severity_filter';
 import * as i18n from './translations';
-const onSeverityChange = jest.fn();
+const onSeverityChange = vi.fn();
 const defaultProps = {
   selectedSeverity: CaseSeverity.LOW,
   onSeverityChange,
 };
 describe('SeverityFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should render EuiSuperSelect with correct options and selected value', () => {
     const { getByTestId, getAllByRole } = render(<SeverityFilter {...defaultProps} />);

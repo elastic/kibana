@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -19,11 +21,11 @@ describe('GET /internal/spaces/_initial_solution_setup', () => {
   const setup = (isRequired: boolean | Error = true) => {
     const router = httpServiceMock.createRouter();
     const spacesClient = spacesClientMock.create();
-    const getSpacesService = jest.fn().mockReturnValue({
-      createSpacesClient: jest.fn().mockReturnValue(spacesClient),
+    const getSpacesService = vi.fn().mockReturnValue({
+      createSpacesClient: vi.fn().mockReturnValue(spacesClient),
     });
     const initialSolutionSetup = new InitialSolutionSetupService(true);
-    jest
+    vi
       .spyOn(initialSolutionSetup, 'isRequired')
       .mockImplementation(() =>
         isRequired instanceof Error ? Promise.reject(isRequired) : Promise.resolve(isRequired)
@@ -111,8 +113,8 @@ describe('GET /internal/spaces/_initial_solution_setup', () => {
     spacesClient.isInitialSolutionSetupRequired.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError('space', DEFAULT_SPACE_ID)
     );
-    const getSpacesService = jest.fn().mockReturnValue({
-      createSpacesClient: jest.fn().mockReturnValue(spacesClient),
+    const getSpacesService = vi.fn().mockReturnValue({
+      createSpacesClient: vi.fn().mockReturnValue(spacesClient),
     });
     const initialSolutionSetup = new InitialSolutionSetupService(true);
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EuiDataGridProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
@@ -20,10 +22,10 @@ import { useComparisonFields } from './hooks/use_comparison_fields';
 
 let mockLocalStorage: Record<string, string> = {};
 
-jest.mock('../../restorable_state', () => {
-  const real = jest.requireActual('../../restorable_state');
+vi.mock('../../restorable_state', async () => {
+  const real = (await vi.importActual('../../restorable_state'));
   return {
-    useRestorableLocalStorage: jest.fn((key: string, storageKey, value: unknown) => {
+    useRestorableLocalStorage: vi.fn((key: string, storageKey, value: unknown) => {
       mockLocalStorage[storageKey] = JSON.stringify(value);
       return real.useRestorableLocalStorage(key, storageKey, value);
     }),
@@ -32,19 +34,22 @@ jest.mock('../../restorable_state', () => {
 
 let mockDataGridProps: EuiDataGridProps | undefined;
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiDataGrid: jest.fn((props) => {
-    mockDataGridProps = props;
-    return <></>;
-  }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiDataGrid: vi.fn((props) => {
+        mockDataGridProps = props;
+        return <></>;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_comparison_fields', () => {
-  const originalModule = jest.requireActual('./hooks/use_comparison_fields');
+vi.mock('./hooks/use_comparison_fields', async () => {
+  const originalModule = (await vi.importActual('./hooks/use_comparison_fields'));
   return {
     ...originalModule,
-    useComparisonFields: jest.fn(originalModule.useComparisonFields),
+    useComparisonFields: vi.fn(originalModule.useComparisonFields),
   };
 });
 
@@ -58,7 +63,7 @@ const createDocMap = (currentDocs = docs) =>
 const renderCompareDocuments = ({
   forceShowAllFields = false,
 }: { forceShowAllFields?: boolean } = {}) => {
-  const replaceSelectedDocs = jest.fn();
+  const replaceSelectedDocs = vi.fn();
   const getCompareDocuments = (props?: Partial<CompareDocumentsProps>) => (
     <CompareDocuments
       id="test"
@@ -76,7 +81,7 @@ const renderCompareDocuments = ({
       fieldFormats={{} as any}
       docMap={createDocMap()}
       replaceSelectedDocs={replaceSelectedDocs}
-      setIsCompareActive={jest.fn()}
+      setIsCompareActive={vi.fn()}
       {...props}
     />
   );

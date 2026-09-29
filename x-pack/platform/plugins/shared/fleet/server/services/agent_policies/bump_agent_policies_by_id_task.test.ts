@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -22,14 +24,17 @@ import {
   scheduleBumpAgentPoliciesByIdTask,
 } from './bump_agent_policies_by_id_task';
 
-jest.mock('../app_context');
-jest.mock('../agent_policy');
-jest.mock('../epm/packages/cache', () => ({
-  runWithCache: jest.fn((fn: () => Promise<unknown>) => fn()),
-}));
+vi.mock('../app_context');
+vi.mock('../agent_policy');
+vi.mock('../epm/packages/cache', () => {
+      const mocked = {
+      runWithCache: vi.fn((fn: () => Promise<unknown>) => fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAgentPolicyService = jest.mocked(agentPolicyService);
-const mockedAppContextService = jest.mocked(appContextService);
+const mockedAgentPolicyService = vi.mocked(agentPolicyService);
+const mockedAppContextService = vi.mocked(appContextService);
 
 const TASK_TYPE = 'fleet:bump_agent_policies_by_id';
 
@@ -37,7 +42,7 @@ const getRegisteredTaskRunner = (
   taskInstance: ConcreteTaskInstance,
   signal = new AbortController().signal
 ): { run: () => Promise<unknown> } => {
-  const registerTaskDefinitions = jest.fn();
+  const registerTaskDefinitions = vi.fn();
   registerBumpAgentPoliciesByIdTask({
     registerTaskDefinitions,
   } as unknown as TaskManagerSetupContract);
@@ -53,7 +58,7 @@ const buildTaskInstance = (params: Record<string, unknown>): ConcreteTaskInstanc
 
 describe('bump_agent_policies_by_id_task', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getLogger.mockReturnValue(loggingSystemMock.createLogger());
   });
 
@@ -116,7 +121,7 @@ describe('bump_agent_policies_by_id_task', () => {
 
   describe('scheduleBumpAgentPoliciesByIdTask', () => {
     it('schedules the task with the policy ids and user', async () => {
-      const schedule = jest.fn();
+      const schedule = vi.fn();
       const taskManagerStart = { schedule } as unknown as TaskManagerStartContract;
       const agentPolicyIdsWithSpace = [{ id: 'policy-1', spaceId: 'default' }];
       const user = { username: 'jdoe' } as any;
@@ -134,7 +139,7 @@ describe('bump_agent_policies_by_id_task', () => {
     });
 
     it('splits large sets into multiple tasks of at most 100 policies each', async () => {
-      const schedule = jest.fn();
+      const schedule = vi.fn();
       const taskManagerStart = { schedule } as unknown as TaskManagerStartContract;
       const agentPolicyIdsWithSpace = Array.from({ length: 250 }, (_, i) => ({
         id: `policy-${i}`,
@@ -150,7 +155,7 @@ describe('bump_agent_policies_by_id_task', () => {
     });
 
     it('does not schedule anything when there are no policies', async () => {
-      const schedule = jest.fn();
+      const schedule = vi.fn();
       const taskManagerStart = { schedule } as unknown as TaskManagerStartContract;
 
       await scheduleBumpAgentPoliciesByIdTask(taskManagerStart, []);

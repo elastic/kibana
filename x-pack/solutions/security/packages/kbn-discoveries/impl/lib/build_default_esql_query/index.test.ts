@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { buildDefaultEsqlQuery } from '.';
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const mockFieldCapsResponse = (fields: string[]) => ({
@@ -22,8 +25,8 @@ const mockFieldCapsResponse = (fields: string[]) => ({
 });
 
 const mockEsClient = {
-  fieldCaps: jest.fn().mockResolvedValue(mockFieldCapsResponse([])),
-  search: jest.fn(),
+  fieldCaps: vi.fn().mockResolvedValue(mockFieldCapsResponse([])),
+  search: vi.fn(),
 } as unknown as ElasticsearchClient;
 
 const DEFAULT_SPACE_ID = 'default';
@@ -32,12 +35,12 @@ const DEFAULT_ALERTS_INDEX_PATTERN = `.alerts-security.alerts-${DEFAULT_SPACE_ID
 
 describe('buildDefaultEsqlQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when allowedFields is provided', () => {
     it('does not call esClient.search', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name', 'user.name'])
       );
 
@@ -52,7 +55,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('returns a query with the provided fields in KEEP', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name', 'user.name'])
       );
 
@@ -71,7 +74,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('always includes _id and @timestamp even when not in allowedFields', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -88,7 +91,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('deduplicates _id and @timestamp if already in allowedFields', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -114,7 +117,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('sorts the user-provided fields alphabetically in KEEP', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['agent.id', 'host.name', 'user.name'])
       );
 
@@ -133,7 +136,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('excludes fields that do not exist in the index', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -152,7 +155,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('falls back to all candidate fields when fieldCaps fails', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockRejectedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockRejectedValueOnce(
         new Error('index_not_found_exception')
       );
 
@@ -172,7 +175,7 @@ describe('buildDefaultEsqlQuery', () => {
 
   describe('when allowedFields is omitted', () => {
     beforeEach(() => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue({
+      (mockEsClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {
@@ -203,7 +206,7 @@ describe('buildDefaultEsqlQuery', () => {
         },
       });
 
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValue(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValue(
         mockFieldCapsResponse(['host.name', 'user.name'])
       );
     });
@@ -259,7 +262,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('throws when fetchAnonymizationFields fails', async () => {
-      (mockEsClient.search as jest.Mock).mockRejectedValue(new Error('index_not_found_exception'));
+      (mockEsClient.search as Mock).mockRejectedValue(new Error('index_not_found_exception'));
 
       await expect(
         buildDefaultEsqlQuery({
@@ -271,7 +274,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('throws when no allowed fields are found', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue({
+      (mockEsClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [
             {
@@ -298,7 +301,7 @@ describe('buildDefaultEsqlQuery', () => {
 
   describe('query structure', () => {
     it('includes FROM with the default alerts index pattern and METADATA _id', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -314,7 +317,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('includes WHERE @timestamp >= NOW() - 24 hours as the first WHERE clause', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -331,7 +334,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('includes WHERE clauses for open/acknowledged and excluding building blocks', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -350,7 +353,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('includes SORT by risk_score DESC and @timestamp DESC', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -365,7 +368,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('includes LIMIT with default size of 100', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -380,7 +383,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('uses the provided size when specified', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -398,7 +401,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('uses a custom alertsIndexPattern when provided', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 
@@ -417,7 +420,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('constructs the correct full query structure', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name', 'user.name'])
       );
 
@@ -463,7 +466,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('uses the spaceId to construct the default alertsIndexPattern', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
         mockFieldCapsResponse(['host.name'])
       );
 

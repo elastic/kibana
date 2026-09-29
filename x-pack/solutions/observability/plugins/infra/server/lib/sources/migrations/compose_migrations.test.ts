@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { composeMigrations } from './compose_migrations';
@@ -15,13 +17,13 @@ type TestDocument = SavedObjectUnsanitizedDoc<{
 
 describe('composeMigrations function', () => {
   test('correctly composes two migration functions', () => {
-    const firstMigration = jest.fn(
+    const firstMigration = vi.fn(
       (doc: TestDocument): TestDocument => ({
         ...doc,
         attributes: { ...doc.attributes, a: doc.attributes.a + 1 },
       })
     );
-    const secondMigration = jest.fn(
+    const secondMigration = vi.fn(
       (doc: TestDocument): TestDocument => ({
         ...doc,
         attributes: { ...doc.attributes, a: doc.attributes.a ** 2 },

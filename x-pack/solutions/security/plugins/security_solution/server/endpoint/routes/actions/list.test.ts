@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock, Mocked } from 'vitest';
+
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
@@ -55,7 +57,7 @@ describe('Action List Route', () => {
   };
 
   let endpointAppContextService: EndpointAppContextService;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
   let licenseService: LicenseService;
   let licenseEmitter: Subject<ILicense>;
 
@@ -90,7 +92,7 @@ describe('Action List Route', () => {
     }: CallApiRouteInterface): Promise<
       AwaitedProperties<SecuritySolutionRequestHandlerContextMock>
     > => {
-      (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
+      (startContract.security.authc.getCurrentUser as Mock).mockImplementationOnce(
         () => superUser
       );
 

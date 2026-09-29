@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCasesClientMockArgs } from '../mocks';
 import { ensureAuthorizedToRunWorkflow } from '../cases/ensure_authorized_to_run_workflow';
 import {
@@ -13,15 +15,15 @@ import {
 } from '../user_actions/record_workflow_execution';
 import { createCasesWorkflowOperations } from './operations';
 
-jest.mock('../cases/ensure_authorized_to_run_workflow');
-jest.mock('../user_actions/record_workflow_execution');
+vi.mock('../cases/ensure_authorized_to_run_workflow');
+vi.mock('../user_actions/record_workflow_execution');
 
 describe('createCasesWorkflowOperations', () => {
   const clientArgs = createCasesClientMockArgs();
   const operations = createCasesWorkflowOperations(clientArgs);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('binds authorization to the request-scoped client arguments', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
@@ -24,11 +27,11 @@ const resolvedUser = {
   email: null,
   profileUid: 'worker-uid',
 };
-const resolveUser = jest.fn().mockResolvedValue(resolvedUser);
+const resolveUser = vi.fn().mockResolvedValue(resolvedUser);
 
-const allowAll = (): jest.Mocked<ImpactPrivilegesChecker> => ({
-  assertCanManage: jest.fn().mockResolvedValue(undefined),
-  assertCanRead: jest.fn().mockResolvedValue(undefined),
+const allowAll = (): Mocked<ImpactPrivilegesChecker> => ({
+  assertCanManage: vi.fn().mockResolvedValue(undefined),
+  assertCanRead: vi.fn().mockResolvedValue(undefined),
 });
 
 const createContext = (input: Record<string, unknown>): StepHandlerContext<never, never> =>
@@ -37,16 +40,16 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     rawInput: input,
     config: {},
     contextManager: {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         execution: { id: 'exec-1', executedBy: 'worker-user' },
         workflow: { spaceId: SPACE_ID },
       }),
-      getScopedEsClient: jest.fn(),
-      getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
-      renderInputTemplate: jest.fn((value) => value),
-      callKibanaApi: jest.fn(),
+      getScopedEsClient: vi.fn(),
+      getFakeRequest: vi.fn().mockReturnValue(FAKE_REQUEST),
+      renderInputTemplate: vi.fn((value) => value),
+      callKibanaApi: vi.fn(),
     },
-    logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     abortSignal: new AbortController().signal,
     stepId: 'attach_impact',
     stepType: 'investigations.attachImpact',
@@ -75,18 +78,18 @@ describe('investigations.attachImpact input schema', () => {
 
 describe('investigations.attachImpact step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const ownerConversations = {
-    get: jest.fn().mockResolvedValue({ permissions: { update_access_control: true } }),
+    get: vi.fn().mockResolvedValue({ permissions: { update_access_control: true } }),
   };
 
   const createDefinition = (
-    attach: jest.Mock,
+    attach: Mock,
     privileges = allowAll(),
-    getAttachmentClient: () => Promise<{ create: jest.Mock } | undefined> = async () => ({
-      create: jest.fn().mockResolvedValue({ id: 'impact-1' }),
+    getAttachmentClient: () => Promise<{ create: Mock } | undefined> = async () => ({
+      create: vi.fn().mockResolvedValue({ id: 'impact-1' }),
     }),
     getConversationClient: () => Promise<typeof ownerConversations> = async () => ownerConversations
   ) => ({
@@ -94,7 +97,7 @@ describe('investigations.attachImpact step', () => {
       getImpactService: () =>
         ({
           attach,
-          getByConversationId: jest.fn(async () => {
+          getByConversationId: vi.fn(async () => {
             const attached = [...attach.mock.results]
               .reverse()
               .find((entry) => entry.type === 'return');
@@ -104,7 +107,7 @@ describe('investigations.attachImpact step', () => {
             const result = await attached.value;
             return result.written;
           }),
-          revertAttach: jest.fn().mockResolvedValue(undefined),
+          revertAttach: vi.fn().mockResolvedValue(undefined),
         } as unknown as ImpactService),
       resolveUser,
       privileges,
@@ -116,7 +119,7 @@ describe('investigations.attachImpact step', () => {
 
   it('should attach through the service with the space and the resolved user', async () => {
     const entities = [{ id: 'user-1' }, { id: 'host-1', name: 'fin-dc-01' }];
-    const attach = jest.fn().mockResolvedValue({
+    const attach = vi.fn().mockResolvedValue({
       written: {
         id: 'impact-1',
         conversationId: 'conv-1',
@@ -139,7 +142,7 @@ describe('investigations.attachImpact step', () => {
   });
 
   it('should assert manage before writing anything', async () => {
-    const attach = jest.fn();
+    const attach = vi.fn();
     const privileges = allowAll();
     privileges.assertCanManage.mockRejectedValue(new ImpactForbiddenError('nope'));
     const { definition } = createDefinition(attach, privileges);
@@ -151,7 +154,7 @@ describe('investigations.attachImpact step', () => {
   });
 
   it('should fail the step with a typed error when the service fails', async () => {
-    const attach = jest.fn().mockRejectedValue(new Error('index unavailable'));
+    const attach = vi.fn().mockRejectedValue(new Error('index unavailable'));
     const { definition } = createDefinition(attach);
 
     await expect(
@@ -160,7 +163,7 @@ describe('investigations.attachImpact step', () => {
   });
 
   it('should fail the step with ConflictError when concurrent attaches exhaust retries', async () => {
-    const attach = jest.fn().mockRejectedValue(new ImpactConflictError('conv-1'));
+    const attach = vi.fn().mockRejectedValue(new ImpactConflictError('conv-1'));
     const { definition } = createDefinition(attach);
 
     await expect(
@@ -169,7 +172,7 @@ describe('investigations.attachImpact step', () => {
   });
 
   it('should reject a malformed input as a ValidationError rather than calling the service', async () => {
-    const attach = jest.fn();
+    const attach = vi.fn();
     const { definition } = createDefinition(attach);
 
     await expect(
@@ -184,8 +187,8 @@ describe('investigations.attachImpact step', () => {
       conversationId: 'conv-1',
       entities: [{ id: 'user-1' }],
     };
-    const attach = jest.fn().mockResolvedValue({ written: impact });
-    const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const attach = vi.fn().mockResolvedValue({ written: impact });
+    const create = vi.fn().mockResolvedValue({ id: 'impact-1' });
     const { definition } = createDefinition(attach, allowAll(), async () => ({ create }));
 
     await definition.handler(
@@ -205,13 +208,13 @@ describe('investigations.attachImpact step', () => {
   });
 
   it('should not write impact when the caller is not the conversation owner', async () => {
-    const attach = jest.fn();
+    const attach = vi.fn();
     const { definition } = createDefinition(
       attach,
       allowAll(),
-      async () => ({ create: jest.fn() }),
+      async () => ({ create: vi.fn() }),
       async () => ({
-        get: jest
+        get: vi
           .fn()
           .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conv-1' })),
       })
@@ -226,10 +229,10 @@ describe('investigations.attachImpact step', () => {
 
 describe('investigations.getImpact step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const getDefinition = (getByConversationId: jest.Mock, privileges = allowAll()) =>
+  const getDefinition = (getByConversationId: Mock, privileges = allowAll()) =>
     getGetImpactStepDefinition({
       getImpactService: () => ({ getByConversationId } as unknown as ImpactService),
       privileges,
@@ -237,7 +240,7 @@ describe('investigations.getImpact step', () => {
 
   it('should return the fields a workflow can branch on', async () => {
     const entities = [{ id: 'host-1', name: 'fin-dc-01' }];
-    const getByConversationId = jest.fn().mockResolvedValue({
+    const getByConversationId = vi.fn().mockResolvedValue({
       id: 'impact-1',
       conversationId: 'conv-1',
       entities,
@@ -256,7 +259,7 @@ describe('investigations.getImpact step', () => {
   });
 
   it('should assert read rather than manage', async () => {
-    const getByConversationId = jest.fn().mockResolvedValue({
+    const getByConversationId = vi.fn().mockResolvedValue({
       id: 'impact-1',
       entities: [{ id: 'host-1' }],
     });
@@ -271,7 +274,7 @@ describe('investigations.getImpact step', () => {
   });
 
   it('should fail the step when the reader lacks the privilege', async () => {
-    const getByConversationId = jest.fn();
+    const getByConversationId = vi.fn();
     const privileges = allowAll();
     privileges.assertCanRead.mockRejectedValue(new ImpactForbiddenError('nope'));
 
@@ -284,7 +287,7 @@ describe('investigations.getImpact step', () => {
   });
 
   it('should fail the step when no impact has been attached yet', async () => {
-    const getByConversationId = jest.fn().mockRejectedValue(new ImpactNotFoundError('conv-1'));
+    const getByConversationId = vi.fn().mockRejectedValue(new ImpactNotFoundError('conv-1'));
 
     await expect(
       getDefinition(getByConversationId).handler(createContext({ conversationId: 'conv-1' }))

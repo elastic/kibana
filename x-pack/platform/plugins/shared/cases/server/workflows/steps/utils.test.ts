@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ConnectorTypes } from '../../../common/types/domain';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../../common/bundled-types.gen';
@@ -68,7 +71,7 @@ describe('resolveActionSourceFromStepContext', () => {
 
   it('falls back to the workflow context when config has no source', () => {
     const context = createStepHandlerContext();
-    (context.contextManager.getContext as jest.Mock).mockReturnValue({
+    (context.contextManager.getContext as Mock).mockReturnValue({
       workflow: { id: 'wf-1', name: 'Escalate' },
       execution: { id: 'exec-1' },
     });
@@ -99,9 +102,9 @@ describe('createCasesStepHandler', () => {
       id: 'case-1',
       connector: { id: 'none' },
     };
-    const operation = jest.fn().mockResolvedValue(createdCase);
-    const getCasesClient = jest.fn().mockResolvedValue({
-      cases: { push: jest.fn() },
+    const operation = vi.fn().mockResolvedValue(createdCase);
+    const getCasesClient = vi.fn().mockResolvedValue({
+      cases: { push: vi.fn() },
     });
 
     const handler = createCasesStepHandler(getCasesClient, operation);
@@ -119,9 +122,9 @@ describe('createCasesStepHandler', () => {
 
   it('passes actionSource from step config to getCasesClient', async () => {
     const actionSource = { type: 'agent', id: 'elastic-ai-agent', name: 'Elastic AI Agent' };
-    const operation = jest.fn().mockResolvedValue({ id: 'case-1', connector: { id: 'none' } });
-    const getCasesClient = jest.fn().mockResolvedValue({
-      cases: { push: jest.fn() },
+    const operation = vi.fn().mockResolvedValue({ id: 'case-1', connector: { id: 'none' } });
+    const getCasesClient = vi.fn().mockResolvedValue({
+      cases: { push: vi.fn() },
     });
 
     const handler = createCasesStepHandler(getCasesClient, operation);
@@ -135,13 +138,13 @@ describe('createCasesStepHandler', () => {
   });
 
   it('calls push when push-case is enabled', async () => {
-    const push = jest.fn();
+    const push = vi.fn();
     const createdCase = {
       id: 'case-1',
       connector: { id: 'connector-1' },
     };
-    const operation = jest.fn().mockResolvedValue(createdCase);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const operation = vi.fn().mockResolvedValue(createdCase);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { push },
     });
 
@@ -157,9 +160,9 @@ describe('createCasesStepHandler', () => {
 
   it('returns error when operation throws', async () => {
     const operationError = new Error('operation failed');
-    const operation = jest.fn().mockRejectedValue(operationError);
-    const getCasesClient = jest.fn().mockResolvedValue({
-      cases: { push: jest.fn() },
+    const operation = vi.fn().mockRejectedValue(operationError);
+    const getCasesClient = vi.fn().mockResolvedValue({
+      cases: { push: vi.fn() },
     });
 
     const handler = createCasesStepHandler(getCasesClient, operation);
@@ -170,9 +173,9 @@ describe('createCasesStepHandler', () => {
 
   it('maps errors via onError callback when provided', async () => {
     const operationError = new Error('operation failed');
-    const operation = jest.fn().mockRejectedValue(operationError);
-    const getCasesClient = jest.fn().mockResolvedValue({
-      cases: { push: jest.fn() },
+    const operation = vi.fn().mockRejectedValue(operationError);
+    const getCasesClient = vi.fn().mockResolvedValue({
+      cases: { push: vi.fn() },
     });
 
     const handler = createCasesStepHandler(getCasesClient, operation, {

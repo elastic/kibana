@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/code-editor';
@@ -14,11 +16,11 @@ import type { UseQueryValidationParams } from './use_query_validation';
 import { useQueryValidation, VALIDATION_DEBOUNCE_MS } from './use_query_validation';
 import type { MapCache } from 'lodash';
 
-const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
-const mockSetModelMarkers = jest.fn();
+const mockValidate = vi.fn().mockResolvedValue({ errors: [], warnings: [] });
+const mockSetModelMarkers = vi.fn();
 
-jest.mock('@kbn/code-editor', () => {
-  const actual = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const actual = (await vi.importActual('@kbn/code-editor'));
   return {
     ...actual,
     ESQLLang: {
@@ -42,7 +44,7 @@ interface ValidationRun {
 const createMockEditorModelRef = () => {
   const ref: React.MutableRefObject<Partial<monaco.editor.ITextModel> | undefined> = {
     current: {
-      isDisposed: jest.fn().mockReturnValue(false),
+      isDisposed: vi.fn().mockReturnValue(false),
     },
   };
   return ref as React.MutableRefObject<monaco.editor.ITextModel | undefined>;
@@ -57,7 +59,7 @@ const createMockEditorRef = () => {
 
 const createMockCache = () => {
   return {
-    clear: jest.fn(),
+    clear: vi.fn(),
   } as unknown as MapCache;
 };
 
@@ -77,33 +79,33 @@ const defaultParams = (
   isQueryLoading: false,
   dataSourcesCache: createMockCache(),
   esqlFieldsCache: createMockCache(),
-  getJoinIndicesCallback: jest.fn(),
-  onQueryUpdate: jest.fn(),
+  getJoinIndicesCallback: vi.fn(),
+  onQueryUpdate: vi.fn(),
   pickerProjectRouting: undefined,
   latencyTracking: {
-    trackValidationLatencyStart: jest.fn(),
-    trackValidationLatencyEnd: jest.fn(),
-    resetValidationTracking: jest.fn(),
+    trackValidationLatencyStart: vi.fn(),
+    trackValidationLatencyEnd: vi.fn(),
+    resetValidationTracking: vi.fn(),
   },
   ...overrides,
 });
 
 const advanceDebounce = () => {
   act(() => {
-    jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    vi.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
   });
 };
 
 describe('useQueryValidation debounced validation', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     mockValidate.mockResolvedValue({ errors: [], warnings: [] });
-    window.performance.mark = jest.fn();
+    window.performance.mark = vi.fn();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('runs client validation once after rapid code changes within the debounce window', async () => {

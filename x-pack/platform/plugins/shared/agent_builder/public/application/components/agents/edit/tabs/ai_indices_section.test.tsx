@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
@@ -15,23 +17,32 @@ import { useForm } from 'react-hook-form';
 import type { AgentFormData } from '../agent_form';
 import { AiIndicesSection } from './ai_indices_section';
 
-jest.mock('../../../../hooks/use_is_context_engine_enabled', () => ({
-  useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
-}));
-jest.mock('../../../../hooks/ai_indices/use_list_ai_indices', () => ({
-  useListAiIndices: () => ({
-    aiIndices: mockAvailableAiIndices,
-    isLoading: mockListLoading,
-    error: mockListError,
-  }),
-}));
-jest.mock('../../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => ({
-  useAgentAiIndicesById: () => ({
-    aiIndices: mockAgentAiIndices,
-    isLoading: false,
-    error: mockAgentAiIndicesError,
-  }),
-}));
+vi.mock('../../../../hooks/use_is_context_engine_enabled', () => {
+      const mocked = {
+      useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/ai_indices/use_list_ai_indices', () => {
+      const mocked = {
+      useListAiIndices: () => ({
+        aiIndices: mockAvailableAiIndices,
+        isLoading: mockListLoading,
+        error: mockListError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => {
+      const mocked = {
+      useAgentAiIndicesById: () => ({
+        aiIndices: mockAgentAiIndices,
+        isLoading: false,
+        error: mockAgentAiIndicesError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const AGENT_ID = 'my-agent';
 const LONG_ID =
@@ -47,7 +58,7 @@ let mockAvailableAiIndices: Array<{ id: string; description?: string; managed: b
 let mockListError: Error | undefined;
 let mockListLoading = false;
 
-const onSubmit = jest.fn();
+const onSubmit = vi.fn();
 
 const TestForm: React.FC<{ assignedIds?: string[]; isFormDisabled?: boolean }> = ({
   assignedIds = [],
@@ -88,7 +99,7 @@ const submittedAiIndices = () => onSubmit.mock.calls[0][0].configuration.ai_indi
 
 describe('AiIndicesSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsContextEngineEnabled = true;
     mockAgentAiIndices = [];
     mockAgentAiIndicesError = undefined;

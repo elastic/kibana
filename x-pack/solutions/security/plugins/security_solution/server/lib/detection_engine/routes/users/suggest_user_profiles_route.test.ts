@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../../common/constants';
@@ -17,10 +20,10 @@ describe('suggestUserProfilesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let mockSecurityStart: ReturnType<typeof securityMock.createStart>;
-  let getStartServicesMock: jest.Mock;
+  let getStartServicesMock: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     mockSecurityStart = securityMock.createStart();
@@ -28,8 +31,8 @@ describe('suggestUserProfilesRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   const buildRequest = () => {
@@ -42,7 +45,7 @@ describe('suggestUserProfilesRoute', () => {
 
   describe('normal status codes', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([{}, { security: mockSecurityStart }]);
+      getStartServicesMock = vi.fn().mockResolvedValue([{}, { security: mockSecurityStart }]);
       suggestUserProfilesRoute(server.router, getStartServicesMock);
     });
 
@@ -71,7 +74,7 @@ describe('suggestUserProfilesRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 });

@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-jest.mock('../../../telemetry/insights', () => ({
-  ...jest.requireActual('../../../telemetry/insights'),
-  getSessionIDfromKibanaRequest: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('../../../telemetry/insights', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../telemetry/insights')),
+      getSessionIDfromKibanaRequest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { AuthenticatedUser } from '@kbn/core/server';
@@ -73,11 +79,11 @@ describe('set attacks workflow status', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
   let telemetrySenderMock: ITelemetryEventsSender;
-  let reportEBT: jest.Mock;
-  let sendOnDemand: jest.Mock;
+  let reportEBT: Mock;
+  let sendOnDemand: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.uiSettings.client.get.mockResolvedValue([]);
@@ -86,22 +92,22 @@ describe('set attacks workflow status', () => {
     );
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
-    reportEBT = jest.fn();
-    sendOnDemand = jest.fn();
+    reportEBT = vi.fn();
+    sendOnDemand = vi.fn();
     telemetrySenderMock = {
       ...createMockTelemetryEventsSender(),
       reportEBT,
       sendOnDemand,
-      getClusterID: jest.fn().mockReturnValue('test-cluster-id'),
-      isTelemetryOptedIn: jest.fn().mockResolvedValue(true),
+      getClusterID: vi.fn().mockReturnValue('test-cluster-id'),
+      isTelemetryOptedIn: vi.fn().mockResolvedValue(true),
     } as unknown as ITelemetryEventsSender;
 
     setAttacksStatusRoute(server.router, ruleDataClient, telemetrySenderMock);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('update_related_alerts: false (attacks only)', () => {
@@ -341,7 +347,7 @@ describe('set attacks workflow status', () => {
     });
 
     test('sends insights telemetry when opted in', async () => {
-      jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
+      vi.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
       context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
 
       await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
@@ -363,8 +369,8 @@ describe('set attacks workflow status', () => {
     });
 
     test('does not send insights telemetry when opted out', async () => {
-      jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
-      telemetrySenderMock.isTelemetryOptedIn = jest.fn().mockResolvedValue(false);
+      vi.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
+      telemetrySenderMock.isTelemetryOptedIn = vi.fn().mockResolvedValue(false);
       context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
 
       await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
@@ -373,7 +379,7 @@ describe('set attacks workflow status', () => {
     });
 
     test('does not send insights telemetry when closing reason validation fails', async () => {
-      jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
+      vi.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
       context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
 
       await server.inject(
@@ -385,7 +391,7 @@ describe('set attacks workflow status', () => {
     });
 
     test('sends insights telemetry before ES update even when update fails', async () => {
-      jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
+      vi.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
       context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
       context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
         new Error('Test error')
@@ -418,15 +424,15 @@ describe('set attacks workflow status', () => {
 
   describe('workflow trigger emission', () => {
     let mockEventBus: {
-      emitAttackStatusChanged: jest.Mock;
-      emitAlertStatusChanged: jest.Mock;
+      emitAttackStatusChanged: Mock;
+      emitAlertStatusChanged: Mock;
     };
 
     beforeEach(() => {
       server = serverMock.create();
       mockEventBus = {
-        emitAttackStatusChanged: jest.fn(),
-        emitAlertStatusChanged: jest.fn(),
+        emitAttackStatusChanged: vi.fn(),
+        emitAlertStatusChanged: vi.fn(),
       };
       setAttacksStatusRoute(
         server.router,
@@ -595,7 +601,7 @@ describe('set attacks workflow status', () => {
           expect.anything(),
           expect.objectContaining({ alertIds: ['alertB'] })
         );
-        const call = (mockEventBus.emitAlertStatusChanged as jest.Mock).mock.calls[0][1];
+        const call = (mockEventBus.emitAlertStatusChanged as Mock).mock.calls[0][1];
         expect(call.alertIds).not.toContain('alertA');
       });
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -106,7 +108,7 @@ describe('FlyoutTemplate tabs', () => {
 
   it('calls onTabChange and respects selectedTabId in controlled mode', async () => {
     const user = userEvent.setup();
-    const onTabChange = jest.fn();
+    const onTabChange = vi.fn();
     const { rerender } = render(
       <FlyoutTemplate
         onClose={noop}
@@ -216,7 +218,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('falls back to the first tab and warns when selectedTabId is invalid', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS} selectedTabId="missing">
@@ -479,7 +481,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('warns in development when tabs are set but no Header is provided', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Subscriber } from 'rxjs';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs';
@@ -53,7 +55,7 @@ describe('ExecutionContract', () => {
 
   test('can cancel execution', () => {
     const execution = createExecution('foo bar=123');
-    const spy = jest.spyOn(execution, 'cancel').mockImplementation(() => {});
+    const spy = vi.spyOn(execution, 'cancel').mockImplementation(() => {});
     const contract = new ExecutionContract(execution);
 
     expect(spy).toHaveBeenCalledTimes(0);

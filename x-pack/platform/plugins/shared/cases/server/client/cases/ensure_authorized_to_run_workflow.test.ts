@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { WriteOperations } from '../../authorization';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { mockCases } from '../../mocks';
@@ -17,7 +19,7 @@ describe('ensureAuthorizedToRunWorkflow', () => {
   const caseB = mockCases[1];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('authorizes using the updateCase privilege (cases:<owner>/updateCase) with a workflow-run audit action', async () => {

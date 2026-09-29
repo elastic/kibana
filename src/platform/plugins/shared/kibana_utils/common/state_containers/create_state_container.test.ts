@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createStateContainer } from './create_state_container';
 
 test('can create state container', () => {
@@ -63,7 +65,7 @@ test('does not shallow merge states', () => {
 
 test('can subscribe and unsubscribe to state changes', () => {
   const stateContainer = createStateContainer({});
-  const spy = jest.fn();
+  const spy = vi.fn();
   const subscription = stateContainer.state$.subscribe(spy);
   stateContainer.set({ a: 1 });
   stateContainer.set({ a: 2 });
@@ -77,8 +79,8 @@ test('can subscribe and unsubscribe to state changes', () => {
 
 test('multiple subscribers can subscribe', () => {
   const stateContainer = createStateContainer({});
-  const spy1 = jest.fn();
-  const spy2 = jest.fn();
+  const spy1 = vi.fn();
+  const spy2 = vi.fn();
   const subscription1 = stateContainer.state$.subscribe(spy1);
   const subscription2 = stateContainer.state$.subscribe(spy2);
   stateContainer.set({ a: 1 });

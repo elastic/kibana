@@ -5,24 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useInitTimerangeFromUrlParam } from './use_init_timerange_url_params';
 import * as redux from 'react-redux-v7';
 import * as globalQueryString from '../../utils/global_query_string';
 import { TestProviders } from '../../mock';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-}));
-jest.mock('../../lib/kibana');
-jest.mock('../../utils/global_query_string', () => ({ useInitializeUrlParam: jest.fn() }));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/kibana');
+vi.mock('../../utils/global_query_string', () => {
+      const mocked = { useInitializeUrlParam: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useInitTimerangeFromUrlParam', () => {
-  const dispatch = jest.fn();
+  const dispatch = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
-    (redux.useDispatch as jest.Mock).mockReturnValue(dispatch);
+    vi.clearAllMocks();
+    (redux.useDispatch as Mock).mockReturnValue(dispatch);
   });
 
   it('should call useInitializeUrlParam with correct params', () => {
@@ -39,7 +48,7 @@ describe('useInitTimerangeFromUrlParam', () => {
     renderHook(() => useInitTimerangeFromUrlParam(), {
       wrapper: TestProviders,
     });
-    const callback = (globalQueryString.useInitializeUrlParam as jest.Mock).mock.calls[0][1];
+    const callback = (globalQueryString.useInitializeUrlParam as Mock).mock.calls[0][1];
     callback({ valueReport: { timerange: { kind: 'absolute' } } });
     expect(dispatch).toHaveBeenCalledTimes(3);
   });
@@ -48,7 +57,7 @@ describe('useInitTimerangeFromUrlParam', () => {
     renderHook(() => useInitTimerangeFromUrlParam(), {
       wrapper: TestProviders,
     });
-    const callback = (globalQueryString.useInitializeUrlParam as jest.Mock).mock.calls[0][1];
+    const callback = (globalQueryString.useInitializeUrlParam as Mock).mock.calls[0][1];
     expect(() => callback(null)).not.toThrow();
   });
 
@@ -64,7 +73,7 @@ describe('useInitTimerangeFromUrlParam', () => {
         },
       },
     };
-    (globalQueryString.useInitializeUrlParam as jest.Mock).mockImplementation((_, cb) =>
+    (globalQueryString.useInitializeUrlParam as Mock).mockImplementation((_, cb) =>
       cb(initialState)
     );
     renderHook(() => useInitTimerangeFromUrlParam(), {
@@ -92,7 +101,7 @@ describe('useInitTimerangeFromUrlParam', () => {
         },
       },
     };
-    (globalQueryString.useInitializeUrlParam as jest.Mock).mockImplementation((_, cb) =>
+    (globalQueryString.useInitializeUrlParam as Mock).mockImplementation((_, cb) =>
       cb(initialState)
     );
     renderHook(() => useInitTimerangeFromUrlParam(), {

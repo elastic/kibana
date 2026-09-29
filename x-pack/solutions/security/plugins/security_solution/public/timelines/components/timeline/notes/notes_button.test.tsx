@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -14,7 +16,7 @@ import { ThemeProvider } from 'styled-components';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
-const toggleShowNotesMock = jest.fn();
+const toggleShowNotesMock = vi.fn();
 
 const mockEventData: DataTableRecord & TimelineItem = {
   id: 'event-id',
@@ -51,7 +53,7 @@ const renderTestComponent = (props?: Partial<ComponentProps<typeof NotesButton>>
 
 describe('helpers', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('should show the notes button correctly', () => {
     renderTestComponent();

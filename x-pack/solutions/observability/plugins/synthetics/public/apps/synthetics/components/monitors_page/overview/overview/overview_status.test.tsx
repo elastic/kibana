@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import * as URL from '../../../../hooks/use_url_params';
@@ -14,20 +17,20 @@ import * as overviewStatusHook from '../../hooks/use_overview_status';
 import { OverviewStatus } from './overview_status';
 
 describe('OverviewStatus', () => {
-  let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
-  let useGetUrlParamsSpy: jest.SpyInstance<SyntheticsUrlParams>;
-  let updateUrlParamsMock: jest.Mock;
+  let useUrlParamsSpy: MockInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
+  let useGetUrlParamsSpy: MockInstance<SyntheticsUrlParams>;
+  let updateUrlParamsMock: Mock;
 
   beforeEach(() => {
     window.localStorage.clear();
-    useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
-    useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
-    updateUrlParamsMock = jest.fn();
+    useUrlParamsSpy = vi.spyOn(URL, 'useUrlParams');
+    useGetUrlParamsSpy = vi.spyOn(URL, 'useGetUrlParams');
+    updateUrlParamsMock = vi.fn();
 
-    useUrlParamsSpy.mockImplementation(() => [jest.fn().mockReturnValue({}), updateUrlParamsMock]);
+    useUrlParamsSpy.mockImplementation(() => [vi.fn().mockReturnValue({}), updateUrlParamsMock]);
     useGetUrlParamsSpy.mockReturnValue({} as SyntheticsUrlParams);
 
-    jest.spyOn(overviewStatusHook, 'useOverviewStatusState').mockReturnValue({
+    vi.spyOn(overviewStatusHook, 'useOverviewStatusState').mockReturnValue({
       status: { up: 2, down: 1, pending: 0, stale: 0, disabledCount: 0 } as any,
       error: undefined,
       loading: false,
@@ -39,7 +42,7 @@ describe('OverviewStatus', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   // Regression coverage: this used to call `application.navigateToApp(..., {
@@ -112,7 +115,7 @@ describe('OverviewStatus', () => {
     // Nested inside the button, a click/tap on the icon would both bubble up
     // (changing the status filter) and be invalid nested-interactive markup
     // for keyboard/screen-reader use.
-    jest.spyOn(overviewStatusHook, 'useOverviewStatusState').mockReturnValue({
+    vi.spyOn(overviewStatusHook, 'useOverviewStatusState').mockReturnValue({
       status: { up: 2, down: 1, pending: 1, stale: 0, disabledCount: 0 } as any,
       error: undefined,
       loading: false,
@@ -143,7 +146,7 @@ describe('OverviewStatus', () => {
   });
 
   it('uses onStatusFilterClick instead of merging into the current URL', () => {
-    const onStatusFilterClick = jest.fn();
+    const onStatusFilterClick = vi.fn();
     const { getByText } = render(
       <OverviewStatus areStatsClickable onStatusFilterClick={onStatusFilterClick} />
     );

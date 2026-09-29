@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -21,20 +24,20 @@ const createMockAgentExecutionError = (errCode: AgentExecutionErrorCode) => {
 };
 
 describe('TrackingService', () => {
-  let mockUsageCounter: jest.Mocked<UsageCounter>;
+  let mockUsageCounter: Mocked<UsageCounter>;
   let logger: MockedLogger;
   let trackingService: TrackingService;
 
   beforeEach(() => {
     mockUsageCounter = {
-      incrementCounter: jest.fn(),
-    } as unknown as jest.Mocked<UsageCounter>;
+      incrementCounter: vi.fn(),
+    } as unknown as Mocked<UsageCounter>;
     logger = loggerMock.create();
     trackingService = new TrackingService(mockUsageCounter, logger);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('ToolCallSource enum', () => {
@@ -258,14 +261,14 @@ describe('TrackingService', () => {
     });
 
     it('tracks query end and increments correct time bucket', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const now = Date.now();
-      jest.setSystemTime(now);
+      vi.setSystemTime(now);
 
       const requestId = trackingService.trackQueryStart('req-1');
 
       // Advance time by 500ms (should be <1s bucket)
-      jest.setSystemTime(now + 500);
+      vi.setSystemTime(now + 500);
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
@@ -274,17 +277,17 @@ describe('TrackingService', () => {
         incrementBy: 1,
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('tracks 1-5s bucket correctly', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const now = Date.now();
-      jest.setSystemTime(now);
+      vi.setSystemTime(now);
 
       const requestId = trackingService.trackQueryStart('req-1');
 
-      jest.setSystemTime(now + 2500);
+      vi.setSystemTime(now + 2500);
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
@@ -293,17 +296,17 @@ describe('TrackingService', () => {
         incrementBy: 1,
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('tracks 5-10s bucket correctly', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const now = Date.now();
-      jest.setSystemTime(now);
+      vi.setSystemTime(now);
 
       const requestId = trackingService.trackQueryStart('req-1');
 
-      jest.setSystemTime(now + 7500);
+      vi.setSystemTime(now + 7500);
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
@@ -312,17 +315,17 @@ describe('TrackingService', () => {
         incrementBy: 1,
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('tracks 10-30s bucket correctly', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const now = Date.now();
-      jest.setSystemTime(now);
+      vi.setSystemTime(now);
 
       const requestId = trackingService.trackQueryStart('req-1');
 
-      jest.setSystemTime(now + 20000);
+      vi.setSystemTime(now + 20000);
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
@@ -331,17 +334,17 @@ describe('TrackingService', () => {
         incrementBy: 1,
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('tracks 30s+ bucket correctly', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const now = Date.now();
-      jest.setSystemTime(now);
+      vi.setSystemTime(now);
 
       const requestId = trackingService.trackQueryStart('req-1');
 
-      jest.setSystemTime(now + 45000);
+      vi.setSystemTime(now + 45000);
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
@@ -350,7 +353,7 @@ describe('TrackingService', () => {
         incrementBy: 1,
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('logs warning when no start time found', () => {
@@ -363,12 +366,12 @@ describe('TrackingService', () => {
     });
 
     it('cleans up start time after trackQueryEnd', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const now = Date.now();
-      jest.setSystemTime(now);
+      vi.setSystemTime(now);
 
       const requestId = trackingService.trackQueryStart('req-1');
-      jest.setSystemTime(now + 500);
+      vi.setSystemTime(now + 500);
       trackingService.trackQueryEnd(requestId!);
 
       // Second call should warn
@@ -376,13 +379,13 @@ describe('TrackingService', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(`No start time found for request: ${requestId}`);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('logs error when trackQueryStart throws', () => {
       // Force an error by mocking Date.now to throw
       const originalDateNow = Date.now;
-      Date.now = jest.fn().mockImplementation(() => {
+      Date.now = vi.fn().mockImplementation(() => {
         throw new Error('Date error');
       });
 
@@ -395,9 +398,9 @@ describe('TrackingService', () => {
     });
 
     it('logs error when trackQueryEnd throws', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const now = Date.now();
-      jest.setSystemTime(now);
+      vi.setSystemTime(now);
 
       const requestId = trackingService.trackQueryStart('req-1');
 
@@ -405,12 +408,12 @@ describe('TrackingService', () => {
         throw new Error('Counter error');
       });
 
-      jest.setSystemTime(now + 500);
+      vi.setSystemTime(now + 500);
       trackingService.trackQueryEnd(requestId!);
 
       expect(logger.error).toHaveBeenCalledWith('Failed to track query end: Counter error');
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 

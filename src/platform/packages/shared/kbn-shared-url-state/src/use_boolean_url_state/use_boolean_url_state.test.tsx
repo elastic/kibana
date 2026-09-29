@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createMemoryHistory, type MemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
@@ -102,7 +104,7 @@ describe('useBooleanUrlState', () => {
 
   it('throws when called outside a <Router>', () => {
     // Suppress React's "uncaught error" log noise from the render throw.
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       expect(() => renderHook(() => useBooleanUrlState(PARAM))).toThrow(
         /must be called inside a <Router>/

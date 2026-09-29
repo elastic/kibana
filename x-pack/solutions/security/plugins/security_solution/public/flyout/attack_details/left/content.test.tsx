@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -13,11 +15,14 @@ import type { LeftPanelTabType } from './tabs';
 import type { LeftPanelPaths } from '../constants/left_panel_paths';
 import { INSIGHTS_TAB_ID, NOTES_TAB_ID } from '../constants/left_panel_paths';
 
-jest.mock('../../shared/components/flyout_body', () => ({
-  FlyoutBody: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="flyout-body">{children}</div>
-  ),
-}));
+vi.mock('../../shared/components/flyout_body', () => {
+      const mocked = {
+      FlyoutBody: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="flyout-body">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTabs: LeftPanelTabType[] = [
   {

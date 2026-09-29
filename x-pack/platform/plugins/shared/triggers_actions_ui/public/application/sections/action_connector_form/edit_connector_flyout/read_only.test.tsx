@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type { ActionTypeModel } from '../../../..';
 
-const ExtraComponent = jest.fn(() => (
+const ExtraComponent = vi.fn(() => (
   <div>Extra Component</div>
 )) as unknown as ActionTypeModel['actionReadOnlyExtraComponent'];
 describe('ReadOnlyConnectorMessage', () => {

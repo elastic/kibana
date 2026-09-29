@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -19,11 +22,11 @@ import { ValueAxesPanel } from './value_axes_panel';
 import { valueAxis, seriesParam } from './mocks';
 
 describe('ValueAxesPanel component', () => {
-  let setParamByIndex: jest.Mock;
-  let onValueAxisPositionChanged: jest.Mock;
-  let setMultipleValidity: jest.Mock;
-  let addValueAxis: jest.Mock;
-  let removeValueAxis: jest.Mock;
+  let setParamByIndex: Mock;
+  let onValueAxisPositionChanged: Mock;
+  let setMultipleValidity: Mock;
+  let addValueAxis: Mock;
+  let removeValueAxis: Mock;
   let defaultProps: ValueAxesPanelProps;
   let axisLeft: ValueAxis;
   let axisRight: ValueAxis;
@@ -31,11 +34,11 @@ describe('ValueAxesPanel component', () => {
   let seriesParamAverage: SeriesParam;
 
   beforeEach(() => {
-    setParamByIndex = jest.fn();
-    onValueAxisPositionChanged = jest.fn();
-    addValueAxis = jest.fn();
-    removeValueAxis = jest.fn();
-    setMultipleValidity = jest.fn();
+    setParamByIndex = vi.fn();
+    onValueAxisPositionChanged = vi.fn();
+    addValueAxis = vi.fn();
+    removeValueAxis = vi.fn();
+    setMultipleValidity = vi.fn();
     axisLeft = { ...valueAxis };
     axisRight = {
       ...valueAxis,

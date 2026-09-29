@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from './knowledge_base_retrieval_tool';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
@@ -19,7 +22,7 @@ import { Document } from '@langchain/core/documents';
 describe('KnowledgeBaseRetievalTool', () => {
   const logger = loggerMock.create();
   const contentReferencesStore = newContentReferencesStoreMock();
-  const getKnowledgeBaseDocumentEntries = jest.fn();
+  const getKnowledgeBaseDocumentEntries = vi.fn();
   const kbDataClient = { getKnowledgeBaseDocumentEntries };
   const defaultArgs = {
     isEnabledKnowledgeBase: true,
@@ -29,7 +32,7 @@ describe('KnowledgeBaseRetievalTool', () => {
   } as unknown as AssistantToolParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('DynamicStructuredTool', () => {
@@ -48,7 +51,7 @@ describe('KnowledgeBaseRetievalTool', () => {
         }),
       ] as Document[]);
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           const reference = creator({ id: 'exampleContentReferenceId' });
           expect(reference.type).toEqual('KnowledgeBaseEntry');

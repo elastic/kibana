@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   VIEW_MODE,
   type DiscoverSession,
@@ -197,8 +200,8 @@ describe('Discover session service', () => {
   it('uses the legacy client when the local switch is disabled', async () => {
     const apiClient = createApiClient();
     const legacyClient = savedSearchPluginMock.createStartContract();
-    jest.mocked(legacyClient.getDiscoverSession).mockResolvedValue(persistedSession);
-    jest.mocked(legacyClient.saveDiscoverSession).mockResolvedValue(persistedSession);
+    vi.mocked(legacyClient.getDiscoverSession).mockResolvedValue(persistedSession);
+    vi.mocked(legacyClient.saveDiscoverSession).mockResolvedValue(persistedSession);
     const sessionService = createSessionService({
       apiClient,
       legacyClient,
@@ -220,10 +223,10 @@ describe('Discover session service', () => {
   });
 });
 
-const createApiClient = (): jest.Mocked<DiscoverSessionClient> => ({
-  create: jest.fn().mockResolvedValue(apiResponse),
-  get: jest.fn().mockResolvedValue(apiGetResponse),
-  upsert: jest.fn().mockResolvedValue(apiResponse),
+const createApiClient = (): Mocked<DiscoverSessionClient> => ({
+  create: vi.fn().mockResolvedValue(apiResponse),
+  get: vi.fn().mockResolvedValue(apiGetResponse),
+  upsert: vi.fn().mockResolvedValue(apiResponse),
 });
 
 const createSaveFixture = () => {

@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 // Wrap the real loaders so we can count reads without stubbing the registry.
-jest.mock('./teams', () => {
-  const actual = jest.requireActual('./teams');
+vi.mock('./teams', async () => {
+  const actual = (await vi.importActual('./teams'));
   return {
     __esModule: true,
     ...actual,
-    getTeams: jest.fn(actual.getTeams),
+    getTeams: vi.fn(actual.getTeams),
   };
 });
 
 import { getTeams } from './teams';
 import { getCodeOwnerAreaMappings } from './code_owner_areas';
 
-const mockGetTeams = getTeams as jest.MockedFunction<typeof getTeams>;
+const mockGetTeams = getTeams as MockedFunction<typeof getTeams>;
 
 describe('getCodeOwnerAreaMappings laziness', () => {
   it('does not read the registry at import time, then computes once and memoizes', () => {

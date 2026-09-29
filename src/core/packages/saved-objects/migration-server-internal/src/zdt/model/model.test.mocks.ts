@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const realStages = jest.requireActual('./stages');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+const realStages = (await vi.importActual('./stages'));
 
 export const StageMocks = Object.keys(realStages).reduce((mocks, key) => {
-  mocks[key] = jest.fn().mockImplementation((state: unknown) => state);
+  mocks[key] = vi.fn().mockImplementation((state: unknown) => state);
   return mocks;
-}, {} as Record<string, jest.MockedFunction<any>>);
+}, {} as Record<string, MockedFunction<any>>);
 
-jest.doMock('./stages', () => {
+vi.doMock('./stages', () => {
   return StageMocks;
 });

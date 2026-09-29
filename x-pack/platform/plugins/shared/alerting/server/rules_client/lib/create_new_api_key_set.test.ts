@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   savedObjectsClientMock,
@@ -35,7 +38,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.0.0';
-const rulesClientParams: jest.Mocked<RulesClientContext> = {
+const rulesClientParams: Mocked<RulesClientContext> = {
   request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
@@ -43,28 +46,28 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   authorization: authorization as unknown as AlertingAuthorization,
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
-  getUserName: jest.fn(),
-  getProfileUid: jest.fn(),
-  createAPIKey: jest.fn(),
+  getUserName: vi.fn(),
+  getProfileUid: vi.fn(),
+  createAPIKey: vi.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
+  getActionsClient: vi.fn(),
+  getEventLogClient: vi.fn(),
   kibanaVersion,
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 1,
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  cloneAPIKey: jest.fn(),
+  isAuthenticationTypeAPIKey: vi.fn(),
+  getAuthenticationAPIKey: vi.fn(),
+  cloneAPIKey: vi.fn(),
   cloneApiKeysOnCreate: false,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  getAlertIndicesAlias: jest.fn(),
+  getAlertIndicesAlias: vi.fn(),
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  isSystemAction: jest.fn(),
+  isSystemAction: vi.fn(),
   isServerless: false,
 };
 

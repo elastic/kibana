@@ -5,104 +5,122 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attack_discovery/generation/assert_authorized_to_execute_workflows';
 
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 
-const mockIsWorkflowsEnabledForSpace = jest.fn();
+const mockIsWorkflowsEnabledForSpace = vi.fn();
 
-jest.mock('../../../lib/is_workflows_enabled_for_space', () => ({
-  isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
-}));
+vi.mock('../../../lib/is_workflows_enabled_for_space', () => {
+      const mocked = {
+      isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from './constants';
 import { getRunStepDefinition } from './get_run_step_definition';
 
-const mockExecuteGenerationWorkflow = jest.fn();
+const mockExecuteGenerationWorkflow = vi.fn();
 
-jest.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow', () => ({
-  executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
-}));
+vi.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow', () => {
+      const mocked = {
+      executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../helpers/resolve_connector_details', () => ({
-  resolveConnectorDetails: jest.fn(),
-}));
+vi.mock('../../helpers/resolve_connector_details', () => {
+      const mocked = {
+      resolveConnectorDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../helpers/resolve_default_connector_id', () => ({
-  resolveDefaultConnectorId: jest.fn(),
-}));
+vi.mock('../../helpers/resolve_default_connector_id', () => {
+      const mocked = {
+      resolveDefaultConnectorId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: () => 'test-execution-uuid',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'test-execution-uuid',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockResolveConnectorDetails = resolveConnectorDetails as jest.MockedFunction<
+const mockResolveConnectorDetails = resolveConnectorDetails as MockedFunction<
   typeof resolveConnectorDetails
 >;
 
-const mockResolveDefaultConnectorId = resolveDefaultConnectorId as jest.MockedFunction<
+const mockResolveDefaultConnectorId = resolveDefaultConnectorId as MockedFunction<
   typeof resolveDefaultConnectorId
 >;
 
 describe('getRunStepDefinition', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
-  const mockActionsClient = { get: jest.fn() };
+  const mockActionsClient = { get: vi.fn() };
 
-  const mockUiSettingsClient = { get: jest.fn() };
+  const mockUiSettingsClient = { get: vi.fn() };
 
-  const mockGetStartServices = jest.fn().mockResolvedValue({
+  const mockGetStartServices = vi.fn().mockResolvedValue({
     coreStart: {
       elasticsearch: {
         client: {
-          asScoped: jest.fn().mockReturnValue({
+          asScoped: vi.fn().mockReturnValue({
             asCurrentUser: {},
           }),
         },
       },
       savedObjects: {
-        getScopedClient: jest.fn().mockReturnValue({}),
+        getScopedClient: vi.fn().mockReturnValue({}),
       },
       uiSettings: {
-        asScopedToClient: jest.fn().mockReturnValue(mockUiSettingsClient),
+        asScopedToClient: vi.fn().mockReturnValue(mockUiSettingsClient),
       },
     },
     pluginsStart: {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+        getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
       },
       security: { authz: {} },
     },
   });
 
-  const mockGetEventLogIndex = jest.fn().mockResolvedValue('.kibana-event-log-*');
-  const mockGetEventLogger = jest.fn().mockResolvedValue({});
+  const mockGetEventLogIndex = vi.fn().mockResolvedValue('.kibana-event-log-*');
+  const mockGetEventLogger = vi.fn().mockResolvedValue({});
 
   const baseMockContext = {
     abortSignal: new AbortController().signal,
     contextManager: {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         execution: { id: 'workflow-run-1' },
         workflow: { id: 'workflow-1', spaceId: 'default' },
       }),
-      getFakeRequest: jest.fn().mockReturnValue({
+      getFakeRequest: vi.fn().mockReturnValue({
         headers: {},
       }),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn(),
     },
     logger: {
-      debug: jest.fn(),
-      error: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
     },
     stepId: 'run-step-1',
     stepType: 'security.attack-discovery.run',
@@ -197,7 +215,7 @@ describe('getRunStepDefinition', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockIsWorkflowsEnabledForSpace.mockResolvedValue(true);
 
@@ -224,17 +242,17 @@ describe('getRunStepDefinition', () => {
       mockGetStartServices.mockResolvedValueOnce({
         coreStart: {
           elasticsearch: {
-            client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
+            client: { asScoped: vi.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
-          savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) },
-          uiSettings: { asScopedToClient: jest.fn().mockReturnValue(mockUiSettingsClient) },
+          savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) },
+          uiSettings: { asScopedToClient: vi.fn().mockReturnValue(mockUiSettingsClient) },
         },
         pluginsStart: {
           actions: {
-            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+            getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
           },
           security: { authz: {} },
-          spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('finance') } },
+          spaces: { spacesService: { getSpaceId: vi.fn().mockReturnValue('finance') } },
         },
       });
 
@@ -490,21 +508,21 @@ describe('getRunStepDefinition', () => {
     const pastTheSoftDeadline = ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS + 1_000;
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('does not resolve while the pipeline is still running past the soft deadline', async () => {
       mockExecuteGenerationWorkflow.mockReturnValue(new Promise(() => {}));
-      const settled = jest.fn();
+      const settled = vi.fn();
 
       void getStepDefinition()
         .handler(syncMockContext as never)
         .then(settled);
-      await jest.advanceTimersByTimeAsync(ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS * 2);
+      await vi.advanceTimersByTimeAsync(ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS * 2);
 
       expect(settled).not.toHaveBeenCalled();
     });
@@ -513,7 +531,7 @@ describe('getRunStepDefinition', () => {
       mockExecuteGenerationWorkflow.mockReturnValue(pipelineResolvingAfter(pastTheSoftDeadline));
 
       const handled = getStepDefinition().handler(syncMockContext as never);
-      await jest.advanceTimersByTimeAsync(pastTheSoftDeadline);
+      await vi.advanceTimersByTimeAsync(pastTheSoftDeadline);
 
       expect((await handled).output?.attack_discoveries).toEqual(handoverDiscoveries);
     });
@@ -522,7 +540,7 @@ describe('getRunStepDefinition', () => {
       mockExecuteGenerationWorkflow.mockReturnValue(pipelineResolvingAfter(pastTheSoftDeadline));
 
       const handled = getStepDefinition().handler(syncMockContext as never);
-      await jest.advanceTimersByTimeAsync(pastTheSoftDeadline);
+      await vi.advanceTimersByTimeAsync(pastTheSoftDeadline);
 
       expect((await handled).output?.status).toBe('completed');
     });

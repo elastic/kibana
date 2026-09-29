@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DataProviderTypeEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -85,7 +87,7 @@ describe('helpers', () => {
     });
 
     test('it should trace an error if the value is not a string', () => {
-      const mockConsole: Console = { trace: jest.fn() } as unknown as Console;
+      const mockConsole: Console = { trace: vi.fn() } as unknown as Console;
       const value = getStringArray(
         'a',
         [
@@ -110,7 +112,7 @@ describe('helpers', () => {
     });
 
     test('it should trace an error if the value is an array of mixed values', () => {
-      const mockConsole: Console = { trace: jest.fn() } as unknown as Console;
+      const mockConsole: Console = { trace: vi.fn() } as unknown as Console;
       const value = getStringArray(
         'a',
         [

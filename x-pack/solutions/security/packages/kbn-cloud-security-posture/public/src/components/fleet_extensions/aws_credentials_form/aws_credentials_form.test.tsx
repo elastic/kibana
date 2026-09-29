@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -74,28 +77,35 @@ const getMockPolicyAWS = (): NewPackagePolicy => {
 };
 
 // Mock dependencies
-jest.mock('../hooks/use_cloud_setup_context');
-jest.mock('./aws_setup_info', () => ({
-  AWSSetupInfoContent: jest.fn(({ info }: { info: React.ReactNode }) => (
-    <div data-test-subj="aws-setup-info">{info}</div>
-  )),
-}));
-jest.mock('./aws_credential_type_selector', () => ({
-  AwsCredentialTypeSelector: jest.fn(() => <div data-test-subj="aws-credentials-type-selector" />),
-}));
-jest.mock('./aws_input_var_fields', () => ({
-  AwsInputVarFields: jest.fn(() => <div data-test-subj="aws-input-var-fields" />),
-}));
+vi.mock('../hooks/use_cloud_setup_context');
+vi.mock('./aws_setup_info', () => {
+      const mocked = {
+      AWSSetupInfoContent: vi.fn(({ info }: { info: React.ReactNode }) => (
+        <div data-test-subj="aws-setup-info">{info}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./aws_credential_type_selector', () => {
+      const mocked = {
+      AwsCredentialTypeSelector: vi.fn(() => <div data-test-subj="aws-credentials-type-selector" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./aws_input_var_fields', () => {
+      const mocked = {
+      AwsInputVarFields: vi.fn(() => <div data-test-subj="aws-input-var-fields" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCloudSetup = useCloudSetup as jest.MockedFunction<typeof useCloudSetup>;
-const mockAwsCredentialTypeSelector = jest.requireMock(
-  './aws_credential_type_selector'
-).AwsCredentialTypeSelector;
-const mockAwsInputVarFields = jest.requireMock('./aws_input_var_fields').AwsInputVarFields;
-const mockAWSSetupInfoContent = jest.requireMock('./aws_setup_info').AWSSetupInfoContent;
+const mockUseCloudSetup = useCloudSetup as MockedFunction<typeof useCloudSetup>;
+const mockAwsCredentialTypeSelector = (await vi.importMock('./aws_credential_type_selector')).AwsCredentialTypeSelector;
+const mockAwsInputVarFields = (await vi.importMock('./aws_input_var_fields')).AwsInputVarFields;
+const mockAWSSetupInfoContent = (await vi.importMock('./aws_setup_info')).AWSSetupInfoContent;
 
 describe('AwsCredentialsForm', () => {
-  const mockUpdatePolicy = jest.fn();
+  const mockUpdatePolicy = vi.fn();
 
   const defaultProps = {
     newPolicy: {
@@ -141,7 +151,7 @@ describe('AwsCredentialsForm', () => {
   interface AwsCredentialsFormTestProps {
     newPolicy: NewPackagePolicy;
     input: NewPackagePolicyInput;
-    updatePolicy: jest.MockedFunction<UpdatePolicy>;
+    updatePolicy: MockedFunction<UpdatePolicy>;
     packageInfo: PackageInfo;
     disabled?: boolean;
     hasInvalidRequiredVars?: boolean;
@@ -412,7 +422,7 @@ describe('AwsCredentialsForm', () => {
 
   describe('supports_cloud_connector cleanup for agent-based deployments', () => {
     it('should set supports_cloud_connector to false when rendering CloudFormation form', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithSupport = {
         ...getMockPolicyAWS(),
         supports_cloud_connector: true, // Start with true (shouldn't be)
@@ -434,7 +444,7 @@ describe('AwsCredentialsForm', () => {
     });
 
     it('should set supports_cloud_connector to false when rendering Manual setup form', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockManualPolicy = {
         ...getMockPolicyAWS(),
         supports_cloud_connector: true,
@@ -470,7 +480,7 @@ describe('AwsCredentialsForm', () => {
     });
 
     it('should not call updatePolicy when supports_cloud_connector is already false', () => {
-      const mockUpdatePolicyFn = jest.fn();
+      const mockUpdatePolicyFn = vi.fn();
       const mockPolicyWithoutSupport = {
         ...getMockPolicyAWS(),
         supports_cloud_connector: false, // Already correct

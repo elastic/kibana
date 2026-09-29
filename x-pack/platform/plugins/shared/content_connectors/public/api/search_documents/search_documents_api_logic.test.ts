@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -24,7 +26,7 @@ describe('SearchDocumentsApiLogic', () => {
     data: [],
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('searchDocuments', () => {
     it('calls correct api', async () => {

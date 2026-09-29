@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
@@ -13,11 +16,11 @@ import { adHocRunStatus } from '../../../../common/constants';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { toScheduledItem } from './utils';
 
-jest.mock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+vi.mock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
-    toScheduledItem: jest.fn().mockImplementation((item) => {
+    toScheduledItem: vi.fn().mockImplementation((item) => {
       if (item.shouldError) {
         throw new Error('error in toScheduledItem');
       }
@@ -26,7 +29,7 @@ jest.mock('./utils', () => {
   };
 });
 
-const toScheduledItemMock = toScheduledItem as jest.Mock;
+const toScheduledItemMock = toScheduledItem as Mock;
 
 describe('calculateGapStateFromAllBackfills', () => {
   const mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -35,7 +38,7 @@ describe('calculateGapStateFromAllBackfills', () => {
   const mockedLogger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockBackfillClient.findOverlappingBackfills.mockResolvedValue([]);
   });
 
@@ -80,7 +83,7 @@ describe('calculateGapStateFromAllBackfills', () => {
       ],
     });
 
-    const spy = jest.spyOn(testGap, 'resetInProgressIntervals');
+    const spy = vi.spyOn(testGap, 'resetInProgressIntervals');
 
     await calculateGapStateFromAllBackfills({
       gap: testGap,
@@ -203,7 +206,7 @@ describe('calculateGapStateFromAllBackfills', () => {
       },
     ]);
 
-    const actualToScheduledItem = jest.requireActual('./utils').toScheduledItem;
+    const actualToScheduledItem = (await vi.importActual('./utils')).toScheduledItem;
     toScheduledItemMock.mockImplementationOnce((item) => {
       if (item.shouldError) {
         throw new Error('error in toScheduledItem');

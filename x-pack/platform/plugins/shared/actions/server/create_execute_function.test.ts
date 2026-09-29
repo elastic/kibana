@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -23,10 +26,10 @@ const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();
 const request = {} as KibanaRequest;
 const mockActionsConfig = actionsConfigMock.create();
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   mockTaskManager.aggregate.mockResolvedValue({
     took: 1,
     timed_out: false,

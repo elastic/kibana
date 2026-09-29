@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
 // The task-manager server entry pulls in the whole plugin graph, which this
 // package's jest config cannot resolve (`TaskCost` comes back undefined).
-jest.mock('@kbn/task-manager-plugin/server', () => ({
-  TaskCost: { Normal: 2 },
-  throwRetryableError: (err: Error) => {
-    throw err;
-  },
-  throwUnrecoverableError: (err: Error) => {
-    throw err;
-  },
-}));
+vi.mock('@kbn/task-manager-plugin/server', () => {
+      const mocked = {
+      TaskCost: { Normal: 2 },
+      throwRetryableError: (err: Error) => {
+        throw err;
+      },
+      throwUnrecoverableError: (err: Error) => {
+        throw err;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   CONTENT_RETENTION_DAYS,
@@ -37,17 +43,17 @@ interface UpdateByQueryArg {
 const setupRunner = (updateByQueryResult: unknown, previousState: Record<string, unknown> = {}) => {
   const coreStart = coreMock.createStart();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
-  (esClient.updateByQuery as jest.Mock).mockImplementation(async () => {
+  (esClient.updateByQuery as Mock).mockImplementation(async () => {
     if (updateByQueryResult instanceof Error) throw updateByQueryResult;
     return updateByQueryResult;
   });
 
   const coreSetup = coreMock.createSetup();
-  (coreSetup.getStartServices as jest.Mock).mockResolvedValue([coreStart, {}, {}]);
+  (coreSetup.getStartServices as Mock).mockResolvedValue([coreStart, {}, {}]);
 
   const definitions: Record<string, { createTaskRunner: Function }> = {};
   const taskManager = {
-    registerTaskDefinitions: jest.fn((defs) => Object.assign(definitions, defs)),
+    registerTaskDefinitions: vi.fn((defs) => Object.assign(definitions, defs)),
   } as unknown as TaskManagerSetupContract;
 
   const logger = loggingSystemMock.createLogger();
@@ -57,14 +63,14 @@ const setupRunner = (updateByQueryResult: unknown, previousState: Record<string,
     taskInstance: { state: previousState, params: {} },
     signal: new AbortController().signal,
     executionUuid: 'test',
-    setCustomTaskRunEventFields: jest.fn(),
+    setCustomTaskRunEventFields: vi.fn(),
   } as unknown as RunContext);
 
   return { runner, esClient, logger };
 };
 
 const lastQuery = (esClient: { updateByQuery: unknown }): UpdateByQueryArg =>
-  (esClient.updateByQuery as jest.Mock).mock.calls[0][0] as UpdateByQueryArg;
+  (esClient.updateByQuery as Mock).mock.calls[0][0] as UpdateByQueryArg;
 
 describe('scrub_report_content task', () => {
   it('only targets reports past the retention window that are not already scrubbed', async () => {

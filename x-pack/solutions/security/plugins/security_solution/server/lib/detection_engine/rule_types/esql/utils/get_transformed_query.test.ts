@@ -5,28 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { injectMetadataId } from '@kbn/securitysolution-utils';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { validateEsqlQuery } from './validate_esql_query';
 import { getTransformedQuery } from './get_transformed_query';
 
-jest.mock('./validate_esql_query', () => ({
-  validateEsqlQuery: jest.fn().mockResolvedValue(true),
-}));
-jest.mock('@kbn/securitysolution-utils', () => ({
-  injectMetadataId: jest.fn(),
-}));
+vi.mock('./validate_esql_query', () => {
+      const mocked = {
+      validateEsqlQuery: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/securitysolution-utils', () => {
+      const mocked = {
+      injectMetadataId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ORIGINAL_QUERY = 'FROM logs*';
 const TRANSFORMED_QUERY = 'FROM logs* METADATA _id';
 
 describe('getTransformedQuery', () => {
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-  const injectMetadataIdMock = injectMetadataId as jest.Mock;
-  const validateEsqlQueryMock = validateEsqlQuery as jest.Mock;
+  const injectMetadataIdMock = injectMetadataId as Mock;
+  const validateEsqlQueryMock = validateEsqlQuery as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     injectMetadataIdMock.mockReturnValue(TRANSFORMED_QUERY);
     validateEsqlQueryMock.mockResolvedValue(true);
   });

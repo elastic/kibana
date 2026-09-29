@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type {
   FileState,
@@ -45,7 +47,7 @@ const mockFileState = (status: 'uploading' | 'uploaded' = 'uploading'): FileStat
 describe('useFileUploadApi', () => {
   it('dispatches START_UPLOAD when files$ emits while idle', () => {
     const uploadState = createMockUploadState();
-    const dispatch = jest.fn();
+    const dispatch = vi.fn();
     const uiState: PasteUploadState = { phase: UploadPhase.IDLE };
 
     renderHook(() => useFileUploadApi(uploadState, uiState, dispatch));
@@ -60,7 +62,7 @@ describe('useFileUploadApi', () => {
 
   it('dispatches UPLOAD_FINISHED when done$ emits during UPLOADING phase', () => {
     const uploadState = createMockUploadState();
-    const dispatch = jest.fn();
+    const dispatch = vi.fn();
     const uiState: PasteUploadState = {
       phase: UploadPhase.UPLOADING,
       placeholder: '<!-- uploading "image.png" -->',
@@ -97,7 +99,7 @@ describe('useFileUploadApi', () => {
 
   it('dispatches RESET when done$ emits but phase is not UPLOADING', () => {
     const uploadState = createMockUploadState();
-    const dispatch = jest.fn();
+    const dispatch = vi.fn();
     const uiState: PasteUploadState = { phase: UploadPhase.IDLE };
 
     renderHook(() => useFileUploadApi(uploadState, uiState, dispatch));
@@ -112,7 +114,7 @@ describe('useFileUploadApi', () => {
 
   it('dispatches UPLOAD_ERROR when error$ emits', () => {
     const uploadState = createMockUploadState();
-    const dispatch = jest.fn();
+    const dispatch = vi.fn();
     const uiState: PasteUploadState = { phase: UploadPhase.IDLE };
 
     renderHook(() => useFileUploadApi(uploadState, uiState, dispatch));
@@ -125,7 +127,7 @@ describe('useFileUploadApi', () => {
 
   it('unsubscribes from observables on unmount', () => {
     const uploadState = createMockUploadState();
-    const dispatch = jest.fn();
+    const dispatch = vi.fn();
     const uiState: PasteUploadState = { phase: UploadPhase.IDLE };
 
     const { unmount } = renderHook(() => useFileUploadApi(uploadState, uiState, dispatch));

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
@@ -19,9 +22,9 @@ import userEvent from '@testing-library/user-event';
 
 let history: MemoryHistory;
 
-const mockRefreshTimeRange = jest.fn();
-let mockHistoryPush: jest.SpyInstance;
-let mockHistoryReplace: jest.SpyInstance;
+const mockRefreshTimeRange = vi.fn();
+let mockHistoryPush: MockInstance;
+let mockHistoryReplace: MockInstance;
 
 function DatePickerWrapper() {
   const location = useLocation();
@@ -53,15 +56,15 @@ function renderDatePicker(initialParams: {
   refreshInterval?: number;
   refreshPaused?: boolean;
 }) {
-  const setTimeSpy = jest.fn();
-  const getTimeSpy = jest.fn().mockReturnValue({});
+  const setTimeSpy = vi.fn();
+  const getTimeSpy = vi.fn().mockReturnValue({});
 
   history = createMemoryHistory({
     initialEntries: [`/?${qs.stringify(initialParams)}`],
   });
 
-  mockHistoryPush = jest.spyOn(history, 'push');
-  mockHistoryReplace = jest.spyOn(history, 'replace');
+  mockHistoryPush = vi.spyOn(history, 'push');
+  mockHistoryReplace = vi.spyOn(history, 'replace');
 
   return {
     ...render(
@@ -74,9 +77,9 @@ function renderDatePicker(initialParams: {
                   timefilter: {
                     setTime: setTimeSpy,
                     getTime: getTimeSpy,
-                    getTimeDefaults: jest.fn().mockReturnValue({}),
-                    getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
-                    getRefreshInterval: jest.fn().mockReturnValue({}),
+                    getTimeDefaults: vi.fn().mockReturnValue({}),
+                    getRefreshIntervalDefaults: vi.fn().mockReturnValue({}),
+                    getRefreshInterval: vi.fn().mockReturnValue({}),
                   },
                 },
               },
@@ -100,15 +103,15 @@ function renderDatePicker(initialParams: {
 
 describe('DatePicker', () => {
   beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => null);
+    vi.spyOn(console, 'error').mockImplementation(() => null);
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('updates the URL when the date range changes', async () => {
@@ -143,7 +146,7 @@ describe('DatePicker', () => {
   });
 
   it('enables auto-refresh when refreshPaused is false', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
 
     renderDatePicker({
       rangeFrom: 'now-15m',
@@ -152,14 +155,14 @@ describe('DatePicker', () => {
       refreshInterval: 1000,
     });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     await waitFor(() => {
       expect(mockRefreshTimeRange).toHaveBeenCalled();
     });
   });
 
   it('disables auto-refresh when refreshPaused is true', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
     renderDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
@@ -167,7 +170,7 @@ describe('DatePicker', () => {
       refreshInterval: 1000,
     });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     await waitFor(() => {
       expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     });

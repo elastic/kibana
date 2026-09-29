@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimelineSaveStatus } from '.';
@@ -13,7 +16,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TimelineId } from '../../../../common/types';
 
-jest.mock('../../../common/hooks/use_selector');
+vi.mock('../../../common/hooks/use_selector');
 
 const renderTimelineSaveStatus = () => {
   return render(
@@ -25,7 +28,7 @@ const renderTimelineSaveStatus = () => {
 
 describe('TimelineSaveStatus', () => {
   it('should render unsaved status if draft timeline', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as Mock).mockReturnValue({
       status: TimelineStatusEnum.draft,
     });
 
@@ -36,7 +39,7 @@ describe('TimelineSaveStatus', () => {
   });
 
   it('should render unsaved status if timeline has been updated', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as Mock).mockReturnValue({
       updated: undefined,
     });
 
@@ -47,7 +50,7 @@ describe('TimelineSaveStatus', () => {
   });
 
   it('should render the unsaved changes status if timeline has changed', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as Mock).mockReturnValue({
       changed: true,
       updated: Date.now(),
     });
@@ -59,7 +62,7 @@ describe('TimelineSaveStatus', () => {
   });
 
   it('should not render any status', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as Mock).mockReturnValue({
       changed: false,
       status: TimelineStatusEnum.active,
       updated: Date.now(),

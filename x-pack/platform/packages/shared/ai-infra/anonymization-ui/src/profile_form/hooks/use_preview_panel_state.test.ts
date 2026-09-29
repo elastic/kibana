@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { TARGET_TYPE_INDEX } from '../../common/target_types';
 import { usePreviewDocumentLoader } from './use_preview_document_loader';
 import { usePreviewPanelState } from './use_preview_panel_state';
 
-jest.mock('./use_preview_document_loader', () => ({
-  usePreviewDocumentLoader: jest.fn(),
-}));
+vi.mock('./use_preview_document_loader', () => {
+      const mocked = {
+      usePreviewDocumentLoader: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setupLoaderMock = ({
   isLoadingPreviewDocument = false,
@@ -23,7 +28,7 @@ const setupLoaderMock = ({
   previewDocumentLoadError?: string;
   previewDocumentSource?: 'target' | 'fallback';
 } = {}) => {
-  jest.mocked(usePreviewDocumentLoader).mockReturnValue({
+  vi.mocked(usePreviewDocumentLoader).mockReturnValue({
     isLoadingPreviewDocument,
     previewDocumentLoadError,
     previewDocumentSource,
@@ -32,7 +37,7 @@ const setupLoaderMock = ({
 
 describe('usePreviewPanelState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns default modes and derived flags', () => {
@@ -105,7 +110,7 @@ describe('usePreviewPanelState', () => {
 
   it('updates preview input when document loader callback resolves', () => {
     let onPreviewDocumentLoaded: ((document: Record<string, unknown>) => void) | undefined;
-    jest.mocked(usePreviewDocumentLoader).mockImplementation((params) => {
+    vi.mocked(usePreviewDocumentLoader).mockImplementation((params) => {
       onPreviewDocumentLoaded = params.onPreviewDocumentLoaded;
       return {
         isLoadingPreviewDocument: false,

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { MigrationDataInputContextProvider, useMigrationDataInputContext } from '.';
 
 describe('MigrationDataInputContext', () => {
   it('provides the context', () => {
-    const openFlyout = jest.fn();
-    const closeFlyout = jest.fn();
+    const openFlyout = vi.fn();
+    const closeFlyout = vi.fn();
     const isFlyoutOpen = true;
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (

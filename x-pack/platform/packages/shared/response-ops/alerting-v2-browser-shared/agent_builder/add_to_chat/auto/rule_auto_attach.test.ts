@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -35,18 +38,18 @@ describe('registerRuleAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let focusedRule$: BehaviorSubject<RuleResponse | undefined>;
-  let addAttachment: jest.Mock;
-  let removeAttachment: jest.Mock;
+  let addAttachment: Mock;
+  let removeAttachment: Mock;
   let cleanup: () => void;
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     focusedRule$ = new BehaviorSubject<RuleResponse | undefined>(undefined);
-    addAttachment = jest.fn();
-    removeAttachment = jest.fn();
+    addAttachment = vi.fn();
+    removeAttachment = vi.fn();
     chatEventsByConversationId = new Map();
 
     const chrome = {
@@ -60,7 +63,7 @@ describe('registerRuleAutoAttach', () => {
       removeAttachment,
       events: {
         ui: { activeConversation$: activeConversation$.asObservable() },
-        getChatEvents$: jest.fn((conversationId: string) => {
+        getChatEvents$: vi.fn((conversationId: string) => {
           let chatEvents$ = chatEventsByConversationId.get(conversationId);
 
           if (!chatEvents$) {
@@ -82,13 +85,13 @@ describe('registerRuleAutoAttach', () => {
 
   afterEach(() => {
     cleanup();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not attach when the Agent Builder sidebar is closed', () => {
     focusedRule$.next(createRule());
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -99,7 +102,7 @@ describe('registerRuleAutoAttach', () => {
     focusedRule$.next(rule);
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
       id: 'rule:rule-1',
@@ -113,7 +116,7 @@ describe('registerRuleAutoAttach', () => {
     focusedRule$.next(createRule());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'rule-1' }));
   });
@@ -122,12 +125,12 @@ describe('registerRuleAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     focusedRule$.next(createRule({ id: 'rule-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
   });
@@ -135,12 +138,12 @@ describe('registerRuleAutoAttach', () => {
   it('attaches when navigating to a rule while an existing conversation is open', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
 
     focusedRule$.next(createRule({ id: 'rule-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'rule-1' }));
   });
@@ -149,7 +152,7 @@ describe('registerRuleAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     focusedRule$.next(createRule({ id: 'rule-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenLastCalledWith(
@@ -157,12 +160,12 @@ describe('registerRuleAutoAttach', () => {
     );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     focusedRule$.next(createRule({ id: 'rule-2' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
@@ -175,9 +178,9 @@ describe('registerRuleAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedRule$.next(createRule({ id: 'rule-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     focusedRule$.next(createRule({ id: 'rule-2' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenNthCalledWith(
@@ -196,7 +199,7 @@ describe('registerRuleAutoAttach', () => {
     focusedRule$.next(createRule());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });

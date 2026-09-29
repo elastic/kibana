@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 import { convertUserProfileAPI } from './convert_api';
 
 describe('convertUserProfileAPI', () => {
   it('returns the API from the source', () => {
     const source: CoreUserProfileDelegateContract = {
-      getCurrent: jest.fn(),
-      getCurrentProfileId: jest.fn(),
-      bulkGet: jest.fn(),
-      suggest: jest.fn(),
-      update: jest.fn(),
+      getCurrent: vi.fn(),
+      getCurrentProfileId: vi.fn(),
+      bulkGet: vi.fn(),
+      suggest: vi.fn(),
+      update: vi.fn(),
     };
 
     const output = convertUserProfileAPI(source);

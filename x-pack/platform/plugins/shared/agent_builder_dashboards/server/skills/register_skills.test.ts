@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { internalTools, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { dashboardManagementSkill as skill } from './dashboard_management_skill';
@@ -12,7 +14,7 @@ import { registerSkills } from './register_skills';
 
 describe('registerSkills', () => {
   it('registers the dashboard management skill', async () => {
-    const register = jest.fn();
+    const register = vi.fn();
     const agentBuilder = {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;

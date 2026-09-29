@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
 import type {
@@ -24,9 +27,12 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { checkOriginConflicts } from './check_origin_conflicts';
 import type { ImportStateMap } from './types';
 
-jest.mock('uuid', () => ({
-  v4: () => 'uuidv4',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'uuidv4',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];
@@ -52,8 +58,8 @@ const MULTI_NS_TYPE = 'multi';
 const OTHER_TYPE = 'other';
 
 describe('#checkOriginConflicts', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
+  let typeRegistry: Mocked<ISavedObjectTypeRegistry>;
   let find: (typeof savedObjectsClient)['find'];
 
   const getResultMock = (...objects: SavedObjectType[]) => ({

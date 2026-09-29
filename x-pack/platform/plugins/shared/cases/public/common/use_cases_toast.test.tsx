@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { useKibana, useToasts } from './lib/kibana';
 import { TestProviders } from './mock';
 import { useCasesToast } from './use_cases_toast';
@@ -14,19 +17,19 @@ import { renderHook } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 
-jest.mock('./lib/kibana');
-jest.mock('./lib/kibana/use_application');
+vi.mock('./lib/kibana');
+vi.mock('./lib/kibana/use_application');
 
-const useToastsMock = useToasts as jest.Mock;
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useApplicationMock = useApplication as jest.Mock;
+const useToastsMock = useToasts as Mock;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const useApplicationMock = useApplication as Mock;
 
 describe('Use cases toast hook', () => {
-  const successMock = jest.fn();
-  const errorMock = jest.fn();
-  const dangerMock = jest.fn();
-  const getUrlForApp = jest.fn().mockReturnValue(`/app/cases/${mockCase.id}`);
-  const navigateToUrl = jest.fn();
+  const successMock = vi.fn();
+  const errorMock = vi.fn();
+  const dangerMock = vi.fn();
+  const getUrlForApp = vi.fn().mockReturnValue(`/app/cases/${mockCase.id}`);
+  const navigateToUrl = vi.fn();
 
   function validateTitle(title: string) {
     const mockParams = successMock.mock.calls[0][0];
@@ -52,7 +55,7 @@ describe('Use cases toast hook', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock().services.application = {
       ...useKibanaMock().services.application,
       getUrlForApp,
@@ -179,7 +182,7 @@ describe('Use cases toast hook', () => {
     });
 
     describe('Toast content', () => {
-      const onViewCaseClick = jest.fn();
+      const onViewCaseClick = vi.fn();
 
       beforeEach(() => {
         onViewCaseClick.mockReset();

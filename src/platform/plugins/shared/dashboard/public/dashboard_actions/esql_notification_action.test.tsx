@@ -46,11 +46,15 @@ describe('esql notification action', () => {
     expect(esqlNotificationAction.couldBecomeCompatible!({ embeddable: {} })).toBe(false);
   });
 
-  it('getCompatibilityChangesSubject emits when esql$ changes', (done) => {
-    const subject = esqlNotificationAction.getCompatibilityChangesSubject!({ embeddable: api });
-    subject?.pipe(skip(1), take(1)).subscribe(() => done());
-    esqlSubject.next([{ esql: 'FROM logs' }]);
-  });
+  it('getCompatibilityChangesSubject emits when esql$ changes', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const subject = esqlNotificationAction.getCompatibilityChangesSubject!({ embeddable: api });
+          subject?.pipe(skip(1), take(1)).subscribe(() => done());
+          esqlSubject.next([{ esql: 'FROM logs' }]);
+        
+      }));
 
   it('getCompatibilityChangesSubject returns undefined for incompatible api', () => {
     expect(

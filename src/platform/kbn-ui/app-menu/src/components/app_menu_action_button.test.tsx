@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,21 +17,21 @@ import { AppMenuActionButton } from './app_menu_action_button';
 describe('AppMenuActionButton', () => {
   const defaultProps = {
     label: 'save',
-    run: jest.fn(),
+    run: vi.fn(),
     iconType: 'save',
     id: 'saveButton',
     isPopoverOpen: false,
-    onPopoverToggle: jest.fn(),
-    onPopoverClose: jest.fn(),
+    onPopoverToggle: vi.fn(),
+    onPopoverClose: vi.fn(),
   };
 
   const splitButtonProps = {
-    run: jest.fn(),
+    run: vi.fn(),
     secondaryButtonAriaLabel: 'More options',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render basic action button', () => {
@@ -114,8 +116,8 @@ describe('AppMenuActionButton', () => {
     const splitButtonPropsWithItems = {
       ...splitButtonProps,
       items: [
-        { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
-        { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
+        { id: 'item1', label: 'Item 1', run: vi.fn(), order: 1 },
+        { id: 'item2', label: 'Item 2', run: vi.fn(), order: 2 },
       ],
       run: undefined as never,
     };

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -60,7 +62,7 @@ describe('FieldButton', () => {
   });
 
   it('calls onClick when button is clicked', async () => {
-    const mockOnClick = jest.fn();
+    const mockOnClick = vi.fn();
     render(<FieldButton {...commonProps} onClick={mockOnClick} />);
 
     const button = screen.getByRole('button');

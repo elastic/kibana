@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   IndicesGetMappingResponse,
@@ -61,8 +63,8 @@ describe('SynchronizationTaskRunner', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers().setSystemTime(newAttemptTime);
+    vi.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(newAttemptTime);
     esClient.indices.getMapping.mockResolvedValue({
       ...(CAISyncTypes.reduce((acc, syncType) => {
         acc[destinationIndexBySyncType(syncType, 'default', 'securitySolution')] = {
@@ -90,7 +92,7 @@ describe('SynchronizationTaskRunner', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('reindexes when the previous sync task is completed and the index is available', async () => {

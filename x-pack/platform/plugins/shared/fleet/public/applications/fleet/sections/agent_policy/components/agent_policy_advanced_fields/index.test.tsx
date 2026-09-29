@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { act } from '@testing-library/react';
@@ -27,21 +30,24 @@ import type { ValidationResults } from '../agent_policy_validation';
 
 import { AgentPolicyAdvancedOptionsContent } from '.';
 
-jest.mock('../../../../../../hooks/use_license');
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  useFleetStatus: jest.fn(),
-}));
+vi.mock('../../../../../../hooks/use_license');
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      useFleetStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
-const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
+const mockedUseLicence = useLicense as MockedFunction<typeof useLicense>;
+const mockedUseFleetStatus = useFleetStatus as MockedFunction<typeof useFleetStatus>;
 
 describe('Agent policy advanced options content', () => {
   let testRender: TestRenderer;
   let renderResult: RenderResult;
   let mockAgentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
-  const mockUpdateAgentPolicy = jest.fn();
-  const mockValidation = jest.fn() as unknown as ValidationResults;
+  const mockUpdateAgentPolicy = vi.fn();
+  const mockValidation = vi.fn() as unknown as ValidationResults;
   const usePlatinumLicense = () =>
     mockedUseLicence.mockReturnValue({
       hasAtLeast: () => true,
@@ -89,7 +95,7 @@ describe('Agent policy advanced options content', () => {
     testRender = createFleetTestRendererMock();
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Agent tamper protection toggle', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FC } from 'react';
 import React from 'react';
 import '@kbn/react-query/mock';
@@ -29,7 +31,7 @@ const mockHttpClient = httpServiceMock.createStartContract();
 const emptyData = { browserFields: {}, fields: [] };
 
 describe('useFetchAlertsFieldsQuery', () => {
-  const mockHttpGet = jest.mocked(mockHttpClient.get);
+  const mockHttpGet = vi.mocked(mockHttpClient.get);
 
   beforeEach(() => {
     mockHttpGet.mockResolvedValue({

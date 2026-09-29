@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKi, kiIdQuery } from './ki_get';
 import { KiNotFoundError } from './errors';
@@ -32,7 +34,7 @@ describe('kiIdQuery', () => {
 });
 
 describe('ki_get', () => {
-  const search = jest.fn();
+  const search = vi.fn();
   const esClient = { search } as unknown as ElasticsearchClient;
 
   beforeEach(() => {

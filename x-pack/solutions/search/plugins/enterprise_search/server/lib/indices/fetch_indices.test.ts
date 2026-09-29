@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   getIndexReturnValue,
   mockMultiIndexResponse,
@@ -20,13 +22,13 @@ import { fetchIndices, fetchSearchIndices } from './fetch_indices';
 describe('fetch indices lib functions', () => {
   const mockClient = {
     asCurrentUser: {
-      count: jest.fn().mockReturnValue({ count: 100 }),
+      count: vi.fn().mockReturnValue({ count: 100 }),
       indices: {
-        get: jest.fn(),
-        stats: jest.fn(),
+        get: vi.fn(),
+        stats: vi.fn(),
       },
       security: {
-        hasPrivileges: jest.fn(),
+        hasPrivileges: vi.fn(),
       },
     },
     asInternalUser: {},
@@ -59,7 +61,7 @@ describe('fetch indices lib functions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
       index: {
         'index-without-prefix': { manage: true, read: true },

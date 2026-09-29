@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import {
   getAzureCredentialsFormOptions,
@@ -14,11 +16,14 @@ import {
 import { AZURE_CREDENTIALS_TYPE } from '../constants';
 
 // Mock the utils function
-jest.mock('../utils', () => ({
-  getAzureCredentialsType: jest.fn(),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      getAzureCredentialsType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getAzureCredentialsType } = jest.requireMock('../utils');
+const { getAzureCredentialsType } = (await vi.importMock('../utils'));
 
 // Shared mock factories for Azure tests
 const createBaseMockInput = (): NewPackagePolicyInput => ({
@@ -204,7 +209,7 @@ describe('get_azure_credentials_form_options', () => {
 
   describe('getAgentlessCredentialsType', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should return CLOUD_CONNECTORS when showCloudConnectors is true and no credentials type', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
@@ -12,9 +15,9 @@ import { useKibana } from '../common/lib/kibana';
 import { useCopyPack } from './use_copy_pack';
 import { PACKS_ID } from './constants';
 
-jest.mock('../common/lib/kibana');
+vi.mock('../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -24,16 +27,16 @@ const createWrapper = (queryClient: QueryClient) => {
 };
 
 describe('useCopyPack', () => {
-  let mockHttp: { post: jest.Mock };
-  let mockToasts: { addSuccess: jest.Mock; addError: jest.Mock; remove: jest.Mock };
-  let mockNavigateToApp: jest.Mock;
+  let mockHttp: { post: Mock };
+  let mockToasts: { addSuccess: Mock; addError: Mock; remove: Mock };
+  let mockNavigateToApp: Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHttp = { post: jest.fn() };
-    mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), remove: jest.fn() };
-    mockNavigateToApp = jest.fn();
+    vi.clearAllMocks();
+    mockHttp = { post: vi.fn() };
+    mockToasts = { addSuccess: vi.fn(), addError: vi.fn(), remove: vi.fn() };
+    mockNavigateToApp = vi.fn();
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
       logger: { log: () => null, warn: () => null, error: () => null },
@@ -77,7 +80,7 @@ describe('useCopyPack', () => {
       data: { saved_object_id: 'new-pack-id', name: 'my-pack_copy' },
     });
 
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useCopyPack({ packId: 'source-id' }), {
       wrapper: createWrapper(queryClient),

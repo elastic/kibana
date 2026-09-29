@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createBatcher } from './batcher';
 
 test('createBatcher', async () => {
@@ -16,7 +18,7 @@ test('createBatcher', async () => {
     { uid: '3', name: 'Charlie' },
   ];
 
-  const fetcher = jest.fn(() => Promise.resolve(users));
+  const fetcher = vi.fn(() => Promise.resolve(users));
 
   const batcher = createBatcher({
     fetcher,

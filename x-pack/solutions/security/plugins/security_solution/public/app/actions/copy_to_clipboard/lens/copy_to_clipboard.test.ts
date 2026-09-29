@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { createCopyToClipboardLensAction } from './copy_to_clipboard';
@@ -15,28 +17,28 @@ import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
-const mockSuccessToast = jest.fn();
+const mockSuccessToast = vi.fn();
 KibanaServices.get().notifications.toasts.addSuccess = mockSuccessToast;
 
-const mockCopy = jest.fn((text: string) => true);
-jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
+const mockCopy = vi.fn((text: string) => true);
+vi.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
 const getMockLensApi = (
   { from, to = 'now' }: { from: string; to: string } = { from: 'now-24h', to: 'now' }
 ): LensApi =>
   getLensApiMock({
     timeRange$: new BehaviorSubject<TimeRange | undefined>({ from, to }),
-    getViewUnderlyingDataArgs: jest.fn(() => ({
+    getViewUnderlyingDataArgs: vi.fn(() => ({
       dataViewSpec: { id: 'index-pattern-id' },
       timeRange: { from: 'now-7d', to: 'now' },
       filters: [],
       query: undefined,
       columns: [],
     })),
-    saveToLibrary: jest.fn(async () => 'saved-id'),
+    saveToLibrary: vi.fn(async () => 'saved-id'),
   });
 
 const lensEmbeddable = getMockLensApi();
@@ -59,7 +61,7 @@ describe('createCopyToClipboardLensAction', () => {
 
   beforeEach(() => {
     currentAppId$.next(APP_UI_ID);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

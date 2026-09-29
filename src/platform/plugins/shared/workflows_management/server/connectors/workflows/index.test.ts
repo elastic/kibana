@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -21,13 +24,13 @@ import {
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 
 const mockWorkflowsManagementApi = {
-  getWorkflow: jest.fn(),
-  runWorkflow: jest.fn(),
-  scheduleWorkflow: jest.fn(),
+  getWorkflow: vi.fn(),
+  runWorkflow: vi.fn(),
+  scheduleWorkflow: vi.fn(),
 } as unknown as WorkflowsManagementApi;
 
 describe('Workflows Connector', () => {
-  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
   describe('getConnectorType', () => {
     it('should return correct connector type configuration', () => {
@@ -57,7 +60,7 @@ describe('Workflows Connector', () => {
     const mockRequest = {} as KibanaRequest;
 
     it('should schedule workflow successfully', async () => {
-      jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue({
+      vi.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue({
         id: 'test-workflow-id',
         name: 'Private workflow',
         yaml: 'name: Private workflow',
@@ -75,7 +78,7 @@ describe('Workflows Connector', () => {
           steps: [],
         },
       });
-      jest
+      vi
         .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
         .mockResolvedValue('workflow-run-123');
 
@@ -155,9 +158,9 @@ describe('Workflows Connector', () => {
     });
 
     it('should skip execution when no alerts are provided', async () => {
-      const mockScheduleWorkflowService = jest.fn().mockResolvedValue('workflow-run-123');
+      const mockScheduleWorkflowService = vi.fn().mockResolvedValue('workflow-run-123');
       const deps: GetWorkflowsConnectorTypeArgs = {
-        getScheduleWorkflowService: jest.fn().mockResolvedValue(mockScheduleWorkflowService),
+        getScheduleWorkflowService: vi.fn().mockResolvedValue(mockScheduleWorkflowService),
       };
 
       const execOptions = {
@@ -236,7 +239,7 @@ describe('Workflows Connector', () => {
     it('should handle schedule workflows service errors', async () => {
       const serviceError = new Error('Service unavailable');
       const deps: GetWorkflowsConnectorTypeArgs = {
-        getScheduleWorkflowService: jest.fn().mockRejectedValue(serviceError),
+        getScheduleWorkflowService: vi.fn().mockRejectedValue(serviceError),
       };
 
       const execOptions = {

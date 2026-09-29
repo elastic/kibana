@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryPendingChange } from '../types/change_history_pending_change';
 import { TEST_SNAPSHOT } from '../test_utils/change_history_test_fixtures';
@@ -19,8 +21,8 @@ const pendingChange: ChangeHistoryPendingChange = {
 };
 
 const adapterWithPendingChange: ChangeHistoryAdapter = {
-  listChanges: jest.fn(),
-  getChange: jest.fn(),
+  listChanges: vi.fn(),
+  getChange: vi.fn(),
   getPendingChange: () => pendingChange,
 };
 
@@ -35,8 +37,8 @@ describe('resolveChangeHistoryPendingChange', () => {
 
   it('returns undefined when the adapter does not implement getPendingChange', () => {
     const adapter: ChangeHistoryAdapter = {
-      listChanges: jest.fn(),
-      getChange: jest.fn(),
+      listChanges: vi.fn(),
+      getChange: vi.fn(),
     };
 
     expect(resolveChangeHistoryPendingChange(adapter, true)).toBeUndefined();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { AgentBuilderErrorCode, AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { ChatCallbackFailureResponse } from '../../../../common/http_api/chat_callback';
@@ -40,18 +43,18 @@ const failurePayload: ChatCallbackFailureResponse = {
 
 const responseTimeout = 60000;
 const createCallbackDeliveryService = (
-  ensureUriAllowed = jest.fn(),
+  ensureUriAllowed = vi.fn(),
   relayClient?: {
-    isRelayOrigin: jest.Mock;
-    postCallback: jest.Mock;
+    isRelayOrigin: Mock;
+    postCallback: Mock;
   }
 ) =>
   new CallbackDeliveryService({
     actions: {
-      getRelayClient: jest.fn().mockReturnValue(relayClient),
-      getActionsConfigurationUtilities: jest.fn().mockReturnValue({
+      getRelayClient: vi.fn().mockReturnValue(relayClient),
+      getActionsConfigurationUtilities: vi.fn().mockReturnValue({
         ensureUriAllowed,
-        getResponseSettings: jest.fn().mockReturnValue({
+        getResponseSettings: vi.fn().mockReturnValue({
           maxContentLength: 1048576,
           timeout: responseTimeout,
         }),
@@ -81,7 +84,7 @@ describe('getCallbackUrl', () => {
 
 describe('validateCallbackUrl', () => {
   it('delegates callback URL validation to the Actions allowed-host validator', () => {
-    const ensureUriAllowed = jest.fn();
+    const ensureUriAllowed = vi.fn();
     const callbackDeliveryService = createCallbackDeliveryService(ensureUriAllowed);
 
     callbackDeliveryService.validateCallbackUrl(callbackUrl);
@@ -92,7 +95,7 @@ describe('validateCallbackUrl', () => {
   it.each(['', '   '])(
     'throws without delegating to the allowed-host validator for a blank callback URL (%p)',
     (blankUrl) => {
-      const ensureUriAllowed = jest.fn();
+      const ensureUriAllowed = vi.fn();
       const callbackDeliveryService = createCallbackDeliveryService(ensureUriAllowed);
 
       expect(() => callbackDeliveryService.validateCallbackUrl(blankUrl)).toThrow(
@@ -106,11 +109,11 @@ describe('validateCallbackUrl', () => {
 
 describe('createTransport', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('posts the exact serialized JSON body through fetch without a signature', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+    const fetchMock = vi.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
     const transport = createCallbackDeliveryService().createTransport(callbackUrl);
 
     const abortController = new AbortController();
@@ -128,12 +131,12 @@ describe('createTransport', () => {
   });
 
   it('posts through the Actions Relay client for matching callback URLs', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch');
+    const fetchMock = vi.spyOn(global, 'fetch');
     const relayClient = {
-      isRelayOrigin: jest.fn().mockReturnValue(true),
-      postCallback: jest.fn().mockResolvedValue({ status: 204 }),
+      isRelayOrigin: vi.fn().mockReturnValue(true),
+      postCallback: vi.fn().mockResolvedValue({ status: 204 }),
     };
-    const transport = createCallbackDeliveryService(jest.fn(), relayClient).createTransport(
+    const transport = createCallbackDeliveryService(vi.fn(), relayClient).createTransport(
       callbackUrl
     );
 
@@ -150,12 +153,12 @@ describe('createTransport', () => {
   });
 
   it('posts through fetch when the URL is not a Relay origin', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+    const fetchMock = vi.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
     const relayClient = {
-      isRelayOrigin: jest.fn().mockReturnValue(false),
-      postCallback: jest.fn(),
+      isRelayOrigin: vi.fn().mockReturnValue(false),
+      postCallback: vi.fn(),
     };
-    const transport = createCallbackDeliveryService(jest.fn(), relayClient).createTransport(
+    const transport = createCallbackDeliveryService(vi.fn(), relayClient).createTransport(
       callbackUrl
     );
 
@@ -168,11 +171,11 @@ describe('createTransport', () => {
 
 describe('makeCallbackRequest', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('posts the payload once when the request succeeds', async () => {
-    const transport = jest.fn().mockResolvedValue({ status: 200 });
+    const transport = vi.fn().mockResolvedValue({ status: 200 });
 
     await createCallbackDeliveryService().makeCallbackRequest({
       payload: failurePayload,
@@ -185,8 +188,8 @@ describe('makeCallbackRequest', () => {
   });
 
   it('aborts and retries requests that exceed the Actions response timeout', async () => {
-    jest.useFakeTimers();
-    const transport = jest.fn().mockImplementation(
+    vi.useFakeTimers();
+    const transport = vi.fn().mockImplementation(
       (_payload, signal: AbortSignal) =>
         new Promise((_resolve, reject) => {
           signal.addEventListener('abort', () => reject(new Error('The operation was aborted')));
@@ -200,15 +203,15 @@ describe('makeCallbackRequest', () => {
     });
     const deliveryExpectation = expect(delivery).rejects.toThrow('The operation was aborted');
 
-    await jest.advanceTimersByTimeAsync(responseTimeout * 4);
+    await vi.advanceTimersByTimeAsync(responseTimeout * 4);
 
     await deliveryExpectation;
     expect(transport).toHaveBeenCalledTimes(3);
   });
 
   it('retries network errors and 5xx responses when retry is true', async () => {
-    jest.useFakeTimers();
-    const transport = jest
+    vi.useFakeTimers();
+    const transport = vi
       .fn()
       .mockRejectedValueOnce(new Error('network down'))
       .mockResolvedValueOnce({ status: 503 })
@@ -221,14 +224,14 @@ describe('makeCallbackRequest', () => {
     });
     const deliveryExpectation = expect(delivery).resolves.toBeUndefined();
 
-    await jest.advanceTimersByTimeAsync(700);
+    await vi.advanceTimersByTimeAsync(700);
 
     await deliveryExpectation;
     expect(transport).toHaveBeenCalledTimes(3);
   });
 
   it('does not retry when retry is false', async () => {
-    const transport = jest.fn().mockResolvedValue({ status: 503 });
+    const transport = vi.fn().mockResolvedValue({ status: 503 });
 
     await expect(
       createCallbackDeliveryService().makeCallbackRequest({
@@ -242,7 +245,7 @@ describe('makeCallbackRequest', () => {
   });
 
   it('does not retry 4xx responses', async () => {
-    const transport = jest.fn().mockResolvedValue({ status: 400 });
+    const transport = vi.fn().mockResolvedValue({ status: 400 });
 
     await expect(
       createCallbackDeliveryService().makeCallbackRequest({
@@ -256,8 +259,8 @@ describe('makeCallbackRequest', () => {
   });
 
   it('throws after exhausting retryable 5xx responses', async () => {
-    jest.useFakeTimers();
-    const transport = jest.fn().mockResolvedValue({ status: 503 });
+    vi.useFakeTimers();
+    const transport = vi.fn().mockResolvedValue({ status: 503 });
 
     const delivery = createCallbackDeliveryService().makeCallbackRequest({
       payload: failurePayload,
@@ -268,7 +271,7 @@ describe('makeCallbackRequest', () => {
       'Callback delivery failed with status 503'
     );
 
-    await jest.advanceTimersByTimeAsync(700);
+    await vi.advanceTimersByTimeAsync(700);
 
     await deliveryExpectation;
     expect(transport).toHaveBeenCalledTimes(3);

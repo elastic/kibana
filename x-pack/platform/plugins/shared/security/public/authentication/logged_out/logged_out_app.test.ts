@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-jest.mock('./logged_out_page');
+
+import { vi } from 'vitest';
+vi.mock('./logged_out_page');
 
 import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -43,14 +45,14 @@ describe('loggedOutApp', () => {
     const appMountParams = {
       element: document.createElement('div'),
       appBasePath: '',
-      onAppLeave: jest.fn(),
-      setHeaderActionMenu: jest.fn(),
+      onAppLeave: vi.fn(),
+      setHeaderActionMenu: vi.fn(),
       history: scopedHistoryMock.create(),
       theme$: themeServiceMock.createTheme$(),
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = jest.requireMock('./logged_out_page').renderLoggedOutPage;
+    const mockRenderApp = (await vi.importMock('./logged_out_page')).renderLoggedOutPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

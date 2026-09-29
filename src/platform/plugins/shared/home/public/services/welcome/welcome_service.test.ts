@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WelcomeServiceSetup } from './welcome_service';
 import { WelcomeService } from './welcome_service';
 
@@ -20,7 +22,7 @@ describe('WelcomeService', () => {
   });
   describe('onRendered', () => {
     test('it should register an onRendered listener', () => {
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       welcomeServiceSetup.registerOnRendered(onRendered);
 
       welcomeService.onRendered();
@@ -28,7 +30,7 @@ describe('WelcomeService', () => {
     });
 
     test('it should handle onRendered errors', () => {
-      const onRendered = jest.fn().mockImplementation(() => {
+      const onRendered = vi.fn().mockImplementation(() => {
         throw new Error('Something went terribly wrong');
       });
       welcomeServiceSetup.registerOnRendered(onRendered);
@@ -38,8 +40,8 @@ describe('WelcomeService', () => {
     });
 
     test('it should allow registering multiple onRendered listeners', () => {
-      const onRendered = jest.fn();
-      const onRendered2 = jest.fn();
+      const onRendered = vi.fn();
+      const onRendered2 = vi.fn();
       welcomeServiceSetup.registerOnRendered(onRendered);
       welcomeServiceSetup.registerOnRendered(onRendered2);
 
@@ -49,7 +51,7 @@ describe('WelcomeService', () => {
     });
 
     test('if the same handler is registered twice, it is called twice', () => {
-      const onRendered = jest.fn();
+      const onRendered = vi.fn();
       welcomeServiceSetup.registerOnRendered(onRendered);
       welcomeServiceSetup.registerOnRendered(onRendered);
 
@@ -59,15 +61,15 @@ describe('WelcomeService', () => {
   });
   describe('renderTelemetryNotice', () => {
     test('it should register a renderer', () => {
-      const renderer = jest.fn().mockReturnValue('rendered text');
+      const renderer = vi.fn().mockReturnValue('rendered text');
       welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer);
 
       expect(welcomeService.renderTelemetryNotice()).toEqual('rendered text');
     });
 
     test('it should fail to register a 2nd renderer and still use the first registered renderer', () => {
-      const renderer = jest.fn().mockReturnValue('rendered text');
-      const renderer2 = jest.fn().mockReturnValue('other text');
+      const renderer = vi.fn().mockReturnValue('rendered text');
+      const renderer2 = vi.fn().mockReturnValue('other text');
       welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer);
       expect(() => welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer2)).toThrow(
         'Only one renderTelemetryNotice handler can be registered'
@@ -77,7 +79,7 @@ describe('WelcomeService', () => {
     });
 
     test('it should handle errors in the renderer', () => {
-      const renderer = jest.fn().mockImplementation(() => {
+      const renderer = vi.fn().mockImplementation(() => {
         throw new Error('Something went terribly wrong');
       });
       welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer);

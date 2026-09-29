@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { buildMetrics, BundleMetricsPlugin } from './bundle_metrics_plugin';
 
 /**
@@ -46,11 +48,11 @@ function createMockCompiler() {
   const compiler = {
     hooks: {
       compilation: {
-        tap: jest.fn((_name: string, fn: (compilation: any) => void) => {
+        tap: vi.fn((_name: string, fn: (compilation: any) => void) => {
           fn({
             hooks: {
               processAssets: {
-                tap: jest.fn((_opts: any, handler: () => void) => {
+                tap: vi.fn((_opts: any, handler: () => void) => {
                   processAssetsHandler = handler;
                 }),
               },

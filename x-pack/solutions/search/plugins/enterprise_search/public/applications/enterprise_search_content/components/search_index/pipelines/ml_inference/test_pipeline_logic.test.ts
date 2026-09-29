@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockMlInferenceValues } from './__mocks__/ml_inference_logic.mock';
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import { nerModel } from '../../../../__mocks__/ml_models.mock';
@@ -64,7 +66,7 @@ describe('TestPipelineLogic', () => {
   const { mount: mountGetDocumentsApiLogic } = new LogicMounter(GetDocumentsApiLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockMlInferenceValues.addInferencePipelineModal = {
       configuration: {
         modelID: '',
@@ -128,11 +130,11 @@ describe('TestPipelineLogic', () => {
       };
 
       it('does nothing if mlInferencePipeline is undefined', () => {
-        jest.spyOn(TestPipelineLogic.actions, 'setSimulatePipelineErrors');
-        jest.spyOn(TestPipelineLogic.actions, 'simulateExistingPipelineApiReset');
-        jest.spyOn(TestPipelineLogic.actions, 'simulatePipelineApiReset');
-        jest.spyOn(TestPipelineLogic.actions, 'makeSimulateExistingPipelineRequest');
-        jest.spyOn(TestPipelineLogic.actions, 'makeSimulatePipelineRequest');
+        vi.spyOn(TestPipelineLogic.actions, 'setSimulatePipelineErrors');
+        vi.spyOn(TestPipelineLogic.actions, 'simulateExistingPipelineApiReset');
+        vi.spyOn(TestPipelineLogic.actions, 'simulatePipelineApiReset');
+        vi.spyOn(TestPipelineLogic.actions, 'makeSimulateExistingPipelineRequest');
+        vi.spyOn(TestPipelineLogic.actions, 'makeSimulatePipelineRequest');
 
         TestPipelineLogic.actions.simulatePipeline();
 
@@ -150,7 +152,7 @@ describe('TestPipelineLogic', () => {
         };
         mockMlInferenceValues.mlInferencePipeline = mockInferencePipeline;
 
-        jest.spyOn(TestPipelineLogic.actions, 'setSimulatePipelineErrors');
+        vi.spyOn(TestPipelineLogic.actions, 'setSimulatePipelineErrors');
         TestPipelineLogic.actions.simulatePipeline();
         expect(TestPipelineLogic.actions.setSimulatePipelineErrors).toHaveBeenCalledWith([]);
       });
@@ -160,8 +162,8 @@ describe('TestPipelineLogic', () => {
         };
         mockMlInferenceValues.mlInferencePipeline = mockInferencePipeline;
 
-        jest.spyOn(TestPipelineLogic.actions, 'simulateExistingPipelineApiReset');
-        jest.spyOn(TestPipelineLogic.actions, 'simulatePipelineApiReset');
+        vi.spyOn(TestPipelineLogic.actions, 'simulateExistingPipelineApiReset');
+        vi.spyOn(TestPipelineLogic.actions, 'simulatePipelineApiReset');
 
         TestPipelineLogic.actions.simulatePipeline();
 
@@ -174,8 +176,8 @@ describe('TestPipelineLogic', () => {
         };
         mockMlInferenceValues.mlInferencePipeline = mockInferencePipeline;
 
-        jest.spyOn(TestPipelineLogic.actions, 'makeSimulateExistingPipelineRequest');
-        jest.spyOn(TestPipelineLogic.actions, 'makeSimulatePipelineRequest');
+        vi.spyOn(TestPipelineLogic.actions, 'makeSimulateExistingPipelineRequest');
+        vi.spyOn(TestPipelineLogic.actions, 'makeSimulatePipelineRequest');
 
         TestPipelineLogic.actions.simulatePipeline();
 
@@ -195,8 +197,8 @@ describe('TestPipelineLogic', () => {
         };
         mockMlInferenceValues.mlInferencePipeline = mockInferencePipeline;
 
-        jest.spyOn(TestPipelineLogic.actions, 'makeSimulateExistingPipelineRequest');
-        jest.spyOn(TestPipelineLogic.actions, 'makeSimulatePipelineRequest');
+        vi.spyOn(TestPipelineLogic.actions, 'makeSimulateExistingPipelineRequest');
+        vi.spyOn(TestPipelineLogic.actions, 'makeSimulatePipelineRequest');
 
         TestPipelineLogic.actions.simulatePipeline();
 

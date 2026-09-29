@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -14,12 +16,12 @@ import { TestProviders } from '../../../../../common/mock';
 
 const defaultProps = {
   mode: 'custom_query' as const,
-  onModeChange: jest.fn(),
+  onModeChange: vi.fn(),
 };
 
 describe('QueryModeSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the selector container', () => {
@@ -102,7 +104,7 @@ describe('QueryModeSelector', () => {
   });
 
   it('calls onModeChange with esql when clicking the ES|QL mode button', async () => {
-    const onModeChange = jest.fn();
+    const onModeChange = vi.fn();
 
     render(
       <TestProviders>
@@ -116,7 +118,7 @@ describe('QueryModeSelector', () => {
   });
 
   it('calls onModeChange with custom_query when clicking the Query builder mode button', async () => {
-    const onModeChange = jest.fn();
+    const onModeChange = vi.fn();
 
     render(
       <TestProviders>
@@ -130,7 +132,7 @@ describe('QueryModeSelector', () => {
   });
 
   it('calls onModeChange exactly once per click', async () => {
-    const onModeChange = jest.fn();
+    const onModeChange = vi.fn();
 
     render(
       <TestProviders>
@@ -144,7 +146,7 @@ describe('QueryModeSelector', () => {
   });
 
   it('does not call onModeChange on initial render', () => {
-    const onModeChange = jest.fn();
+    const onModeChange = vi.fn();
 
     render(
       <TestProviders>

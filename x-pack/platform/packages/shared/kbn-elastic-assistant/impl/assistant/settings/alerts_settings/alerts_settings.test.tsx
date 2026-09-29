@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
@@ -14,11 +16,11 @@ import { DEFAULT_LATEST_ALERTS } from '../../../assistant_context/constants';
 
 describe('AlertsSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('updates the knowledgeBase settings when the alerts range slider is changed', () => {
-    const setUpdatedKnowledgeBaseSettings = jest.fn();
+    const setUpdatedKnowledgeBaseSettings = vi.fn();
     const knowledgeBase: KnowledgeBaseConfig = {
       latestAlerts: DEFAULT_LATEST_ALERTS,
     };

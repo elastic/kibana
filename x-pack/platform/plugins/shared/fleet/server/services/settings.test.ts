@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
@@ -21,22 +24,22 @@ import { createDefaultSettings, getSettings, saveSettings, settingsSetup } from 
 import { auditLoggingService } from './audit_logging';
 import { fleetServerHostService } from './fleet_server_host';
 
-jest.mock('./app_context');
-jest.mock('./audit_logging');
-jest.mock('./fleet_server_host');
+vi.mock('./app_context');
+vi.mock('./audit_logging');
+vi.mock('./fleet_server_host');
 
-const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+const mockedFleetServerHostService = fleetServerHostService as Mocked<
   typeof fleetServerHostService
 >;
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
 describe('settingsSetup', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockedAppContextService.getCloud.mockReset();
     mockedAppContextService.getConfig.mockReset();
     mockedAppContextService.getExperimentalFeatures.mockReset();
@@ -591,7 +594,7 @@ describe('saveSettings', () => {
 });
 describe('createDefaultSettings', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   beforeEach(() => {
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);

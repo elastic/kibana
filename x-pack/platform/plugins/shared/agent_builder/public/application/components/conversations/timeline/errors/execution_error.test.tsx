@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -23,24 +25,30 @@ import {
 } from '@kbn/agent-builder-common/base/errors';
 import { ExecutionError } from './execution_error';
 
-jest.mock('../../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    docLinksService: { limitationsKnownIssuesConversationLengthExceeded: 'https://docs' },
-  }),
-}));
+vi.mock('../../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        docLinksService: { limitationsKnownIssuesConversationLengthExceeded: 'https://docs' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./reasoning_error_panel', () => ({
-  ReasoningErrorPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="reasoningErrorPanel">{children}</div>
-  ),
-}));
+vi.mock('./reasoning_error_panel', () => {
+      const mocked = {
+      ReasoningErrorPanel: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="reasoningErrorPanel">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
 describe('ExecutionError', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows hook execution callout and skips the reasoning error panel', () => {

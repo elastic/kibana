@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
@@ -17,9 +19,12 @@ import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 
-jest.mock('@kbn/data-plugin/public/services', () => ({
-  getUiSettings: () => ({ get: jest.fn() }),
-}));
+vi.mock('@kbn/data-plugin/public/services', () => {
+      const mocked = {
+      getUiSettings: () => ({ get: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TimeseriesVisualization', () => {
   describe('TimeSeries Y-Axis formatted value', () => {
@@ -32,7 +37,7 @@ describe('TimeseriesVisualization', () => {
 
     setFieldFormats(
       getFieldFormatsRegistry({
-        uiSettings: { get: jest.fn() },
+        uiSettings: { get: vi.fn() },
       })
     );
 

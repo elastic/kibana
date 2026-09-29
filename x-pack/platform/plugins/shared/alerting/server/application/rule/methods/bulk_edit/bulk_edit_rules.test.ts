@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { RulesClient } from '../../../../rules_client/rules_client';
@@ -23,32 +26,39 @@ import type { RawRule } from '../../../../types';
 import type { Rule } from '../../../../../common';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/snooze/get_active_snooze_if_exist', () => ({
-  getActiveSnoozeIfExist: jest.fn(),
-}));
+vi.mock('../../../../lib/snooze/get_active_snooze_if_exist', () => {
+      const mocked = {
+      getActiveSnoozeIfExist: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   let uuid = 100;
   return { v4: () => `${uuid++}` };
 });
 
-jest.mock('../get_schedule_frequency', () => ({
-  validateScheduleLimit: jest.fn(),
-}));
+vi.mock('../get_schedule_frequency', () => {
+      const mocked = {
+      validateScheduleLimit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getActiveSnoozeIfExist } = jest.requireMock(
-  '../../../../lib/snooze/get_active_snooze_if_exist'
-);
-const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
+const { getActiveSnoozeIfExist } = (await vi.importMock('../../../../lib/snooze/get_active_snooze_if_exist'));
+const { validateScheduleLimit } = (await vi.importMock('../get_schedule_frequency'));
 
 const kibanaVersion = 'v8.2.0';
-const createAPIKeyMock = jest.fn();
-const isAuthenticationTypeApiKeyMock = jest.fn();
-const getAuthenticationApiKeyMock = jest.fn();
+const createAPIKeyMock = vi.fn();
+const isAuthenticationTypeApiKeyMock = vi.fn();
+const getAuthenticationApiKeyMock = vi.fn();
 
 const {
   rulesClientParams,
@@ -65,20 +75,20 @@ const {
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
 });
-const paramsModifier = jest.fn();
+const paramsModifier = vi.fn();
 
 const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
 
 describe('bulkEdit()', () => {
   let rulesClient: RulesClient;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
   const existingRule: SavedObject<RawRule> = {
     id: '1',
     type: RULE_SAVED_OBJECT_TYPE,
@@ -127,10 +137,10 @@ describe('bulkEdit()', () => {
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = { saved_objects: [existingDecryptedRule] }
   ) => {
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValue({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield response;
         },
@@ -140,7 +150,7 @@ describe('bulkEdit()', () => {
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
 
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient = (await rulesClientParams.getActionsClient()) as Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       createMockConnector({
@@ -557,7 +567,7 @@ describe('bulkEdit()', () => {
     const connectorAdapter: ConnectorAdapter = {
       connectorTypeId: '.test',
       ruleActionParamsSchema: schema.object({ foo: schema.string() }),
-      buildActionParams: jest.fn(),
+      buildActionParams: vi.fn(),
     };
 
     rulesClientParams.connectorAdapterRegistry.register(connectorAdapter);
@@ -2009,7 +2019,7 @@ describe('bulkEdit()', () => {
 
     test('should skip operation when params modifiers does not modify index pattern array', async () => {
       const originalValidate = bulkEditOperationsSchema.validate;
-      bulkEditOperationsSchema.validate = jest.fn();
+      bulkEditOperationsSchema.validate = vi.fn();
 
       paramsModifier.mockResolvedValue({
         modifiedParams: {
@@ -3522,9 +3532,9 @@ describe('bulkEdit()', () => {
       } as SavedObject<RawRule>);
 
     const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {

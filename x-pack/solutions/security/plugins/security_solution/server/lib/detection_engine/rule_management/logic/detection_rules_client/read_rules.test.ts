@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { readRules } from './read_rules';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import {
@@ -27,8 +29,8 @@ export class TestError extends Error {
 
 describe('read_rules', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
   describe('readRules', () => {
     test('should return the output from rulesClient if id is set but ruleId is undefined', async () => {

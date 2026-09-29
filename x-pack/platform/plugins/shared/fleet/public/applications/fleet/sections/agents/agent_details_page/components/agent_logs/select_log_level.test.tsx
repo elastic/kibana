@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,17 +17,17 @@ import { sendPostAgentAction, useAuthz, useStartServices } from '../../../../../
 
 import { SelectLogLevel } from './select_log_level';
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    useAuthz: jest.fn(),
-    useStartServices: jest.fn(),
-    sendPostAgentAction: jest.fn(),
+    ...(await vi.importActual('../../../../../hooks')),
+    useAuthz: vi.fn(),
+    useStartServices: vi.fn(),
+    sendPostAgentAction: vi.fn(),
   };
 });
 
-const mockUseStartServices = useStartServices as jest.Mock;
-const mockSendPostAgentAction = sendPostAgentAction as jest.Mock;
+const mockUseStartServices = useStartServices as Mock;
+const mockSendPostAgentAction = sendPostAgentAction as Mock;
 
 const createAgent = (logLevel?: string) =>
   ({
@@ -41,7 +44,7 @@ const createAgent = (logLevel?: string) =>
 
 describe('SelectLogLevel', () => {
   beforeEach(() => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
       },
@@ -49,8 +52,8 @@ describe('SelectLogLevel', () => {
     mockUseStartServices.mockReturnValue({
       notifications: {
         toasts: {
-          addSuccess: jest.fn(),
-          addError: jest.fn(),
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
         },
       },
       docLinks: {

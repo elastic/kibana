@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getStackProductsUsage } from './get_stack_products_usage';
 
@@ -17,7 +19,7 @@ describe('getStackProductsUsage', () => {
   const clusterUuid = '1abcde2';
   const availableCcs = false;
   const callCluster = {
-    search: jest.fn().mockImplementation(() => ({
+    search: vi.fn().mockImplementation(() => ({
       hits: {
         hits: [],
       },

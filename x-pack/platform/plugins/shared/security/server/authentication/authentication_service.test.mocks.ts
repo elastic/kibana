@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const mockCanRedirectRequest = jest.fn();
-jest.mock('./can_redirect_request', () => ({ canRedirectRequest: mockCanRedirectRequest }));
+import { vi } from 'vitest';
+
+export const mockCanRedirectRequest = vi.fn();
+vi.mock('./can_redirect_request', () => {
+      const mocked = { canRedirectRequest: mockCanRedirectRequest };
+      return { ...mocked, default: mocked };
+    });

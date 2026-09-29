@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,8 +14,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicySnoozeModal } from './action_policy_snooze_modal';
 
 describe('ActionPolicySnoozeModal', () => {
-  const onApplySnooze = jest.fn();
-  const onCancel = jest.fn();
+  const onApplySnooze = vi.fn();
+  const onCancel = vi.fn();
 
   const renderModal = () =>
     render(
@@ -27,7 +29,7 @@ describe('ActionPolicySnoozeModal', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the duration options without the indefinite option', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { setupAlertsCapabilitiesSwitcher } from './alerts_capabilities_switcher';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -17,7 +19,7 @@ describe('setupAlertsCapabilitiesSwitcher', () => {
     return {
       coreSetup,
       logger,
-      getSecurityStart: jest.fn(),
+      getSecurityStart: vi.fn(),
     };
   };
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type {
   VersionedRouteResponseValidation,
@@ -31,10 +33,10 @@ describe('prepareVersionedRouteValidation', () => {
       request: {},
       response: {
         200: {
-          body: jest.fn(() => schema.string()),
+          body: vi.fn(() => schema.string()),
         },
         404: {
-          body: jest.fn(() => schema.string()),
+          body: vi.fn(() => schema.string()),
         },
         500: {
           description: 'just a description',
@@ -64,7 +66,7 @@ describe('prepareVersionedRouteValidation', () => {
   describe('deferred validation with onceCacheOnSuccess', () => {
     it('defers construction and retries on failure', () => {
       let attemptCount = 0;
-      const brokenFactory = jest.fn(() => {
+      const brokenFactory = vi.fn(() => {
         attemptCount++;
         throw new Error(`Attempt ${attemptCount}`);
       });
@@ -92,7 +94,7 @@ describe('prepareVersionedRouteValidation', () => {
         request: { body: schema.string() },
         response: { 200: { body: () => schema.string() } },
       };
-      const factory = jest.fn(
+      const factory = vi.fn(
         (): VersionedRouteValidation<unknown, unknown, unknown> => validation
       );
 

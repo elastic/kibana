@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
@@ -13,18 +16,18 @@ import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_a
 import { getAttackDiscoveryAttachmentData } from './get_attack_discovery_attachment_data';
 import { useAttackDiscoveryAttachment } from '.';
 
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');
 
-const mockUseAgentBuilderAttachment = useAgentBuilderAttachment as jest.Mock;
+const mockUseAgentBuilderAttachment = useAgentBuilderAttachment as Mock;
 
 const [attackDiscovery] = getMockAttackDiscoveryAlerts();
 const { replacements } = attackDiscovery;
 
 describe('useAttackDiscoveryAttachment', () => {
-  const mockOpenAgentBuilderFlyout = jest.fn();
+  const mockOpenAgentBuilderFlyout = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAgentBuilderAttachment.mockReturnValue({
       openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
     });

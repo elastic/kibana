@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { pascalKeysToCamel } from './aws_cloudwatch_api';
 import { AwsCloudwatch } from './aws_cloudwatch';
@@ -19,19 +21,19 @@ import {
 } from './types';
 
 describe('AWS CloudWatch connector', () => {
-  const mockPost = jest.fn();
+  const mockPost = vi.fn();
   const mockClient = { post: mockPost };
 
   const mockContext = {
     client: mockClient,
     config: { region: 'us-east-1' },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   const jsonResponse = (data: unknown) => ({ data });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {

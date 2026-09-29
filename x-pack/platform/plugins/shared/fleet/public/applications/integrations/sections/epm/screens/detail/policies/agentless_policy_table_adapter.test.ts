@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { PackageInfo } from '../../../../../types';
 import type { AgentlessPolicy } from '../../../../../../../../common/types/models/agentless_policy';
 import { agentlessPolicyToPackagePolicy } from '../../../../../../../../common/services';
 
 import { agentlessPolicyToTableItem } from './agentless_policy_table_adapter';
 
-jest.mock('../../../../../../../../common/services', () => ({
-  agentlessPolicyToPackagePolicy: jest.fn(),
-}));
+vi.mock('../../../../../../../../common/services', () => {
+      const mocked = {
+      agentlessPolicyToPackagePolicy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAgentlessPolicyToPackagePolicy = agentlessPolicyToPackagePolicy as jest.MockedFunction<
+const mockAgentlessPolicyToPackagePolicy = agentlessPolicyToPackagePolicy as MockedFunction<
   typeof agentlessPolicyToPackagePolicy
 >;
 
@@ -36,7 +42,7 @@ describe('agentlessPolicyToTableItem', () => {
   } as unknown as AgentlessPolicy;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAgentlessPolicyToPackagePolicy.mockReturnValue({
       name: 'Nginx agentless',
       namespace: 'default',

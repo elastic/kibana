@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -58,8 +60,8 @@ describe('AlertEpisodeRunbook', () => {
   });
 
   it('fades preview content that exceeds the maximum height', () => {
-    jest.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(121);
-    jest.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(120);
+    vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(121);
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(120);
 
     render(
       <I18nProvider>

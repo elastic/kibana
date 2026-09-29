@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   getILMPolicies,
   saveILMMigrationChanges,
@@ -13,21 +16,24 @@ import {
 import { stepInstallPrecheck } from './step_install_precheck';
 import { ensureFleetGlobalEsAssets } from '../../../../setup/ensure_fleet_global_es_assets';
 
-jest.mock('../../../..');
-jest.mock('../../../../setup/ensure_fleet_global_es_assets');
-jest.mock('../../../elasticsearch/template/default_settings', () => ({
-  ...jest.requireActual('../../../elasticsearch/template/default_settings'),
-  getILMMigrationStatus: jest.fn().mockResolvedValue(new Map()),
-  getILMPolicies: jest.fn().mockResolvedValue(new Map()),
-  saveILMMigrationChanges: jest.fn(),
-}));
+vi.mock('../../../..');
+vi.mock('../../../../setup/ensure_fleet_global_es_assets');
+vi.mock('../../../elasticsearch/template/default_settings', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../elasticsearch/template/default_settings')),
+      getILMMigrationStatus: vi.fn().mockResolvedValue(new Map()),
+      getILMPolicies: vi.fn().mockResolvedValue(new Map()),
+      saveILMMigrationChanges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('stepInstallPrecheck', () => {
-  const mockGetILMPolicies = getILMPolicies as jest.Mock;
-  const mockSaveILMMigrationChanges = saveILMMigrationChanges as jest.Mock;
+  const mockGetILMPolicies = getILMPolicies as Mock;
+  const mockSaveILMMigrationChanges = saveILMMigrationChanges as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should use new ILM policy when policies not modified', async () => {
@@ -138,6 +144,6 @@ describe('stepInstallPrecheck', () => {
   it('should call ensureFleetGlobalEsAssets', async () => {
     await stepInstallPrecheck();
 
-    expect(jest.mocked(ensureFleetGlobalEsAssets)).toHaveBeenCalled();
+    expect(vi.mocked(ensureFleetGlobalEsAssets)).toHaveBeenCalled();
   });
 });

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { renderHook, act } from '@testing-library/react';
 import { PAGINATION_MAX_SIZE } from '@kbn/as-code-shared-schemas';
@@ -18,10 +21,10 @@ import { useDashboardListingTable } from './use_dashboard_listing_table';
 import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 
-const clearStateMock = jest.fn();
-const getDashboardUrl = jest.fn();
-const goToDashboard = jest.fn();
-const getUiSettingsMock = jest.fn().mockImplementation((key) => {
+const clearStateMock = vi.fn();
+const getDashboardUrl = vi.fn();
+const goToDashboard = vi.fn();
+const getUiSettingsMock = vi.fn().mockImplementation((key) => {
   if (key === 'savedObjects:listingLimit') {
     return 20;
   }
@@ -31,48 +34,60 @@ const getUiSettingsMock = jest.fn().mockImplementation((key) => {
   return null;
 });
 
-jest.mock('@kbn/ebt-tools', () => ({
-  reportPerformanceMetricEvent: jest.fn(),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      reportPerformanceMetricEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../confirm_overlays', () => ({
-  confirmCreateWithUnsaved: jest.fn().mockImplementation((fn) => fn()),
-}));
+vi.mock('../confirm_overlays', () => {
+      const mocked = {
+      confirmCreateWithUnsaved: vi.fn().mockImplementation((fn) => fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../_dashboard_listing_strings', () => ({
-  dashboardListingTableStrings: {
-    getEntityName: jest.fn().mockReturnValue('Dashboard'),
-    getTableListTitle: jest.fn().mockReturnValue('Dashboard List'),
-    getEntityNamePlural: jest.fn().mockReturnValue('Dashboards'),
-  },
-}));
+vi.mock('../_dashboard_listing_strings', () => {
+      const mocked = {
+      dashboardListingTableStrings: {
+        getEntityName: vi.fn().mockReturnValue('Dashboard'),
+        getTableListTitle: vi.fn().mockReturnValue('Dashboard List'),
+        getEntityNamePlural: vi.fn().mockReturnValue('Dashboards'),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../dashboard_client', () => ({
-  dashboardClient: {
-    delete: jest.fn().mockResolvedValue(true),
-    update: jest.fn().mockResolvedValue(true),
-  },
-  findService: {
-    findById: jest.fn(),
-    search: jest.fn().mockResolvedValue({ data: [], meta: { total: 0, page: 1, per_page: 20 } }),
-  },
-  checkForDuplicateDashboardTitle: jest.fn(),
-}));
+vi.mock('../../dashboard_client', () => {
+      const mocked = {
+      dashboardClient: {
+        delete: vi.fn().mockResolvedValue(true),
+        update: vi.fn().mockResolvedValue(true),
+      },
+      findService: {
+        findById: vi.fn(),
+        search: vi.fn().mockResolvedValue({ data: [], meta: { total: 0, page: 1, per_page: 20 } }),
+      },
+      checkForDuplicateDashboardTitle: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDashboardListingTable', () => {
   const dashboardBackupService = getDashboardBackupService();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    dashboardBackupService.dashboardHasUnsavedEdits = jest.fn().mockReturnValue(true);
+    dashboardBackupService.dashboardHasUnsavedEdits = vi.fn().mockReturnValue(true);
 
-    dashboardBackupService.getDashboardIdsWithUnsavedChanges = jest.fn().mockReturnValue([]);
+    dashboardBackupService.getDashboardIdsWithUnsavedChanges = vi.fn().mockReturnValue([]);
 
     dashboardBackupService.clearState = clearStateMock;
     coreServices.uiSettings.get = getUiSettingsMock;
-    coreServices.notifications.toasts.addError = jest.fn();
-    coreServices.userProfile.getCurrent = jest.fn().mockResolvedValue({ uid: 'test-user' });
+    coreServices.notifications.toasts.addError = vi.fn();
+    coreServices.userProfile.getCurrent = vi.fn().mockResolvedValue({ uid: 'test-user' });
   });
 
   test('should return the correct initial hasInitialFetchReturned state', () => {
@@ -248,7 +263,7 @@ describe('useDashboardListingTable', () => {
   });
 
   test('contentEditor.onSave should not include access_control in update payload', async () => {
-    (findService.findById as jest.Mock).mockResolvedValue({
+    (findService.findById as Mock).mockResolvedValue({
       id: 'test-id',
       status: 'success',
       attributes: {
@@ -272,7 +287,7 @@ describe('useDashboardListingTable', () => {
       } as Parameters<Required<OpenContentEditorParams>['onSave']>[0]);
     });
 
-    const payload = (dashboardClient.update as jest.Mock).mock.lastCall[1];
+    const payload = (dashboardClient.update as Mock).mock.lastCall[1];
     expect(dashboardClient.update).toHaveBeenCalledWith(
       'test-id',
       expect.objectContaining({
@@ -342,7 +357,7 @@ describe('useDashboardListingTable', () => {
     });
 
     test('clamps per_page to PAGINATION_MAX_SIZE when listingLimit exceeds it', async () => {
-      coreServices.uiSettings.get = jest.fn().mockImplementation((key) => {
+      coreServices.uiSettings.get = vi.fn().mockImplementation((key) => {
         if (key === 'savedObjects:listingLimit') return PAGINATION_MAX_SIZE + 9000;
         if (key === 'savedObjects:perPage') return 5;
         return null;

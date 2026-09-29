@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { LookupsFileUpload } from '.';
 import { MigrationSource } from '../../../../types';
 
 describe('LookupsFileUpload', () => {
-  const props = { createResources: jest.fn(), migrationSource: MigrationSource.SPLUNK };
+  const props = { createResources: vi.fn(), migrationSource: MigrationSource.SPLUNK };
 
   it('renders the file picker', () => {
     const { getByTestId } = render(<LookupsFileUpload {...props} />);
@@ -29,13 +31,13 @@ describe('LookupsFileUpload', () => {
   });
 
   it('renders skip button when onSkip is provided', () => {
-    const { getByTestId } = render(<LookupsFileUpload {...props} onSkip={jest.fn()} />);
+    const { getByTestId } = render(<LookupsFileUpload {...props} onSkip={vi.fn()} />);
     expect(getByTestId('lookupsUploadSkipButton')).toBeInTheDocument();
     expect(getByTestId('lookupsUploadSkipButton')).toHaveTextContent('Skip');
   });
 
   it('calls onSkip when skip button is clicked', () => {
-    const onSkip = jest.fn();
+    const onSkip = vi.fn();
     const { getByTestId } = render(<LookupsFileUpload {...props} onSkip={onSkip} />);
     fireEvent.click(getByTestId('lookupsUploadSkipButton'));
     expect(onSkip).toHaveBeenCalledTimes(1);

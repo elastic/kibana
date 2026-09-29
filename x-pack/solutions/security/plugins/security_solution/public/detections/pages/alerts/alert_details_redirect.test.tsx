@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
@@ -15,22 +18,25 @@ import { mockHistory } from '../../../common/utils/route/mocks';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/use_is_new_flyout_enabled');
 
 const testAlertId = 'test-alert-id';
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    alertId: testAlertId,
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => ({
+        alertId: testAlertId,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const testIndex = '.someTestIndex';
 const testTimestamp = '2023-04-20T12:00:00.000Z';
 const mockPathname = `${ALERT_DETAILS_REDIRECT_PATH}/${testAlertId}`;
 
-const mockUseIsNewFlyoutEnabled = useIsNewFlyoutEnabled as jest.Mock;
+const mockUseIsNewFlyoutEnabled = useIsNewFlyoutEnabled as Mock;
 
 describe('AlertDetailsRedirect', () => {
   beforeEach(() => {
@@ -219,7 +225,7 @@ describe('AlertDetailsRedirect', () => {
         </TestProviders>
       );
 
-      const [[callArg]] = (historyMock.replace as jest.Mock).mock.calls;
+      const [[callArg]] = (historyMock.replace as Mock).mock.calls;
       expect(callArg.search).not.toContain('flyout=');
       expect(callArg.search).toContain('flyoutV2=');
     });
@@ -247,7 +253,7 @@ describe('AlertDetailsRedirect', () => {
         </TestProviders>
       );
 
-      const [[callArg]] = (historyMock.replace as jest.Mock).mock.calls;
+      const [[callArg]] = (historyMock.replace as Mock).mock.calls;
       const search = new URLSearchParams(callArg.search);
       expect(search.get('flyoutV2')).toBe(existingFlyoutV2);
     });

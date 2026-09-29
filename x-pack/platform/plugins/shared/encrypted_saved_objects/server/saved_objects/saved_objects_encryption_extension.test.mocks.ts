@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { getDescriptorNamespace } from './get_descriptor_namespace';
 
-export const mockGetDescriptorNamespace = jest.fn() as jest.MockedFunction<
+export const mockGetDescriptorNamespace = vi.fn() as MockedFunction<
   typeof getDescriptorNamespace
 >;
 
-jest.mock('./get_descriptor_namespace', () => {
+vi.mock('./get_descriptor_namespace', () => {
   return {
     getDescriptorNamespace: mockGetDescriptorNamespace,
   };

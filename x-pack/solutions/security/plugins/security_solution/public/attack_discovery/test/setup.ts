@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-jest.mock('../../data_view_manager/hooks/use_data_view');
+import { vi } from 'vitest';
+
+vi.mock('../../data_view_manager/hooks/use_data_view');

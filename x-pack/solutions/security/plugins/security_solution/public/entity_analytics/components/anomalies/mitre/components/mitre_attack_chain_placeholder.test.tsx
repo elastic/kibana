@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /**
  * Verifies that MitreAttackChainPlaceholder always renders a sizing skeleton
  * and its children regardless of MITRE query state.  The bug it guards against:
@@ -17,8 +19,8 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MitreAttackChainPlaceholder } from './mitre_attack_chain_placeholder';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -38,9 +40,9 @@ jest.mock('@elastic/eui', () => {
 });
 
 beforeAll(() => {
-  global.ResizeObserver = jest.fn().mockImplementation(() => ({
-    observe: jest.fn(),
-    disconnect: jest.fn(),
+  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    disconnect: vi.fn(),
   }));
 });
 

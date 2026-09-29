@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
@@ -19,10 +21,10 @@ import { render } from '@testing-library/react';
 import { cloneDeep } from 'lodash';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { defaultColumnHeaderType } from '../column_headers/default_headers';
-jest.mock('./plain_column_renderer');
+vi.mock('./plain_column_renderer');
 
-jest.mock('../../../../../common/components/link_to', () => {
-  const original = jest.requireActual('../../../../../common/components/link_to');
+vi.mock('../../../../../common/components/link_to', async () => {
+  const original = (await vi.importActual('../../../../../common/components/link_to'));
   return {
     ...original,
     useFormatUrl: () => ({
@@ -57,7 +59,7 @@ const defaultProps = {
 
 describe('reasonColumnRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('isIntance', () => {

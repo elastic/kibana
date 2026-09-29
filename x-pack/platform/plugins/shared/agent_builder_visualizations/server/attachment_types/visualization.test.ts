@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createVisualizationAttachmentType } from './visualization';
 
-const mockToAPIFormat = jest.fn().mockReturnValue({ type: 'xy', layers: [] });
+const mockToAPIFormat = vi.fn().mockReturnValue({ type: 'xy', layers: [] });
 
-jest.mock('@kbn/lens-embeddable-utils', () => ({
-  LensConfigBuilder: jest.fn().mockImplementation(() => ({
-    toAPIFormat: (...args: unknown[]) => mockToAPIFormat(...args),
-  })),
-}));
+vi.mock('@kbn/lens-embeddable-utils', () => {
+      const mocked = {
+      LensConfigBuilder: vi.fn().mockImplementation(() => ({
+        toAPIFormat: (...args: unknown[]) => mockToAPIFormat(...args),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const resolveMock = jest.fn();
+const resolveMock = vi.fn();
 
 const createContext = () =>
   ({
@@ -25,7 +30,7 @@ const createContext = () =>
 
 describe('createVisualizationAttachmentType resolve()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockToAPIFormat.mockReturnValue({ type: 'xy', layers: [] });
   });
 

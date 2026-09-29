@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectDoc } from '../serialization';
 import type { SavedObjectsModelUnsafeTransformChange } from './model_change';
 import type {
@@ -33,10 +35,10 @@ describe('test', () => {
   };
   const testContext: SavedObjectModelTransformationContext = {
     log: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     modelVersion: 1,
     namespaceType: 'agnostic',

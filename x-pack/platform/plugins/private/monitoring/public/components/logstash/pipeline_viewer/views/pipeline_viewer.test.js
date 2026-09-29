@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { PipelineViewer } from './pipeline_viewer';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../sparkline', () => ({
-  Sparkline: () => 'Sparkline',
-}));
+vi.mock('../../../sparkline', () => {
+      const mocked = {
+      Sparkline: () => 'Sparkline',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PipelineViewer component', () => {
   let pipeline;
@@ -48,7 +53,7 @@ describe('PipelineViewer component', () => {
       },
     };
 
-    component = <PipelineViewer pipeline={pipeline} setDetailVertexId={jest.fn()} />;
+    component = <PipelineViewer pipeline={pipeline} setDetailVertexId={vi.fn()} />;
   });
 
   it('passes expected props', () => {
@@ -60,7 +65,7 @@ describe('PipelineViewer component', () => {
   it('renders DetailDrawer when selected vertex is not null', () => {
     const vertex = { id: 'stdin' };
     component = (
-      <PipelineViewer pipeline={pipeline} setDetailVertexId={jest.fn()} detailVertex={vertex} />
+      <PipelineViewer pipeline={pipeline} setDetailVertexId={vi.fn()} detailVertex={vertex} />
     );
 
     const renderedComponent = shallow(component);

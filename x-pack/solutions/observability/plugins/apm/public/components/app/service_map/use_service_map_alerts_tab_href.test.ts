@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MouseEvent } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useServiceMapAlertsNavigateFactory } from './use_service_map_alerts_tab_href';
@@ -13,28 +15,40 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-jest.mock('../../../hooks/use_apm_router', () => ({
-  useApmRouter: jest.fn(),
-}));
+vi.mock('../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: jest.fn(),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: jest.fn(),
-}));
+vi.mock('../../../hooks/use_apm_route_path', () => {
+      const mocked = {
+      useApmRoutePath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: jest.fn(),
-}));
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseApmRouter = jest.mocked(useApmRouter);
-const mockedUseAnyOfApmParams = jest.mocked(useAnyOfApmParams);
-const mockedUseApmRoutePath = jest.mocked(useApmRoutePath);
-const mockedUseApmPluginContext = jest.mocked(useApmPluginContext);
+const mockedUseApmRouter = vi.mocked(useApmRouter);
+const mockedUseAnyOfApmParams = vi.mocked(useAnyOfApmParams);
+const mockedUseApmRoutePath = vi.mocked(useApmRoutePath);
+const mockedUseApmPluginContext = vi.mocked(useApmPluginContext);
 
-const mockedLink = jest.fn(
+const mockedLink = vi.fn(
   (path: string, args: { path?: Record<string, string>; query?: Record<string, unknown> }) => {
     const concretePath = path.replace(/\{serviceName\}/, args.path?.serviceName ?? '');
     const search = new URLSearchParams();
@@ -57,10 +71,10 @@ const serviceMapQuery = {
 };
 
 describe('useServiceMapAlertsNavigateFactory', () => {
-  const navigateToUrl = jest.fn();
+  const navigateToUrl = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseApmRouter.mockReturnValue({ link: mockedLink } as unknown as ReturnType<
       typeof useApmRouter
     >);
@@ -82,8 +96,8 @@ describe('useServiceMapAlertsNavigateFactory', () => {
     expect(handler).toBeDefined();
 
     const event = {
-      preventDefault: jest.fn(),
-      stopPropagation: jest.fn(),
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
     } as unknown as MouseEvent;
 
     act(() => {
@@ -122,8 +136,8 @@ describe('useServiceMapAlertsNavigateFactory', () => {
     const { result } = renderHook(() => useServiceMapAlertsNavigateFactory());
     const handler = result.current('opbeans-rum');
     const event = {
-      preventDefault: jest.fn(),
-      stopPropagation: jest.fn(),
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
     } as unknown as MouseEvent;
 
     act(() => {

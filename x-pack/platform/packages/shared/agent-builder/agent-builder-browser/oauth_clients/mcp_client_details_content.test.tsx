@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -51,7 +53,7 @@ describe.each(['modal', 'flyout'] as const)('McpClientDetailsContent (%s)', (pre
   ])('displays and copies $resource in $spaceId', ({ resource, spaceId, expected }) => {
     const clientDetails = Object.freeze({ id: 'client-id', resource });
     const originalExecCommand = document.execCommand;
-    const execCommand = jest.fn(() => {
+    const execCommand = vi.fn(() => {
       expect(window.getSelection()?.toString()).toBe(expected);
       return true;
     });

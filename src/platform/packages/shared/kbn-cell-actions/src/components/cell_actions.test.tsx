@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { CellActions } from './cell_actions';
@@ -27,11 +29,14 @@ const DATA = {
   value: VALUE,
 };
 
-jest.mock('./hover_actions_popover', () => ({
-  HoverActionsPopover: jest.fn((props) => (
-    <span data-test-subj="hoverActionsPopover">{props.anchorPosition}</span>
-  )),
-}));
+vi.mock('./hover_actions_popover', () => {
+      const mocked = {
+      HoverActionsPopover: vi.fn((props) => (
+        <span data-test-subj="hoverActionsPopover">{props.anchorPosition}</span>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('CellActions', () => {
   it('renders', async () => {
     const getActionsPromise = Promise.resolve([]);

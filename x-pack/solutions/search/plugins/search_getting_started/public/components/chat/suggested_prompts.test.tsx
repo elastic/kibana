@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,11 +17,11 @@ import { SuggestedPrompts } from './suggested_prompts';
 import { useSuggestedPrompts } from '../../hooks/use_suggested_prompts';
 import { useOpenAgentBuilder } from '../../hooks/use_open_agent_builder';
 
-jest.mock('../../hooks/use_suggested_prompts');
-jest.mock('../../hooks/use_open_agent_builder');
+vi.mock('../../hooks/use_suggested_prompts');
+vi.mock('../../hooks/use_open_agent_builder');
 
-const mockUseSuggestedPrompts = useSuggestedPrompts as jest.Mock;
-const mockUseOpenAgentBuilder = useOpenAgentBuilder as jest.Mock;
+const mockUseSuggestedPrompts = useSuggestedPrompts as Mock;
+const mockUseOpenAgentBuilder = useOpenAgentBuilder as Mock;
 
 const FIXED_PROMPTS = DEFAULT_PROMPTS.slice(0, 4);
 
@@ -30,7 +33,7 @@ const wrap = (ui: React.ReactElement) =>
   );
 
 describe('SuggestedPrompts', () => {
-  const mockOpenAgentBuilder = jest.fn();
+  const mockOpenAgentBuilder = vi.fn();
 
   beforeEach(() => {
     mockOpenAgentBuilder.mockClear();

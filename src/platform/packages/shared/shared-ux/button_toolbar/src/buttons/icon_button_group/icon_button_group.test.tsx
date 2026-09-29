@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,7 +21,7 @@ describe('<IconButtonGroup />', () => {
     renderWithI18n(
       <IconButtonGroup
         legend="Legend"
-        buttons={[{ label: 'Text', onClick: jest.fn(), iconType: 'text' }]}
+        buttons={[{ label: 'Text', onClick: vi.fn(), iconType: 'text' }]}
       />
     );
 
@@ -31,7 +33,7 @@ describe('<IconButtonGroup />', () => {
       <IconButtonGroup
         legend="Legend"
         buttons={[
-          { label: 'Text', onClick: jest.fn(), iconType: 'text', toolTipContent: 'Tooltip' },
+          { label: 'Text', onClick: vi.fn(), iconType: 'text', toolTipContent: 'Tooltip' },
         ]}
       />
     );
@@ -45,7 +47,7 @@ describe('<IconButtonGroup />', () => {
       <IconButtonGroup
         legend="Legend"
         buttons={[
-          { label: 'Text', onClick: jest.fn(), iconType: 'text', toolTipContent: 'Tooltip' },
+          { label: 'Text', onClick: vi.fn(), iconType: 'text', toolTipContent: 'Tooltip' },
         ]}
       />
     );
@@ -62,7 +64,7 @@ describe('<IconButtonGroup />', () => {
         buttons={[
           {
             label: 'Text',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
             iconType: 'text',
             'data-ebt-action': 'editGridSettings',
             'data-ebt-element': 'chartsToolbar',

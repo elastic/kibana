@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 
 import { MlJobLink } from './ml_job_link';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: { theme: { theme$: {} }, http: { basePath: { get: jest.fn(() => {}) } } },
+    useKibana: vi.fn().mockReturnValue({
+      services: { theme: { theme$: {} }, http: { basePath: { get: vi.fn(() => {}) } } },
     }),
   };
 });

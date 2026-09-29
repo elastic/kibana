@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createFsRepository } from './fs_repository';
@@ -30,7 +32,7 @@ describe('createFsRepository', () => {
   });
 
   it('registers an FS repository in Elasticsearch', async () => {
-    const createRepository = jest.fn().mockResolvedValue(undefined);
+    const createRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
         createRepository,
@@ -62,7 +64,7 @@ describe('createFsRepository', () => {
   });
 
   it('registers with verify: true when explicitly requested', async () => {
-    const createRepository = jest.fn().mockResolvedValue(undefined);
+    const createRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
         createRepository,
@@ -79,7 +81,7 @@ describe('createFsRepository', () => {
   });
 
   it('omits optional settings when undefined', async () => {
-    const createRepository = jest.fn().mockResolvedValue(undefined);
+    const createRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
         createRepository,

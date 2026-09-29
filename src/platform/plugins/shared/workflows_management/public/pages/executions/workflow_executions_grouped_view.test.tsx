@@ -7,19 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { WorkflowExecutionsGroupedView } from './workflow_executions_grouped_view';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
-jest.mock('../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => ({
-  FormattedRelativeEnhanced: ({ value }: { value: Date }) => <span>{value.toISOString()}</span>,
-}));
+vi.mock('../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => {
+      const mocked = {
+      FormattedRelativeEnhanced: ({ value }: { value: Date }) => <span>{value.toISOString()}</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/ui/use_formatted_date', () => ({
-  useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
-}));
+vi.mock('../../shared/ui/use_formatted_date', () => {
+      const mocked = {
+      useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createExecution = (
   overrides: Partial<WorkflowExecutionListItemDto> = {}
@@ -40,7 +48,7 @@ const renderGroupedView = (executions: WorkflowExecutionListItemDto[]) =>
     <WorkflowExecutionsGroupedView
       executions={executions}
       groupBy="workflow"
-      onOpenExecution={jest.fn()}
+      onOpenExecution={vi.fn()}
     />,
     { wrapper: getTestProvider({}) }
   );

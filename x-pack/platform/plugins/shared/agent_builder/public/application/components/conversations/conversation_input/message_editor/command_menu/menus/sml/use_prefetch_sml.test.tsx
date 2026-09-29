@@ -5,35 +5,46 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { usePrefetchSml } from './use_prefetch_sml';
 
-const mockPrefetchQuery = jest.fn();
-const mockAutocomplete = jest.fn();
+const mockPrefetchQuery = vi.fn();
+const mockAutocomplete = vi.fn();
 
-jest.mock('@kbn/react-query', () => ({
-  useQueryClient: () => ({
-    prefetchQuery: mockPrefetchQuery,
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQueryClient: () => ({
+        prefetchQuery: mockPrefetchQuery,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    smlService: { autocomplete: mockAutocomplete },
-  }),
-}));
+vi.mock('../../../../../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        smlService: { autocomplete: mockAutocomplete },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockExperimentalEnabled = true;
-jest.mock('../../../../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => mockExperimentalEnabled,
-}));
+vi.mock('../../../../../../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useExperimentalFeatures: () => mockExperimentalEnabled,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePrefetchSml', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExperimentalEnabled = true;
   });
 

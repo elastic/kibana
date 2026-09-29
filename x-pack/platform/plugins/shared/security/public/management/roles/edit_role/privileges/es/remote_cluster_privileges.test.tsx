@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -40,7 +42,7 @@ test('it renders without crashing', async () => {
             run_as: [],
           },
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         editable
         validator={new RoleValidator()}
         availableRemoteClusterPrivileges={['monitor_enrich']}
@@ -79,7 +81,7 @@ test('it renders an RemoteClusterPrivilegesForm for each remote cluster privileg
             run_as: [],
           },
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         editable
         validator={new RoleValidator()}
         availableRemoteClusterPrivileges={['monitor_enrich']}
@@ -112,7 +114,7 @@ test('it renders fields as disabled when not editable', async () => {
         run_as: [],
       },
     },
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     editable: false,
     validator: new RoleValidator(),
     availableRemoteClusterPrivileges: ['monitor_enrich'],
@@ -158,7 +160,7 @@ test('it renders fields as disabled when `allowRemoteClusterPrivileges` is set t
         run_as: [],
       },
     },
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     editable: false,
     validator: new RoleValidator(),
     availableRemoteClusterPrivileges: ['monitor_enrich'],

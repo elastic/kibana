@@ -5,27 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ViewInDropdown } from './view_in_dropdown';
 import { TestProvidersWithServices } from '../../../__test_helpers__/create_mock_kibana_services';
 
-const mockGetUrl = jest.fn();
-const mockNavigateToPrefilledEditor = jest.fn();
+const mockGetUrl = vi.fn();
+const mockNavigateToPrefilledEditor = vi.fn();
 
-jest.mock('../../../common/hooks/use_logs_data_view', () => ({
-  useLogsDataView: jest.fn(() => ({
-    data: { id: 'logs-osquery-data-view-id', title: 'logs-osquery_manager.result*' },
-  })),
-}));
+vi.mock('../../../common/hooks/use_logs_data_view', () => {
+      const mocked = {
+      useLogsDataView: vi.fn(() => ({
+        data: { id: 'logs-osquery-data-view-id', title: 'logs-osquery_manager.result*' },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-  useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
-}));
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setupKibana = ({
   discoverShow = true,
@@ -36,7 +44,7 @@ const setupKibana = ({
     services: {
       discover: { locator: { getUrl: mockGetUrl } },
       lens: {
-        canUseEditor: jest.fn().mockReturnValue(canUseEditor),
+        canUseEditor: vi.fn().mockReturnValue(canUseEditor),
         navigateToPrefilledEditor: mockNavigateToPrefilledEditor,
       },
       application: {
@@ -58,7 +66,7 @@ const renderDropdown = (props: Partial<Parameters<typeof ViewInDropdown>[0]> = {
 
 describe('ViewInDropdown', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
   });
 

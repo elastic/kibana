@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { StopAfterField } from '../stop_after_field';
@@ -23,7 +25,7 @@ describe('StopAfterField', () => {
           enabled={false}
           value={afterStart}
           startDate={startDate}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -32,7 +34,7 @@ describe('StopAfterField', () => {
 
     it('renders the date picker body when `enabled` is true', () => {
       renderWithProviders(
-        <StopAfterField enabled value={afterStart} startDate={startDate} onChange={jest.fn()} />
+        <StopAfterField enabled value={afterStart} startDate={startDate} onChange={vi.fn()} />
       );
 
       expect(screen.getByTestId('osquery-schedule-stop-after-date')).toBeInTheDocument();
@@ -40,7 +42,7 @@ describe('StopAfterField', () => {
 
     it('keeps the input editable at the DOM level so the picker popover can still open', () => {
       renderWithProviders(
-        <StopAfterField enabled value={afterStart} startDate={startDate} onChange={jest.fn()} />
+        <StopAfterField enabled value={afterStart} startDate={startDate} onChange={vi.fn()} />
       );
 
       expect(screen.getByTestId('osquery-schedule-stop-after-date-input')).not.toHaveAttribute(
@@ -49,7 +51,7 @@ describe('StopAfterField', () => {
     });
 
     it('fires onChange({ enabled: true, date }) when the toggle is flipped on', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <StopAfterField
           enabled={false}
@@ -72,7 +74,7 @@ describe('StopAfterField', () => {
           enabled={false}
           value={beforeStart}
           startDate={startDate}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -84,7 +86,7 @@ describe('StopAfterField', () => {
       // interacted with) — otherwise the user sees an error before they have
       // had a chance to pick a date.
       renderWithProviders(
-        <StopAfterField enabled value={beforeStart} startDate={startDate} onChange={jest.fn()} />
+        <StopAfterField enabled value={beforeStart} startDate={startDate} onChange={vi.fn()} />
       );
 
       expect(screen.queryByText(STOP_AFTER_BEFORE_START_ERROR)).not.toBeInTheDocument();
@@ -92,7 +94,7 @@ describe('StopAfterField', () => {
 
     it('surfaces the before-start error after the field is blurred', () => {
       renderWithProviders(
-        <StopAfterField enabled value={beforeStart} startDate={startDate} onChange={jest.fn()} />
+        <StopAfterField enabled value={beforeStart} startDate={startDate} onChange={vi.fn()} />
       );
 
       fireEvent.blur(screen.getByTestId('osquery-schedule-stop-after-date-input'));
@@ -106,7 +108,7 @@ describe('StopAfterField', () => {
           enabled
           value={beforeStart}
           startDate={startDate}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           showErrors
         />
       );
@@ -116,7 +118,7 @@ describe('StopAfterField', () => {
 
     it('surfaces the before-start error when date equals startDate exactly after blur', () => {
       renderWithProviders(
-        <StopAfterField enabled value={startDate} startDate={startDate} onChange={jest.fn()} />
+        <StopAfterField enabled value={startDate} startDate={startDate} onChange={vi.fn()} />
       );
 
       fireEvent.blur(screen.getByTestId('osquery-schedule-stop-after-date-input'));
@@ -128,7 +130,7 @@ describe('StopAfterField', () => {
 
     it('passes validation when enabled and date > startDate', () => {
       renderWithProviders(
-        <StopAfterField enabled value={afterStart} startDate={startDate} onChange={jest.fn()} />
+        <StopAfterField enabled value={afterStart} startDate={startDate} onChange={vi.fn()} />
       );
 
       expect(screen.queryByText(STOP_AFTER_BEFORE_START_ERROR)).not.toBeInTheDocument();

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.setTimeout(15 * 1000);
+vi.setConfig({ testTimeout: 15 * 1000 });
 
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule, StepAboutRuleReadOnly } from '.';
@@ -40,15 +43,15 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/containers/source');
-jest.mock('../../../../common/components/ml/hooks/use_get_jobs');
-jest.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/containers/source');
+vi.mock('../../../../common/components/ml/hooks/use_get_jobs');
+vi.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,7 +63,7 @@ jest.mock('@elastic/eui', () => {
 });
 const mockedUseKibana = mockUseKibana();
 const mockedUseGetEndpointExceptionsPerPolicyOptIn =
-  useGetEndpointExceptionsPerPolicyOptIn as jest.Mock;
+  useGetEndpointExceptionsPerPolicyOptIn as Mock;
 
 export const stepDefineStepMLRule: DefineStepRule = {
   ruleType: 'machine_learning',
@@ -91,8 +94,8 @@ export const stepDefineStepMLRule: DefineStepRule = {
 };
 
 describe('StepAboutRuleComponent', () => {
-  let useGetInstalledJobMock: jest.Mock;
-  let useSecurityJobsMock: jest.Mock;
+  let useGetInstalledJobMock: Mock;
+  let useSecurityJobsMock: Mock;
   const TestComp = ({
     defineStepDefaultOverride,
     aboutStepDefaultOverride,
@@ -138,14 +141,14 @@ describe('StepAboutRuleComponent', () => {
   };
 
   beforeEach(() => {
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as Mock).mockImplementation(() => [
       false,
       {
         indexPatterns: stubIndexPattern,
       },
     ]);
-    (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue(mockedUseKibana);
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { edit: true },
@@ -153,10 +156,10 @@ describe('StepAboutRuleComponent', () => {
         customHighlightedFields: { edit: true },
       },
     });
-    useGetInstalledJobMock = (useGetInstalledJob as jest.Mock).mockImplementation(() => ({
+    useGetInstalledJobMock = (useGetInstalledJob as Mock).mockImplementation(() => ({
       jobs: [],
     }));
-    useSecurityJobsMock = (useSecurityJobs as jest.Mock).mockImplementation(() => ({ jobs: [] }));
+    useSecurityJobsMock = (useSecurityJobs as Mock).mockImplementation(() => ({ jobs: [] }));
 
     mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({
       data: { status: false },
@@ -270,7 +273,7 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is valid if both "name" and "description" are present', async () => {
-    const handleSubmit = jest.fn();
+    const handleSubmit = vi.fn();
 
     const { user } = setup(<TestComp onSubmit={handleSubmit} />);
 
@@ -299,7 +302,7 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('it allows user to set the risk score as a number (and not a string)', async () => {
-    const handleSubmit = jest.fn();
+    const handleSubmit = vi.fn();
 
     const { user } = setup(
       <TestComp
@@ -339,7 +342,7 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('does not modify the provided risk score until the user changes the severity', async () => {
-    const handleSubmit = jest.fn();
+    const handleSubmit = vi.fn();
 
     const { user } = setup(
       <TestComp
@@ -388,7 +391,7 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('should use index based on ML jobs when creating/editing ML rule', async () => {
-    (useFetchIndex as jest.Mock).mockClear();
+    (useFetchIndex as Mock).mockClear();
     useSecurityJobsMock.mockImplementation(() => ({
       jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: true }],
       loading: false,
@@ -406,7 +409,7 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('should use default rule index if selected ML jobs are not installed when creating/editing ML rule', async () => {
-    (useFetchIndex as jest.Mock).mockClear();
+    (useFetchIndex as Mock).mockClear();
     useSecurityJobsMock.mockImplementation(() => ({
       jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: false }],
       loading: false,

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 import { UpgradeContentsComponent } from './upgrade_contents';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('JobsTableFilters', () => {
   test('renders correctly against snapshot', () => {

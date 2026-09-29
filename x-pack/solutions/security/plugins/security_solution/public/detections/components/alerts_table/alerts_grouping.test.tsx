@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, within, waitFor, screen, cleanup } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
@@ -28,22 +31,25 @@ import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mo
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 
-jest.mock('../../containers/detection_engine/alerts/use_query');
-jest.mock('../../../common/utils/normalize_time_range');
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('test-uuid'),
-}));
+vi.mock('../../containers/detection_engine/alerts/use_query');
+vi.mock('../../../common/utils/normalize_time_range');
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('test-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDate = {
   from: '2020-07-07T08:20:18.966Z',
   to: '2020-07-08T08:20:18.966Z',
 };
 
-const mockUseGlobalTime = jest
+const mockUseGlobalTime = vi
   .fn()
-  .mockReturnValue({ ...mockDate, setQuery: jest.fn(), deleteQuery: jest.fn() });
+  .mockReturnValue({ ...mockDate, setQuery: vi.fn(), deleteQuery: vi.fn() });
 
-jest.mock('../../../common/containers/use_global_time', () => {
+vi.mock('../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
@@ -56,8 +62,8 @@ const mockOptions = [
   { label: 'Source IP', key: 'source.ip' },
 ];
 
-jest.mock('../../../common/utils/alerts', () => {
-  const actual = jest.requireActual('../../../common/utils/alerts');
+vi.mock('../../../common/utils/alerts', async () => {
+  const actual = (await vi.importActual('../../../common/utils/alerts'));
 
   return {
     ...actual,
@@ -65,27 +71,30 @@ jest.mock('../../../common/utils/alerts', () => {
   };
 });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
 
-const mockUseFieldBrowserOptions = jest.fn();
-jest.mock('../../../timelines/components/fields_browser', () => ({
-  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
-}));
+const mockUseFieldBrowserOptions = vi.fn();
+vi.mock('../../../timelines/components/fields_browser', () => {
+      const mocked = {
+      useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+const mockUseResizeObserver: Mock = useResizeObserver as Mock;
+vi.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -95,52 +104,76 @@ jest.mock('../../../common/lib/kibana', () => {
         ...mockedUseKibana.services,
         telemetry: mockedTelemetry,
         storage: {
-          get: jest.fn().mockReturnValue([25, 25, 25]),
-          set: jest.fn(),
+          get: vi.fn().mockReturnValue([25, 25, 25]),
+          set: vi.fn(),
         },
       },
     }),
   };
 });
 
-jest.mock('./timeline_actions/use_add_bulk_to_timeline', () => ({
-  useAddBulkToTimelineAction: jest.fn(() => {}),
-}));
+vi.mock('./timeline_actions/use_add_bulk_to_timeline', () => {
+      const mocked = {
+      useAddBulkToTimelineAction: vi.fn(() => {}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock InspectButton to reduce rendering overhead
-jest.mock('../../../common/components/inspect', () => ({
-  InspectButton: () => null,
-}));
+vi.mock('../../../common/components/inspect', () => {
+      const mocked = {
+      InspectButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useInspectButton hook
-jest.mock('../alerts_kpis/common/hooks', () => ({
-  useInspectButton: jest.fn(),
-}));
+vi.mock('../alerts_kpis/common/hooks', () => {
+      const mocked = {
+      useInspectButton: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useInvalidFilterQuery hook
-jest.mock('../../../common/hooks/use_invalid_filter_query', () => ({
-  useInvalidFilterQuery: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_invalid_filter_query', () => {
+      const mocked = {
+      useInvalidFilterQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useBrowserFields to avoid unnecessary field processing
-jest.mock('../../../data_view_manager/hooks/use_browser_fields', () => ({
-  useBrowserFields: jest.fn().mockReturnValue({}),
-}));
+vi.mock('../../../data_view_manager/hooks/use_browser_fields', () => {
+      const mocked = {
+      useBrowserFields: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useIsExperimentalFeatureEnabled to avoid state access
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock combineQueries to avoid expensive query building
-jest.mock('../../../common/lib/kuery', () => ({
-  combineQueries: jest.fn().mockReturnValue({ filterQuery: '{}' }),
-}));
+vi.mock('../../../common/lib/kuery', () => {
+      const mocked = {
+      combineQueries: vi.fn().mockReturnValue({ filterQuery: '{}' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock PopoverItems to simplify rendering
-jest.mock('../../../common/components/popover_items', () => ({
-  PopoverItems: () => null,
-}));
+vi.mock('../../../common/components/popover_items', () => {
+      const mocked = {
+      PopoverItems: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
@@ -171,7 +204,7 @@ const testProps: AlertsTableComponentProps = {
   tableId: TableId.test,
 };
 
-const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
+const mockUseQueryAlerts = useQueryAlerts as Mock;
 const mockQueryResponse = {
   loading: false,
   data: {},
@@ -229,7 +262,7 @@ describe('GroupedAlertsTable', () => {
   let store = createMockStore();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     store = createMockStore({
       ...mockGlobalState,
       groups: {
@@ -237,7 +270,7 @@ describe('GroupedAlertsTable', () => {
       },
     });
 
-    jest.mocked(useDataView).mockReturnValue({
+    vi.mocked(useDataView).mockReturnValue({
       status: 'ready',
       dataView,
     });
@@ -291,7 +324,7 @@ describe('GroupedAlertsTable', () => {
 
   it('renders empty grouping table when group is selected without data', async () => {
     mockUseQueryAlerts.mockReturnValue(mockQueryResponse);
-    jest
+    vi
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
 
@@ -306,7 +339,7 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('renders grouping table in first accordion level when single group is selected', async () => {
-    jest
+    vi
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
 
@@ -324,7 +357,7 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('Query gets passed correctly', async () => {
-    jest
+    vi
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
 
@@ -346,7 +379,7 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('renders grouping table in second accordion level when 2 groups are selected', async () => {
-    jest
+    vi
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
     store = createMockStore({
@@ -381,7 +414,7 @@ describe('GroupedAlertsTable', () => {
 
   describe('pagination reset on group change', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(window.localStorage, 'getItem')
         .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
       store = createMockStore({
@@ -479,7 +512,7 @@ describe('GroupedAlertsTable', () => {
 
   describe('pagination reset on page size change', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(window.localStorage, 'getItem')
         .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
       store = createMockStore({
@@ -550,7 +583,7 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('sends telemetry data when selected group changes', async () => {
-    jest
+    vi
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
     store = createMockStore({
@@ -620,8 +653,8 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('calls onAggregationsChange when aggregations are updated', async () => {
-    const onAggregationsChange = jest.fn();
-    jest
+    const onAggregationsChange = vi.fn();
+    vi
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -16,16 +19,16 @@ import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/const
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 describe('TrustedDevicesApiClient', () => {
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
 
   beforeEach(() => {
-    fakeHttpServices = coreMock.createStart().http as jest.Mocked<HttpSetup>;
-    jest.clearAllMocks();
+    fakeHttpServices = coreMock.createStart().http as Mocked<HttpSetup>;
+    vi.clearAllMocks();
   });
 
   it('getInstance delegates to ExceptionsListApiClient.getInstance with correct args', () => {
     const expected = {} as unknown as ExceptionsListApiClient;
-    const spy = jest
+    const spy = vi
       .spyOn(ExceptionsListApiClient, 'getInstance')
       .mockReturnValue(expected as unknown as ExceptionsListApiClient);
 

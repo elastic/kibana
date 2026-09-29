@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -19,25 +21,28 @@ import {
   mockNavigateToUrl,
 } from '@kbn/security-solution-navigation/mocks/context';
 
-jest.mock('@kbn/security-solution-navigation/src/context');
+vi.mock('@kbn/security-solution-navigation/src/context');
 
 mockGetUrlForApp.mockImplementation(
   (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path}`
 );
 
-const mockUseRouteSpy = jest.fn();
-jest.mock('../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: () => mockUseRouteSpy(),
-}));
+const mockUseRouteSpy = vi.fn();
+vi.mock('../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: () => mockUseRouteSpy(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SEARCH_QUERY = '?search=test';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
-    useLocation: jest.fn(() => ({
+    useLocation: vi.fn(() => ({
       search: SEARCH_QUERY,
     })),
   };
@@ -58,7 +63,7 @@ describe('Table Navigation', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders with correct tab highlighted', () => {

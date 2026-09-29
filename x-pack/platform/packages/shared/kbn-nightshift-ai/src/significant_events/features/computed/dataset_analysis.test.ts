@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { describeDataset, formatDocumentAnalysis, getMappingConflicts } from '@kbn/ai-tools';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 
-jest.mock('@kbn/ai-tools', () => ({
-  describeDataset: jest.fn(),
-  formatDocumentAnalysis: jest.fn(),
-  getMappingConflicts: jest.fn(),
-}));
+vi.mock('@kbn/ai-tools', () => {
+      const mocked = {
+      describeDataset: vi.fn(),
+      formatDocumentAnalysis: vi.fn(),
+      getMappingConflicts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const describeDatasetMock = jest.mocked(describeDataset);
-const formatDocumentAnalysisMock = jest.mocked(formatDocumentAnalysis);
-const getMappingConflictsMock = jest.mocked(getMappingConflicts);
+const describeDatasetMock = vi.mocked(describeDataset);
+const formatDocumentAnalysisMock = vi.mocked(formatDocumentAnalysis);
+const getMappingConflictsMock = vi.mocked(getMappingConflicts);
 
 const target: AnalysisTarget = {
   id: 'logs.test-default',
@@ -27,14 +32,14 @@ const target: AnalysisTarget = {
   samplingSource: 'logs.test-default',
 };
 const esClient = {} as ElasticsearchClient;
-const logger = { debug: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn() } as unknown as Logger;
 const signal = new AbortController().signal;
 
 const formatted = { total: 1, sampled: 1, fields: {} };
 
 describe('datasetAnalysisGenerator', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     describeDatasetMock.mockResolvedValue({} as never);
     formatDocumentAnalysisMock.mockReturnValue(formatted as never);
   });

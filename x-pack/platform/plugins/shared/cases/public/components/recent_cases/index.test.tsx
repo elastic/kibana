@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, fireEvent, screen } from '@testing-library/react';
 import type { RecentCasesProps } from '.';
@@ -22,10 +25,10 @@ import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../containers/user_profiles/use_get_current_user_profile');
-jest.mock('../../containers/use_get_cases');
-jest.mock('../../common/lib/kibana/hooks');
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../containers/user_profiles/use_get_current_user_profile');
+vi.mock('../../containers/use_get_cases');
+vi.mock('../../common/lib/kibana/hooks');
+vi.mock('../../common/navigation/hooks');
 
 const defaultProps: RecentCasesProps = {
   maxCasesToShow: 10,
@@ -35,13 +38,13 @@ const mockData = {
   ...useGetCasesMockState,
 };
 
-const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
-const useGetCasesMock = useGetCases as jest.Mock;
-const useCurrentUserMock = useCurrentUser as jest.Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as Mock;
+const useGetCasesMock = useGetCases as Mock;
+const useCurrentUserMock = useCurrentUser as Mock;
 
 describe('RecentCases', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetCurrentUserProfileMock.mockReturnValue({
       data: userProfiles[0],
       isLoading: false,

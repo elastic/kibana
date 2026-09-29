@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import { EndpointScriptFlyout, type EndpointScriptFlyoutProps } from './script_flyout';
@@ -15,8 +18,8 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import { useGetEndpointScript } from '../../../../../hooks/script_library';
 
-jest.mock('../../../../../hooks/script_library/use_get_script_by_id');
-const mockedUseGetEndpointScript = useGetEndpointScript as jest.Mock;
+vi.mock('../../../../../hooks/script_library/use_get_script_by_id');
+const mockedUseGetEndpointScript = useGetEndpointScript as Mock;
 
 describe('EndpointScriptFlyout', () => {
   let render: (props?: EndpointScriptFlyoutProps) => ReturnType<AppContextTestRender['render']>;
@@ -33,7 +36,7 @@ describe('EndpointScriptFlyout', () => {
     defaultGetScriptHookReturn = {
       isRefetching: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     };
 
     mockedUseGetEndpointScript.mockReturnValue(defaultGetScriptHookReturn);
@@ -45,9 +48,9 @@ describe('EndpointScriptFlyout', () => {
         sortField: 'name',
         sortDirection: 'asc',
       },
-      onCloseFlyout: jest.fn(),
-      onClickAction: jest.fn(),
-      onSuccess: jest.fn(),
+      onCloseFlyout: vi.fn(),
+      onClickAction: vi.fn(),
+      onSuccess: vi.fn(),
       show: 'details',
       'data-test-subj': 'test',
       scriptItem: scriptsGenerator.generate({
@@ -66,7 +69,7 @@ describe('EndpointScriptFlyout', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Rendering', () => {
@@ -128,7 +131,7 @@ describe('EndpointScriptFlyout', () => {
   describe('Data fetching and submission', () => {
     it.each(['details', 'edit'])('should fetch script data when needed for `%s`', (show) => {
       const scriptData = scriptsGenerator.generate();
-      const refetchMock = jest.fn().mockResolvedValue({ data: scriptData });
+      const refetchMock = vi.fn().mockResolvedValue({ data: scriptData });
       mockedUseGetEndpointScript.mockImplementation(() => ({
         ...defaultGetScriptHookReturn,
         refetch: refetchMock,

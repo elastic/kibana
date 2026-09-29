@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -15,7 +17,7 @@ import { PackagePolicyInputConfig } from './package_policy_input_config';
 describe('PackagePolicyInputConfig', () => {
   function render(value = 'generic', datastreams: any = []) {
     const renderer = createFleetTestRendererMock();
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     const utils = renderer.render(
       <PackagePolicyInputConfig
@@ -50,7 +52,7 @@ describe('PackagePolicyInputConfig', () => {
 
   it('should hide deprecated vars on new installations (isEditPage=false)', () => {
     const renderer = createFleetTestRendererMock();
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     const utils = renderer.render(
       <PackagePolicyInputConfig
@@ -89,7 +91,7 @@ describe('PackagePolicyInputConfig', () => {
 
   it('should render section titles for vars with a matching section attribute', () => {
     const renderer = createFleetTestRendererMock();
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     const utils = renderer.render(
       <PackagePolicyInputConfig
@@ -128,7 +130,7 @@ describe('PackagePolicyInputConfig', () => {
 
   it('should render vars without a section attribute as ungrouped even when sections are defined', () => {
     const renderer = createFleetTestRendererMock();
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     const utils = renderer.render(
       <PackagePolicyInputConfig
@@ -159,7 +161,7 @@ describe('PackagePolicyInputConfig', () => {
 
   it('should not render section titles when no sections prop is provided', () => {
     const renderer = createFleetTestRendererMock();
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     const utils = renderer.render(
       <PackagePolicyInputConfig
@@ -195,7 +197,7 @@ describe('PackagePolicyInputConfig', () => {
       showConditionField = true
     ) => {
       const renderer = createFleetTestRendererMock();
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       const utils = renderer.render(
         <PackagePolicyInputConfig
           hasInputStreams={false}
@@ -243,7 +245,7 @@ describe('PackagePolicyInputConfig', () => {
 
   it('should show deprecated vars on edit page (isEditPage=true)', () => {
     const renderer = createFleetTestRendererMock();
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     const utils = renderer.render(
       <PackagePolicyInputConfig

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CtiEnabledModule } from './cti_enabled_module';
@@ -13,12 +16,12 @@ import { mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 
-jest.mock('../../containers/overview_cti_links/use_ti_data_sources');
-const useTiDataSourcesMock = useTiDataSources as jest.Mock;
+vi.mock('../../containers/overview_cti_links/use_ti_data_sources');
+const useTiDataSourcesMock = useTiDataSources as Mock;
 useTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../containers/overview_cti_links');
-const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
+vi.mock('../../containers/overview_cti_links');
+const useCtiDashboardLinksMock = useCtiDashboardLinks as Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
 describe('CtiEnabledModule', () => {

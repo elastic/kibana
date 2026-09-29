@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type {
@@ -56,7 +59,7 @@ const setup = ({
   setExpandedDoc,
   query,
 }: {
-  setExpandedDoc?: jest.Mock;
+  setExpandedDoc?: Mock;
   query?: { esql: string } | { query: string; language: string };
 } = {}) => {
   const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>(undefined);
@@ -86,7 +89,7 @@ const degradedDocsGating = [
 describe('getRowAdditionalLeadingControls (logs)', () => {
   clickTargets.forEach(({ controlId, section }) => {
     it(`queues the ${section} section and opens the log overview tab when its control is clicked`, () => {
-      const setExpandedDoc = jest.fn();
+      const setExpandedDoc = vi.fn();
       const { controls, logOverviewContext$ } = setup({ setExpandedDoc });
 
       getOnClick(findControl(controls, controlId))(rowProps);
@@ -105,7 +108,7 @@ describe('getRowAdditionalLeadingControls (logs)', () => {
     it(`${
       enabled ? 'enables' : 'disables'
     } quality-issue detection for an ES|QL query that ${requests} _ignored`, () => {
-      const { controls } = setup({ setExpandedDoc: jest.fn(), query: { esql } });
+      const { controls } = setup({ setExpandedDoc: vi.fn(), query: { esql } });
 
       const element = findControl(controls, DEGRADED_DOCS_CONTROL_ID).render(noopControl, rowProps);
 

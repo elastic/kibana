@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 
@@ -261,12 +263,12 @@ describe('VarGroupSelector', () => {
     const defaultProps = {
       varGroup: mockVarGroup,
       selectedOptionName: 'direct_access_key',
-      onSelectionChange: jest.fn(),
+      onSelectionChange: vi.fn(),
       isAgentlessEnabled: false,
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should render the selector with title and options', () => {

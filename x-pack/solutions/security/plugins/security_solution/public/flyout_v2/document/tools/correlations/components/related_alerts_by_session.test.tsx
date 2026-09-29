@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
@@ -25,17 +28,17 @@ import {
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../../main/hooks/use_fetch_related_alerts_by_session');
-jest.mock('../hooks/use_paginated_alerts');
-jest.mock('../../../../../common/hooks/is_in_security_app');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../main/hooks/use_fetch_related_alerts_by_session');
+vi.mock('../hooks/use_paginated_alerts');
+vi.mock('../../../../../common/hooks/is_in_security_app');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
-const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
+const useAlertsPrivilegesMock = useAlertsPrivileges as Mock;
 
 const entityId = 'entityId';
 const scopeId = 'scopeId';
 const eventId = 'eventId';
-const mockOnShowAlert = jest.fn();
+const mockOnShowAlert = vi.fn();
 
 const TOGGLE_ICON = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID
@@ -67,17 +70,17 @@ describe('<RelatedAlertsBySession />', () => {
     useAlertsPrivilegesMock.mockReturnValue({
       hasAlertsRead: true,
     });
-    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+    vi.mocked(useIsInSecurityApp).mockReturnValue(true);
   });
 
   it('should render component correctly', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: ['1', '2'],
       dataCount: 2,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -115,7 +118,7 @@ describe('<RelatedAlertsBySession />', () => {
   });
 
   it('should render null if error', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
       loading: false,
       error: true,
     });
@@ -125,13 +128,13 @@ describe('<RelatedAlertsBySession />', () => {
   });
 
   it('should render no data message', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
       dataCount: 0,
     });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+    (usePaginatedAlerts as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],

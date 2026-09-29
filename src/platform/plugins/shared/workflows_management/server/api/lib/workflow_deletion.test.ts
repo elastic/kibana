@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   StepExecutionsDataClient,
@@ -39,12 +41,12 @@ const makeStorageClient = (
   hits: Array<{ _id: string; _source: ReturnType<typeof makeWorkflowSource> }>
 ) => {
   const mockClient = {
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       hits: {
         hits: hits.map((h) => ({ _id: h._id, _source: h._source, _seq_no: 7, _primary_term: 2 })),
       },
     }),
-    bulk: jest
+    bulk: vi
       .fn()
       .mockImplementation(
         async ({ operations }: { operations: Array<{ index: { _id: string } }> }) => ({
@@ -53,8 +55,8 @@ const makeStorageClient = (
           })),
         })
       ),
-    delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
-    index: jest.fn().mockResolvedValue({ _seq_no: 8, _primary_term: 1 }),
+    delete: vi.fn().mockResolvedValue({ result: 'deleted' }),
+    index: vi.fn().mockResolvedValue({ _seq_no: 8, _primary_term: 1 }),
   };
   return {
     client: mockClient,
@@ -64,23 +66,23 @@ const makeStorageClient = (
 
 const makeExecutionsDataAccess = () => {
   const workflowExecutionsDataClient = {
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataClient;
 
   return { workflowExecutionsDataClient, stepExecutionsDataClient };
 };
 
-const noopExecutions = jest.fn().mockResolvedValue({ total: 0, results: [] });
+const noopExecutions = vi.fn().mockResolvedValue({ total: 0, results: [] });
 
 describe('deleteWorkflows', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('checks the stored access before any delete write', async () => {
     const { client, storage } = makeStorageClient([{ _id: 'wf-1', _source: makeWorkflowSource() }]);
-    const assertCanDelete = jest.fn(() => {
+    const assertCanDelete = vi.fn(() => {
       throw new Error('Access revoked');
     });
     await expect(
@@ -146,13 +148,13 @@ describe('deleteWorkflows', () => {
     expect(result.deleted).toBe(1);
     expect(client.delete).toHaveBeenCalledWith(expect.objectContaining({ id: 'private-workflow' }));
     expect(
-      jest.mocked(dataClients.stepExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
+      vi.mocked(dataClients.stepExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
     ).toBeLessThan(
-      jest.mocked(dataClients.workflowExecutionsDataClient.deleteByQuery).mock
+      vi.mocked(dataClients.workflowExecutionsDataClient.deleteByQuery).mock
         .invocationCallOrder[0]
     );
     expect(
-      jest.mocked(dataClients.workflowExecutionsDataClient.deleteByQuery).mock
+      vi.mocked(dataClients.workflowExecutionsDataClient.deleteByQuery).mock
         .invocationCallOrder[0]
     ).toBeLessThan(client.delete.mock.invocationCallOrder[0]);
     expect(dataClients.stepExecutionsDataClient.deleteByQuery).toHaveBeenCalledWith(
@@ -420,10 +422,10 @@ describe('deleteWorkflows', () => {
           refresh: true,
           conflicts: 'proceed',
         });
-        expect(jest.mocked(dataClient.deleteByQuery).mock.invocationCallOrder[0]).toBeLessThan(
+        expect(vi.mocked(dataClient.deleteByQuery).mock.invocationCallOrder[0]).toBeLessThan(
           client.delete.mock.invocationCallOrder[0]
         );
-        expect(jest.mocked(dataClient.deleteByQuery).mock.invocationCallOrder[1]).toBeGreaterThan(
+        expect(vi.mocked(dataClient.deleteByQuery).mock.invocationCallOrder[1]).toBeGreaterThan(
           client.delete.mock.invocationCallOrder[3]
         );
       }
@@ -441,7 +443,7 @@ describe('deleteWorkflows', () => {
         },
       ]);
       const dataClients = makeExecutionsDataAccess();
-      jest
+      vi
         .mocked(dataClients.stepExecutionsDataClient.deleteByQuery)
         .mockRejectedValueOnce(new Error('purge failed'));
 
@@ -489,10 +491,10 @@ describe('deleteWorkflows', () => {
         });
 
         expect(client.delete.mock.invocationCallOrder[0]).toBeLessThan(
-          jest.mocked(workflowExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
+          vi.mocked(workflowExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
         );
         expect(client.delete.mock.invocationCallOrder[0]).toBeLessThan(
-          jest.mocked(stepExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
+          vi.mocked(stepExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
         );
         expect(client.bulk.mock.calls[0][0].operations[0].index.document).toMatchObject({
           enabled: false,
@@ -533,7 +535,7 @@ describe('deleteWorkflows', () => {
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
       const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
-      const getWorkflowExecutions = jest.fn().mockResolvedValue({ total: 1, results: [{}] });
+      const getWorkflowExecutions = vi.fn().mockResolvedValue({ total: 1, results: [{}] });
       client.bulk
         .mockResolvedValueOnce({
           items: [{ index: { _id: 'wf-1', status: 200 } }],
@@ -590,7 +592,7 @@ describe('deleteWorkflows', () => {
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
       const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
-      const getWorkflowExecutions = jest
+      const getWorkflowExecutions = vi
         .fn()
         .mockRejectedValue(new Error('execution lookup failed'));
       client.bulk
@@ -653,7 +655,7 @@ describe('deleteWorkflows', () => {
           },
         ]);
         const dataClients = makeExecutionsDataAccess();
-        const deleteByQuery = jest.mocked(
+        const deleteByQuery = vi.mocked(
           target === 'steps'
             ? dataClients.stepExecutionsDataClient.deleteByQuery
             : dataClients.workflowExecutionsDataClient.deleteByQuery
@@ -699,7 +701,7 @@ describe('deleteWorkflows', () => {
               { _id: 'wf-1', _source: makeWorkflowSource({ access_control: accessControl }) },
             ]);
             const dataClients = makeExecutionsDataAccess();
-            const deleteByQuery = jest.mocked(
+            const deleteByQuery = vi.mocked(
               target === 'steps'
                 ? dataClients.stepExecutionsDataClient.deleteByQuery
                 : dataClients.workflowExecutionsDataClient.deleteByQuery
@@ -743,7 +745,7 @@ describe('bound workflow deletion OCC', () => {
         : {}
     );
     const { client, storage } = makeStorageClient([]);
-    const deleteDocument = jest.fn().mockResolvedValue(undefined);
+    const deleteDocument = vi.fn().mockResolvedValue(undefined);
     const params = {
       ids: ['bound'],
       spaceId: 'default',
@@ -753,7 +755,7 @@ describe('bound workflow deletion OCC', () => {
       ...makeExecutionsDataAccess(),
       taskScheduler: null,
       logger,
-      getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
+      getWorkflowExecutions: vi.fn().mockResolvedValue({ total: 0, results: [] }),
       guardedDelete: { id: 'bound', document, seqNo: 7, primaryTerm: 1, deleteDocument },
     };
     return { client, params, deleteDocument };
@@ -785,11 +787,11 @@ describe('bound workflow deletion OCC', () => {
   it('removes private history before deleting the guarded workflow document', async () => {
     const { params, deleteDocument } = setup(true, true);
     const calls: string[] = [];
-    jest.mocked(params.stepExecutionsDataClient.deleteByQuery).mockImplementationOnce(async () => {
+    vi.mocked(params.stepExecutionsDataClient.deleteByQuery).mockImplementationOnce(async () => {
       calls.push('steps');
       return { deleted: 1 };
     });
-    jest
+    vi
       .mocked(params.workflowExecutionsDataClient.deleteByQuery)
       .mockImplementationOnce(async () => {
         calls.push('executions');
@@ -808,7 +810,7 @@ describe('bound workflow deletion OCC', () => {
       const { client, params, deleteDocument } = setup(true, true);
       const dataClient =
         target === 'steps' ? params.stepExecutionsDataClient : params.workflowExecutionsDataClient;
-      jest.mocked(dataClient.deleteByQuery).mockResolvedValueOnce({ version_conflicts: 1 });
+      vi.mocked(dataClient.deleteByQuery).mockResolvedValueOnce({ version_conflicts: 1 });
 
       await expect(deleteWorkflows(params)).rejects.toThrow('remains soft-deleted');
       expect(deleteDocument).not.toHaveBeenCalled();

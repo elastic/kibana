@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 
@@ -12,14 +15,14 @@ import { useKibana } from '../../common/lib/kibana';
 import { readCasesPermissions, TestProviders } from '../../common/mock';
 import { useReadonlyHeader } from './use_readonly_header';
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-jest.mock('../../common/lib/kibana');
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+vi.mock('../../common/lib/kibana');
 
-const mockedSetBadge = jest.fn();
+const mockedSetBadge = vi.fn();
 
 describe('CaseContainerComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock().services.chrome.setBadge = mockedSetBadge;
   });
 

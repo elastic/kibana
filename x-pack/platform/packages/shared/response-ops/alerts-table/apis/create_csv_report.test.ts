@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { createCsvReport } from './create_csv_report';
 
-jest.mock('@kbn/rison', () => ({
-  encode: jest.fn((val) => JSON.stringify(val)),
-}));
+vi.mock('@kbn/rison', () => {
+      const mocked = {
+      encode: vi.fn((val) => JSON.stringify(val)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createCsvReport', () => {
   const mockCoreSetup = coreMock.createSetup();
@@ -32,7 +37,7 @@ describe('createCsvReport', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http.post.mockResolvedValue(undefined);
   });
 

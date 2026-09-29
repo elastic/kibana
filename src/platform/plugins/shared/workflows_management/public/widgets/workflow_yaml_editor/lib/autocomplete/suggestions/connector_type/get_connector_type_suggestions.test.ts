@@ -7,22 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { getConnectorTypeSuggestions } from './get_connector_type_suggestions';
 
 // Mock the dependencies
-jest.mock('../../../connectors_cache', () => ({
-  getCachedAllConnectors: jest.fn(),
-}));
+vi.mock('../../../connectors_cache', () => {
+      const mocked = {
+      getCachedAllConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../snippets/generate_builtin_step_snippet', () => ({
-  generateBuiltInStepSnippet: jest.fn(),
-}));
+vi.mock('../../../snippets/generate_builtin_step_snippet', () => {
+      const mocked = {
+      generateBuiltInStepSnippet: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../snippets/generate_connector_snippet', () => ({
-  generateConnectorSnippet: jest.fn(),
-}));
+vi.mock('../../../snippets/generate_connector_snippet', () => {
+      const mocked = {
+      generateConnectorSnippet: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
@@ -70,10 +82,10 @@ describe('getConnectorTypeSuggestions', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getCachedAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
-    (generateBuiltInStepSnippet as jest.Mock).mockImplementation((type) => `${type}:\n  # snippet`);
-    (generateConnectorSnippet as jest.Mock).mockImplementation(
+    vi.clearAllMocks();
+    (getCachedAllConnectors as Mock).mockReturnValue(mockConnectors);
+    (generateBuiltInStepSnippet as Mock).mockImplementation((type) => `${type}:\n  # snippet`);
+    (generateConnectorSnippet as Mock).mockImplementation(
       (type) => `${type}:\n  connector-id: my-connector`
     );
   });
@@ -311,7 +323,7 @@ describe('getConnectorTypeSuggestions', () => {
   describe('caching', () => {
     beforeEach(() => {
       // Clear all mocks before each caching test
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       // Also need to clear the internal cache of the function under test
       // Since we can't access the cache directly, we'll just note that tests
       // may be affected by previous test runs
@@ -323,11 +335,11 @@ describe('getConnectorTypeSuggestions', () => {
 
       // First call
       const result1 = getConnectorTypeSuggestions(uniquePrefix, mockRange);
-      const callCount1 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount1 = (getCachedAllConnectors as Mock).mock.calls.length;
 
       // Second call with same parameters - should use cache
       const result2 = getConnectorTypeSuggestions(uniquePrefix, mockRange);
-      const callCount2 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount2 = (getCachedAllConnectors as Mock).mock.calls.length;
 
       // Due to caching, getCachedAllConnectors should NOT be called again
       expect(callCount2).toBe(callCount1);
@@ -340,10 +352,10 @@ describe('getConnectorTypeSuggestions', () => {
       const prefix2 = 'uniquetest3';
 
       getConnectorTypeSuggestions(prefix1, mockRange);
-      const callCount1 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount1 = (getCachedAllConnectors as Mock).mock.calls.length;
 
       getConnectorTypeSuggestions(prefix2, mockRange);
-      const callCount2 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount2 = (getCachedAllConnectors as Mock).mock.calls.length;
 
       // Different prefix means new function call, so getCachedAllConnectors is called again
       expect(callCount2).toBe(callCount1 + 1);
@@ -354,10 +366,10 @@ describe('getConnectorTypeSuggestions', () => {
       const uniquePrefix = 'uniquetest4';
 
       getConnectorTypeSuggestions(uniquePrefix, mockRange);
-      const callCount1 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount1 = (getCachedAllConnectors as Mock).mock.calls.length;
 
       getConnectorTypeSuggestions(uniquePrefix, differentRange);
-      const callCount2 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount2 = (getCachedAllConnectors as Mock).mock.calls.length;
 
       // Different range means new cache key, so getCachedAllConnectors is called again
       expect(callCount2).toBe(callCount1 + 1);
@@ -378,14 +390,14 @@ describe('getConnectorTypeSuggestions', () => {
     });
 
     it('should handle empty connector list', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+      (getCachedAllConnectors as Mock).mockReturnValue([]);
       const result = getConnectorTypeSuggestions('', mockRange);
       // Should still have built-in steps
       expect(result.length).toBeGreaterThanOrEqual(6);
     });
 
     it('should handle connectors without descriptions', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         { type: '.custom' }, // No description
       ]);
       const result = getConnectorTypeSuggestions('custom', mockRange);
@@ -397,7 +409,7 @@ describe('getConnectorTypeSuggestions', () => {
     });
 
     it('should prefer summary over description for the display label of registered steps', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         {
           type: 'data.map',
           summary: 'Map Collection',

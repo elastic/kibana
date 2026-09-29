@@ -7,28 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type MutableRefObject } from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { DateRangePickerDialog } from './date_range_picker_dialog';
 
-const mockSetIsEditing = jest.fn();
+const mockSetIsEditing = vi.fn();
 const mockPanelRef: MutableRefObject<HTMLElement | null> = { current: null };
 
-jest.mock('./date_range_picker_context', () => ({
-  useDateRangePickerContext: () => ({
-    isEditing: true,
-    setIsEditing: mockSetIsEditing,
-    panelRef: mockPanelRef,
-    panelId: 'test-panel',
-    width: 'auto' as const,
-  }),
-}));
+vi.mock('./date_range_picker_context', () => {
+      const mocked = {
+      useDateRangePickerContext: () => ({
+        isEditing: true,
+        setIsEditing: mockSetIsEditing,
+        panelRef: mockPanelRef,
+        panelId: 'test-panel',
+        width: 'auto' as const,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./date_range_picker_control', () => ({
-  DateRangePickerControl: () => <button>Open picker</button>,
-}));
+vi.mock('./date_range_picker_control', () => {
+      const mocked = {
+      DateRangePickerControl: () => <button>Open picker</button>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Simulates CalendarPanel: header, day buttons, and footer.
 // `day-1` uses `tabIndex={0}` to allow focus (matches react-day-picker's expected pattern).

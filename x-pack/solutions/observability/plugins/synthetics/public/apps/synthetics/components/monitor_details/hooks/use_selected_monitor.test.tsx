@@ -5,45 +5,69 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSelectedMonitor } from './use_selected_monitor';
 import { useExternalMonitor } from './use_external_monitor';
 import { useGetUrlParams } from '../../../hooks';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ monitorId: 'config-1' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => ({ monitorId: 'config-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => ({
-  useDispatch: () => mockDispatch,
-  useSelector: jest.fn(),
-}));
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: () => mockDispatch,
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_kibana_space', () => ({
-  useKibanaSpace: () => ({ space: { id: 'default' } }),
-}));
+vi.mock('../../../../../hooks/use_kibana_space', () => {
+      const mocked = {
+      useKibanaSpace: () => ({ space: { id: 'default' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsRefreshContext: () => ({ lastRefresh: 0, refreshInterval: 60 }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: () => ({ lastRefresh: 0, refreshInterval: 60 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state', () => ({
-  getMonitorAction: { get: jest.fn((payload) => ({ type: 'MONITOR_GET', payload })) },
-  selectEncryptedSyntheticsSavedMonitors: jest.fn(),
-  selectMonitorListState: jest.fn(),
-  selectorMonitorDetailsState: jest.fn(),
-  selectSyntheticsMonitorError: jest.fn(),
-}));
+vi.mock('../../../state', () => {
+      const mocked = {
+      getMonitorAction: { get: vi.fn((payload) => ({ type: 'MONITOR_GET', payload })) },
+      selectEncryptedSyntheticsSavedMonitors: vi.fn(),
+      selectMonitorListState: vi.fn(),
+      selectorMonitorDetailsState: vi.fn(),
+      selectSyntheticsMonitorError: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: jest.fn(),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_external_monitor', () => ({
-  useExternalMonitor: jest.fn(),
-}));
+vi.mock('./use_external_monitor', () => {
+      const mocked = {
+      useExternalMonitor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useSelector } from 'react-redux-v7';
 import {
@@ -54,9 +78,9 @@ import {
   selectSyntheticsMonitorError,
 } from '../../../state';
 
-const mockUseSelector = useSelector as unknown as jest.Mock;
-const mockUseExternalMonitor = useExternalMonitor as jest.MockedFunction<typeof useExternalMonitor>;
-const mockUseGetUrlParams = useGetUrlParams as jest.MockedFunction<typeof useGetUrlParams>;
+const mockUseSelector = useSelector as unknown as Mock;
+const mockUseExternalMonitor = useExternalMonitor as MockedFunction<typeof useExternalMonitor>;
+const mockUseGetUrlParams = useGetUrlParams as MockedFunction<typeof useGetUrlParams>;
 
 interface SetupOptions {
   remoteName?: string;
@@ -111,7 +135,7 @@ const setupMocks = ({
 
 describe('useSelectedMonitor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('local path (no remoteName in URL)', () => {

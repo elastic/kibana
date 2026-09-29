@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMockDatasource } from '../mocks/datasource_mock';
 import { getDefaultVisualValuesForLayer } from './datasource_default_values';
 
@@ -22,7 +24,7 @@ describe('getDefaultVisualValuesForLayer', () => {
 
   it('should prioritize layer settings to default ones ', () => {
     const mockDatasource = createMockDatasource('first');
-    mockDatasource.publicAPIMock.getVisualDefaults = jest.fn(() => ({
+    mockDatasource.publicAPIMock.getVisualDefaults = vi.fn(() => ({
       col1: { truncateText: false },
     }));
     expect(
@@ -32,7 +34,7 @@ describe('getDefaultVisualValuesForLayer', () => {
 
   it('should give priority to first layer', () => {
     const mockDatasource = createMockDatasource('first');
-    mockDatasource.publicAPIMock.getVisualDefaults = jest.fn(() => ({
+    mockDatasource.publicAPIMock.getVisualDefaults = vi.fn(() => ({
       col1: { truncateText: false },
       col2: { truncateText: true },
     }));

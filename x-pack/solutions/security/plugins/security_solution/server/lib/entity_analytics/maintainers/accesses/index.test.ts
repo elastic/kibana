@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 
@@ -14,7 +16,7 @@ import * as engineModule from '../engine/run_relationship_maintainer';
 type Ctx = Parameters<typeof accessesFrequentlyMaintainer.run>[0];
 
 describe('accessesFrequentlyMaintainer', () => {
-  const makeTelemetry = () => ({ report: jest.fn() });
+  const makeTelemetry = () => ({ report: vi.fn() });
 
   const makeContext = (overrides: Partial<Ctx> = {}): Ctx =>
     ({
@@ -38,14 +40,14 @@ describe('accessesFrequentlyMaintainer', () => {
     } as unknown as Ctx);
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('calls telemetry.report with funnel, sources, and breakdown', async () => {
     const telemetry = makeTelemetry();
     const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
 
-    jest
+    vi
       .spyOn(engineModule, 'runRelationshipMaintainer')
       .mockImplementation(async ({ telemetryCollector }) => {
         if (telemetryCollector) {
@@ -106,7 +108,7 @@ describe('accessesFrequentlyMaintainer', () => {
     const telemetry = makeTelemetry();
     const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
 
-    jest
+    vi
       .spyOn(engineModule, 'runRelationshipMaintainer')
       .mockImplementation(async ({ telemetryCollector }) => {
         if (telemetryCollector) {
@@ -147,7 +149,7 @@ describe('accessesFrequentlyMaintainer', () => {
       signal: ac.signal,
     });
 
-    const spy = jest.spyOn(engineModule, 'runRelationshipMaintainer').mockResolvedValue({
+    const spy = vi.spyOn(engineModule, 'runRelationshipMaintainer').mockResolvedValue({
       totalBuckets: 0,
       totalRecords: 0,
       totalWritten: 0,
@@ -170,7 +172,7 @@ describe('accessesFrequentlyMaintainer', () => {
     const telemetry = makeTelemetry();
     const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
 
-    jest
+    vi
       .spyOn(engineModule, 'runRelationshipMaintainer')
       .mockImplementation(async ({ telemetryCollector }) => {
         if (telemetryCollector) {

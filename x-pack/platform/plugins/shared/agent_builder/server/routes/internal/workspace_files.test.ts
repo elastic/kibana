@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -18,12 +21,12 @@ const ROUTE_PATH = `${internalApiPath}/conversations/{conversation_id}/files`;
 
 describe('Workspace files route', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let mockReadFile: jest.Mock;
+  let mockReadFile: Mock;
 
   const createContext = () =>
     ({
       licensing: Promise.resolve({
-        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
       }),
     } as any);
 
@@ -36,21 +39,21 @@ describe('Workspace files route', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockReadFile = jest.fn();
+    mockReadFile = vi.fn();
     const workspacesService = {
-      getScopedClient: jest.fn().mockResolvedValue({ readFile: mockReadFile }),
+      getScopedClient: vi.fn().mockResolvedValue({ readFile: mockReadFile }),
     };
     const getInternalServices = () =>
       ({ workspaces: workspacesService } as unknown as InternalStartServices);
 
     const handlers: Record<string, any> = {};
     const mockRouter = {
-      get: jest.fn().mockImplementation((config: { path: string }, handler: any) => {
+      get: vi.fn().mockImplementation((config: { path: string }, handler: any) => {
         handlers[config.path] = handler;
       }),
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerWorkspaceFileRoutes({
       router: mockRouter,

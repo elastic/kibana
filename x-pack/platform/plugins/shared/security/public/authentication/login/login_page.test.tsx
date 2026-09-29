@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -41,8 +43,8 @@ const renderPage = (ui: React.ReactElement) =>
 
 describe('LoginPage', () => {
   const httpMock = {
-    get: jest.fn(),
-    addLoadingCountSource: jest.fn(),
+    get: vi.fn(),
+    addLoadingCountSource: vi.fn(),
   } as any;
   const resetHttpMock = () => {
     httpMock.get.mockReset();

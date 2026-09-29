@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type {
@@ -26,17 +29,23 @@ import {
   useMetricSourceKind,
 } from './use_metric_source_kind';
 
-const mockReportError = jest.fn();
-jest.mock('../../chart/hooks/use_report_chart_section_error', () => ({
-  useReportChartSectionError: jest.fn(() => mockReportError),
-}));
+const mockReportError = vi.fn();
+vi.mock('../../chart/hooks/use_report_chart_section_error', () => {
+      const mocked = {
+      useReportChartSectionError: vi.fn(() => mockReportError),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../observability/metrics/context/metrics_experience_state_provider', () => ({
-  useMetricsExperienceState: jest.fn(),
-}));
+vi.mock('../../observability/metrics/context/metrics_experience_state_provider', () => {
+      const mocked = {
+      useMetricsExperienceState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseMetricsExperienceState = useMetricsExperienceState as jest.Mock;
-const mockedUseReportChartSectionError = useReportChartSectionError as jest.Mock;
+const mockedUseMetricsExperienceState = useMetricsExperienceState as Mock;
+const mockedUseReportChartSectionError = useReportChartSectionError as Mock;
 const TEST_PROFILE_ID = 'metrics-data-source-profile';
 
 const matchedItem = (name: string, key: IndexKind): MatchedItem =>
@@ -46,7 +55,7 @@ const matchedItem = (name: string, key: IndexKind): MatchedItem =>
     item: { name },
   } as unknown as MatchedItem);
 
-const buildDataViews = (impl: jest.Mock) =>
+const buildDataViews = (impl: Mock) =>
   ({ getIndices: impl } as unknown as DataViewsPublicPluginStart);
 
 const buildWrapper = (externalServices: ExternalServices | undefined) => {
@@ -60,7 +69,7 @@ const buildWrapper = (externalServices: ExternalServices | undefined) => {
 
 describe('useMetricSourceKind', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseReportChartSectionError.mockReturnValue(mockReportError);
     mockedUseMetricsExperienceState.mockReturnValue({ profileId: TEST_PROFILE_ID });
     // The hook caches in-flight promises in a module-level Map that persists
@@ -87,7 +96,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('returns the fallback when name is undefined and does not call getIndices', () => {
-    const getIndices = jest.fn();
+    const getIndices = vi.fn();
     const { result } = renderHook(
       () => useMetricSourceKind({ name: undefined, fallback: METRIC_SOURCE_KIND.DATA_STREAM }),
       { wrapper: buildWrapper({ dataViews: buildDataViews(getIndices) }) }
@@ -97,7 +106,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('returns INDEX when getIndices matches a plain index by tag key', async () => {
-    const getIndices = jest.fn().mockResolvedValue([matchedItem('metrics-plain-index', 'index')]);
+    const getIndices = vi.fn().mockResolvedValue([matchedItem('metrics-plain-index', 'index')]);
     const { result } = renderHook(
       () =>
         useMetricSourceKind({
@@ -116,7 +125,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('returns DATA_STREAM when getIndices matches a data stream', async () => {
-    const getIndices = jest.fn().mockResolvedValue([matchedItem('logs-ds', 'data_stream')]);
+    const getIndices = vi.fn().mockResolvedValue([matchedItem('logs-ds', 'data_stream')]);
     const { result } = renderHook(
       () => useMetricSourceKind({ name: 'logs-ds', fallback: METRIC_SOURCE_KIND.INDEX }),
       { wrapper: buildWrapper({ dataViews: buildDataViews(getIndices) }) }
@@ -126,7 +135,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('falls back to the provided fallback when the name is not in the response', async () => {
-    const getIndices = jest.fn().mockResolvedValue([matchedItem('other-source', 'index')]);
+    const getIndices = vi.fn().mockResolvedValue([matchedItem('other-source', 'index')]);
     const { result } = renderHook(
       () =>
         useMetricSourceKind({ name: 'not-in-response', fallback: METRIC_SOURCE_KIND.DATA_STREAM }),
@@ -138,7 +147,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('falls back to the provided fallback and evicts the cache when getIndices rejects', async () => {
-    const getIndices = jest
+    const getIndices = vi
       .fn()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce([matchedItem('retry-source', 'index')]);
@@ -160,7 +169,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('evicts the cache when source is not in the response so subsequent lookups retry', async () => {
-    const getIndices = jest
+    const getIndices = vi
       .fn()
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([matchedItem('eventually-found', 'data_stream')]);
@@ -182,7 +191,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('deduplicates concurrent requests for the same name (cache)', async () => {
-    const getIndices = jest.fn().mockResolvedValue([matchedItem('dedup-source', 'index')]);
+    const getIndices = vi.fn().mockResolvedValue([matchedItem('dedup-source', 'index')]);
     const wrapper = buildWrapper({ dataViews: buildDataViews(getIndices) });
 
     const a = renderHook(
@@ -200,7 +209,7 @@ describe('useMetricSourceKind', () => {
   });
 
   it('does not expose the previous source kind when the name changes (stale guard)', async () => {
-    const getIndices = jest.fn(async (args: { pattern: string }) =>
+    const getIndices = vi.fn(async (args: { pattern: string }) =>
       args.pattern === 'first-source'
         ? [matchedItem('first-source', 'index')]
         : new Promise(() => {})
@@ -224,7 +233,7 @@ describe('useMetricSourceKind', () => {
 
   it('reports to APM when getIndices throws and still returns the fallback', async () => {
     const error = new Error('network failure');
-    const getIndices = jest.fn().mockRejectedValue(error);
+    const getIndices = vi.fn().mockRejectedValue(error);
 
     const { result } = renderHook(
       () =>

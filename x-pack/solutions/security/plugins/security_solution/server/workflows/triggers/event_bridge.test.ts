@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { SecuritySolutionEventBus } from '../../events/event_bus';
@@ -24,19 +27,19 @@ const mockRequest = {} as KibanaRequest;
 
 describe('registerSecurityWorkflowEventBridge', () => {
   let bus: SecuritySolutionEventBus;
-  let mockEmitEvent: jest.Mock;
-  let mockGetClient: jest.Mock;
+  let mockEmitEvent: Mock;
+  let mockGetClient: Mock;
   let mockWorkflowsExtensions: WorkflowsExtensionsServerPluginStart;
   let mockLogger: Pick<Logger, 'warn'>;
 
   beforeEach(() => {
     bus = new SecuritySolutionEventBus();
-    mockEmitEvent = jest.fn().mockResolvedValue(undefined);
-    mockGetClient = jest.fn().mockResolvedValue({ emitEvent: mockEmitEvent });
+    mockEmitEvent = vi.fn().mockResolvedValue(undefined);
+    mockGetClient = vi.fn().mockResolvedValue({ emitEvent: mockEmitEvent });
     mockWorkflowsExtensions = {
       getClient: mockGetClient,
     } as unknown as WorkflowsExtensionsServerPluginStart;
-    mockLogger = { warn: jest.fn() };
+    mockLogger = { warn: vi.fn() };
   });
 
   afterEach(() => {

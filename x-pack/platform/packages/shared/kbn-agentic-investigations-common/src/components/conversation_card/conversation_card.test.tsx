@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -24,16 +26,16 @@ const investigation: Investigation = {
   events: [],
 };
 
-const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
+const renderCard = (isSelected?: boolean, onClickCard = vi.fn()) => {
   renderWithKibanaRenderContext(
     <ConversationCard
       investigation={investigation}
       hasBorder={false}
       isSelected={isSelected}
       onClickCard={onClickCard}
-      onClickAction={jest.fn()}
-      onOpenChat={jest.fn()}
-      onClickRecommendedAction={jest.fn()}
+      onClickAction={vi.fn()}
+      onOpenChat={vi.fn()}
+      onClickRecommendedAction={vi.fn()}
       renderAssignees={() => null}
     />
   );
@@ -72,10 +74,10 @@ describe('ConversationCard', () => {
       <ConversationCard
         investigation={{ ...investigation, createdAt, updatedAt: new Date().toISOString() }}
         hasBorder={false}
-        onClickCard={jest.fn()}
-        onClickAction={jest.fn()}
-        onOpenChat={jest.fn()}
-        onClickRecommendedAction={jest.fn()}
+        onClickCard={vi.fn()}
+        onClickAction={vi.fn()}
+        onOpenChat={vi.fn()}
+        onClickRecommendedAction={vi.fn()}
         renderAssignees={() => null}
       />
     );
@@ -89,10 +91,10 @@ describe('ConversationCard', () => {
       <ConversationCard
         investigation={{ ...investigation, createdAt: '2024-03-05T14:30:00.000Z' }}
         hasBorder={false}
-        onClickCard={jest.fn()}
-        onClickAction={jest.fn()}
-        onOpenChat={jest.fn()}
-        onClickRecommendedAction={jest.fn()}
+        onClickCard={vi.fn()}
+        onClickAction={vi.fn()}
+        onOpenChat={vi.fn()}
+        onClickRecommendedAction={vi.fn()}
         renderAssignees={() => null}
       />
     );

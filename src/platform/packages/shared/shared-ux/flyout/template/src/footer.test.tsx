@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
@@ -131,7 +133,7 @@ describe('FlyoutTemplate footer', () => {
   });
 
   it('a menu with empty panels alongside a PrimaryAction renders the PrimaryAction without warning', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(noop);
 
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">

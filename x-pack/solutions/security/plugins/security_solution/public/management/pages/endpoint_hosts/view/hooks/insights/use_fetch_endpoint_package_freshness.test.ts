@@ -5,33 +5,42 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useFetchEndpointPackageFreshness } from './use_fetch_endpoint_package_freshness';
 
-const mockHttpGet = jest.fn();
+const mockHttpGet = vi.fn();
 
-jest.mock('../../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: { http: { get: mockHttpGet } },
-  }),
-}));
+vi.mock('../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { http: { get: mockHttpGet } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../services/policies/ingest', () => ({
-  sendGetEndpointSecurityPackage: jest.fn(),
-}));
+vi.mock('../../../../../services/policies/ingest', () => {
+      const mocked = {
+      sendGetEndpointSecurityPackage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQuery = jest.requireMock('@kbn/react-query').useQuery;
-const mockSendGetEndpointSecurityPackage = jest.requireMock(
-  '../../../../../services/policies/ingest'
-).sendGetEndpointSecurityPackage;
+const mockUseQuery = (await vi.importMock('@kbn/react-query')).useQuery;
+const mockSendGetEndpointSecurityPackage = (await vi.importMock('../../../../../services/policies/ingest')).sendGetEndpointSecurityPackage;
 
 describe('useFetchEndpointPackageFreshness', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQuery.mockImplementation((_key: unknown, queryFn: unknown) => {
       if (typeof queryFn === 'function') {
         queryFn().catch(() => {});

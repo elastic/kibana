@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useGetFlyoutLink } from './use_get_flyout_link';
 import { useGetAppUrl } from '@kbn/security-solution-navigation';
 import { ALERT_DETAILS_REDIRECT_PATH } from '../../../../../common/constants';
 
-jest.mock('@kbn/security-solution-navigation');
+vi.mock('@kbn/security-solution-navigation');
 
 const eventId = 'eventId';
 const indexName = 'indexName';
@@ -18,7 +21,7 @@ const timestamp = 'timestamp';
 
 describe('useGetFlyoutLink', () => {
   it('should return url', () => {
-    (useGetAppUrl as jest.Mock).mockReturnValue({
+    (useGetAppUrl as Mock).mockReturnValue({
       getAppUrl: (data: { path: string }) => data.path,
     });
 

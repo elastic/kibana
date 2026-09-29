@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { setTlsConfigMock } from './http_server.test.mocks';
 import type { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
@@ -117,7 +120,7 @@ beforeEach(() => {
 
 afterEach(async () => {
   await server.stop();
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 test('log listening address after started', async () => {
@@ -182,7 +185,7 @@ test('does not allow router registration after server is listening', async () =>
 
   const router2 = new Router('/bar', logger, enhanceWithContext, routerOptions);
   expect(() => registerRouter(router2)).toThrowErrorMatchingInlineSnapshot(
-    `"Routers can be registered only when HTTP server is stopped."`
+    `[Error: Routers can be registered only when HTTP server is stopped.]`
   );
 });
 
@@ -943,7 +946,7 @@ test('returns server and connection options on start', async () => {
 
 test('throws an error if starts without set up', async () => {
   await expect(server.start()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Http server is not setup up yet"`
+    `[Error: Http server is not setup up yet]`
   );
 });
 
@@ -1832,7 +1835,7 @@ test('closes sockets on timeout', async () => {
 
   await server.start();
 
-  expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
+  await expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
 
   await supertest(innerServer.listener).get('/b').expect(200);
 });
@@ -1851,7 +1854,7 @@ describe('setup contract', () => {
       const create = async () => await createCookieSessionStorageFactory(cookieOptions);
 
       await create();
-      expect(create()).rejects.toThrow('A cookieSessionStorageFactory was already created');
+      await expect(create()).rejects.toThrow('A cookieSessionStorageFactory was already created');
     });
 
     test('does not throw if called after stop', async () => {
@@ -1915,8 +1918,8 @@ describe('setup contract', () => {
     test('registers routes with expected options', async () => {
       const { registerStaticDir } = await server.setup({ config$ });
       expect(createServer).toHaveBeenCalledTimes(1);
-      const [{ value: myServer }] = (createServer as jest.Mock).mock.results;
-      jest.spyOn(myServer, 'route');
+      const [{ value: myServer }] = (createServer as Mock).mock.results;
+      vi.spyOn(myServer, 'route');
       expect(myServer.route).toHaveBeenCalledTimes(0);
       registerStaticDir('/static/{path*}', assetFolder);
       expect(myServer.route).toHaveBeenCalledTimes(1);

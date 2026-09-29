@@ -7,25 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 
-const mockEnrichErrorMessage = jest.fn();
+const mockEnrichErrorMessage = vi.fn();
 
-jest.mock('@kbn/workflows/common/utils/yaml', () => ({
-  getPathAtOffset: jest.fn().mockReturnValue([]),
-}));
+vi.mock('@kbn/workflows/common/utils/yaml', () => {
+      const mocked = {
+      getPathAtOffset: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-yaml', () => ({
-  enrichErrorMessage: (...args: any[]) => mockEnrichErrorMessage(...args),
-}));
+vi.mock('@kbn/workflows-yaml', () => {
+      const mocked = {
+      enrichErrorMessage: (...args: any[]) => mockEnrichErrorMessage(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/connector_params_schema_resolver', () => ({
-  connectorParamsSchemaResolver: jest.fn().mockReturnValue(null),
-}));
+vi.mock('../../../../common/lib/connector_params_schema_resolver', () => {
+      const mocked = {
+      connectorParamsSchemaResolver: vi.fn().mockReturnValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type IMarkerData = monaco.editor.IMarkerData;
 type ITextModel = monaco.editor.ITextModel;
@@ -44,7 +55,7 @@ function createMarker(overrides: Partial<IMarkerData> = {}): IMarkerData {
 
 function createEditorModel(): ITextModel {
   return {
-    getOffsetAt: jest.fn().mockReturnValue(0),
+    getOffsetAt: vi.fn().mockReturnValue(0),
   } as unknown as ITextModel;
 }
 
@@ -52,7 +63,7 @@ const dummySchema = z.string();
 
 describe('formatMonacoYamlMarker', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEnrichErrorMessage.mockReturnValue({ message: 'enriched message', enriched: true });
   });
 

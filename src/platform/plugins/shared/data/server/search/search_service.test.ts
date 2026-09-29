@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, CoreStart, SavedObject } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -30,8 +33,8 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
-let mockSessionClient: jest.Mocked<IScopedSearchSessionsClient>;
-jest.mock('./session', () => {
+let mockSessionClient: Mocked<IScopedSearchSessionsClient>;
+vi.mock('./session', () => {
   class SearchSessionService {
     setup() {}
     start() {}
@@ -50,7 +53,7 @@ describe('Search service', () => {
   beforeEach(() => {
     const context = coreMock.createPluginInitializerContext({});
     const mockLogger = context.logger.get();
-    context.config.create = jest.fn().mockImplementation(() => {
+    context.config.create = vi.fn().mockImplementation(() => {
       return of({
         search: {
           aggs: {
@@ -71,8 +74,8 @@ describe('Search service', () => {
       const setup = plugin.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
         expressions: {
-          registerFunction: jest.fn(),
-          registerType: jest.fn(),
+          registerFunction: vi.fn(),
+          registerType: vi.fn(),
         },
       } as unknown as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
@@ -95,19 +98,19 @@ describe('Search service', () => {
     let mockScopedClient: IScopedSearchClient;
     let searchPluginStart: ISearchStart<IEsSearchRequest, IEsSearchResponse<any>>;
     let mockStrategy: any;
-    let mockStrategyNoCancel: jest.Mocked<ISearchStrategy>;
+    let mockStrategyNoCancel: Mocked<ISearchStrategy>;
 
     const sessionId = '1234';
 
     beforeEach(() => {
       mockStrategy = {
-        search: jest.fn().mockReturnValue(of({})),
-        cancel: jest.fn(),
-        extend: jest.fn(),
+        search: vi.fn().mockReturnValue(of({})),
+        cancel: vi.fn(),
+        extend: vi.fn(),
       };
 
       mockStrategyNoCancel = {
-        search: jest.fn().mockReturnValue(of({})),
+        search: vi.fn().mockReturnValue(of({})),
       };
 
       mockSessionClient = createSearchSessionsClientMock();
@@ -130,7 +133,7 @@ describe('Search service', () => {
 
     describe('asScoped with opts', () => {
       it('calls elasticsearch.client.asScoped with only request when opts is omitted', () => {
-        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as Mock;
         asScopedSpy.mockClear();
 
         const request = {} as any;
@@ -141,7 +144,7 @@ describe('Search service', () => {
       });
 
       it('calls elasticsearch.client.asScoped with request and projectRouting: "space" when opts.projectRouting is "space"', () => {
-        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as Mock;
         asScopedSpy.mockClear();
 
         const request = { url: new URL('https://kibana/s/my-space') } as any;
@@ -152,7 +155,7 @@ describe('Search service', () => {
       });
 
       it('returns a scoped client that can search when called with opts', async () => {
-        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as Mock;
         asScopedSpy.mockClear();
 
         const request = {} as any;
@@ -171,7 +174,7 @@ describe('Search service', () => {
       it('searches using the original request if not restoring, trackId is not called if there is no id in the response', async () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: false, isRestore: false };
-        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
+        mockSessionClient.trackId = vi.fn().mockResolvedValue(undefined);
 
         mockStrategy.search.mockReturnValue(
           of({
@@ -204,7 +207,7 @@ describe('Search service', () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: true, isRestore: true };
 
-        mockSessionClient.getId = jest.fn().mockResolvedValueOnce('my_id');
+        mockSessionClient.getId = vi.fn().mockResolvedValueOnce('my_id');
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
@@ -217,7 +220,7 @@ describe('Search service', () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: true, isRestore: true };
 
-        mockSessionClient.getId = jest.fn().mockImplementation(() => {
+        mockSessionClient.getId = vi.fn().mockImplementation(() => {
           throw new NoSearchIdInSessionError();
         });
 
@@ -232,7 +235,7 @@ describe('Search service', () => {
       it('does not fail if `trackId` throws', async () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: true, isRestore: false };
-        mockSessionClient.trackId = jest.fn().mockRejectedValue(undefined);
+        mockSessionClient.trackId = vi.fn().mockRejectedValue(undefined);
 
         mockStrategy.search.mockReturnValue(
           of({
@@ -250,7 +253,7 @@ describe('Search service', () => {
       it("doesn't call trackId if session is not stored", async () => {
         const searchRequest = { params: {} };
         const options = { sessionId };
-        mockSessionClient.trackId = jest.fn();
+        mockSessionClient.trackId = vi.fn();
 
         mockStrategy.search.mockReturnValue(
           of({
@@ -267,7 +270,7 @@ describe('Search service', () => {
       it('calls `trackId` once, if the response contains an `id`, session is stored and not restoring', async () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: true, isRestore: false };
-        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
+        mockSessionClient.trackId = vi.fn().mockResolvedValue(undefined);
 
         mockStrategy.search.mockReturnValue(
           of(
@@ -292,8 +295,8 @@ describe('Search service', () => {
       it('does not call `trackId` if search is already tracked', async () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: true, isRestore: false, isSearchStored: true };
-        mockSessionClient.getId = jest.fn().mockResolvedValueOnce('my_id');
-        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
+        mockSessionClient.getId = vi.fn().mockResolvedValueOnce('my_id');
+        mockSessionClient.trackId = vi.fn().mockResolvedValue(undefined);
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
@@ -303,8 +306,8 @@ describe('Search service', () => {
       it('does not call `trackId` if restoring', async () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: true, isRestore: true };
-        mockSessionClient.getId = jest.fn().mockResolvedValueOnce('my_id');
-        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
+        mockSessionClient.getId = vi.fn().mockResolvedValueOnce('my_id');
+        mockSessionClient.trackId = vi.fn().mockResolvedValue(undefined);
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
@@ -314,8 +317,8 @@ describe('Search service', () => {
       it('does not call `trackId` if no session id provided', async () => {
         const searchRequest = { params: {} };
         const options = {};
-        mockSessionClient.getId = jest.fn().mockResolvedValueOnce('my_id');
-        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
+        mockSessionClient.getId = vi.fn().mockResolvedValueOnce('my_id');
+        mockSessionClient.trackId = vi.fn().mockResolvedValue(undefined);
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
@@ -337,11 +340,11 @@ describe('Search service', () => {
       };
 
       it('cancels a saved object with no search ids', async () => {
-        mockSessionClient.getSearchIdMapping = jest
+        mockSessionClient.getSearchIdMapping = vi
           .fn()
           .mockResolvedValue(new Map<string, string>());
-        mockSessionClient.cancel = jest.fn().mockResolvedValue(mockSavedObject);
-        const cancelSpy = jest.spyOn(mockScopedClient, 'cancel');
+        mockSessionClient.cancel = vi.fn().mockResolvedValue(mockSavedObject);
+        const cancelSpy = vi.spyOn(mockScopedClient, 'cancel');
 
         await mockScopedClient.cancelSession('123');
 
@@ -352,9 +355,9 @@ describe('Search service', () => {
       it('cancels a saved object and search ids', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockStrategy.cancel = jest.fn();
-        mockSessionClient.cancel = jest.fn().mockResolvedValue(mockSavedObject);
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockStrategy.cancel = vi.fn();
+        mockSessionClient.cancel = vi.fn().mockResolvedValue(mockSavedObject);
 
         await mockScopedClient.cancelSession('123');
 
@@ -370,9 +373,9 @@ describe('Search service', () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'nocancel');
         mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockStrategy.cancel = jest.fn();
-        mockSessionClient.cancel = jest.fn().mockResolvedValue(mockSavedObject);
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockStrategy.cancel = vi.fn();
+        mockSessionClient.cancel = vi.fn().mockResolvedValue(mockSavedObject);
 
         await mockScopedClient.cancelSession('123');
 
@@ -388,9 +391,9 @@ describe('Search service', () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'notsupported');
         mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockStrategy.cancel = jest.fn();
-        mockSessionClient.cancel = jest.fn().mockResolvedValue(mockSavedObject);
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockStrategy.cancel = vi.fn();
+        mockSessionClient.cancel = vi.fn().mockResolvedValue(mockSavedObject);
 
         await mockScopedClient.cancelSession('123');
 
@@ -417,11 +420,11 @@ describe('Search service', () => {
       };
 
       it('deletes a saved object with no search ids', async () => {
-        mockSessionClient.getSearchIdMapping = jest
+        mockSessionClient.getSearchIdMapping = vi
           .fn()
           .mockResolvedValue(new Map<string, string>());
-        mockSessionClient.delete = jest.fn().mockResolvedValue(mockSavedObject);
-        const cancelSpy = jest.spyOn(mockScopedClient, 'cancel');
+        mockSessionClient.delete = vi.fn().mockResolvedValue(mockSavedObject);
+        const cancelSpy = vi.spyOn(mockScopedClient, 'cancel');
 
         await mockScopedClient.deleteSession('123');
 
@@ -432,9 +435,9 @@ describe('Search service', () => {
       it('deletes a saved object and search ids', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockSessionClient.delete = jest.fn().mockResolvedValue(mockSavedObject);
-        mockStrategy.cancel = jest.fn();
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockSessionClient.delete = vi.fn().mockResolvedValue(mockSavedObject);
+        mockStrategy.cancel = vi.fn();
 
         await mockScopedClient.deleteSession('123');
 
@@ -450,9 +453,9 @@ describe('Search service', () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'nocancel');
         mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockSessionClient.delete = jest.fn().mockResolvedValue(mockSavedObject);
-        mockStrategy.cancel = jest.fn();
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockSessionClient.delete = vi.fn().mockResolvedValue(mockSavedObject);
+        mockStrategy.cancel = vi.fn();
 
         await mockScopedClient.deleteSession('123');
 
@@ -468,9 +471,9 @@ describe('Search service', () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'notsupported');
         mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockStrategy.cancel = jest.fn();
-        mockSessionClient.delete = jest.fn().mockResolvedValue(mockSavedObject);
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockStrategy.cancel = vi.fn();
+        mockSessionClient.delete = vi.fn().mockResolvedValue(mockSavedObject);
 
         await mockScopedClient.deleteSession('123');
 
@@ -497,11 +500,11 @@ describe('Search service', () => {
       };
 
       it('extends a saved object with no search ids', async () => {
-        mockSessionClient.getSearchIdMapping = jest
+        mockSessionClient.getSearchIdMapping = vi
           .fn()
           .mockResolvedValue(new Map<string, string>());
-        mockSessionClient.extend = jest.fn().mockResolvedValue(mockSavedObject);
-        mockStrategy.extend = jest.fn();
+        mockSessionClient.extend = vi.fn().mockResolvedValue(mockSavedObject);
+        mockStrategy.extend = vi.fn();
 
         await mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
@@ -512,9 +515,9 @@ describe('Search service', () => {
       it('extends a saved object and search ids', async () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockSessionClient.extend = jest.fn().mockResolvedValue(mockSavedObject);
-        mockStrategy.extend = jest.fn();
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockSessionClient.extend = vi.fn().mockResolvedValue(mockSavedObject);
+        mockStrategy.extend = vi.fn();
 
         await mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
@@ -530,9 +533,9 @@ describe('Search service', () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'nocancel');
         mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockSessionClient.extend = jest.fn().mockResolvedValue(mockSavedObject);
-        mockStrategy.extend = jest.fn().mockResolvedValue({});
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockSessionClient.extend = vi.fn().mockResolvedValue(mockSavedObject);
+        mockStrategy.extend = vi.fn().mockResolvedValue({});
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
@@ -549,9 +552,9 @@ describe('Search service', () => {
         const mockMap = new Map<string, string>();
         mockMap.set('abc', 'notsupported');
         mockMap.set('def', ENHANCED_ES_SEARCH_STRATEGY);
-        mockSessionClient.getSearchIdMapping = jest.fn().mockResolvedValue(mockMap);
-        mockSessionClient.extend = jest.fn().mockResolvedValue(mockSavedObject);
-        mockStrategy.extend = jest.fn().mockResolvedValue({});
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(mockMap);
+        mockSessionClient.extend = vi.fn().mockResolvedValue(mockSavedObject);
+        mockStrategy.extend = vi.fn().mockResolvedValue({});
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
@@ -567,7 +570,7 @@ describe('Search service', () => {
 
     describe('updateSessionStatuses', () => {
       it('calls updateSessionStatuses on the session client', async () => {
-        mockSessionClient.updateStatuses = jest.fn().mockResolvedValue(undefined);
+        mockSessionClient.updateStatuses = vi.fn().mockResolvedValue(undefined);
 
         await mockScopedClient.updateSessionStatuses(['id1', 'id2']);
 

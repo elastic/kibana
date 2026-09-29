@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -16,11 +19,11 @@ import { useCurrentUser } from '../../../../common/lib/kibana';
 import { shallow } from 'enzyme';
 import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('ExceptionItemComments', () => {
   beforeEach(() => {
-    (useCurrentUser as jest.Mock).mockReturnValue({
+    (useCurrentUser as Mock).mockReturnValue({
       username: 'user',
       email: 'email',
       fullName: 'full name',
@@ -39,8 +42,8 @@ describe('ExceptionItemComments', () => {
     const wrapper = shallow(
       <ExceptionItemComments
         newCommentValue={'This is a new comment'}
-        newCommentOnChange={jest.fn()}
-        setCommentError={jest.fn()}
+        newCommentOnChange={vi.fn()}
+        setCommentError={vi.fn()}
       />
     );
 
@@ -50,7 +53,7 @@ describe('ExceptionItemComments', () => {
   });
 
   it('it uses user email if fullName is not available', () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({
+    (useCurrentUser as Mock).mockReturnValue({
       username: 'user',
       email: 'email',
       fullName: '',
@@ -67,8 +70,8 @@ describe('ExceptionItemComments', () => {
     const wrapper = shallow(
       <ExceptionItemComments
         newCommentValue={'This is a new comment'}
-        newCommentOnChange={jest.fn()}
-        setCommentError={jest.fn()}
+        newCommentOnChange={vi.fn()}
+        setCommentError={vi.fn()}
       />
     );
 
@@ -78,7 +81,7 @@ describe('ExceptionItemComments', () => {
   });
 
   it('it uses username if fullName and email are not available', () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({
+    (useCurrentUser as Mock).mockReturnValue({
       username: 'user',
       email: '',
       fullName: '',
@@ -95,8 +98,8 @@ describe('ExceptionItemComments', () => {
     const wrapper = shallow(
       <ExceptionItemComments
         newCommentValue={'This is a new comment'}
-        newCommentOnChange={jest.fn()}
-        setCommentError={jest.fn()}
+        newCommentOnChange={vi.fn()}
+        setCommentError={vi.fn()}
       />
     );
 
@@ -110,8 +113,8 @@ describe('ExceptionItemComments', () => {
       <TestProviders>
         <ExceptionItemComments
           newCommentValue={'This is a new comment'}
-          newCommentOnChange={jest.fn()}
-          setCommentError={jest.fn()}
+          newCommentOnChange={vi.fn()}
+          setCommentError={vi.fn()}
         />
       </TestProviders>
     );
@@ -122,13 +125,13 @@ describe('ExceptionItemComments', () => {
   });
 
   it('it calls newCommentOnChange on comment update change', () => {
-    const mockOnCommentChange = jest.fn();
+    const mockOnCommentChange = vi.fn();
     const wrapper = mountWithIntl(
       <TestProviders>
         <ExceptionItemComments
           newCommentValue="This is a new comment"
           newCommentOnChange={mockOnCommentChange}
-          setCommentError={jest.fn()}
+          setCommentError={vi.fn()}
         />
       </TestProviders>
     );
@@ -145,7 +148,7 @@ describe('ExceptionItemComments', () => {
   });
 
   it('it renders existing comments if any exist', () => {
-    const mockOnCommentChange = jest.fn();
+    const mockOnCommentChange = vi.fn();
     const wrapper = mountWithIntl(
       <TestProviders>
         <ExceptionItemComments
@@ -159,7 +162,7 @@ describe('ExceptionItemComments', () => {
           ]}
           newCommentValue={''}
           newCommentOnChange={mockOnCommentChange}
-          setCommentError={jest.fn()}
+          setCommentError={vi.fn()}
         />
       </TestProviders>
     );
@@ -168,12 +171,12 @@ describe('ExceptionItemComments', () => {
   });
 
   it('it calls setCommentError on comment error update change', async () => {
-    const mockSetCommentError = jest.fn();
+    const mockSetCommentError = vi.fn();
     const { getByLabelText, queryByText } = render(
       <TestProviders>
         <ExceptionItemComments
           newCommentValue="This is a new comment"
-          newCommentOnChange={jest.fn()}
+          newCommentOnChange={vi.fn()}
           setCommentError={mockSetCommentError}
         />
       </TestProviders>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 import { focusManager } from '@kbn/react-query';
 
@@ -13,18 +15,21 @@ import { createFleetTestRendererMock } from '../../mock';
 import { sendRequestForRq } from './use_request';
 import { useUpgradeAgentlessPoliciesDryRunQuery } from './agentless_policy';
 
-jest.mock('./use_request', () => ({
-  ...jest.requireActual('./use_request'),
-  sendRequestForRq: jest.fn(),
-}));
+vi.mock('./use_request', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_request')),
+      sendRequestForRq: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The upgrade dry run is a POST that react-query treats as a query. These tests pin down that it
 // behaves as a point-in-time read: exactly one request per (ids, version) pair, with none of the
 // default refetch triggers (window focus, remount, list reorder) silently repeating the POST.
 describe('useUpgradeAgentlessPoliciesDryRunQuery', () => {
   beforeEach(() => {
-    jest.mocked(sendRequestForRq).mockClear();
-    jest.mocked(sendRequestForRq).mockResolvedValue([{ id: 'agentless-1', hasErrors: false }]);
+    vi.mocked(sendRequestForRq).mockClear();
+    vi.mocked(sendRequestForRq).mockResolvedValue([{ id: 'agentless-1', hasErrors: false }]);
   });
 
   // NOTE: the Fleet test renderer shares one QueryClient across tests in this file, so each test

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { withExistingMigration } from './with_existing_migration_id';
@@ -12,7 +14,7 @@ import { withExistingMigration } from './with_existing_migration_id';
 const mockRuleMigrationsClient = {
   data: {
     migrations: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   },
 };
@@ -20,7 +22,7 @@ const mockRuleMigrationsClient = {
 const mockDashboardMigrationsClient = {
   data: {
     migrations: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   },
 };
@@ -28,14 +30,14 @@ const mockDashboardMigrationsClient = {
 const mockSecuritySolutionContext = {
   securitySolution: {
     siemMigrations: {
-      getRulesClient: jest.fn().mockReturnValue(mockRuleMigrationsClient),
-      getDashboardsClient: jest.fn().mockReturnValue(mockDashboardMigrationsClient),
+      getRulesClient: vi.fn().mockReturnValue(mockRuleMigrationsClient),
+      getDashboardsClient: vi.fn().mockReturnValue(mockDashboardMigrationsClient),
     },
   },
 };
 
 const mockContext = {
-  resolve: jest.fn().mockResolvedValue(mockSecuritySolutionContext),
+  resolve: vi.fn().mockResolvedValue(mockSecuritySolutionContext),
 } as unknown as SecuritySolutionRequestHandlerContext;
 
 const mockMigration = {
@@ -54,7 +56,7 @@ const mockReq = {
 } as unknown as KibanaRequest<{ migration_id: string }, unknown, unknown, never>;
 
 const mockRes = {
-  notFound: jest.fn(),
+  notFound: vi.fn(),
 } as unknown as KibanaResponseFactory;
 
 describe('withExistingMigrationId', () => {
@@ -63,7 +65,7 @@ describe('withExistingMigrationId', () => {
       mockRuleMigrationsClient.data.migrations.get.mockResolvedValue(mockMigration);
     });
     it('should call the handler', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const wrappedHandler = withExistingMigration(handler);
       await wrappedHandler(mockContext, mockReq, mockRes);
 
@@ -76,7 +78,7 @@ describe('withExistingMigrationId', () => {
       mockRuleMigrationsClient.data.migrations.get.mockResolvedValue(undefined);
     });
     it('should return a 404 response', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const wrappedHandler = withExistingMigration(handler);
       await wrappedHandler(mockContext, mockReq, mockRes);
 

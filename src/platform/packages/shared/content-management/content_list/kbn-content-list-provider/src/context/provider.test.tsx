@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { ContentListProvider, useContentListConfig } from './provider';
@@ -16,7 +18,7 @@ import type { ContentListItem } from '../item';
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 
 describe('ContentListProvider', () => {
-  const mockFindItems = jest.fn(
+  const mockFindItems = vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: [],
       total: 0,
@@ -38,7 +40,7 @@ describe('ContentListProvider', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('context provision', () => {
@@ -235,7 +237,7 @@ describe('ContentListProvider', () => {
 
     describe('contentEditor feature', () => {
       it('passes `features.contentEditor` through to the context', () => {
-        const open = jest.fn();
+        const open = vi.fn();
         const { result } = renderHook(() => useContentListConfig(), {
           wrapper: createWrapper({ features: { contentEditor: { open } } }),
         });
@@ -278,7 +280,7 @@ describe('ContentListProvider', () => {
   describe('useContentListConfig', () => {
     it('throws when used outside provider', () => {
       // Suppress console.error for expected error.
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       expect(() => {
         renderHook(() => useContentListConfig());

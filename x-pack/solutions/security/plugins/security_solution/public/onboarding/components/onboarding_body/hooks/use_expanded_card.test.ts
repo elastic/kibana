@@ -5,35 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useExpandedCard } from './use_expanded_card';
 import type { OnboardingCardId } from '../../../constants';
 import { waitFor, renderHook, act } from '@testing-library/react';
 
-const mockSetCard = jest.fn();
-jest.mock('../../hooks/use_url_detail', () => ({
-  ...jest.requireActual('../../hooks/use_url_detail'),
-  useUrlDetail: () => ({ setCard: mockSetCard }),
-}));
+const mockSetCard = vi.fn();
+vi.mock('../../hooks/use_url_detail', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks/use_url_detail')),
+      useUrlDetail: () => ({ setCard: mockSetCard }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: () => ({ hash: '#card-1', pathname: '/test' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: () => ({ hash: '#card-1', pathname: '/test' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useExpandedCard Hook', () => {
   const mockCardId = 'card-1' as OnboardingCardId;
-  const mockScrollTo = jest.fn();
+  const mockScrollTo = vi.fn();
   global.window.scrollTo = mockScrollTo;
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
-  const mockGetElementById = jest.fn().mockReturnValue({
-    focus: jest.fn(),
+  const mockGetElementById = vi.fn().mockReturnValue({
+    focus: vi.fn(),
     offsetTop: 100,
   });
   document.getElementById = mockGetElementById;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the page is completely loaded', () => {
@@ -53,7 +61,7 @@ describe('useExpandedCard Hook', () => {
   describe('when the card is expanded manually', () => {
     beforeEach(() => {
       mockGetElementById.mockReturnValueOnce({
-        focus: jest.fn(),
+        focus: vi.fn(),
         offsetTop: 200,
       });
     });

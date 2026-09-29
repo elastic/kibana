@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -28,63 +31,66 @@ import {
   ATTACK_TAG_ACTION_ID,
 } from '../../../../common/constants/action_ids';
 
-jest.mock(
+vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
 );
-jest.mock(
+vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items'
 );
-jest.mock(
+vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items'
 );
-jest.mock(
+vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items'
 );
-jest.mock(
+vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items'
 );
-jest.mock(
+vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items'
 );
-jest.mock(
+vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_explore_in_attacks_context_menu_items'
 );
-jest.mock(
+vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items'
 );
-jest.mock('../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(),
-}));
+vi.mock('../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 const mockUseAttackViewInAiAssistantContextMenuItems =
-  useAttackViewInAiAssistantContextMenuItems as jest.MockedFunction<
+  useAttackViewInAiAssistantContextMenuItems as MockedFunction<
     typeof useAttackViewInAiAssistantContextMenuItems
   >;
 const mockUseAttackWorkflowStatusContextMenuItems =
-  useAttackWorkflowStatusContextMenuItems as jest.MockedFunction<
+  useAttackWorkflowStatusContextMenuItems as MockedFunction<
     typeof useAttackWorkflowStatusContextMenuItems
   >;
 const mockUseAttackAssigneesContextMenuItems =
-  useAttackAssigneesContextMenuItems as jest.MockedFunction<
+  useAttackAssigneesContextMenuItems as MockedFunction<
     typeof useAttackAssigneesContextMenuItems
   >;
-const mockUseAttackTagsContextMenuItems = useAttackTagsContextMenuItems as jest.MockedFunction<
+const mockUseAttackTagsContextMenuItems = useAttackTagsContextMenuItems as MockedFunction<
   typeof useAttackTagsContextMenuItems
 >;
 const mockUseAttackInvestigateInTimelineContextMenuItems =
-  useAttackInvestigateInTimelineContextMenuItems as jest.MockedFunction<
+  useAttackInvestigateInTimelineContextMenuItems as MockedFunction<
     typeof useAttackInvestigateInTimelineContextMenuItems
   >;
 const mockUseAttackExploreInAttacksContextMenuItems =
-  useAttackExploreInAttacksContextMenuItems as jest.MockedFunction<
+  useAttackExploreInAttacksContextMenuItems as MockedFunction<
     typeof useAttackExploreInAttacksContextMenuItems
   >;
-const mockUseIsInSecurityApp = useIsInSecurityApp as jest.MockedFunction<typeof useIsInSecurityApp>;
-const mockUseAttackCaseContextMenuItems = useAttackCaseContextMenuItems as jest.MockedFunction<
+const mockUseIsInSecurityApp = useIsInSecurityApp as MockedFunction<typeof useIsInSecurityApp>;
+const mockUseAttackCaseContextMenuItems = useAttackCaseContextMenuItems as MockedFunction<
   typeof useAttackCaseContextMenuItems
 >;
 
 const mockUseAttackRunWorkflowContextMenuItems =
-  useAttackRunWorkflowContextMenuItems as jest.MockedFunction<
+  useAttackRunWorkflowContextMenuItems as MockedFunction<
     typeof useAttackRunWorkflowContextMenuItems
   >;
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
@@ -103,7 +109,7 @@ function renderAttack(attack: AttackDiscoveryAlert, isRemoteDocument = false) {
 
 describe('AttacksGroupTakeActionItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Default mock returns for context menu hooks
     mockUseAttackViewInAiAssistantContextMenuItems.mockReturnValue({

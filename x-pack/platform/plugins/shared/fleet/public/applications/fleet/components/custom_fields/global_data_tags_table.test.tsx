@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import type { RenderResult } from '@testing-library/react';
@@ -15,11 +18,14 @@ import type { GlobalDataTag } from '../../../../../common/types';
 
 import { GlobalDataTagsTable } from './global_data_tags_table';
 
-jest.mock('../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-}));
+vi.mock('../../../../hooks/use_fleet_status', () => {
+      const mocked = {
+      FleetStatusProvider: (props: any) => {
+        return props.children;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_IDS = {
   NAME_INPUT: 'globalDataTagsNameInput',
@@ -28,7 +34,7 @@ const TEST_IDS = {
 
 describe('GlobalDataTagsTable', () => {
   let renderResult: RenderResult;
-  let mockUpdateAgentPolicy: jest.Mock;
+  let mockUpdateAgentPolicy: Mock;
   const globalDataTags: GlobalDataTag[] = [
     { name: 'tag1', value: 'value1' },
     { name: 'tag2', value: 'value2' },
@@ -36,7 +42,7 @@ describe('GlobalDataTagsTable', () => {
   let renderer: TestRenderer;
 
   const renderComponent = (tags: GlobalDataTag[], options?: { isDisabled?: boolean }) => {
-    mockUpdateAgentPolicy = jest.fn();
+    mockUpdateAgentPolicy = vi.fn();
     renderer = createFleetTestRendererMock();
 
     const TestComponent = () => {
@@ -65,7 +71,7 @@ describe('GlobalDataTagsTable', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render initial tags', async () => {

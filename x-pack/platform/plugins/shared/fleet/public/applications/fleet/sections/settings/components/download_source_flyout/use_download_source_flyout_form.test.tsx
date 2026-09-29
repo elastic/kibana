@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -16,18 +18,21 @@ import {
   type AuthType,
 } from './use_download_source_flyout_form';
 
-jest.mock('../../../../../../hooks/use_authz', () => ({
-  useAuthz: () => ({
-    fleet: {
-      allSettings: true,
-    },
-  }),
-}));
+vi.mock('../../../../../../hooks/use_authz', () => {
+      const mocked = {
+      useAuthz: () => ({
+        fleet: {
+          allSettings: true,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
   it('should block submission when certificate path contains spaces', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = testRenderer.renderHook(() =>
       useDowloadSourceFlyoutForm(onSuccess, undefined)
     );
@@ -49,7 +54,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
   it('should block submission when certificate key path contains spaces', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = testRenderer.renderHook(() =>
       useDowloadSourceFlyoutForm(onSuccess, undefined)
     );
@@ -71,7 +76,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
   it('should block submission when certificate authorities path contains spaces', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = testRenderer.renderHook(() =>
       useDowloadSourceFlyoutForm(onSuccess, undefined)
     );
@@ -95,7 +100,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
   it('should allow submission when all SSL paths are valid', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     testRenderer.startServices.http.post.mockResolvedValue({ item: {} });
     const { result } = testRenderer.renderHook(() =>
       useDowloadSourceFlyoutForm(onSuccess, undefined)
@@ -116,7 +121,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
   it('should block submission when username contains only spaces', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = testRenderer.renderHook(() =>
       useDowloadSourceFlyoutForm(onSuccess, undefined)
     );

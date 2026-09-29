@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -13,38 +16,41 @@ import * as useTimeRangeMetadataContextModule from '../../../../hooks/use_time_r
 import * as useUnifiedSearchHooks from './use_unified_search';
 import { useHostCount } from './use_host_count';
 
-jest.mock('../../../../hooks/use_fetcher');
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../containers/plugin_config_context');
-jest.mock('./use_unified_search');
+vi.mock('../../../../hooks/use_fetcher');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../containers/plugin_config_context');
+vi.mock('./use_unified_search');
 // Pin the first-paint gate open so the test needn't mount its upstream contexts.
-jest.mock('./use_hosts_page_ready', () => ({
-  useHostsPageReady: () => true,
-}));
+vi.mock('./use_hosts_page_ready', () => {
+      const mocked = {
+      useHostsPageReady: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useHostCount', () => {
-  jest.spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext').mockReturnValue({
+  vi.spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext').mockReturnValue({
     data: { preferredSchema: 'ecs', schemas: ['ecs', 'semconv'] },
     status: FETCH_STATUS.SUCCESS,
   });
-  const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
+  const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
     typeof useKibanaContextForPlugin
   >;
 
-  const telemetryMock = { reportHostsViewTotalHostCountRetrieved: jest.fn() };
+  const telemetryMock = { reportHostsViewTotalHostCountRetrieved: vi.fn() };
 
   useKibanaContextForPluginMock.mockReturnValue({
     services: { telemetry: telemetryMock },
   } as unknown as ReturnType<typeof useKibanaContextForPluginHook.useKibanaContextForPlugin>);
 
   const useUnifiedSearchContextMock =
-    useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
+    useUnifiedSearchHooks.useUnifiedSearchContext as MockedFunction<
       typeof useUnifiedSearchHooks.useUnifiedSearchContext
     >;
 
   const mockUseUnifiedContext = (searchCriteria: any) => {
     useUnifiedSearchContextMock.mockReturnValue({
-      buildQuery: jest.fn(() => 'query'),
+      buildQuery: vi.fn(() => 'query'),
       parsedDateRange: { from: '', to: '' },
       searchCriteria,
     } as unknown as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
@@ -54,7 +60,7 @@ describe('useHostCount', () => {
     const fetcherDataMock = { count: 10 };
 
     beforeAll(() => {
-      (useFetcher as jest.Mock).mockReturnValue({
+      (useFetcher as Mock).mockReturnValue({
         data: fetcherDataMock,
         status: 'success',
         error: null,
@@ -62,7 +68,7 @@ describe('useHostCount', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('and there is no filters or query applied', () => {
@@ -162,13 +168,13 @@ describe('useHostCount', () => {
           preferredSchema: 'no schema available',
         });
 
-        (useFetcher as jest.Mock).mockReturnValue({
+        (useFetcher as Mock).mockReturnValue({
           data: { count: 0 },
           status: 'success',
           error: null,
         });
 
-        jest
+        vi
           .spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext')
           .mockReturnValue({
             data: { preferredSchema: 'ecs', schemas: [] },
@@ -191,7 +197,7 @@ describe('useHostCount', () => {
 
   describe('when data is fetched with error', () => {
     beforeAll(() => {
-      (useFetcher as jest.Mock).mockReturnValue({
+      (useFetcher as Mock).mockReturnValue({
         data: {},
         status: 'error',
         error: 'error',

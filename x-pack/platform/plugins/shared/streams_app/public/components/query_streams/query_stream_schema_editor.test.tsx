@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -32,8 +34,8 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
           field={mockField}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
           isSaving={false}
         />
       </Wrapper>
@@ -48,8 +50,8 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
           field={mockField}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
           isSaving={false}
         />
       </Wrapper>
@@ -72,8 +74,8 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
           field={fieldWithoutDescription}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
           isSaving={false}
         />
       </Wrapper>
@@ -85,13 +87,13 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
   });
 
   it('calls onSave with updated description', async () => {
-    const mockOnSave = jest.fn();
+    const mockOnSave = vi.fn();
 
     render(
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
           field={mockField}
-          onClose={jest.fn()}
+          onClose={vi.fn()}
           onSave={mockOnSave}
           isSaving={false}
         />
@@ -117,8 +119,8 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
           field={mockField}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
           isSaving={false}
         />
       </Wrapper>
@@ -140,8 +142,8 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
           field={fieldWithLongType}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
           isSaving={false}
         />
       </Wrapper>
@@ -152,13 +154,13 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
   });
 
   it('allows clearing description by saving empty string', async () => {
-    const mockOnSave = jest.fn();
+    const mockOnSave = vi.fn();
 
     render(
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
           field={mockField}
-          onClose={jest.fn()}
+          onClose={vi.fn()}
           onSave={mockOnSave}
           isSaving={false}
         />

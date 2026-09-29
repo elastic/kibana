@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { FieldRule } from '@kbn/anonymization-common';
 import {
@@ -22,7 +24,7 @@ const baseRules: FieldRule[] = [
 
 describe('useFieldRulesPanelState', () => {
   it('filters rows by search query', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
         fieldRules: baseRules,
@@ -39,7 +41,7 @@ describe('useFieldRulesPanelState', () => {
   });
 
   it('orders filtered rows by ranking (query relevance, ECS boost, alphabetical fallback)', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
         fieldRules: baseRules,
@@ -62,7 +64,7 @@ describe('useFieldRulesPanelState', () => {
   });
 
   it('toggles select all matching fields when filters are active', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
         fieldRules: baseRules,
@@ -95,7 +97,7 @@ describe('useFieldRulesPanelState', () => {
   });
 
   it('toggles select all fields across all rules when no filters are active', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
         fieldRules: baseRules,
@@ -115,7 +117,7 @@ describe('useFieldRulesPanelState', () => {
   });
 
   it('applies bulk action to selected rows only', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
         fieldRules: baseRules,
@@ -141,7 +143,7 @@ describe('useFieldRulesPanelState', () => {
   });
 
   it('keeps existing entity class when clearing with invalid value', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
         fieldRules: baseRules,
@@ -159,7 +161,7 @@ describe('useFieldRulesPanelState', () => {
   });
 
   it('suggests entity class when toggling field to anonymize', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
         fieldRules: baseRules,
@@ -177,7 +179,7 @@ describe('useFieldRulesPanelState', () => {
   });
 
   it('falls back to MISC when suggestion is unavailable', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const rules: FieldRule[] = [
       { field: 'custom.field', allowed: true, anonymized: false, entityClass: undefined },
     ];
@@ -198,7 +200,7 @@ describe('useFieldRulesPanelState', () => {
   });
 
   it('reports counters for allow/anonymize/deny', () => {
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
         fieldRules: baseRules,

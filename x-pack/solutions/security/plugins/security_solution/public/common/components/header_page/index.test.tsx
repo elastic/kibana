@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -14,8 +16,8 @@ import { TestProviders } from '../../mock';
 import { HeaderPage } from '.';
 import { SecurityPageName } from '../../../app/types';
 
-jest.mock('../../lib/kibana');
-jest.mock('../link_to');
+vi.mock('../../lib/kibana');
+vi.mock('../link_to');
 
 describe('HeaderPage', () => {
   test('it renders', () => {

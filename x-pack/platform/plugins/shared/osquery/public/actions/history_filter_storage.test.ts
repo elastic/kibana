@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { saveHistoryFilters, getHistoryFilters } from './history_filter_storage';
 
 describe('history_filter_storage', () => {
@@ -36,23 +38,23 @@ describe('history_filter_storage', () => {
 
   describe('graceful degradation', () => {
     it('should not throw when sessionStorage.setItem throws', () => {
-      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
         throw new Error('QuotaExceededError');
       });
 
       expect(() => saveHistoryFilters('?q=test')).not.toThrow();
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('should return empty string when sessionStorage.getItem throws', () => {
-      jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
         throw new Error('SecurityError');
       });
 
       expect(getHistoryFilters()).toBe('');
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
   });
 });

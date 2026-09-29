@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   resolveSignificantEventsTuningConfig,
@@ -89,7 +91,7 @@ describe('resolveSignificantEventsTuningConfig', () => {
   });
 
   it('drops unknown keys without falling back to defaults', () => {
-    const logger = { warn: jest.fn() };
+    const logger = { warn: vi.fn() };
     const result = resolveSignificantEventsTuningConfig(
       { sample_size: 30, legacy_field: 99 },
       logger
@@ -99,14 +101,14 @@ describe('resolveSignificantEventsTuningConfig', () => {
   });
 
   it('falls back to full defaults and warns on an out-of-bounds value', () => {
-    const logger = { warn: jest.fn() };
+    const logger = { warn: vi.fn() };
     const result = resolveSignificantEventsTuningConfig({ sample_size: 500 }, logger);
     expect(result).toEqual(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid'));
   });
 
   it('resets a legacy 0-100 semantic_min_score and warns', () => {
-    const logger = { warn: jest.fn() };
+    const logger = { warn: vi.fn() };
     const result = resolveSignificantEventsTuningConfig({ semantic_min_score: 75 }, logger);
     expect(result.semantic_min_score).toBe(
       DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score

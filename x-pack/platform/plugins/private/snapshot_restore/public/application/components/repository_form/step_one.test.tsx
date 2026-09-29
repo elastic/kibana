@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,18 +24,18 @@ const testRepo = (overrides: Record<string, unknown>) =>
 
 const repositoryTypes: RepositoryType[] = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
 
-const mockUseLoadRepositoryTypes = jest.fn();
+const mockUseLoadRepositoryTypes = vi.fn();
 
-jest.mock('../../services/http', () => {
-  const actual = jest.requireActual<typeof import('../../services/http')>('../../services/http');
+vi.mock('../../services/http', async () => {
+  const actual = (await vi.importActual<typeof import('../../services/http')>('../../services/http'));
   return {
     ...actual,
     useLoadRepositoryTypes: (...args: unknown[]) => mockUseLoadRepositoryTypes(...args),
   };
 });
 
-jest.mock('../../app_context', () => {
-  const actual = jest.requireActual<typeof import('../../app_context')>('../../app_context');
+vi.mock('../../app_context', async () => {
+  const actual = (await vi.importActual<typeof import('../../app_context')>('../../app_context'));
 
   return {
     ...actual,
@@ -62,15 +65,15 @@ textService.setup(i18n);
 
 const defaultProps: {
   repository: Repository | EmptyRepository;
-  onNext: jest.Mock;
-  onCancel: jest.Mock;
-  updateRepository: jest.Mock;
+  onNext: Mock;
+  onCancel: Mock;
+  updateRepository: Mock;
   validation: { isValid: boolean; errors: Record<string, string[]> };
 } = {
   repository: { name: '', type: null, settings: {} },
-  onNext: jest.fn(),
-  onCancel: jest.fn(),
-  updateRepository: jest.fn(),
+  onNext: vi.fn(),
+  onCancel: vi.fn(),
+  updateRepository: vi.fn(),
   validation: { isValid: true, errors: {} },
 };
 
@@ -84,7 +87,7 @@ const renderStepOne = (overrides: Partial<typeof defaultProps> = {}) => {
 
 describe('<RepositoryFormStepOne />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLoadRepositoryTypes.mockReturnValue({
       isLoading: false,
       error: null,
@@ -134,7 +137,7 @@ describe('<RepositoryFormStepOne />', () => {
 
   describe('WHEN the next button is clicked', () => {
     it('SHOULD call onNext', () => {
-      const onNext = jest.fn();
+      const onNext = vi.fn();
       renderStepOne({ onNext });
 
       fireEvent.click(screen.getByTestId('nextButton'));
@@ -145,7 +148,7 @@ describe('<RepositoryFormStepOne />', () => {
 
   describe('WHEN the cancel button is clicked', () => {
     it('SHOULD call onCancel', () => {
-      const onCancel = jest.fn();
+      const onCancel = vi.fn();
       renderStepOne({ onCancel });
 
       fireEvent.click(screen.getByTestId('cancelButton'));
@@ -156,7 +159,7 @@ describe('<RepositoryFormStepOne />', () => {
 
   describe('WHEN a repository type card is clicked', () => {
     it('SHOULD call updateRepository with the selected type', () => {
-      const updateRepository = jest.fn();
+      const updateRepository = vi.fn();
       renderStepOne({ updateRepository });
 
       fireEvent.click(screen.getByTestId('fsRepositoryType'));
@@ -170,7 +173,7 @@ describe('<RepositoryFormStepOne />', () => {
 
   describe('WHEN source-only toggle is enabled', () => {
     it('SHOULD call updateRepository with source type and delegateType', () => {
-      const updateRepository = jest.fn();
+      const updateRepository = vi.fn();
       renderStepOne({
         updateRepository,
         repository: testRepo({ name: 'test', type: 'fs', settings: {} }),
@@ -189,7 +192,7 @@ describe('<RepositoryFormStepOne />', () => {
 
   describe('WHEN source-only toggle is disabled', () => {
     it('SHOULD call updateRepository reverting to the delegate type', () => {
-      const updateRepository = jest.fn();
+      const updateRepository = vi.fn();
       renderStepOne({
         updateRepository,
         repository: testRepo({ name: 'test', type: 'source', settings: { delegateType: 'fs' } }),

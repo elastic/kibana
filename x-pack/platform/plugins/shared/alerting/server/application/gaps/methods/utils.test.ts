@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   extractGapDurationSums,
   calculateHighestPriorityGapFillStatus,
@@ -15,14 +17,17 @@ import {
   type GapDurationBucket,
 } from './utils';
 
-jest.mock('../../../lib/rule_gaps/build_gaps_filter', () => ({
-  buildGapsFilter: jest.fn(() => 'mocked_filter'),
-}));
+vi.mock('../../../lib/rule_gaps/build_gaps_filter', () => {
+      const mocked = {
+      buildGapsFilter: vi.fn(() => 'mocked_filter'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('utils', () => {
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   describe('extractGapDurationSums', () => {

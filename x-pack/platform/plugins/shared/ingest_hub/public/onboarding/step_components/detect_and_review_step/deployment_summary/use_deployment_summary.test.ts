@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
 // Mock use_agent_policy_summary to prevent useQuery from being called without a QueryClientProvider.
 // useDeploymentSummary calls useAgentPolicySummary unconditionally (it's a no-op when agentPolicyId
 // is absent), but the hook internally calls useGetEnrollmentAPIKeysQuery which requires @tanstack/react-query.
-jest.mock('./use_agent_policy_summary', () => ({
-  useAgentPolicySummary: () => ({
-    agentPolicyName: undefined,
-    enrollmentToken: undefined,
-    agentCount: undefined,
-  }),
-}));
+vi.mock('./use_agent_policy_summary', () => {
+      const mocked = {
+      useAgentPolicySummary: () => ({
+        agentPolicyName: undefined,
+        enrollmentToken: undefined,
+        agentCount: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useDeploymentSummary } from './use_deployment_summary';
 import type { PersistedEcfLaunchStep } from '../../ecf_deployment_section';
 
-const mockUseSessionStorage = useSessionStorage as jest.Mock;
+const mockUseSessionStorage = useSessionStorage as Mock;
 
 const SERVICE_SETTINGS_WITH_REGION = { globalRegion: 'us-east-1', serviceVars: {} };
 const SERVICE_SETTINGS_EMPTY = { globalRegion: '', serviceVars: {} };
@@ -48,14 +54,14 @@ const mockStorageCalls = (
   { connectorName }: { connectorName?: string } = {}
 ) => {
   mockUseSessionStorage
-    .mockReturnValueOnce([serviceSettings, jest.fn()])
-    .mockReturnValueOnce([{ connectorName }, jest.fn()])
-    .mockReturnValueOnce([ecfLaunchStep, jest.fn()]);
+    .mockReturnValueOnce([serviceSettings, vi.fn()])
+    .mockReturnValueOnce([{ connectorName }, vi.fn()])
+    .mockReturnValueOnce([ecfLaunchStep, vi.fn()]);
 };
 
 describe('useDeploymentSummary', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('managed_integration', () => {

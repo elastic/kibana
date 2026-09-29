@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { addSubPipelineToIndexSpecificMlPipeline } from './create_ml_inference_pipeline';
@@ -12,11 +14,11 @@ import { getInferencePipelineNameFromIndexName } from './ml_inference_pipeline_u
 
 const mockClient = {
   ingest: {
-    getPipeline: jest.fn(),
-    putPipeline: jest.fn(),
+    getPipeline: vi.fn(),
+    putPipeline: vi.fn(),
   },
   ml: {
-    getTrainedModels: jest.fn(),
+    getTrainedModels: vi.fn(),
   },
 };
 
@@ -26,7 +28,7 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
   const pipelineName = 'ml-inference-my-pipeline';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should add the sub-pipeline reference to the parent ML pipeline if it isn't there", async () => {

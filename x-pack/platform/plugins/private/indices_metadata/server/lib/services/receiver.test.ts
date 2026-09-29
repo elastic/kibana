@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { MetadataReceiver } from './receiver';
@@ -15,22 +18,22 @@ describe('Indices Metadata - MetadataReceiver', () => {
   let receiver: MetadataReceiver;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     logger = loggingSystemMock.createLogger();
     esClient = {
       indices: {
-        get: jest.fn(),
-        getDataStream: jest.fn(),
-        stats: jest.fn(),
-        getIndexTemplate: jest.fn(),
+        get: vi.fn(),
+        getDataStream: vi.fn(),
+        stats: vi.fn(),
+        getIndexTemplate: vi.fn(),
       },
       ilm: {
-        explainLifecycle: jest.fn(),
-        getLifecycle: jest.fn(),
+        explainLifecycle: vi.fn(),
+        getLifecycle: vi.fn(),
       },
       transport: {
-        request: jest.fn(),
+        request: vi.fn(),
       },
     } as unknown as ElasticsearchClient;
 
@@ -56,7 +59,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     };
 
     it('should successfully fetch indices', async () => {
-      (esClient.indices.get as jest.Mock).mockResolvedValue(mockIndicesResponse);
+      (esClient.indices.get as Mock).mockResolvedValue(mockIndicesResponse);
 
       const result = await receiver.getIndices();
 
@@ -88,7 +91,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
       { description: 'null', mockValue: null },
       { description: 'undefined', mockValue: undefined },
     ])('should handle $description indices response', async ({ mockValue }) => {
-      (esClient.indices.get as jest.Mock).mockResolvedValue(mockValue);
+      (esClient.indices.get as Mock).mockResolvedValue(mockValue);
 
       const result = await receiver.getIndices();
 
@@ -97,7 +100,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should handle errors and log warning', async () => {
       const error = new Error('Elasticsearch error');
-      (esClient.indices.get as jest.Mock).mockRejectedValue(error);
+      (esClient.indices.get as Mock).mockRejectedValue(error);
 
       await expect(receiver.getIndices()).rejects.toThrow('Elasticsearch error');
       expect(logger.warn).toHaveBeenCalledWith('Error fetching indices', { error });
@@ -112,7 +115,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         'test-index-2': {},
       };
 
-      (esClient.indices.get as jest.Mock).mockResolvedValue(incompleteResponse);
+      (esClient.indices.get as Mock).mockResolvedValue(incompleteResponse);
 
       const result = await receiver.getIndices();
 
@@ -151,7 +154,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     };
 
     it('should successfully fetch datastreams', async () => {
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockDataStreamResponse);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockDataStreamResponse);
 
       const result = await receiver.getDataStreams();
 
@@ -189,7 +192,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
       { description: 'undefined data_streams', mockValue: { data_streams: undefined } },
       { description: 'missing data_streams property', mockValue: {} },
     ])('should handle $description response', async ({ mockValue }) => {
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockValue);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockValue);
 
       const result = await receiver.getDataStreams();
 
@@ -205,7 +208,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(responseWithoutIndices);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(responseWithoutIndices);
 
       const result = await receiver.getDataStreams();
 
@@ -223,7 +226,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should handle errors and log error', async () => {
       const error = new Error('Elasticsearch error');
-      (esClient.indices.getDataStream as jest.Mock).mockRejectedValue(error);
+      (esClient.indices.getDataStream as Mock).mockRejectedValue(error);
 
       await expect(receiver.getDataStreams()).rejects.toThrow('Elasticsearch error');
       expect(logger.error).toHaveBeenCalledWith('Error fetching datastreams', { error });
@@ -253,7 +256,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockResponse);
 
       const result = await receiver.getDataStreams();
 
@@ -291,7 +294,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockResponse);
 
       const result = await receiver.getDataStreams();
 
@@ -345,7 +348,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockResponse);
 
       const result = await receiver.getDataStreams();
 
@@ -385,7 +388,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockResponse);
 
       const result = await receiver.getDataStreams();
 
@@ -415,7 +418,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockResponse);
 
       const result = await receiver.getDataStreams();
 
@@ -451,7 +454,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockResponse);
 
       const result = await receiver.getDataStreams();
 
@@ -477,7 +480,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+      (esClient.indices.getDataStream as Mock).mockResolvedValue(mockResponse);
 
       const result = await receiver.getDataStreams();
 
@@ -535,7 +538,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     };
 
     it('should successfully fetch index templates', async () => {
-      (esClient.indices.getIndexTemplate as jest.Mock).mockResolvedValue(mockTemplateResponse);
+      (esClient.indices.getIndexTemplate as Mock).mockResolvedValue(mockTemplateResponse);
 
       const result = await receiver.getIndexTemplatesStats();
 
@@ -578,7 +581,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
       { description: 'null', mockValue: { index_templates: null } },
       { description: 'undefined', mockValue: { index_templates: undefined } },
     ])('should handle $description index_templates response', async ({ mockValue }) => {
-      (esClient.indices.getIndexTemplate as jest.Mock).mockResolvedValue(mockValue);
+      (esClient.indices.getIndexTemplate as Mock).mockResolvedValue(mockValue);
 
       const result = await receiver.getIndexTemplatesStats();
 
@@ -599,7 +602,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ],
       };
 
-      (esClient.indices.getIndexTemplate as jest.Mock).mockResolvedValue(templateWithoutDataStream);
+      (esClient.indices.getIndexTemplate as Mock).mockResolvedValue(templateWithoutDataStream);
 
       const result = await receiver.getIndexTemplatesStats();
 
@@ -622,7 +625,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should handle errors and log warning', async () => {
       const error = new Error('Elasticsearch error');
-      (esClient.indices.getIndexTemplate as jest.Mock).mockRejectedValue(error);
+      (esClient.indices.getIndexTemplate as Mock).mockRejectedValue(error);
 
       await expect(receiver.getIndexTemplatesStats()).rejects.toThrow('Elasticsearch error');
       expect(logger.warn).toHaveBeenCalledWith('Error fetching index templates', { error });
@@ -664,7 +667,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     };
 
     it('should successfully fetch indices stats', async () => {
-      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+      (esClient.indices.stats as Mock).mockResolvedValue(mockStatsResponse);
 
       const results = [];
       for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
@@ -715,7 +718,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
       { description: 'null', mockValue: { indices: null } },
       { description: 'undefined', mockValue: { indices: undefined } },
     ])('should handle $description indices response', async ({ mockValue }) => {
-      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockValue);
+      (esClient.indices.stats as Mock).mockResolvedValue(mockValue);
 
       const results = [];
       for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
@@ -726,7 +729,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     });
 
     it('should handle chunk size limits', async () => {
-      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+      (esClient.indices.stats as Mock).mockResolvedValue(mockStatsResponse);
 
       const results = [];
       for await (const stat of receiver.getIndicesStats(['test-index-1'], 5000)) {
@@ -742,7 +745,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should handle errors and log error', async () => {
       const error = new Error('Elasticsearch error');
-      (esClient.indices.stats as jest.Mock).mockRejectedValue(error);
+      (esClient.indices.stats as Mock).mockRejectedValue(error);
 
       const iterator = receiver.getIndicesStats(['test-index-1'], 10);
       await expect(iterator.next()).rejects.toThrow('Elasticsearch error');
@@ -774,7 +777,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         },
       };
 
-      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockResponseWithoutPrimaries);
+      (esClient.indices.stats as Mock).mockResolvedValue(mockResponseWithoutPrimaries);
 
       const results = [];
       for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
@@ -828,7 +831,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         },
       };
 
-      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockResponseWithoutIndexingFailures);
+      (esClient.indices.stats as Mock).mockResolvedValue(mockResponseWithoutIndexingFailures);
 
       const results = [];
       for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
@@ -862,7 +865,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         },
       };
 
-      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockResponseMinimalData);
+      (esClient.indices.stats as Mock).mockResolvedValue(mockResponseMinimalData);
 
       const results = [];
       for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
@@ -923,12 +926,12 @@ describe('Indices Metadata - MetadataReceiver', () => {
         ])(
           'should not log debug message when $description',
           async ({ meteringResponse, expectError }) => {
-            (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+            (esClient.indices.stats as Mock).mockResolvedValue(mockStatsResponse);
 
             if (meteringResponse instanceof Error) {
-              (esClient.transport.request as jest.Mock).mockRejectedValue(meteringResponse);
+              (esClient.transport.request as Mock).mockRejectedValue(meteringResponse);
             } else {
-              (esClient.transport.request as jest.Mock).mockResolvedValue(meteringResponse);
+              (esClient.transport.request as Mock).mockResolvedValue(meteringResponse);
             }
 
             const results = [];
@@ -981,8 +984,8 @@ describe('Indices Metadata - MetadataReceiver', () => {
             ],
           };
 
-          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
-          (esClient.transport.request as jest.Mock).mockResolvedValue(mockMeteringResponse);
+          (esClient.indices.stats as Mock).mockResolvedValue(mockStatsResponse);
+          (esClient.transport.request as Mock).mockResolvedValue(mockMeteringResponse);
 
           const results = [];
           for await (const stat of serverlessReceiver.getIndicesStats(['test-index-1'], 10)) {
@@ -1057,8 +1060,8 @@ describe('Indices Metadata - MetadataReceiver', () => {
             ],
           };
 
-          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockMultiIndexStatsResponse);
-          (esClient.transport.request as jest.Mock).mockResolvedValue(mockMeteringResponse);
+          (esClient.indices.stats as Mock).mockResolvedValue(mockMultiIndexStatsResponse);
+          (esClient.transport.request as Mock).mockResolvedValue(mockMeteringResponse);
 
           const results = [];
           for await (const stat of serverlessReceiver.getIndicesStats(
@@ -1101,7 +1104,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
       describe('non-serverless mode', () => {
         it('should not call metering API', async () => {
-          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+          (esClient.indices.stats as Mock).mockResolvedValue(mockStatsResponse);
 
           const results = [];
           for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
@@ -1132,7 +1135,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
   describe('isIlmStatsAvailable', () => {
     it('should return true when ILM explain API is available', async () => {
-      (esClient.ilm.explainLifecycle as jest.Mock).mockResolvedValue({});
+      (esClient.ilm.explainLifecycle as Mock).mockResolvedValue({});
 
       const result = await receiver.isIlmStatsAvailable();
 
@@ -1146,7 +1149,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should return true when API returns 404', async () => {
       const error = { meta: { statusCode: 404 } };
-      (esClient.ilm.explainLifecycle as jest.Mock).mockRejectedValue(error);
+      (esClient.ilm.explainLifecycle as Mock).mockRejectedValue(error);
 
       const result = await receiver.isIlmStatsAvailable();
 
@@ -1155,7 +1158,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should return false when API returns other errors', async () => {
       const error = { meta: { statusCode: 500 } };
-      (esClient.ilm.explainLifecycle as jest.Mock).mockRejectedValue(error);
+      (esClient.ilm.explainLifecycle as Mock).mockRejectedValue(error);
 
       const result = await receiver.isIlmStatsAvailable();
 
@@ -1175,7 +1178,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     };
 
     it('should successfully fetch ILM stats', async () => {
-      (esClient.ilm.explainLifecycle as jest.Mock).mockResolvedValue(mockIlmResponse);
+      (esClient.ilm.explainLifecycle as Mock).mockResolvedValue(mockIlmResponse);
 
       const results = [];
       for await (const stat of receiver.getIlmsStats(['test-index-1'])) {
@@ -1203,7 +1206,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
       { description: 'null', mockValue: { indices: null } },
       { description: 'undefined', mockValue: { indices: undefined } },
     ])('should handle $description indices response', async ({ mockValue }) => {
-      (esClient.ilm.explainLifecycle as jest.Mock).mockResolvedValue(mockValue);
+      (esClient.ilm.explainLifecycle as Mock).mockResolvedValue(mockValue);
 
       const results = [];
       for await (const stat of receiver.getIlmsStats(['test-index-1'])) {
@@ -1223,7 +1226,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         },
       };
 
-      (esClient.ilm.explainLifecycle as jest.Mock).mockResolvedValue(incompleteResponse);
+      (esClient.ilm.explainLifecycle as Mock).mockResolvedValue(incompleteResponse);
 
       const results = [];
       for await (const stat of receiver.getIlmsStats(['test-index-1', 'test-index-2'])) {
@@ -1248,7 +1251,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should handle errors from ES client', async () => {
       const error = new Error('Elasticsearch error');
-      (esClient.ilm.explainLifecycle as jest.Mock).mockRejectedValue(error);
+      (esClient.ilm.explainLifecycle as Mock).mockRejectedValue(error);
 
       const iterator = receiver.getIlmsStats(['test-index-1']);
       await expect(iterator.next()).rejects.toThrow('Elasticsearch error');
@@ -1279,7 +1282,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     };
 
     it('should successfully fetch ILM policies', async () => {
-      (esClient.ilm.getLifecycle as jest.Mock).mockResolvedValue(mockPolicyResponse);
+      (esClient.ilm.getLifecycle as Mock).mockResolvedValue(mockPolicyResponse);
 
       const results = [];
       for await (const policy of receiver.getIlmsPolicies(['policy1'], 30)) {
@@ -1320,7 +1323,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     });
 
     it('should handle empty policies response', async () => {
-      (esClient.ilm.getLifecycle as jest.Mock).mockResolvedValue({});
+      (esClient.ilm.getLifecycle as Mock).mockResolvedValue({});
 
       const results = [];
       for await (const policy of receiver.getIlmsPolicies(['policy1'], 30)) {
@@ -1331,7 +1334,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
     });
 
     it('should handle chunk size limits', async () => {
-      (esClient.ilm.getLifecycle as jest.Mock).mockResolvedValue(mockPolicyResponse);
+      (esClient.ilm.getLifecycle as Mock).mockResolvedValue(mockPolicyResponse);
 
       const results = [];
       for await (const policy of receiver.getIlmsPolicies(['policy1'], 5000)) {
@@ -1360,7 +1363,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
         },
       };
 
-      (esClient.ilm.getLifecycle as jest.Mock).mockResolvedValue(policyWithoutMinAge);
+      (esClient.ilm.getLifecycle as Mock).mockResolvedValue(policyWithoutMinAge);
 
       const results = [];
       for await (const policy of receiver.getIlmsPolicies(['policy1'], 30)) {
@@ -1384,7 +1387,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
     it('should handle errors from ES client', async () => {
       const error = new Error('Elasticsearch error');
-      (esClient.ilm.getLifecycle as jest.Mock).mockRejectedValue(error);
+      (esClient.ilm.getLifecycle as Mock).mockRejectedValue(error);
 
       const iterator = receiver.getIlmsPolicies(['policy1'], 30);
       await expect(iterator.next()).rejects.toThrow('Elasticsearch error');

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
@@ -16,49 +19,64 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
 import { useKibana } from '../../../../hooks/use_kibana';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: () => mockDispatch,
-}));
-jest.mock('../../../../hooks/use_kibana');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: () => mockDispatch,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_kibana');
 const mockTelemetry = {
-  reportWorkflowAiChatOpened: jest.fn(),
-  reportWorkflowAiSessionCompleted: jest.fn(),
-  reportAiProposalReceived: jest.fn(),
-  reportAiProposalResolved: jest.fn(),
+  reportWorkflowAiChatOpened: vi.fn(),
+  reportWorkflowAiSessionCompleted: vi.fn(),
+  reportAiProposalReceived: vi.fn(),
+  reportAiProposalResolved: vi.fn(),
 };
-jest.mock('../../../../hooks/use_telemetry', () => ({
-  useTelemetry: () => mockTelemetry,
-}));
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useUiSetting: jest.fn(),
-}));
-const useUiSettingMock = useUiSetting as jest.MockedFunction<typeof useUiSetting>;
-jest.mock('uuid', () => ({ v4: () => 'mock-uuid-1234' }));
-jest.mock('../../../../features/ai_integration', () => ({
-  AttachmentBridge: jest.fn().mockImplementation(() => ({
-    start: jest.fn(),
-    stop: jest.fn(),
-    setAttachmentId: jest.fn(),
-  })),
-  ProposalManager: jest.fn().mockImplementation(() => ({
-    initialize: jest.fn(),
-    dispose: jest.fn(),
-    getDiffHunks: jest.fn().mockReturnValue([]),
-    hasPendingProposals: jest.fn().mockReturnValue(false),
-  })),
-  setActiveProposalManager: jest.fn(),
-  setLastCreateSessionId: jest.fn(),
-  setSidebarOpen: jest.fn(),
-  consumeSidebarRestoreFor: jest.fn().mockReturnValue(false),
-  hasPersistedConversation: jest.fn().mockReturnValue(false),
-  findLinkedWorkflowAttachment: jest.requireActual('../../../../features/ai_integration')
-    .findLinkedWorkflowAttachment,
-  WORKFLOW_EDITOR_ATTACHMENT_ID: jest.requireActual('../../../../features/ai_integration')
-    .WORKFLOW_EDITOR_ATTACHMENT_ID,
-}));
+vi.mock('../../../../hooks/use_telemetry', () => {
+      const mocked = {
+      useTelemetry: () => mockTelemetry,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useUiSetting: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const useUiSettingMock = useUiSetting as MockedFunction<typeof useUiSetting>;
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'mock-uuid-1234' };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../features/ai_integration', async () => {
+      const mocked = {
+      AttachmentBridge: vi.fn().mockImplementation(() => ({
+        start: vi.fn(),
+        stop: vi.fn(),
+        setAttachmentId: vi.fn(),
+      })),
+      ProposalManager: vi.fn().mockImplementation(() => ({
+        initialize: vi.fn(),
+        dispose: vi.fn(),
+        getDiffHunks: vi.fn().mockReturnValue([]),
+        hasPendingProposals: vi.fn().mockReturnValue(false),
+      })),
+      setActiveProposalManager: vi.fn(),
+      setLastCreateSessionId: vi.fn(),
+      setSidebarOpen: vi.fn(),
+      consumeSidebarRestoreFor: vi.fn().mockReturnValue(false),
+      hasPersistedConversation: vi.fn().mockReturnValue(false),
+      findLinkedWorkflowAttachment: (await vi.importActual('../../../../features/ai_integration'))
+        .findLinkedWorkflowAttachment,
+      WORKFLOW_EDITOR_ATTACHMENT_ID: (await vi.importActual('../../../../features/ai_integration'))
+        .WORKFLOW_EDITOR_ATTACHMENT_ID,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type AiIntegrationModule = typeof import('../../../../features/ai_integration');
 const {
@@ -66,40 +84,41 @@ const {
   setSidebarOpen: mockSetSidebarOpen,
   consumeSidebarRestoreFor: mockConsumeSidebarRestoreFor,
   hasPersistedConversation: mockHasPersistedConversation,
-} = jest.requireMock('../../../../features/ai_integration') as {
-  setLastCreateSessionId: jest.MockedFunction<AiIntegrationModule['setLastCreateSessionId']>;
-  setSidebarOpen: jest.MockedFunction<AiIntegrationModule['setSidebarOpen']>;
-  consumeSidebarRestoreFor: jest.MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
-  hasPersistedConversation: jest.MockedFunction<AiIntegrationModule['hasPersistedConversation']>;
+} = (await vi.importMock('../../../../features/ai_integration')) as {
+  setLastCreateSessionId: MockedFunction<AiIntegrationModule['setLastCreateSessionId']>;
+  setSidebarOpen: MockedFunction<AiIntegrationModule['setSidebarOpen']>;
+  consumeSidebarRestoreFor: MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
+  hasPersistedConversation: MockedFunction<AiIntegrationModule['hasPersistedConversation']>;
 };
-const { AttachmentBridge: mockAttachmentBridge } = jest.requireMock(
-  '../../../../features/ai_integration'
-) as { AttachmentBridge: jest.Mock };
-jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
-  ProposalTracker: jest.fn().mockImplementation(() => ({
-    onAllResolved: jest.fn().mockReturnValue(jest.fn()),
-    updateStatus: jest.fn(),
-    cascadeDecline: jest.fn().mockReturnValue([]),
-    clearAll: jest.fn(),
-    getAllRecords: jest.fn().mockReturnValue([]),
-  })),
-}));
+const { AttachmentBridge: mockAttachmentBridge } = (await vi.importMock('../../../../features/ai_integration')) as { AttachmentBridge: Mock };
+vi.mock('../../../../features/ai_integration/proposal_tracker', () => {
+      const mocked = {
+      ProposalTracker: vi.fn().mockImplementation(() => ({
+        onAllResolved: vi.fn().mockReturnValue(vi.fn()),
+        updateStatus: vi.fn(),
+        cascadeDecline: vi.fn().mockReturnValue([]),
+        clearAll: vi.fn(),
+        getAllRecords: vi.fn().mockReturnValue([]),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 type ContentChangeCallback = () => void;
 
 const createMockModel = (value = 'name: test-workflow') => {
   let contentChangeCallback: ContentChangeCallback | null = null;
   return {
-    getValue: jest.fn().mockReturnValue(value),
-    onDidChangeContent: jest.fn((cb: ContentChangeCallback) => {
+    getValue: vi.fn().mockReturnValue(value),
+    onDidChangeContent: vi.fn((cb: ContentChangeCallback) => {
       contentChangeCallback = cb;
-      return { dispose: jest.fn() };
+      return { dispose: vi.fn() };
     }),
     simulateContentChange: (newValue?: string) => {
       if (newValue) {
-        (mockModel.getValue as jest.Mock).mockReturnValue(newValue);
+        (mockModel.getValue as Mock).mockReturnValue(newValue);
       }
       contentChangeCallback?.();
     },
@@ -109,7 +128,7 @@ const createMockModel = (value = 'name: test-workflow') => {
 let mockModel: ReturnType<typeof createMockModel>;
 
 const createMockEditor = (model: ReturnType<typeof createMockModel>) =>
-  ({ getModel: jest.fn().mockReturnValue(model) } as any);
+  ({ getModel: vi.fn().mockReturnValue(model) } as any);
 
 const embeddableChatAccessReady = {
   hasRequiredLicense: true,
@@ -117,18 +136,18 @@ const embeddableChatAccessReady = {
 } as const;
 
 const createMockAgentBuilder = () => ({
-  addAttachment: jest.fn(),
-  removeAttachment: jest.fn(),
-  setChatConfig: jest.fn(),
-  clearChatConfig: jest.fn(),
-  openChat: jest.fn().mockReturnValue({ chatRef: { close: jest.fn() } }),
-  getAgentBuilderAccess: jest.fn().mockResolvedValue(embeddableChatAccessReady),
+  addAttachment: vi.fn(),
+  removeAttachment: vi.fn(),
+  setChatConfig: vi.fn(),
+  clearChatConfig: vi.fn(),
+  openChat: vi.fn().mockReturnValue({ chatRef: { close: vi.fn() } }),
+  getAgentBuilderAccess: vi.fn().mockResolvedValue(embeddableChatAccessReady),
   events: {
     chat$: new Subject<BrowserChatEvent>(),
-    getChatEvents$: jest.fn(() => new Subject<BrowserChatEvent>().asObservable()),
+    getChatEvents$: vi.fn(() => new Subject<BrowserChatEvent>().asObservable()),
     ui: { activeConversation$: new BehaviorSubject<ActiveConversation | null>(null) },
   },
-  updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
+  updateAttachmentOrigin: vi.fn().mockResolvedValue(undefined),
   tools: {},
   attachments: {},
 });
@@ -190,15 +209,15 @@ const expectedChatConfig = (
 
 describe('useAgentBuilderIntegration', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockModel = createMockModel(INITIAL_YAML);
     mockConsumeSidebarRestoreFor.mockReturnValue(false);
     mockHasPersistedConversation.mockReturnValue(false);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   describe('attachment sync on mount', () => {
@@ -341,7 +360,7 @@ describe('useAgentBuilderIntegration', () => {
 
       mockModel.simulateContentChange('name: changed');
       act(() => {
-        jest.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
       });
 
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
@@ -396,7 +415,7 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.setChatConfig).not.toHaveBeenCalled();
 
       act(() => {
-        jest.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
       });
 
       const expected = expectedAttachment(updatedYaml);
@@ -423,12 +442,12 @@ describe('useAgentBuilderIntegration', () => {
 
       mockModel.simulateContentChange('change-1');
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
       mockModel.simulateContentChange('change-2');
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
       mockModel.simulateContentChange('change-3');
@@ -436,7 +455,7 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.setChatConfig).not.toHaveBeenCalled();
 
       act(() => {
-        jest.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
       });
 
       expect(agentBuilder.setChatConfig).toHaveBeenCalledTimes(1);
@@ -485,7 +504,7 @@ describe('useAgentBuilderIntegration', () => {
       unmount();
 
       act(() => {
-        jest.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
       });
 
       expect(agentBuilder.setChatConfig).not.toHaveBeenCalled();
@@ -678,7 +697,7 @@ describe('useAgentBuilderIntegration', () => {
   describe('cleanup closes the chat sidebar', () => {
     it('closes the chat sidebar on unmount (leaves the workflow app)', async () => {
       const agentBuilder = createMockAgentBuilder();
-      const chatRef = { close: jest.fn() };
+      const chatRef = { close: vi.fn() };
       agentBuilder.openChat.mockReturnValue({ chatRef });
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -703,7 +722,7 @@ describe('useAgentBuilderIntegration', () => {
       // closing because the effect cleanup ran on workflowId change and
       // called chatRef.close(). The close is now scoped to true unmount.
       const agentBuilder = createMockAgentBuilder();
-      const chatRef = { close: jest.fn() };
+      const chatRef = { close: vi.fn() };
       agentBuilder.openChat.mockReturnValue({ chatRef });
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -736,7 +755,7 @@ describe('useAgentBuilderIntegration', () => {
 
     it('does NOT close the sidebar when workflowName changes (unrelated dep churn)', async () => {
       const agentBuilder = createMockAgentBuilder();
-      const chatRef = { close: jest.fn() };
+      const chatRef = { close: vi.fn() };
       agentBuilder.openChat.mockReturnValue({ chatRef });
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -1313,7 +1332,7 @@ describe('useAgentBuilderIntegration', () => {
       agentBuilder.addAttachment.mockClear();
       act(() => {
         mockModel.simulateContentChange('name: edited');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
@@ -1363,7 +1382,7 @@ describe('useAgentBuilderIntegration', () => {
       agentBuilder.addAttachment.mockClear();
       act(() => {
         mockModel.simulateContentChange('name: edited');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(

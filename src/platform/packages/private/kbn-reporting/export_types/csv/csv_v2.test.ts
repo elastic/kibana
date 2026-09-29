@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/generate-csv', () => {
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
+vi.mock('@kbn/generate-csv', () => {
   class CsvGeneratorMock {
     generateData() {
       return { content_type: 'text/csv' };
@@ -39,7 +42,7 @@ const rawRequest: FakeRawRequest = {
 };
 const request = rawRequest as unknown as KibanaRequest;
 const taskInstanceFields = { startedAt: null, retryAt: null };
-const stream = {} as jest.Mocked<Writable>;
+const stream = {} as Mocked<Writable>;
 const spaceProjectRouting = { projectRouting: 'space' };
 
 const createPayload = (): TaskPayloadCsvFromSavedObject => ({
@@ -64,7 +67,7 @@ const setupExportType = () => {
   const data = dataPluginMock.createStartContract();
   const discover = discoverPluginMock.createStartContract();
   const esClient = elasticsearchServiceMock.createClusterClient();
-  const searchSourceAsScoped = jest.spyOn(data.search.searchSource, 'asScoped');
+  const searchSourceAsScoped = vi.spyOn(data.search.searchSource, 'asScoped');
   const exportType = new CsvV2ExportType(
     coreMock.createSetup(),
     config,
@@ -92,7 +95,7 @@ beforeAll(() => {
 test('uses space-scoped clients for ES|QL reports', async () => {
   const { data, discover, esClient, exportType } = setupExportType();
   const locatorClient = await discover.locator.asScopedClient(request);
-  jest.mocked(locatorClient.queryFromLocator).mockResolvedValue({ esql: 'FROM logs-*' });
+  vi.mocked(locatorClient.queryFromLocator).mockResolvedValue({ esql: 'FROM logs-*' });
 
   await exportType.runTask({
     jobId: 'esql-report',

@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { validateEndDate } from './v1';
 
 describe('validateEndDate', () => {
   const mockCurrentDate = new Date('2025-01-01T00:00:00.000Z');
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers().setSystemTime(mockCurrentDate);
+    vi.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(mockCurrentDate);
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('validates end date correctly', () => {

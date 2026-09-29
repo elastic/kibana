@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
 import { RULES_CONTENT_LIST_ID } from '../constants';
 import { ruleKeys } from './query_key_factory';
@@ -14,16 +17,19 @@ import {
   invalidateRulesTagsFacet,
 } from './invalidate_rules_content_list';
 
-jest.mock('@kbn/content-list-provider', () => ({
-  contentListKeys: { all: jest.fn((id: string) => ['contentList', id]) },
-  contentListQueryClient: { invalidateQueries: jest.fn().mockResolvedValue(undefined) },
-}));
+vi.mock('@kbn/content-list-provider', () => {
+      const mocked = {
+      contentListKeys: { all: vi.fn((id: string) => ['contentList', id]) },
+      contentListQueryClient: { invalidateQueries: vi.fn().mockResolvedValue(undefined) },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInvalidateQueries = contentListQueryClient.invalidateQueries as jest.Mock;
+const mockInvalidateQueries = contentListQueryClient.invalidateQueries as Mock;
 
 describe('invalidateRulesContentList helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('invalidateRulesListView invalidates the Content List scope for the rules list', async () => {

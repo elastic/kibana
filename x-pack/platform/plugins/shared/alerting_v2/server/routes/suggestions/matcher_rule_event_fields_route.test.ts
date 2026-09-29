@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { createRouteDependencies } from '../test_utils';
 import { MatcherRuleEventFieldsRoute } from './matcher_rule_event_fields_route';
 
-const createSuggestionsService = (): jest.Mocked<MatcherSuggestionsService> =>
+const createSuggestionsService = (): Mocked<MatcherSuggestionsService> =>
   ({
-    getRuleEventFieldNames: jest.fn(),
-    getSuggestions: jest.fn(),
-  } as unknown as jest.Mocked<MatcherSuggestionsService>);
+    getRuleEventFieldNames: vi.fn(),
+    getSuggestions: vi.fn(),
+  } as unknown as Mocked<MatcherSuggestionsService>);
 
 describe('MatcherRuleEventFieldsRoute', () => {
   it('calls getDataFieldNames with undefined when no matcher query param is provided', async () => {

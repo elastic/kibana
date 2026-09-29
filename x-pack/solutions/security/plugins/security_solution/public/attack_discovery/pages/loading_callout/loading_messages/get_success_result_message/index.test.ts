@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getSuccessResultMessage } from '.';
 
-jest.mock('../get_formatted_time', () => ({
-  getFormattedDate: jest.fn(() => 'mocked-date'),
-}));
+vi.mock('../get_formatted_time', () => {
+      const mocked = {
+      getFormattedDate: vi.fn(() => 'mocked-date'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../translations', () => ({
-  NO_MATCHING_ALERTS_VIA: jest.fn(() => 'no-matching-alerts'),
-  RAN_SUCCESSFULLY_VIA_WITH_DISCOVERIES_COUNT: jest.fn(() => 'with-discoveries'),
-  RAN_SUCCESSFULLY_VIA_NO_DISCOVERIES_COUNT: jest.fn(() => 'no-discoveries'),
-  RAN_SUCCESSFULLY_VIA_WITH_SUMMARY: jest.fn(() => 'with-summary'),
-}));
+vi.mock('../../translations', () => {
+      const mocked = {
+      NO_MATCHING_ALERTS_VIA: vi.fn(() => 'no-matching-alerts'),
+      RAN_SUCCESSFULLY_VIA_WITH_DISCOVERIES_COUNT: vi.fn(() => 'with-discoveries'),
+      RAN_SUCCESSFULLY_VIA_NO_DISCOVERIES_COUNT: vi.fn(() => 'no-discoveries'),
+      RAN_SUCCESSFULLY_VIA_WITH_SUMMARY: vi.fn(() => 'with-summary'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   alertsContextCount: 1,
@@ -28,7 +36,7 @@ const defaultProps = {
 
 describe('getSuccessResultMessage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns no-matching-alerts when alertsContextCount is 0', () => {
@@ -63,8 +71,8 @@ describe('getSuccessResultMessage', () => {
       expect(result).toBe('with-summary');
     });
 
-    it('passes hallucinationsFilteredCount when provided', () => {
-      const { RAN_SUCCESSFULLY_VIA_WITH_SUMMARY } = jest.requireMock('../../translations');
+    it('passes hallucinationsFilteredCount when provided', async () => {
+      const { RAN_SUCCESSFULLY_VIA_WITH_SUMMARY } = (await vi.importMock('../../translations'));
 
       getSuccessResultMessage({ ...summaryProps, hallucinationsFilteredCount: 1 });
 
@@ -73,8 +81,8 @@ describe('getSuccessResultMessage', () => {
       );
     });
 
-    it('passes hallucinationsFilteredCount as undefined when not provided (custom workflow)', () => {
-      const { RAN_SUCCESSFULLY_VIA_WITH_SUMMARY } = jest.requireMock('../../translations');
+    it('passes hallucinationsFilteredCount as undefined when not provided (custom workflow)', async () => {
+      const { RAN_SUCCESSFULLY_VIA_WITH_SUMMARY } = (await vi.importMock('../../translations'));
 
       getSuccessResultMessage(summaryProps);
 

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { WorkspaceStorage } from './storage';
 import { WorkspaceClient } from './workspace_client';
 import { WORKSPACE_SCHEMA_VERSION, type WorkspaceDocument, type WorkspaceFile } from '../types';
 
 const createMockStorage = () => {
-  const search = jest.fn();
-  const index = jest.fn();
+  const search = vi.fn();
+  const index = vi.fn();
   const client = { search, index };
   const storage = {
-    getClient: jest.fn().mockReturnValue(client),
+    getClient: vi.fn().mockReturnValue(client),
   } as unknown as WorkspaceStorage;
   return { storage, search, index };
 };

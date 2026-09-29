@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { join } from 'path';
 import fs from 'fs';
 
@@ -16,10 +18,10 @@ import del from 'del';
 import { existingInstall, assertVersion } from './kibana';
 import { Logger } from '../../logger';
 
-jest.spyOn(fs, 'statSync');
+vi.spyOn(fs, 'statSync');
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('kibana cli', function () {
@@ -140,6 +142,6 @@ describe('kibana cli', function () {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createVerify } from 'crypto';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -23,13 +26,13 @@ import {
 } from './message_signing_service';
 
 describe('MessageSigningService', () => {
-  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
-  let esoClientMock: jest.Mocked<EncryptedSavedObjectsClient>;
+  let soClientMock: Mocked<SavedObjectsClientContract>;
+  let esoClientMock: Mocked<EncryptedSavedObjectsClient>;
   let messageSigningService: MessageSigningServiceInterface;
 
   function mockCreatePointInTimeFinderAsInternalUser(savedObjects: unknown[] = []) {
-    esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
-      close: jest.fn(),
+    esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockResolvedValue({
+      close: vi.fn(),
       find: function* asyncGenerator() {
         yield { saved_objects: savedObjects };
       },
@@ -37,16 +40,16 @@ describe('MessageSigningService', () => {
   }
 
   function mockCreatePointInTimeFinderAsInternalUserOnce(savedObjects: unknown[] = []) {
-    esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+    esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: savedObjects };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [] };
         },
@@ -60,10 +63,10 @@ describe('MessageSigningService', () => {
     });
     appContextService.start(mockContext);
     esoClientMock =
-      mockContext.encryptedSavedObjectsStart!.getClient() as jest.Mocked<EncryptedSavedObjectsClient>;
+      mockContext.encryptedSavedObjectsStart!.getClient() as Mocked<EncryptedSavedObjectsClient>;
     soClientMock = appContextService
       .getSavedObjects()
-      .getScopedClient({} as unknown as KibanaRequest) as jest.Mocked<SavedObjectsClientContract>;
+      .getScopedClient({} as unknown as KibanaRequest) as Mocked<SavedObjectsClientContract>;
 
     messageSigningService = new MessageSigningService(loggingSystemMock.create(), esoClientMock);
   }
@@ -86,7 +89,7 @@ describe('MessageSigningService', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('can correctly generate key pair if none exist', async () => {
@@ -135,7 +138,7 @@ describe('MessageSigningService', () => {
     it('throws `getCurrentKeyPairObj` error if any on rotate', async () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
       // mock delete to throw
-      jest
+      vi
         .spyOn(messageSigningService, 'getCurrentKeyPairObj' as any)
         .mockRejectedValue(Error('foo'));
 
@@ -170,7 +173,7 @@ describe('MessageSigningService', () => {
     it('throws `generateKeyPair` error if any on rotate', async () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
       // mock delete to throw
-      messageSigningService.generateKeyPair = jest.fn().mockRejectedValue(Error('foo'));
+      messageSigningService.generateKeyPair = vi.fn().mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
       await expect(response).rejects.toThrow('Error rotating key pair: foo');
@@ -211,12 +214,12 @@ describe('MessageSigningService', () => {
     });
 
     it('will retry getting keypair if ESO error', async () => {
-      esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+      esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockRejectedValueOnce(new Error('some error'))
         .mockRejectedValueOnce(new Error('another error'))
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [] };
           },
@@ -256,7 +259,7 @@ describe('MessageSigningService', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('can correctly generate key pair if none exist', async () => {

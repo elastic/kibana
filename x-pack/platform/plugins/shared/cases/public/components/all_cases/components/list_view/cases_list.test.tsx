@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,28 +17,31 @@ import { basicCase } from '../../../../containers/mock';
 import type { CasesFindResponseUI } from '../../../../../common/ui/types';
 import * as i18n from '../../translations';
 
-jest.mock('../../../../common/navigation/hooks');
+vi.mock('../../../../common/navigation/hooks');
 
-jest.mock('./case_list_item', () => ({
-  CaseListItem: ({
-    theCase,
-    isSelected,
-    hasSelection,
-    isSelectable,
-  }: {
-    theCase: { id: string };
-    isSelected: boolean;
-    hasSelection: boolean;
-    isSelectable: boolean;
-  }) => (
-    <div
-      data-test-subj={`cases-list-item-${theCase.id}`}
-      data-is-selected={isSelected}
-      data-has-selection={hasSelection}
-      data-is-selectable={isSelectable}
-    />
-  ),
-}));
+vi.mock('./case_list_item', () => {
+      const mocked = {
+      CaseListItem: ({
+        theCase,
+        isSelected,
+        hasSelection,
+        isSelectable,
+      }: {
+        theCase: { id: string };
+        isSelected: boolean;
+        hasSelection: boolean;
+        isSelectable: boolean;
+      }) => (
+        <div
+          data-test-subj={`cases-list-item-${theCase.id}`}
+          data-is-selected={isSelected}
+          data-has-selection={hasSelection}
+          data-is-selectable={isSelectable}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const alwaysSelectable = () => true;
 
@@ -61,17 +66,17 @@ const defaultProps = {
   userProfiles: new Map(),
   isLoading: false,
   pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 1 },
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   disableActions: false,
   selectedFields: [],
   selectedCases: [],
-  onSelectionChange: jest.fn(),
+  onSelectionChange: vi.fn(),
   isSelectable: alwaysSelectable,
 };
 
 describe('CasesList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows skeleton loading when isLoading and no cases', () => {
@@ -141,7 +146,7 @@ describe('CasesList', () => {
       <CasesList
         {...defaultProps}
         selectedCases={[basicCase]}
-        onSelectionChange={jest.fn()}
+        onSelectionChange={vi.fn()}
         isSelectable={alwaysSelectable}
       />
     );
@@ -160,7 +165,7 @@ describe('CasesList', () => {
         {...defaultProps}
         data={{ ...mockData, cases: [basicCase, secondCase], total: 2 }}
         selectedCases={[secondCase]}
-        onSelectionChange={jest.fn()}
+        onSelectionChange={vi.fn()}
         isSelectable={alwaysSelectable}
       />
     );
@@ -182,7 +187,7 @@ describe('CasesList', () => {
   });
 
   it('calls onChange with correct page params when changing items per page', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const manyData: CasesFindResponseUI = {
       ...mockData,
       cases: Array.from({ length: 10 }, (_, idx) => ({ ...basicCase, id: `case-${idx}` })),
@@ -205,7 +210,7 @@ describe('CasesList', () => {
   });
 
   it('calls onChange with correct page params when changing page', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const manyData: CasesFindResponseUI = {
       ...mockData,
       cases: Array.from({ length: 10 }, (_, idx) => ({ ...basicCase, id: `case-${idx}` })),

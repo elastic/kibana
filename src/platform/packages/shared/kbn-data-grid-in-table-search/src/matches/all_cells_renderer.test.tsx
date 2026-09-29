@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { AllCellsRenderer } from './all_cells_renderer';
@@ -16,16 +18,16 @@ import { wrapRenderCellValueWithInTableSearchSupport } from '../wrap_render_cell
 describe('AllCellsRenderer', () => {
   const testData = generateMockData(100, 2);
 
-  const originalRenderCellValue = jest.fn(getRenderCellValueMock(testData));
+  const originalRenderCellValue = vi.fn(getRenderCellValueMock(testData));
   const getRenderCellValueWrappedMock = () =>
-    jest.fn(wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue, 'black', 'green'));
+    vi.fn(wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue, 'black', 'green'));
 
   beforeEach(() => {
     originalRenderCellValue.mockClear();
   });
 
   it('processes all cells in all rows', async () => {
-    const onFinish = jest.fn();
+    const onFinish = vi.fn();
     const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = 'cell';
@@ -54,7 +56,7 @@ describe('AllCellsRenderer', () => {
   });
 
   it('counts multiple matches correctly', async () => {
-    const onFinish = jest.fn();
+    const onFinish = vi.fn();
     const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = '-';
@@ -83,7 +85,7 @@ describe('AllCellsRenderer', () => {
   });
 
   it('counts a single match correctly', async () => {
-    const onFinish = jest.fn();
+    const onFinish = vi.fn();
     const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = 'cell-in-row-10-col-0';
@@ -120,7 +122,7 @@ describe('AllCellsRenderer', () => {
   });
 
   it('skips cells which create exceptions', async () => {
-    const onFinish = jest.fn();
+    const onFinish = vi.fn();
     const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = '50';

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 
@@ -13,12 +16,15 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 
 import { AiAssistant } from '.';
 
-jest.mock('../../../../assistant/use_assistant_availability', () => ({
-  useAssistantAvailability: jest.fn(),
-}));
+vi.mock('../../../../assistant/use_assistant_availability', () => {
+      const mocked = {
+      useAssistantAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useAssistantAvailabilityMock = useAssistantAvailability as jest.Mock;
-const getFieldsMock = jest.fn().mockReturnValue({ queryBar: { value: { query: 'something' } } });
+const useAssistantAvailabilityMock = useAssistantAvailability as Mock;
+const getFieldsMock = vi.fn().mockReturnValue({ queryBar: { value: { query: 'something' } } });
 describe('AiAssistant', () => {
   beforeEach(() => {
     useAssistantAvailabilityMock.mockReturnValue({ hasAssistantPrivilege: true });
@@ -27,7 +33,7 @@ describe('AiAssistant', () => {
     useAssistantAvailabilityMock.mockReturnValue({ hasAssistantPrivilege: false });
 
     const { container } = render(
-      <AiAssistant getFields={getFieldsMock} setFieldValue={jest.fn()} />,
+      <AiAssistant getFields={getFieldsMock} setFieldValue={vi.fn()} />,
       {
         wrapper: TestProviders,
       }
@@ -36,7 +42,7 @@ describe('AiAssistant', () => {
     expect(container).toBeEmptyDOMElement();
   });
   it('renders chat component when has hasAssistantPrivilege', () => {
-    render(<AiAssistant getFields={getFieldsMock} setFieldValue={jest.fn()} />, {
+    render(<AiAssistant getFields={getFieldsMock} setFieldValue={vi.fn()} />, {
       wrapper: TestProviders,
     });
 

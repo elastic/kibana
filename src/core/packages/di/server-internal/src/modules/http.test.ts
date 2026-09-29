@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { type Container } from 'inversify';
 import { inject, injectable, optional } from 'inversify';
 import { createToken, KibanaContainerModule, Scope } from '@kbn/core-di';
@@ -55,16 +58,16 @@ const expectedRouteConfig = {
 };
 
 describe('http', () => {
-  let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
+  let injection: Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
-  let http: jest.Mocked<TCoreSetup['http']>;
-  let router: jest.Mocked<ReturnType<typeof http.createRouter>>;
+  let http: Mocked<TCoreSetup['http']>;
+  let router: Mocked<ReturnType<typeof http.createRouter>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
-    router = { post: jest.fn(), handleLegacyErrors: jest.fn() } as unknown as typeof router;
-    http = { createRouter: jest.fn().mockReturnValue(router) } as unknown as typeof http;
+    router = { post: vi.fn(), handleLegacyErrors: vi.fn() } as unknown as typeof router;
+    http = { createRouter: vi.fn().mockReturnValue(router) } as unknown as typeof http;
     container = injection.getContainer();
     container.load(new KibanaContainerModule(loadHttp));
     container.bind(CoreSetup('http')).toConstantValue(http);
@@ -104,15 +107,15 @@ describe('http', () => {
     setup(container);
     start(container);
 
-    const handleSpy = jest.spyOn(TestRoute.prototype, 'handle');
+    const handleSpy = vi.spyOn(TestRoute.prototype, 'handle');
     expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, expect.any(Function));
     const [, handler] = router.post.mock.lastCall!;
     const request = {} as unknown as KibanaRequest;
     const response = {
-      ok: jest.fn(() => 'something'),
-    } as unknown as jest.Mocked<KibanaResponseFactory>;
+      ok: vi.fn(() => 'something'),
+    } as unknown as Mocked<KibanaResponseFactory>;
     const scope = container.get(Scope);
-    const disposeSpy = jest.spyOn(scope, 'dispose');
+    const disposeSpy = vi.spyOn(scope, 'dispose');
 
     await expect(handler({} as any, request, response)).resolves.toBe('something');
     expect(response.ok).toHaveBeenCalled();
@@ -131,8 +134,8 @@ describe('http', () => {
 
     const [, handler] = router.post.mock.lastCall!;
     const response = {
-      ok: jest.fn(() => 'something'),
-    } as unknown as jest.Mocked<KibanaResponseFactory>;
+      ok: vi.fn(() => 'something'),
+    } as unknown as Mocked<KibanaResponseFactory>;
 
     await expect(handler({} as any, {} as unknown as KibanaRequest, response)).resolves.toBe(
       'something'
@@ -141,7 +144,7 @@ describe('http', () => {
   });
 
   it('should wrap a route handler to handle legacy errors', () => {
-    const wrapper = jest.fn();
+    const wrapper = vi.fn();
     router.handleLegacyErrors.mockReturnValue(wrapper);
     TestRoute.handleLegacyErrors = true;
     container.bind(Route).toConstantValue(TestRoute);

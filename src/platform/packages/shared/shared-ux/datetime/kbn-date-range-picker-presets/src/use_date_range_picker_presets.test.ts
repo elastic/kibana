@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 
@@ -30,21 +33,21 @@ const lockedPresets: PresetItem[] = defaultPresets.map((preset) => ({
 }));
 
 const createServiceMock = (
-  overrides: Partial<jest.Mocked<DateRangePickerPresetsService>> = {}
-): jest.Mocked<DateRangePickerPresetsService> => ({
-  getDefaultPresets: jest.fn(() => defaultPresets),
-  getPresets$: jest.fn(() => of(lockedPresets)),
-  canPersist: jest.fn(() => true),
-  savePreset: jest.fn<Promise<SavePresetOutcome>, [PresetItem]>().mockResolvedValue('saved'),
-  deletePreset: jest.fn<Promise<void>, [PresetItem]>().mockResolvedValue(undefined),
+  overrides: Partial<Mocked<DateRangePickerPresetsService>> = {}
+): Mocked<DateRangePickerPresetsService> => ({
+  getDefaultPresets: vi.fn(() => defaultPresets),
+  getPresets$: vi.fn(() => of(lockedPresets)),
+  canPersist: vi.fn(() => true),
+  savePreset: vi.fn<Promise<SavePresetOutcome>, [PresetItem]>().mockResolvedValue('saved'),
+  deletePreset: vi.fn<Promise<void>, [PresetItem]>().mockResolvedValue(undefined),
   ...overrides,
 });
 
 const createNotifications = (): NotificationsStart =>
   ({
     toasts: {
-      addDanger: jest.fn(),
-      addWarning: jest.fn(),
+      addDanger: vi.fn(),
+      addWarning: vi.fn(),
     },
   } as unknown as NotificationsStart);
 
@@ -53,7 +56,7 @@ const renderPresetsHook = ({
   persistenceEnabled = true,
   notifications = createNotifications(),
 }: {
-  service?: jest.Mocked<DateRangePickerPresetsService>;
+  service?: Mocked<DateRangePickerPresetsService>;
   persistenceEnabled?: boolean;
   notifications?: NotificationsStart;
 } = {}) => {
@@ -67,7 +70,7 @@ describe('useDateRangePickerPresets', () => {
   describe('when enabled', () => {
     it('returns the resolved presets from the service', async () => {
       const stored: PresetItem[] = [{ start: 'now-1h', end: 'now', label: 'Last hour' }];
-      const service = createServiceMock({ getPresets$: jest.fn(() => of(stored)) });
+      const service = createServiceMock({ getPresets$: vi.fn(() => of(stored)) });
       const { hook } = renderPresetsHook({ service });
 
       await waitFor(() => expect(hook.result.current.presets).toEqual(stored));
@@ -83,7 +86,7 @@ describe('useDateRangePickerPresets', () => {
     });
 
     it('omits save/delete handlers when the user cannot write', () => {
-      const service = createServiceMock({ canPersist: jest.fn(() => false) });
+      const service = createServiceMock({ canPersist: vi.fn(() => false) });
       const { hook } = renderPresetsHook({ service });
 
       expect(hook.result.current.onPresetSave).toBeUndefined();
@@ -102,7 +105,7 @@ describe('useDateRangePickerPresets', () => {
 
     it('warns when the preset limit is reached', async () => {
       const service = createServiceMock({
-        savePreset: jest
+        savePreset: vi
           .fn<Promise<SavePresetOutcome>, [PresetItem]>()
           .mockResolvedValue('limit-reached'),
       });
@@ -117,7 +120,7 @@ describe('useDateRangePickerPresets', () => {
 
     it('shows a danger toast when saving fails', async () => {
       const service = createServiceMock({
-        savePreset: jest
+        savePreset: vi
           .fn<Promise<SavePresetOutcome>, [PresetItem]>()
           .mockRejectedValue(new Error('boom')),
       });
@@ -141,7 +144,7 @@ describe('useDateRangePickerPresets', () => {
 
     it('shows a danger toast when deleting fails', async () => {
       const service = createServiceMock({
-        deletePreset: jest.fn<Promise<void>, [PresetItem]>().mockRejectedValue(new Error('boom')),
+        deletePreset: vi.fn<Promise<void>, [PresetItem]>().mockRejectedValue(new Error('boom')),
       });
       const { hook, notifications } = renderPresetsHook({ service });
       await waitFor(() => expect(hook.result.current.onPresetDelete).toBeDefined());

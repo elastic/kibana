@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -27,8 +29,8 @@ let capturedOnTimeChange: ((props: any) => void) | undefined;
 let capturedOnRefreshChange: ((props: any) => void) | undefined;
 let capturedOnRefresh: (() => void) | undefined;
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiSuperDatePicker: (props: any) => {
@@ -42,15 +44,15 @@ jest.mock('@elastic/eui', () => {
 
 describe('AnalyticsCollectionToolbar', () => {
   const mockActions = {
-    deleteAnalyticsCollection: jest.fn(),
-    findDataViewId: jest.fn(),
-    onTimeRefresh: jest.fn(),
-    setRefreshInterval: jest.fn(),
-    setTimeRange: jest.fn(),
+    deleteAnalyticsCollection: vi.fn(),
+    findDataViewId: vi.fn(),
+    onTimeRefresh: vi.fn(),
+    setRefreshInterval: vi.fn(),
+    setTimeRange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedOnTimeChange = undefined;
     capturedOnRefreshChange = undefined;
     capturedOnRefresh = undefined;

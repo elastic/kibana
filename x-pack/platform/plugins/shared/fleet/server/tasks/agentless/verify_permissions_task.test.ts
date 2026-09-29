@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
@@ -19,38 +22,50 @@ import {
   scheduleVerifyPermissionsTask,
 } from './verify_permissions_task';
 
-jest.mock('../../services/agent_policy_update', () => ({
-  agentPolicyUpdateEventHandler: jest.fn(),
-}));
+vi.mock('../../services/agent_policy_update', () => {
+      const mocked = {
+      agentPolicyUpdateEventHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/agent_policy', () => ({
-  agentPolicyService: {
-    list: jest.fn(),
-    createVerifierPolicy: jest.fn(),
-    deleteVerifierPolicy: jest.fn(),
-  },
-  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('ingest-agent-policies'),
-}));
+vi.mock('../../services/agent_policy', () => {
+      const mocked = {
+      agentPolicyService: {
+        list: vi.fn(),
+        createVerifierPolicy: vi.fn(),
+        deleteVerifierPolicy: vi.fn(),
+      },
+      getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/epm/packages', () => ({
-  getPackageInfo: jest.fn().mockResolvedValue({ name: 'aws', title: 'AWS', version: '2.0.0' }),
-}));
+vi.mock('../../services/epm/packages', () => {
+      const mocked = {
+      getPackageInfo: vi.fn().mockResolvedValue({ name: 'aws', title: 'AWS', version: '2.0.0' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/epm/packages/install', () => ({
-  ensureInstalledPackage: jest.fn().mockResolvedValue({
-    status: 'already_installed',
-    package: { name: 'aws', version: '2.0.0' },
-  }),
-}));
+vi.mock('../../services/epm/packages/install', () => {
+      const mocked = {
+      ensureInstalledPackage: vi.fn().mockResolvedValue({
+        status: 'already_installed',
+        package: { name: 'aws', version: '2.0.0' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as jest.MockedFunction<
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as MockedFunction<
   typeof getAgentPolicySavedObjectType
 >;
 
 const mockSoClient = {
-  find: jest.fn(),
-  update: jest.fn(),
+  find: vi.fn(),
+  update: vi.fn(),
 } as any;
 
 const mockEsClient = {} as any;
@@ -87,7 +102,7 @@ describe('verify_permissions_task', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSoClient.find.mockReset();
     mockSoClient.update.mockReset();
     mockedAgentPolicyService.list.mockReset();
@@ -96,12 +111,12 @@ describe('verify_permissions_task', () => {
     const mockContext = createAppContextStartContractMock();
     appContextService.start(mockContext);
 
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
-    jest
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+    vi
       .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
       .mockReturnValue(mockSoClient);
-    jest.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(mockEsClient);
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+    vi.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(mockEsClient);
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableOTelVerifier: true,
     } as any);
 
@@ -168,7 +183,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should skip when enableOTelVerifier is disabled', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
         enableOTelVerifier: false,
       } as any);
 
@@ -180,7 +195,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should skip when experimental features are undefined', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue(undefined as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue(undefined as any);
 
       await taskRunner.run();
       expect(logger.debug).toHaveBeenCalledWith(
@@ -605,7 +620,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should NOT request a follow-up run when the feature flag is off', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
         enableOTelVerifier: false,
       } as any);
 

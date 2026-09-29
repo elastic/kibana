@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowSummaries } from './use_workflow_summaries';
 
-const mockMgetWorkflows = jest.fn();
+const mockMgetWorkflows = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: () => ({ mgetWorkflows: mockMgetWorkflows }),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: () => ({ mgetWorkflows: mockMgetWorkflows }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderSummaries = (initialIds: string[]) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -33,7 +38,7 @@ describe('useWorkflowSummaries', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not fetch and is not loading when there are no ids', () => {

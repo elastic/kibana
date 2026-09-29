@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { getAgentBuilderResourceAvailability } from './get_agent_builder_resource_availability';
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
 } as unknown as Logger;
 
 const mockCore = coreMock.createSetup();
@@ -19,13 +22,13 @@ const request = httpServerMock.createKibanaRequest();
 
 describe('getAgentBuilderResourceAvailability', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
+    vi.resetAllMocks();
+    (mockCore.getStartServices as unknown as Mock).mockResolvedValue([
       {},
       {
         spaces: {
           spacesService: {
-            getActiveSpace: jest.fn().mockResolvedValue({ solution: 'oblt' }),
+            getActiveSpace: vi.fn().mockResolvedValue({ solution: 'oblt' }),
           },
         },
       },
@@ -43,12 +46,12 @@ describe('getAgentBuilderResourceAvailability', () => {
   });
 
   it('returns unavailable when space solution is Elasticsearch', async () => {
-    (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
+    (mockCore.getStartServices as unknown as Mock).mockResolvedValue([
       {},
       {
         spaces: {
           spacesService: {
-            getActiveSpace: jest.fn().mockResolvedValue({ solution: 'es' }),
+            getActiveSpace: vi.fn().mockResolvedValue({ solution: 'es' }),
           },
         },
       },
@@ -65,12 +68,12 @@ describe('getAgentBuilderResourceAvailability', () => {
   });
 
   it('returns unavailable when space solution is Security', async () => {
-    (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
+    (mockCore.getStartServices as unknown as Mock).mockResolvedValue([
       {},
       {
         spaces: {
           spacesService: {
-            getActiveSpace: jest.fn().mockResolvedValue({ solution: 'security' }),
+            getActiveSpace: vi.fn().mockResolvedValue({ solution: 'security' }),
           },
         },
       },
@@ -87,12 +90,12 @@ describe('getAgentBuilderResourceAvailability', () => {
   });
 
   it('returns available when space solution is undefined', async () => {
-    (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
+    (mockCore.getStartServices as unknown as Mock).mockResolvedValue([
       {},
       {
         spaces: {
           spacesService: {
-            getActiveSpace: jest.fn().mockResolvedValue({ solution: undefined }),
+            getActiveSpace: vi.fn().mockResolvedValue({ solution: undefined }),
           },
         },
       },
@@ -108,7 +111,7 @@ describe('getAgentBuilderResourceAvailability', () => {
   });
 
   it('returns available when spaces plugin is unavailable', async () => {
-    (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([{}, {}]);
+    (mockCore.getStartServices as unknown as Mock).mockResolvedValue([{}, {}]);
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore as any,
       request,

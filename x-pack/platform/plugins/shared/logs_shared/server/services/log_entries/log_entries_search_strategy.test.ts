@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { lastValueFrom, of, throwError } from 'rxjs';
 import {
@@ -265,7 +267,7 @@ describe('LogEntries search strategy', () => {
 });
 
 const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
-  search: jest.fn((esSearchRequest: IEsSearchRequest) => {
+  search: vi.fn((esSearchRequest: IEsSearchRequest) => {
     if (typeof esSearchRequest.id === 'string') {
       if (esSearchRequest.id === esSearchResponse.id) {
         return of(esSearchResponse);
@@ -284,7 +286,7 @@ const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
       return of(esSearchResponse);
     }
   }),
-  cancel: jest.fn().mockResolvedValue(undefined),
+  cancel: vi.fn().mockResolvedValue(undefined),
 });
 
 const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => ({
@@ -300,6 +302,6 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
 // because the `licensing` plugin modifies the `RequestHandlerContext` core type.
 const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
-    getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
+    getSearchStrategy: vi.fn().mockReturnValue(esSearchStrategyMock),
   },
 });

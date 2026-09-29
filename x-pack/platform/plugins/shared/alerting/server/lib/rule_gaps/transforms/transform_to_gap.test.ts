@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { transformToGap } from './transform_to_gap';
 import { Gap } from '../gap';
@@ -63,8 +65,8 @@ describe('transformToGap', () => {
   });
 
   it('transforms valid event to Gap object', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(mockNow));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(mockNow));
 
     const events = createMockEvent();
     const result = transformToGap(events);
@@ -93,7 +95,7 @@ describe('transformToGap', () => {
       _primary_term: 1,
     });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('filters out invalid gaps (missing range)', () => {

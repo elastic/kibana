@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { isNativeFunctionCallingSupportedMock } from './inference_adapter.test.mocks';
 import type OpenAI from 'openai';
 import { v4 } from 'uuid';
@@ -50,11 +53,11 @@ function createOpenAIChunk({
 
 describe('inferenceAdapter', () => {
   const executorMock = {
-    getConnector: jest.fn(),
-    invoke: jest.fn(),
+    getConnector: vi.fn(),
+    invoke: vi.fn(),
   } as InferenceExecutor & {
-    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
-    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+    invoke: MockedFunction<InferenceExecutor['invoke']>;
+    getConnector: MockedFunction<InferenceExecutor['getConnector']>;
   };
 
   const logger = loggerMock.create();

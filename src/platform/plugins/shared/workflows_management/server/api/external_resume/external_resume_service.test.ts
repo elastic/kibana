@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   ExecutionStatus,
   HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
@@ -59,17 +62,17 @@ function createStepExecution(
 
 describe('external resume service', () => {
   const workflowsService = {
-    getStepExecution: jest.fn(),
-    getWorkflowsExecutionEngine: jest.fn(),
-    claimHitlStepForExternalResume: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowsService>;
+    getStepExecution: vi.fn(),
+    getWorkflowsExecutionEngine: vi.fn(),
+    claimHitlStepForExternalResume: vi.fn(),
+  } as unknown as Mocked<WorkflowsService>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     workflowsService.getStepExecution.mockResolvedValue(createStepExecution());
     workflowsService.claimHitlStepForExternalResume.mockResolvedValue(true);
     workflowsService.getWorkflowsExecutionEngine.mockResolvedValue({
-      resumeWorkflowExecution: jest.fn().mockResolvedValue({
+      resumeWorkflowExecution: vi.fn().mockResolvedValue({
         resumedBy: 'external_resume:step-exec-1',
       }),
     } as unknown as WorkflowsExecutionEnginePluginStart);
@@ -330,7 +333,7 @@ describe('external resume service', () => {
 
   it('maps engine invalid-status errors to ExternalResumeError', async () => {
     workflowsService.getWorkflowsExecutionEngine.mockResolvedValue({
-      resumeWorkflowExecution: jest
+      resumeWorkflowExecution: vi
         .fn()
         .mockRejectedValue(
           new WorkflowExecutionInvalidStatusError('exec-1', 'running', 'waiting_for_input')
@@ -353,11 +356,11 @@ describe('external resume service', () => {
 
 describe('getExternalResumeFormPage', () => {
   const workflowsService = {
-    getStepExecution: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowsService>;
+    getStepExecution: vi.fn(),
+  } as unknown as Mocked<WorkflowsService>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     workflowsService.getStepExecution.mockResolvedValue(
       createStepExecution({
         input: {

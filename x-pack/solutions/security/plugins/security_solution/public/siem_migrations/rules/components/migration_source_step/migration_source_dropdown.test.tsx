@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MigrationSourceDropdown } from './migration_source_dropdown';
@@ -13,12 +15,15 @@ import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../../common/constants';
 import { mocked } from 'jest-mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MigrationSourceDropdown', () => {
-  const mockSetMigrationSource = jest.fn();
+  const mockSetMigrationSource = vi.fn();
 
   const defaultProps = {
     migrationSource: MigrationSource.SPLUNK,
@@ -37,7 +42,7 @@ describe('MigrationSourceDropdown', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 
 import { READ_RULE_EXECUTION_RESULTS_URL } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -83,8 +85,8 @@ describe('readRuleExecutionResultsRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return 200 when client returns data', async () => {
@@ -153,8 +155,8 @@ describe('readRuleExecutionResultsRoute', () => {
 
   it('should use default values for optional parameters', async () => {
     // Freeze time for the duration of the test to avoid flakiness
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2000-01-01T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2000-01-01T12:00:00.000Z'));
 
     try {
       clients.ruleExecutionLog.getUnifiedExecutionResults.mockResolvedValue({
@@ -182,7 +184,7 @@ describe('readRuleExecutionResultsRoute', () => {
       expect(args.filter?.to).toBe('2000-01-01T12:00:00.000Z');
     } finally {
       // Unfreeze time
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 });

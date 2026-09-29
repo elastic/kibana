@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -47,8 +49,8 @@ describe('FieldRuleEditor', () => {
   it('can render a text-based field rule', () => {
     const props = {
       rule: new FieldRule('username', '*'),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
@@ -60,8 +62,8 @@ describe('FieldRuleEditor', () => {
   it('can render a number-based field rule', () => {
     const props = {
       rule: new FieldRule('username', 12),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
@@ -73,8 +75,8 @@ describe('FieldRuleEditor', () => {
   it('can render a null-based field rule', () => {
     const props = {
       rule: new FieldRule('username', null),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
@@ -86,8 +88,8 @@ describe('FieldRuleEditor', () => {
   it('can render a boolean-based field rule (true)', () => {
     const props = {
       rule: new FieldRule('username', true),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
@@ -99,8 +101,8 @@ describe('FieldRuleEditor', () => {
   it('can render a boolean-based field rule (false)', () => {
     const props = {
       rule: new FieldRule('username', false),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
@@ -112,8 +114,8 @@ describe('FieldRuleEditor', () => {
   it('can render with alternate values specified', () => {
     const props = {
       rule: new FieldRule('username', ['*', 12, null, true, false]),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
@@ -143,8 +145,8 @@ describe('FieldRuleEditor', () => {
   it('allows alternate values to be added when "allowAdd" is set to true', () => {
     const props = {
       rule: new FieldRule('username', null),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
@@ -161,8 +163,8 @@ describe('FieldRuleEditor', () => {
   it('allows values to be deleted; deleting all values invokes "onDelete"', () => {
     const props = {
       rule: new FieldRule('username', ['*', 12, null]),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     const { rerender } = renderWithIntl(<FieldRuleEditor {...props} />);
@@ -215,8 +217,8 @@ describe('FieldRuleEditor', () => {
   it('allows field data types to be changed', () => {
     const props = {
       rule: new FieldRule('username', '*'),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
@@ -238,8 +240,8 @@ describe('FieldRuleEditor', () => {
     it('disables all fields and hides buttons', () => {
       const props = {
         rule: new FieldRule('username', ['*', 12, null, true]),
-        onChange: jest.fn(),
-        onDelete: jest.fn(),
+        onChange: vi.fn(),
+        onDelete: vi.fn(),
         readOnly: true,
       };
 

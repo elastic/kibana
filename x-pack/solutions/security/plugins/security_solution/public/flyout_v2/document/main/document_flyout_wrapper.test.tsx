@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -15,14 +18,17 @@ import { useAlertsPrivileges } from '../../../detections/containers/detection_en
 import { TestProviders } from '../../../common/mock';
 import { DocumentFlyoutWrapper } from './document_flyout_wrapper';
 
-jest.mock('@kbn/unified-doc-viewer-plugin/public');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('@kbn/unified-doc-viewer-plugin/public');
+vi.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
-const mockDocumentFlyout = jest.fn((props: unknown) => <div data-test-subj="documentFlyoutStub" />);
-jest.mock('.', () => ({
-  DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
-}));
+const mockDocumentFlyout = vi.fn((props: unknown) => <div data-test-subj="documentFlyoutStub" />);
+vi.mock('.', () => {
+      const mocked = {
+      DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createAlertHit = (): DataTableRecord =>
   ({
@@ -45,8 +51,8 @@ const renderDocumentFlyoutWrapper = (
       <DocumentFlyoutWrapper
         documentId="doc-id"
         indexName="my-index"
-        renderCellActions={jest.fn()}
-        onAlertUpdated={jest.fn()}
+        renderCellActions={vi.fn()}
+        onAlertUpdated={vi.fn()}
         {...props}
       />
     </TestProviders>
@@ -54,14 +60,14 @@ const renderDocumentFlyoutWrapper = (
 
 describe('DocumentFlyoutWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'ready',
       dataView: mockDataView,
     });
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Loading, null, vi.fn()]);
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
   });
 
   it('fetches clicked document using document id and index', () => {
@@ -76,7 +82,7 @@ describe('DocumentFlyoutWrapper', () => {
   });
 
   it('renders loading while data view is loading', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'loading',
       dataView: mockDataView,
     });
@@ -93,8 +99,8 @@ describe('DocumentFlyoutWrapper', () => {
 
   it('renders loading while alerts privileges are loading for an alert', () => {
     const alertHit = createAlertHit();
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Found, alertHit, vi.fn()]);
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
@@ -108,12 +114,12 @@ describe('DocumentFlyoutWrapper', () => {
       flattened: { 'event.kind': 'event' },
       isAnchor: false,
     } as DataTableRecord;
-    (useEsDocSearch as jest.Mock).mockReturnValue([
+    (useEsDocSearch as Mock).mockReturnValue([
       ElasticRequestState.Found,
       nonAlertHit,
-      jest.fn(),
+      vi.fn(),
     ]);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
 
     const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 
@@ -123,9 +129,9 @@ describe('DocumentFlyoutWrapper', () => {
 
   it('renders DocumentFlyout when document is found', () => {
     const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
-    const refetchDocument = jest.fn();
-    const onAlertUpdated = jest.fn();
-    (useEsDocSearch as jest.Mock).mockReturnValue([
+    const refetchDocument = vi.fn();
+    const onAlertUpdated = vi.fn();
+    (useEsDocSearch as Mock).mockReturnValue([
       ElasticRequestState.Found,
       hit,
       refetchDocument,
@@ -156,7 +162,7 @@ describe('DocumentFlyoutWrapper', () => {
   });
 
   it('renders not-found state when no document matches', () => {
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.NotFound, null, vi.fn()]);
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
@@ -164,7 +170,7 @@ describe('DocumentFlyoutWrapper', () => {
   });
 
   it('renders error state when document fetch fails', () => {
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Error, null, jest.fn()]);
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Error, null, vi.fn()]);
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
@@ -172,11 +178,11 @@ describe('DocumentFlyoutWrapper', () => {
   });
 
   it('renders data view error when the data view failed to load', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'error',
       dataView: mockDataView,
     });
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.NotFound, null, vi.fn()]);
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
@@ -194,11 +200,11 @@ describe('DocumentFlyoutWrapper', () => {
       ...mockDataView,
       hasMatchedIndices: () => false,
     };
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'ready',
       dataView: degradedDataView,
     });
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Found, hit, vi.fn()]);
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
@@ -212,7 +218,7 @@ describe('DocumentFlyoutWrapper', () => {
   });
 
   it('renders nothing when the document request returns found without a hit', () => {
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, null, jest.fn()]);
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Found, null, vi.fn()]);
 
     const { queryByTestId } = renderDocumentFlyoutWrapper();
 
@@ -223,8 +229,8 @@ describe('DocumentFlyoutWrapper', () => {
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
     const alertHit = createAlertHit();
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Found, alertHit, vi.fn()]);
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
 
     const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 

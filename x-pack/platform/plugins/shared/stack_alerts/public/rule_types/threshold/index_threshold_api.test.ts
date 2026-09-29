@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import { getThresholdRuleVisualizationData } from './index_threshold_api';
 
@@ -28,10 +31,10 @@ describe('getThresholdRuleVisualizationData', () => {
     interval: '1m',
   };
 
-  let httpPost: jest.Mock;
+  let httpPost: Mock;
 
   beforeEach(() => {
-    httpPost = jest.fn().mockResolvedValue({ results: [] });
+    httpPost = vi.fn().mockResolvedValue({ results: [] });
   });
 
   it('includes project_routing in the request body when projectRouting is set', async () => {

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { syncRoutes } from './sync_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
-jest.mock('../../utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const route = syncRoutes['GET /internal/streams/_knowledge_indicators/_streams_with_indicators'];
 
@@ -20,10 +26,10 @@ const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerP
   ({
     params: {},
     request: {},
-    getScopedClients: jest.fn().mockResolvedValue({
+    getScopedClients: vi.fn().mockResolvedValue({
       licensing: {},
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-        getStreamNamesToReconcile: jest.fn().mockResolvedValue(streamNames),
+      getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({
+        getStreamNamesToReconcile: vi.fn().mockResolvedValue(streamNames),
       }),
     }),
     server: {} as HandlerParams['server'],
@@ -31,7 +37,7 @@ const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerP
 
 describe('streamsWithIndicatorsRoute', () => {
   beforeEach(() => {
-    (assertSignificantEventsAccess as jest.Mock).mockClear();
+    (assertSignificantEventsAccess as Mock).mockClear();
   });
 
   it('maps stream names to the foreach item shape', async () => {

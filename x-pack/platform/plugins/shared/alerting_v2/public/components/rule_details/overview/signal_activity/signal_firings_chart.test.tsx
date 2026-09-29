@@ -5,44 +5,55 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SignalFiringsChart, type SignalFiringsChartProps } from './signal_firings_chart';
 
-const mockSettings = jest.fn();
-const mockHistogramBarSeries = jest.fn();
-const mockAxis = jest.fn();
+const mockSettings = vi.fn();
+const mockHistogramBarSeries = vi.fn();
+const mockAxis = vi.fn();
 
-jest.mock('@elastic/charts', () => ({
-  Chart: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="signalFiringsChart">{children}</div>
-  ),
-  Settings: (props: Record<string, unknown>) => {
-    mockSettings(props);
-    return null;
-  },
-  HistogramBarSeries: (props: Record<string, unknown>) => {
-    mockHistogramBarSeries(props);
-    return null;
-  },
-  Axis: (props: Record<string, unknown>) => {
-    mockAxis(props);
-    return null;
-  },
-  Position: { Left: 'left', Bottom: 'bottom' },
-  ScaleType: { Time: 'time', Linear: 'linear' },
-}));
+vi.mock('@elastic/charts', () => {
+      const mocked = {
+      Chart: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="signalFiringsChart">{children}</div>
+      ),
+      Settings: (props: Record<string, unknown>) => {
+        mockSettings(props);
+        return null;
+      },
+      HistogramBarSeries: (props: Record<string, unknown>) => {
+        mockHistogramBarSeries(props);
+        return null;
+      },
+      Axis: (props: Record<string, unknown>) => {
+        mockAxis(props);
+        return null;
+      },
+      Position: { Left: 'left', Bottom: 'bottom' },
+      ScaleType: { Time: 'time', Linear: 'linear' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockBaseTheme = { lineSeriesStyle: {} };
-const mockUseChartsBaseTheme = jest.fn(() => mockBaseTheme);
+const mockUseChartsBaseTheme = vi.fn(() => mockBaseTheme);
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({ theme: { useChartsBaseTheme: mockUseChartsBaseTheme } }),
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: () => ({ theme: { useChartsBaseTheme: mockUseChartsBaseTheme } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di', () => {
+      const mocked = {
+      PluginStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const BASE_GTE_MS = 1_700_000_000_000;
 const BASE_LTE_MS = BASE_GTE_MS + 24 * 60 * 60 * 1000;
@@ -56,7 +67,7 @@ const defaultProps: SignalFiringsChartProps = {
   gteMs: BASE_GTE_MS,
   lteMs: BASE_LTE_MS,
   minIntervalMs: BUCKET_INTERVAL_MS,
-  onBrushRange: jest.fn(),
+  onBrushRange: vi.fn(),
 };
 
 const renderChart = (props: Partial<SignalFiringsChartProps> = {}) =>
@@ -64,7 +75,7 @@ const renderChart = (props: Partial<SignalFiringsChartProps> = {}) =>
 
 describe('SignalFiringsChart', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the chart container', () => {
@@ -99,7 +110,7 @@ describe('SignalFiringsChart', () => {
   });
 
   it('calls onBrushRange with the selected epoch ms range', () => {
-    const onBrushRange = jest.fn();
+    const onBrushRange = vi.fn();
     renderChart({ onBrushRange });
 
     const [[settingsProps]] = mockSettings.mock.calls;
@@ -111,7 +122,7 @@ describe('SignalFiringsChart', () => {
   });
 
   it('does not call onBrushRange when the brush event has no x range', () => {
-    const onBrushRange = jest.fn();
+    const onBrushRange = vi.fn();
     renderChart({ onBrushRange });
 
     const [[settingsProps]] = mockSettings.mock.calls;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Readable } from 'stream';
 import { parseGeminiStream, parseGeminiResponse } from './gemini';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -14,7 +16,7 @@ describe('parseGeminiStream', () => {
   let mockStream: Readable;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockStream = new Readable({
       read() {},
     });
@@ -48,7 +50,7 @@ describe('parseGeminiStream', () => {
     mockStream.push(data);
     mockStream.push(null);
 
-    const tokenHandler = jest.fn();
+    const tokenHandler = vi.fn();
     await parseGeminiStream(mockStream, mockLogger, undefined, tokenHandler);
 
     expect(tokenHandler).toHaveBeenCalledWith('Hello');

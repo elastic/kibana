@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowApi } from '@kbn/workflows-ui';
 import {
@@ -16,10 +19,13 @@ import {
   resolveAllReferences,
 } from './export_workflows';
 
-const mockDownloadFileAs = jest.fn();
-jest.mock('@kbn/share-plugin/public', () => ({
-  downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
-}));
+const mockDownloadFileAs = vi.fn();
+vi.mock('@kbn/share-plugin/public', () => {
+      const mocked = {
+      downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
   id: 'w-1',
@@ -33,21 +39,24 @@ const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowL
   ...overrides,
 });
 
-const mockGenerateWorkflowsZip = jest
+const mockGenerateWorkflowsZip = vi
   .fn()
   .mockResolvedValue(new Blob(['zip'], { type: 'application/zip' }));
-jest.mock('./export/generate_zip_archive', () => ({
-  generateWorkflowsZip: (...args: unknown[]) => mockGenerateWorkflowsZip(...args),
-}));
+vi.mock('./export/generate_zip_archive', () => {
+      const mocked = {
+      generateWorkflowsZip: (...args: unknown[]) => mockGenerateWorkflowsZip(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockWorkflowApi = (
   yamlEntries: Array<{ id: string; yaml: string }> = [
     { id: 'w-1', yaml: 'name: First\nsteps: []' },
     { id: 'w-2', yaml: 'name: Second\nsteps: []' },
   ]
-): jest.Mocked<WorkflowApi> =>
+): Mocked<WorkflowApi> =>
   ({
-    exportWorkflows: jest.fn().mockResolvedValue({
+    exportWorkflows: vi.fn().mockResolvedValue({
       entries: yamlEntries,
       manifest: {
         exportedCount: yamlEntries.length,
@@ -55,11 +64,11 @@ const createMockWorkflowApi = (
         version: '1',
       },
     }),
-  } as unknown as jest.Mocked<WorkflowApi>);
+  } as unknown as Mocked<WorkflowApi>);
 
 describe('export_workflows', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('exportSingleWorkflow', () => {

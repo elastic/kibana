@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { mockLogger } from '../test_utils';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import type { ConcreteTaskInstance, PartialConcreteTaskInstance } from '../task';
@@ -33,12 +36,12 @@ const createTask = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTask
 
 describe('resolveTaskDocumentConflicts', () => {
   const logger = mockLogger();
-  let store: jest.Mocked<Updatable>;
+  let store: Mocked<Updatable>;
   let originalTask: ConcreteTaskInstance;
   let partialTask: PartialConcreteTaskInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     store = bufferedTaskStoreMock.create();
     originalTask = createTask();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 import { mockHttpRequest, renderJobCreate } from './helpers';
@@ -24,7 +26,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
   const clickNext = () => fireEvent.click(screen.getByTestId('rollupJobNextButton'));
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());

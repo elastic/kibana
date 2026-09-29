@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -16,11 +19,14 @@ import {
 } from './ki_queries_generation_service';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
-jest.mock('./identify_ki_queries_via_agent', () => ({
-  executeKIQueryGenerationAgent: jest.fn(),
-}));
+vi.mock('./identify_ki_queries_via_agent', () => {
+      const mocked = {
+      executeKIQueryGenerationAgent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const executeKIQueryGenerationAgentMock = executeKIQueryGenerationAgent as jest.MockedFunction<
+const executeKIQueryGenerationAgentMock = executeKIQueryGenerationAgent as MockedFunction<
   typeof executeKIQueryGenerationAgent
 >;
 
@@ -30,10 +36,10 @@ const makeDeps = (
   overrides: Partial<GenerateKIQueriesDependencies> = {}
 ): GenerateKIQueriesDependencies => ({
   streamsClient: {
-    getStream: jest.fn().mockResolvedValue(definition),
+    getStream: vi.fn().mockResolvedValue(definition),
   } as unknown as GenerateKIQueriesDependencies['streamsClient'],
   kiClient: {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
+    getStreamToQueryLinksMap: vi.fn().mockResolvedValue({
       'logs.test': [
         {
           query: {
@@ -57,13 +63,13 @@ const makeDeps = (
   logger: loggerMock.create(),
   signal: new AbortController().signal,
   telemetry: {
-    trackSignificantEventsQueriesGenerated: jest.fn(),
+    trackSignificantEventsQueriesGenerated: vi.fn(),
   } as unknown as EbtTelemetryClient,
   ...overrides,
 });
 
 describe('generateKIQueries', () => {
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -86,7 +92,7 @@ describe('generateKIQueries', () => {
 
   it('returns generated queries and reports telemetry', async () => {
     const telemetry = {
-      trackSignificantEventsQueriesGenerated: jest.fn(),
+      trackSignificantEventsQueriesGenerated: vi.fn(),
     } as unknown as EbtTelemetryClient;
 
     const result = await generateKIQueries(

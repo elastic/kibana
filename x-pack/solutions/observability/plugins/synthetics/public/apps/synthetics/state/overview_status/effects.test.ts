@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { put, select } from 'redux-saga/effects';
 import type { OverviewStatus, OverviewStatusMetaData } from '../../../../../common/runtime_types';
 import { selectOverviewPageState } from '../overview/selectors';
@@ -49,10 +51,10 @@ describe('augmentStaleStatusWorker', () => {
   // `createAsyncAction().get` stamps `meta.dispatchedAt: Date.now()`, so pin the
   // clock to keep the dispatched action equal to the one built in the assertion.
   beforeAll(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
+    vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
   });
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('dispatches a stale lookup for the unique pending monitor ids in a windowed view', () => {
@@ -89,10 +91,10 @@ describe('refreshRemainingCardWindowWorker', () => {
   const pageState = { page: 1, perPage: 20, query: 'foo' };
 
   beforeAll(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+    vi.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
   });
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('dispatches the next silent append while the loaded window is not covered', () => {

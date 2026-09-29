@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -26,22 +29,31 @@ import {
 import { SummaryTab } from './summary_tab';
 
 // Mock heavy child components to speed up tests
-jest.mock('./alerts_tab', () => ({
-  AlertsTab: jest.fn(() => <div data-test-subj="testAlertsTab">{'AlertsTab'}</div>),
-}));
+vi.mock('./alerts_tab', () => {
+      const mocked = {
+      AlertsTab: vi.fn(() => <div data-test-subj="testAlertsTab">{'AlertsTab'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./summary_tab', () => ({
-  SummaryTab: jest.fn(() => <div data-test-subj="testAttackSummaryTab">{'SummaryTab'}</div>),
-}));
+vi.mock('./summary_tab', () => {
+      const mocked = {
+      SummaryTab: vi.fn(() => <div data-test-subj="testAttackSummaryTab">{'SummaryTab'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/components/local_storage', () => ({
-  useLocalStorage: jest.fn(),
-}));
+vi.mock('../../../../../common/components/local_storage', () => {
+      const mocked = {
+      useLocalStorage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 describe('AttackDetailsContainer', () => {
   const mockAttack = getMockAttackDiscoveryAlerts()[0];
@@ -51,8 +63,8 @@ describe('AttackDetailsContainer', () => {
     defaultFilters: [],
     isTableLoading: false,
   };
-  const mockSetSelectedTabId = jest.fn();
-  const reportEventMock = jest.fn();
+  const mockSetSelectedTabId = vi.fn();
+  const reportEventMock = vi.fn();
 
   const renderContainer = (props = {}) =>
     render(
@@ -62,9 +74,9 @@ describe('AttackDetailsContainer', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useLocalStorage as jest.Mock).mockReturnValue([ATTACK_SUMMARY_TAB, mockSetSelectedTabId]);
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useLocalStorage as Mock).mockReturnValue([ATTACK_SUMMARY_TAB, mockSetSelectedTabId]);
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent: reportEventMock,
@@ -116,7 +128,7 @@ describe('AttackDetailsContainer', () => {
     });
 
     it('renders the content based on stored value', () => {
-      (useLocalStorage as jest.Mock).mockReturnValue([ALERTS_TAB, mockSetSelectedTabId]);
+      (useLocalStorage as Mock).mockReturnValue([ALERTS_TAB, mockSetSelectedTabId]);
       renderContainer();
 
       expect(screen.getByTestId('testAlertsTab')).toBeInTheDocument();
@@ -124,7 +136,7 @@ describe('AttackDetailsContainer', () => {
     });
 
     it('updates stored value to alerts tab when tab is clicked', () => {
-      (useLocalStorage as jest.Mock).mockReturnValue([ATTACK_SUMMARY_TAB, mockSetSelectedTabId]);
+      (useLocalStorage as Mock).mockReturnValue([ATTACK_SUMMARY_TAB, mockSetSelectedTabId]);
       renderContainer();
 
       fireEvent.click(screen.getByText('Alerts'));
@@ -136,7 +148,7 @@ describe('AttackDetailsContainer', () => {
     });
 
     it('updates stored value to summary tab when tab is clicked', () => {
-      (useLocalStorage as jest.Mock).mockReturnValue([ALERTS_TAB, mockSetSelectedTabId]);
+      (useLocalStorage as Mock).mockReturnValue([ALERTS_TAB, mockSetSelectedTabId]);
       renderContainer();
 
       fireEvent.click(screen.getByText('Attack summary'));

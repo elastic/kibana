@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,19 +15,25 @@ import type { Props } from '.';
 import { NewChat } from '.';
 
 const mockUseAssistantOverlay = {
-  showAssistantOverlay: jest.fn(),
+  showAssistantOverlay: vi.fn(),
 };
-jest.mock('../assistant/use_assistant_overlay', () => ({
-  useAssistantOverlay: () => mockUseAssistantOverlay,
-}));
+vi.mock('../assistant/use_assistant_overlay', () => {
+      const mocked = {
+      useAssistantOverlay: () => mockUseAssistantOverlay,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockUseAssistantContext = {
   codeBlockRef: { current: null },
   assistantAvailability: { isAssistantVisible: true },
 };
-jest.mock('../..', () => ({
-  useAssistantContext: () => mockUseAssistantContext,
-}));
+vi.mock('../..', () => {
+      const mocked = {
+      useAssistantContext: () => mockUseAssistantContext,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps: Props = {
   category: 'alert',
@@ -45,7 +53,7 @@ describe('NewChat', () => {
     };
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the default New Chat button with an assistant (AiButton) icon', () => {
@@ -127,7 +135,7 @@ describe('NewChat', () => {
   });
 
   it('calls onShowOverlay callback on click', async () => {
-    const onShowOverlaySpy = jest.fn();
+    const onShowOverlaySpy = vi.fn();
     render(<NewChat {...defaultProps} onShowOverlay={onShowOverlaySpy} />);
 
     const newChatButton = screen.getByTestId('plusCircle');
@@ -138,7 +146,7 @@ describe('NewChat', () => {
   });
 
   it('calls onShowOverlay callback on click for link', async () => {
-    const onShowOverlaySpy = jest.fn();
+    const onShowOverlaySpy = vi.fn();
     render(<NewChat {...defaultProps} asLink={true} onShowOverlay={onShowOverlaySpy} />);
 
     const newChatLink = screen.getByTestId('newChatLink');
@@ -149,7 +157,7 @@ describe('NewChat', () => {
   });
 
   it('assigns onExportCodeBlock callback to context codeBlock reference', () => {
-    const onExportCodeBlock = jest.fn();
+    const onExportCodeBlock = vi.fn();
     render(<NewChat {...defaultProps} onExportCodeBlock={onExportCodeBlock} />);
 
     expect(mockUseAssistantContext.codeBlockRef.current).toBe(onExportCodeBlock);

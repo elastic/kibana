@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RulesCounters } from './rules_counters';
@@ -20,19 +23,22 @@ import { RULE_FAILED } from '../../../common/constants';
 import userEvent from '@testing-library/user-event';
 import { benchmarkValuesMock, itemsDataMock, paramsMock } from './__mocks__';
 
-jest.mock('../../common/hooks/use_benchmark_dynamic_values');
-jest.mock('react-router-dom', () => ({
-  useParams: jest.fn(),
-}));
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings');
-jest.mock('../benchmarks/use_csp_benchmark_integrations');
-jest.mock('../../common/hooks/use_kibana');
+vi.mock('../../common/hooks/use_benchmark_dynamic_values');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings');
+vi.mock('../benchmarks/use_csp_benchmark_integrations');
+vi.mock('../../common/hooks/use_kibana');
 
 describe('RulesCounters', () => {
-  const mockNavigate = jest.fn();
+  const mockNavigate = vi.fn();
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: {
           basePath: {
@@ -50,20 +56,20 @@ describe('RulesCounters', () => {
       },
     });
 
-    (useCspBenchmarkIntegrationsV2 as jest.Mock).mockReturnValue({
+    (useCspBenchmarkIntegrationsV2 as Mock).mockReturnValue({
       status: 'success',
       data: {
         items: itemsDataMock,
       },
     });
 
-    (useBenchmarkDynamicValues as jest.Mock).mockReturnValue({
+    (useBenchmarkDynamicValues as Mock).mockReturnValue({
       getBenchmarkDynamicValues: () => benchmarkValuesMock,
     });
 
-    (useParams as jest.Mock).mockReturnValue(paramsMock);
+    (useParams as Mock).mockReturnValue(paramsMock);
 
-    (useNavigateFindings as jest.Mock).mockReturnValue(mockNavigate); // Store the mock function
+    (useNavigateFindings as Mock).mockReturnValue(mockNavigate); // Store the mock function
   });
 
   it('should not show empty state and show correct posture score', () => {

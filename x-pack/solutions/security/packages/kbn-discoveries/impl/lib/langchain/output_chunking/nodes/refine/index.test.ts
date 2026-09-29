@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
@@ -59,11 +62,11 @@ export const mockUnrefinedAttackDiscoveries: AttackDiscovery[] = [
   },
 ];
 
-jest.mock('../helpers/get_chain_with_format_instructions', () => {
-  const mockInvoke = jest.fn().mockResolvedValue('');
+vi.mock('../helpers/get_chain_with_format_instructions', () => {
+  const mockInvoke = vi.fn().mockResolvedValue('');
 
   return {
-    getChainWithFormatInstructions: jest.fn().mockReturnValue({
+    getChainWithFormatInstructions: vi.fn().mockReturnValue({
       chain: {
         invoke: mockInvoke,
       },
@@ -100,24 +103,24 @@ const initialGraphState: AttackDiscoveryGraphState = {
 };
 
 describe('getRefineNode', () => {
-  let mockResponseIsHallucinated: jest.Mock;
+  let mockResponseIsHallucinated: Mock;
   let generationSchema: ZodType<{ insights: AttackDiscovery[] }>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(attackDiscoveryTimestamp));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(attackDiscoveryTimestamp));
 
     mockLlm = new FakeLLM({
       response: '',
     }) as unknown as ActionsClientLlm;
-    mockResponseIsHallucinated = jest.fn().mockReturnValue(false);
+    mockResponseIsHallucinated = vi.fn().mockReturnValue(false);
     generationSchema = getAttackDiscoveriesGenerationSchema(prompts);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns a function', () => {
@@ -133,7 +136,7 @@ describe('getRefineNode', () => {
 
   it('invokes the chain with the unrefinedResults from state and format instructions', async () => {
     const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
-      .invoke as jest.Mock;
+      .invoke as Mock;
 
     const refineNode = getRefineNode({
       llm: mockLlm,
@@ -170,7 +173,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const mockInvoke = getChainWithFormatInstructions({
       llm: mockLlmWithResponse,
       generationSchema,
-    }).chain.invoke as jest.Mock;
+    }).chain.invoke as Mock;
 
     mockInvoke.mockResolvedValue(response);
 
@@ -204,7 +207,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const mockInvoke = getChainWithFormatInstructions({
       llm: mockLlmWithResponse,
       generationSchema,
-    }).chain.invoke as jest.Mock;
+    }).chain.invoke as Mock;
 
     mockInvoke.mockResolvedValue(rawResponse);
 
@@ -217,7 +220,7 @@ ${ATTACK_DISCOVERY_REFINE}
 
     await refineNode(initialGraphState);
 
-    const debugMessages = (localLogger.debug as jest.Mock).mock.calls.map(([arg]) =>
+    const debugMessages = (localLogger.debug as Mock).mock.calls.map(([arg]) =>
       typeof arg === 'function' ? (arg as () => string)() : String(arg)
     );
 
@@ -234,7 +237,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const mockInvoke = getChainWithFormatInstructions({
       llm: mockLlmWithHallucination,
       generationSchema,
-    }).chain.invoke as jest.Mock;
+    }).chain.invoke as Mock;
 
     mockInvoke.mockResolvedValue(hallucinatedResponse);
 
@@ -271,7 +274,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const mockInvoke = getChainWithFormatInstructions({
       llm: mockLlmWithRepeatedGenerations,
       generationSchema,
-    }).chain.invoke as jest.Mock;
+    }).chain.invoke as Mock;
 
     mockInvoke.mockResolvedValue(repeatedResponse);
 
@@ -308,7 +311,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const mockInvoke = getChainWithFormatInstructions({
       llm: mockLlmWithResponse,
       generationSchema,
-    }).chain.invoke as jest.Mock;
+    }).chain.invoke as Mock;
 
     mockInvoke.mockResolvedValue(response);
 
@@ -351,7 +354,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const mockInvoke = getChainWithFormatInstructions({
       llm: mockLlmWithResponse,
       generationSchema,
-    }).chain.invoke as jest.Mock;
+    }).chain.invoke as Mock;
 
     mockInvoke.mockResolvedValue(secondResponse);
 
@@ -389,7 +392,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const mockInvoke = getChainWithFormatInstructions({
       llm: mockLlmWithResponse,
       generationSchema,
-    }).chain.invoke as jest.Mock;
+    }).chain.invoke as Mock;
 
     mockInvoke.mockResolvedValue(response);
 

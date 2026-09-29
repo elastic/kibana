@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ActionScheduler } from './action_scheduler';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -38,11 +41,14 @@ import {
   getRuleType,
 } from './test_fixtures';
 
-jest.mock('../inject_action_params', () => ({
-  injectActionParams: jest.fn(),
-}));
+vi.mock('../inject_action_params', () => {
+      const mocked = {
+      injectActionParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const injectActionParamsMock = injectActionParams as jest.Mock;
+const injectActionParamsMock = injectActionParams as Mock;
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -82,10 +88,9 @@ const getSchedulerContext = (params = {}) => {
 const DATE_1970 = new Date('1970-01-01T00:00:00.000Z');
 
 describe('Action Scheduler', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest
-      .requireMock('../inject_action_params')
+  beforeEach(async () => {
+    vi.resetAllMocks();
+    (await vi.importMock('../inject_action_params'))
       .injectActionParams.mockImplementation(
         ({ actionParams }: InjectActionParamsOpts) => actionParams
       );
@@ -160,7 +165,7 @@ describe('Action Scheduler', () => {
       alertGroup: 'default',
     });
 
-    expect(jest.requireMock('../inject_action_params').injectActionParams).toHaveBeenCalledWith({
+    expect((await vi.importMock('../inject_action_params')).injectActionParams).toHaveBeenCalledWith({
       actionTypeId: 'test',
       actionParams: {
         alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 1 goes here',
@@ -2690,7 +2695,7 @@ describe('Action Scheduler', () => {
 
   describe('System actions', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockActionsPlugin.isSystemActionConnector.mockReturnValue(true);
     });
 
@@ -2721,7 +2726,7 @@ describe('Action Scheduler', () => {
         },
       });
 
-      const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+      const buildActionParams = vi.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
 
       executorParams.taskRunnerContext.connectorAdapterRegistry.register({
         connectorTypeId: '.test-system-action',
@@ -2854,7 +2859,7 @@ describe('Action Scheduler', () => {
         },
       });
 
-      const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+      const buildActionParams = vi.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
 
       executorParams.actionsClient.isSystemAction.mockReturnValue(true);
       executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
@@ -2923,7 +2928,7 @@ describe('Action Scheduler', () => {
         },
       });
 
-      const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+      const buildActionParams = vi.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
 
       executorParams.actionsClient.isSystemAction.mockReturnValue(true);
       executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
@@ -2964,7 +2969,7 @@ describe('Action Scheduler', () => {
         },
       });
 
-      const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+      const buildActionParams = vi.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
 
       executorParams.actionsClient.isSystemAction.mockReturnValue(true);
       executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';

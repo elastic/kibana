@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -23,129 +26,159 @@ import { FLYOUT_ACTION, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
-const mockReportActionClicked = jest.fn();
-jest.mock('../../../shared/hooks/use_flyout_telemetry');
+const mockReportActionClicked = vi.fn();
+vi.mock('../../../shared/hooks/use_flyout_telemetry');
 
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
-jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
-jest.mock(
+vi.mock('../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions'
 );
-jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions');
-jest.mock(
+vi.mock('../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions');
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions'
 );
-jest.mock('../../../../common/hooks/is_in_security_app');
+vi.mock('../../../../common/hooks/is_in_security_app');
 // The button forwards field-browser data (derived from the hit) to the action hooks. Stub the
 // derivation with the flattened-based conversion so these fixtures/expectations stay stable; the
 // real `getTimelineEventsDetailsFromRecord` is covered by its own test.
-jest.mock('../utils/get_timeline_events_details_from_record', () => ({
-  getTimelineEventsDetailsFromRecord: jest.fn((hit: { flattened?: Record<string, unknown> }) =>
-    Object.entries(hit.flattened ?? {}).map(([field, value]) => ({
-      field,
-      values: Array.isArray(value)
-        ? value.map(String)
-        : value != null
-        ? [String(value)]
-        : undefined,
-      originalValue: value,
-      isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
-      category: field.split('.')[0],
-    }))
-  ),
-}));
-jest.mock(
+vi.mock('../utils/get_timeline_events_details_from_record', () => {
+      const mocked = {
+      getTimelineEventsDetailsFromRecord: vi.fn((hit: { flattened?: Record<string, unknown> }) =>
+        Object.entries(hit.flattened ?? {}).map(([field, value]) => ({
+          field,
+          values: Array.isArray(value)
+            ? value.map(String)
+            : value != null
+            ? [String(value)]
+            : undefined,
+          originalValue: value,
+          isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
+          category: field.split('.')[0],
+        }))
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action',
-  () => ({
-    useHostIsolationAction: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        useHostIsolationAction: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout',
-  () => ({
-    HostIsolationFlyout: ({
-      isolateAction,
-      onClose,
-    }: {
-      isolateAction: string;
-      onClose: () => void;
-    }) => (
-      <button type="button" data-test-subj={`hostIsolationMock-${isolateAction}`} onClick={onClose}>
-        {`isolation-mock-${isolateAction}`}
-      </button>
-    ),
-  })
+  () => {
+      const mocked = {
+        HostIsolationFlyout: ({
+          isolateAction,
+          onClose,
+        }: {
+          isolateAction: string;
+          onClose: () => void;
+        }) => (
+          <button type="button" data-test-subj={`hostIsolationMock-${isolateAction}`} onClick={onClose}>
+            {`isolation-mock-${isolateAction}`}
+          </button>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseResponderActionItem = jest.fn().mockReturnValue([]);
-jest.mock('../../../../common/components/endpoint/responder', () => ({
-  useResponderActionItem: (...args: unknown[]) => mockUseResponderActionItem(...args),
-}));
+const mockUseResponderActionItem = vi.fn().mockReturnValue([]);
+vi.mock('../../../../common/components/endpoint/responder', () => {
+      const mocked = {
+      useResponderActionItem: (...args: unknown[]) => mockUseResponderActionItem(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseExploreActions = jest.fn().mockReturnValue({ exploreActionItems: [] });
-jest.mock('../hooks/use_explore_actions', () => ({
-  useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
-}));
+const mockUseExploreActions = vi.fn().mockReturnValue({ exploreActionItems: [] });
+vi.mock('../hooks/use_explore_actions', () => {
+      const mocked = {
+      useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
-  () => ({
-    AddExceptionFlyoutWrapper: () => <div data-test-subj="addExceptionFlyoutWrapper" />,
-  })
+  () => {
+      const mocked = {
+        AddExceptionFlyoutWrapper: () => <div data-test-subj="addExceptionFlyoutWrapper" />,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+const mockUseRunAlertWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runAlertWorkflowPanel: [],
 });
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
-  () => ({
-    useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
-  })
+  () => {
+      const mocked = {
+        useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runDocumentWorkflowPanel: [],
 });
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
-  () => ({
-    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
-  })
+  () => {
+      const mocked = {
+        useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockIsOsqueryAvailable = jest.fn().mockReturnValue(false);
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      osquery: {
-        isOsqueryAvailable: mockIsOsqueryAvailable,
-      },
-    },
-  }),
-}));
+const mockIsOsqueryAvailable = vi.fn().mockReturnValue(false);
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          osquery: {
+            isOsqueryAvailable: mockIsOsqueryAvailable,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../detections/components/osquery/osquery_flyout', () => ({
-  OsqueryFlyout: ({ agentId, onClose }: { agentId: string; onClose: () => void }) => (
-    <button type="button" data-test-subj="osqueryFlyoutMock" onClick={onClose}>
-      {`osquery-mock-${agentId}`}
-    </button>
-  ),
-}));
+vi.mock('../../../../detections/components/osquery/osquery_flyout', () => {
+      const mocked = {
+      OsqueryFlyout: ({ agentId, onClose }: { agentId: string; onClose: () => void }) => (
+        <button type="button" data-test-subj="osqueryFlyoutMock" onClick={onClose}>
+          {`osquery-mock-${agentId}`}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
-const mockUseAlertsActions = useAlertsActions as jest.Mock;
-const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
-const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
-const mockUseAlertExceptionActions = useAlertExceptionActions as jest.Mock;
-const mockUseFlyoutTelemetry = useFlyoutTelemetry as jest.Mock;
+const mockUseAddToCaseActions = useAddToCaseActions as Mock;
+const mockUseAlertsActions = useAlertsActions as Mock;
+const mockUseAlertAssigneesActions = useAlertAssigneesActions as Mock;
+const mockUseAlertTagsActions = useAlertTagsActions as Mock;
+const mockUseAlertExceptionActions = useAlertExceptionActions as Mock;
+const mockUseFlyoutTelemetry = useFlyoutTelemetry as Mock;
 
 const createMockHit = (
   flattened: Record<string, unknown> = {},
@@ -166,9 +199,9 @@ const remoteEventHit = createMockHit(
   { 'event.kind': 'event' },
   'remote-cluster:.alerts-security.alerts-default'
 );
-const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
-const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
-const mockUseHostIsolationAction = useHostIsolationAction as jest.Mock;
+const mockUseInvestigateInTimeline = useInvestigateInTimeline as Mock;
+const mockUseIsInSecurityApp = useIsInSecurityApp as Mock;
+const mockUseHostIsolationAction = useHostIsolationAction as Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
 const mockDetailsData = [
   {
@@ -179,9 +212,9 @@ const mockDetailsData = [
     isObjectArray: false,
   },
 ];
-const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
-const mockOnAlertUpdated = jest.fn();
-const mockOnShowNotes = jest.fn();
+const mockRefetchFlyoutData = vi.fn().mockResolvedValue(undefined);
+const mockOnAlertUpdated = vi.fn();
+const mockOnShowNotes = vi.fn();
 const defaultProps = {
   hit: createMockHit({ 'host.name': ['test-host'] }),
   ecsData: mockEcsData,
@@ -194,7 +227,7 @@ const renderTakeActionButton = (props = defaultProps) => render(<TakeActionButto
 
 describe('<TakeActionButton />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: [] });
     mockUseAlertsActions.mockReturnValue({ actionItems: [], panels: [] });
     mockUseAlertAssigneesActions.mockReturnValue({
@@ -215,7 +248,7 @@ describe('<TakeActionButton />', () => {
     mockIsOsqueryAvailable.mockReturnValue(false);
     mockUseFlyoutTelemetry.mockReturnValue({
       reportActionClicked: mockReportActionClicked,
-      reportHeaderItemClicked: jest.fn(),
+      reportHeaderItemClicked: vi.fn(),
     });
   });
 
@@ -387,7 +420,7 @@ describe('<TakeActionButton />', () => {
 
   it('should include investigateInTimelineActionItems when in Security app', () => {
     mockUseIsInSecurityApp.mockReturnValue(true);
-    const timelineItem = { name: 'Investigate in Timeline', onClick: jest.fn() };
+    const timelineItem = { name: 'Investigate in Timeline', onClick: vi.fn() };
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimelineActionItems: [timelineItem],
     });
@@ -401,7 +434,7 @@ describe('<TakeActionButton />', () => {
 
   it('should not include investigateInTimelineActionItems when not in Security app (e.g. Discover)', () => {
     mockUseIsInSecurityApp.mockReturnValue(false);
-    const timelineItem = { name: 'Investigate in Timeline', onClick: jest.fn() };
+    const timelineItem = { name: 'Investigate in Timeline', onClick: vi.fn() };
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimelineActionItems: [timelineItem],
     });
@@ -422,7 +455,7 @@ describe('<TakeActionButton />', () => {
   });
 
   it('should include status action items when alertStatus is present in hit', () => {
-    const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
+    const statusItem = { name: 'Mark as acknowledged', onClick: vi.fn() };
     mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
 
     const alertHit = createMockHit({ 'kibana.alert.workflow_status': 'open' });
@@ -438,7 +471,7 @@ describe('<TakeActionButton />', () => {
   });
 
   it('should not include status action items when alertStatus is not present in hit', () => {
-    const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
+    const statusItem = { name: 'Mark as acknowledged', onClick: vi.fn() };
     mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
 
     renderTakeActionButton({ ...defaultProps, hit: createMockHit() });
@@ -561,7 +594,7 @@ describe('<TakeActionButton />', () => {
       {
         key: 'endpointResponseActions-action-item',
         name: 'Respond',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
       },
     ]);
 
@@ -654,10 +687,10 @@ describe('<TakeActionButton />', () => {
   });
 
   describe('alert vs non-alert document', () => {
-    const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
-    const assigneeItem = { name: 'Assign alert', onClick: jest.fn() };
-    const tagsItem = { name: 'Apply alert tags', onClick: jest.fn() };
-    const workflowItem = { name: 'Run workflow', onClick: jest.fn() };
+    const statusItem = { name: 'Mark as acknowledged', onClick: vi.fn() };
+    const assigneeItem = { name: 'Assign alert', onClick: vi.fn() };
+    const tagsItem = { name: 'Apply alert tags', onClick: vi.fn() };
+    const workflowItem = { name: 'Run workflow', onClick: vi.fn() };
 
     beforeEach(() => {
       mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
@@ -705,13 +738,13 @@ describe('<TakeActionButton />', () => {
     });
 
     it('should use useRunAlertWorkflowPanel menu items for alert documents', () => {
-      const alertWorkflowItem = { name: 'Alert workflow', onClick: jest.fn() };
+      const alertWorkflowItem = { name: 'Alert workflow', onClick: vi.fn() };
       mockUseRunAlertWorkflowPanel.mockReturnValue({
         runWorkflowMenuItem: [alertWorkflowItem],
         runAlertWorkflowPanel: [],
       });
       mockUseRunDocumentWorkflowPanel.mockReturnValue({
-        runWorkflowMenuItem: [{ name: 'Document workflow', onClick: jest.fn() }],
+        runWorkflowMenuItem: [{ name: 'Document workflow', onClick: vi.fn() }],
         runDocumentWorkflowPanel: [],
       });
 
@@ -729,10 +762,10 @@ describe('<TakeActionButton />', () => {
 
     it('should use useRunDocumentWorkflowPanel menu items for non-alert documents', () => {
       mockUseRunAlertWorkflowPanel.mockReturnValue({
-        runWorkflowMenuItem: [{ name: 'Alert workflow', onClick: jest.fn() }],
+        runWorkflowMenuItem: [{ name: 'Alert workflow', onClick: vi.fn() }],
         runAlertWorkflowPanel: [],
       });
-      const documentWorkflowItem = { name: 'Document workflow', onClick: jest.fn() };
+      const documentWorkflowItem = { name: 'Document workflow', onClick: vi.fn() };
       mockUseRunDocumentWorkflowPanel.mockReturnValue({
         runWorkflowMenuItem: [documentWorkflowItem],
         runDocumentWorkflowPanel: [],
@@ -767,12 +800,12 @@ describe('<TakeActionButton />', () => {
   });
 
   describe('remote document', () => {
-    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
-    const caseItem = { name: 'Add to case', onClick: jest.fn() };
-    const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
-    const assigneeItem = { name: 'Assign alert', onClick: jest.fn() };
-    const tagsItem = { name: 'Apply alert tags', onClick: jest.fn() };
-    const workflowItem = { name: 'Run workflow', onClick: jest.fn() };
+    const timelineItem = { name: 'Investigate in timeline', onClick: vi.fn() };
+    const caseItem = { name: 'Add to case', onClick: vi.fn() };
+    const statusItem = { name: 'Mark as acknowledged', onClick: vi.fn() };
+    const assigneeItem = { name: 'Assign alert', onClick: vi.fn() };
+    const tagsItem = { name: 'Apply alert tags', onClick: vi.fn() };
+    const workflowItem = { name: 'Run workflow', onClick: vi.fn() };
 
     beforeEach(() => {
       mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: [caseItem] });
@@ -828,7 +861,7 @@ describe('<TakeActionButton />', () => {
 
     it('should show the explore item for a remote alert in Discover', () => {
       mockUseIsInSecurityApp.mockReturnValue(false);
-      const exploreItem = { name: 'Explore in Alerts', onClick: jest.fn() };
+      const exploreItem = { name: 'Explore in Alerts', onClick: vi.fn() };
       mockUseExploreActions.mockReturnValue({ exploreActionItems: [exploreItem] });
 
       const { getByTestId, getByText, queryByText } = renderTakeActionButton({
@@ -845,7 +878,7 @@ describe('<TakeActionButton />', () => {
 
     it('should show the explore item for a remote event in Discover', () => {
       mockUseIsInSecurityApp.mockReturnValue(false);
-      const exploreItem = { name: 'Explore in Timeline', onClick: jest.fn() };
+      const exploreItem = { name: 'Explore in Timeline', onClick: vi.fn() };
       mockUseExploreActions.mockReturnValue({ exploreActionItems: [exploreItem] });
 
       const { getByTestId, getByText, queryByText } = renderTakeActionButton({
@@ -892,7 +925,7 @@ describe('<TakeActionButton />', () => {
   });
 
   describe('Explore action (Discover context only)', () => {
-    const exploreItem = { name: 'Explore action', onClick: jest.fn() };
+    const exploreItem = { name: 'Explore action', onClick: vi.fn() };
 
     it('should not include explore items when in Security app', () => {
       mockUseIsInSecurityApp.mockReturnValue(true);
@@ -1043,7 +1076,7 @@ describe('<TakeActionButton />', () => {
           key: 'isolate-host-action-item',
           'data-test-subj': 'isolate-host-action-item',
           name: 'Isolate host',
-          onClick: jest.fn(),
+          onClick: vi.fn(),
         },
       ]);
 
@@ -1085,7 +1118,7 @@ describe('<TakeActionButton />', () => {
             key: 'add-to-case-action',
             'data-test-subj': 'add-to-case-action',
             name: 'Add to case',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
           },
         ],
       });

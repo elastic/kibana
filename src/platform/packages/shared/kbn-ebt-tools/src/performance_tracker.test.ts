@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -21,15 +23,18 @@ import {
 } from './performance_tracker';
 
 // Mock the performance API
-const mockMark = jest.fn();
-const mockGetEntriesByType = jest.fn();
-const mockClearMarks = jest.fn();
-const mockMeasure = jest.fn();
+const mockMark = vi.fn();
+const mockGetEntriesByType = vi.fn();
+const mockClearMarks = vi.fn();
+const mockMeasure = vi.fn();
 
 // Mock uuid to return predictable values
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'test-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'test-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Performance Tracker', () => {
   beforeAll(() => {
@@ -46,7 +51,7 @@ describe('Performance Tracker', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createPerformanceTracker', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -29,12 +31,12 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const mockHttp = {
-  post: jest.fn(),
+  post: vi.fn(),
 };
 const http = mockHttp as unknown as HttpStart;
 
 const mockToasts = {
-  addDanger: jest.fn(),
+  addDanger: vi.fn(),
 };
 const toasts = mockToasts as unknown as ToastsStart;
 
@@ -46,7 +48,7 @@ const params = {
 
 describe('useAlertsGroupAggregationsQuery', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('displays toast on errors', async () => {

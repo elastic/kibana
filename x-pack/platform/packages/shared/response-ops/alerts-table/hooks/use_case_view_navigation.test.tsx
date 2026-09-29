@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
@@ -28,7 +30,7 @@ const wrapper = ({ children }: PropsWithChildren) => {
 };
 
 describe('useCaseViewNavigation', () => {
-  const navigateToApp = jest.fn();
+  const navigateToApp = vi.fn();
 
   beforeEach(() => {
     application.currentAppId$ = new BehaviorSubject<string>('testAppId');

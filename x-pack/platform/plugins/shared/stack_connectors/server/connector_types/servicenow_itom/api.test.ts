@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { externalServiceITOMMock, itomEventParams } from '../lib/servicenow/mocks';
 import type { ExternalServiceITOM } from '../lib/servicenow/types';
@@ -12,7 +15,7 @@ import { api, prepareParams } from './api';
 const mockedLogger = loggerMock.create();
 
 describe('api_itom', () => {
-  let externalService: jest.Mocked<ExternalServiceITOM>;
+  let externalService: Mocked<ExternalServiceITOM>;
   const eventParamsWithFormattedDate = {
     ...itomEventParams,
     time_of_event: '2021-10-13 10:51:44',
@@ -20,7 +23,7 @@ describe('api_itom', () => {
 
   beforeEach(() => {
     externalService = externalServiceITOMMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('prepareParams', () => {

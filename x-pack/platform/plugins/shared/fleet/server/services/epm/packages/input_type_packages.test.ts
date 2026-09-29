@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
@@ -25,44 +28,44 @@ import {
 } from './input_type_packages';
 import { cleanupAssets } from './remove';
 
-jest.mock('../../data_streams');
-jest.mock('./get');
-jest.mock('./install_index_template_pipeline');
-jest.mock('./es_assets_reference');
-jest.mock('./remove');
+vi.mock('../../data_streams');
+vi.mock('./get');
+vi.mock('./install_index_template_pipeline');
+vi.mock('./es_assets_reference');
+vi.mock('./remove');
 
-const cleanupAssetsMock = cleanupAssets as jest.MockedFunction<typeof cleanupAssets>;
+const cleanupAssetsMock = cleanupAssets as MockedFunction<typeof cleanupAssets>;
 
-jest.mock('../../app_context', () => {
-  const logger = { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
+vi.mock('../../app_context', () => {
+  const logger = { error: vi.fn(), debug: vi.fn(), warn: vi.fn(), info: vi.fn() };
   const mockedSavedObjectTagging = {
-    createInternalAssignmentService: jest.fn(),
-    createTagClient: jest.fn(),
+    createInternalAssignmentService: vi.fn(),
+    createTagClient: vi.fn(),
   };
 
   return {
     appContextService: {
-      getLogger: jest.fn(() => {
+      getLogger: vi.fn(() => {
         return logger;
       }),
-      getTelemetryEventsSender: jest.fn(),
-      getSavedObjects: jest.fn(() => ({
-        createImporter: jest.fn(),
+      getTelemetryEventsSender: vi.fn(),
+      getSavedObjects: vi.fn(() => ({
+        createImporter: vi.fn(),
       })),
-      getConfig: jest.fn(() => ({})),
-      getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
-      getInternalUserSOClientForSpaceId: jest.fn(),
-      getExperimentalFeatures: jest.fn(),
+      getConfig: vi.fn(() => ({})),
+      getSavedObjectsTagging: vi.fn(() => mockedSavedObjectTagging),
+      getInternalUserSOClientForSpaceId: vi.fn(),
+      getExperimentalFeatures: vi.fn(),
     },
   };
 });
 
 describe('installAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
-    jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
-    jest.mocked(installIndexTemplatesAndPipelines).mockClear();
-    jest.mocked(appContextService.getConfig).mockReturnValue({} as any);
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    vi.mocked(optimisticallyAddEsAssetReferences).mockReset();
+    vi.mocked(installIndexTemplatesAndPipelines).mockClear();
+    vi.mocked(appContextService.getConfig).mockReturnValue({} as any);
+    const mockedLogger = vi.mocked(appContextService.getLogger());
     mockedLogger.debug.mockClear();
     mockedLogger.error.mockClear();
     mockedLogger.warn.mockClear();
@@ -70,7 +73,7 @@ describe('installAssetsForInputPackagePolicy', () => {
   });
 
   it('should do nothing for non input package', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
     await installAssetsForInputPackagePolicy({
       pkgInfo: {
         type: 'integration',
@@ -81,7 +84,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       logger: mockedLogger,
       packagePolicy: {} as any,
     });
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toHaveBeenCalled();
+    expect(vi.mocked(optimisticallyAddEsAssetReferences)).not.toHaveBeenCalled();
   });
 
   const TEST_PKG_INFO_INPUT = {
@@ -97,9 +100,9 @@ describe('installAssetsForInputPackagePolicy', () => {
   };
 
   it('should throw for input package if package is not installed', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue(undefined);
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue(undefined);
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await expect(() =>
       installAssetsForInputPackagePolicy({
@@ -126,22 +129,22 @@ describe('installAssetsForInputPackagePolicy', () => {
   });
 
   it('should skip index template creation when existing data stream is owned by different package with force true', async () => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: { name: 'filestream', version: '2.0.0' },
       packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
       assetsMap: new Map(),
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
       {
         name: 'logs-my_dataset-default',
         _meta: { package: { name: 'other_package' } },
       },
     ] as any);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
@@ -165,24 +168,24 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
 
   it('should skip index template creation when existing index template is owned by different package with force true', async () => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: { name: 'filestream', version: '2.0.0' },
       packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
       assetsMap: new Map(),
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
       name: 'logs-my_dataset',
       _meta: { package: { name: 'other_package' } },
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
@@ -206,25 +209,25 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
 
   it('should install templates when existing data stream has no _meta field', async () => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: { name: 'filestream', version: '2.0.0' },
       packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
       assetsMap: new Map(),
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
       {
         name: 'logs-my_dataset-default',
       },
     ] as any);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
@@ -248,25 +251,25 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
   });
 
   it('should throw for an uploaded package when the existing data stream has no _meta field', async () => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: { name: 'uploaded_probe', version: '1.0.0', install_source: 'upload' },
       packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
       assetsMap: new Map(),
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
       {
         name: 'logs-my_dataset-default',
       },
     ] as any);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await expect(
       installAssetsForInputPackagePolicy({
@@ -292,11 +295,11 @@ describe('installAssetsForInputPackagePolicy', () => {
       })
     ).rejects.toThrowError(PackagePolicyValidationError);
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
 
   it('should throw for an uploaded package when a same-name stream is not corroborated by installed assets', async () => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'uploaded_probe',
         version: '1.0.0',
@@ -308,15 +311,15 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
       {
         name: 'logs-my_dataset-default',
         _meta: { package: { name: 'uploaded_probe' } },
       },
     ] as any);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await expect(
       installAssetsForInputPackagePolicy({
@@ -342,11 +345,11 @@ describe('installAssetsForInputPackagePolicy', () => {
       })
     ).rejects.toThrowError(PackagePolicyValidationError);
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
 
   it('should install templates for an uploaded package when the live stream is corroborated by installed assets', async () => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'uploaded_probe',
         version: '1.0.0',
@@ -358,15 +361,15 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
       {
         name: 'logs-my_dataset-default',
         _meta: { package: { name: 'uploaded_probe' } },
       },
     ] as any);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
@@ -390,11 +393,11 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
   });
 
   it('should throw for an uploaded package when a same-name index template is not corroborated by installed assets', async () => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'uploaded_probe',
         version: '1.0.0',
@@ -406,13 +409,13 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
       name: 'logs-my_dataset',
       _meta: { package: { name: 'uploaded_probe' } },
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await expect(
       installAssetsForInputPackagePolicy({
@@ -438,11 +441,11 @@ describe('installAssetsForInputPackagePolicy', () => {
       })
     ).rejects.toThrowError(PackagePolicyValidationError);
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
 
   it('should install templates for an uploaded package when the existing index template is corroborated by installed assets', async () => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'uploaded_probe',
         version: '1.0.0',
@@ -454,13 +457,13 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
       name: 'logs-my_dataset',
       _meta: { package: { name: 'uploaded_probe' } },
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
@@ -484,15 +487,15 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
   });
 
   it('should skip the corroboration guard when skipUploadPackageValidation is set', async () => {
-    jest
+    vi
       .mocked(appContextService.getConfig)
       .mockReturnValue({ internal: { skipUploadPackageValidation: true } } as any);
 
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'uploaded_probe',
         version: '1.0.0',
@@ -504,15 +507,15 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
       {
         name: 'logs-my_dataset-default',
         _meta: { package: { name: 'uploaded_probe' } },
       },
     ] as any);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
@@ -536,14 +539,14 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+    expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
   });
 
   it('should install es index patterns for input package if package is installed', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'test',
         version: '1.0.0',
@@ -553,7 +556,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: TEST_PKG_INFO_INPUT as any,
@@ -578,7 +581,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
+    expect(vi.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       expect.anything(),
@@ -590,11 +593,11 @@ describe('installAssetsForInputPackagePolicy', () => {
 
   describe('OTel es_index_patterns', () => {
     afterEach(() => {
-      jest.mocked(appContextService.getExperimentalFeatures).mockReset();
+      vi.mocked(appContextService.getExperimentalFeatures).mockReset();
     });
 
     it('stores an .otel-suffixed es index pattern for an otelcol input package', async () => {
-      jest
+      vi
         .mocked(appContextService.getExperimentalFeatures)
         .mockReturnValue({ enableOtelIntegrations: true } as any);
       const OTEL_PKG_INFO = {
@@ -611,9 +614,9 @@ describe('installAssetsForInputPackagePolicy', () => {
           },
         ],
       };
-      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null as any);
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null as any);
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: { name: 'verifier_otel', version: '0.1.1', installed_es: [] },
         packageInfo: OTEL_PKG_INFO,
         assetsMap: new Map(),
@@ -625,7 +628,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         soClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
         force: false,
-        logger: jest.mocked(appContextService.getLogger()),
+        logger: vi.mocked(appContextService.getLogger()),
         packagePolicy: {
           inputs: [
             {
@@ -641,7 +644,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         } as any,
       });
 
-      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
+      expect(vi.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
         expect.anything(),
         'verifier_otel',
         [],
@@ -651,7 +654,7 @@ describe('installAssetsForInputPackagePolicy', () => {
   });
 
   it('should remove time_series index mode for non-metrics data stream types', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
 
     const pkgInfoWithTimeSeries = {
       ...TEST_PKG_INFO_INPUT,
@@ -661,7 +664,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       },
     };
 
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'test',
         version: '1.0.0',
@@ -671,7 +674,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: pkgInfoWithTimeSeries as any,
@@ -700,14 +703,14 @@ describe('installAssetsForInputPackagePolicy', () => {
     );
 
     // Verify index_mode was actually removed
-    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const installCall = vi.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
     const dataStreams = installCall?.[0]?.onlyForDataStreams;
     expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
   });
 
   it('should preserve time_series index mode for metrics data stream type', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     const pkgInfoWithTimeSeries = {
       type: 'input',
@@ -725,7 +728,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       },
     };
 
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'test',
         version: '1.0.0',
@@ -735,7 +738,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: pkgInfoWithTimeSeries as any,
@@ -764,13 +767,13 @@ describe('installAssetsForInputPackagePolicy', () => {
     );
 
     // Verify index_mode was preserved
-    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const installCall = vi.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
     const dataStreams = installCall?.[0]?.onlyForDataStreams;
     expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
   });
 
   it('should use data_stream_type var when provided', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
 
     const pkgInfoWithTimeSeries = {
       ...TEST_PKG_INFO_INPUT,
@@ -780,7 +783,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       },
     };
 
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'test',
         version: '1.0.0',
@@ -790,7 +793,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: pkgInfoWithTimeSeries as any,
@@ -825,14 +828,14 @@ describe('installAssetsForInputPackagePolicy', () => {
     );
 
     // Verify index_mode was removed
-    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const installCall = vi.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
     const dataStreams = installCall?.[0]?.onlyForDataStreams;
     expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
   });
 
   it('should add time_series index mode for OTel metrics data streams when not present', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     const pkgInfoWithoutTimeSeries = {
       type: 'input',
@@ -847,7 +850,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       // No elasticsearch config with index_mode
     };
 
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'otel',
         version: '1.0.0',
@@ -857,7 +860,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: pkgInfoWithoutTimeSeries as any,
@@ -889,14 +892,14 @@ describe('installAssetsForInputPackagePolicy', () => {
     );
 
     // Verify index_mode was added
-    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const installCall = vi.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
     const dataStreams = installCall?.[0]?.onlyForDataStreams;
     expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
   });
 
   it('should preserve existing time_series index mode for OTel metrics data streams', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     const pkgInfoWithTimeSeries = {
       type: 'input',
@@ -914,7 +917,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       },
     };
 
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'otel',
         version: '1.0.0',
@@ -924,7 +927,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: pkgInfoWithTimeSeries as any,
@@ -957,13 +960,13 @@ describe('installAssetsForInputPackagePolicy', () => {
     );
 
     // Verify index_mode was preserved
-    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const installCall = vi.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
     const dataStreams = installCall?.[0]?.onlyForDataStreams;
     expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
   });
 
   it('should not add time_series index mode for non-OTel metrics data streams without it', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
 
     const pkgInfoWithoutTimeSeries = {
       type: 'input',
@@ -978,7 +981,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       // No elasticsearch config with index_mode
     };
 
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'test',
         version: '1.0.0',
@@ -988,7 +991,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
       pkgInfo: pkgInfoWithoutTimeSeries as any,
@@ -1017,7 +1020,7 @@ describe('installAssetsForInputPackagePolicy', () => {
     );
 
     // Verify index_mode was not added
-    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const installCall = vi.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
     const dataStreams = installCall?.[0]?.onlyForDataStreams;
     expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
   });
@@ -1079,13 +1082,13 @@ describe('installAssetsForInputPackagePolicy', () => {
     };
 
     beforeEach(() => {
-      jest.mocked(installIndexTemplatesAndPipelines).mockReset();
-      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+      vi.mocked(installIndexTemplatesAndPipelines).mockReset();
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
     });
 
     it('should install index templates for all signal types when dynamic_signal_types is true', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: {
           name: 'otel',
           version: '1.0.0',
@@ -1094,7 +1097,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         assetsMap: new Map(),
         paths: [],
       } as any);
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
 
       await installAssetsForInputPackagePolicy({
         pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
@@ -1119,10 +1122,10 @@ describe('installAssetsForInputPackagePolicy', () => {
       });
 
       // Should be called 3 times (once for each signal type: logs, metrics, traces)
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
 
       // Verify it was called for logs
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
         expect.objectContaining({
           onlyForDataStreams: [
             expect.objectContaining({
@@ -1134,7 +1137,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       );
 
       // Verify it was called for metrics
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
         expect.objectContaining({
           onlyForDataStreams: [
             expect.objectContaining({
@@ -1146,7 +1149,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       );
 
       // Verify it was called for traces
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
         expect.objectContaining({
           onlyForDataStreams: [
             expect.objectContaining({
@@ -1159,7 +1162,7 @@ describe('installAssetsForInputPackagePolicy', () => {
     });
 
     it('should install index templates for all signal types when dynamic_signal_types is true and policy template has no type', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: {
           name: 'otel',
           version: '1.0.0',
@@ -1168,7 +1171,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         assetsMap: new Map(),
         paths: [],
       } as any);
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
 
       await installAssetsForInputPackagePolicy({
         pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES_NO_TYPE as any,
@@ -1192,14 +1195,14 @@ describe('installAssetsForInputPackagePolicy', () => {
         } as any,
       });
 
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
-      const calls = jest.mocked(installIndexTemplatesAndPipelines).mock.calls;
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
+      const calls = vi.mocked(installIndexTemplatesAndPipelines).mock.calls;
       const types = calls.map((c) => c[0]?.onlyForDataStreams?.[0]?.type);
       expect(types.sort()).toEqual(['logs', 'metrics', 'traces']);
     });
 
     it('should install index template for single signal type when dynamic_signal_types is false', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: {
           name: 'otel',
           version: '1.0.0',
@@ -1208,7 +1211,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         assetsMap: new Map(),
         paths: [],
       } as any);
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
 
       await installAssetsForInputPackagePolicy({
         pkgInfo: OTEL_PKG_INFO_NO_DYNAMIC_SIGNAL_TYPES as any,
@@ -1233,10 +1236,10 @@ describe('installAssetsForInputPackagePolicy', () => {
       });
 
       // Should only be called once for the single signal type
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
 
       // Verify it was called only for logs
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
         expect.objectContaining({
           onlyForDataStreams: [
             expect.objectContaining({
@@ -1249,7 +1252,7 @@ describe('installAssetsForInputPackagePolicy', () => {
     });
 
     it('should install index template for single signal type when dynamic_signal_types is not defined (backward compatibility)', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: {
           name: 'otel',
           version: '1.0.0',
@@ -1258,7 +1261,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         assetsMap: new Map(),
         paths: [],
       } as any);
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
 
       await installAssetsForInputPackagePolicy({
         pkgInfo: OTEL_PKG_INFO_WITHOUT_FLAG as any,
@@ -1283,10 +1286,10 @@ describe('installAssetsForInputPackagePolicy', () => {
       });
 
       // Should only be called once for the single signal type
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
 
       // Verify it was called only for metrics
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
         expect.objectContaining({
           onlyForDataStreams: [
             expect.objectContaining({
@@ -1311,7 +1314,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           },
         ],
       };
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: {
           name: 'profiling_otel',
           version: '1.0.0',
@@ -1320,7 +1323,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         assetsMap: new Map(),
         paths: [],
       } as any);
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
 
       await installAssetsForInputPackagePolicy({
         pkgInfo: OTEL_PKG_INFO_PROFILES as any,
@@ -1346,11 +1349,11 @@ describe('installAssetsForInputPackagePolicy', () => {
 
       // profiles is owned end-to-end by Universal Profiling; Fleet must not create data streams
       // for it (elastic/package-spec#1191).
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });
 
     it('should respect data_stream.type var when dynamic_signal_types is true', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: {
           name: 'otel',
           version: '1.0.0',
@@ -1359,7 +1362,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         assetsMap: new Map(),
         paths: [],
       } as any);
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
 
       await installAssetsForInputPackagePolicy({
         pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
@@ -1387,9 +1390,9 @@ describe('installAssetsForInputPackagePolicy', () => {
       });
 
       // Should still create all 3 templates with the custom dataset
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
 
-      const calls = jest.mocked(installIndexTemplatesAndPipelines).mock.calls;
+      const calls = vi.mocked(installIndexTemplatesAndPipelines).mock.calls;
       const datasets = calls.map((call) => call[0]?.onlyForDataStreams?.[0]).filter(Boolean);
 
       expect(datasets).toEqual([
@@ -1400,7 +1403,7 @@ describe('installAssetsForInputPackagePolicy', () => {
     });
 
     it('should skip existing data streams for each signal type', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: {
           name: 'otel',
           version: '1.0.0',
@@ -1411,7 +1414,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any);
 
       // Mock that logs data stream already exists (from same package)
-      jest
+      vi
         .mocked(dataStreamService)
         .getMatchingDataStreams.mockImplementation(async (esClient, params) => {
           if (params.type === 'logs') {
@@ -1429,7 +1432,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           return [];
         });
 
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
 
       await installAssetsForInputPackagePolicy({
         pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
@@ -1454,10 +1457,10 @@ describe('installAssetsForInputPackagePolicy', () => {
       });
 
       // Should only be called 2 times (metrics and traces, logs skipped because it already exists)
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(2);
 
       // Verify logs was skipped
-      const calls = jest.mocked(installIndexTemplatesAndPipelines).mock.calls;
+      const calls = vi.mocked(installIndexTemplatesAndPipelines).mock.calls;
       const types = calls.map((call) => call[0]?.onlyForDataStreams?.[0]?.type).filter(Boolean);
       expect(types).not.toContain('logs');
       expect(types).toContain('metrics');
@@ -1465,7 +1468,7 @@ describe('installAssetsForInputPackagePolicy', () => {
     });
 
     it('should install new asset structure when force is true and index template already exists (e.g. upgrade from integration 1.x to input 2.x)', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: {
           name: 'filestream',
           version: '2.0.0',
@@ -1475,14 +1478,14 @@ describe('installAssetsForInputPackagePolicy', () => {
         paths: [],
       } as any);
 
-      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
       // Legacy index template from 1.x exists
-      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+      vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
         name: 'logs-filestream.generic',
         _meta: { package: { name: 'filestream' } },
       } as any);
 
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
 
       await installAssetsForInputPackagePolicy({
         pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
@@ -1507,18 +1510,18 @@ describe('installAssetsForInputPackagePolicy', () => {
       });
 
       // Should install new component templates and ingest pipelines (not skip)
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
     });
   });
 });
 
 describe('removeAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
-    jest.mocked(cleanupAssetsMock).mockReset();
+    vi.mocked(cleanupAssetsMock).mockReset();
   });
 
   it('should clean up assets for integration packages with status = installed', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
     const installation = {
       name: 'my-integration',
       version: '1.0.0',
@@ -1537,7 +1540,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
         custom_dataset: 'logs-my-integration.custom_dataset-*',
       },
     } as any;
-    jest.mocked(getInstallation).mockResolvedValue(installation);
+    vi.mocked(getInstallation).mockResolvedValue(installation);
 
     await removeAssetsForInputPackagePolicy({
       packageInfo: {
@@ -1571,7 +1574,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
   });
 
   it('should do nothing for packages with status !== installed', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
     await removeAssetsForInputPackagePolicy({
       packageInfo: {
         type: 'input',
@@ -1586,7 +1589,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
   });
 
   it('should clean up assets for input packages with status = installed', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
     const installation = {
       name: 'logs',
       version: '1.0.0',
@@ -1614,7 +1617,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
         test: 'logs-udp.test-*',
       },
     } as any;
-    jest.mocked(getInstallation).mockResolvedValue(installation);
+    vi.mocked(getInstallation).mockResolvedValue(installation);
 
     await removeAssetsForInputPackagePolicy({
       packageInfo: {
@@ -1648,7 +1651,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
   });
 
   it('should clean up assets matching exactly the datasetName', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const mockedLogger = vi.mocked(appContextService.getLogger());
     const installation = {
       name: 'logs',
       version: '1.0.0',
@@ -1672,7 +1675,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
         },
       ],
     } as any;
-    jest.mocked(getInstallation).mockResolvedValue(installation);
+    vi.mocked(getInstallation).mockResolvedValue(installation);
 
     await removeAssetsForInputPackagePolicy({
       packageInfo: {
@@ -1706,8 +1709,8 @@ describe('removeAssetsForInputPackagePolicy', () => {
   });
 
   it('should not clean up assets for input packages with status not installed', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
-    jest.mocked(getInstallation).mockResolvedValue(undefined);
+    const mockedLogger = vi.mocked(appContextService.getLogger());
+    vi.mocked(getInstallation).mockResolvedValue(undefined);
 
     await removeAssetsForInputPackagePolicy({
       packageInfo: {
@@ -1725,8 +1728,8 @@ describe('removeAssetsForInputPackagePolicy', () => {
   });
 
   it('should log error if cleanupAssets failed', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
-    jest.mocked(getInstallation).mockResolvedValue({
+    const mockedLogger = vi.mocked(appContextService.getLogger());
+    vi.mocked(getInstallation).mockResolvedValue({
       name: 'logs',
       version: '1.0.0',
     } as any);
@@ -2082,14 +2085,14 @@ describe('removeAssetsForInputPackagePolicy', () => {
 
   describe('installAssetsForCustomDatasetPolicy', () => {
     beforeEach(() => {
-      jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
-      jest.mocked(installIndexTemplatesAndPipelines).mockClear();
-      jest.mocked(dataStreamService).getMatchingDataStreams.mockReset();
-      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockReset();
+      vi.mocked(optimisticallyAddEsAssetReferences).mockReset();
+      vi.mocked(installIndexTemplatesAndPipelines).mockClear();
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockReset();
+      vi.mocked(dataStreamService).getMatchingIndexTemplate.mockReset();
     });
 
     it('should do nothing when there are no custom dataset streams', async () => {
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
       await installAssetsForCustomDatasetPolicy({
         pkgInfo: {
           type: 'integration',
@@ -2115,13 +2118,13 @@ describe('removeAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       });
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });
 
     it('should install templates for integration package with custom dataset', async () => {
-      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: { name: 'nginx', version: '1.0.0', installed_es: [] },
         packageInfo: {
           type: 'integration',
@@ -2133,7 +2136,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
         paths: [],
       } as any);
 
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
       await installAssetsForCustomDatasetPolicy({
         pkgInfo: {
           type: 'integration',
@@ -2162,27 +2165,27 @@ describe('removeAssetsForInputPackagePolicy', () => {
         } as any,
       });
 
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
-      const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+      const installCall = vi.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
       const dataStreams = installCall?.[0]?.onlyForDataStreams;
       expect(dataStreams?.[0]?.dataset).toBe('my_custom_access');
       expect(dataStreams?.[0]?.type).toBe('logs');
       expect(dataStreams?.[0]?.path).toBe('access');
 
-      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledTimes(1);
-      const esPatternCall = jest.mocked(optimisticallyAddEsAssetReferences).mock.calls[0];
+      expect(vi.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledTimes(1);
+      const esPatternCall = vi.mocked(optimisticallyAddEsAssetReferences).mock.calls[0];
       const esIndexPatterns = esPatternCall?.[3];
       expect(esIndexPatterns).toHaveProperty('my_custom_access');
     });
 
     it('should throw for an uploaded package when a custom dataset matches an ownerless live stream', async () => {
-      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
         {
           name: 'logs-generic-default',
         },
       ] as any);
-      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: { name: 'uploaded_probe', version: '1.0.0', install_source: 'upload' },
         packageInfo: {
           type: 'integration',
@@ -2194,7 +2197,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
         paths: [],
       } as any);
 
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
       await expect(
         installAssetsForCustomDatasetPolicy({
           pkgInfo: {
@@ -2225,13 +2228,13 @@ describe('removeAssetsForInputPackagePolicy', () => {
         })
       ).rejects.toThrowError(PackagePolicyValidationError);
 
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });
 
     it('should pass customDataStreamOriginDataset and customDataStreamOriginType to installIndexTemplatesAndPipelines', async () => {
-      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: { name: 'nginx', version: '1.0.0', installed_es: [] },
         packageInfo: {
           type: 'integration',
@@ -2243,7 +2246,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
         paths: [],
       } as any);
 
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
       await installAssetsForCustomDatasetPolicy({
         pkgInfo: {
           type: 'integration',
@@ -2272,16 +2275,16 @@ describe('removeAssetsForInputPackagePolicy', () => {
         } as any,
       });
 
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
-      const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0][0];
+      expect(vi.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+      const installCall = vi.mocked(installIndexTemplatesAndPipelines).mock.calls[0][0];
       expect(installCall.customDataStreamOriginDataset).toBe('nginx.access');
       expect(installCall.customDataStreamOriginType).toBe('logs');
     });
 
     it('should not apply applyTimeSeriesIndexMode for integration packages', async () => {
-      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      vi.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+      vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
         installation: { name: 'nginx', version: '1.0.0', installed_es: [] },
         packageInfo: {
           type: 'integration',
@@ -2300,7 +2303,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
         paths: [],
       } as any);
 
-      const mockedLogger = jest.mocked(appContextService.getLogger());
+      const mockedLogger = vi.mocked(appContextService.getLogger());
       await installAssetsForCustomDatasetPolicy({
         pkgInfo: {
           type: 'integration',
